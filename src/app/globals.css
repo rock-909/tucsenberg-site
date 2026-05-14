@@ -79,6 +79,26 @@
   --blue-900: oklch(0.2 0.05 240);
   --blue-950: oklch(0.16 0.04 240);
 
+  /* Role color tokens. Components should consume semantic tokens below. */
+  --color-brand-primary: #123b5d;
+  --color-brand-accent: #0f7c82;
+  --color-surface-canvas: #f7fafc;
+  --color-surface-elevated: #ffffff;
+  --color-surface-muted: #dceff1;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-border-default: #cbd5e1;
+  --color-border-strong: #94a3b8;
+  --color-state-success: oklch(0.56 0.13 155);
+  --color-state-warning: oklch(0.66 0.14 72);
+  --color-state-danger: oklch(0.55 0.2 27);
+  --color-state-info: var(--color-brand-accent);
+
+  /* Accent is for links, focus rings, selected state, and narrow status cues.
+     Do not use it as broad card background, default icon color, divider color,
+     or decorative fill. */
+
   /* Border Radius — 8px base */
   --radius: 0.5rem;
   --radius-none: 0;
@@ -88,52 +108,52 @@
   --radius-round: 9999px;
 
   /* Foundation */
-  --background: var(--neutral-1);
-  --foreground: var(--neutral-12);
+  --background: var(--color-surface-canvas);
+  --foreground: var(--color-text-primary);
 
   /* Surfaces */
-  --card: var(--neutral-1);
-  --card-foreground: var(--neutral-12);
-  --popover: var(--neutral-1);
-  --popover-foreground: var(--neutral-12);
+  --card: var(--color-surface-elevated);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-elevated);
+  --popover-foreground: var(--color-text-primary);
 
   /* Brand Primary */
-  --primary: var(--brand-9);
-  --primary-foreground: var(--neutral-1);
-  --primary-dark: var(--brand-10);
-  --primary-light: var(--brand-3);
-  --primary-50: var(--brand-2);
+  --primary: var(--color-brand-primary);
+  --primary-foreground: var(--color-surface-elevated);
+  --primary-dark: color-mix(in oklch, var(--color-brand-primary) 82%, black);
+  --primary-light: var(--color-surface-muted);
+  --primary-50: var(--color-surface-muted);
 
   /* Secondary */
   --secondary: var(--neutral-1);
   --secondary-foreground: var(--neutral-12);
 
   /* Accent */
-  --accent: var(--brand-3);
-  --accent-foreground: var(--brand-11);
+  --accent: var(--color-surface-muted);
+  --accent-foreground: var(--color-brand-primary);
 
   /* Muted */
   --muted: var(--neutral-3);
-  --muted-foreground: var(--neutral-9);
+  --muted-foreground: var(--color-text-muted);
 
   /* Status Colors */
-  --success: oklch(0.56 0.13 155);
+  --success: var(--color-state-success);
   --success-muted: oklch(0.965 0.025 155);
   --success-border: oklch(0.86 0.06 155);
   --success-foreground: oklch(0.3 0.075 155);
   --success-light: var(--success-muted);
 
-  --warning: oklch(0.66 0.14 72);
+  --warning: var(--color-state-warning);
   --warning-muted: oklch(0.965 0.035 72);
   --warning-border: oklch(0.86 0.075 72);
   --warning-foreground: oklch(0.34 0.075 72);
 
-  --error: oklch(0.55 0.2 27);
+  --error: var(--color-state-danger);
   --error-muted: oklch(0.965 0.025 27);
   --error-border: oklch(0.86 0.065 27);
   --error-foreground: oklch(0.35 0.13 27);
 
-  --info: var(--brand-9);
+  --info: var(--color-state-info);
   --info-muted: var(--brand-2);
   --info-border: var(--brand-5);
   --info-foreground: var(--brand-11);
@@ -142,10 +162,10 @@
   --destructive-foreground: var(--neutral-1);
 
   /* Borders & Inputs */
-  --border: var(--neutral-4);
-  --border-light: var(--neutral-3);
+  --border: var(--color-border-default);
+  --border-light: var(--color-surface-muted);
   --input: var(--neutral-1);
-  --ring: var(--brand-8);
+  --ring: var(--color-brand-accent);
 
   /* Charts */
   --chart-1: var(--brand-9);
