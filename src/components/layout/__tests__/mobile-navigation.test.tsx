@@ -8,6 +8,7 @@ import {
   MobileMenuButton,
   MobileNavigationInteractive as MobileNavigation,
 } from "@/components/layout/mobile-navigation-interactive";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
 const mockLocale = { current: "en" as "en" | "zh" };
@@ -250,6 +251,14 @@ describe("MobileNavigation Component", () => {
       expect(html).toContain("About");
       expect(html).toContain('href="/"');
       expect(html).not.toContain("aria-expanded");
+    });
+
+    it("renders the mobile CTA as the stable placeholder hash link", () => {
+      const html = renderToStaticMarkup(<MobileNavigationLinks />);
+
+      expect(html).toContain(`href="${SINGLE_SITE_ROUTE_HREFS.comingSoon}"`);
+      expect(html).not.toContain("mobile_nav_cta");
+      expect(html).not.toContain("%23coming-soon");
     });
 
     it("renders mobile navigation trigger", () => {
