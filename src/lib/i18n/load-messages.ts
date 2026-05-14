@@ -41,6 +41,10 @@ const MESSAGE_LOADERS: Record<
     critical: () => import("@messages/en/critical.json"),
     deferred: () => import("@messages/en/deferred.json"),
   },
+  es: {
+    critical: () => import("@messages/es/critical.json"),
+    deferred: () => import("@messages/es/deferred.json"),
+  },
   zh: {
     critical: () => import("@messages/zh/critical.json"),
     deferred: () => import("@messages/zh/deferred.json"),
@@ -52,11 +56,14 @@ function interpolateSiteMessageString(
   locale: Locale,
   siteValues: SiteMessageValues,
 ): string {
+  const copyright =
+    siteValues.copyright[locale as keyof SiteMessageValues["copyright"]] ??
+    siteValues.copyright.en;
   const replacements: Record<string, string> = {
     siteName: siteValues.siteName,
     companyName: siteValues.companyName,
     currentYear: siteValues.currentYear,
-    copyright: siteValues.copyright[locale],
+    copyright,
   };
 
   return value.replace(

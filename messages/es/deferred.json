@@ -1,0 +1,460 @@
+{
+  "error": "[ES-TODO] An error occurred. Please try again.",
+  "turnstileRequired": "[ES-TODO] Please complete the security verification.",
+  "errorBoundary": {
+    "title": "[ES-TODO] An error occurred",
+    "description": "[ES-TODO] Something went wrong. Please try refreshing the page.",
+    "tryAgain": "[ES-TODO] Try Again"
+  },
+  "legal": {
+    "effectiveDate": "[ES-TODO] Effective Date",
+    "lastUpdated": "[ES-TODO] Last Updated",
+    "tableOfContents": "[ES-TODO] Table of Contents"
+  },
+  "themeDemo": {
+    "title": "[ES-TODO] Theme System Demo",
+    "description": "[ES-TODO] Testing theme switching and Chinese-English font mixing",
+    "chineseTest": "[ES-TODO] Chinese Font Test",
+    "englishTest": "[ES-TODO] English Font Test",
+    "chineseDescription": "[ES-TODO] This is Chinese font testing content, using PingFang SC font fallback strategy. Modern B2B enterprise design style showcase.",
+    "englishDescription": "[ES-TODO] This is English font testing content using Geist Sans font. Modern B2B enterprise design style showcase.",
+    "chineseInput": "[ES-TODO] Chinese Input",
+    "englishInput": "[ES-TODO] English Input",
+    "chinesePlaceholder": "[ES-TODO] Enter Chinese content",
+    "englishPlaceholder": "[ES-TODO] Enter English content",
+    "primaryButton": "[ES-TODO] Primary",
+    "secondaryButton": "[ES-TODO] Secondary",
+    "outlineButton": "[ES-TODO] Outline"
+  },
+  "instructions": {
+    "getStarted": "[ES-TODO] Get started by editing",
+    "saveChanges": "[ES-TODO] Save and see your changes instantly."
+  },
+  "actions": {
+    "deployNow": "[ES-TODO] Deploy now",
+    "readDocs": "[ES-TODO] Read our docs"
+  },
+  "formTemplate": {
+    "form": {
+      "success": "[ES-TODO] Success",
+      "error": "[ES-TODO] Unknown error",
+      "submitting": "[ES-TODO] Submitting...",
+      "submit": "[ES-TODO] Submit",
+      "selectOption": "[ES-TODO] Select an option"
+    },
+    "example": {
+      "fields": {
+        "name": {
+          "label": "[ES-TODO] Name",
+          "placeholder": "[ES-TODO] Enter your name"
+        },
+        "email": {
+          "label": "[ES-TODO] Email",
+          "placeholder": "[ES-TODO] Enter your email"
+        },
+        "message": {
+          "label": "[ES-TODO] Message",
+          "placeholder": "[ES-TODO] Enter your message"
+        }
+      }
+    }
+  },
+  "contact": {
+    "context": {
+      "productFamilyLabel": "[ES-TODO] You are asking about:"
+    },
+    "title": "[ES-TODO] Contact Us",
+    "description": "[ES-TODO] Get in touch with our team for inquiries, support, or partnership opportunities.",
+    "features": "[ES-TODO] Multiple ways to reach us and get the support you need",
+    "panel": {
+      "contactTitle": "[ES-TODO] Contact Methods",
+      "email": "[ES-TODO] Email",
+      "emailUnavailable": "[ES-TODO] Use the form on this page; configure a real receiver before public launch.",
+      "phone": "[ES-TODO] Phone",
+      "hoursTitle": "[ES-TODO] Business Hours",
+      "weekdays": "[ES-TODO] Mon - Fri",
+      "saturday": "[ES-TODO] Saturday",
+      "sunday": "[ES-TODO] Sunday",
+      "closed": "[ES-TODO] Closed",
+      "responseTitle": "[ES-TODO] What to expect",
+      "responseTimeLabel": "[ES-TODO] Typical response",
+      "responseTimeValue": "[ES-TODO] Within 24 business hours",
+      "bestForLabel": "[ES-TODO] Best for",
+      "bestForValue": "[ES-TODO] Inquiries, quotes, demos, project scope, and content replacement questions",
+      "prepareLabel": "[ES-TODO] Helpful details",
+      "prepareValue": "[ES-TODO] Share your offer type, target audience, needed pages, timeline, and current assets"
+    },
+    "form": {
+      "title": "[ES-TODO] Contact Us",
+      "description": "[ES-TODO] Get in touch with us. We'd love to hear from you.",
+      "optional": "[ES-TODO] optional",
+      "fullName": "[ES-TODO] Full name",
+      "email": "[ES-TODO] Email Address",
+      "company": "[ES-TODO] Company Name",
+      "phone": "[ES-TODO] Phone Number",
+      "subject": "[ES-TODO] Subject",
+      "message": "[ES-TODO] Message",
+      "fullNamePlaceholder": "[ES-TODO] Enter your full name",
+      "emailPlaceholder": "[ES-TODO] your@email.com",
+      "companyPlaceholder": "[ES-TODO] Your company name",
+      "phonePlaceholder": "[ES-TODO] +1 (555) 123-4567",
+      "subjectPlaceholder": "[ES-TODO] What can we help you with?",
+      "messagePlaceholder": "[ES-TODO] Please describe your needs or questions...",
+      "acceptPrivacy": "[ES-TODO] I agree to the privacy policy and terms of service",
+      "marketingConsent": "[ES-TODO] I would like to receive marketing communications",
+      "submit": "[ES-TODO] Send Message",
+      "submitting": "[ES-TODO] Sending...",
+      "submitSuccess": "[ES-TODO] Message sent successfully!",
+      "submitError": "[ES-TODO] We couldn't send your message. Please try again shortly.",
+      "networkError": "[ES-TODO] We could not submit the form. Please try again.",
+      "success": "[ES-TODO] Thank you! Your message has been sent successfully. We will get back to you soon.",
+      "error": "[ES-TODO] Sorry, there was an error sending your message. Please try again later.",
+      "loadError": "[ES-TODO] The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+      "retryLoad": "[ES-TODO] Retry loading form",
+      "rateLimitMessage": "[ES-TODO] You've recently contacted us. Please wait a moment before sending another message.",
+      "errors": {
+        "generic": "[ES-TODO] Please review the highlighted fields and try again.",
+        "fullName": {
+          "required": "[ES-TODO] Full name is required",
+          "tooShort": "[ES-TODO] Full name is required",
+          "tooLong": "[ES-TODO] Full name must be less than 50 characters",
+          "invalid": "[ES-TODO] Full name contains invalid characters"
+        },
+        "email": {
+          "required": "[ES-TODO] Email address is required",
+          "invalid": "[ES-TODO] Please enter a valid email address",
+          "tooLong": "[ES-TODO] Email must be less than 100 characters"
+        },
+        "company": {
+          "tooShort": "[ES-TODO] Company name must be at least 2 characters",
+          "tooLong": "[ES-TODO] Company name must be less than 100 characters",
+          "invalid": "[ES-TODO] Company name contains invalid characters"
+        },
+        "productSlug": {
+          "required": "[ES-TODO] Please choose a product before sending your inquiry",
+          "invalid": "[ES-TODO] The selected product is not recognized"
+        },
+        "productName": {
+          "required": "[ES-TODO] Product name is required",
+          "tooShort": "[ES-TODO] Product name must be at least 2 characters",
+          "tooLong": "[ES-TODO] Product name must be less than 100 characters",
+          "invalid": "[ES-TODO] Product name contains invalid characters"
+        },
+        "quantity": {
+          "required": "[ES-TODO] Quantity is required",
+          "invalid": "[ES-TODO] Quantity must be a valid amount"
+        },
+        "requirements": {
+          "tooLong": "[ES-TODO] Requirements must be less than 1000 characters",
+          "invalid": "[ES-TODO] Requirements contain invalid characters"
+        },
+        "message": {
+          "required": "[ES-TODO] Message is required",
+          "tooShort": "[ES-TODO] Message must be at least 10 characters",
+          "tooLong": "[ES-TODO] Message must be less than 1000 characters"
+        },
+        "phone": {
+          "invalid": "[ES-TODO] Please enter a valid phone number"
+        },
+        "subject": {
+          "length": "[ES-TODO] Subject must be between 5 and 100 characters"
+        },
+        "acceptPrivacy": {
+          "required": "[ES-TODO] You must accept the privacy policy"
+        },
+        "website": {
+          "shouldBeEmpty": "[ES-TODO] This field should be empty"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "[ES-TODO] Full name is required",
+        "fullNameTooShort": "[ES-TODO] Full name is required",
+        "emailRequired": "[ES-TODO] Email address is required",
+        "emailInvalid": "[ES-TODO] Please enter a valid email address",
+        "messageRequired": "[ES-TODO] Message is required",
+        "messageTooShort": "[ES-TODO] Message must be at least 10 characters"
+      }
+    }
+  },
+  "formatting": {
+    "date": {
+      "today": "[ES-TODO] Today",
+      "yesterday": "[ES-TODO] Yesterday",
+      "tomorrow": "[ES-TODO] Tomorrow",
+      "lastUpdated": "[ES-TODO] Last updated on {date}",
+      "publishedOn": "[ES-TODO] Published on {date}"
+    },
+    "number": {
+      "currency": "[ES-TODO] ${amount}",
+      "percentage": "[ES-TODO] {value}%",
+      "fileSize": "[ES-TODO] {size} {unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "[ES-TODO] No items",
+        "one": "[ES-TODO] One item",
+        "other": "[ES-TODO] {count} items"
+      },
+      "users": {
+        "zero": "[ES-TODO] No users online",
+        "one": "[ES-TODO] One user online",
+        "other": "[ES-TODO] {count} users online"
+      },
+      "notifications": {
+        "zero": "[ES-TODO] No new notifications",
+        "one": "[ES-TODO] One new notification",
+        "other": "[ES-TODO] {count} new notifications"
+      }
+    }
+  },
+  "progress": {
+    "title": "[ES-TODO] Development Progress",
+    "status": "[ES-TODO] Development Progress",
+    "nearCompletion": "[ES-TODO] Nearly Complete",
+    "planning": "[ES-TODO] Planning",
+    "development": "[ES-TODO] Development",
+    "testing": "[ES-TODO] Testing",
+    "launch": "[ES-TODO] Launch",
+    "ariaLabel": "[ES-TODO] Project development progress indicator",
+    "completed": "[ES-TODO] Completed",
+    "current": "[ES-TODO] Current step",
+    "upcoming": "[ES-TODO] Upcoming"
+  },
+  "ReactScanDemo": {
+    "title": "[ES-TODO] React Scan Performance Demo",
+    "description": "[ES-TODO] Interactive demonstration of React Scan performance monitoring capabilities",
+    "instructions": {
+      "title": "[ES-TODO] How to Use This Demo",
+      "step1": "[ES-TODO] Press Ctrl+Shift+X to toggle React Scan on/off",
+      "step2": "[ES-TODO] Click the buttons below to trigger different types of renders",
+      "step3": "[ES-TODO] Watch for red highlights (unnecessary renders) and green highlights (optimized renders)",
+      "step4": "[ES-TODO] Use the React Scan toolbar in the bottom-right corner for detailed analysis"
+    }
+  },
+  "themes": {
+    "title": "[ES-TODO] Theme System",
+    "description": "[ES-TODO] Dynamic theme switching with light and dark mode support.",
+    "toggle": "[ES-TODO] Theme Toggle",
+    "language": "[ES-TODO] Language Switch",
+    "colors": {
+      "title": "[ES-TODO] Color Palette"
+    },
+    "typography": {
+      "title": "[ES-TODO] Typography",
+      "bold": "[ES-TODO] Bold Text",
+      "medium": "[ES-TODO] Medium Text",
+      "normal": "[ES-TODO] Normal Text",
+      "muted": "[ES-TODO] Muted Text"
+    }
+  },
+  "stats": {
+    "technologies": "[ES-TODO] Technologies",
+    "typescript": "[ES-TODO] TypeScript Coverage",
+    "performance": "[ES-TODO] Performance Score",
+    "languages": "[ES-TODO] Languages"
+  },
+  "email": "[ES-TODO] Email Address",
+  "emailPlaceholder": "[ES-TODO] your@email.com",
+  "phone": "[ES-TODO] Phone Number",
+  "organization": {
+    "name": "[ES-TODO] {companyName}",
+    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths",
+    "phone": "[ES-TODO] Contact sales by email",
+    "social": {
+      "twitter": "[ES-TODO] https://x.com/example",
+      "linkedin": "[ES-TODO] https://www.linkedin.com/company/example"
+    }
+  },
+  "website": {
+    "name": "[ES-TODO] {siteName}",
+    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths"
+  },
+  "article": {
+    "defaultAuthor": "[ES-TODO] {companyName}"
+  },
+  "products": {
+    "pageTitle": "[ES-TODO] Products",
+    "pageDescription": "[ES-TODO] Explore our comprehensive range of high-quality products for your business needs.",
+    "emptyState": "[ES-TODO] No products available. Please check back later.",
+    "viewDetails": "[ES-TODO] View Details",
+    "requestQuote": "[ES-TODO] Request Quote",
+    "allCategories": "[ES-TODO] All Categories",
+    "allStandards": "[ES-TODO] All Standards",
+    "standardsFilterAriaLabel": "[ES-TODO] Filter by standards",
+    "featured": "[ES-TODO] Featured",
+    "breadcrumb": {
+      "home": "[ES-TODO] Home",
+      "products": "[ES-TODO] Products"
+    },
+    "card": {
+      "moq": "[ES-TODO] MOQ",
+      "leadTime": "[ES-TODO] Lead Time",
+      "supplyCapacity": "[ES-TODO] Capacity"
+    },
+    "detail": {
+      "specifications": "[ES-TODO] Specifications",
+      "tradeInfo": "[ES-TODO] Trade Information",
+      "certifications": "[ES-TODO] Certifications",
+      "relatedProducts": "[ES-TODO] Related Products",
+      "downloadPdf": "[ES-TODO] Download product PDF",
+      "labels": {
+        "moq": "[ES-TODO] Minimum Order",
+        "leadTime": "[ES-TODO] Lead Time",
+        "supplyCapacity": "[ES-TODO] Supply Capacity",
+        "packaging": "[ES-TODO] Packaging",
+        "portOfLoading": "[ES-TODO] Port of Loading"
+      }
+    },
+    "inquiry": {
+      "title": "[ES-TODO] Product Inquiry",
+      "description": "[ES-TODO] Interested in this product? Send us an inquiry for pricing and availability.",
+      "productName": "[ES-TODO] Product",
+      "quantity": "[ES-TODO] Quantity Required",
+      "quantityPlaceholder": "[ES-TODO] e.g., 500 pieces",
+      "targetPrice": "[ES-TODO] Target Price (optional)",
+      "targetPricePlaceholder": "[ES-TODO] e.g., $10 per unit",
+      "requirements": "[ES-TODO] Special Requirements",
+      "requirementsPlaceholder": "[ES-TODO] Please describe any special requirements such as customization, packaging, or certifications...",
+      "submit": "[ES-TODO] Send Inquiry",
+      "submitting": "[ES-TODO] Sending...",
+      "success": "[ES-TODO] Your inquiry has been sent successfully! We will get back to you within 24 hours.",
+      "error": "[ES-TODO] Failed to send inquiry. Please try again later.",
+      "turnstileRequired": "[ES-TODO] Please complete the security verification."
+    }
+  },
+  "title": "[ES-TODO] Showcase Website Starter",
+  "trust": {
+    "testimonials": {
+      "title": "[ES-TODO] What Our Clients Say",
+      "subtitle": "[ES-TODO] Trusted by businesses worldwide"
+    },
+    "partners": {
+      "title": "[ES-TODO] Our Partners",
+      "subtitle": "[ES-TODO] Collaborating with industry leaders"
+    },
+    "certifications": {
+      "title": "[ES-TODO] Certifications & Standards",
+      "subtitle": "[ES-TODO] Quality you can trust"
+    },
+    "stats": {
+      "title": "[ES-TODO] By the Numbers",
+      "yearsInBusiness": "[ES-TODO] Years in Business",
+      "countriesServed": "[ES-TODO] Countries Served",
+      "satisfactionRate": "[ES-TODO] Client Satisfaction",
+      "projectsCompleted": "[ES-TODO] Projects Delivered"
+    }
+  },
+  "faq": {
+    "sectionTitle": "[ES-TODO] Frequently Asked Questions",
+    "items": {}
+  },
+  "privacy": {
+    "pageTitle": "[ES-TODO] Privacy Policy",
+    "pageDescription": "[ES-TODO] Learn how we collect, use, and protect your personal information.",
+    "lastUpdated": "[ES-TODO] Last Updated",
+    "effectiveDate": "[ES-TODO] Effective Date",
+    "tableOfContents": "[ES-TODO] Table of Contents",
+    "sections": {
+      "introduction": "[ES-TODO] Introduction",
+      "informationCollected": "[ES-TODO] Information We Collect",
+      "howWeUse": "[ES-TODO] How We Use Your Information",
+      "sharing": "[ES-TODO] Information Sharing",
+      "security": "[ES-TODO] Data Security",
+      "retention": "[ES-TODO] Data Retention",
+      "rights": "[ES-TODO] Your Privacy Rights",
+      "children": "[ES-TODO] Children's Privacy",
+      "changes": "[ES-TODO] Changes to This Policy",
+      "contact": "[ES-TODO] Contact Us"
+    }
+  },
+  "terms": {
+    "pageTitle": "[ES-TODO] Terms of Service",
+    "pageDescription": "[ES-TODO] Read our terms and conditions for using our services and purchasing products.",
+    "lastUpdated": "[ES-TODO] Last Updated",
+    "effectiveDate": "[ES-TODO] Effective Date",
+    "tableOfContents": "[ES-TODO] Table of Contents",
+    "sections": {
+      "introduction": "[ES-TODO] Introduction",
+      "acceptance": "[ES-TODO] Acceptance of Terms",
+      "services": "[ES-TODO] Services Description",
+      "orders": "[ES-TODO] Orders & Contracts",
+      "payment": "[ES-TODO] Payment Terms",
+      "shipping": "[ES-TODO] Shipping & Delivery",
+      "warranty": "[ES-TODO] Warranty & Returns",
+      "liability": "[ES-TODO] Limitation of Liability",
+      "ip": "[ES-TODO] Intellectual Property",
+      "confidentiality": "[ES-TODO] Confidentiality",
+      "termination": "[ES-TODO] Termination",
+      "governing": "[ES-TODO] Governing Law",
+      "disputes": "[ES-TODO] Dispute Resolution",
+      "contact": "[ES-TODO] Contact Information"
+    }
+  },
+  "customProject": {
+    "meta": {
+      "title": "[ES-TODO] Custom Project Support | Showcase Website Starter",
+      "description": "[ES-TODO] Replaceable custom-project example for scope, proposal, brand adaptation, review, and delivery."
+    },
+    "hero": {
+      "title": "[ES-TODO] Custom Project Support",
+      "subtitle": "[ES-TODO] Your scope. A reusable project flow."
+    },
+    "scope": {
+      "title": "[ES-TODO] Service Scope",
+      "customSizes": {
+        "title": "[ES-TODO] Custom Configuration",
+        "desc": "[ES-TODO] Replace this with the real configuration options, packages, service levels, or product variations."
+      },
+      "privateLabel": {
+        "title": "[ES-TODO] Private Label",
+        "desc": "[ES-TODO] Use this area for brand adaptation, private label, white-label, or client-specific presentation needs."
+      },
+      "implementationSupport": {
+        "title": "[ES-TODO] Implementation Support",
+        "desc": "[ES-TODO] Explain setup, onboarding, integration, production, or delivery support for the real project."
+      },
+      "qualityAssurance": {
+        "title": "[ES-TODO] Quality Assurance",
+        "desc": "[ES-TODO] Describe the real review process, acceptance criteria, documentation, or approval steps."
+      }
+    },
+    "process": {
+      "title": "[ES-TODO] How We Work Together",
+      "step1": {
+        "title": "[ES-TODO] Discovery",
+        "desc": "[ES-TODO] Share the goal, audience, offer, constraints, and current assets",
+        "timeline": "[ES-TODO] Step 1"
+      },
+      "step2": {
+        "title": "[ES-TODO] Proposal",
+        "desc": "[ES-TODO] Confirm the page scope, content needs, and success criteria",
+        "timeline": "[ES-TODO] Step 2"
+      },
+      "step3": {
+        "title": "[ES-TODO] Example or Preview",
+        "desc": "[ES-TODO] Prepare the first page, component, sample, or implementation preview",
+        "timeline": "[ES-TODO] Step 3"
+      },
+      "step4": {
+        "title": "[ES-TODO] Review",
+        "desc": "[ES-TODO] Check content, UI states, proof, forms, and expected behavior",
+        "timeline": "[ES-TODO] Step 4"
+      },
+      "step5": {
+        "title": "[ES-TODO] Delivery",
+        "desc": "[ES-TODO] Finalize content, configuration, verification, and launch preparation",
+        "timeline": "[ES-TODO] Step 5"
+      }
+    },
+    "standards": {
+      "title": "[ES-TODO] Supported Standards",
+      "desc": "[ES-TODO] Replace these labels with the real standards, platforms, deliverables, or acceptance rules for the new project.",
+      "custom": "[ES-TODO] Custom scope also supported"
+    },
+    "cta": {
+      "heading": "[ES-TODO] Start a Custom Project",
+      "description": "[ES-TODO] Tell us the goal, audience, content, timeline, and replacement needs. This example should become your real intake path.",
+      "button": "[ES-TODO] Get Started"
+    }
+  }
+}

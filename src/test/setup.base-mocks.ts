@@ -12,36 +12,44 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/mdx-importers.generated", () => ({
   postImporters: {
     en: {},
+    es: {},
     zh: {},
   },
   productImporters: {
     en: {},
+    es: {},
     zh: {},
   },
   pageImporters: {
     en: {},
+    es: {},
     zh: {},
   },
 }));
 
-// Mock next/font/google for Figtree + JetBrains Mono
+// Mock next/font/google for Tucsenberg font stack.
 vi.mock("next/font/google", () => ({
-  Figtree: vi.fn(() => ({
-    variable: "--font-figtree",
-    className: "figtree",
-    style: { fontFamily: "Figtree" },
+  IBM_Plex_Sans: vi.fn(() => ({
+    variable: "--font-ibm-plex-sans",
+    className: "ibm-plex-sans",
+    style: { fontFamily: "IBM Plex Sans" },
   })),
-  JetBrains_Mono: vi.fn(() => ({
-    variable: "--font-jetbrains-mono",
-    className: "jetbrains-mono",
-    style: { fontFamily: "JetBrains Mono" },
+  Inter: vi.fn(() => ({
+    variable: "--font-inter",
+    className: "inter",
+    style: { fontFamily: "Inter" },
+  })),
+  IBM_Plex_Mono: vi.fn(() => ({
+    variable: "--font-ibm-plex-mono",
+    className: "ibm-plex-mono",
+    style: { fontFamily: "IBM Plex Mono" },
   })),
 }));
 
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-figtree",
+    variable: "--font-ibm-plex-sans",
     className: "font-local",
-    style: { fontFamily: "Figtree" },
+    style: { fontFamily: "IBM Plex Sans" },
   })),
 }));

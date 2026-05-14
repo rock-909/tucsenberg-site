@@ -1361,7 +1361,7 @@ const TEXT_RULES = [
   {
     ruleId: "todo-marker",
     severity: "error",
-    pattern: /\bTODO\b/gu,
+    pattern: /(?<!ES-)\bTODO\b/gu,
     message: "TODO marker is present in buyer-visible content.",
   },
   {
@@ -1804,7 +1804,33 @@ function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
   );
 }
 
+function checkSpanishTodoMarkersForProduction(rootDir = ROOT) {
+  const spanishMessageFiles = [
+    path.join(rootDir, "messages/es/critical.json"),
+    path.join(rootDir, "messages/es/deferred.json"),
+  ];
+
+  const offenders = spanishMessageFiles.filter((filePath) => {
+    if (!fs.existsSync(filePath)) return false;
+    return fs.readFileSync(filePath, "utf8").includes("[ES-TODO] ");
+  });
+
+  if (offenders.length === 0) return;
+
+  throw new Error(
+    [
+      "Spanish placeholder copy remains in production-readiness messages:",
+      ...offenders.map((filePath) => `- ${path.relative(rootDir, filePath)}`),
+      "Replace [ES-TODO] strings with reviewed Latin American Spanish before production launch.",
+    ].join("\n"),
+  );
+}
+
 function runContentReadinessCheck(rootDir = ROOT, options = {}) {
+  if (options.strictClientLaunch === true) {
+    checkSpanishTodoMarkersForProduction(rootDir);
+  }
+
   const findings = collectContentReadinessFindings(rootDir, options);
   const errors = findings.filter((finding) => finding.severity === "error");
   const warnings = findings.filter((finding) => finding.severity === "warning");
@@ -1825,9 +1851,15 @@ function printReadinessFinding(finding) {
 }
 
 function runContentReadinessCli(args = []) {
-  const result = runContentReadinessCheck(ROOT, {
-    strictClientLaunch: args.includes("--strict-client-launch"),
-  });
+  let result;
+  try {
+    result = runContentReadinessCheck(ROOT, {
+      strictClientLaunch: args.includes("--strict-client-launch"),
+    });
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return false;
+  }
 
   if (result.findings.length === 0) {
     console.log("content readiness passed: no buyer-visible residue found");
@@ -3350,6 +3382,7 @@ module.exports = {
   parseArgs: parseContentSlugArgs,
   parseFrontmatter,
   parseGuardrailException,
+  checkSpanishTodoMarkersForProduction,
   runBrandCheck,
   runCloudflareOfficialCompareCli,
   runCloudflarePreviewDeployedProof,
