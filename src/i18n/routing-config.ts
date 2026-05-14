@@ -19,8 +19,9 @@ export const routing = defineRouting({
   // 注意：仅包含已实现的页面路径，避免 404 错误
   pathnames: PATHNAMES,
 
-  // 启用hreflang链接
-  alternateLinks: true,
+  // Public hreflang is generated from LOCALES_CONFIG.publicLocales by the
+  // SEO helpers. Keep next-intl from emitting runtime-only zh alternates.
+  alternateLinks: false,
 
   // 启用智能语言检测
   localeDetection: true,

@@ -57,6 +57,7 @@ export interface PublicStaticPageDefinition {
 function localizedPath(path: string): LocalizedPath {
   return Object.freeze({
     en: path,
+    es: path,
     zh: path,
   });
 }

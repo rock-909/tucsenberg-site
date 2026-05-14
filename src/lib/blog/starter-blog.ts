@@ -231,6 +231,8 @@ const ZH_ARTICLES = [
 
 const ARTICLES_BY_LOCALE = {
   en: EN_ARTICLES,
+  // Spanish starter blog copy is deferred with the rest of starter content.
+  es: EN_ARTICLES,
   zh: ZH_ARTICLES,
 } as const satisfies Record<Locale, readonly StarterBlogArticle[]>;
 

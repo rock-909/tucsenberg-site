@@ -52,6 +52,7 @@ describe("pages.config static public page registry", () => {
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
       expect(definition.pageType).toBeTruthy();
       expect(definition.localizedPaths).toHaveProperty("en");
+      expect(definition.localizedPaths).toHaveProperty("es");
       expect(definition.localizedPaths).toHaveProperty("zh");
       expect(definition.seoKey).toMatch(/^[a-z][a-zA-Z0-9.:-]*$/);
       expect(definition.routeOwner).toMatch(

@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
 import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
+import type { Locale } from "@/i18n/routing-config";
 import { getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { loadClientMessages } from "@/lib/i18n/client-messages";
 import { mainNavigation } from "@/lib/navigation";
@@ -27,7 +28,7 @@ interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 interface AsyncLocaleLayoutContentProps {
-  locale: "en" | "zh";
+  locale: Locale;
   children: ReactNode;
 }
 

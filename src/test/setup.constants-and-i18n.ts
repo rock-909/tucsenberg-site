@@ -73,7 +73,7 @@ vi.mock("next-intl/server", () => ({
 // Mock @/i18n/routing - 提供完整的路由Mock配置
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
     pathnames: {
       "/": "/",

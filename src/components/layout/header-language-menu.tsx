@@ -10,8 +10,9 @@ import {
   useState,
 } from "react";
 import { ANIMATION_DURATION_VERY_SLOW } from "@/constants/core";
+import type { Locale } from "@/i18n/routing-config";
 
-type HeaderLanguageLocale = "en" | "zh";
+type HeaderLanguageLocale = Locale;
 type TimeoutHandle = ReturnType<typeof setTimeout>;
 
 interface HeaderLanguageMenuProps {
@@ -35,11 +36,13 @@ const LANGUAGE_OPTIONS: Array<{
   label: string;
 }> = [
   { locale: "en", label: "English" },
+  { locale: "es", label: "Español" },
   { locale: "zh", label: "简体中文" },
 ];
 
 const LANGUAGE_LABELS = {
   en: "English",
+  es: "Español",
   zh: "简体中文",
 } as const;
 
@@ -254,10 +257,13 @@ export function HeaderLanguageMenu({
   const { switchingTo, handleLanguageClick } = useLanguageTransition();
   const currentLanguageName = LANGUAGE_LABELS[locale];
   const languageHrefs = useMemo(
-    () => ({
-      en: getLanguageHref(pathname, "en"),
-      zh: getLanguageHref(pathname, "zh"),
-    }),
+    () =>
+      Object.fromEntries(
+        LANGUAGE_OPTIONS.map((option) => [
+          option.locale,
+          getLanguageHref(pathname, option.locale),
+        ]),
+      ) as Record<HeaderLanguageLocale, string>,
     [pathname],
   );
 

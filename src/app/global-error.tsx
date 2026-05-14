@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { coerceLocale } from "@/i18n/locale-utils";
+import type { Locale } from "@/i18n/routing-config";
 import { isPublicRuntimeDevelopment } from "@/lib/env";
 
 interface GlobalErrorProps {
@@ -23,6 +24,14 @@ const translations = {
     goHome: "Go to homepage",
     devDetails: "Error Details (Development Only)",
   },
+  es: {
+    title: "Algo salió mal.",
+    description:
+      "Disculpa las molestias. Se produjo un error inesperado.",
+    tryAgain: "Intentar de nuevo",
+    goHome: "Ir al inicio",
+    devDetails: "Detalles del error (solo desarrollo)",
+  },
   zh: {
     title: "出错了！",
     description: "非常抱歉给您带来不便。发生了意外错误。",
@@ -32,11 +41,17 @@ const translations = {
   },
 } as const;
 
-function getLocaleFromBrowser(): "en" | "zh" {
+function getLocaleFromBrowser(): Locale {
   if (typeof window === "undefined") return coerceLocale(undefined);
 
   const browserLang = navigator.language?.toLowerCase() || "";
-  return coerceLocale(browserLang.startsWith("zh") ? "zh" : "en");
+  const browserLocale = browserLang.startsWith("zh")
+    ? "zh"
+    : browserLang.startsWith("es")
+      ? "es"
+      : "en";
+
+  return coerceLocale(browserLocale);
 }
 
 function isDevelopmentRuntime(): boolean {
@@ -50,7 +65,6 @@ async function reportGlobalError(error: Error): Promise<void> {
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const locale = getLocaleFromBrowser();
-  // Safe: locale is strictly typed as 'en' | 'zh' from getLocaleFromBrowser()
   const t = translations[locale];
 
   useEffect(() => {

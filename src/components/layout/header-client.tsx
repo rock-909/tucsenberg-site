@@ -1,6 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useState, type ReactNode } from "react";
+import type { Locale } from "@/i18n/routing-config";
 import { Link } from "@/i18n/routing";
 
 const MobileNavigationInteractive = lazy(() =>
@@ -17,6 +18,7 @@ const HeaderLanguageMenu = lazy(() =>
 
 const LANGUAGE_LABELS = {
   en: "English",
+  es: "Español",
   zh: "简体中文",
 } as const;
 
@@ -25,17 +27,17 @@ interface MobileNavigationIslandProps {
   openMenuLabel?: string;
   closeMenuLabel?: string;
   languageLabel?: string;
-  locale?: "en" | "zh";
+  locale?: Locale;
 }
 
 interface LanguageToggleIslandProps {
-  locale: "en" | "zh";
+  locale: Locale;
 }
 
 interface MobileNavigationFallbackProps {
   children?: ReactNode;
   languageLabel: string;
-  locale: "en" | "zh";
+  locale: Locale;
   onActivate: () => void;
   openMenuLabel: string;
 }
@@ -45,7 +47,7 @@ function MobileLanguageFallback({
   locale,
 }: {
   languageLabel: string;
-  locale: "en" | "zh";
+  locale: Locale;
 }) {
   const currentLanguageName = LANGUAGE_LABELS[locale];
 
@@ -67,6 +69,15 @@ function MobileLanguageFallback({
           prefetch={false}
         >
           <span translate="no">English</span>
+        </Link>
+        <Link
+          href="/"
+          className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          hrefLang="es"
+          locale="es"
+          prefetch={false}
+        >
+          <span translate="no">Español</span>
         </Link>
         <Link
           href="/"

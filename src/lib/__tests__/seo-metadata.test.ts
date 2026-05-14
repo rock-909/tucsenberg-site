@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PageType } from "@/config/paths";
+import { siteFacts } from "@/config/site-facts";
 // Import after mocks
 import {
   createPageSEOConfig,
@@ -130,9 +131,11 @@ describe("SEO Metadata", () => {
           "Exports to {countries}+ countries with {employees}+ staff",
       });
 
-      expect(metadata.title).toBe("Established in 2018");
+      expect(metadata.title).toBe(
+        `Established in ${siteFacts.company.established}`,
+      );
       expect(metadata.description).toBe(
-        "Exports to 20+ countries with 60+ staff",
+        `Exports to ${siteFacts.stats.exportCountries}+ countries with ${siteFacts.company.employees}+ staff`,
       );
     });
 

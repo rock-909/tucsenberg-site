@@ -16,6 +16,7 @@ import { Check, Globe, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Link, usePathname } from "@/i18n/routing";
+import type { Locale } from "@/i18n/routing-config";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
 import {
   MobileNavigationLinks,
@@ -54,6 +55,25 @@ interface MobileMenuState {
   isLanguageExpanded: boolean;
   isOpen: boolean;
   pathname: string;
+}
+
+const MOBILE_LANGUAGE_OPTIONS: Array<{
+  locale: Locale;
+  label: string;
+}> = [
+  { locale: "en", label: "English" },
+  { locale: "es", label: "Español" },
+  { locale: "zh", label: "简体中文" },
+];
+
+const MOBILE_LANGUAGE_LABELS: Record<Locale, string> = {
+  en: "English",
+  es: "Español",
+  zh: "简体中文",
+};
+
+function isMobileLanguageLocale(locale: string): locale is Locale {
+  return locale === "en" || locale === "es" || locale === "zh";
 }
 
 export function MobileMenuButton({
@@ -124,13 +144,11 @@ function MobileLanguageSwitcher({
   onNavigate?: () => void;
   pathname: string;
 }) {
-  const currentLocale = useLocale() === "zh" ? "zh" : "en";
-
-  const languages = [
-    { locale: "en" as const, label: "English" },
-    { locale: "zh" as const, label: "简体中文" },
-  ];
-  const currentLanguageLabel = currentLocale === "zh" ? "简体中文" : "English";
+  const runtimeLocale = useLocale();
+  const currentLocale = isMobileLanguageLocale(runtimeLocale)
+    ? runtimeLocale
+    : "en";
+  const currentLanguageLabel = MOBILE_LANGUAGE_LABELS[currentLocale];
 
   const handleNavigate = () => {
     onExpandedChange(false);
@@ -172,7 +190,7 @@ function MobileLanguageSwitcher({
         </span>
       </Button>
       {isExpanded
-        ? languages.map(({ locale, label }) => {
+        ? MOBILE_LANGUAGE_OPTIONS.map(({ locale, label }) => {
             const isActive = currentLocale === locale;
             return (
               <Link

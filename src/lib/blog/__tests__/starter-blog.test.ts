@@ -5,16 +5,22 @@ import {
 } from "@/lib/blog/starter-blog";
 
 describe("starter blog content", () => {
-  it("provides launch education articles in both locales", () => {
+  it("provides launch education articles in all runtime locales", () => {
     const enArticles = getStarterBlogArticles("en");
+    const esArticles = getStarterBlogArticles("es");
     const zhArticles = getStarterBlogArticles("zh");
 
     expect(enArticles).toHaveLength(4);
+    expect(esArticles).toHaveLength(4);
     expect(zhArticles).toHaveLength(4);
+    expect(enArticles.map((article) => article.slug)).toEqual(
+      esArticles.map((article) => article.slug),
+    );
     expect(enArticles.map((article) => article.slug)).toEqual(
       zhArticles.map((article) => article.slug),
     );
     expect(enArticles[0]?.title).toContain("launch");
+    expect(esArticles[0]?.title).toContain("launch");
     expect(zhArticles[0]?.title).toContain("上线");
   });
 

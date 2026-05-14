@@ -11,7 +11,7 @@ import {
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
-const mockLocale = { current: "en" as "en" | "zh" };
+const mockLocale = { current: "en" as "en" | "es" | "zh" };
 const mockTranslationOverrides: { current?: Record<string, string> } = {};
 
 // Mock next-intl
@@ -678,6 +678,9 @@ describe("MobileLanguageSwitcher Integration", () => {
       screen.getByTestId("mobile-language-option-label-en"),
     ).toBeInTheDocument();
     expect(
+      screen.getByTestId("mobile-language-option-label-es"),
+    ).toBeInTheDocument();
+    expect(
       screen.getByTestId("mobile-language-option-label-zh"),
     ).toBeInTheDocument();
   });
@@ -716,7 +719,7 @@ describe("MobileLanguageSwitcher Integration", () => {
   });
 
   it("defaults to English when locale context is not zh", async () => {
-    mockLocale.current = "en";
+    mockLocale.current = "fr" as "en";
 
     renderWithIntl(<MobileNavigation />);
 
@@ -729,6 +732,21 @@ describe("MobileLanguageSwitcher Integration", () => {
       .getByTestId("mobile-language-option-label-en")
       .closest("a");
     expect(englishLink).toHaveClass("bg-accent");
+  });
+
+  it("detects Spanish from next-intl locale context", async () => {
+    mockLocale.current = "es";
+
+    renderWithIntl(<MobileNavigation />);
+
+    const trigger = screen.getByRole("button", { name: /menu/i });
+    await user.click(trigger);
+    await user.click(screen.getByRole("button", { name: "Language Español" }));
+
+    const spanishLink = screen
+      .getByTestId("mobile-language-option-label-es")
+      .closest("a");
+    expect(spanishLink).toHaveClass("bg-accent");
   });
 
   it("closes menu when language link is clicked", async () => {

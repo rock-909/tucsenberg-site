@@ -248,6 +248,10 @@ describe("site-config", () => {
       const configuredConfig = {
         ...SITE_CONFIG,
         baseUrl: "https://showcase-website-starter.test",
+        social: {
+          twitter: "https://x.com/tucsenberg",
+          linkedin: "https://www.linkedin.com/company/tucsenberg",
+        },
       } satisfies SiteConfig;
       const result = validateSiteConfig(configuredConfig);
       expect(result.valid).toBe(true);
