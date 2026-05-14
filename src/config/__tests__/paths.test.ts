@@ -27,21 +27,37 @@ const isPhone = (value: string) =>
   /^\+\d{1,3}[-\s]?\(?[\d]{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,9}$/.test(value);
 
 const CURRENT_PRODUCTION_LOCALE_CONTRACT = {
-  locales: ["en", "zh"],
+  locales: ["en", "es", "zh"],
+  publicLocales: ["en", "es"],
   defaultLocale: "en",
   localePrefix: "always",
+  prefixes: {
+    en: "",
+    es: "/es",
+    zh: "/zh",
+  },
+  displayNames: {
+    en: "English",
+    es: "Español",
+    zh: "中文",
+  },
   timeZones: {
     en: "UTC",
+    es: "America/Mexico_City",
     zh: "Asia/Shanghai",
   },
   currencies: {
     en: "USD",
+    es: "USD",
     zh: "CNY",
   },
 } as const satisfies {
   locales: readonly Locale[];
+  publicLocales: readonly Locale[];
   defaultLocale: Locale;
   localePrefix: "always";
+  prefixes: Record<Locale, string>;
+  displayNames: Record<Locale, string>;
   timeZones: Record<Locale, string>;
   currencies: Record<Locale, string>;
 };
@@ -50,9 +66,11 @@ describe("paths configuration", () => {
   describe("type definitions", () => {
     it("should have valid Locale type", () => {
       const enLocale: Locale = "en";
+      const esLocale: Locale = "es";
       const zhLocale: Locale = "zh";
 
       expect(enLocale).toBe("en");
+      expect(esLocale).toBe("es");
       expect(zhLocale).toBe("zh");
     });
 
@@ -77,10 +95,12 @@ describe("paths configuration", () => {
     it("should have valid LocalizedPath structure", () => {
       const path: LocalizedPath = {
         en: "/test",
+        es: "/test",
         zh: "/test",
       };
 
       expect(path.en).toBe("/test");
+      expect(path.es).toBe("/test");
       expect(path.zh).toBe("/test");
     });
   });
@@ -107,8 +127,10 @@ describe("paths configuration", () => {
     it("should have both locales for each page type", () => {
       Object.entries(PATHS_CONFIG).forEach(([_pageType, paths]) => {
         expect(paths).toHaveProperty("en");
+        expect(paths).toHaveProperty("es");
         expect(paths).toHaveProperty("zh");
         expect(typeof paths.en).toBe("string");
+        expect(typeof paths.es).toBe("string");
         expect(typeof paths.zh).toBe("string");
       });
     });
@@ -118,9 +140,11 @@ describe("paths configuration", () => {
         if (pageType !== "home") {
           // Paths should start with "/" and contain only lowercase letters, hyphens, and forward slashes
           expect(paths.en).toMatch(/^\/[a-z/-]+$/);
+          expect(paths.es).toMatch(/^\/[a-z/-]+$/);
           expect(paths.zh).toMatch(/^\/[a-z/-]+$/);
         } else {
           expect(paths.en).toBe("/");
+          expect(paths.es).toBe("/");
           expect(paths.zh).toBe("/");
         }
       });
@@ -130,6 +154,7 @@ describe("paths configuration", () => {
       Object.entries(PATHS_CONFIG).forEach(([_pageType, paths]) => {
         // All languages should use the same path (standard approach)
         expect(paths.en).toBe(paths.zh);
+        expect(paths.en).toBe(paths.es);
       });
     });
 
@@ -152,6 +177,15 @@ describe("paths configuration", () => {
       expect(LOCALES_CONFIG.localePrefix).toBe(
         CURRENT_PRODUCTION_LOCALE_CONTRACT.localePrefix,
       );
+      expect(LOCALES_CONFIG.publicLocales).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.publicLocales,
+      );
+      expect(LOCALES_CONFIG.prefixes).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.prefixes,
+      );
+      expect(LOCALES_CONFIG.displayNames).toEqual(
+        CURRENT_PRODUCTION_LOCALE_CONTRACT.displayNames,
+      );
       expect(LOCALES_CONFIG.timeZones).toEqual(
         CURRENT_PRODUCTION_LOCALE_CONTRACT.timeZones,
       );
@@ -167,34 +201,41 @@ describe("paths configuration", () => {
 
     it("should have valid prefixes", () => {
       expect(LOCALES_CONFIG.prefixes.en).toBe("");
+      expect(LOCALES_CONFIG.prefixes.es).toBe("/es");
       expect(LOCALES_CONFIG.prefixes.zh).toBe("/zh");
     });
 
     it("should have display names", () => {
       expect(LOCALES_CONFIG.displayNames.en).toBe("English");
+      expect(LOCALES_CONFIG.displayNames.es).toBe("Español");
       expect(LOCALES_CONFIG.displayNames.zh).toBe("中文");
     });
 
     it("should expose locale time zones and currencies from the registry", () => {
       expect(LOCALES_CONFIG.timeZones).toEqual({
         en: "UTC",
+        es: "America/Mexico_City",
         zh: "Asia/Shanghai",
       });
       expect(LOCALES_CONFIG.currencies).toEqual({
         en: "USD",
+        es: "USD",
         zh: "CNY",
       });
     });
 
     it("should resolve locale metadata through helpers", () => {
       expect(getLocaleTimeZone("en")).toBe("UTC");
+      expect(getLocaleTimeZone("es")).toBe("America/Mexico_City");
       expect(getLocaleTimeZone("zh")).toBe("Asia/Shanghai");
       expect(getLocaleCurrency("en")).toBe("USD");
+      expect(getLocaleCurrency("es")).toBe("USD");
       expect(getLocaleCurrency("zh")).toBe("CNY");
     });
 
     it("should have time zones", () => {
       expect(LOCALES_CONFIG.timeZones.en).toBe("UTC");
+      expect(LOCALES_CONFIG.timeZones.es).toBe("America/Mexico_City");
       expect(LOCALES_CONFIG.timeZones.zh).toBe("Asia/Shanghai");
     });
 
@@ -216,8 +257,10 @@ describe("paths configuration", () => {
     });
 
     it("should have basic site information", () => {
-      expect(SITE_CONFIG.name).toBe("Showcase Website Starter");
-      expect(SITE_CONFIG.description).toMatch(/public demo starter/iu);
+      expect(SITE_CONFIG.name).toBe("Tucsenberg");
+      expect(SITE_CONFIG.description).toMatch(
+        /aftermarket aeration replacement membranes/iu,
+      );
     });
 
     it("should use environment variable for baseUrl", () => {
@@ -256,14 +299,19 @@ describe("paths configuration", () => {
   describe("getLocalizedPath", () => {
     it("should return correct path for valid page type and locale", () => {
       expect(getLocalizedPath("home", "en")).toBe("/");
+      expect(getLocalizedPath("home", "es")).toBe("/");
       expect(getLocalizedPath("home", "zh")).toBe("/");
       expect(getLocalizedPath("capabilities", "en")).toBe("/capabilities");
+      expect(getLocalizedPath("capabilities", "es")).toBe("/capabilities");
       expect(getLocalizedPath("capabilities", "zh")).toBe("/capabilities");
       expect(getLocalizedPath("howItWorks", "en")).toBe("/how-it-works");
+      expect(getLocalizedPath("howItWorks", "es")).toBe("/how-it-works");
       expect(getLocalizedPath("howItWorks", "zh")).toBe("/how-it-works");
       expect(getLocalizedPath("blog", "en")).toBe("/blog");
+      expect(getLocalizedPath("blog", "es")).toBe("/blog");
       expect(getLocalizedPath("blog", "zh")).toBe("/blog");
       expect(getLocalizedPath("about", "en")).toBe("/about");
+      expect(getLocalizedPath("about", "es")).toBe("/about");
       expect(getLocalizedPath("about", "zh")).toBe("/about");
     });
 
@@ -345,6 +393,7 @@ describe("paths configuration", () => {
       expect(getPageTypeFromPath("/", "en")).toBe("home");
       expect(getPageTypeFromPath("", "en")).toBe("home");
       expect(getPageTypeFromPath("/about", "en")).toBe("about");
+      expect(getPageTypeFromPath("/about", "es")).toBe("about");
       expect(getPageTypeFromPath("/contact", "zh")).toBe("contact");
       expect(getPageTypeFromPath("/blog", "en")).toBe("blog");
     });
@@ -356,6 +405,7 @@ describe("paths configuration", () => {
 
     it("should work with both locales", () => {
       expect(getPageTypeFromPath("/products", "en")).toBe("products");
+      expect(getPageTypeFromPath("/products", "es")).toBe("products");
       expect(getPageTypeFromPath("/products", "zh")).toBe("products");
       expect(getPageTypeFromPath("/blog", "zh")).toBe("blog");
     });
@@ -433,6 +483,7 @@ describe("paths configuration", () => {
   describe("边缘情况和错误处理", () => {
     it("should handle empty string paths", () => {
       expect(getPageTypeFromPath("", "en")).toBe("home");
+      expect(getPageTypeFromPath("", "es")).toBe("home");
       expect(getPageTypeFromPath("", "zh")).toBe("home");
     });
 

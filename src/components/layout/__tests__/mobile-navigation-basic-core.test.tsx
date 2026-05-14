@@ -62,7 +62,7 @@ vi.mock("@/i18n/routing", () => ({
   })),
   usePathname: vi.fn(() => "/"),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
     pathnames: {
       "/": "/",
@@ -94,6 +94,10 @@ describe("Mobile Navigation - Basic Core Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.products": "Products",
           "navigation.blog": "Blog",
           "navigation.customProject": "Custom",
@@ -154,8 +158,8 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       render(<MobileNavigation />);
 
       // Navigation items should not be visible when closed
-      expect(screen.queryByText("Home")).not.toBeInTheDocument();
-      expect(screen.queryByText("About")).not.toBeInTheDocument();
+      expect(screen.queryByText("Membranes")).not.toBeInTheDocument();
+      expect(screen.queryByText("Compatibility")).not.toBeInTheDocument();
     });
 
     it("has correct button type", () => {
@@ -233,7 +237,7 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       expect(trigger).toHaveAttribute("aria-expanded", "true");
 
       // 检查菜单是否打开（通过查找导航项）
-      expect(screen.getByText("Home")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
     });
 
     it("shows menu icon when menu is closed", async () => {
@@ -253,10 +257,10 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      expect(screen.getByText("Home")).toBeInTheDocument();
-      expect(screen.getByText("About")).toBeInTheDocument();
-      expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
+      expect(screen.getByText("Compatibility")).toBeInTheDocument();
+      expect(screen.getByText("Materials")).toBeInTheDocument();
+      expect(screen.getByText("Quote")).toBeInTheDocument();
       expect(screen.queryByText("Custom")).not.toBeInTheDocument();
     });
 
@@ -264,8 +268,8 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       render(<MobileNavigation />);
 
       // 初始状态下导航项应该不可见
-      expect(screen.queryByText("Home")).not.toBeInTheDocument();
-      expect(screen.queryByText("About")).not.toBeInTheDocument();
+      expect(screen.queryByText("Membranes")).not.toBeInTheDocument();
+      expect(screen.queryByText("Compatibility")).not.toBeInTheDocument();
     });
 
     it("handles keyboard activation", async () => {
@@ -310,7 +314,7 @@ describe("Mobile Navigation - Basic Core Tests", () => {
       expect(trigger).toHaveAttribute("aria-expanded", "true");
 
       // 检查菜单内容是否可见
-      expect(screen.getByText("Home")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
     });
 
     it("handles component re-renders during open state", async () => {

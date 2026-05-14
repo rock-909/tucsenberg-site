@@ -65,10 +65,11 @@ describe("HeaderLanguageMenu", () => {
       "href",
       "/en/products/north-america",
     );
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
-      "/zh/products/north-america",
+      "/es/products/north-america",
     );
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
   });
 
   it("keeps locale root links clean without duplicate slashes", () => {
@@ -80,9 +81,9 @@ describe("HeaderLanguageMenu", () => {
       "href",
       "/en",
     );
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
-      "/zh",
+      "/es",
     );
   });
 
@@ -92,25 +93,25 @@ describe("HeaderLanguageMenu", () => {
     setBrowserPathname("/en/about");
     fireEvent.click(screen.getByTestId("language-toggle-button"));
 
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
-      "/zh/about",
+      "/es/about",
     );
 
     fireEvent.click(screen.getByTestId("language-toggle-button"));
     setBrowserPathname("/en/contact");
     fireEvent.click(screen.getByTestId("language-toggle-button"));
 
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
-      "/zh/contact",
+      "/es/contact",
     );
   });
 
   it("shows a temporary loading indicator for the selected target locale", () => {
     render(<HeaderLanguageMenu initialOpen locale="en" />);
 
-    fireEvent.click(screen.getByTestId("language-link-zh"));
+    fireEvent.click(screen.getByTestId("language-link-es"));
 
     expect(screen.getByTestId("loader-icon")).toBeInTheDocument();
 
@@ -119,6 +120,20 @@ describe("HeaderLanguageMenu", () => {
     });
 
     expect(screen.queryByTestId("loader-icon")).not.toBeInTheDocument();
+  });
+
+  it("keeps internal Chinese preview out of the public desktop language menu", () => {
+    render(<HeaderLanguageMenu initialOpen locale="zh" />);
+
+    expect(screen.getByTestId("language-current-label")).toHaveTextContent(
+      "简体中文",
+    );
+    expect(screen.getByTestId("language-link-en")).toBeInTheDocument();
+    expect(screen.getByTestId("language-link-es")).toBeInTheDocument();
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("language-option-label-zh"),
+    ).not.toBeInTheDocument();
   });
 
   it("toggles the menu from the trigger and closes with Escape", () => {

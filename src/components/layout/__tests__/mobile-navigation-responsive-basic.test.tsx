@@ -90,6 +90,10 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.services": "Services",
           "navigation.contact": "Contact",
           "navigation.products": "Products",
@@ -244,15 +248,15 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      // Simulate route change to about page
-      mockPathname.current = "/about";
+      // Step 2 nav items share the same placeholder target.
+      mockPathname.current = "#coming-soon";
       rerender(<MobileNavigation />);
 
       const reopenedTrigger = screen.getByRole("button");
       await user.click(reopenedTrigger);
 
-      const aboutLink = screen.getByRole("link", { name: "About" });
-      expect(aboutLink).toHaveAttribute("aria-current", "page");
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      expect(membranesLink).toHaveAttribute("aria-current", "page");
     });
 
     it("closes the menu during route changes", async () => {

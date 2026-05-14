@@ -7,8 +7,9 @@ import {
   type PageType,
 } from "@/config/paths";
 import { siteFacts } from "@/config/site-facts";
+import { isPublicSeoLocale } from "@/config/paths/locales-config";
 import { ONE } from "@/constants";
-import { getRuntimeEnvString } from "@/lib/env";
+import { getPublicRuntimeEnvString, getRuntimeEnvString } from "@/lib/env";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -57,33 +58,64 @@ function normalizePath(path: string): string {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
+function getRequestAwareBaseUrl(): string {
+  const siteUrl = getPublicRuntimeEnvString("NEXT_PUBLIC_SITE_URL");
+  if (siteUrl !== undefined && siteUrl.trim().length > 0) {
+    return siteUrl;
+  }
+
+  const baseUrl = getPublicRuntimeEnvString("NEXT_PUBLIC_BASE_URL");
+  if (baseUrl !== undefined && baseUrl.trim().length > 0) {
+    return baseUrl;
+  }
+
+  return SITE_CONFIG.baseUrl;
+}
+
 function buildCanonicalForPath(locale: Locale, path: string): string {
   const safeLocale = resolveLocale(locale);
   const normalizedPath = normalizePath(path);
   return new URL(
     `/${safeLocale}${normalizedPath}`,
-    SITE_CONFIG.baseUrl,
+    getRequestAwareBaseUrl(),
   ).toString();
 }
 
 function buildLanguagesForPath(path: string): Record<string, string> {
   const normalizedPath = normalizePath(path);
+  const baseUrl = getRequestAwareBaseUrl();
 
   const entries: Array<[string, string]> = LOCALES_CONFIG.publicLocales.map(
     (locale) => [
       locale,
-      new URL(`/${locale}${normalizedPath}`, SITE_CONFIG.baseUrl).toString(),
+      new URL(`/${locale}${normalizedPath}`, baseUrl).toString(),
     ],
   );
   entries.push([
     "x-default",
     new URL(
       `/${LOCALES_CONFIG.defaultLocale}${normalizedPath}`,
-      SITE_CONFIG.baseUrl,
+      baseUrl,
     ).toString(),
   ]);
 
   return Object.fromEntries(entries);
+}
+
+function buildRobotsForLocale(locale: Locale): Metadata["robots"] {
+  const shouldIndex = isPublicSeoLocale(locale);
+
+  return {
+    index: shouldIndex,
+    follow: shouldIndex,
+    googleBot: {
+      index: shouldIndex,
+      follow: shouldIndex,
+      "max-video-preview": -ONE,
+      "max-image-preview": "large",
+      "max-snippet": -ONE,
+    },
+  };
 }
 
 /**
@@ -261,17 +293,7 @@ export function generateLocalizedMetadata(
     },
 
     // 其他元数据
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -ONE,
-        "max-image-preview": "large",
-        "max-snippet": -ONE,
-      },
-    },
+    robots: buildRobotsForLocale(safeLocale),
 
     // 验证标签
     verification: {

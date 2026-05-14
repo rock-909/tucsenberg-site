@@ -166,7 +166,13 @@ function CardGridSection({
           <h2 className="text-[32px] font-bold leading-tight tracking-[-0.03em]">
             {title}
           </h2>
-          <p className="mt-3 text-muted-foreground">{description}</p>
+          <p
+            className={
+              muted ? "mt-3 text-foreground/80" : "mt-3 text-muted-foreground"
+            }
+          >
+            {description}
+          </p>
         </div>
         <div className={`mt-9 grid gap-4 ${columnsClassName}`}>
           {items.map((item) => (

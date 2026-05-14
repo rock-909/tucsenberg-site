@@ -26,8 +26,8 @@ test.describe("Homepage Core Functionality", () => {
   });
 
   test("should load homepage with all core sections", async ({ page }) => {
-    // Verify page title
-    await expect(page).toHaveTitle(/Showcase Website Starter/);
+    // Verify Step 2 brand title
+    await expect(page).toHaveTitle(/Tucsenberg/);
 
     // Verify all 5 core sections are present and visible using semantic selectors
     const heroSection = page.getByTestId("hero-section");

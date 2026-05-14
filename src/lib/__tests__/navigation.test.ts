@@ -19,7 +19,8 @@ import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
   mockLocalesConfig: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
 }));
@@ -208,11 +209,13 @@ describe("navigation", () => {
 
     it("should localize root path", () => {
       expect(getLocalizedHref("/", "en")).toBe("/en");
+      expect(getLocalizedHref("/", "es")).toBe("/es");
       expect(getLocalizedHref("/", "zh")).toBe("/zh");
     });
 
     it("should localize internal paths", () => {
       expect(getLocalizedHref("/about", "en")).toBe("/en/about");
+      expect(getLocalizedHref("/about", "es")).toBe("/es/about");
       expect(getLocalizedHref("/about", "zh")).toBe("/zh/about");
       expect(getLocalizedHref("/products/enterprise", "en")).toBe(
         "/en/products/enterprise",

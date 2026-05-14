@@ -45,7 +45,15 @@ vi.mock("@/lib/i18n/performance", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    defaultLocale: "en",
+  },
+}));
+
+vi.mock("@/config/paths/locales-config", () => ({
+  LOCALES_CONFIG: {
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
 }));
@@ -181,9 +189,10 @@ describe("Structured Data Generation", () => {
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",
-          availableLanguage: ["en", "zh"],
+          availableLanguage: ["en", "es"],
         },
       });
+      expect(JSON.stringify(schema)).not.toContain('"zh"');
       expect(
         (schema.contactPoint as Record<string, unknown>).telephone,
       ).toBeUndefined();
@@ -277,8 +286,9 @@ describe("Structured Data Generation", () => {
         name: "Example Showcase Company",
         description: "Reusable showcase website starter",
         url: "https://example.com",
-        inLanguage: ["en", "zh"],
+        inLanguage: ["en", "es"],
       });
+      expect(JSON.stringify(schema)).not.toContain('"zh"');
       expect(schema).not.toHaveProperty("potentialAction");
       expect(JSON.stringify(schema)).not.toContain("SearchAction");
       expect(JSON.stringify(schema)).not.toContain("/search");

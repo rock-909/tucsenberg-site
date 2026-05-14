@@ -57,13 +57,14 @@ interface MobileMenuState {
   pathname: string;
 }
 
+type PublicMobileLanguageLocale = Exclude<Locale, "zh">;
+
 const MOBILE_LANGUAGE_OPTIONS: Array<{
-  locale: Locale;
+  locale: PublicMobileLanguageLocale;
   label: string;
 }> = [
   { locale: "en", label: "English" },
   { locale: "es", label: "Español" },
-  { locale: "zh", label: "简体中文" },
 ];
 
 const MOBILE_LANGUAGE_LABELS: Record<Locale, string> = {

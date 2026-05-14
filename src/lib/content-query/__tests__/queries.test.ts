@@ -49,6 +49,48 @@ describe("content-query manifest runtime", () => {
     });
   });
 
+  it("falls Spanish MDX-backed pages back to English content during Step 2", async () => {
+    mockGetContentEntry.mockImplementation(
+      (type: string, locale: string, slug: string) => {
+        if (locale === "es") return undefined;
+        if (locale !== "en") return undefined;
+
+        return {
+          type,
+          locale,
+          slug,
+          extension: ".mdx",
+          filePath: `/content/pages/${locale}/${slug}.mdx`,
+          relativePath: `content/pages/${locale}/${slug}.mdx`,
+          metadata: {
+            title: "About",
+            description: "About page",
+            slug,
+            publishedAt: "2026-01-01",
+          },
+          content: "## About",
+        };
+      },
+    );
+
+    const page = await getPageBySlug("about", "es");
+
+    expect(mockGetContentEntry).toHaveBeenNthCalledWith(
+      1,
+      "pages",
+      "es",
+      "about",
+    );
+    expect(mockGetContentEntry).toHaveBeenNthCalledWith(
+      2,
+      "pages",
+      "en",
+      "about",
+    );
+    expect(page.filePath).toBe("/content/pages/en/about.mdx");
+    expect(page.metadata.title).toBe("About");
+  });
+
   it("throws the existing content-not-found message when a manifest entry is missing", async () => {
     mockGetContentEntry.mockReturnValue(undefined);
 

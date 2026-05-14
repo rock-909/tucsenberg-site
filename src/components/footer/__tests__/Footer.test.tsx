@@ -77,15 +77,19 @@ describe("Footer Component", () => {
 
     expect(navigationLinks).toEqual([
       { href: "/", text: "Home" },
-      { href: "/products", text: "Products" },
-      { href: "/blog", text: "Blog" },
-      { href: "/about", text: "About" },
+      { href: "#coming-soon", text: "Membranes" },
+      { href: "#coming-soon", text: "Compatibility" },
+      { href: "#coming-soon", text: "Materials" },
     ]);
     expect(navigationLinks).not.toContainEqual({
       href: "/contact",
       text: "Contact",
     });
     expect(supportLinks).toContainEqual({
+      href: "#coming-soon",
+      text: "Quote",
+    });
+    expect(supportLinks).not.toContainEqual({
       href: "/contact",
       text: "Contact",
     });

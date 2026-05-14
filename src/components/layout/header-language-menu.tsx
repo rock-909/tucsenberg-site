@@ -13,6 +13,7 @@ import { ANIMATION_DURATION_VERY_SLOW } from "@/constants/core";
 import type { Locale } from "@/i18n/routing-config";
 
 type HeaderLanguageLocale = Locale;
+type PublicHeaderLanguageLocale = Exclude<HeaderLanguageLocale, "zh">;
 type TimeoutHandle = ReturnType<typeof setTimeout>;
 
 interface HeaderLanguageMenuProps {
@@ -31,13 +32,21 @@ interface LanguageTransitionState {
   handleLanguageClick: (targetLocale: HeaderLanguageLocale) => void;
 }
 
-const LANGUAGE_OPTIONS: Array<{
+const RUNTIME_LANGUAGE_OPTIONS: Array<{
   locale: HeaderLanguageLocale;
   label: string;
 }> = [
   { locale: "en", label: "English" },
   { locale: "es", label: "Español" },
   { locale: "zh", label: "简体中文" },
+];
+
+const PUBLIC_LANGUAGE_OPTIONS: Array<{
+  locale: PublicHeaderLanguageLocale;
+  label: string;
+}> = [
+  { locale: "en", label: "English" },
+  { locale: "es", label: "Español" },
 ];
 
 const LANGUAGE_LABELS = {
@@ -140,7 +149,7 @@ function normalizeHeaderPathname(pathname: string) {
     ? normalized
     : `/${normalized}`;
 
-  for (const option of LANGUAGE_OPTIONS) {
+  for (const option of RUNTIME_LANGUAGE_OPTIONS) {
     const localePrefix = `/${option.locale}`;
 
     if (withLeadingSlash === localePrefix) {
@@ -259,11 +268,11 @@ export function HeaderLanguageMenu({
   const languageHrefs = useMemo(
     () =>
       Object.fromEntries(
-        LANGUAGE_OPTIONS.map((option) => [
+        PUBLIC_LANGUAGE_OPTIONS.map((option) => [
           option.locale,
           getLanguageHref(pathname, option.locale),
         ]),
-      ) as Record<HeaderLanguageLocale, string>,
+      ) as Record<PublicHeaderLanguageLocale, string>,
     [pathname],
   );
 
@@ -305,7 +314,7 @@ export function HeaderLanguageMenu({
           translate="no"
           className={MENU_CLASS_NAME}
         >
-          {LANGUAGE_OPTIONS.map((option) => (
+          {PUBLIC_LANGUAGE_OPTIONS.map((option) => (
             <div data-testid="language-dropdown-item" key={option.locale}>
               <a
                 href={languageHrefs[option.locale]}

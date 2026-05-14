@@ -57,6 +57,7 @@ describe("SEO Metadata", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
     delete process.env.GOOGLE_SITE_VERIFICATION;
     delete process.env.YANDEX_VERIFICATION;
   });
@@ -163,6 +164,22 @@ describe("SEO Metadata", () => {
       expect(metadataEn.openGraph?.siteName).toBe("Test Site");
     });
 
+    it("marks internal Chinese preview metadata as noindex", () => {
+      const metadata = generateLocalizedMetadata("zh", "about");
+
+      expect(metadata.robots).toEqual({
+        index: false,
+        follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      });
+    });
+
     it("should handle missing environment variables", () => {
       delete process.env.GOOGLE_SITE_VERIFICATION;
       delete process.env.YANDEX_VERIFICATION;
@@ -252,6 +269,71 @@ describe("SEO Metadata", () => {
 
       const openGraph = metadata.openGraph as unknown as { url?: string };
       expect(openGraph.url).toBe("https://example.com/es/about");
+    });
+
+    it("keeps internal Chinese preview canonical but marks it noindex", () => {
+      const metadata = generateMetadataForPath({
+        locale: "zh",
+        pageType: "about",
+        path: "/about",
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/zh/about",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "https://example.com/en/about",
+        es: "https://example.com/es/about",
+        "x-default": "https://example.com/en/about",
+      });
+      expect(metadata.robots).toEqual(
+        expect.objectContaining({
+          index: false,
+          follow: false,
+        }),
+      );
+    });
+
+    it("uses runtime public base URL for path-aware canonical and hreflang links", () => {
+      vi.stubEnv("NEXT_PUBLIC_BASE_URL", "http://localhost:3100");
+
+      const metadata = generateMetadataForPath({
+        locale: "en",
+        pageType: "contact",
+        path: "/contact",
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "http://localhost:3100/en/contact",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "http://localhost:3100/en/contact",
+        es: "http://localhost:3100/es/contact",
+        "x-default": "http://localhost:3100/en/contact",
+      });
+
+      const openGraph = metadata.openGraph as unknown as { url?: string };
+      expect(openGraph.url).toBe("http://localhost:3100/en/contact");
+    });
+
+    it("prefers runtime public site URL over runtime base URL", () => {
+      vi.stubEnv("NEXT_PUBLIC_BASE_URL", "http://localhost:3100");
+      vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://preview.example.test");
+
+      const metadata = generateMetadataForPath({
+        locale: "es",
+        pageType: "contact",
+        path: "/contact",
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "https://preview.example.test/es/contact",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "https://preview.example.test/en/contact",
+        es: "https://preview.example.test/es/contact",
+        "x-default": "https://preview.example.test/en/contact",
+      });
     });
   });
 

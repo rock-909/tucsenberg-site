@@ -79,15 +79,6 @@ function MobileLanguageFallback({
         >
           <span translate="no">Español</span>
         </Link>
-        <Link
-          href="/"
-          className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          hrefLang="zh"
-          locale="zh"
-          prefetch={false}
-        >
-          <span translate="no">简体中文</span>
-        </Link>
       </div>
     </details>
   );

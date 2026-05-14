@@ -8,7 +8,7 @@ import { expect, test } from "@playwright/test";
  * - <link rel="canonical"> points to correct URL
  * - JSON-LD structured data present and valid
  * - Open Graph tags present
- * - hreflang alternates present for both locales
+ * - hreflang alternates present for public locales only
  */
 
 const KEY_PAGES = [
@@ -110,16 +110,19 @@ for (const { path, name, expectedGraphTypes } of KEY_PAGES) {
     test("has one hreflang alternate per locale", async ({ page }) => {
       await page.goto(path);
       const enAlt = page.locator('link[rel="alternate"][hreflang="en"]');
+      const esAlt = page.locator('link[rel="alternate"][hreflang="es"]');
       const zhAlt = page.locator('link[rel="alternate"][hreflang="zh"]');
       const xDefaultAlt = page.locator(
         'link[rel="alternate"][hreflang="x-default"]',
       );
 
       await expect(enAlt).toHaveCount(1);
-      await expect(zhAlt).toHaveCount(1);
+      await expect(esAlt).toHaveCount(1);
+      await expect(zhAlt).toHaveCount(0);
       await expect(xDefaultAlt).toHaveCount(1);
       await expect(enAlt).toHaveAttribute("href", /\/en/);
-      await expect(zhAlt).toHaveAttribute("href", /\/zh/);
+      await expect(esAlt).toHaveAttribute("href", /\/es/);
+      await expect(xDefaultAlt).toHaveAttribute("href", /\/en/);
     });
   });
 }

@@ -303,13 +303,15 @@ test.describe("Next.js 16 国际化重定向验证", () => {
       const hreflangLinks = await page.locator("link[hreflang]").all();
       expect(hreflangLinks.length).toBeGreaterThan(0);
 
-      // 验证包含英文和中文的 hreflang
+      // Step 2 SEO boundary: public hreflang is en/es/x-default only.
       const hreflangValues = await Promise.all(
         hreflangLinks.map((link) => link.getAttribute("hreflang")),
       );
 
       expect(hreflangValues).toContain("en");
-      expect(hreflangValues).toContain("zh");
+      expect(hreflangValues).toContain("es");
+      expect(hreflangValues).toContain("x-default");
+      expect(hreflangValues).not.toContain("zh");
     });
 
     test("应该为中文页面设置正确的元数据", async ({ page }) => {
@@ -347,9 +349,9 @@ test.describe("Next.js 16 国际化重定向验证", () => {
         // 等待导航完成
         await page.waitForLoadState("networkidle");
 
-        // 验证切换到中文版本的对应页面（使用 Shared Pathnames）
+        // Public language switcher exposes Spanish, not internal zh preview.
         const finalUrl = page.url();
-        expect(finalUrl).toMatch(/\/zh\/about\/?$/);
+        expect(finalUrl).toMatch(/\/es\/about\/?$/);
       }
     });
 

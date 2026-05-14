@@ -48,7 +48,7 @@ vi.mock("@/i18n/routing", () => ({
     </a>
   ),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
   },
 }));
@@ -64,8 +64,8 @@ vi.mock("@/config/paths", () => ({
     },
   },
   LOCALES_CONFIG: {
-    locales: ["en", "zh"],
-    publicLocales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
   PATHS_CONFIG: {
@@ -267,11 +267,11 @@ describe("Market Landing Page", () => {
         description:
           "Replaceable catalog example for a standards-based product or service group.",
         alternates: {
-          canonical: "https://www.example.com/en/products/north-america",
+          canonical: "https://example.com/en/products/north-america",
           languages: {
-            en: "https://www.example.com/en/products/north-america",
-            zh: "https://www.example.com/zh/products/north-america",
-            "x-default": "https://www.example.com/en/products/north-america",
+            en: "https://example.com/en/products/north-america",
+            es: "https://example.com/es/products/north-america",
+            "x-default": "https://example.com/en/products/north-america",
           },
         },
       });

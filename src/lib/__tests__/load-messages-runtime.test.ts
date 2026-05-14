@@ -249,7 +249,6 @@ describe("load-messages runtime gating", () => {
         SINGLE_SITE_FACTS.company.yearsInBusiness,
     );
     const expectedEnCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}. All rights reserved.`;
-    const expectedEsCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}. Todos los derechos reservados.`;
     const expectedZhCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}。保留所有权利。`;
 
     const [enMessages, esMessages, zhMessages] = await Promise.all([
@@ -282,13 +281,13 @@ describe("load-messages runtime gating", () => {
       `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
     );
     expect(esMessages.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEsCopyright}`,
+      `[ES-TODO] ${expectedEnCopyright}`,
     );
     expect(esMessages.home.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEsCopyright}`,
-    );
-    expect(esMessages.footer.copyright).not.toBe(
       `[ES-TODO] ${expectedEnCopyright}`,
+    );
+    expect(esMessages.footer.copyright).not.toContain(
+      "Todos los derechos reservados",
     );
     expect(esMessages["structured-data"].organization.name).toBe(
       `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,

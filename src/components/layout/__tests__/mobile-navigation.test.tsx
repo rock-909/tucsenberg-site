@@ -366,8 +366,11 @@ describe("MobileNavigation Component", () => {
         screen.getByTestId("mobile-language-option-label-en"),
       ).toHaveAttribute("translate", "no");
       expect(
-        screen.getByTestId("mobile-language-option-label-zh"),
+        screen.getByTestId("mobile-language-option-label-es"),
       ).toHaveAttribute("translate", "no");
+      expect(
+        screen.queryByTestId("mobile-language-option-label-zh"),
+      ).not.toBeInTheDocument();
     });
 
     it("displays all navigation items when open", async () => {
@@ -681,8 +684,8 @@ describe("MobileLanguageSwitcher Integration", () => {
       screen.getByTestId("mobile-language-option-label-es"),
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("mobile-language-option-label-zh"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("mobile-language-option-label-zh"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders mobile navigation links before the language row", async () => {
@@ -702,7 +705,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("detects current locale from next-intl locale context", async () => {
+  it("shows the internal Chinese preview as current but not as a public switch target", async () => {
     mockLocale.current = "zh";
 
     renderWithIntl(<MobileNavigation />);
@@ -711,11 +714,15 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
     await user.click(screen.getByRole("button", { name: "Language 简体中文" }));
 
-    // Chinese should be marked as active (has check icon)
-    const chineseLink = screen
-      .getByTestId("mobile-language-option-label-zh")
-      .closest("a");
-    expect(chineseLink).toHaveClass("bg-accent");
+    expect(
+      screen.queryByTestId("mobile-language-option-label-zh"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("mobile-language-option-label-en"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("mobile-language-option-label-es"),
+    ).toBeInTheDocument();
   });
 
   it("defaults to English when locale context is not zh", async () => {
@@ -756,9 +763,9 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
     await user.click(screen.getByRole("button", { name: "Language English" }));
 
-    // Click on a language link
-    const chineseLink = screen.getByTestId("mobile-language-option-label-zh");
-    await user.click(chineseLink);
+    // Click on a public language link
+    const spanishLink = screen.getByTestId("mobile-language-option-label-es");
+    await user.click(spanishLink);
 
     // Menu should close
     await waitFor(() => {
@@ -774,7 +781,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
     await user.click(screen.getByRole("button", { name: "Language English" }));
     expect(
-      screen.getByTestId("mobile-language-option-label-zh"),
+      screen.getByTestId("mobile-language-option-label-es"),
     ).toBeInTheDocument();
 
     await user.click(trigger);

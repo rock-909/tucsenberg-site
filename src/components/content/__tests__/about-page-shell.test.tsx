@@ -202,7 +202,7 @@ describe("AboutPageShell", () => {
     expect(screen.queryByText(/faq:/)).not.toBeInTheDocument();
   });
 
-  it("renders CTA with link to products page", () => {
+  it("renders CTA with the Step 2 coming-soon placeholder link", () => {
     render(
       <AboutPageShell
         metadata={baseMetadata}
@@ -212,7 +212,7 @@ describe("AboutPageShell", () => {
     );
 
     const ctaLink = screen.getByRole("link", { name: /view products/i });
-    expect(ctaLink).toHaveAttribute("href", "/products");
+    expect(ctaLink).toHaveAttribute("href", "#coming-soon");
   });
 
   it("falls back to title when heroTitle is absent", () => {

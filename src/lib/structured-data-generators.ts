@@ -12,7 +12,7 @@ import {
   getPublicLogoPath,
 } from "@/config/public-trust";
 import { SITE_CONFIG } from "@/config/paths/site-config";
-import { routing } from "@/i18n/routing";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 const EXAMPLE_SOCIAL_URLS = new Set([
@@ -133,7 +133,7 @@ export function generateOrganizationData(
       "@type": "ContactPoint",
       ...(telephone ? { telephone } : {}),
       contactType: "customer service",
-      availableLanguage: routing.locales,
+      availableLanguage: LOCALES_CONFIG.publicLocales,
     },
     sameAs: collectConfirmedSocialUrls([
       t("organization.social.twitter", {
@@ -168,7 +168,7 @@ export function generateWebSiteData(
         defaultValue: SITE_CONFIG.seo.defaultDescription,
       }),
     url: data.url || FALLBACK_BASE_URL,
-    inLanguage: routing.locales,
+    inLanguage: LOCALES_CONFIG.publicLocales,
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }
