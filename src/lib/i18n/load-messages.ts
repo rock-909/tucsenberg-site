@@ -56,14 +56,11 @@ function interpolateSiteMessageString(
   locale: Locale,
   siteValues: SiteMessageValues,
 ): string {
-  const copyright =
-    siteValues.copyright[locale as keyof SiteMessageValues["copyright"]] ??
-    siteValues.copyright.en;
   const replacements: Record<string, string> = {
     siteName: siteValues.siteName,
     companyName: siteValues.companyName,
     currentYear: siteValues.currentYear,
-    copyright,
+    copyright: siteValues.copyright[locale],
   };
 
   return value.replace(

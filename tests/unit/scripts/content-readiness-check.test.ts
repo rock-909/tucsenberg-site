@@ -475,6 +475,75 @@ describe("content-readiness-check", () => {
     expectFinding(result.errors, "lorem-ipsum", "messages/zh/critical.json");
   });
 
+  it("allows Spanish TODO placeholder messages before strict client launch", () => {
+    const rootDir = createFixture({
+      "messages/es/critical.json": JSON.stringify({
+        headline: "[ES-TODO] Spanish placeholder copy",
+      }),
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = runContentReadinessCheck(rootDir);
+
+    expect(result.status).toBe("passed");
+    expect(result.errors).toEqual([]);
+    expectFinding(
+      result.warnings,
+      "spanish-placeholder",
+      "messages/es/critical.json",
+    );
+  });
+
+  it("blocks Spanish TODO placeholder messages in strict client launch", () => {
+    const rootDir = createFixture({
+      "messages/es/critical.json": JSON.stringify({
+        headline: "[ES-TODO] Spanish placeholder copy",
+      }),
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = runContentReadinessCheck(rootDir, {
+      strictClientLaunch: true,
+    });
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "spanish-placeholder",
+      "messages/es/critical.json",
+    );
+  });
+
+  it("blocks Spanish TODO placeholders outside message files in strict client launch", () => {
+    const rootDir = createFixture({
+      "content/pages/es/about.mdx": "[ES-TODO] This page copy is not ready.",
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = runContentReadinessCheck(rootDir, {
+      strictClientLaunch: true,
+    });
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "spanish-placeholder",
+      "content/pages/es/about.mdx",
+    );
+  });
+
+  it("keeps ordinary TODO markers blocking by default", () => {
+    const rootDir = createFixture({
+      "content/pages/en/contact.mdx": "TODO replace this launch copy.",
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = runContentReadinessCheck(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(result.errors, "todo-marker", "content/pages/en/contact.mdx");
+  });
+
   it("reports the real JSON value line when keys repeat", () => {
     const rootDir = createFixture({
       "messages/en/critical.json": [

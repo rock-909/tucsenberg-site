@@ -1359,9 +1359,16 @@ const TEXT_RULES = [
       "Image replacement placeholder is still present. Replace it before launch.",
   },
   {
+    ruleId: "spanish-placeholder",
+    severity: "warning",
+    pattern: /\[ES-TODO\]\s*/gu,
+    message:
+      "Spanish placeholder copy remains in buyer-visible content. Replace [ES-TODO] strings with reviewed Latin American Spanish before production launch.",
+  },
+  {
     ruleId: "todo-marker",
     severity: "error",
-    pattern: /(?<!ES-)\bTODO\b/gu,
+    pattern: /\bTODO\b/gu,
     message: "TODO marker is present in buyer-visible content.",
   },
   {
@@ -1409,6 +1416,7 @@ const STRICT_CLIENT_LAUNCH_BLOCKER_RULE_IDS = new Set([
   "replace-this-image",
   "replaceable-content",
   "sample-product",
+  "spanish-placeholder",
   "starter-identity",
   "your-company",
   "your-email",
@@ -1763,6 +1771,14 @@ function scanReadinessFile(rootDir, file, options = {}) {
 
       for (const match of unit.value.matchAll(rule.pattern)) {
         const index = match.index ?? 0;
+        if (
+          rule.ruleId === "todo-marker" &&
+          unit.value
+            .slice(Math.max(0, index - 4), index + "TODO".length)
+            .includes("ES-TODO")
+        ) {
+          continue;
+        }
         findings.push({
           file: file.repoPath,
           line: unit.line,
@@ -1805,32 +1821,12 @@ function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
 }
 
 function checkSpanishTodoMarkersForProduction(rootDir = ROOT) {
-  const spanishMessageFiles = [
-    path.join(rootDir, "messages/es/critical.json"),
-    path.join(rootDir, "messages/es/deferred.json"),
-  ];
-
-  const offenders = spanishMessageFiles.filter((filePath) => {
-    if (!fs.existsSync(filePath)) return false;
-    return fs.readFileSync(filePath, "utf8").includes("[ES-TODO] ");
-  });
-
-  if (offenders.length === 0) return;
-
-  throw new Error(
-    [
-      "Spanish placeholder copy remains in production-readiness messages:",
-      ...offenders.map((filePath) => `- ${path.relative(rootDir, filePath)}`),
-      "Replace [ES-TODO] strings with reviewed Latin American Spanish before production launch.",
-    ].join("\n"),
-  );
+  return collectContentReadinessFindings(rootDir, {
+    strictClientLaunch: true,
+  }).filter((finding) => finding.ruleId === "spanish-placeholder");
 }
 
 function runContentReadinessCheck(rootDir = ROOT, options = {}) {
-  if (options.strictClientLaunch === true) {
-    checkSpanishTodoMarkersForProduction(rootDir);
-  }
-
   const findings = collectContentReadinessFindings(rootDir, options);
   const errors = findings.filter((finding) => finding.severity === "error");
   const warnings = findings.filter((finding) => finding.severity === "warning");

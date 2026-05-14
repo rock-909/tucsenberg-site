@@ -48,8 +48,8 @@ vi.mock("next/font/google", () => ({
 
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-ibm-plex-sans",
+    variable: "--font-figtree",
     className: "font-local",
-    style: { fontFamily: "IBM Plex Sans" },
+    style: { fontFamily: "Figtree" },
   })),
 }));
