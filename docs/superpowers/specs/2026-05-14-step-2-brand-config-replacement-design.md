@@ -83,6 +83,8 @@ This means:
 6. **Theme token replacement**
    - Update `src/app/globals.css`.
    - Keep semantic usage in components. Do not add raw brand hex values directly to page/component class names.
+   - Raw brand hex values may appear only in one authored runtime token surface: the `:root` block in `src/app/globals.css`.
+   - Step 2 should add a review/test guard where practical to catch raw `#123B5D`, `#0F7C82`, `#DCEFF1`, and `#F7FAFC` values outside the approved token surface.
    - Introduce role-based tokens first, then map existing starter tokens to them.
    - Token names must not encode color names such as `navy` or `teal`.
    - Required role-based tokens:
@@ -106,20 +108,28 @@ This means:
 
    - Existing tokens such as `--primary`, `--background`, `--foreground`, `--muted`, `--border`, and Radix-style `--brand-*` may remain, but should map to the new role tokens where practical.
    - Step 4 must be able to tune the visual system by changing token values rather than editing components.
+   - `--color-brand-accent` is an interaction/status accent, not a decoration color. Use it for links, focus rings, selected state, and narrow status cues. Do not use it as a broad card background, default icon color, divider color, or decorative fill.
 
 7. **Font strategy**
    - The target brand stack is:
      - display/body: IBM Plex Sans + Inter
      - mono: IBM Plex Mono
-   - First confirm whether starter rules forbid runtime font network dependencies or all build-time font fetching.
-   - Current evidence:
+   - Step 2 must first confirm the starter font rule hardness level before editing font code.
+   - Current evidence from grep:
      - Next.js docs describe `next/font/google` as self-hosting fonts, with no browser requests to Google at runtime.
-     - Starter UI rules say `next/font/local` is the safe default and to avoid runtime font network dependencies.
+     - `.claude/rules/ui.md` says `next/font/local` is the safe default and to avoid runtime font network dependencies for buyer-visible pages.
+     - `src/app/[locale]/layout-fonts.ts` comments say the current local Figtree setup avoids depending on the Google Fonts network path and keeps builds stable when Google Fonts is unreachable in CI or pre-push hooks.
+     - `src/test/setup.base-mocks.ts` already mocks `next/font/google`, so tests do not appear to ban `next/font/google`.
+     - No grep evidence showed an ESLint rule, commit hook, or architecture guard that hard-bans `next/font/google`.
    - Therefore Step 2 should prefer `next/font/google` for:
      - `IBM_Plex_Sans`
      - `Inter`
      - `IBM_Plex_Mono`
    - This is acceptable because Next self-hosts Google fonts after build-time resolution and runtime stays same-origin.
+   - Font loading details:
+     - `IBM_Plex_Sans`: subsets `["latin", "latin-ext"]`, weights `["300", "400", "600"]`, display `swap`.
+     - `IBM_Plex_Mono`: subsets `["latin", "latin-ext"]`, weight `["400"]`, display `swap`.
+     - `Inter`: only keep if it has a defined usage. In Step 2 it should be the body fallback after IBM Plex Sans, not an unused import. Use subsets `["latin", "latin-ext"]`, weights `["400", "600"]` or variable default if the Next font API requires it.
    - If build-time network fetch proves blocked or incompatible, use a system fallback temporarily:
      - `-apple-system`, `BlinkMacSystemFont`, `"Segoe UI"`, sans-serif
      - keep the IBM Plex/Inter names in CSS fallback order
@@ -138,6 +148,17 @@ This means:
      - Step 2 status
      - decisions made for navigation placeholder, font strategy, and zh indexing
      - any follow-up if Google font self-hosting fails and local `.woff2` vendoring is needed
+
+10. **Tests and guards**
+   - Add or update tests for the Step 2 contracts, not only existing starter tests.
+   - Required coverage:
+     - `messages/es/*` key structure matches `messages/en/*`.
+     - copied Spanish string leaves contain `[ES-TODO] ` during Step 2.
+     - production/readiness guard fails if `[ES-TODO] ` remains when production readiness is explicitly checked.
+     - `robots()` includes `/zh/` in disallow paths.
+     - sitemap entries do not include `/zh/` URLs.
+     - sitemap alternates/hreflang do not include `zh`.
+     - metadata alternates generated through `src/lib/seo-metadata.ts` and `src/lib/seo/url-generator.ts` do not include `zh` in public language alternates.
 
 ### Out of scope
 
@@ -188,7 +209,29 @@ Implementation must avoid treating zh as a public SEO locale:
 - robots output should disallow `/zh/`.
 - hreflang helpers should filter out `zh`.
 
-If existing helpers assume all configured locales are public, Step 2 should add a small explicit public-locale concept rather than hiding this in route-specific conditionals.
+Concrete implementation surfaces:
+
+- `src/config/paths/locales-config.ts`
+  - keep all runtime locales: `en`, `es`, `zh`
+  - add explicit public SEO locale truth, for example `publicLocales: ["en", "es"]`
+  - keep `zh` as an internal locale
+- `src/app/sitemap.ts`
+  - generate entries only for public SEO locales
+  - build alternates only for public SEO locales plus `x-default`
+- `src/app/robots.ts`
+  - continues to consume `SINGLE_SITE_ROBOTS_DISALLOW_PATHS`
+- `src/config/single-site-seo.ts`
+  - add `/zh/` to `SINGLE_SITE_ROBOTS_DISALLOW_PATHS`
+  - keep sitemap page allowlist here
+- `src/lib/seo/url-generator.ts`
+  - use public SEO locales for `generateLanguageAlternates()` and `generateHreflangLinks()`
+  - keep runtime URL generation available for all configured locales
+- `src/lib/seo-metadata.ts`
+  - `buildLanguagesForPath()` should use public SEO locales only
+- `src/i18n/routing-config.ts`
+  - keep runtime `routing.locales` as all configured locales so `/zh` still works for internal preview
+
+Do not create parallel sitemap/robots generators. Update the existing files above.
 
 ### Navigation placeholder behavior
 
@@ -203,10 +246,16 @@ Preferred implementation:
   - `Materials`
   - `Quote`
 - Each item points to the same placeholder target until Step 3/4 implement real routes.
+- Use option A for `Quote`: keep it in the nav from Step 2 and point it to the placeholder until Step 4 implements the real RFQ form. The placeholder should say the quote form arrives in the Step 4 sample flow.
 - Placeholder text should be short and direct, for example:
   - English: "This Tucsenberg section is being prepared."
   - Spanish placeholder: `[ES-TODO] This Tucsenberg section is being prepared.`
   - Chinese: "这个 Tucsenberg 页面正在准备中。"
+- Placeholder page structure should not look like an empty "under construction" page:
+  - H1 should reflect the selected navigation label when possible, or a clear generic "Tucsenberg pages are being prepared."
+  - Body copy should explain what is being built in one or two sentences.
+  - Include a return-home link and, if practical, a quote-related link that currently resolves back to the same placeholder.
+  - Use no lorem ipsum and no starter language.
 
 Do not keep `Blog` in main nav for Step 2. Blog/content moat work belongs later.
 
@@ -243,6 +292,8 @@ Example mapping intent:
 
 The implementation can preserve the existing Radix-style scale if tests or components depend on it. The important part is that Tucsenberg-specific values enter through role tokens, not scattered component edits.
 
+Step 2 should also add an enforceable or reviewable check that raw brand hex values do not appear outside `src/app/globals.css`. If this is implemented as a test, it should scan likely authored UI/config surfaces and allow only the `:root` token definitions.
+
 ### Font implementation
 
 Preferred implementation:
@@ -251,21 +302,22 @@ Preferred implementation:
 import { IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 
 export const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "600"],
   variable: "--font-ibm-plex-sans",
   display: "swap",
 });
 
 export const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "600"],
   variable: "--font-inter",
   display: "swap",
 });
 
 export const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["400"],
   variable: "--font-ibm-plex-mono",
   display: "swap",
 });
@@ -277,11 +329,31 @@ export const ibmPlexMono = IBM_Plex_Mono({
 
 ```css
 --font-display: var(--font-ibm-plex-sans);
---font-body: var(--font-inter), var(--font-ibm-plex-sans);
+--font-body: var(--font-ibm-plex-sans), var(--font-inter);
 --font-mono: var(--font-ibm-plex-mono);
 ```
 
+Inter remains installed as a secondary Latin UI/body fallback, not as an unused font. If the implementation shows Inter is not referenced after token mapping, remove it instead of importing an unused font.
+
 If the final code needs to preserve existing `--font-sans` consumers, keep `--font-sans` as an alias to `--font-body`.
+
+The rule hardness decision is:
+
+- `.claude/rules/ui.md` is prose guidance, not a hard lint/commit-hook ban.
+- Current hooks do not appear to block `next/font/google`.
+- Step 2 may use `next/font/google`, but must keep the fallback path documented if build-time font fetching fails.
+
+### Spanish placeholder lifecycle
+
+`[ES-TODO] ` is a temporary Step 2 marker, not acceptable final production copy.
+
+Lifecycle:
+
+- Step 2 creates `messages/es/*` by copying English structure and prefixing every string leaf with `[ES-TODO] `.
+- Step 4 clears `[ES-TODO] ` only for the four sample pages/flows it translates for real.
+- Remaining `[ES-TODO] ` markers may stay in non-public/incomplete Spanish surfaces during development, but production readiness must fail until public Spanish pages are translated.
+- Add a script/test guard so a production-readiness check can detect `[ES-TODO] ` in `messages/es/**` and fail with a clear message.
+- Do not silently strip the prefix without replacing the text with actual Latin American Spanish.
 
 ## Validation
 
@@ -293,25 +365,43 @@ Step 2 implementation must be verified with the smallest meaningful commands fir
    pnpm exec vitest run src/config/__tests__/pages-config.test.ts src/config/paths/__tests__/site-config.test.ts
    ```
 
-2. Font tests after layout font changes:
+2. SEO public-locale tests after sitemap/robots/hreflang changes:
+
+   ```bash
+   pnpm exec vitest run src/app/__tests__/robots.test.ts src/app/__tests__/sitemap.test.ts src/lib/__tests__/seo-metadata.test.ts src/lib/seo/__tests__/url-generator.test.ts
+   ```
+
+3. Font tests after layout font changes:
 
    ```bash
    pnpm exec vitest run 'src/app/[locale]/__tests__/layout-fonts.test.ts'
    ```
 
-3. Message and content validation after adding Spanish files:
+4. Message and content validation after adding Spanish files:
 
    ```bash
    pnpm content:check
    ```
 
-4. Type check after config changes:
+5. Step 2 contract tests:
+
+   ```bash
+   pnpm exec vitest run tests/unit/i18n-message-contract.test.ts src/config/__tests__/static-theme-colors.test.ts
+   ```
+
+   Required assertions:
+
+   - Spanish split messages are key-compatible with English split messages.
+   - Spanish copied leaf strings contain `[ES-TODO] ` during this placeholder phase.
+   - raw Tucsenberg brand hex values are not used outside the global token source.
+
+6. Type check after config changes:
 
    ```bash
    pnpm type-check
    ```
 
-5. Local dev smoke:
+7. Local dev smoke:
 
    ```bash
    pnpm dev
@@ -320,7 +410,7 @@ Step 2 implementation must be verified with the smallest meaningful commands fir
    curl -I http://localhost:3000/zh
    ```
 
-6. If sitemap/robots can be tested through route handlers, verify:
+8. If sitemap/robots can be tested through route handlers, verify:
 
    ```bash
    curl http://localhost:3000/robots.txt
@@ -348,6 +438,7 @@ Mitigation:
 Mitigation:
 
 - Add an explicit public locale list or helper instead of scattering `locale !== "zh"` checks.
+- Update the existing sitemap, metadata, and SEO URL helper tests so `zh` exclusion is regression-covered.
 
 ### Risk: `next/font/google` cannot fetch during build
 
@@ -380,7 +471,12 @@ Step 2 is complete when:
 - `en`, `es`, and `zh` exist in runtime locale config.
 - `zh` is available for internal preview but excluded from public SEO surfaces.
 - Spanish message/content files exist structurally and copied string values are prefixed with `[ES-TODO] `.
+- A production-readiness guard can fail on remaining `[ES-TODO] ` markers.
 - Theme role tokens exist and current semantic tokens map to Tucsenberg color values.
+- Raw Tucsenberg brand hex values are confined to the approved global token surface.
+- `--color-brand-accent` is documented and used as an interaction/status accent, not broad decoration.
 - Fonts use IBM Plex Sans / Inter / IBM Plex Mono through `next/font/google`, or a documented local-font fallback if build-time fetch fails.
+- Sitemap/robots/hreflang implementation points are the existing `src/app/sitemap.ts`, `src/app/robots.ts`, `src/lib/seo-metadata.ts`, and `src/lib/seo/url-generator.ts` surfaces.
+- Tests cover Spanish message structure, `/zh/` robots disallow, no `/zh/` sitemap URLs, and no `zh` public hreflang alternates.
 - `DEVELOPMENT-LOG.md` records the Step 2 decisions and any follow-up.
 - Validation commands listed above have been run, and any failures are either fixed or explicitly documented as blockers.
