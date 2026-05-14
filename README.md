@@ -1,8 +1,8 @@
-# Showcase Website Starter
+# Tucsenberg Site
 
-展示型网站起步项目，适合企业展示、产品展示、服务展示、询盘转化、多语言内容、组件治理和 Cloudflare 部署。
+Tucsenberg 官网代码仓库，面向 aftermarket aeration replacement membranes 的英文 / 西语公开站点。
 
-这个项目不是某个具体公司网站，也不是一次性空壳。它是一套可复制的网站基础盘：新项目从这里开始，替换品牌、内容、产品或服务信息、图片资产、表单接收方式和部署配置后继续开发。
+本仓库由 `showcase-website-starter` 复制而来，但当前项目入口和业务真相以 `CLAUDE.md`、`PROJECT-BRIEF.md`、`DEVELOPMENT-LOG.md` 为准。starter 规则只作为参考文件保留在 `CLAUDE.starter.md` 和 `AGENTS.starter.md`。
 
 ## 先看这里
 
@@ -39,7 +39,7 @@ pnpm website:build:cf
 
 完整版本清单见 `docs/technical/tech-stack.md`；升级边界和暂不跟随项见 `docs/technical/dependency-upgrade-policy.md`。
 
-## 新项目替换原则
+## 当前替换原则
 
 - 保留页面结构，不做空白站。
 - 示例内容只作为占位，不代表真实客户承诺。
@@ -52,7 +52,7 @@ pnpm website:build:cf
 
 ## AI 协作入口
 
-- Codex：`AGENTS.md`
+- Codex：遵守会话注入的项目指令；starter 原规则参考 `AGENTS.starter.md`
 - Claude：`CLAUDE.md`
 - 本地协作偏好：`CLAUDE.local.md`
 - 网站起步说明：`docs/website/`

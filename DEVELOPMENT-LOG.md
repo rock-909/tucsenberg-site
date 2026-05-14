@@ -7,7 +7,7 @@
 
 ## 当前阶段
 
-**Phase 1 建站骨架已落地** — starter 已复制进本目录，下一步进入品牌替换。
+**Phase 1 Step 2 in progress** — 品牌/config/i18n/SEO/nav/token/font 壳层已替换，正在做收尾验证；深层产品数据、真实兼容页、真实 quote 表单留到 Step 3/4。
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## 进行中
 
-（暂无，下一步从 Step 2 品牌替换开始）
+- [ ] Step 2 全量验证：locale / sitemap / robots / font / token / message contract / content readiness / type-check / dev smoke。
 
 ---
 
@@ -43,20 +43,15 @@
 
 ### Step 2: 品牌替换（按 starter 替换清单）
 
-按 `docs/website/新项目替换清单.md` 顺序：
-1. **品牌身份** — 修改 `src/config/single-site.ts` + `src/config/website/profile.ts` + `src/config/website/seo.ts`
-2. **i18n 配置** — `i18n.json` 改为：
-   ```json
-   {
-     "locales": ["en", "es", "zh"],
-     "defaultLocale": "en"
-   }
-   ```
-   生产环境只发 en + es，zh 仅本地 dev（通过 sitemap 排除 + robots noindex 实现）
-3. **产品/服务信息** — 修改 `src/config/website/products.ts` + `src/config/single-site-product-catalog.ts` + `src/constants/product-specs/`
-4. **首页 sections** — `src/config/website/homepage.ts` 改成 PROJECT-BRIEF 里的 7 段顺序
-5. **设计 token** — `src/app/globals.css` 改为 Engineering Navy 配色（`#123B5D` + `#0F7C82` + `#DCEFF1` + `#F7FAFC`）
-6. **字体** — 切换到 IBM Plex Sans + Inter + IBM Plex Mono
+按 `docs/superpowers/specs/2026-05-14-step-2-brand-config-replacement-design.md` 和 `docs/superpowers/plans/2026-05-14-step-2-brand-config-replacement.md` 执行：
+1. [x] **品牌身份** — `src/config/single-site.ts` 已切到 Tucsenberg / `https://tucsenberg.com` / aeration replacement membranes 定位。
+2. [x] **i18n 配置** — runtime locales = `en` / `es` / `zh`；public SEO locales = `en` / `es`；`zh` 仅内部预览。
+3. [x] **Spanish placeholder** — `messages/es/*` 与英文结构同构，字符串叶子用 `[ES-TODO] ` 标记；正式上线前 strict guard 会拦截。
+4. [x] **SEO 边界** — sitemap / hreflang 只出 `en` + `es`；robots 明确 `Disallow: /zh/`。
+5. [x] **导航占位** — 主导航锁定 `Membranes / Compatibility / Materials / Quote`，当前都指向 `#coming-soon`，不保留 starter 的 Products / About / Contact 导航壳。
+6. [x] **设计 token** — `src/app/globals.css` 已改为 role-based tokens；raw brand hex 只允许在 token/bridge 层，组件不直接硬编码。
+7. [x] **字体** — 使用 `next/font/google` 的 IBM Plex Sans + Inter + IBM Plex Mono；Next 构建期自托管，运行时不请求 Google Fonts。
+8. [ ] **最终验证** — 等 Step 2 Task 8 跑完 targeted tests / content check / type-check / dev smoke 后收口。
 
 ### Step 3: 数据层（产品 + 兼容性）
 
@@ -130,6 +125,11 @@
 ## 最近决策（按时间倒序）
 
 ### 2026-05-14
+- **Step 2 品牌/config 壳层替换进入最终验证** — 本轮不做深层产品数据、不做真实 `/compatible/*`、不做真实 `/materials/*`、不做真实 `/quote` 表单，也不动 `content/blog/*` / `content/pages/*` 现有 MDX。已完成的壳层决策：Tucsenberg identity、runtime `en/es/zh` + public SEO `en/es`、Spanish `[ES-TODO]` 占位、`zh` robots/sitemap/hreflang 排除、Tucsenberg 主导航占位、role-based 色彩 token、IBM Plex / Inter 字体栈。
+- **导航占位决策** — 不保留 starter 的 Products / About / Contact 主导航。主导航 label 固定为 `Membranes / Compatibility / Materials / Quote`，当前全部指向 `#coming-soon`，首页提供 i18n 化 placeholder 说明；`Quote` 采用方案 A：先保留 IA 入口，表单到 Step 4 再实装。
+- **`zh` 索引边界落地** — `zh` 是 runtime/internal preview locale，不进 sitemap，不出 hreflang；robots 输出包含 `Disallow: /zh/`。公开 SEO 只声明 `en` / `es` / `x-default`。
+- **字体策略落地** — 使用 `next/font/google` 加载 `IBM_Plex_Sans` / `Inter` / `IBM_Plex_Mono`。本仓库没有 ESLint/hook 硬禁 `next/font/google`；starter 的规则口径是避免 buyer-visible runtime font network dependency。Next 会在构建期解析并自托管，运行时不请求 Google Fonts。若后续 CI/部署环境证明构建期无法拉取 Google Fonts，再 vendoring 本地 `.woff2` 到 `next/font/local`。
+- **Spanish placeholder policy** — `messages/es/*` 先复制英文结构并给所有字符串叶子加 `[ES-TODO] `，方便 dev/staging 一眼看出未翻译；Step 4 写 4 页样板西语时逐条清前缀。正式 client launch strict guard 若仍有 `[ES-TODO]` 会 fail。
 - **DESIGN.md v1 沉淀** — 跑了 qiaomu-design-advisor 的 reference fit check（8 个 qiaomu 内置候选 + 4 个手动补的工业目录站）。主参考定为 **IBM Carbon + HashiCorp + McMaster-Carr**，辅参考 Vercel/Geist + DigiKey + Grainger，反面参考 ClickHouse / Resend / AerationStore。三个落地决策：(1) Hero 走 IBM Carbon 路线，Display 01 = IBM Plex Sans **60px / weight 300**；(2) 首屏折中 —— 保留 H1 + sub-claim 但立刻接 compatibility search bar + OEM family grid，**不要 hero 图也不要堆 CTA**；(3) 按钮圆角 **6px**。完整规则见 `DESIGN.md`（已整篇替换 starter 通用版）。
 - **建站骨架已落地** — 从 `showcase-website-starter` 复制代码到本 repo，排除了 `.git`、`node_modules`、`.next`、`.open-next`、`reports`、`storybook-static`、`test-results` 等本地运行产物
 - **starter 规则保留为参考文件** — 本项目主入口仍是 `CLAUDE.md`；starter 的 `CLAUDE.md` 和 `AGENTS.md` 分别保留为 `CLAUDE.starter.md`、`AGENTS.starter.md`

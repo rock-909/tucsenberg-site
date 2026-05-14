@@ -4,7 +4,7 @@
 
 ## 入口文件
 
-- Codex：`AGENTS.md`
+- Codex：遵守会话注入的项目指令；starter 原规则参考 `AGENTS.starter.md`
 - Claude：`CLAUDE.md`
 - 本地协作偏好：`CLAUDE.local.md`
 
