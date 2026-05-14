@@ -15,6 +15,12 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
+const EXAMPLE_SOCIAL_URLS = new Set([
+  "https://x.com/example",
+  "https://www.linkedin.com/company/example",
+]);
+const TODO_PREFIX_PATTERN = /^\[[^\]]*TODO[^\]]*\]\s*/iu;
+const BRACKET_PLACEHOLDER_PATTERN = /^\[[A-Z0-9_-]+\]$/u;
 
 interface ProductGroupInput {
   name: string;
@@ -71,6 +77,29 @@ export function buildSchemaFallback(type: string): Record<string, unknown> {
   };
 }
 
+function normalizeSocialUrl(value: string): string | undefined {
+  const trimmed = value.trim();
+  const withoutTodoPrefix = trimmed.replace(TODO_PREFIX_PATTERN, "").trim();
+
+  if (
+    !withoutTodoPrefix ||
+    TODO_PREFIX_PATTERN.test(trimmed) ||
+    BRACKET_PLACEHOLDER_PATTERN.test(withoutTodoPrefix) ||
+    EXAMPLE_SOCIAL_URLS.has(withoutTodoPrefix)
+  ) {
+    return undefined;
+  }
+
+  return withoutTodoPrefix;
+}
+
+function collectConfirmedSocialUrls(values: string[]): string[] {
+  return values.flatMap((value) => {
+    const normalized = normalizeSocialUrl(value);
+    return normalized ? [normalized] : [];
+  });
+}
+
 /**
  * 生成组织结构化数据
  */
@@ -106,14 +135,14 @@ export function generateOrganizationData(
       contactType: "customer service",
       availableLanguage: routing.locales,
     },
-    sameAs: [
+    sameAs: collectConfirmedSocialUrls([
       t("organization.social.twitter", {
         defaultValue: SITE_CONFIG.social.twitter,
       }),
       t("organization.social.linkedin", {
         defaultValue: SITE_CONFIG.social.linkedin,
       }),
-    ],
+    ]),
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }

@@ -192,11 +192,13 @@ describe("Structured Data Generation", () => {
       expect(JSON.stringify(schema)).not.toContain("/images/logo.svg");
 
       const sameAs = schema["sameAs"] as string[];
-      expect(sameAs).toEqual([
-        "https://x.com/example",
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("https://x.com/example");
+      expect(JSON.stringify(schema)).not.toContain(
         "https://www.linkedin.com/company/example",
-      ]);
-      expect(sameAs).toHaveLength(2);
+      );
+      expect(JSON.stringify(schema)).not.toContain("[TWITTER_URL]");
+      expect(JSON.stringify(schema)).not.toContain("[LINKEDIN_URL]");
     });
 
     it("should handle different locales", async () => {
@@ -206,6 +208,62 @@ describe("Structured Data Generation", () => {
         locale: "zh",
         namespace: "structured-data",
       });
+    });
+
+    it("filters ES-TODO social placeholders from organization sameAs", async () => {
+      const mockT = vi.fn(
+        (key: string, options?: { defaultValue?: string }) => {
+          const translations: Record<string, string> = {
+            "organization.social.twitter": "[ES-TODO] https://x.com/example",
+            "organization.social.linkedin":
+              "[ES-TODO] https://www.linkedin.com/company/example",
+          };
+
+          return translations[key] || options?.defaultValue || key;
+        },
+      );
+
+      mockGetTranslations.mockResolvedValueOnce(mockT);
+
+      const schema = await generateLocalizedStructuredData(
+        "es",
+        "Organization",
+        {},
+      );
+      const sameAs = schema["sameAs"] as string[];
+
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("[ES-TODO]");
+      expect(JSON.stringify(schema)).not.toContain("https://x.com/example");
+      expect(JSON.stringify(schema)).not.toContain(
+        "https://www.linkedin.com/company/example",
+      );
+    });
+
+    it("filters bracket social placeholders from organization sameAs", async () => {
+      const mockT = vi.fn(
+        (key: string, options?: { defaultValue?: string }) => {
+          const translations: Record<string, string> = {
+            "organization.social.twitter": "[TWITTER_URL]",
+            "organization.social.linkedin": "[LINKEDIN_URL]",
+          };
+
+          return translations[key] || options?.defaultValue || key;
+        },
+      );
+
+      mockGetTranslations.mockResolvedValueOnce(mockT);
+
+      const schema = await generateLocalizedStructuredData(
+        "en",
+        "Organization",
+        {},
+      );
+      const sameAs = schema["sameAs"] as string[];
+
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("[TWITTER_URL]");
+      expect(JSON.stringify(schema)).not.toContain("[LINKEDIN_URL]");
     });
   });
 
