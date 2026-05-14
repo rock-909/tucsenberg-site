@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { getPublicStaticPageDefinition } from "@/config/pages.config";
-import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
+import {
+  LOCALES_CONFIG,
+  SITE_CONFIG,
+  type Locale,
+  type PageType,
+} from "@/config/paths";
 import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
-import { routing } from "@/i18n/routing-config";
 import { getRuntimeEnvString } from "@/lib/env";
 import {
   generateCanonicalURL,
@@ -65,14 +69,16 @@ function buildCanonicalForPath(locale: Locale, path: string): string {
 function buildLanguagesForPath(path: string): Record<string, string> {
   const normalizedPath = normalizePath(path);
 
-  const entries: Array<[string, string]> = routing.locales.map((locale) => [
-    locale,
-    new URL(`/${locale}${normalizedPath}`, SITE_CONFIG.baseUrl).toString(),
-  ]);
+  const entries: Array<[string, string]> = LOCALES_CONFIG.publicLocales.map(
+    (locale) => [
+      locale,
+      new URL(`/${locale}${normalizedPath}`, SITE_CONFIG.baseUrl).toString(),
+    ],
+  );
   entries.push([
     "x-default",
     new URL(
-      `/${routing.defaultLocale}${normalizedPath}`,
+      `/${LOCALES_CONFIG.defaultLocale}${normalizedPath}`,
       SITE_CONFIG.baseUrl,
     ).toString(),
   ]);

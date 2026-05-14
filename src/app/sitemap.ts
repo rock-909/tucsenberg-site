@@ -7,7 +7,7 @@ import {
   getStaticPageLastModified,
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
-import { SITE_CONFIG } from "@/config/paths";
+import { LOCALES_CONFIG, SITE_CONFIG } from "@/config/paths";
 import { getProductMarketPath } from "@/config/paths/utils";
 import {
   getSingleSiteSitemapPageConfig,
@@ -15,11 +15,11 @@ import {
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
   type SingleSiteSitemapPageConfig,
 } from "@/config/single-site-seo";
-import { routing } from "@/i18n/routing";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
 const BASE_URL = SITE_CONFIG.baseUrl;
+const PUBLIC_LOCALES = LOCALES_CONFIG.publicLocales;
 
 type PageConfig = SingleSiteSitemapPageConfig;
 
@@ -37,12 +37,15 @@ function getPageConfig(path: string): PageConfig {
 
 // Build alternate languages object for a URL path
 function buildAlternateLanguages(path: string): Record<string, string> {
-  const entries = routing.locales.map((locale) => [
+  const entries = PUBLIC_LOCALES.map((locale) => [
     locale,
     `${BASE_URL}/${locale}${path}`,
   ]);
   // x-default 指向默认语言版本，帮助搜索引擎识别语言选择器页面
-  entries.push(["x-default", `${BASE_URL}/${routing.defaultLocale}${path}`]);
+  entries.push([
+    "x-default",
+    `${BASE_URL}/${LOCALES_CONFIG.defaultLocale}${path}`,
+  ]);
   return Object.fromEntries(entries);
 }
 
@@ -68,7 +71,7 @@ function createSitemapEntry(
   };
 }
 
-// Generate static page entries for all locales
+// Generate static page entries for public SEO locales only
 async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   const mdxPages = SINGLE_SITE_PUBLIC_STATIC_PAGES.filter(isMdxDrivenPage);
   const mdxDates = new Map<string, Date>();
@@ -80,7 +83,7 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = [];
 
-  for (const locale of routing.locales) {
+  for (const locale of PUBLIC_LOCALES) {
     for (const page of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
       const config = getPageConfig(page);
       const url = `${BASE_URL}/${locale}${page}`;
@@ -98,7 +101,7 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
-// Generate product catalog entries (market + family pages) for all locales
+// Generate product catalog entries (market pages) for public SEO locales only
 function generateCatalogEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
 
@@ -108,7 +111,7 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
     const path = getProductMarketPath(market.slug);
     const lastModified = getStaticPageLastModified(path, STATIC_PAGE_LASTMOD);
 
-    for (const locale of routing.locales) {
+    for (const locale of PUBLIC_LOCALES) {
       entries.push(
         createSitemapEntry({
           url: `${BASE_URL}/${locale}${path}`,

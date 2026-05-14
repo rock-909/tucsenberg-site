@@ -16,6 +16,11 @@ const { mockGenerateCanonicalURL, mockGenerateLanguageAlternates } = vi.hoisted(
 );
 
 vi.mock("@/config/paths", () => ({
+  LOCALES_CONFIG: {
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
+    defaultLocale: "en",
+  },
   SITE_CONFIG: {
     baseUrl: "https://example.com",
     name: "Test Site",
@@ -40,7 +45,8 @@ describe("SEO Metadata", () => {
     mockGenerateCanonicalURL.mockReturnValue("https://example.com/canonical");
     mockGenerateLanguageAlternates.mockReturnValue({
       en: "https://example.com/en",
-      zh: "https://example.com/zh",
+      es: "https://example.com/es",
+      "x-default": "https://example.com/en",
     });
 
     // Mock environment variables
@@ -215,9 +221,10 @@ describe("SEO Metadata", () => {
       );
       expect(metadata.alternates?.languages).toEqual({
         en: "https://example.com/en/about",
-        zh: "https://example.com/zh/about",
+        es: "https://example.com/es/about",
         "x-default": "https://example.com/en/about",
       });
+      expect(metadata.alternates?.languages).not.toHaveProperty("zh");
 
       const openGraph = metadata.openGraph as unknown as { url?: string };
       expect(openGraph.url).toBe("https://example.com/en/about");

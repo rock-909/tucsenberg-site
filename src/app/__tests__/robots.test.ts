@@ -79,6 +79,15 @@ describe("robots.ts", () => {
       expect(disallowed).toContain("/error-test/");
     });
 
+    it("should disallow internal Chinese preview paths", () => {
+      const result = robots();
+      const rulesArray = normalizeRules(result.rules);
+      const wildcardRule = rulesArray[0];
+      const disallowed = wildcardRule?.disallow;
+
+      expect(disallowed).toContain("/zh/");
+    });
+
     it("should include sitemap URL", () => {
       const result = robots();
 

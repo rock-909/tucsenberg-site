@@ -78,14 +78,15 @@ describe("URLGenerator", () => {
   });
 
   describe("generateLanguageAlternates", () => {
-    it("should generate alternates for all supported languages including x-default", () => {
+    it("should generate public SEO alternates including x-default", () => {
       const alternates = generator.generateLanguageAlternates("about");
 
       expect(alternates).toEqual({
         en: "https://example.com/en/about",
-        zh: "https://example.com/zh/about",
+        es: "https://example.com/es/about",
         "x-default": "https://example.com/en/about",
       });
+      expect(alternates).not.toHaveProperty("zh");
     });
 
     it("should have x-default pointing to default locale", () => {
@@ -100,19 +101,20 @@ describe("URLGenerator", () => {
     it("should generate hreflang links including x-default", () => {
       const links = generator.generateHreflangLinks("about");
 
-      expect(links).toHaveLength(3); // en, zh, x-default
+      expect(links).toHaveLength(3); // en, es, x-default
       expect(links).toContainEqual({
         href: "https://example.com/en/about",
         hreflang: "en",
       });
       expect(links).toContainEqual({
-        href: "https://example.com/zh/about",
-        hreflang: "zh",
+        href: "https://example.com/es/about",
+        hreflang: "es",
       });
       expect(links).toContainEqual({
         href: "https://example.com/en/about",
         hreflang: "x-default",
       });
+      expect(links.some((link) => link.hreflang === "zh")).toBe(false);
     });
   });
 
@@ -153,8 +155,8 @@ describe("URLGenerator", () => {
     it("should generate entries for all pages and languages", () => {
       const entries = generator.generateAllSitemapEntries();
 
-      // 10 live static page types x 2 languages = 20 entries.
-      expect(entries).toHaveLength(20);
+      // 10 live static page types x 3 runtime languages = 30 entries.
+      expect(entries).toHaveLength(30);
       expect(
         entries.some((entry) => entry.loc.includes("/bending-machines")),
       ).toBe(false);
@@ -164,9 +166,10 @@ describe("URLGenerator", () => {
       const homeEntries = entries.filter(
         (entry) =>
           entry.loc === "https://example.com/en" ||
+          entry.loc === "https://example.com/es" ||
           entry.loc === "https://example.com/zh",
       );
-      expect(homeEntries).toHaveLength(2);
+      expect(homeEntries).toHaveLength(3);
 
       // 检查主页优先级
       homeEntries.forEach((entry) => {
@@ -252,7 +255,7 @@ describe("URLGenerator", () => {
 
     it("should return supported locales", () => {
       const locales = generator.getSupportedLocales();
-      expect(locales).toEqual(["en", "zh"]);
+      expect(locales).toEqual(["en", "es", "zh"]);
     });
 
     it("should return default locale", () => {
@@ -407,15 +410,17 @@ describe("Comprehensive sitemap generation", () => {
   it("should have correct priorities for different page types", () => {
     const entries = generator.generateAllSitemapEntries();
 
-    // With localePrefix: 'always', home URLs are /en and /zh (no trailing slash)
+    // With localePrefix: 'always', home URLs include every runtime locale.
     const homeEntries = entries.filter(
       (entry) =>
         entry.loc === "https://example.com/en" ||
+        entry.loc === "https://example.com/es" ||
         entry.loc === "https://example.com/zh",
     );
     const otherEntries = entries.filter(
       (entry) =>
         entry.loc !== "https://example.com/en" &&
+        entry.loc !== "https://example.com/es" &&
         entry.loc !== "https://example.com/zh",
     );
 

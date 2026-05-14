@@ -99,6 +99,7 @@ describe("single-site-seo", () => {
       "/_next/",
       "/ops/",
       "/error-test/",
+      "/zh/",
     ]);
   });
 });
