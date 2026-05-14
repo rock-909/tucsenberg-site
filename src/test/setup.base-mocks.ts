@@ -27,23 +27,34 @@ vi.mock("@/lib/mdx-importers.generated", () => ({
   },
 }));
 
+const googleFontMocks = vi.hoisted(() => {
+  type GoogleFontOptions = {
+    variable: string;
+    subsets: string[];
+    weight: string[];
+    display: string;
+  };
+
+  const createGoogleFontMock = (fontFamily: string, className: string) =>
+    vi.fn((options: GoogleFontOptions) => ({
+      variable: options.variable,
+      className,
+      style: { fontFamily },
+      options,
+    }));
+
+  return {
+    IBM_Plex_Sans: createGoogleFontMock("IBM Plex Sans", "ibm-plex-sans"),
+    Inter: createGoogleFontMock("Inter", "inter"),
+    IBM_Plex_Mono: createGoogleFontMock("IBM Plex Mono", "ibm-plex-mono"),
+  };
+});
+
 // Mock next/font/google for Tucsenberg font stack.
 vi.mock("next/font/google", () => ({
-  IBM_Plex_Sans: vi.fn(() => ({
-    variable: "--font-ibm-plex-sans",
-    className: "ibm-plex-sans",
-    style: { fontFamily: "IBM Plex Sans" },
-  })),
-  Inter: vi.fn(() => ({
-    variable: "--font-inter",
-    className: "inter",
-    style: { fontFamily: "Inter" },
-  })),
-  IBM_Plex_Mono: vi.fn(() => ({
-    variable: "--font-ibm-plex-mono",
-    className: "ibm-plex-mono",
-    style: { fontFamily: "IBM Plex Mono" },
-  })),
+  IBM_Plex_Sans: googleFontMocks.IBM_Plex_Sans,
+  Inter: googleFontMocks.Inter,
+  IBM_Plex_Mono: googleFontMocks.IBM_Plex_Mono,
 }));
 
 vi.mock("next/font/local", () => ({

@@ -1,38 +1,39 @@
-import localFont from "next/font/local";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 
 /**
- * Primary sans token — Figtree (variable, 300-900)
- *
- * Uses a checked-in Latin subset so builds stay deterministic
- * without depending on the Google Fonts network path.
+ * Primary sans token.
  */
-export const figtree = localFont({
-  src: "./Figtree-Latin.woff2",
-  variable: "--font-figtree",
+export const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "600"],
   display: "swap",
-  preload: true,
+  variable: "--font-ibm-plex-sans",
 });
 
 /**
- * Monospace fallback token
- *
- * Used for spec values, step numbers, standards, proof metrics.
- * We intentionally avoid a network-fetched secondary font here so builds
- * remain stable when Google Fonts is unreachable in CI or pre-push hooks.
+ * Secondary sans token used as a system-like fallback in the design stack.
  */
-export const jetbrainsMono = {
-  variable: "--font-jetbrains-mono",
-  className: "",
-  style: {
-    fontFamily:
-      'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-  },
-} as const;
+export const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "600"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+/**
+ * Monospace token for specs, standards, and proof metrics.
+ */
+export const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400"],
+  display: "swap",
+  variable: "--font-ibm-plex-mono",
+});
 
 /**
  * Get font class names string for html element.
- * Returns CSS variable classes for Figtree + JetBrains Mono.
+ * Returns CSS variable classes for the full Tucsenberg font stack.
  */
 export function getFontClassNames(): string {
-  return `${figtree.variable} ${jetbrainsMono.variable}`;
+  return [ibmPlexSans.variable, inter.variable, ibmPlexMono.variable].join(" ");
 }
