@@ -229,6 +229,27 @@ describe("SEO Metadata", () => {
       const openGraph = metadata.openGraph as unknown as { url?: string };
       expect(openGraph.url).toBe("https://example.com/en/about");
     });
+
+    it("should preserve Spanish canonical/openGraph URL while excluding zh hreflang", () => {
+      const metadata = generateMetadataForPath({
+        locale: "es",
+        pageType: "about",
+        path: "/about",
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/es/about",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "https://example.com/en/about",
+        es: "https://example.com/es/about",
+        "x-default": "https://example.com/en/about",
+      });
+      expect(metadata.alternates?.languages).not.toHaveProperty("zh");
+
+      const openGraph = metadata.openGraph as unknown as { url?: string };
+      expect(openGraph.url).toBe("https://example.com/es/about");
+    });
   });
 
   describe("createPageSEOConfig", () => {

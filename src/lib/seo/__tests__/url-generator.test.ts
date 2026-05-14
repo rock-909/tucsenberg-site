@@ -154,22 +154,24 @@ describe("URLGenerator", () => {
   describe("generateAllSitemapEntries", () => {
     it("should generate entries for all pages and languages", () => {
       const entries = generator.generateAllSitemapEntries();
+      const urls = entries.map((entry) => entry.loc);
 
-      // 10 live static page types x 3 runtime languages = 30 entries.
-      expect(entries).toHaveLength(30);
+      // 10 live static page types x 2 public SEO languages = 20 entries.
+      expect(entries).toHaveLength(20);
       expect(
         entries.some((entry) => entry.loc.includes("/bending-machines")),
       ).toBe(false);
       expect(entries.some((entry) => entry.loc.includes("/blog"))).toBe(true);
+      expect(urls.some((url) => url.includes("/zh"))).toBe(false);
+      expect(urls.some((url) => url.includes("/es"))).toBe(true);
 
       // 检查是否包含主页条目
       const homeEntries = entries.filter(
         (entry) =>
           entry.loc === "https://example.com/en" ||
-          entry.loc === "https://example.com/es" ||
-          entry.loc === "https://example.com/zh",
+          entry.loc === "https://example.com/es",
       );
-      expect(homeEntries).toHaveLength(3);
+      expect(homeEntries).toHaveLength(2);
 
       // 检查主页优先级
       homeEntries.forEach((entry) => {
@@ -410,18 +412,16 @@ describe("Comprehensive sitemap generation", () => {
   it("should have correct priorities for different page types", () => {
     const entries = generator.generateAllSitemapEntries();
 
-    // With localePrefix: 'always', home URLs include every runtime locale.
+    // With localePrefix: 'always', public sitemap helper only emits SEO locales.
     const homeEntries = entries.filter(
       (entry) =>
         entry.loc === "https://example.com/en" ||
-        entry.loc === "https://example.com/es" ||
-        entry.loc === "https://example.com/zh",
+        entry.loc === "https://example.com/es",
     );
     const otherEntries = entries.filter(
       (entry) =>
         entry.loc !== "https://example.com/en" &&
-        entry.loc !== "https://example.com/es" &&
-        entry.loc !== "https://example.com/zh",
+        entry.loc !== "https://example.com/es",
     );
 
     homeEntries.forEach((entry) => {

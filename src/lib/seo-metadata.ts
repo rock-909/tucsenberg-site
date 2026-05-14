@@ -32,7 +32,7 @@ interface SEOConfig {
 const FALLBACK_LOCALE: Locale = "en";
 
 function resolveLocale(locale: Locale): Locale {
-  return locale === "zh" ? "zh" : FALLBACK_LOCALE;
+  return LOCALES_CONFIG.locales.includes(locale) ? locale : FALLBACK_LOCALE;
 }
 
 /** Replace ICU-style {placeholders} with siteFacts values in SEO strings. */

@@ -251,9 +251,9 @@ export class URLGenerator {
   generateAllSitemapEntries(): SitemapEntry[] {
     const entries: SitemapEntry[] = [];
 
-    // 为每个页面类型和语言生成条目
+    // Public sitemap helpers must only expose public SEO locales.
     Object.keys(PATHS_CONFIG).forEach((pageType) => {
-      this.locales.forEach((locale) => {
+      this.publicLocales.forEach((locale) => {
         const entry = this.generateSitemapEntry(pageType as PageType, locale, {
           changefreq:
             pageType === "home"
