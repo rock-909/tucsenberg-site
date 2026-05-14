@@ -36,6 +36,12 @@ describe("i18n locale truth parity", () => {
     expect(sorted(toolLocales)).toEqual(sorted(LOCALES_CONFIG.locales));
   });
 
+  it("keeps public SEO locales explicit and excludes internal Chinese preview", () => {
+    expect(LOCALES_CONFIG.locales).toEqual(["en", "es", "zh"]);
+    expect(LOCALES_CONFIG.publicLocales).toEqual(["en", "es"]);
+    expect(LOCALES_CONFIG.publicLocales).not.toContain("zh");
+  });
+
   it("documents the tooling locale config as a mirror, not the runtime truth", () => {
     const configSource = readFileSync("i18n-locales.config.js", "utf8");
 
