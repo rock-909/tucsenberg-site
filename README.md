@@ -6,12 +6,11 @@ Tucsenberg 官网代码仓库，面向 aftermarket aeration replacement membrane
 
 ## 先看这里
 
-1. `docs/website/README.md`
-2. `docs/website/新项目替换清单.md`
-3. `docs/website/品牌设置.md`
-4. `docs/website/内容设置.md`
-5. `docs/website/部署设置.md`
-6. `docs/website/AI工作流.md`
+1. `CLAUDE.md`
+2. `PROJECT-BRIEF.md`
+3. `DEVELOPMENT-LOG.md`
+4. `docs/website/README.md`
+5. `docs/website/新项目替换清单.md`
 
 ## 常用命令
 

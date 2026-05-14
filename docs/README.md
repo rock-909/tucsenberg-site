@@ -16,9 +16,9 @@
 
 ## 2026-05-12 技术栈升级后的文档边界
 
-本轮依赖同步后，当前版本真相只看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md` 和 `docs/technical/tech-stack.md`。不要把历史执行计划里的旧版本号当成当前状态。
+本轮依赖同步后，当前版本真相只看 `package.json`、lockfile、`CLAUDE.md`、Codex 会话注入的项目指令、`AGENTS.starter.md`（starter 参考）和 `docs/technical/tech-stack.md`。不要把历史执行计划里的旧版本号当成当前状态。
 
-- `README.md`、`AGENTS.md`、`CLAUDE.md`、`guides/`、`technical/` 才是当前真相入口。
+- `README.md`、`CLAUDE.md`、`PROJECT-BRIEF.md`、`DEVELOPMENT-LOG.md`、`guides/`、`technical/` 才是当前真相入口；Codex 使用会话注入规则，starter 原规则只看 `AGENTS.starter.md`。
 - `audits/`、`reports/`、`superpowers/plans/`、`superpowers/prompts/` 多数是历史证据或执行计划，旧 Node / Next / OpenNext / Wrangler 版本号代表当时的运行环境，不代表当前项目状态。
 - 退役内容目录要从当前入口移除：`content/posts/` 当前不存在；产品 MDX 已归档到 `content/_archive/products/`，不再作为运行时内容源。
 - 根目录 flat locale 文件不再保留；运行时和验证都读取 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json`。
