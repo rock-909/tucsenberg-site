@@ -22,20 +22,15 @@ const messages = {
 };
 
 describe("product-family contact context", () => {
-  it("builds a Contact href object with internal slugs only", () => {
-    expect(
-      buildProductFamilyContactHref({
-        marketSlug: "north-america",
-        familySlug: "couplings",
-      }),
-    ).toEqual({
-      pathname: "/contact",
-      query: {
-        intent: "product-family",
-        market: "north-america",
-        family: "couplings",
-      },
+  it("keeps the Step 2 placeholder contact target as a plain hash link", () => {
+    const href = buildProductFamilyContactHref({
+      marketSlug: "north-america",
+      familySlug: "couplings",
     });
+
+    expect(href).toBe("#coming-soon");
+    expect(JSON.stringify(href)).not.toContain("?intent=");
+    expect(JSON.stringify(href)).not.toContain("%23coming-soon");
   });
 
   it("parses valid product family context and resolves trusted labels", () => {

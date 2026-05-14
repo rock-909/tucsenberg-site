@@ -65,6 +65,7 @@ vi.mock("@/config/paths", () => ({
   },
   LOCALES_CONFIG: {
     locales: ["en", "zh"],
+    publicLocales: ["en", "zh"],
     defaultLocale: "en",
   },
   PATHS_CONFIG: {
@@ -232,28 +233,21 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders server links from each family to Contact with context", async () => {
+    it("renders server links from each family to the Step 2 placeholder", async () => {
       await renderPage("north-america");
 
       const sweepsLink = screen.getByRole("link", {
         name: /request quote for sample product shapes/i,
       });
 
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("/contact"),
-      );
-      expect(sweepsLink).toHaveAttribute(
+      expect(sweepsLink).toHaveAttribute("href", "#coming-soon");
+      expect(sweepsLink).not.toHaveAttribute(
         "href",
         expect.stringContaining("intent=product-family"),
       );
-      expect(sweepsLink).toHaveAttribute(
+      expect(sweepsLink).not.toHaveAttribute(
         "href",
-        expect.stringContaining("market=north-america"),
-      );
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("family=sample-product-shapes"),
+        expect.stringContaining("%23coming-soon"),
       );
     });
 
@@ -334,12 +328,12 @@ describe("Market Landing Page", () => {
     });
   });
 
-  describe("Scenario 1.7: CTA links to /contact", () => {
-    it("renders CTA section with link to /contact", async () => {
+  describe("Scenario 1.7: CTA links to the Step 2 placeholder", () => {
+    it("renders CTA section with link to #coming-soon", async () => {
       await renderPage("north-america");
 
       const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "/contact");
+      expect(ctaLink).toHaveAttribute("href", "#coming-soon");
     });
 
     it("renders CTA heading with market label", async () => {

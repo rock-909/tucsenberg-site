@@ -43,8 +43,8 @@ function resolveSingleSiteBaseUrl(fallback: string): string {
 const baseUrl = resolveSingleSiteBaseUrl("https://tucsenberg.com");
 
 const social = {
-  twitter: "https://x.com/tucsenberg",
-  linkedin: "https://www.linkedin.com/company/tucsenberg",
+  twitter: "[TWITTER_URL]",
+  linkedin: "[LINKEDIN_URL]",
 } as const;
 
 const contact = {
@@ -204,27 +204,6 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
           href: SINGLE_SITE_ROUTE_HREFS.terms,
           external: false,
           translationKey: "footer.sections.support.terms",
-        },
-      ],
-    },
-    {
-      key: "social",
-      title: "Social",
-      translationKey: "footer.sections.social.title",
-      links: [
-        {
-          key: "twitter",
-          label: "Twitter",
-          href: social.twitter,
-          external: true,
-          translationKey: "footer.sections.social.twitter",
-        },
-        {
-          key: "linkedin",
-          label: "LinkedIn",
-          href: social.linkedin,
-          external: true,
-          translationKey: "footer.sections.social.linkedin",
         },
       ],
     },

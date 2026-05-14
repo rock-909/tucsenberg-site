@@ -29,6 +29,10 @@ export function buildProductFamilyContactHref({
   marketSlug: string;
   familySlug: string;
 }): LinkHref {
+  if (SINGLE_SITE_HOME_LINK_TARGETS.contact.startsWith("#")) {
+    return SINGLE_SITE_HOME_LINK_TARGETS.contact;
+  }
+
   return {
     pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
     query: {

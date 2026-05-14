@@ -45,4 +45,17 @@ describe("footer-links", () => {
       SINGLE_SITE_ROUTE_HREFS.comingSoon,
     ]);
   });
+
+  it("does not expose unconfirmed Tucsenberg social URLs", () => {
+    const footerLinks = FOOTER_COLUMNS.flatMap((column) => column.links);
+
+    expect(
+      footerLinks.some((link) => link.href.includes("x.com/tucsenberg")),
+    ).toBe(false);
+    expect(
+      footerLinks.some((link) =>
+        link.href.includes("linkedin.com/company/tucsenberg"),
+      ),
+    ).toBe(false);
+  });
 });
