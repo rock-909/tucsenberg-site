@@ -1,0 +1,347 @@
+/**
+ * 集中测试 Mock 消息 - 中文版
+ *
+ * 此文件提供统一的中文测试消息源。当前 runtime 真相来自
+ * messages/zh/critical.json + messages/zh/deferred.json。
+ *
+ * @usage
+ * ```typescript
+ * // 导入中文消息
+ * import { combinedMessages } from '@/test/constants/mock-messages-zh';
+ *
+ * // 在测试中使用
+ * renderWithIntl(<Component />, 'zh', combinedMessages);
+ * ```
+ *
+ * @see src/test/constants/mock-messages.ts - 英文版集中 mock
+ */
+
+/**
+ * Common 命名空间 - 通用消息 (中文)
+ */
+export const commonMessages = {
+  loading: "加载中…",
+  error: "发生错误",
+  success: "成功",
+  cancel: "取消",
+  confirm: "确认",
+  save: "保存",
+  edit: "编辑",
+  delete: "删除",
+  search: "搜索",
+  filter: "筛选",
+  sort: "排序",
+  next: "下一页",
+  previous: "上一页",
+  close: "关闭",
+  open: "打开",
+  toast: {
+    form: {
+      contact: {
+        success: "消息发送成功！",
+        successDescription: "感谢您的留言，我们会尽快回复您。",
+        error: "消息发送失败",
+        errorDescription: "请稍后重试或直接联系我们。",
+        loading: "正在发送消息...",
+      },
+      newsletter: {
+        success: "订阅成功！",
+        successDescription: "感谢您订阅我们的邮件通讯。",
+        error: "订阅失败",
+        errorDescription: "请检查您的邮箱地址并重试。",
+        loading: "正在订阅...",
+      },
+      feedback: {
+        success: "反馈提交成功！",
+        successDescription: "感谢您的宝贵反馈。",
+        error: "反馈提交失败",
+        errorDescription: "请稍后重试。",
+        loading: "正在提交反馈...",
+      },
+    },
+  },
+} as const;
+
+/**
+ * Navigation 命名空间 - 导航相关消息 (中文)
+ */
+export const navigationMessages = {
+  home: "首页",
+  about: "关于",
+  contact: "联系我们",
+  contactSales: "联系我们",
+  services: "服务",
+  products: "产品",
+  solutions: "解决方案",
+  resources: "资源",
+  enterprise: "企业版",
+  docs: "文档",
+  pricing: "定价",
+  blog: "博客",
+  login: "登录",
+  logout: "退出",
+  profile: "个人资料",
+  settings: "设置",
+  frameworks: "框架",
+  infrastructure: "基础设施",
+  security: "安全",
+  aiApps: "AI 应用",
+  webApps: "Web 应用",
+  ecommerce: "电商",
+  guides: "指南",
+  frameworksDescription: "使用最佳框架构建",
+  infrastructureDescription: "可扩展且可靠的基础设施",
+  securityDescription: "企业级安全保障",
+  aiAppsDescription: "大规模部署 AI 应用",
+  webAppsDescription: "现代 Web 应用平台",
+  ecommerceDescription: "为您的在线商店提供动力",
+  docsDescription: "完整的文档和指南",
+  guidesDescription: "分步教程",
+  blogDescription: "最新更新和见解",
+  menu: "菜单",
+  close: "关闭",
+} as const;
+
+/**
+ * Accessibility 命名空间 - 无障碍访问消息 (中文)
+ */
+export const accessibilityMessages = {
+  skipToContent: "跳转到主要内容",
+  openMenu: "打开导航菜单",
+  closeMenu: "关闭导航菜单",
+  loading: "内容正在加载",
+  error: "发生了错误",
+  languageSelector: "选择语言",
+  themeSelector: "选择主题",
+} as const;
+
+/**
+ * Theme 命名空间 - 主题切换相关消息 (中文)
+ */
+export const themeMessages = {
+  toggle: "切换主题",
+  toggleLabel: "主题切换",
+  light: "明亮模式",
+  dark: "暗黑模式",
+  system: "系统模式",
+  selectTheme: "选择显示主题",
+  selectDisplayTheme: "选择显示主题：",
+  switchToLight: "切换到明亮模式",
+  switchToDark: "切换到暗黑模式",
+  switchToSystem: "切换到系统模式",
+} as const;
+
+/**
+ * Language 命名空间 - 语言切换相关消息 (中文)
+ */
+export const languageMessages = {
+  toggle: "切换语言",
+  selectLanguage: "选择语言",
+  english: "英语",
+  chinese: "中文",
+  switching: "正在切换语言…",
+  switchSuccess: "语言切换成功",
+  switchError: "语言切换失败",
+  fallbackWarning: "部分内容可能无法以您选择的语言显示",
+  detectionInfo: "检测信息",
+  source: "来源",
+  confidence: "置信度",
+  userPreference: "用户偏好已保存",
+  detector: {
+    title: "检测信息",
+    source: "来源",
+    confidence: "置信度",
+    userSaved: "✓ 用户偏好已保存",
+    sources: {
+      browser: "浏览器",
+      cookie: "Cookie",
+      url: "URL",
+      header: "请求头",
+      default: "默认",
+      user: "用户",
+      stored: "已存储",
+      geo: "地理位置",
+      timezone: "时区",
+    },
+  },
+} as const;
+
+/**
+ * ErrorBoundary 命名空间 - 错误边界组件消息 (中文)
+ */
+export const errorBoundaryMessages = {
+  title: "发生错误",
+  description: "出现了一些问题，请尝试刷新页面。",
+  tryAgain: "重试",
+} as const;
+
+/**
+ * SEO 命名空间 - SEO 相关元数据 (中文)
+ */
+export const seoMessages = {
+  title: "示例展示型公司",
+  description: "专业产品与服务展示网站",
+  siteName: "示例展示型公司",
+  keywords: "展示型网站, 产品展示, 服务展示, 公司介绍",
+  pages: {
+    home: {
+      title: "示例展示型公司 - 产品与服务展示",
+      description: "用于展示公司能力、产品服务和询盘路径的示例网站。",
+    },
+    about: {
+      title: "关于我们 - 示例展示型公司",
+      description: "了解示例展示型公司的能力、流程和服务方式。",
+    },
+    contact: {
+      title: "联系我们 - 示例展示型公司",
+      description: "联系我们的团队获取产品咨询和技术支持。",
+    },
+    products: {
+      title: "产品中心 - 示例展示型公司",
+      description: "探索示例产品和服务分类。",
+    },
+    blog: {
+      title: "新闻动态 - 示例展示型公司",
+      description: "示例展示型公司的最新资讯和行业动态。",
+    },
+  },
+} as const;
+
+/**
+ * Footer 命名空间 - 页脚相关消息 (中文)
+ */
+export const footerMessages = {
+  sections: {
+    product: {
+      title: "产品",
+      home: "首页",
+      enterprise: "企业版",
+      pricing: "定价",
+    },
+    company: {
+      title: "公司",
+      terms: "条款",
+      aiPolicy: "AI政策",
+      privacy: "隐私",
+    },
+    resources: {
+      title: "资源",
+      faqs: "常见问题",
+      docs: "文档",
+      ambassadors: "大使",
+      community: "社区",
+      platform: "平台",
+    },
+    social: {
+      title: "社交",
+    },
+  },
+  platform: {
+    products: {
+      title: "产品",
+      ai: "AI",
+      enterprise: "企业版",
+      fluidCompute: "弹性算力",
+      nextjs: "Next.js",
+      observability: "可观测性",
+      previews: "预览",
+      rendering: "渲染",
+      security: "安全",
+      turbo: "Turbo",
+      domains: "域名",
+      v0: "v0",
+    },
+    resources: {
+      title: "资源",
+      community: "社区",
+      docs: "文档",
+      guides: "指南",
+      academy: "学院",
+      help: "帮助",
+      integrations: "集成",
+      pricing: "定价",
+      resources: "资源",
+      solutionPartners: "解���方案合作伙伴",
+      startups: "初创企业",
+      templates: "模板",
+      sdks: "SDK",
+    },
+    company: {
+      title: "公司",
+      about: "关于",
+      blog: "博客",
+      careers: "招聘",
+      changelog: "更新日志",
+      contact: "联系我们",
+      customers: "客户",
+      events: "活动",
+      partners: "合作伙伴",
+      shipped: "已发布",
+      privacy: "隐私政策",
+      legal: "法律",
+    },
+    social: {
+      title: "社交",
+      github: "GitHub",
+      linkedin: "LinkedIn",
+      twitter: "Twitter",
+      youtube: "YouTube",
+    },
+  },
+} as const;
+
+/**
+ * Under Construction 命名空间 - 施工中页面消息 (中文)
+ */
+export const underConstructionMessages = {
+  title: "建设中",
+  subtitle: "我们正在努力为您打造精彩内容",
+  description: "此页面正在开发中。我们正在构建优秀的功能，很快就会准备就绪。",
+  backToHome: "返回首页",
+  comingSoon: "即将推出",
+  expectedCompletion: "预计完成时间：{date}",
+  expectedLaunch: "预计上线：{date}",
+  stayTuned: "敬请期待更新",
+  contactUs: "联系我们获取更多信息",
+  pages: {
+    contact: {
+      title: "联系我们",
+      description: "联系我们的团队进行咨询、支持或合作机会。",
+      features: "多种联系方式，获得您需要的支持",
+    },
+  },
+} as const;
+
+/**
+ * 合并所有命名空间的完整中文消息对象
+ */
+export const combinedMessages = {
+  common: commonMessages,
+  navigation: navigationMessages,
+  accessibility: accessibilityMessages,
+  theme: themeMessages,
+  language: languageMessages,
+  errorBoundary: errorBoundaryMessages,
+  seo: seoMessages,
+  footer: footerMessages,
+  underConstruction: underConstructionMessages,
+} as const;
+
+/**
+ * 类型导出 - 供 TypeScript 类型检查使用
+ */
+export type MockMessagesZh = typeof combinedMessages;
+export type CommonMessagesZh = typeof commonMessages;
+export type NavigationMessagesZh = typeof navigationMessages;
+export type AccessibilityMessagesZh = typeof accessibilityMessages;
+export type ThemeMessagesZh = typeof themeMessages;
+export type LanguageMessagesZh = typeof languageMessages;
+export type ErrorBoundaryMessagesZh = typeof errorBoundaryMessages;
+export type SeoMessagesZh = typeof seoMessages;
+export type FooterMessagesZh = typeof footerMessages;
+export type UnderConstructionMessagesZh = typeof underConstructionMessages;
+
+/**
+ * 默认导出合并消息
+ */
+export default combinedMessages;

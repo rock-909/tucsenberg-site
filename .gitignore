@@ -1,0 +1,108 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+next-env.d.ts
+out/
+dist/
+build/
+storybook-static/
+public/messages/
+.trash-next-artifacts/
+
+# Cache
+.eslintcache
+*.tsbuildinfo
+.turbo/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# x-reader runtime
+unified_inbox.json
+
+# AI Tools (personal config)
+.agent/
+.continue/
+.factory/
+.kiro/
+.claude/settings.local.json
+.claude/skills-backup-*/
+.claude/skills-reference-*/
+.claude/worktrees/
+.claude-plugin/
+.agents/
+/skills/
+skills-lock.json
+sessions/
+config.json
+views.json
+labels/
+statuses/
+squirrel.toml
+scripts/ralph/
+.firecrawl/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test & Reports
+coverage/
+reports/
+playwright-report/
+test-results/
+.playwright-cli/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel/
+
+# Cloudflare
+.open-next/
+.wrangler/
+.dev.vars
+wrangler.toml
+
+# Local MCP config (may contain secrets)
+.mcp.json
+.lighthouseci/
+# next-agents-md
+.next-docs/
+
+# Stryker mutation testing
+.stryker-tmp/
+
+# Codex review loop (runtime state & output)
+.context/
+.claude/review-loop.local.md
+.claude/review-loop.log
+reviews/
+
+.codex/auth.json
+.codex/history.jsonl
+.codex/log/
+.codex/*.sqlite*
+.codex/shell_snapshots/
+.superpowers/
+.omx/
+.eslintcache-audit
+.worktrees/

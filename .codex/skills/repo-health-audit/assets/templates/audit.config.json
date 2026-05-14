@@ -1,0 +1,106 @@
+{
+  "audit_name": "full-project-health-v2",
+  "audit_root": "docs/audits/full-project-health-v2",
+  "target_base": "origin/main",
+  "run_posture": "read-only",
+  "business_code_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    ".github/workflows/**",
+    "public/**"
+  ],
+  "allowed_write_globs": [
+    "docs/audits/full-project-health-v2/runs/**",
+    ".context/audits/full-project-health-v2/**"
+  ],
+  "forbidden_write_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    ".github/workflows/**",
+    "public/**"
+  ],
+  "report_files": [
+    "00-final-report.md",
+    "01-quality-map.md",
+    "02-findings.json",
+    "03-evidence-log.md",
+    "04-process-retro.md"
+  ],
+  "lanes": [
+    {
+      "id": "00",
+      "name": "Baseline / runtime truth",
+      "output": "lanes/00-baseline-runtime.md",
+      "evidence": "evidence/00-baseline-runtime/"
+    },
+    {
+      "id": "01",
+      "name": "Architecture / coupling",
+      "output": "lanes/01-architecture-coupling.md",
+      "evidence": "evidence/01-architecture-coupling/"
+    },
+    {
+      "id": "02",
+      "name": "Security / trust boundary",
+      "output": "lanes/02-security-trust-boundary.md",
+      "evidence": "evidence/02-security-trust-boundary/"
+    },
+    {
+      "id": "03",
+      "name": "UI / performance / accessibility",
+      "output": "lanes/03-ui-performance-accessibility.md",
+      "evidence": "evidence/03-ui-performance-accessibility/"
+    },
+    {
+      "id": "04",
+      "name": "SEO / content / conversion",
+      "output": "lanes/04-seo-content-conversion.md",
+      "evidence": "evidence/04-seo-content-conversion/"
+    },
+    {
+      "id": "05",
+      "name": "Tests / AI smell / dead code",
+      "output": "lanes/05-tests-ai-smell-dead-code.md",
+      "evidence": "evidence/05-tests-ai-smell-dead-code/"
+    }
+  ],
+  "commands": {
+    "required": [
+      "git status --short --branch",
+      "node -v",
+      "pnpm -v",
+      "pnpm type-check",
+      "pnpm lint:check",
+      "pnpm test",
+      "pnpm build"
+    ],
+    "optional": [
+      "pnpm website:build:cf",
+      "pnpm website:build:cf",
+      "pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err",
+      "pnpm exec knip -c knip.jsonc --dependencies --files",
+      "pnpm exec semgrep --config=semgrep.yml src --json"
+    ],
+    "credential_blocked": []
+  },
+  "credential_blockers": [
+    "Cloudflare dashboard or deploy token",
+    "Google Search Console",
+    "PageSpeed or CrUX API access",
+    "Email or lead-delivery provider dashboard"
+  ],
+  "stop_lines": [
+    "base branch or commit unclear",
+    "unexpected business-code diff in read-only audit",
+    "audit package or adapter incomplete",
+    "planned command references a missing script",
+    "P0/P1 lacks fresh evidence",
+    "credential-dependent claim lacks credential access"
+  ]
+}

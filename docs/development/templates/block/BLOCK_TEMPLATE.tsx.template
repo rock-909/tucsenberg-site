@@ -1,0 +1,208 @@
+/**
+ * Block Component Template
+ *
+ * This template demonstrates the standard structure for creating new block components.
+ * Copy this file to create new blocks and replace placeholder content.
+ *
+ * Key patterns enforced:
+ * 1. Use Container/Section primitives for consistent layout
+ * 2. Use i18nNamespace prop with configurable default for translations
+ * 3. Use siteFacts for non-translatable business data
+ * 4. TypeScript interfaces for all props
+ * 5. Intersection observer for scroll animations
+ *
+ * Usage:
+ *   cp docs/development/templates/block/BLOCK_TEMPLATE.tsx src/components/blocks/[category]/[name]-block.tsx
+ */
+
+"use client";
+
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { Container } from "@/components/ui/container";
+import { Section } from "@/components/ui/section";
+import { siteFacts } from "@/config/site-facts";
+import { COUNT_700 } from "@/constants/count";
+import { DEC_0_2 } from "@/constants/decimal";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * Define your block-specific item types here.
+ * Example: CardItem, FeatureItem, TestimonialItem, etc.
+ */
+export interface BlockItem {
+  title: string;
+  description: string;
+  // Add more fields as needed
+}
+
+/**
+ * Block component props interface.
+ * All blocks should follow this pattern for consistency.
+ */
+export interface BlockTemplateProps {
+  /** Optional custom items - falls back to defaults from translations */
+  items?: BlockItem[];
+  /** i18n namespace - allows parent to override translation scope */
+  i18nNamespace?: string;
+  /** Additional class names for the section wrapper */
+  className?: string;
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const UI_CONSTANTS = {
+  ANIMATION_DURATION: COUNT_700,
+  INTERSECTION_THRESHOLD: DEC_0_2,
+} as const;
+
+// ============================================================================
+// Sub-components (Internal)
+// ============================================================================
+
+/**
+ * Internal sub-component example.
+ * Keep sub-components private unless they need to be exported for composition.
+ */
+function BlockItemCard({ item, index }: { item: BlockItem; index: number }) {
+  return (
+    <div
+      className="rounded-lg border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+      style={{
+        transitionDelay: `${index * 100}ms`,
+      }}
+    >
+      <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
+      <p className="text-sm text-muted-foreground">{item.description}</p>
+    </div>
+  );
+}
+
+// ============================================================================
+// Default Data Factory
+// ============================================================================
+
+/**
+ * Generate default data from translations.
+ * This pattern keeps default content in i18n files for easy localization.
+ */
+function getDefaultItems(t: (key: string) => string): BlockItem[] {
+  return [
+    {
+      title: t("items.item1.title"),
+      description: t("items.item1.description"),
+    },
+    {
+      title: t("items.item2.title"),
+      description: t("items.item2.description"),
+    },
+    {
+      title: t("items.item3.title"),
+      description: t("items.item3.description"),
+    },
+  ];
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+/**
+ * BlockTemplate - Example block component demonstrating standard patterns.
+ *
+ * Replace this with your actual block implementation.
+ * Key structural elements to preserve:
+ * - Section wrapper with spacing/background variants
+ * - Container for responsive max-width
+ * - Intersection observer for scroll animations
+ * - i18nNamespace prop pattern
+ */
+export function BlockTemplate({
+  items,
+  i18nNamespace = "blockTemplate", // Change to your actual namespace
+  className,
+}: BlockTemplateProps) {
+  // Translation hook with configurable namespace
+  const t = useTranslations(i18nNamespace);
+
+  // Scroll animation
+  const { ref, isVisible } = useIntersectionObserver<HTMLDivElement>({
+    threshold: UI_CONSTANTS.INTERSECTION_THRESHOLD,
+    triggerOnce: true,
+  });
+
+  // Resolve items: props override > translation defaults
+  const resolvedItems = items ?? getDefaultItems(t);
+
+  return (
+    <Section spacing="xl" background="default" className={className}>
+      <Container size="xl">
+        <div
+          ref={ref}
+          className={cn(
+            "transition-all ease-out",
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+          )}
+          style={{
+            transitionDuration: `${UI_CONSTANTS.ANIMATION_DURATION}ms`,
+          }}
+        >
+          {/* Header */}
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              {t("title")}
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              {t("subtitle")}
+            </p>
+          </div>
+
+          {/* Content Grid */}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {resolvedItems.map((item, index) => (
+              <BlockItemCard key={index} item={item} index={index} />
+            ))}
+          </div>
+
+          {/* Example: Using siteFacts for business data */}
+          <div className="mt-12 text-center text-sm text-muted-foreground">
+            <p>
+              {t("footer", {
+                companyName: siteFacts.company.name,
+                yearsInBusiness: siteFacts.company.yearsInBusiness,
+              })}
+            </p>
+          </div>
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+// ============================================================================
+// Server Component Variant (Optional)
+// ============================================================================
+
+/**
+ * For server-side rendered blocks, create a separate file:
+ *   [name]-block.server.tsx
+ *
+ * Use getTranslations instead of useTranslations:
+ *
+ * ```tsx
+ * import { getTranslations } from 'next-intl/server';
+ *
+ * export async function BlockTemplateServer({
+ *   i18nNamespace = 'blockTemplate',
+ * }: BlockTemplateProps) {
+ *   const t = await getTranslations(i18nNamespace);
+ *   // ... render without client-side hooks
+ * }
+ * ```
+ */

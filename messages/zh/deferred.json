@@ -1,0 +1,460 @@
+{
+  "error": "发生错误，请重试。",
+  "turnstileRequired": "请完成安全验证。",
+  "errorBoundary": {
+    "title": "发生错误",
+    "description": "出现了一些问题，请尝试刷新页面。",
+    "tryAgain": "重试"
+  },
+  "legal": {
+    "effectiveDate": "生效日期",
+    "lastUpdated": "最后更新",
+    "tableOfContents": "目录"
+  },
+  "themeDemo": {
+    "title": "主题系统演示",
+    "description": "测试主题切换和中英文字体混排效果",
+    "chineseTest": "中文字体测试",
+    "englishTest": "英文字体测试",
+    "chineseDescription": "这是中文字体测试内容，使用了PingFang SC字体回退策略。现代化B2B企业级设计风格展示。",
+    "englishDescription": "这是英文字体测试内容，使用Geist Sans字体。现代化B2B企业级设计风格展示。",
+    "chineseInput": "中文输入框",
+    "englishInput": "英文输入框",
+    "chinesePlaceholder": "请输入中文内容",
+    "englishPlaceholder": "请输入英文内容",
+    "primaryButton": "主要按钮",
+    "secondaryButton": "次要按钮",
+    "outlineButton": "轮廓按钮"
+  },
+  "instructions": {
+    "getStarted": "开始编辑",
+    "saveChanges": "保存并立即查看您的更改"
+  },
+  "actions": {
+    "deployNow": "立即部署",
+    "readDocs": "阅读文档"
+  },
+  "formTemplate": {
+    "form": {
+      "success": "成功",
+      "error": "未知错误",
+      "submitting": "提交中...",
+      "submit": "提交",
+      "selectOption": "选择一个选项"
+    },
+    "example": {
+      "fields": {
+        "name": {
+          "label": "姓名",
+          "placeholder": "请输入您的姓名"
+        },
+        "email": {
+          "label": "邮箱",
+          "placeholder": "请输入您的邮箱"
+        },
+        "message": {
+          "label": "留言",
+          "placeholder": "请输入您的留言"
+        }
+      }
+    }
+  },
+  "contact": {
+    "context": {
+      "productFamilyLabel": "你正在咨询："
+    },
+    "title": "联系我们",
+    "description": "联系我们的团队进行咨询、支持或合作机会。",
+    "features": "多种联系方式，获得您需要的支持",
+    "panel": {
+      "contactTitle": "联系方式",
+      "email": "邮箱",
+      "emailUnavailable": "请使用本页表单；公开上线前需要配置真实接收方。",
+      "phone": "电话",
+      "hoursTitle": "营业时间",
+      "weekdays": "周一 - 周五",
+      "saturday": "周六",
+      "sunday": "周日",
+      "closed": "休息",
+      "responseTitle": "联系后会发生什么",
+      "responseTimeLabel": "通常回复时间",
+      "responseTimeValue": "工作日 24 小时内",
+      "bestForLabel": "适合咨询",
+      "bestForValue": "咨询、报价、演示、项目范围和内容替换问题",
+      "prepareLabel": "建议提供",
+      "prepareValue": "业务类型、目标受众、需要的页面、时间计划和现有素材"
+    },
+    "form": {
+      "title": "联系我们",
+      "description": "与我们取得联系，我们很乐意听到您的声音。",
+      "optional": "选填",
+      "fullName": "姓名",
+      "email": "邮箱地址",
+      "company": "公司名称",
+      "phone": "电话号码",
+      "subject": "主题",
+      "message": "消息内容",
+      "fullNamePlaceholder": "请输入您的姓名",
+      "emailPlaceholder": "your@email.com",
+      "companyPlaceholder": "您的公司名称",
+      "phonePlaceholder": "+86 138 0000 0000",
+      "subjectPlaceholder": "我们可以为您提供什么帮助？",
+      "messagePlaceholder": "请描述您的需求或问题...",
+      "acceptPrivacy": "我同意隐私政策和服务条款",
+      "marketingConsent": "我希望接收营销通讯",
+      "submit": "发送消息",
+      "submitting": "发送中...",
+      "submitSuccess": "消息已成功发送！",
+      "submitError": "消息发送失败，请稍后再试。",
+      "networkError": "表单暂时无法提交，请稍后重试。",
+      "success": "谢谢！您的消息已成功发送。我们会尽快回复您。",
+      "error": "抱歉，发送消息时出现错误。请稍后重试。",
+      "loadError": "安全询盘表单暂时无法加载。请重试，或使用本页右侧联系方式。",
+      "retryLoad": "重新加载表单",
+      "rateLimitMessage": "您刚刚提交过表单，请稍候再尝试。",
+      "errors": {
+        "generic": "请检查标记的字段后再试一次。",
+        "fullName": {
+          "required": "姓名为必填项",
+          "tooShort": "姓名为必填项",
+          "tooLong": "姓名长度需少于50个字符",
+          "invalid": "姓名包含无效字符"
+        },
+        "email": {
+          "required": "邮箱地址为必填项",
+          "invalid": "请输入有效的邮箱地址",
+          "tooLong": "邮箱地址长度需少于100个字符"
+        },
+        "company": {
+          "tooShort": "公司名称至少需要2个字符",
+          "tooLong": "公司名称需少于100个字符",
+          "invalid": "公司名称包含无效字符"
+        },
+        "productSlug": {
+          "required": "请选择产品后再提交询盘",
+          "invalid": "所选产品无法识别"
+        },
+        "productName": {
+          "required": "产品名称为必填项",
+          "tooShort": "产品名称至少需要2个字符",
+          "tooLong": "产品名称需少于100个字符",
+          "invalid": "产品名称包含无效字符"
+        },
+        "quantity": {
+          "required": "需求数量为必填项",
+          "invalid": "需求数量格式无效"
+        },
+        "requirements": {
+          "tooLong": "特殊要求需少于1000个字符",
+          "invalid": "特殊要求包含无效字符"
+        },
+        "message": {
+          "required": "消息内容为必填项",
+          "tooShort": "消息内容至少需要10个字符",
+          "tooLong": "消息内容需少于1000个字符"
+        },
+        "phone": {
+          "invalid": "请输入有效的电话号码"
+        },
+        "subject": {
+          "length": "主题长度需在5到100个字符之间"
+        },
+        "acceptPrivacy": {
+          "required": "必须同意隐私政策"
+        },
+        "website": {
+          "shouldBeEmpty": "该字段应保持为空"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "姓名为必填项",
+        "fullNameTooShort": "姓名为必填项",
+        "emailRequired": "邮箱地址为必填项",
+        "emailInvalid": "请输入有效的邮箱地址",
+        "messageRequired": "消息内容为必填项",
+        "messageTooShort": "消息内容至少需要10个字符"
+      }
+    }
+  },
+  "formatting": {
+    "date": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "tomorrow": "明天",
+      "lastUpdated": "最后更新于 {date}",
+      "publishedOn": "发布于 {date}"
+    },
+    "number": {
+      "currency": "¥{amount}",
+      "percentage": "{value}％",
+      "fileSize": "{size}{unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "暂无项目",
+        "one": "1个项目",
+        "other": "{count}个项目"
+      },
+      "users": {
+        "zero": "暂无在线用户",
+        "one": "1位用户在线",
+        "other": "{count}位用户在线"
+      },
+      "notifications": {
+        "zero": "暂无新通知",
+        "one": "1条新通知",
+        "other": "{count}条新通知"
+      }
+    }
+  },
+  "progress": {
+    "title": "开发进度",
+    "status": "开发进度",
+    "nearCompletion": "即将完成",
+    "planning": "规划中",
+    "development": "开发中",
+    "testing": "测试中",
+    "launch": "即将发布",
+    "ariaLabel": "项目开发进度指示器",
+    "completed": "已完成",
+    "current": "当前步骤",
+    "upcoming": "即将开始"
+  },
+  "ReactScanDemo": {
+    "title": "React Scan 性能演示",
+    "description": "React Scan 性能监控功能的交互式演示",
+    "instructions": {
+      "title": "如何使用此演示",
+      "step1": "按 Ctrl+Shift+X 切换 React Scan 开启/关闭",
+      "step2": "点击下方按钮触发不同类型的渲染",
+      "step3": "观察红色高亮（不必要渲染）和绿色高亮（优化渲染）",
+      "step4": "使用右下角的 React Scan 工具栏进行详细分析"
+    }
+  },
+  "themes": {
+    "title": "主题系统",
+    "description": "支持明暗模式切换的动态主题系统。",
+    "toggle": "主题切换",
+    "language": "语言切换",
+    "colors": {
+      "title": "色彩调色板"
+    },
+    "typography": {
+      "title": "排版",
+      "bold": "加粗文本",
+      "medium": "中等粗细文本",
+      "normal": "正常文本",
+      "muted": "辅助文本"
+    }
+  },
+  "stats": {
+    "technologies": "项技术",
+    "typescript": "TypeScript 覆盖率",
+    "performance": "性能评分",
+    "languages": "语言数量"
+  },
+  "email": "邮箱地址",
+  "emailPlaceholder": "your@email.com",
+  "phone": "电话号码",
+  "organization": {
+    "name": "{companyName}",
+    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter",
+    "phone": "请通过邮箱联系销售团队",
+    "social": {
+      "twitter": "https://x.com/example",
+      "linkedin": "https://www.linkedin.com/company/example"
+    }
+  },
+  "website": {
+    "name": "{siteName}",
+    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter"
+  },
+  "article": {
+    "defaultAuthor": "{companyName}"
+  },
+  "products": {
+    "pageTitle": "产品中心",
+    "pageDescription": "探索我们为您的业务需求提供的全系列优质产品。",
+    "emptyState": "暂无产品，请稍后再来查看。",
+    "viewDetails": "查看详情",
+    "requestQuote": "询价",
+    "allCategories": "全部分类",
+    "allStandards": "全部标准",
+    "standardsFilterAriaLabel": "按标准筛选",
+    "featured": "精选",
+    "breadcrumb": {
+      "home": "首页",
+      "products": "产品中心"
+    },
+    "card": {
+      "moq": "数量",
+      "leadTime": "交货期",
+      "supplyCapacity": "供货能力"
+    },
+    "detail": {
+      "specifications": "产品规格",
+      "tradeInfo": "贸易信息",
+      "certifications": "产品认证",
+      "relatedProducts": "相关产品",
+      "downloadPdf": "下载产品 PDF 资料",
+      "labels": {
+        "moq": "最小数量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供货能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港口"
+      }
+    },
+    "inquiry": {
+      "title": "产品询价",
+      "description": "对此产品感兴趣？发送询价获取报价和货期信息。",
+      "productName": "产品名称",
+      "quantity": "需求数量",
+      "quantityPlaceholder": "例如：500 件",
+      "targetPrice": "目标价格（选填）",
+      "targetPricePlaceholder": "例如：每件 10 美元",
+      "requirements": "特殊要求",
+      "requirementsPlaceholder": "请描述您的特殊需求，如定制、包装或认证要求...",
+      "submit": "发送询价",
+      "submitting": "发送中...",
+      "success": "询价已成功发送！我们将在 24 小时内回复您。",
+      "error": "询价发送失败，请稍后重试。",
+      "turnstileRequired": "请完成安全验证。"
+    }
+  },
+  "title": "Showcase Website Starter",
+  "trust": {
+    "testimonials": {
+      "title": "客户评价",
+      "subtitle": "受到全球企业的信赖"
+    },
+    "partners": {
+      "title": "合作伙伴",
+      "subtitle": "与行业领导者携手合作"
+    },
+    "certifications": {
+      "title": "资质认证",
+      "subtitle": "值得信赖的品质保证"
+    },
+    "stats": {
+      "title": "数字见证",
+      "yearsInBusiness": "经营年限",
+      "countriesServed": "服务国家",
+      "satisfactionRate": "客户满意度",
+      "projectsCompleted": "交付项目"
+    }
+  },
+  "faq": {
+    "sectionTitle": "常见问题解答",
+    "items": {}
+  },
+  "privacy": {
+    "pageTitle": "隐私政策",
+    "pageDescription": "了解我们如何收集、使用和保护您的个人信息。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "informationCollected": "我们收集的信息",
+      "howWeUse": "我们如何使用您的信息",
+      "sharing": "信息共享",
+      "security": "数据安全",
+      "retention": "数据保留",
+      "rights": "您的隐私权利",
+      "children": "儿童隐私",
+      "changes": "政策变更",
+      "contact": "联系我们"
+    }
+  },
+  "terms": {
+    "pageTitle": "服务条款",
+    "pageDescription": "阅读我们的服务使用条款和产品采购条件。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "acceptance": "条款接受",
+      "services": "服务说明",
+      "orders": "订单与合同",
+      "payment": "付款条款",
+      "shipping": "运输与交付",
+      "warranty": "保修与退换",
+      "liability": "责任限制",
+      "ip": "知识产权",
+      "confidentiality": "保密条款",
+      "termination": "终止条款",
+      "governing": "适用法律",
+      "disputes": "争议解决",
+      "contact": "联系方式"
+    }
+  },
+  "customProject": {
+    "meta": {
+      "title": "定制项目支持 | Showcase Website Starter",
+      "description": "可替换的定制项目示例，用于说明范围、方案、品牌适配、确认和交付。"
+    },
+    "hero": {
+      "title": "定制项目支持",
+      "subtitle": "您的范围，一条可复用项目流程。"
+    },
+    "scope": {
+      "title": "服务范围",
+      "customSizes": {
+        "title": "定制配置",
+        "desc": "把这里替换成真实配置选项、套餐、服务等级或产品变体。"
+      },
+      "privateLabel": {
+        "title": "品牌适配",
+        "desc": "用于说明品牌适配、自有品牌、白标服务或客户专属展示需求。"
+      },
+      "implementationSupport": {
+        "title": "实施支持",
+        "desc": "说明真实项目中的配置、接入、生产、上线或交付支持。"
+      },
+      "qualityAssurance": {
+        "title": "质量确认",
+        "desc": "说明真实审核流程、验收标准、文档或确认步骤。"
+      }
+    },
+    "process": {
+      "title": "合作流程",
+      "step1": {
+        "title": "需求沟通",
+        "desc": "说明目标、受众、业务内容、限制和现有素材",
+        "timeline": "步骤 1"
+      },
+      "step2": {
+        "title": "方案确认",
+        "desc": "确认页面范围、内容需求和成功标准",
+        "timeline": "步骤 2"
+      },
+      "step3": {
+        "title": "示例或预览",
+        "desc": "准备第一个页面、组件、样例或实施预览",
+        "timeline": "步骤 3"
+      },
+      "step4": {
+        "title": "审核确认",
+        "desc": "检查内容、UI 状态、证据、表单和预期行为",
+        "timeline": "步骤 4"
+      },
+      "step5": {
+        "title": "交付准备",
+        "desc": "完成内容、配置、验证和上线准备",
+        "timeline": "步骤 5"
+      }
+    },
+    "standards": {
+      "title": "支持标准",
+      "desc": "把这些标签替换为新项目真实的标准、平台、交付物或验收规则。",
+      "custom": "也支持定制范围"
+    },
+    "cta": {
+      "heading": "开始定制项目",
+      "description": "告诉我们目标、受众、内容、时间计划和替换需求。这个示例应改成你的真实需求入口。",
+      "button": "立即开始"
+    }
+  }
+}

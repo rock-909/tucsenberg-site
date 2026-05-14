@@ -1,0 +1,1627 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "close": "Close",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "open": "Open",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "Message sent successfully!",
+          "successDescription": "Thank you for your message. We'll get back to you soon.",
+          "error": "Failed to send message",
+          "errorDescription": "Please try again later or contact us directly.",
+          "loading": "Sending message..."
+        },
+        "newsletter": {
+          "success": "Successfully subscribed!",
+          "successDescription": "Thank you for subscribing to our newsletter.",
+          "error": "Subscription failed",
+          "errorDescription": "Please check your email and try again.",
+          "loading": "Subscribing..."
+        },
+        "feedback": {
+          "success": "Feedback submitted!",
+          "successDescription": "Thank you for your valuable feedback.",
+          "error": "Failed to submit feedback",
+          "errorDescription": "Please try again later.",
+          "loading": "Submitting feedback..."
+        }
+      }
+    }
+  },
+  "navigation": {
+    "siteName": "{siteName}",
+    "siteDescription": "Reusable showcase website starter for products, services, proof, and inquiry paths.",
+    "home": "Home",
+    "more": "More",
+    "capabilities": "Capabilities",
+    "howItWorks": "How It Works",
+    "about": "About",
+    "contact": "Contact",
+    "contactSales": "Contact",
+    "customProject": "Custom",
+    "services": "Services",
+    "products": "Products",
+    "blog": "Blog",
+    "solutions": "Solutions",
+    "resources": "Resources",
+    "enterprise": "Enterprise",
+    "docs": "Docs",
+    "pricing": "Pricing",
+    "privacy": "Privacy Policy",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "frameworks": "Frameworks",
+    "infrastructure": "Infrastructure",
+    "security": "Security",
+    "aiApps": "AI Apps",
+    "webApps": "Web Apps",
+    "ecommerce": "Ecommerce",
+    "guides": "Guides",
+    "frameworksDescription": "Build with the best frameworks",
+    "infrastructureDescription": "Scalable and reliable infrastructure",
+    "securityDescription": "Enterprise-grade security",
+    "aiAppsDescription": "Deploy AI applications at scale",
+    "webAppsDescription": "Modern web application platform",
+    "ecommerceDescription": "Power your online store",
+    "docsDescription": "Complete documentation and guides",
+    "guidesDescription": "Step-by-step tutorials",
+    "blogDescription": "Latest updates and insights"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "toggleLabel": "Theme toggle",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "selectTheme": "Select display theme",
+    "selectDisplayTheme": "Select a display theme:",
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "switchToSystem": "Switch to system theme"
+  },
+  "language": {
+    "toggle": "Toggle language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "chinese": "中文",
+    "switching": "Switching language...",
+    "switchSuccess": "Language switched successfully",
+    "switchError": "Failed to switch language",
+    "fallbackWarning": "Some content may not be available in your selected language",
+    "detectionInfo": "Detection Info",
+    "source": "Source",
+    "confidence": "Confidence",
+    "userPreference": "User preference saved",
+    "detector": {
+      "title": "Detection Info",
+      "source": "Source",
+      "confidence": "Confidence",
+      "userSaved": "✓ User preference saved",
+      "sources": {
+        "browser": "Browser",
+        "cookie": "Cookie",
+        "url": "URL",
+        "header": "Header",
+        "default": "Default",
+        "user": "User",
+        "stored": "Stored",
+        "geo": "Geo",
+        "timezone": "Timezone"
+      }
+    }
+  },
+  "blog": {
+    "index": {
+      "eyebrow": "Launch guide",
+      "title": "Blog",
+      "description": "Practical notes for turning a starter into a public showcase website: content, pages, deployment, analytics, and replacement boundaries.",
+      "articleListLabel": "Starter launch articles",
+      "readArticle": "Read article"
+    },
+    "article": {
+      "backToBlog": "Back to blog"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Public demo starter site",
+      "title": "No website yet? Start with a deployable showcase-site foundation.",
+      "subtitle": "This starter gives a project the first real website structure: pages, content replacement surfaces, inquiry flow, multilingual copy, and a Cloudflare-ready launch path.",
+      "cta": {
+        "primary": "View product capabilities",
+        "secondary": "Contact"
+      },
+      "proof": {
+        "countries": "{countries}+",
+        "countriesLabel": "Countries",
+        "range": "3+",
+        "rangeLabel": "Offer Types",
+        "production": "Ready",
+        "productionLabel": "Starter Status",
+        "est": "{established}",
+        "estLabel": "Est."
+      },
+      "preview": {
+        "label": "What this starter provides",
+        "title": "A public site foundation, not a blank shell",
+        "description": "The demo is intentionally complete enough to evaluate, while still making replacement boundaries visible before a real launch.",
+        "items": [
+          "Home, Products, Blog, About, and Contact",
+          "Brand and content replacement surfaces",
+          "Inquiry path with anti-abuse basics",
+          "Cloudflare-ready deployment direction"
+        ],
+        "pages": "Pages",
+        "components": "Components",
+        "storybook": "Storybook",
+        "workflow": "AI workflow",
+        "note": "Replace example content before launch"
+      }
+    },
+    "problems": {
+      "title": "The first blocker is usually not design polish. It is that the website does not exist yet.",
+      "description": "A new project often has no public structure, no content plan, no deployment path, and no clear way for visitors to contact the owner.",
+      "items": {
+        "structure": {
+          "title": "No page structure",
+          "description": "There is no agreed Home, Products, Blog, About, Contact, or legal page baseline."
+        },
+        "content": {
+          "title": "No content plan",
+          "description": "Brand facts, offer copy, proof assets, images, and launch boundaries are scattered or missing."
+        },
+        "deployment": {
+          "title": "No launch path",
+          "description": "A local build is not enough; the site still needs a preview and deployment path that can be proven."
+        },
+        "inquiry": {
+          "title": "No inquiry flow",
+          "description": "Visitors need a simple contact route, and the owner needs a real destination for submissions."
+        },
+        "multilingual": {
+          "title": "No multilingual baseline",
+          "description": "If the site needs English and Chinese, copy, routing, and switching must be built in from the start."
+        }
+      }
+    },
+    "answer": {
+      "title": "The starter gives that missing foundation first.",
+      "description": "It is not a finished client website. It is a reusable public demo that shows the structure, replacement work, and launch proof a real site still needs.",
+      "items": {
+        "pageStructure": {
+          "title": "Clear page structure",
+          "description": "Home, Products, Blog, About, Contact, and supporting pages are already wired as a real public site shape."
+        },
+        "replacementSurface": {
+          "title": "Visible replacement surface",
+          "description": "Brand, offers, page copy, SEO, images, legal text, and contact details are treated as explicit launch inputs."
+        },
+        "inquiryPath": {
+          "title": "Inquiry path",
+          "description": "The site includes a contact route and form foundation, with basic anti-abuse and lead-handling boundaries."
+        },
+        "cloudflareFoundation": {
+          "title": "Cloudflare-ready foundation",
+          "description": "Cloudflare is the recommended deployment path. Optional compatibility can stay secondary without becoming the default promise."
+        }
+      }
+    },
+    "startPath": {
+      "title": "A practical path from starter to public launch.",
+      "description": "Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
+      "items": {
+        "brand": {
+          "title": "Replace brand facts",
+          "description": "Company name, domain, logo, colors, contact details, and legal identity become real owner-confirmed facts."
+        },
+        "content": {
+          "title": "Replace page content",
+          "description": "Home, product or service copy, proof assets, blog guidance, images, and legal pages become real launch content."
+        },
+        "forms": {
+          "title": "Connect forms",
+          "description": "Contact submissions, email delivery, anti-abuse checks, and response ownership point to real accounts."
+        },
+        "deploy": {
+          "title": "Deploy and verify",
+          "description": "Cloudflare preview, form canary, traffic visibility, and owner signoff prove readiness separately from local checks."
+        }
+      }
+    },
+    "starterBoundary": {
+      "title": "This demo looks finished because the starter should prove the launch path.",
+      "description": "The public demo shows a complete website shape while keeping the replacement work visible before a real business uses it.",
+      "listLabel": "Starter replacement requirements",
+      "items": [
+        {
+          "title": "Replace the business identity",
+          "description": "Company name, domain, contact details, legal body, logo, and social links must become owner-confirmed facts."
+        },
+        {
+          "title": "Replace the offer story",
+          "description": "Products, services, proof, images, and response promises must match the real business."
+        },
+        {
+          "title": "Connect the lead path",
+          "description": "Inquiry forms, email, Airtable or CRM destinations, Turnstile, and canary checks must use the real environment."
+        },
+        {
+          "title": "Prove the deployment",
+          "description": "Cloudflare build, preview smoke, dashboard credentials, and owner signoff stay separate from local test results."
+        }
+      ],
+      "primary": "See how it works",
+      "secondary": "Review contact flow"
+    },
+    "chain": {
+      "title": "From Content to Inquiry, One Reusable Flow.",
+      "subtitle": "The starter keeps content, components, review surfaces, and contact paths connected so each new website starts from a working base.",
+      "step1": {
+        "title": "Offer Review",
+        "desc": "Clarify what the new website needs to present before replacing example content"
+      },
+      "step2": {
+        "title": "Content Setup",
+        "desc": "Replace brand facts, offerings, proof, images, and conversion copy in the right source files"
+      },
+      "step3": {
+        "title": "Component Reuse",
+        "desc": "Use existing sections and Storybook previews before creating new UI"
+      },
+      "step4": {
+        "title": "Page Assembly",
+        "desc": "Build a complete site from reusable sections, translations, and page content"
+      },
+      "step5": {
+        "title": "Verification",
+        "desc": "Run brand, content, component, type, test, and build checks before launch"
+      },
+      "stat1": "Single content model",
+      "stat2": "5-step replacement flow",
+      "stat3": "AI reuse guardrails"
+    },
+    "products": {
+      "title": "Offer Examples",
+      "subtitle": "Replaceable product, service, resource, and custom-project examples for a real showcase website.",
+      "cta": "View All Products",
+      "item1": {
+        "tag": "Product Example",
+        "title": "Product Showcase",
+        "spec1": "Categories, highlights, and specs",
+        "spec2": "Cards, market pages, and detail sections",
+        "spec3": "Replace with real product data",
+        "standard": "Example Catalog",
+        "link": "/products"
+      },
+      "item2": {
+        "tag": "Service Example",
+        "title": "Service Showcase",
+        "spec1": "Use cases, process, and outcomes",
+        "spec2": "Proof, resources, and FAQs",
+        "spec3": "Replace with real service scope",
+        "standard": "Example Service",
+        "link": "/products/specialty-product-systems"
+      },
+      "item3": {
+        "tag": "Service",
+        "title": "Custom Project Support",
+        "spec1": "Discovery, proposal, and delivery",
+        "spec2": "Brand adaptation and configuration",
+        "spec3": "Replace with real custom workflow",
+        "standard": "Per project scope",
+        "link": "/custom-project-support"
+      }
+    },
+    "resources": {
+      "title": "Resource Examples",
+      "subtitle": "Replaceable resources for buyers, clients, partners, or visitors who need more detail before contacting you.",
+      "item1": {
+        "title": "Product Catalog",
+        "desc": "Example listing structure for products, services, packages, or solution groups.",
+        "link": "/contact"
+      },
+      "item2": {
+        "title": "Technical Specifications",
+        "desc": "Example detail page for specifications, scope, requirements, or service levels.",
+        "link": "/contact"
+      },
+      "item3": {
+        "title": "Downloadable Assets",
+        "desc": "Placeholder for brochures, decks, technical files, checklists, or media kits.",
+        "link": "/contact"
+      },
+      "item4": {
+        "title": "Proof Assets",
+        "desc": "Placeholder for certifications, case studies, testimonials, audits, or references.",
+        "link": "/contact"
+      }
+    },
+    "sample": {
+      "title": "Preview Before You Commit.",
+      "description": "Use the example pages and Storybook components to review structure, copy, and UI states before turning this into a real website.",
+      "cta": "Review Contact Flow"
+    },
+    "scenarios": {
+      "title": "Where This Starter Fits",
+      "subtitle": "Reusable across product, service, and organization showcase websites. Replace these examples with real use cases.",
+      "cardEyebrow": "Use Case {count}",
+      "countryBadge": "{countries}+ countries",
+      "proofLabel": "Replaceable use cases",
+      "item1": {
+        "title": "Product Showcase",
+        "desc": "Use cards, spec tables, resources, and inquiry CTAs to help visitors evaluate an offer quickly.",
+        "quote": "\"Replace this with a real customer quote only after it is verified.\""
+      },
+      "item2": {
+        "title": "Service Business",
+        "desc": "Explain process, deliverables, proof, and next steps without rebuilding the page system.",
+        "quote": "\"Use this area for a real service result, testimonial, or case note.\""
+      },
+      "item3": {
+        "title": "Custom Project",
+        "desc": "Show discovery, proposal, configuration, approval, and delivery steps for tailored work.",
+        "quote": "\"Add real project proof here after the new site has evidence.\""
+      }
+    },
+    "quality": {
+      "title": "Our Commitments",
+      "subtitle": "Starter-level promises that should be replaced with real business commitments before launch.",
+      "commitment1": {
+        "title": "Clear Response Window",
+        "desc": "State the real response time visitors can expect after submitting an inquiry."
+      },
+      "commitment2": {
+        "title": "Verified Proof Only",
+        "desc": "Replace placeholder claims with evidence your real project can support."
+      },
+      "commitment3": {
+        "title": "Reusable Page System",
+        "desc": "Keep page sections modular so future AI work can reuse them safely."
+      },
+      "commitment4": {
+        "title": "Simple Contact Path",
+        "desc": "Keep the primary inquiry path visible and easy to complete."
+      },
+      "commitment5": {
+        "title": "Replaceable Content",
+        "desc": "Keep example content useful for preview, but clearly replace it before a real launch."
+      },
+      "certifications": {
+        "title": "Certifications & Standards",
+        "certified": "Certified",
+        "compliant": "Compliant",
+        "applying": "Applying",
+        "iso9001": "ISO 9001:2015",
+        "iso9001Num": "240021Q09730R0S"
+      },
+      "standards": {
+        "exampleA": "Example Standard A",
+        "exampleB": "Example Standard B",
+        "exampleC": "Example Standard C",
+        "exampleD": "Example Standard D"
+      },
+      "logoWall": "Replaceable proof and reference area",
+      "proofStrip": {
+        "note": "Use this proof strip only for verified certifications, references, and project evidence in a real website.",
+        "standards": "Example standards",
+        "countries": "Example markets"
+      }
+    },
+    "finalCta": {
+      "title": "Start from a real website foundation, then replace what must become yours.",
+      "description": "Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
+      "primary": "View product capabilities",
+      "secondary": "Contact",
+      "trustAriaLabel": "Homepage trust facts",
+      "trust": "Example response promise · Replace proof before launch · {countries}+ placeholder markets"
+    },
+    "footer": {
+      "about": {
+        "title": "{siteName}",
+        "desc": "A replaceable showcase website starter for presenting offers, proof, resources, and inquiry paths."
+      },
+      "products": {
+        "title": "Products",
+        "items": {
+          "item1": "Product Showcase",
+          "item2": "Service Showcase",
+          "item3": "Resource Examples",
+          "item4": "Custom Projects"
+        }
+      },
+      "resources": {
+        "title": "Resources",
+        "items": {
+          "item1": "Product Catalog",
+          "item2": "Technical Specs",
+          "item3": "CAD Downloads",
+          "item4": "Certifications"
+        }
+      },
+      "contact": {
+        "title": "Contact",
+        "items": {
+          "item1": "Request a Quote",
+          "item2": "Free Sample Request",
+          "item3": "Technical Support",
+          "item4": "Project Review"
+        }
+      },
+      "copyright": "{copyright}",
+      "location": "Replace with real dispatch point"
+    },
+    "cta": {
+      "message": "Contact us for samples or technical support",
+      "button": "Get Quote"
+    },
+    "techStack": {
+      "title": "Technology Stack",
+      "subtitle": "Built with cutting-edge technologies for enterprise-grade performance and scalability.",
+      "learnMore": "Learn More",
+      "learnMoreLabel": "Learn more about {target}",
+      "categories": {
+        "core": "Core Frameworks",
+        "ui": "UI System",
+        "i18n": "Internationalization",
+        "tools": "Tooling",
+        "testing": "Testing",
+        "dev": "Dev Tools",
+        "performance": "Performance Monitoring",
+        "security": "Security",
+        "animation": "Animation",
+        "deployment": "Deployment",
+        "quality": "Code Quality",
+        "docs": "Documentation",
+        "data": "Data Fetching",
+        "state": "State Management"
+      },
+      "technologies": {
+        "nextjs": "React full-stack framework with SSR/SSG",
+        "react": "Modern user interface library",
+        "typescript": "Type-safe JavaScript superset",
+        "tailwindcss": "Utility-first CSS framework",
+        "shadcn-ui": "Copy-paste component library",
+        "radix-ui": "Unstyled, accessible component primitives",
+        "next-intl": "Next.js internationalization solution",
+        "eslint": "JavaScript/TypeScript code linter",
+        "prettier": "Code formatting tool",
+        "lefthook": "Git hooks management tool",
+        "vitest": "Fast unit testing framework",
+        "playwright": "End-to-end testing framework",
+        "husky": "Git hooks management tool",
+        "jest": "JavaScript testing framework",
+        "testing-library": "React component testing tool",
+        "pnpm": "Fast, disk space efficient package manager",
+        "turbo": "High-performance build system",
+        "lighthouse": "Web performance audit tool",
+        "semgrep": "Static code security analysis tool",
+        "embla-carousel": "Lightweight carousel component library",
+        "cloudflare": "Cloudflare Workers deployment platform",
+        "sonarqube": "Code quality and security analysis platform",
+        "storybook": "Component development and documentation tool",
+        "swr": "Data fetching and caching library",
+        "zustand": "Lightweight state management library"
+      },
+      "stats": {
+        "totalTech": "Total Technologies",
+        "categories": "Categories",
+        "modern": "Modern Stack",
+        "quality": "Quality Score"
+      }
+    },
+    "showcase": {
+      "title": "Component Showcase",
+      "subtitle": "Explore our comprehensive UI component library with live examples and interactive demos.",
+      "tabs": {
+        "components": "Components",
+        "themes": "Themes",
+        "responsive": "Responsive"
+      },
+      "components": {
+        "buttons": {
+          "title": "Button Components",
+          "description": "Various button styles and sizes for different use cases.",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "outline": "Outline",
+          "ghost": "Ghost",
+          "small": "Small",
+          "default": "Default",
+          "large": "Large"
+        },
+        "forms": {
+          "title": "Form Components",
+          "description": "Input fields and form controls with validation support.",
+          "name": "Full Name",
+          "namePlaceholder": "Enter your full name",
+          "email": "Email Address",
+          "emailPlaceholder": "Enter your email",
+          "submit": "Submit Form"
+        },
+        "interactive": {
+          "title": "Interactive Elements",
+          "description": "Buttons and controls with dynamic behavior and state management.",
+          "likes": "Likes",
+          "star": "Star",
+          "download": "Download",
+          "share": "Share"
+        },
+        "badges": {
+          "title": "Badge Components",
+          "description": "Status indicators and labels for various content types.",
+          "default": "Default",
+          "secondary": "Secondary",
+          "outline": "Outline",
+          "destructive": "Error",
+          "success": "Success",
+          "warning": "Warning",
+          "info": "Info"
+        }
+      },
+      "themes": {
+        "title": "Theme System",
+        "description": "Dynamic theme switching with light and dark mode support.",
+        "toggle": "Theme Toggle",
+        "language": "Language Switch",
+        "colors": {
+          "title": "Color Palette"
+        },
+        "typography": {
+          "title": "Typography",
+          "bold": "Bold Text",
+          "medium": "Medium Text",
+          "normal": "Normal Text",
+          "muted": "Muted Text"
+        }
+      },
+      "responsive": {
+        "title": "Responsive Design",
+        "description": "Optimized layouts for all device sizes and screen resolutions.",
+        "mobile": {
+          "title": "Mobile First",
+          "description": "Optimized for mobile devices with touch-friendly interfaces."
+        },
+        "tablet": {
+          "title": "Tablet Ready",
+          "description": "Perfect layout adaptation for tablet screens and orientations."
+        },
+        "desktop": {
+          "title": "Desktop Enhanced",
+          "description": "Full-featured desktop experience with advanced interactions."
+        }
+      }
+    },
+    "overview": {
+      "title": "Starter Capabilities",
+      "subtitle": "A reusable website base with content ownership, component governance, visual review, and deployment checks.",
+      "features": {
+        "performance": {
+          "title": "Content Ownership",
+          "description": "Brand facts, page prose, and shared UI text each have a clear editing surface."
+        },
+        "security": {
+          "title": "Quality Checks",
+          "description": "Validation commands help catch broken content, translations, components, types, tests, and builds."
+        },
+        "i18n": {
+          "title": "Multilingual Ready",
+          "description": "The starter includes English and Chinese content paths with translation validation.",
+          "languageUnit": "Locales"
+        },
+        "themes": {
+          "title": "Customizable Sections",
+          "description": "Homepage, about, product/service, custom project, contact, privacy, and terms pages are ready to adapt.",
+          "multiTheme": "Flexible"
+        },
+        "typescript": {
+          "title": "Design Tokens",
+          "description": "Color, spacing, and component rules keep UI changes easier for AI to manage."
+        },
+        "deployment": {
+          "title": "Deployment Path",
+          "description": "Next.js, Cloudflare/OpenNext, Turnstile, email, and form basics stay wired for later replacement."
+        }
+      },
+      "highlights": {
+        "title": "Core Capabilities",
+        "subtitle": "What makes this starter easier for future AI-assisted website work.",
+        "modern": "Component Governance",
+        "scalable": "Reusable Page Sections",
+        "accessible": "Storybook Review",
+        "performant": "Build Verification",
+        "secure": "ISO 9001 Certified",
+        "maintainable": "AI Workflow Rules"
+      },
+      "architecture": {
+        "title": "Product Lines",
+        "frontend": {
+          "title": "Product Example",
+          "description": "Replaceable catalog pages, cards, specs, and inquiry CTAs for product-led websites."
+        },
+        "ui": {
+          "title": "Service Example",
+          "description": "Reusable structure for explaining process, deliverables, proof, and next steps."
+        },
+        "tooling": {
+          "title": "Custom Project Example",
+          "description": "A structured page for project scope, collaboration steps, quality review, and intake."
+        }
+      },
+      "cta": {
+        "title": "Ready to Adapt This Starter?",
+        "description": "Replace the example identity, offerings, proof, content, images, and deployment settings for a real website.",
+        "getStarted": "Start Inquiry",
+        "viewSource": "View Offerings"
+      }
+    },
+    "title": "Showcase Website Starter",
+    "subtitle": "Reusable Showcase Website Starter",
+    "description": "Reusable website starter for product, service, proof, and inquiry presentation.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "welcome": "Welcome to Showcase Website Starter",
+    "modernApp": "A modern web application built with Next.js 16 and React 19",
+    "features": {
+      "title": "Features",
+      "performance": {
+        "title": "High Performance",
+        "description": "Optimized for speed and efficiency with modern web technologies."
+      },
+      "scalable": {
+        "title": "Scalable Architecture",
+        "description": "Built to grow with your business needs and requirements."
+      },
+      "secure": {
+        "title": "Enterprise Security",
+        "description": "Industry-standard security practices and compliance."
+      }
+    },
+    "modernStack": "Modern Stack",
+    "modernStackDesc": "Built with the latest technologies",
+    "internationalization": "Internationalization",
+    "internationalizationDesc": "Multi-language support with next-intl",
+    "testingReady": "Testing Ready",
+    "testingReadyDesc": "Comprehensive E2E testing setup"
+  },
+  "monitoring": {
+    "loadError": "Monitoring component failed to load"
+  },
+  "footer": {
+    "systemStatus": "All systems normal.",
+    "sections": {
+      "product": {
+        "title": "Product",
+        "home": "Home",
+        "enterprise": "Enterprise",
+        "pricing": "Pricing"
+      },
+      "company": {
+        "title": "Company",
+        "terms": "Terms",
+        "aiPolicy": "AI Policy",
+        "privacy": "Privacy"
+      },
+      "resources": {
+        "title": "Resources",
+        "faqs": "FAQs",
+        "docs": "Docs",
+        "ambassadors": "Ambassadors",
+        "community": "Community",
+        "platform": "Platform"
+      },
+      "navigation": {
+        "title": "Navigation",
+        "home": "Home",
+        "about": "About",
+        "products": "Products",
+        "blog": "Blog",
+        "contact": "Contact"
+      },
+      "social": {
+        "title": "Social",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn"
+      },
+      "support": {
+        "title": "Support",
+        "contact": "Contact",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service"
+      }
+    },
+    "platform": {
+      "products": {
+        "title": "Products",
+        "ai": "AI",
+        "enterprise": "Enterprise",
+        "fluidCompute": "Fluid Compute",
+        "nextjs": "Next.js",
+        "observability": "Observability",
+        "previews": "Previews",
+        "rendering": "Rendering",
+        "security": "Security",
+        "turbo": "Turbo",
+        "domains": "Domains",
+        "v0": "v0"
+      },
+      "resources": {
+        "title": "Resources",
+        "community": "Community",
+        "docs": "Docs",
+        "guides": "Guides",
+        "academy": "Academy",
+        "help": "Help",
+        "integrations": "Integrations",
+        "pricing": "Pricing",
+        "resources": "Resources",
+        "solutionPartners": "Solution Partners",
+        "startups": "Startups",
+        "templates": "Templates",
+        "sdks": "SDKs"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "careers": "Careers",
+        "changelog": "Changelog",
+        "contact": "Contact Us",
+        "customers": "Customers",
+        "events": "Events",
+        "partners": "Partners",
+        "shipped": "Shipped",
+        "privacy": "Privacy Policy",
+        "legal": "Legal"
+      },
+      "social": {
+        "title": "Social",
+        "linkedin": "LinkedIn",
+        "twitter": "Twitter",
+        "youtube": "YouTube"
+      }
+    },
+    "learn": "Learn",
+    "examples": "Examples",
+    "goToNextjs": "Go to nextjs.org",
+    "copyright": "{copyright}",
+    "description": "Reusable showcase website starter for products, services, proof, and inquiry paths."
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "loading": "Content is loading",
+    "error": "An error has occurred",
+    "languageSelector": "Select language",
+    "themeSelector": "Select theme",
+    "securityVerificationUnavailable": "Security verification is temporarily unavailable.",
+    "turnstileDevBypass": "Dev mode: Turnstile verification bypassed",
+    "turnstileTestMode": "Bot protection disabled in test mode",
+    "turnstileLoadFailed": "Security verification failed to load."
+  },
+  "underConstruction": {
+    "title": "Under Construction",
+    "subtitle": "We're working hard to bring you something amazing",
+    "description": "This page is currently under development. We're building something great and will have it ready soon.",
+    "backToHome": "Back to Home",
+    "comingSoon": "Coming Soon",
+    "expectedCompletion": "Expected completion: {date}",
+    "expectedLaunch": "Expected launch: {date}",
+    "dates": {
+      "q2_2024": "Q2 2024",
+      "q3_2024": "Q3 2024"
+    },
+    "stayTuned": "Stay tuned for updates",
+    "contactUs": "Contact us for more information",
+    "progress": {
+      "title": "Development Progress"
+    },
+    "pages": {
+      "products": {
+        "title": "Products - Under Construction",
+        "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "features": "Product features and specifications coming soon"
+      },
+      "about": {
+        "title": "About Us - Under Construction",
+        "description": "Learn more about our story, mission, and the team behind our innovative solutions.",
+        "features": "Company story, team profiles, and mission statement coming soon"
+      },
+      "contact": {
+        "title": "Contact Us",
+        "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        "features": "Multiple ways to reach us and get the support you need",
+        "panel": {
+          "contactTitle": "Contact Methods",
+          "email": "Email",
+          "emailUnavailable": "Use the form on this page; configure a real receiver before public launch.",
+          "phone": "Phone",
+          "hoursTitle": "Business Hours",
+          "weekdays": "Mon - Fri",
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "closed": "Closed",
+          "responseTitle": "What to expect",
+          "responseTimeLabel": "Typical response",
+          "responseTimeValue": "Within 24 business hours",
+          "bestForLabel": "Best for",
+          "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
+          "prepareLabel": "Helpful details",
+          "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+        }
+      }
+    },
+    "animation": {
+      "loading": "Loading animation",
+      "construction": "Construction in progress"
+    },
+    "status": {
+      "inProgress": "In Progress"
+    },
+    "features": {
+      "title": "Feature Preview",
+      "performance": "High Performance",
+      "performanceDesc": "Optimized performance and fast loading experience",
+      "collaboration": "Team Collaboration",
+      "collaborationDesc": "Powerful team collaboration and project management features",
+      "quality": "Quality Assurance",
+      "qualityDesc": "Strict quality control and testing processes"
+    },
+    "social": {
+      "followUs": "Follow us for the latest updates"
+    },
+    "subscription": {
+      "title": "Get Launch Notifications",
+      "description": "Be the first to know about our latest updates",
+      "placeholder": "Enter your email address",
+      "submit": "Subscribe",
+      "submitting": "Submitting...",
+      "success": "Successfully subscribed! We'll notify you soon"
+    },
+    "emailSubscription": {
+      "title": "Stay in the Loop",
+      "description": "Subscribe to receive updates about our launch timeline and new features.",
+      "success": "You're subscribed! We'll keep you posted.",
+      "placeholder": "Enter your email address",
+      "button": "Notify Me"
+    },
+    "contact": {
+      "title": "Need Assistance?",
+      "description": "Reach out to our team for tailored support and partnership opportunities.",
+      "button": "Contact Support"
+    }
+  },
+  "cookie": {
+    "title": "Cookie Preferences",
+    "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
+    "learnMore": "Privacy policy",
+    "acceptAll": "Accept All",
+    "rejectAll": "Reject All",
+    "manage": "Manage",
+    "close": "Close",
+    "cancel": "Cancel",
+    "savePreferences": "Save Preferences",
+    "preferences": {
+      "title": "Cookie Preferences",
+      "description": "Choose which cookies you want to allow. Essential cookies are always enabled."
+    },
+    "categories": {
+      "necessary": "Essential",
+      "necessaryDesc": "Required for the website to function properly. Cannot be disabled.",
+      "analytics": "Analytics",
+      "analyticsDesc": "Help us understand how visitors interact with our website.",
+      "marketing": "Marketing",
+      "marketingDesc": "Used to deliver personalized content and advertisements."
+    }
+  },
+  "structured-data": {
+    "organization": {
+      "name": "{companyName}",
+      "description": "Reusable showcase website starter for products, services, proof, and inquiry paths",
+      "phone": "Contact sales by email",
+      "social": {
+        "twitter": "https://x.com/example",
+        "linkedin": "https://www.linkedin.com/company/example"
+      }
+    },
+    "website": {
+      "name": "{siteName}",
+      "description": "Reusable showcase website starter for products, services, proof, and inquiry paths"
+    },
+    "article": {
+      "defaultTitle": "Article",
+      "defaultDescription": "Article description",
+      "defaultAuthor": "{companyName}"
+    },
+    "product": {
+      "defaultName": "Product",
+      "defaultDescription": "Product description"
+    }
+  },
+  "apiErrors": {
+    "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again later.",
+    "UNAUTHORIZED": "Unauthorized access.",
+    "FORBIDDEN": "This request is not allowed.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
+    "INVALID_JSON_BODY": "Invalid request format.",
+    "INVALID_REQUEST": "Some required fields are missing or invalid.",
+    "PAYLOAD_TOO_LARGE": "The request payload is too large.",
+    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
+    "CONFIRMATION_REQUIRED": "Please add confirm=true parameter to confirm this action.",
+    "INVALID_LOCALE_PARAMETER": "Invalid locale parameter.",
+    "SUBSCRIBE_SUCCESS": "Successfully subscribed to notifications.",
+    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "Email is required.",
+    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "Invalid email address.",
+    "SUBSCRIBE_SECURITY_REQUIRED": "Security verification required.",
+    "SUBSCRIBE_SECURITY_FAILED": "Security verification failed. Please try again.",
+    "SUBSCRIBE_PROCESSING_ERROR": "An error occurred. Please try again.",
+    "CONTACT_SUCCESS": "Your message was sent successfully.",
+    "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
+    "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
+    "CONTACT_STATS_ERROR": "Failed to load contact form statistics.",
+    "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
+    "INQUIRY_SUCCESS": "Inquiry submitted successfully.",
+    "INQUIRY_SECURITY_REQUIRED": "Security verification required.",
+    "INQUIRY_SECURITY_FAILED": "Security verification failed. Please try again.",
+    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
+    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later.",
+    "TURNSTILE_SUCCESS": "Verification successful.",
+    "TURNSTILE_MISSING_TOKEN": "Security verification required.",
+    "TURNSTILE_VERIFICATION_FAILED": "Security verification failed. Please try again.",
+    "TURNSTILE_NETWORK_ERROR": "Failed to communicate with the verification service.",
+    "TURNSTILE_NOT_CONFIGURED": "Security verification is not configured on the server.",
+    "WEB_VITALS_RECORDED": "Web Vitals data recorded successfully.",
+    "WEB_VITALS_INVALID_FORMAT": "The provided data does not match the expected Web Vitals format.",
+    "WEB_VITALS_PROCESS_FAILED": "Failed to process Web Vitals data.",
+    "WEB_VITALS_RETRIEVE_FAILED": "Failed to retrieve Web Vitals statistics.",
+    "WEB_VITALS_DELETED": "Web Vitals data deleted successfully.",
+    "WEB_VITALS_DELETE_FAILED": "Failed to delete Web Vitals data.",
+    "I18N_ANALYTICS_RECORDED": "i18n analytics data recorded successfully.",
+    "I18N_ANALYTICS_INVALID_FORMAT": "The provided data does not match the expected i18n analytics format.",
+    "I18N_ANALYTICS_PROCESS_FAILED": "Failed to process i18n analytics data.",
+    "I18N_ANALYTICS_RETRIEVE_FAILED": "Failed to retrieve i18n analytics statistics.",
+    "I18N_ANALYTICS_DELETED": "i18n analytics data deleted successfully.",
+    "I18N_ANALYTICS_DELETE_FAILED": "Failed to delete i18n analytics data.",
+    "MONITORING_DATA_RECEIVED": "Monitoring data received successfully.",
+    "MONITORING_INVALID_FORMAT": "Required fields: source, metrics, timestamp.",
+    "MONITORING_PROCESS_FAILED": "Failed to process monitoring dashboard data.",
+    "MONITORING_RETRIEVE_FAILED": "Failed to retrieve monitoring dashboard data.",
+    "MONITORING_DELETED": "Monitoring data deleted successfully.",
+    "MONITORING_DELETE_FAILED": "Failed to delete monitoring dashboard data.",
+    "MONITORING_CONFIG_UPDATED": "Monitoring configuration updated successfully.",
+    "MONITORING_CONFIG_INVALID": "Configuration object is required.",
+    "MONITORING_CONFIG_UPDATE_FAILED": "Failed to update monitoring configuration.",
+    "CACHE_INVALIDATED": "Cache invalidated successfully.",
+    "CACHE_LOCALE_REQUIRED": "Locale is required for this cache invalidation.",
+    "CACHE_INVALID_DOMAIN": "Invalid cache domain.",
+    "CACHE_INVALIDATION_FAILED": "Failed to invalidate cache.",
+    "UNKNOWN_ERROR": "An unknown error occurred."
+  },
+  "errors": {
+    "global": {
+      "title": "Something went wrong!",
+      "description": "We apologize for the inconvenience. An unexpected error has occurred.",
+      "tryAgain": "Try again",
+      "goHome": "Go to homepage",
+      "devDetails": "Error Details (Development Only)"
+    },
+    "products": {
+      "title": "Failed to load product information",
+      "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "contact": {
+      "title": "Contact form temporarily unavailable",
+      "description": "Our team will look into this issue immediately. You can try again later or contact us through other channels.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Back to homepage"
+    },
+    "serverError": "Internal server error",
+    "networkError": "Network connection error",
+    "validationError": "Please check your input",
+    "unauthorized": "You are not authorized to access this page",
+    "forbidden": "Access to this resource is forbidden",
+    "timeout": "Request timeout - please try again",
+    "generic": "Something went wrong. Please try again later.",
+    "translationMissing": "Translation not available",
+    "loadingFailed": "Failed to load content"
+  },
+  "catalog": {
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
+    "overview": {
+      "title": "Starter product capabilities",
+      "description": "A showcase-site starter covering site structure, content replacement, inquiry flow, and launch foundation.",
+      "kicker": "What the starter includes",
+      "capabilitiesTitle": "Result capabilities",
+      "capabilitiesDescription": "The page explains what a project can start from before real content is replaced.",
+      "byStandard": "By Example Category",
+      "specialty": "Specialty Examples"
+    },
+    "starterCapabilities": {
+      "siteFoundation": {
+        "title": "Showcase-site foundation",
+        "description": "Home, Products, Blog, About, Contact, legal pages, navigation, and responsive layout are already connected."
+      },
+      "replacementSurface": {
+        "title": "Content replacement surface",
+        "description": "Brand facts, page copy, product or service entries, SEO, images, and multilingual text have clear places to replace."
+      },
+      "inquiryPath": {
+        "title": "Inquiry path",
+        "description": "The contact page, form flow, basic anti-abuse controls, and lead handling path are ready for a real owner."
+      },
+      "launchPath": {
+        "title": "Launch path",
+        "description": "Cloudflare is the recommended deployment route, with optional compatibility kept secondary and traffic visibility treated as a real surface."
+      }
+    },
+    "technicalProofTitle": "Technical proof",
+    "technicalProofDescription": "The starter includes the technical baseline a public demo needs without making the product page a developer manual.",
+    "technicalProof": {
+      "next": {
+        "title": "Next.js app foundation",
+        "description": "App Router, Server Components first, metadata, localized routes, and production build checks."
+      },
+      "cloudflare": {
+        "title": "Cloudflare/OpenNext deployment path",
+        "description": "Cloudflare and OpenNext stay the recommended deployment truth for this starter."
+      },
+      "i18n": {
+        "title": "Multilingual content",
+        "description": "English and Chinese navigation, page copy, metadata, and article content stay aligned."
+      },
+      "quality": {
+        "title": "Quality checks",
+        "description": "Type, lint, content, component, website, and build checks remain part of the launch path."
+      },
+      "security": {
+        "title": "Form security basics",
+        "description": "Contact and inquiry paths include validation, anti-abuse controls, and explicit runtime configuration."
+      },
+      "traffic": {
+        "title": "Traffic visibility",
+        "description": "Owner-facing traffic information is treated as a real protected surface, not marketing decoration."
+      }
+    },
+    "boundary": {
+      "title": "Starter, not a finished client website",
+      "description": "Real launch still requires real content, images, contact details, legal copy, secrets, and deployment proof.",
+      "items": {
+        "content": "Replace real business content",
+        "assets": "Replace real images and proof",
+        "legal": "Review legal and contact details",
+        "deployment": "Prove deployment and forms"
+      }
+    },
+    "cta": {
+      "title": "Ready to turn the starter into a public site?",
+      "description": "Use the launch articles or contact path to decide what must be replaced first.",
+      "blog": "Learn how to start",
+      "contact": "Contact"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "Jump to"
+      },
+      "technical": {
+        "title": "Technical Properties"
+      },
+      "certifications": {
+        "title": "Certifications & Compliance"
+      },
+      "trade": {
+        "title": "Trade Information",
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      },
+      "specsComingSoon": "Specifications coming soon. Contact us for detailed product data.",
+      "cta": {
+        "heading": "Need to review {marketLabel}?",
+        "description": "Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
+        "button": "Request a Quote"
+      },
+      "familyInquiry": {
+        "cta": "Request quote for {familyLabel}"
+      }
+    },
+    "specTable": {
+      "size": "Size",
+      "angle": "Angle",
+      "wallThickness": "Wall Thickness",
+      "endType": "End Type",
+      "radius": "Radius",
+      "type": "Type",
+      "length": "Length",
+      "schedule": "Schedule",
+      "bendRadius": "Bend Radius",
+      "connection": "Connection",
+      "duty": "Duty",
+      "material": "Material",
+      "outerDiameter": "Outer Diameter"
+    },
+    "familyCount": "{count} product families",
+    "markets": {
+      "north-america": {
+        "label": "Primary Offer Example",
+        "description": "Replaceable catalog example for a standards-based product or service group."
+      },
+      "australia-new-zealand": {
+        "label": "Secondary Offer Example",
+        "description": "Replaceable catalog example for a second market, service tier, or regional offer."
+      },
+      "mexico": {
+        "label": "Regional Offer Example",
+        "description": "Replaceable catalog example for a regional or compliance-based offer."
+      },
+      "europe": {
+        "label": "Platform Offer Example",
+        "description": "Replaceable catalog example for another market, platform, or standards group."
+      },
+      "specialty-product-systems": {
+        "label": "Specialty Examples",
+        "description": "Replaceable specialty examples for niche product, service, or project workflows."
+      }
+    },
+    "families": {
+      "north-america": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for versions, shapes, packages, or service variants."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for add-ons, bundles, or supporting services."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples with size, standard, or package details."
+        }
+      },
+      "australia-new-zealand": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for a second market or service variant."
+        },
+        "bellmouths": {
+          "label": "Resource Kits",
+          "description": "Replaceable accessory examples for a product, service, or resource variant."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for a second market or service variant."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for a second market or service variant."
+        }
+      },
+      "mexico": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for a regional or compliance-based offer."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for a regional offer."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for a regional offer."
+        }
+      },
+      "europe": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for another market or standards group."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for another market group."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for another market group."
+        }
+      },
+      "specialty-product-systems": {
+        "specialty-units": {
+          "label": "Specialty Units",
+          "description": "Replaceable specialty examples for niche products, services, or workflows."
+        },
+        "fittings": {
+          "label": "Integration Examples",
+          "description": "Integration examples for product, service, or workflow systems."
+        }
+      }
+    },
+    "technicalLabels": {
+      "material": "Material",
+      "surface": "Surface",
+      "uvResistance": "Outdoor Readiness",
+      "temperatureRange": "Operating Range",
+      "lifespan": "Lifecycle Claim",
+      "fireRating": "Safety Claim",
+      "standard": "Example Standard",
+      "transparency": "Visibility Layer",
+      "maxWorkingPressure": "Project Limit",
+      "impactResistance": "Durability Claim"
+    },
+    "specs": {
+      "north-america": {
+        "technical": {
+          "material": "Replaceable core material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard A ready",
+              "1": "Configurable material",
+              "2": "Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Bundle-ready structure",
+              "1": "Secure handoff path",
+              "2": "Multi-size range"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Basic and advanced tiers",
+              "1": "Standard package lengths",
+              "2": "Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          }
+        }
+      },
+      "australia-new-zealand": {
+        "technical": {
+          "material": "Replaceable secondary material",
+          "surface": "Example finish or content layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim",
+          "standard": "Example Standard B"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard B ready",
+              "1": "Standard and premium tiers",
+              "2": "Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "bellmouths": {
+            "highlights": {
+              "0": "Resource entry support",
+              "1": "Example Standard B compatible",
+              "2": "Visitor guidance ready"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Bundle-ready structure",
+              "1": "Example Standard B compatible",
+              "2": "Standard and premium tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Standard and premium tiers",
+              "1": "Reusable package lengths",
+              "2": "Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          }
+        }
+      },
+      "mexico": {
+        "technical": {
+          "material": "Replaceable regional material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Reusable size set",
+              "2": "Light and heavy tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Bundle-ready structure",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Standard package lengths",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "europe": {
+        "technical": {
+          "material": "Replaceable platform material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Three service tiers",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Bundle-ready structure",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Standard package lengths",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "specialty-product-systems": {
+        "technical": {
+          "material": "Specialty example material",
+          "transparency": "Optional visibility or reporting layer",
+          "maxWorkingPressure": "Project-specific limit",
+          "temperatureRange": "Project-specific operating range",
+          "surface": "Example finish or experience layer",
+          "impactResistance": "Replace with real durability claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "specialty-units": {
+            "highlights": {
+              "0": "Specialty example material",
+              "1": "Quiet experience option",
+              "2": "Controlled handoff points"
+            },
+            "groups": {
+              "0": {
+                "label": "Compact Format"
+              },
+              "1": {
+                "label": "Extended Format"
+              }
+            }
+          },
+          "fittings": {
+            "highlights": {
+              "0": "Impact-aware example",
+              "1": "High-requirement scenario",
+              "2": "Multiple connection options"
+            },
+            "groups": {
+              "0": {
+                "label": "Compact Integrations"
+              },
+              "1": {
+                "label": "Extended Integrations"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rowValues": {
+      "bellEnd": "Default",
+      "plainEnd": "Default",
+      "standardCoupling": "Standard Bundle",
+      "expansionCoupling": "Extended Bundle",
+      "standardBellmouth": "Resource Kit",
+      "heavyDutyBellmouth": "Extended Resource Kit",
+      "mediumDuty": "Standard Tier",
+      "heavyDuty": "Premium Tier",
+      "pushFit": "Default",
+      "flange": "Custom",
+      "connector": "Connector",
+      "bend90": "90° Bend",
+      "bend45": "45° Bend",
+      "yDiverter": "Y-Diverter",
+      "accessPanel": "Access Panel",
+      "specialty": "Specialty Example",
+      "custom": "Custom"
+    }
+  }
+}

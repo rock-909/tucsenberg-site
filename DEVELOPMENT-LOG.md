@@ -1,0 +1,175 @@
+# Tucsenberg Site — 开发进度
+
+> 最新更新：2026-05-14
+> 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
+
+---
+
+## 当前阶段
+
+**Phase 1 建站骨架已落地** — starter 已复制进本目录，下一步进入品牌替换。
+
+---
+
+## 已完成
+
+- [x] 整体网站规划（PROJECT-BRIEF.md 全部章节，~700 行）
+- [x] 产品线决策：Phase 1 = EPDM + TPU/PU，Phase 2 加 PTFE，Silicone 不做标准品
+- [x] 设计基调：Engineering Navy + IBM Plex Sans 组合
+- [x] 内容集群规划：4 Pillar + P0/P1/P2 supporting articles
+- [x] 15 个页面叙事 outline（hero / sections / CTA / 信任元素）
+- [x] 信任模块 + SLA + 措辞备选（A/B/C 三选一）
+- [x] 关键 buyer 原话语料（105 条溯源，存在 aeration-brand/_reference）
+- [x] 建站骨架落地：已从 `showcase-website-starter` 复制代码，保留本项目主文档，`package.json` 已改名为 `tucsenberg-site`，本目录已初始化 git，`pnpm install` + `pnpm dev` 冒烟通过
+
+---
+
+## 进行中
+
+（暂无，下一步从 Step 2 品牌替换开始）
+
+---
+
+## 待办（按顺序）
+
+### Step 1: 建站骨架（已完成 2026-05-14）
+
+1. [x] **从 `/Users/Data/workspace/showcase-website-starter/` 复制到本目录**
+   - 保留本目录已有的 `PROJECT-BRIEF.md`、`CLAUDE.md`、`DEVELOPMENT-LOG.md`
+   - starter 的 `CLAUDE.md` 复制为 `CLAUDE.starter.md`（参考用），本目录的 `CLAUDE.md` 是主入口
+2. [x] **改 `package.json` name 为 `tucsenberg-site`**
+3. [x] **初始化 git 仓库**（暂不推远端）
+4. [x] **跑通 `pnpm install` + `pnpm dev`** 验证 starter 在本目录可运行
+
+### Step 2: 品牌替换（按 starter 替换清单）
+
+按 `docs/website/新项目替换清单.md` 顺序：
+1. **品牌身份** — 修改 `src/config/single-site.ts` + `src/config/website/profile.ts` + `src/config/website/seo.ts`
+2. **i18n 配置** — `i18n.json` 改为：
+   ```json
+   {
+     "locales": ["en", "es", "zh"],
+     "defaultLocale": "en"
+   }
+   ```
+   生产环境只发 en + es，zh 仅本地 dev（通过 sitemap 排除 + robots noindex 实现）
+3. **产品/服务信息** — 修改 `src/config/website/products.ts` + `src/config/single-site-product-catalog.ts` + `src/constants/product-specs/`
+4. **首页 sections** — `src/config/website/homepage.ts` 改成 PROJECT-BRIEF 里的 7 段顺序
+5. **设计 token** — `src/app/globals.css` 改为 Engineering Navy 配色（`#123B5D` + `#0F7C82` + `#DCEFF1` + `#F7FAFC`）
+6. **字体** — 切换到 IBM Plex Sans + Inter + IBM Plex Mono
+
+### Step 3: 数据层（产品 + 兼容性）
+
+7. **设计产品数据 schema**：
+   - `src/data/products/` — ProductGroup + ProductVariant
+   - `src/data/compatibility/` — OEMModel + CompatibilityMapping（带 fitStatus / confidence / requiredChecks）
+   - Zod validation
+   - 从 `aeration-brand/catalog/oem-product-teardown.md` 提取数据填充
+8. **构建时生成 JSON index**（compatibility-index.by-brand.json / by-model.json / by-product.json）
+9. **写兼容性 QA tests**（每个 mapping 有 confidence、slug 唯一、每个品牌 page 至少 1 个 mapping）
+
+### Step 4: 4 页样板（i18n 冒烟测试，英 + 西 + 中 三语同步）
+
+10. **首页 `/`**
+11. **产品页样板 `/membranes/9-inch-epdm-disc-replacement`**
+12. **兼容页样板 `/compatible/sanitaire`**
+13. **表单页 `/quote`**
+
+这 4 页确认：
+- 西语单词长度不撑爆按钮 / 标题
+- i18n key 命名合理
+- 中文混排字体回落正常
+- 表单 / 上传 / Turnstile / Resend / 兼容查询交互全通
+
+### Step 5: 剩余 11 页英文版
+
+14. `/membranes/` + `/membranes/disc/` + `/membranes/tube/`
+15. 4 个核心产品页（9" TPU / tube EPDM / tube TPU / 12" disc）
+16. `/compatible/` + `/compatible/edi` + `/compatible/ssi`
+17. `/materials/tpu-vs-epdm`
+18. `/guides/identify-your-membrane`
+19. `/quality`
+20. `/procurement`
+21. `/about`
+
+### Step 6: 剩余 11 页批量翻译
+
+英文 stable 后一次性翻完 es + zh。
+
+### Step 7: 4 Pillar + 10 P0 Supporting articles
+
+按 PROJECT-BRIEF 的 cluster 规划写。
+
+### Step 8: 上线前 quality 门禁
+
+- `pnpm brand:check` / `content:check` / `component:check` / `website:check`
+- Lighthouse CI
+- Playwright E2E
+- 部署到 Cloudflare staging
+
+---
+
+## 业务方等待项（不阻塞开发，但影响上线和实际数据）
+
+| 等什么 | 影响什么 | 谁负责 |
+|--------|---------|--------|
+| 品弘 EPDM 能力 + 价格 + 交期 | 产品页定价区间、交期承诺、兼容覆盖范围 | 用户 |
+| 备选 EPDM 供应商验证（江苏宜兴/苏州） | 多供应商组合 | 用户 |
+| Microsoft for Startups / Google for Startups 申请结果 | 邮件基础设施成本 | 用户 |
+| 2 个变体域名购买（Cloudflare Registrar） | 冷邮件域名隔离 | 用户 |
+| 实拍产品图 + 安装/拆装近景 | 视觉资产，hero / 产品页头图 | 用户 |
+
+---
+
+## 卡点
+
+（暂无）
+
+---
+
+## 最近决策（按时间倒序）
+
+### 2026-05-14
+- **DESIGN.md v1 沉淀** — 跑了 qiaomu-design-advisor 的 reference fit check（8 个 qiaomu 内置候选 + 4 个手动补的工业目录站）。主参考定为 **IBM Carbon + HashiCorp + McMaster-Carr**，辅参考 Vercel/Geist + DigiKey + Grainger，反面参考 ClickHouse / Resend / AerationStore。三个落地决策：(1) Hero 走 IBM Carbon 路线，Display 01 = IBM Plex Sans **60px / weight 300**；(2) 首屏折中 —— 保留 H1 + sub-claim 但立刻接 compatibility search bar + OEM family grid，**不要 hero 图也不要堆 CTA**；(3) 按钮圆角 **6px**。完整规则见 `DESIGN.md`（已整篇替换 starter 通用版）。
+- **建站骨架已落地** — 从 `showcase-website-starter` 复制代码到本 repo，排除了 `.git`、`node_modules`、`.next`、`.open-next`、`reports`、`storybook-static`、`test-results` 等本地运行产物
+- **starter 规则保留为参考文件** — 本项目主入口仍是 `CLAUDE.md`；starter 的 `CLAUDE.md` 和 `AGENTS.md` 分别保留为 `CLAUDE.starter.md`、`AGENTS.starter.md`
+- **Claude / Codex 分工** — Codex 负责工程基建（starter 复制、品牌替换、数据 schema、JSON index 构建、QA tests 这类机械活，对应 DEVELOPMENT-LOG Step 1-3），Claude 负责前端设计判断（视觉调性落地、Engineering Navy → 具体组件、买家心理路径 → 页面节奏、i18n 措辞、西语字段长度适配、AI slop 避坑）。新会话接手时按这条分工决定是开 Codex 还是用 Claude。
+
+### 2026-05-12
+- **第二公开语种确定为 Spanish** — 覆盖 5 亿母语者 + 20+ 国家，LATAM 工业市场 TPU 匹配度高，竞争密度最低
+- **翻译节奏** — 先做 4 页样板（英 + 西 + 中 同步）做 i18n 冒烟测试，剩余 11 页英文先完成后批量翻译
+- **中文不公开索引** — 仅本地 dev / 内部预览用，不进 sitemap，hreflang 仅声明 en ↔ es
+- **CWF 不强制走** — 直接用 Deep Research 产出的 outline 写文案，需要时单独调 copy-editing / seo-page skill 检查
+
+### 2026-05-11
+- **Phase 1 产品线确定** — EPDM（门票，70-80% 市场）+ TPU/PU（差异化，工业私营场景），PTFE 放 Phase 2，Silicone 不做标准品（仅 RFQ 定制）
+- **TPU 定位修正** — 不按 "premium 溢价" 卖，按 "工况必要性" 卖（公开价差只有几个百分点，但客户在含油/化学废水场景下没得选）
+- **品弘 EPDM 备选** — 品弘 TPU 强项，EPDM 不一定强（江苏宜兴/苏州红海），需要找第二个 EPDM 供应商
+- **8 种页面类型** — 新增识别引导页 / 质量页 / 采购 FAQ / 资料下载页（来自 Pro 架构审查 + 设计调研）
+- **设计基调** — 5 关键词：精确 · 克制 · 工程化 · 兼容导向 · 采购友好
+- **首页 7 段结构顺序** — Hero compatibility bar → OEM families → Material selector → Why trust → Spec downloads → Upload part list → FAQ
+- **产品数据模型** — ProductGroup + ProductVariant + OEMModel + CompatibilityMapping（含 fitStatus / confidence / requiredChecks）
+- **Cross-reference 实现方式** — 静态 JSON + client-side filter + URL 参数预填 RFQ，不上 D1
+- **部署目标** — Cloudflare Workers via OpenNext（不是 Pages 静态站）
+
+### 2026-05-10
+- **品牌名 + 域名** — Tucsenberg / tucsenberg.com（Cloudflare 已注册）
+- **商业模式** — 前后端分离（自有英文品牌 + Next.js + SEO + outbound / 供应商做制造后端）
+- **冷邮件方案定稿** — Smartlead Base $39/月 + M365 Business Basic no Teams $4.40/user + 阿里云企业邮箱（主域名）+ Resend（事务邮件），总 ~$58.6/月
+
+---
+
+## 完整研究档案位置
+
+业务 / 研究档案在 aeration-brand repo，不在本 repo：
+
+| 档案 | 路径 |
+|------|------|
+| OEM 产品数据 | `aeration-brand/catalog/oem-product-teardown.md` |
+| 内容策略完整版 | `aeration-brand/_reference/deep-research-content-strategy-narrative-result.md` |
+| 设计方向完整版 | `aeration-brand/_reference/deep-research-website-design-direction-result.md` |
+| 材质市场调研 | `aeration-brand/_reference/deep-research-membrane-material-market-result.md` |
+| 网站架构审查 | `aeration-brand/_reference/pro-review-website-architecture-result.md` |
+| 竞品拆解 | `aeration-brand/_reference/aerationstore-competitive-teardown.md` |
+| 业务指南 | `aeration-brand/docs/aeration-business-guide.md` |
+| 冷邮件方案 | `aeration-brand/docs/cold-email-setup-guide.md` |

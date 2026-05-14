@@ -1,0 +1,315 @@
+/**
+ * 可复用组件测试模板
+ * 基于ThemeToggle成功模式，为组件测试提供标准化结构
+ *
+ * @version 1.0.0
+ * @author ThemeToggle测试优化项目
+ */
+
+import "@testing-library/jest-dom";
+import React from "react";
+import { fireEvent } from "@testing-library/react";
+
+// 测试常量定义
+const TEST_CONSTANTS = {
+  TIMEOUT: {
+    DEFAULT: 1000,
+    SHORT_DELAY: 100,
+    EXTENDED: 5000,
+  },
+  COUNT: {
+    SMALL: 3,
+    MEDIUM: 5,
+    LARGE: 10,
+  },
+};
+
+/**
+ * 组件测试模板接口
+ */
+export interface ComponentTestTemplate<TProps = Record<string, unknown>> {
+  componentName: string;
+  Component: React.ComponentType<TProps>;
+  defaultProps?: Partial<TProps>;
+  mockSetup: () => void;
+  mockCleanup: () => void;
+}
+
+/**
+ * 标准测试结构模板
+ */
+export class ComponentTestStructure<TProps = Record<string, unknown>> {
+  private template: ComponentTestTemplate<TProps>;
+
+  constructor(template: ComponentTestTemplate<TProps>) {
+    this.template = template;
+  }
+
+  /**
+   * 生成标准测试套件结构
+   */
+  generateTestSuite(): string {
+    return `
+import '@testing-library/jest-dom/vitest';
+import { TEST_CONSTANTS } from '@/test/constants/test-constants';
+import { fireEvent, render } from '@testing-library/react';
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
+import { ${this.template.componentName} } from '@/testing/${this.template.componentName.toLowerCase()}';
+
+// Mock设置区域
+${this.generateMockSection()}
+
+describe('${this.template.componentName} Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    ${typeof this.template.mockSetup === "function" ? "// 调用mockSetup()" : ""}
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    ${typeof this.template.mockCleanup === "function" ? "// 调用mockCleanup()" : ""}
+  });
+
+  // 基础渲染测试
+  describe('Basic Rendering', () => {
+    it('should render without errors (architecture validation)', () => {
+      expect(() => {
+        const { container } = render(<${this.template.componentName} />);
+        expect(container).toBeInTheDocument();
+      }).not.toThrow();
+    });
+
+    it('should render component with correct DOM structure', () => {
+      render(<${this.template.componentName} />);
+
+      // 验证主要DOM元素存在
+      // TODO: 添加具体的DOM结构验证
+    });
+
+    it('should render with correct accessibility attributes', () => {
+      render(<${this.template.componentName} />);
+
+      // 验证ARIA属性
+      // TODO: 添加具体的可访问性验证
+    });
+  });
+
+  // 功能测试
+  describe('Functionality', () => {
+    // TODO: 添加功能测试用例
+  });
+
+  // 状态管理测试
+  describe('State Management', () => {
+    // TODO: 添加状态管理测试用例
+  });
+
+  // 边缘情况测试
+  describe('Edge Cases & Error Handling', () => {
+    // TODO: 添加边缘情况测试用例
+  });
+
+  // 可访问性测试
+  describe('Accessibility & Keyboard Navigation', () => {
+    // TODO: 添加可访问性测试用例
+  });
+});
+`;
+  }
+
+  /**
+   * 生成Mock设置部分
+   */
+  private generateMockSection(): string {
+    return `
+// Mock配置示例 - 使用vi.hoisted确保Mock在模块导入前设置
+// const { mockFunction } = vi.hoisted(() => ({
+//   mockFunction: vi.fn(),
+// }));
+//
+// vi.mock('module-name', () => ({
+//   functionName: mockFunction,
+// }));
+`;
+  }
+
+  /**
+   * 生成测试用例模板
+   */
+  generateTestCase(
+    description: string,
+    category:
+      | "rendering"
+      | "functionality"
+      | "state"
+      | "edge"
+      | "accessibility",
+  ): string {
+    const templates = {
+      rendering: `
+    it('${description}', () => {
+      render(<${this.template.componentName} />);
+
+      // 验证渲染结果
+      // TODO: 添加具体验证逻辑
+    });`,
+      functionality: `
+    it('${description}', () => {
+      render(<${this.template.componentName} />);
+
+      // 模拟用户交互
+      // TODO: 添加交互逻辑
+
+      // 验证功能结果
+      // TODO: 添加验证逻辑
+    });`,
+      state: `
+    it('${description}', () => {
+      // 设置初始状态
+      // TODO: 配置Mock状态
+
+      render(<${this.template.componentName} />);
+
+      // 验证状态管理
+      // TODO: 添加状态验证逻辑
+    });`,
+      edge: `
+    it('${description}', () => {
+      // 模拟边缘情况
+      // TODO: 设置异常条件
+
+      render(<${this.template.componentName} />);
+
+      // 验证错误处理
+      // TODO: 添加错误处理验证
+    });`,
+      accessibility: `
+    it('${description}', () => {
+      render(<${this.template.componentName} />);
+
+      // 验证可访问性
+      // TODO: 添加ARIA属性验证
+      // TODO: 添加键盘导航验证
+    });`,
+    };
+
+    const safeTemplates = new Map(Object.entries(templates));
+    return (
+      safeTemplates.get(category) ||
+      `
+    it('${description}', () => {
+      // 未知测试类别
+      throw new Error('Unknown test category: ${category}');
+    });`
+    );
+  }
+}
+
+/**
+ * 测试工具函数
+ */
+export const TestUtils = {
+  /**
+   * 创建Mock函数工厂
+   */
+  createMockFactory: <T extends (..._args: unknown[]) => unknown>(
+    implementation?: T,
+  ): unknown => {
+    return vi.fn(implementation) as unknown;
+  },
+
+  /**
+   * 等待异步操作完成
+   */
+  waitForAsync: async (timeout: number = TEST_CONSTANTS.TIMEOUT.DEFAULT) => {
+    await new Promise((resolve) => setTimeout(resolve, timeout));
+  },
+
+  /**
+   * 模拟用户交互
+   */
+  simulateUserInteraction: {
+    click: (element: Element) => fireEvent.click(element),
+    keyDown: (element: Element, key: string) =>
+      fireEvent.keyDown(element, { key, code: key }),
+    focus: (element: HTMLElement) => element.focus(),
+  },
+
+  /**
+   * 验证DOM元素
+   */
+  verifyElement: {
+    exists: (selector: string) => {
+      const element = document.querySelector(selector);
+      expect(element).toBeInTheDocument();
+      return element;
+    },
+    hasAttribute: (
+      element: Element | null,
+      attribute: string,
+      value?: string,
+    ) => {
+      expect(element).toBeInTheDocument();
+      if (value) {
+        expect(element).toHaveAttribute(attribute, value);
+      } else {
+        expect(element).toHaveAttribute(attribute);
+      }
+    },
+    hasText: (element: Element | null, text: string) => {
+      expect(element).toBeInTheDocument();
+      expect(element).toHaveTextContent(text);
+    },
+  },
+};
+
+/**
+ * 常用测试模式
+ */
+export const TestPatterns = {
+  /**
+   * 基础渲染测试模式
+   */
+  basicRendering: (_componentName: string) => ({
+    architectureValidation: `should render without errors (architecture validation)`,
+    domStructure: `should render component with correct DOM structure`,
+    accessibility: `should render with correct accessibility attributes`,
+  }),
+
+  /**
+   * 交互测试模式
+   */
+  interaction: {
+    click: (action: string) => `should handle ${action} when clicked`,
+    keyboard: (key: string, action: string) =>
+      `should handle ${action} when ${key} key is pressed`,
+    focus: (element: string) => `should manage focus correctly for ${element}`,
+  },
+
+  /**
+   * 状态测试模式
+   */
+  state: {
+    initial: (state: string) => `should handle initial ${state} state properly`,
+    change: (from: string, to: string) =>
+      `should update from ${from} to ${to} state`,
+    persistence: (data: string) => `should persist ${data} correctly`,
+    sync: (source: string, target: string) =>
+      `should synchronize ${source} with ${target}`,
+  },
+
+  /**
+   * 错误处理测试模式
+   */
+  errorHandling: {
+    graceful: (scenario: string) => `should handle ${scenario} gracefully`,
+    recovery: (error: string) => `should recover from ${error} error`,
+    fallback: (feature: string) =>
+      `should provide fallback when ${feature} fails`,
+  },
+};
+
+export default ComponentTestStructure;

@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: en-US
+
+reviews:
+  profile: chill
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+  path_filters:
+    - "!pnpm-lock.yaml"
+    - "!.next/**"
+    - "!dist/**"
+    - "!coverage/**"
+    - "!*.config.{js,mjs,cjs}"
+    - "!lighthouserc.js"
+    - "!public/mockServiceWorker.js"
+  path_instructions:
+    - path: "src/app/api/**"
+      instructions: |
+        All write endpoints (POST/PUT/PATCH/DELETE) must have rate limiting AND authentication before merge.
+        Existing endpoint protection table:
+        - /api/whatsapp/send: API Key Auth + Rate Limit
+        - /api/whatsapp/webhook: Signature Verify + Rate Limit
+        - /api/contact: Rate Limit
+        - /api/inquiry: Turnstile + Rate Limit
+        - /api/subscribe: Rate Limit
+        - /api/cache/invalidate: Secret Auth + Pre/Post Rate Limit
+        - /api/csp-report: Rate Limit
+        Verify: Zod schema validation on all user input. No unfiltered dangerouslySetInnerHTML. URLs must validate protocol.
+    - path: "src/components/**"
+      instructions: |
+        Server Components first — only add "use client" when the component requires interactivity (event handlers, hooks, browser APIs).
+        All user-facing text must use next-intl translation keys (getTranslations / useTranslations). No hardcoded strings.
+        Images must use next/image. fill prop requires sizes attribute.
+        Radix UI + next/dynamic must use ssr: false to prevent hydration mismatch.
+    - path: "src/app/[locale]/**"
+      instructions: |
+        Cache Components compatibility:
+        - setRequestLocale(locale) must be called in layout/page before any hooks.
+        - "use cache" segments must NOT use request-dependent APIs (getTranslations() without explicit locale, getLocale(), cookies(), headers()).
+        - Safe pattern: getTranslations({ locale, namespace }) with explicit locale parameter.
+        Page props convention: params is Promise<{ locale: string }>.
+    - path: "**/__tests__/**"
+      instructions: |
+        Tests must be behavior-driven: verify what the user can do (navigation targets, form submissions), not just element presence.
+        Links must verify href resolves to a known route. Buttons must verify onClick behavior or navigation.
+        Test descriptions should use "user does X -> Y happens" language.
+        No presence-only assertions like toBeInTheDocument() without also checking behavior.
+        Must use centralized mocks from src/test/ — no duplicate mock creation.
+  tools:
+    eslint:
+      enabled: true
+    semgrep:
+      enabled: true
+    gitleaks:
+      enabled: true
+    actionlint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    biome:
+      enabled: false
+    checkov:
+      enabled: false
+    hadolint:
+      enabled: false
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+
+tone_instructions: >
+  Skip style/formatting (ESLint+Prettier handle it). Focus on logic, security, performance, architecture. Next.js 16 with Cache Components — check "use cache" compat.
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - ".claude/rules/*.md"
+
+chat:
+  auto_reply: true

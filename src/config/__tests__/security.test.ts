@@ -1,0 +1,246 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  generateCSP,
+  getSecurityConfig,
+  getSecurityHeaders,
+  SECURITY_MODES,
+} from "../security";
+
+describe("Security Configuration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("generateCSP", () => {
+    it("should generate basic CSP in development", () => {
+      vi.stubEnv("NODE_ENV", "development");
+
+      const csp = generateCSP();
+      expect(csp).toContain("default-src 'self'");
+      expect(csp).toContain("'unsafe-inline'");
+      expect(csp).toContain("'unsafe-eval'");
+      expect(csp).toContain("https://unpkg.com");
+    });
+
+    it("should generate strict CSP in production", () => {
+      vi.stubEnv("NODE_ENV", "production");
+
+      const csp = generateCSP();
+      expect(csp).toContain("default-src 'self'");
+      // style-src allows 'unsafe-inline' for Tailwind CSS compatibility
+      expect(csp).toMatch(/style-src[^;]*'unsafe-inline'/);
+      expect(csp).toMatch(/style-src-elem[^;]*'unsafe-inline'/);
+      // script-src should NOT contain unsafe-inline in production
+      expect(csp).not.toMatch(/script-src(?!-elem)[^;]*'unsafe-inline'/);
+      // Static App Router/RSC emits inline bootstrap script elements. Without
+      // nonce/proxy dynamic rendering, production must allow those elements.
+      expect(csp).toMatch(/script-src-elem[^;]*'unsafe-inline'/);
+      // Keep inline event handlers blocked even though inline script elements
+      // are allowed for Next's static bootstrap payload.
+      expect(csp).toContain("script-src-attr 'none'");
+      // App Router/RSC inline script content changes whenever streamed payloads
+      // change. This static CSP mode does not rely on content hashes.
+      expect(csp).not.toContain("'sha256-");
+      expect(csp).not.toContain("'unsafe-eval'");
+      expect(csp).toContain("upgrade-insecure-requests");
+    });
+
+    it("should generate static CSP without nonce directives", () => {
+      vi.stubEnv("NODE_ENV", "production");
+
+      const csp = generateCSP();
+      expect(csp).not.toContain("'nonce-");
+      expect(csp).toMatch(/script-src(?!-elem)[^;]*'self'/);
+    });
+
+    it("should include required external domains", () => {
+      const csp = generateCSP();
+      expect(csp).toContain("https://challenges.cloudflare.com");
+      expect(csp).toContain("https://fonts.googleapis.com");
+      expect(csp).toContain("https://fonts.gstatic.com");
+      expect(csp).toContain("https://www.googletagmanager.com");
+      expect(csp).toContain("https://www.google-analytics.com");
+    });
+
+    it("should set frame-ancestors to none", () => {
+      const csp = generateCSP();
+      expect(csp).toContain("frame-ancestors 'none'");
+    });
+  });
+
+  describe("getSecurityHeaders", () => {
+    it("should return security headers when enabled", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+
+      const headers = getSecurityHeaders(true);
+      expect(headers).toHaveLength(9);
+
+      const headerKeys = headers.map((h) => h.key);
+      expect(headerKeys).toContain("X-Frame-Options");
+      expect(headerKeys).toContain("X-Content-Type-Options");
+      expect(headerKeys).toContain("Referrer-Policy");
+      expect(headerKeys).toContain("Strict-Transport-Security");
+      expect(headerKeys).toContain("Content-Security-Policy");
+      expect(headerKeys).toContain("Permissions-Policy");
+    });
+
+    it("should return empty array when disabled", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
+
+      const headers = getSecurityHeaders(true);
+      expect(headers).toHaveLength(0);
+    });
+
+    it("should emit static CSP without nonce directives", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+
+      const headers = getSecurityHeaders(true);
+
+      const cspHeader = headers.find(
+        (h) => h.key === "Content-Security-Policy",
+      );
+      expect(cspHeader?.value).not.toContain("'nonce-");
+    });
+
+    it("should set correct X-Frame-Options", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+
+      const headers = getSecurityHeaders(true);
+      const frameHeader = headers.find((h) => h.key === "X-Frame-Options");
+      expect(frameHeader?.value).toBe("DENY");
+    });
+
+    it("should set correct HSTS header", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+
+      const headers = getSecurityHeaders(true);
+      const hstsHeader = headers.find(
+        (h) => h.key === "Strict-Transport-Security",
+      );
+      expect(hstsHeader?.value).toBe(
+        "max-age=63072000; includeSubDomains; preload",
+      );
+    });
+
+    it("should output Content-Security-Policy in strict mode", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "strict");
+
+      const headers = getSecurityHeaders(true);
+      const headerKeys = headers.map((h) => h.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy");
+      expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
+    });
+
+    it("should output Content-Security-Policy-Report-Only in relaxed mode", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
+
+      const headers = getSecurityHeaders(true);
+      const headerKeys = headers.map((h) => h.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy-Report-Only");
+      expect(headerKeys).not.toContain("Content-Security-Policy");
+    });
+
+    it("should output Content-Security-Policy in moderate mode", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
+
+      const headers = getSecurityHeaders(true);
+      const headerKeys = headers.map((h) => h.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy");
+      expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
+    });
+
+    it("should include report-uri directive in CSP", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+      vi.stubEnv("CSP_REPORT_URI", "");
+
+      const headers = getSecurityHeaders(true);
+      const cspHeader = headers.find(
+        (h) =>
+          h.key === "Content-Security-Policy" ||
+          h.key === "Content-Security-Policy-Report-Only",
+      );
+
+      expect(cspHeader?.value).toContain("report-uri /api/csp-report");
+    });
+
+    it("should allow CSP report-uri override via env", () => {
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+      vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
+
+      const headers = getSecurityHeaders(true);
+      const cspHeader = headers.find(
+        (h) =>
+          h.key === "Content-Security-Policy" ||
+          h.key === "Content-Security-Policy-Report-Only",
+      );
+
+      expect(cspHeader?.value).toContain(
+        "report-uri https://example.com/csp-report",
+      );
+    });
+  });
+
+  describe("getSecurityConfig", () => {
+    it("should return strict mode by default", () => {
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "");
+
+      const config = getSecurityConfig(true);
+      expect(config).toEqual(SECURITY_MODES.strict);
+    });
+
+    it("should return moderate mode when configured", () => {
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
+
+      const config = getSecurityConfig(true);
+      expect(config).toEqual(SECURITY_MODES.moderate);
+    });
+
+    it("should return relaxed mode when configured", () => {
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
+
+      const config = getSecurityConfig(true);
+      expect(config).toEqual(SECURITY_MODES.relaxed);
+    });
+  });
+
+  describe("SECURITY_MODES", () => {
+    it("should have correct strict mode configuration", () => {
+      expect(SECURITY_MODES.strict).toEqual({
+        cspReportOnly: false,
+        enforceHTTPS: true,
+        strictTransportSecurity: true,
+        contentTypeOptions: true,
+        frameOptions: "DENY",
+        xssProtection: true,
+      });
+    });
+
+    it("should have correct moderate mode configuration", () => {
+      expect(SECURITY_MODES.moderate).toEqual({
+        cspReportOnly: false,
+        enforceHTTPS: true,
+        strictTransportSecurity: true,
+        contentTypeOptions: true,
+        frameOptions: "SAMEORIGIN",
+        xssProtection: true,
+      });
+    });
+
+    it("should have correct relaxed mode configuration", () => {
+      expect(SECURITY_MODES.relaxed).toEqual({
+        cspReportOnly: true,
+        enforceHTTPS: false,
+        strictTransportSecurity: false,
+        contentTypeOptions: true,
+        frameOptions: "SAMEORIGIN",
+        xssProtection: false,
+      });
+    });
+  });
+});

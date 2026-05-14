@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "showcase-website",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-04",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // Wrangler-level minification via esbuild. OpenNext split-function minify
+  // remains disabled in open-next.config.ts until it has fresh preview proof.
+  // Bundle size assumes the Cloudflare Workers paid plan.
+  "minify": true,
+  // Drop __name() annotations from minified output for additional gzip savings.
+  "keep_names": false,
+  // Keep cold starts close to the visitor when Cloudflare can infer placement.
+  "placement": { "mode": "smart" },
+  // Static assets (OpenNext output)
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+
+  // No cron triggers in current phase.
+
+  "env": {
+    "preview": {
+      "vars": {
+        "APP_ENV": "preview",
+        "DEPLOYMENT_PLATFORM": "cloudflare",
+        "NEXT_PUBLIC_BASE_URL": "https://preview.example.com",
+        "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
+      },
+    },
+    "production": {
+      "vars": {
+        "APP_ENV": "production",
+        "DEPLOYMENT_PLATFORM": "cloudflare",
+        "NEXT_PUBLIC_BASE_URL": "https://example.com",
+        "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
+      },
+    },
+  },
+}

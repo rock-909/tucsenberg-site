@@ -1,0 +1,27 @@
+{
+  "run_id": "YYYY-MM-DD-run-name",
+  "base_commit": "commit-sha",
+  "runtime_targets": [
+    {
+      "kind": "local-build",
+      "target": "artifact or command",
+      "status": "available"
+    }
+  ],
+  "commands": [
+    {
+      "command": "pnpm build",
+      "result": "not-run",
+      "classification": "required",
+      "evidence_path": "evidence/00-baseline-runtime/pnpm-build.txt",
+      "notes": "not run yet"
+    }
+  ],
+  "external_sources": [
+    {
+      "source": "Google Search Console",
+      "status": "blocked",
+      "blocker": "credential unavailable"
+    }
+  ]
+}

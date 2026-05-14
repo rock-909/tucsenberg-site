@@ -1,0 +1,323 @@
+"use server";
+
+/**
+ * React 19 Server Action模板
+ * 基于src/app/actions.ts的成功实践，提供标准化的Server Action架构模式
+ *
+ * @version 1.0.0
+ * @author React 19架构升级项目
+ * @description 标准化的Server Action模板，包含错误处理、类型安全、日志记录等最佳实践
+ */
+import { z } from "zod";
+import { logger } from "@/lib/logger";
+import {
+  createErrorResultWithLogging,
+  createSuccessResultWithLogging,
+  getFormDataBoolean,
+  getFormDataString,
+  withErrorHandling,
+  type ServerActionResult,
+} from "@/lib/actions/server-action-utils";
+
+/**
+ * 通用表单数据验证Schema示例
+ */
+export const genericFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+  consent: z.boolean().refine((val) => val === true, "Consent is required"),
+});
+
+export type GenericFormData = z.infer<typeof genericFormSchema>;
+
+/**
+ * Server Action结果类型示例
+ */
+export interface GenericActionResult {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 处理的记录ID */
+  recordId?: string;
+  /** 额外的处理信息 */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 扩展的表单数据类型，包含安全验证
+ */
+export interface SecureFormData extends GenericFormData {
+  /** 安全验证token（如Turnstile） */
+  securityToken?: string;
+  /** 提交时间戳 */
+  submittedAt: string;
+  /** 客户端指纹（可选） */
+  clientFingerprint?: string;
+}
+
+/**
+ * 验证表单数据的通用函数
+ * @param data 待验证的表单数据
+ * @param schema Zod验证Schema
+ * @returns 验证结果
+ */
+function validateSecureFormData<T extends object>(
+  data: T,
+  schema: z.ZodSchema<T>,
+): {
+  success: boolean;
+  error?: string;
+  details?: string[];
+  data?: T;
+} {
+  // 基础数据验证
+  const baseValidation = schema.safeParse(data);
+  if (!baseValidation.success) {
+    const errorMessages = baseValidation.error.issues.map((error) => {
+      const field = error.path.join(".");
+      return `${field}: ${error.message}`;
+    });
+
+    return {
+      success: false,
+      error: "Validation failed",
+      details: errorMessages,
+    };
+  }
+
+  // 时间戳验证（防止重放攻击）
+  if ("submittedAt" in data && typeof data.submittedAt === "string") {
+    const submittedAt = new Date(data.submittedAt);
+    const now = new Date();
+    const timeDiff = now.getTime() - submittedAt.getTime();
+    const maxAge = 10 * 60 * 1000; // 10分钟
+
+    if (timeDiff > maxAge || timeDiff < 0) {
+      return {
+        success: false,
+        error: "Form submission expired or invalid",
+        details: ["Please refresh the page and try again"],
+      };
+    }
+  }
+
+  return {
+    success: true,
+    data: baseValidation.data,
+  };
+}
+
+/**
+ * 处理表单提交的通用函数
+ * @param validatedData 已验证的表单数据
+ * @returns 处理结果
+ */
+async function processFormSubmission(
+  validatedData: GenericFormData,
+): Promise<GenericActionResult> {
+  try {
+    // 这里实现具体的业务逻辑
+    // 例如：保存到数据库、发送邮件、调用外部API等
+
+    logger.info("Processing form submission", {
+      name: validatedData.name,
+      email: validatedData.email,
+      messageLength: validatedData.message.length,
+    });
+
+    // 模拟异步处理
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // 生成记录ID（实际应用中可能来自数据库）
+    const recordId = (() => {
+      if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+      ) {
+        return `record_${crypto.randomUUID().replaceAll("-", "")}`;
+      }
+      if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.getRandomValues === "function"
+      ) {
+        const buf = new Uint32Array(3);
+        crypto.getRandomValues(buf);
+        const randomPart = Array.from(buf, (value) =>
+          value.toString(36).padStart(4, "0"),
+        ).join("");
+        return `record_${Date.now()}_${randomPart.substring(0, 12)}`;
+      }
+      throw new Error("Secure random generator unavailable for record id");
+    })();
+
+    return {
+      success: true,
+      recordId,
+      metadata: {
+        processedAt: new Date().toISOString(),
+        userAgent: "server-action",
+      },
+    };
+  } catch (error) {
+    logger.error("Form processing error:", error);
+    throw error;
+  }
+}
+
+/**
+ * 通用Server Action模板
+ *
+ * 使用示例：
+ * ```tsx
+ * const [state, formAction, isPending] = useActionState(genericFormAction, null);
+ *
+ * <form action={formAction}>
+ *   <input name="name" required />
+ *   <input name="email" type="email" required />
+ *   <textarea name="message" required />
+ *   <input name="consent" type="checkbox" required />
+ *   <button disabled={isPending}>Submit</button>
+ * </form>
+ * ```
+ */
+export const genericFormAction = withErrorHandling(
+  async (_prevState, formData: FormData): Promise<ServerActionResult> => {
+    logger.info("Generic form action started");
+
+    try {
+      // 1. 提取表单数据
+      const rawData: SecureFormData = {
+        name: getFormDataString(formData, "name"),
+        email: getFormDataString(formData, "email"),
+        message: getFormDataString(formData, "message"),
+        consent: getFormDataBoolean(formData, "consent"),
+        securityToken: getFormDataString(formData, "securityToken") || "",
+        submittedAt:
+          getFormDataString(formData, "submittedAt") ||
+          new Date().toISOString(),
+        clientFingerprint:
+          getFormDataString(formData, "clientFingerprint") || "",
+      };
+
+      // 2. 验证表单数据
+      const validation = await validateSecureFormData(
+        rawData,
+        genericFormSchema,
+      );
+      if (!validation.success) {
+        return createErrorResultWithLogging(
+          validation.error || "Validation failed",
+          ["VALIDATION_ERROR"],
+        );
+      }
+
+      // 3. 安全验证（如果需要）
+      if (rawData.securityToken) {
+        // 这里可以添加Turnstile或其他安全验证
+        // const isSecurityValid = await verifySecurityToken(rawData.securityToken);
+        // if (!isSecurityValid) {
+        //   return createErrorResultWithLogging(
+        //     'Security verification failed',
+        //     'SECURITY_ERROR'
+        //   );
+        // }
+      }
+
+      // 4. 处理业务逻辑
+      await processFormSubmission(validation.data!);
+
+      // 5. 返回成功结果
+      return createSuccessResultWithLogging("Form submitted successfully");
+    } catch (error) {
+      logger.error("Generic form action error:", error);
+      return createErrorResultWithLogging("An unexpected error occurred", [
+        "INTERNAL_ERROR",
+      ]);
+    }
+  },
+);
+
+/**
+ * 创建自定义Server Action的示例函数
+ *
+ * 使用示例：
+ * ```typescript
+ * export const myCustomAction = withErrorHandling(
+ *   async (prevState, formData: FormData) => {
+ *     const data = extractFormData(formData);
+ *     const result = await processData(data);
+ *     return createSuccessResultWithLogging('Success', result);
+ *   }
+ * );
+ * ```
+ */
+export const createCustomServerActionExample = `
+// 示例：创建自定义Server Action
+export const myCustomAction = withErrorHandling(
+  async (prevState, formData: FormData) => {
+    try {
+      // 1. 提取数据
+      const data = {
+        field1: getFormDataString(formData, 'field1'),
+        field2: getFormDataString(formData, 'field2'),
+      };
+
+      // 2. 验证数据
+      const schema = z.object({
+        field1: z.string().min(1),
+        field2: z.string().email(),
+      });
+
+      const validation = schema.safeParse(data);
+      if (!validation.success) {
+        return createErrorResultWithLogging(
+          'Validation failed',
+          ['VALIDATION_ERROR']
+        );
+      }
+
+      // 3. 处理业务逻辑
+      const result = await processBusinessLogic(validation.data);
+
+      // 4. 返回结果
+      return createSuccessResultWithLogging('Success');
+
+    } catch (error) {
+      return createErrorResultWithLogging(
+        'Error occurred',
+        ['INTERNAL_ERROR']
+      );
+    }
+  }
+);
+`;
+
+/**
+ * Server Action最佳实践示例
+ */
+export const SERVER_ACTION_BEST_PRACTICES = {
+  // 1. 总是使用withErrorHandling包装
+  // 2. 使用Zod进行数据验证
+  // 3. 记录详细的日志信息
+  // 4. 实现适当的安全检查
+  // 5. 返回结构化的结果
+  // 6. 处理所有可能的错误情况
+  // 7. 使用类型安全的数据提取
+  // 8. 实现防重放攻击机制
+} as const;
+
+/**
+ * 使用示例配置
+ */
+export const USAGE_EXAMPLES = {
+  basicForm: {
+    schema: genericFormSchema,
+    action: genericFormAction,
+    fields: ["name", "email", "message", "consent"],
+  },
+  customForm: {
+    // 参考createCustomServerActionExample创建自定义action
+    description:
+      "See createCustomServerActionExample for implementation pattern",
+  },
+} as const;

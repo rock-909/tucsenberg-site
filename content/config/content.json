@@ -1,0 +1,28 @@
+{
+  "defaultLocale": "en",
+  "supportedLocales": ["en", "zh"],
+  "postsPerPage": 12,
+  "enableDrafts": false,
+  "enableSearch": true,
+  "autoGenerateExcerpt": true,
+  "excerptLength": 160,
+  "dateFormat": "YYYY-MM-DD",
+  "timeZone": "UTC",
+  "validation": {
+    "strictMode": false,
+    "requireSlug": true,
+    "requireLocale": false,
+    "requireAuthor": true,
+    "requireDescription": true,
+    "requireTags": false,
+    "requireCategories": false,
+    "maxTitleLength": 100,
+    "maxDescriptionLength": 200,
+    "maxExcerptLength": 300,
+    "products": {
+      "requireCoverImage": true,
+      "requireCategory": true,
+      "requirePrice": false
+    }
+  }
+}

@@ -1,0 +1,281 @@
+/**
+ * Product Inquiry API Route
+ * Handles product-specific inquiries via product page drawer
+ */
+
+import "server-only";
+import { NextRequest, type NextResponse } from "next/server";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/api-response";
+import {
+  mapZodIssuesToValidationDetails,
+  type ValidationFieldErrorKeys,
+} from "@/lib/api/validation-error-details";
+import {
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
+import { safeParseJson } from "@/lib/api/safe-parse-json";
+import { isRuntimeProduction } from "@/lib/env";
+import {
+  withRateLimit,
+  type RateLimitContext,
+} from "@/lib/api/with-rate-limit";
+import { processLead, type LeadResult } from "@/lib/lead-pipeline/process-lead";
+import {
+  LEAD_TYPES,
+  productLeadSchema,
+  type ProductLeadInput,
+} from "@/lib/lead-pipeline/lead-schema";
+import { logger, sanitizeIP } from "@/lib/logger";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_SERVICE_UNAVAILABLE,
+} from "@/constants";
+import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
+
+const TURNSTILE_SERVICE_FAILURE_CODES = new Set([
+  "not-configured",
+  "network-error",
+  "timeout",
+]);
+
+interface ProductLeadValidationSuccess {
+  success: true;
+  data: ProductLeadInput;
+}
+
+interface ProductLeadValidationFailure {
+  success: false;
+  details: string[];
+}
+
+type ProductLeadValidationResult =
+  | ProductLeadValidationSuccess
+  | ProductLeadValidationFailure;
+
+const PRODUCT_INQUIRY_FIELD_ERROR_KEYS: ValidationFieldErrorKeys = {
+  fullName: "errors.fullName",
+  email: "errors.email",
+  company: "errors.company",
+  productSlug: "errors.productSlug",
+  productName: "errors.productName",
+  quantity: "errors.quantity",
+  requirements: "errors.requirements",
+};
+
+function getSuccessfulReferenceId(
+  result: LeadResult,
+  message = "referenceId missing on successful lead result",
+): string {
+  if (!result.referenceId) {
+    throw new Error(message);
+  }
+
+  return result.referenceId;
+}
+
+async function validateProductInquiryTurnstile(
+  token: string | undefined,
+  clientIP: string,
+): Promise<NextResponse | null> {
+  if (!token) {
+    logger.warn("Product inquiry missing Turnstile token", {
+      ip: sanitizeIP(clientIP),
+    });
+    return createApiErrorResponse(
+      API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+      HTTP_BAD_REQUEST,
+    );
+  }
+
+  const verificationResult = await verifyTurnstileDetailed(token, clientIP, {
+    expectedAction: "product_inquiry",
+  });
+
+  if (verificationResult.success) {
+    return null;
+  }
+
+  const errorCodes = verificationResult.errorCodes ?? [];
+  const isServiceFailure = errorCodes.some((code) =>
+    TURNSTILE_SERVICE_FAILURE_CODES.has(code),
+  );
+
+  if (isServiceFailure) {
+    logger.error("Lead Turnstile verification unavailable", {
+      ip: sanitizeIP(clientIP),
+      errorCodes,
+    });
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVICE_UNAVAILABLE,
+      HTTP_SERVICE_UNAVAILABLE,
+    );
+  }
+
+  logger.warn("Product inquiry Turnstile verification failed", {
+    ip: sanitizeIP(clientIP),
+    errorCodes,
+  });
+  return createApiErrorResponse(
+    API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
+    HTTP_BAD_REQUEST,
+  );
+}
+
+function validateLeadData(
+  data: Record<string, unknown>,
+): ProductLeadValidationResult {
+  const parsed = productLeadSchema.safeParse({
+    type: LEAD_TYPES.PRODUCT,
+    fullName: data.fullName,
+    productSlug: data.productSlug,
+    productName: data.productName,
+    quantity: data.quantity,
+    requirements: data.requirements,
+    email: data.email,
+    company: data.company,
+    marketingConsent: data.marketingConsent,
+  });
+
+  if (parsed.success) {
+    return {
+      success: true,
+      data: parsed.data,
+    };
+  }
+
+  return {
+    success: false,
+    details: mapZodIssuesToValidationDetails(
+      parsed.error.issues,
+      PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
+    ),
+  };
+}
+
+function createProductInquirySuccessResponse(
+  result: LeadResult,
+  clientIP: string,
+  startTime: number,
+) {
+  if (!isRuntimeProduction()) {
+    logger.info("Product inquiry submitted successfully", {
+      referenceId: result.referenceId,
+      ip: sanitizeIP(clientIP),
+      processingTime: Date.now() - startTime,
+      emailSent: result.emailSent,
+      recordCreated: result.recordCreated,
+    });
+  }
+
+  return createApiSuccessResponse({
+    referenceId: getSuccessfulReferenceId(
+      result,
+      "referenceId missing on successful lead result",
+    ),
+  });
+}
+
+function createProductInquiryFailureResponse(
+  result: LeadResult,
+  clientIP: string,
+  startTime: number,
+) {
+  logger.warn("Product inquiry submission failed", {
+    error: result.error,
+    ip: sanitizeIP(clientIP),
+    processingTime: Date.now() - startTime,
+    referenceId: result.referenceId,
+  });
+
+  const isValidationError = result.error === "VALIDATION_ERROR";
+  return createApiErrorResponse(
+    isValidationError
+      ? API_ERROR_CODES.INQUIRY_VALIDATION_FAILED
+      : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+    isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
+  );
+}
+
+/**
+ * POST /api/inquiry
+ * Handle product inquiry form submission
+ */
+const POST_RATE_LIMITED = withRateLimit(
+  "inquiry",
+  async (request: NextRequest, { clientIP }: RateLimitContext) => {
+    const parsedBody = await safeParseJson<{
+      turnstileToken?: string;
+      [key: string]: unknown;
+    }>(request, { route: "/api/inquiry" });
+
+    if (!parsedBody.ok) {
+      return createApiErrorResponse(
+        parsedBody.errorCode,
+        parsedBody.statusCode,
+      );
+    }
+
+    const startTime = Date.now();
+
+    try {
+      const data = parsedBody.data ?? {};
+      const leadValidation = validateLeadData(data);
+      if (!leadValidation.success) {
+        return createApiErrorResponse(
+          API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+          HTTP_BAD_REQUEST,
+          { details: leadValidation.details },
+        );
+      }
+
+      const turnstileError = await validateProductInquiryTurnstile(
+        typeof data.turnstileToken === "string"
+          ? data.turnstileToken
+          : undefined,
+        clientIP,
+      );
+      if (turnstileError) return turnstileError;
+
+      const result = await processLead({
+        ...leadValidation.data,
+      });
+
+      if (result.success) {
+        return createProductInquirySuccessResponse(result, clientIP, startTime);
+      }
+
+      return createProductInquiryFailureResponse(result, clientIP, startTime);
+    } catch (error) {
+      logger.error("Product inquiry submission failed unexpectedly", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        ip: sanitizeIP(clientIP),
+        processingTime: Date.now() - startTime,
+      });
+
+      return createApiErrorResponse(
+        API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+        HTTP_INTERNAL_ERROR,
+      );
+    }
+  },
+);
+
+export async function POST(request: NextRequest) {
+  const response = await POST_RATE_LIMITED(request);
+  return applyCorsHeaders({ request, response });
+}
+
+/**
+ * OPTIONS /api/inquiry
+ * Handle CORS preflight requests
+ */
+export function OPTIONS(request: NextRequest) {
+  return createCorsPreflightResponse(request);
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "FPH-001",
+    "source_finding_ids": ["FPH-L00-001"],
+    "title": "Short finding title",
+    "severity": "P2",
+    "domain": "process",
+    "source_lane": "00-baseline-runtime",
+    "confidence": "medium",
+    "evidence_level": "Strong hypothesis",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "path/to/file:line",
+        "summary": "what this proves"
+      }
+    ],
+    "impact": "owner-readable impact",
+    "root_cause": "root cause",
+    "recommended_fix": "delete-first or simplify-first repair direction",
+    "verification_needed": "proof needed after repair",
+    "linus_gate": "Needs proof"
+  }
+]
