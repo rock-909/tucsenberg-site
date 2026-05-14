@@ -55,7 +55,7 @@ export function getLocaleCurrency(
 }
 
 export function isPublicSeoLocale(
-  locale: ConfiguredLocale,
+  locale: string,
 ): locale is PublicSeoLocale {
   return LOCALES_CONFIG.publicLocales.includes(locale as PublicSeoLocale);
 }
