@@ -43,8 +43,12 @@
   },
   "navigation": {
     "siteName": "{siteName}",
-    "siteDescription": "用于展示产品、服务、证据和询盘路径的可复用网站 starter。",
+    "siteDescription": "面向 OEM 系列匹配和 RFQ 需求的曝气替换膜片。",
     "home": "首页",
+    "membranes": "膜片",
+    "compatibility": "兼容性",
+    "materials": "材料",
+    "quote": "询价",
     "more": "更多",
     "capabilities": "能力",
     "howItWorks": "如何使用",
@@ -429,6 +433,12 @@
       "secondary": "联系我们",
       "trustAriaLabel": "首页信任信息",
       "trust": "示例响应承诺 · 上线前替换证据 · {countries}+ 占位市场"
+    },
+    "comingSoon": {
+      "title": "Tucsenberg 产品页面正在准备中。",
+      "description": "膜片系列、兼容性、材料和 RFQ 信息会先停留在这个安全占位区，等负责人确认内容后再展开。",
+      "quoteNote": "需要膜片询价？RFQ 路由接通前请先使用这个占位入口。",
+      "backHome": "返回首页"
     },
     "footer": {
       "about": {

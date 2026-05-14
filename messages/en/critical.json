@@ -43,8 +43,12 @@
   },
   "navigation": {
     "siteName": "{siteName}",
-    "siteDescription": "Reusable showcase website starter for products, services, proof, and inquiry paths.",
+    "siteDescription": "Aftermarket aeration replacement membranes for OEM-family matching and RFQ fit.",
     "home": "Home",
+    "membranes": "Membranes",
+    "compatibility": "Compatibility",
+    "materials": "Materials",
+    "quote": "Quote",
     "more": "More",
     "capabilities": "Capabilities",
     "howItWorks": "How It Works",
@@ -429,6 +433,12 @@
       "secondary": "Contact",
       "trustAriaLabel": "Homepage trust facts",
       "trust": "Example response promise · Replace proof before launch · {countries}+ placeholder markets"
+    },
+    "comingSoon": {
+      "title": "Tucsenberg product pages are being prepared.",
+      "description": "Membrane family, compatibility, material, and RFQ details will stay on this safe placeholder until owner-confirmed content is ready.",
+      "quoteNote": "Need a membrane quote? Please use this placeholder until the RFQ route is connected.",
+      "backHome": "Back to home"
     },
     "footer": {
       "about": {

@@ -55,31 +55,41 @@ describe("navigation", () => {
       expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
     });
 
-    it("should match the public demo starter navigation order", () => {
+    it("should match the Tucsenberg placeholder navigation order", () => {
       expect(mainNavigation).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
         {
-          key: "products",
-          href: "/products",
-          translationKey: "navigation.products",
+          key: "membranes",
+          href: "#coming-soon",
+          translationKey: "navigation.membranes",
         },
         {
-          key: "blog",
-          href: "/blog",
-          translationKey: "navigation.blog",
+          key: "compatibility",
+          href: "#coming-soon",
+          translationKey: "navigation.compatibility",
         },
-        { key: "about", href: "/about", translationKey: "navigation.about" },
+        {
+          key: "materials",
+          href: "#coming-soon",
+          translationKey: "navigation.materials",
+        },
+        {
+          key: "quote",
+          href: "#coming-soon",
+          translationKey: "navigation.quote",
+        },
       ]);
     });
 
-    it("should keep contact and old education pages out of the main navigation", () => {
+    it("should keep starter pages out of the main navigation", () => {
       const actualKeys = mainNavigation.map((item) => item.key);
 
-      expect(actualKeys).toContain("blog");
       expect(actualKeys).not.toContain("capabilities");
       expect(actualKeys).not.toContain("howItWorks");
       expect(actualKeys).not.toContain("customProject");
       expect(actualKeys).not.toContain("contact");
+      expect(actualKeys).not.toContain("products");
+      expect(actualKeys).not.toContain("blog");
+      expect(actualKeys).not.toContain("about");
       expect(actualKeys).not.toContain("privacy");
     });
 
@@ -88,15 +98,15 @@ describe("navigation", () => {
         expect(item.key).toBeTruthy();
         expect(item.href).toBeTruthy();
         expect(item.translationKey).toBeTruthy();
-        expect(item.href).toMatch(/^\/[a-z-]*$/);
+        expect(item.href).toBe("#coming-soon");
         expect(item.translationKey).toMatch(/^navigation\./);
       });
     });
 
-    it("should have home item pointing to root", () => {
-      const homeItem = mainNavigation.find((item) => item.key === "home");
-      expect(homeItem).toBeDefined();
-      expect(homeItem!.href).toBe("/");
+    it("should have quote item pointing to the safe placeholder", () => {
+      const quoteItem = mainNavigation.find((item) => item.key === "quote");
+      expect(quoteItem).toBeDefined();
+      expect(quoteItem!.href).toBe("#coming-soon");
     });
 
     it("should have unique keys", () => {
@@ -105,10 +115,13 @@ describe("navigation", () => {
       expect(keys.length).toBe(uniqueKeys.size);
     });
 
-    it("should have unique hrefs", () => {
-      const hrefs = mainNavigation.map((item) => item.href);
-      const uniqueHrefs = new Set(hrefs);
-      expect(hrefs.length).toBe(uniqueHrefs.size);
+    it("should keep all hrefs on the shared placeholder", () => {
+      expect(mainNavigation.map((item) => item.href)).toEqual([
+        "#coming-soon",
+        "#coming-soon",
+        "#coming-soon",
+        "#coming-soon",
+      ]);
     });
   });
 
@@ -221,6 +234,11 @@ describe("navigation", () => {
         "/zh/docs#installation",
       );
     });
+
+    it("should keep same-page anchor placeholders unchanged", () => {
+      expect(getLocalizedHref("#coming-soon", "en")).toBe("#coming-soon");
+      expect(getLocalizedHref("#coming-soon", "zh")).toBe("#coming-soon");
+    });
   });
 
   describe("NAVIGATION_BREAKPOINTS", () => {
@@ -305,15 +323,14 @@ describe("navigation", () => {
   });
 
   describe("integration tests", () => {
-    it("should work with real navigation items", () => {
-      const aboutItem = mainNavigation.find((item) => item.key === "about");
-      expect(aboutItem).toBeDefined();
+    it("should work with the real placeholder navigation items", () => {
+      const quoteItem = mainNavigation.find((item) => item.key === "quote");
+      expect(quoteItem).toBeDefined();
 
-      const localizedHref = getLocalizedHref(aboutItem!.href, "en");
-      expect(localizedHref).toBe("/en/about");
+      const localizedHref = getLocalizedHref(quoteItem!.href, "en");
+      expect(localizedHref).toBe("#coming-soon");
 
-      const isActive = isActivePath("/en/about", aboutItem!.href);
-      expect(isActive).toBe(true);
+      expect(quoteItem!.translationKey).toBe("navigation.quote");
     });
 
     it("should handle all navigation items correctly", () => {
@@ -322,12 +339,8 @@ describe("navigation", () => {
         const enHref = getLocalizedHref(item.href, "en");
         const zhHref = getLocalizedHref(item.href, "zh");
 
-        expect(enHref).toMatch(/^\/en/);
-        expect(zhHref).toMatch(/^\/zh/);
-
-        // Test active path detection
-        const isActive = isActivePath(enHref, item.href);
-        expect(isActive).toBe(true);
+        expect(enHref).toBe("#coming-soon");
+        expect(zhHref).toBe("#coming-soon");
       });
     });
   });

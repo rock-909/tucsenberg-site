@@ -43,8 +43,12 @@
   },
   "navigation": {
     "siteName": "[ES-TODO] {siteName}",
-    "siteDescription": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths.",
+    "siteDescription": "[ES-TODO] Aftermarket aeration replacement membranes for OEM-family matching and RFQ fit.",
     "home": "[ES-TODO] Home",
+    "membranes": "[ES-TODO] Membranes",
+    "compatibility": "[ES-TODO] Compatibility",
+    "materials": "[ES-TODO] Materials",
+    "quote": "[ES-TODO] Quote",
     "more": "[ES-TODO] More",
     "capabilities": "[ES-TODO] Capabilities",
     "howItWorks": "[ES-TODO] How It Works",
@@ -429,6 +433,12 @@
       "secondary": "[ES-TODO] Contact",
       "trustAriaLabel": "[ES-TODO] Homepage trust facts",
       "trust": "[ES-TODO] Example response promise · Replace proof before launch · {countries}+ placeholder markets"
+    },
+    "comingSoon": {
+      "title": "[ES-TODO] Tucsenberg product pages are being prepared.",
+      "description": "[ES-TODO] Membrane family, compatibility, material, and RFQ details will stay on this safe placeholder until owner-confirmed content is ready.",
+      "quoteNote": "[ES-TODO] Need a membrane quote? Please use this placeholder until the RFQ route is connected.",
+      "backHome": "[ES-TODO] Back to home"
     },
     "footer": {
       "about": {

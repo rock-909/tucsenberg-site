@@ -40,47 +40,48 @@ function resolveSingleSiteBaseUrl(fallback: string): string {
   return fallback;
 }
 
-const baseUrl = resolveSingleSiteBaseUrl("https://example.com");
+const baseUrl = resolveSingleSiteBaseUrl("https://tucsenberg.com");
 
 const social = {
-  twitter: "https://x.com/example",
-  linkedin: "https://www.linkedin.com/company/example",
+  twitter: "https://x.com/tucsenberg",
+  linkedin: "https://www.linkedin.com/company/tucsenberg",
 } as const;
 
 const contact = {
   phone: "+86-518-0000-0000",
-  email: "starter-contact@example.com",
+  email: "contact@tucsenberg.com",
 } as const;
 
-const establishedYear = 2018;
+const establishedYear = 2026;
 const siteFactSnapshotYear = 2026;
 
 /**
  * Single-site canonical source for the current cutover phase.
  */
-export const SINGLE_SITE_KEY = "showcase" as const;
+export const SINGLE_SITE_KEY = "tucsenberg" as const;
 export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
   key: SINGLE_SITE_KEY,
   config: {
     baseUrl,
-    name: "Showcase Website Starter",
+    name: "Tucsenberg",
     description:
-      "Public demo starter for launching a showcase website foundation",
+      "Aftermarket aeration replacement membranes for buyers matching OEM families, materials, and RFQ requirements.",
     seo: {
-      titleTemplate: "%s | Showcase Website Starter",
-      defaultTitle: "Showcase Website Starter - Public Demo Starter Site",
+      titleTemplate: "%s | Tucsenberg",
+      defaultTitle: "Tucsenberg - Aftermarket Aeration Replacement Membranes",
       defaultDescription:
-        "A public demo starter site for teams that need a deployable showcase website foundation before they have a real website.",
+        "Tucsenberg helps buyers source aftermarket aeration replacement membranes by OEM family, material fit, and RFQ-ready project requirements.",
       keywords: [
-        "showcase website starter",
-        "public demo starter site",
-        "company website starter",
-        "product showcase website",
-        "service showcase website",
-        "inquiry website starter",
-        "multilingual website starter",
-        "component governance",
-        "storybook website starter",
+        "Tucsenberg membranes",
+        "aftermarket aeration membranes",
+        "aeration replacement membranes",
+        "OEM membrane family fit",
+        "EPDM aeration membrane",
+        "silicone aeration membrane",
+        "PTFE aeration membrane",
+        "fine bubble diffuser membrane",
+        "wastewater aeration replacement parts",
+        "membrane RFQ",
       ],
     },
     social,
@@ -88,14 +89,14 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
   },
   facts: {
     company: {
-      name: "Showcase Website Starter",
+      name: "Tucsenberg",
       established: establishedYear,
       yearsInBusiness: siteFactSnapshotYear - establishedYear,
-      employees: 60,
+      employees: 0,
       location: {
-        country: "Replace before launch",
-        city: "Replace before launch",
-        address: "Replace before launch",
+        country: "China",
+        city: "To be confirmed",
+        address: "To be confirmed",
       },
     },
     contact: {
@@ -107,20 +108,13 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
         sundayClosed: true,
       },
     },
-    certifications: [
-      {
-        name: "ISO 9001:2015",
-        certificateNumber: "240021Q09730R0S",
-        validUntil: "2027-03",
-      },
-    ],
+    certifications: [],
     stats: {
-      exportCountries: 20,
-      annualCapacity:
-        "Example product, service, resource, and inquiry presentation",
-      clientsServed: 60,
-      exampleFootprint: 100,
-      onTimeDeliveryRate: 98,
+      exportCountries: 0,
+      annualCapacity: "Aftermarket aeration membrane RFQ scope to be confirmed",
+      clientsServed: 0,
+      exampleFootprint: 0,
+      onTimeDeliveryRate: 0,
     },
     social: {
       linkedin: social.linkedin,
@@ -163,25 +157,25 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
           translationKey: "footer.sections.navigation.home",
         },
         {
-          key: "products",
-          label: "Products",
-          href: SINGLE_SITE_ROUTE_HREFS.products,
+          key: "membranes",
+          label: "Membranes",
+          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
           external: false,
-          translationKey: "footer.sections.navigation.products",
+          translationKey: "navigation.membranes",
         },
         {
-          key: "blog",
-          label: "Blog",
-          href: SINGLE_SITE_ROUTE_HREFS.blog,
+          key: "compatibility",
+          label: "Compatibility",
+          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
           external: false,
-          translationKey: "footer.sections.navigation.blog",
+          translationKey: "navigation.compatibility",
         },
         {
-          key: "about",
-          label: "About",
-          href: SINGLE_SITE_ROUTE_HREFS.about,
+          key: "materials",
+          label: "Materials",
+          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
           external: false,
-          translationKey: "footer.sections.navigation.about",
+          translationKey: "navigation.materials",
         },
       ],
     },
@@ -191,11 +185,11 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
       translationKey: "footer.sections.support.title",
       links: [
         {
-          key: "contact",
-          label: "Contact",
-          href: SINGLE_SITE_ROUTE_HREFS.contact,
+          key: "quote",
+          label: "Quote",
+          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
           external: false,
-          translationKey: "footer.sections.support.contact",
+          translationKey: "navigation.quote",
         },
         {
           key: "privacy",
