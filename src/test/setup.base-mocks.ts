@@ -35,18 +35,33 @@ const googleFontMocks = vi.hoisted(() => {
     display: string;
   };
 
-  const createGoogleFontMock = (fontFamily: string, className: string) =>
-    vi.fn((options: GoogleFontOptions) => ({
-      variable: options.variable,
+  const createGoogleFontMock = (
+    fontFamily: string,
+    variable: string,
+    className: string,
+  ) =>
+    vi.fn((_options: GoogleFontOptions) => ({
+      variable,
       className,
       style: { fontFamily },
-      options,
     }));
 
   return {
-    IBM_Plex_Sans: createGoogleFontMock("IBM Plex Sans", "ibm-plex-sans"),
-    Inter: createGoogleFontMock("Inter", "inter"),
-    IBM_Plex_Mono: createGoogleFontMock("IBM Plex Mono", "ibm-plex-mono"),
+    IBM_Plex_Sans: createGoogleFontMock(
+      "IBM Plex Sans",
+      "__variable_ibm_plex_sans",
+      "__className_ibm_plex_sans",
+    ),
+    Inter: createGoogleFontMock(
+      "Inter",
+      "__variable_inter",
+      "__className_inter",
+    ),
+    IBM_Plex_Mono: createGoogleFontMock(
+      "IBM Plex Mono",
+      "__variable_ibm_plex_mono",
+      "__className_ibm_plex_mono",
+    ),
   };
 });
 
@@ -59,8 +74,8 @@ vi.mock("next/font/google", () => ({
 
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-figtree",
-    className: "font-local",
-    style: { fontFamily: "Figtree" },
+    variable: "__variable_local_font",
+    className: "__className_local_font",
+    style: { fontFamily: "Local Font" },
   })),
 }));
