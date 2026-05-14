@@ -21,6 +21,7 @@ const EXPLICIT_BROWSER_UI_FILES = [
   "src/config/footer-style-tokens.ts",
   "src/config/footer-links.ts",
 ] as const;
+const RAW_BRAND_HEX_SCAN_ROOT = "src";
 
 function collectFiles(directoryPath: string): string[] {
   let entries: string[];
@@ -64,6 +65,16 @@ function importsStaticThemeColors(source: string) {
           specifier.endsWith("/static-theme-colors.ts")))
     );
   });
+}
+
+function collectRawBrandHexScanFiles(): string[] {
+  return collectFiles(RAW_BRAND_HEX_SCAN_ROOT).filter(
+    (filePath, index, allFiles) =>
+      allFiles.indexOf(filePath) === index &&
+      !RAW_BRAND_HEX_ALLOWLIST.has(filePath) &&
+      !filePath.startsWith("src/emails/") &&
+      /\.(ts|tsx|css)$/.test(filePath),
+  );
 }
 
 describe("static theme colors", () => {
@@ -140,21 +151,19 @@ describe("static theme colors", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("keeps raw Tucsenberg brand hex values out of browser ui files", () => {
-    const browserUiFiles = [
-      ...BROWSER_UI_SCAN_ROOTS.flatMap((directoryPath) =>
-        collectFiles(directoryPath),
-      ),
-      ...EXPLICIT_BROWSER_UI_FILES,
-    ].filter(
-      (filePath, index, allFiles) =>
-        allFiles.indexOf(filePath) === index &&
-        !RAW_BRAND_HEX_ALLOWLIST.has(filePath) &&
-        !filePath.startsWith("src/emails/") &&
-        /\.(ts|tsx|css)$/.test(filePath),
-    );
+  it("scans the whole src tree for raw Tucsenberg brand hex drift", () => {
+    const scannedFiles = collectRawBrandHexScanFiles();
 
-    const offenders = browserUiFiles.flatMap((filePath) => {
+    expect(scannedFiles).toContain("src/config/single-site.ts");
+    expect(scannedFiles).toContain("src/lib/navigation.ts");
+    expect(scannedFiles).not.toContain("src/app/globals.css");
+    expect(scannedFiles).not.toContain("src/config/static-theme-colors.ts");
+  });
+
+  it("keeps raw Tucsenberg brand hex values out of src files", () => {
+    const srcFiles = collectRawBrandHexScanFiles();
+
+    const offenders = srcFiles.flatMap((filePath) => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan reads approved repo source files to catch raw brand hex drift
       const source = readFileSync(filePath, "utf8");
 
