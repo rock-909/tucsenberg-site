@@ -23,12 +23,13 @@
 - [x] 建站骨架落地：已从 `showcase-website-starter` 复制代码，保留本项目主文档，`package.json` 已改名为 `tucsenberg-site`，本目录已初始化 git，`pnpm install` + `pnpm dev` 冒烟通过
 - [x] repo config 初步对齐：`.env.example`、Wrangler、CI URL、CODEOWNERS、CodeRabbit、public security files、OG 图和 runtime env defaults 已切到 Tucsenberg
 - [x] Step 3 产品兼容数据层：`src/data/product-compatibility/` 已提供 Zod schema、静态产品/OEM 数据、三套查询索引和 part-number 搜索。
+- [x] Step 4 四页样板：首页、产品详情页、OEM 兼容页、Quote 询价页全部跑在 `src/data/product-compatibility/` 数据层上；part-number / 西语 / 中文数据已清理；全站 ⌘K 兼容性搜索（任意页面唤起）已接入；英 + 西公开、中文仅内部预览；产品详情页 / OEM 页的动态路由现已按公开语言进 sitemap（每个产品 slug 出 `/membranes/{slug}`，每个 OEM 品牌 slug 出 `/compatible/{brand}`，中文不进、不索引）。
 
 ---
 
 ## 进行中
 
-- [ ] Step 4 四页样板：首页、产品页样板、Sanitaire 兼容页样板、Quote 表单页。
+- [ ] Step 5：剩余 11 页英文版（Step 4 已收尾，下一步进入 Step 5）。
 
 ---
 
@@ -138,6 +139,10 @@
 | 2 个变体域名购买（Cloudflare Registrar） | 冷邮件域名隔离 | 用户 |
 | 实拍产品图 + 安装/拆装近景 | 视觉资产，hero / 产品页头图 | 用户 |
 
+### 跟进项（开发侧，待处理）
+
+- 本地 `main` 已与 `origin/main` 分叉，需要做一次 reset 对齐（本分支不处理，作为独立跟进项；处理前确认本地无未推送的有效改动）。
+
 ---
 
 ## 卡点
@@ -150,6 +155,8 @@
 
 ### 2026-05-15
 
+- **Step 4 四页样板完成** — 首页、产品详情页、OEM 兼容页、Quote 询价页全部上线并跑在产品-兼容数据层上；全站 ⌘K 搜索、三语数据清理、公开语言动态路由进 sitemap。代码侧唯一新增改动是把产品/品牌动态路由按公开语言（仅英 + 西，中文不进）写入 sitemap，并补回 `quote` 路由的存在性断言。全套门禁顺序通过（type-check / lint / 3269 测试全绿 / brand / content / component / react:doctor 90 / build / Cloudflare build 全 exit 0）。
+- **权威数据层定案** — 产品-兼容的唯一权威数据层是 `src/data/product-compatibility/`（Zod schema + 静态数据 + 索引 + part-number 搜索）。`src/data/` 下当前只有这一个目录；早期探索阶段提到的本地 `src/data/` 变体 A 实际并未落库（已核实不存在该目录），按"不使用、不引用"对待，后续不要再新建并行数据层。
 - **A/B 设计方向反哺定案** — B 版（Claude Design 探索）的视觉皮（暗色优先 / Inter 做 display / 满屏 pill / 密度切换）**全部拒绝**，与 DESIGN.md 第 2 节反面参考一致；只吸收其三个交互骨架反哺进 DESIGN.md v1.1：(1) 全局兼容性搜索（首页第一屏主入口 + 全站 ⌘K 可唤起，用 A 视觉 token 实现，不是暗色 palette）；(2) 深层页上下文条（复用 hero Trust ribbon 槽位形态）；(3) `/compatible/[brand]` 的 OEM 系列下划线 tab。视觉锁定不变，仍是 A 体系（IBM Plex Sans 300 / Navy / Teal / 6px / 无 pill）。用户决策点：兼容搜索定位 = 首页第一屏主入口。
 - **进度认知校正** — 跨会话曾误判项目已到 Step 4；核实后真实状态为 **Phase 1 Step 2 收尾**：当前可访问页面仍是 starter 演示页套 Tucsenberg 品牌字，PROJECT-BRIEF 规划的 Tucsenberg 页面（兼容搜索首页 / `/membranes` / `/compatible/sanitaire` / 真实 `/quote`）尚未落地；Step 3 数据层、Step 4 四页样板均未开始。组件库与 Radix governed adoption 计划的 wrapper 已建但 6 个切片验收闸门尚未跑（计划文档勾选框仍全空）。当前在 `radix-governed-full-adoption` 分支，工作区干净。
 
