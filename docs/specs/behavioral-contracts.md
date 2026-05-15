@@ -22,18 +22,18 @@
 
 ### Navigation & Discovery
 
-#### BC-001: Homepage loads and shows core value proposition
+#### BC-001: Homepage loads and routes the buyer into a part-number path
 
-A buyer landing on the homepage sees the hero section with a clear heading, proof metrics (countries, experience), and two CTA buttons leading to /contact and /products.
+A buyer landing on the homepage sees the brand H1 and compatibility sub-claim, an operable hero compatibility search (typing a known OEM part number surfaces a matching result link into the OEM compatibility path), an OEM brand grid where each brand links to its `/compatible/{slug}` page, and a final CTA that links to the quote page and to a membranes product page.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E |
 | Test File | `tests/e2e/homepage.spec.ts` |
-| Status | Partial |
+| Status | Covered |
 
-Notes: Hero section visibility and CTA link count are tested. CTA `href` targets (/contact, /products) are not explicitly verified.
+Notes: E2E runs for `/en` and `/es`. It verifies the brand H1, the hero compatibility search resolving a known OEM part number (`00223` → Sanitaire model) to a `/compatible/sanitaire` result link, an OEM brand card linking to `/compatible/sanitaire`, and the final CTA `href` targets (`/quote` and the `/membranes/tuc-d9-epdm` product page) in the active locale. The spec fails on page runtime/console errors.
 
 ---
 
@@ -408,11 +408,11 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
-| Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
+| Navigation & Discovery | 6 | 5 | 1 | 0 | 0 |
 | Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
 | Content & Information | 6 | 4 | 1 | 1 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **14** | **9** | **1** | **1** |
+| **Total** | **24** | **15** | **8** | **1** | **1** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -420,7 +420,7 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 ### Critical gaps (no or partial coverage on Critical contracts)
 
-- **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
+- No current critical gap for BC-001: the homepage compatibility-search entry, OEM brand grid, and quote/membranes CTA `href` targets are E2E-covered for `/en` and `/es`.
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
 - No current critical content gap for BC-013: products overview now has focused unit coverage and an E2E navigation journey.
 
