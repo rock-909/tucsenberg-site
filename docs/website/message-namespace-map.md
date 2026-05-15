@@ -1,6 +1,6 @@
 # Message namespace map
 
-这份表只解决一个问题：派生新项目时，`messages` 里哪些文案必须替换，哪些只需要按项目语气检查，哪些不要一上来乱改。
+这份表只解决一个问题：Tucsenberg 当前阶段改 `messages` 时，哪些文案必须替换，哪些只需要按项目语气检查，哪些不要一上来乱改。
 
 当前运行时消息文件只有这两组：
 
@@ -11,24 +11,24 @@
 
 ## 标签含义
 
-- `must-replace`：client launch 前必须替换或确认，不能把 starter 示例当真实项目内容。
+- `must-replace`：公开上线前必须替换或确认，不能把临时示例当真实项目内容。
 - `review-or-tune`：通常可以保留结构，但要按新项目语气、页面组合、产品类型或法务要求检查。
 - `do-not-edit-first`：不要先从这里动手；这些通常是通用 UI、状态、错误、主题或运行机制文案。
 
 ## `messages/{locale}/critical.json`
 
-| Namespace | Category | 用途 | 派生项目处理方式 |
+| Namespace | Category | 用途 | Tucsenberg 处理方式 |
 | --- | --- | --- | --- |
 | `common` | `do-not-edit-first` | 通用按钮、状态、短标签。 | 除非项目语气有明确要求，否则先保留。 |
 | `navigation` | `review-or-tune` | 顶部导航、菜单、CTA 文案。 | 路由和页面组合改完后同步检查。 |
 | `theme` | `do-not-edit-first` | 主题切换相关 UI。 | 不要当品牌色入口，品牌色去配置和设计 token。 |
 | `language` | `do-not-edit-first` | 语言切换相关 UI。 | 新增语言时跟 i18n 配置一起改，不单独改文案。 |
-| `blog` | `review-or-tune` | 博客入口和列表短文案。 | 如果派生项目没有 blog，再按页面定位决定保留或隐藏。 |
+| `blog` | `review-or-tune` | 博客入口和列表短文案。 | 如果 Tucsenberg 不用时间线 blog，再按 resources / learn 定位决定保留或隐藏。 |
 | `home` | `must-replace` | 首页 hero、section、CTA、买家可见主表达。 | 必须替换成新项目自己的价值表达。 |
 | `monitoring` | `do-not-edit-first` | 监控或状态类通用文案。 | 保留，除非改了对应运行能力。 |
 | `footer` | `must-replace` | 页脚品牌、链接、说明、联系入口。 | 必须按新公司身份和链接检查。 |
 | `accessibility` | `do-not-edit-first` | 无障碍辅助文案。 | 保留，除非 UI 行为变了。 |
-| `underConstruction` | `review-or-tune` | 未完工/占位页面文案。 | 派生项目公开前应确认是否还需要展示。 |
+| `underConstruction` | `review-or-tune` | 未完工/占位页面文案。 | Tucsenberg 公开前应确认是否还需要展示。 |
 | `cookie` | `review-or-tune` | Cookie 提示和同意文案。 | 按实际 analytics / tracking / 法务要求检查。 |
 | `structured-data` | `do-not-edit-first` | 结构化数据辅助文案。 | 先改配置和内容真相源，不要直接在这里修业务事实。 |
 | `apiErrors` | `do-not-edit-first` | API 错误码对用户显示的统一文案。 | 不要为单个业务场景临时写散；改 API contract 时再动。 |
@@ -37,13 +37,13 @@
 
 ## `messages/{locale}/deferred.json`
 
-| Namespace | Category | 用途 | 派生项目处理方式 |
+| Namespace | Category | 用途 | Tucsenberg 处理方式 |
 | --- | --- | --- | --- |
 | `error` | `do-not-edit-first` | 通用错误短文案。 | 先保留。 |
 | `turnstileRequired` | `do-not-edit-first` | Turnstile 人机验证提示。 | 只有改表单安全策略时再动。 |
 | `errorBoundary` | `do-not-edit-first` | React 错误边界文案。 | 先保留。 |
 | `legal` | `review-or-tune` | 法务区块通用短文案。 | 跟隐私/条款页面一起检查。 |
-| `themeDemo` | `do-not-edit-first` | 主题演示文案。 | 如果派生项目不展示 demo，可后续清理展示入口。 |
+| `themeDemo` | `do-not-edit-first` | 主题演示文案。 | 如果 Tucsenberg 不展示 demo，可后续清理展示入口。 |
 | `instructions` | `do-not-edit-first` | 通用操作说明。 | 先保留。 |
 | `actions` | `do-not-edit-first` | 通用动作按钮文案。 | 先保留。 |
 | `formTemplate` | `review-or-tune` | 表单模板、字段辅助文案。 | 改联系表单或询盘流程时检查。 |
@@ -61,7 +61,7 @@
 | `article` | `review-or-tune` | 文章相关短标签。 | 如果不启用文章/博客，可后续收缩。 |
 | `products` | `must-replace` | 产品相关延迟区块短文案。 | 必须跟 catalog truth 一起替换。 |
 | `title` | `do-not-edit-first` | 通用标题短文案。 | 先保留。 |
-| `trust` | `review-or-tune` | 信任、证明、资质相关短文案。 | 不能保留 starter 示例证明；上线前必须确认。 |
+| `trust` | `review-or-tune` | 信任、证明、资质相关短文案。 | 不能保留临时示例证明；上线前必须确认。 |
 | `faq` | `review-or-tune` | FAQ 短文案。 | 跟页面 FAQ 和业务问答一起检查。 |
 | `privacy` | `must-replace` | 隐私相关 UI 文案。 | 必须跟 `content/pages/{locale}/privacy.mdx` 和法务主体一致。 |
 | `terms` | `must-replace` | 条款相关 UI 文案。 | 必须跟 `content/pages/{locale}/terms.mdx` 和法务主体一致。 |

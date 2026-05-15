@@ -33,7 +33,7 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 ```
 
 Do not introduce phase-named Cloudflare commands or private topology wrappers.
-This starter uses the native OpenNext Cloudflare CLI plus Wrangler dry-run for
+This repo uses the native OpenNext Cloudflare CLI plus Wrangler dry-run for
 local deploy-artifact proof.
 
 ## Proof table
@@ -64,7 +64,7 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 
 Keep `src/middleware.ts` as the runtime entrypoint.
 
-Do not rename `src/middleware.ts` to `src/proxy.ts` in this starter. Cloudflare/OpenNext support is not acceptable for a blind migration.
+Do not rename `src/middleware.ts` to `src/proxy.ts` in this repo. Cloudflare/OpenNext support is not acceptable for a blind migration.
 Next.js warns that `middleware` is deprecated, but this repo treats that as a known
 platform-transition warning, not as a reason to risk the locale-routing entrypoint.
 Current decision record:
@@ -102,13 +102,13 @@ middleware-provided trusted IP headers.
 - Do not add `cacheTag()`, `revalidateTag()`, or `revalidatePath()` to
   production code without a new Cloudflare proof plan.
 - Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
-  cache storage as a starter default.
+  cache storage as a default.
 - New `"use cache"` boundaries must stay narrow and explain why rebuild/redeploy
   is not enough.
 - Content updates flow through rebuild/redeploy unless a future CMS integration
   proves a different path.
 - `wrangler.jsonc` must not add `r2_buckets`, `d1_databases`, or
-  `durable_objects` for this starter by default.
+  `durable_objects` for this repo by default.
 - `open-next.config.ts` must not add custom incremental cache, tag cache, or
   queue overrides by default.
 

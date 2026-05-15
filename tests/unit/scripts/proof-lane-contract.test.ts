@@ -214,7 +214,7 @@ describe("proof lane contract", () => {
       expect.objectContaining({
         NODE_ENV: "production",
         APP_ENV: "preview",
-        NEXT_PUBLIC_SITE_URL: "https://showcase-website-starter.test",
+        NEXT_PUBLIC_SITE_URL: "https://tucsenberg.com",
         CLOUDFLARE_API_TOKEN: "${{ secrets.CLOUDFLARE_API_TOKEN }}",
         CLOUDFLARE_ACCOUNT_ID: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
       }),
@@ -815,8 +815,8 @@ describe("proof lane contract", () => {
     expect(brandSettings).not.toContain("src/config/website");
     expect(brandSettings).not.toContain("镜像层");
 
-    expect(replacementChecklist).toContain("client launch");
-    expect(replacementChecklist).toContain("starter 示例");
+    expect(replacementChecklist).toContain("公开上线");
+    expect(replacementChecklist).toContain("临时示例");
     expect(replacementChecklist).toContain("SEO");
     expect(replacementChecklist).toContain("法务");
     expect(qualityProof).toContain("src/config/single-site.ts");
@@ -829,7 +829,7 @@ describe("proof lane contract", () => {
     expect(qualityProof).toContain("catalog truth");
     expect(qualityProof).toContain("crawl / indexing truth");
     expect(qualityProof).toContain("canonical authoring source");
-    expect(qualityProof).toContain("starter 示例可以存在于 starter 仓库");
+    expect(qualityProof).toContain("临时示例可以存在于受控开发阶段");
     expect(qualityProof).not.toContain("src/config/website");
     expect(qualityProof).toContain(
       "PUBLIC_LAUNCH_STRICT=true node scripts/starter-checks.js validate-production-config",

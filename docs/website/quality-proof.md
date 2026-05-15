@@ -3,18 +3,18 @@
 质量检查脚本的拆分计划记录在 `docs/website/starter-checks-split-plan.md`。
 现在所有 `node scripts/starter-checks.js <command>` 公开命令都是兼容面；后续内部即使拆文件，也不能随便换命令名、参数习惯或证明口径。
 
-这份文档说明新项目从 starter 派生后，怎样证明“网站真的适合继续推进”，而不是只看构建或测试绿灯。
+这份文档说明 Tucsenberg 怎样证明“网站真的适合继续推进”，而不是只看构建或测试绿灯。
 
 核心原则：
 
 - 门禁绿只是最低运行底线，不等于内容、转化、部署都可靠。
 - 本地证明、CI 证明、预览部署证明、上线前人工确认要分开说。
 - 不把示例品牌、示例产品、示例联系方式当成真实上线内容。
-- 不把旧项目的脚本、域名、产品事实、第三方集成配置原样搬进新项目。
+- 不把旧项目的脚本、域名、产品事实、第三方集成配置原样搬进当前站点。
 
 ## 起步后先做什么
 
-新项目替换品牌和内容后，先跑基础验证：
+Tucsenberg 替换品牌和内容后，先跑基础验证：
 
 ```bash
 pnpm brand:check
@@ -46,7 +46,7 @@ Local release proof is not public launch proof. Public launch still requires `PU
 - 生产组件没有绕过 UI wrapper 直接用 Radix，也没有明显绕过设计 token；
 - Storybook 当前能构建出来。
 
-它不证明每一个业务区块、页面区块、表单组合都有 Storybook 覆盖。业务/page-level stories 是 starter 的示例和评审辅助，可以逐步增加，但不作为派生项目的硬门禁。
+它不证明每一个业务区块、页面区块、表单组合都有 Storybook 覆盖。业务/page-level stories 是当前站点的评审辅助，可以逐步增加，但不作为当前阶段的硬门禁。
 
 ### Optional Lighthouse proof boundary
 
@@ -73,7 +73,7 @@ Cloudflare platform detection uses `DEPLOYMENT_PLATFORM=cloudflare` as the canon
 
 `NEXT_PUBLIC_SECURITY_MODE=strict` means enforced security headers with the current static-compatible CSP. It is not nonce-level strict CSP.
 
-This starter intentionally does not add a proxy-generated nonce by default. A nonce CSP lane must be opened separately because it requires dynamic rendering, Cloudflare/OpenNext proof, and fresh checks for Cache Components, Turnstile, analytics, deployed smoke, and form canary behavior.
+This site intentionally does not add a proxy-generated nonce by default. A nonce CSP lane must be opened separately because it requires dynamic rendering, Cloudflare/OpenNext proof, and fresh checks for Cache Components, Turnstile, analytics, deployed smoke, and form canary behavior.
 
 Current nonce feasibility decision: `docs/website/nonce-csp-feasibility.md`.
 
@@ -129,7 +129,7 @@ React Doctor runs as an error-level quality gate: error blocks CI; warning is ba
 
 ### 2. 内容就绪检查
 
-目标：防止 starter 示例内容进入买家可见页面。
+目标：防止临时示例内容进入买家可见页面。
 
 只应该扫描买家可见输入面：
 
@@ -154,17 +154,17 @@ React Doctor runs as an error-level quality gate: error blocks CI; warning is ba
 
 否则会误扫测试里故意保留的坏样本，导致永远红，甚至诱导删除有价值的测试。
 
-Starter 现在提供 `node scripts/starter-checks.js content-readiness` 做第一轮自动检查。它只扫上面这些买家可见输入面，并故意排除 docs、tests、reports 和 generated output；翻译检查以 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json` 为准。
+当前兼容命令 `node scripts/starter-checks.js content-readiness` 做第一轮自动检查。它只扫上面这些买家可见输入面，并故意排除 docs、tests、reports 和 generated output；翻译检查以 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json` 为准。
 
-client launch 前还要跑 `PUBLIC_LAUNCH_STRICT=true node scripts/starter-checks.js validate-production-config`。这个 strict gate 会把 starter 公司身份、示例域名、示例邮箱、SEO 默认值、待确认 logo/product photos、`PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED`，以及 About / Contact / Privacy / Terms 这类 owner-reviewed 内容作为上线阻断项。
+公开上线前还要跑 `PUBLIC_LAUNCH_STRICT=true node scripts/starter-checks.js validate-production-config`。这个 strict gate 会把旧模板公司身份、示例域名、示例邮箱、SEO 默认值、待确认 logo/product photos、`PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED`，以及 About / Contact / Privacy / Terms 这类 owner-reviewed 内容作为上线阻断项。
 
 单站公司身份的 canonical authoring source 是 `src/config/single-site.ts`。导航和链接看 `src/config/single-site-navigation.ts` 与 `src/config/single-site-links.ts`，页面表达看 `src/config/single-site-page-expression.ts`，SEO crawl / indexing 看 `src/config/single-site-seo.ts`。
 
-这个命令能证明明显的 starter / fake / placeholder 残留有没有被扫出来；它不能证明内容法律上正确、文案足够有说服力，或已经得到 owner 确认。
+这个命令能证明明显的旧模板 / fake / placeholder 残留有没有被扫出来；它不能证明内容法律上正确、文案足够有说服力，或已经得到 owner 确认。
 
-对产品/服务页来说，catalog truth 是一整组输入面：`src/config/single-site-product-catalog.ts`、`src/constants/product-specs/**`、messages 文案和产品图片都要一起替换。starter 示例可以存在于 starter 仓库；公开客户站不能把这些示例当成真实销售事实。
+对产品/服务页来说，catalog truth 是一整组输入面：`src/config/single-site-product-catalog.ts`、`src/constants/product-specs/**`、messages 文案和产品图片都要一起替换。临时示例可以存在于受控开发阶段；公开上线不能把这些示例当成真实销售事实。
 
-crawl / indexing truth 也要单独看：`src/config/single-site-seo.ts` 控制 sitemap、robots、公共静态页面索引策略和 lastmod 来源。派生项目如果改了页面结构、产品市场或公开索引策略，不能只改页面文案或站点标题。
+crawl / indexing truth 也要单独看：`src/config/single-site-seo.ts` 控制 sitemap、robots、公共静态页面索引策略和 lastmod 来源。Tucsenberg 如果改了页面结构、产品市场或公开索引策略，不能只改页面文案或站点标题。
 
 ### 3. 预览健康接口证明
 
@@ -227,7 +227,7 @@ The runtime result distinguishes `recordCreated` from `ownerNotified`; do not tr
 
 如果新增 client boundary，要能解释为什么这个组件必须在浏览器里跑。
 
-Starter 现在提供 `node scripts/starter-checks.js client-boundary`。它会把 `src/` 下顶层 `"use client"` 文件和 `docs/quality/client-boundary-budget.json` 对比，并把当前报告写到 `reports/quality/client-boundary-budget.json`。
+当前兼容命令 `node scripts/starter-checks.js client-boundary` 会把 `src/` 下顶层 `"use client"` 文件和 `docs/quality/client-boundary-budget.json` 对比，并把当前报告写到 `reports/quality/client-boundary-budget.json`。
 
 这是源码结构 proof，不是浏览器行为 proof。它不证明 hydration 行为、页面 UX 或真实浏览器里的交互质量。
 
@@ -270,7 +270,7 @@ node scripts/quality/retention-reports.mjs --keep 5
 ### 7. Cloudflare middleware/proxy 边界
 
 Next.js 当前推荐 `proxy.ts`，并会输出 Next.js deprecation warning。
-但这个 starter 暂不迁移：
+但当前 Tucsenberg 站点暂不迁移：
 
 - Do not rename `src/middleware.ts` to `src/proxy.ts`.
 - Cloudflare/OpenNext support is not acceptable for a blind migration.
@@ -297,9 +297,9 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 
 ### 8. Cloudflare image transformation proof
 
-starter baseline 不启用 Cloudflare Image Optimization。默认 `pnpm build`、`pnpm website:build:cf` 和 `pnpm release:verify` 只证明普通 Cloudflare/OpenNext 构建链路，不证明 Cloudflare Transformations 或 Cloudflare Images 的真实边缘行为。
+current baseline 不启用 Cloudflare Image Optimization。默认 `pnpm build`、`pnpm website:build:cf` 和 `pnpm release:verify` 只证明普通 Cloudflare/OpenNext 构建链路，不证明 Cloudflare Transformations 或 Cloudflare Images 的真实边缘行为。
 
-如果派生项目选择 Cloudflare Transformations 或 Cloudflare Images，至少补充：
+如果 Tucsenberg 选择 Cloudflare Transformations 或 Cloudflare Images，至少补充：
 
 ```bash
 pnpm build
@@ -322,7 +322,7 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 这些不是代码能自动替你确认的事：
 
 - 真实公司名、地址、电话、邮箱已经 owner 确认。
-- logo、favicon、OG 图、产品/服务图片不是 starter 示例。
+- logo、favicon、OG 图、产品/服务图片不是旧模板示例。
 - Terms / Privacy / About 文案适合当前公司。
 - 联系/询盘表单能在部署环境写入目标系统。
 - 邮件通知或 CRM/Airtable 记录可以被人工查到。

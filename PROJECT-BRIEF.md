@@ -673,15 +673,15 @@ CompatibilityMapping（兼容映射）
 - 视频内容嵌入
 - Comparison 页面（OEM vs aftermarket / TPU vs EPDM 等）
 
-## Starter 能力研判
+## 当前代码基础研判
 
-基于 `showcase-website-starter` 模板：
+基于当前 Next.js / Cloudflare 代码基础：
 
 | 维度 | 评估 |
 |------|------|
 | 技术栈（Next.js 16 + Cloudflare Workers via OpenNext） | 完全够用 |
-| SEO（12 个 skills + structured-data 系统） | 超出需求 |
-| 设计（CWF + DWF + impeccable skills） | 够用 |
+| SEO（structured-data 系统 + sitemap/robots/hreflang helpers） | 超出需求 |
+| 设计（CWF / DWF / impeccable 设计工作流资产） | 够用 |
 | 内容（MDX + i18n + CWF） | 够用 |
 | 询盘（inquiry API + lead-pipeline + Resend + Turnstile） | 直接可用 |
 
@@ -789,7 +789,7 @@ CompatibilityMapping（兼容映射）
 
 ## 前端实现规范
 
-### 设计 Token 落地（基于 starter `src/app/globals.css`）
+### 设计 Token 落地（基于当前 `src/app/globals.css`）
 
 **主色（方案 A：Engineering Navy + Process Teal）：**
 
@@ -802,7 +802,7 @@ CompatibilityMapping（兼容映射）
   --background: #F7FAFC;       /* Light page background */
   --foreground: #0F172A;       /* Body text */
 
-  /* 状态色（保留 starter 默认 + 微调）*/
+  /* 状态色 */
   --success: 142 71% 45%;
   --warning: 38 92% 50%;
   --error: 0 72% 51%;
@@ -824,7 +824,7 @@ CompatibilityMapping（兼容映射）
 
 ### 响应式 Breakpoint 策略
 
-延用 Tailwind 4 默认 + starter 约定：
+延用 Tailwind 4 默认 + 当前仓库约定：
 
 | Breakpoint | 宽度 | 用途 |
 |-----------|------|------|
@@ -834,14 +834,14 @@ CompatibilityMapping（兼容映射）
 | `xl` | 1280px+ | 桌面 |
 | `2xl` | 1536px+ | 大屏 |
 
-**Container max-width: 1080px**（来自 starter DESIGN.md），左右 padding 24px。
+**Container max-width: 1080px**（来自当前 `DESIGN.md`），左右 padding 24px。
 
 **移动端优先：** 所有组件先按 mobile 写，再 `md:` 加桌面样式。
 
 ### 组件层约定
 
-- **优先用 starter 已有的 `src/components/ui/*` 组件**（基于 Radix Primitives）
-- **不导入 `@radix-ui/themes`** — starter 的 ADR-ui-foundation 禁止在业务页面使用
+- **优先复用当前 `src/components/ui/*` 组件**（基于 Radix Primitives）
+- **不导入 `@radix-ui/themes` 到业务页面** — 业务页面走当前 UI wrapper 和 token
 - **核心业务组件应该新建在 `src/components/sections/`**（hero / trust modules / RFQ form）
 - **Cross-reference 查询工具放 `src/components/cross-reference/`** 单独管理
 
@@ -858,7 +858,7 @@ CompatibilityMapping（兼容映射）
 
 ### 动效规范
 
-- **遵循 starter 的 `MOTION-PRINCIPLES.md`**
+- **遵循当前动效原则文档**
 - **业务页面动效极克制** — 工程买家不喜欢"沉浸式"
 - **允许的：** subtle hover state、表单字段 focus、loading spinner、scroll-triggered fade-in（>200ms 才出现）
 - **禁止的：** 大幅 parallax、自动播放视频、夸张 transition、装饰性微动效
@@ -869,7 +869,7 @@ CompatibilityMapping（兼容映射）
 - 工程买家通常在白天办公环境查规格
 - 截图发给同事 / 老板时浅底更通用
 - 节省 Phase 1 维护成本（双套色彩 token + 测试矩阵翻倍）
-- starter 的 next-themes 保留，但 Phase 1 不暴露切换按钮
+- 当前 next-themes 能力保留，但 Phase 1 不暴露切换按钮
 
 Phase 2 看用户反馈再决定。
 
@@ -888,7 +888,7 @@ Phase 2 看用户反馈再决定。
 | **First Contentful Paint** | < 1.5s | < 2.0s |
 | **JS bundle（per page）** | < 100KB gzipped | < 150KB |
 
-**配置在 `lighthouserc.js`**（starter 已有，需调整阈值）。
+**配置在 `lighthouserc.js`**（当前已有，需按 Tucsenberg 阈值调整）。
 
 ### Analytics Event Schema
 
@@ -939,7 +939,7 @@ product_detail_clicked
 
 ### Cloudflare Web Analytics
 
-Starter 已配置接口，需要在 `src/config/single-site.ts` 填入 zone id + token。
+当前代码基础已预留 Cloudflare Web Analytics 配置面，需要按 Tucsenberg 部署环境填入 zone id、hostname 和 server-only token。
 
 ---
 
@@ -953,13 +953,13 @@ Starter 已配置接口，需要在 `src/config/single-site.ts` 填入 zone id +
 - **存储：** Cloudflare R2，不公开直链，后台用 signed URL（24h 有效）
 - **病毒扫描：** Phase 1 可选 Cloudflare Workers + ClamAV，Phase 2 必须
 - **反爬反垃圾：**
-  - Turnstile（starter 已集成）
+  - Turnstile（当前代码基础已集成）
   - Rate limit：单 IP 每小时 ≤ 10 次 RFQ 提交
   - Honeypot field（隐藏字段，正常用户不填，机器人会填）
 
 ### CSP 策略
 
-Starter 已有 CSP report endpoint（`/api/csp-report`），保留并监控。
+当前代码基础已有 CSP report endpoint（`/api/csp-report`），保留并监控。
 
 ### 数据保留
 
@@ -1037,7 +1037,7 @@ Starter 已有 CSP report endpoint（`/api/csp-report`），保留并监控。
 
 ### 实现
 
-starter 的 `content/pages/{locale}/privacy.mdx` 和 `terms.mdx` 已有占位，按上面要点填充。
+当前 `content/pages/{locale}/privacy.mdx` 和 `terms.mdx` 已有占位，按上面要点填充。
 
 ---
 
@@ -1056,7 +1056,7 @@ starter 的 `content/pages/{locale}/privacy.mdx` 和 `terms.mdx` 已有占位，
 - **首页 hero 视觉** — 走 DWF 做 HTML 原型 + 五维审计
 - **产品页样板** — 走 DWF 定型后其他产品页复制
 
-### 必须用的 starter Skills
+### 必须用的审查能力
 
 - `seo-schema` — 每页 Schema markup 必查
 - `seo-page` — 上线前每页 SEO 全项审

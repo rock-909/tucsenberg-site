@@ -17,8 +17,8 @@ test.describe.configure({ mode: "serial" });
 test.describe("Contact Form - Test-Mode Smoke", () => {
   const getExpectedContactTitle = (locale: "en" | "zh"): RegExp => {
     return locale === "zh"
-      ? /联系.*Showcase Website Starter|获取报价|联系我们/i
-      : /Contact.*Showcase Website Starter|Get a Quote/i;
+      ? /联系.*Showcase Website Starter|联系.*Tucsenberg|获取报价|联系我们/i
+      : /Contact.*Showcase Website Starter|Contact.*Tucsenberg|Get a Quote/i;
   };
 
   const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")

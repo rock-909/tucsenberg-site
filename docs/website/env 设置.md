@@ -15,7 +15,7 @@
 - API token、邮件密钥、Airtable token、Turnstile secret、Cloudflare analytics token、限流 pepper 都必须保持 server-only。
 - Turnstile 的 `site key` 可以公开给浏览器，`secret key` 绝不能公开。
 - 没有使用某个集成时，对应变量可以留空。
-- starter 可以在本地使用默认值；client launch 前必须按真实项目补齐部署、表单和 owner 可见性配置。
+- 本地可以使用安全默认值；client launch 前必须按 Tucsenberg 真实配置补齐部署、表单和 owner 可见性配置。
 
 ## 必须理解的分组
 

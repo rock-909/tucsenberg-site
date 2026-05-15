@@ -258,7 +258,7 @@
   "phone": "[ES-TODO] Phone Number",
   "organization": {
     "name": "[ES-TODO] {companyName}",
-    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths",
+    "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths",
     "phone": "[ES-TODO] Contact sales by email",
     "social": {
       "twitter": "[ES-TODO] https://x.com/example",
@@ -267,7 +267,7 @@
   },
   "website": {
     "name": "[ES-TODO] {siteName}",
-    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths"
+    "description": "[ES-TODO] Tucsenberg site for aftermarket aeration membrane compatibility review, material guidance, and RFQ-ready inquiry paths"
   },
   "article": {
     "defaultAuthor": "[ES-TODO] {companyName}"
@@ -322,7 +322,7 @@
       "turnstileRequired": "[ES-TODO] Please complete the security verification."
     }
   },
-  "title": "[ES-TODO] Showcase Website Starter",
+  "title": "[ES-TODO] Tucsenberg",
   "trust": {
     "testimonials": {
       "title": "[ES-TODO] What Our Clients Say",
@@ -392,12 +392,12 @@
   },
   "customProject": {
     "meta": {
-      "title": "[ES-TODO] Custom Project Support | Showcase Website Starter",
-      "description": "[ES-TODO] Replaceable custom-project example for scope, proposal, brand adaptation, review, and delivery."
+      "title": "[ES-TODO] Custom Review Support | Tucsenberg",
+      "description": "[ES-TODO] Temporary custom-review support page for compatibility inputs, material questions, RFQ scope, and delivery review."
     },
     "hero": {
-      "title": "[ES-TODO] Custom Project Support",
-      "subtitle": "[ES-TODO] Your scope. A reusable project flow."
+      "title": "[ES-TODO] Custom Review Support",
+      "subtitle": "[ES-TODO] Your membrane evidence. A controlled review path."
     },
     "scope": {
       "title": "[ES-TODO] Service Scope",

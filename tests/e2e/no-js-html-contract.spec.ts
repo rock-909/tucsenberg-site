@@ -19,7 +19,7 @@ const localeCases = [
     targetFallbackHref: "/es",
     targetLocale: "es",
     targetHomeHeading:
-      /\[ES-TODO\] No website yet\? Start with a deployable showcase-site foundation\./i,
+      /\[ES-TODO\] Replacement membrane paths for installed aeration systems\./i,
     fullNameLabel: "Full name",
     optionalLabel: "optional",
   },
@@ -32,7 +32,7 @@ const localeCases = [
     targetFallbackHref: "/en",
     targetLocale: "en",
     targetHomeHeading:
-      /No website yet\? Start with a deployable showcase-site foundation\./i,
+      /Replacement membrane paths for installed aeration systems\./i,
     fullNameLabel: "[ES-TODO] Full name",
     optionalLabel: "[ES-TODO] optional",
   },

@@ -1,42 +1,42 @@
 # Repository default owner
-# The repository default is primary-only. This file encodes enforceable review routing, not diversified maintainer headcount.
-* @Alx-707
+# The repository default is single-owner. This file encodes enforceable review routing, not diversified maintainer headcount.
+* @rock-909
 
 # Tier A: runtime entry + locale routing
 # Tier A paths require the primary owner and the backup review path.
 # The backup path is a review fallback, not a second enforceable repository owner identity.
-/src/middleware.ts @Alx-707 developer@flood-control.com
-/src/i18n/ @Alx-707 developer@flood-control.com
-/src/app/[locale]/layout.tsx @Alx-707 developer@flood-control.com
-/src/app/[locale]/head.tsx @Alx-707 developer@flood-control.com
+/src/middleware.ts @rock-909
+/src/i18n/ @rock-909
+/src/app/[locale]/layout.tsx @rock-909
+/src/app/[locale]/head.tsx @rock-909
 
 # Tier A: lead/contact pipeline
-/src/app/api/contact/ @Alx-707 developer@flood-control.com
-/src/app/api/inquiry/ @Alx-707 developer@flood-control.com
-/src/app/api/subscribe/ @Alx-707 developer@flood-control.com
-/src/lib/lead-pipeline/ @Alx-707 developer@flood-control.com
-/src/components/forms/ @Alx-707 developer@flood-control.com
+/src/app/api/contact/ @rock-909
+/src/app/api/inquiry/ @rock-909
+/src/app/api/subscribe/ @rock-909
+/src/lib/lead-pipeline/ @rock-909
+/src/components/forms/ @rock-909
 
 # Tier A: security + abuse protection
-/src/config/security.ts @Alx-707 developer@flood-control.com
-/src/lib/security/ @Alx-707 developer@flood-control.com
-/src/app/api/verify-turnstile/ @Alx-707 developer@flood-control.com
-/src/app/api/csp-report/ @Alx-707 developer@flood-control.com
+/src/config/security.ts @rock-909
+/src/lib/security/ @rock-909
+/src/app/api/verify-turnstile/ @rock-909
+/src/app/api/csp-report/ @rock-909
 
 # Tier A: platform build + deployment chain
-/open-next.config.ts @Alx-707 developer@flood-control.com
-/next.config.ts @Alx-707 developer@flood-control.com
-/.github/workflows/ @Alx-707 developer@flood-control.com
-/scripts/cloudflare/ @Alx-707 developer@flood-control.com
-/wrangler.jsonc @Alx-707 developer@flood-control.com
+/open-next.config.ts @rock-909
+/next.config.ts @rock-909
+/.github/workflows/ @rock-909
+/scripts/cloudflare/ @rock-909
+/wrangler.jsonc @rock-909
 
 # Tier A: translation critical path
-/messages/en/critical.json @Alx-707 developer@flood-control.com
-/messages/en/deferred.json @Alx-707 developer@flood-control.com
-/messages/zh/critical.json @Alx-707 developer@flood-control.com
-/messages/zh/deferred.json @Alx-707 developer@flood-control.com
-/scripts/starter-checks.js @Alx-707 developer@flood-control.com
+/messages/en/critical.json @rock-909
+/messages/en/deferred.json @rock-909
+/messages/zh/critical.json @rock-909
+/messages/zh/deferred.json @rock-909
+/scripts/starter-checks.js @rock-909
 
 # Tier A: cache utilities + health
-/src/lib/cache/ @Alx-707 developer@flood-control.com
-/src/app/api/health/ @Alx-707 developer@flood-control.com
+/src/lib/cache/ @rock-909
+/src/app/api/health/ @rock-909

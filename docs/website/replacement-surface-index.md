@@ -1,11 +1,11 @@
 # Replacement surface index
 
-这份索引把派生新项目时“到底该改哪些文件”收成一张表。
+这份索引把 Tucsenberg 上线前“到底该改哪些文件”收成一张表。
 
 标签含义：
 
-- `must-replace`：client launch 前必须替换或确认，不能把 starter 示例当真实项目内容。
-- `review-or-tune`：通常可以保留 starter 结构，但要按项目语气、页面组合或部署方式检查。
+- `must-replace`：公开上线前必须替换或确认，不能把临时示例当真实项目内容。
+- `review-or-tune`：通常可以保留当前结构，但要按 Tucsenberg 语气、页面组合或部署方式检查。
 - `do-not-edit-first`：不要先改这里；它们通常是 facade、生成文件或运行机制，应该从上游真相源派生。
 
 ## Replacement groups
@@ -24,7 +24,7 @@
 
 ## Do not edit first
 
-这些文件容易被误认为“也能改”，但它们不是派生项目的第一入口：
+这些文件容易被误认为“也能改”，但它们不是 Tucsenberg 当前阶段的第一入口：
 
 - `src/config/paths/site-config.ts`：runtime/validation facade，负责导出运行时读取的站点配置和 production placeholder 校验。改品牌事实应去 `src/config/single-site.ts`。
 - `src/constants/product-catalog.ts`：query facade，负责按 slug 查询 market / family 并服务路由、sitemap 和页面读取。改产品事实应去 `src/config/single-site-product-catalog.ts` 和 `src/constants/product-specs/**`。
@@ -41,7 +41,7 @@ node scripts/starter-checks.js content-manifest --check
 
 ## Minimum replacement proof
 
-派生项目完成第一轮替换后，至少跑：
+Tucsenberg 完成第一轮替换后，至少跑：
 
 ```bash
 pnpm brand:check

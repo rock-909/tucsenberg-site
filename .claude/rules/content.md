@@ -29,9 +29,9 @@ Every content field has one authoring source.
 | Shared labels/nav/buttons/form chrome | `messages/{locale}/*.json` | MDX frontmatter |
 | Reusable catalog/card data | typed config + i18n namespace | page prose only |
 
-## Starter replacement order
+## Tucsenberg replacement order
 
-For derived projects, replace in this order:
+For Tucsenberg content work, replace in this order:
 
 1. `src/config/single-site.ts`
 2. `src/config/single-site-page-expression.ts`
@@ -40,7 +40,7 @@ For derived projects, replace in this order:
 5. `messages/{locale}/{critical,deferred}.json`
 6. product/catalog/spec config and public images
 
-Do not treat starter examples as client-ready facts.
+Do not treat old template examples as Tucsenberg-ready facts.
 
 ## Page content
 

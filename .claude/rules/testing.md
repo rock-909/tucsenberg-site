@@ -32,7 +32,7 @@ Use narrower Vitest/Playwright commands while developing, then run the command
 that proves the changed behavior.
 
 Heavy mutation or broad review lanes are opt-in only. Do not treat them as
-default proof for ordinary starter work.
+default proof for ordinary site work.
 
 ## React quality gates
 

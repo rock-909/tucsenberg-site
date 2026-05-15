@@ -102,9 +102,9 @@ export const clientEnvSchema = {
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_WEBSITE_BASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_APP_NAME: z.string().default("Example Showcase Company"),
+  NEXT_PUBLIC_APP_NAME: z.string().default("Tucsenberg"),
   NEXT_PUBLIC_APP_VERSION: z.string().default("1.0.0"),
-  NEXT_PUBLIC_SITE_KEY: z.string().default("showcase"),
+  NEXT_PUBLIC_SITE_KEY: z.string().default("tucsenberg"),
 
   // Analytics & Monitoring
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
@@ -151,7 +151,7 @@ export const clientEnvSchema = {
 
   // Internationalization
   NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default("en"),
-  NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en,zh"),
+  NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en,es,zh"),
   NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET: z
     .string()
     .optional()

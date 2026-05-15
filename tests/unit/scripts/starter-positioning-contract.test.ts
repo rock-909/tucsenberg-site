@@ -9,8 +9,8 @@ function readRepoFile(relativePath: string) {
   return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
 }
 
-describe("starter positioning contract", () => {
-  it("records the starter positioning decision before slimming core modules", () => {
+describe("Tucsenberg positioning contract", () => {
+  it("preserves core surfaces unless a separate migration plan exists", () => {
     const readme = readRepoFile("docs/website/README.md");
     const replacement = readRepoFile("docs/website/新项目替换清单.md");
     const decision = readRepoFile(
@@ -22,7 +22,7 @@ describe("starter positioning contract", () => {
     expect(decision).toContain("Minimal core plus optional presets");
     expect(decision).toContain("Current decision");
     expect(replacement).toContain(
-      "Do not delete products, ops, Storybook, or governance tests without a positioning decision",
+      "Do not delete products, ops, Storybook, or governance tests just to make the repo look smaller. Scope reduction requires a separate migration plan.",
     );
   });
 });

@@ -37,8 +37,8 @@ To create an Apple Touch Icon:
 1. **Brand Consistency**: Use project's color scheme and typography
 2. **Readability**: Ensure text is legible at small sizes
 3. **Professional**: Maintain B2B enterprise aesthetic
-4. **Technology Focus**: Highlight modern tech stack
-5. **Call to Action**: Include subtle CTA or value proposition
+4. **Engineering Focus**: Highlight compatibility review, material guidance, or RFQ readiness
+5. **Call to Action**: Include a restrained Tucsenberg value proposition
 
 ## Current Status
 

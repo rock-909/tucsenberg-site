@@ -1,6 +1,6 @@
 # 内容和 SEO 字段合同
 
-这个 starter 把页面正文、翻译文案、站点配置和 Next.js SEO metadata 分在不同地方。不要把它们混成一个“内容文件”来理解。
+当前站点把页面正文、翻译文案、站点配置和 Next.js SEO metadata 分在不同地方。不要把它们混成一个“内容文件”来理解。
 
 这份合同说明：什么内容改哪里，MDX frontmatter 每个字段负责什么，以及 SEO 最后由哪一层生成。
 
@@ -39,16 +39,16 @@
 
 ```yaml
 locale: 'zh'
-title: '关于这个展示型网站 starter'
-description: '了解这个 starter 为什么存在、适合谁、不适合谁，以及公开上线前必须替换什么。'
+title: '关于 Tucsenberg'
+description: '了解 Tucsenberg 的 aftermarket aeration replacement membrane 定位、询盘路径和兼容性审核边界。'
 slug: 'about'
 publishedAt: '2024-01-10'
 updatedAt: '2026-05-05'
 lastReviewed: '2026-05-05'
 draft: false
 seo:
-  title: '关于这个展示型网站 starter'
-  description: '展示型网站 starter 的身份、适用对象、边界和公开上线前替换要求。'
+  title: '关于 Tucsenberg'
+  description: 'Tucsenberg 的身份、适用对象、兼容性边界和公开上线前替换要求。'
 ```
 
 ### 当前内容已经使用的可选字段
@@ -71,19 +71,19 @@ seo:
 示例：
 
 ```yaml
-author: 'Showcase Website Starter Team'
+author: 'Tucsenberg'
 layout: 'default'
 showToc: true
-heroTitle: '一个面向真实公开上线准备的展示型网站 starter'
+heroTitle: 'Tucsenberg aftermarket membrane support'
 heroSubtitle: '不是虚构公司介绍'
-heroDescription: '这个页面解释 starter 是什么、适合谁，以及公开上线前哪些内容必须变成真实事实。'
+heroDescription: '这个页面解释 Tucsenberg 面向谁、解决什么兼容性问题，以及哪些上线事实需要 owner 确认。'
 seo:
-  keywords: ['展示型网站 starter', 'starter 边界', '公开上线网站']
+  keywords: ['Tucsenberg', 'aftermarket aeration membrane', 'compatibility review']
   ogImage: '/images/about-og.jpg'
 faq:
-  - id: starter-purpose
+  - id: tucsenberg-purpose
     question: '这是已经完成的客户官网吗？'
-    answer: '不是。这是带可运行结构和可替换示例内容的 starter demo。'
+    answer: '不是。Tucsenberg 页面仍需按真实产品、兼容性审核和 RFQ 流程完成上线前确认。'
 ```
 
 ## 图片语义
@@ -96,7 +96,7 @@ faq:
 | 产品 / 服务卡片图片 | 通常在产品配置、服务配置或规格配置里 | 用在买家可见的列表卡片、产品入口、市场页或详情页。不要试图用一个 MDX `seo.ogImage` 统一解决。 |
 | MDX 内联图片 | MDX 正文里 | 属于页面正文内容，跟段落、说明、案例图一起维护。 |
 
-client launch 前，如果 `seo.ogImage` 仍指向 starter 示例图，例如 `/images/og-image.jpg` 或 `/images/about-og.jpg`，要替换成真实项目自己的分享图。
+client launch 前，如果 `seo.ogImage` 仍指向临时示例图，例如 `/images/og-image.jpg` 或 `/images/about-og.jpg`，要替换成 Tucsenberg 自己的分享图。
 
 ## SEO 生成职责
 
@@ -123,8 +123,8 @@ SEO 最终输出不是只由 MDX 决定。当前职责分工如下：
 - 各语言目录下的 `slug` 默认保持同步，例如 `content/pages/en/about.mdx` 和 `content/pages/zh/about.mdx` 都用 `slug: 'about'`。除非未来明确采用 localized pathname 策略，否则不要私自改成一边 `about`、一边 `guanyu`。
 - buyer-visible 内容改了，要更新 `updatedAt`。这里的 buyer-visible 包括正文、标题、FAQ、页面摘要、重要产品或服务说明。
 - 法务、信任、上线敏感内容被 owner 或相关负责人复核后，要更新 `lastReviewed`。
-- client launch 前要替换 starter 的 `seo.ogImage` 示例图，不要把 starter 分享图当成客户真实资产。
-- 不要把 starter MDX 里的法律声明当作已获 owner review 的最终声明。Privacy、Terms、信任承诺、交付承诺都必须由真实 owner 或法律负责人确认。
+- client launch 前要替换临时 `seo.ogImage` 示例图，不要把占位分享图当成 Tucsenberg 真实资产。
+- 不要把旧 MDX 里的法律声明当作已获 owner review 的最终声明。Privacy、Terms、信任承诺、交付承诺都必须由真实 owner 或法律负责人确认。
 
 ## 验证命令
 

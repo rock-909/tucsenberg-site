@@ -14,13 +14,13 @@ import {
  *
  * BC-002: Key pages remain directly reachable
  * BC-005: 404 for invalid routes
- * BC-013: Products page explains starter capabilities
+ * BC-013: Products page explains Tucsenberg review capabilities
  * BC-014: Market detail routes remain reachable
  * BC-020: All internal links point to real routes
  */
 
 test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
-  test("user navigates from homepage to products and sees starter capabilities", async ({
+  test("user navigates from homepage to products and sees Tucsenberg review capabilities", async ({
     page,
   }) => {
     // Start at homepage
@@ -44,12 +44,12 @@ test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
     await page.goto("/en/products");
     await expect(page).toHaveURL(/\/products/);
 
-    // BC-013: Products page should explain starter capabilities, not a market-card catalog.
+    // BC-013: Products page should explain Tucsenberg review capabilities, not a market-card catalog.
     await expect(
-      page.getByRole("heading", { name: /Starter product capabilities/i }),
+      page.getByRole("heading", { name: /Membrane compatibility paths/i }),
     ).toBeVisible({ timeout: 10_000 });
     await expect(
-      page.getByRole("heading", { name: /Showcase-site foundation/i }),
+      page.getByRole("heading", { name: /Membrane site foundation/i }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Technical proof/i }),
@@ -61,7 +61,7 @@ test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: /Starter, not a finished client website/i,
+        name: /Tucsenberg work-in-progress, not a finished product catalog/i,
       }),
     ).toBeVisible();
 
@@ -102,7 +102,7 @@ test.describe("Journey: Navigate All Pages (BC-002)", () => {
       titlePattern: /How It Works|Example|Tucsenberg/i,
     },
     { path: "/en/about", titlePattern: /About/i },
-    { path: "/en/products", titlePattern: /Product/i },
+    { path: "/en/products", titlePattern: /Membrane|Product/i },
     { path: "/en/contact", titlePattern: /Contact|Example/i },
     {
       path: "/en/custom-project-support",

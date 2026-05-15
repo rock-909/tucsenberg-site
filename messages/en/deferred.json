@@ -258,7 +258,7 @@
   "phone": "Phone Number",
   "organization": {
     "name": "{companyName}",
-    "description": "Reusable showcase website starter for products, services, proof, and inquiry paths",
+    "description": "Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths",
     "phone": "Contact sales by email",
     "social": {
       "twitter": "https://x.com/example",
@@ -267,7 +267,7 @@
   },
   "website": {
     "name": "{siteName}",
-    "description": "Reusable showcase website starter for products, services, proof, and inquiry paths"
+    "description": "Tucsenberg site for aftermarket aeration membrane compatibility review, material guidance, and RFQ-ready inquiry paths"
   },
   "article": {
     "defaultAuthor": "{companyName}"
@@ -322,7 +322,7 @@
       "turnstileRequired": "Please complete the security verification."
     }
   },
-  "title": "Showcase Website Starter",
+  "title": "Tucsenberg",
   "trust": {
     "testimonials": {
       "title": "What Our Clients Say",
@@ -392,12 +392,12 @@
   },
   "customProject": {
     "meta": {
-      "title": "Custom Project Support | Showcase Website Starter",
-      "description": "Replaceable custom-project example for scope, proposal, brand adaptation, review, and delivery."
+      "title": "Custom Review Support | Tucsenberg",
+      "description": "Temporary custom-review support page for compatibility inputs, material questions, RFQ scope, and delivery review."
     },
     "hero": {
-      "title": "Custom Project Support",
-      "subtitle": "Your scope. A reusable project flow."
+      "title": "Custom Review Support",
+      "subtitle": "Your membrane evidence. A controlled review path."
     },
     "scope": {
       "title": "Service Scope",

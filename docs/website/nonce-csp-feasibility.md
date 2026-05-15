@@ -16,7 +16,7 @@ Current default remains static-compatible CSP:
 
 ## Why nonce CSP is not the default
 
-Installed Next.js documentation says nonce CSP needs a proxy-generated nonce before rendering and therefore requires dynamic rendering. That changes the current starter trade-off:
+Installed Next.js documentation says nonce CSP needs a proxy-generated nonce before rendering and therefore requires dynamic rendering. That changes the current site trade-off:
 
 - Static optimization and CDN caching assumptions change.
 - Cache Components behavior must be re-proven.
@@ -24,7 +24,7 @@ Installed Next.js documentation says nonce CSP needs a proxy-generated nonce bef
 - Cloudflare/OpenNext output must be verified again, not assumed from a normal build.
 - Turnstile, analytics, and any `next/script` usage must be checked with nonce propagation.
 
-The current starter is a reusable showcase baseline. It should not pay this runtime and proof cost until a derived project has a real security requirement that justifies it.
+The current Tucsenberg site baseline should not pay this runtime and proof cost until a concrete security requirement justifies it.
 
 ## Minimum proof before future implementation
 
@@ -78,4 +78,4 @@ Any future nonce CSP implementation must first prove all of these, in a separate
 
 ## Current recommended status
 
-Keep the default static-compatible CSP, monitor CSP reports, and revisit nonce CSP only when a real derived project has a concrete compliance or sensitive-data requirement.
+Keep the default static-compatible CSP, monitor CSP reports, and revisit nonce CSP only when Tucsenberg has a concrete compliance or sensitive-data requirement.

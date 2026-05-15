@@ -1,46 +1,41 @@
 # Project Context
 
-这份文档给 AI 快速理解 starter 的用途。它不是某个真实公司的商业背景。
+这份文档给 AI 快速理解 Tucsenberg 当前网站项目。它是当前仓库的项目上下文，不是通用模板说明。
 
 ## 项目定位
 
-`showcase-website-starter` 是展示型网站起步项目。
+`tucsenberg-site` 是 Tucsenberg 官网代码仓库，目标域名是 `tucsenberg.com`。
 
-它适合拿来做：
+网站定位：
 
-- 企业官网
-- 产品展示站
-- 服务展示站
-- 多语言询盘站
-- 小型品牌展示站
-- 需要 Cloudflare/OpenNext 部署链路的网站
+- aftermarket aeration replacement membranes；
+- part-number / OEM-family compatibility review helper；
+- material guidance + batch RFQ path；
+- English + Spanish public site，Chinese only for internal preview。
 
-它不是空白模板，也不是已完成的客户网站。新项目应该在保留结构和能力的基础上替换品牌、内容、图片、产品/服务信息、表单接收方式和部署配置。
+它不是泛品牌官网，也不再作为 reusable starter 维护。旧模板内容只作为过渡期占位或历史参考，不能当成 Tucsenberg 事实。
 
 ## 默认目标
 
 默认目标是让访问者快速理解：
 
-- 这家公司或项目提供什么；
-- 为什么可信；
-- 哪些产品、服务或能力值得继续看；
-- 下一步应该联系、询价、预约还是查看详情。
+- Tucsenberg 提供什么替换膜路径；
+- 买家手里有什么信息可以用于兼容性 review；
+- EPDM / TPU/PU / 后续 PTFE 应该如何按工况判断；
+- 报价前需要哪些 part number、照片、尺寸、数量和停机信息；
+- 哪些 OEM trademark / compatibility 边界不能越线。
 
-## 示例身份
+## 当前阶段边界
 
-仓库里出现的 `Example Showcase Company` 只是示例占位，不是真实客户。
+Phase 1 Step 2 只做品牌/config/i18n/SEO/nav/token/font 壳层和 repo config 去模板化。
 
-派生新项目时必须替换：
+当前不做：
 
-- 公司名
-- 品牌名
-- 域名
-- 联系邮箱和电话
-- 地址
-- 产品或服务分类
-- 图片资产
-- 证据材料
-- 部署账号和 secrets
+- 深层产品数据 schema；
+- 真实 `/compatible/*`；
+- 真实 `/materials/*`；
+- 真实 `/quote` 表单行为；
+- `content/blog/*` / `content/pages/*` 现有 MDX 清空替换。
 
 ## 内容替换位置
 
@@ -50,11 +45,11 @@
 - 导航和页面表达：`src/config/single-site-navigation.ts`、`src/config/single-site-links.ts`、`src/config/single-site-page-expression.ts`
 - 产品/服务示例：`src/config/single-site-product-catalog.ts`、`src/constants/product-specs/**`
 - 图片：`public/images/**`
-- 新项目说明：`docs/website/`
+- 项目说明：`docs/website/`
 
 ## AI 使用规则
 
-- 不要把示例内容当成真实客户承诺。
+- 不要把旧模板示例内容当成 Tucsenberg 承诺。
 - 不要恢复旧项目品牌、旧上线记录或旧工作流产物。
 - 如果用户给了真实业务素材，先更新 `src/config/single-site*.ts`、`src/constants/product-specs/**` 和 `content/pages/{locale}/`，再改页面组件。
 - 如果要沉淀长期规则，写入 `docs/website/`、`AGENTS.md`、`CLAUDE.md` 或 `.claude/rules/`，不要只写在聊天里。
