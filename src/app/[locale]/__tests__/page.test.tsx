@@ -1,7 +1,15 @@
+/**
+ * The home page imports `@/data/product-compatibility`, which runs Zod
+ * `.parse()` at module load. The global test setup mocks zod, so we must
+ * unmock it here for the catalog to initialize.
+ */
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Home, { generateStaticParams } from "../page";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+
+vi.unmock("zod");
 
 type MockLinkHref = string | { pathname: string };
 type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
@@ -10,76 +18,28 @@ type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
 };
 
 const homeMessages: Record<string, string> = {
-  "hero.eyebrow": "Aftermarket aeration membranes",
-  "hero.title": "Replacement membrane paths for installed aeration systems.",
+  "hero.title": "Find Your Replacement Membrane",
   "hero.subtitle":
-    "Tucsenberg is preparing compatibility-led membrane pages for O&M teams that need OEM-family matching, material guidance, and RFQ-ready review inputs.",
-  "hero.cta.primary": "Review membrane paths",
-  "hero.cta.secondary": "Prepare a quote request",
-  "hero.preview.label": "What Tucsenberg is building",
-  "hero.preview.title": "Compatibility review first, broad catalog later",
-  "hero.preview.description":
-    "The site is intentionally in a safe work-in-progress state until product data, compatibility records, and RFQ routing are owner-confirmed.",
-  "hero.preview.items.0":
-    "Membranes, compatibility, materials, and quote paths",
-  "hero.preview.items.1": "OEM-family and part-number review inputs",
-  "hero.preview.items.2": "RFQ path with anti-abuse basics",
-  "hero.preview.items.3": "Cloudflare-ready deployment direction",
-  "problems.title":
-    "Replacement membrane buyers usually arrive with partial evidence, not a clean catalog SKU.",
-  "problems.description":
-    "A maintenance team may have an OEM family, an old part number, a body photo, dimensions, wastewater conditions, or only a shutdown deadline.",
-  "problems.items.structure.title": "No clean part path",
-  "problems.items.structure.description":
-    "A buyer needs membrane diameter, diffuser body fit, OEM family, and review caveats before a quote is responsible.",
-  "problems.items.content.title": "Incomplete evidence",
-  "problems.items.content.description":
-    "Photos, old membranes, dimensions, wastewater conditions, and quantity bands often arrive in different formats.",
-  "problems.items.deployment.title": "Unclear material risk",
-  "problems.items.deployment.description":
-    "EPDM, TPU/PU, and later PTFE-coated EPDM need condition-based guidance instead of vague quality claims.",
-  "problems.items.inquiry.title": "RFQ friction",
-  "problems.items.inquiry.description":
-    "Quote review is slower when part numbers, installed model, quantity, and shutdown timing are not collected together.",
-  "problems.items.multilingual.title": "Regional review path",
-  "problems.items.multilingual.description":
-    "English and Spanish public pages must keep the same review logic while Chinese stays internal preview only.",
-  "answer.title": "Tucsenberg starts with compatibility review before quote.",
-  "answer.description":
-    "The site is being shaped around part-number matching, material decision support, RFQ intake, and clear OEM trademark boundaries.",
-  "answer.items.pageStructure.title": "Membrane path structure",
-  "answer.items.pageStructure.description":
-    "Membranes, compatibility, materials, quote, quality, procurement, and legal boundaries each have a defined place.",
-  "answer.items.replacementSurface.title": "Review input surface",
-  "answer.items.replacementSurface.description":
-    "Part numbers, photos, dimensions, wastewater conditions, quantity bands, and shutdown timing are treated as explicit RFQ inputs.",
-  "answer.items.inquiryPath.title": "Quote review path",
-  "answer.items.inquiryPath.description":
-    "The quote flow will ask for enough evidence to return a responsible membrane recommendation, not a brand-name match alone.",
-  "answer.items.cloudflareFoundation.title": "Cloudflare-ready foundation",
-  "answer.items.cloudflareFoundation.description":
-    "Cloudflare/OpenNext remains the deployment path while Tucsenberg content and lead routing are confirmed.",
-  "startPath.title": "A practical path from membrane evidence to RFQ.",
-  "startPath.description":
-    "Use the current placeholder IA to lock the flow, then fill it with confirmed product, compatibility, material, and quote data.",
-  "startPath.items.brand.title": "Confirm product facts",
-  "startPath.items.brand.description":
-    "Membrane families, materials, legal entity, domain, contact channels, and brand assets become owner-confirmed facts.",
-  "startPath.items.content.title": "Replace page content",
-  "startPath.items.content.description":
-    "Membrane pages, compatibility guides, material guidance, quality proof, images, and legal pages become Tucsenberg launch content.",
-  "startPath.items.forms.title": "Connect quote flow",
-  "startPath.items.forms.description":
-    "RFQ submissions, Turnstile, lead destinations, email delivery, and response ownership point to real accounts.",
-  "startPath.items.deploy.title": "Deploy and verify",
-  "startPath.items.deploy.description":
-    "Cloudflare preview, form canary, content readiness, and owner signoff prove readiness separately from local checks.",
-  "finalCta.title":
-    "Prepare the membrane evidence, then request a responsible quote.",
-  "finalCta.description":
-    "Use the current placeholder path to understand what Tucsenberg will ask for before issuing a compatibility-led quote.",
-  "finalCta.primary": "Review membrane paths",
-  "finalCta.secondary": "Prepare a quote request",
+    "Enter a part number, OEM model, or diffuser brand to check compatibility.",
+  "oemGrid.overline": "OEM COMPATIBILITY",
+  "oemGrid.title": "Replacement Membranes for Major Brands",
+  "materials.overline": "MATERIAL SELECTION",
+  "materials.title": "Choose the Material That Matches Your Conditions",
+  "materials.epdm.name": "EPDM",
+  "materials.epdm.description":
+    "Municipal and light industrial wastewater conditions.",
+  "materials.tpu.name": "TPU",
+  "materials.tpu.description":
+    "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
+  "trust.scope": "Aftermarket replacement membranes only",
+  "trust.leadTime": "Lead time confirmed per quote",
+  "trust.sla": "Quote response within 2 business days",
+  "trust.noFit": "No-fit, no-charge review",
+  "cta.title": "Have a part number ready?",
+  "cta.description":
+    "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
+  "cta.requestQuote": "Request a Quote",
+  "cta.viewMembranes": "Browse All Membranes",
 };
 
 vi.mock("@/i18n/routing", () => ({
@@ -95,13 +55,30 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(() => (key: string) => homeMessages[key] ?? key),
+  getTranslations: vi.fn(
+    () => (key: string, values?: Record<string, string>) =>
+      values?.brand
+        ? `View ${values.brand} compatible parts`
+        : (homeMessages[key] ?? key),
+  ),
   setRequestLocale: vi.fn(),
 }));
 
 vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
   JsonLdScript: () => <script type="application/ld+json" />,
+}));
+
+vi.mock("@/components/search/home-hero-search", () => ({
+  HomeHeroSearch: () => (
+    <input
+      type="search"
+      role="combobox"
+      aria-label="Compatibility search"
+      aria-controls="home-search-results"
+      aria-expanded={false}
+    />
+  ),
 }));
 
 describe("Home Page", () => {
@@ -117,7 +94,7 @@ describe("Home Page", () => {
   });
 
   describe("Home Component", () => {
-    it("should explain the Tucsenberg membrane review journey", async () => {
+    it("leads with the compatibility-first hero and search", async () => {
       const HomeComponent = await Home({
         params: Promise.resolve({ locale: "en" }),
       });
@@ -127,36 +104,64 @@ describe("Home Page", () => {
       expect(
         screen.getByRole("heading", {
           level: 1,
-          name: /Replacement membrane paths for installed aeration systems\./,
+          name: "Find Your Replacement Membrane",
         }),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("home-problem-section")).toBeInTheDocument();
-      expect(screen.getByTestId("home-answer-section")).toBeInTheDocument();
-      expect(screen.getByTestId("home-start-path-section")).toBeInTheDocument();
-      expect(screen.getByTestId("home-final-action")).toBeInTheDocument();
       expect(
-        screen.getByText("Cloudflare-ready foundation"),
+        screen.getByRole("combobox", { name: "Compatibility search" }),
       ).toBeInTheDocument();
+    });
+
+    it("links each OEM brand card to its compatibility page", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
+      expect(
+        screen.getByRole("link", { name: /Sanitaire compatible parts/ }),
+      ).toHaveAttribute("href", "/compatible/sanitaire");
+      expect(
+        screen.getByRole("link", { name: /EDI compatible parts/ }),
+      ).toHaveAttribute("href", "/compatible/edi");
+      expect(
+        screen.getByRole("link", { name: /SSI Aeration compatible parts/ }),
+      ).toHaveAttribute("href", "/compatible/ssi-aeration");
+    });
+
+    it("presents condition-based material guidance without quality claims", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
+      expect(screen.getByText("EPDM")).toBeInTheDocument();
+      expect(screen.getByText("TPU")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "Membranes, compatibility, materials, and quote paths",
+          "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
         ),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("OEM-family and part-number review inputs"),
-      ).toBeInTheDocument();
+        screen.queryByText(/premium|high quality|better than/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it("routes the final CTAs to quote and the membrane catalog", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
       expect(
-        screen.getByText("RFQ path with anti-abuse basics"),
-      ).toBeInTheDocument();
+        screen.getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.quote);
       expect(
-        screen.getByText("Cloudflare-ready deployment direction"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getAllByRole("link", { name: "Review membrane paths" })[0],
-      ).toHaveAttribute("href", "#coming-soon");
-      expect(
-        screen.getAllByRole("link", { name: "Prepare a quote request" })[0],
-      ).toHaveAttribute("href", "#coming-soon");
+        screen.getByRole("link", { name: "Browse All Membranes" }),
+      ).toHaveAttribute("href", "/membranes/tuc-d9-epdm");
     });
 
     it("should have correct container classes", async () => {

@@ -34,6 +34,10 @@
 | `apiErrors` | `do-not-edit-first` | API 错误码对用户显示的统一文案。 | 不要为单个业务场景临时写散；改 API contract 时再动。 |
 | `errors` | `do-not-edit-first` | 页面错误、not found、fallback 文案。 | 保留为通用兜底，除非错误页设计变了。 |
 | `catalog` | `must-replace` | 产品/服务市场、系列、卡片和列表短文案。 | 必须跟 `src/config/single-site-product-catalog.ts` 和 `src/constants/product-specs/**` 一起替换。 |
+| `membraneProduct` | `must-replace` | 产品详情页（`/membranes/[product]`）spec、兼容性、material 决策、CTA 文案。 | 必须跟 `src/data/product-compatibility/**` 一起替换，不能保留示例值。 |
+| `compatibleBrand` | `must-replace` | OEM 兼容页（`/compatible/[brand]`）facet、结果卡、trademark disclaimer 文案。 | 必须按真实 OEM 兼容数据和商标免责声明确认。 |
+| `quote` | `must-replace` | 报价页（`/quote`）表单字段、说明、响应承诺文案。 | 必须按真实接收方式、字段和响应承诺替换。 |
+| `search` | `review-or-tune` | 全局兼容搜索（⌘K）输入、结果分组、空结果文案。 | 结构可保留，按 Tucsenberg 搜索范围和语气检查。 |
 
 ## `messages/{locale}/deferred.json`
 

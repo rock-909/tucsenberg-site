@@ -13,6 +13,7 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "contact",
   "cookie",
   "errors",
+  "home",
   "language",
   "navigation",
   "search",

@@ -4,39 +4,24 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
+import { oemBrands } from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
+import { JsonLdGraphScript } from "@/components/seo";
+import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
-import {
-  SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS,
-  SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS,
-  SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS,
-} from "@/config/single-site-page-expression";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
-import { JsonLdGraphScript } from "@/components/seo";
 
 type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
-
-interface HomeCardItem {
-  title: string;
-  description: string;
-}
-
-interface HomeStepItem extends HomeCardItem {
-  number: string;
-}
 
 interface HomePageProps {
   params: Promise<LocaleParam>;
 }
 
-const HERO_PREVIEW_ITEMS = [
-  { key: "page-structure", messageIndex: 0 },
-  { key: "replacement-surface", messageIndex: 1 },
-  { key: "inquiry-path", messageIndex: 2 },
-  { key: "cloudflare-launch", messageIndex: 3 },
-] as const;
+const TRUST_ITEMS = ["scope", "leadTime", "sla", "noFit"] as const;
+const MATERIAL_ITEMS = ["epdm", "tpu"] as const;
+const BROWSE_ALL_MEMBRANES_HREF = "/membranes/tuc-d9-epdm";
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -58,233 +43,125 @@ export async function generateMetadata({
   });
 }
 
-function getHomePageContent(t: HomeTranslator) {
-  return {
-    problems: SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS.map((key) => ({
-      title: t(`problems.items.${key}.title`),
-      description: t(`problems.items.${key}.description`),
-    })),
-    answers: SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS.map((key) => ({
-      title: t(`answer.items.${key}.title`),
-      description: t(`answer.items.${key}.description`),
-    })),
-    startPath: SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS.map(
-      (key, index) => ({
-        number: String(index + 1).padStart(2, "0"),
-        title: t(`startPath.items.${key}.title`),
-        description: t(`startPath.items.${key}.description`),
-      }),
-    ),
-  };
-}
-
-function HomeHero({ t }: { t: HomeTranslator }) {
+function Overline({ children }: { children: string }) {
   return (
-    <section data-testid="hero-section" className="px-6 py-16 md:py-24">
-      <div className="mx-auto grid max-w-[1080px] gap-10 md:grid-cols-[1.12fr_0.88fr] md:items-center">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-            {t("hero.eyebrow")}
-          </p>
-          <h1 className="mt-4 text-[36px] font-extrabold leading-[1.08] tracking-[-0.04em] md:text-[56px]">
-            {t("hero.title")}
-          </h1>
-          <p className="mt-5 max-w-[620px] text-lg leading-8 text-muted-foreground">
-            {t("hero.subtitle")}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
-                {t("hero.cta.primary")}
-              </Link>
-            </Button>
-            <Button variant="secondary" asChild>
-              <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
-                {t("hero.cta.secondary")}
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <div
-          className="rounded-2xl border border-border bg-card p-6 shadow-border"
-          data-testid="hero-preview-card"
-          aria-labelledby="hero-preview-title"
-        >
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            {t("hero.preview.label")}
-          </p>
-          <h2
-            id="hero-preview-title"
-            className="mt-3 text-2xl font-bold tracking-[-0.03em]"
-          >
-            {t("hero.preview.title")}
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            {t("hero.preview.description")}
-          </p>
-          <ul className="mt-6 space-y-3">
-            {HERO_PREVIEW_ITEMS.map((item) => (
-              <li
-                key={item.key}
-                className="rounded-xl border border-border bg-muted px-4 py-3 text-sm font-medium"
-              >
-                {t(`hero.preview.items.${item.messageIndex}`)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
+    <p className="font-mono text-[12px] font-semibold tracking-[1.4px] text-muted-foreground uppercase">
+      {children}
+    </p>
   );
 }
 
-function CardGridSection({
-  title,
-  description,
-  items,
-  testId,
-  columnsClassName,
-  muted = false,
-}: {
-  title: string;
-  description: string;
-  items: readonly HomeCardItem[];
-  testId: string;
-  columnsClassName: string;
-  muted?: boolean;
-}) {
+function HeroSection({ t }: { t: HomeTranslator }) {
   return (
-    <section
-      data-testid={testId}
-      className={`border-t border-border px-6 py-14 md:py-20 ${
-        muted ? "bg-muted/40" : ""
-      }`}
-    >
+    <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-20">
       <div className="mx-auto max-w-[1080px]">
-        <div className="max-w-2xl">
-          <h2 className="text-[32px] font-bold leading-tight tracking-[-0.03em]">
-            {title}
-          </h2>
-          <p
-            className={
-              muted ? "mt-3 text-foreground/80" : "mt-3 text-muted-foreground"
-            }
-          >
-            {description}
-          </p>
-        </div>
-        <div className={`mt-9 grid gap-4 ${columnsClassName}`}>
-          {items.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-xl border border-border bg-card p-5"
-            >
-              <h3 className="font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {item.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function StartPathSection({
-  t,
-  items,
-}: {
-  t: HomeTranslator;
-  items: readonly HomeStepItem[];
-}) {
-  return (
-    <section
-      data-testid="home-start-path-section"
-      className="border-t border-border px-6 py-14 md:py-20"
-    >
-      <div className="mx-auto max-w-[1080px]">
-        <div className="max-w-2xl">
-          <h2 className="text-[32px] font-bold leading-tight tracking-[-0.03em]">
-            {t("startPath.title")}
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            {t("startPath.description")}
-          </p>
-        </div>
-        <div className="mt-9 grid gap-4 md:grid-cols-4">
-          {items.map((item) => (
-            <article
-              key={item.number}
-              className="rounded-xl border border-border bg-card p-5"
-            >
-              <span className="font-mono text-sm font-semibold text-primary">
-                {item.number}
-              </span>
-              <h3 className="mt-3 font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {item.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HomeFinalAction({ t }: { t: HomeTranslator }) {
-  return (
-    <section
-      data-testid="home-final-action"
-      className="bg-primary px-6 py-16 text-primary-foreground md:py-24"
-    >
-      <div className="mx-auto max-w-[760px] text-center">
-        <h2 className="text-[36px] font-bold leading-tight tracking-[-0.03em]">
-          {t("finalCta.title")}
-        </h2>
-        <p className="mt-4 text-primary-foreground/90">
-          {t("finalCta.description")}
+        <h1 className="max-w-[15ch] text-[40px] leading-[1.12] font-light tracking-[-0.01em] text-primary md:text-[60px] md:leading-[1.08]">
+          {t("hero.title")}
+        </h1>
+        <p className="mt-5 max-w-[60ch] text-lg leading-[1.56] text-muted-foreground">
+          {t("hero.subtitle")}
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <div className="mt-8">
+          <HomeHeroSearch />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function OemGridSection({ t }: { t: HomeTranslator }) {
+  return (
+    <section className="bg-card px-6 py-16 md:py-20">
+      <div className="mx-auto max-w-[1080px]">
+        <Overline>{t("oemGrid.overline")}</Overline>
+        <h2 className="mt-3 text-[28px] leading-tight font-light tracking-[-0.01em] text-foreground md:text-[32px]">
+          {t("oemGrid.title")}
+        </h2>
+        <div className="mt-9 grid gap-4 md:grid-cols-3">
+          {oemBrands.map((brand) => (
+            <Link
+              key={brand.id}
+              href={`/compatible/${brand.slug}` as "/"}
+              className="group rounded-[8px] border border-border bg-background p-6 shadow-border transition-shadow hover:shadow-[0_0_0_1px_var(--color-brand-accent)]"
+            >
+              <span className="text-lg font-semibold text-foreground">
+                {brand.name}
+              </span>
+              <span className="mt-3 block text-sm font-medium text-[var(--brand-teal)] group-hover:underline">
+                {t("oemGrid.viewAll", { brand: brand.name })}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TrustRibbon({ t }: { t: HomeTranslator }) {
+  return (
+    <section className="p-6">
+      <ul className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-x-8 gap-y-2">
+        {TRUST_ITEMS.map((key) => (
+          <li
+            key={key}
+            className="text-sm text-muted-foreground before:mr-2 before:text-[var(--brand-teal)] before:content-['—']"
+          >
+            {t(`trust.${key}`)}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function MaterialsSection({ t }: { t: HomeTranslator }) {
+  return (
+    <section className="bg-card px-6 py-16 md:py-20">
+      <div className="mx-auto max-w-[1080px]">
+        <Overline>{t("materials.overline")}</Overline>
+        <h2 className="mt-3 text-[28px] leading-tight font-light tracking-[-0.01em] text-foreground md:text-[32px]">
+          {t("materials.title")}
+        </h2>
+        <div className="mt-9 grid gap-4 md:grid-cols-2">
+          {MATERIAL_ITEMS.map((key) => (
+            <article
+              key={key}
+              className="rounded-[8px] border border-border bg-background p-6 shadow-border"
+            >
+              <h3 className="font-mono text-sm font-semibold tracking-[0.5px] text-foreground">
+                {t(`materials.${key}.name`)}
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                {t(`materials.${key}.description`)}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FinalCta({ t }: { t: HomeTranslator }) {
+  return (
+    <section className="bg-primary px-6 py-20 text-primary-foreground md:py-24">
+      <div className="mx-auto max-w-[720px]">
+        <h2 className="text-[28px] leading-tight font-light tracking-[-0.01em] md:text-[36px]">
+          {t("cta.title")}
+        </h2>
+        <p className="mt-4 max-w-[52ch] text-primary-foreground/85">
+          {t("cta.description")}
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
           <Button variant="on-dark" size="lg" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
-              {t("finalCta.primary")}
+            <Link href={SINGLE_SITE_ROUTE_HREFS.quote}>
+              {t("cta.requestQuote")}
             </Link>
           </Button>
           <Button variant="ghost-dark" size="lg" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
-              {t("finalCta.secondary")}
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ComingSoonSection({ t }: { t: HomeTranslator }) {
-  return (
-    <section
-      id="coming-soon"
-      data-testid="coming-soon-section"
-      className="border-t border-border bg-muted/40 px-6 py-14 md:py-20"
-    >
-      <div className="mx-auto max-w-[760px] rounded-2xl border border-border bg-card p-6 shadow-border md:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-          {t("comingSoon.quoteNote")}
-        </p>
-        <h2 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.03em]">
-          {t("comingSoon.title")}
-        </h2>
-        <p className="mt-4 leading-7 text-muted-foreground">
-          {t("comingSoon.description")}
-        </p>
-        <div className="mt-6">
-          <Button variant="secondary" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.home}>
-              {t("comingSoon.backHome")}
+            <Link href={BROWSE_ALL_MEMBRANES_HREF as "/"}>
+              {t("cta.viewMembranes")}
             </Link>
           </Button>
         </div>
@@ -297,32 +174,15 @@ export default async function Home({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
-  const content = getHomePageContent(t);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <JsonLdGraphScript locale={locale as Locale} />
-      <div>
-        <HomeHero t={t} />
-        <CardGridSection
-          title={t("problems.title")}
-          description={t("problems.description")}
-          items={content.problems}
-          testId="home-problem-section"
-          columnsClassName="md:grid-cols-5"
-        />
-        <CardGridSection
-          title={t("answer.title")}
-          description={t("answer.description")}
-          items={content.answers}
-          testId="home-answer-section"
-          columnsClassName="md:grid-cols-2"
-          muted
-        />
-        <StartPathSection t={t} items={content.startPath} />
-        <ComingSoonSection t={t} />
-        <HomeFinalAction t={t} />
-      </div>
+      <HeroSection t={t} />
+      <OemGridSection t={t} />
+      <TrustRibbon t={t} />
+      <MaterialsSection t={t} />
+      <FinalCta t={t} />
     </div>
   );
 }

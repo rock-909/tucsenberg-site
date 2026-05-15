@@ -88,15 +88,6 @@ function collectLeafPaths(value: unknown, prefix = ""): string[] {
   );
 }
 
-function collectStringLeaves(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value)) return value.flatMap(collectStringLeaves);
-  if (isJsonObject(value)) {
-    return Object.values(value).flatMap(collectStringLeaves);
-  }
-  return [];
-}
-
 const LOCALE_MESSAGES = [
   ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
   ["es", mergeMessages(esCriticalMessages, esDeferredMessages)],
@@ -151,15 +142,37 @@ describe("real i18n runtime message contract", () => {
     );
   });
 
-  it("marks copied Spanish placeholder strings with ES-TODO", () => {
-    const spanishLeaves = [
-      ...collectStringLeaves(esCriticalMessages),
-      ...collectStringLeaves(esDeferredMessages),
-    ];
+  // Spanish leaves that are legitimately identical to English (technical
+  // material tokens kept in English per content rules), so an untranslated
+  // copy here is intentional and must not require the [ES-TODO] marker.
+  const ES_IDENTICAL_ALLOWLIST = new Set<string>([
+    "home.materials.epdm.name",
+    "home.materials.tpu.name",
+    "membraneProduct.hero.specBar.material",
+    "membraneProduct.hero.specBar.sku",
+    "compatibleBrand.filter.material",
+    "quote.form.materialOptions.epdm",
+    "quote.form.materialOptions.tpu",
+  ]);
 
-    expect(spanishLeaves.length).toBeGreaterThan(0);
-    expect(spanishLeaves.every((value) => value.startsWith("[ES-TODO] "))).toBe(
-      true,
-    );
+  it("marks untranslated Spanish copies with ES-TODO", () => {
+    const enMessages = mergeMessages(enCriticalMessages, enDeferredMessages);
+    const esMessages = mergeMessages(esCriticalMessages, esDeferredMessages);
+    const esPaths = collectLeafPaths(esMessages);
+
+    expect(esPaths.length).toBeGreaterThan(0);
+
+    const untranslatedCopies = esPaths.filter((path) => {
+      if (ES_IDENTICAL_ALLOWLIST.has(path)) return false;
+      const esValue = getMessageValue(esMessages, path);
+      const enValue = getMessageValue(enMessages, path);
+      if (typeof esValue !== "string" || typeof enValue !== "string") {
+        return false;
+      }
+      // A verbatim English copy that is NOT flagged is a contract violation.
+      return esValue === enValue && !esValue.startsWith("[ES-TODO] ");
+    });
+
+    expect(untranslatedCopies).toEqual([]);
   });
 });

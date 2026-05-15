@@ -44,14 +44,6 @@ interface FactualCriticalMessages {
   navigation: {
     siteName: string;
   };
-  home: {
-    footer: {
-      about: {
-        title: string;
-      };
-      copyright: string;
-    };
-  };
   footer: {
     copyright: string;
   };
@@ -112,8 +104,6 @@ function assertFactualCriticalMessages(
   value: unknown,
 ): asserts value is FactualCriticalMessages {
   expectStringPath(value, ["navigation", "siteName"]);
-  expectStringPath(value, ["home", "footer", "about", "title"]);
-  expectStringPath(value, ["home", "footer", "copyright"]);
   expectStringPath(value, ["footer", "copyright"]);
   expectStringPath(value, ["structured-data", "organization", "name"]);
   expectStringPath(value, ["structured-data", "website", "name"]);
@@ -261,9 +251,7 @@ describe("load-messages runtime gating", () => {
     assertFactualCriticalMessages(zhMessages);
 
     expect(enMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(enMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(enMessages.footer.copyright).toBe(expectedEnCopyright);
-    expect(enMessages.home.footer.copyright).toBe(expectedEnCopyright);
     expect(enMessages["structured-data"].organization.name).toBe(
       SINGLE_SITE_FACTS.company.name,
     );
@@ -277,13 +265,7 @@ describe("load-messages runtime gating", () => {
     expect(esMessages.navigation.siteName).toBe(
       `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
     );
-    expect(esMessages.home.footer.about.title).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
-    );
     expect(esMessages.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEnCopyright}`,
-    );
-    expect(esMessages.home.footer.copyright).toBe(
       `[ES-TODO] ${expectedEnCopyright}`,
     );
     expect(esMessages.footer.copyright).not.toContain(
@@ -300,9 +282,7 @@ describe("load-messages runtime gating", () => {
     );
 
     expect(zhMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(zhMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(zhMessages.footer.copyright).toBe(expectedZhCopyright);
-    expect(zhMessages.home.footer.copyright).toBe(expectedZhCopyright);
     expect(JSON.stringify(enMessages)).not.toMatch(factualPlaceholderPattern);
     expect(JSON.stringify(esMessages)).not.toMatch(factualPlaceholderPattern);
     expect(JSON.stringify(zhMessages)).not.toMatch(factualPlaceholderPattern);
@@ -358,12 +338,8 @@ describe("load-messages runtime gating", () => {
 
     expect(enCritical.navigation.siteName).toBe("{siteName}");
     expect(zhCritical.navigation.siteName).toBe("{siteName}");
-    expect(enCritical.home.footer.about.title).toBe("{siteName}");
-    expect(zhCritical.home.footer.about.title).toBe("{siteName}");
     expect(enCritical.footer.copyright).toBe("{copyright}");
     expect(zhCritical.footer.copyright).toBe("{copyright}");
-    expect(enCritical.home.footer.copyright).toBe("{copyright}");
-    expect(zhCritical.home.footer.copyright).toBe("{copyright}");
 
     expect(enCritical["structured-data"].organization.name).toBe(
       "{companyName}",
