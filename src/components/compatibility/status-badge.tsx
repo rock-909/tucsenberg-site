@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type StatusTone = "success" | "warning" | "neutral";
+export type StatusTone = "success" | "warning" | "neutral";
 
 const TONE_CLASS: Record<StatusTone, string> = {
   success:
