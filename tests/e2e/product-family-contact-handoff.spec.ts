@@ -20,8 +20,11 @@ const localeCases = [
     marketSlug: "north-america",
     familySlug: "sample-product-shapes",
     inquiryLabel: "Request quote for Sample Product Shapes",
-    marketLabel: "Primary Offer Example",
-    familyLabel: "Sample Product Shapes",
+    contextLabel: "You are asking about:",
+    marketLabel: "Membrane review path",
+    familyLabel: "Replacement membrane family",
+    legacyMarketLabel: "Primary Offer Example",
+    legacyFamilyLabel: "Sample Product Shapes",
   },
   {
     locale: "zh",
@@ -30,8 +33,11 @@ const localeCases = [
     marketSlug: "north-america",
     familySlug: "sample-product-shapes",
     inquiryLabel: "咨询 示例形态",
-    marketLabel: "主要业务示例",
-    familyLabel: "示例形态",
+    contextLabel: "你正在咨询：",
+    marketLabel: "膜片 review 路径",
+    familyLabel: "替换膜片系列",
+    legacyMarketLabel: "主要业务示例",
+    legacyFamilyLabel: "示例形态",
   },
 ] as const;
 
@@ -48,7 +54,7 @@ function expectProductFamilyContactUrl(
 
 for (const localeCase of localeCases) {
   test.describe(`product family Contact handoff (${localeCase.locale})`, () => {
-    test("keeps the localized Contact href without showing legacy catalog context", async ({
+    test("renders a localized Contact href and opens Contact with context", async ({
       page,
     }) => {
       await page.goto(localeCase.productPath, {
@@ -112,12 +118,13 @@ for (const localeCase of localeCases) {
         fallbackDelay: FALLBACK_DELAY_MS,
       });
 
-      await expect(
-        page.getByTestId("product-family-context-notice"),
-      ).toHaveCount(0);
-      await expect(page.getByText(localeCase.marketLabel)).toHaveCount(0);
-      await expect(page.getByText(localeCase.familyLabel)).toHaveCount(0);
-      await expect(page.getByTestId("contact-form-shell")).toBeVisible();
+      const notice = page.getByTestId("product-family-context-notice");
+      await expect(notice).toBeVisible();
+      await expect(notice).toContainText(localeCase.contextLabel);
+      await expect(notice).toContainText(localeCase.marketLabel);
+      await expect(notice).toContainText(localeCase.familyLabel);
+      await expect(notice).not.toContainText(localeCase.legacyMarketLabel);
+      await expect(notice).not.toContainText(localeCase.legacyFamilyLabel);
     });
   });
 }

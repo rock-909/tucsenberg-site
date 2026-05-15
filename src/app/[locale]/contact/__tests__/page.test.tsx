@@ -226,7 +226,7 @@ describe("ContactPage MDX migration", () => {
     );
   });
 
-  it("ignores legacy product family context query params on the Contact page", async () => {
+  it("renders validated product family context from Contact query params", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
@@ -238,7 +238,9 @@ describe("ContactPage MDX migration", () => {
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(screen.queryByText("You are asking about:")).not.toBeInTheDocument();
+    expect(screen.getByText("You are asking about:")).toBeInTheDocument();
+    expect(screen.getByText(/Membrane review path/)).toBeInTheDocument();
+    expect(screen.getByText(/Replacement membrane family/)).toBeInTheDocument();
     expect(screen.queryByText(/Primary Offer Example/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Support Packages/)).not.toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
@@ -263,7 +265,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
-  it("keeps the form column free of legacy product family notices", async () => {
+  it("keeps the product family notice in the same left column as the form", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
@@ -276,9 +278,9 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     const formColumn = screen.getByTestId("contact-form-column");
-    expect(
-      screen.queryByTestId("product-family-context-notice"),
-    ).not.toBeInTheDocument();
+    expect(formColumn).toContainElement(
+      screen.getByTestId("product-family-context-notice"),
+    );
     expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
     expect(formColumn).not.toHaveTextContent(/Primary Offer Example/);
     expect(formColumn).not.toHaveTextContent(/Support Packages/);

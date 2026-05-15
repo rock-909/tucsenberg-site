@@ -14,6 +14,9 @@ const REQUIRED_RUNTIME_KEYS = [
   "accessibility.turnstileTestMode",
   "accessibility.turnstileLoadFailed",
   "contact.form.networkError",
+  "contact.context.productFamilyLabel",
+  "contact.context.marketFallbackLabel",
+  "contact.context.familyFallbackLabel",
 ] as const;
 
 const INQUIRY_API_VALIDATION_DETAIL_KEYS = [
@@ -263,6 +266,36 @@ describe("real i18n runtime message contract", () => {
         esCriticalMessages,
         "underConstruction.pages.about.description",
         "[ES-TODO] Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
+      ],
+      [
+        enDeferredMessages,
+        "contact.context.marketFallbackLabel",
+        "Membrane review path",
+      ],
+      [
+        enDeferredMessages,
+        "contact.context.familyFallbackLabel",
+        "Replacement membrane family",
+      ],
+      [
+        zhDeferredMessages,
+        "contact.context.marketFallbackLabel",
+        "膜片 review 路径",
+      ],
+      [
+        zhDeferredMessages,
+        "contact.context.familyFallbackLabel",
+        "替换膜片系列",
+      ],
+      [
+        esDeferredMessages,
+        "contact.context.marketFallbackLabel",
+        "[ES-TODO] Membrane review path",
+      ],
+      [
+        esDeferredMessages,
+        "contact.context.familyFallbackLabel",
+        "[ES-TODO] Replacement membrane family",
       ],
     ] as const;
 

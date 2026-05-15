@@ -61,7 +61,9 @@
   },
   "contact": {
     "context": {
-      "productFamilyLabel": "你正在咨询："
+      "productFamilyLabel": "你正在咨询：",
+      "marketFallbackLabel": "膜片 review 路径",
+      "familyFallbackLabel": "替换膜片系列"
     },
     "title": "联系我们",
     "description": "联系我们的团队进行咨询、支持或合作机会。",

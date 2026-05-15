@@ -13,6 +13,7 @@
 
 ## 已完成
 
+- [x] 2026-05-15 BC-009 修复：恢复 product family inquiry -> localized Contact URL -> validated context notice；Contact notice 使用 Tucsenberg-safe fallback 文案，不直接展示仍受保护的 starter catalog labels。主导航 / 首页 Quote 入口仍按 Step 2 保持 `#coming-soon` 占位。
 - [x] 整体网站规划（PROJECT-BRIEF.md 全部章节，~700 行）
 - [x] 产品线决策：Phase 1 = EPDM + TPU/PU，Phase 2 加 PTFE，Silicone 不做标准品
 - [x] 设计基调：Engineering Navy + IBM Plex Sans 组合

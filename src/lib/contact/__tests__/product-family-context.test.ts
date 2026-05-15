@@ -19,18 +19,29 @@ const messages = {
       },
     },
   },
+  contact: {
+    context: {
+      marketFallbackLabel: "Membrane review path",
+      familyFallbackLabel: "Replacement membrane family",
+    },
+  },
 };
 
 describe("product-family contact context", () => {
-  it("keeps the Step 2 placeholder contact target as a plain hash link", () => {
+  it("builds a Contact href object with validated product-family context", () => {
     const href = buildProductFamilyContactHref({
       marketSlug: "north-america",
       familySlug: "couplings",
     });
 
-    expect(href).toBe("#coming-soon");
-    expect(JSON.stringify(href)).not.toContain("?intent=");
-    expect(JSON.stringify(href)).not.toContain("%23coming-soon");
+    expect(href).toEqual({
+      pathname: "/contact",
+      query: {
+        intent: "product-family",
+        market: "north-america",
+        family: "couplings",
+      },
+    });
   });
 
   it("parses valid product family context and resolves trusted labels", () => {
@@ -47,8 +58,8 @@ describe("product-family contact context", () => {
       intent: "product-family",
       marketSlug: "north-america",
       familySlug: "couplings",
-      marketLabel: "Primary Offer Example",
-      familyLabel: "Support Packages",
+      marketLabel: "Membrane review path",
+      familyLabel: "Replacement membrane family",
     });
   });
 
