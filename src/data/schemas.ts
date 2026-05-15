@@ -12,19 +12,27 @@ export const dimensionSchema = z.object({
 
 export type Dimension = z.infer<typeof dimensionSchema>;
 
-export const temperatureRangeSchema = z.object({
-  min: z.number(),
-  max: z.number(),
-  unit: z.enum(["celsius", "fahrenheit"]),
-});
+export const temperatureRangeSchema = z
+  .object({
+    min: z.number(),
+    max: z.number(),
+    unit: z.enum(["celsius", "fahrenheit"]),
+  })
+  .refine((data) => data.min < data.max, {
+    message: "min must be less than max",
+  });
 
 export type TemperatureRange = z.infer<typeof temperatureRangeSchema>;
 
-export const airFlowRangeSchema = z.object({
-  min: z.number(),
-  max: z.number(),
-  unit: z.enum(["scfm", "sm3/hr/m"]),
-});
+export const airFlowRangeSchema = z
+  .object({
+    min: z.number(),
+    max: z.number(),
+    unit: z.enum(["scfm", "sm3/hr/m"]),
+  })
+  .refine((data) => data.min < data.max, {
+    message: "min must be less than max",
+  });
 
 export type AirFlowRange = z.infer<typeof airFlowRangeSchema>;
 
@@ -38,7 +46,7 @@ export const productGroupSchema = z.object({
   name: i18nTextSchema,
   description: i18nTextSchema,
   category: z.enum(["disc", "tube"]),
-  variantIds: z.array(z.string()),
+  variantIds: z.array(z.string().min(1)),
 });
 
 export type ProductGroup = z.infer<typeof productGroupSchema>;
@@ -80,7 +88,7 @@ export const oemBrandSchema = z.object({
   name: z.string().min(1),
   parentCompany: z.string().min(1).optional(),
   trademarkDisclaimer: i18nTextSchema,
-  modelIds: z.array(z.string()),
+  modelIds: z.array(z.string().min(1)),
 });
 
 export type OEMBrand = z.infer<typeof oemBrandSchema>;
@@ -94,7 +102,7 @@ export const oemModelSchema = z.object({
   slug: z.string().min(1),
   brandId: z.string().min(1),
   name: z.string().min(1),
-  oemPartNumbers: z.array(z.string()),
+  oemPartNumbers: z.array(z.string().min(1)),
   category: z.enum(["disc", "tube"]),
   specs: z
     .object({
@@ -118,7 +126,7 @@ export const compatibilityMappingSchema = z.object({
   productVariantId: z.string().min(1),
   fitStatus: z.enum(["exact", "verify-dimensions", "custom"]),
   confidence: z.enum(["high", "medium", "low"]),
-  requiredChecks: z.array(z.string()),
+  requiredChecks: z.array(z.string().min(1)),
   disclaimer: z.string().min(1),
 });
 

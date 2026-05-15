@@ -83,6 +83,26 @@ describe("productVariantSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("validates a ProductVariant with empty specs object", () => {
+    const variantNoSpecs = {
+      id: "pv-tube-1m-tpu",
+      slug: "1m-tube-tpu",
+      groupId: "pg-tube-1m",
+      name: {
+        en: "1m TPU Tube Membrane",
+        es: "Membrana de tubo TPU de 1m",
+        zh: "1米TPU管式膜片",
+      },
+      material: "tpu",
+      sku: "TUC-T1M-TPU",
+      phase: 2,
+      specs: {},
+    };
+
+    const result = productVariantSchema.safeParse(variantNoSpecs);
+    expect(result.success).toBe(true);
+  });
+
   it('rejects ProductVariant with invalid material ("rubber")', () => {
     const invalidVariant = {
       id: "pv-disc-9inch-rubber",
@@ -121,6 +141,19 @@ describe("oemBrandSchema", () => {
     const result = oemBrandSchema.safeParse(validBrand);
     expect(result.success).toBe(true);
   });
+
+  it("rejects OEMBrand when trademarkDisclaimer is missing", () => {
+    const invalidBrand = {
+      id: "oem-sanitaire",
+      slug: "sanitaire",
+      name: "Sanitaire",
+      parentCompany: "Xylem Inc.",
+      modelIds: ["oem-model-sanitaire-gold"],
+    };
+
+    const result = oemBrandSchema.safeParse(invalidBrand);
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("oemModelSchema", () => {
@@ -140,6 +173,20 @@ describe("oemModelSchema", () => {
 
     const result = oemModelSchema.safeParse(validModel);
     expect(result.success).toBe(true);
+  });
+
+  it('rejects OEMModel with invalid category ("pipe")', () => {
+    const invalidModel = {
+      id: "oem-model-invalid",
+      slug: "invalid-model",
+      brandId: "oem-sanitaire",
+      name: "Invalid Model",
+      oemPartNumbers: ["INVALID-001"],
+      category: "pipe",
+    };
+
+    const result = oemModelSchema.safeParse(invalidModel);
+    expect(result.success).toBe(false);
   });
 });
 
