@@ -262,15 +262,22 @@ describe("load-messages runtime gating", () => {
       SINGLE_SITE_FACTS.company.name,
     );
 
-    expect(esMessages.navigation.siteName).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
-    );
-    expect(esMessages.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEnCopyright}`,
-    );
-    expect(esMessages.footer.copyright).not.toContain(
-      "Todos los derechos reservados",
-    );
+    // Phase-1 public-ES posture: ES publishes publicly, so public chrome must
+    // NOT leak `[ES-TODO]`. `navigation.siteName` and `footer.copyright` are
+    // pure ICU/brand leaves (`{siteName}` / `{copyright}`) that resolve to the
+    // same factual brand values across all locales by necessity. Commit
+    // `8adbd43` correctly removed the `[ES-TODO]` flag from these and curated
+    // them into the documented `ES_IDENTICAL_ALLOWLIST` of
+    // `tests/unit/i18n-message-contract.test.ts`; ES == EN here is intended,
+    // not a translation miss. These assertions still enforce that the runtime
+    // loader resolves concrete factual brand values for public ES chrome.
+    expect(esMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
+    expect(esMessages.footer.copyright).toBe(expectedEnCopyright);
+    expect(esMessages.navigation.siteName).not.toContain("[ES-TODO]");
+    expect(esMessages.footer.copyright).not.toContain("[ES-TODO]");
+    // `critical.structured-data` ES leaves were intentionally LEFT `[ES-TODO]`
+    // by `8adbd43` (not public chrome; flagged for later translation), so these
+    // assertions still legitimately expect the `[ES-TODO]` prefix.
     expect(esMessages["structured-data"].organization.name).toBe(
       `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
     );
