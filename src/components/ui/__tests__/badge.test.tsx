@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import { Badge } from "@/components/ui/badge";
 
 describe("Badge", () => {
-  it("renders text and rich content in the default div shell", () => {
+  it("renders text and rich content with a stable public contract", () => {
     render(
       <Badge data-testid="badge">
         <svg aria-hidden="true" data-testid="badge-icon" />
@@ -12,9 +13,11 @@ describe("Badge", () => {
     );
 
     const badge = screen.getByTestId("badge");
-    expect(badge.tagName).toBe("DIV");
+    expect(badge.tagName).toBe("SPAN");
     expect(badge).toHaveTextContent("Ready");
     expect(badge).toContainElement(screen.getByTestId("badge-icon"));
+    expect(badge).toHaveAttribute("data-slot", "badge");
+    expect(badge).toHaveAttribute("data-ui-pilot", "radix-themes-badge");
     expect(badge).toHaveClass(
       "inline-flex",
       "items-center",
@@ -54,5 +57,14 @@ describe("Badge", () => {
     expect(badge).toHaveAttribute("role", "status");
     expect(badge).toHaveAttribute("aria-label", "Status indicator");
     expect(badge).toHaveClass("custom-spacing", "bg-primary");
+  });
+
+  it("forwards refs to the public badge element", () => {
+    const badgeRef = createRef<HTMLSpanElement>();
+
+    render(<Badge ref={badgeRef}>Ready</Badge>);
+
+    expect(badgeRef.current).toBeInstanceOf(HTMLSpanElement);
+    expect(badgeRef.current).toHaveAttribute("data-slot", "badge");
   });
 });

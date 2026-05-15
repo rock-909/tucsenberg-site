@@ -217,6 +217,18 @@ describe("CookieBanner", () => {
       expect(checkboxes[0]).toBeDisabled();
     });
 
+    it("renders cookie category toggles through the local Checkbox wrapper", () => {
+      render(<CookieBanner />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+
+      const analyticsCheckbox = screen.getByRole("checkbox", {
+        name: "Analytics",
+      });
+
+      expect(analyticsCheckbox).toHaveAttribute("data-slot", "checkbox");
+    });
+
     it("analytics checkbox is unchecked by default", () => {
       render(<CookieBanner />);
 
@@ -297,6 +309,19 @@ describe("CookieBanner", () => {
       fireEvent.click(analyticsCheckbox);
 
       // Save preferences
+      fireEvent.click(screen.getByRole("button", { name: "Save Preferences" }));
+
+      expect(mockSavePreferences).toHaveBeenCalledWith({
+        analytics: true,
+        marketing: false,
+      });
+    });
+
+    it("saves preferences after toggling analytics through visible label text", () => {
+      render(<CookieBanner />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+      fireEvent.click(screen.getByText("Analytics"));
       fireEvent.click(screen.getByRole("button", { name: "Save Preferences" }));
 
       expect(mockSavePreferences).toHaveBeenCalledWith({

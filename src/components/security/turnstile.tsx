@@ -8,6 +8,7 @@ import {
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
 } from "@/lib/env";
+import { StatusCallout } from "@/components/ui/status-callout";
 
 /**
  * 使用全局 logger（开发环境输出，生产环境静默）
@@ -47,16 +48,13 @@ const DEFAULT_TURNSTILE_LABELS = {
 
 function TurnstileBypassStatus({ className, label }: TurnstileStatusProps) {
   return (
-    <div
+    <StatusCallout
       className={`turnstile-bypass ${className ?? ""}`}
       data-testid="turnstile-bypass"
-      role="status"
-      aria-live="polite"
+      tone="warning"
     >
-      <div className="rounded-md border border-[var(--warning-border)] bg-[var(--warning-muted)] p-3 text-sm text-[var(--warning-foreground)]">
-        {label}
-      </div>
-    </div>
+      {label}
+    </StatusCallout>
   );
 }
 
@@ -76,13 +74,12 @@ function TurnstileUnavailableStatus({
   label,
 }: TurnstileStatusProps) {
   return (
-    <div
+    <StatusCallout
       className={`turnstile-fallback ${className ?? ""}`}
-      role="status"
-      aria-live="polite"
+      tone="warning"
     >
-      <div className="text-sm text-destructive">{label}</div>
-    </div>
+      {label}
+    </StatusCallout>
   );
 }
 

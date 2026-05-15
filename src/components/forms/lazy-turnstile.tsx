@@ -12,6 +12,7 @@ import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
 import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { requestIdleCallback } from "@/lib/idle-callback";
 import { LazyIslandErrorBoundary } from "@/components/ui/lazy-island-error-boundary";
+import { StatusCallout } from "@/components/ui/status-callout";
 
 const TURNSTILE_PLACEHOLDER_CLASS_NAME =
   "h-[var(--turnstile-placeholder-height)] w-full animate-pulse rounded-md bg-muted";
@@ -145,13 +146,12 @@ export function LazyTurnstile({
     <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
   );
   const failureFallback = (
-    <div
+    <StatusCallout
       className={`turnstile-fallback ${className ?? "w-full"}`}
-      role="status"
-      aria-live="polite"
+      tone="warning"
     >
-      <div className="text-sm text-destructive">{labelText.unavailable}</div>
-    </div>
+      {labelText.unavailable}
+    </StatusCallout>
   );
   const handleLazyError = () => {
     onError?.(labelText.loadFailed);

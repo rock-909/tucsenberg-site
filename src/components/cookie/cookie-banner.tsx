@@ -23,6 +23,8 @@ import { useTranslations } from "next-intl";
 import { useCookieConsent } from "@/lib/cookie-consent";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const CSS_VAR_BANNER_HEIGHT = "--cookie-banner-height";
 const COOKIE_PREFERENCES_PANEL_ID = "cookie-preferences-panel";
@@ -415,24 +417,23 @@ function CategoryToggle({
   const descriptionId = `${id}-description`;
 
   return (
-    <label
+    <div
       className={cn(
         "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors",
         disabled ? "cursor-not-allowed bg-muted/50" : "hover:bg-muted/50",
         checked && !disabled && "border-primary/50 bg-primary/5",
       )}
     >
-      <input
+      <Checkbox
         id={id}
-        type="checkbox"
         checked={checked}
         disabled={disabled}
-        onChange={(e) => onChange?.(e.target.checked)}
+        onCheckedChange={(value) => onChange?.(value === true)}
         aria-labelledby={labelId}
         aria-describedby={descriptionId}
         className="mt-0.5 size-4 rounded border-input accent-primary disabled:cursor-not-allowed disabled:opacity-50"
       />
-      <span className="flex-1 space-y-0.5">
+      <Label htmlFor={id} className="flex-1 cursor-pointer space-y-0.5">
         <span
           id={labelId}
           className="block text-xs leading-none font-medium text-foreground"
@@ -445,7 +446,7 @@ function CategoryToggle({
         >
           {description}
         </span>
-      </span>
-    </label>
+      </Label>
+    </div>
   );
 }

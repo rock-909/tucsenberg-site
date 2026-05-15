@@ -57,29 +57,35 @@ describe("ProductSpecs", () => {
     });
   });
 
-  describe("custom className", () => {
-    it("applies custom className to Card", () => {
+  describe("local wrapper contract", () => {
+    it("renders through SpecCard and applies custom className there", () => {
       const { container } = render(
         <ProductSpecs specs={sampleSpecs} className="custom-specs-class" />,
       );
 
       const card = container.querySelector('[data-slot="card"]');
-      expect(card).toHaveClass("custom-specs-class");
+      expect(card).toBeNull();
+      const specCard = container.querySelector('[data-slot="spec-card"]');
+      expect(specCard).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-data-card",
+      );
+      expect(specCard).toHaveClass("custom-specs-class");
     });
   });
 
   describe("styling", () => {
-    it("has overflow-hidden class on card", () => {
+    it("keeps overflow-hidden on the spec card", () => {
       const { container } = render(<ProductSpecs specs={sampleSpecs} />);
 
-      const card = container.querySelector('[data-slot="card"]');
+      const card = container.querySelector('[data-slot="spec-card"]');
       expect(card).toHaveClass("overflow-hidden");
     });
 
-    it("has bg-muted/50 on header", () => {
+    it("keeps bg-muted/50 on the data-card header", () => {
       const { container } = render(<ProductSpecs specs={sampleSpecs} />);
 
-      const header = container.querySelector('[data-slot="card-header"]');
+      const header = container.querySelector('[data-slot="data-card-header"]');
       expect(header).toHaveClass("bg-muted/50");
     });
   });
@@ -315,14 +321,20 @@ describe("ProductTradeInfo", () => {
     });
   });
 
-  describe("custom className", () => {
-    it("applies custom className to Card", () => {
+  describe("local wrapper contract", () => {
+    it("renders through SpecCard and applies custom className there", () => {
       const { container } = render(
         <ProductTradeInfo moq="100 pcs" className="custom-trade-class" />,
       );
 
       const card = container.querySelector('[data-slot="card"]');
-      expect(card).toHaveClass("custom-trade-class");
+      expect(card).toBeNull();
+      const specCard = container.querySelector('[data-slot="spec-card"]');
+      expect(specCard).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-data-card",
+      );
+      expect(specCard).toHaveClass("custom-trade-class");
     });
   });
 

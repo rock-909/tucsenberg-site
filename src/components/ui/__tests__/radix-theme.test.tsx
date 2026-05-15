@@ -29,6 +29,19 @@ describe("RadixThemePilot", () => {
     );
   });
 
+  it("supports named Radix takeover surfaces", () => {
+    render(
+      <RadixThemePilot surface="form-control">
+        <span>Form control surface</span>
+      </RadixThemePilot>,
+    );
+
+    expect(screen.getByTestId("radix-theme-pilot")).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-form-control",
+    );
+  });
+
   it("keeps Radix Theme typography mapped to project-owned font tokens", () => {
     render(
       <RadixThemePilot>

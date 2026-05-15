@@ -53,10 +53,15 @@
 - **shadcn/ui**：基础组件来源
 - **Radix UI**
   - `@radix-ui/react-accordion 1.2.12`
+  - `@radix-ui/react-checkbox 1.3.3`
+  - `@radix-ui/react-collapsible 1.1.12`
   - `@radix-ui/react-dialog 1.1.15`
   - `@radix-ui/react-dropdown-menu 2.1.16`
   - `@radix-ui/react-label 2.1.8`
+  - `@radix-ui/react-radio-group 1.3.8`
+  - `@radix-ui/react-separator 1.1.8`
   - `@radix-ui/react-slot 1.2.4`
+  - `@radix-ui/themes 3.3.0`
 
 ### 样式与体验辅助
 

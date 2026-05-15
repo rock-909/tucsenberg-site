@@ -356,6 +356,14 @@ describe("MobileNavigation Component", () => {
         screen.getByRole("button", { name: "Language English" }),
       );
 
+      expect(screen.getByTestId("mobile-language-switcher")).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-primitive-collapsible",
+      );
+      expect(screen.getByTestId("mobile-language-options")).toHaveAttribute(
+        "data-slot",
+        "collapsible-content",
+      );
       expect(screen.getByTestId("mobile-language-switcher")).not.toHaveClass(
         "notranslate",
       );

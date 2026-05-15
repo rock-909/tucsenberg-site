@@ -171,7 +171,7 @@ describe("ContactPage MDX migration", () => {
   it("renders the Tucsenberg placeholder email while suppressing fake starter contact details", async () => {
     const { ContactMethodsCard } = await import("../contact-page-sections");
 
-    render(
+    const { container } = render(
       <ContactMethodsCard
         copy={{
           title: "Contact Methods",
@@ -186,6 +186,29 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByText("contact@tucsenberg.com")).toBeInTheDocument();
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-slot="data-card"]')).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-data-card",
+    );
+  });
+
+  it("renders response expectations as a governed data card", async () => {
+    const { ResponseExpectationsCard } =
+      await import("../contact-page-sections");
+
+    const { container } = render(
+      <ResponseExpectationsCard
+        responseCopy={contactCopy.panel.response}
+        hoursCopy={contactCopy.panel.hours}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Response Time" }));
+    expect(screen.getByText("Within 24 hours")).toBeInTheDocument();
+    expect(container.querySelector('[data-slot="data-card"]')).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-data-card",
+    );
   });
 
   it("renders FAQ from MDX frontmatter", async () => {

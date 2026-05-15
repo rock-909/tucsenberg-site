@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SpecCard, SpecCardRow } from "@/components/ui/spec-card";
 
 export interface ProductSpecsProps {
   /** Key-value pairs of product specifications */
@@ -29,24 +29,11 @@ export function ProductSpecs({
   }
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="text-lg">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <dl className="divide-y divide-border">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="grid grid-cols-[1fr_2fr] gap-4 px-6 py-3 text-sm even:bg-muted/30"
-            >
-              <dt className="font-medium text-muted-foreground">{key}</dt>
-              <dd className="text-foreground">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </CardContent>
-    </Card>
+    <SpecCard title={title} className={cn("overflow-hidden", className)}>
+      {entries.map(([key, value]) => (
+        <SpecCardRow key={key} label={key} value={value} />
+      ))}
+    </SpecCard>
   );
 }
 
@@ -166,25 +153,10 @@ export function ProductTradeInfo({
   }
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="text-lg">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <dl className="divide-y divide-border">
-          {items.map((item) => (
-            <div
-              key={item.key}
-              className="grid grid-cols-[1fr_2fr] gap-4 px-6 py-3 text-sm even:bg-muted/30"
-            >
-              <dt className="font-medium text-muted-foreground">
-                {item.label}
-              </dt>
-              <dd className="text-foreground">{item.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </CardContent>
-    </Card>
+    <SpecCard title={title} className={cn("overflow-hidden", className)}>
+      {items.map((item) => (
+        <SpecCardRow key={item.key} label={item.label} value={item.value} />
+      ))}
+    </SpecCard>
   );
 }

@@ -262,6 +262,10 @@ describe("ContactFormContainer - 剩余高级测试", () => {
       expect(
         screen.getByTestId("contact-form-status-message"),
       ).toBeInTheDocument();
+      expect(statusElement).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-status-callout",
+      );
       expect(
         screen.getByTestId("contact-form-status-message-text"),
       ).toHaveTextContent("Form submitted successfully!");
@@ -308,6 +312,10 @@ describe("ContactFormContainer - 剩余高级测试", () => {
 
       const statusMessage = screen.getByTestId("contact-form-status-message");
       expectSemanticStatusClasses(statusMessage, FORM_STATUS_CLASS_NAMES.error);
+      expect(statusMessage).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-status-callout",
+      );
       expect(
         screen.getByTestId("contact-form-status-message-text"),
       ).toHaveTextContent("Failed to submit form. Please try again.");
@@ -397,6 +405,10 @@ describe("ContactFormContainer - ErrorDisplay", () => {
     expect(
       screen.getByTestId("contact-form-error-heading"),
     ).toBeInTheDocument();
+    expect(screen.getByTestId("contact-form-error-display")).toHaveAttribute(
+      "data-slot",
+      "error-summary",
+    );
     expect(screen.getByText("errors.invalidEmail")).toBeInTheDocument();
     expect(screen.getByText("errors.messageTooShort")).toBeInTheDocument();
   });

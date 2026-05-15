@@ -3,21 +3,20 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Input } from "@/components/ui/input";
 
+function getControlSurface(control: HTMLElement): HTMLElement {
+  const surface = control.closest(".w-full");
+  expect(surface).toBeInstanceOf(HTMLElement);
+  return surface as HTMLElement;
+}
+
 describe("Input", () => {
   it("renders the default textbox shell with placeholder and base classes", () => {
     render(<Input placeholder="Enter text here" data-testid="input" />);
 
     const input = screen.getByPlaceholderText("Enter text here");
     expect(input).toHaveAttribute("data-slot", "input");
-    expect(input).toHaveClass(
-      "flex",
-      "h-10",
-      "w-full",
-      "rounded-xl",
-      "border",
-      "text-base",
-      "md:text-sm",
-    );
+    expect(input).toHaveAttribute("data-ui-pilot", "radix-themes-form-control");
+    expect(getControlSurface(input)).toHaveClass("w-full");
   });
 
   it.each([
@@ -56,7 +55,7 @@ describe("Input", () => {
     expect(input).toHaveAttribute("maxlength", "50");
     expect(input).toBeRequired();
     expect(input).toHaveAttribute("readonly");
-    expect(input).toHaveClass("custom-input");
+    expect(document.querySelector(".custom-input")).toContainElement(input);
   });
 
   it("emits user input and keyboard/focus events", async () => {
@@ -99,12 +98,25 @@ describe("Input", () => {
     await user.type(input, "test");
 
     expect(input).toBeDisabled();
-    expect(input).toHaveClass(
-      "disabled:pointer-events-none",
-      "disabled:opacity-50",
+    expect(getControlSurface(input)).toHaveClass(
+      "has-[input:disabled]:pointer-events-none",
+      "has-[input:disabled]:opacity-50",
     );
     expect(handleChange).not.toHaveBeenCalled();
     expect(handleFocus).not.toHaveBeenCalled();
+  });
+
+  it("applies invalid and focus state classes through the Radix control surface", () => {
+    render(<Input aria-invalid placeholder="Email" />);
+
+    const input = screen.getByPlaceholderText("Email");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(getControlSurface(input)).toHaveClass(
+      "focus-within:border-ring",
+      "focus-within:ring-[3px]",
+      "has-[input[aria-invalid=true]]:border-destructive",
+      "has-[input[aria-invalid=true]]:ring-destructive/20",
+    );
   });
 
   it("supports file input styling and change events", () => {
@@ -125,5 +137,66 @@ describe("Input", () => {
       "file:font-medium",
     );
     expect(handleChange).toHaveBeenCalled();
+  });
+
+  it("keeps hidden inputs native and out of the Radix form-control surface", () => {
+    render(
+      <Input
+        type="hidden"
+        name="trackingId"
+        value="lead-123"
+        data-testid="hidden-input"
+      />,
+    );
+
+    const input = screen.getByTestId("hidden-input");
+    expect(input).toHaveAttribute("type", "hidden");
+    expect(input).not.toHaveAttribute("data-ui-pilot");
+  });
+
+  it("includes hidden input name/value in real FormData", () => {
+    render(
+      <form aria-label="lead form">
+        <Input type="hidden" name="trackingId" value="lead-123" />
+      </form>,
+    );
+
+    const form = screen.getByRole("form", {
+      name: "lead form",
+    }) as HTMLFormElement;
+
+    expect(new FormData(form).get("trackingId")).toBe("lead-123");
+  });
+
+  it("includes typed textual input in real FormData", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <form aria-label="lead form">
+        <Input name="email" type="email" placeholder="Email" />
+      </form>,
+    );
+
+    await user.type(screen.getByPlaceholderText("Email"), "buyer@example.com");
+
+    const form = screen.getByRole("form", {
+      name: "lead form",
+    }) as HTMLFormElement;
+
+    expect(new FormData(form).get("email")).toBe("buyer@example.com");
+  });
+
+  it("includes textual defaultValue in real FormData", () => {
+    render(
+      <form aria-label="lead form">
+        <Input name="email" type="email" defaultValue="buyer@example.com" />
+      </form>,
+    );
+
+    const form = screen.getByRole("form", {
+      name: "lead form",
+    }) as HTMLFormElement;
+
+    expect(new FormData(form).get("email")).toBe("buyer@example.com");
   });
 });

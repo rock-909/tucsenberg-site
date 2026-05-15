@@ -135,6 +135,11 @@
 
 ## 最近决策（按时间倒序）
 
+### 2026-05-15
+
+- **A/B 设计方向反哺定案** — B 版（Claude Design 探索）的视觉皮（暗色优先 / Inter 做 display / 满屏 pill / 密度切换）**全部拒绝**，与 DESIGN.md 第 2 节反面参考一致；只吸收其三个交互骨架反哺进 DESIGN.md v1.1：(1) 全局兼容性搜索（首页第一屏主入口 + 全站 ⌘K 可唤起，用 A 视觉 token 实现，不是暗色 palette）；(2) 深层页上下文条（复用 hero Trust ribbon 槽位形态）；(3) `/compatible/[brand]` 的 OEM 系列下划线 tab。视觉锁定不变，仍是 A 体系（IBM Plex Sans 300 / Navy / Teal / 6px / 无 pill）。用户决策点：兼容搜索定位 = 首页第一屏主入口。
+- **进度认知校正** — 跨会话曾误判项目已到 Step 4；核实后真实状态为 **Phase 1 Step 2 收尾**：当前可访问页面仍是 starter 演示页套 Tucsenberg 品牌字，PROJECT-BRIEF 规划的 Tucsenberg 页面（兼容搜索首页 / `/membranes` / `/compatible/sanitaire` / 真实 `/quote`）尚未落地；Step 3 数据层、Step 4 四页样板均未开始。组件库与 Radix governed adoption 计划的 wrapper 已建但 6 个切片验收闸门尚未跑（计划文档勾选框仍全空）。当前在 `radix-governed-full-adoption` 分支，工作区干净。
+
 ### 2026-05-14
 
 - **repo config 从 starter 复用的边界** — `.gitignore`、`.gitattributes`、`.npmrc`、`.node-version`、`.nvmrc`、lefthook、commitlint、ESLint、Cloudflare deploy workflow 等通用工程配置继续复用；它们是 repo 工具链，不是品牌面。

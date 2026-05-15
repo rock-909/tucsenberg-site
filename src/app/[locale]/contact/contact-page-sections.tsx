@@ -2,7 +2,12 @@ import { Suspense } from "react";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { ProductFamilyContextNotice } from "@/components/contact/product-family-context-notice";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
-import { Card } from "@/components/ui/card";
+import {
+  DataCard,
+  DataCardContent,
+  DataCardHeader,
+  DataCardTitle,
+} from "@/components/ui/data-card";
 import { SectionHead } from "@/components/ui/section-head";
 import {
   getPublicContactEmail,
@@ -26,9 +31,11 @@ export function ContactMethodsCard({
   const publicPhone = getPublicContactPhone(siteFacts.contact.phone);
 
   return (
-    <Card className="p-6">
-      <h3 className="mb-4 text-xl font-semibold">{copy.title}</h3>
-      <div className="space-y-4">
+    <DataCard className="p-6">
+      <DataCardHeader>
+        <DataCardTitle className="text-xl">{copy.title}</DataCardTitle>
+      </DataCardHeader>
+      <DataCardContent className="space-y-4">
         <div className="flex items-center space-x-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <svg
@@ -76,8 +83,8 @@ export function ContactMethodsCard({
             </div>
           </div>
         ) : null}
-      </div>
-    </Card>
+      </DataCardContent>
+    </DataCard>
   );
 }
 
@@ -89,51 +96,59 @@ export function ResponseExpectationsCard({
   hoursCopy: ContactPageData["copy"]["panel"]["hours"];
 }) {
   return (
-    <Card className="p-6">
-      <h3 className="mb-4 text-xl font-semibold">{responseCopy.title}</h3>
-      <dl className="space-y-4 text-sm">
-        <div className="space-y-1">
-          <dt className="font-medium">{responseCopy.responseTimeLabel}</dt>
-          <dd className="text-muted-foreground">
-            {responseCopy.responseTimeValue}
-          </dd>
-        </div>
-        <div className="space-y-1">
-          <dt className="font-medium">{responseCopy.bestForLabel}</dt>
-          <dd className="text-muted-foreground">{responseCopy.bestForValue}</dd>
-        </div>
-        <div className="space-y-1">
-          <dt className="font-medium">{responseCopy.prepareLabel}</dt>
-          <dd className="text-muted-foreground">{responseCopy.prepareValue}</dd>
-        </div>
-      </dl>
+    <DataCard className="p-6">
+      <DataCardHeader>
+        <DataCardTitle className="text-xl">{responseCopy.title}</DataCardTitle>
+      </DataCardHeader>
+      <DataCardContent>
+        <dl className="space-y-4 text-sm">
+          <div className="space-y-1">
+            <dt className="font-medium">{responseCopy.responseTimeLabel}</dt>
+            <dd className="text-muted-foreground">
+              {responseCopy.responseTimeValue}
+            </dd>
+          </div>
+          <div className="space-y-1">
+            <dt className="font-medium">{responseCopy.bestForLabel}</dt>
+            <dd className="text-muted-foreground">
+              {responseCopy.bestForValue}
+            </dd>
+          </div>
+          <div className="space-y-1">
+            <dt className="font-medium">{responseCopy.prepareLabel}</dt>
+            <dd className="text-muted-foreground">
+              {responseCopy.prepareValue}
+            </dd>
+          </div>
+        </dl>
 
-      <div className="mt-6 border-t pt-6">
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {hoursCopy.title}
-        </h4>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between gap-4">
-            <span>{hoursCopy.weekdaysLabel}</span>
-            <span className="text-muted-foreground">
-              {siteFacts.contact.businessHours?.weekdays}
-            </span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span>{hoursCopy.saturdayLabel}</span>
-            <span className="text-muted-foreground">
-              {siteFacts.contact.businessHours?.saturday}
-            </span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span>{hoursCopy.sundayLabel}</span>
-            <span className="text-muted-foreground">
-              {hoursCopy.closedLabel}
-            </span>
+        <div className="mt-6 border-t pt-6">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {hoursCopy.title}
+          </h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between gap-4">
+              <span>{hoursCopy.weekdaysLabel}</span>
+              <span className="text-muted-foreground">
+                {siteFacts.contact.businessHours?.weekdays}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span>{hoursCopy.saturdayLabel}</span>
+              <span className="text-muted-foreground">
+                {siteFacts.contact.businessHours?.saturday}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span>{hoursCopy.sundayLabel}</span>
+              <span className="text-muted-foreground">
+                {hoursCopy.closedLabel}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </DataCardContent>
+    </DataCard>
   );
 }
 

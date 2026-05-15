@@ -1,4 +1,5 @@
 import type { ProductFamilyContactContext } from "@/lib/contact/product-family-context";
+import { StatusCallout } from "@/components/ui/status-callout";
 
 export function ProductFamilyContextNotice({
   context,
@@ -12,9 +13,11 @@ export function ProductFamilyContextNotice({
   }
 
   return (
-    <div
-      className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4"
+    <StatusCallout
+      className="mb-6"
       data-testid="product-family-context-notice"
+      live={false}
+      tone="info"
     >
       <p className="text-sm font-medium">{label}</p>
       <p className="mt-1 text-sm text-muted-foreground">
@@ -22,6 +25,6 @@ export function ProductFamilyContextNotice({
         {" / "}
         <span translate="no">{context.familyLabel}</span>
       </p>
-    </div>
+    </StatusCallout>
   );
 }

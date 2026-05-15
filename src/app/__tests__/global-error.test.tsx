@@ -55,13 +55,19 @@ describe("GlobalError", () => {
     it("should render Try again button", () => {
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      expect(screen.getByText("Try again")).toBeInTheDocument();
+      expect(screen.getByTestId("try-again-button")).toHaveAttribute(
+        "data-slot",
+        "button",
+      );
     });
 
     it("should render Go to homepage button", () => {
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      expect(screen.getByText("Go to homepage")).toBeInTheDocument();
+      expect(screen.getByTestId("go-home-button")).toHaveAttribute(
+        "data-slot",
+        "button",
+      );
     });
 
     it("should render the main container", () => {

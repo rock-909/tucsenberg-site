@@ -1,5 +1,11 @@
 import type { SpecGroup } from "@/constants/product-specs/types";
 import { cn } from "@/lib/utils";
+import {
+  DataCard,
+  DataCardContent,
+  DataCardHeader,
+  DataCardTitle,
+} from "@/components/ui/data-card";
 
 export interface SpecTableProps {
   specGroups: SpecGroup[];
@@ -20,11 +26,13 @@ function SpecRow({ row }: { row: string[] }) {
 
 function SpecGroupTable({ group }: { group: SpecGroup }) {
   return (
-    <div>
-      <h4 className="mb-3 font-mono text-sm font-semibold text-muted-foreground">
-        {group.groupLabel}
-      </h4>
-      <div className="overflow-x-auto rounded-lg border border-border">
+    <DataCard className="gap-3 p-4">
+      <DataCardHeader>
+        <DataCardTitle className="font-mono text-sm text-muted-foreground">
+          {group.groupLabel}
+        </DataCardTitle>
+      </DataCardHeader>
+      <DataCardContent className="overflow-x-auto rounded-lg border border-border p-0">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50">
@@ -44,8 +52,8 @@ function SpecGroupTable({ group }: { group: SpecGroup }) {
             ))}
           </tbody>
         </table>
-      </div>
-    </div>
+      </DataCardContent>
+    </DataCard>
   );
 }
 

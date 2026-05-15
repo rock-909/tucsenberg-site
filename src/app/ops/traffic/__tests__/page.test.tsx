@@ -78,6 +78,10 @@ describe("OpsTrafficPage", () => {
     expect(
       screen.getByText("Access key was not accepted."),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Access key")).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-form-control",
+    );
     expect(mockedGetCachedTraffic).not.toHaveBeenCalled();
   });
 
@@ -114,5 +118,8 @@ describe("OpsTrafficPage", () => {
     expect(screen.getByText("320")).toBeInTheDocument();
     expect(screen.getByText("1200")).toBeInTheDocument();
     expect(screen.getByText("5.00%")).toBeInTheDocument();
+    expect(
+      screen.getByText("320").closest("[data-metric-card]"),
+    ).toHaveAttribute("data-ui-pilot", "radix-themes-data-card");
   });
 });

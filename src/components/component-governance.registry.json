@@ -13,10 +13,25 @@
     "card": {
       "story": "required"
     },
+    "checkbox": {
+      "story": "required"
+    },
     "contact-form-control": {
       "story": "required"
     },
     "contact-form-shell": {
+      "story": "required"
+    },
+    "collapsible": {
+      "story": "required"
+    },
+    "data-card": {
+      "story": "required"
+    },
+    "dropdown-menu": {
+      "story": "required"
+    },
+    "field": {
       "story": "required"
     },
     "input": {
@@ -31,7 +46,13 @@
     "lazy-theme-switcher": {
       "story": "required"
     },
+    "metric-card": {
+      "story": "required"
+    },
     "radix-theme": {
+      "story": "required"
+    },
+    "radio-group": {
       "story": "required"
     },
     "section-head": {
@@ -44,6 +65,12 @@
       "story": "required"
     },
     "social-icons": {
+      "story": "required"
+    },
+    "spec-card": {
+      "story": "required"
+    },
+    "status-callout": {
       "story": "required"
     },
     "textarea": {

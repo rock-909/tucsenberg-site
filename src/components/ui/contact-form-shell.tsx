@@ -1,3 +1,5 @@
+"use client";
+
 import { Card as RadixCard } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 import { RadixThemePilot } from "@/components/ui/radix-theme";

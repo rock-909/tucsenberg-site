@@ -1,3 +1,5 @@
+"use client";
+
 import { TextArea as RadixTextArea, TextField } from "@radix-ui/themes";
 import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";

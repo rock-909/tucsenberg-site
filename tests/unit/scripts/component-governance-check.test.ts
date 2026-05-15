@@ -244,6 +244,32 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("fails when production UI code outside src/components/ui dynamically loads Radix primitives", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/layout/header.tsx":
+          'export async function loadMenu() { return import("@radix-ui/react-dropdown-menu"); }',
+        "src/components/forms/contact-form.tsx":
+          'const checkbox = require("@radix-ui/react-checkbox");\nexport function ContactForm() { return checkbox; }',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/components/layout/header.tsx",
+    );
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/components/forms/contact-form.tsx",
+    );
+  });
+
   it("allows direct Radix imports inside src/components/ui", () => {
     const rootDir = createFixture({
       "src/components/component-governance.registry.json": registry({
@@ -328,12 +354,12 @@ describe("component-governance-check", () => {
   it("fails when Radix Themes is imported from an unapproved UI wrapper", () => {
     const rootDir = createFixture({
       "src/components/component-governance.registry.json": registry({
-        badge: { story: "required" },
+        "experimental-card": { story: "required" },
       }),
-      "src/components/ui/badge.tsx":
+      "src/components/ui/experimental-card.tsx":
         'import { Badge } from "@radix-ui/themes";\nexport function LocalBadge() { return <Badge />; }',
-      "src/components/ui/badge.stories.tsx":
-        "export default { title: 'UI/Badge' };",
+      "src/components/ui/experimental-card.stories.tsx":
+        "export default { title: 'UI/ExperimentalCard' };",
     });
     fixtureRoots.push(rootDir);
 
@@ -343,7 +369,7 @@ describe("component-governance-check", () => {
     expectFinding(
       result.errors,
       "radix-themes-import-unapproved-ui-wrapper",
-      "src/components/ui/badge.tsx",
+      "src/components/ui/experimental-card.tsx",
     );
   });
 
@@ -396,6 +422,32 @@ describe("component-governance-check", () => {
       result.errors,
       "radix-themes-internal-class",
       "src/components/sections/hero-section.tsx",
+    );
+  });
+
+  it("fails when tests assert Radix Themes internal classes", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/ui/badge.test.tsx":
+          'it("uses radix internals", () => expect(screen.getByText("New")).toHaveClass("rt-Badge"));',
+        "src/components/products/product-card.test.tsx":
+          'it("queries radix internals", () => document.querySelector("[class*=rt-]"));',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-internal-class",
+      "src/components/ui/badge.test.tsx",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-internal-class",
+      "src/components/products/product-card.test.tsx",
     );
   });
 
