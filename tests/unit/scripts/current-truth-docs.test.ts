@@ -283,7 +283,7 @@ describe("current-truth docs guard", () => {
       expect.objectContaining({
         file: "docs/guides/RELEASE-PROOF-RUNBOOK.md",
         error:
-          'missing release-proof runbook command "node scripts/starter-checks.js cf-official-compare --source-only"',
+          'missing release-proof runbook command "node scripts/starter-checks.js cf-static-baseline --source-only"',
       }),
     );
   });

@@ -17,12 +17,17 @@
 
 ### 1. 内容更新通过重新部署
 
-当前更稳的方式是：
+当前更稳的方式是 static redeploy profile：
 
 - 内容、翻译、产品表达更新后重新部署
 - 不依赖运行时 tag invalidation 让线上内容变更
 - 不保留 R2 / D1 / Durable Object 运行时缓存栈作为上线依赖
 - 允许非转化页使用无 `cacheTag()` 的 Cache Components 边界解决构建约束，但不能把它变成线上内容更新机制
+
+这不是 OpenNext Cloudflare 的能力限制。官方方案支持 R2 incremental
+cache、`WORKER_SELF_REFERENCE`、D1/Durable Object tag cache 和 Durable
+Object queue。当前项目不用这套 profile，是因为现阶段没有 CMS、ISR、
+on-demand revalidation 或跨 isolate 持久增量缓存需求。
 
 ### 2. i18n 相关缓存必须显式传 `locale`
 
@@ -61,6 +66,14 @@
 - `src/lib/i18n/load-messages.ts`
 - `src/lib/i18n/performance.ts`
 - 任何新引入 `"use cache"`、`cacheLife()`、`cacheTag()` 或运行时 tag invalidation 的函数
+
+触发官方 OpenNext Cloudflare cache profile 评估的信号：
+
+- 引入 CMS，且要求内容不经 rebuild/redeploy 即更新
+- 使用 `export const revalidate` 或 `fetch(..., { next: { revalidate } })`
+- 使用 `revalidateTag()` / `revalidatePath()`
+- 使用 `cacheTag()` 或远程 cache handler
+- 需要跨部署、跨 isolate 的持久增量缓存一致性
 
 ## 当前参考来源
 

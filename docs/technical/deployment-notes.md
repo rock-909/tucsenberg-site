@@ -114,11 +114,17 @@ pnpm exec wrangler deploy --dry-run --env preview
 
 ## Runtime Cache Policy
 
-starter 默认不依赖 R2 / D1 / Durable Object 作为运行时内容缓存和内容失效机制。
+当前仓库使用 **static redeploy profile**：不依赖 R2 / D1 /
+Durable Object 作为运行时内容缓存和内容失效机制。
 
 内容、翻译、页面更新默认通过重新构建和重新部署发布。
 
-如果未来项目需要 CMS 或运行时内容失效，需要重新做架构决策，并同步更新：
+这不是 OpenNext Cloudflare 的能力限制。官方 cache profile 支持 R2
+incremental cache、`WORKER_SELF_REFERENCE` service binding、D1 或 Durable
+Object tag cache、Durable Object queue 等组件。当前项目暂不接入，是因为
+上线模型不需要 ISR、on-demand revalidation 或 CMS 驱动的运行时内容更新。
+
+如果未来项目需要 CMS、ISR 或运行时内容失效，需要重新做架构决策，并同步更新：
 
 - `.claude/rules/cloudflare.md`
 - `docs/technical/next16-cache-notes.md`

@@ -103,7 +103,7 @@
 这个仓库里，常见 targeted proof 是：
 
 - `node scripts/starter-checks.js truth-docs`
-- `node scripts/starter-checks.js cf-official-compare --source-only`
+- `node scripts/starter-checks.js cf-static-baseline --source-only`
 - `node scripts/starter-checks.js truth-docs`
 - `pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts tests/integration/api/subscribe.test.ts`
 - `pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts src/i18n/__tests__/request.test.ts src/lib/__tests__/load-messages.fallback.test.ts`

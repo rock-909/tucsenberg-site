@@ -27,7 +27,7 @@ node scripts/starter-checks.js <command>
 | `cf-preview-smoke` | 探测本地 Cloudflare preview 的页面、header、cookie 和可选 health 行为。 | 不适合第一波。Cloudflare proof 命令先不要动。 |
 | `deployed-smoke` | 探测已部署 URL 的关键路由和健康接口。 | 不适合第一波。它依赖外部 URL 和部署状态。 |
 | `cf-preview-deployed` | 走预览部署路径，再执行 deployed smoke。 | 不适合第一波。它涉及部署、凭证、外部环境和发布证明链。 |
-| `cf-official-compare` | 检查 Cloudflare source/generated deploy config 合同，确认官方 dry-run proof 的边界。 | 不适合第一波。它属于 Cloudflare proof 合同。 |
+| `cf-static-baseline` | 检查当前 static/redeploy Cloudflare profile 合同，确认 dry-run proof 的边界。 | 不适合第一波。它属于 Cloudflare proof 合同。 |
 | `release-verify` | 串起完整本地 release proof flow。 | 不适合第一波。release proof 命令必须保持稳定。 |
 
 ## Split principles
@@ -63,7 +63,7 @@ scripts/
     content/
       manifest.mjs
     proof/
-      cloudflare-official-compare.mjs
+      cloudflare-static-baseline.mjs
       cloudflare-preview-smoke.mjs
       deployed-smoke.mjs
       preview-deployed.mjs
@@ -157,7 +157,7 @@ node scripts/starter-checks.js <command>
 - `cf-preview-deployed`
 - `cf-preview-smoke`
 - `deployed-smoke`
-- `cf-official-compare`
+- `cf-static-baseline`
 - `validate-production-config`
 
 原因很简单：它们牵涉 release proof、Cloudflare proof、真实部署、外部 URL、凭证或 public launch 口径。先保持这些命令稳定，等低风险命令拆分方式被证明后，再单独规划。

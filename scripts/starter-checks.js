@@ -2109,7 +2109,7 @@ const CURRENT_TRUTH_COMMAND_DOCS = [
 
 const RELEASE_PROOF_SEQUENCE = [
   "node scripts/starter-checks.js truth-docs",
-  "node scripts/starter-checks.js cf-official-compare --source-only",
+  "node scripts/starter-checks.js cf-static-baseline --source-only",
   "pnpm type-check",
   "pnpm lint:check",
   "pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts src/i18n/__tests__/request.test.ts src/lib/__tests__/load-messages.fallback.test.ts",
@@ -2128,7 +2128,7 @@ const RELEASE_VERIFY_COMMANDS = [
   },
   {
     command: "node",
-    args: ["scripts/starter-checks.js", "cf-official-compare", "--source-only"],
+    args: ["scripts/starter-checks.js", "cf-static-baseline", "--source-only"],
   },
   {
     command: "pnpm",
@@ -2445,14 +2445,14 @@ function runReleaseVerify() {
 }
 
 // ---------------------------------------------------------------------------
-// Cloudflare official compare
+// Cloudflare static redeploy baseline
 // ---------------------------------------------------------------------------
 
-const CLOUDFLARE_SOURCE_CHECKS = [
+const CLOUDFLARE_STATIC_BASELINE_SOURCE_CHECKS = [
   {
     file: "open-next.config.ts",
     label:
-      "OpenNext config stays anchored to the Cloudflare adapter without custom cache or split topology",
+      "OpenNext config stays on the current static redeploy profile without runtime cache or split topology",
     requiredSnippets: ["defineCloudflareConfig"],
     forbiddenSnippets: [
       "r2IncrementalCache",
@@ -2466,7 +2466,8 @@ const CLOUDFLARE_SOURCE_CHECKS = [
   },
   {
     file: "wrangler.jsonc",
-    label: "Wrangler config keeps the static-generation Cloudflare baseline",
+    label:
+      "Wrangler config keeps the current static redeploy Cloudflare profile",
     requiredSnippets: ['".open-next/worker.js"', '"ASSETS"'],
     forbiddenSnippets: [
       '"WORKER_SELF_REFERENCE"',
@@ -2532,14 +2533,14 @@ function formatCloudflareCompareForbiddenSnippet(snippet) {
   return check.type === "regex" ? check.match.toString() : check.match;
 }
 
-function collectCloudflareOfficialCompareFailures(options = {}) {
+function collectCloudflareStaticBaselineFailures(options = {}) {
   const { sourceOnly = false, generatedOnly = false } = options;
   const failures = [];
   const packageJson = JSON.parse(readCloudflareCompareFile("package.json"));
   const scripts = packageJson.scripts ?? {};
 
   if (!generatedOnly) {
-    for (const check of CLOUDFLARE_SOURCE_CHECKS) {
+    for (const check of CLOUDFLARE_STATIC_BASELINE_SOURCE_CHECKS) {
       const content = readCloudflareCompareFile(check.file);
       const missing = check.requiredSnippets.filter(
         (snippet) => !content.includes(snippet),
@@ -2632,14 +2633,17 @@ function collectCloudflareOfficialCompareFailures(options = {}) {
 
   if (generatedOnly) {
     console.warn(
-      "cf-official-compare: --generated-only is retired; native Cloudflare deploy-artifact proof is `pnpm exec wrangler deploy --dry-run --env preview` after `pnpm website:build:cf`.",
+      "cf-static-baseline: --generated-only is retired; native Cloudflare deploy-artifact proof is `pnpm exec wrangler deploy --dry-run --env preview` after `pnpm website:build:cf`.",
     );
   }
 
   return failures;
 }
 
-function runCloudflareOfficialCompareCli(args = []) {
+const collectCloudflareOfficialCompareFailures =
+  collectCloudflareStaticBaselineFailures;
+
+function runCloudflareStaticBaselineCli(args = []) {
   const sourceOnly = args.includes("--source-only");
   const generatedOnly = args.includes("--generated-only");
   const requireGenerated =
@@ -2647,26 +2651,26 @@ function runCloudflareOfficialCompareCli(args = []) {
 
   if (sourceOnly && generatedOnly) {
     console.error(
-      "cf-official-compare: --generated-only is retired; use --source-only plus wrangler deploy --dry-run.",
+      "cf-static-baseline: --generated-only is retired; use --source-only plus wrangler deploy --dry-run.",
     );
     return false;
   }
 
   if (sourceOnly && args.includes("--require-generated")) {
     console.error(
-      "cf-official-compare: generated phase configs are retired; --require-generated is no longer supported.",
+      "cf-static-baseline: generated phase configs are retired; --require-generated is no longer supported.",
     );
     return false;
   }
 
-  const failures = collectCloudflareOfficialCompareFailures({
+  const failures = collectCloudflareStaticBaselineFailures({
     sourceOnly,
     generatedOnly,
     requireGenerated,
   });
 
   if (failures.length > 0) {
-    console.error("cf-official-compare: failed");
+    console.error("cf-static-baseline: failed");
     for (const failure of failures) {
       console.error(`- ${failure.file}: ${failure.label}`);
       for (const snippet of failure.missing) {
@@ -2681,22 +2685,29 @@ function runCloudflareOfficialCompareCli(args = []) {
     return false;
   }
 
-  console.log("cf-official-compare: passed");
+  console.log("cf-static-baseline: passed");
   if (generatedOnly) {
     console.log(
       "Generated phase config checks are retired. Run `pnpm exec wrangler deploy --dry-run --env preview` for native deploy-artifact proof.",
     );
   } else if (sourceOnly) {
     console.log(
-      "Verified static-generation Cloudflare source baseline against open-next.config.ts, wrangler.jsonc, and package deploy aliases.",
+      "Verified current static redeploy Cloudflare profile against open-next.config.ts, wrangler.jsonc, and package deploy aliases.",
     );
   } else {
     console.log(
-      "Verified static-generation Cloudflare source baseline. Native deploy-artifact proof is covered by wrangler deploy --dry-run.",
+      "Verified current static redeploy Cloudflare profile. Native deploy-artifact proof is covered by wrangler deploy --dry-run.",
     );
   }
 
   return true;
+}
+
+function runCloudflareOfficialCompareCli(args = []) {
+  console.warn(
+    "cf-official-compare is a deprecated alias; use cf-static-baseline for the current static redeploy profile.",
+  );
+  return runCloudflareStaticBaselineCli(args);
 }
 
 // ---------------------------------------------------------------------------
@@ -3311,7 +3322,8 @@ Commands:
   cf-preview-smoke    Probe local Cloudflare preview behavior
   deployed-smoke      Probe deployed URL route health
   cf-preview-deployed Deploy preview workers and run deployed smoke
-  cf-official-compare Check Cloudflare source/generated deploy config contract
+  cf-static-baseline Check current static/redeploy Cloudflare profile contract
+  cf-official-compare Deprecated alias for cf-static-baseline
   release-verify      Run full release verification flow
 `);
 }
@@ -3362,6 +3374,9 @@ async function main(argv = process.argv.slice(2)) {
     case "cf-preview-deployed":
       ok = runCloudflarePreviewDeployedProof();
       break;
+    case "cf-static-baseline":
+      ok = runCloudflareStaticBaselineCli(args);
+      break;
     case "cf-official-compare":
       ok = runCloudflareOfficialCompareCli(args);
       break;
@@ -3400,6 +3415,7 @@ module.exports = {
   buildKey,
   collectClientBoundaryFiles,
   collectCloudflareOfficialCompareFailures,
+  collectCloudflareStaticBaselineFailures,
   collectComponentGovernanceFindings,
   collectContentReadinessFindings,
   collectCurrentTruthDocFindings,
@@ -3424,6 +3440,7 @@ module.exports = {
   checkSpanishTodoMarkersForProduction,
   runBrandCheck,
   runCloudflareOfficialCompareCli,
+  runCloudflareStaticBaselineCli,
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
   runClientBoundaryBudgetCheck,

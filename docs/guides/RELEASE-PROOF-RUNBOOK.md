@@ -37,7 +37,7 @@ pnpm release:verify
 
 ```bash
 node scripts/starter-checks.js truth-docs
-node scripts/starter-checks.js cf-official-compare --source-only
+node scripts/starter-checks.js cf-static-baseline --source-only
 pnpm type-check
 pnpm lint:check
 pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts src/i18n/__tests__/request.test.ts src/lib/__tests__/load-messages.fallback.test.ts
@@ -69,6 +69,7 @@ Local release proof is not public launch proof. Public launch still requires `PU
 - `type-check` 早于构建；它会先运行 `next typegen`，再做 TypeScript 检查
 - `next-env.d.ts` 是 Next.js 生成文件：保留在 TypeScript `include` 里，但不入库；提交前只确认它没有作为未跟踪源码被带入
 - `build` 早于 `website:build:cf`，因为两条线仍共享构建产物族
+- `node scripts/starter-checks.js cf-static-baseline --source-only` 检查的是当前 static/redeploy Cloudflare profile，不是说官方 R2/D1/DO cache profile 不支持
 - `pnpm exec wrangler deploy --dry-run --env preview` 跟在 `website:build:cf` 后面，作为当前更强的本地 Cloudflare deploy-artifact proof
 - 最后跑 release smoke，因为它是 release bundle 的浏览器冒烟层
 - 如果改动重接了单站真相层或 cutover gate，发布前还要补：
@@ -89,7 +90,7 @@ Local release proof is not public launch proof. Public launch still requires `PU
 
 ```bash
 node scripts/starter-checks.js truth-docs
-node scripts/starter-checks.js cf-official-compare --source-only
+node scripts/starter-checks.js cf-static-baseline --source-only
 ```
 
 再按需补 change-scoped suites 和串行构建：
