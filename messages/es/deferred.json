@@ -2,9 +2,9 @@
   "error": "[ES-TODO] An error occurred. Please try again.",
   "turnstileRequired": "[ES-TODO] Please complete the security verification.",
   "errorBoundary": {
-    "title": "[ES-TODO] An error occurred",
-    "description": "[ES-TODO] Something went wrong. Please try refreshing the page.",
-    "tryAgain": "[ES-TODO] Try Again"
+    "title": "Se produjo un error",
+    "description": "Algo salió mal. Pruebe a actualizar la página.",
+    "tryAgain": "Reintentar"
   },
   "legal": {
     "effectiveDate": "[ES-TODO] Effective Date",

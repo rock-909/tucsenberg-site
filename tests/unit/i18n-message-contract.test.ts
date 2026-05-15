@@ -143,8 +143,12 @@ describe("real i18n runtime message contract", () => {
   });
 
   // Spanish leaves that are legitimately identical to English (technical
-  // material tokens kept in English per content rules), so an untranslated
-  // copy here is intentional and must not require the [ES-TODO] marker.
+  // material tokens kept in English per content rules, pure ICU passthrough
+  // tokens, brand/platform proper nouns, language endonyms, and accepted
+  // anglicisms rendered identically in professional Spanish web UI), so an
+  // untranslated copy here is intentional and must not require the [ES-TODO]
+  // marker. This list curates legitimate-identical leaves only; the assertion
+  // logic below is unchanged.
   const ES_IDENTICAL_ALLOWLIST = new Set<string>([
     "home.materials.epdm.name",
     "home.materials.tpu.name",
@@ -153,6 +157,30 @@ describe("real i18n runtime message contract", () => {
     "compatibleBrand.filter.material",
     "quote.form.materialOptions.epdm",
     "quote.form.materialOptions.tpu",
+    // Pure ICU passthrough tokens (rendered value is fully dynamic).
+    "navigation.siteName",
+    "footer.copyright",
+    // Language switcher endonyms (shown in their own language by convention).
+    "language.english",
+    "language.chinese",
+    // Locale-detection source labels (technical, identical in ES).
+    "language.detector.sources.cookie",
+    "language.detector.sources.url",
+    // Accepted anglicisms used identically in professional Spanish web UI.
+    "navigation.blog",
+    "navigation.frameworks",
+    "footer.sections.navigation.blog",
+    "footer.platform.resources.startups",
+    // Brand / platform proper nouns (not translated in any locale).
+    "footer.sections.social.twitter",
+    "footer.sections.social.linkedin",
+    "footer.platform.products.fluidCompute",
+    "footer.platform.products.nextjs",
+    "footer.platform.products.turbo",
+    "footer.platform.products.v0",
+    "footer.platform.social.linkedin",
+    "footer.platform.social.twitter",
+    "footer.platform.social.youtube",
   ]);
 
   it("marks untranslated Spanish copies with ES-TODO", () => {
