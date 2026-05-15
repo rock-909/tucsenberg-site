@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { getHeaderMobileMenuButton } from "./helpers/navigation";
 
+const rawBaseUrl =
+  process.env.PLAYWRIGHT_BASE_URL ??
+  process.env.BASE_URL ??
+  process.env.STAGING_URL ??
+  "http://localhost:3000";
+
+const BASE_ORIGIN = new URL(rawBaseUrl).origin;
+
 const localeCases = [
   {
     locale: "en",
@@ -8,26 +16,25 @@ const localeCases = [
     contactHeading: /Contact Us/i,
     languageLabel: "Select Language",
     currentLanguage: "English",
-    targetFallbackHref: "/zh",
-    targetLocale: "zh",
-    targetContactHeading: /联系我们/i,
-    targetHomeHeading: /还没有网站？先从可部署的展示型网站基础开始。/i,
+    targetFallbackHref: "/es",
+    targetLocale: "es",
+    targetHomeHeading:
+      /\[ES-TODO\] No website yet\? Start with a deployable showcase-site foundation\./i,
     fullNameLabel: "Full name",
     optionalLabel: "optional",
   },
   {
-    locale: "zh",
-    skipLabel: "跳转到主要内容",
-    contactHeading: /联系我们/i,
-    languageLabel: "选择语言",
-    currentLanguage: "简体中文",
+    locale: "es",
+    skipLabel: "[ES-TODO] Skip to main content",
+    contactHeading: /Contact Us/i,
+    languageLabel: "[ES-TODO] Select Language",
+    currentLanguage: "Español",
     targetFallbackHref: "/en",
     targetLocale: "en",
-    targetContactHeading: /Contact Us/i,
     targetHomeHeading:
       /No website yet\? Start with a deployable showcase-site foundation\./i,
-    fullNameLabel: "姓名",
-    optionalLabel: "选填",
+    fullNameLabel: "[ES-TODO] Full name",
+    optionalLabel: "[ES-TODO] optional",
   },
 ] as const;
 
@@ -42,7 +49,7 @@ for (const localeCase of localeCases) {
     test("homepage keeps meaningful structure without client boot", async ({
       page,
     }) => {
-      await page.goto(`http://localhost:3000/${localeCase.locale}`, {
+      await page.goto(`${BASE_ORIGIN}/${localeCase.locale}`, {
         waitUntil: "domcontentloaded",
       });
 
@@ -64,7 +71,7 @@ for (const localeCase of localeCases) {
       page,
     }) => {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.goto(`http://localhost:3000/${localeCase.locale}`, {
+      await page.goto(`${BASE_ORIGIN}/${localeCase.locale}`, {
         waitUntil: "domcontentloaded",
       });
 
@@ -92,26 +99,31 @@ for (const localeCase of localeCases) {
       const englishLanguageLink = fallbackPanel.locator(
         'a[hreflang="en"][href="/en"]',
       );
+      const spanishLanguageLink = fallbackPanel.locator(
+        'a[hreflang="es"][href="/es"]',
+      );
       const chineseLanguageLink = fallbackPanel.locator(
         'a[hreflang="zh"][href="/zh"]',
       );
 
       await expect(englishLanguageLink).toBeHidden();
-      await expect(chineseLanguageLink).toBeHidden();
+      await expect(spanishLanguageLink).toBeHidden();
+      await expect(chineseLanguageLink).toHaveCount(0);
       await expect(englishLanguageLink).toHaveAttribute("href", "/en");
-      await expect(chineseLanguageLink).toHaveAttribute("href", "/zh");
+      await expect(spanishLanguageLink).toHaveAttribute("href", "/es");
 
       await languageFallback.click();
 
       await expect(englishLanguageLink).toBeVisible();
-      await expect(chineseLanguageLink).toBeVisible();
+      await expect(spanishLanguageLink).toBeVisible();
+      await expect(chineseLanguageLink).toHaveCount(0);
     });
 
     test("mobile language fallback lands on the selected locale root without JavaScript", async ({
       page,
     }) => {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.goto(`http://localhost:3000/${localeCase.locale}/contact`, {
+      await page.goto(`${BASE_ORIGIN}/${localeCase.locale}/contact`, {
         waitUntil: "domcontentloaded",
       });
 
@@ -146,7 +158,7 @@ for (const localeCase of localeCases) {
     test("contact page renders form structure without JavaScript", async ({
       page,
     }) => {
-      await page.goto(`http://localhost:3000/${localeCase.locale}/contact`, {
+      await page.goto(`${BASE_ORIGIN}/${localeCase.locale}/contact`, {
         waitUntil: "domcontentloaded",
       });
 
@@ -202,7 +214,7 @@ for (const localeCase of localeCases) {
         `/${localeCase.locale}/terms`,
         `/${localeCase.locale}/custom-project-support`,
       ]) {
-        await page.goto(`http://localhost:3000${path}`, {
+        await page.goto(`${BASE_ORIGIN}${path}`, {
           waitUntil: "domcontentloaded",
         });
 

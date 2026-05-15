@@ -21,6 +21,17 @@ const rawBaseUrl =
   "http://localhost:3000";
 
 const BASE_ORIGIN = new URL(rawBaseUrl).origin;
+const PUBLIC_NAV_ITEMS = ["Membranes", "Compatibility", "Materials", "Quote"];
+const REMOVED_STARTER_LINKS = [
+  "Home",
+  "Products",
+  "Blog",
+  "About",
+  "Capabilities",
+  "How It Works",
+  "Custom",
+  "Contact",
+];
 
 test.describe("Navigation System", () => {
   test.beforeEach(async ({ page }) => {
@@ -87,21 +98,18 @@ test.describe("Navigation System", () => {
       const nav = getNav(page);
       await expect(nav).toBeVisible();
 
-      await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "Products" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "Blog" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "About" })).toBeVisible();
-      await expect(nav.getByRole("link", { name: "Capabilities" })).toHaveCount(
-        0,
-      );
-      await expect(nav.getByRole("link", { name: "How It Works" })).toHaveCount(
-        0,
-      );
-      await expect(nav.getByRole("link", { name: "Custom" })).toHaveCount(0);
-      await expect(nav.getByRole("link", { name: "Contact" })).toHaveCount(0);
+      for (const label of PUBLIC_NAV_ITEMS) {
+        const link = nav.getByRole("link", { name: label });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", "#coming-soon");
+      }
+
+      for (const label of REMOVED_STARTER_LINKS) {
+        await expect(nav.getByRole("link", { name: label })).toHaveCount(0);
+      }
     });
 
-    test("should navigate between pages and highlight active link", async ({
+    test("should keep Step 2 placeholder navigation stable and non-breaking", async ({
       page,
     }) => {
       // Dismiss cookie consent dialog if present to avoid click interception
@@ -123,33 +131,18 @@ test.describe("Navigation System", () => {
         return;
       }
 
-      const routeChecks = [
-        {
-          href: "/en/products",
-          pattern: /\/en\/products$/,
-        },
-        {
-          href: "/en/blog",
-          pattern: /\/en\/blog$/,
-        },
-        {
-          href: "/en/about",
-          pattern: /\/en\/about$/,
-        },
-      ] as const;
-
-      for (const route of routeChecks) {
-        const clickedRoute = await safeClick(
-          page,
-          `nav a[href="${route.href}"]:visible`,
-        );
-        expect(clickedRoute).toBe(true);
-        await page.waitForURL(route.pattern, { waitUntil: "domcontentloaded" });
-        await waitForStablePage(page);
-        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-        await page.goto("/en");
-        await waitForStablePage(page);
+      const nav = getNav(page);
+      for (const label of PUBLIC_NAV_ITEMS) {
+        const link = nav.getByRole("link", { name: label });
+        await expect(link).toHaveAttribute("href", "#coming-soon");
       }
+
+      const clickedRoute = await safeClick(
+        page,
+        'nav a[href="#coming-soon"]:visible',
+      );
+      expect(clickedRoute).toBe(true);
+      await waitForStablePage(page);
 
       // Dismiss cookie dialog again if it reappeared
       if (await cookieDialog.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -160,9 +153,7 @@ test.describe("Navigation System", () => {
         }
       }
 
-      // The loop above returns to home after each route; history behavior is
-      // covered by the dedicated back/forward navigation test below.
-      await expect(page).toHaveURL(/\/en\/?$/);
+      await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
         timeout: 30_000,
       });
@@ -198,10 +189,10 @@ test.describe("Navigation System", () => {
         attempts++;
       }
 
-      // Verify we can navigate through links with arrow keys
-      const homeLink = nav.getByRole("link", { name: "Home" });
-      await homeLink.focus();
-      await expect(homeLink).toBeFocused();
+      // Verify we can focus and activate the first placeholder link.
+      const firstNavLink = nav.getByRole("link", { name: "Membranes" });
+      await firstNavLink.focus();
+      await expect(firstNavLink).toBeFocused();
 
       // Press Enter to activate
       await page.keyboard.press("Enter");
@@ -211,8 +202,7 @@ test.describe("Navigation System", () => {
         fallbackDelay: 500,
       });
 
-      // Should stay on home page or navigate properly
-      expect(page.url()).toContain("/en");
+      await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
     });
 
     test("should handle external links correctly", async ({ page }) => {
@@ -275,17 +265,22 @@ test.describe("Navigation System", () => {
       // Verify sheet content
       await expect(mobileNavSheet.getByRole("heading").first()).toBeVisible();
 
-      // Verify navigation links in mobile menu (match actual config)
-      const expectedLinks = ["Home", "Products", "Blog", "About"];
-      for (const linkText of expectedLinks) {
-        const link = mobileNavSheet.getByRole("link", {
+      // Verify navigation links in mobile menu (match Step 2 placeholder IA)
+      for (const linkText of PUBLIC_NAV_ITEMS) {
+        const links = mobileNavSheet.getByRole("link", {
           exact: true,
           name: linkText,
         });
-        await expect(link).toBeVisible();
+        const count = await links.count();
+        expect(count).toBeGreaterThanOrEqual(1);
+
+        for (let index = 0; index < count; index += 1) {
+          const link = links.nth(index);
+          await expect(link).toBeVisible();
+          await expect(link).toHaveAttribute("href", "#coming-soon");
+        }
       }
-      const removedLinks = ["Capabilities", "How It Works", "Custom"];
-      for (const linkText of removedLinks) {
+      for (const linkText of REMOVED_STARTER_LINKS) {
         await expect(
           mobileNavSheet.getByRole("link", {
             exact: true,
@@ -293,9 +288,6 @@ test.describe("Navigation System", () => {
           }),
         ).toHaveCount(0);
       }
-      await expect(
-        mobileNavSheet.getByRole("link", { exact: true, name: "Contact" }),
-      ).toBeVisible();
       await expect(mobileNavSheet.getByText("Select Language")).toBeVisible();
 
       // Close menu by clicking close button
@@ -333,44 +325,47 @@ test.describe("Navigation System", () => {
       await expect(mobileMenuButton).toBeFocused();
     });
 
-    test("should navigate from mobile menu and auto-close", async ({
+    test("should expose placeholder links from mobile menu without dead routes", async ({
       page,
     }) => {
-      const clickMobileMenuRoute = async (href: string, urlPattern: RegExp) => {
-        const mobileMenuButton = getHeaderMobileMenuButton(page);
-        await expect(mobileMenuButton).toBeVisible();
-        await mobileMenuButton.click();
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
+      await expect(mobileMenuButton).toBeVisible();
+      await mobileMenuButton.click();
 
-        const mobileNavSheet = page.getByRole("dialog", {
-          name: /mobile navigation/i,
+      const mobileNavSheet = page.getByRole("dialog", {
+        name: /mobile navigation/i,
+      });
+      await expect(mobileNavSheet).toBeVisible();
+      await waitForStablePage(page);
+
+      for (const label of PUBLIC_NAV_ITEMS) {
+        const links = mobileNavSheet.getByRole("link", {
+          exact: true,
+          name: label,
         });
-        await expect(mobileNavSheet).toBeVisible();
-        await waitForStablePage(page);
+        const count = await links.count();
+        expect(count).toBeGreaterThanOrEqual(1);
 
-        const clickedRoute = await safeClick(
-          page,
-          `${MOBILE_MENU_CONTENT_SELECTOR} a[href="${href}"]`,
-        );
-        expect(clickedRoute).toBe(true);
+        for (let index = 0; index < count; index += 1) {
+          await expect(links.nth(index)).toHaveAttribute(
+            "href",
+            "#coming-soon",
+          );
+        }
+      }
 
-        await page.waitForURL(urlPattern, { waitUntil: "domcontentloaded" });
-        await waitForStablePage(page);
-
-        // Sheet should auto-close after navigation
-        await expect(mobileNavSheet).not.toBeVisible({ timeout: 10_000 });
-
-        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      };
-
-      await clickMobileMenuRoute("/en/products", /\/en\/products$/);
-      await page.goto("/en", { waitUntil: "domcontentloaded" });
+      const clickedRoute = await safeClick(
+        page,
+        `${MOBILE_MENU_CONTENT_SELECTOR} a[href="#coming-soon"]`,
+      );
+      expect(clickedRoute).toBe(true);
       await waitForStablePage(page);
 
-      await clickMobileMenuRoute("/en/blog", /\/en\/blog$/);
-      await page.goto("/en", { waitUntil: "domcontentloaded" });
-      await waitForStablePage(page);
+      // Sheet should auto-close after hash navigation.
+      await expect(mobileNavSheet).not.toBeVisible({ timeout: 10_000 });
 
-      await clickMobileMenuRoute("/en/about", /\/en\/about$/);
+      await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
 
     test("should support touch interactions", async ({ page }) => {
@@ -430,19 +425,35 @@ test.describe("Navigation System", () => {
           name: /mobile navigation/i,
         });
         await mobileNavSheet
-          .getByRole("link", { name: "About" })
+          .getByRole("link", { name: "Membranes" })
           .first()
           .click();
       } else {
         const nav = getNav(page);
-        const aboutLink = nav.getByRole("link", { name: "About" });
-        await aboutLink.click();
+        const membranesLink = nav.getByRole("link", { name: "Membranes" });
+        await membranesLink.click();
       }
-      await page.waitForURL("**/en/about");
+      await expect
+        .poll(() => {
+          const currentUrl = new URL(page.url());
+          return {
+            pathname: currentUrl.pathname,
+            search: currentUrl.search,
+            hash: currentUrl.hash,
+          };
+        })
+        .toEqual({
+          pathname: "/en",
+          search: "?utm_source=test&utm_medium=e2e",
+          hash: "#coming-soon",
+        });
 
-      // Query parameters might be preserved depending on implementation
-      // This test documents the expected behavior
-      expect(page.url()).toContain("/en/about");
+      // Hash placeholder navigation should preserve the active URL path.
+      const navigatedUrl = new URL(page.url());
+      expect(navigatedUrl.pathname).toBe("/en");
+      expect(navigatedUrl.searchParams.get("utm_source")).toBe("test");
+      expect(navigatedUrl.searchParams.get("utm_medium")).toBe("e2e");
+      expect(navigatedUrl.hash).toBe("#coming-soon");
     });
 
     test("should handle browser back/forward navigation", async ({ page }) => {
@@ -458,25 +469,8 @@ test.describe("Navigation System", () => {
         }
       }
 
-      const isMobile = await isHeaderInMobileMode(page);
-
-      // Navigate to About page
-      if (isMobile) {
-        const mobileMenuButton = getHeaderMobileMenuButton(page);
-        await expect(mobileMenuButton).toBeVisible();
-        await mobileMenuButton.click();
-        const mobileNavSheet = page.getByRole("dialog", {
-          name: /mobile navigation/i,
-        });
-        await mobileNavSheet
-          .getByRole("link", { name: "About" })
-          .first()
-          .click();
-      } else {
-        const nav = getNav(page);
-        const aboutLink = nav.getByRole("link", { name: "About" });
-        await aboutLink.click();
-      }
+      // About remains a real route but is no longer part of public nav.
+      await page.goto("/en/about", { waitUntil: "domcontentloaded" });
       await page.waitForURL("**/en/about");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
@@ -548,9 +542,9 @@ test.describe("Navigation System", () => {
       } else {
         const nav = getNav(page);
         await expect(nav).toHaveAttribute("aria-label", "Main navigation");
-        await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
-        await expect(nav.getByRole("link", { name: "Products" })).toBeVisible();
-        await expect(nav.getByRole("link", { name: "About" })).toBeVisible();
+        for (const label of PUBLIC_NAV_ITEMS) {
+          await expect(nav.getByRole("link", { name: label })).toBeVisible();
+        }
       }
     });
 
@@ -624,13 +618,13 @@ test.describe("Navigation System", () => {
           name: /mobile navigation/i,
         });
         await expect(
-          mobileNavSheet.getByRole("link", { name: "Home" }).first(),
+          mobileNavSheet.getByRole("link", { name: "Membranes" }).first(),
         ).toBeVisible();
       } else {
         const nav = getNav(page);
         await expect(nav).toBeVisible();
-        const homeLink = nav.getByRole("link", { name: "Home" });
-        await expect(homeLink).toBeVisible();
+        const membranesLink = nav.getByRole("link", { name: "Membranes" });
+        await expect(membranesLink).toBeVisible();
       }
     });
   });
@@ -661,13 +655,13 @@ test.describe("Navigation System", () => {
       // Measure navigation time
       const startTime = Date.now();
 
-      const aboutLink = nav.getByRole("link", { name: "About" });
-      await aboutLink.click({ noWaitAfter: true });
-      await page.waitForURL("**/en/about");
+      const membranesLink = nav.getByRole("link", { name: "Membranes" });
+      await membranesLink.click({ noWaitAfter: true });
+      await page.waitForURL("**/en#coming-soon");
 
       const navigationTime = Date.now() - startTime;
 
-      console.log(`About navigation time: ${navigationTime}ms`);
+      console.log(`Placeholder navigation time: ${navigationTime}ms`);
 
       // Navigation should be fast (CI runners can be slightly slower than local machines)
       const budgetMs = process.env.CI ? 1500 : 1000;

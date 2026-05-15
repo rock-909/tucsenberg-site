@@ -7,9 +7,10 @@ const mockCreateNavigation = vi.fn();
 const mockDefineRouting = vi.fn();
 
 const CURRENT_ROUTING_CONTRACT = {
-  locales: ["en", "zh"],
+  locales: ["en", "es", "zh"],
   defaultLocale: "en",
   localePrefix: "always",
+  alternateLinks: false,
 } as const;
 
 vi.mock("next-intl/navigation", () => ({
@@ -65,7 +66,7 @@ describe("i18n Routing Configuration", () => {
             "/contact": "/contact",
             "/products": "/products",
           }),
-          alternateLinks: true,
+          alternateLinks: CURRENT_ROUTING_CONTRACT.alternateLinks,
           localeDetection: true,
         }),
       );
@@ -74,6 +75,7 @@ describe("i18n Routing Configuration", () => {
           locales: CURRENT_ROUTING_CONTRACT.locales,
           defaultLocale: CURRENT_ROUTING_CONTRACT.defaultLocale,
           localePrefix: CURRENT_ROUTING_CONTRACT.localePrefix,
+          alternateLinks: CURRENT_ROUTING_CONTRACT.alternateLinks,
         }),
       );
     });
@@ -103,9 +105,9 @@ describe("i18n Routing Configuration", () => {
       expect(config?.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
     });
 
-    it("应该启用alternateLinks", async () => {
+    it("应该关闭 next-intl 自动 alternateLinks", async () => {
       const config = await getRoutingDefinition();
-      expect(config?.alternateLinks).toBe(true);
+      expect(config?.alternateLinks).toBe(false);
     });
 
     it("应该启用localeDetection", async () => {
@@ -217,9 +219,10 @@ describe("i18n Routing Configuration", () => {
   });
 
   describe("SEO配置", () => {
-    it("应该启用hreflang链接生成", async () => {
+    it("应该避免 next-intl 按 runtime locales 自动生成 zh hreflang", async () => {
       const config = await getRoutingDefinition();
-      expect(config.alternateLinks).toBe(true);
+      expect(config.alternateLinks).toBe(false);
+      expect(LOCALES_CONFIG.publicLocales).not.toContain("zh");
     });
 
     it("应该启用智能语言检测", async () => {

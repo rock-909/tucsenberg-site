@@ -62,7 +62,8 @@ export function getLocalizedHref(href: string, locale: Locale): string {
   if (
     href.startsWith("http") ||
     href.startsWith("mailto:") ||
-    href.startsWith("tel:")
+    href.startsWith("tel:") ||
+    href.startsWith("#")
   ) {
     return href;
   }

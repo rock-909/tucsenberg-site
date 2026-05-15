@@ -41,6 +41,10 @@ const MESSAGE_LOADERS: Record<
     critical: () => import("@messages/en/critical.json"),
     deferred: () => import("@messages/en/deferred.json"),
   },
+  es: {
+    critical: () => import("@messages/es/critical.json"),
+    deferred: () => import("@messages/es/deferred.json"),
+  },
   zh: {
     critical: () => import("@messages/zh/critical.json"),
     deferred: () => import("@messages/zh/deferred.json"),

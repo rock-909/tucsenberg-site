@@ -31,8 +31,8 @@ describe("single-site-page-expression", () => {
     ]);
     expect(SINGLE_SITE_HOME_TRAILING_SECTION_ORDER).toEqual(["finalCta"]);
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({
-      contact: "/contact",
-      products: "/products",
+      contact: "#coming-soon",
+      products: "#coming-soon",
     });
   });
 
@@ -110,9 +110,11 @@ describe("single-site-page-expression", () => {
 
     expect(groupedMarketSlugs.sort()).toEqual(allMarketSlugs.sort());
     expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
-      "/contact",
+      "#coming-soon",
     );
-    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/products");
-    expect(SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.ctaHref).toBe("/contact");
+    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("#coming-soon");
+    expect(SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.ctaHref).toBe(
+      "#coming-soon",
+    );
   });
 });

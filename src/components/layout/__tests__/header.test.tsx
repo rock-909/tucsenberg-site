@@ -127,7 +127,7 @@ describe("Header Component", () => {
       const menuButton = screen.getByTestId("header-mobile-menu-button");
 
       expect(mobileContactWrapper).toHaveClass("header-mobile-only");
-      expect(mobileContactCta).toHaveAttribute("href", "/contact");
+      expect(mobileContactCta).toHaveAttribute("href", "#coming-soon");
       expect(mobileContactCta).toHaveTextContent("Contact Sales");
       expect(
         mobileContactCta.compareDocumentPosition(menuButton) &

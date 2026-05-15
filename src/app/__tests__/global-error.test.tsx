@@ -252,6 +252,19 @@ describe("GlobalError", () => {
       expect(screen.getByText("返回首页")).toBeInTheDocument();
     });
 
+    it("should detect Spanish locale from browser language", () => {
+      Object.defineProperty(global, "navigator", {
+        writable: true,
+        value: { language: "es-MX" },
+      });
+
+      render(<GlobalError error={mockError} reset={mockReset} />);
+
+      expect(screen.getByText("Algo salió mal.")).toBeInTheDocument();
+      expect(screen.getByText("Intentar de nuevo")).toBeInTheDocument();
+      expect(screen.getByText("Ir al inicio")).toBeInTheDocument();
+    });
+
     it("should detect Chinese locale from zh-TW", () => {
       Object.defineProperty(global, "navigator", {
         writable: true,
@@ -274,6 +287,19 @@ describe("GlobalError", () => {
       fireEvent.click(screen.getByTestId("go-home-button"));
 
       expect(window.location.href).toBe("/zh");
+    });
+
+    it("should navigate to Spanish homepage when locale is es", () => {
+      Object.defineProperty(global, "navigator", {
+        writable: true,
+        value: { language: "es-MX" },
+      });
+
+      render(<GlobalError error={mockError} reset={mockReset} />);
+
+      fireEvent.click(screen.getByTestId("go-home-button"));
+
+      expect(window.location.href).toBe("/es");
     });
 
     it("should default to English for non-Chinese languages", () => {

@@ -1359,6 +1359,13 @@ const TEXT_RULES = [
       "Image replacement placeholder is still present. Replace it before launch.",
   },
   {
+    ruleId: "spanish-placeholder",
+    severity: "warning",
+    pattern: /\[ES-TODO\]\s*/gu,
+    message:
+      "Spanish placeholder copy remains in buyer-visible content. Replace [ES-TODO] strings with reviewed Latin American Spanish before production launch.",
+  },
+  {
     ruleId: "todo-marker",
     severity: "error",
     pattern: /\bTODO\b/gu,
@@ -1409,6 +1416,7 @@ const STRICT_CLIENT_LAUNCH_BLOCKER_RULE_IDS = new Set([
   "replace-this-image",
   "replaceable-content",
   "sample-product",
+  "spanish-placeholder",
   "starter-identity",
   "your-company",
   "your-email",
@@ -1763,6 +1771,14 @@ function scanReadinessFile(rootDir, file, options = {}) {
 
       for (const match of unit.value.matchAll(rule.pattern)) {
         const index = match.index ?? 0;
+        if (
+          rule.ruleId === "todo-marker" &&
+          unit.value
+            .slice(Math.max(0, index - 4), index + "TODO".length)
+            .includes("ES-TODO")
+        ) {
+          continue;
+        }
         findings.push({
           file: file.repoPath,
           line: unit.line,
@@ -1804,6 +1820,12 @@ function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
   );
 }
 
+function checkSpanishTodoMarkersForProduction(rootDir = ROOT) {
+  return collectContentReadinessFindings(rootDir, {
+    strictClientLaunch: true,
+  }).filter((finding) => finding.ruleId === "spanish-placeholder");
+}
+
 function runContentReadinessCheck(rootDir = ROOT, options = {}) {
   const findings = collectContentReadinessFindings(rootDir, options);
   const errors = findings.filter((finding) => finding.severity === "error");
@@ -1825,9 +1847,15 @@ function printReadinessFinding(finding) {
 }
 
 function runContentReadinessCli(args = []) {
-  const result = runContentReadinessCheck(ROOT, {
-    strictClientLaunch: args.includes("--strict-client-launch"),
-  });
+  let result;
+  try {
+    result = runContentReadinessCheck(ROOT, {
+      strictClientLaunch: args.includes("--strict-client-launch"),
+    });
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return false;
+  }
 
   if (result.findings.length === 0) {
     console.log("content readiness passed: no buyer-visible residue found");
@@ -3350,6 +3378,7 @@ module.exports = {
   parseArgs: parseContentSlugArgs,
   parseFrontmatter,
   parseGuardrailException,
+  checkSpanishTodoMarkersForProduction,
   runBrandCheck,
   runCloudflareOfficialCompareCli,
   runCloudflarePreviewDeployedProof,

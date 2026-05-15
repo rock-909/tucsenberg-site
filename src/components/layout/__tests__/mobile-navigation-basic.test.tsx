@@ -81,6 +81,10 @@ describe("Mobile Navigation - Main Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.contact": "Contact",
           "navigation.products": "Products",
           "navigation.blog": "Blog",
@@ -143,8 +147,8 @@ describe("Mobile Navigation - Main Tests", () => {
       render(<MobileNavigation />);
 
       // Navigation items should not be visible when closed
-      expect(screen.queryByText("Home")).not.toBeInTheDocument();
-      expect(screen.queryByText("About")).not.toBeInTheDocument();
+      expect(screen.queryByText("Membranes")).not.toBeInTheDocument();
+      expect(screen.queryByText("Compatibility")).not.toBeInTheDocument();
     });
 
     it("has correct button type", () => {
@@ -243,10 +247,10 @@ describe("Mobile Navigation - Main Tests", () => {
       const trigger = screen.getByRole("button");
       fireEvent.click(trigger);
 
-      expect(screen.getByText("Home")).toBeInTheDocument();
-      expect(screen.getByText("About")).toBeInTheDocument();
-      expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
+      expect(screen.getByText("Compatibility")).toBeInTheDocument();
+      expect(screen.getByText("Materials")).toBeInTheDocument();
+      expect(screen.getByText("Quote")).toBeInTheDocument();
       expect(screen.queryByText("Custom")).not.toBeInTheDocument();
     });
 
@@ -257,11 +261,11 @@ describe("Mobile Navigation - Main Tests", () => {
 
       // Open menu
       fireEvent.click(trigger);
-      expect(screen.getByText("Home")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
 
       // Close menu
       fireEvent.click(trigger);
-      expect(screen.queryByText("Home")).not.toBeInTheDocument();
+      expect(screen.queryByText("Membranes")).not.toBeInTheDocument();
     });
 
     it("handles keyboard activation", async () => {
@@ -306,7 +310,7 @@ describe("Mobile Navigation - Main Tests", () => {
       expect(trigger).toHaveAttribute("aria-expanded", "true");
 
       // Check that menu content is visible
-      expect(screen.getByText("Home")).toBeInTheDocument();
+      expect(screen.getByText("Membranes")).toBeInTheDocument();
 
       // Note: Radix UI Sheet closes when clicking the overlay, not arbitrary outside elements
       // This test verifies the menu opens correctly and content is accessible

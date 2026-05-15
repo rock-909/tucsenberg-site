@@ -1,6 +1,6 @@
 {
   "sourceLocale": "en",
-  "targetLocales": ["zh"],
+  "targetLocales": ["es", "zh"],
   "buckets": [
     {
       "include": ["messages/**/*.json"],

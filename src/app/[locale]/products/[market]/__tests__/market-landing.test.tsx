@@ -48,7 +48,7 @@ vi.mock("@/i18n/routing", () => ({
     </a>
   ),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
   },
 }));
@@ -64,7 +64,8 @@ vi.mock("@/config/paths", () => ({
     },
   },
   LOCALES_CONFIG: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
   PATHS_CONFIG: {
@@ -232,28 +233,21 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders server links from each family to Contact with context", async () => {
+    it("renders server links from each family to the Step 2 placeholder", async () => {
       await renderPage("north-america");
 
       const sweepsLink = screen.getByRole("link", {
         name: /request quote for sample product shapes/i,
       });
 
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("/contact"),
-      );
-      expect(sweepsLink).toHaveAttribute(
+      expect(sweepsLink).toHaveAttribute("href", "#coming-soon");
+      expect(sweepsLink).not.toHaveAttribute(
         "href",
         expect.stringContaining("intent=product-family"),
       );
-      expect(sweepsLink).toHaveAttribute(
+      expect(sweepsLink).not.toHaveAttribute(
         "href",
-        expect.stringContaining("market=north-america"),
-      );
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("family=sample-product-shapes"),
+        expect.stringContaining("%23coming-soon"),
       );
     });
 
@@ -273,11 +267,11 @@ describe("Market Landing Page", () => {
         description:
           "Replaceable catalog example for a standards-based product or service group.",
         alternates: {
-          canonical: "https://www.example.com/en/products/north-america",
+          canonical: "https://example.com/en/products/north-america",
           languages: {
-            en: "https://www.example.com/en/products/north-america",
-            zh: "https://www.example.com/zh/products/north-america",
-            "x-default": "https://www.example.com/en/products/north-america",
+            en: "https://example.com/en/products/north-america",
+            es: "https://example.com/es/products/north-america",
+            "x-default": "https://example.com/en/products/north-america",
           },
         },
       });
@@ -334,12 +328,12 @@ describe("Market Landing Page", () => {
     });
   });
 
-  describe("Scenario 1.7: CTA links to /contact", () => {
-    it("renders CTA section with link to /contact", async () => {
+  describe("Scenario 1.7: CTA links to the Step 2 placeholder", () => {
+    it("renders CTA section with link to #coming-soon", async () => {
       await renderPage("north-america");
 
       const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "/contact");
+      expect(ctaLink).toHaveAttribute("href", "#coming-soon");
     });
 
     it("renders CTA heading with market label", async () => {

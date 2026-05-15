@@ -6,6 +6,12 @@ import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const IMPORT_FROM_PATTERN = /from\s+["']([^"']+)["']/g;
 const BRIDGE_SOURCE = readFileSync("src/config/static-theme-colors.ts", "utf8");
+const RAW_BRAND_HEX_VALUES = ["#123B5D", "#0F7C82", "#DCEFF1", "#F7FAFC"];
+const RAW_BRAND_HEX_ALLOWLIST = new Set([
+  "src/app/globals.css",
+  "src/config/static-theme-colors.ts",
+  "src/config/__tests__/static-theme-colors.test.ts",
+]);
 const BROWSER_UI_SCAN_ROOTS = [
   "src/components",
   "src/app",
@@ -15,6 +21,7 @@ const EXPLICIT_BROWSER_UI_FILES = [
   "src/config/footer-style-tokens.ts",
   "src/config/footer-links.ts",
 ] as const;
+const RAW_BRAND_HEX_SCAN_ROOT = "src";
 
 function collectFiles(directoryPath: string): string[] {
   let entries: string[];
@@ -60,6 +67,16 @@ function importsStaticThemeColors(source: string) {
   });
 }
 
+function collectRawBrandHexScanFiles(): string[] {
+  return collectFiles(RAW_BRAND_HEX_SCAN_ROOT).filter(
+    (filePath, index, allFiles) =>
+      allFiles.indexOf(filePath) === index &&
+      !RAW_BRAND_HEX_ALLOWLIST.has(filePath) &&
+      !filePath.startsWith("src/emails/") &&
+      /\.(ts|tsx|css)$/.test(filePath),
+  );
+}
+
 describe("static theme colors", () => {
   it("exposes email-safe sRGB values for non-CSS surfaces", () => {
     expect(Object.keys(STATIC_THEME_COLORS).sort()).toEqual([
@@ -86,6 +103,25 @@ describe("static theme colors", () => {
     }
   });
 
+  it("aligns the non-CSS bridge to Tucsenberg sRGB role colors", () => {
+    expect(STATIC_THEME_COLORS).toEqual({
+      primary: "#123B5D",
+      primaryHover: "#0B2A43",
+      success: "#0F7B5F",
+      successLight: "#EEF9F4",
+      warning: "#9A5A00",
+      warningLight: "#FFF7DC",
+      error: "#B42318",
+      text: "#0F172A",
+      textLight: "#64748B",
+      muted: "#64748B",
+      background: "#F7FAFC",
+      contentBackground: "#FFFFFF",
+      headerText: "#FFFFFF",
+      border: "#CBD5E1",
+    });
+  });
+
   it("documents the bridge boundary instead of pretending to be brand truth", () => {
     expect(BRIDGE_SOURCE).toContain("sRGB bridge for src/app/globals.css");
     expect(BRIDGE_SOURCE).toContain("non-CSS surfaces only");
@@ -110,6 +146,30 @@ describe("static theme colors", () => {
     const offenders = browserUiFiles.filter((filePath) => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan reads approved repo source files to enforce non-CSS bridge isolation
       return importsStaticThemeColors(readFileSync(filePath, "utf8"));
+    });
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("scans the whole src tree for raw Tucsenberg brand hex drift", () => {
+    const scannedFiles = collectRawBrandHexScanFiles();
+
+    expect(scannedFiles).toContain("src/config/single-site.ts");
+    expect(scannedFiles).toContain("src/lib/navigation.ts");
+    expect(scannedFiles).not.toContain("src/app/globals.css");
+    expect(scannedFiles).not.toContain("src/config/static-theme-colors.ts");
+  });
+
+  it("keeps raw Tucsenberg brand hex values out of src files", () => {
+    const srcFiles = collectRawBrandHexScanFiles();
+
+    const offenders = srcFiles.flatMap((filePath) => {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only boundary scan reads approved repo source files to catch raw brand hex drift
+      const source = readFileSync(filePath, "utf8");
+
+      return RAW_BRAND_HEX_VALUES.filter((hexValue) =>
+        source.toLowerCase().includes(hexValue.toLowerCase()),
+      ).map((hexValue) => `${filePath}: ${hexValue}`);
     });
 
     expect(offenders).toEqual([]);

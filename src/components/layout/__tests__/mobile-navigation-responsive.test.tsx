@@ -91,6 +91,10 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.services": "Services",
           "navigation.contact": "Contact",
           "navigation.menu": "Menu",
@@ -283,15 +287,15 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
       // 使用 fireEvent 避免 pointer-events 问题
       fireEvent.click(trigger);
 
-      // Simulate route change to about page
-      mockPathname.current = "/about";
+      // Step 2 nav items share the same placeholder target.
+      mockPathname.current = "#coming-soon";
       rerender(<MobileNavigation />);
 
       const reopenedTrigger = screen.getByRole("button");
       fireEvent.click(reopenedTrigger);
 
-      const aboutLink = screen.getByRole("link", { name: "About" });
-      expect(aboutLink).toHaveAttribute("aria-current", "page");
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      expect(membranesLink).toHaveAttribute("aria-current", "page");
     });
 
     it("handles complex route patterns", async () => {

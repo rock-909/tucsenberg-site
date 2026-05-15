@@ -14,8 +14,8 @@ test.describe("Basic Navigation", () => {
     // Wait for the page to load
     await page.waitForLoadState("networkidle");
 
-    // Check if the page title is correct
-    await expect(page).toHaveTitle(/Showcase Website Starter/);
+    // Check if the Step 2 brand title is correct
+    await expect(page).toHaveTitle(/Tucsenberg/);
 
     // Check if main navigation is present - use first() to avoid strict mode violation
     const navigation = page.locator("nav").first();
@@ -33,14 +33,18 @@ test.describe("Basic Navigation", () => {
     await removeInterferingElements(page);
     await waitForStablePage(page);
 
-    // 通过主导航测试到 About 页的跳转（与 i18n 导航辅助保持一致）
+    // Step 2 public nav is Tucsenberg-specific placeholder IA; real content
+    // routes such as About remain reachable directly but are no longer nav items.
     const nav = getNav(page);
-    const aboutLink = nav.getByRole("link", { name: "About" });
-    await expect(aboutLink).toBeVisible({ timeout: 10_000 });
+    const membranesLink = nav.getByRole("link", { name: "Membranes" });
+    await expect(membranesLink).toBeVisible({ timeout: 10_000 });
+    await expect(membranesLink).toHaveAttribute("href", "#coming-soon");
 
-    // 点击 About 链接并使用 URL 断言自动等待导航完成
-    await aboutLink.click();
-    await expect(page).toHaveURL(/\/about/);
+    await membranesLink.click();
+    await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
+
+    const aboutResponse = await page.goto("/en/about");
+    expect(aboutResponse?.status()).toBe(200);
   });
 
   test("should handle language switching", async ({ page }) => {
@@ -53,16 +57,26 @@ test.describe("Basic Navigation", () => {
       .or(
         page
           .locator('button:has-text("EN")')
-          .or(page.locator('button:has-text("中文")')),
+          .or(page.locator('button:has-text("ES")')),
       );
 
     if (await languageSwitcher.first().isVisible()) {
       await languageSwitcher.first().click();
       await page.waitForLoadState("networkidle");
 
-      // Verify language change - match with or without trailing slash
-      const currentUrl = page.url();
-      expect(currentUrl).toMatch(/\/(en|zh)(\/|$)/);
+      const spanishLink = page
+        .locator('[data-testid="language-link-es"]')
+        .first();
+
+      if (await spanishLink.isVisible()) {
+        await spanishLink.click();
+        await expect(page).toHaveURL(/\/es(\/|$)/);
+      } else {
+        // If the control rendered as a non-expanded toggle in this viewport,
+        // the public language surface must still be en/es-only.
+        const currentUrl = page.url();
+        expect(currentUrl).toMatch(/\/(en|es)(\/|$)/);
+      }
     }
   });
 

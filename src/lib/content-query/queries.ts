@@ -12,6 +12,7 @@ import type {
   ParsedContent,
 } from "@/types/content.types";
 import { getContentEntry } from "@/lib/content-manifest";
+import { getContentLocaleCandidates } from "@/lib/content-locale-fallback";
 
 type ContentLoader<T> = (slug: string, locale?: Locale) => T;
 
@@ -32,7 +33,9 @@ function getContentBySlug<T extends ContentMetadata = ContentMetadata>(
     throw new Error(`Content not found: ${slug}`);
   }
 
-  const entry = getContentEntry(type, locale, slug);
+  const entry = getContentLocaleCandidates(type, locale)
+    .map((candidateLocale) => getContentEntry(type, candidateLocale, slug))
+    .find((candidateEntry) => candidateEntry !== undefined);
 
   if (entry === undefined) {
     throw new Error(`Content not found: ${slug}`);

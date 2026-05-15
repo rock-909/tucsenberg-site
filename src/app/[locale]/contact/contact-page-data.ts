@@ -7,6 +7,7 @@ import {
   interpolateFaqAnswer,
 } from "@/lib/content/mdx-faq";
 import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
+import { getContentLocaleCandidates } from "@/lib/content-locale-fallback";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import { getStaticSplitMessages } from "@/lib/i18n/static-split-messages";
@@ -26,7 +27,11 @@ function getStaticMessages(locale: Locale): Record<string, unknown> {
 }
 
 export function getStaticContactPage(locale: Locale): Page {
-  const entry = CONTENT_MANIFEST.byKey[`pages/${locale}/contact`];
+  const entry = getContentLocaleCandidates("pages", locale)
+    .map((candidateLocale) => {
+      return CONTENT_MANIFEST.byKey[`pages/${candidateLocale}/contact`];
+    })
+    .find((candidateEntry) => candidateEntry !== undefined);
 
   if (entry === undefined) {
     throw new Error(`Static contact page not found for locale: ${locale}`);

@@ -12,7 +12,7 @@ import {
  * Aligned to Behavioral Contracts (docs/specs/behavioral-contracts.md).
  * Each test covers a real user journey, not individual component checks.
  *
- * BC-002: Navigate to all main pages from header
+ * BC-002: Key pages remain directly reachable
  * BC-005: 404 for invalid routes
  * BC-013: Products page explains starter capabilities
  * BC-014: Market detail routes remain reachable
@@ -33,11 +33,15 @@ test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
     await removeInterferingElements(page);
     await waitForStablePage(page);
 
-    // Click Products in navigation
+    // Step 2 public nav uses Tucsenberg placeholder IA. Products remains a
+    // direct route for legacy/content coverage until later content replacement.
     const nav = getNav(page);
-    const productsLink = nav.getByRole("link", { name: /Products/i });
-    await expect(productsLink).toBeVisible({ timeout: 10_000 });
-    await productsLink.click();
+    await expect(nav.getByRole("link", { name: "Membranes" })).toHaveAttribute(
+      "href",
+      "#coming-soon",
+    );
+
+    await page.goto("/en/products");
     await expect(page).toHaveURL(/\/products/);
 
     // BC-013: Products page should explain starter capabilities, not a market-card catalog.
@@ -88,9 +92,15 @@ test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
 
 test.describe("Journey: Navigate All Pages (BC-002)", () => {
   const pages = [
-    { path: "/en", titlePattern: /Showcase Website Starter/i },
-    { path: "/en/capabilities", titlePattern: /Capabilities|Example/i },
-    { path: "/en/how-it-works", titlePattern: /How It Works|Example/i },
+    { path: "/en", titlePattern: /Tucsenberg/i },
+    {
+      path: "/en/capabilities",
+      titlePattern: /Capabilities|Example|Tucsenberg/i,
+    },
+    {
+      path: "/en/how-it-works",
+      titlePattern: /How It Works|Example|Tucsenberg/i,
+    },
     { path: "/en/about", titlePattern: /About/i },
     { path: "/en/products", titlePattern: /Product/i },
     { path: "/en/contact", titlePattern: /Contact|Example/i },
@@ -173,7 +183,9 @@ test.describe("Journey: CTA Links Resolve (BC-020)", () => {
 });
 
 test.describe("Journey: Language Parity (BC-003)", () => {
-  test("key pages exist in both en and zh", async ({ page }) => {
+  test("key pages exist in public locales and internal zh preview", async ({
+    page,
+  }) => {
     const paths = ["/", "/about", "/products", "/contact"];
 
     for (const path of paths) {
@@ -181,7 +193,11 @@ test.describe("Journey: Language Parity (BC-003)", () => {
       const enResponse = await page.goto(`/en${path}`);
       expect(enResponse?.status()).toBe(200);
 
-      // Chinese version
+      // Spanish public version
+      const esResponse = await page.goto(`/es${path}`);
+      expect(esResponse?.status()).toBe(200);
+
+      // Chinese internal preview version
       const zhResponse = await page.goto(`/zh${path}`);
       expect(zhResponse?.status()).toBe(200);
     }

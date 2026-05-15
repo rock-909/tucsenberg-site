@@ -16,7 +16,7 @@ vi.mock("next-intl/server", () => ({
 // Mock next-intl routing
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
   },
   Link: ({
@@ -44,7 +44,8 @@ vi.mock("@/i18n/routing", () => ({
 
 vi.mock("@/config/paths", () => ({
   LOCALES_CONFIG: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
   SITE_CONFIG: {

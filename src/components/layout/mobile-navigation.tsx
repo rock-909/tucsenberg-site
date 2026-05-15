@@ -62,10 +62,7 @@ export function MobileNavigationLinks({
         })}
         <li className="pt-4">
           <Link
-            href={{
-              pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
-              query: { source: "mobile_nav_cta" },
-            }}
+            href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
             prefetch={false}
             className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
             onClick={onNavigate}

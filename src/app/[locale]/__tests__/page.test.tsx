@@ -84,7 +84,7 @@ const homeMessages: Record<string, string> = {
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
   },
   Link: ({ children, href, ...props }: MockLinkProps) => (
@@ -108,7 +108,11 @@ describe("Home Page", () => {
   describe("generateStaticParams", () => {
     it("should return params for all locales", () => {
       const params = generateStaticParams();
-      expect(params).toEqual([{ locale: "en" }, { locale: "zh" }]);
+      expect(params).toEqual([
+        { locale: "en" },
+        { locale: "es" },
+        { locale: "zh" },
+      ]);
     });
   });
 
@@ -147,10 +151,10 @@ describe("Home Page", () => {
       ).toBeInTheDocument();
       expect(
         screen.getAllByRole("link", { name: "View product capabilities" })[0],
-      ).toHaveAttribute("href", "/products");
+      ).toHaveAttribute("href", "#coming-soon");
       expect(
         screen.getAllByRole("link", { name: "Contact" })[0],
-      ).toHaveAttribute("href", "/contact");
+      ).toHaveAttribute("href", "#coming-soon");
     });
 
     it("should have correct container classes", async () => {
@@ -173,8 +177,8 @@ describe("Home Page", () => {
     });
 
     it("should handle delayed params resolution", async () => {
-      const delayedParams = new Promise<{ locale: "en" | "zh" }>((resolve) =>
-        setTimeout(() => resolve({ locale: "en" }), 10),
+      const delayedParams = new Promise<{ locale: "en" | "es" | "zh" }>(
+        (resolve) => setTimeout(() => resolve({ locale: "en" }), 10),
       );
 
       const HomeComponent = await Home({ params: delayedParams });

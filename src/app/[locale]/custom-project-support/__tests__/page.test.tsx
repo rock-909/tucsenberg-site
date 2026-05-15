@@ -146,10 +146,10 @@ describe("Feature: Custom Project Support Page", () => {
     expect(await screen.findByTestId("faq-section")).toBeInTheDocument();
   });
 
-  it("CTA links to /contact", async () => {
+  it("CTA links to the Step 2 coming-soon placeholder", async () => {
     await renderPage();
     const ctaLink = await screen.findByRole("link", { name: /cta\.button/i });
-    expect(ctaLink).toHaveAttribute("href", "/contact");
+    expect(ctaLink).toHaveAttribute("href", "#coming-soon");
   });
 
   it("renders in Chinese locale", async () => {

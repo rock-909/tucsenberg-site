@@ -4,11 +4,11 @@
 
 ## 入口文件
 
-- Codex：`AGENTS.md`
+- Codex：遵守会话注入的项目指令；starter 原规则参考 `AGENTS.starter.md`
 - Claude：`CLAUDE.md`
 - 本地协作偏好：`CLAUDE.local.md`
 
-两个入口文件都应该指向本目录下的网站说明文档，不要写成两份互相冲突的百科。
+Claude 入口文件和 Codex 会话规则都应该指向本目录下的网站说明文档，不要写成两套互相冲突的百科。
 
 ## Skills
 

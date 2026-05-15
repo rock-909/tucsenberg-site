@@ -6,6 +6,7 @@ export interface SiteMessageValues {
   currentYear: string;
   copyright: {
     en: string;
+    es: string;
     zh: string;
   };
 }
@@ -23,6 +24,7 @@ export function getSiteMessageValues(): SiteMessageValues {
     currentYear,
     copyright: {
       en: `(c) ${currentYear} ${companyName}. All rights reserved.`,
+      es: `(c) ${currentYear} ${companyName}. All rights reserved.`,
       zh: `(c) ${currentYear} ${companyName}。保留所有权利。`,
     },
   };

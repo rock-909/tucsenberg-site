@@ -12,36 +12,70 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/mdx-importers.generated", () => ({
   postImporters: {
     en: {},
+    es: {},
     zh: {},
   },
   productImporters: {
     en: {},
+    es: {},
     zh: {},
   },
   pageImporters: {
     en: {},
+    es: {},
     zh: {},
   },
 }));
 
-// Mock next/font/google for Figtree + JetBrains Mono
+const googleFontMocks = vi.hoisted(() => {
+  type GoogleFontOptions = {
+    variable: string;
+    subsets: string[];
+    weight: string[];
+    display: string;
+  };
+
+  const createGoogleFontMock = (
+    fontFamily: string,
+    variable: string,
+    className: string,
+  ) =>
+    vi.fn((_options: GoogleFontOptions) => ({
+      variable,
+      className,
+      style: { fontFamily },
+    }));
+
+  return {
+    IBM_Plex_Sans: createGoogleFontMock(
+      "IBM Plex Sans",
+      "__variable_ibm_plex_sans",
+      "__className_ibm_plex_sans",
+    ),
+    Inter: createGoogleFontMock(
+      "Inter",
+      "__variable_inter",
+      "__className_inter",
+    ),
+    IBM_Plex_Mono: createGoogleFontMock(
+      "IBM Plex Mono",
+      "__variable_ibm_plex_mono",
+      "__className_ibm_plex_mono",
+    ),
+  };
+});
+
+// Mock next/font/google for Tucsenberg font stack.
 vi.mock("next/font/google", () => ({
-  Figtree: vi.fn(() => ({
-    variable: "--font-figtree",
-    className: "figtree",
-    style: { fontFamily: "Figtree" },
-  })),
-  JetBrains_Mono: vi.fn(() => ({
-    variable: "--font-jetbrains-mono",
-    className: "jetbrains-mono",
-    style: { fontFamily: "JetBrains Mono" },
-  })),
+  IBM_Plex_Sans: googleFontMocks.IBM_Plex_Sans,
+  Inter: googleFontMocks.Inter,
+  IBM_Plex_Mono: googleFontMocks.IBM_Plex_Mono,
 }));
 
 vi.mock("next/font/local", () => ({
   default: vi.fn(() => ({
-    variable: "--font-figtree",
-    className: "font-local",
-    style: { fontFamily: "Figtree" },
+    variable: "__variable_local_font",
+    className: "__className_local_font",
+    style: { fontFamily: "Local Font" },
   })),
 }));

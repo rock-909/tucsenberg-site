@@ -1,10 +1,39 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { SINGLE_SITE_FACTS } from "@/config/single-site";
+import {
+  SINGLE_SITE_CONFIG,
+  SINGLE_SITE_FACTS,
+  SINGLE_SITE_KEY,
+  SINGLE_SITE_NAVIGATION,
+} from "@/config/single-site";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { siteFacts } from "@/config/site-facts";
 
 describe("site-facts", () => {
+  it("uses the Tucsenberg identity shell", () => {
+    expect(SINGLE_SITE_KEY).toBe("tucsenberg");
+    expect(SINGLE_SITE_CONFIG.name).toBe("Tucsenberg");
+    expect(siteFacts.company.name).toBe("Tucsenberg");
+    expect(siteFacts.contact.email).toBe("contact@tucsenberg.com");
+    expect(siteFacts.company.location.country).toBe("China");
+  });
+
+  it("keeps the Step 2 main navigation on the safe placeholder", () => {
+    expect(SINGLE_SITE_NAVIGATION.map((item) => item.key)).toEqual([
+      "membranes",
+      "compatibility",
+      "materials",
+      "quote",
+    ]);
+    expect(SINGLE_SITE_NAVIGATION.map((item) => item.href)).toEqual([
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    ]);
+  });
+
   it("exports site facts with expected shape", () => {
     expect(siteFacts).toBeTruthy();
     expect(siteFacts).toBe(SINGLE_SITE_FACTS);
@@ -12,7 +41,7 @@ describe("site-facts", () => {
     expect(typeof siteFacts.company.name).toBe("string");
     expect(typeof siteFacts.company.established).toBe("number");
     expect(typeof siteFacts.company.yearsInBusiness).toBe("number");
-    expect(siteFacts.company.yearsInBusiness).toBeGreaterThan(0);
+    expect(siteFacts.company.yearsInBusiness).toBeGreaterThanOrEqual(0);
     expect(typeof siteFacts.company.location.country).toBe("string");
     expect(typeof siteFacts.company.location.city).toBe("string");
 

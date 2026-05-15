@@ -94,12 +94,12 @@ function HomeHero({ t }: { t: HomeTranslator }) {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild>
-              <Link href={SINGLE_SITE_ROUTE_HREFS.products}>
+              <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
                 {t("hero.cta.primary")}
               </Link>
             </Button>
             <Button variant="secondary" asChild>
-              <Link href={SINGLE_SITE_ROUTE_HREFS.contact}>
+              <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
                 {t("hero.cta.secondary")}
               </Link>
             </Button>
@@ -166,7 +166,13 @@ function CardGridSection({
           <h2 className="text-[32px] font-bold leading-tight tracking-[-0.03em]">
             {title}
           </h2>
-          <p className="mt-3 text-muted-foreground">{description}</p>
+          <p
+            className={
+              muted ? "mt-3 text-foreground/80" : "mt-3 text-muted-foreground"
+            }
+          >
+            {description}
+          </p>
         </div>
         <div className={`mt-9 grid gap-4 ${columnsClassName}`}>
           {items.map((item) => (
@@ -243,13 +249,42 @@ function HomeFinalAction({ t }: { t: HomeTranslator }) {
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Button variant="on-dark" size="lg" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.products}>
+            <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
               {t("finalCta.primary")}
             </Link>
           </Button>
           <Button variant="ghost-dark" size="lg" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.contact}>
+            <Link href={SINGLE_SITE_ROUTE_HREFS.comingSoon}>
               {t("finalCta.secondary")}
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ComingSoonSection({ t }: { t: HomeTranslator }) {
+  return (
+    <section
+      id="coming-soon"
+      data-testid="coming-soon-section"
+      className="border-t border-border bg-muted/40 px-6 py-14 md:py-20"
+    >
+      <div className="mx-auto max-w-[760px] rounded-2xl border border-border bg-card p-6 shadow-border md:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          {t("comingSoon.quoteNote")}
+        </p>
+        <h2 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.03em]">
+          {t("comingSoon.title")}
+        </h2>
+        <p className="mt-4 leading-7 text-muted-foreground">
+          {t("comingSoon.description")}
+        </p>
+        <div className="mt-6">
+          <Button variant="secondary" asChild>
+            <Link href={SINGLE_SITE_ROUTE_HREFS.home}>
+              {t("comingSoon.backHome")}
             </Link>
           </Button>
         </div>
@@ -285,6 +320,7 @@ export default async function Home({ params }: HomePageProps) {
           muted
         />
         <StartPathSection t={t} items={content.startPath} />
+        <ComingSoonSection t={t} />
         <HomeFinalAction t={t} />
       </div>
     </div>

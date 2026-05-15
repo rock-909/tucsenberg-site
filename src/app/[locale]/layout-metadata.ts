@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
-import { SITE_CONFIG } from "@/config/paths";
+import { LOCALES_CONFIG, SITE_CONFIG } from "@/config/paths";
+import { isPublicSeoLocale } from "@/config/paths/locales-config";
 import { ONE } from "@/constants";
 import { getRuntimeEnvString } from "@/lib/env";
+
+function buildLayoutRobots(locale: string): Metadata["robots"] {
+  const isKnownLocale = LOCALES_CONFIG.locales.includes(
+    locale as (typeof LOCALES_CONFIG.locales)[number],
+  );
+  const shouldIndex = isKnownLocale ? isPublicSeoLocale(locale) : true;
+
+  return {
+    index: shouldIndex,
+    follow: shouldIndex,
+    googleBot: {
+      index: shouldIndex,
+      follow: shouldIndex,
+      "max-video-preview": -ONE,
+      "max-image-preview": "large",
+      "max-snippet": -ONE,
+    },
+  };
+}
 
 /**
  * Locale layout metadata (base only).
@@ -18,8 +38,7 @@ export async function generateLocaleMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  // await params 是 Next.js 16 的要求，但解析很快
-  await params;
+  const { locale } = await params;
   const metadataBaseUrl = SITE_CONFIG.baseUrl || "http://localhost:3000";
 
   return {
@@ -29,17 +48,7 @@ export async function generateLocaleMetadata({
       template: SITE_CONFIG.seo.titleTemplate,
     },
     description: SITE_CONFIG.seo.defaultDescription,
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -ONE,
-        "max-image-preview": "large",
-        "max-snippet": -ONE,
-      },
-    },
+    robots: buildLayoutRobots(locale),
     verification: {
       google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
       yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),

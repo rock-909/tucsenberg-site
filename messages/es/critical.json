@@ -1,0 +1,1637 @@
+{
+  "common": {
+    "loading": "[ES-TODO] Loading...",
+    "error": "[ES-TODO] An error occurred",
+    "close": "[ES-TODO] Close",
+    "success": "[ES-TODO] Success",
+    "cancel": "[ES-TODO] Cancel",
+    "confirm": "[ES-TODO] Confirm",
+    "save": "[ES-TODO] Save",
+    "edit": "[ES-TODO] Edit",
+    "delete": "[ES-TODO] Delete",
+    "search": "[ES-TODO] Search",
+    "filter": "[ES-TODO] Filter",
+    "sort": "[ES-TODO] Sort",
+    "next": "[ES-TODO] Next",
+    "previous": "[ES-TODO] Previous",
+    "open": "[ES-TODO] Open",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "[ES-TODO] Message sent successfully!",
+          "successDescription": "[ES-TODO] Thank you for your message. We'll get back to you soon.",
+          "error": "[ES-TODO] Failed to send message",
+          "errorDescription": "[ES-TODO] Please try again later or contact us directly.",
+          "loading": "[ES-TODO] Sending message..."
+        },
+        "newsletter": {
+          "success": "[ES-TODO] Successfully subscribed!",
+          "successDescription": "[ES-TODO] Thank you for subscribing to our newsletter.",
+          "error": "[ES-TODO] Subscription failed",
+          "errorDescription": "[ES-TODO] Please check your email and try again.",
+          "loading": "[ES-TODO] Subscribing..."
+        },
+        "feedback": {
+          "success": "[ES-TODO] Feedback submitted!",
+          "successDescription": "[ES-TODO] Thank you for your valuable feedback.",
+          "error": "[ES-TODO] Failed to submit feedback",
+          "errorDescription": "[ES-TODO] Please try again later.",
+          "loading": "[ES-TODO] Submitting feedback..."
+        }
+      }
+    }
+  },
+  "navigation": {
+    "siteName": "[ES-TODO] {siteName}",
+    "siteDescription": "[ES-TODO] Aftermarket aeration replacement membranes for OEM-family matching and RFQ fit.",
+    "home": "[ES-TODO] Home",
+    "membranes": "[ES-TODO] Membranes",
+    "compatibility": "[ES-TODO] Compatibility",
+    "materials": "[ES-TODO] Materials",
+    "quote": "[ES-TODO] Quote",
+    "more": "[ES-TODO] More",
+    "capabilities": "[ES-TODO] Capabilities",
+    "howItWorks": "[ES-TODO] How It Works",
+    "about": "[ES-TODO] About",
+    "contact": "[ES-TODO] Contact",
+    "contactSales": "[ES-TODO] Quote",
+    "customProject": "[ES-TODO] Custom",
+    "services": "[ES-TODO] Services",
+    "products": "[ES-TODO] Products",
+    "blog": "[ES-TODO] Blog",
+    "solutions": "[ES-TODO] Solutions",
+    "resources": "[ES-TODO] Resources",
+    "enterprise": "[ES-TODO] Enterprise",
+    "docs": "[ES-TODO] Docs",
+    "pricing": "[ES-TODO] Pricing",
+    "privacy": "[ES-TODO] Privacy Policy",
+    "login": "[ES-TODO] Login",
+    "logout": "[ES-TODO] Logout",
+    "profile": "[ES-TODO] Profile",
+    "settings": "[ES-TODO] Settings",
+    "frameworks": "[ES-TODO] Frameworks",
+    "infrastructure": "[ES-TODO] Infrastructure",
+    "security": "[ES-TODO] Security",
+    "aiApps": "[ES-TODO] AI Apps",
+    "webApps": "[ES-TODO] Web Apps",
+    "ecommerce": "[ES-TODO] Ecommerce",
+    "guides": "[ES-TODO] Guides",
+    "frameworksDescription": "[ES-TODO] Build with the best frameworks",
+    "infrastructureDescription": "[ES-TODO] Scalable and reliable infrastructure",
+    "securityDescription": "[ES-TODO] Enterprise-grade security",
+    "aiAppsDescription": "[ES-TODO] Deploy AI applications at scale",
+    "webAppsDescription": "[ES-TODO] Modern web application platform",
+    "ecommerceDescription": "[ES-TODO] Power your online store",
+    "docsDescription": "[ES-TODO] Complete documentation and guides",
+    "guidesDescription": "[ES-TODO] Step-by-step tutorials",
+    "blogDescription": "[ES-TODO] Latest updates and insights"
+  },
+  "theme": {
+    "toggle": "[ES-TODO] Toggle theme",
+    "toggleLabel": "[ES-TODO] Theme toggle",
+    "light": "[ES-TODO] Light",
+    "dark": "[ES-TODO] Dark",
+    "system": "[ES-TODO] System",
+    "selectTheme": "[ES-TODO] Select display theme",
+    "selectDisplayTheme": "[ES-TODO] Select a display theme:",
+    "switchToLight": "[ES-TODO] Switch to light theme",
+    "switchToDark": "[ES-TODO] Switch to dark theme",
+    "switchToSystem": "[ES-TODO] Switch to system theme"
+  },
+  "language": {
+    "toggle": "[ES-TODO] Toggle language",
+    "selectLanguage": "[ES-TODO] Select Language",
+    "english": "[ES-TODO] English",
+    "chinese": "[ES-TODO] 中文",
+    "switching": "[ES-TODO] Switching language...",
+    "switchSuccess": "[ES-TODO] Language switched successfully",
+    "switchError": "[ES-TODO] Failed to switch language",
+    "fallbackWarning": "[ES-TODO] Some content may not be available in your selected language",
+    "detectionInfo": "[ES-TODO] Detection Info",
+    "source": "[ES-TODO] Source",
+    "confidence": "[ES-TODO] Confidence",
+    "userPreference": "[ES-TODO] User preference saved",
+    "detector": {
+      "title": "[ES-TODO] Detection Info",
+      "source": "[ES-TODO] Source",
+      "confidence": "[ES-TODO] Confidence",
+      "userSaved": "[ES-TODO] ✓ User preference saved",
+      "sources": {
+        "browser": "[ES-TODO] Browser",
+        "cookie": "[ES-TODO] Cookie",
+        "url": "[ES-TODO] URL",
+        "header": "[ES-TODO] Header",
+        "default": "[ES-TODO] Default",
+        "user": "[ES-TODO] User",
+        "stored": "[ES-TODO] Stored",
+        "geo": "[ES-TODO] Geo",
+        "timezone": "[ES-TODO] Timezone"
+      }
+    }
+  },
+  "blog": {
+    "index": {
+      "eyebrow": "[ES-TODO] Launch guide",
+      "title": "[ES-TODO] Blog",
+      "description": "[ES-TODO] Practical notes for turning a starter into a public showcase website: content, pages, deployment, analytics, and replacement boundaries.",
+      "articleListLabel": "[ES-TODO] Starter launch articles",
+      "readArticle": "[ES-TODO] Read article"
+    },
+    "article": {
+      "backToBlog": "[ES-TODO] Back to blog"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "[ES-TODO] Public demo starter site",
+      "title": "[ES-TODO] No website yet? Start with a deployable showcase-site foundation.",
+      "subtitle": "[ES-TODO] This starter gives a project the first real website structure: pages, content replacement surfaces, inquiry flow, multilingual copy, and a Cloudflare-ready launch path.",
+      "cta": {
+        "primary": "[ES-TODO] View product capabilities",
+        "secondary": "[ES-TODO] Contact"
+      },
+      "proof": {
+        "countries": "[ES-TODO] {countries}+",
+        "countriesLabel": "[ES-TODO] Countries",
+        "range": "[ES-TODO] 3+",
+        "rangeLabel": "[ES-TODO] Offer Types",
+        "production": "[ES-TODO] Ready",
+        "productionLabel": "[ES-TODO] Starter Status",
+        "est": "[ES-TODO] {established}",
+        "estLabel": "[ES-TODO] Est."
+      },
+      "preview": {
+        "label": "[ES-TODO] What this starter provides",
+        "title": "[ES-TODO] A public site foundation, not a blank shell",
+        "description": "[ES-TODO] The demo is intentionally complete enough to evaluate, while still making replacement boundaries visible before a real launch.",
+        "items": [
+          "[ES-TODO] Home, Products, Blog, About, and Contact",
+          "[ES-TODO] Brand and content replacement surfaces",
+          "[ES-TODO] Inquiry path with anti-abuse basics",
+          "[ES-TODO] Cloudflare-ready deployment direction"
+        ],
+        "pages": "[ES-TODO] Pages",
+        "components": "[ES-TODO] Components",
+        "storybook": "[ES-TODO] Storybook",
+        "workflow": "[ES-TODO] AI workflow",
+        "note": "[ES-TODO] Replace example content before launch"
+      }
+    },
+    "problems": {
+      "title": "[ES-TODO] The first blocker is usually not design polish. It is that the website does not exist yet.",
+      "description": "[ES-TODO] A new project often has no public structure, no content plan, no deployment path, and no clear way for visitors to contact the owner.",
+      "items": {
+        "structure": {
+          "title": "[ES-TODO] No page structure",
+          "description": "[ES-TODO] There is no agreed Home, Products, Blog, About, Contact, or legal page baseline."
+        },
+        "content": {
+          "title": "[ES-TODO] No content plan",
+          "description": "[ES-TODO] Brand facts, offer copy, proof assets, images, and launch boundaries are scattered or missing."
+        },
+        "deployment": {
+          "title": "[ES-TODO] No launch path",
+          "description": "[ES-TODO] A local build is not enough; the site still needs a preview and deployment path that can be proven."
+        },
+        "inquiry": {
+          "title": "[ES-TODO] No inquiry flow",
+          "description": "[ES-TODO] Visitors need a simple contact route, and the owner needs a real destination for submissions."
+        },
+        "multilingual": {
+          "title": "[ES-TODO] No multilingual baseline",
+          "description": "[ES-TODO] If the site needs English and Chinese, copy, routing, and switching must be built in from the start."
+        }
+      }
+    },
+    "answer": {
+      "title": "[ES-TODO] The starter gives that missing foundation first.",
+      "description": "[ES-TODO] It is not a finished client website. It is a reusable public demo that shows the structure, replacement work, and launch proof a real site still needs.",
+      "items": {
+        "pageStructure": {
+          "title": "[ES-TODO] Clear page structure",
+          "description": "[ES-TODO] Home, Products, Blog, About, Contact, and supporting pages are already wired as a real public site shape."
+        },
+        "replacementSurface": {
+          "title": "[ES-TODO] Visible replacement surface",
+          "description": "[ES-TODO] Brand, offers, page copy, SEO, images, legal text, and contact details are treated as explicit launch inputs."
+        },
+        "inquiryPath": {
+          "title": "[ES-TODO] Inquiry path",
+          "description": "[ES-TODO] The site includes a contact route and form foundation, with basic anti-abuse and lead-handling boundaries."
+        },
+        "cloudflareFoundation": {
+          "title": "[ES-TODO] Cloudflare-ready foundation",
+          "description": "[ES-TODO] Cloudflare is the recommended deployment path. Optional compatibility can stay secondary without becoming the default promise."
+        }
+      }
+    },
+    "startPath": {
+      "title": "[ES-TODO] A practical path from starter to public launch.",
+      "description": "[ES-TODO] Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
+      "items": {
+        "brand": {
+          "title": "[ES-TODO] Replace brand facts",
+          "description": "[ES-TODO] Company name, domain, logo, colors, contact details, and legal identity become real owner-confirmed facts."
+        },
+        "content": {
+          "title": "[ES-TODO] Replace page content",
+          "description": "[ES-TODO] Home, product or service copy, proof assets, blog guidance, images, and legal pages become real launch content."
+        },
+        "forms": {
+          "title": "[ES-TODO] Connect forms",
+          "description": "[ES-TODO] Contact submissions, email delivery, anti-abuse checks, and response ownership point to real accounts."
+        },
+        "deploy": {
+          "title": "[ES-TODO] Deploy and verify",
+          "description": "[ES-TODO] Cloudflare preview, form canary, traffic visibility, and owner signoff prove readiness separately from local checks."
+        }
+      }
+    },
+    "starterBoundary": {
+      "title": "[ES-TODO] This demo looks finished because the starter should prove the launch path.",
+      "description": "[ES-TODO] The public demo shows a complete website shape while keeping the replacement work visible before a real business uses it.",
+      "listLabel": "[ES-TODO] Starter replacement requirements",
+      "items": [
+        {
+          "title": "[ES-TODO] Replace the business identity",
+          "description": "[ES-TODO] Company name, domain, contact details, legal body, logo, and social links must become owner-confirmed facts."
+        },
+        {
+          "title": "[ES-TODO] Replace the offer story",
+          "description": "[ES-TODO] Products, services, proof, images, and response promises must match the real business."
+        },
+        {
+          "title": "[ES-TODO] Connect the lead path",
+          "description": "[ES-TODO] Inquiry forms, email, Airtable or CRM destinations, Turnstile, and canary checks must use the real environment."
+        },
+        {
+          "title": "[ES-TODO] Prove the deployment",
+          "description": "[ES-TODO] Cloudflare build, preview smoke, dashboard credentials, and owner signoff stay separate from local test results."
+        }
+      ],
+      "primary": "[ES-TODO] See how it works",
+      "secondary": "[ES-TODO] Review contact flow"
+    },
+    "chain": {
+      "title": "[ES-TODO] From Content to Inquiry, One Reusable Flow.",
+      "subtitle": "[ES-TODO] The starter keeps content, components, review surfaces, and contact paths connected so each new website starts from a working base.",
+      "step1": {
+        "title": "[ES-TODO] Offer Review",
+        "desc": "[ES-TODO] Clarify what the new website needs to present before replacing example content"
+      },
+      "step2": {
+        "title": "[ES-TODO] Content Setup",
+        "desc": "[ES-TODO] Replace brand facts, offerings, proof, images, and conversion copy in the right source files"
+      },
+      "step3": {
+        "title": "[ES-TODO] Component Reuse",
+        "desc": "[ES-TODO] Use existing sections and Storybook previews before creating new UI"
+      },
+      "step4": {
+        "title": "[ES-TODO] Page Assembly",
+        "desc": "[ES-TODO] Build a complete site from reusable sections, translations, and page content"
+      },
+      "step5": {
+        "title": "[ES-TODO] Verification",
+        "desc": "[ES-TODO] Run brand, content, component, type, test, and build checks before launch"
+      },
+      "stat1": "[ES-TODO] Single content model",
+      "stat2": "[ES-TODO] 5-step replacement flow",
+      "stat3": "[ES-TODO] AI reuse guardrails"
+    },
+    "products": {
+      "title": "[ES-TODO] Offer Examples",
+      "subtitle": "[ES-TODO] Replaceable product, service, resource, and custom-project examples for a real showcase website.",
+      "cta": "[ES-TODO] View All Products",
+      "item1": {
+        "tag": "[ES-TODO] Product Example",
+        "title": "[ES-TODO] Product Showcase",
+        "spec1": "[ES-TODO] Categories, highlights, and specs",
+        "spec2": "[ES-TODO] Cards, market pages, and detail sections",
+        "spec3": "[ES-TODO] Replace with real product data",
+        "standard": "[ES-TODO] Example Catalog",
+        "link": "[ES-TODO] /products"
+      },
+      "item2": {
+        "tag": "[ES-TODO] Service Example",
+        "title": "[ES-TODO] Service Showcase",
+        "spec1": "[ES-TODO] Use cases, process, and outcomes",
+        "spec2": "[ES-TODO] Proof, resources, and FAQs",
+        "spec3": "[ES-TODO] Replace with real service scope",
+        "standard": "[ES-TODO] Example Service",
+        "link": "[ES-TODO] /products/specialty-product-systems"
+      },
+      "item3": {
+        "tag": "[ES-TODO] Service",
+        "title": "[ES-TODO] Custom Project Support",
+        "spec1": "[ES-TODO] Discovery, proposal, and delivery",
+        "spec2": "[ES-TODO] Brand adaptation and configuration",
+        "spec3": "[ES-TODO] Replace with real custom workflow",
+        "standard": "[ES-TODO] Per project scope",
+        "link": "[ES-TODO] /custom-project-support"
+      }
+    },
+    "resources": {
+      "title": "[ES-TODO] Resource Examples",
+      "subtitle": "[ES-TODO] Replaceable resources for buyers, clients, partners, or visitors who need more detail before contacting you.",
+      "item1": {
+        "title": "[ES-TODO] Product Catalog",
+        "desc": "[ES-TODO] Example listing structure for products, services, packages, or solution groups.",
+        "link": "[ES-TODO] /contact"
+      },
+      "item2": {
+        "title": "[ES-TODO] Technical Specifications",
+        "desc": "[ES-TODO] Example detail page for specifications, scope, requirements, or service levels.",
+        "link": "[ES-TODO] /contact"
+      },
+      "item3": {
+        "title": "[ES-TODO] Downloadable Assets",
+        "desc": "[ES-TODO] Placeholder for brochures, decks, technical files, checklists, or media kits.",
+        "link": "[ES-TODO] /contact"
+      },
+      "item4": {
+        "title": "[ES-TODO] Proof Assets",
+        "desc": "[ES-TODO] Placeholder for certifications, case studies, testimonials, audits, or references.",
+        "link": "[ES-TODO] /contact"
+      }
+    },
+    "sample": {
+      "title": "[ES-TODO] Preview Before You Commit.",
+      "description": "[ES-TODO] Use the example pages and Storybook components to review structure, copy, and UI states before turning this into a real website.",
+      "cta": "[ES-TODO] Review Contact Flow"
+    },
+    "scenarios": {
+      "title": "[ES-TODO] Where This Starter Fits",
+      "subtitle": "[ES-TODO] Reusable across product, service, and organization showcase websites. Replace these examples with real use cases.",
+      "cardEyebrow": "[ES-TODO] Use Case {count}",
+      "countryBadge": "[ES-TODO] {countries}+ countries",
+      "proofLabel": "[ES-TODO] Replaceable use cases",
+      "item1": {
+        "title": "[ES-TODO] Product Showcase",
+        "desc": "[ES-TODO] Use cards, spec tables, resources, and inquiry CTAs to help visitors evaluate an offer quickly.",
+        "quote": "[ES-TODO] \"Replace this with a real customer quote only after it is verified.\""
+      },
+      "item2": {
+        "title": "[ES-TODO] Service Business",
+        "desc": "[ES-TODO] Explain process, deliverables, proof, and next steps without rebuilding the page system.",
+        "quote": "[ES-TODO] \"Use this area for a real service result, testimonial, or case note.\""
+      },
+      "item3": {
+        "title": "[ES-TODO] Custom Project",
+        "desc": "[ES-TODO] Show discovery, proposal, configuration, approval, and delivery steps for tailored work.",
+        "quote": "[ES-TODO] \"Add real project proof here after the new site has evidence.\""
+      }
+    },
+    "quality": {
+      "title": "[ES-TODO] Our Commitments",
+      "subtitle": "[ES-TODO] Starter-level promises that should be replaced with real business commitments before launch.",
+      "commitment1": {
+        "title": "[ES-TODO] Clear Response Window",
+        "desc": "[ES-TODO] State the real response time visitors can expect after submitting an inquiry."
+      },
+      "commitment2": {
+        "title": "[ES-TODO] Verified Proof Only",
+        "desc": "[ES-TODO] Replace placeholder claims with evidence your real project can support."
+      },
+      "commitment3": {
+        "title": "[ES-TODO] Reusable Page System",
+        "desc": "[ES-TODO] Keep page sections modular so future AI work can reuse them safely."
+      },
+      "commitment4": {
+        "title": "[ES-TODO] Simple Contact Path",
+        "desc": "[ES-TODO] Keep the primary inquiry path visible and easy to complete."
+      },
+      "commitment5": {
+        "title": "[ES-TODO] Replaceable Content",
+        "desc": "[ES-TODO] Keep example content useful for preview, but clearly replace it before a real launch."
+      },
+      "certifications": {
+        "title": "[ES-TODO] Certifications & Standards",
+        "certified": "[ES-TODO] Certified",
+        "compliant": "[ES-TODO] Compliant",
+        "applying": "[ES-TODO] Applying",
+        "iso9001": "[ES-TODO] ISO 9001:2015",
+        "iso9001Num": "[ES-TODO] 240021Q09730R0S"
+      },
+      "standards": {
+        "exampleA": "[ES-TODO] Example Standard A",
+        "exampleB": "[ES-TODO] Example Standard B",
+        "exampleC": "[ES-TODO] Example Standard C",
+        "exampleD": "[ES-TODO] Example Standard D"
+      },
+      "logoWall": "[ES-TODO] Replaceable proof and reference area",
+      "proofStrip": {
+        "note": "[ES-TODO] Use this proof strip only for verified certifications, references, and project evidence in a real website.",
+        "standards": "[ES-TODO] Example standards",
+        "countries": "[ES-TODO] Example markets"
+      }
+    },
+    "finalCta": {
+      "title": "[ES-TODO] Start from a real website foundation, then replace what must become yours.",
+      "description": "[ES-TODO] Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
+      "primary": "[ES-TODO] View product capabilities",
+      "secondary": "[ES-TODO] Contact",
+      "trustAriaLabel": "[ES-TODO] Homepage trust facts",
+      "trust": "[ES-TODO] Example response promise · Replace proof before launch · {countries}+ placeholder markets"
+    },
+    "comingSoon": {
+      "title": "[ES-TODO] Tucsenberg product pages are being prepared.",
+      "description": "[ES-TODO] Membrane family, compatibility, material, and RFQ details will stay on this safe placeholder until owner-confirmed content is ready.",
+      "quoteNote": "[ES-TODO] Need a membrane quote? Please use this placeholder until the RFQ route is connected.",
+      "backHome": "[ES-TODO] Back to home"
+    },
+    "footer": {
+      "about": {
+        "title": "[ES-TODO] {siteName}",
+        "desc": "[ES-TODO] A replaceable showcase website starter for presenting offers, proof, resources, and inquiry paths."
+      },
+      "products": {
+        "title": "[ES-TODO] Products",
+        "items": {
+          "item1": "[ES-TODO] Product Showcase",
+          "item2": "[ES-TODO] Service Showcase",
+          "item3": "[ES-TODO] Resource Examples",
+          "item4": "[ES-TODO] Custom Projects"
+        }
+      },
+      "resources": {
+        "title": "[ES-TODO] Resources",
+        "items": {
+          "item1": "[ES-TODO] Product Catalog",
+          "item2": "[ES-TODO] Technical Specs",
+          "item3": "[ES-TODO] CAD Downloads",
+          "item4": "[ES-TODO] Certifications"
+        }
+      },
+      "contact": {
+        "title": "[ES-TODO] Contact",
+        "items": {
+          "item1": "[ES-TODO] Request a Quote",
+          "item2": "[ES-TODO] Free Sample Request",
+          "item3": "[ES-TODO] Technical Support",
+          "item4": "[ES-TODO] Project Review"
+        }
+      },
+      "copyright": "[ES-TODO] {copyright}",
+      "location": "[ES-TODO] Replace with real dispatch point"
+    },
+    "cta": {
+      "message": "[ES-TODO] Contact us for samples or technical support",
+      "button": "[ES-TODO] Get Quote"
+    },
+    "techStack": {
+      "title": "[ES-TODO] Technology Stack",
+      "subtitle": "[ES-TODO] Built with cutting-edge technologies for enterprise-grade performance and scalability.",
+      "learnMore": "[ES-TODO] Learn More",
+      "learnMoreLabel": "[ES-TODO] Learn more about {target}",
+      "categories": {
+        "core": "[ES-TODO] Core Frameworks",
+        "ui": "[ES-TODO] UI System",
+        "i18n": "[ES-TODO] Internationalization",
+        "tools": "[ES-TODO] Tooling",
+        "testing": "[ES-TODO] Testing",
+        "dev": "[ES-TODO] Dev Tools",
+        "performance": "[ES-TODO] Performance Monitoring",
+        "security": "[ES-TODO] Security",
+        "animation": "[ES-TODO] Animation",
+        "deployment": "[ES-TODO] Deployment",
+        "quality": "[ES-TODO] Code Quality",
+        "docs": "[ES-TODO] Documentation",
+        "data": "[ES-TODO] Data Fetching",
+        "state": "[ES-TODO] State Management"
+      },
+      "technologies": {
+        "nextjs": "[ES-TODO] React full-stack framework with SSR/SSG",
+        "react": "[ES-TODO] Modern user interface library",
+        "typescript": "[ES-TODO] Type-safe JavaScript superset",
+        "tailwindcss": "[ES-TODO] Utility-first CSS framework",
+        "shadcn-ui": "[ES-TODO] Copy-paste component library",
+        "radix-ui": "[ES-TODO] Unstyled, accessible component primitives",
+        "next-intl": "[ES-TODO] Next.js internationalization solution",
+        "eslint": "[ES-TODO] JavaScript/TypeScript code linter",
+        "prettier": "[ES-TODO] Code formatting tool",
+        "lefthook": "[ES-TODO] Git hooks management tool",
+        "vitest": "[ES-TODO] Fast unit testing framework",
+        "playwright": "[ES-TODO] End-to-end testing framework",
+        "husky": "[ES-TODO] Git hooks management tool",
+        "jest": "[ES-TODO] JavaScript testing framework",
+        "testing-library": "[ES-TODO] React component testing tool",
+        "pnpm": "[ES-TODO] Fast, disk space efficient package manager",
+        "turbo": "[ES-TODO] High-performance build system",
+        "lighthouse": "[ES-TODO] Web performance audit tool",
+        "semgrep": "[ES-TODO] Static code security analysis tool",
+        "embla-carousel": "[ES-TODO] Lightweight carousel component library",
+        "cloudflare": "[ES-TODO] Cloudflare Workers deployment platform",
+        "sonarqube": "[ES-TODO] Code quality and security analysis platform",
+        "storybook": "[ES-TODO] Component development and documentation tool",
+        "swr": "[ES-TODO] Data fetching and caching library",
+        "zustand": "[ES-TODO] Lightweight state management library"
+      },
+      "stats": {
+        "totalTech": "[ES-TODO] Total Technologies",
+        "categories": "[ES-TODO] Categories",
+        "modern": "[ES-TODO] Modern Stack",
+        "quality": "[ES-TODO] Quality Score"
+      }
+    },
+    "showcase": {
+      "title": "[ES-TODO] Component Showcase",
+      "subtitle": "[ES-TODO] Explore our comprehensive UI component library with live examples and interactive demos.",
+      "tabs": {
+        "components": "[ES-TODO] Components",
+        "themes": "[ES-TODO] Themes",
+        "responsive": "[ES-TODO] Responsive"
+      },
+      "components": {
+        "buttons": {
+          "title": "[ES-TODO] Button Components",
+          "description": "[ES-TODO] Various button styles and sizes for different use cases.",
+          "primary": "[ES-TODO] Primary",
+          "secondary": "[ES-TODO] Secondary",
+          "outline": "[ES-TODO] Outline",
+          "ghost": "[ES-TODO] Ghost",
+          "small": "[ES-TODO] Small",
+          "default": "[ES-TODO] Default",
+          "large": "[ES-TODO] Large"
+        },
+        "forms": {
+          "title": "[ES-TODO] Form Components",
+          "description": "[ES-TODO] Input fields and form controls with validation support.",
+          "name": "[ES-TODO] Full Name",
+          "namePlaceholder": "[ES-TODO] Enter your full name",
+          "email": "[ES-TODO] Email Address",
+          "emailPlaceholder": "[ES-TODO] Enter your email",
+          "submit": "[ES-TODO] Submit Form"
+        },
+        "interactive": {
+          "title": "[ES-TODO] Interactive Elements",
+          "description": "[ES-TODO] Buttons and controls with dynamic behavior and state management.",
+          "likes": "[ES-TODO] Likes",
+          "star": "[ES-TODO] Star",
+          "download": "[ES-TODO] Download",
+          "share": "[ES-TODO] Share"
+        },
+        "badges": {
+          "title": "[ES-TODO] Badge Components",
+          "description": "[ES-TODO] Status indicators and labels for various content types.",
+          "default": "[ES-TODO] Default",
+          "secondary": "[ES-TODO] Secondary",
+          "outline": "[ES-TODO] Outline",
+          "destructive": "[ES-TODO] Error",
+          "success": "[ES-TODO] Success",
+          "warning": "[ES-TODO] Warning",
+          "info": "[ES-TODO] Info"
+        }
+      },
+      "themes": {
+        "title": "[ES-TODO] Theme System",
+        "description": "[ES-TODO] Dynamic theme switching with light and dark mode support.",
+        "toggle": "[ES-TODO] Theme Toggle",
+        "language": "[ES-TODO] Language Switch",
+        "colors": {
+          "title": "[ES-TODO] Color Palette"
+        },
+        "typography": {
+          "title": "[ES-TODO] Typography",
+          "bold": "[ES-TODO] Bold Text",
+          "medium": "[ES-TODO] Medium Text",
+          "normal": "[ES-TODO] Normal Text",
+          "muted": "[ES-TODO] Muted Text"
+        }
+      },
+      "responsive": {
+        "title": "[ES-TODO] Responsive Design",
+        "description": "[ES-TODO] Optimized layouts for all device sizes and screen resolutions.",
+        "mobile": {
+          "title": "[ES-TODO] Mobile First",
+          "description": "[ES-TODO] Optimized for mobile devices with touch-friendly interfaces."
+        },
+        "tablet": {
+          "title": "[ES-TODO] Tablet Ready",
+          "description": "[ES-TODO] Perfect layout adaptation for tablet screens and orientations."
+        },
+        "desktop": {
+          "title": "[ES-TODO] Desktop Enhanced",
+          "description": "[ES-TODO] Full-featured desktop experience with advanced interactions."
+        }
+      }
+    },
+    "overview": {
+      "title": "[ES-TODO] Starter Capabilities",
+      "subtitle": "[ES-TODO] A reusable website base with content ownership, component governance, visual review, and deployment checks.",
+      "features": {
+        "performance": {
+          "title": "[ES-TODO] Content Ownership",
+          "description": "[ES-TODO] Brand facts, page prose, and shared UI text each have a clear editing surface."
+        },
+        "security": {
+          "title": "[ES-TODO] Quality Checks",
+          "description": "[ES-TODO] Validation commands help catch broken content, translations, components, types, tests, and builds."
+        },
+        "i18n": {
+          "title": "[ES-TODO] Multilingual Ready",
+          "description": "[ES-TODO] The starter includes English and Chinese content paths with translation validation.",
+          "languageUnit": "[ES-TODO] Locales"
+        },
+        "themes": {
+          "title": "[ES-TODO] Customizable Sections",
+          "description": "[ES-TODO] Homepage, about, product/service, custom project, contact, privacy, and terms pages are ready to adapt.",
+          "multiTheme": "[ES-TODO] Flexible"
+        },
+        "typescript": {
+          "title": "[ES-TODO] Design Tokens",
+          "description": "[ES-TODO] Color, spacing, and component rules keep UI changes easier for AI to manage."
+        },
+        "deployment": {
+          "title": "[ES-TODO] Deployment Path",
+          "description": "[ES-TODO] Next.js, Cloudflare/OpenNext, Turnstile, email, and form basics stay wired for later replacement."
+        }
+      },
+      "highlights": {
+        "title": "[ES-TODO] Core Capabilities",
+        "subtitle": "[ES-TODO] What makes this starter easier for future AI-assisted website work.",
+        "modern": "[ES-TODO] Component Governance",
+        "scalable": "[ES-TODO] Reusable Page Sections",
+        "accessible": "[ES-TODO] Storybook Review",
+        "performant": "[ES-TODO] Build Verification",
+        "secure": "[ES-TODO] ISO 9001 Certified",
+        "maintainable": "[ES-TODO] AI Workflow Rules"
+      },
+      "architecture": {
+        "title": "[ES-TODO] Product Lines",
+        "frontend": {
+          "title": "[ES-TODO] Product Example",
+          "description": "[ES-TODO] Replaceable catalog pages, cards, specs, and inquiry CTAs for product-led websites."
+        },
+        "ui": {
+          "title": "[ES-TODO] Service Example",
+          "description": "[ES-TODO] Reusable structure for explaining process, deliverables, proof, and next steps."
+        },
+        "tooling": {
+          "title": "[ES-TODO] Custom Project Example",
+          "description": "[ES-TODO] A structured page for project scope, collaboration steps, quality review, and intake."
+        }
+      },
+      "cta": {
+        "title": "[ES-TODO] Ready to Adapt This Starter?",
+        "description": "[ES-TODO] Replace the example identity, offerings, proof, content, images, and deployment settings for a real website.",
+        "getStarted": "[ES-TODO] Start Inquiry",
+        "viewSource": "[ES-TODO] View Offerings"
+      }
+    },
+    "title": "[ES-TODO] Showcase Website Starter",
+    "subtitle": "[ES-TODO] Reusable Showcase Website Starter",
+    "description": "[ES-TODO] Reusable website starter for product, service, proof, and inquiry presentation.",
+    "getStarted": "[ES-TODO] Get Started",
+    "learnMore": "[ES-TODO] Learn More",
+    "welcome": "[ES-TODO] Welcome to Showcase Website Starter",
+    "modernApp": "[ES-TODO] A modern web application built with Next.js 16 and React 19",
+    "features": {
+      "title": "[ES-TODO] Features",
+      "performance": {
+        "title": "[ES-TODO] High Performance",
+        "description": "[ES-TODO] Optimized for speed and efficiency with modern web technologies."
+      },
+      "scalable": {
+        "title": "[ES-TODO] Scalable Architecture",
+        "description": "[ES-TODO] Built to grow with your business needs and requirements."
+      },
+      "secure": {
+        "title": "[ES-TODO] Enterprise Security",
+        "description": "[ES-TODO] Industry-standard security practices and compliance."
+      }
+    },
+    "modernStack": "[ES-TODO] Modern Stack",
+    "modernStackDesc": "[ES-TODO] Built with the latest technologies",
+    "internationalization": "[ES-TODO] Internationalization",
+    "internationalizationDesc": "[ES-TODO] Multi-language support with next-intl",
+    "testingReady": "[ES-TODO] Testing Ready",
+    "testingReadyDesc": "[ES-TODO] Comprehensive E2E testing setup"
+  },
+  "monitoring": {
+    "loadError": "[ES-TODO] Monitoring component failed to load"
+  },
+  "footer": {
+    "systemStatus": "[ES-TODO] All systems normal.",
+    "sections": {
+      "product": {
+        "title": "[ES-TODO] Product",
+        "home": "[ES-TODO] Home",
+        "enterprise": "[ES-TODO] Enterprise",
+        "pricing": "[ES-TODO] Pricing"
+      },
+      "company": {
+        "title": "[ES-TODO] Company",
+        "terms": "[ES-TODO] Terms",
+        "aiPolicy": "[ES-TODO] AI Policy",
+        "privacy": "[ES-TODO] Privacy"
+      },
+      "resources": {
+        "title": "[ES-TODO] Resources",
+        "faqs": "[ES-TODO] FAQs",
+        "docs": "[ES-TODO] Docs",
+        "ambassadors": "[ES-TODO] Ambassadors",
+        "community": "[ES-TODO] Community",
+        "platform": "[ES-TODO] Platform"
+      },
+      "navigation": {
+        "title": "[ES-TODO] Navigation",
+        "home": "[ES-TODO] Home",
+        "about": "[ES-TODO] About",
+        "products": "[ES-TODO] Products",
+        "blog": "[ES-TODO] Blog",
+        "contact": "[ES-TODO] Contact"
+      },
+      "social": {
+        "title": "[ES-TODO] Social",
+        "twitter": "[ES-TODO] Twitter",
+        "linkedin": "[ES-TODO] LinkedIn"
+      },
+      "support": {
+        "title": "[ES-TODO] Support",
+        "contact": "[ES-TODO] Contact",
+        "privacy": "[ES-TODO] Privacy Policy",
+        "terms": "[ES-TODO] Terms of Service"
+      }
+    },
+    "platform": {
+      "products": {
+        "title": "[ES-TODO] Products",
+        "ai": "[ES-TODO] AI",
+        "enterprise": "[ES-TODO] Enterprise",
+        "fluidCompute": "[ES-TODO] Fluid Compute",
+        "nextjs": "[ES-TODO] Next.js",
+        "observability": "[ES-TODO] Observability",
+        "previews": "[ES-TODO] Previews",
+        "rendering": "[ES-TODO] Rendering",
+        "security": "[ES-TODO] Security",
+        "turbo": "[ES-TODO] Turbo",
+        "domains": "[ES-TODO] Domains",
+        "v0": "[ES-TODO] v0"
+      },
+      "resources": {
+        "title": "[ES-TODO] Resources",
+        "community": "[ES-TODO] Community",
+        "docs": "[ES-TODO] Docs",
+        "guides": "[ES-TODO] Guides",
+        "academy": "[ES-TODO] Academy",
+        "help": "[ES-TODO] Help",
+        "integrations": "[ES-TODO] Integrations",
+        "pricing": "[ES-TODO] Pricing",
+        "resources": "[ES-TODO] Resources",
+        "solutionPartners": "[ES-TODO] Solution Partners",
+        "startups": "[ES-TODO] Startups",
+        "templates": "[ES-TODO] Templates",
+        "sdks": "[ES-TODO] SDKs"
+      },
+      "company": {
+        "title": "[ES-TODO] Company",
+        "about": "[ES-TODO] About",
+        "careers": "[ES-TODO] Careers",
+        "changelog": "[ES-TODO] Changelog",
+        "contact": "[ES-TODO] Contact Us",
+        "customers": "[ES-TODO] Customers",
+        "events": "[ES-TODO] Events",
+        "partners": "[ES-TODO] Partners",
+        "shipped": "[ES-TODO] Shipped",
+        "privacy": "[ES-TODO] Privacy Policy",
+        "legal": "[ES-TODO] Legal"
+      },
+      "social": {
+        "title": "[ES-TODO] Social",
+        "linkedin": "[ES-TODO] LinkedIn",
+        "twitter": "[ES-TODO] Twitter",
+        "youtube": "[ES-TODO] YouTube"
+      }
+    },
+    "learn": "[ES-TODO] Learn",
+    "examples": "[ES-TODO] Examples",
+    "goToNextjs": "[ES-TODO] Go to nextjs.org",
+    "copyright": "[ES-TODO] {copyright}",
+    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths."
+  },
+  "accessibility": {
+    "skipToContent": "[ES-TODO] Skip to main content",
+    "openMenu": "[ES-TODO] Open navigation menu",
+    "closeMenu": "[ES-TODO] Close navigation menu",
+    "loading": "[ES-TODO] Content is loading",
+    "error": "[ES-TODO] An error has occurred",
+    "languageSelector": "[ES-TODO] Select language",
+    "themeSelector": "[ES-TODO] Select theme",
+    "securityVerificationUnavailable": "[ES-TODO] Security verification is temporarily unavailable.",
+    "turnstileDevBypass": "[ES-TODO] Dev mode: Turnstile verification bypassed",
+    "turnstileTestMode": "[ES-TODO] Bot protection disabled in test mode",
+    "turnstileLoadFailed": "[ES-TODO] Security verification failed to load."
+  },
+  "underConstruction": {
+    "title": "[ES-TODO] Under Construction",
+    "subtitle": "[ES-TODO] We're working hard to bring you something amazing",
+    "description": "[ES-TODO] This page is currently under development. We're building something great and will have it ready soon.",
+    "backToHome": "[ES-TODO] Back to Home",
+    "comingSoon": "[ES-TODO] Coming Soon",
+    "expectedCompletion": "[ES-TODO] Expected completion: {date}",
+    "expectedLaunch": "[ES-TODO] Expected launch: {date}",
+    "dates": {
+      "q2_2024": "[ES-TODO] Q2 2024",
+      "q3_2024": "[ES-TODO] Q3 2024"
+    },
+    "stayTuned": "[ES-TODO] Stay tuned for updates",
+    "contactUs": "[ES-TODO] Contact us for more information",
+    "progress": {
+      "title": "[ES-TODO] Development Progress"
+    },
+    "pages": {
+      "products": {
+        "title": "[ES-TODO] Products - Under Construction",
+        "description": "[ES-TODO] Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "features": "[ES-TODO] Product features and specifications coming soon"
+      },
+      "about": {
+        "title": "[ES-TODO] About Us - Under Construction",
+        "description": "[ES-TODO] Learn more about our story, mission, and the team behind our innovative solutions.",
+        "features": "[ES-TODO] Company story, team profiles, and mission statement coming soon"
+      },
+      "contact": {
+        "title": "[ES-TODO] Contact Us",
+        "description": "[ES-TODO] Get in touch with our team for inquiries, support, or partnership opportunities.",
+        "features": "[ES-TODO] Multiple ways to reach us and get the support you need",
+        "panel": {
+          "contactTitle": "[ES-TODO] Contact Methods",
+          "email": "[ES-TODO] Email",
+          "emailUnavailable": "[ES-TODO] Use the form on this page; configure a real receiver before public launch.",
+          "phone": "[ES-TODO] Phone",
+          "hoursTitle": "[ES-TODO] Business Hours",
+          "weekdays": "[ES-TODO] Mon - Fri",
+          "saturday": "[ES-TODO] Saturday",
+          "sunday": "[ES-TODO] Sunday",
+          "closed": "[ES-TODO] Closed",
+          "responseTitle": "[ES-TODO] What to expect",
+          "responseTimeLabel": "[ES-TODO] Typical response",
+          "responseTimeValue": "[ES-TODO] Within 24 business hours",
+          "bestForLabel": "[ES-TODO] Best for",
+          "bestForValue": "[ES-TODO] Inquiries, quotes, demos, project scope, and content replacement questions",
+          "prepareLabel": "[ES-TODO] Helpful details",
+          "prepareValue": "[ES-TODO] Share your offer type, target audience, needed pages, timeline, and current assets"
+        }
+      }
+    },
+    "animation": {
+      "loading": "[ES-TODO] Loading animation",
+      "construction": "[ES-TODO] Construction in progress"
+    },
+    "status": {
+      "inProgress": "[ES-TODO] In Progress"
+    },
+    "features": {
+      "title": "[ES-TODO] Feature Preview",
+      "performance": "[ES-TODO] High Performance",
+      "performanceDesc": "[ES-TODO] Optimized performance and fast loading experience",
+      "collaboration": "[ES-TODO] Team Collaboration",
+      "collaborationDesc": "[ES-TODO] Powerful team collaboration and project management features",
+      "quality": "[ES-TODO] Quality Assurance",
+      "qualityDesc": "[ES-TODO] Strict quality control and testing processes"
+    },
+    "social": {
+      "followUs": "[ES-TODO] Follow us for the latest updates"
+    },
+    "subscription": {
+      "title": "[ES-TODO] Get Launch Notifications",
+      "description": "[ES-TODO] Be the first to know about our latest updates",
+      "placeholder": "[ES-TODO] Enter your email address",
+      "submit": "[ES-TODO] Subscribe",
+      "submitting": "[ES-TODO] Submitting...",
+      "success": "[ES-TODO] Successfully subscribed! We'll notify you soon"
+    },
+    "emailSubscription": {
+      "title": "[ES-TODO] Stay in the Loop",
+      "description": "[ES-TODO] Subscribe to receive updates about our launch timeline and new features.",
+      "success": "[ES-TODO] You're subscribed! We'll keep you posted.",
+      "placeholder": "[ES-TODO] Enter your email address",
+      "button": "[ES-TODO] Notify Me"
+    },
+    "contact": {
+      "title": "[ES-TODO] Need Assistance?",
+      "description": "[ES-TODO] Reach out to our team for tailored support and partnership opportunities.",
+      "button": "[ES-TODO] Contact Support"
+    }
+  },
+  "cookie": {
+    "title": "[ES-TODO] Cookie Preferences",
+    "description": "[ES-TODO] We use cookies to enhance your browsing experience and analyze site traffic.",
+    "learnMore": "[ES-TODO] Privacy policy",
+    "acceptAll": "[ES-TODO] Accept All",
+    "rejectAll": "[ES-TODO] Reject All",
+    "manage": "[ES-TODO] Manage",
+    "close": "[ES-TODO] Close",
+    "cancel": "[ES-TODO] Cancel",
+    "savePreferences": "[ES-TODO] Save Preferences",
+    "preferences": {
+      "title": "[ES-TODO] Cookie Preferences",
+      "description": "[ES-TODO] Choose which cookies you want to allow. Essential cookies are always enabled."
+    },
+    "categories": {
+      "necessary": "[ES-TODO] Essential",
+      "necessaryDesc": "[ES-TODO] Required for the website to function properly. Cannot be disabled.",
+      "analytics": "[ES-TODO] Analytics",
+      "analyticsDesc": "[ES-TODO] Help us understand how visitors interact with our website.",
+      "marketing": "[ES-TODO] Marketing",
+      "marketingDesc": "[ES-TODO] Used to deliver personalized content and advertisements."
+    }
+  },
+  "structured-data": {
+    "organization": {
+      "name": "[ES-TODO] {companyName}",
+      "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths",
+      "phone": "[ES-TODO] Contact sales by email",
+      "social": {
+        "twitter": "[ES-TODO] https://x.com/example",
+        "linkedin": "[ES-TODO] https://www.linkedin.com/company/example"
+      }
+    },
+    "website": {
+      "name": "[ES-TODO] {siteName}",
+      "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths"
+    },
+    "article": {
+      "defaultTitle": "[ES-TODO] Article",
+      "defaultDescription": "[ES-TODO] Article description",
+      "defaultAuthor": "[ES-TODO] {companyName}"
+    },
+    "product": {
+      "defaultName": "[ES-TODO] Product",
+      "defaultDescription": "[ES-TODO] Product description"
+    }
+  },
+  "apiErrors": {
+    "RATE_LIMIT_EXCEEDED": "[ES-TODO] Too many requests. Please try again later.",
+    "UNAUTHORIZED": "[ES-TODO] Unauthorized access.",
+    "FORBIDDEN": "[ES-TODO] This request is not allowed.",
+    "INTERNAL_SERVER_ERROR": "[ES-TODO] An unexpected error occurred. Please try again later.",
+    "INVALID_JSON_BODY": "[ES-TODO] Invalid request format.",
+    "INVALID_REQUEST": "[ES-TODO] Some required fields are missing or invalid.",
+    "PAYLOAD_TOO_LARGE": "[ES-TODO] The request payload is too large.",
+    "UNSUPPORTED_MEDIA_TYPE": "[ES-TODO] Unsupported content type.",
+    "CONFIRMATION_REQUIRED": "[ES-TODO] Please add confirm=true parameter to confirm this action.",
+    "INVALID_LOCALE_PARAMETER": "[ES-TODO] Invalid locale parameter.",
+    "SUBSCRIBE_SUCCESS": "[ES-TODO] Successfully subscribed to notifications.",
+    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "[ES-TODO] Email is required.",
+    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "[ES-TODO] Invalid email address.",
+    "SUBSCRIBE_SECURITY_REQUIRED": "[ES-TODO] Security verification required.",
+    "SUBSCRIBE_SECURITY_FAILED": "[ES-TODO] Security verification failed. Please try again.",
+    "SUBSCRIBE_PROCESSING_ERROR": "[ES-TODO] An error occurred. Please try again.",
+    "CONTACT_SUCCESS": "[ES-TODO] Your message was sent successfully.",
+    "CONTACT_VALIDATION_FAILED": "[ES-TODO] Please check the highlighted fields and try again.",
+    "CONTACT_PROCESSING_ERROR": "[ES-TODO] We could not submit your message right now. Please try again later.",
+    "CONTACT_STATS_ERROR": "[ES-TODO] Failed to load contact form statistics.",
+    "CONTACT_SUBMISSION_EXPIRED": "[ES-TODO] This form expired. Please refresh the page and try again.",
+    "INQUIRY_SUCCESS": "[ES-TODO] Inquiry submitted successfully.",
+    "INQUIRY_SECURITY_REQUIRED": "[ES-TODO] Security verification required.",
+    "INQUIRY_SECURITY_FAILED": "[ES-TODO] Security verification failed. Please try again.",
+    "INQUIRY_VALIDATION_FAILED": "[ES-TODO] Please review your inquiry details and try again.",
+    "INQUIRY_PROCESSING_ERROR": "[ES-TODO] We could not send your inquiry right now. Please try again later.",
+    "TURNSTILE_SUCCESS": "[ES-TODO] Verification successful.",
+    "TURNSTILE_MISSING_TOKEN": "[ES-TODO] Security verification required.",
+    "TURNSTILE_VERIFICATION_FAILED": "[ES-TODO] Security verification failed. Please try again.",
+    "TURNSTILE_NETWORK_ERROR": "[ES-TODO] Failed to communicate with the verification service.",
+    "TURNSTILE_NOT_CONFIGURED": "[ES-TODO] Security verification is not configured on the server.",
+    "WEB_VITALS_RECORDED": "[ES-TODO] Web Vitals data recorded successfully.",
+    "WEB_VITALS_INVALID_FORMAT": "[ES-TODO] The provided data does not match the expected Web Vitals format.",
+    "WEB_VITALS_PROCESS_FAILED": "[ES-TODO] Failed to process Web Vitals data.",
+    "WEB_VITALS_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve Web Vitals statistics.",
+    "WEB_VITALS_DELETED": "[ES-TODO] Web Vitals data deleted successfully.",
+    "WEB_VITALS_DELETE_FAILED": "[ES-TODO] Failed to delete Web Vitals data.",
+    "I18N_ANALYTICS_RECORDED": "[ES-TODO] i18n analytics data recorded successfully.",
+    "I18N_ANALYTICS_INVALID_FORMAT": "[ES-TODO] The provided data does not match the expected i18n analytics format.",
+    "I18N_ANALYTICS_PROCESS_FAILED": "[ES-TODO] Failed to process i18n analytics data.",
+    "I18N_ANALYTICS_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve i18n analytics statistics.",
+    "I18N_ANALYTICS_DELETED": "[ES-TODO] i18n analytics data deleted successfully.",
+    "I18N_ANALYTICS_DELETE_FAILED": "[ES-TODO] Failed to delete i18n analytics data.",
+    "MONITORING_DATA_RECEIVED": "[ES-TODO] Monitoring data received successfully.",
+    "MONITORING_INVALID_FORMAT": "[ES-TODO] Required fields: source, metrics, timestamp.",
+    "MONITORING_PROCESS_FAILED": "[ES-TODO] Failed to process monitoring dashboard data.",
+    "MONITORING_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve monitoring dashboard data.",
+    "MONITORING_DELETED": "[ES-TODO] Monitoring data deleted successfully.",
+    "MONITORING_DELETE_FAILED": "[ES-TODO] Failed to delete monitoring dashboard data.",
+    "MONITORING_CONFIG_UPDATED": "[ES-TODO] Monitoring configuration updated successfully.",
+    "MONITORING_CONFIG_INVALID": "[ES-TODO] Configuration object is required.",
+    "MONITORING_CONFIG_UPDATE_FAILED": "[ES-TODO] Failed to update monitoring configuration.",
+    "CACHE_INVALIDATED": "[ES-TODO] Cache invalidated successfully.",
+    "CACHE_LOCALE_REQUIRED": "[ES-TODO] Locale is required for this cache invalidation.",
+    "CACHE_INVALID_DOMAIN": "[ES-TODO] Invalid cache domain.",
+    "CACHE_INVALIDATION_FAILED": "[ES-TODO] Failed to invalidate cache.",
+    "UNKNOWN_ERROR": "[ES-TODO] An unknown error occurred."
+  },
+  "errors": {
+    "global": {
+      "title": "[ES-TODO] Something went wrong!",
+      "description": "[ES-TODO] We apologize for the inconvenience. An unexpected error has occurred.",
+      "tryAgain": "[ES-TODO] Try again",
+      "goHome": "[ES-TODO] Go to homepage",
+      "devDetails": "[ES-TODO] Error Details (Development Only)"
+    },
+    "products": {
+      "title": "[ES-TODO] Failed to load product information",
+      "description": "[ES-TODO] We couldn't load the product details. Please try again or return to the homepage to browse other content.",
+      "tryAgain": "[ES-TODO] Try again",
+      "goHome": "[ES-TODO] Back to homepage"
+    },
+    "contact": {
+      "title": "[ES-TODO] Contact form temporarily unavailable",
+      "description": "[ES-TODO] Our team will look into this issue immediately. You can try again later or contact us through other channels.",
+      "tryAgain": "[ES-TODO] Try again",
+      "goHome": "[ES-TODO] Back to homepage"
+    },
+    "notFound": {
+      "title": "[ES-TODO] Page not found",
+      "description": "[ES-TODO] The page you're looking for doesn't exist or has been moved.",
+      "goHome": "[ES-TODO] Back to homepage"
+    },
+    "serverError": "[ES-TODO] Internal server error",
+    "networkError": "[ES-TODO] Network connection error",
+    "validationError": "[ES-TODO] Please check your input",
+    "unauthorized": "[ES-TODO] You are not authorized to access this page",
+    "forbidden": "[ES-TODO] Access to this resource is forbidden",
+    "timeout": "[ES-TODO] Request timeout - please try again",
+    "generic": "[ES-TODO] Something went wrong. Please try again later.",
+    "translationMissing": "[ES-TODO] Translation not available",
+    "loadingFailed": "[ES-TODO] Failed to load content"
+  },
+  "catalog": {
+    "breadcrumb": {
+      "home": "[ES-TODO] Home",
+      "products": "[ES-TODO] Products"
+    },
+    "overview": {
+      "title": "[ES-TODO] Starter product capabilities",
+      "description": "[ES-TODO] A showcase-site starter covering site structure, content replacement, inquiry flow, and launch foundation.",
+      "kicker": "[ES-TODO] What the starter includes",
+      "capabilitiesTitle": "[ES-TODO] Result capabilities",
+      "capabilitiesDescription": "[ES-TODO] The page explains what a project can start from before real content is replaced.",
+      "byStandard": "[ES-TODO] By Example Category",
+      "specialty": "[ES-TODO] Specialty Examples"
+    },
+    "starterCapabilities": {
+      "siteFoundation": {
+        "title": "[ES-TODO] Showcase-site foundation",
+        "description": "[ES-TODO] Home, Products, Blog, About, Contact, legal pages, navigation, and responsive layout are already connected."
+      },
+      "replacementSurface": {
+        "title": "[ES-TODO] Content replacement surface",
+        "description": "[ES-TODO] Brand facts, page copy, product or service entries, SEO, images, and multilingual text have clear places to replace."
+      },
+      "inquiryPath": {
+        "title": "[ES-TODO] Inquiry path",
+        "description": "[ES-TODO] The contact page, form flow, basic anti-abuse controls, and lead handling path are ready for a real owner."
+      },
+      "launchPath": {
+        "title": "[ES-TODO] Launch path",
+        "description": "[ES-TODO] Cloudflare is the recommended deployment route, with optional compatibility kept secondary and traffic visibility treated as a real surface."
+      }
+    },
+    "technicalProofTitle": "[ES-TODO] Technical proof",
+    "technicalProofDescription": "[ES-TODO] The starter includes the technical baseline a public demo needs without making the product page a developer manual.",
+    "technicalProof": {
+      "next": {
+        "title": "[ES-TODO] Next.js app foundation",
+        "description": "[ES-TODO] App Router, Server Components first, metadata, localized routes, and production build checks."
+      },
+      "cloudflare": {
+        "title": "[ES-TODO] Cloudflare/OpenNext deployment path",
+        "description": "[ES-TODO] Cloudflare and OpenNext stay the recommended deployment truth for this starter."
+      },
+      "i18n": {
+        "title": "[ES-TODO] Multilingual content",
+        "description": "[ES-TODO] English and Chinese navigation, page copy, metadata, and article content stay aligned."
+      },
+      "quality": {
+        "title": "[ES-TODO] Quality checks",
+        "description": "[ES-TODO] Type, lint, content, component, website, and build checks remain part of the launch path."
+      },
+      "security": {
+        "title": "[ES-TODO] Form security basics",
+        "description": "[ES-TODO] Contact and inquiry paths include validation, anti-abuse controls, and explicit runtime configuration."
+      },
+      "traffic": {
+        "title": "[ES-TODO] Traffic visibility",
+        "description": "[ES-TODO] Owner-facing traffic information is treated as a real protected surface, not marketing decoration."
+      }
+    },
+    "boundary": {
+      "title": "[ES-TODO] Starter, not a finished client website",
+      "description": "[ES-TODO] Real launch still requires real content, images, contact details, legal copy, secrets, and deployment proof.",
+      "items": {
+        "content": "[ES-TODO] Replace real business content",
+        "assets": "[ES-TODO] Replace real images and proof",
+        "legal": "[ES-TODO] Review legal and contact details",
+        "deployment": "[ES-TODO] Prove deployment and forms"
+      }
+    },
+    "cta": {
+      "title": "[ES-TODO] Ready to turn the starter into a public site?",
+      "description": "[ES-TODO] Use the launch articles or contact path to decide what must be replaced first.",
+      "blog": "[ES-TODO] Learn how to start",
+      "contact": "[ES-TODO] Contact"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "[ES-TODO] Jump to"
+      },
+      "technical": {
+        "title": "[ES-TODO] Technical Properties"
+      },
+      "certifications": {
+        "title": "[ES-TODO] Certifications & Compliance"
+      },
+      "trade": {
+        "title": "[ES-TODO] Trade Information",
+        "moq": "[ES-TODO] Minimum Order",
+        "leadTime": "[ES-TODO] Lead Time",
+        "supplyCapacity": "[ES-TODO] Supply Capacity",
+        "packaging": "[ES-TODO] Packaging",
+        "portOfLoading": "[ES-TODO] Port of Loading"
+      },
+      "specsComingSoon": "[ES-TODO] Specifications coming soon. Contact us for detailed product data.",
+      "cta": {
+        "heading": "[ES-TODO] Need to review {marketLabel}?",
+        "description": "[ES-TODO] Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
+        "button": "[ES-TODO] Request a Quote"
+      },
+      "familyInquiry": {
+        "cta": "[ES-TODO] Request quote for {familyLabel}"
+      }
+    },
+    "specTable": {
+      "size": "[ES-TODO] Size",
+      "angle": "[ES-TODO] Angle",
+      "wallThickness": "[ES-TODO] Wall Thickness",
+      "endType": "[ES-TODO] End Type",
+      "radius": "[ES-TODO] Radius",
+      "type": "[ES-TODO] Type",
+      "length": "[ES-TODO] Length",
+      "schedule": "[ES-TODO] Schedule",
+      "bendRadius": "[ES-TODO] Bend Radius",
+      "connection": "[ES-TODO] Connection",
+      "duty": "[ES-TODO] Duty",
+      "material": "[ES-TODO] Material",
+      "outerDiameter": "[ES-TODO] Outer Diameter"
+    },
+    "familyCount": "[ES-TODO] {count} product families",
+    "markets": {
+      "north-america": {
+        "label": "[ES-TODO] Primary Offer Example",
+        "description": "[ES-TODO] Replaceable catalog example for a standards-based product or service group."
+      },
+      "australia-new-zealand": {
+        "label": "[ES-TODO] Secondary Offer Example",
+        "description": "[ES-TODO] Replaceable catalog example for a second market, service tier, or regional offer."
+      },
+      "mexico": {
+        "label": "[ES-TODO] Regional Offer Example",
+        "description": "[ES-TODO] Replaceable catalog example for a regional or compliance-based offer."
+      },
+      "europe": {
+        "label": "[ES-TODO] Platform Offer Example",
+        "description": "[ES-TODO] Replaceable catalog example for another market, platform, or standards group."
+      },
+      "specialty-product-systems": {
+        "label": "[ES-TODO] Specialty Examples",
+        "description": "[ES-TODO] Replaceable specialty examples for niche product, service, or project workflows."
+      }
+    },
+    "families": {
+      "north-america": {
+        "sample-product-shapes": {
+          "label": "[ES-TODO] Sample Product Shapes",
+          "description": "[ES-TODO] Replaceable item examples for versions, shapes, packages, or service variants."
+        },
+        "couplings": {
+          "label": "[ES-TODO] Support Packages",
+          "description": "[ES-TODO] Replaceable companion examples for add-ons, bundles, or supporting services."
+        },
+        "sample-product-runs": {
+          "label": "[ES-TODO] Sample Product Runs",
+          "description": "[ES-TODO] Replaceable item examples with size, standard, or package details."
+        }
+      },
+      "australia-new-zealand": {
+        "sample-product-shapes": {
+          "label": "[ES-TODO] Sample Product Shapes",
+          "description": "[ES-TODO] Replaceable item examples for a second market or service variant."
+        },
+        "bellmouths": {
+          "label": "[ES-TODO] Resource Kits",
+          "description": "[ES-TODO] Replaceable accessory examples for a product, service, or resource variant."
+        },
+        "couplings": {
+          "label": "[ES-TODO] Support Packages",
+          "description": "[ES-TODO] Replaceable companion examples for a second market or service variant."
+        },
+        "sample-product-runs": {
+          "label": "[ES-TODO] Sample Product Runs",
+          "description": "[ES-TODO] Replaceable item examples for a second market or service variant."
+        }
+      },
+      "mexico": {
+        "sample-product-shapes": {
+          "label": "[ES-TODO] Sample Product Shapes",
+          "description": "[ES-TODO] Replaceable item examples for a regional or compliance-based offer."
+        },
+        "couplings": {
+          "label": "[ES-TODO] Support Packages",
+          "description": "[ES-TODO] Replaceable companion examples for a regional offer."
+        },
+        "sample-product-runs": {
+          "label": "[ES-TODO] Sample Product Runs",
+          "description": "[ES-TODO] Replaceable item examples for a regional offer."
+        }
+      },
+      "europe": {
+        "sample-product-shapes": {
+          "label": "[ES-TODO] Sample Product Shapes",
+          "description": "[ES-TODO] Replaceable item examples for another market or standards group."
+        },
+        "couplings": {
+          "label": "[ES-TODO] Support Packages",
+          "description": "[ES-TODO] Replaceable companion examples for another market group."
+        },
+        "sample-product-runs": {
+          "label": "[ES-TODO] Sample Product Runs",
+          "description": "[ES-TODO] Replaceable item examples for another market group."
+        }
+      },
+      "specialty-product-systems": {
+        "specialty-units": {
+          "label": "[ES-TODO] Specialty Units",
+          "description": "[ES-TODO] Replaceable specialty examples for niche products, services, or workflows."
+        },
+        "fittings": {
+          "label": "[ES-TODO] Integration Examples",
+          "description": "[ES-TODO] Integration examples for product, service, or workflow systems."
+        }
+      }
+    },
+    "technicalLabels": {
+      "material": "[ES-TODO] Material",
+      "surface": "[ES-TODO] Surface",
+      "uvResistance": "[ES-TODO] Outdoor Readiness",
+      "temperatureRange": "[ES-TODO] Operating Range",
+      "lifespan": "[ES-TODO] Lifecycle Claim",
+      "fireRating": "[ES-TODO] Safety Claim",
+      "standard": "[ES-TODO] Example Standard",
+      "transparency": "[ES-TODO] Visibility Layer",
+      "maxWorkingPressure": "[ES-TODO] Project Limit",
+      "impactResistance": "[ES-TODO] Durability Claim"
+    },
+    "specs": {
+      "north-america": {
+        "technical": {
+          "material": "[ES-TODO] Replaceable core material",
+          "surface": "[ES-TODO] Example finish or presentation layer",
+          "uvResistance": "[ES-TODO] Outdoor-ready placeholder attribute",
+          "temperatureRange": "[ES-TODO] Project-specific operating range",
+          "lifespan": "[ES-TODO] Replace with real lifecycle claim",
+          "fireRating": "[ES-TODO] Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "[ES-TODO] Example minimum order",
+          "leadTime": "[ES-TODO] Replace with real timeline",
+          "supplyCapacity": "[ES-TODO] Replace with real monthly capacity",
+          "packaging": "[ES-TODO] Replace with real packaging or delivery model",
+          "portOfLoading": "[ES-TODO] Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard A ready",
+              "1": "[ES-TODO] Configurable material",
+              "2": "[ES-TODO] Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Basic Option"
+              },
+              "1": {
+                "label": "[ES-TODO] Advanced Option"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "[ES-TODO] Bundle-ready structure",
+              "1": "[ES-TODO] Secure handoff path",
+              "2": "[ES-TODO] Multi-size range"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Basic Option"
+              },
+              "1": {
+                "label": "[ES-TODO] Advanced Option"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "[ES-TODO] Basic and advanced tiers",
+              "1": "[ES-TODO] Standard package lengths",
+              "2": "[ES-TODO] Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Basic Option"
+              },
+              "1": {
+                "label": "[ES-TODO] Advanced Option"
+              }
+            }
+          }
+        }
+      },
+      "australia-new-zealand": {
+        "technical": {
+          "material": "[ES-TODO] Replaceable secondary material",
+          "surface": "[ES-TODO] Example finish or content layer",
+          "uvResistance": "[ES-TODO] Outdoor-ready placeholder attribute",
+          "temperatureRange": "[ES-TODO] Project-specific operating range",
+          "lifespan": "[ES-TODO] Replace with real lifecycle claim",
+          "fireRating": "[ES-TODO] Replace with real safety claim",
+          "standard": "[ES-TODO] Example Standard B"
+        },
+        "trade": {
+          "moq": "[ES-TODO] Example minimum order",
+          "leadTime": "[ES-TODO] Replace with real timeline",
+          "supplyCapacity": "[ES-TODO] Replace with real monthly capacity",
+          "packaging": "[ES-TODO] Replace with real packaging or delivery model",
+          "portOfLoading": "[ES-TODO] Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard B ready",
+              "1": "[ES-TODO] Standard and premium tiers",
+              "2": "[ES-TODO] Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Standard Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Premium Tier"
+              }
+            }
+          },
+          "bellmouths": {
+            "highlights": {
+              "0": "[ES-TODO] Resource entry support",
+              "1": "[ES-TODO] Example Standard B compatible",
+              "2": "[ES-TODO] Visitor guidance ready"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Standard Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Premium Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "[ES-TODO] Bundle-ready structure",
+              "1": "[ES-TODO] Example Standard B compatible",
+              "2": "[ES-TODO] Standard and premium tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Standard Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Premium Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "[ES-TODO] Standard and premium tiers",
+              "1": "[ES-TODO] Reusable package lengths",
+              "2": "[ES-TODO] Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Standard Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Premium Tier"
+              }
+            }
+          }
+        }
+      },
+      "mexico": {
+        "technical": {
+          "material": "[ES-TODO] Replaceable regional material",
+          "surface": "[ES-TODO] Example finish or presentation layer",
+          "uvResistance": "[ES-TODO] Outdoor-ready placeholder attribute",
+          "temperatureRange": "[ES-TODO] Project-specific operating range",
+          "lifespan": "[ES-TODO] Replace with real lifecycle claim",
+          "fireRating": "[ES-TODO] Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "[ES-TODO] Example minimum order",
+          "leadTime": "[ES-TODO] Replace with real timeline",
+          "supplyCapacity": "[ES-TODO] Replace with real monthly capacity",
+          "packaging": "[ES-TODO] Replace with real packaging or delivery model",
+          "portOfLoading": "[ES-TODO] Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard C ready",
+              "1": "[ES-TODO] Reusable size set",
+              "2": "[ES-TODO] Light and heavy tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard C ready",
+              "1": "[ES-TODO] Bundle-ready structure",
+              "2": "[ES-TODO] Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard C ready",
+              "1": "[ES-TODO] Standard package lengths",
+              "2": "[ES-TODO] Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "europe": {
+        "technical": {
+          "material": "[ES-TODO] Replaceable platform material",
+          "surface": "[ES-TODO] Example finish or presentation layer",
+          "uvResistance": "[ES-TODO] Outdoor-ready placeholder attribute",
+          "temperatureRange": "[ES-TODO] Project-specific operating range",
+          "lifespan": "[ES-TODO] Replace with real lifecycle claim",
+          "fireRating": "[ES-TODO] Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "[ES-TODO] Example minimum order",
+          "leadTime": "[ES-TODO] Replace with real timeline",
+          "supplyCapacity": "[ES-TODO] Replace with real monthly capacity",
+          "packaging": "[ES-TODO] Replace with real packaging or delivery model",
+          "portOfLoading": "[ES-TODO] Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard D ready",
+              "1": "[ES-TODO] Three service tiers",
+              "2": "[ES-TODO] Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Medium Tier"
+              },
+              "2": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard D ready",
+              "1": "[ES-TODO] Bundle-ready structure",
+              "2": "[ES-TODO] Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Medium Tier"
+              },
+              "2": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "[ES-TODO] Example Standard D ready",
+              "1": "[ES-TODO] Standard package lengths",
+              "2": "[ES-TODO] Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Light Tier"
+              },
+              "1": {
+                "label": "[ES-TODO] Medium Tier"
+              },
+              "2": {
+                "label": "[ES-TODO] Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "specialty-product-systems": {
+        "technical": {
+          "material": "[ES-TODO] Specialty example material",
+          "transparency": "[ES-TODO] Optional visibility or reporting layer",
+          "maxWorkingPressure": "[ES-TODO] Project-specific limit",
+          "temperatureRange": "[ES-TODO] Project-specific operating range",
+          "surface": "[ES-TODO] Example finish or experience layer",
+          "impactResistance": "[ES-TODO] Replace with real durability claim"
+        },
+        "trade": {
+          "moq": "[ES-TODO] Example minimum order",
+          "leadTime": "[ES-TODO] Replace with real timeline",
+          "supplyCapacity": "[ES-TODO] Replace with real monthly capacity",
+          "packaging": "[ES-TODO] Replace with real packaging or delivery model",
+          "portOfLoading": "[ES-TODO] Replace with real dispatch point"
+        },
+        "families": {
+          "specialty-units": {
+            "highlights": {
+              "0": "[ES-TODO] Specialty example material",
+              "1": "[ES-TODO] Quiet experience option",
+              "2": "[ES-TODO] Controlled handoff points"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Compact Format"
+              },
+              "1": {
+                "label": "[ES-TODO] Extended Format"
+              }
+            }
+          },
+          "fittings": {
+            "highlights": {
+              "0": "[ES-TODO] Impact-aware example",
+              "1": "[ES-TODO] High-requirement scenario",
+              "2": "[ES-TODO] Multiple connection options"
+            },
+            "groups": {
+              "0": {
+                "label": "[ES-TODO] Compact Integrations"
+              },
+              "1": {
+                "label": "[ES-TODO] Extended Integrations"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rowValues": {
+      "bellEnd": "[ES-TODO] Default",
+      "plainEnd": "[ES-TODO] Default",
+      "standardCoupling": "[ES-TODO] Standard Bundle",
+      "expansionCoupling": "[ES-TODO] Extended Bundle",
+      "standardBellmouth": "[ES-TODO] Resource Kit",
+      "heavyDutyBellmouth": "[ES-TODO] Extended Resource Kit",
+      "mediumDuty": "[ES-TODO] Standard Tier",
+      "heavyDuty": "[ES-TODO] Premium Tier",
+      "pushFit": "[ES-TODO] Default",
+      "flange": "[ES-TODO] Custom",
+      "connector": "[ES-TODO] Connector",
+      "bend90": "[ES-TODO] 90° Bend",
+      "bend45": "[ES-TODO] 45° Bend",
+      "yDiverter": "[ES-TODO] Y-Diverter",
+      "accessPanel": "[ES-TODO] Access Panel",
+      "specialty": "[ES-TODO] Specialty Example",
+      "custom": "[ES-TODO] Custom"
+    }
+  }
+}

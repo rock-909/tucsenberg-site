@@ -251,11 +251,13 @@ describe("load-messages runtime gating", () => {
     const expectedEnCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}. All rights reserved.`;
     const expectedZhCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}。保留所有权利。`;
 
-    const [enMessages, zhMessages] = await Promise.all([
+    const [enMessages, esMessages, zhMessages] = await Promise.all([
       loadCriticalMessages("en"),
+      loadCriticalMessages("es"),
       loadCriticalMessages("zh"),
     ]);
     assertFactualCriticalMessages(enMessages);
+    assertFactualCriticalMessages(esMessages);
     assertFactualCriticalMessages(zhMessages);
 
     expect(enMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
@@ -272,11 +274,37 @@ describe("load-messages runtime gating", () => {
       SINGLE_SITE_FACTS.company.name,
     );
 
+    expect(esMessages.navigation.siteName).toBe(
+      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
+    );
+    expect(esMessages.home.footer.about.title).toBe(
+      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
+    );
+    expect(esMessages.footer.copyright).toBe(
+      `[ES-TODO] ${expectedEnCopyright}`,
+    );
+    expect(esMessages.home.footer.copyright).toBe(
+      `[ES-TODO] ${expectedEnCopyright}`,
+    );
+    expect(esMessages.footer.copyright).not.toContain(
+      "Todos los derechos reservados",
+    );
+    expect(esMessages["structured-data"].organization.name).toBe(
+      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+    );
+    expect(esMessages["structured-data"].website.name).toBe(
+      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
+    );
+    expect(esMessages["structured-data"].article.defaultAuthor).toBe(
+      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+    );
+
     expect(zhMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
     expect(zhMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(zhMessages.footer.copyright).toBe(expectedZhCopyright);
     expect(zhMessages.home.footer.copyright).toBe(expectedZhCopyright);
     expect(JSON.stringify(enMessages)).not.toMatch(factualPlaceholderPattern);
+    expect(JSON.stringify(esMessages)).not.toMatch(factualPlaceholderPattern);
     expect(JSON.stringify(zhMessages)).not.toMatch(factualPlaceholderPattern);
   });
 

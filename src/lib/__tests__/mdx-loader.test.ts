@@ -78,6 +78,46 @@ describe("mdx-loader manifest-only runtime behavior", () => {
     );
   });
 
+  it("falls Spanish page MDX back to the English importer during Step 2", async () => {
+    const Component: ComponentType = () => null;
+    getContentEntryMock.mockImplementation(
+      (type: string, locale: string, slug: string) => {
+        if (type !== "pages" || slug !== "exists" || locale !== "en") {
+          return undefined;
+        }
+
+        return {
+          type: "pages",
+          locale: "en",
+          slug: "exists",
+          extension: ".mdx",
+          filePath: "/content/pages/en/exists.mdx",
+          relativePath: "content/pages/en/exists.mdx",
+          metadata: {},
+          content: "",
+        };
+      },
+    );
+    pageImporterMock.mockResolvedValue({ default: Component });
+    const { getMDXComponent } = await import("@/lib/mdx-loader");
+
+    await expect(getMDXComponent("pages", "es", "exists")).resolves.toBe(
+      Component,
+    );
+    expect(getContentEntryMock).toHaveBeenNthCalledWith(
+      1,
+      "pages",
+      "es",
+      "exists",
+    );
+    expect(getContentEntryMock).toHaveBeenNthCalledWith(
+      2,
+      "pages",
+      "en",
+      "exists",
+    );
+  });
+
   it("returns null when the generated importer rejects", async () => {
     getContentEntryMock.mockReturnValue({
       type: "pages",

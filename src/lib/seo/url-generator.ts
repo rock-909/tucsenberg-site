@@ -11,6 +11,7 @@ import {
   type Locale,
   type PageType,
 } from "@/config/paths";
+import type { PublicSeoLocale } from "@/config/paths/locales-config";
 import { SEO_CONSTANTS } from "@/constants/seo-constants";
 
 // URL生成选项接口
@@ -60,11 +61,13 @@ export class URLGenerator {
   private readonly baseUrl: string;
   private readonly defaultLocale: Locale;
   private readonly locales: readonly Locale[];
+  private readonly publicLocales: readonly PublicSeoLocale[];
 
   constructor() {
     this.baseUrl = SITE_CONFIG.baseUrl;
     this.defaultLocale = LOCALES_CONFIG.defaultLocale;
     this.locales = LOCALES_CONFIG.locales;
+    this.publicLocales = LOCALES_CONFIG.publicLocales;
   }
 
   /**
@@ -131,7 +134,7 @@ export class URLGenerator {
     options: URLGeneratorOptions = {},
   ): string {
     const opts = this.mergeOptions(options);
-    const localizedPath = getLocalizedPath(pageType, locale);
+    const localizedPath = this.getLocalizedPathForLocale(pageType, locale);
 
     let path = this.buildPath(locale, localizedPath, opts.includeLocale);
     path = this.applyTrailingSlash(path, opts.trailingSlash);
@@ -141,6 +144,25 @@ export class URLGenerator {
     }
 
     return path || "/";
+  }
+
+  /**
+   * Resolve page path for all runtime locales.
+   *
+   * Some locale content can share the default path before fully translated
+   * pathnames exist. Runtime URL generation should still work for those
+   * locales instead of blocking public SEO alternates.
+   */
+  private getLocalizedPathForLocale(
+    pageType: PageType,
+    locale: Locale,
+  ): string {
+    const paths = PATHS_CONFIG[pageType];
+    if (paths && Object.prototype.hasOwnProperty.call(paths, locale)) {
+      return paths[locale];
+    }
+
+    return getLocalizedPath(pageType, this.defaultLocale);
   }
 
   /**
@@ -159,10 +181,10 @@ export class URLGenerator {
    */
   generateLanguageAlternates(
     pageType: PageType,
-  ): Record<Locale | "x-default", string> {
+  ): Record<PublicSeoLocale | "x-default", string> {
     const alternates: Record<string, string> = {};
 
-    this.locales.forEach((locale) => {
+    this.publicLocales.forEach((locale) => {
       alternates[locale] = this.generateCanonicalURL(pageType, locale);
     });
 
@@ -172,7 +194,7 @@ export class URLGenerator {
       this.defaultLocale,
     );
 
-    return alternates as Record<Locale | "x-default", string>;
+    return alternates as Record<PublicSeoLocale | "x-default", string>;
   }
 
   /**
@@ -181,7 +203,7 @@ export class URLGenerator {
   generateHreflangLinks(pageType: PageType): HreflangLink[] {
     const links: HreflangLink[] = [];
 
-    this.locales.forEach((locale) => {
+    this.publicLocales.forEach((locale) => {
       links.push({
         href: this.generateCanonicalURL(pageType, locale),
         hreflang: locale,
@@ -229,9 +251,9 @@ export class URLGenerator {
   generateAllSitemapEntries(): SitemapEntry[] {
     const entries: SitemapEntry[] = [];
 
-    // 为每个页面类型和语言生成条目
+    // Public sitemap helpers must only expose public SEO locales.
     Object.keys(PATHS_CONFIG).forEach((pageType) => {
-      this.locales.forEach((locale) => {
+      this.publicLocales.forEach((locale) => {
         const entry = this.generateSitemapEntry(pageType as PageType, locale, {
           changefreq:
             pageType === "home"

@@ -73,6 +73,10 @@ describe("Mobile Navigation - Core Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.contact": "Contact",
           "navigation.contactSales": "Contact Sales",
           "navigation.products": "Products",
@@ -159,12 +163,22 @@ describe("Mobile Navigation - Core Tests", () => {
       // Use fireEvent to avoid pointer-events issues
       fireEvent.click(toggleButton);
 
-      expect(screen.getByRole("link", { name: /home/i })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /about/i })).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /products/i }),
+        screen.getByRole("link", { name: /membranes/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /blog/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /compatibility/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /materials/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /quote/i })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /products/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /blog/i }),
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: /custom/i }),
       ).not.toBeInTheDocument();
@@ -174,8 +188,8 @@ describe("Mobile Navigation - Core Tests", () => {
     });
 
     it("should highlight active navigation item", async () => {
-      // Set pathname to /about to test aria-current
-      mockPathname.current = "/about";
+      // Step 2 nav items share the same placeholder target.
+      mockPathname.current = "#coming-soon";
 
       render(<MobileNavigation />);
 
@@ -183,8 +197,8 @@ describe("Mobile Navigation - Core Tests", () => {
       // Use fireEvent to avoid pointer-events issues
       fireEvent.click(toggleButton);
 
-      const aboutLink = screen.getByRole("link", { name: /about/i });
-      expect(aboutLink).toHaveAttribute("aria-current", "page");
+      const membranesLink = screen.getByRole("link", { name: /membranes/i });
+      expect(membranesLink).toHaveAttribute("aria-current", "page");
     });
 
     it("should close menu when navigation link is clicked", async () => {
@@ -194,8 +208,8 @@ describe("Mobile Navigation - Core Tests", () => {
       // Use fireEvent to avoid pointer-events issues
       fireEvent.click(toggleButton);
 
-      const homeLink = screen.getByRole("link", { name: /home/i });
-      fireEvent.click(homeLink);
+      const membranesLink = screen.getByRole("link", { name: /membranes/i });
+      fireEvent.click(membranesLink);
 
       expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     });
@@ -285,12 +299,16 @@ describe("Mobile Navigation - Core Tests", () => {
       fireEvent.click(toggleButton);
 
       // Verify translated labels are used
-      expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Products" }),
+        screen.getByRole("link", { name: "Membranes" }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Blog" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Compatibility" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Materials" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Quote" })).toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: "Custom" }),
       ).not.toBeInTheDocument();

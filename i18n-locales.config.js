@@ -11,6 +11,6 @@
  */
 
 module.exports = {
-  locales: ["en", "zh"],
+  locales: ["en", "es", "zh"],
   defaultLocale: "en",
 };

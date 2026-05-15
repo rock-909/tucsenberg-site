@@ -17,7 +17,7 @@ test.describe("Safe Navigation Tests", () => {
 
   test("should load homepage without interference", async ({ page }) => {
     // 检查页面基本元素
-    await expect(page).toHaveTitle(/Showcase Website Starter/);
+    await expect(page).toHaveTitle(/Tucsenberg/);
 
     // 验证没有干扰元素
     const reactScanToolbar = page.locator("#react-scan-toolbar-root");
@@ -192,7 +192,7 @@ test.describe("Safe Navigation Tests", () => {
       'button[aria-label*="Language"]',
       'button[aria-label*="语言"]',
       'button:has-text("EN")',
-      'button:has-text("中文")',
+      'button:has-text("ES")',
     ];
 
     let languageButtonFound = false;

@@ -62,6 +62,7 @@ export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
   "/_next/",
   "/ops/",
   "/error-test/",
+  "/zh/",
 ] as const;
 
 export function getSingleSiteSitemapPageConfig(

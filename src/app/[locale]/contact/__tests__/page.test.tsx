@@ -168,7 +168,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByText("建议提供")).toBeInTheDocument();
   });
 
-  it("does not render placeholder contact details while public contact facts are not configured", async () => {
+  it("renders the Tucsenberg placeholder email while suppressing fake starter contact details", async () => {
     const { ContactMethodsCard } = await import("../contact-page-sections");
 
     render(
@@ -176,19 +176,14 @@ describe("ContactPage MDX migration", () => {
         copy={{
           title: "Contact Methods",
           emailLabel: "Email",
-          emailUnavailable:
-            "Use the form on this page; configure a real receiver before public launch.",
+          emailUnavailable: "Use the form on this page.",
           phoneLabel: "Phone",
         }}
       />,
     );
 
     expect(screen.queryByText("sales@example.com")).not.toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Use the form on this page; configure a real receiver before public launch.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText("contact@tucsenberg.com")).toBeInTheDocument();
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
   });

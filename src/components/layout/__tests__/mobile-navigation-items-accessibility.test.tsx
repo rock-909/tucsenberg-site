@@ -71,6 +71,10 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         const translations: Record<string, string> = {
           "navigation.home": "Home",
           "navigation.about": "About",
+          "navigation.membranes": "Membranes",
+          "navigation.compatibility": "Compatibility",
+          "navigation.materials": "Materials",
+          "navigation.quote": "Quote",
           "navigation.capabilities": "Capabilities",
           "navigation.howItWorks": "How It Works",
           "navigation.products": "Products",
@@ -158,8 +162,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      const homeLink = screen.getByRole("link", { name: "Home" });
-      await user.click(homeLink);
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      await user.click(membranesLink);
 
       expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
@@ -172,21 +176,22 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       const links = screen.getAllByRole("link");
       expect(links.length).toBeGreaterThanOrEqual(3);
-      const [homeLink, productsLink, customLink] = links as HTMLAnchorElement[];
-      if (!homeLink || !productsLink || !customLink) {
+      const [membranesLink, compatibilityLink, materialsLink] =
+        links as HTMLAnchorElement[];
+      if (!membranesLink || !compatibilityLink || !materialsLink) {
         throw new Error(
           "Expected navigation links to be present for keyboard test",
         );
       }
 
-      homeLink.focus();
-      expect(homeLink).toHaveFocus();
+      membranesLink.focus();
+      expect(membranesLink).toHaveFocus();
 
       await user.tab();
-      expect(productsLink).toHaveFocus();
+      expect(compatibilityLink).toHaveFocus();
 
       await user.tab();
-      expect(customLink).toHaveFocus();
+      expect(materialsLink).toHaveFocus();
     });
 
     it("handles missing translations gracefully", async () => {
@@ -200,8 +205,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       fireEvent.click(trigger);
 
       // Should still render with fallback keys
-      expect(screen.getByText("navigation.home")).toBeInTheDocument();
-      expect(screen.getByText("navigation.about")).toBeInTheDocument();
+      expect(screen.getByText("navigation.membranes")).toBeInTheDocument();
+      expect(screen.getByText("navigation.compatibility")).toBeInTheDocument();
     });
 
     it("renders navigation items in correct order", async () => {
@@ -215,10 +220,10 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       // Navigation items + CTA. Language links are collapsed by default.
       expect(linkTexts).toEqual([
-        "Home",
-        "Products",
-        "Blog",
-        "About",
+        "Membranes",
+        "Compatibility",
+        "Materials",
+        "Quote",
         "Contact Sales",
       ]);
 
@@ -227,8 +232,11 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         screen.getByTestId("mobile-language-option-label-en"),
       ).toBeInTheDocument();
       expect(
-        screen.getByTestId("mobile-language-option-label-zh"),
+        screen.getByTestId("mobile-language-option-label-es"),
       ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("mobile-language-option-label-zh"),
+      ).not.toBeInTheDocument();
     });
 
     it("applies consistent styling to navigation items", async () => {
@@ -262,8 +270,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      const homeLink = screen.getByRole("link", { name: "Home" });
-      expect(homeLink).toBeInTheDocument();
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      expect(membranesLink).toBeInTheDocument();
     });
 
     it("handles long navigation item text", async () => {
@@ -272,6 +280,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           const translations: Record<string, string> = {
             "navigation.home": "Very Long Home Page Title",
             "navigation.about": "About Us and Our Company",
+            "navigation.membranes": "Very Long Membranes Catalog Title",
+            "navigation.compatibility": "Compatibility Guidance and Fit Notes",
             "navigation.services": "Our Professional Services",
             "navigation.contact": "Contact Information",
             "navigation.menu": "Menu",
@@ -286,8 +296,12 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      expect(screen.getByText("Very Long Home Page Title")).toBeInTheDocument();
-      expect(screen.getByText("About Us and Our Company")).toBeInTheDocument();
+      expect(
+        screen.getByText("Very Long Membranes Catalog Title"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Compatibility Guidance and Fit Notes"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -419,19 +433,19 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
     });
 
     it("handles aria-current for navigation items", async () => {
-      // Set pathname to /products to test aria-current
-      mockPathname.current = "/products";
+      // Set placeholder anchor path to test aria-current.
+      mockPathname.current = "#coming-soon";
 
       render(<MobileNavigation />);
 
       const trigger = screen.getByRole("button");
       fireEvent.click(trigger);
 
-      const productsLink = screen.getByRole("link", { name: "Products" });
-      expect(productsLink).toHaveAttribute("aria-current", "page");
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      expect(membranesLink).toHaveAttribute("aria-current", "page");
 
-      const homeLink = screen.getByRole("link", { name: "Home" });
-      expect(homeLink).not.toHaveAttribute("aria-current");
+      const contactLink = screen.getByRole("link", { name: "Contact Sales" });
+      expect(contactLink).not.toHaveAttribute("aria-current");
     });
 
     it("provides proper link semantics", async () => {
@@ -453,6 +467,10 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           const translations: Record<string, string> = {
             "navigation.home": "首页",
             "navigation.about": "关于我们",
+            "navigation.membranes": "膜片",
+            "navigation.compatibility": "兼容性",
+            "navigation.materials": "材料",
+            "navigation.quote": "询价",
             "navigation.products": "产品",
             "navigation.blog": "博客",
             "accessibility.openMenu": "打开菜单",
@@ -475,8 +493,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       // aria-label changes to t("accessibility.closeMenu") which is "关闭菜单"
       expect(trigger).toHaveAttribute("aria-label", "关闭菜单");
 
-      expect(screen.getByText("首页")).toBeInTheDocument();
-      expect(screen.getByText("关于我们")).toBeInTheDocument();
+      expect(screen.getByText("膜片")).toBeInTheDocument();
+      expect(screen.getByText("兼容性")).toBeInTheDocument();
     });
 
     it("handles complex accessibility scenarios", async () => {
@@ -496,9 +514,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(nav).toBeInTheDocument();
 
       // Navigate to link
-      const homeLink = screen.getByRole("link", { name: "Home" });
-      homeLink.focus();
-      expect(homeLink).toHaveFocus();
+      const membranesLink = screen.getByRole("link", { name: "Membranes" });
+      membranesLink.focus();
+      expect(membranesLink).toHaveFocus();
 
       // Close menu
       await user.keyboard("{Escape}");

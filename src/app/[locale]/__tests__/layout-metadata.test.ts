@@ -18,6 +18,11 @@ const { mockSiteConfig, mockRouting } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/config/paths", () => ({
+  LOCALES_CONFIG: {
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
+    defaultLocale: "en",
+  },
   SITE_CONFIG: mockSiteConfig,
 }));
 
@@ -64,5 +69,22 @@ describe("Locale layout metadata", () => {
     const metadata = await generateLocaleMetadata({ params });
 
     expect(metadata.openGraph).toBeUndefined();
+  });
+
+  it("marks the internal Chinese preview layout metadata as noindex", async () => {
+    const params = Promise.resolve({ locale: "zh" });
+    const metadata = await generateLocaleMetadata({ params });
+
+    expect(metadata.robots).toEqual({
+      index: false,
+      follow: false,
+      googleBot: {
+        index: false,
+        follow: false,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    });
   });
 });

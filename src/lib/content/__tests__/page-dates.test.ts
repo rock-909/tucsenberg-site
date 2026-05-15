@@ -61,7 +61,7 @@ describe("page-dates", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toContain("howItWorks");
   });
 
-  it("loads the latest MDX updatedAt across locales for route-derived paths", async () => {
+  it("loads the latest MDX updatedAt across content-backed locales for route-derived paths", async () => {
     mockGetContentEntry.mockImplementation(
       (type: string, locale: string, slug: string) => ({
         type,
@@ -88,6 +88,47 @@ describe("page-dates", () => {
     expect(lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
     expect(mockGetContentEntry).toHaveBeenCalledWith("pages", "en", "about");
     expect(mockGetContentEntry).toHaveBeenCalledWith("pages", "zh", "about");
+    expect(mockGetContentEntry).not.toHaveBeenCalledWith(
+      "pages",
+      "es",
+      "about",
+    );
+    expect(mockLoggerWarn).not.toHaveBeenCalled();
+  });
+
+  it("does not warn for Spanish MDX pages that are intentionally deferred", async () => {
+    mockGetContentEntry.mockImplementation(
+      (type: string, locale: string, slug: string) => {
+        if (locale === "es") {
+          return undefined;
+        }
+
+        return {
+          type,
+          locale,
+          slug,
+          extension: ".mdx",
+          filePath: `/content/pages/${locale}/${slug}.mdx`,
+          relativePath: `content/pages/${locale}/${slug}.mdx`,
+          metadata: {
+            publishedAt: "2026-01-01T00:00:00Z",
+            updatedAt: "2026-04-01T00:00:00Z",
+          },
+          content: "",
+        };
+      },
+    );
+
+    await expect(
+      getMdxPageLastModified(getCanonicalPath("about")),
+    ).resolves.toEqual(new Date("2026-04-01T00:00:00Z"));
+
+    expect(mockGetContentEntry).not.toHaveBeenCalledWith(
+      "pages",
+      "es",
+      "about",
+    );
+    expect(mockLoggerWarn).not.toHaveBeenCalled();
   });
 
   it("rejects paths that are not mapped from a static route id", async () => {

@@ -10,6 +10,7 @@
 import type { ComponentType } from "react";
 import type { ContentType, Locale } from "@/types/content.types";
 import { getContentEntry } from "@/lib/content-manifest";
+import { getContentLocaleCandidates } from "@/lib/content-locale-fallback";
 import {
   pageImporters,
   postImporters,
@@ -39,14 +40,22 @@ async function loadMDXContent(
   locale: Locale,
   slug: string,
 ): Promise<MDXContentModule | null> {
-  const entry = getContentEntry(type, locale, slug);
+  const importers = getImportersForType(type);
+  let resolvedLocale: Locale | null = null;
 
-  if (entry === undefined) {
+  for (const candidateLocale of getContentLocaleCandidates(type, locale)) {
+    const entry = getContentEntry(type, candidateLocale, slug);
+    if (entry !== undefined) {
+      resolvedLocale = candidateLocale;
+      break;
+    }
+  }
+
+  if (resolvedLocale === null) {
     return null;
   }
 
-  const importers = getImportersForType(type);
-  const localeImporters = importers[locale];
+  const localeImporters = importers[resolvedLocale];
 
   if (localeImporters === undefined) {
     return null;

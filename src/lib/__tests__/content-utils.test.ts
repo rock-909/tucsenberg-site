@@ -36,7 +36,7 @@ const mockFs = vi.mocked(fs);
 
 const CURRENT_CONTENT_LOCALE_CONTRACT = {
   defaultLocale: "en",
-  supportedLocales: ["en", "zh"],
+  supportedLocales: ["en", "es", "zh"],
 } satisfies Pick<ContentConfig, "defaultLocale" | "supportedLocales">;
 
 function expectedDefaultContentConfig(

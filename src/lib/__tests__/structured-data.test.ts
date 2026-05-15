@@ -45,7 +45,15 @@ vi.mock("@/lib/i18n/performance", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
+    defaultLocale: "en",
+  },
+}));
+
+vi.mock("@/config/paths/locales-config", () => ({
+  LOCALES_CONFIG: {
+    locales: ["en", "es", "zh"],
+    publicLocales: ["en", "es"],
     defaultLocale: "en",
   },
 }));
@@ -181,9 +189,10 @@ describe("Structured Data Generation", () => {
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",
-          availableLanguage: ["en", "zh"],
+          availableLanguage: ["en", "es"],
         },
       });
+      expect(JSON.stringify(schema)).not.toContain('"zh"');
       expect(
         (schema.contactPoint as Record<string, unknown>).telephone,
       ).toBeUndefined();
@@ -192,11 +201,13 @@ describe("Structured Data Generation", () => {
       expect(JSON.stringify(schema)).not.toContain("/images/logo.svg");
 
       const sameAs = schema["sameAs"] as string[];
-      expect(sameAs).toEqual([
-        "https://x.com/example",
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("https://x.com/example");
+      expect(JSON.stringify(schema)).not.toContain(
         "https://www.linkedin.com/company/example",
-      ]);
-      expect(sameAs).toHaveLength(2);
+      );
+      expect(JSON.stringify(schema)).not.toContain("[TWITTER_URL]");
+      expect(JSON.stringify(schema)).not.toContain("[LINKEDIN_URL]");
     });
 
     it("should handle different locales", async () => {
@@ -206,6 +217,62 @@ describe("Structured Data Generation", () => {
         locale: "zh",
         namespace: "structured-data",
       });
+    });
+
+    it("filters ES-TODO social placeholders from organization sameAs", async () => {
+      const mockT = vi.fn(
+        (key: string, options?: { defaultValue?: string }) => {
+          const translations: Record<string, string> = {
+            "organization.social.twitter": "[ES-TODO] https://x.com/example",
+            "organization.social.linkedin":
+              "[ES-TODO] https://www.linkedin.com/company/example",
+          };
+
+          return translations[key] || options?.defaultValue || key;
+        },
+      );
+
+      mockGetTranslations.mockResolvedValueOnce(mockT);
+
+      const schema = await generateLocalizedStructuredData(
+        "es",
+        "Organization",
+        {},
+      );
+      const sameAs = schema["sameAs"] as string[];
+
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("[ES-TODO]");
+      expect(JSON.stringify(schema)).not.toContain("https://x.com/example");
+      expect(JSON.stringify(schema)).not.toContain(
+        "https://www.linkedin.com/company/example",
+      );
+    });
+
+    it("filters bracket social placeholders from organization sameAs", async () => {
+      const mockT = vi.fn(
+        (key: string, options?: { defaultValue?: string }) => {
+          const translations: Record<string, string> = {
+            "organization.social.twitter": "[TWITTER_URL]",
+            "organization.social.linkedin": "[LINKEDIN_URL]",
+          };
+
+          return translations[key] || options?.defaultValue || key;
+        },
+      );
+
+      mockGetTranslations.mockResolvedValueOnce(mockT);
+
+      const schema = await generateLocalizedStructuredData(
+        "en",
+        "Organization",
+        {},
+      );
+      const sameAs = schema["sameAs"] as string[];
+
+      expect(sameAs).toEqual([]);
+      expect(JSON.stringify(schema)).not.toContain("[TWITTER_URL]");
+      expect(JSON.stringify(schema)).not.toContain("[LINKEDIN_URL]");
     });
   });
 
@@ -219,8 +286,9 @@ describe("Structured Data Generation", () => {
         name: "Example Showcase Company",
         description: "Reusable showcase website starter",
         url: "https://example.com",
-        inLanguage: ["en", "zh"],
+        inLanguage: ["en", "es"],
       });
+      expect(JSON.stringify(schema)).not.toContain('"zh"');
       expect(schema).not.toHaveProperty("potentialAction");
       expect(JSON.stringify(schema)).not.toContain("SearchAction");
       expect(JSON.stringify(schema)).not.toContain("/search");

@@ -1,10 +1,13 @@
 import { getMdxPageSlugByStaticPath } from "@/config/pages.config";
 import type { Locale } from "@/types/content.types";
-import { routing } from "@/i18n/routing";
 import { getContentEntry } from "@/lib/content-manifest";
 import { logger } from "@/lib/logger";
 
 const MDX_PAGE_SLUGS: Record<string, string> = getMdxPageSlugByStaticPath();
+const CONTENT_BACKED_MDX_LOCALES = [
+  "en",
+  "zh",
+] as const satisfies readonly Locale[];
 
 export function isMdxDrivenPage(path: string): boolean {
   return path in MDX_PAGE_SLUGS;
@@ -17,7 +20,7 @@ export function getMdxPageLastModified(path: string): Promise<Date> {
       throw new Error(`No MDX slug mapping for path: ${path}`);
     }
 
-    const results = routing.locales.map((locale) => {
+    const results = CONTENT_BACKED_MDX_LOCALES.map((locale) => {
       try {
         const entry = getContentEntry("pages", locale as Locale, slug);
         if (entry === undefined) {

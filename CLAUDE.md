@@ -60,7 +60,7 @@ PROJECT-BRIEF 已经把关键决策浓缩了。**只在需要具体原文/原数
 
 ## 关键约束（来自 starter + 本项目）
 
-来自 starter 的硬约束（克隆进来后由 starter 的 CLAUDE.md 维护）：
+来自 starter 的硬约束（克隆进来后由 `CLAUDE.starter.md` 维护）：
 1. TypeScript strict，没有 `any`
 2. Server Components first，`"use client"` 仅在交互必需
 3. i18n required，所有 user-facing text 走 translation keys

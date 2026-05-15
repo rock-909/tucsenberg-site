@@ -1,5 +1,7 @@
 import enCriticalMessages from "../../messages/en/critical.json";
 import enDeferredMessages from "../../messages/en/deferred.json";
+import esCriticalMessages from "../../messages/es/critical.json";
+import esDeferredMessages from "../../messages/es/deferred.json";
 import zhCriticalMessages from "../../messages/zh/critical.json";
 import zhDeferredMessages from "../../messages/zh/deferred.json";
 import { describe, expect, it } from "vitest";
@@ -70,11 +72,39 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   }, messages);
 }
 
+function collectLeafPaths(value: unknown, prefix = ""): string[] {
+  if (typeof value !== "object" || value === null) {
+    return [prefix];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((entry, index) =>
+      collectLeafPaths(entry, `${prefix}.${index}`.replace(/^\./u, "")),
+    );
+  }
+
+  return Object.entries(value).flatMap(([key, child]) =>
+    collectLeafPaths(child, `${prefix}.${key}`.replace(/^\./u, "")),
+  );
+}
+
+function collectStringLeaves(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(collectStringLeaves);
+  if (isJsonObject(value)) {
+    return Object.values(value).flatMap(collectStringLeaves);
+  }
+  return [];
+}
+
+const LOCALE_MESSAGES = [
+  ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
+  ["es", mergeMessages(esCriticalMessages, esDeferredMessages)],
+  ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
+] as const;
+
 describe("real i18n runtime message contract", () => {
-  it.each([
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  it.each(LOCALE_MESSAGES)(
     "keeps degraded-state form keys in the real %s split message bundle",
     (_locale, messages) => {
       for (const keyPath of REQUIRED_RUNTIME_KEYS) {
@@ -86,10 +116,7 @@ describe("real i18n runtime message contract", () => {
     },
   );
 
-  it.each([
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  it.each(LOCALE_MESSAGES)(
     "keeps inquiry API validation detail keys in the real %s contact form bundle",
     (_locale, messages) => {
       for (const detailKey of INQUIRY_API_VALIDATION_DETAIL_KEYS) {
@@ -102,10 +129,7 @@ describe("real i18n runtime message contract", () => {
     },
   );
 
-  it.each([
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  it.each(LOCALE_MESSAGES)(
     "keeps contact API validation detail keys in the real %s contact form bundle",
     (_locale, messages) => {
       for (const detailKey of CONTACT_API_VALIDATION_DETAIL_KEYS) {
@@ -117,4 +141,25 @@ describe("real i18n runtime message contract", () => {
       }
     },
   );
+
+  it("keeps Spanish split message keys structurally aligned with English", () => {
+    expect(collectLeafPaths(esCriticalMessages).sort()).toEqual(
+      collectLeafPaths(enCriticalMessages).sort(),
+    );
+    expect(collectLeafPaths(esDeferredMessages).sort()).toEqual(
+      collectLeafPaths(enDeferredMessages).sort(),
+    );
+  });
+
+  it("marks copied Spanish placeholder strings with ES-TODO", () => {
+    const spanishLeaves = [
+      ...collectStringLeaves(esCriticalMessages),
+      ...collectStringLeaves(esDeferredMessages),
+    ];
+
+    expect(spanishLeaves.length).toBeGreaterThan(0);
+    expect(spanishLeaves.every((value) => value.startsWith("[ES-TODO] "))).toBe(
+      true,
+    );
+  });
 });

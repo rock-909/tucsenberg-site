@@ -27,7 +27,7 @@ vi.mock("@/config/paths", async (importOriginal) => {
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en", "es", "zh"],
     defaultLocale: "en",
   },
 }));
@@ -99,13 +99,16 @@ describe("sitemap.ts", () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it("should include static pages for all locales", async () => {
+    it("should include static pages for public SEO locales only", async () => {
       const result = await sitemap();
 
-      for (const locale of ["en", "zh"]) {
+      for (const locale of ["en", "es"]) {
         for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
           expect(findEntry(result, locale, pagePath)).toBeDefined();
         }
+      }
+      for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
+        expect(findEntry(result, "zh", pagePath)).toBeUndefined();
       }
     });
 
@@ -127,8 +130,8 @@ describe("sitemap.ts", () => {
         priority: 1.0,
         changeFrequency: "daily",
       });
-      expect(findEntry(result, "zh", "/about")).toMatchObject({
-        url: "https://example.com/zh/about",
+      expect(findEntry(result, "es", "/about")).toMatchObject({
+        url: "https://example.com/es/about",
         priority: 0.8,
         changeFrequency: "monthly",
         lastModified: new Date("2026-04-20T00:00:00Z"),
@@ -163,7 +166,7 @@ describe("sitemap.ts", () => {
       const urls = result.map((entry) => entry.url);
 
       expect(urls).toContain("https://example.com/en/blog");
-      expect(urls).toContain("https://example.com/zh/blog");
+      expect(urls).toContain("https://example.com/es/blog");
       expect(urls).not.toContain("https://example.com/en/blog/post-a");
       expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
@@ -177,6 +180,9 @@ describe("sitemap.ts", () => {
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
         );
         expect(urls).toContain(
+          localizedUrl("es", getProductMarketPath(marketSlug)),
+        );
+        expect(urls).not.toContain(
           localizedUrl("zh", getProductMarketPath(marketSlug)),
         );
       }
@@ -242,11 +248,30 @@ describe("sitemap.ts", () => {
       }
     });
 
-    it("should include x-default in alternates", async () => {
+    it("should include public SEO locales and x-default in alternates", async () => {
       const result = await sitemap();
       const enHome = findEntry(result, defaultLocale, "");
 
-      expect(enHome?.alternates?.languages?.["x-default"]).toBeDefined();
+      expect(enHome?.alternates?.languages).toEqual({
+        en: "https://example.com/en",
+        es: "https://example.com/es",
+        "x-default": "https://example.com/en",
+      });
+    });
+
+    it("should not expose zh URLs in sitemap entries or alternates", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(urls.some((url) => url.includes("/zh"))).toBe(false);
+      for (const entry of result) {
+        expect(entry.alternates?.languages).not.toHaveProperty("zh");
+        expect(
+          Object.values(entry.alternates?.languages ?? {}).some((url) =>
+            url.includes("/zh"),
+          ),
+        ).toBe(false);
+      }
     });
 
     it("should set home page priority to 1.0", async () => {

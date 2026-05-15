@@ -1,15 +1,15 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { waitForLoadWithFallback } from "./test-environment-setup";
 
-const PRODUCT_FAMILY_INTENT = "product-family";
-const MARKET_SLUG = "north-america";
-const FAMILY_SLUG = "sample-product-shapes";
 const LOAD_TIMEOUT_MS = 10_000;
 const FALLBACK_DELAY_MS = 500;
 
 interface ExpectedContactUrl {
   origin: string;
   pathname: string;
+  intent: string;
+  marketSlug: string;
+  familySlug: string;
 }
 
 const localeCases = [
@@ -17,6 +17,8 @@ const localeCases = [
     locale: "en",
     productPath: "/en/products/north-america",
     contactPath: "/en/contact",
+    marketSlug: "north-america",
+    familySlug: "sample-product-shapes",
     inquiryLabel: "Request quote for Sample Product Shapes",
     contextLabel: "You are asking about:",
     marketLabel: "Primary Offer Example",
@@ -26,6 +28,8 @@ const localeCases = [
     locale: "zh",
     productPath: "/zh/products/north-america",
     contactPath: "/zh/contact",
+    marketSlug: "north-america",
+    familySlug: "sample-product-shapes",
     inquiryLabel: "咨询 示例形态",
     contextLabel: "你正在咨询：",
     marketLabel: "主要业务示例",
@@ -33,32 +37,15 @@ const localeCases = [
   },
 ] as const;
 
-function parseRenderedHref(page: Page, href: string): URL {
-  return new URL(href, page.url());
-}
-
-function isProductFamilyContactUrl(
-  url: URL,
-  expected: ExpectedContactUrl,
-): boolean {
-  return (
-    url.origin === expected.origin &&
-    url.pathname === expected.pathname &&
-    url.searchParams.get("intent") === PRODUCT_FAMILY_INTENT &&
-    url.searchParams.get("market") === MARKET_SLUG &&
-    url.searchParams.get("family") === FAMILY_SLUG
-  );
-}
-
 function expectProductFamilyContactUrl(
   url: URL,
   expected: ExpectedContactUrl,
 ): void {
   expect(url.origin).toBe(expected.origin);
   expect(url.pathname).toBe(expected.pathname);
-  expect(url.searchParams.get("intent")).toBe(PRODUCT_FAMILY_INTENT);
-  expect(url.searchParams.get("market")).toBe(MARKET_SLUG);
-  expect(url.searchParams.get("family")).toBe(FAMILY_SLUG);
+  expect(url.searchParams.get("intent")).toBe(expected.intent);
+  expect(url.searchParams.get("market")).toBe(expected.marketSlug);
+  expect(url.searchParams.get("family")).toBe(expected.familySlug);
 }
 
 for (const localeCase of localeCases) {
@@ -74,6 +61,9 @@ for (const localeCase of localeCases) {
       const expectedContactUrl = {
         origin: new URL(page.url()).origin,
         pathname: localeCase.contactPath,
+        intent: "product-family",
+        marketSlug: localeCase.marketSlug,
+        familySlug: localeCase.familySlug,
       } satisfies ExpectedContactUrl;
 
       const inquiryLink = page.getByRole("link", {
@@ -89,14 +79,30 @@ for (const localeCase of localeCases) {
         );
       }
 
-      expectProductFamilyContactUrl(
-        parseRenderedHref(page, renderedHref),
-        expectedContactUrl,
-      );
+      if (renderedHref === "#coming-soon") {
+        await inquiryLink.click();
+
+        await expect
+          .poll(() => {
+            const currentUrl = new URL(page.url());
+            return `${currentUrl.pathname}${currentUrl.hash}`;
+          })
+          .toBe(`${localeCase.productPath}#coming-soon`);
+
+        return;
+      }
+
+      const renderedUrl = new URL(renderedHref, page.url());
+      expectProductFamilyContactUrl(renderedUrl, expectedContactUrl);
 
       await Promise.all([
         page.waitForURL(
-          (url) => isProductFamilyContactUrl(url, expectedContactUrl),
+          (url) =>
+            url.origin === expectedContactUrl.origin &&
+            url.pathname === expectedContactUrl.pathname &&
+            url.searchParams.get("intent") === expectedContactUrl.intent &&
+            url.searchParams.get("market") === expectedContactUrl.marketSlug &&
+            url.searchParams.get("family") === expectedContactUrl.familySlug,
           { waitUntil: "domcontentloaded" },
         ),
         inquiryLink.click(),

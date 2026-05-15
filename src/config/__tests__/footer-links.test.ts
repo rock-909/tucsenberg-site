@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SINGLE_SITE_FOOTER_COLUMNS } from "@/config/single-site";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 
 describe("footer-links", () => {
@@ -24,5 +25,37 @@ describe("footer-links", () => {
         expect(link.href.length).toBeGreaterThan(0);
       }
     }
+  });
+
+  it("keeps Tucsenberg placeholder links out of unfinished business pages", () => {
+    const footerLinks = FOOTER_COLUMNS.flatMap((column) => column.links);
+
+    expect(
+      footerLinks
+        .filter((link) =>
+          ["membranes", "compatibility", "materials", "quote"].includes(
+            link.key,
+          ),
+        )
+        .map((link) => link.href),
+    ).toEqual([
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    ]);
+  });
+
+  it("does not expose unconfirmed Tucsenberg social URLs", () => {
+    const footerLinks = FOOTER_COLUMNS.flatMap((column) => column.links);
+
+    expect(
+      footerLinks.some((link) => link.href.includes("x.com/tucsenberg")),
+    ).toBe(false);
+    expect(
+      footerLinks.some((link) =>
+        link.href.includes("linkedin.com/company/tucsenberg"),
+      ),
+    ).toBe(false);
   });
 });

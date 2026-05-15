@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import {
+  isPublicSeoLocale,
+  LOCALES_CONFIG,
+} from "@/config/paths/locales-config";
 import i18nToolConfig from "../../i18n.json";
 
 const require = createRequire(import.meta.url);
@@ -34,6 +37,24 @@ describe("i18n locale truth parity", () => {
     expect(i18nToolConfig.sourceLocale).toBe(LOCALES_CONFIG.defaultLocale);
     expect(sorted(i18nToolConfig.targetLocales)).toEqual(sorted(targetLocales));
     expect(sorted(toolLocales)).toEqual(sorted(LOCALES_CONFIG.locales));
+  });
+
+  it("keeps public SEO locales explicit and excludes internal Chinese preview", () => {
+    expect(LOCALES_CONFIG.locales).toEqual(["en", "es", "zh"]);
+    expect(LOCALES_CONFIG.publicLocales).toEqual(["en", "es"]);
+    expect(LOCALES_CONFIG.publicLocales).not.toContain("zh");
+    expect(
+      LOCALES_CONFIG.publicLocales.every((locale) =>
+        LOCALES_CONFIG.locales.includes(locale),
+      ),
+    ).toBe(true);
+  });
+
+  it("guards public SEO locales from raw locale strings", () => {
+    expect(isPublicSeoLocale("en")).toBe(true);
+    expect(isPublicSeoLocale("es")).toBe(true);
+    expect(isPublicSeoLocale("zh")).toBe(false);
+    expect(isPublicSeoLocale("fr")).toBe(false);
   });
 
   it("documents the tooling locale config as a mirror, not the runtime truth", () => {
