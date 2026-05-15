@@ -19,7 +19,7 @@ describe("site-facts", () => {
     expect(siteFacts.company.location.country).toBe("China");
   });
 
-  it("keeps the Step 2 main navigation on the safe placeholder", () => {
+  it("points main navigation at the Step 4 membranes, compatibility, and quote routes", () => {
     expect(SINGLE_SITE_NAVIGATION.map((item) => item.key)).toEqual([
       "membranes",
       "compatibility",
@@ -27,10 +27,10 @@ describe("site-facts", () => {
       "quote",
     ]);
     expect(SINGLE_SITE_NAVIGATION.map((item) => item.href)).toEqual([
+      "/membranes/tuc-d9-epdm",
+      "/compatible/sanitaire",
       SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.quote,
     ]);
   });
 

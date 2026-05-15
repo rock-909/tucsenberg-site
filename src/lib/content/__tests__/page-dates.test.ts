@@ -34,6 +34,7 @@ describe("page-dates", () => {
       "",
       getCanonicalPath("products"),
       getCanonicalPath("blog"),
+      getCanonicalPath("quote"),
     ]);
     const representativePageContracts = [
       { path: "", isMdx: false },

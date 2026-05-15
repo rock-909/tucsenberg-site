@@ -433,8 +433,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
     });
 
     it("handles aria-current for navigation items", async () => {
-      // Set placeholder anchor path to test aria-current.
-      mockPathname.current = "#coming-soon";
+      // Membranes is wired to its real Step 4 route.
+      mockPathname.current = "/membranes/tuc-d9-epdm";
 
       render(<MobileNavigation />);
 

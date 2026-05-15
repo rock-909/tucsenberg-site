@@ -12,6 +12,7 @@ export const SINGLE_SITE_ROUTE_HREFS = {
   privacy: getCanonicalPath("privacy"),
   terms: getCanonicalPath("terms"),
   customProject: getCanonicalPath("customProject"),
+  quote: getCanonicalPath("quote"),
 } as const;
 
 export const SINGLE_SITE_HOME_LINK_TARGETS = {

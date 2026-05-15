@@ -6,12 +6,12 @@ export type { SiteNavigationItem } from "@/config/site-types";
 export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] = [
   {
     key: "membranes",
-    href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    href: "/membranes/tuc-d9-epdm",
     translationKey: "navigation.membranes",
   },
   {
     key: "compatibility",
-    href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    href: "/compatible/sanitaire",
     translationKey: "navigation.compatibility",
   },
   {
@@ -21,7 +21,7 @@ export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] = [
   },
   {
     key: "quote",
-    href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    href: SINGLE_SITE_ROUTE_HREFS.quote,
     translationKey: "navigation.quote",
   },
 ];

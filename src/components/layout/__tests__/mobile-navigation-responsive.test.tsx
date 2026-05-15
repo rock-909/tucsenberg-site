@@ -287,8 +287,8 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
       // 使用 fireEvent 避免 pointer-events 问题
       fireEvent.click(trigger);
 
-      // Step 2 nav items share the same placeholder target.
-      mockPathname.current = "#coming-soon";
+      // Step 4 wires the membranes nav item to its real route.
+      mockPathname.current = "/membranes/tuc-d9-epdm";
       rerender(<MobileNavigation />);
 
       const reopenedTrigger = screen.getByRole("button");

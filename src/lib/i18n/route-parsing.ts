@@ -47,6 +47,14 @@ const DYNAMIC_ROUTE_BUILDERS: Record<
     pathname: DYNAMIC_PATHS_CONFIG.blogArticle.pattern,
     params: { slug: match[1]! },
   }),
+  membraneProduct: (match) => ({
+    pathname: DYNAMIC_PATHS_CONFIG.membraneProduct.pattern,
+    params: { product: match[1]! },
+  }),
+  compatibleBrand: (match) => ({
+    pathname: DYNAMIC_PATHS_CONFIG.compatibleBrand.pattern,
+    params: { brand: match[1]! },
+  }),
 };
 
 /**

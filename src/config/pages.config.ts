@@ -21,7 +21,8 @@ type PublicStaticPageSeoKey =
   | "content.pages.terms"
   | "content.pages.capabilities"
   | "content.pages.how-it-works"
-  | "content.pages.custom-project-support";
+  | "content.pages.custom-project-support"
+  | "content.pages.quote";
 
 interface PublicStaticPageSitemapConfig {
   include: boolean;
@@ -167,6 +168,16 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "custom-project-support" },
       routeOwner: "src/app/[locale]/custom-project-support/page.tsx",
+    },
+    {
+      pageType: "quote",
+      localizedPaths: localizedPath("/quote"),
+      navigationKey: "navigation.quote",
+      seoKey: "content.pages.quote",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
+      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
+      mdxCollection: null,
+      routeOwner: "src/app/[locale]/quote/page.tsx",
     },
   ] as const satisfies readonly PublicStaticPageDefinition[]);
 

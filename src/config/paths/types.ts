@@ -22,10 +22,15 @@ export type PageType =
   | "blog"
   | "privacy"
   | "terms"
-  | "customProject";
+  | "customProject"
+  | "quote";
 
 // 动态路由类型定义
-export type DynamicPageType = "productMarket" | "blogArticle";
+export type DynamicPageType =
+  | "productMarket"
+  | "blogArticle"
+  | "membraneProduct"
+  | "compatibleBrand";
 
 // 动态路由路径模式
 export interface DynamicRoutePattern {

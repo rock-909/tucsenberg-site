@@ -27,6 +27,7 @@ describe("single-site-seo", () => {
       "capabilities",
       "howItWorks",
       "customProject",
+      "quote",
     ]);
     expect([...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES].sort()).toEqual(
       Object.keys(PATHS_CONFIG).sort(),

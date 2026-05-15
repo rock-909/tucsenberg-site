@@ -737,6 +737,7 @@ describe("paths configuration", () => {
         "privacy",
         "terms",
         "customProject",
+        "quote",
       ];
 
       // All expected types should be present
