@@ -348,9 +348,17 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const messageInput = page.getByLabel(/message/i);
       await expect(messageInput).toHaveAttribute("name", "message");
 
-      const privacyCheckbox = page.getByLabel(/privacy policy/i);
-      await expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
-      await expect(privacyCheckbox).toHaveAttribute("type", "checkbox");
+      const privacyCheckbox = page.getByRole("checkbox", {
+        name: /privacy policy/i,
+      });
+      await expect(privacyCheckbox).toBeVisible();
+      await expect(privacyCheckbox).toHaveAttribute("aria-required", "true");
+
+      const privacyFormInput = form
+        .locator('input[name="acceptPrivacy"][type="checkbox"]')
+        .first();
+      await expect(privacyFormInput).toHaveAttribute("name", "acceptPrivacy");
+      await expect(privacyFormInput).toHaveAttribute("type", "checkbox");
     });
   });
 
