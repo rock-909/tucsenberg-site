@@ -162,4 +162,112 @@ describe("real i18n runtime message contract", () => {
       true,
     );
   });
+
+  it("keeps shallow buyer-visible launch copy aligned to Tucsenberg wording", () => {
+    const expectedValues = [
+      [enCriticalMessages, "home.products.item1.title", "Membrane Paths"],
+      [enCriticalMessages, "home.products.item2.title", "RFQ Review Path"],
+      [enCriticalMessages, "home.scenarios.item1.title", "Membrane Paths"],
+      [
+        enCriticalMessages,
+        "home.footer.products.items.item1",
+        "Membrane Paths",
+      ],
+      [
+        enCriticalMessages,
+        "home.footer.products.items.item2",
+        "RFQ Review Path",
+      ],
+      [enCriticalMessages, "home.showcase.title", "Interface Preview"],
+      [
+        enCriticalMessages,
+        "home.showcase.subtitle",
+        "Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
+      ],
+      [
+        enCriticalMessages,
+        "underConstruction.pages.products.description",
+        "Tucsenberg membrane pages are being prepared around OEM-family evidence, material fit, and RFQ-ready inputs.",
+      ],
+      [
+        enCriticalMessages,
+        "underConstruction.pages.about.description",
+        "Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
+      ],
+      [zhCriticalMessages, "home.products.item1.title", "膜片路径"],
+      [zhCriticalMessages, "home.products.item2.title", "RFQ review 路径"],
+      [zhCriticalMessages, "home.scenarios.item1.title", "膜片路径"],
+      [zhCriticalMessages, "home.footer.products.items.item1", "膜片路径"],
+      [
+        zhCriticalMessages,
+        "home.footer.products.items.item2",
+        "RFQ review 路径",
+      ],
+      [zhCriticalMessages, "home.showcase.title", "界面预览"],
+      [
+        zhCriticalMessages,
+        "home.showcase.subtitle",
+        "预览用于膜片路径、RFQ intake 和上线准备的界面模块。",
+      ],
+      [
+        zhCriticalMessages,
+        "underConstruction.pages.products.description",
+        "Tucsenberg 膜片页面正在围绕 OEM-family 证据、材质适配和 RFQ-ready 输入准备。",
+      ],
+      [
+        zhCriticalMessages,
+        "underConstruction.pages.about.description",
+        "了解 Tucsenberg 如何准备以 part number 为核心的替换膜片网站。",
+      ],
+      [
+        esCriticalMessages,
+        "home.products.item1.title",
+        "[ES-TODO] Membrane Paths",
+      ],
+      [
+        esCriticalMessages,
+        "home.products.item2.title",
+        "[ES-TODO] RFQ Review Path",
+      ],
+      [
+        esCriticalMessages,
+        "home.scenarios.item1.title",
+        "[ES-TODO] Membrane Paths",
+      ],
+      [
+        esCriticalMessages,
+        "home.footer.products.items.item1",
+        "[ES-TODO] Membrane Paths",
+      ],
+      [
+        esCriticalMessages,
+        "home.footer.products.items.item2",
+        "[ES-TODO] RFQ Review Path",
+      ],
+      [
+        esCriticalMessages,
+        "home.showcase.title",
+        "[ES-TODO] Interface Preview",
+      ],
+      [
+        esCriticalMessages,
+        "home.showcase.subtitle",
+        "[ES-TODO] Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
+      ],
+      [
+        esCriticalMessages,
+        "underConstruction.pages.products.description",
+        "[ES-TODO] Tucsenberg membrane pages are being prepared around OEM-family evidence, material fit, and RFQ-ready inputs.",
+      ],
+      [
+        esCriticalMessages,
+        "underConstruction.pages.about.description",
+        "[ES-TODO] Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
+      ],
+    ] as const;
+
+    for (const [messages, keyPath, expectedValue] of expectedValues) {
+      expect(getMessageValue(messages, keyPath), keyPath).toBe(expectedValue);
+    }
+  });
 });
