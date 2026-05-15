@@ -16,6 +16,7 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "home",
   "language",
   "navigation",
+  "quote",
   "search",
 ] as const;
 

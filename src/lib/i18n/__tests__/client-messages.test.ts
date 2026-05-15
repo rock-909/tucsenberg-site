@@ -43,6 +43,7 @@ describe("client message scoping", () => {
       "home",
       "language",
       "navigation",
+      "quote",
       "search",
     ]);
   });
