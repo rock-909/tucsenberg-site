@@ -430,6 +430,30 @@ part-number cell:
 - 表单字段最小化：part number(s) + 数量 + 公司 + 邮箱 + 国家。其他都 optional。
 - 文件上传：part list CSV / 拆下来的旧膜照片
 
+### 跨页交互模式 —— B 原型探索反哺（仅吸收交互，不吸收视觉）
+
+> 背景：B 版（Claude Design 探索）产出过一套 SaaS Dashboard 视觉皮 + 一组交互骨架。
+> 视觉皮（暗色优先 / Inter 做 display / 满屏 pill / 密度切换）**全部拒绝**，与第 2 节反面参考一致。
+> 下列三个**交互模式**命中买家路径，吸收进来，但一律用本文件第 3-6 节的 A 视觉 token / 字体 / 圆角实现，不引入任何 B 皮肤。
+
+**1. 全局兼容性搜索（primary 入口）**
+
+- 主放置点：**首页第一屏 compatibility search bar**（已在上面 hero 模式锁定，这里强化）。
+- 全站增强：任意页面顶部可用键盘（`⌘K` / `Ctrl K`）或顶栏入口随时唤起同一个兼容搜索。买家在任何深层页想到一个 part number 都能立刻查，不用回首页。
+- 视觉：唤起后是一个居中的 boxed 搜索面板（输入框规范见第 6 节，圆角 6px，focus teal ring），**不是** B 那种暗色 ⌘K palette。结果行用 part-number mono + fit-status 徽章（第 6 节徽章规范）。
+- 约束：这是 Phase 1 的兼容查询入口本体，不是"以后再加"的站内全文搜索；只搜 part number / OEM model，不搜文章。
+
+**2. 上下文条（context ribbon）**
+
+- 用途：在 `/compatible/[brand]` 和 `/membranes/[product]` 这类深层页，顶部薄薄一行显示买家当前所处坐标（当前 OEM 系列 / 当前材质 / 当前直径），降低长决策路径里的迷路感。
+- 落点：复用 hero 模式里已定义的 **Trust ribbon 槽位**形态（薄、单行、克制），不新增视觉语言。文字用 Small / overline 规范，数值用 mono。
+- 禁止：做成 B 那种带背景色块的"context bar"或面包屑塞满状态 pill。
+
+**3. OEM 系列切换 tab**
+
+- 用途：`/compatible/[brand]` 顶部，在同品牌多个 OEM 系列之间切换（如 Sanitaire 9" disc / Sanitaire tube）。
+- 视觉：下划线式 tab（active 用 teal 下划线 + Navy 文字），不是 B 的 pill tab，不是色块 tab。与左侧 facet 筛选并存：tab 切大类，facet 筛细维度。
+
 ## 8. 动效
 
 **克制原则**：所有交互动画 < 200ms，缓动 `cubic-bezier(0.4, 0, 0.2, 1)`。
@@ -502,3 +526,4 @@ part-number cell:
 ## 12. 版本
 
 - v1（2026-05-14）— 从 starter provisional DESIGN.md 整篇替换，基于 qiaomu reference fit check + 工业目录站补参考 + 用户三处决策（hero 300 / 折中首屏 / 按钮 6px）
+- v1.1（2026-05-15）— A/B 反哺：第 7 节新增"跨页交互模式"小节。吸收 B 原型探索的三个交互骨架（全局兼容搜索 ⌘K 唤起 / 上下文条 / OEM 系列 tab），明确拒绝 B 的全部视觉皮（暗色优先 / Inter display / pill / 密度切换）。视觉锁定不变，仍是第 2-6 节的 A 体系。用户决策：兼容搜索 = 首页第一屏主入口 + 全站可唤起。
