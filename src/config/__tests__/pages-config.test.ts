@@ -27,13 +27,6 @@ const EXPECTED_STATIC_PUBLIC_PAGE_TYPES = [
   "quote",
 ] as const satisfies readonly PageType[];
 
-// Routes whose owner files are introduced in later Step 4 tasks; their config
-// is registered now so navigation and sitemap can point at the eventual pages.
-const PENDING_ROUTE_OWNERS: ReadonlySet<string> = new Set([
-  // Created in Step 4 Task 9; exception removed in Task 10 Step 7.
-  "src/app/[locale]/quote/page.tsx",
-]);
-
 const REPO_ROOT = process.cwd();
 
 function repoFileExists(relativePath: string): boolean {
@@ -66,9 +59,7 @@ describe("pages.config static public page registry", () => {
       expect(definition.routeOwner).toMatch(
         /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
       );
-      if (!PENDING_ROUTE_OWNERS.has(definition.routeOwner)) {
-        expect(repoFileExists(definition.routeOwner)).toBe(true);
-      }
+      expect(repoFileExists(definition.routeOwner)).toBe(true);
       expect(definition.sitemap.include).toBe(true);
       expect(definition.sitemap.priority).toBeGreaterThan(0);
       expect(definition.sitemap.priority).toBeLessThanOrEqual(1);

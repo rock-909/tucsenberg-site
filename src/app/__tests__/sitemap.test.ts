@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
+import {
+  getCanonicalPath,
+  getCompatibleBrandPath,
+  getMembraneProductPath,
+  getProductMarketPath,
+} from "@/config/paths/utils";
+import { oemBrands, productVariants } from "@/data/product-compatibility";
 import {
   getAllMarketFamilyCombos,
   getAllMarketSlugs,
@@ -11,6 +17,10 @@ import {
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
 import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap from "../sitemap";
+
+// The product-compatibility data layer parses fixtures with zod at module load;
+// the global zod mock would break those parses, so opt out for this suite.
+vi.unmock("zod");
 
 // Mock dependencies before imports
 vi.mock("@/config/paths", async (importOriginal) => {
@@ -390,6 +400,110 @@ describe("sitemap.ts", () => {
       expect(customProject?.changeFrequency).toBe(
         customProjectConfig.changeFrequency,
       );
+    });
+
+    it("should include a membrane product URL per productVariant slug for public locales only", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(productVariants.length).toBeGreaterThan(0);
+      for (const variant of productVariants) {
+        const path = getMembraneProductPath(variant.slug);
+        expect(urls).toContain(localizedUrl("en", path));
+        expect(urls).toContain(localizedUrl("es", path));
+        expect(urls).not.toContain(localizedUrl("zh", path));
+      }
+    });
+
+    it("should include a compatible brand URL per oemBrand slug for public locales only", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(oemBrands.length).toBeGreaterThan(0);
+      for (const brand of oemBrands) {
+        const path = getCompatibleBrandPath(brand.slug);
+        expect(urls).toContain(localizedUrl("en", path));
+        expect(urls).toContain(localizedUrl("es", path));
+        expect(urls).not.toContain(localizedUrl("zh", path));
+      }
+    });
+
+    it("should expose membrane/brand alternates without zh", async () => {
+      const result = await sitemap();
+      const [variant] = productVariants;
+      const [brand] = oemBrands;
+
+      expect(variant).toBeDefined();
+      expect(brand).toBeDefined();
+      const variantEntry = findEntry(
+        result,
+        defaultLocale,
+        getMembraneProductPath(variant?.slug ?? ""),
+      );
+      const brandEntry = findEntry(
+        result,
+        defaultLocale,
+        getCompatibleBrandPath(brand?.slug ?? ""),
+      );
+
+      expect(variantEntry?.alternates?.languages).toEqual({
+        en: localizedUrl("en", getMembraneProductPath(variant?.slug ?? "")),
+        es: localizedUrl("es", getMembraneProductPath(variant?.slug ?? "")),
+        "x-default": localizedUrl(
+          "en",
+          getMembraneProductPath(variant?.slug ?? ""),
+        ),
+      });
+      expect(brandEntry?.alternates?.languages).not.toHaveProperty("zh");
+    });
+
+    it("maps every emitted sitemap URL to a real route pattern (no orphans)", async () => {
+      const result = await sitemap();
+      const productsPath = getCanonicalPath("products");
+      const staticPaths = new Set(
+        SINGLE_SITE_PUBLIC_STATIC_PAGES.map((page) =>
+          page === "" ? "" : page,
+        ),
+      );
+      const marketPaths = new Set(
+        getAllMarketSlugs().map((slug) => getProductMarketPath(slug)),
+      );
+      const membranePaths = new Set(
+        productVariants.map((variant) => getMembraneProductPath(variant.slug)),
+      );
+      const brandPaths = new Set(
+        oemBrands.map((brand) => getCompatibleBrandPath(brand.slug)),
+      );
+
+      function isKnownRoute(path: string): boolean {
+        if (staticPaths.has(path)) {
+          return true;
+        }
+        if (path === productsPath || marketPaths.has(path)) {
+          return true;
+        }
+        return membranePaths.has(path) || brandPaths.has(path);
+      }
+
+      const localePrefixes = ["en", "es"].map(
+        (locale) => `${BASE_URL}/${locale}`,
+      );
+
+      for (const entry of result) {
+        const prefix = localePrefixes.find(
+          (candidate) =>
+            entry.url === candidate || entry.url.startsWith(`${candidate}/`),
+        );
+        expect(
+          prefix,
+          `URL not under a public locale: ${entry.url}`,
+        ).toBeDefined();
+        const path = entry.url.slice((prefix ?? "").length);
+        expect(
+          isKnownRoute(path),
+          `Orphan sitemap URL has no backing route: ${entry.url}`,
+        ).toBe(true);
+      }
     });
   });
 });

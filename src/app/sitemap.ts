@@ -8,9 +8,15 @@ import {
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
 import { LOCALES_CONFIG, SITE_CONFIG } from "@/config/paths";
-import { getProductMarketPath } from "@/config/paths/utils";
+import {
+  getCompatibleBrandPath,
+  getMembraneProductPath,
+  getProductMarketPath,
+} from "@/config/paths/utils";
+import { oemBrands, productVariants } from "@/data/product-compatibility";
 import {
   getSingleSiteSitemapPageConfig,
+  SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
   type SingleSiteSitemapPageConfig,
@@ -126,13 +132,56 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
+// Generate product-compatibility entries (membrane product detail pages and
+// OEM compatibility pages) for public SEO locales only.
+function generateCompatibilityEntries(): MetadataRoute.Sitemap {
+  const entries: MetadataRoute.Sitemap = [];
+  const lastModified = new Date(SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO);
+
+  const membraneConfig = getPageConfig("membraneProduct");
+  for (const variant of productVariants) {
+    const path = getMembraneProductPath(variant.slug);
+
+    for (const locale of PUBLIC_LOCALES) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified,
+          config: membraneConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  const brandConfig = getPageConfig("compatibleBrand");
+  for (const brand of oemBrands) {
+    const path = getCompatibleBrandPath(brand.slug);
+
+    for (const locale of PUBLIC_LOCALES) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified,
+          config: brandConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  return entries;
+}
+
 /**
  * Dynamic sitemap generation for Next.js.
- * Includes static pages and product catalog pages with i18n alternates.
+ * Includes static pages, product catalog pages, and product-compatibility
+ * detail/brand pages with i18n alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = await generateStaticPageEntries();
   const catalogEntries = generateCatalogEntries();
+  const compatibilityEntries = generateCompatibilityEntries();
 
-  return [...staticEntries, ...catalogEntries];
+  return [...staticEntries, ...catalogEntries, ...compatibilityEntries];
 }
