@@ -5,7 +5,7 @@ describe("Contact page localized rendering content", () => {
   it("provides Chinese body sections from MDX", async () => {
     const page = await getPageBySlug("contact", "zh");
 
-    expect(page.content).toContain("## 联系方式");
-    expect(page.content).toContain("## 响应预期");
+    expect(page.content).toContain("## 提交替换膜片询价");
+    expect(page.content).toContain("## 有用的 RFQ 输入");
   });
 });

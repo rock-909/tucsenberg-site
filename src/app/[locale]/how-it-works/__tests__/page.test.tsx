@@ -37,7 +37,7 @@ describe("HowItWorksPage", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "Move from No Website to a Launchable Foundation",
+        name: "Prepare the evidence before asking for a replacement membrane",
       }),
     ).toBeInTheDocument();
     expect(container.querySelector("ol")).not.toBeNull();
@@ -45,7 +45,7 @@ describe("HowItWorksPage", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(5);
     expect(
       screen.getByText(
-        "Check traffic and sign off: set up owner reporting visibility, review real traffic, and confirm the launch state with the owner.",
+        "Let the review connect the evidence to a replacement path.",
       ),
     ).toBeInTheDocument();
   });
@@ -59,12 +59,13 @@ describe("HowItWorksPage", () => {
     );
     expect(page.metadata.slug).toBe("how-it-works");
     expect(page.metadata.seo?.keywords).toEqual([
-      "website setup process",
-      "showcase website launch",
-      "Cloudflare launch workflow",
-      "B2B website starter",
+      "replacement membrane RFQ",
+      "aeration membrane part number",
+      "OEM diffuser membrane replacement",
     ]);
-    expect(page.content).toContain("1. Replace the business facts");
+    expect(page.content).toContain(
+      "1. Identify the OEM family, installed model, diffuser body, or old part number if available.",
+    );
   });
 
   it("uses real MDX frontmatter for page SEO", async () => {
@@ -76,14 +77,13 @@ describe("HowItWorksPage", () => {
       expect.objectContaining({
         pageType: "howItWorks",
         config: {
-          title: "How It Works | Setup to Launch",
+          title: "How It Works | Replacement Membrane RFQ Preparation",
           description:
-            "Use the starter as a complete demo, replace the business facts, connect the lead path, deploy on Cloudflare, and prove the result before calling it launch-ready.",
+            "Learn what information helps Tucsenberg review an aftermarket aeration replacement membrane inquiry.",
           keywords: [
-            "website setup process",
-            "showcase website launch",
-            "Cloudflare launch workflow",
-            "B2B website starter",
+            "replacement membrane RFQ",
+            "aeration membrane part number",
+            "OEM diffuser membrane replacement",
           ],
           image: "/images/og-image.jpg",
         },

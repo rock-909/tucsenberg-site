@@ -111,7 +111,7 @@ describe("ContactPage MDX migration", () => {
 
     expect(
       within(content).getByRole("heading", { level: 1 }),
-    ).toHaveTextContent("Contact Us");
+    ).toHaveTextContent("Contact Tucsenberg");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
@@ -219,7 +219,7 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(await screen.findByTestId("faq-section")).toHaveTextContent(
-      "How fast should a real site respond?",
+      "Is a response time guaranteed?",
     );
   });
 
@@ -298,13 +298,15 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "zh" }),
     });
 
-    expect(enMetadata.title).toBe("Contact | Showcase Website Starter");
-    expect(enMetadata.description).toBe(
-      "Use this starter contact page as a quick action for inquiries, demo requests, or launch questions before connecting a real receiver.",
+    expect(enMetadata.title).toBe(
+      "Contact Tucsenberg | Replacement Membrane RFQ",
     );
-    expect(zhMetadata.title).toBe("联系 | Showcase Website Starter");
+    expect(enMetadata.description).toBe(
+      "Contact Tucsenberg with OEM family, part number, membrane dimensions, photos, material conditions, and quantity range for replacement membrane review.",
+    );
+    expect(zhMetadata.title).toBe("联系 Tucsenberg | 替换膜片 RFQ");
     expect(zhMetadata.description).toBe(
-      "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口；正式上线前请接入真实接收方。",
+      "向 Tucsenberg 提交 OEM family、part number、膜片尺寸、照片、材质工况和数量区间，用于替换膜片 review。",
     );
     expect(enMetadata.other?.google).not.toBe("notranslate");
     expect(zhMetadata.other?.google).not.toBe("notranslate");

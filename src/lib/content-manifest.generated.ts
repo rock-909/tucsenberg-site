@@ -35,80 +35,80 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/en/about.mdx",
     "metadata": {
       "locale": "en",
-      "title": "About this showcase website starter",
-      "description": "Learn why this starter exists, who it fits, who it does not fit, and what must be replaced before launch.",
+      "title": "About Tucsenberg",
+      "description": "Learn how Tucsenberg is preparing a part-number-led replacement membrane website for OEM-family matching, material review, and RFQ intake.",
       "slug": "about",
       "publishedAt": "2024-01-10",
-      "updatedAt": "2026-05-05",
-      "author": "Showcase Website Starter Team",
+      "updatedAt": "2026-05-15",
+      "author": "Tucsenberg Team",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2026-05-05",
+      "lastReviewed": "2026-05-15",
       "draft": false,
-      "heroTitle": "A showcase website starter designed for real public launch preparation",
-      "heroSubtitle": "Not a fictional company profile",
-      "heroDescription": "This page explains what the starter is, who it fits, and what must still become real before a public launch.",
+      "heroTitle": "A replacement membrane site built around installed aeration systems",
+      "heroSubtitle": "Part-number evidence before broad catalog claims",
+      "heroDescription": "Tucsenberg is preparing an aftermarket aeration replacement membrane website for buyers who need OEM-family matching, material fit review, and RFQ-ready inputs.",
       "seo": {
-        "title": "About this showcase website starter",
-        "description": "Starter identity, fit, boundaries, and replacement requirements for a public showcase website foundation.",
+        "title": "About Tucsenberg",
+        "description": "Tucsenberg is an aftermarket aeration replacement membrane brand preparing OEM-family, part-number, material-fit, and RFQ review paths.",
         "keywords": [
-          "showcase website starter",
-          "starter boundary",
-          "public launch website"
+          "Tucsenberg",
+          "aftermarket aeration membranes",
+          "replacement membrane RFQ"
         ],
         "ogImage": "/images/about-og.jpg"
       },
       "aboutSections": {
-        "valuesTitle": "What this starter is designed to protect",
+        "valuesTitle": "What this website is being built to support",
         "values": {
           "quality": {
-            "title": "Launch structure",
-            "description": "The starter keeps pages, navigation, inquiry paths, and replacement work in one clear public-site structure."
+            "title": "Installed-system focus",
+            "description": "The site starts from OEM family, old part number, diffuser body, dimensions, and field evidence."
           },
           "innovation": {
-            "title": "Reusable foundation",
-            "description": "It provides a working foundation that can be adapted without rebuilding every route and component from zero."
+            "title": "Material-fit review",
+            "description": "EPDM, TPU/PU, and later PTFE-coated EPDM are presented by wastewater condition fit, not vague quality claims."
           },
           "service": {
-            "title": "Owner clarity",
-            "description": "The site makes visible what a real owner must confirm before launch."
+            "title": "RFQ preparation",
+            "description": "Inquiry paths ask for the evidence needed to review a replacement membrane request responsibly."
           },
           "integrity": {
-            "title": "Honest boundary",
-            "description": "It is not an empty shell, but it is also not a finished client website."
+            "title": "Controlled launch claims",
+            "description": "Product data, compatibility records, legal text, and quote routing stay limited until owner-confirmed."
           }
         },
         "statLabels": {
-          "yearsExperience": "Starter baseline",
-          "countriesServed": "Locales",
-          "happyClients": "Replacement surfaces",
-          "productsDelivered": "Launch path"
+          "yearsExperience": "Launch phase",
+          "countriesServed": "Public locales",
+          "happyClients": "RFQ inputs",
+          "productsDelivered": "Membrane paths"
         },
         "cta": {
-          "title": "Review the starter capabilities",
-          "description": "See what the starter includes before replacing it with real business facts and assets.",
-          "button": "View products"
+          "title": "Prepare a membrane inquiry",
+          "description": "Share OEM family, part number, dimensions, photos, material conditions, and quantity range when available.",
+          "button": "Prepare RFQ"
         }
       },
       "faq": [
         {
-          "id": "starter-purpose",
-          "question": "Is this a finished client website?",
-          "answer": "No. This is a reusable starter demo with working structure and replaceable example content."
+          "id": "tucsenberg-role",
+          "question": "What is Tucsenberg?",
+          "answer": "Tucsenberg is an aftermarket aeration replacement membrane brand being built around OEM-family matching, material review, and RFQ preparation."
         },
         {
-          "id": "who-fits",
-          "question": "Who is this starter for?",
-          "answer": "It fits projects that do not yet have a public website and need a fast, clear showcase-site foundation."
+          "id": "launch-state",
+          "question": "Is the full compatibility database live?",
+          "answer": "No. The site shell is in launch-prep state until product data, compatibility records, and RFQ routing are owner-confirmed."
         },
         {
-          "id": "what-to-replace",
-          "question": "What must be replaced before launch?",
-          "answer": "Replace business facts, page content, images, legal copy, form routing, secrets, and deployment settings."
+          "id": "buyer-inputs",
+          "question": "What information helps a replacement membrane inquiry?",
+          "answer": "Useful inputs include OEM family, old part number, disc or tube format, dimensions, photos, wastewater conditions, quantity range, and shutdown timing."
         }
       ]
     },
-    "content": "\n## Why this starter exists\n\nMany projects do not just lack pages. They lack a complete public launch foundation: a clear site structure, content ownership, inquiry flow, deployment path, and owner-facing visibility.\n\nThis starter gives those pieces a working shape before a real project replaces the example content.\n\n## Who it fits\n\n- Projects with no current website.\n- Teams that need a public showcase foundation quickly.\n- Sites that need multilingual content, inquiry flow, and Cloudflare deployment basics.\n- Owners who want a reusable starting point instead of a blank visual shell.\n\n## Who it does not fit\n\n- Projects with a complete custom brand system already finished.\n- Sites that need complex commerce, accounts, or backend workflows in the first version.\n- Teams looking for a design-only template with no launch workflow.\n\n## Honest boundary\n\nThis starter is not an empty shell. It has real routes, components, content structure, form paths, and deployment assumptions.\n\nIt is also not a finished client website. A real launch still needs confirmed business facts, real images, legal copy, form destinations, secrets, Cloudflare settings, and deployed smoke proof.\n"
+    "content": "\n## Why Tucsenberg starts with part numbers\n\nReplacement membrane buyers rarely arrive with a clean catalog SKU. They may have an old part number, an installed OEM family, a worn membrane, a diffuser body photo, or only a shutdown deadline.\n\nTucsenberg is being shaped around that buying situation. The site is meant to help a maintenance or procurement team collect enough evidence for a responsible replacement membrane review.\n\n## Current launch boundary\n\nThe public shell already reflects the intended Tucsenberg direction: aftermarket aeration replacement membranes, OEM-family matching, material-fit guidance, and RFQ intake.\n\nIt is not yet a finished product database. Product pages, compatibility mappings, quote routing, legal terms, and response ownership still need confirmed inputs before they become launch claims.\n\n## What the site will support\n\n- Buyers comparing replacement paths for installed disc or tube diffuser systems.\n- RFQ preparation based on OEM family, part number, dimensions, photos, and wastewater conditions.\n- Material questions across EPDM, TPU/PU, and later PTFE-coated EPDM.\n- English and Spanish public launch paths, with Chinese kept for internal preview.\n\n## What remains unconfirmed\n\n- Final product specifications and compatibility mappings.\n- Legal entity, legal terms, privacy details, and contact ownership.\n- Quote routing, response workflow, and any service-level commitments.\n- Product photos, datasheets, and customer-facing proof assets.\n"
   },
   {
     "type": "pages",
@@ -119,26 +119,25 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/en/capabilities.mdx",
     "metadata": {
       "locale": "en",
-      "title": "Starter Capabilities",
-      "description": "A website and lead foundation for a small B2B company.",
+      "title": "Tucsenberg Capabilities",
+      "description": "Current Tucsenberg website capabilities for membrane replacement paths, OEM-family inputs, material-fit review, and RFQ preparation.",
       "slug": "capabilities",
       "publishedAt": "2026-04-26",
-      "updatedAt": "2026-05-04",
-      "lastReviewed": "2026-05-04",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "Starter Capabilities | Website and Lead Foundation",
-        "description": "See the replaceable public pages, offer story, lead path, Cloudflare deployment proof, owner reporting visibility, and replacement guardrails included in this showcase website starter.",
+        "title": "Tucsenberg Capabilities | Membrane Replacement RFQ Path",
+        "description": "See how Tucsenberg is preparing replacement membrane paths around OEM-family evidence, material fit, and RFQ input quality.",
         "keywords": [
-          "showcase website starter",
-          "B2B website capabilities",
-          "lead foundation",
-          "Cloudflare website starter"
+          "Tucsenberg capabilities",
+          "replacement membrane RFQ",
+          "OEM family membrane matching"
         ],
         "ogImage": "/images/og-image.jpg"
       }
     },
-    "content": "\n## A Website and Lead Foundation for a Small B2B Company\n\nThe demo shows the pieces a company needs before a public launch: pages, offer story, inquiry path, deployment proof, and owner traffic visibility.\n\n## Credible Public Pages\n\nHome, capabilities, process, about, contact, privacy, and terms pages start from a working structure.\n\n## Clear Offer Story\n\nProduct, service, resource, and custom-project examples show how real offers can be explained.\n\n## Lead Capture Path\n\nContact and inquiry flows stay visible, testable, and ready for real destinations.\n\n## Cloudflare Deploy\n\nThe supported route is Cloudflare Workers through OpenNext.\n\n## Owner Reporting Visibility\n\nOnce credentials are configured, the owner can confirm real Cloudflare traffic is visible.\n\n## Replacement Guardrails\n\nDocs and checks keep sample identity, proof, legal copy, and deployment values from being treated as real launch truth.\n"
+    "content": "\n## Membrane replacement paths in preparation\n\nTucsenberg is being built around replacement membrane inquiries where the buyer may not have a clean SKU. The site structure supports OEM-family evidence, part numbers, photos, dimensions, material conditions, and quantity ranges.\n\n## OEM-family evidence\n\nFuture compatibility pages will organize replacement paths by installed OEM family and selected model groups. Until those records are confirmed, the site keeps this as a launch-prep capability rather than a complete database claim.\n\n## Material-fit review\n\nEPDM and TPU/PU are Phase 1 material paths. PTFE-coated EPDM remains a later material path. The wording must stay condition-based, especially for industrial wastewater, oils, solvents, fouling, and chemical exposure.\n\n## RFQ preparation\n\nThe inquiry path should help buyers send useful evidence: OEM family, old part number, disc or tube format, dimensions, photos, wastewater conditions, quantity range, and shutdown timing.\n\n## Technical launch foundation\n\nThe site keeps the existing Cloudflare/OpenNext direction while Tucsenberg content, compatibility records, and lead routing are confirmed.\n\n## Guardrails\n\nUnconfirmed product data, legal terms, delivery promises, warranty language, and quote behavior must not be presented as launch-ready facts.\n"
   },
   {
     "type": "pages",
@@ -149,41 +148,41 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/en/contact.mdx",
     "metadata": {
       "locale": "en",
-      "title": "Contact Us",
-      "description": "Use this starter contact page as the quick entry for inquiries, demo requests, or launch questions.",
+      "title": "Contact Tucsenberg",
+      "description": "Send replacement membrane RFQ inputs, OEM-family evidence, part numbers, dimensions, photos, material conditions, and quantity range.",
       "slug": "contact",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2026-05-05",
-      "lastReviewed": "2026-05-05",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "Contact | Showcase Website Starter",
-        "description": "Use this starter contact page as a quick action for inquiries, demo requests, or launch questions before connecting a real receiver."
+        "title": "Contact Tucsenberg | Replacement Membrane RFQ",
+        "description": "Contact Tucsenberg with OEM family, part number, membrane dimensions, photos, material conditions, and quantity range for replacement membrane review."
       },
       "faq": [
         {
           "id": "response-time",
-          "question": "How fast should a real site respond?",
-          "answer": "Use this placeholder to explain your real response expectation, such as one business day or a specific support window."
+          "question": "Is a response time guaranteed?",
+          "answer": "Not yet. The public response workflow must be confirmed before a response window is promised."
         },
         {
           "id": "inquiry-details",
-          "question": "What should visitors include?",
-          "answer": "Ask for the information your real team needs: product or service interest, quantity or scope, timeline, destination, budget, or project notes."
+          "question": "What should I include?",
+          "answer": "Include OEM family, installed model or old part number, disc or tube format, dimensions, photos, wastewater conditions, quantity range, and shutdown timing if available."
         },
         {
-          "id": "samples-or-demos",
-          "question": "Can this page support samples, demos, or consultations?",
-          "answer": "Yes. Rename the CTA and fields to match the real conversion path for your project."
+          "id": "unknown-model",
+          "question": "What if I do not know the model?",
+          "answer": "Send photos of the diffuser body, membrane, connector, and any markings on the old part. Dimensions and a part list can also help."
         },
         {
           "id": "form-routing",
           "question": "Where does the form send inquiries?",
-          "answer": "Configure the real receiver before launch, such as email, Airtable, CRM, or another lead management system."
+          "answer": "The final receiver must be configured before public launch. Current copy describes the intended inquiry content only."
         }
       ]
     },
-    "content": "\n## Get in Touch\n\nThis is the quick contact entry for the public demo starter. It shows where a real project can collect inquiries, demo requests, or launch questions once the owner connects a real receiver.\n\nBefore using it for a real business, replace the copy, form routing, response expectations, and receiver details.\n\n## Response Expectations\n\n- **General inquiries**: replace with your real response window.\n- **Quote or project requests**: explain what details help your team respond.\n- **Technical or service questions**: clarify whether they go to sales, support, or a specialist.\n- **Demo, sample, or consultation requests**: adapt this section to the project’s real next step.\n"
+    "content": "\n## Send a replacement membrane inquiry\n\nUse this page to prepare the information Tucsenberg will need for aftermarket aeration replacement membrane review.\n\nThe best inquiry includes OEM family, old part number if available, disc or tube format, membrane dimensions, photos, wastewater conditions, quantity range, and shutdown timing.\n\n## Useful RFQ inputs\n\n- OEM family or installed model.\n- Old part number, drawing, or part list.\n- Disc or tube format and key dimensions.\n- Material preference or wastewater conditions.\n- Quantity range and shutdown timing.\n- Photos of the diffuser body, membrane, connector, and markings.\n\n## Current launch boundary\n\nFinal form routing, receiver ownership, and response expectations still need to be confirmed before public launch.\n"
   },
   {
     "type": "pages",
@@ -240,25 +239,24 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "en",
       "title": "How It Works",
-      "description": "Move from no website to a launchable foundation.",
+      "description": "Prepare a replacement membrane inquiry with OEM-family evidence, part numbers, dimensions, material conditions, and quantity range.",
       "slug": "how-it-works",
       "publishedAt": "2026-04-26",
-      "updatedAt": "2026-05-04",
-      "lastReviewed": "2026-05-04",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "How It Works | Setup to Launch",
-        "description": "Use the starter as a complete demo, replace the business facts, connect the lead path, deploy on Cloudflare, and prove the result before calling it launch-ready.",
+        "title": "How It Works | Replacement Membrane RFQ Preparation",
+        "description": "Learn what information helps Tucsenberg review an aftermarket aeration replacement membrane inquiry.",
         "keywords": [
-          "website setup process",
-          "showcase website launch",
-          "Cloudflare launch workflow",
-          "B2B website starter"
+          "replacement membrane RFQ",
+          "aeration membrane part number",
+          "OEM diffuser membrane replacement"
         ],
         "ogImage": "/images/og-image.jpg"
       }
     },
-    "content": "\n## Move from No Website to a Launchable Foundation\n\nUse the starter as a complete demo, replace the business facts, connect the lead path, deploy on Cloudflare, and prove the result before calling it launch-ready.\n\n1. Replace the business facts: update brand, domain, contact details, offer content, images, legal body, and proof assets.\n2. Review the public story: make sure the homepage and support pages explain the real business clearly.\n3. Connect the lead path: configure form security, email, Airtable or CRM storage, and a safe test submission flow.\n4. Deploy on Cloudflare: run the Cloudflare build and preview proof before a public route is treated as ready.\n5. Check traffic and sign off: set up owner reporting visibility, review real traffic, and confirm the launch state with the owner.\n"
+    "content": "\n## Prepare the evidence before asking for a replacement membrane\n\nA responsible membrane review starts with the installed system, not with a broad catalog claim.\n\n1. Identify the OEM family, installed model, diffuser body, or old part number if available.\n2. Share the membrane format, dimensions, photos, drawings, or part list.\n3. Describe the wastewater conditions that may affect material fit.\n4. Provide the quantity range and shutdown timing.\n5. Let the review connect the evidence to a replacement path.\n\n## If the model is unknown\n\nSend photos of the diffuser body, membrane, connector, and any markings on the old part. Dimensions are useful even when the brand or model name is missing.\n\n## If the material is uncertain\n\nState the wastewater type, chemical exposure, oil or solvent presence, temperature range if known, and whether fouling has been a problem. EPDM, TPU/PU, and later PTFE-coated EPDM should be reviewed by condition fit.\n\n## If the project is urgent\n\nInclude shutdown timing and quantity range. This helps separate emergency replacement needs from planned annual procurement.\n"
   },
   {
     "type": "pages",
@@ -335,80 +333,80 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/zh/about.mdx",
     "metadata": {
       "locale": "zh",
-      "title": "关于这个展示型网站 starter",
-      "description": "了解这个 starter 为什么存在、适合谁、不适合谁，以及公开上线前必须替换什么。",
+      "title": "关于 Tucsenberg",
+      "description": "了解 Tucsenberg 如何围绕 part number、OEM family 匹配、材质 review 和 RFQ intake 搭建替换膜片网站。",
       "slug": "about",
       "publishedAt": "2024-01-10",
-      "updatedAt": "2026-05-05",
-      "author": "Showcase Website Starter Team",
+      "updatedAt": "2026-05-15",
+      "author": "Tucsenberg Team",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2026-05-05",
+      "lastReviewed": "2026-05-15",
       "draft": false,
-      "heroTitle": "一个面向真实公开上线准备的展示型网站 starter",
-      "heroSubtitle": "不是虚构公司介绍",
-      "heroDescription": "这个页面解释 starter 是什么、适合谁，以及公开上线前哪些内容必须变成真实事实。",
+      "heroTitle": "围绕现有曝气系统搭建的替换膜片网站",
+      "heroSubtitle": "先看 part number 证据，再谈完整目录",
+      "heroDescription": "Tucsenberg 正在准备一个 aftermarket aeration replacement membrane 网站，服务需要 OEM-family 匹配、材质适配 review 和 RFQ 输入的买家。",
       "seo": {
-        "title": "关于这个展示型网站 starter",
-        "description": "展示型网站 starter 的身份、适用对象、边界和公开上线前替换要求。",
+        "title": "关于 Tucsenberg",
+        "description": "Tucsenberg 是一个 aftermarket aeration replacement membrane 品牌，正在准备 OEM-family、part number、材质适配和 RFQ review 路径。",
         "keywords": [
-          "展示型网站 starter",
-          "starter 边界",
-          "公开上线网站"
+          "Tucsenberg",
+          "曝气替换膜片",
+          "替换膜片 RFQ"
         ],
         "ogImage": "/images/about-og.jpg"
       },
       "aboutSections": {
-        "valuesTitle": "这个 starter 保护什么",
+        "valuesTitle": "这个网站要支持什么",
         "values": {
           "quality": {
-            "title": "上线结构",
-            "description": "starter 把页面、导航、询盘路径和替换工作放进一套清楚的公开网站结构里。"
+            "title": "围绕现有系统",
+            "description": "网站从 OEM family、旧 part number、diffuser body、尺寸和现场证据开始。"
           },
           "innovation": {
-            "title": "可复用基础",
-            "description": "它提供一套可运行基础，真实项目可以在此基础上替换，而不是每条路由和组件都从零开始。"
+            "title": "材质适配 review",
+            "description": "EPDM、TPU/PU 和后续 PTFE-coated EPDM 按废水工况说明，不靠空泛质量词。"
           },
           "service": {
-            "title": "Owner 清晰度",
-            "description": "网站把真实 owner 上线前必须确认的事项摆在明面上。"
+            "title": "RFQ 输入准备",
+            "description": "询价路径会收集负责 review 替换膜片请求所需的信息。"
           },
           "integrity": {
-            "title": "诚实边界",
-            "description": "它不是空壳模板，但也不是已经完成的客户网站。"
+            "title": "控制上线承诺",
+            "description": "产品数据、兼容记录、法律文本和报价路由都等 owner 确认后再变成上线承诺。"
           }
         },
         "statLabels": {
-          "yearsExperience": "Starter 基线",
-          "countriesServed": "语言版本",
-          "happyClients": "替换面",
-          "productsDelivered": "上线链路"
+          "yearsExperience": "上线阶段",
+          "countriesServed": "公开语种",
+          "happyClients": "RFQ 输入",
+          "productsDelivered": "膜片路径"
         },
         "cta": {
-          "title": "查看 starter 能力",
-          "description": "先了解 starter 包含什么，再把它替换成真实业务事实和资产。",
-          "button": "查看产品"
+          "title": "准备膜片询价",
+          "description": "如有 OEM family、part number、尺寸、照片、材质工况和数量区间，请一起提交。",
+          "button": "准备 RFQ"
         }
       },
       "faq": [
         {
-          "id": "starter-purpose",
-          "question": "这是已经完成的客户官网吗？",
-          "answer": "不是。这是带可运行结构和可替换示例内容的 starter demo。"
+          "id": "tucsenberg-role",
+          "question": "Tucsenberg 是什么？",
+          "answer": "Tucsenberg 是一个 aftermarket aeration replacement membrane 品牌，网站会围绕 OEM-family 匹配、材质 review 和 RFQ 准备来建设。"
         },
         {
-          "id": "who-fits",
-          "question": "这个 starter 适合谁？",
-          "answer": "适合还没有公开网站、需要快速获得展示型网站基础的项目。"
+          "id": "launch-state",
+          "question": "完整兼容数据库已经上线了吗？",
+          "answer": "还没有。当前网站壳层处于 launch-prep 状态，产品数据、兼容记录和 RFQ 路由确认后才会变成上线内容。"
         },
         {
-          "id": "what-to-replace",
-          "question": "上线前必须替换什么？",
-          "answer": "要替换业务事实、页面内容、图片、法务文案、表单流向、密钥和部署设置。"
+          "id": "buyer-inputs",
+          "question": "替换膜片询价最好提供什么？",
+          "answer": "有用信息包括 OEM family、旧 part number、disc 或 tube 形式、尺寸、照片、废水工况、数量区间和停机时间。"
         }
       ]
     },
-    "content": "\n## 为什么需要这个 starter\n\n很多项目缺的不是一个页面，而是一套完整的公开上线基础：清楚的网站结构、内容归属、询盘流程、部署路径和 owner 可见的信息。\n\n这个 starter 先把这些部分做成可运行形态，再让真实项目替换示例内容。\n\n## 适合谁\n\n- 当前还没有网站的项目。\n- 需要快速获得公开展示基础的团队。\n- 需要多语言内容、询盘路径和 Cloudflare 部署基础的网站。\n- 想从可复用基础开始，而不是从空白视觉壳开始的 owner。\n\n## 不适合谁\n\n- 已经有完整定制品牌系统的项目。\n- 第一版就需要复杂交易、账号或后台工作流的网站。\n- 只想要视觉模板、不需要上线工作流的团队。\n\n## 诚实边界\n\n这个 starter 不是空壳。它有真实路由、组件、内容结构、表单路径和部署假设。\n\n但它也不是最终客户网站。真实上线仍然需要确认过的业务事实、真实图片、法务文案、表单接收方、密钥、Cloudflare 设置和部署 smoke 证明。\n"
+    "content": "\n## Tucsenberg 为什么从 part number 开始\n\n替换膜片买家通常不是带着干净 SKU 来的。他们可能只有旧 part number、现有 OEM family、磨损膜片、diffuser body 照片，或者一个停机日期。\n\nTucsenberg 会围绕这个采购场景来建设。网站目标是帮助维护或采购团队整理足够证据，再进入负责的替换膜片 review。\n\n## 当前上线边界\n\n当前公开壳层已经体现 Tucsenberg 的方向：曝气系统替换膜片、OEM-family 匹配、材质适配说明和 RFQ intake。\n\n它还不是最终产品数据库。产品页、兼容映射、报价路由、法律条款和响应归属，都需要确认后才能成为上线承诺。\n\n## 网站会支持什么\n\n- 为现有 disc 或 tube diffuser 系统寻找替换路径的买家。\n- 基于 OEM family、part number、尺寸、照片和废水工况准备 RFQ。\n- 围绕 EPDM、TPU/PU 和后续 PTFE-coated EPDM 的材质问题。\n- 英文和西语公开上线路径，中文只做内部预览。\n\n## 还没确认什么\n\n- 最终产品规格和兼容映射。\n- 法律主体、法律条款、隐私细节和联系归属。\n- 报价路由、响应流程和任何服务级别承诺。\n- 产品照片、datasheet 和买家可见的证明资产。\n"
   },
   {
     "type": "pages",
@@ -419,26 +417,25 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/zh/capabilities.mdx",
     "metadata": {
       "locale": "zh",
-      "title": "Starter 能力",
-      "description": "给小型 B2B 公司用的网站和线索基础设施。",
+      "title": "Tucsenberg 能力范围",
+      "description": "当前 Tucsenberg 网站围绕替换膜片路径、OEM-family 输入、材质适配 review 和 RFQ 准备所承载的能力。",
       "slug": "capabilities",
       "publishedAt": "2026-04-26",
-      "updatedAt": "2026-05-04",
-      "lastReviewed": "2026-05-04",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "Starter 能力 | 网站和线索基础设施",
-        "description": "了解这个展示型网站 starter 包含的可替换公开页面、业务表达、线索路径、Cloudflare 部署证明、owner 报告可见性和替换防线。",
+        "title": "Tucsenberg 能力范围 | 替换膜片 RFQ 路径",
+        "description": "了解 Tucsenberg 如何围绕 OEM-family 证据、材质适配和 RFQ 输入质量准备替换膜片路径。",
         "keywords": [
-          "展示型网站 starter",
-          "B2B 网站能力",
-          "线索基础设施",
-          "Cloudflare 网站 starter"
+          "Tucsenberg 能力",
+          "替换膜片 RFQ",
+          "OEM family 膜片匹配"
         ],
         "ogImage": "/images/og-image.jpg"
       }
     },
-    "content": "\n## 给小型 B2B 公司用的网站和线索基础设施\n\n这个 demo 展示公开上线前需要的基础部分：页面、业务表达、询盘路径、部署证明和 owner 可见的流量信息。\n\n## 可信的公开页面\n\n首页、能力、流程、关于、联系、隐私和条款页面都从可运行结构开始。\n\n## 清楚的业务表达\n\n产品、服务、资源和定制项目示例说明真实业务应该如何被讲清楚。\n\n## 线索收集路径\n\n联系和询盘流程保持可见、可测，并能接入真实目的地。\n\n## Cloudflare 部署\n\n支持路径是通过 OpenNext 部署到 Cloudflare Workers。\n\n## Owner 报告可见性\n\n配置凭证后，owner 可以确认真实 Cloudflare 访问是否可见。\n\n## 替换防线\n\n文档和检查会阻止示例身份、证据、法务文案和部署配置被当成真实上线事实。\n"
+    "content": "\n## 正在准备的替换膜片路径\n\nTucsenberg 面向的询价场景是：买家不一定有干净 SKU。网站结构会支持 OEM-family 证据、part number、照片、尺寸、材质工况和数量区间。\n\n## OEM-family 证据\n\n后续兼容页会按现有 OEM family 和精选型号组组织替换路径。在这些记录确认前，网站只把它作为 launch-prep 能力，不写成完整数据库承诺。\n\n## 材质适配 review\n\nEPDM 和 TPU/PU 是 Phase 1 材质路径。PTFE-coated EPDM 是后续材质路径。相关表述要按工况写，尤其是工业废水、油脂、溶剂、fouling 和化学暴露。\n\n## RFQ 准备\n\n询价路径应帮助买家提交有用证据：OEM family、旧 part number、disc 或 tube 形式、尺寸、照片、废水工况、数量区间和停机时间。\n\n## 技术上线基础\n\n网站继续沿用 Cloudflare/OpenNext 方向，同时确认 Tucsenberg 内容、兼容记录和 lead routing。\n\n## 防线\n\n未确认的产品数据、法律条款、交付承诺、保修语言和报价行为，都不能写成已可上线的事实。\n"
   },
   {
     "type": "pages",
@@ -449,41 +446,41 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/zh/contact.mdx",
     "metadata": {
       "locale": "zh",
-      "title": "联系我们",
-      "description": "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口。",
+      "title": "联系 Tucsenberg",
+      "description": "提交替换膜片 RFQ 输入、OEM-family 证据、part number、尺寸、照片、材质工况和数量区间。",
       "slug": "contact",
       "publishedAt": "2024-01-01",
-      "updatedAt": "2026-05-05",
-      "lastReviewed": "2026-05-05",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "联系 | Showcase Website Starter",
-        "description": "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口；正式上线前请接入真实接收方。"
+        "title": "联系 Tucsenberg | 替换膜片 RFQ",
+        "description": "向 Tucsenberg 提交 OEM family、part number、膜片尺寸、照片、材质工况和数量区间，用于替换膜片 review。"
       },
       "faq": [
         {
           "id": "response-time",
-          "question": "真实网站应该多久回复？",
-          "answer": "这里应替换成真实响应预期，比如一个工作日内回复，或具体客服时间。"
+          "question": "现在承诺响应时间吗？",
+          "answer": "暂不承诺。公开响应流程确认后，才能写具体响应窗口。"
         },
         {
           "id": "inquiry-details",
-          "question": "访客应该提供哪些信息？",
-          "answer": "请根据真实团队需要填写提示，例如产品或服务兴趣、数量或范围、时间计划、目的地、预算或项目说明。"
+          "question": "应该提供什么信息？",
+          "answer": "如有 OEM family、现有型号或旧 part number、disc 或 tube 形式、尺寸、照片、废水工况、数量区间和停机时间，请一起提供。"
         },
         {
-          "id": "samples-or-demos",
-          "question": "这个页面可以支持样品、演示或咨询预约吗？",
-          "answer": "可以。把 CTA 和字段改成真实项目需要的转化路径即可。"
+          "id": "unknown-model",
+          "question": "不知道型号怎么办？",
+          "answer": "可以发送 diffuser body、膜片、连接处和旧件标记的照片。尺寸和 part list 也有帮助。"
         },
         {
           "id": "form-routing",
-          "question": "表单会把询盘发送到哪里？",
-          "answer": "上线前请配置真实接收方，例如邮箱、Airtable、CRM 或其他线索管理系统。"
+          "question": "表单会发到哪里？",
+          "answer": "最终接收方必须在公开上线前配置。当前文案只说明目标询价内容。"
         }
       ]
     },
-    "content": "\n## 联系方式\n\n这是 public demo starter 的快速联系入口。真实项目接入接收方后，可以用它收集询盘、演示预约或上线相关问题。\n\n用于真实业务前，请替换文案、表单流向、响应预期和接收方信息。\n\n## 响应预期\n\n- **一般咨询**：替换成真实响应时间。\n- **报价或项目请求**：说明哪些信息有助于团队回复。\n- **技术或服务问题**：说明会由销售、支持还是专业人员处理。\n- **演示、样品或咨询预约**：按项目真实下一步调整这一段。\n"
+    "content": "\n## 提交替换膜片询价\n\n这个页面用于准备 Tucsenberg review aftermarket aeration replacement membrane 所需的信息。\n\n最有用的询价信息包括 OEM family、旧 part number、disc 或 tube 形式、膜片尺寸、照片、废水工况、数量区间和停机时间。\n\n## 有用的 RFQ 输入\n\n- OEM family 或现有型号。\n- 旧 part number、图纸或 part list。\n- Disc 或 tube 形式，以及关键尺寸。\n- 材质偏好或废水工况。\n- 数量区间和停机时间。\n- Diffuser body、膜片、连接处和标记照片。\n\n## 当前上线边界\n\n最终表单路由、接收方归属和响应预期，还需要在公开上线前确认。\n"
   },
   {
     "type": "pages",
@@ -539,26 +536,25 @@ const _entries: ContentEntry[] = [
     "relativePath": "content/pages/zh/how-it-works.mdx",
     "metadata": {
       "locale": "zh",
-      "title": "如何使用",
-      "description": "从没有网站，到一套可上线的基础设施。",
+      "title": "如何准备询价",
+      "description": "用 OEM-family 证据、part number、尺寸、材质工况和数量区间准备替换膜片询价。",
       "slug": "how-it-works",
       "publishedAt": "2026-04-26",
-      "updatedAt": "2026-05-04",
-      "lastReviewed": "2026-05-04",
+      "updatedAt": "2026-05-15",
+      "lastReviewed": "2026-05-15",
       "draft": false,
       "seo": {
-        "title": "如何使用 | 从设置到上线",
-        "description": "以这个完整 demo 为起点，替换业务事实，接通线索路径，部署到 Cloudflare，并在证明完成后再说可以上线。",
+        "title": "如何准备询价 | 替换膜片 RFQ 输入",
+        "description": "了解哪些信息有助于 Tucsenberg review aftermarket aeration replacement membrane 询价。",
         "keywords": [
-          "网站搭建流程",
-          "展示型网站上线",
-          "Cloudflare 上线流程",
-          "B2B 网站 starter"
+          "替换膜片 RFQ",
+          "曝气膜片 part number",
+          "OEM diffuser membrane replacement"
         ],
         "ogImage": "/images/og-image.jpg"
       }
     },
-    "content": "\n## 从没有网站，到一套可上线的基础设施\n\n以这个完整 demo 为起点，替换业务事实，接通线索路径，部署到 Cloudflare，并在证明完成后再说可以上线。\n\n1. 替换业务事实：更新品牌、域名、联系方式、业务内容、图片、法务主体和证据材料。\n2. 检查公开表达：确认首页和支持页面能把真实业务讲清楚。\n3. 接通线索路径：配置表单安全、邮件、Airtable 或 CRM 存储，以及安全的测试提交流程。\n4. 部署到 Cloudflare：完成 Cloudflare 构建和预览证明后，才能把公开路由当成可用结果。\n5. 查看流量并确认：配置 Owner 报告可见性，确认真实访问是否可见，再由 owner 做上线确认。\n"
+    "content": "\n## 先准备证据，再询替换膜片\n\n负责任的膜片 review 从现有系统开始，而不是从泛目录承诺开始。\n\n1. 尽量确认 OEM family、现有型号、diffuser body 或旧 part number。\n2. 提供膜片形式、尺寸、照片、图纸或 part list。\n3. 描述可能影响材质适配的废水工况。\n4. 提供数量区间和停机时间。\n5. 再根据这些证据连接到替换路径。\n\n## 如果型号不确定\n\n可以发送 diffuser body、膜片、连接处和旧件标记的照片。即使缺少品牌或型号名，尺寸信息也有帮助。\n\n## 如果材质不确定\n\n说明废水类型、化学暴露、是否有油脂或溶剂、已知温度范围，以及 fouling 是否是问题。EPDM、TPU/PU 和后续 PTFE-coated EPDM 都应按工况适配来 review。\n\n## 如果项目很急\n\n请提供停机时间和数量区间。这样可以区分紧急替换和年度计划采购。\n"
   },
   {
     "type": "pages",

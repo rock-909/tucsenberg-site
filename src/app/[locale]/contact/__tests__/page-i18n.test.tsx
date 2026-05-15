@@ -17,7 +17,7 @@ describe("Contact page MDX i18n", () => {
       >,
     );
 
-    expect(en[0]?.question).toContain("How fast should a real site respond?");
-    expect(zh[0]?.question).toContain("真实网站应该多久回复？");
+    expect(en[0]?.question).toContain("Is a response time guaranteed?");
+    expect(zh[0]?.question).toContain("现在承诺响应时间吗？");
   });
 });
