@@ -1633,5 +1633,102 @@
       "transparency": "可视层",
       "uvResistance": "户外适配"
     }
+  },
+  "membraneProduct": {
+    "hero": {
+      "overline": "替换膜片",
+      "specBar": {
+        "diameter": "直径",
+        "material": "材质",
+        "category": "类型",
+        "sku": "SKU"
+      }
+    },
+    "compatibility": {
+      "title": "兼容 OEM 型号",
+      "description": "本膜片为以下 OEM 曝气器型号的计划替换件。下单前请确认尺寸与配件。",
+      "crossRefNote": "所列编号为 OEM 编号或公开的交叉参考／互换编号，并非由 OEM 销售的编号。",
+      "fitStatus": {
+        "exact": "精确匹配",
+        "verify-dimensions": "需核对尺寸",
+        "custom": "定制"
+      },
+      "confidence": {
+        "high": "高置信度",
+        "medium": "中置信度",
+        "low": "低置信度"
+      },
+      "requiredChecks": "买方须确认",
+      "noChecksRequired": "无需额外核对"
+    },
+    "cta": {
+      "requestQuote": "就此部件询价",
+      "viewGroup": "查看全部尺寸"
+    }
+  },
+  "compatibleBrand": {
+    "hero": {
+      "overline": "OEM 兼容性",
+      "description": "适用于 {brand} 曝气器的替换膜片。"
+    },
+    "disclaimer": "商标声明",
+    "filter": {
+      "all": "全部",
+      "disc": "盘式型号",
+      "tube": "管式型号",
+      "material": "材质",
+      "materialAll": "全部材质"
+    },
+    "results": {
+      "compatibleProduct": "兼容的 Tucsenberg 替换件",
+      "partNumbers": "OEM／交叉参考编号",
+      "fitStatus": "匹配状态",
+      "confidence": "置信度",
+      "requiredChecks": "买方须确认",
+      "noChecksRequired": "无需额外核对",
+      "requestQuote": "就此部件询价",
+      "empty": "没有型号符合所选筛选条件。"
+    }
+  },
+  "quote": {
+    "hero": {
+      "title": "询价",
+      "description": "告诉我们您的需求。我们会审核您的请求并在 2 个工作日内回复。"
+    },
+    "form": {
+      "partNumbers": "部件编号或 OEM 型号",
+      "partNumbersHint": "请填写 Tucsenberg SKU、OEM 部件编号或型号名称",
+      "quantity": "数量",
+      "quantityHint": "所需的大致数量",
+      "company": "公司／组织",
+      "email": "邮箱",
+      "name": "姓名",
+      "country": "国家／地区",
+      "material": "首选材质",
+      "materialOptions": {
+        "epdm": "EPDM",
+        "tpu": "TPU",
+        "notSure": "不确定 — 请为我建议"
+      },
+      "shutdownDate": "停机日期／紧急程度",
+      "shutdownDateHint": "您需要在何时安装膜片？",
+      "notes": "补充说明",
+      "fileUpload": "上传部件清单或照片",
+      "fileUploadHint": "CSV、PDF 或图片（最大 10MB）",
+      "submit": "提交询价请求",
+      "submitting": "提交中..."
+    },
+    "summary": {
+      "title": "您的请求摘要",
+      "empty": "填写信息以查看请求摘要",
+      "leadTime": "交期",
+      "leadTimeValue": "在询价审核时确认",
+      "responseTime": "回复时间",
+      "responseTimeValue": "2 个工作日内"
+    },
+    "success": {
+      "title": "询价请求已提交",
+      "description": "我们已收到您的请求，将在 2 个工作日内回复至 {email}。"
+    }
   }
 }

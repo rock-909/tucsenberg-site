@@ -1633,5 +1633,102 @@
       "specialty": "[ES-TODO] Specialty Example",
       "custom": "[ES-TODO] Custom"
     }
+  },
+  "membraneProduct": {
+    "hero": {
+      "overline": "MEMBRANA DE REEMPLAZO",
+      "specBar": {
+        "diameter": "Diámetro",
+        "material": "Material",
+        "category": "Tipo",
+        "sku": "SKU"
+      }
+    },
+    "compatibility": {
+      "title": "Modelos OEM compatibles",
+      "description": "Esta membrana es un reemplazo previsto para los siguientes modelos de difusores OEM. Confirme las dimensiones y los herrajes antes de pedir.",
+      "crossRefNote": "Los números mostrados son números OEM o números de referencia cruzada / intercambio publicados, no números vendidos por el OEM.",
+      "fitStatus": {
+        "exact": "Ajuste exacto",
+        "verify-dimensions": "Verificar dimensiones",
+        "custom": "Personalizado"
+      },
+      "confidence": {
+        "high": "Confianza alta",
+        "medium": "Confianza media",
+        "low": "Confianza baja"
+      },
+      "requiredChecks": "El comprador debe verificar",
+      "noChecksRequired": "No se requiere verificación adicional"
+    },
+    "cta": {
+      "requestQuote": "Solicitar cotización para esta pieza",
+      "viewGroup": "Ver todos los tamaños"
+    }
+  },
+  "compatibleBrand": {
+    "hero": {
+      "overline": "COMPATIBILIDAD OEM",
+      "description": "Membranas de reemplazo para difusores de aireación {brand}."
+    },
+    "disclaimer": "Aviso de marca registrada",
+    "filter": {
+      "all": "Todos",
+      "disc": "Modelos de disco",
+      "tube": "Modelos de tubo",
+      "material": "Material",
+      "materialAll": "Todos los materiales"
+    },
+    "results": {
+      "compatibleProduct": "Reemplazo Tucsenberg compatible",
+      "partNumbers": "Números OEM / de referencia cruzada",
+      "fitStatus": "Estado de ajuste",
+      "confidence": "Confianza",
+      "requiredChecks": "El comprador debe verificar",
+      "noChecksRequired": "No se requiere verificación adicional",
+      "requestQuote": "Solicitar cotización para esta pieza",
+      "empty": "Ningún modelo coincide con los filtros seleccionados."
+    }
+  },
+  "quote": {
+    "hero": {
+      "title": "Solicitar cotización",
+      "description": "Indíquenos lo que necesita. Revisamos su solicitud y respondemos en un plazo de 2 días hábiles."
+    },
+    "form": {
+      "partNumbers": "Número(s) de pieza o modelo OEM",
+      "partNumbersHint": "Ingrese el SKU de Tucsenberg, el número de pieza OEM o el nombre del modelo",
+      "quantity": "Cantidad",
+      "quantityHint": "Cantidad aproximada requerida",
+      "company": "Empresa / Organización",
+      "email": "Correo electrónico",
+      "name": "Nombre completo",
+      "country": "País",
+      "material": "Material preferido",
+      "materialOptions": {
+        "epdm": "EPDM",
+        "tpu": "TPU",
+        "notSure": "No estoy seguro — asesórenme"
+      },
+      "shutdownDate": "Fecha de parada / Urgencia",
+      "shutdownDateHint": "¿Cuándo necesita instalar las membranas?",
+      "notes": "Notas adicionales",
+      "fileUpload": "Subir lista de piezas o fotos",
+      "fileUploadHint": "CSV, PDF o imágenes (máx. 10MB)",
+      "submit": "Enviar solicitud de cotización",
+      "submitting": "Enviando..."
+    },
+    "summary": {
+      "title": "Resumen de su solicitud",
+      "empty": "Agregue detalles para ver el resumen de su solicitud",
+      "leadTime": "Plazo de entrega",
+      "leadTimeValue": "Confirmado durante la revisión de la cotización",
+      "responseTime": "Tiempo de respuesta",
+      "responseTimeValue": "En un plazo de 2 días hábiles"
+    },
+    "success": {
+      "title": "Solicitud de cotización enviada",
+      "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles."
+    }
   }
 }

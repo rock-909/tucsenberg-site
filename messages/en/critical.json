@@ -1633,5 +1633,102 @@
       "specialty": "Specialty Example",
       "custom": "Custom"
     }
+  },
+  "membraneProduct": {
+    "hero": {
+      "overline": "REPLACEMENT MEMBRANE",
+      "specBar": {
+        "diameter": "Diameter",
+        "material": "Material",
+        "category": "Type",
+        "sku": "SKU"
+      }
+    },
+    "compatibility": {
+      "title": "Compatible OEM Models",
+      "description": "This membrane is a planned replacement for the following OEM diffuser models. Confirm dimensions and hardware before ordering.",
+      "crossRefNote": "Numbers shown are OEM or published cross-reference / interchange numbers, not numbers sold by the OEM.",
+      "fitStatus": {
+        "exact": "Exact Fit",
+        "verify-dimensions": "Verify Dimensions",
+        "custom": "Custom"
+      },
+      "confidence": {
+        "high": "High Confidence",
+        "medium": "Medium Confidence",
+        "low": "Low Confidence"
+      },
+      "requiredChecks": "Buyer Must Verify",
+      "noChecksRequired": "No additional verification required"
+    },
+    "cta": {
+      "requestQuote": "Request Quote for This Part",
+      "viewGroup": "View All Sizes"
+    }
+  },
+  "compatibleBrand": {
+    "hero": {
+      "overline": "OEM COMPATIBILITY",
+      "description": "Replacement membranes for {brand} aeration diffusers."
+    },
+    "disclaimer": "Trademark Disclaimer",
+    "filter": {
+      "all": "All",
+      "disc": "Disc Models",
+      "tube": "Tube Models",
+      "material": "Material",
+      "materialAll": "All Materials"
+    },
+    "results": {
+      "compatibleProduct": "Compatible Tucsenberg Replacement",
+      "partNumbers": "OEM / Cross-Reference Numbers",
+      "fitStatus": "Fit Status",
+      "confidence": "Confidence",
+      "requiredChecks": "Buyer Must Verify",
+      "noChecksRequired": "No additional verification required",
+      "requestQuote": "Request Quote for This Part",
+      "empty": "No models match the selected filters."
+    }
+  },
+  "quote": {
+    "hero": {
+      "title": "Request a Quote",
+      "description": "Tell us what you need. We review your request and respond within 2 business days."
+    },
+    "form": {
+      "partNumbers": "Part Number(s) or OEM Model",
+      "partNumbersHint": "Enter Tucsenberg SKU, OEM part number, or model name",
+      "quantity": "Quantity",
+      "quantityHint": "Approximate quantity needed",
+      "company": "Company / Organization",
+      "email": "Email",
+      "name": "Full Name",
+      "country": "Country",
+      "material": "Preferred Material",
+      "materialOptions": {
+        "epdm": "EPDM",
+        "tpu": "TPU",
+        "notSure": "Not sure — advise me"
+      },
+      "shutdownDate": "Shutdown Date / Urgency",
+      "shutdownDateHint": "When do you need the membranes installed?",
+      "notes": "Additional Notes",
+      "fileUpload": "Upload Part List or Photos",
+      "fileUploadHint": "CSV, PDF, or images (max 10MB)",
+      "submit": "Submit Quote Request",
+      "submitting": "Submitting..."
+    },
+    "summary": {
+      "title": "Your Request Summary",
+      "empty": "Add details to see your request summary",
+      "leadTime": "Lead Time",
+      "leadTimeValue": "Confirmed during quote review",
+      "responseTime": "Response Time",
+      "responseTimeValue": "Within 2 business days"
+    },
+    "success": {
+      "title": "Quote Request Submitted",
+      "description": "We received your request and will respond to {email} within 2 business days."
+    }
   }
 }
