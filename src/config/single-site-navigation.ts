@@ -1,4 +1,7 @@
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import type { SiteNavigationItem } from "@/config/site-types";
 
 export type { SiteNavigationItem } from "@/config/site-types";
@@ -6,7 +9,7 @@ export type { SiteNavigationItem } from "@/config/site-types";
 export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] = [
   {
     key: "membranes",
-    href: "/membranes/tuc-d9-epdm",
+    href: FEATURED_MEMBRANE_HREF,
     translationKey: "navigation.membranes",
   },
   {

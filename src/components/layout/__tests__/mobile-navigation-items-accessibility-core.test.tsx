@@ -189,7 +189,7 @@ describe("Mobile Navigation - Core Tests", () => {
 
     it("should highlight active navigation item", async () => {
       // Step 4 wires the membranes nav item to its real route.
-      mockPathname.current = "/membranes/tuc-d9-epdm";
+      mockPathname.current = "/membranes/9-inch-epdm-disc-replacement";
 
       render(<MobileNavigation />);
 

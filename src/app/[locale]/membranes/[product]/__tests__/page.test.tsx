@@ -17,11 +17,17 @@ type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
 };
 
 const notFoundError = new Error("NEXT_NOT_FOUND");
+const permanentRedirectError = new Error("NEXT_REDIRECT");
+
+const permanentRedirectMock = vi.fn((_url: string) => {
+  throw permanentRedirectError;
+});
 
 vi.mock("next/navigation", () => ({
   notFound: vi.fn(() => {
     throw notFoundError;
   }),
+  permanentRedirect: (url: string) => permanentRedirectMock(url),
 }));
 
 vi.mock("@/i18n/routing", () => ({
@@ -49,10 +55,17 @@ vi.mock("@/app/[locale]/membranes/[product]/compatibility-section", () => ({
   CompatibilitySection: () => <section data-testid="compatibility-section" />,
 }));
 
+const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
+
 describe("Membrane product page", () => {
-  it("generates a param for every variant slug across locales", () => {
+  it("generates a canonical descriptive param for every variant across locales", () => {
     const params = generateStaticParams();
     expect(params).toContainEqual({
+      locale: "en",
+      product: CANONICAL_D9_EPDM,
+    });
+    // The legacy SKU slug is a redirect source, never a generated param.
+    expect(params).not.toContainEqual({
       locale: "en",
       product: "tuc-d9-epdm",
     });
@@ -61,9 +74,9 @@ describe("Membrane product page", () => {
     ).toBeGreaterThan(1);
   });
 
-  it("renders the spec bar and quote CTA for a known slug", async () => {
+  it("renders the spec bar and quote CTA for the canonical descriptive slug", async () => {
     const Page = await ProductPage({
-      params: Promise.resolve({ locale: "en", product: "tuc-d9-epdm" }),
+      params: Promise.resolve({ locale: "en", product: CANONICAL_D9_EPDM }),
     });
 
     render(Page);
@@ -71,9 +84,37 @@ describe("Membrane product page", () => {
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     expect(screen.getByText("EPDM")).toBeInTheDocument();
     expect(screen.getByText("TUC-D9-EPDM")).toBeInTheDocument();
+    // `?sku=` keeps the real SKU for the RFQ; `?product=` uses the canonical slug.
     expect(
       screen.getByRole("link", { name: "cta.requestQuote" }),
-    ).toHaveAttribute("href", "/quote?sku=TUC-D9-EPDM&product=tuc-d9-epdm");
+    ).toHaveAttribute(
+      "href",
+      `/quote?sku=TUC-D9-EPDM&product=${CANONICAL_D9_EPDM}`,
+    );
+  });
+
+  it("permanently redirects the legacy SKU slug to the canonical descriptive URL", async () => {
+    permanentRedirectMock.mockClear();
+    await expect(
+      ProductPage({
+        params: Promise.resolve({ locale: "en", product: "tuc-d9-epdm" }),
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT");
+    expect(permanentRedirectMock).toHaveBeenCalledWith(
+      `/en/membranes/${CANONICAL_D9_EPDM}`,
+    );
+  });
+
+  it("preserves the locale prefix on the SKU redirect", async () => {
+    permanentRedirectMock.mockClear();
+    await expect(
+      ProductPage({
+        params: Promise.resolve({ locale: "es", product: "tuc-t62-tpu" }),
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT");
+    expect(permanentRedirectMock).toHaveBeenCalledWith(
+      "/es/membranes/62-mm-tpu-tube-replacement",
+    );
   });
 
   it("calls notFound() for an unknown slug", async () => {

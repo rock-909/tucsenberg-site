@@ -33,7 +33,9 @@ A buyer landing on the homepage sees the brand H1 and compatibility sub-claim, a
 | Test File | `tests/e2e/homepage.spec.ts` |
 | Status | Covered |
 
-Notes: E2E runs for `/en` and `/es`. It verifies the brand H1, the hero compatibility search resolving a known OEM part number (`00223` → Sanitaire model) to a `/compatible/sanitaire` result link, an OEM brand card linking to `/compatible/sanitaire`, and the final CTA `href` targets (`/quote` and the `/membranes/tuc-d9-epdm` product page) in the active locale. The spec fails on page runtime/console errors.
+Notes: E2E runs for `/en` and `/es`. It verifies the brand H1, the hero compatibility search resolving a known OEM part number (`00223` → Sanitaire model) to a `/compatible/sanitaire` result link, an OEM brand card linking to `/compatible/sanitaire`, and the final CTA `href` targets (`/quote` and the canonical descriptive membrane product page `/membranes/9-inch-epdm-disc-replacement`) in the active locale. The spec fails on page runtime/console errors.
+
+Membrane product URL contract: the canonical product detail URL is the descriptive buyer slug `{diameter}-{unit}-{material}-{form}-replacement` (e.g. `/membranes/9-inch-epdm-disc-replacement`). The legacy data-layer SKU slug (`/membranes/tuc-d9-epdm`) issues a permanent (308) redirect to the canonical descriptive URL, preserving the locale prefix, so datasheet / QR / already-shared SKU links never 404. The sitemap emits only the canonical descriptive slug per public locale (ZH excluded). Proof: `src/data/product-compatibility/__tests__/product-slug.test.ts`, `src/app/[locale]/membranes/[product]/__tests__/page.test.tsx`, `src/app/__tests__/sitemap.test.ts`.
 
 ---
 

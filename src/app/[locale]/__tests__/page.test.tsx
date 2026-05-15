@@ -7,7 +7,10 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Home, { generateStaticParams } from "../page";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 
 vi.unmock("zod");
 
@@ -161,7 +164,11 @@ describe("Home Page", () => {
       ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.quote);
       expect(
         screen.getByRole("link", { name: "Browse All Membranes" }),
-      ).toHaveAttribute("href", "/membranes/tuc-d9-epdm");
+      ).toHaveAttribute("href", FEATURED_MEMBRANE_HREF);
+      // Final CTA uses the canonical descriptive membrane slug.
+      expect(FEATURED_MEMBRANE_HREF).toBe(
+        "/membranes/9-inch-epdm-disc-replacement",
+      );
     });
 
     it("should have correct container classes", async () => {

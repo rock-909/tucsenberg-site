@@ -5,7 +5,11 @@ import {
   getMembraneProductPath,
   getProductMarketPath,
 } from "@/config/paths/utils";
-import { oemBrands, productVariants } from "@/data/product-compatibility";
+import {
+  canonicalProductSlug,
+  oemBrands,
+  productVariants,
+} from "@/data/product-compatibility";
 import {
   getAllMarketFamilyCombos,
   getAllMarketSlugs,
@@ -402,16 +406,21 @@ describe("sitemap.ts", () => {
       );
     });
 
-    it("should include a membrane product URL per productVariant slug for public locales only", async () => {
+    it("should include a canonical descriptive membrane URL per productVariant for public locales only", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
       expect(productVariants.length).toBeGreaterThan(0);
       for (const variant of productVariants) {
-        const path = getMembraneProductPath(variant.slug);
+        const path = getMembraneProductPath(canonicalProductSlug(variant));
         expect(urls).toContain(localizedUrl("en", path));
         expect(urls).toContain(localizedUrl("es", path));
         expect(urls).not.toContain(localizedUrl("zh", path));
+
+        // The legacy SKU slug is a redirect source and must NOT be emitted.
+        const skuPath = getMembraneProductPath(variant.slug);
+        expect(urls).not.toContain(localizedUrl("en", skuPath));
+        expect(urls).not.toContain(localizedUrl("es", skuPath));
       }
     });
 
@@ -435,11 +444,10 @@ describe("sitemap.ts", () => {
 
       expect(variant).toBeDefined();
       expect(brand).toBeDefined();
-      const variantEntry = findEntry(
-        result,
-        defaultLocale,
-        getMembraneProductPath(variant?.slug ?? ""),
-      );
+      const variantPath = variant
+        ? getMembraneProductPath(canonicalProductSlug(variant))
+        : "";
+      const variantEntry = findEntry(result, defaultLocale, variantPath);
       const brandEntry = findEntry(
         result,
         defaultLocale,
@@ -447,12 +455,9 @@ describe("sitemap.ts", () => {
       );
 
       expect(variantEntry?.alternates?.languages).toEqual({
-        en: localizedUrl("en", getMembraneProductPath(variant?.slug ?? "")),
-        es: localizedUrl("es", getMembraneProductPath(variant?.slug ?? "")),
-        "x-default": localizedUrl(
-          "en",
-          getMembraneProductPath(variant?.slug ?? ""),
-        ),
+        en: localizedUrl("en", variantPath),
+        es: localizedUrl("es", variantPath),
+        "x-default": localizedUrl("en", variantPath),
       });
       expect(brandEntry?.alternates?.languages).not.toHaveProperty("zh");
     });
@@ -469,7 +474,9 @@ describe("sitemap.ts", () => {
         getAllMarketSlugs().map((slug) => getProductMarketPath(slug)),
       );
       const membranePaths = new Set(
-        productVariants.map((variant) => getMembraneProductPath(variant.slug)),
+        productVariants.map((variant) =>
+          getMembraneProductPath(canonicalProductSlug(variant)),
+        ),
       );
       const brandPaths = new Set(
         oemBrands.map((brand) => getCompatibleBrandPath(brand.slug)),

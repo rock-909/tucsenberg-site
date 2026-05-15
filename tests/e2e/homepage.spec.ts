@@ -59,7 +59,9 @@ const LOCALE_CASES: readonly LocaleCase[] = [
 const KNOWN_PART_NUMBER = "00223";
 const KNOWN_MODEL_NAME = /Silver Series II 9 inch Disc/i;
 const FIRST_BRAND_SLUG = "sanitaire";
-const MEMBRANES_HREF_FRAGMENT = "/membranes/tuc-d9-epdm";
+// Canonical descriptive membrane slug (the SKU slug `tuc-d9-epdm`
+// 308-redirects to this). The final CTA links straight to the canonical URL.
+const MEMBRANES_HREF_FRAGMENT = "/membranes/9-inch-epdm-disc-replacement";
 
 async function gotoHomepage(page: Page, locale: string): Promise<void> {
   await page.goto(`/${locale}`, { waitUntil: "domcontentloaded" });

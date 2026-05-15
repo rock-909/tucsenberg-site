@@ -11,6 +11,14 @@ export {
   getProductCompatibility,
 } from "@/data/product-compatibility/accessors";
 export {
+  allCanonicalProductSlugs,
+  canonicalProductSlug,
+  canonicalProductSlugForVariantId,
+  getProductCompatibilityByCanonicalSlug,
+  resolveCanonicalProductSlugFromSku,
+  toCanonicalProductSlug,
+} from "@/data/product-compatibility/product-slug";
+export {
   compatibilityByBrand,
   compatibilityByModel,
   compatibilityByProduct,

@@ -7,7 +7,10 @@ import {
   SINGLE_SITE_KEY,
   SINGLE_SITE_NAVIGATION,
 } from "@/config/single-site";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { siteFacts } from "@/config/site-facts";
 
 describe("site-facts", () => {
@@ -27,11 +30,15 @@ describe("site-facts", () => {
       "quote",
     ]);
     expect(SINGLE_SITE_NAVIGATION.map((item) => item.href)).toEqual([
-      "/membranes/tuc-d9-epdm",
+      FEATURED_MEMBRANE_HREF,
       "/compatible/sanitaire",
       SINGLE_SITE_ROUTE_HREFS.comingSoon,
       SINGLE_SITE_ROUTE_HREFS.quote,
     ]);
+    // The featured membrane nav target is the canonical descriptive slug.
+    expect(FEATURED_MEMBRANE_HREF).toBe(
+      "/membranes/9-inch-epdm-disc-replacement",
+    );
   });
 
   it("exports site facts with expected shape", () => {

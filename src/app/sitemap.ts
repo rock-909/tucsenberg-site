@@ -13,7 +13,11 @@ import {
   getMembraneProductPath,
   getProductMarketPath,
 } from "@/config/paths/utils";
-import { oemBrands, productVariants } from "@/data/product-compatibility";
+import {
+  canonicalProductSlug,
+  oemBrands,
+  productVariants,
+} from "@/data/product-compatibility";
 import {
   getSingleSiteSitemapPageConfig,
   SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO,
@@ -139,8 +143,10 @@ function generateCompatibilityEntries(): MetadataRoute.Sitemap {
   const lastModified = new Date(SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO);
 
   const membraneConfig = getPageConfig("membraneProduct");
+  // Emit ONLY the canonical descriptive slug. The legacy SKU slug is a
+  // permanent-redirect source, not an indexable URL.
   for (const variant of productVariants) {
-    const path = getMembraneProductPath(variant.slug);
+    const path = getMembraneProductPath(canonicalProductSlug(variant));
 
     for (const locale of PUBLIC_LOCALES) {
       entries.push(

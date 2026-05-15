@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  getProductCompatibility,
+  canonicalProductSlug,
+  getProductCompatibilityByCanonicalSlug,
   productVariants,
+  resolveCanonicalProductSlugFromSku,
 } from "@/data/product-compatibility";
+import { getMembraneProductPath } from "@/config/paths/utils";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
 import { CompatibilitySection } from "@/app/[locale]/membranes/[product]/compatibility-section";
@@ -18,7 +21,10 @@ interface ProductPageProps {
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
-    productVariants.map((variant) => ({ locale, product: variant.slug })),
+    productVariants.map((variant) => ({
+      locale,
+      product: canonicalProductSlug(variant),
+    })),
   );
 }
 
@@ -26,7 +32,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { locale, product } = await params;
-  const entry = getProductCompatibility(product);
+  const entry = getProductCompatibilityByCanonicalSlug(product);
 
   if (!entry) return {};
 
@@ -47,8 +53,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { locale, product } = await params;
   setRequestLocale(locale);
 
-  const entry = getProductCompatibility(product);
+  const entry = getProductCompatibilityByCanonicalSlug(product);
   if (!entry) {
+    // Legacy SKU slug (datasheet / QR / already-shared link): permanently
+    // redirect to the canonical descriptive URL so it never 404s and link
+    // equity consolidates. 308 in this server context; ships in the static
+    // build (no next.config redirects() needed for OpenNext Cloudflare).
+    const canonicalSlug = resolveCanonicalProductSlugFromSku(product);
+    if (canonicalSlug) {
+      permanentRedirect(`/${locale}${getMembraneProductPath(canonicalSlug)}`);
+    }
     notFound();
   }
 
@@ -68,9 +82,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { label: t("hero.specBar.sku"), value: entry.sku, mono: true },
   ];
 
+  // `?sku=` carries the real SKU for the RFQ (quote form reads `sku`).
+  // `?product=` carries the canonical descriptive slug for display/context.
   const quoteHref =
     `/quote?sku=${encodeURIComponent(entry.sku)}` +
-    `&product=${encodeURIComponent(entry.productSlug)}`;
+    `&product=${encodeURIComponent(product)}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

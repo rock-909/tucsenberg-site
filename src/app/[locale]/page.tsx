@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 
@@ -21,7 +24,7 @@ interface HomePageProps {
 
 const TRUST_ITEMS = ["scope", "leadTime", "sla", "noFit"] as const;
 const MATERIAL_ITEMS = ["epdm", "tpu"] as const;
-const BROWSE_ALL_MEMBRANES_HREF = "/membranes/tuc-d9-epdm";
+const BROWSE_ALL_MEMBRANES_HREF = FEATURED_MEMBRANE_HREF;
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();

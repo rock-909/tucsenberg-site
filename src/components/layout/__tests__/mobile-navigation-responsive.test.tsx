@@ -288,7 +288,7 @@ describe("Mobile Navigation Responsive - Main Tests", () => {
       fireEvent.click(trigger);
 
       // Step 4 wires the membranes nav item to its real route.
-      mockPathname.current = "/membranes/tuc-d9-epdm";
+      mockPathname.current = "/membranes/9-inch-epdm-disc-replacement";
       rerender(<MobileNavigation />);
 
       const reopenedTrigger = screen.getByRole("button");

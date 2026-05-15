@@ -15,6 +15,9 @@ import {
   type NavigationItem,
 } from "../navigation";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
+import { FEATURED_MEMBRANE_HREF } from "@/config/single-site-links";
+
+const CANONICAL_MEMBRANE_HREF = "/membranes/9-inch-epdm-disc-replacement";
 
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
@@ -60,7 +63,7 @@ describe("navigation", () => {
       expect(mainNavigation).toEqual([
         {
           key: "membranes",
-          href: "/membranes/tuc-d9-epdm",
+          href: CANONICAL_MEMBRANE_HREF,
           translationKey: "navigation.membranes",
         },
         {
@@ -118,11 +121,13 @@ describe("navigation", () => {
 
     it("should wire hrefs to the Step 4 routes with materials still pending", () => {
       expect(mainNavigation.map((item) => item.href)).toEqual([
-        "/membranes/tuc-d9-epdm",
+        CANONICAL_MEMBRANE_HREF,
         "/compatible/sanitaire",
         "#coming-soon",
         "/quote",
       ]);
+      // Nav uses the centralized canonical featured-membrane href.
+      expect(FEATURED_MEMBRANE_HREF).toBe(CANONICAL_MEMBRANE_HREF);
     });
   });
 
