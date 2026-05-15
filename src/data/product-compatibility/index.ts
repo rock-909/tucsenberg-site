@@ -6,6 +6,11 @@ export {
 } from "@/data/product-compatibility/catalog";
 export { compatibilityMappings } from "@/data/product-compatibility/mappings";
 export {
+  getBrandCompatibility,
+  getModelCompatibility,
+  getProductCompatibility,
+} from "@/data/product-compatibility/accessors";
+export {
   compatibilityByBrand,
   compatibilityByModel,
   compatibilityByProduct,
