@@ -239,14 +239,14 @@ describe("proof lane contract", () => {
       "node scripts/starter-checks.js truth-docs",
     );
     expect(releaseProofFlow).toContain(
-      "node scripts/starter-checks.js cf-official-compare --source-only",
+      "node scripts/starter-checks.js cf-static-baseline --source-only",
     );
     expect(releaseProofFlow).not.toContain(
-      "node scripts/starter-checks.js cf-official-compare --generated-only",
+      "node scripts/starter-checks.js cf-static-baseline --generated-only",
     );
     expect(
       releaseProofFlow.indexOf(
-        "node scripts/starter-checks.js cf-official-compare --source-only",
+        "node scripts/starter-checks.js cf-static-baseline --source-only",
       ),
     ).toBeLessThan(
       releaseProofFlow.indexOf(

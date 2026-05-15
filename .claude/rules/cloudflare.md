@@ -99,18 +99,39 @@ middleware-provided trusted IP headers.
 
 ## Cache and runtime bindings
 
+Current profile: **static redeploy profile**.
+
+This is a Tucsenberg phase policy, not an OpenNext Cloudflare limitation.
+OpenNext Cloudflare officially supports R2 incremental cache, service
+self-reference, D1/Durable Object tag cache, and Durable Object queues for ISR
+or on-demand revalidation. This repo does not use that official cache profile
+by default because content, translations, and page copy currently ship through
+rebuild/redeploy.
+
 - Do not add `cacheTag()`, `revalidateTag()`, or `revalidatePath()` to
   production code without a new Cloudflare proof plan.
 - Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
-  cache storage as a default.
+  cache storage under the current static redeploy profile.
 - New `"use cache"` boundaries must stay narrow and explain why rebuild/redeploy
   is not enough.
 - Content updates flow through rebuild/redeploy unless a future CMS integration
   proves a different path.
-- `wrangler.jsonc` must not add `r2_buckets`, `d1_databases`, or
-  `durable_objects` for this repo by default.
+- `wrangler.jsonc` must not add `services.WORKER_SELF_REFERENCE`,
+  `r2_buckets`, `d1_databases`, or `durable_objects` under the current profile.
 - `open-next.config.ts` must not add custom incremental cache, tag cache, or
-  queue overrides by default.
+  queue overrides under the current profile.
 
-If those platform pieces become real requirements later, update this file,
-the related proof docs, and the matching tests in the same branch.
+Open a dedicated **official OpenNext Cloudflare cache profile** proof lane if
+any of these become real product requirements:
+
+- CMS-driven content updates without rebuild/redeploy.
+- ISR via `export const revalidate` or `fetch(..., { next: { revalidate } })`.
+- On-demand invalidation through `revalidateTag()` or `revalidatePath()`.
+- Persistent cache tagging through `cacheTag()` or remote cache handlers.
+- Cross-isolate or cross-deployment incremental cache consistency.
+
+That lane should evaluate the official R2 incremental cache, D1 or Durable
+Object tag cache, Durable Object queue, `WORKER_SELF_REFERENCE`, required
+Wrangler bindings/migrations, and deployed preview behavior together. If those
+platform pieces become real requirements later, update this file, the related
+proof docs, and the matching tests in the same branch.
