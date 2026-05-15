@@ -15,6 +15,7 @@ import {
 } from "@/components/layout/header-client";
 import { Logo } from "@/components/layout/logo";
 import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
+import { SearchLauncher } from "@/components/search/search-launcher";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -218,6 +219,9 @@ function HeaderUtilityControls({
                 </span>
               </Link>
             </Button>
+          </div>
+          <div className="header-full-desktop-only h-10 items-center justify-end">
+            <SearchLauncher />
           </div>
           <div className="header-full-desktop-only h-10 w-28 items-center justify-end">
             <LanguageToggleIsland locale={locale} />

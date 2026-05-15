@@ -1730,5 +1730,15 @@
       "title": "Solicitud de cotización enviada",
       "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles."
     }
+  },
+  "search": {
+    "placeholder": "Busque por número de pieza, modelo OEM o marca...",
+    "label": "Búsqueda de compatibilidad",
+    "noResults": "Sin resultados para \"{query}\"",
+    "modelsHeading": "Modelos OEM",
+    "productsHeading": "Membranas Tucsenberg",
+    "requestQuote": "Solicitar cotización",
+    "openHint": "Buscar ⌘K",
+    "close": "Cerrar"
   }
 }

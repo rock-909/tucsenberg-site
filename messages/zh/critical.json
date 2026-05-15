@@ -1730,5 +1730,15 @@
       "title": "询价请求已提交",
       "description": "我们已收到您的请求，将在 2 个工作日内回复至 {email}。"
     }
+  },
+  "search": {
+    "placeholder": "按零件号、OEM 型号或品牌搜索...",
+    "label": "兼容性搜索",
+    "noResults": "未找到 \"{query}\" 的结果",
+    "modelsHeading": "OEM 型号",
+    "productsHeading": "Tucsenberg 膜片",
+    "requestQuote": "申请报价",
+    "openHint": "搜索 ⌘K",
+    "close": "关闭"
   }
 }

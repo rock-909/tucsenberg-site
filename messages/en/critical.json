@@ -1730,5 +1730,15 @@
       "title": "Quote Request Submitted",
       "description": "We received your request and will respond to {email} within 2 business days."
     }
+  },
+  "search": {
+    "placeholder": "Search by part number, OEM model, or brand...",
+    "label": "Compatibility search",
+    "noResults": "No results for \"{query}\"",
+    "modelsHeading": "OEM models",
+    "productsHeading": "Tucsenberg membranes",
+    "requestQuote": "Request quote",
+    "openHint": "Search ⌘K",
+    "close": "Close"
   }
 }

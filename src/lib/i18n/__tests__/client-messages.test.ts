@@ -41,6 +41,7 @@ describe("client message scoping", () => {
       "errors",
       "language",
       "navigation",
+      "search",
     ]);
   });
 
