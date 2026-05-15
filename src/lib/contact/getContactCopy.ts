@@ -56,7 +56,7 @@ const CONTACT_COPY_FALLBACKS = {
   "panel.saturday": "Saturday",
   "panel.sunday": "Sunday",
   "panel.closed": "Closed",
-  "panel.responseTitle": "What to expect",
+  "panel.responseTitle": "What to prepare",
   "panel.responseTimeLabel": "Response window",
   "panel.responseTimeValue": "To be confirmed before public launch",
   "panel.bestForLabel": "Best for",

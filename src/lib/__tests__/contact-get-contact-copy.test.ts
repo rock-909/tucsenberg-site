@@ -193,7 +193,7 @@ describe("getContactCopy", () => {
     expect(copy.panel.hours.saturdayLabel).toBe("Saturday");
     expect(copy.panel.hours.sundayLabel).toBe("Sunday");
     expect(copy.panel.hours.closedLabel).toBe("Closed");
-    expect(copy.panel.response.title).toBe("What to expect");
+    expect(copy.panel.response.title).toBe("What to prepare");
     expect(copy.panel.response.responseTimeValue).toBe(
       "To be confirmed before public launch",
     );

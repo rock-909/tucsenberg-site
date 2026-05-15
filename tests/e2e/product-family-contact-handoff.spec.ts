@@ -20,7 +20,6 @@ const localeCases = [
     marketSlug: "north-america",
     familySlug: "sample-product-shapes",
     inquiryLabel: "Request quote for Sample Product Shapes",
-    contextLabel: "You are asking about:",
     marketLabel: "Primary Offer Example",
     familyLabel: "Sample Product Shapes",
   },
@@ -31,7 +30,6 @@ const localeCases = [
     marketSlug: "north-america",
     familySlug: "sample-product-shapes",
     inquiryLabel: "咨询 示例形态",
-    contextLabel: "你正在咨询：",
     marketLabel: "主要业务示例",
     familyLabel: "示例形态",
   },
@@ -50,7 +48,7 @@ function expectProductFamilyContactUrl(
 
 for (const localeCase of localeCases) {
   test.describe(`product family Contact handoff (${localeCase.locale})`, () => {
-    test("renders a localized Contact href and opens Contact with context", async ({
+    test("keeps the localized Contact href without showing legacy catalog context", async ({
       page,
     }) => {
       await page.goto(localeCase.productPath, {
@@ -114,11 +112,12 @@ for (const localeCase of localeCases) {
         fallbackDelay: FALLBACK_DELAY_MS,
       });
 
-      const notice = page.getByTestId("product-family-context-notice");
-      await expect(notice).toBeVisible();
-      await expect(notice).toContainText(localeCase.contextLabel);
-      await expect(notice).toContainText(localeCase.marketLabel);
-      await expect(notice).toContainText(localeCase.familyLabel);
+      await expect(
+        page.getByTestId("product-family-context-notice"),
+      ).toHaveCount(0);
+      await expect(page.getByText(localeCase.marketLabel)).toHaveCount(0);
+      await expect(page.getByText(localeCase.familyLabel)).toHaveCount(0);
+      await expect(page.getByTestId("contact-form-shell")).toBeVisible();
     });
   });
 }
