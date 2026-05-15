@@ -44,6 +44,11 @@ export const RATE_LIMIT_PRESETS = {
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
+  quote: {
+    maxRequests: COUNT_TEN,
+    windowMs: MINUTE_MS,
+    failureMode: "closed" as const,
+  },
   subscribe: {
     maxRequests: COUNT_THREE,
     windowMs: MINUTE_MS,
