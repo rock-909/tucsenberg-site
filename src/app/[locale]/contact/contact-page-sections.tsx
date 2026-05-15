@@ -18,8 +18,6 @@ import type { FaqItem } from "@/types/content.types";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
 
-export type ContactSearchParams = Record<string, string | string[] | undefined>;
-
 export function ContactMethodsCard({
   copy,
 }: {

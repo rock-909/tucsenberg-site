@@ -43,8 +43,8 @@ const contactCopy = {
       phoneLabel: "Phone",
     },
     response: {
-      title: "Response Time",
-      responseTimeLabel: "Response",
+      title: "What to prepare",
+      responseTimeLabel: "Response window",
       responseTimeValue: "To be confirmed before public launch",
       bestForLabel: "Best for",
       bestForValue: "Replacement membrane RFQs",
@@ -204,7 +204,7 @@ describe("ContactPage MDX migration", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Response Time" }));
+    expect(screen.getByRole("heading", { name: "What to prepare" }));
     expect(
       screen.getByText("To be confirmed before public launch"),
     ).toBeInTheDocument();
