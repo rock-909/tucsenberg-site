@@ -75,6 +75,8 @@ spacing:
 
 O&M contractor 和工业废水维护团队搜 `sanitaire membrane replacement` 落到这里，5 秒内确认兼容，3 分钟内拿到询价。**视觉只服务这条路径，不抢戏。**
 
+**灰色地带裁判规则**：当本文件没有明确规定、需要凭感觉做判断时，往 Linear / Vercel / IBM 的方向靠，不要往 Stripe 奢华感或 ClickHouse 喧嚣感靠。
+
 **5 关键词约束所有判断**：
 - **精确** — 数字、规格、part number 用 mono；表格优先于段落
 - **克制** — 单 accent 色，无装饰图，hero 不堆 CTA

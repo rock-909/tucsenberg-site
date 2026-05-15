@@ -79,21 +79,41 @@
   --blue-900: oklch(0.2 0.05 240);
   --blue-950: oklch(0.16 0.04 240);
 
-  /* Role color tokens. Components should consume semantic tokens below. */
+  /* Role color tokens. Components should consume semantic tokens below.
+     Values aligned to DESIGN.md v1.1 ink scale + brand variants. */
   --color-brand-primary: #123b5d;
+  --color-brand-primary-hover: #1b4d77;
+  --color-brand-primary-active: #0b2a45;
   --color-brand-accent: #0f7c82;
+  --color-brand-accent-hover: #0d6a6f;
   --color-surface-canvas: #f7fafc;
   --color-surface-elevated: #ffffff;
   --color-surface-muted: #dceff1;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #334155;
-  --color-text-muted: #64748b;
-  --color-border-default: #cbd5e1;
-  --color-border-strong: #94a3b8;
-  --color-state-success: oklch(0.56 0.13 155);
-  --color-state-warning: oklch(0.66 0.14 72);
-  --color-state-danger: oklch(0.55 0.2 27);
+  --color-surface-overlay: rgba(15, 31, 46, 0.5);
+
+  /* Ink scale (DESIGN.md §3) — text + border shared, layered by density */
+  --ink-900: #0f1f2e;
+  --ink-700: #2e4256;
+  --ink-500: #5c6f80;
+  --ink-400: #8a9bab;
+  --ink-300: #c5cfdb;
+  --ink-200: #e2e8f0;
+  --ink-100: #f1f4f8;
+
+  --color-text-primary: var(--ink-900);
+  --color-text-secondary: var(--ink-700);
+  --color-text-muted: var(--ink-500);
+  --color-text-placeholder: var(--ink-400);
+  --color-border-default: var(--ink-200);
+  --color-border-strong: var(--ink-300);
+  --color-state-success: #1f7a47;
+  --color-state-success-tint: #e3f1e9;
+  --color-state-warning: #b5570b;
+  --color-state-warning-tint: #fcefe0;
+  --color-state-danger: #b0322c;
+  --color-state-danger-tint: #fbe9e7;
   --color-state-info: var(--color-brand-accent);
+  --color-state-info-tint: var(--color-surface-muted);
 
   /* Accent is for links, focus rings, selected state, and narrow status cues.
      Do not use it as broad card background, default icon color, divider color,
@@ -120,7 +140,8 @@
   /* Brand Primary */
   --primary: var(--color-brand-primary);
   --primary-foreground: var(--color-surface-elevated);
-  --primary-dark: color-mix(in oklch, var(--color-brand-primary) 82%, black);
+  --primary-dark: var(--color-brand-primary-hover);
+  --primary-active: var(--color-brand-primary-active);
   --primary-light: var(--color-surface-muted);
   --primary-50: var(--color-surface-muted);
 
@@ -136,27 +157,27 @@
   --muted: var(--neutral-3);
   --muted-foreground: var(--color-text-muted);
 
-  /* Status Colors */
+  /* Status Colors (DESIGN.md §3 hex values) */
   --success: var(--color-state-success);
-  --success-muted: oklch(0.965 0.025 155);
+  --success-muted: var(--color-state-success-tint);
   --success-border: oklch(0.86 0.06 155);
-  --success-foreground: oklch(0.3 0.075 155);
+  --success-foreground: var(--color-state-success);
   --success-light: var(--success-muted);
 
   --warning: var(--color-state-warning);
-  --warning-muted: oklch(0.965 0.035 72);
+  --warning-muted: var(--color-state-warning-tint);
   --warning-border: oklch(0.86 0.075 72);
-  --warning-foreground: oklch(0.34 0.075 72);
+  --warning-foreground: var(--color-state-warning);
 
   --error: var(--color-state-danger);
-  --error-muted: oklch(0.965 0.025 27);
+  --error-muted: var(--color-state-danger-tint);
   --error-border: oklch(0.86 0.065 27);
-  --error-foreground: oklch(0.35 0.13 27);
+  --error-foreground: var(--color-state-danger);
 
   --info: var(--color-state-info);
-  --info-muted: var(--brand-2);
+  --info-muted: var(--color-state-info-tint);
   --info-border: var(--brand-5);
-  --info-foreground: var(--brand-11);
+  --info-foreground: var(--color-brand-accent);
 
   --destructive: var(--error);
   --destructive-foreground: var(--neutral-1);
@@ -239,7 +260,7 @@
 
   /* Typography — IBM Plex / Inter stack */
   --font-display: var(--font-ibm-plex-sans);
-  --font-body: var(--font-ibm-plex-sans), var(--font-inter);
+  --font-body: var(--font-inter), var(--font-ibm-plex-sans);
   --font-sans:
     var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono:
@@ -250,7 +271,11 @@
     "Microsoft YaHei", sans-serif;
 
   /* Container */
-  --container-max: 1080px;
+  --container-max: 1200px;
+  --container-padding: 24px;
+  --container-padding-desktop: 32px;
+  --section-y-mobile: 64px;
+  --section-y-desktop: 96px;
   --nav-h: 56px;
 
   /* Footer Dark Surface */
@@ -271,6 +296,7 @@
   --button-primary-bg: var(--primary);
   --button-primary-fg: var(--primary-foreground);
   --button-primary-hover-bg: var(--primary-dark);
+  --button-primary-active-bg: var(--primary-active);
 
   --button-accent-bg: var(--accent);
   --button-accent-fg: var(--accent-foreground);
@@ -303,20 +329,23 @@
   --card-default-shadow: none;
   --card-elevated-shadow: var(--shadow-md);
 
-  /* Input */
+  /* Input — aligned to DESIGN.md §6 */
   --input-height: 2.5rem;
-  --input-padding-x: 1rem;
-  --input-radius: var(--radius);
+  --input-padding-x: 0.75rem;
+  --input-padding-y: 0.625rem;
 
   /* Table */
   --table-radius: var(--radius-soft);
   --table-header-bg: var(--neutral-3);
   --table-row-hover-bg: color-mix(in oklch, var(--primary) 8%, transparent);
 
-  /* Badge */
-  --badge-radius: var(--radius-round);
-  --badge-padding-x: 0.75rem;
-  --badge-padding-y: 0.25rem;
+  /* Badge — 4px radius per DESIGN.md (pill 9999px forbidden) */
+  --badge-radius: 4px;
+  --badge-padding-x: 0.5rem;
+  --badge-padding-y: 0.125rem;
+
+  /* Input — 6px radius per DESIGN.md */
+  --input-radius: 6px;
 }
 
 /* ==================== RADIX THEMES PILOT MAPPING ==================== */
@@ -589,6 +618,157 @@
 
   .skip-link:focus {
     top: 6px;
+  }
+}
+
+/* ==================== TYPOGRAPHY SCALE (DESIGN.md §4) ==================== */
+/* 12-role type system. Components use these classes instead of ad-hoc sizing. */
+
+@layer components {
+  .type-display-01 {
+    font-family: var(--font-display);
+    font-size: 60px;
+    font-weight: 300;
+    line-height: 1.17;
+    letter-spacing: 0;
+    color: var(--ink-900);
+  }
+  @media (max-width: 768px) {
+    .type-display-01 {
+      font-size: 40px;
+    }
+  }
+
+  .type-display-02 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1.17;
+    letter-spacing: 0;
+    color: var(--ink-900);
+  }
+  @media (max-width: 768px) {
+    .type-display-02 {
+      font-size: 32px;
+    }
+  }
+
+  .type-heading-01 {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.32px;
+    color: var(--ink-900);
+  }
+
+  .type-heading-02 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.32px;
+    color: var(--ink-900);
+  }
+  @media (max-width: 768px) {
+    .type-heading-02 {
+      font-size: 24px;
+    }
+  }
+
+  .type-heading-03 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.33;
+    letter-spacing: -0.24px;
+    color: var(--ink-900);
+  }
+
+  .type-heading-04 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+    color: var(--ink-900);
+  }
+
+  .type-body-large {
+    font-family: var(--font-body), var(--font-chinese);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.56;
+  }
+
+  .type-body {
+    font-family: var(--font-body), var(--font-chinese);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .type-body-emphasis {
+    font-family: var(--font-body), var(--font-chinese);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .type-small {
+    font-family: var(--font-body), var(--font-chinese);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.16px;
+  }
+
+  .type-caption {
+    font-family: var(--font-body), var(--font-chinese);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.32px;
+  }
+
+  .type-button {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .type-nav {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .type-overline {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--ink-500);
+  }
+
+  .type-part-number {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    font-feature-settings: "tnum";
+  }
+
+  .type-mono-body {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    font-feature-settings: "tnum";
   }
 }
 

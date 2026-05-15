@@ -51,8 +51,8 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
   "--popover-foreground": "var(--color-text-primary)",
   "--primary": "var(--color-brand-primary)",
   "--primary-foreground": "var(--color-surface-elevated)",
-  "--primary-dark":
-    "color-mix(in oklch, var(--color-brand-primary) 82%, black)",
+  "--primary-dark": "var(--color-brand-primary-hover)",
+  "--primary-active": "var(--color-brand-primary-active)",
   "--primary-light": "var(--color-surface-muted)",
   "--primary-50": "var(--color-surface-muted)",
   "--accent": "var(--color-surface-muted)",
