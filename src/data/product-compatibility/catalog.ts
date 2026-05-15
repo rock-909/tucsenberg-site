@@ -11,13 +11,13 @@ const productGroupData = [
     slug: "disc-membranes",
     name: {
       en: "Disc replacement membranes",
-      es: "[ES-TODO] Disc replacement membranes",
-      zh: "[ZH-TODO] 盘式替换膜片",
+      es: "Membranas de repuesto tipo disco",
+      zh: "盘式替换膜片",
     },
     description: {
       en: "Replacement disc membranes for common 7 inch, 9 inch, and 12 inch fine-bubble diffuser bodies.",
-      es: "[ES-TODO] Replacement disc membranes for common 7 inch, 9 inch, and 12 inch fine-bubble diffuser bodies.",
-      zh: "[ZH-TODO] 适配常见 7 寸、9 寸、12 寸微孔曝气盘体的替换膜片。",
+      es: 'Membranas de disco de repuesto para cuerpos de difusor de burbuja fina de 7", 9" y 12" de uso común.',
+      zh: '适配常见 7"、9"、12" 微孔曝气盘体的替换膜片。',
     },
     category: "disc",
     variantIds: ["tuc-d9-epdm", "tuc-d9-tpu", "tuc-d12-epdm", "tuc-d7-epdm"],
@@ -27,13 +27,13 @@ const productGroupData = [
     slug: "tube-membranes",
     name: {
       en: "Tube replacement membranes",
-      es: "[ES-TODO] Tube replacement membranes",
-      zh: "[ZH-TODO] 管式替换膜片",
+      es: "Membranas de repuesto tipo tubo",
+      zh: "管式替换膜片",
     },
     description: {
       en: "Replacement tube membranes organized by outside diameter for installed fine-bubble tube diffuser systems.",
-      es: "[ES-TODO] Replacement tube membranes organized by outside diameter for installed fine-bubble tube diffuser systems.",
-      zh: "[ZH-TODO] 按外径组织的管式替换膜片，用于已安装微孔管式曝气系统。",
+      es: "Membranas de tubo de repuesto organizadas por diámetro exterior para sistemas de difusores de tubo de burbuja fina instalados.",
+      zh: "按外径组织的管式替换膜片，用于已安装的微孔管式曝气系统。",
     },
     category: "tube",
     variantIds: ["tuc-t62-epdm", "tuc-t62-tpu", "tuc-t91-epdm"],
@@ -47,8 +47,8 @@ const productVariantData = [
     groupId: "disc-membranes",
     name: {
       en: "9 inch disc EPDM membrane",
-      es: "[ES-TODO] 9 inch disc EPDM membrane",
-      zh: "[ZH-TODO] 9 寸盘式 EPDM 膜片",
+      es: 'Membrana de disco EPDM de 9"',
+      zh: '9" 盘式 EPDM 膜片',
     },
     material: "epdm",
     sku: "TUC-D9-EPDM",
@@ -63,8 +63,8 @@ const productVariantData = [
     groupId: "disc-membranes",
     name: {
       en: "9 inch disc TPU membrane",
-      es: "[ES-TODO] 9 inch disc TPU membrane",
-      zh: "[ZH-TODO] 9 寸盘式 TPU 膜片",
+      es: 'Membrana de disco TPU de 9"',
+      zh: '9" 盘式 TPU 膜片',
     },
     material: "tpu",
     sku: "TUC-D9-TPU",
@@ -79,8 +79,8 @@ const productVariantData = [
     groupId: "disc-membranes",
     name: {
       en: "12 inch disc EPDM membrane",
-      es: "[ES-TODO] 12 inch disc EPDM membrane",
-      zh: "[ZH-TODO] 12 寸盘式 EPDM 膜片",
+      es: 'Membrana de disco EPDM de 12"',
+      zh: '12" 盘式 EPDM 膜片',
     },
     material: "epdm",
     sku: "TUC-D12-EPDM",
@@ -95,8 +95,8 @@ const productVariantData = [
     groupId: "disc-membranes",
     name: {
       en: "7 inch disc EPDM membrane",
-      es: "[ES-TODO] 7 inch disc EPDM membrane",
-      zh: "[ZH-TODO] 7 寸盘式 EPDM 膜片",
+      es: 'Membrana de disco EPDM de 7"',
+      zh: '7" 盘式 EPDM 膜片',
     },
     material: "epdm",
     sku: "TUC-D7-EPDM",
@@ -111,8 +111,8 @@ const productVariantData = [
     groupId: "tube-membranes",
     name: {
       en: "62 mm tube EPDM membrane",
-      es: "[ES-TODO] 62 mm tube EPDM membrane",
-      zh: "[ZH-TODO] 62 mm 管式 EPDM 膜片",
+      es: "Membrana de tubo EPDM de 62 mm",
+      zh: "62 mm 管式 EPDM 膜片",
     },
     material: "epdm",
     sku: "TUC-T62-EPDM",
@@ -127,8 +127,8 @@ const productVariantData = [
     groupId: "tube-membranes",
     name: {
       en: "62 mm tube TPU membrane",
-      es: "[ES-TODO] 62 mm tube TPU membrane",
-      zh: "[ZH-TODO] 62 mm 管式 TPU 膜片",
+      es: "Membrana de tubo TPU de 62 mm",
+      zh: "62 mm 管式 TPU 膜片",
     },
     material: "tpu",
     sku: "TUC-T62-TPU",
@@ -143,8 +143,8 @@ const productVariantData = [
     groupId: "tube-membranes",
     name: {
       en: "91 mm tube EPDM membrane",
-      es: "[ES-TODO] 91 mm tube EPDM membrane",
-      zh: "[ZH-TODO] 91 mm 管式 EPDM 膜片",
+      es: "Membrana de tubo EPDM de 91 mm",
+      zh: "91 mm 管式 EPDM 膜片",
     },
     material: "epdm",
     sku: "TUC-T91-EPDM",
@@ -162,8 +162,8 @@ const oemBrandData = [
     name: "Sanitaire",
     trademarkDisclaimer: {
       en: "Sanitaire is a registered trademark of Xylem. Tucsenberg is not affiliated with or endorsed by Xylem.",
-      es: "[ES-TODO] Sanitaire is a registered trademark of Xylem. Tucsenberg is not affiliated with or endorsed by Xylem.",
-      zh: "[ZH-TODO] Sanitaire is a registered trademark of Xylem. Tucsenberg is not affiliated with or endorsed by Xylem.",
+      es: "Sanitaire es una marca registrada de Xylem. Tucsenberg no está afiliada a Xylem ni cuenta con su respaldo.",
+      zh: "Sanitaire 是 Xylem 的注册商标。Tucsenberg 与 Xylem 无任何关联，也未获得 Xylem 的认可。",
     },
     modelIds: [
       "sanitaire-silver-series-ii-9-inch-disc",
@@ -177,8 +177,8 @@ const oemBrandData = [
     name: "EDI",
     trademarkDisclaimer: {
       en: "EDI is a registered trademark of Environmental Dynamics International. Tucsenberg is not affiliated with or endorsed by Environmental Dynamics International.",
-      es: "[ES-TODO] EDI is a registered trademark of Environmental Dynamics International. Tucsenberg is not affiliated with or endorsed by Environmental Dynamics International.",
-      zh: "[ZH-TODO] EDI is a registered trademark of Environmental Dynamics International. Tucsenberg is not affiliated with or endorsed by Environmental Dynamics International.",
+      es: "EDI es una marca registrada de Environmental Dynamics International. Tucsenberg no está afiliada a Environmental Dynamics International ni cuenta con su respaldo.",
+      zh: "EDI 是 Environmental Dynamics International 的注册商标。Tucsenberg 与 Environmental Dynamics International 无任何关联，也未获得其认可。",
     },
     modelIds: [
       "edi-flexair-threaded-disc-7-inch",
@@ -194,8 +194,8 @@ const oemBrandData = [
     name: "SSI Aeration",
     trademarkDisclaimer: {
       en: "SSI Aeration is a registered trademark of SSI Aeration. Tucsenberg is not affiliated with or endorsed by SSI Aeration.",
-      es: "[ES-TODO] SSI Aeration is a registered trademark of SSI Aeration. Tucsenberg is not affiliated with or endorsed by SSI Aeration.",
-      zh: "[ZH-TODO] SSI Aeration is a registered trademark of SSI Aeration. Tucsenberg is not affiliated with or endorsed by SSI Aeration.",
+      es: "SSI Aeration es una marca registrada de SSI Aeration. Tucsenberg no está afiliada a SSI Aeration ni cuenta con su respaldo.",
+      zh: "SSI Aeration 是 SSI Aeration 的注册商标。Tucsenberg 与 SSI Aeration 无任何关联，也未获得 SSI Aeration 的认可。",
     },
     modelIds: [
       "ssi-afd270-9-inch-disc",
@@ -211,7 +211,7 @@ const oemModelData = [
     slug: "sanitaire-silver-series-ii-9-inch-disc",
     brandId: "sanitaire",
     name: "Silver Series II 9 inch Disc",
-    oemPartNumbers: ["00223", "MM01", "MM02", "MM03"],
+    oemPartNumbers: ["00223"],
     searchAliases: [
       "Sanitaire 9 inch disc",
       "Sanitaire Silver Series II",
@@ -391,7 +391,7 @@ const oemModelData = [
     slug: "ssi-afd270-9-inch-disc",
     brandId: "ssi-aeration",
     name: "AFD270 9 inch Disc",
-    oemPartNumbers: ["AFD270", "AFD270-E", "B07KBHGX2V"],
+    oemPartNumbers: ["AFD270", "AFD270-E"],
     searchAliases: [
       "SSI AFD270",
       "SSI AFD270-E",
@@ -409,7 +409,7 @@ const oemModelData = [
     slug: "ssi-aft-62-mm-tube",
     brandId: "ssi-aeration",
     name: "AFT 62 mm Tube",
-    oemPartNumbers: ["AFT-N2500-E", "MM11"],
+    oemPartNumbers: ["AFT-N2500-E"],
     searchAliases: [
       "SSI AFT 62",
       "AFT 62 mm",
