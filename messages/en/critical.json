@@ -865,13 +865,13 @@
           "saturday": "Saturday",
           "sunday": "Sunday",
           "closed": "Closed",
-          "responseTitle": "What to expect",
-          "responseTimeLabel": "Typical response",
-          "responseTimeValue": "Within 24 business hours",
+          "responseTitle": "What to prepare",
+          "responseTimeLabel": "Response window",
+          "responseTimeValue": "To be confirmed before public launch",
           "bestForLabel": "Best for",
-          "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
+          "bestForValue": "Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
           "prepareLabel": "Helpful details",
-          "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+          "prepareValue": "Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing"
         }
       }
     },

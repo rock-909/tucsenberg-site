@@ -57,14 +57,14 @@ const CONTACT_COPY_FALLBACKS = {
   "panel.sunday": "Sunday",
   "panel.closed": "Closed",
   "panel.responseTitle": "What to expect",
-  "panel.responseTimeLabel": "Typical response",
-  "panel.responseTimeValue": "Within 24 business hours",
+  "panel.responseTimeLabel": "Response window",
+  "panel.responseTimeValue": "To be confirmed before public launch",
   "panel.bestForLabel": "Best for",
   "panel.bestForValue":
-    "RFQs, product specs, MOQ, samples, and lead-time questions",
+    "Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
   "panel.prepareLabel": "Helpful details",
   "panel.prepareValue":
-    "Share product type, size/standard, quantity, destination market, and timeline",
+    "Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing",
 } satisfies Record<string, string>;
 
 const CONTACT_MESSAGE_ROOTS = [["contact"]] as const;

@@ -865,13 +865,13 @@
           "saturday": "周六",
           "sunday": "周日",
           "closed": "休息",
-          "responseTitle": "联系后会发生什么",
-          "responseTimeLabel": "通常回复时间",
-          "responseTimeValue": "工作日 24 小时内",
+          "responseTitle": "建议准备",
+          "responseTimeLabel": "响应窗口",
+          "responseTimeValue": "公开上线前确认",
           "bestForLabel": "适合咨询",
-          "bestForValue": "咨询、报价、演示、项目范围和内容替换问题",
+          "bestForValue": "替换膜片 RFQ、OEM-family 检查、材质适配问题和 part list review",
           "prepareLabel": "建议提供",
-          "prepareValue": "业务类型、目标受众、需要的页面、时间计划和现有素材"
+          "prepareValue": "OEM family、part number、尺寸、照片、废水工况、数量区间和停机时间"
         }
       }
     },

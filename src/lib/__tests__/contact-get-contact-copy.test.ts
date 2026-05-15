@@ -35,14 +35,14 @@ describe("getContactCopy", () => {
     "panel.sunday": "Sunday",
     "panel.closed": "Closed",
     "panel.responseTitle": "What to expect",
-    "panel.responseTimeLabel": "Typical response",
-    "panel.responseTimeValue": "Within 24 business hours",
+    "panel.responseTimeLabel": "Response window",
+    "panel.responseTimeValue": "To be confirmed before public launch",
     "panel.bestForLabel": "Best for",
     "panel.bestForValue":
-      "RFQs, product specs, MOQ, samples, and lead-time questions",
+      "Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
     "panel.prepareLabel": "Helpful details",
     "panel.prepareValue":
-      "Share product type, size/standard, quantity, destination market, and timeline",
+      "Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing",
   } as const;
 
   const defaultMessages = {
@@ -86,7 +86,7 @@ describe("getContactCopy", () => {
     expect(copy.header.description).toBe("Get in touch with our team");
     expect(copy.panel.contact.title).toBe("Contact Methods");
     expect(copy.panel.response.prepareValue).toBe(
-      "Share product type, size/standard, quantity, destination market, and timeline",
+      "Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing",
     );
     expect(mockLoggerWarn).not.toHaveBeenCalled();
   });
@@ -195,7 +195,14 @@ describe("getContactCopy", () => {
     expect(copy.panel.hours.closedLabel).toBe("Closed");
     expect(copy.panel.response.title).toBe("What to expect");
     expect(copy.panel.response.responseTimeValue).toBe(
-      "Within 24 business hours",
+      "To be confirmed before public launch",
+    );
+    expect(copy.panel.response.responseTimeValue).not.toMatch(/24/i);
+    expect(copy.panel.response.bestForValue).not.toMatch(
+      /demo|content replacement|project scope/i,
+    );
+    expect(copy.panel.response.prepareValue).not.toMatch(
+      /target audience|needed pages|current assets/i,
     );
     expect(copy.panel.response.bestForLabel).toBe("Best for");
     expect(copy.panel.response.prepareLabel).toBe("Helpful details");

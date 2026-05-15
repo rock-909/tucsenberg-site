@@ -865,13 +865,13 @@
           "saturday": "[ES-TODO] Saturday",
           "sunday": "[ES-TODO] Sunday",
           "closed": "[ES-TODO] Closed",
-          "responseTitle": "[ES-TODO] What to expect",
-          "responseTimeLabel": "[ES-TODO] Typical response",
-          "responseTimeValue": "[ES-TODO] Within 24 business hours",
+          "responseTitle": "[ES-TODO] What to prepare",
+          "responseTimeLabel": "[ES-TODO] Response window",
+          "responseTimeValue": "[ES-TODO] To be confirmed before public launch",
           "bestForLabel": "[ES-TODO] Best for",
-          "bestForValue": "[ES-TODO] Inquiries, quotes, demos, project scope, and content replacement questions",
+          "bestForValue": "[ES-TODO] Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
           "prepareLabel": "[ES-TODO] Helpful details",
-          "prepareValue": "[ES-TODO] Share your offer type, target audience, needed pages, timeline, and current assets"
+          "prepareValue": "[ES-TODO] Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing"
         }
       }
     },

@@ -45,11 +45,11 @@ const contactCopy = {
     response: {
       title: "Response Time",
       responseTimeLabel: "Response",
-      responseTimeValue: "Within 24 hours",
+      responseTimeValue: "To be confirmed before public launch",
       bestForLabel: "Best for",
-      bestForValue: "Quotes",
+      bestForValue: "Replacement membrane RFQs",
       prepareLabel: "Prepare",
-      prepareValue: "Product specs",
+      prepareValue: "OEM family and part number",
     },
     hours: {
       title: "Business Hours",
@@ -162,9 +162,10 @@ describe("ContactPage MDX migration", () => {
       screen.getByRole("heading", { name: "联系方式" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "联系后会发生什么" }),
+      screen.getByRole("heading", { name: "建议准备" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
+    expect(screen.getByText("公开上线前确认")).toBeInTheDocument();
+    expect(screen.queryByText(/工作日 24 小时内/)).not.toBeInTheDocument();
     expect(screen.getByText("建议提供")).toBeInTheDocument();
   });
 
@@ -204,7 +205,9 @@ describe("ContactPage MDX migration", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Response Time" }));
-    expect(screen.getByText("Within 24 hours")).toBeInTheDocument();
+    expect(
+      screen.getByText("To be confirmed before public launch"),
+    ).toBeInTheDocument();
     expect(container.querySelector('[data-slot="data-card"]')).toHaveAttribute(
       "data-ui-pilot",
       "radix-themes-data-card",
@@ -223,7 +226,7 @@ describe("ContactPage MDX migration", () => {
     );
   });
 
-  it("renders validated product family context from Contact query params", async () => {
+  it("ignores legacy product family context query params on the Contact page", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
@@ -235,9 +238,10 @@ describe("ContactPage MDX migration", () => {
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(screen.getByText("You are asking about:")).toBeInTheDocument();
-    expect(screen.getByText(/Primary Offer Example/)).toBeInTheDocument();
-    expect(screen.getByText(/Support Packages/)).toBeInTheDocument();
+    expect(screen.queryByText("You are asking about:")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Primary Offer Example/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Support Packages/)).not.toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
   it("ignores invalid product family context without rendering raw query text", async () => {
@@ -259,7 +263,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
-  it("keeps the product family notice in the same left column as the form", async () => {
+  it("keeps the form column free of legacy product family notices", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
@@ -272,10 +276,36 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     const formColumn = screen.getByTestId("contact-form-column");
-    expect(formColumn).toContainElement(
-      screen.getByTestId("product-family-context-notice"),
-    );
+    expect(
+      screen.queryByTestId("product-family-context-notice"),
+    ).not.toBeInTheDocument();
     expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
+    expect(formColumn).not.toHaveTextContent(/Primary Offer Example/);
+    expect(formColumn).not.toHaveTextContent(/Support Packages/);
+  });
+
+  it("does not render starter demo wording in the Contact panel", async () => {
+    const actualContactCopy = await vi.importActual<
+      typeof import("@/lib/contact/getContactCopy")
+    >("@/lib/contact/getContactCopy");
+    mockGetContactCopyFromMessages.mockImplementation(
+      actualContactCopy.getContactCopyFromMessages,
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(
+      screen.getByText("To be confirmed before public launch"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/24 business hours/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/demos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/content replacement/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/target audience/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/needed pages/i)).not.toBeInTheDocument();
   });
 
   it("does not protect the entire Contact page from browser translation", async () => {
