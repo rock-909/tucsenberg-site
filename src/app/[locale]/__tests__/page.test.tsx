@@ -10,76 +10,76 @@ type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
 };
 
 const homeMessages: Record<string, string> = {
-  "hero.eyebrow": "Public demo starter site",
-  "hero.title":
-    "No website yet? Start with a deployable showcase-site foundation.",
+  "hero.eyebrow": "Aftermarket aeration membranes",
+  "hero.title": "Replacement membrane paths for installed aeration systems.",
   "hero.subtitle":
-    "This starter gives a project the first real website structure: pages, content replacement surfaces, inquiry flow, multilingual copy, and a Cloudflare-ready launch path.",
-  "hero.cta.primary": "View product capabilities",
-  "hero.cta.secondary": "Contact",
-  "hero.preview.label": "What this starter provides",
-  "hero.preview.title": "A public site foundation, not a blank shell",
+    "Tucsenberg is preparing compatibility-led membrane pages for O&M teams that need OEM-family matching, material guidance, and RFQ-ready review inputs.",
+  "hero.cta.primary": "Review membrane paths",
+  "hero.cta.secondary": "Prepare a quote request",
+  "hero.preview.label": "What Tucsenberg is building",
+  "hero.preview.title": "Compatibility review first, broad catalog later",
   "hero.preview.description":
-    "The demo is intentionally complete enough to evaluate, while still making replacement boundaries visible before a real launch.",
-  "hero.preview.items.0": "Home, Products, Blog, About, and Contact",
-  "hero.preview.items.1": "Brand and content replacement surfaces",
-  "hero.preview.items.2": "Inquiry path with anti-abuse basics",
+    "The site is intentionally in a safe work-in-progress state until product data, compatibility records, and RFQ routing are owner-confirmed.",
+  "hero.preview.items.0":
+    "Membranes, compatibility, materials, and quote paths",
+  "hero.preview.items.1": "OEM-family and part-number review inputs",
+  "hero.preview.items.2": "RFQ path with anti-abuse basics",
   "hero.preview.items.3": "Cloudflare-ready deployment direction",
   "problems.title":
-    "The first blocker is usually not design polish. It is that the website does not exist yet.",
+    "Replacement membrane buyers usually arrive with partial evidence, not a clean catalog SKU.",
   "problems.description":
-    "A new project often has no public structure, no content plan, no deployment path, and no clear way for visitors to contact the owner.",
-  "problems.items.structure.title": "No page structure",
+    "A maintenance team may have an OEM family, an old part number, a body photo, dimensions, wastewater conditions, or only a shutdown deadline.",
+  "problems.items.structure.title": "No clean part path",
   "problems.items.structure.description":
-    "There is no agreed Home, Products, Blog, About, Contact, or legal page baseline.",
-  "problems.items.content.title": "No content plan",
+    "A buyer needs membrane diameter, diffuser body fit, OEM family, and review caveats before a quote is responsible.",
+  "problems.items.content.title": "Incomplete evidence",
   "problems.items.content.description":
-    "Brand facts, offer copy, proof assets, images, and launch boundaries are scattered or missing.",
-  "problems.items.deployment.title": "No launch path",
+    "Photos, old membranes, dimensions, wastewater conditions, and quantity bands often arrive in different formats.",
+  "problems.items.deployment.title": "Unclear material risk",
   "problems.items.deployment.description":
-    "A local build is not enough; the site still needs a preview and deployment path that can be proven.",
-  "problems.items.inquiry.title": "No inquiry flow",
+    "EPDM, TPU/PU, and later PTFE-coated EPDM need condition-based guidance instead of vague quality claims.",
+  "problems.items.inquiry.title": "RFQ friction",
   "problems.items.inquiry.description":
-    "Visitors need a simple contact route, and the owner needs a real destination for submissions.",
-  "problems.items.multilingual.title": "No multilingual baseline",
+    "Quote review is slower when part numbers, installed model, quantity, and shutdown timing are not collected together.",
+  "problems.items.multilingual.title": "Regional review path",
   "problems.items.multilingual.description":
-    "If the site needs English and Chinese, copy, routing, and switching must be built in from the start.",
-  "answer.title": "The starter gives that missing foundation first.",
+    "English and Spanish public pages must keep the same review logic while Chinese stays internal preview only.",
+  "answer.title": "Tucsenberg starts with compatibility review before quote.",
   "answer.description":
-    "It is not a finished client website. It is a reusable public demo that shows the structure, replacement work, and launch proof a real site still needs.",
-  "answer.items.pageStructure.title": "Clear page structure",
+    "The site is being shaped around part-number matching, material decision support, RFQ intake, and clear OEM trademark boundaries.",
+  "answer.items.pageStructure.title": "Membrane path structure",
   "answer.items.pageStructure.description":
-    "Home, Products, Blog, About, Contact, and supporting pages are already wired as a real public site shape.",
-  "answer.items.replacementSurface.title": "Visible replacement surface",
+    "Membranes, compatibility, materials, quote, quality, procurement, and legal boundaries each have a defined place.",
+  "answer.items.replacementSurface.title": "Review input surface",
   "answer.items.replacementSurface.description":
-    "Brand, offers, page copy, SEO, images, legal text, and contact details are treated as explicit launch inputs.",
-  "answer.items.inquiryPath.title": "Inquiry path",
+    "Part numbers, photos, dimensions, wastewater conditions, quantity bands, and shutdown timing are treated as explicit RFQ inputs.",
+  "answer.items.inquiryPath.title": "Quote review path",
   "answer.items.inquiryPath.description":
-    "The site includes a contact route and form foundation, with basic anti-abuse and lead-handling boundaries.",
+    "The quote flow will ask for enough evidence to return a responsible membrane recommendation, not a brand-name match alone.",
   "answer.items.cloudflareFoundation.title": "Cloudflare-ready foundation",
   "answer.items.cloudflareFoundation.description":
-    "Cloudflare is the recommended deployment path. Optional compatibility can stay secondary without becoming the default promise.",
-  "startPath.title": "A practical path from starter to public launch.",
+    "Cloudflare/OpenNext remains the deployment path while Tucsenberg content and lead routing are confirmed.",
+  "startPath.title": "A practical path from membrane evidence to RFQ.",
   "startPath.description":
-    "Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
-  "startPath.items.brand.title": "Replace brand facts",
+    "Use the current placeholder IA to lock the flow, then fill it with confirmed product, compatibility, material, and quote data.",
+  "startPath.items.brand.title": "Confirm product facts",
   "startPath.items.brand.description":
-    "Company name, domain, logo, colors, contact details, and legal identity become real owner-confirmed facts.",
+    "Membrane families, materials, legal entity, domain, contact channels, and brand assets become owner-confirmed facts.",
   "startPath.items.content.title": "Replace page content",
   "startPath.items.content.description":
-    "Home, product or service copy, proof assets, blog guidance, images, and legal pages become real launch content.",
-  "startPath.items.forms.title": "Connect forms",
+    "Membrane pages, compatibility guides, material guidance, quality proof, images, and legal pages become Tucsenberg launch content.",
+  "startPath.items.forms.title": "Connect quote flow",
   "startPath.items.forms.description":
-    "Contact submissions, email delivery, anti-abuse checks, and response ownership point to real accounts.",
+    "RFQ submissions, Turnstile, lead destinations, email delivery, and response ownership point to real accounts.",
   "startPath.items.deploy.title": "Deploy and verify",
   "startPath.items.deploy.description":
-    "Cloudflare preview, form canary, traffic visibility, and owner signoff prove readiness separately from local checks.",
+    "Cloudflare preview, form canary, content readiness, and owner signoff prove readiness separately from local checks.",
   "finalCta.title":
-    "Start from a real website foundation, then replace what must become yours.",
+    "Prepare the membrane evidence, then request a responsible quote.",
   "finalCta.description":
-    "Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
-  "finalCta.primary": "View product capabilities",
-  "finalCta.secondary": "Contact",
+    "Use the current placeholder path to understand what Tucsenberg will ask for before issuing a compatibility-led quote.",
+  "finalCta.primary": "Review membrane paths",
+  "finalCta.secondary": "Prepare a quote request",
 };
 
 vi.mock("@/i18n/routing", () => ({
@@ -117,7 +117,7 @@ describe("Home Page", () => {
   });
 
   describe("Home Component", () => {
-    it("should explain the no-website-to-launch starter journey", async () => {
+    it("should explain the Tucsenberg membrane review journey", async () => {
       const HomeComponent = await Home({
         params: Promise.resolve({ locale: "en" }),
       });
@@ -127,7 +127,7 @@ describe("Home Page", () => {
       expect(
         screen.getByRole("heading", {
           level: 1,
-          name: /No website yet\? Start with a deployable showcase-site foundation\./,
+          name: /Replacement membrane paths for installed aeration systems\./,
         }),
       ).toBeInTheDocument();
       expect(screen.getByTestId("home-problem-section")).toBeInTheDocument();
@@ -138,22 +138,24 @@ describe("Home Page", () => {
         screen.getByText("Cloudflare-ready foundation"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Home, Products, Blog, About, and Contact"),
+        screen.getByText(
+          "Membranes, compatibility, materials, and quote paths",
+        ),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Brand and content replacement surfaces"),
+        screen.getByText("OEM-family and part-number review inputs"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Inquiry path with anti-abuse basics"),
+        screen.getByText("RFQ path with anti-abuse basics"),
       ).toBeInTheDocument();
       expect(
         screen.getByText("Cloudflare-ready deployment direction"),
       ).toBeInTheDocument();
       expect(
-        screen.getAllByRole("link", { name: "View product capabilities" })[0],
+        screen.getAllByRole("link", { name: "Review membrane paths" })[0],
       ).toHaveAttribute("href", "#coming-soon");
       expect(
-        screen.getAllByRole("link", { name: "Contact" })[0],
+        screen.getAllByRole("link", { name: "Prepare a quote request" })[0],
       ).toHaveAttribute("href", "#coming-soon");
     });
 

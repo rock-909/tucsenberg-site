@@ -1,7 +1,7 @@
-Security Disclosure Policy for Example Showcase Company
+Security Disclosure Policy for Tucsenberg
 
 How to report:
-- Send reports to security@example.com
+- Send reports to contact@tucsenberg.com
 - Include reproduction steps, impact, and any proof-of-concept material
 
 What to expect:

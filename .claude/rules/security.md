@@ -30,7 +30,7 @@ Browser-exposed write endpoints need:
 - stable machine-readable error codes.
 
 Do not add body hashing, distributed rate limiting, or duplicate-submission
-replay as starter defaults. Add them later only when a real incident justifies
+replay as site defaults. Add them later only when a real incident justifies
 the extra complexity.
 
 ## Lead-family behavior
@@ -89,7 +89,7 @@ requires route-local ordering.
   Actions and streaming.
 - `NEXT_PUBLIC_SECURITY_MODE=strict` means enforced security headers with a
   static-compatible CSP. It is not nonce-level strict CSP.
-- CSP is static by starter default. Do not add dynamic nonce handling unless a
+- CSP is static by current default. Do not add dynamic nonce handling unless a
   dedicated dynamic rendering proof plan justifies the trade-off.
 - A nonce CSP lane needs a proxy-generated nonce plus Cloudflare/OpenNext proof;
   do not mix that into ordinary security cleanup.

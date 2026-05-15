@@ -133,8 +133,8 @@
     "index": {
       "eyebrow": "[ES-TODO] Launch guide",
       "title": "[ES-TODO] Blog",
-      "description": "[ES-TODO] Practical notes for turning a starter into a public showcase website: content, pages, deployment, analytics, and replacement boundaries.",
-      "articleListLabel": "[ES-TODO] Starter launch articles",
+      "description": "[ES-TODO] Practical notes for Tucsenberg launch readiness: membranes, compatibility, materials, quote flow, deployment, analytics, and content boundaries.",
+      "articleListLabel": "[ES-TODO] Tucsenberg launch articles",
       "readArticle": "[ES-TODO] Read article"
     },
     "article": {
@@ -143,12 +143,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "[ES-TODO] Public demo starter site",
-      "title": "[ES-TODO] No website yet? Start with a deployable showcase-site foundation.",
-      "subtitle": "[ES-TODO] This starter gives a project the first real website structure: pages, content replacement surfaces, inquiry flow, multilingual copy, and a Cloudflare-ready launch path.",
+      "eyebrow": "[ES-TODO] Aftermarket aeration membranes",
+      "title": "[ES-TODO] Replacement membrane paths for installed aeration systems.",
+      "subtitle": "[ES-TODO] Tucsenberg is preparing compatibility-led membrane pages for O&M teams that need OEM-family matching, material guidance, and RFQ-ready review inputs.",
       "cta": {
-        "primary": "[ES-TODO] View product capabilities",
-        "secondary": "[ES-TODO] Contact"
+        "primary": "[ES-TODO] Review membrane paths",
+        "secondary": "[ES-TODO] Prepare a quote request"
       },
       "proof": {
         "countries": "[ES-TODO] {countries}+",
@@ -156,101 +156,101 @@
         "range": "[ES-TODO] 3+",
         "rangeLabel": "[ES-TODO] Offer Types",
         "production": "[ES-TODO] Ready",
-        "productionLabel": "[ES-TODO] Starter Status",
+        "productionLabel": "[ES-TODO] Site Status",
         "est": "[ES-TODO] {established}",
         "estLabel": "[ES-TODO] Est."
       },
       "preview": {
-        "label": "[ES-TODO] What this starter provides",
-        "title": "[ES-TODO] A public site foundation, not a blank shell",
-        "description": "[ES-TODO] The demo is intentionally complete enough to evaluate, while still making replacement boundaries visible before a real launch.",
+        "label": "[ES-TODO] What Tucsenberg is building",
+        "title": "[ES-TODO] Compatibility review first, broad catalog later",
+        "description": "[ES-TODO] The site is intentionally in a safe work-in-progress state until product data, compatibility records, and RFQ routing are owner-confirmed.",
         "items": [
-          "[ES-TODO] Home, Products, Blog, About, and Contact",
-          "[ES-TODO] Brand and content replacement surfaces",
-          "[ES-TODO] Inquiry path with anti-abuse basics",
+          "[ES-TODO] Membranes, compatibility, materials, and quote paths",
+          "[ES-TODO] OEM-family and part-number review inputs",
+          "[ES-TODO] RFQ path with anti-abuse basics",
           "[ES-TODO] Cloudflare-ready deployment direction"
         ],
         "pages": "[ES-TODO] Pages",
         "components": "[ES-TODO] Components",
         "storybook": "[ES-TODO] Storybook",
         "workflow": "[ES-TODO] AI workflow",
-        "note": "[ES-TODO] Replace example content before launch"
+        "note": "[ES-TODO] Owner-confirmed product data arrives in the next steps"
       }
     },
     "problems": {
-      "title": "[ES-TODO] The first blocker is usually not design polish. It is that the website does not exist yet.",
-      "description": "[ES-TODO] A new project often has no public structure, no content plan, no deployment path, and no clear way for visitors to contact the owner.",
+      "title": "[ES-TODO] Replacement membrane buyers usually arrive with partial evidence, not a clean catalog SKU.",
+      "description": "[ES-TODO] A maintenance team may have an OEM family, an old part number, a body photo, dimensions, wastewater conditions, or only a shutdown deadline.",
       "items": {
         "structure": {
-          "title": "[ES-TODO] No page structure",
-          "description": "[ES-TODO] There is no agreed Home, Products, Blog, About, Contact, or legal page baseline."
+          "title": "[ES-TODO] No clean part path",
+          "description": "[ES-TODO] A buyer needs membrane diameter, diffuser body fit, OEM family, and review caveats before a quote is responsible."
         },
         "content": {
-          "title": "[ES-TODO] No content plan",
-          "description": "[ES-TODO] Brand facts, offer copy, proof assets, images, and launch boundaries are scattered or missing."
+          "title": "[ES-TODO] Incomplete evidence",
+          "description": "[ES-TODO] Photos, old membranes, dimensions, wastewater conditions, and quantity bands often arrive in different formats."
         },
         "deployment": {
-          "title": "[ES-TODO] No launch path",
-          "description": "[ES-TODO] A local build is not enough; the site still needs a preview and deployment path that can be proven."
+          "title": "[ES-TODO] Unclear material risk",
+          "description": "[ES-TODO] EPDM, TPU/PU, and later PTFE-coated EPDM need condition-based guidance instead of vague quality claims."
         },
         "inquiry": {
-          "title": "[ES-TODO] No inquiry flow",
-          "description": "[ES-TODO] Visitors need a simple contact route, and the owner needs a real destination for submissions."
+          "title": "[ES-TODO] RFQ friction",
+          "description": "[ES-TODO] Quote review is slower when part numbers, installed model, quantity, and shutdown timing are not collected together."
         },
         "multilingual": {
-          "title": "[ES-TODO] No multilingual baseline",
-          "description": "[ES-TODO] If the site needs English and Chinese, copy, routing, and switching must be built in from the start."
+          "title": "[ES-TODO] Regional review path",
+          "description": "[ES-TODO] English and Spanish public pages must keep the same review logic while Chinese stays internal preview only."
         }
       }
     },
     "answer": {
-      "title": "[ES-TODO] The starter gives that missing foundation first.",
-      "description": "[ES-TODO] It is not a finished client website. It is a reusable public demo that shows the structure, replacement work, and launch proof a real site still needs.",
+      "title": "[ES-TODO] Tucsenberg starts with compatibility review before quote.",
+      "description": "[ES-TODO] The site is being shaped around part-number matching, material decision support, RFQ intake, and clear OEM trademark boundaries.",
       "items": {
         "pageStructure": {
-          "title": "[ES-TODO] Clear page structure",
-          "description": "[ES-TODO] Home, Products, Blog, About, Contact, and supporting pages are already wired as a real public site shape."
+          "title": "[ES-TODO] Membrane path structure",
+          "description": "[ES-TODO] Membranes, compatibility, materials, quote, quality, procurement, and legal boundaries each have a defined place."
         },
         "replacementSurface": {
-          "title": "[ES-TODO] Visible replacement surface",
-          "description": "[ES-TODO] Brand, offers, page copy, SEO, images, legal text, and contact details are treated as explicit launch inputs."
+          "title": "[ES-TODO] Review input surface",
+          "description": "[ES-TODO] Part numbers, photos, dimensions, wastewater conditions, quantity bands, and shutdown timing are treated as explicit RFQ inputs."
         },
         "inquiryPath": {
-          "title": "[ES-TODO] Inquiry path",
-          "description": "[ES-TODO] The site includes a contact route and form foundation, with basic anti-abuse and lead-handling boundaries."
+          "title": "[ES-TODO] Quote review path",
+          "description": "[ES-TODO] The quote flow will ask for enough evidence to return a responsible membrane recommendation, not a brand-name match alone."
         },
         "cloudflareFoundation": {
           "title": "[ES-TODO] Cloudflare-ready foundation",
-          "description": "[ES-TODO] Cloudflare is the recommended deployment path. Optional compatibility can stay secondary without becoming the default promise."
+          "description": "[ES-TODO] Cloudflare/OpenNext remains the deployment path while Tucsenberg content and lead routing are confirmed."
         }
       }
     },
     "startPath": {
-      "title": "[ES-TODO] A practical path from starter to public launch.",
-      "description": "[ES-TODO] Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
+      "title": "[ES-TODO] A practical path from membrane evidence to RFQ.",
+      "description": "[ES-TODO] Use the current placeholder IA to lock the flow, then fill it with confirmed product, compatibility, material, and quote data.",
       "items": {
         "brand": {
-          "title": "[ES-TODO] Replace brand facts",
-          "description": "[ES-TODO] Company name, domain, logo, colors, contact details, and legal identity become real owner-confirmed facts."
+          "title": "[ES-TODO] Confirm product facts",
+          "description": "[ES-TODO] Membrane families, materials, legal entity, domain, contact channels, and brand assets become owner-confirmed facts."
         },
         "content": {
           "title": "[ES-TODO] Replace page content",
-          "description": "[ES-TODO] Home, product or service copy, proof assets, blog guidance, images, and legal pages become real launch content."
+          "description": "[ES-TODO] Membrane pages, compatibility guides, material guidance, quality proof, images, and legal pages become Tucsenberg launch content."
         },
         "forms": {
-          "title": "[ES-TODO] Connect forms",
-          "description": "[ES-TODO] Contact submissions, email delivery, anti-abuse checks, and response ownership point to real accounts."
+          "title": "[ES-TODO] Connect quote flow",
+          "description": "[ES-TODO] RFQ submissions, Turnstile, lead destinations, email delivery, and response ownership point to real accounts."
         },
         "deploy": {
           "title": "[ES-TODO] Deploy and verify",
-          "description": "[ES-TODO] Cloudflare preview, form canary, traffic visibility, and owner signoff prove readiness separately from local checks."
+          "description": "[ES-TODO] Cloudflare preview, form canary, content readiness, and owner signoff prove readiness separately from local checks."
         }
       }
     },
     "starterBoundary": {
-      "title": "[ES-TODO] This demo looks finished because the starter should prove the launch path.",
-      "description": "[ES-TODO] The public demo shows a complete website shape while keeping the replacement work visible before a real business uses it.",
-      "listLabel": "[ES-TODO] Starter replacement requirements",
+      "title": "[ES-TODO] This site is unfinished by design until Tucsenberg facts are confirmed.",
+      "description": "[ES-TODO] The current shell shows the intended website shape while keeping unconfirmed product data and RFQ behavior out of production claims.",
+      "listLabel": "[ES-TODO] Tucsenberg launch requirements",
       "items": [
         {
           "title": "[ES-TODO] Replace the business identity",
@@ -269,19 +269,19 @@
           "description": "[ES-TODO] Cloudflare build, preview smoke, dashboard credentials, and owner signoff stay separate from local test results."
         }
       ],
-      "primary": "[ES-TODO] See how it works",
-      "secondary": "[ES-TODO] Review contact flow"
+      "primary": "[ES-TODO] See the review path",
+      "secondary": "[ES-TODO] Prepare quote inputs"
     },
     "chain": {
-      "title": "[ES-TODO] From Content to Inquiry, One Reusable Flow.",
-      "subtitle": "[ES-TODO] The starter keeps content, components, review surfaces, and contact paths connected so each new website starts from a working base.",
+      "title": "[ES-TODO] From part evidence to RFQ, one controlled flow.",
+      "subtitle": "[ES-TODO] Tucsenberg keeps compatibility review, material guidance, quote intake, and deployment proof connected while the site moves toward launch.",
       "step1": {
-        "title": "[ES-TODO] Offer Review",
-        "desc": "[ES-TODO] Clarify what the new website needs to present before replacing example content"
+        "title": "[ES-TODO] Input Review",
+        "desc": "[ES-TODO] Clarify what part number, OEM family, photo, dimensions, or wastewater evidence the buyer has"
       },
       "step2": {
         "title": "[ES-TODO] Content Setup",
-        "desc": "[ES-TODO] Replace brand facts, offerings, proof, images, and conversion copy in the right source files"
+        "desc": "[ES-TODO] Replace membrane facts, compatibility paths, material guidance, proof, images, and RFQ copy in the right source files"
       },
       "step3": {
         "title": "[ES-TODO] Component Reuse",
@@ -289,7 +289,7 @@
       },
       "step4": {
         "title": "[ES-TODO] Page Assembly",
-        "desc": "[ES-TODO] Build a complete site from reusable sections, translations, and page content"
+        "desc": "[ES-TODO] Build a complete site from Tucsenberg sections, translations, and page content"
       },
       "step5": {
         "title": "[ES-TODO] Verification",
@@ -301,7 +301,7 @@
     },
     "products": {
       "title": "[ES-TODO] Offer Examples",
-      "subtitle": "[ES-TODO] Replaceable product, service, resource, and custom-project examples for a real showcase website.",
+      "subtitle": "[ES-TODO] Temporary product, compatibility, material, and RFQ examples for the Tucsenberg build-out.",
       "cta": "[ES-TODO] View All Products",
       "item1": {
         "tag": "[ES-TODO] Product Example",
@@ -361,8 +361,8 @@
       "cta": "[ES-TODO] Review Contact Flow"
     },
     "scenarios": {
-      "title": "[ES-TODO] Where This Starter Fits",
-      "subtitle": "[ES-TODO] Reusable across product, service, and organization showcase websites. Replace these examples with real use cases.",
+      "title": "[ES-TODO] Where Tucsenberg Fits",
+      "subtitle": "[ES-TODO] Focused on aftermarket aeration membrane replacement paths. Current examples stay provisional until confirmed data lands.",
       "cardEyebrow": "[ES-TODO] Use Case {count}",
       "countryBadge": "[ES-TODO] {countries}+ countries",
       "proofLabel": "[ES-TODO] Replaceable use cases",
@@ -384,7 +384,7 @@
     },
     "quality": {
       "title": "[ES-TODO] Our Commitments",
-      "subtitle": "[ES-TODO] Starter-level promises that should be replaced with real business commitments before launch.",
+      "subtitle": "[ES-TODO] Launch promises that must stay evidence-backed before public release.",
       "commitment1": {
         "title": "[ES-TODO] Clear Response Window",
         "desc": "[ES-TODO] State the real response time visitors can expect after submitting an inquiry."
@@ -427,10 +427,10 @@
       }
     },
     "finalCta": {
-      "title": "[ES-TODO] Start from a real website foundation, then replace what must become yours.",
-      "description": "[ES-TODO] Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
-      "primary": "[ES-TODO] View product capabilities",
-      "secondary": "[ES-TODO] Contact",
+      "title": "[ES-TODO] Prepare the membrane evidence, then request a responsible quote.",
+      "description": "[ES-TODO] Use the current placeholder path to understand what Tucsenberg will ask for before issuing a compatibility-led quote.",
+      "primary": "[ES-TODO] Review membrane paths",
+      "secondary": "[ES-TODO] Prepare a quote request",
       "trustAriaLabel": "[ES-TODO] Homepage trust facts",
       "trust": "[ES-TODO] Example response promise · Replace proof before launch · {countries}+ placeholder markets"
     },
@@ -443,7 +443,7 @@
     "footer": {
       "about": {
         "title": "[ES-TODO] {siteName}",
-        "desc": "[ES-TODO] A replaceable showcase website starter for presenting offers, proof, resources, and inquiry paths."
+        "desc": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths."
       },
       "products": {
         "title": "[ES-TODO] Products",
@@ -617,8 +617,8 @@
       }
     },
     "overview": {
-      "title": "[ES-TODO] Starter Capabilities",
-      "subtitle": "[ES-TODO] A reusable website base with content ownership, component governance, visual review, and deployment checks.",
+      "title": "[ES-TODO] Tucsenberg Site Capabilities",
+      "subtitle": "[ES-TODO] A Tucsenberg website base with content ownership, component governance, visual review, and deployment checks.",
       "features": {
         "performance": {
           "title": "[ES-TODO] Content Ownership",
@@ -630,7 +630,7 @@
         },
         "i18n": {
           "title": "[ES-TODO] Multilingual Ready",
-          "description": "[ES-TODO] The starter includes English and Chinese content paths with translation validation.",
+          "description": "[ES-TODO] The site includes English, Spanish, and internal Chinese content paths with translation validation.",
           "languageUnit": "[ES-TODO] Locales"
         },
         "themes": {
@@ -649,7 +649,7 @@
       },
       "highlights": {
         "title": "[ES-TODO] Core Capabilities",
-        "subtitle": "[ES-TODO] What makes this starter easier for future AI-assisted website work.",
+        "subtitle": "[ES-TODO] What makes this site easier for future AI-assisted Tucsenberg website work.",
         "modern": "[ES-TODO] Component Governance",
         "scalable": "[ES-TODO] Reusable Page Sections",
         "accessible": "[ES-TODO] Storybook Review",
@@ -665,7 +665,7 @@
         },
         "ui": {
           "title": "[ES-TODO] Service Example",
-          "description": "[ES-TODO] Reusable structure for explaining process, deliverables, proof, and next steps."
+          "description": "[ES-TODO] Reusable structure for explaining compatibility process, material guidance, proof, and next steps."
         },
         "tooling": {
           "title": "[ES-TODO] Custom Project Example",
@@ -673,18 +673,18 @@
         }
       },
       "cta": {
-        "title": "[ES-TODO] Ready to Adapt This Starter?",
-        "description": "[ES-TODO] Replace the example identity, offerings, proof, content, images, and deployment settings for a real website.",
+        "title": "[ES-TODO] Ready to Build the Tucsenberg Site?",
+        "description": "[ES-TODO] Replace provisional examples with owner-confirmed membrane, compatibility, proof, content, images, and deployment settings.",
         "getStarted": "[ES-TODO] Start Inquiry",
         "viewSource": "[ES-TODO] View Offerings"
       }
     },
-    "title": "[ES-TODO] Showcase Website Starter",
-    "subtitle": "[ES-TODO] Reusable Showcase Website Starter",
-    "description": "[ES-TODO] Reusable website starter for product, service, proof, and inquiry presentation.",
+    "title": "[ES-TODO] Tucsenberg",
+    "subtitle": "[ES-TODO] Aftermarket Aeration Replacement Membranes",
+    "description": "[ES-TODO] Aftermarket aeration replacement membrane site for compatibility review, material guidance, and RFQ-ready inquiry paths.",
     "getStarted": "[ES-TODO] Get Started",
     "learnMore": "[ES-TODO] Learn More",
-    "welcome": "[ES-TODO] Welcome to Showcase Website Starter",
+    "welcome": "[ES-TODO] Welcome to Tucsenberg",
     "modernApp": "[ES-TODO] A modern web application built with Next.js 16 and React 19",
     "features": {
       "title": "[ES-TODO] Features",
@@ -808,7 +808,7 @@
     "examples": "[ES-TODO] Examples",
     "goToNextjs": "[ES-TODO] Go to nextjs.org",
     "copyright": "[ES-TODO] {copyright}",
-    "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths."
+    "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths."
   },
   "accessibility": {
     "skipToContent": "[ES-TODO] Skip to main content",
@@ -941,7 +941,7 @@
   "structured-data": {
     "organization": {
       "name": "[ES-TODO] {companyName}",
-      "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths",
+      "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths",
       "phone": "[ES-TODO] Contact sales by email",
       "social": {
         "twitter": "[ES-TODO] https://x.com/example",
@@ -950,7 +950,7 @@
     },
     "website": {
       "name": "[ES-TODO] {siteName}",
-      "description": "[ES-TODO] Reusable showcase website starter for products, services, proof, and inquiry paths"
+      "description": "[ES-TODO] Tucsenberg site for aftermarket aeration membrane compatibility review, material guidance, and RFQ-ready inquiry paths"
     },
     "article": {
       "defaultTitle": "[ES-TODO] Article",
@@ -1062,34 +1062,34 @@
       "products": "[ES-TODO] Products"
     },
     "overview": {
-      "title": "[ES-TODO] Starter product capabilities",
-      "description": "[ES-TODO] A showcase-site starter covering site structure, content replacement, inquiry flow, and launch foundation.",
-      "kicker": "[ES-TODO] What the starter includes",
-      "capabilitiesTitle": "[ES-TODO] Result capabilities",
-      "capabilitiesDescription": "[ES-TODO] The page explains what a project can start from before real content is replaced.",
+      "title": "[ES-TODO] Membrane compatibility paths",
+      "description": "[ES-TODO] Tucsenberg is preparing membrane family, OEM-family compatibility, material guidance, and RFQ intake surfaces for Phase 1.",
+      "kicker": "[ES-TODO] What Tucsenberg is preparing",
+      "capabilitiesTitle": "[ES-TODO] Review capabilities",
+      "capabilitiesDescription": "[ES-TODO] This page explains what a buyer can prepare before owner-confirmed product and compatibility data lands.",
       "byStandard": "[ES-TODO] By Example Category",
       "specialty": "[ES-TODO] Specialty Examples"
     },
     "starterCapabilities": {
       "siteFoundation": {
-        "title": "[ES-TODO] Showcase-site foundation",
-        "description": "[ES-TODO] Home, Products, Blog, About, Contact, legal pages, navigation, and responsive layout are already connected."
+        "title": "[ES-TODO] Membrane site foundation",
+        "description": "[ES-TODO] Membrane, compatibility, material, quote, legal, navigation, and responsive layout surfaces are connected."
       },
       "replacementSurface": {
-        "title": "[ES-TODO] Content replacement surface",
-        "description": "[ES-TODO] Brand facts, page copy, product or service entries, SEO, images, and multilingual text have clear places to replace."
+        "title": "[ES-TODO] Compatibility review surface",
+        "description": "[ES-TODO] OEM family, part number, page copy, SEO, images, and multilingual text have clear places to replace with Tucsenberg facts."
       },
       "inquiryPath": {
-        "title": "[ES-TODO] Inquiry path",
-        "description": "[ES-TODO] The contact page, form flow, basic anti-abuse controls, and lead handling path are ready for a real owner."
+        "title": "[ES-TODO] RFQ path",
+        "description": "[ES-TODO] The contact and quote foundations are ready to be connected to a real Tucsenberg intake workflow."
       },
       "launchPath": {
         "title": "[ES-TODO] Launch path",
-        "description": "[ES-TODO] Cloudflare is the recommended deployment route, with optional compatibility kept secondary and traffic visibility treated as a real surface."
+        "description": "[ES-TODO] Cloudflare remains the deployment route, with compatibility and lead proof treated as real launch surfaces."
       }
     },
     "technicalProofTitle": "[ES-TODO] Technical proof",
-    "technicalProofDescription": "[ES-TODO] The starter includes the technical baseline a public demo needs without making the product page a developer manual.",
+    "technicalProofDescription": "[ES-TODO] The site includes the technical baseline Tucsenberg needs without making the membrane pages developer-facing.",
     "technicalProof": {
       "next": {
         "title": "[ES-TODO] Next.js app foundation",
@@ -1097,11 +1097,11 @@
       },
       "cloudflare": {
         "title": "[ES-TODO] Cloudflare/OpenNext deployment path",
-        "description": "[ES-TODO] Cloudflare and OpenNext stay the recommended deployment truth for this starter."
+        "description": "[ES-TODO] Cloudflare and OpenNext stay the recommended deployment truth for this site."
       },
       "i18n": {
         "title": "[ES-TODO] Multilingual content",
-        "description": "[ES-TODO] English and Chinese navigation, page copy, metadata, and article content stay aligned."
+        "description": "[ES-TODO] English, Spanish, and internal Chinese navigation, page copy, metadata, and article content stay aligned."
       },
       "quality": {
         "title": "[ES-TODO] Quality checks",
@@ -1117,20 +1117,20 @@
       }
     },
     "boundary": {
-      "title": "[ES-TODO] Starter, not a finished client website",
-      "description": "[ES-TODO] Real launch still requires real content, images, contact details, legal copy, secrets, and deployment proof.",
+      "title": "[ES-TODO] Tucsenberg work-in-progress, not a finished product catalog",
+      "description": "[ES-TODO] Real launch still requires owner-confirmed product data, images, contact details, legal copy, secrets, and deployment proof.",
       "items": {
-        "content": "[ES-TODO] Replace real business content",
-        "assets": "[ES-TODO] Replace real images and proof",
+        "content": "[ES-TODO] Replace with confirmed membrane content",
+        "assets": "[ES-TODO] Replace with confirmed images and proof",
         "legal": "[ES-TODO] Review legal and contact details",
         "deployment": "[ES-TODO] Prove deployment and forms"
       }
     },
     "cta": {
-      "title": "[ES-TODO] Ready to turn the starter into a public site?",
-      "description": "[ES-TODO] Use the launch articles or contact path to decide what must be replaced first.",
-      "blog": "[ES-TODO] Learn how to start",
-      "contact": "[ES-TODO] Contact"
+      "title": "[ES-TODO] Ready to prepare a membrane review?",
+      "description": "[ES-TODO] Use the quote path or supporting content to decide what product evidence must be collected first.",
+      "blog": "[ES-TODO] Learn how to prepare",
+      "contact": "[ES-TODO] Prepare quote inputs"
     },
     "market": {
       "familyNav": {

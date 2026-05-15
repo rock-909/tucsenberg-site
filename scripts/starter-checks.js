@@ -1988,8 +1988,8 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/website/部署设置.md",
     required: [
       "Cloudflare image delivery strategy",
-      "starter baseline",
-      "customer upgrade lane",
+      "current baseline",
+      "upgrade lane",
     ],
     forbidden: [
       "Cloudflare Image Optimization is enabled by default",
@@ -2002,7 +2002,7 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/website/新项目替换清单.md",
     required: [
       "图片交付策略",
-      "starter baseline",
+      "current baseline",
       "Cloudflare Transformations",
       "Cloudflare Images",
     ],

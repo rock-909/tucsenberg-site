@@ -1,5 +1,5 @@
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 
-[projects."/ABSOLUTE/PATH/TO/showcase-website-starter"]
+[projects."/ABSOLUTE/PATH/TO/tucsenberg-site"]
 trust_level = "trusted"

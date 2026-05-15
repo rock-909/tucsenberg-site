@@ -4,7 +4,7 @@
 
 ## 入口文件
 
-- Codex：遵守会话注入的项目指令；starter 原规则参考 `AGENTS.starter.md`
+- Codex：遵守会话注入的项目指令和当前仓库文档。
 - Claude：`CLAUDE.md`
 - 本地协作偏好：`CLAUDE.local.md`
 
@@ -12,7 +12,7 @@ Claude 入口文件和 Codex 会话规则都应该指向本目录下的网站说
 
 ## Skills
 
-`.claude/skills/` 和 `.codex/skills/` 是 starter 的 AI 能力层，应随项目迁移。
+`.claude/skills/` 和 `.codex/skills/` 是当前仓库的 AI 能力层。保留通用能力，去掉旧品牌/旧项目语境。
 
 要求：
 
@@ -42,7 +42,7 @@ Claude 入口文件和 Codex 会话规则都应该指向本目录下的网站说
 docs/workflows/cwf/
 ```
 
-也就是说：workflow 是 starter 能力，历史产物不是 starter 内容。
+也就是说：workflow 可以保留，历史产物不能当成 Tucsenberg 当前内容。
 
 ## MCP
 

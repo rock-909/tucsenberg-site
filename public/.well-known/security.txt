@@ -1,8 +1,8 @@
-# Security Policy for Example Showcase Company (showcasepipe.com)
+# Security Policy for Tucsenberg
 # https://securitytxt.org/
 
-Contact: mailto:security@showcasepipe.com
+Contact: mailto:contact@tucsenberg.com
 Expires: 2027-03-17T00:00:00.000Z
-Preferred-Languages: en, zh
-Canonical: https://example.com/.well-known/security.txt
-Policy: https://example.com/security-policy.txt
+Preferred-Languages: en, es
+Canonical: https://tucsenberg.com/.well-known/security.txt
+Policy: https://tucsenberg.com/security-policy.txt

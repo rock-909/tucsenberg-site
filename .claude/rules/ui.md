@@ -68,7 +68,7 @@ project tokens for narrative, static, brand-heavy, and page-layout UI.
 
 Reusable UI primitives need Storybook stories for states that matter to review.
 Business/page-level Storybook coverage can grow over time and is not a blocker
-for unrelated starter reset work.
+for unrelated reset work.
 
 Storybook uses the Vite builder. Do not add webpack-only Storybook assumptions
 or addons unless the change includes a current Storybook build proof.

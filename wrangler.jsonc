@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "showcase-website",
+  "name": "tucsenberg-site",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-05-04",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -26,7 +26,7 @@
       "vars": {
         "APP_ENV": "preview",
         "DEPLOYMENT_PLATFORM": "cloudflare",
-        "NEXT_PUBLIC_BASE_URL": "https://preview.example.com",
+        "NEXT_PUBLIC_BASE_URL": "https://preview.tucsenberg.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
       },
     },
@@ -34,7 +34,7 @@
       "vars": {
         "APP_ENV": "production",
         "DEPLOYMENT_PLATFORM": "cloudflare",
-        "NEXT_PUBLIC_BASE_URL": "https://example.com",
+        "NEXT_PUBLIC_BASE_URL": "https://tucsenberg.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
       },
     },

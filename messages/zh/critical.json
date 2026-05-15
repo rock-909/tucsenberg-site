@@ -133,8 +133,8 @@
     "index": {
       "eyebrow": "上线指南",
       "title": "博客",
-      "description": "围绕 starter 如何变成可公开展示的网站，整理内容、页面、部署、流量和替换边界。",
-      "articleListLabel": "Starter 上线文章",
+      "description": "围绕 Tucsenberg 上线准备整理膜片、兼容性、材质、询价流程、部署、分析和内容边界。",
+      "articleListLabel": "Tucsenberg 上线文章",
       "readArticle": "阅读文章"
     },
     "article": {
@@ -143,12 +143,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "可公开上线的 demo starter site",
-      "title": "还没有网站？先从可部署的展示型网站基础开始。",
-      "subtitle": "这个 starter 给一个项目补上第一套真实网站结构：页面、内容替换面、询盘路径、多语言文案，以及 Cloudflare-ready 的上线路径。",
+      "eyebrow": "曝气系统替换膜片",
+      "title": "面向现有曝气系统的替换膜片路径。",
+      "subtitle": "Tucsenberg 正在准备以兼容性 review 为核心的膜片页面，服务需要 OEM-family 匹配、材质判断和批量询价输入的 O&M 团队。",
       "cta": {
-        "primary": "查看产品能力",
-        "secondary": "联系我们"
+        "primary": "查看膜片路径",
+        "secondary": "准备询价输入"
       },
       "proof": {
         "countries": "{countries}+",
@@ -156,101 +156,101 @@
         "range": "3+",
         "rangeLabel": "业务类型",
         "production": "Ready",
-        "productionLabel": "Starter 状态",
+        "productionLabel": "网站状态",
         "est": "{established}",
         "estLabel": "年创立"
       },
       "preview": {
-        "label": "这个 starter 提供什么",
-        "title": "不是空白壳子，而是一套公开网站基础",
-        "description": "demo 会刻意做得足够完整，方便判断；同时也把真实上线前必须替换的边界讲清楚。",
+        "label": "Tucsenberg 正在建设什么",
+        "title": "先做兼容性 review，再做完整目录",
+        "description": "在产品数据、兼容记录和 RFQ 路由确认前，网站会保持安全的建设中状态。",
         "items": [
-          "首页、产品、博客、关于、联系",
-          "品牌和内容替换面",
-          "带基础防滥用的询盘路径",
+          "膜片、兼容性、材质和询价路径",
+          "OEM-family 和 part number review 输入",
+          "带基础反滥用保护的 RFQ 路径",
           "Cloudflare-ready 部署方向"
         ],
         "pages": "页面",
         "components": "组件",
         "storybook": "Storybook",
         "workflow": "AI 工作流",
-        "note": "上线前必须替换示例内容"
+        "note": "下一步补入 owner-confirmed 产品数据"
       }
     },
     "problems": {
-      "title": "第一个卡点通常不是视觉细节，而是网站本身还不存在。",
-      "description": "很多新项目没有公开页面结构、没有内容计划、没有部署路径，也没有一个让访客联系负责人的清楚入口。",
+      "title": "替换膜片买家通常带着不完整证据来，而不是带着干净 SKU。",
+      "description": "维护团队可能只有 OEM family、旧 part number、安装照片、尺寸、废水条件，或者一个停机日期。",
       "items": {
         "structure": {
-          "title": "没有页面结构",
-          "description": "首页、产品、博客、关于、联系和法务页还没有形成一套基础框架。"
+          "title": "没有清晰 part 路径",
+          "description": "负责任报价前，需要确认膜片直径、diffuser body fit、OEM family 和 review caveats。"
         },
         "content": {
-          "title": "没有内容计划",
-          "description": "品牌事实、业务文案、证明材料、图片和上线边界要么分散，要么还没准备。"
+          "title": "证据不完整",
+          "description": "照片、旧膜片、尺寸、废水条件和数量档通常来自不同格式。"
         },
         "deployment": {
-          "title": "没有上线路径",
-          "description": "本地构建成功还不够；网站还需要能证明的预览和部署路径。"
+          "title": "材质风险不清楚",
+          "description": "EPDM、TPU/PU 和后续 PTFE-coated EPDM 需要按工况说明，不能靠空泛质量词。"
         },
         "inquiry": {
-          "title": "没有询盘路径",
-          "description": "访客需要简单联系入口，负责人也需要真实接收表单的目的地。"
+          "title": "RFQ 摩擦",
+          "description": "如果 part number、installed model、数量和停机时间没有一起收集，quote review 会变慢。"
         },
         "multilingual": {
-          "title": "没有多语言基础",
-          "description": "如果网站需要中英文，文案、路由和语言切换一开始就要内置。"
+          "title": "区域 review 路径",
+          "description": "英文和西语公开页必须保持同一套 review 逻辑，中文只做内部预览。"
         }
       }
     },
     "answer": {
-      "title": "这个 starter 先补上缺失的网站基础。",
-      "description": "它不是已经替客户完成的成品网站，而是一套可复用的公开 demo：展示结构、替换工作和真实上线还需要证明什么。",
+      "title": "Tucsenberg 先做兼容性 review，再报价。",
+      "description": "网站会围绕 part-number 匹配、材质决策支持、RFQ intake 和清晰 OEM trademark 边界展开。",
       "items": {
         "pageStructure": {
-          "title": "清楚的页面结构",
-          "description": "首页、产品、博客、关于、联系和辅助页面已经按真实公开网站的形态接好。"
+          "title": "膜片路径结构",
+          "description": "膜片、兼容性、材质、询价、质量、采购和法律边界都有明确位置。"
         },
         "replacementSurface": {
-          "title": "明确的替换面",
-          "description": "品牌、业务、页面文案、SEO、图片、法务文本和联系方式都被当成上线输入。"
+          "title": "Review 输入面",
+          "description": "Part number、照片、尺寸、废水条件、数量档和停机时间都是明确 RFQ 输入。"
         },
         "inquiryPath": {
-          "title": "询盘路径",
-          "description": "网站包含联系入口和表单基础，也保留基础防滥用和线索处理边界。"
+          "title": "Quote review 路径",
+          "description": "询价流会收集足够证据来返回负责任的膜片建议，而不是只按品牌名匹配。"
         },
         "cloudflareFoundation": {
           "title": "Cloudflare-ready 基础",
-          "description": "Cloudflare 是推荐部署路径。其他平台兼容可以保留为可选项，但不混成默认承诺。"
+          "description": "Cloudflare/OpenNext 仍是部署路径，同时确认 Tucsenberg 内容和 lead routing。"
         }
       }
     },
     "startPath": {
-      "title": "从 starter 到公开上线的实际路径。",
-      "description": "把这个 demo 当成网站起点，然后替换所有必须属于真实负责人的部分。",
+      "title": "从膜片证据到 RFQ 的实际路径。",
+      "description": "先用当前 placeholder IA 锁定流程，再填入确认后的产品、兼容性、材质和询价数据。",
       "items": {
         "brand": {
-          "title": "替换品牌事实",
-          "description": "公司名、域名、logo、颜色、联系方式和法务身份都要变成负责人确认的事实。"
+          "title": "确认产品事实",
+          "description": "膜片系列、材质、法律主体、域名、联系方式和品牌资产都要变成 owner-confirmed 事实。"
         },
         "content": {
           "title": "替换页面内容",
-          "description": "首页、产品或服务文案、证明材料、博客说明、图片和法务页都要变成真实上线内容。"
+          "description": "膜片页、兼容性 guide、材质说明、质量证明、图片和法律页都要变成 Tucsenberg 上线内容。"
         },
         "forms": {
-          "title": "接通表单",
-          "description": "联系提交、邮件发送、防滥用检查和响应负责人都要指向真实账号。"
+          "title": "接入询价流",
+          "description": "RFQ 提交、Turnstile、lead destination、邮件投递和响应归属都要指向真实账户。"
         },
         "deploy": {
           "title": "部署并验证",
-          "description": "Cloudflare 预览、表单 canary、流量可见性和负责人确认，要和本地检查分开证明。"
+          "description": "Cloudflare preview、form canary、content readiness 和 owner signoff 要和本地检查分开证明。"
         }
       }
     },
     "starterBoundary": {
-      "title": "它看起来像成品，是为了证明上线路径能跑通。",
-      "description": "公开 demo 展示一套完整网站形态，同时把真实项目上线前必须替换的内容摆在明面上。",
-      "listLabel": "Starter 替换要求",
+      "title": "在 Tucsenberg 事实确认前，这个站点有意保持未完成状态。",
+      "description": "当前壳层展示目标网站形态，同时避免把未确认产品数据和 RFQ 行为写成生产承诺。",
+      "listLabel": "Tucsenberg 上线要求",
       "items": [
         {
           "title": "替换业务身份",
@@ -269,31 +269,31 @@
           "description": "Cloudflare 构建、预览检查、流量面板凭证和 owner 确认要和本地测试分开看。"
         }
       ],
-      "primary": "查看使用流程",
-      "secondary": "查看联系流程"
+      "primary": "查看 review 路径",
+      "secondary": "准备询价输入"
     },
     "chain": {
-      "title": "从内容到询盘，一条可复用流程。",
-      "subtitle": "这个 starter 把内容、组件、预览和联系路径串起来，让每个新网站都从可运行基础开始。",
+      "title": "从 part 证据到 RFQ，一条受控流程。",
+      "subtitle": "Tucsenberg 会在上线推进中保持兼容性 review、材质指导、询价 intake 和部署证明互相连接。",
       "step1": {
-        "title": "业务确认",
-        "desc": "替换示例内容前，先确认新网站需要展示什么"
+        "title": "输入 review",
+        "desc": "确认买家手里有什么 part number、OEM family、照片、尺寸或废水证据"
       },
       "step2": {
         "title": "内容设置",
-        "desc": "在正确位置替换品牌事实、业务内容、证据、图片和转化文案"
+        "desc": "在正确源文件里替换膜片事实、兼容路径、材质指导、证明、图片和 RFQ 文案"
       },
       "step3": {
         "title": "组件复用",
-        "desc": "新增 UI 前，先复用现有 section 和 Storybook 预览"
+        "desc": "新增 UI 前先复用已有 section 和 Storybook preview"
       },
       "step4": {
         "title": "页面组装",
-        "desc": "用可复用 section、翻译和页面内容组合完整网站"
+        "desc": "用 Tucsenberg sections、翻译和页面内容组装完整站点"
       },
       "step5": {
-        "title": "验证检查",
-        "desc": "上线前运行品牌、内容、组件、类型、测试和构建检查"
+        "title": "验证",
+        "desc": "上线前跑 brand、content、component、type、test 和 build checks"
       },
       "stat1": "单一内容模型",
       "stat2": "5步替换流程",
@@ -301,7 +301,7 @@
     },
     "products": {
       "title": "业务示例",
-      "subtitle": "可替换的产品、服务、资源和定制项目示例，用于快速搭出真实展示型网站。",
+      "subtitle": "Tucsenberg build-out 阶段的临时产品、兼容性、材质和 RFQ 示例。",
       "cta": "查看全部产品",
       "item1": {
         "tag": "产品示例",
@@ -361,8 +361,8 @@
       "cta": "查看联系流程"
     },
     "scenarios": {
-      "title": "这个 Starter 适合什么场景",
-      "subtitle": "可复用于产品、服务和组织展示型网站。请把这些示例替换成真实使用场景。",
+      "title": "Tucsenberg 适用场景",
+      "subtitle": "聚焦 aftermarket aeration membrane replacement paths。当前示例在确认数据落地前都只是临时内容。",
       "cardEyebrow": "应用场景 {count}",
       "countryBadge": "{countries}+ 个国家",
       "proofLabel": "可替换使用场景",
@@ -384,7 +384,7 @@
     },
     "quality": {
       "title": "我们的承诺",
-      "subtitle": "这些是 starter 级别的示例承诺，上线前应替换为真实业务承诺。",
+      "subtitle": "公开上线前，承诺必须有证据支撑。",
       "commitment1": {
         "title": "明确响应时间",
         "desc": "说明访客提交咨询后，真实团队预计多久回复。"
@@ -427,10 +427,10 @@
       }
     },
     "finalCta": {
-      "title": "先从真实网站基础开始，再替换成你的内容。",
-      "description": "可以先看这个 starter 包含什么，也可以直接用联系入口进入下一步真实配置讨论。",
-      "primary": "查看产品能力",
-      "secondary": "联系我们",
+      "title": "先准备膜片证据，再申请负责任的报价。",
+      "description": "通过当前占位路径了解 Tucsenberg 报价前会要求哪些输入。",
+      "primary": "查看膜片路径",
+      "secondary": "准备询价输入",
       "trustAriaLabel": "首页信任信息",
       "trust": "示例响应承诺 · 上线前替换证据 · {countries}+ 占位市场"
     },
@@ -443,7 +443,7 @@
     "footer": {
       "about": {
         "title": "{siteName}",
-        "desc": "可复用展示型网站 starter，用于展示业务、证据、资源和询盘路径。"
+        "desc": "Tucsenberg 提供曝气系统替换膜片的兼容性 review、材质指导和 RFQ-ready intake 路径。"
       },
       "products": {
         "title": "产品",
@@ -617,8 +617,8 @@
       }
     },
     "overview": {
-      "title": "Starter 能力",
-      "subtitle": "一个可复用网站基础盘，包含内容归属、组件治理、视觉预览和部署检查。",
+      "title": "Tucsenberg 网站能力",
+      "subtitle": "包含内容归属、组件治理、视觉 review 和部署检查的 Tucsenberg 网站基础。",
       "features": {
         "performance": {
           "title": "内容归属",
@@ -630,7 +630,7 @@
         },
         "i18n": {
           "title": "多语言就绪",
-          "description": "Starter 已包含中英文内容路径和翻译验证。",
+          "description": "网站包含英文、西语和内部中文内容路径，并保留翻译验证。",
           "languageUnit": "种语言"
         },
         "themes": {
@@ -649,9 +649,9 @@
       },
       "highlights": {
         "title": "核心能力",
-        "subtitle": "这些能力让后续 AI 辅助建站更容易复用和检查。",
+        "subtitle": "这套基础如何帮助后续 AI-assisted Tucsenberg 网站工作。",
         "modern": "组件治理",
-        "scalable": "可复用页面 Section",
+        "scalable": "可复用页面 section",
         "accessible": "Storybook 预览",
         "performant": "构建验证",
         "secure": "ISO 9001认证",
@@ -665,7 +665,7 @@
         },
         "ui": {
           "title": "服务示例",
-          "description": "用于说明流程、交付物、证据和下一步的可复用结构。"
+          "description": "用于说明兼容性流程、材质指导、证明和下一步的可复用结构。"
         },
         "tooling": {
           "title": "定制项目示例",
@@ -673,18 +673,18 @@
         }
       },
       "cta": {
-        "title": "准备改造这个 Starter？",
-        "description": "把示例身份、业务内容、证据、文案、图片和部署设置替换成真实网站内容。",
+        "title": "准备建设 Tucsenberg 网站？",
+        "description": "用 owner-confirmed 膜片、兼容性、证明、内容、图片和部署设置替换临时示例。",
         "getStarted": "开始咨询",
         "viewSource": "查看业务示例"
       }
     },
-    "title": "Showcase Website Starter",
-    "subtitle": "可复用展示型网站 Starter",
-    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter。",
+    "title": "Tucsenberg",
+    "subtitle": "曝气系统替换膜片",
+    "description": "Tucsenberg 网站用于 aftermarket aeration membrane compatibility review、material guidance 和 RFQ-ready inquiry paths。",
     "getStarted": "开始使用",
     "learnMore": "了解更多",
-    "welcome": "欢迎来到 Showcase Website Starter",
+    "welcome": "欢迎来到 Tucsenberg",
     "modernApp": "基于 Next.js 16 和 React 19 构建的现代化Web应用",
     "features": {
       "title": "特性",
@@ -808,7 +808,7 @@
     "examples": "示例",
     "goToNextjs": "访问nextjs.org",
     "copyright": "{copyright}",
-    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter。"
+    "description": "Tucsenberg 提供曝气系统替换膜片的兼容性 review、材质指导和 RFQ-ready intake 路径。"
   },
   "accessibility": {
     "skipToContent": "跳转到主要内容",
@@ -941,7 +941,7 @@
   "structured-data": {
     "organization": {
       "name": "{companyName}",
-      "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter",
+      "description": "Tucsenberg 提供曝气系统替换膜片的兼容性 review、材质指导和 RFQ-ready intake 路径",
       "phone": "请通过邮箱联系销售团队",
       "social": {
         "twitter": "https://x.com/example",
@@ -950,7 +950,7 @@
     },
     "website": {
       "name": "{siteName}",
-      "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter"
+      "description": "Tucsenberg 网站用于 aftermarket aeration membrane compatibility review、material guidance 和 RFQ-ready inquiry paths"
     },
     "article": {
       "defaultTitle": "文章",
@@ -1062,34 +1062,34 @@
       "products": "产品中心"
     },
     "overview": {
-      "title": "starter 产品能力",
-      "description": "一套覆盖页面结构、内容替换、询盘路径和上线基础的展示型网站 starter。",
-      "kicker": "starter 包含什么",
-      "capabilitiesTitle": "结果能力",
-      "capabilitiesDescription": "这个页面说明项目在替换真实内容前，可以从哪些已接好的基础能力开始。",
+      "title": "膜片兼容性路径",
+      "description": "Tucsenberg 正在为 Phase 1 准备膜片系列、OEM-family 兼容性、材质指导和 RFQ intake surface。",
+      "kicker": "Tucsenberg 正在准备什么",
+      "capabilitiesTitle": "Review 能力",
+      "capabilitiesDescription": "在 owner-confirmed 产品和兼容性数据落地前，本页说明买家可以先准备什么。",
       "byStandard": "按示例分类",
       "specialty": "特色示例"
     },
     "starterCapabilities": {
       "siteFoundation": {
-        "title": "展示站基础",
-        "description": "首页、产品、博客、关于、联系、法律页面、导航和响应式布局已经连成一套。"
+        "title": "膜片站点基础",
+        "description": "膜片、兼容性、材质、询价、法律、导航和响应式布局 surface 已经连接。"
       },
       "replacementSurface": {
-        "title": "内容替换面",
-        "description": "品牌事实、页面文案、产品或服务、SEO、图片和多语言文字都有明确替换位置。"
+        "title": "兼容性 review surface",
+        "description": "OEM family、part number、页面文案、SEO、图片和多语言文本都有清晰位置来替换为 Tucsenberg 事实。"
       },
       "inquiryPath": {
-        "title": "询盘路径",
-        "description": "联系页、表单流程、基础防滥用控制和线索处理路径已经准备好接入真实 owner。"
+        "title": "RFQ 路径",
+        "description": "联系和询价基础已准备好，后续接入真实 Tucsenberg intake workflow。"
       },
       "launchPath": {
         "title": "上线路径",
-        "description": "Cloudflare 是推荐部署路径，可选兼容保留为次级，流量可见性被当成真实功能面。"
+        "description": "Cloudflare 仍是部署路径，兼容性和 lead proof 作为真实上线面处理。"
       }
     },
     "technicalProofTitle": "技术证明",
-    "technicalProofDescription": "starter 保留公开 demo 需要的技术基础，但不会把产品页写成开发者手册。",
+    "technicalProofDescription": "网站保留 Tucsenberg 需要的技术基础，但不会把膜片页面写成开发者页面。",
     "technicalProof": {
       "next": {
         "title": "Next.js 应用基础",
@@ -1097,11 +1097,11 @@
       },
       "cloudflare": {
         "title": "Cloudflare/OpenNext 部署路径",
-        "description": "Cloudflare 和 OpenNext 是这个 starter 的推荐部署真相。"
+        "description": "Cloudflare 和 OpenNext 是本站推荐部署真相。"
       },
       "i18n": {
         "title": "多语言内容",
-        "description": "中英文导航、页面文案、metadata 和文章内容保持同步。"
+        "description": "英文、西语和内部中文导航、页面文案、metadata 和文章内容保持一致。"
       },
       "quality": {
         "title": "质量检查",
@@ -1117,20 +1117,20 @@
       }
     },
     "boundary": {
-      "title": "starter，不是已经完成的客户网站",
-      "description": "真实上线仍然需要真实内容、图片、联系方式、法律文案、密钥和部署证明。",
+      "title": "Tucsenberg 建设中，不是已完成产品目录",
+      "description": "真实上线仍需要 owner-confirmed 产品数据、图片、联系方式、法律文案、secrets 和部署证明。",
       "items": {
-        "content": "替换真实业务内容",
-        "assets": "替换真实图片和证明",
-        "legal": "复核法律和联系方式",
-        "deployment": "证明部署和表单可用"
+        "content": "替换为确认后的膜片内容",
+        "assets": "替换为确认后的图片和证明",
+        "legal": "review 法律和联系方式",
+        "deployment": "证明部署和表单"
       }
     },
     "cta": {
-      "title": "准备把 starter 变成公开网站？",
-      "description": "先阅读上线文章，或通过联系入口判断哪些内容要先替换。",
-      "blog": "了解如何开始",
-      "contact": "联系"
+      "title": "准备做膜片 review？",
+      "description": "用询价路径或 supporting content 判断先要收集哪些产品证据。",
+      "blog": "了解如何准备",
+      "contact": "准备询价输入"
     },
     "market": {
       "familyNav": {

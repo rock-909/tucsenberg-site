@@ -20,15 +20,14 @@ reviews:
   path_instructions:
     - path: "src/app/api/**"
       instructions: |
-        All write endpoints (POST/PUT/PATCH/DELETE) must have rate limiting AND authentication before merge.
-        Existing endpoint protection table:
-        - /api/whatsapp/send: API Key Auth + Rate Limit
-        - /api/whatsapp/webhook: Signature Verify + Rate Limit
-        - /api/contact: Rate Limit
-        - /api/inquiry: Turnstile + Rate Limit
-        - /api/subscribe: Rate Limit
-        - /api/cache/invalidate: Secret Auth + Pre/Post Rate Limit
-        - /api/csp-report: Rate Limit
+        Tucsenberg write endpoints must keep route-appropriate abuse protection before merge.
+        Current endpoint protection table:
+        - /api/contact: Rate Limit + canonical contact validation
+        - /api/inquiry: Turnstile + Rate Limit + product lead validation
+        - /api/subscribe: Rate Limit + newsletter validation
+        - /api/csp-report: Rate Limit + report body validation
+        - /api/verify-turnstile: Turnstile verification helper
+        - /api/health: GET-only health probe
         Verify: Zod schema validation on all user input. No unfiltered dangerouslySetInnerHTML. URLs must validate protocol.
     - path: "src/components/**"
       instructions: |

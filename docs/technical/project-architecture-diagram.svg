@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200" role="img" aria-labelledby="title desc">
-  <title id="title">Showcase Website Starter Project Architecture Diagram</title>
-  <desc id="desc">Single-site Example Showcase Company website architecture showing delivery, app, content, business logic, external integrations, and quality guardrails.</desc>
+  <title id="title">Tucsenberg Site Project Architecture Diagram</title>
+  <desc id="desc">Single-site Tucsenberg website architecture showing delivery, app, content, business logic, external integrations, and quality guardrails.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f8fbff"/>
@@ -43,7 +43,7 @@
   <rect x="0" y="0" width="1800" height="1200" fill="url(#bg)"/>
   <rect x="48" y="38" width="1704" height="1124" rx="28" fill="none" stroke="#d7e1ec" stroke-width="2"/>
 
-  <text x="84" y="96" class="title">Showcase Website Starter - Current Project Architecture</text>
+  <text x="84" y="96" class="title">Tucsenberg Site - Current Project Architecture</text>
   <text x="84" y="130" class="subtitle">Single-site Next.js 16 platform with bilingual content, guarded lead capture, Cloudflare delivery, and repo-level quality gates</text>
 
   <rect x="84" y="164" width="240" height="34" rx="17" fill="url(#accent)"/>

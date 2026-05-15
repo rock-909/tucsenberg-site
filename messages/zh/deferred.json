@@ -258,7 +258,7 @@
   "phone": "电话号码",
   "organization": {
     "name": "{companyName}",
-    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter",
+    "description": "Tucsenberg 提供曝气系统替换膜片的兼容性 review、材质指导和 RFQ-ready intake 路径",
     "phone": "请通过邮箱联系销售团队",
     "social": {
       "twitter": "https://x.com/example",
@@ -267,7 +267,7 @@
   },
   "website": {
     "name": "{siteName}",
-    "description": "用于展示产品、服务、证据和询盘路径的可复用网站 starter"
+    "description": "Tucsenberg 网站用于 aftermarket aeration membrane compatibility review、material guidance 和 RFQ-ready inquiry paths"
   },
   "article": {
     "defaultAuthor": "{companyName}"
@@ -322,7 +322,7 @@
       "turnstileRequired": "请完成安全验证。"
     }
   },
-  "title": "Showcase Website Starter",
+  "title": "Tucsenberg",
   "trust": {
     "testimonials": {
       "title": "客户评价",
@@ -392,12 +392,12 @@
   },
   "customProject": {
     "meta": {
-      "title": "定制项目支持 | Showcase Website Starter",
-      "description": "可替换的定制项目示例，用于说明范围、方案、品牌适配、确认和交付。"
+      "title": "Custom Review Support | Tucsenberg",
+      "description": "用于兼容输入、材质问题、RFQ scope 和交付 review 的临时 custom-review support 页面。"
     },
     "hero": {
-      "title": "定制项目支持",
-      "subtitle": "您的范围，一条可复用项目流程。"
+      "title": "Custom Review Support",
+      "subtitle": "你的膜片证据，一条受控 review 路径。"
     },
     "scope": {
       "title": "服务范围",

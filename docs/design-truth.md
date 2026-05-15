@@ -1,17 +1,17 @@
 # Design Truth
 
-这份文档只记录 starter 当前已经确认的设计真相。  
-它不是某个客户项目的最终品牌规范。
+这份文档只记录 Tucsenberg 当前已经确认的设计真相。
+它是当前网站的工作规范，不是通用模板品牌规范。
 
 ## 当前设计定位
 
-`showcase-website-starter` 的默认设计方向是：
+`tucsenberg-site` 的默认设计方向是：
 
-- 清晰
-- 可信
-- 现代
+- 精确
 - 克制
-- 易替换
+- 工程化
+- 兼容导向
+- 采购友好
 - 便于 AI 复用和维护
 
 默认避免两种偏差：
@@ -21,12 +21,12 @@
 
 ## 当前品牌表达
 
-当前视觉只是 starter 基线，不是派生项目的最终品牌。
+当前视觉是 Tucsenberg Phase 1 工作基线。
 
 设计上要做到：
 
-- 示例内容看起来完整可运行；
-- 新品牌替换时不需要逐个组件改颜色；
+- 当前未完成页面看起来像 Tucsenberg work-in-progress，而不是旧模板站；
+- 后续调色时不需要逐个组件改颜色；
 - 组件状态、表单、卡片、导航等有统一规则；
 - Storybook 可以作为组件预览和审核面。
 
@@ -37,9 +37,9 @@
 
 ### 色彩
 
-- Current truth: starter uses a replaceable role-based color system.
+- Current truth: Tucsenberg uses a role-based color system.
 - Stable interface: semantic roles and token architecture.
-- Provisional value: current blue/neutral palette.
+- Provisional value: Engineering Navy / Process Teal / cool neutral palette.
 
 规则：
 
@@ -49,7 +49,7 @@
 
 ### 字体
 
-- 当前主字体基线：Figtree + 中英文混排回退策略。
+- 当前主字体基线：IBM Plex Sans + Inter + IBM Plex Mono，中文走系统回退。
 - 排版优先清晰、稳定、可读。
 
 ### 形状与阴影
@@ -94,7 +94,7 @@ Hero 里的 CTA 按钮可以用项目 Button wrapper，因为它是控件。Hero
 
 ## 当前不采用的方向
 
-- 把 starter 做成某个具体行业的固定品牌。
+- 把 Tucsenberg 做回泛模板站。
 - 每个页面随手新建一套按钮、卡片、表单。
 - 大量硬编码颜色。
 - 用 fake proof、fake logo、fake 客户来制造信任。

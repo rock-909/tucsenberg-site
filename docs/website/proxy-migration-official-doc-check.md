@@ -30,9 +30,9 @@ Installed Next.js docs are the source used for this check:
 - `runtime = "edge"` is not supported for Cache Components.
 - Nonce CSP examples use a proxy-generated nonce and require dynamic rendering.
 
-## Current starter context
+## Current site context
 
-This starter currently has:
+This site currently has:
 
 - Next.js 16 Cache Components enabled in `next.config.ts`.
 - Cloudflare/OpenNext as the supported deployment path.
@@ -51,9 +51,9 @@ Keep `src/middleware.ts` for now.
 Do not create `src/proxy.ts` just to silence the framework deprecation warning.
 Treat the warning as a known platform-transition warning.
 
-If a future project decides to actually migrate, that future branch must be a
+If Tucsenberg later decides to actually migrate, that future branch must be a
 separate migration lane. It should not be bundled with CSP, i18n, Cloudflare, or
-starter cleanup work.
+cleanup work.
 
 ## Non-goals
 

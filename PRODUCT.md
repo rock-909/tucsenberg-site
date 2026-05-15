@@ -1,141 +1,140 @@
 ---
-name: Showcase Website Starter
+name: Tucsenberg Site
 register: website
-status: starter-baseline
-last_updated: 2026-04-30
+status: phase-1-build
+last_updated: 2026-05-14
 ---
 
-# Website Product Context
+# Tucsenberg Product Context
 
 ## Status
 
 This file is the project-level product context for design, content, and implementation agents.
 
-This repository is a reusable starter for showcase websites. It is not a finished client website and does not represent one real company.
+This repository is the Tucsenberg website codebase for `tucsenberg.com`. It is no longer maintained as a reusable website template.
 
 ## Product
 
-`showcase-website-starter` helps create a polished website for a company, product line, service business, manufacturer, studio, or similar organization that needs to explain:
+Tucsenberg presents aftermarket aeration replacement membranes for industrial wastewater and O&M maintenance buyers.
 
-- what it offers;
-- why visitors should trust it;
-- which product or service paths matter;
-- how to contact or inquire;
-- what evidence supports its claims.
+The site should help buyers:
 
-The starter includes working examples, but all example names, products, proof points, images, and contact details must be replaced before using it for a real project.
+- identify whether their installed diffuser body or OEM family can be reviewed for a compatible membrane;
+- choose a material path such as EPDM, TPU/PU, or later PTFE-coated EPDM based on wastewater conditions;
+- understand what evidence Tucsenberg needs before quoting;
+- submit a batch RFQ with part numbers, photos, dimensions, quantity band, shutdown timing, and notes;
+- understand what Tucsenberg can and cannot claim about OEM compatibility.
 
 ## North Star
 
-The website should make it easier for a visitor to understand the business and take a useful next step.
+The website should make Tucsenberg feel like a precise part-number and compatibility-review helper, not a generic brand brochure.
 
-For many projects that means an inquiry form. For others it may mean booking a call, requesting a quote, viewing product details, reading case material, or downloading a brochure.
+The desired visitor action is an RFQ or compatibility-review request that includes enough data for Tucsenberg to return a responsible quote path.
 
-Design quality is judged by clarity, trust, and conversion usefulness, not by decoration alone.
+Design quality is judged by clarity, buyer trust, technical discipline, and RFQ usefulness.
 
 ## Default Audience Model
 
-The starter should support several common showcase-site audiences:
-
 | Audience | Main concern | Website implication |
 | --- | --- | --- |
-| Buyer / prospect | Can this company solve my problem? | Make offer, fit, proof, and next action clear. |
-| Partner / distributor | Is this company reliable enough to work with? | Surface process, capability, response path, and commercial basics. |
-| Technical evaluator | Do the details match my requirements? | Keep specs, scope, standards, and constraints easy to scan. |
-| Owner / operator | Can I quickly adapt this site for my business? | Keep replacement surfaces obvious and documented. |
-
-Do not overfit the starter to one industry. Example content may lean toward product/service showcase, but the structure should remain reusable.
+| O&M contractor | Can I replace membranes without changing the retained diffuser body? | Lead with OEM family, part number, dimensions, and review inputs. |
+| Industrial wastewater maintenance team | Which material fits my water chemistry and operating risk? | Explain EPDM vs TPU/PU vs PTFE in condition-based language, not vague quality claims. |
+| Procurement buyer | Can this be quoted, documented, shipped, and justified internally? | Surface quantity bands, documentation, warranty boundary, Incoterms, and response path. |
+| Technical evaluator | What evidence supports fit and what is still unverified? | Use CRR-style review language, caveats, batch records, and trademark disclaimers. |
 
 ## Visitor Decision Path
 
-A good showcase website usually answers these questions in order:
+The core path is:
 
-1. What is this website about?
-2. Is this relevant to me?
-3. What can I evaluate quickly?
-4. What proof makes the claims believable?
-5. What should I do next?
+1. I need replacement aeration membranes.
+2. I know an OEM family, part number, model, photo, or dimensions.
+3. I need to know whether Tucsenberg can review a compatible replacement.
+4. I need material guidance before I buy.
+5. I need quote requirements, lead time, quantity band, and risk boundaries.
+6. I submit an RFQ or contact Tucsenberg with the strongest evidence I have.
 
 Pages, sections, components, and copy should support that path.
 
-## Default Conversion Model
+## Conversion Model
 
 Primary conversion:
 
-- Submit a contact or inquiry form.
+- Submit a quote or compatibility-review request.
 
 Secondary conversions:
 
-- Request a quote.
-- Ask a question.
-- Request a sample, demo, catalog, or consultation.
-- Navigate to product/service detail pages.
+- Email Tucsenberg with a part number, installed model, photos, dimensions, or material conditions.
+- Navigate from a compatibility or material page into the RFQ route.
+- Read procurement, quality, and legal boundary pages before submitting.
 
-Default inquiry form fields:
+Default RFQ fields should favor useful maintenance evidence over generic contact capture:
 
 1. Name
 2. Email
-3. Interest or topic
-4. Message
-
-Keep this simple unless a real project proves that a longer form is worth the extra friction.
+3. Company / organization
+4. Country
+5. OEM family or part number if known
+6. Installed model / diffuser body if known
+7. Quantity band
+8. Preferred material or wastewater condition
+9. Shutdown date / urgency
+10. Notes and optional attachments
 
 ## Content Model
 
-Starter content is intentionally replaceable.
-
-Use these as the default replacement surfaces:
+Use these current authoring surfaces:
 
 - Brand and company facts: `src/config/single-site.ts`
+- SEO, sitemap, robots, and public locale boundaries: `src/config/single-site-seo.ts`
 - Page prose and FAQ: `content/pages/{locale}/*.mdx`
 - Shared UI labels: `messages/{locale}/critical.json` and `messages/{locale}/deferred.json`
 - Navigation and page expression: `src/config/single-site-navigation.ts`, `src/config/single-site-links.ts`, and `src/config/single-site-page-expression.ts`
-- Product/service examples: `src/config/single-site-product-catalog.ts` and `src/constants/product-specs/**`
-- Images: `public/images/**`
-- Deployment and secrets: local environment files and Cloudflare settings
+- Product / compatibility placeholders before Step 3: `src/config/single-site-product-catalog.ts` and `src/constants/product-specs/**`
+- Images and share assets: `public/images/**`
+- Deployment and secrets: `.env.example`, `.dev.vars.example`, `wrangler.jsonc`, GitHub secrets, and Cloudflare settings
 
 ## Brand Voice
 
 Default tone:
 
-- Clear
-- Practical
-- Direct
-- Trust-building
-- Specific enough to be useful
+- precise;
+- restrained;
+- engineering-minded;
+- buyer-friendly;
+- clear about evidence and caveats.
 
 Avoid:
 
-- unsupported claims;
-- vague superlatives;
-- filler copy that only sounds impressive;
-- fake certifications, fake customers, fake awards, or fake evidence;
-- UI text that hides what the visitor should do next.
+- unsupported claims such as "high quality", "efficient", or "durable";
+- implying OEM authorization or OEM-equivalent performance;
+- saying TPU/PU is premium or better by default;
+- fake certifications, fake customers, fake awards, or fake proof;
+- hiding what evidence the buyer needs to provide before quote.
 
 ## Design Implications
 
-The starter should help AI and human reviewers make good reuse decisions:
-
-- Prefer existing components before creating new ones.
-- Keep page sections modular and easy to inspect in Storybook where useful.
+- Lead with compatibility review and material decision support.
+- Keep navigation Tucsenberg-specific: membranes, compatibility, materials, quote.
 - Use semantic design tokens instead of hard-coded colors.
-- Keep content and brand facts in documented replacement surfaces.
+- Keep IBM Plex Sans / Inter / IBM Plex Mono as the target font stack.
+- Keep current unfinished pages visibly Tucsenberg work-in-progress, not generic template residue.
 - Preserve accessibility, responsive behavior, and no-JS/basic HTML fallbacks for critical paths.
 
 ## Source Documents
 
-Primary starter docs:
+Primary project docs:
 
+- `CLAUDE.md`
+- `PROJECT-BRIEF.md`
+- `DEVELOPMENT-LOG.md`
 - `docs/website/README.md`
 - `docs/website/新项目替换清单.md`
-- `docs/website/品牌设置.md`
-- `docs/website/内容设置.md`
-- `docs/website/部署设置.md`
-- `docs/website/AI工作流.md`
+- `docs/website/quality-proof.md`
 
 Design and component governance:
 
 - `DESIGN.md`
 - `docs/design-truth.md`
+- `docs/decisions/ADR-ui-foundation.md`
 - `docs/impeccable/system/COMPONENT-GOVERNANCE.md`
 - `docs/impeccable/system/COLOR-SYSTEM.md`

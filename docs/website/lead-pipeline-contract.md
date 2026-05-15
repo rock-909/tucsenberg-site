@@ -1,11 +1,11 @@
 # Lead pipeline contract
 
-This document records the current lead pipeline contract for the website starter.
+This document records the current lead pipeline contract for Tucsenberg site.
 Phase 3 keeps this contract explicit instead of rewriting working lead code by default.
 
 ## Purpose
 
-The starter has three public lead entry points:
+The site currently has three public lead entry points:
 
 - Contact form lead
 - Product inquiry lead
