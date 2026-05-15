@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none",
+  "inline-flex items-center rounded-[4px] border px-2 py-0.5 text-xs font-medium tracking-[0.16px] transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none",
   {
     variants: {
       variant: {
@@ -67,7 +67,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
         data-slot="badge"
         data-ui-pilot="radix-themes-badge"
         color={badgeColors[selectedVariant]}
-        radius="full"
+        radius="small"
         size="1"
         variant={radixBadgeVariants[selectedVariant]}
         className={cn(badgeVariants({ variant }), className)}

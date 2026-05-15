@@ -1,11 +1,12 @@
 /**
  * Product Inquiry API — Integration Tests
  *
- * Tests the full POST /api/inquiry chain with only external services mocked:
+ * Tests POST /api/inquiry route ordering with service boundaries mocked:
+ * - Rate limit store (external/shared storage boundary)
  * - Turnstile verification (Cloudflare API)
  * - Lead pipeline (Resend email + Airtable CRM)
  *
- * Internal protection chain runs as real code:
+ * Route-local protection ordering runs as real code:
  * - Rate limiting (via withRateLimit HOF)
  * - JSON parsing + validation
  * - Turnstile token presence check

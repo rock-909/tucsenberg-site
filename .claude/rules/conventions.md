@@ -19,7 +19,8 @@ middleware/proxy behavior, or Next config.
 - This repo uses Next.js 16 App Router.
 - Page/layout `params` and `searchParams` use the installed async request API
   shape.
-- Locale routes live under `/[locale]` for `en` and `zh`.
+- Locale routes live under `/[locale]` for runtime locales `en`, `es`, and
+  `zh`; public SEO surfaces expose `en` and `es` only.
 - Keep layouts and non-interactive sections as Server Components.
 - Push `"use client"` down to interactive leaf components.
 

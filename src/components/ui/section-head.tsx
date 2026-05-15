@@ -26,9 +26,7 @@ export function SectionHead({
         className={cn("mb-9 flex items-end justify-between gap-6", className)}
       >
         <div>
-          <h2 className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em]">
-            {title}
-          </h2>
+          <h2 className="type-heading-02">{title}</h2>
           {subtitle && (
             <p className="mt-2 max-w-[560px] text-muted-foreground">
               {subtitle}
@@ -42,9 +40,7 @@ export function SectionHead({
 
   return (
     <div className={cn("mb-9", className)}>
-      <h2 className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em]">
-        {title}
-      </h2>
+      <h2 className="type-heading-02">{title}</h2>
       {subtitle && (
         <p className="mt-2 max-w-[560px] text-muted-foreground">{subtitle}</p>
       )}
