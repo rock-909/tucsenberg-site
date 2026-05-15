@@ -13,7 +13,7 @@ const localeCases = [
   {
     locale: "en",
     skipLabel: "Skip to main content",
-    contactHeading: /Contact Us/i,
+    contactHeading: /Contact Tucsenberg/i,
     languageLabel: "Select Language",
     currentLanguage: "English",
     targetFallbackHref: "/es",
@@ -26,7 +26,7 @@ const localeCases = [
   {
     locale: "es",
     skipLabel: "[ES-TODO] Skip to main content",
-    contactHeading: /Contact Us/i,
+    contactHeading: /Contact Tucsenberg/i,
     languageLabel: "[ES-TODO] Select Language",
     currentLanguage: "Español",
     targetFallbackHref: "/en",

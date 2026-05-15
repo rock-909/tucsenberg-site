@@ -305,7 +305,7 @@
       "cta": "[ES-TODO] View All Products",
       "item1": {
         "tag": "[ES-TODO] Product Example",
-        "title": "[ES-TODO] Product Showcase",
+        "title": "[ES-TODO] Membrane Paths",
         "spec1": "[ES-TODO] Categories, highlights, and specs",
         "spec2": "[ES-TODO] Cards, market pages, and detail sections",
         "spec3": "[ES-TODO] Replace with real product data",
@@ -314,7 +314,7 @@
       },
       "item2": {
         "tag": "[ES-TODO] Service Example",
-        "title": "[ES-TODO] Service Showcase",
+        "title": "[ES-TODO] RFQ Review Path",
         "spec1": "[ES-TODO] Use cases, process, and outcomes",
         "spec2": "[ES-TODO] Proof, resources, and FAQs",
         "spec3": "[ES-TODO] Replace with real service scope",
@@ -367,7 +367,7 @@
       "countryBadge": "[ES-TODO] {countries}+ countries",
       "proofLabel": "[ES-TODO] Replaceable use cases",
       "item1": {
-        "title": "[ES-TODO] Product Showcase",
+        "title": "[ES-TODO] Membrane Paths",
         "desc": "[ES-TODO] Use cards, spec tables, resources, and inquiry CTAs to help visitors evaluate an offer quickly.",
         "quote": "[ES-TODO] \"Replace this with a real customer quote only after it is verified.\""
       },
@@ -448,8 +448,8 @@
       "products": {
         "title": "[ES-TODO] Products",
         "items": {
-          "item1": "[ES-TODO] Product Showcase",
-          "item2": "[ES-TODO] Service Showcase",
+          "item1": "[ES-TODO] Membrane Paths",
+          "item2": "[ES-TODO] RFQ Review Path",
           "item3": "[ES-TODO] Resource Examples",
           "item4": "[ES-TODO] Custom Projects"
         }
@@ -535,8 +535,8 @@
       }
     },
     "showcase": {
-      "title": "[ES-TODO] Component Showcase",
-      "subtitle": "[ES-TODO] Explore our comprehensive UI component library with live examples and interactive demos.",
+      "title": "[ES-TODO] Interface Preview",
+      "subtitle": "[ES-TODO] Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
       "tabs": {
         "components": "[ES-TODO] Components",
         "themes": "[ES-TODO] Themes",
@@ -843,12 +843,12 @@
     "pages": {
       "products": {
         "title": "[ES-TODO] Products - Under Construction",
-        "description": "[ES-TODO] Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "description": "[ES-TODO] Tucsenberg membrane pages are being prepared around OEM-family evidence, material fit, and RFQ-ready inputs.",
         "features": "[ES-TODO] Product features and specifications coming soon"
       },
       "about": {
         "title": "[ES-TODO] About Us - Under Construction",
-        "description": "[ES-TODO] Learn more about our story, mission, and the team behind our innovative solutions.",
+        "description": "[ES-TODO] Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
         "features": "[ES-TODO] Company story, team profiles, and mission statement coming soon"
       },
       "contact": {
@@ -865,13 +865,13 @@
           "saturday": "[ES-TODO] Saturday",
           "sunday": "[ES-TODO] Sunday",
           "closed": "[ES-TODO] Closed",
-          "responseTitle": "[ES-TODO] What to expect",
-          "responseTimeLabel": "[ES-TODO] Typical response",
-          "responseTimeValue": "[ES-TODO] Within 24 business hours",
+          "responseTitle": "[ES-TODO] What to prepare",
+          "responseTimeLabel": "[ES-TODO] Response window",
+          "responseTimeValue": "[ES-TODO] To be confirmed before public launch",
           "bestForLabel": "[ES-TODO] Best for",
-          "bestForValue": "[ES-TODO] Inquiries, quotes, demos, project scope, and content replacement questions",
+          "bestForValue": "[ES-TODO] Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
           "prepareLabel": "[ES-TODO] Helpful details",
-          "prepareValue": "[ES-TODO] Share your offer type, target audience, needed pages, timeline, and current assets"
+          "prepareValue": "[ES-TODO] Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing"
         }
       }
     },

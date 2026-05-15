@@ -21,9 +21,9 @@ describe("Badge", () => {
     expect(badge).toHaveClass(
       "inline-flex",
       "items-center",
-      "rounded-full",
+      "rounded-[4px]",
       "text-xs",
-      "font-semibold",
+      "font-medium",
     );
   });
 

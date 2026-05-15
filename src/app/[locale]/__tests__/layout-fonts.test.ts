@@ -92,7 +92,7 @@ describe("Layout Fonts Configuration", () => {
 
       expect(IBM_Plex_Mono).toHaveBeenCalledWith({
         subsets: ["latin", "latin-ext"],
-        weight: ["400"],
+        weight: ["400", "500", "600"],
         display: "swap",
         variable: "--font-ibm-plex-mono",
       });

@@ -67,6 +67,9 @@ If behavior changes, update the contract and proving tests in the same branch.
 - Critical smoke/E2E tests must fail on runtime errors.
 - Tests named integration, contract, or protection must not mock away the core
   proof path while presenting themselves as primary proof.
+- If a test mocks service boundaries, name and document the exact boundary it
+  still proves, for example route ordering rather than full external
+  integration.
 - Console warning/error suppression must include a narrow reason.
 
 ## Playwright selectors
@@ -93,8 +96,8 @@ Use shared test utilities instead of duplicating mock systems:
 
 - `@/test/utils`
 - `src/test/constants/mock-messages.ts`
-- `src/test/mock-utils.ts`
-- factory helpers under `src/test/factories/`
+- `src/test/render-async-page.tsx`
+- focused setup helpers under `src/test/setup.*.ts`
 
 ## Skips
 

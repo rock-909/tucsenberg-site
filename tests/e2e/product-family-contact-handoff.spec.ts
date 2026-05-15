@@ -21,8 +21,10 @@ const localeCases = [
     familySlug: "sample-product-shapes",
     inquiryLabel: "Request quote for Sample Product Shapes",
     contextLabel: "You are asking about:",
-    marketLabel: "Primary Offer Example",
-    familyLabel: "Sample Product Shapes",
+    marketLabel: "Membrane review path",
+    familyLabel: "Replacement membrane family",
+    legacyMarketLabel: "Primary Offer Example",
+    legacyFamilyLabel: "Sample Product Shapes",
   },
   {
     locale: "zh",
@@ -32,8 +34,10 @@ const localeCases = [
     familySlug: "sample-product-shapes",
     inquiryLabel: "咨询 示例形态",
     contextLabel: "你正在咨询：",
-    marketLabel: "主要业务示例",
-    familyLabel: "示例形态",
+    marketLabel: "膜片 review 路径",
+    familyLabel: "替换膜片系列",
+    legacyMarketLabel: "主要业务示例",
+    legacyFamilyLabel: "示例形态",
   },
 ] as const;
 
@@ -119,6 +123,8 @@ for (const localeCase of localeCases) {
       await expect(notice).toContainText(localeCase.contextLabel);
       await expect(notice).toContainText(localeCase.marketLabel);
       await expect(notice).toContainText(localeCase.familyLabel);
+      await expect(notice).not.toContainText(localeCase.legacyMarketLabel);
+      await expect(notice).not.toContainText(localeCase.legacyFamilyLabel);
     });
   });
 }

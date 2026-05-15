@@ -16,13 +16,14 @@ Before creating a component, check existing folders:
 
 ```text
 src/components/ui
-src/components/blocks
 src/components/sections
 src/components/forms
 src/components/products
 src/components/layout
 src/components/contact
-src/components/trust
+src/components/content
+src/components/grid
+src/components/seo
 ```
 
 Decision order:
@@ -39,15 +40,17 @@ primitives directly from page sections or business components.
 
 ## Radix UI foundation
 
-The project uses a hybrid / pilot-first UI foundation. Read
-`docs/decisions/ADR-ui-foundation.md` before adding Radix Themes or changing
-the UI foundation.
+The project uses a governed full-adoption UI foundation. See
+`docs/decisions/ADR-ui-foundation.md` for the full ADR.
 
-- Radix Primitives are approved for complex interactions.
-- Radix-style 1-12 color roles are approved as the color reasoning model.
+- Radix Primitives are the default for complex interactions and repeated controls.
+- Radix Themes is approved for form, state, badge, data, and control surfaces
+  through `src/components/ui/*` wrappers.
+- Radix-style 1-12 color scales are the color reasoning model.
 - Tailwind continues to own page layout, responsive structure, and brand expression.
 - Runtime color truth remains in `src/app/globals.css`.
-- Radix Themes is pilot-only and may be used only through approved local UI wrappers.
+- Radix Themes must not take over hero, product storytelling, proof sections,
+  footer, or page narrative structure.
 
 Business code must import UI from local wrappers, for example
 `@/components/ui/*`.
@@ -112,7 +115,8 @@ Use `cn()` from `@/lib/utils` for conditional classes.
   older `priority` examples.
 - Do not remove the Cloudflare `images.unoptimized` baseline or add a custom
   image loader without a separate deployed Cloudflare image proof.
-- `next/font/local` is the safe default for branded fonts. Avoid adding runtime
-  font network dependencies for buyer-visible pages.
+- `next/font/local` is the safest default for proprietary branded fonts.
+  `next/font/google` is acceptable when the installed Next.js docs confirm
+  build-time self-hosting and browser runtime sends no Google font requests.
 - For `next/image`, `next/font`, and metadata APIs, check the installed Next.js
   docs before editing.

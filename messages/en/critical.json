@@ -305,7 +305,7 @@
       "cta": "View All Products",
       "item1": {
         "tag": "Product Example",
-        "title": "Product Showcase",
+        "title": "Membrane Paths",
         "spec1": "Categories, highlights, and specs",
         "spec2": "Cards, market pages, and detail sections",
         "spec3": "Replace with real product data",
@@ -314,7 +314,7 @@
       },
       "item2": {
         "tag": "Service Example",
-        "title": "Service Showcase",
+        "title": "RFQ Review Path",
         "spec1": "Use cases, process, and outcomes",
         "spec2": "Proof, resources, and FAQs",
         "spec3": "Replace with real service scope",
@@ -367,7 +367,7 @@
       "countryBadge": "{countries}+ countries",
       "proofLabel": "Replaceable use cases",
       "item1": {
-        "title": "Product Showcase",
+        "title": "Membrane Paths",
         "desc": "Use cards, spec tables, resources, and inquiry CTAs to help visitors evaluate an offer quickly.",
         "quote": "\"Replace this with a real customer quote only after it is verified.\""
       },
@@ -448,8 +448,8 @@
       "products": {
         "title": "Products",
         "items": {
-          "item1": "Product Showcase",
-          "item2": "Service Showcase",
+          "item1": "Membrane Paths",
+          "item2": "RFQ Review Path",
           "item3": "Resource Examples",
           "item4": "Custom Projects"
         }
@@ -535,8 +535,8 @@
       }
     },
     "showcase": {
-      "title": "Component Showcase",
-      "subtitle": "Explore our comprehensive UI component library with live examples and interactive demos.",
+      "title": "Interface Preview",
+      "subtitle": "Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
       "tabs": {
         "components": "Components",
         "themes": "Themes",
@@ -843,12 +843,12 @@
     "pages": {
       "products": {
         "title": "Products - Under Construction",
-        "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "description": "Tucsenberg membrane pages are being prepared around OEM-family evidence, material fit, and RFQ-ready inputs.",
         "features": "Product features and specifications coming soon"
       },
       "about": {
         "title": "About Us - Under Construction",
-        "description": "Learn more about our story, mission, and the team behind our innovative solutions.",
+        "description": "Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
         "features": "Company story, team profiles, and mission statement coming soon"
       },
       "contact": {
@@ -865,13 +865,13 @@
           "saturday": "Saturday",
           "sunday": "Sunday",
           "closed": "Closed",
-          "responseTitle": "What to expect",
-          "responseTimeLabel": "Typical response",
-          "responseTimeValue": "Within 24 business hours",
+          "responseTitle": "What to prepare",
+          "responseTimeLabel": "Response window",
+          "responseTimeValue": "To be confirmed before public launch",
           "bestForLabel": "Best for",
-          "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
+          "bestForValue": "Replacement membrane RFQs, OEM-family checks, material-fit questions, and part-list review",
           "prepareLabel": "Helpful details",
-          "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+          "prepareValue": "Share OEM family, part number, dimensions, photos, wastewater conditions, quantity range, and shutdown timing"
         }
       }
     },

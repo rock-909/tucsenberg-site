@@ -52,13 +52,13 @@ test.describe("About page MDX rendering", () => {
     });
   }
 
-  test("en about page explains starter identity instead of a fictional company", async ({
+  test("en about page explains Tucsenberg identity and launch boundary", async ({
     page,
   }) => {
     await page.goto("/en/about", { waitUntil: "domcontentloaded" });
     await page.waitForURL("**/en/about");
     await waitForLoadWithFallback(page, {
-      context: "about starter identity en",
+      context: "about Tucsenberg identity en",
       loadTimeout: 10_000,
       fallbackDelay: 500,
     });
@@ -68,11 +68,16 @@ test.describe("About page MDX rendering", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: /showcase website starter designed for real public launch/i,
+        name: /replacement membrane site built around installed aeration systems/i,
       }),
     ).toBeVisible();
     await expect(
-      page.getByText(/not a fictional company profile/i),
+      page.getByText(/not yet a finished product database/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        /OEM-family matching, material-fit guidance, and RFQ intake/i,
+      ),
     ).toBeVisible();
   });
 });

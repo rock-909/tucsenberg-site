@@ -305,7 +305,7 @@
       "cta": "查看全部产品",
       "item1": {
         "tag": "产品示例",
-        "title": "产品展示",
+        "title": "膜片路径",
         "spec1": "分类、亮点和规格",
         "spec2": "卡片、市场页和详情区块",
         "spec3": "替换成真实产品数据",
@@ -314,7 +314,7 @@
       },
       "item2": {
         "tag": "服务示例",
-        "title": "服务展示",
+        "title": "RFQ review 路径",
         "spec1": "使用场景、流程和结果",
         "spec2": "证据、资源和 FAQ",
         "spec3": "替换成真实服务范围",
@@ -367,7 +367,7 @@
       "countryBadge": "{countries}+ 个国家",
       "proofLabel": "可替换使用场景",
       "item1": {
-        "title": "产品展示",
+        "title": "膜片路径",
         "desc": "用卡片、规格表、资源和询盘 CTA 帮助访客快速评估业务。",
         "quote": "\"这里应替换为经过确认的真实客户评价。\""
       },
@@ -448,8 +448,8 @@
       "products": {
         "title": "产品",
         "items": {
-          "item1": "产品展示",
-          "item2": "服务展示",
+          "item1": "膜片路径",
+          "item2": "RFQ review 路径",
           "item3": "资源示例",
           "item4": "定制项目"
         }
@@ -535,8 +535,8 @@
       }
     },
     "showcase": {
-      "title": "组件展示",
-      "subtitle": "探索我们全面的UI组件库，包含实时示例和交互演示。",
+      "title": "界面预览",
+      "subtitle": "预览用于膜片路径、RFQ intake 和上线准备的界面模块。",
       "tabs": {
         "components": "组件",
         "themes": "主题",
@@ -843,12 +843,12 @@
     "pages": {
       "products": {
         "title": "产品展示 - 建设中",
-        "description": "我们的产品展示正在精心制作中。探索将改变您业务的创新解决方案。",
+        "description": "Tucsenberg 膜片页面正在围绕 OEM-family 证据、材质适配和 RFQ-ready 输入准备。",
         "features": "产品功能和规格说明即将推出"
       },
       "about": {
         "title": "关于我们 - 建设中",
-        "description": "了解更多关于我们的故事、使命以及创新解决方案背后的团队。",
+        "description": "了解 Tucsenberg 如何准备以 part number 为核心的替换膜片网站。",
         "features": "公司故事、团队简介和使命宣言即将推出"
       },
       "contact": {
@@ -865,13 +865,13 @@
           "saturday": "周六",
           "sunday": "周日",
           "closed": "休息",
-          "responseTitle": "联系后会发生什么",
-          "responseTimeLabel": "通常回复时间",
-          "responseTimeValue": "工作日 24 小时内",
+          "responseTitle": "建议准备",
+          "responseTimeLabel": "响应窗口",
+          "responseTimeValue": "公开上线前确认",
           "bestForLabel": "适合咨询",
-          "bestForValue": "咨询、报价、演示、项目范围和内容替换问题",
+          "bestForValue": "替换膜片 RFQ、OEM-family 检查、材质适配问题和 part list review",
           "prepareLabel": "建议提供",
-          "prepareValue": "业务类型、目标受众、需要的页面、时间计划和现有素材"
+          "prepareValue": "OEM family、part number、尺寸、照片、废水工况、数量区间和停机时间"
         }
       }
     },

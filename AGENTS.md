@@ -1,26 +1,73 @@
-# Tucsenberg Site — Cross-Tool Agent Instructions
+# Tucsenberg Site
 
-This file provides shared instructions for all AI coding tools (Codex, Copilot, etc.). Claude Code uses `CLAUDE.md` as primary; if using Claude, read that instead.
+Tucsenberg 官网代码仓库（tucsenberg.com）。
 
-## Project
+**品牌定位：** Aftermarket aeration replacement membrane brand，面向全球 O&M contractor 和工业废水维护团队。
+**网站定位：** part-number problem solver，不是泛品牌官网。
 
-Tucsenberg 官网（tucsenberg.com）— aftermarket aeration replacement membrane brand website. Part-number problem solver for O&M contractors and industrial wastewater maintenance teams. Evolved from a Showcase Website Starter; engineering foundations are retained.
+业务运营在另一个 repo：`/Users/Data/workspace/aeration-brand/`。
 
-## Before Coding
+<!-- BEGIN:nextjs-agent-rules -->
 
-Read these in order:
+# Next.js: ALWAYS read docs before coding
 
-1. `CLAUDE.md` — full project rules and context (canonical source)
-2. `PROJECT-BRIEF.md` — site planning (positioning / pages / design / content / phases)
-3. `DEVELOPMENT-LOG.md` — current progress and next steps
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data may be outdated — the docs are the source of truth.
 
-Do not rely on chat memory for project truth. Decisions that must survive sessions go into project docs.
+<!-- END:nextjs-agent-rules -->
 
-## Stack
+---
 
-Next.js 16.2.6 (App Router, Cache Components) + React 19.2.6 + TypeScript 6 + Tailwind CSS 4 + next-intl 4
+## 什么时候必须停下来问用户
 
-## Commands
+- 业务定位、产品承诺、客户话术、价格/交期/认证等商业判断
+- 不可逆操作、跨 repo 迁移、上线域名/账号/密钥
+- Phase 范围外的新功能
+- 需要用户提供素材、客户资料、供应链事实
+
+其他技术执行自主处理。进度和决策写回 `DEVELOPMENT-LOG.md`。
+
+---
+
+## 业务约束
+
+1. Phase 1 公开发英文 + 西语；中文只做本地 dev / 内部预览，不进 sitemap、不索引。
+2. TPU 不写成 "premium" 或 "better than EPDM"，只写工况适配。
+3. OEM 兼容页底部必须有 trademark disclaimer。
+4. 不写 "high quality / efficient / durable" 这类空泛形容词。
+5. i18n key 用嵌套结构，按页面 / 区块 / 字段命名。
+
+---
+
+## 新会话先读
+
+1. `PROJECT-BRIEF.md` — 网站完整规划（定位 / 页面 / 设计 / 内容 / Phase）
+2. `DEVELOPMENT-LOG.md` — 当前进度 / 下一步 / 业务等待项 / 决策记录
+
+---
+
+## 仓库边界
+
+- **本 repo：** 网站代码 + 上线内容（`content/`、`src/`、`messages/`）
+- **aeration-brand repo：** 供应商 / 客户 / 冷邮件 / 业务指南 / 完整调研档案
+
+**单向引用**。本 repo 可以引用 aeration-brand 的内容；不要把研究档案复制进本 repo。需要原始资料时去 `aeration-brand/_reference/`，但 `PROJECT-BRIEF.md` 已经浓缩了关键决策。
+
+---
+
+## 决策表
+
+| 场景 | 应该做 | 不要做 |
+| --- | --- | --- |
+| 需要业务资料 | 去 `PROJECT-BRIEF.md`，必要时只读 aeration-brand 原始资料 | 把研究档案复制进本 repo |
+| 改页面文案 | 改 MDX 或 translation keys，跑 `content:check` | 在组件里硬编码英文 |
+| 改 Next.js 行为 | 先查 `node_modules/next/dist/docs/` | 用旧经验猜 API |
+| 写文案 | 用具体工况数据、买家场景说话 | 用 AI slop 套话或空泛形容词 |
+| 改旧 MDX 内容 | 按 Step 4-7 阶段计划做 | 在当前阶段顺手清空 blog / pages 旧 MDX |
+| 项目方向 | 围绕 Tucsenberg 上线推进 | 把项目重新泛化回通用模板 |
+
+---
+
+## 命令
 
 ```bash
 pnpm dev
@@ -35,48 +82,22 @@ pnpm build
 pnpm website:build:cf
 ```
 
-`pnpm build` and `pnpm website:build:cf` write to the same `.next` directory — never run them in parallel.
+`pnpm build` 和 `pnpm website:build:cf` 写同一个 `.next` 目录，不能并行跑。
 
-Use the smallest validation that proves the change:
+---
 
-- Type-only changes: `pnpm type-check`
-- Lint-sensitive edits: `pnpm lint:check`
-- Unit-tested logic: `pnpm test`
-- Content / i18n / brand: `pnpm content:check` + `pnpm brand:check`
-- Component governance: `pnpm component:check`
-- Next.js / runtime changes: `pnpm build`
-- Cloudflare / OpenNext: run `pnpm build` before `pnpm website:build:cf`
-- Broad or release-facing changes: `pnpm website:check`
+## 规则路由
 
-## Constraints
+项目规则文件在 `.claude/rules/`。编辑前读对应文件：
 
-1. **TypeScript strict** — no `any`
-2. **Server Components first** — `"use client"` only for interactivity
-3. **i18n required** — all user-facing text via translation keys or MDX content sources
-4. **No hardcoded brand/product/SEO values** in components
-5. **GitHub Flow** — `main` is the only long-lived branch; feature branches merge through PRs
-
-## Reference Sources
-
-Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data may be outdated; the installed package docs are the source of truth. For other dependencies, prefer official or version-locked local docs.
-
-## Rule Routing
-
-Before editing, read the matching rule files under `.claude/rules/`:
-
-| Task touches | Read |
+| 任务涉及 | 读取 |
 | --- | --- |
-| Next.js routing, layouts, metadata, caching, Server Components | `conventions.md` + `node_modules/next/dist/docs/` |
-| Cloudflare / OpenNext build, deploy, runtime | `cloudflare.md` |
-| TypeScript style, imports, naming | `coding-standards.md` + `code-quality.md` |
-| i18n, translations, locale routing | `i18n.md` |
-| API routes, validation, CSP, security | `security.md` |
-| UI components, Tailwind, shadcn/ui, Radix | `ui.md` |
-| Design tokens, brand color, theme | `ui.md` + `DESIGN.md` + `docs/design-truth.md` + `docs/impeccable/system/COLOR-SYSTEM.md` |
-| MDX, page content, frontmatter | `content.md` |
-| Tests, mocks, Vitest, Playwright | `testing.md` |
-| JSON-LD, structured data | `structured-data.md` |
-
-## UI Foundation
-
-See `docs/decisions/ADR-ui-foundation.md`. Radix Primitives for complex interactions; Tailwind for layout and brand expression. Runtime color truth in `src/app/globals.css`. Radix Themes only through approved `src/components/ui/*` wrappers — do not import `@radix-ui/themes` directly from pages, sections, or layout components.
+| TypeScript / 代码质量 | `coding-standards.md` + `code-quality.md` |
+| Next.js 路由、布局、缓存、Server Components | `conventions.md` + `node_modules/next/dist/docs/` |
+| Cloudflare / OpenNext / build runtime | `cloudflare.md` |
+| i18n / locale routing | `i18n.md` |
+| API routes / validation / CSP / security | `security.md` |
+| UI / Tailwind / shadcn / Radix / design tokens | `ui.md` |
+| 内容源 / MDX / page copy | `content.md` |
+| Tests / mocks / Vitest / Playwright | `testing.md` |
+| Structured data / JSON-LD | `structured-data.md` |

@@ -11,13 +11,13 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
-    label: "Inquiry context",
+    label: "Inquiry source",
     context: {
       intent: PRODUCT_FAMILY_CONTACT_INTENT,
-      marketSlug: "starter-market",
-      marketLabel: "Starter market",
-      familySlug: "starter-family",
-      familyLabel: "Starter family",
+      marketSlug: "disc-membranes",
+      marketLabel: "Disc replacement membranes",
+      familySlug: "nine-inch-epdm",
+      familyLabel: "9 inch disc EPDM membrane",
     },
   },
 } satisfies Meta<typeof ProductFamilyContextNotice>;
@@ -33,10 +33,10 @@ export const LongFamilyName: Story = {
     context: {
       intent: PRODUCT_FAMILY_CONTACT_INTENT,
       marketSlug: "long-market",
-      marketLabel: "Long replacement market label for layout review",
+      marketLabel: "Long membrane replacement path label for layout review",
       familySlug: "long-family",
       familyLabel:
-        "Very long replaceable product or service family name used by a starter project",
+        "Very long replacement membrane family name used to review wrapping",
     },
   },
 };
@@ -46,10 +46,10 @@ export const ChineseCopy: Story = {
     label: "询盘来源",
     context: {
       intent: PRODUCT_FAMILY_CONTACT_INTENT,
-      marketSlug: "starter-market-zh",
-      marketLabel: "示例市场分类",
-      familySlug: "starter-family-zh",
-      familyLabel: "较长的中文产品或服务系列名称",
+      marketSlug: "disc-membranes-zh",
+      marketLabel: "盘式替换膜片",
+      familySlug: "nine-inch-epdm-zh",
+      familyLabel: "9 寸盘式 EPDM 膜片",
     },
   },
 };
