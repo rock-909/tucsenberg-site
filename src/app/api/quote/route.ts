@@ -44,6 +44,7 @@ import {
   HTTP_BAD_REQUEST,
   HTTP_INTERNAL_ERROR,
   HTTP_SERVICE_UNAVAILABLE,
+  MAX_LEAD_REQUIREMENTS_LENGTH,
 } from "@/constants";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 
@@ -132,6 +133,15 @@ function composeProductLead(rfq: RfqLeadInput) {
     RFQ_PRODUCT_NAME_MAX,
   );
 
+  // Individually valid RFQ fields (partNumbers ≤500, notes ≤2000, plus label
+  // lines) can compose past the product lead `requirements` cap. `processLead`
+  // re-validates the composed lead via `productLeadSchema`, so an uncapped
+  // join would be silently dropped as VALIDATION_ERROR. Cap the final block
+  // here, mirroring how `productName` is bounded above.
+  const requirements = requirementLines
+    .join("\n")
+    .slice(0, MAX_LEAD_REQUIREMENTS_LENGTH);
+
   return {
     type: LEAD_TYPES.PRODUCT,
     fullName: rfq.fullName,
@@ -140,7 +150,7 @@ function composeProductLead(rfq: RfqLeadInput) {
     productSlug: RFQ_PRODUCT_SLUG,
     productName,
     quantity: rfq.quantity?.trim() || RFQ_QUANTITY_FALLBACK,
-    requirements: requirementLines.join("\n"),
+    requirements,
     marketingConsent: rfq.marketingConsent,
   };
 }

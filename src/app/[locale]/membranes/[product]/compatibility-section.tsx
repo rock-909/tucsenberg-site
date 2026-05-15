@@ -53,7 +53,7 @@ function ModelRow({
       <td className="p-4">
         {checks.length > 0 ? (
           <details className="text-sm">
-            <summary className="cursor-pointer font-medium text-[var(--brand-teal)]">
+            <summary className="cursor-pointer font-medium text-[var(--color-brand-accent)]">
               {t("compatibility.requiredChecks")}
             </summary>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">

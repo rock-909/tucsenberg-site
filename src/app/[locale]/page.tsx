@@ -87,7 +87,7 @@ function OemGridSection({ t }: { t: HomeTranslator }) {
               <span className="text-lg font-semibold text-foreground">
                 {brand.name}
               </span>
-              <span className="mt-3 block text-sm font-medium text-[var(--brand-teal)] group-hover:underline">
+              <span className="mt-3 block text-sm font-medium text-[var(--color-brand-accent)] group-hover:underline">
                 {t("oemGrid.viewAll", { brand: brand.name })}
               </span>
             </Link>
@@ -105,7 +105,7 @@ function TrustRibbon({ t }: { t: HomeTranslator }) {
         {TRUST_ITEMS.map((key) => (
           <li
             key={key}
-            className="text-sm text-muted-foreground before:mr-2 before:text-[var(--brand-teal)] before:content-['—']"
+            className="text-sm text-muted-foreground before:mr-2 before:text-[var(--color-brand-accent)] before:content-['—']"
           >
             {t(`trust.${key}`)}
           </li>

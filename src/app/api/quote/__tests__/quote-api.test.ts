@@ -14,6 +14,10 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
+import {
+  MAX_LEAD_PART_NUMBERS_LENGTH,
+  MAX_LEAD_REQUIREMENTS_LENGTH,
+} from "@/constants";
 import { POST } from "../route";
 
 vi.unmock("zod");
@@ -156,6 +160,32 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
 
     expect(response.status).toBe(400);
     expect(processLead).not.toHaveBeenCalled();
+  });
+
+  it("caps composed requirements so a max-length RFQ is not dropped on re-validation", async () => {
+    // partNumbers (≤500) + notes (≤2000) are each individually valid under
+    // rfqLeadSchema, but the composed `requirements` block would exceed the
+    // product lead cap and be silently rejected by processLead's
+    // re-validation. The route must cap the composed value instead.
+    const body = {
+      ...validRfqData(),
+      partNumbers: "A".repeat(MAX_LEAD_PART_NUMBERS_LENGTH),
+      notes: "B".repeat(MAX_LEAD_REQUIREMENTS_LENGTH),
+    };
+
+    const response = await POST(createRequest(body));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(processLead).toHaveBeenCalledTimes(1);
+
+    const leadArg = vi.mocked(processLead).mock.calls[0]![0] as {
+      requirements: string;
+    };
+    expect(leadArg.requirements.length).toBeLessThanOrEqual(
+      MAX_LEAD_REQUIREMENTS_LENGTH,
+    );
   });
 
   it("returns 429 when the rate-limit gate trips first", async () => {

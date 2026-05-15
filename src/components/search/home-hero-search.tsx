@@ -64,7 +64,7 @@ function ModelRows({
                   )}&model=${encodeURIComponent(model.modelSlug)}` as "/"
                 }
                 prefetch={false}
-                className="mt-1 inline-block text-xs font-medium text-[var(--brand-teal)] hover:underline"
+                className="mt-1 inline-block text-xs font-medium text-[var(--color-brand-accent)] hover:underline"
               >
                 {tSearch("requestQuote")}
               </Link>

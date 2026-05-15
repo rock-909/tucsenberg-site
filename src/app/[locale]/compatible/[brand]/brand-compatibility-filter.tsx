@@ -86,7 +86,7 @@ function ProductBlock({
       </div>
       {product.checks.length > 0 ? (
         <details className="mt-3 text-sm">
-          <summary className="cursor-pointer font-medium text-[var(--brand-teal)]">
+          <summary className="cursor-pointer font-medium text-[var(--color-brand-accent)]">
             {labels.requiredChecks}
           </summary>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
@@ -106,7 +106,7 @@ function ProductBlock({
       <Link
         href={product.quoteHref as "/"}
         prefetch={false}
-        className="mt-3 inline-block text-sm font-medium text-[var(--brand-teal)] hover:underline"
+        className="mt-3 inline-block text-sm font-medium text-[var(--color-brand-accent)] hover:underline"
       >
         {labels.requestQuote}
       </Link>
@@ -150,7 +150,7 @@ export function BrandCompatibilityFilter({
                 onClick={() => setCategory(tab.key)}
                 className={
                   active
-                    ? "border-b-2 border-[var(--brand-teal)] pb-1 text-sm font-semibold text-primary"
+                    ? "border-b-2 border-[var(--color-brand-accent)] pb-1 text-sm font-semibold text-primary"
                     : "border-b-2 border-transparent pb-1 text-sm text-muted-foreground hover:text-foreground"
                 }
               >
