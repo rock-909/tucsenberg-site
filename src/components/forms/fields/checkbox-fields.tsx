@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { FORM_FIELD_REQUIRED_CLASS_NAME } from "@/components/forms/form-status-styles";
 
@@ -18,13 +19,11 @@ export function CheckboxFields({ t, isPending }: CheckboxFieldsProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <input
+          <Checkbox
             id="acceptPrivacy"
             name="acceptPrivacy"
-            type="checkbox"
             disabled={isPending}
             required
-            className="h-4 w-4 rounded border border-input"
           />
           <Label
             htmlFor="acceptPrivacy"
@@ -37,12 +36,10 @@ export function CheckboxFields({ t, isPending }: CheckboxFieldsProps) {
 
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <input
+          <Checkbox
             id="marketingConsent"
             name="marketingConsent"
-            type="checkbox"
             disabled={isPending}
-            className="h-4 w-4 rounded border border-input"
           />
           <Label htmlFor="marketingConsent" className="text-sm">
             {t("marketingConsent")}

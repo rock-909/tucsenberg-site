@@ -105,12 +105,20 @@ describe("Contact Form Fields - Core Tests", () => {
     });
 
     it("should have required attribute on checkbox", () => {
-      render(<CheckboxFields {...defaultProps} />);
+      const { container } = render(
+        <form>
+          <CheckboxFields {...defaultProps} />
+        </form>,
+      );
 
       const checkbox = screen.getByLabelText(/acceptPrivacy/i);
-      expect(checkbox).toHaveAttribute("required");
-      expect(checkbox).toHaveAttribute("name", "acceptPrivacy");
-      expect(checkbox).toHaveAttribute("type", "checkbox");
+      const formInput = container.querySelector('input[name="acceptPrivacy"]');
+
+      expect(checkbox).toBeRequired();
+      expect(checkbox).toHaveAttribute("data-slot", "checkbox");
+      expect(formInput).toBeInstanceOf(HTMLInputElement);
+      expect(formInput).toHaveAttribute("type", "checkbox");
+      expect(formInput).toHaveAttribute("required");
     });
 
     it("should handle checkbox interactions", async () => {
@@ -179,13 +187,13 @@ describe("Contact Form Fields - Core Tests", () => {
 
   describe("React 19 Native Form Integration", () => {
     it("should render all form fields with correct names", () => {
-      render(
-        <div>
+      const { container } = render(
+        <form>
           <NameFields {...defaultProps} />
           <ContactFields {...defaultProps} />
           <CheckboxFields {...defaultProps} />
           <AdditionalFields {...defaultProps} />
-        </div>,
+        </form>,
       );
 
       // Verify all fields have correct name attributes for form submission
@@ -203,14 +211,12 @@ describe("Contact Form Fields - Core Tests", () => {
         "name",
         "subject",
       );
-      expect(screen.getByLabelText(/acceptPrivacy/i)).toHaveAttribute(
-        "name",
-        "acceptPrivacy",
-      );
-      expect(screen.getByLabelText(/marketingConsent/i)).toHaveAttribute(
-        "name",
-        "marketingConsent",
-      );
+      expect(
+        container.querySelector('input[name="acceptPrivacy"]'),
+      ).toBeInstanceOf(HTMLInputElement);
+      expect(
+        container.querySelector('input[name="marketingConsent"]'),
+      ).toBeInstanceOf(HTMLInputElement);
     });
 
     it("should handle form submission state with isPending", () => {

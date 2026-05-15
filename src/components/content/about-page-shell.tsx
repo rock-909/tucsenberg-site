@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MetricCard } from "@/components/ui/metric-card";
 import { siteFacts } from "@/config/site-facts";
 import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
@@ -228,18 +229,16 @@ export function AboutPageShell({
 
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <dl className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {statItems.map((item) => (
-              <div key={item.key} className="text-center">
-                <div className="mb-2 text-4xl font-bold text-primary">
-                  {item.value}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {item.label}
-                </div>
-              </div>
+              <MetricCard
+                key={item.key}
+                label={item.label}
+                value={item.value}
+                className="items-center text-center"
+              />
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 

@@ -100,9 +100,14 @@ describe("ContactFormIsland", () => {
 
     await renderIsland();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The form could not load.",
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("The form could not load.");
+    expect(alert).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-status-callout",
     );
+    expect(alert).toHaveAttribute("aria-live", "assertive");
+    expect(alert).toHaveClass("border-[var(--error-border)]");
     expect(reportError).toHaveBeenCalledTimes(1);
     expect(reportError.mock.calls[0]?.[0]).toBeInstanceOf(Error);
 

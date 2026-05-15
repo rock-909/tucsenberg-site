@@ -91,9 +91,13 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
       );
     });
 
-    it("keeps configured checkboxes native and accessible during the text-control pilot", async () => {
+    it("uses Radix-backed configured checkboxes without losing native FormData", async () => {
       const user = userEvent.setup();
-      render(<FormFields {...defaultProps} />);
+      render(
+        <form data-testid="form">
+          <FormFields {...defaultProps} />
+        </form>,
+      );
 
       const privacyCheckbox = screen.getByRole("checkbox", {
         name: /acceptPrivacy/i,
@@ -102,21 +106,29 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
         name: /marketingConsent/i,
       });
 
-      expect(privacyCheckbox).toHaveAttribute("type", "checkbox");
-      expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
       expect(privacyCheckbox).toBeRequired();
-      expect(marketingCheckbox).toHaveAttribute("type", "checkbox");
-      expect(marketingCheckbox).toHaveAttribute("name", "marketingConsent");
       expect(marketingCheckbox).not.toBeRequired();
+      expect(privacyCheckbox).toHaveAttribute("data-slot", "checkbox");
+      expect(
+        screen.getByTestId("form").querySelector('input[name="acceptPrivacy"]'),
+      ).toHaveAttribute("type", "checkbox");
+      expect(
+        screen
+          .getByTestId("form")
+          .querySelector('input[name="marketingConsent"]'),
+      ).toHaveAttribute("type", "checkbox");
 
       await user.click(privacyCheckbox);
       await user.click(marketingCheckbox);
 
       expect(privacyCheckbox).toBeChecked();
       expect(marketingCheckbox).toBeChecked();
+      const form = screen.getByTestId("form") as HTMLFormElement;
+      expect(new FormData(form).get("acceptPrivacy")).toBe("on");
+      expect(new FormData(form).get("marketingConsent")).toBe("on");
     });
 
-    it("keeps checkbox labels clickable during the text-control pilot", async () => {
+    it("keeps checkbox labels clickable after Radix adoption", async () => {
       const user = userEvent.setup();
       render(<FormFields {...defaultProps} />);
 
@@ -226,19 +238,34 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
     });
 
     it("should have correct checkbox attributes", () => {
-      render(<CheckboxFields {...defaultProps} />);
+      render(
+        <form data-testid="form">
+          <CheckboxFields {...defaultProps} />
+        </form>,
+      );
 
       const privacyCheckbox = screen.getByLabelText(/acceptPrivacy/i);
       const marketingCheckbox = screen.getByLabelText(/marketingConsent/i);
 
-      expect(privacyCheckbox).toHaveAttribute("required");
-      expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
-      expect(marketingCheckbox).toHaveAttribute("name", "marketingConsent");
+      expect(privacyCheckbox).toHaveAttribute("data-slot", "checkbox");
+      expect(marketingCheckbox).toHaveAttribute("data-slot", "checkbox");
+      expect(
+        screen.getByTestId("form").querySelector('input[name="acceptPrivacy"]'),
+      ).toHaveAttribute("required");
+      expect(
+        screen
+          .getByTestId("form")
+          .querySelector('input[name="marketingConsent"]'),
+      ).toHaveAttribute("type", "checkbox");
     });
 
     it("should handle checkbox interactions", async () => {
       const user = userEvent.setup();
-      render(<CheckboxFields {...defaultProps} />);
+      render(
+        <form data-testid="form">
+          <CheckboxFields {...defaultProps} />
+        </form>,
+      );
 
       const privacyCheckbox = screen.getByLabelText(/acceptPrivacy/i);
       const marketingCheckbox = screen.getByLabelText(/marketingConsent/i);
@@ -251,6 +278,9 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
 
       expect(privacyCheckbox).toBeChecked();
       expect(marketingCheckbox).toBeChecked();
+      const form = screen.getByTestId("form") as HTMLFormElement;
+      expect(new FormData(form).get("acceptPrivacy")).toBe("on");
+      expect(new FormData(form).get("marketingConsent")).toBe("on");
     });
 
     it("should disable checkboxes when isPending is true", () => {

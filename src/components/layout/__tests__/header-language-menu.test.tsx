@@ -1,5 +1,12 @@
 import { readFileSync } from "node:fs";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ANIMATION_DURATION_VERY_SLOW } from "@/constants/core";
 import { HeaderLanguageMenu } from "@/components/layout/header-language-menu";
@@ -8,6 +15,13 @@ function setBrowserPathname(pathname: string) {
   Object.defineProperty(window, "location", {
     value: { ...window.location, pathname } as Location,
     configurable: true,
+  });
+}
+
+function openLanguageMenu() {
+  fireEvent.pointerDown(screen.getByTestId("language-toggle-button"), {
+    button: 0,
+    ctrlKey: false,
   });
 }
 
@@ -22,13 +36,14 @@ describe("HeaderLanguageMenu", () => {
     vi.useRealTimers();
   });
 
-  it("keeps the deferred header menu free of shared Radix primitives", () => {
+  it("uses the local DropdownMenu wrapper instead of direct Radix imports", () => {
     const source = readFileSync(
       "src/components/layout/header-language-menu.tsx",
       "utf8",
     );
 
-    expect(source).not.toContain("@/components/ui/dropdown-menu");
+    expect(source).toContain("@/components/ui/dropdown-menu");
+    expect(source).not.toContain("@radix-ui/react-dropdown-menu");
     expect(source).not.toContain("@/components/ui/button");
     expect(source).not.toContain("@/lib/navigation");
     expect(source).not.toContain("@/lib/i18n/route-parsing");
@@ -91,16 +106,16 @@ describe("HeaderLanguageMenu", () => {
     render(<HeaderLanguageMenu locale="en" />);
 
     setBrowserPathname("/en/about");
-    fireEvent.click(screen.getByTestId("language-toggle-button"));
+    openLanguageMenu();
 
     expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
       "/es/about",
     );
 
-    fireEvent.click(screen.getByTestId("language-toggle-button"));
+    openLanguageMenu();
     setBrowserPathname("/en/contact");
-    fireEvent.click(screen.getByTestId("language-toggle-button"));
+    openLanguageMenu();
 
     expect(screen.getByTestId("language-link-es")).toHaveAttribute(
       "href",
@@ -113,6 +128,7 @@ describe("HeaderLanguageMenu", () => {
 
     fireEvent.click(screen.getByTestId("language-link-es"));
 
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     expect(screen.getByTestId("loader-icon")).toBeInTheDocument();
 
     act(() => {
@@ -141,7 +157,7 @@ describe("HeaderLanguageMenu", () => {
 
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId("language-toggle-button"));
+    openLanguageMenu();
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
     expect(screen.getByTestId("language-toggle-button")).toHaveAttribute(
@@ -158,13 +174,54 @@ describe("HeaderLanguageMenu", () => {
     );
   });
 
-  it("closes when the user clicks outside the menu", () => {
+  it("closes when the user clicks outside the menu", async () => {
+    vi.useRealTimers();
+    const user = userEvent.setup();
     render(<HeaderLanguageMenu initialOpen locale="en" />);
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
 
-    fireEvent.pointerDown(document.body);
+    await user.click(document.body);
 
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
+  });
+
+  it("opens from the keyboard and keeps real href values", () => {
+    render(<HeaderLanguageMenu locale="en" />);
+
+    fireEvent.keyDown(screen.getByTestId("language-toggle-button"), {
+      key: "Enter",
+    });
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
+      "href",
+      "/es/products/north-america",
+    );
+  });
+
+  it("activates a language item from the keyboard and closes the menu", async () => {
+    vi.useRealTimers();
+    const user = userEvent.setup();
+    render(<HeaderLanguageMenu locale="en" />);
+
+    await user.tab();
+    expect(screen.getByTestId("language-toggle-button")).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(screen.getByTestId("language-link-es")).toHaveAttribute(
+      "href",
+      "/es/products/north-america",
+    );
+
+    await user.keyboard("{ArrowDown}{ArrowDown}{Enter}");
+
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("loader-icon")).toBeInTheDocument();
   });
 });

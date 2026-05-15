@@ -135,6 +135,15 @@ describe("AboutPageShell", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("Launch structure")).toBeInTheDocument();
+    const statLabel = screen.getAllByText("Starter baseline").find((node) =>
+      node.getAttribute("data-slot") === "metric-card-description",
+    );
+    expect(statLabel).toBeInTheDocument();
+    expect(statLabel?.closest("[data-metric-card]")).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-themes-data-card",
+    );
+    expect(statLabel?.closest("dl")).toBeInTheDocument();
   });
 
   it("renders FAQ section when faq items present", () => {

@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
+import { StatusCallout } from "@/components/ui/status-callout";
 
 type ContactFormComponent = ComponentType;
 
@@ -114,10 +115,7 @@ export function ContactFormIsland({
 
   if (state.loadState.status === "failed") {
     return (
-      <div
-        className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive"
-        role="alert"
-      >
+      <StatusCallout className="p-6 text-sm" tone="error">
         <p>{errorMessage}</p>
         <Button
           className="mt-4"
@@ -128,7 +126,7 @@ export function ContactFormIsland({
         >
           {retryLabel}
         </Button>
-      </div>
+      </StatusCallout>
     );
   }
 

@@ -48,6 +48,11 @@ Local release proof is not public launch proof. Public launch still requires `PU
 
 它不证明每一个业务区块、页面区块、表单组合都有 Storybook 覆盖。业务/page-level stories 是当前站点的评审辅助，可以逐步增加，但不作为当前阶段的硬门禁。
 
+Browser proof screenshots are local or CI proof artifacts by default. Track
+them in git only when a spec, plan, or decision record explicitly names the
+screenshot as durable review evidence. Do not force-add ad hoc screenshots from
+`reports/**` only because a local browser proof captured them.
+
 ### Optional Lighthouse proof boundary
 
 Lighthouse is a bundled manual performance check, not a default CI gate and not a git-hook task.
@@ -230,6 +235,11 @@ The runtime result distinguishes `recordCreated` from `ownerNotified`; do not tr
 当前兼容命令 `node scripts/starter-checks.js client-boundary` 会把 `src/` 下顶层 `"use client"` 文件和 `docs/quality/client-boundary-budget.json` 对比，并把当前报告写到 `reports/quality/client-boundary-budget.json`。
 
 这是源码结构 proof，不是浏览器行为 proof。它不证明 hydration 行为、页面 UX 或真实浏览器里的交互质量。
+
+Radix Themes wrappers are counted explicitly when they import client-only
+Radix Themes components. Do not hide third-party client component cost behind a
+server-looking local wrapper; add the wrapper to the budget and explain why the
+surface needs Radix-backed behavior or standardized state styling.
 
 ### 6. Route mode proof
 

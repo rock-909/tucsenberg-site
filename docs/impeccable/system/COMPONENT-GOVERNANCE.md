@@ -155,8 +155,8 @@ When scanner output and visual/runtime behavior disagree, treat the scanner as a
 
 ## Radix boundary
 
-Radix is part of the hybrid / pilot-first UI foundation. The accepted decision
-is recorded in `docs/decisions/ADR-ui-foundation.md`.
+Radix is part of the governed full-adoption UI foundation. The accepted
+decision is recorded in `docs/decisions/ADR-ui-foundation.md`.
 
 Production UI should normally consume project wrappers from
 `src/components/ui/`.
@@ -165,7 +165,7 @@ Allowed:
 
 - `@radix-ui/react-*` imports inside `src/components/ui/`;
 - `@radix-ui/themes` imports only inside approved `src/components/ui/`
-  pilot wrappers;
+  wrappers;
 - tests and stories when directly testing or demonstrating UI wrappers.
 
 Not allowed by default:

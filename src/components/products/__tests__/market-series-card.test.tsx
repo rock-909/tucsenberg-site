@@ -78,7 +78,10 @@ describe("MarketSeriesCard", () => {
     const MarketSeriesCard = await importComponent();
     render(<MarketSeriesCard {...defaultProps} />);
 
-    expect(screen.getByText("Example Standard A")).toBeInTheDocument();
+    const badge = screen.getByText("Example Standard A");
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveAttribute("data-slot", "badge");
+    expect(badge).toHaveAttribute("data-ui-pilot", "radix-themes-badge");
   });
 
   it("renders market description", async () => {

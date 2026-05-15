@@ -7,6 +7,7 @@ import {
   ContactFormTextInput,
   ContactFormTextarea,
 } from "@/components/ui/contact-form-control";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   buildFormFieldsFromConfig,
@@ -184,13 +185,11 @@ export const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
           {checkboxFields.map((field) => (
             <div key={field.key} className="space-y-2">
               <div className="flex items-center space-x-2">
-                <input
+                <Checkbox
                   id={field.key}
                   name={field.key}
-                  type="checkbox"
                   disabled={isPending}
                   required={field.required}
-                  className="size-4 rounded border border-input"
                 />
                 <Label
                   htmlFor={field.key}

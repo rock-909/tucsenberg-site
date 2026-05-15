@@ -9,6 +9,11 @@ import {
   OPS_TRAFFIC_ACCESS_COOKIE_NAME,
   verifyOpsAccessCookieValue,
 } from "@/lib/ops/access-cookie";
+import { Button } from "@/components/ui/button";
+import { Field, FieldControl, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { MetricCard } from "@/components/ui/metric-card";
+import { StatusCallout } from "@/components/ui/status-callout";
 
 export function generateMetadata(): Metadata {
   return {
@@ -23,9 +28,9 @@ function UnconfiguredState() {
   return (
     <main className="mx-auto max-w-[960px] px-6 py-16">
       <h1 className="text-3xl font-bold">Traffic dashboard</h1>
-      <p className="mt-4 rounded-lg border p-4 text-sm text-muted-foreground">
+      <StatusCallout className="mt-4" live={false} tone="info">
         Traffic dashboard is not configured
-      </p>
+      </StatusCallout>
       <p className="mt-3 text-sm text-muted-foreground">
         Add Cloudflare analytics credentials on the server to enable real
         traffic data.
@@ -42,28 +47,27 @@ function AccessForm({ denied }: { denied: boolean }) {
         Enter the owner access key to view Cloudflare traffic data.
       </p>
       {denied ? (
-        <p className="mt-4 rounded-lg border border-destructive p-3 text-sm">
+        <StatusCallout className="mt-4" tone="error">
           Access key was not accepted.
-        </p>
+        </StatusCallout>
       ) : null}
       <form
         className="mt-6 grid gap-3"
         method="post"
         action="/ops/traffic/access"
       >
-        <label className="text-sm font-medium" htmlFor="accessKey">
-          Access key
-        </label>
-        <input
-          id="accessKey"
-          name="accessKey"
-          type="password"
-          className="rounded-md border px-3 py-2"
-          autoComplete="current-password"
-        />
-        <button className="rounded-md bg-primary px-4 py-2 text-primary-foreground">
-          View dashboard
-        </button>
+        <Field>
+          <FieldLabel htmlFor="accessKey">Access key</FieldLabel>
+          <FieldControl>
+            <Input
+              id="accessKey"
+              name="accessKey"
+              type="password"
+              autoComplete="current-password"
+            />
+          </FieldControl>
+        </Field>
+        <Button type="submit">View dashboard</Button>
       </form>
     </main>
   );
@@ -80,28 +84,16 @@ function Dashboard({ data }: { data: CloudflareTrafficDashboardData }) {
         Hostname: {data.hostname}. Last updated: {data.lastUpdated}.
       </p>
       <dl className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border p-4">
-          <dt className="text-sm text-muted-foreground">
-            Visits in the last 7 days
-          </dt>
-          <dd className="mt-2 text-2xl font-bold">{data.summary.visits}</dd>
-        </div>
-        <div className="rounded-xl border p-4">
-          <dt className="text-sm text-muted-foreground">Requests</dt>
-          <dd className="mt-2 text-2xl font-bold">{data.summary.requests}</dd>
-        </div>
-        <div className="rounded-xl border p-4">
-          <dt className="text-sm text-muted-foreground">Bandwidth</dt>
-          <dd className="mt-2 text-2xl font-bold">
-            {data.summary.bandwidthBytes}
-          </dd>
-        </div>
-        <div className="rounded-xl border p-4">
-          <dt className="text-sm text-muted-foreground">Error rate</dt>
-          <dd className="mt-2 text-2xl font-bold">
-            {(data.summary.errorRate * 100).toFixed(2)}%
-          </dd>
-        </div>
+        <MetricCard
+          label="Visits in the last 7 days"
+          value={data.summary.visits}
+        />
+        <MetricCard label="Requests" value={data.summary.requests} />
+        <MetricCard label="Bandwidth" value={data.summary.bandwidthBytes} />
+        <MetricCard
+          label="Error rate"
+          value={`${(data.summary.errorRate * 100).toFixed(2)}%`}
+        />
       </dl>
     </main>
   );

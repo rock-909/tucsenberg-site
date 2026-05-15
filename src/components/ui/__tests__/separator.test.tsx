@@ -11,6 +11,11 @@ describe("Separator Component", () => {
       const separator = screen.getByTestId("separator");
       expect(separator).toBeInTheDocument();
       expect(separator.tagName).toBe("DIV");
+      expect(separator).toHaveAttribute("data-slot", "separator");
+      expect(separator).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-primitive-separator",
+      );
     });
 
     it("applies default horizontal orientation", () => {

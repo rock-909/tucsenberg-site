@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  type RefObject,
   useCallback,
   useEffect,
   useId,
@@ -11,6 +10,12 @@ import {
 } from "react";
 import { ANIMATION_DURATION_VERY_SLOW } from "@/constants/core";
 import type { Locale } from "@/i18n/routing-config";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type HeaderLanguageLocale = Locale;
 type PublicHeaderLanguageLocale = Exclude<HeaderLanguageLocale, "zh">;
@@ -21,14 +26,9 @@ interface HeaderLanguageMenuProps {
   initialOpen?: boolean;
 }
 
-interface DismissableMenuOptions {
-  isOpen: boolean;
-  onClose: () => void;
-  rootRef: RefObject<HTMLDivElement | null>;
-}
-
 interface LanguageTransitionState {
   switchingTo: HeaderLanguageLocale | null;
+  showClosedLoader: boolean;
   handleLanguageClick: (targetLocale: HeaderLanguageLocale) => void;
 }
 
@@ -179,46 +179,11 @@ function getCurrentBrowserPathname() {
   return window.location.pathname || "/";
 }
 
-function isNode(target: EventTarget | null): target is Node {
-  return target instanceof Node;
-}
-
-function useDismissableMenu({
-  isOpen,
-  onClose,
-  rootRef,
-}: DismissableMenuOptions) {
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!isNode(event.target) || rootRef.current?.contains(event.target)) {
-        return;
-      }
-
-      onClose();
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose, rootRef]);
-}
-
 function useLanguageTransition(): LanguageTransitionState {
   const [switchingTo, setSwitchingTo] = useState<HeaderLanguageLocale | null>(
     null,
   );
+  const [showClosedLoader, setShowClosedLoader] = useState(false);
   const transitionTimeoutRef = useRef<TimeoutHandle | null>(null);
 
   const clearTransitionTimeout = useCallback(() => {
@@ -231,8 +196,10 @@ function useLanguageTransition(): LanguageTransitionState {
     (targetLocale: HeaderLanguageLocale) => {
       clearTransitionTimeout();
       setSwitchingTo(targetLocale);
+      setShowClosedLoader(true);
       transitionTimeoutRef.current = setTimeout(() => {
         setSwitchingTo(null);
+        setShowClosedLoader(false);
         transitionTimeoutRef.current = null;
       }, ANIMATION_DURATION_VERY_SLOW);
     },
@@ -241,29 +208,26 @@ function useLanguageTransition(): LanguageTransitionState {
 
   useEffect(() => clearTransitionTimeout, [clearTransitionTimeout]);
 
-  return { switchingTo, handleLanguageClick };
+  return { switchingTo, showClosedLoader, handleLanguageClick };
 }
 
 export function HeaderLanguageMenu({
   locale,
   initialOpen = false,
 }: HeaderLanguageMenuProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const menuBaseId = useId();
   const triggerId = `${menuBaseId}-trigger`;
   const menuId = `${menuBaseId}-menu`;
   const [pathname, setPathname] = useState(getCurrentBrowserPathname);
   const [isOpen, setIsOpen] = useState(() => initialOpen);
-  const closeMenu = useCallback(() => setIsOpen(false), []);
-  const toggleMenu = useCallback(() => {
-    const nextIsOpen = !isOpen;
+  const handleOpenChange = useCallback((nextIsOpen: boolean) => {
     if (nextIsOpen) {
       setPathname(getCurrentBrowserPathname());
     }
     setIsOpen(nextIsOpen);
-  }, [isOpen]);
-  useDismissableMenu({ isOpen, onClose: closeMenu, rootRef });
-  const { switchingTo, handleLanguageClick } = useLanguageTransition();
+  }, []);
+  const { switchingTo, showClosedLoader, handleLanguageClick } =
+    useLanguageTransition();
   const currentLanguageName = LANGUAGE_LABELS[locale];
   const languageHrefs = useMemo(
     () =>
@@ -277,53 +241,51 @@ export function HeaderLanguageMenu({
   );
 
   return (
-    <div
-      ref={rootRef}
-      data-testid="language-switcher"
-      className="notranslate relative inline-block"
-      translate="no"
-    >
-      <button
-        type="button"
-        id={triggerId}
-        data-testid="language-toggle-button"
-        aria-label={currentLanguageName}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        aria-controls={menuId}
-        className={TRIGGER_CLASS_NAME}
-        onClick={toggleMenu}
+    <DropdownMenu modal={false} open={isOpen} onOpenChange={handleOpenChange}>
+      <div
+        data-testid="language-switcher"
+        className="notranslate relative inline-block"
+        translate="no"
       >
-        <GlobeIcon />
-        <span
-          className="text-xs font-medium text-muted-foreground"
-          data-testid="language-current-label"
-          translate="no"
+        <DropdownMenuTrigger
+          id={triggerId}
+          data-testid="language-toggle-button"
+          aria-label={currentLanguageName}
+          aria-controls={menuId}
+          className={TRIGGER_CLASS_NAME}
         >
-          {currentLanguageName}
-        </span>
-        <ChevronIcon isOpen={isOpen} />
-      </button>
-      {isOpen && (
-        <div
+          <GlobeIcon />
+          <span
+            className="text-xs font-medium text-muted-foreground"
+            data-testid="language-current-label"
+            translate="no"
+          >
+            {currentLanguageName}
+          </span>
+          {showClosedLoader && <LoaderIcon />}
+          <ChevronIcon isOpen={isOpen} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
           id={menuId}
-          role="menu"
           aria-labelledby={triggerId}
           data-testid="language-dropdown-content"
-          data-state="open"
+          align="end"
           translate="no"
           className={MENU_CLASS_NAME}
         >
           {PUBLIC_LANGUAGE_OPTIONS.map((option) => (
-            <div data-testid="language-dropdown-item" key={option.locale}>
+            <DropdownMenuItem
+              asChild
+              data-testid="language-dropdown-item"
+              key={option.locale}
+              onSelect={() => handleLanguageClick(option.locale)}
+            >
               <a
                 href={languageHrefs[option.locale]}
                 className={LANGUAGE_LINK_CLASS_NAME}
                 data-locale={option.locale}
                 data-testid={`language-link-${option.locale}`}
-                role="menuitem"
                 translate="no"
-                onClick={() => handleLanguageClick(option.locale)}
               >
                 <span
                   className="text-xs"
@@ -337,10 +299,10 @@ export function HeaderLanguageMenu({
                   <CheckIcon />
                 )}
               </a>
-            </div>
+            </DropdownMenuItem>
           ))}
-        </div>
-      )}
-    </div>
+        </DropdownMenuContent>
+      </div>
+    </DropdownMenu>
   );
 }

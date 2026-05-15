@@ -70,6 +70,38 @@ describe("ContactFormStaticFallback", () => {
     expect(submitLabel).toHaveAttribute("translate", "no");
   });
 
+  it("keeps the static fallback as a native no-JS form surface", () => {
+    render(<ContactFormStaticFallback messages={messages} />);
+
+    const form = document.querySelector(
+      'form[data-contact-form-fallback="static"]',
+    );
+    const fullName = document.querySelector('input[name="fullName"]');
+    const email = document.querySelector('input[name="email"]');
+    const message = document.querySelector('textarea[name="message"]');
+    const privacy = document.querySelector('input[name="acceptPrivacy"]');
+    const privacyLabel = document.querySelector('label[for="acceptPrivacy"]');
+
+    expect(form).toBeInTheDocument();
+    expect(form).toHaveAttribute("novalidate");
+    expect(fullName).toHaveAttribute("type", "text");
+    expect(fullName).toHaveAttribute("autocomplete", "name");
+    expect(email).toHaveAttribute("type", "email");
+    expect(message?.tagName).toBe("TEXTAREA");
+    expect(privacy?.tagName).toBe("INPUT");
+    expect(privacy).toHaveAttribute("type", "checkbox");
+    expect(privacy).toHaveAttribute("required");
+    expect(privacy).toBeDisabled();
+    expect(privacyLabel).toBeInTheDocument();
+    expect(screen.getByLabelText("I agree to the privacy policy")).toBe(
+      privacy,
+    );
+    expect(screen.getByRole("button", { name: "Submit" })).toHaveAttribute(
+      "type",
+      "submit",
+    );
+  });
+
   it.each(actualLocaleMessages)(
     "uses actual $locale fallback copy and shows company as optional",
     ({

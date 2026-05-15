@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { coerceLocale } from "@/i18n/locale-utils";
 import type { Locale } from "@/i18n/routing-config";
 import { isPublicRuntimeDevelopment } from "@/lib/env";
+import { Button } from "@/components/ui/button";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -26,8 +27,7 @@ const translations = {
   },
   es: {
     title: "Algo salió mal.",
-    description:
-      "Disculpa las molestias. Se produjo un error inesperado.",
+    description: "Disculpa las molestias. Se produjo un error inesperado.",
     tryAgain: "Intentar de nuevo",
     goHome: "Ir al inicio",
     devDetails: "Detalles del error (solo desarrollo)",
@@ -97,24 +97,25 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </details>
             )}
             <div className="space-y-4">
-              <button
+              <Button
                 type="button"
                 onClick={reset}
-                className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[var(--primary-dark)]"
+                className="w-full"
                 data-testid="try-again-button"
               >
                 {t.tryAgain}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   window.location.href = `/${locale}`;
                 }}
-                className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] border-2 border-primary bg-transparent px-5 py-2.5 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/10"
+                className="w-full"
+                variant="outline"
                 data-testid="go-home-button"
               >
                 {t.goHome}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

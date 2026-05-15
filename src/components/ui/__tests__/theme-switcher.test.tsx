@@ -59,9 +59,13 @@ describe("ThemeSwitcher", () => {
 
     // Wait for mounted state (skeleton renders disabled buttons first)
     await screen.findByTestId("theme-switcher-highlight");
+    expect(screen.getByRole("radiogroup")).toHaveAttribute(
+      "data-ui-pilot",
+      "radix-primitive-radio-group",
+    );
 
-    const darkButton = screen.getByRole("button", { name: "Dark theme" });
-    await user.click(darkButton);
+    const darkRadio = screen.getByRole("radio", { name: "Dark theme" });
+    await user.click(darkRadio);
 
     expect(mockSetTheme).toHaveBeenCalledWith("dark");
   });

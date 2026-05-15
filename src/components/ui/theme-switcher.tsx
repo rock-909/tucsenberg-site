@@ -4,6 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ThemeSwitcherHighlight } from "@/components/ui/theme-switcher-highlight";
 
 const themes = [
@@ -29,7 +30,10 @@ const subscribeHydration = () => unsubscribeHydration;
 const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
-export type ThemeSwitcherProps = React.HTMLAttributes<HTMLDivElement> & {
+export type ThemeSwitcherProps = Omit<
+  React.ComponentPropsWithoutRef<typeof RadioGroup>,
+  "onValueChange" | "value"
+> & {
   className?: string;
 };
 
@@ -43,6 +47,7 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
   const dataTestId = (rest as Record<string, unknown>)["data-testid"] as
     | string
     | undefined;
+  const selectedTheme = theme ?? "system";
 
   const handleThemeClick = useCallback(
     (themeKey: "light" | "dark" | "system") => {
@@ -78,24 +83,27 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
   }
 
   return (
-    <div
+    <RadioGroup
       className={cn(
-        "relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border",
+        "relative isolate flex h-8 grid-cols-none rounded-full bg-background p-1 ring-1 ring-border",
         className,
       )}
       {...rest}
       data-testid={dataTestId ?? "theme-toggle"}
+      value={selectedTheme}
+      onValueChange={(value) =>
+        handleThemeClick(value as "light" | "dark" | "system")
+      }
     >
       {themes.map(({ key, icon: Icon, label }) => {
-        const isActive = theme === key;
+        const isActive = selectedTheme === key;
 
         return (
-          <button
+          <RadioGroupItem
             aria-label={label}
-            className="relative h-6 w-6 rounded-full"
+            className="relative h-6 w-6 rounded-full border-0 bg-transparent shadow-none data-[state=checked]:border-0 data-[state=checked]:bg-transparent"
             key={key}
-            onClick={() => handleThemeClick(key as "light" | "dark" | "system")}
-            type="button"
+            value={key}
           >
             {isActive ? <ThemeSwitcherHighlight /> : null}
             <Icon
@@ -104,9 +112,9 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
                 isActive ? "text-foreground" : "text-muted-foreground",
               )}
             />
-          </button>
+          </RadioGroupItem>
         );
       })}
-    </div>
+    </RadioGroup>
   );
 };

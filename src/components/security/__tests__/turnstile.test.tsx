@@ -230,7 +230,12 @@ describe("TurnstileWidget", () => {
 
       render(<TurnstileWidget labels={labels} />);
 
-      expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+      const status = screen.getByRole("status");
+      expect(status).toHaveTextContent(labels.unavailable);
+      expect(status).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-status-callout",
+      );
     });
 
     it("uses the provided test-mode label when the site key is missing", () => {
@@ -250,8 +255,11 @@ describe("TurnstileWidget", () => {
 
       render(<TurnstileWidget labels={labels} />);
 
-      expect(screen.getByTestId("turnstile-bypass")).toHaveTextContent(
-        labels.devBypass,
+      const status = screen.getByTestId("turnstile-bypass");
+      expect(status).toHaveTextContent(labels.devBypass);
+      expect(status).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-status-callout",
       );
     });
   });

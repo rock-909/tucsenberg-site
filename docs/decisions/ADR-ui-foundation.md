@@ -1,24 +1,31 @@
-# ADR: Hybrid / Pilot-First UI Foundation
+# ADR: Radix Governed Full Adoption UI Foundation
 
 Status: accepted
-Date: 2026-05-13
+Date: 2026-05-14
 Owner: project maintainers
 Applies to: reusable showcase websites built from this starter
 
 ## Decision
 
-This project does not use a full-site Radix Themes-first migration.
+This project uses a governed full-adoption UI foundation: Radix owns as much of
+the standardizable UI layer as possible, while Tailwind and project tokens keep
+owning brand expression and page storytelling.
 
-The accepted UI foundation is hybrid and pilot-first:
+The accepted split is:
 
-- Radix Primitives are the default foundation for complex interactions.
+- Radix Primitives are the default foundation for complex interactions and
+  repeated controls.
 - Radix-style 1-12 color scales are the long-term color discipline.
 - Tailwind continues to own page layout, responsive structure, and brand expression.
 - Project tokens in `src/app/globals.css` remain the runtime color truth source.
-- Radix Themes may be used only inside approved local UI wrappers.
-- The first Radix Themes pilot surface is the Contact / Inquiry form.
-- If the first pilot passes, Radix Themes may expand only to form, state, specification, badge, card, and data/control surfaces.
+- Radix Themes may be used for form, state, badge, data, specification, and
+  control surfaces, but only through approved local UI wrappers.
 - Radix Themes must not take over hero sections, product storytelling, proof sections, footer art direction, or page narrative structure.
+
+This is not a lightweight pilot and not a full-site visual-system takeover.
+The default is: if a surface is a control, interaction, state display, form, or
+data/specification block, migrate it to a Radix-backed local wrapper unless a
+named stop-line is proven.
 
 ## Why this is the right split
 
@@ -131,7 +138,7 @@ Project-owned tokens remain the source of truth:
 - `--neutral-1` through `--neutral-12`;
 - semantic roles such as `--background`, `--foreground`, `--card`, `--primary`, `--border`, `--ring`, `--success-*`, `--warning-*`, and `--error-*`.
 
-If Radix Themes is installed for a pilot, its `--accent-*`, `--gray-*`,
+If Radix Themes is used by a wrapper, its `--accent-*`, `--gray-*`,
 `--color-background`, `--color-surface`, focus variables, and typography
 variables must map back to project-owned roles. Radix default palettes or font
 choices must not silently become brand identity.
@@ -148,10 +155,10 @@ project already has a translation path.
 
 ## Rollback rule
 
-If the pilot fails technically, remove Radix Themes from the pilot and keep
-Radix Primitives plus the color discipline.
+If a Radix Themes surface fails technically, remove or freeze Radix Themes for
+that surface and keep Radix Primitives plus the local wrapper boundary.
 
-If the pilot passes technically but fails visually, freeze Radix Themes inside
+If a Radix-backed surface passes technically but fails visually, freeze it inside
 the existing wrapper scope and do not expand it into brand-heavy or narrative
 surfaces.
 

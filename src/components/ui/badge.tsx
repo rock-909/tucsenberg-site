@@ -1,4 +1,7 @@
-import { forwardRef, type HTMLAttributes } from "react";
+"use client";
+
+import { Badge as RadixBadge } from "@radix-ui/themes";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +26,9 @@ const badgeVariants = cva(
 );
 
 interface BadgeProps
-  extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
+  extends
+    Omit<ComponentPropsWithoutRef<typeof RadixBadge>, "color" | "variant">,
+    VariantProps<typeof badgeVariants> {
   // 支持额外的HTML属性，即使它们不是div的标准属性
   disabled?: boolean;
   form?: string;
@@ -32,11 +37,39 @@ interface BadgeProps
   autoComplete?: string;
 }
 
-const Badge = forwardRef<HTMLDivElement, BadgeProps>(
+const badgeColors = {
+  default: "blue",
+  secondary: "gray",
+  destructive: "red",
+  outline: "gray",
+} as const satisfies Record<
+  NonNullable<BadgeProps["variant"]>,
+  ComponentPropsWithoutRef<typeof RadixBadge>["color"]
+>;
+
+const radixBadgeVariants = {
+  default: "solid",
+  secondary: "soft",
+  destructive: "solid",
+  outline: "outline",
+} as const satisfies Record<
+  NonNullable<BadgeProps["variant"]>,
+  ComponentPropsWithoutRef<typeof RadixBadge>["variant"]
+>;
+
+const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant, ...props }, ref) => {
+    const selectedVariant = variant ?? "default";
+
     return (
-      <div
+      <RadixBadge
         ref={ref}
+        data-slot="badge"
+        data-ui-pilot="radix-themes-badge"
+        color={badgeColors[selectedVariant]}
+        radius="full"
+        size="1"
+        variant={radixBadgeVariants[selectedVariant]}
         className={cn(badgeVariants({ variant }), className)}
         {...props}
       />

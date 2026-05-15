@@ -74,14 +74,15 @@
 
 ## 当前 UI 底座决策
 
-当前采用 hybrid / pilot-first UI foundation，详见
+当前采用 Radix governed full-adoption UI foundation，详见
 `docs/decisions/ADR-ui-foundation.md`。
 
-- Radix Primitives 是复杂交互默认底座。
+- Radix Primitives 是复杂交互和重复控件的默认底座。
 - Radix-style 1-12 色阶是长期颜色纪律。
 - Tailwind 继续负责页面布局、响应式结构和品牌表达。
 - `src/app/globals.css` 里的项目 tokens 继续是运行时颜色真相源。
-- Radix Themes 只允许在本地 UI wrapper 内做 pilot。
+- Radix Themes 可以接管表单、状态、badge、数据/规格和控制型表面，
+  但只能通过本地 UI wrapper 暴露。
 
 判断 UI 走哪条路时，不按页面区域粗分，而按行为分：
 

@@ -4,7 +4,11 @@ import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { translateApiError } from "@/lib/api/translate-error-code";
 import { type ServerActionResult } from "@/lib/actions/server-action-utils";
 import { type ContactFormResult } from "@/components/forms/use-contact-form";
-import { FORM_STATUS_CLASS_NAMES } from "@/components/forms/form-status-styles";
+import { ErrorSummary } from "@/components/ui/field";
+import {
+  StatusCallout,
+  type StatusCalloutTone,
+} from "@/components/ui/status-callout";
 
 const FORM_NETWORK_ERROR_CODE = "FORM_NETWORK_ERROR";
 
@@ -14,22 +18,22 @@ const FORM_NETWORK_ERROR_CODE = "FORM_NETWORK_ERROR";
 function getStatusConfig(
   status: FormSubmissionStatus,
   t: (key: string) => string,
-): { className: string; message: string } | undefined {
+): { message: string; tone: StatusCalloutTone } | undefined {
   switch (status) {
     case "success":
       return {
-        className: FORM_STATUS_CLASS_NAMES.success,
         message: t("submitSuccess"),
+        tone: "success",
       };
     case "error":
       return {
-        className: FORM_STATUS_CLASS_NAMES.error,
         message: t("submitError"),
+        tone: "error",
       };
     case "submitting":
       return {
-        className: FORM_STATUS_CLASS_NAMES.submitting,
         message: t("submitting"),
+        tone: "info",
       };
     case "idle":
     default:
@@ -47,20 +51,17 @@ export const StatusMessage = memo(({ status, t }: StatusMessageProps) => {
 
   const config = getStatusConfig(status, t);
   if (!config) return null;
-  const isError = status === "error";
 
   return (
-    <div
-      className={`rounded-md border p-4 ${config.className}`}
+    <StatusCallout
       data-testid="contact-form-status-message"
-      role={isError ? "alert" : "status"}
-      aria-live={isError ? "assertive" : "polite"}
+      tone={config.tone}
       translate="no"
     >
       <span data-testid="contact-form-status-message-text" translate="no">
         {config.message}
       </span>
-    </div>
+    </StatusCallout>
   );
 });
 
@@ -80,7 +81,6 @@ interface ErrorDisplayState {
   hasRenderableError: boolean;
   shouldShowTranslatedMessage: boolean;
   shouldShowRawMessage: boolean;
-  containerClass: string;
 }
 
 function hasSubmittedError(
@@ -122,7 +122,6 @@ function getErrorDisplayState(
       (uniqueDetails?.length ?? 0) > 0,
     shouldShowTranslatedMessage,
     shouldShowRawMessage,
-    containerClass: `rounded-lg border p-4 ${FORM_STATUS_CLASS_NAMES.error}`,
   };
 }
 
@@ -140,18 +139,14 @@ export function ErrorDisplay({
     hasRenderableError,
     shouldShowTranslatedMessage,
     shouldShowRawMessage,
-    containerClass,
   } = getErrorDisplayState(state, translateForm, translateApi);
 
   if (!hasRenderableError) return null;
 
   return (
-    <div
+    <ErrorSummary
       ref={containerRef}
-      className={containerClass}
       data-testid="contact-form-error-display"
-      role="alert"
-      aria-live="assertive"
       tabIndex={-1}
       translate="no"
     >
@@ -173,6 +168,6 @@ export function ErrorDisplay({
           ))}
         </ul>
       )}
-    </div>
+    </ErrorSummary>
   );
 }

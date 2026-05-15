@@ -29,7 +29,10 @@ describe("Input accessibility", () => {
     const input = screen.getByLabelText("Email");
     expect(input).toHaveAttribute("aria-required", "true");
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByTestId("input")).toHaveClass(
+    expect(input).toHaveAttribute("data-ui-pilot", "radix-themes-form-control");
+    const surface = input.closest(".w-full");
+    expect(surface).toBeInstanceOf(HTMLElement);
+    expect(surface).toHaveClass(
       "focus-visible:border-ring",
       "focus-visible:ring-[3px]",
       "aria-invalid:border-destructive",

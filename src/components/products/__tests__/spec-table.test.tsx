@@ -56,5 +56,16 @@ describe("Feature: Market Page — Spec Matrix", () => {
       const wrapper = container.querySelector('[class*="overflow"]');
       expect(wrapper).toBeInTheDocument();
     });
+
+    it("uses the local DataCard wrapper for each specification group", async () => {
+      const { container } = render(await SpecTable({ specGroups: mockGroups }));
+      const cards = container.querySelectorAll('[data-slot="data-card"]');
+
+      expect(cards).toHaveLength(mockGroups.length);
+      expect(cards[0]).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-data-card",
+      );
+    });
   });
 });

@@ -892,16 +892,24 @@ const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
   /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
-const COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
+const COMPONENT_GOVERNANCE_TEST_FILE_PATTERN =
+  /(?:\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
+const COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN =
+  /(?:from\s+["']@radix-ui\/(?:react-[^"']+)(?:\/[^"']*)?["']|import\s*\(\s*["']@radix-ui\/(?:react-[^"']+)(?:\/[^"']*)?["']\s*\)|require\s*\(\s*["']@radix-ui\/(?:react-[^"']+)(?:\/[^"']*)?["']\s*\))/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_APPROVED_WRAPPERS = new Set([
   "src/components/ui/radix-theme.tsx",
   "src/components/ui/contact-form-shell.tsx",
   "src/components/ui/contact-form-control.tsx",
+  "src/components/ui/badge.tsx",
+  "src/components/ui/data-card.tsx",
+  "src/components/ui/input.tsx",
+  "src/components/ui/status-callout.tsx",
+  "src/components/ui/textarea.tsx",
 ]);
 const COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN =
   /(?:from\s+["']@radix-ui\/themes(?:\/[^"']*)?["']|import\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\)|require\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\))/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
-  /(?:^|[\s"'`.[_-])rt-[A-Za-z0-9_-]+/;
+  /(?:^|[\s"'`.[_=-])rt-[A-Za-z0-9_-]*/;
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_MODULE_PATTERN =
   "(?:@/config/static-theme-colors|(?:\\.\\.?/)+config/static-theme-colors)";
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_IMPORT_PATTERN = new RegExp(
@@ -966,6 +974,23 @@ function getScannedSourceFiles(rootDir) {
     for (const file of walkFiles(rootDir, root)) {
       if (!COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file)) continue;
       if (COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file)) continue;
+      files.push(file);
+    }
+  }
+
+  return files;
+}
+
+function getScannedTestContractFiles(rootDir) {
+  const files = [];
+
+  for (const root of [
+    COMPONENT_GOVERNANCE_COMPONENTS_ROOT,
+    COMPONENT_GOVERNANCE_APP_ROOT,
+  ]) {
+    for (const file of walkFiles(rootDir, root)) {
+      if (!COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file)) continue;
+      if (!COMPONENT_GOVERNANCE_TEST_FILE_PATTERN.test(file)) continue;
       files.push(file);
     }
   }
@@ -1195,6 +1220,24 @@ function collectTextScanFindings(rootDir, errors) {
           getPatternLineNumber(
             source,
             COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_IMPORT_PATTERN,
+          ),
+        ),
+      );
+    }
+  }
+
+  for (const file of getScannedTestContractFiles(rootDir)) {
+    const source = readText(rootDir, file);
+
+    if (COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN.test(source)) {
+      errors.push(
+        createFinding(
+          file,
+          "radix-themes-internal-class",
+          "Tests must assert public UI contracts, not Radix Themes internal .rt-* classes.",
+          getPatternLineNumber(
+            source,
+            COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN,
           ),
         ),
       );

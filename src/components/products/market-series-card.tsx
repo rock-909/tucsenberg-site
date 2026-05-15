@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { getProductMarketPath } from "@/config/paths";
+import { Badge } from "@/components/ui/badge";
 
 interface MarketSeriesCardProps {
   slug: string;
@@ -42,9 +43,9 @@ export function MarketSeriesCard({
           className="object-contain p-4 transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </div>
-      <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+      <Badge variant="secondary" className="mb-2 font-mono text-xs">
         {standardLabel}
-      </span>
+      </Badge>
       <h2 className="mb-2 text-lg font-semibold text-foreground group-hover:text-primary">
         {label}
       </h2>

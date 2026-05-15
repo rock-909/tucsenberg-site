@@ -282,7 +282,12 @@ describe("LazyTurnstile", () => {
       });
 
       expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
-      expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+      const status = screen.getByRole("status");
+      expect(status).toHaveTextContent(labels.unavailable);
+      expect(status).toHaveAttribute(
+        "data-ui-pilot",
+        "radix-themes-status-callout",
+      );
       expect(onError).toHaveBeenCalledWith(labels.loadFailed);
     } finally {
       consoleError.mockRestore();
