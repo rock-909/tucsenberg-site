@@ -1130,7 +1130,12 @@
         "low": "低置信度"
       },
       "requiredChecks": "买方须确认",
-      "noChecksRequired": "无需额外核对"
+      "noChecksRequired": "无需额外核对",
+      "modelColumn": "OEM 型号",
+      "partNumbersColumn": "OEM / 交叉参考号",
+      "fitColumn": "适配",
+      "confidenceColumn": "置信度",
+      "checksColumn": "需核对项"
     },
     "cta": {
       "requestQuote": "就此部件询价",

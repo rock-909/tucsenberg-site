@@ -1130,7 +1130,12 @@
         "low": "Low Confidence"
       },
       "requiredChecks": "Buyer Must Verify",
-      "noChecksRequired": "No additional verification required"
+      "noChecksRequired": "No additional verification required",
+      "modelColumn": "OEM Model",
+      "partNumbersColumn": "OEM / Cross-Ref Numbers",
+      "fitColumn": "Fit",
+      "confidenceColumn": "Confidence",
+      "checksColumn": "Required Checks"
     },
     "cta": {
       "requestQuote": "Request Quote for This Part",

@@ -1130,7 +1130,12 @@
         "low": "Confianza baja"
       },
       "requiredChecks": "El comprador debe verificar",
-      "noChecksRequired": "No se requiere verificación adicional"
+      "noChecksRequired": "No se requiere verificación adicional",
+      "modelColumn": "Modelo OEM",
+      "partNumbersColumn": "Números OEM / de referencia cruzada",
+      "fitColumn": "Ajuste",
+      "confidenceColumn": "Confianza",
+      "checksColumn": "Verificaciones requeridas"
     },
     "cta": {
       "requestQuote": "Solicitar cotización para esta pieza",

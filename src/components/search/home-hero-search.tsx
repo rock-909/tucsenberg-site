@@ -4,11 +4,11 @@ import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   findCompatibilityMatches,
-  type LocalizedText,
   type ModelCompatibilityEntry,
   type ProductCompatibilityEntry,
 } from "@/data/product-compatibility";
 import { Link } from "@/i18n/routing";
+import { localizeText } from "@/lib/i18n/localize-text";
 import { cn } from "@/lib/utils";
 
 const MIN_QUERY_LENGTH = 2;
@@ -19,12 +19,6 @@ const EMPTY_RESULTS: {
 } = { models: [], products: [] };
 
 type Translate = (key: string, values?: Record<string, string>) => string;
-
-function localized(text: LocalizedText, locale: string): string {
-  if (locale === "es") return text.es;
-  if (locale === "zh") return text.zh;
-  return text.en;
-}
 
 function ModelRows({
   models,
@@ -108,7 +102,7 @@ function ProductRows({
               className="block"
             >
               <span className="text-sm font-medium text-foreground">
-                {localized(product.name, locale)}
+                {localizeText(product.name, locale)}
               </span>
               <span className="ml-2 font-mono text-[14px] tabular-nums text-muted-foreground">
                 {product.sku}
