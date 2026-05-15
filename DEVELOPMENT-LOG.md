@@ -1,13 +1,13 @@
 # Tucsenberg Site — 开发进度
 
-> 最新更新：2026-05-14
+> 最新更新：2026-05-15
 > 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
 
 ---
 
 ## 当前阶段
 
-**Phase 1 Step 2 in progress** — 品牌/config/i18n/SEO/nav/token/font 壳层已替换，正在做 repo config 与活入口去 starter 化收尾验证；深层产品数据、真实兼容页、真实 quote 表单留到 Step 3/4。
+**Phase 1 Step 3 complete** — 产品 + OEM 兼容性数据层已建立；真实兼容页、真实 quote 表单和页面展示留到 Step 4。
 
 ---
 
@@ -22,13 +22,13 @@
 - [x] 关键 buyer 原话语料（105 条溯源，存在 aeration-brand/_reference）
 - [x] 建站骨架落地：已从 `showcase-website-starter` 复制代码，保留本项目主文档，`package.json` 已改名为 `tucsenberg-site`，本目录已初始化 git，`pnpm install` + `pnpm dev` 冒烟通过
 - [x] repo config 初步对齐：`.env.example`、Wrangler、CI URL、CODEOWNERS、CodeRabbit、public security files、OG 图和 runtime env defaults 已切到 Tucsenberg
+- [x] Step 3 产品兼容数据层：`src/data/product-compatibility/` 已提供 Zod schema、静态产品/OEM 数据、三套查询索引和 part-number 搜索。
 
 ---
 
 ## 进行中
 
-- [ ] Step 2 最终验证：locale / sitemap / robots / font / token / message contract / content readiness / targeted tests。
-- [ ] 活入口去 starter 化：README、CLAUDE、PRODUCT、PROJECT-BRIEF、docs/website、`.claude/rules`、governance docs、public static surfaces。
+- [ ] Step 4 四页样板：首页、产品页样板、Sanitaire 兼容页样板、Quote 表单页。
 
 ---
 
@@ -57,21 +57,34 @@
 8. [x] **repo/config 去 starter 化** — 新仓库复用 starter 的通用 git/tooling 配置，同时把当前项目必须具备 Tucsenberg 身份的配置和公开静态面改掉。
 9. [ ] **最终验证** — 等 targeted tests / content check / diff check 跑完后收口。
 
-### Step 3: 数据层（产品 + 兼容性）
+### Step 3: 数据层（产品 + 兼容性）（已完成 2026-05-15）
 
-1. **设计产品数据 schema**
-   - `src/data/products/` — ProductGroup + ProductVariant
-   - `src/data/compatibility/` — OEMModel + CompatibilityMapping（带 fitStatus / confidence / requiredChecks）
-   - Zod validation
-   - 从 `aeration-brand/catalog/oem-product-teardown.md` 提取数据填充
-2. **构建时生成 JSON index**
-   - `compatibility-index.by-brand.json`
-   - `compatibility-index.by-model.json`
-   - `compatibility-index.by-product.json`
-3. **写兼容性 QA tests**
-   - 每个 mapping 有 confidence
+1. [x] **设计产品数据 schema**
+   - `src/data/product-compatibility/schemas.ts` — ProductGroup / ProductVariant / OEMBrand / OEMModel / CompatibilityMapping
+   - Zod validation 已接入静态数据加载与 QA tests
+   - 从 `aeration-brand/catalog/oem-product-teardown.md` 提取 Phase 1 所需型号、零件号、尺寸、连接方式
+2. [x] **生成可调用索引**
+   - `compatibilityByBrand` — brand → models → compatible products
+   - `compatibilityByModel` — model → compatible products
+   - `compatibilityByProduct` — product → compatible OEM models
+   - `findCompatibilityMatches()` 支持 OEM 零件号 / 型号 / Tucsenberg SKU 搜索
+3. [x] **写兼容性 QA tests**
+   - Zod schema 校验
    - slug 唯一
-   - 每个品牌 page 至少 1 个 mapping
+   - mapping 引用存在
+   - mapping confidence 必填
+   - 每个 OEM brand 至少 1 条 mapping
+   - i18n 三语字段都有值
+
+**Step 3 数据覆盖：**
+
+- OEM brands: 3（Sanitaire / EDI / SSI Aeration）
+- OEM models: 11
+- Tucsenberg product variants: 7
+- Compatibility mappings: 17
+- SKUs: `TUC-D9-EPDM`, `TUC-D9-TPU`, `TUC-D12-EPDM`, `TUC-D7-EPDM`, `TUC-T62-EPDM`, `TUC-T62-TPU`, `TUC-T91-EPDM`
+- 边界：不含定价；未确认的 Shore 硬度、拉伸强度、精确供应商参数没有硬填。
+- Review hardening: OEM 型号别名搜索已覆盖 `FlexAir 62x610` / `Sanitaire MT-2` 等输入；兼容映射的 required checks 与 disclaimer 已改为三语字段；产品反查结果会携带 OEM trademark disclaimer；QA tests 已锁定 SKU/品牌库存、slug-keyed 索引、引用关系、类别一致性和映射唯一性。
 
 ### Step 4: 4 页样板（i18n 冒烟测试，英 + 西 + 中 三语同步）
 
