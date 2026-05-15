@@ -196,4 +196,65 @@ describe("RFQ quote page", () => {
       screen.getByText("success.description:dana@example.com"),
     ).toBeInTheDocument();
   });
+
+  it("shows the network error message when the POST rejects", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockRejectedValue(new Error("offline"));
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/quote",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("errors.networkError")).toBeInTheDocument();
+    });
+  });
+
+  it("maps a non-OK API error code to its translated message", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ success: false, errorCode: "INVALID_REQUEST" }),
+        { status: 422, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/quote",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("apiErrors.INVALID_REQUEST")).toBeInTheDocument();
+    });
+  });
 });

@@ -226,7 +226,9 @@ function FileZone({
         ) : null}
       </div>
       <FieldHint>{hint}</FieldHint>
-      {fileError ? <FieldError>{hint}</FieldError> : null}
+      <div aria-live="polite">
+        {fileError ? <FieldError>{hint}</FieldError> : null}
+      </div>
     </Field>
   );
 }
