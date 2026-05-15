@@ -7,7 +7,7 @@
 
 ## 当前阶段
 
-**Phase 1 Step 2 in progress** — 品牌/config/i18n/SEO/nav/token/font 壳层已替换，正在做 repo config 与活入口去 starter 化收尾验证；深层产品数据、真实兼容页、真实 quote 表单留到 Step 3/4。
+**Phase 1 Step 3 complete** — 产品数据层已建成（3 OEM 品牌 / 14 型号 / 5 产品族 / 7 变体 / 20 条兼容映射 / 三语翻译 / 50 个 QA 测试）。Step 2 收尾验证已通过。下一步 Step 4 四页样板。
 
 ---
 
@@ -27,7 +27,6 @@
 
 ## 进行中
 
-- [ ] Step 2 最终验证：locale / sitemap / robots / font / token / message contract / content readiness / targeted tests。
 - [ ] 活入口去 starter 化：README、CLAUDE、PRODUCT、PROJECT-BRIEF、docs/website、`.claude/rules`、governance docs、public static surfaces。
 
 ---
@@ -57,21 +56,16 @@
 8. [x] **repo/config 去 starter 化** — 新仓库复用 starter 的通用 git/tooling 配置，同时把当前项目必须具备 Tucsenberg 身份的配置和公开静态面改掉。
 9. [ ] **最终验证** — 等 targeted tests / content check / diff check 跑完后收口。
 
-### Step 3: 数据层（产品 + 兼容性）
+### Step 3: 数据层（产品 + 兼容性）— 完成 2026-05-15
 
-1. **设计产品数据 schema**
-   - `src/data/products/` — ProductGroup + ProductVariant
-   - `src/data/compatibility/` — OEMModel + CompatibilityMapping（带 fitStatus / confidence / requiredChecks）
-   - Zod validation
-   - 从 `aeration-brand/catalog/oem-product-teardown.md` 提取数据填充
-2. **构建时生成 JSON index**
-   - `compatibility-index.by-brand.json`
-   - `compatibility-index.by-model.json`
-   - `compatibility-index.by-product.json`
-3. **写兼容性 QA tests**
-   - 每个 mapping 有 confidence
-   - slug 唯一
-   - 每个品牌 page 至少 1 个 mapping
+- [x] 产品数据 Zod schema（5 个数据类型 + I18nText + 3 个 spec 子 schema）
+- [x] OEM 品牌和型号数据（3 品牌 / 14 型号 / 真实零件号来自 OEM teardown）
+- [x] Tucsenberg 产品数据（5 产品族 / 7 变体 / SKU: TUC-[type][size]-[material]）
+- [x] 兼容映射（20 条映射，覆盖 Sanitaire / EDI / SSI，含 fitStatus / confidence / requiredChecks）
+- [x] 查询函数（按品牌 / 型号 / 产品 / 零件号搜索，支持模糊匹配）
+- [x] QA 测试（50 个：schema 验证 / slug 唯一 / 引用完整性 / i18n 完整性 / 覆盖率 / 查询行为）
+- [x] 三语翻译到位（en / es / zh，无占位标记）
+- [x] 全量验收通过（type-check / lint / 3318 测试 / brand:check / content:check / Next build / CF build）
 
 ### Step 4: 4 页样板（i18n 冒烟测试，英 + 西 + 中 三语同步）
 
