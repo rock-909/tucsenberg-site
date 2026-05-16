@@ -87,6 +87,46 @@ vi.mock("@/app/[locale]/membranes/[product]/compatibility-section", () => ({
   CompatibilitySection: () => <section data-testid="compatibility-section" />,
 }));
 
+// The page composes frozen Phase-A `@/components/trust` primitives, each an
+// async Server Component that loads complete i18n via `next/cache`. They have
+// dedicated coverage in `src/components/trust/__tests__`; stub them so this
+// orchestration test (slug resolution, 404, spec bar, quote pre-fill,
+// metadata) is not coupled to their internal message loading.
+vi.mock("@/components/trust", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/trust")>();
+  return {
+    ...actual,
+    TrademarkDisclaimer: ({ variant }: { variant: string }) => (
+      <div data-testid="trademark-disclaimer" data-variant={variant} />
+    ),
+    NarrativeSection: ({
+      title,
+      body,
+      children,
+    }: {
+      title: string;
+      body?: string;
+      children?: ReactNode;
+    }) => (
+      <section data-testid="narrative-section">
+        <h2>{title}</h2>
+        {body ? <p>{body}</p> : null}
+        {children}
+      </section>
+    ),
+    MaterialDecisionCard: () => (
+      <section data-testid="material-decision-card" />
+    ),
+    BatchControlsBlock: () => <section data-testid="batch-controls-block" />,
+    SlaCommitments: ({ layout }: { layout: string }) => (
+      <ul data-testid="sla-commitments" data-layout={layout} />
+    ),
+    CompatibilityProofBox: () => (
+      <section data-testid="compatibility-proof-box" />
+    ),
+  };
+});
+
 const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
 
 describe("Membrane product page", () => {
