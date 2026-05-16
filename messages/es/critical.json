@@ -243,8 +243,7 @@
     "cta": {
       "title": "¿Tiene un número de pieza a mano?",
       "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",
-      "requestQuote": "Solicitar una cotización",
-      "viewMembranes": "Ver todas las membranas"
+      "requestQuote": "Solicitar una cotización"
     }
   },
   "monitoring": {

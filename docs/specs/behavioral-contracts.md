@@ -473,3 +473,34 @@ Retired contracts are kept for historical traceability but excluded from active 
 ### Medium-priority gaps
 
 - **BC-019** (Untested): Custom project page
+
+## Step 4.1 — Phase B
+
+This section is append-only. It records the Phase-B home-page rebuild
+amendments to existing contracts. It does not edit any prior contract text.
+
+### BC-001 update (Phase B home rebuild)
+
+The homepage is now the full B1 narrative composition. The buyer-facing
+contract is extended as follows:
+
+- The page renders, in order: hero + compatibility search → what-we-confirm
+  narrative → find-by-membrane-type (links resolve to real descriptive
+  `/membranes/{canonical-slug}` routes from the frozen data layer) → OEM brand
+  grid (driven by `getOemBrandFacts()` / `getBrandPathStats()`, frozen brand
+  order `[sanitaire, edi, ssi-aeration]`, each card showing its documented
+  compatibility-path count) → shared SLA commitments ribbon
+  (`trust.sla.*`) → four-risks narrative → frozen compatibility proof box →
+  material decision card → batch controls block → home FAQ (Q01–Q06 via the
+  reused `FaqSection` in direct `faqItems` mode, still emitting FAQPage
+  JSON-LD) → final CTA → footer trademark disclaimer.
+- The final CTA is now **single**: it links only to the quote page
+  (`SINGLE_SITE_ROUTE_HREFS.quote`). The previous secondary
+  "Browse All Membranes" link is removed.
+- The page **ends** with the footer `TrademarkDisclaimer`
+  (`data-testid="trademark-disclaimer"`, `data-variant="footer"`) as the last
+  child of the page root, carrying the Phase-A `legal.trademark.footer` copy.
+
+E2E proof: `tests/e2e/homepage.spec.ts` ("ends with a single quote CTA and a
+footer trademark disclaimer") for `/en` and `/es`. Unit/integration proof:
+`src/app/[locale]/__tests__/page.test.tsx`.

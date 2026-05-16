@@ -7,10 +7,7 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Home, { generateStaticParams } from "../page";
-import {
-  FEATURED_MEMBRANE_HREF,
-  SINGLE_SITE_ROUTE_HREFS,
-} from "@/config/single-site-links";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import {
   getBrandPathStats,
   getOemBrandFacts,
@@ -34,7 +31,6 @@ const homeMessages: Record<string, string> = {
   "cta.description":
     "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
   "cta.requestQuote": "Request a Quote",
-  "cta.viewMembranes": "Browse All Membranes",
 };
 
 vi.mock("@/i18n/routing", () => ({
@@ -93,6 +89,11 @@ vi.mock("@/components/trust", async (importOriginal) => {
       <section data-testid="material-decision-card" />
     ),
     BatchControlsBlock: () => <section data-testid="batch-controls-block" />,
+    TrademarkDisclaimer: ({ variant }: { variant: string }) => (
+      <footer data-testid="trademark-disclaimer" data-variant={variant}>
+        Tucsenberg manufactures aftermarket aeration replacement membranes.
+      </footer>
+    ),
   };
 });
 
@@ -323,23 +324,26 @@ describe("Home Page", () => {
       expect(jsonLd?.textContent ?? "").toContain('"@type":"FAQPage"');
     });
 
-    it("routes the final CTAs to quote and the membrane catalog", async () => {
+    it("ends with a single quote CTA and a footer trademark disclaimer", async () => {
       const HomeComponent = await Home({
         params: Promise.resolve({ locale: "en" }),
       });
 
-      render(HomeComponent);
+      const { container } = render(HomeComponent);
 
       expect(
         screen.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.quote);
       expect(
-        screen.getByRole("link", { name: "Browse All Membranes" }),
-      ).toHaveAttribute("href", FEATURED_MEMBRANE_HREF);
-      // Final CTA uses the canonical descriptive membrane slug.
-      expect(FEATURED_MEMBRANE_HREF).toBe(
-        "/membranes/9-inch-epdm-disc-replacement",
-      );
+        screen.queryByRole("link", { name: "Browse All Membranes" }),
+      ).not.toBeInTheDocument();
+
+      const disclaimer = screen.getByTestId("trademark-disclaimer");
+      expect(disclaimer).toHaveAttribute("data-variant", "footer");
+
+      // The trademark disclaimer is the last child of the page root.
+      const root = container.firstChild as HTMLElement;
+      expect(root.lastElementChild).toBe(disclaimer);
     });
 
     it("should have correct container classes", async () => {

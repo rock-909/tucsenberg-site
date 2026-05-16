@@ -243,8 +243,7 @@
     "cta": {
       "title": "Have a part number ready?",
       "description": "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
-      "requestQuote": "Request a Quote",
-      "viewMembranes": "Browse All Membranes"
+      "requestQuote": "Request a Quote"
     }
   },
   "monitoring": {
