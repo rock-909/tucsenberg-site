@@ -3,10 +3,11 @@
 import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  findCompatibilityMatches,
+  matchClientSearchIndex,
+  type ClientSearchIndex,
   type ModelCompatibilityEntry,
   type ProductCompatibilityEntry,
-} from "@/data/product-compatibility";
+} from "@/data/product-compatibility/search-match";
 import { Link } from "@/i18n/routing";
 import { localizeText } from "@/lib/i18n/localize-text";
 import { cn } from "@/lib/utils";
@@ -115,7 +116,11 @@ function ProductRows({
   );
 }
 
-export function HomeHeroSearch() {
+export function HomeHeroSearch({
+  searchIndex,
+}: {
+  searchIndex: ClientSearchIndex;
+}) {
   const tHero = useTranslations("home.hero");
   const tSearch = useTranslations("search");
   const locale = useLocale();
@@ -127,8 +132,8 @@ export function HomeHeroSearch() {
 
   const results = useMemo(() => {
     if (!hasQuery) return EMPTY_RESULTS;
-    return findCompatibilityMatches(trimmed);
-  }, [hasQuery, trimmed]);
+    return matchClientSearchIndex(trimmed, searchIndex);
+  }, [hasQuery, trimmed, searchIndex]);
 
   const hasMatches = results.models.length > 0 || results.products.length > 0;
   const showPanel = hasQuery;

@@ -4,7 +4,11 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
-import { oemBrands } from "@/data/product-compatibility";
+import {
+  buildClientSearchIndex,
+  oemBrands,
+  type ClientSearchIndex,
+} from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
@@ -54,7 +58,13 @@ function Overline({ children }: { children: string }) {
   );
 }
 
-function HeroSection({ t }: { t: HomeTranslator }) {
+function HeroSection({
+  t,
+  searchIndex,
+}: {
+  t: HomeTranslator;
+  searchIndex: ClientSearchIndex;
+}) {
   return (
     <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-20">
       <div className="mx-auto max-w-[1080px]">
@@ -65,7 +75,7 @@ function HeroSection({ t }: { t: HomeTranslator }) {
           {t("hero.subtitle")}
         </p>
         <div className="mt-8">
-          <HomeHeroSearch />
+          <HomeHeroSearch searchIndex={searchIndex} />
         </div>
       </div>
     </section>
@@ -177,11 +187,12 @@ export default async function Home({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
+  const searchIndex = buildClientSearchIndex();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <JsonLdGraphScript locale={locale as Locale} />
-      <HeroSection t={t} />
+      <HeroSection t={t} searchIndex={searchIndex} />
       <OemGridSection t={t} />
       <TrustRibbon t={t} />
       <MaterialsSection t={t} />
