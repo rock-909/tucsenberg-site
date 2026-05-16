@@ -206,24 +206,34 @@ describe("real i18n runtime message contract", () => {
 
   it("keeps shallow buyer-visible launch copy aligned to Tucsenberg wording", () => {
     const expectedValues = [
-      [enCriticalMessages, "home.products.item1.title", "Membrane Paths"],
-      [enCriticalMessages, "home.products.item2.title", "RFQ Review Path"],
-      [enCriticalMessages, "home.scenarios.item1.title", "Membrane Paths"],
+      // Step-4 rebuilt the home surface as a compatibility-search hero.
+      // The old starter home keys (home.products.*, home.showcase.*,
+      // home.scenarios.*, home.footer.*) were intentionally removed with the
+      // old home page during the #6 merge. These pins now assert the real
+      // merged Step-4 buyer-visible launch copy instead.
+      [enCriticalMessages, "home.hero.title", "Find Your Replacement Membrane"],
       [
         enCriticalMessages,
-        "home.footer.products.items.item1",
-        "Membrane Paths",
+        "home.hero.subtitle",
+        "Enter a part number, OEM model, or diffuser brand to check compatibility.",
       ],
       [
         enCriticalMessages,
-        "home.footer.products.items.item2",
-        "RFQ Review Path",
+        "home.oemGrid.title",
+        "Replacement Membranes for Major Brands",
       ],
-      [enCriticalMessages, "home.showcase.title", "Interface Preview"],
+      [enCriticalMessages, "home.materials.epdm.name", "EPDM"],
       [
         enCriticalMessages,
-        "home.showcase.subtitle",
-        "Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
+        "home.materials.tpu.description",
+        "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
+      ],
+      [enCriticalMessages, "home.cta.title", "Have a part number ready?"],
+      [enCriticalMessages, "home.cta.requestQuote", "Request a Quote"],
+      [
+        enCriticalMessages,
+        "home.trust.scope",
+        "Aftermarket replacement membranes only",
       ],
       [
         enCriticalMessages,
@@ -235,21 +245,22 @@ describe("real i18n runtime message contract", () => {
         "underConstruction.pages.about.description",
         "Learn how Tucsenberg is preparing a part-number-led replacement membrane site.",
       ],
-      [zhCriticalMessages, "home.products.item1.title", "膜片路径"],
-      [zhCriticalMessages, "home.products.item2.title", "RFQ review 路径"],
-      [zhCriticalMessages, "home.scenarios.item1.title", "膜片路径"],
-      [zhCriticalMessages, "home.footer.products.items.item1", "膜片路径"],
+      [zhCriticalMessages, "home.hero.title", "查找您的替换膜片"],
       [
         zhCriticalMessages,
-        "home.footer.products.items.item2",
-        "RFQ review 路径",
+        "home.hero.subtitle",
+        "输入零件号、OEM 型号或曝气器品牌以核对兼容性。",
       ],
-      [zhCriticalMessages, "home.showcase.title", "界面预览"],
+      [zhCriticalMessages, "home.oemGrid.title", "面向主流品牌的替换膜片"],
+      [zhCriticalMessages, "home.materials.epdm.name", "EPDM"],
       [
         zhCriticalMessages,
-        "home.showcase.subtitle",
-        "预览用于膜片路径、RFQ intake 和上线准备的界面模块。",
+        "home.materials.tpu.description",
+        "含油、化学品或高油脂废水工况，此类工况下 EPDM 会劣化。",
       ],
+      [zhCriticalMessages, "home.cta.title", "已经有零件号了吗？"],
+      [zhCriticalMessages, "home.cta.requestQuote", "请求报价"],
+      [zhCriticalMessages, "home.trust.scope", "仅提供售后替换膜片"],
       [
         zhCriticalMessages,
         "underConstruction.pages.products.description",
@@ -260,41 +271,42 @@ describe("real i18n runtime message contract", () => {
         "underConstruction.pages.about.description",
         "了解 Tucsenberg 如何准备以 part number 为核心的替换膜片网站。",
       ],
+      // The Step-4 home surface ships fully translated Spanish (no [ES-TODO]),
+      // so the public es buyer copy must assert the real Spanish wording.
       [
         esCriticalMessages,
-        "home.products.item1.title",
-        "[ES-TODO] Membrane Paths",
+        "home.hero.title",
+        "Encuentre su membrana de repuesto",
       ],
       [
         esCriticalMessages,
-        "home.products.item2.title",
-        "[ES-TODO] RFQ Review Path",
+        "home.hero.subtitle",
+        "Introduzca un número de pieza, modelo OEM o marca de difusor para verificar la compatibilidad.",
       ],
       [
         esCriticalMessages,
-        "home.scenarios.item1.title",
-        "[ES-TODO] Membrane Paths",
+        "home.oemGrid.title",
+        "Membranas de repuesto para las principales marcas",
+      ],
+      [esCriticalMessages, "home.materials.epdm.name", "EPDM"],
+      [
+        esCriticalMessages,
+        "home.materials.tpu.description",
+        "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada.",
       ],
       [
         esCriticalMessages,
-        "home.footer.products.items.item1",
-        "[ES-TODO] Membrane Paths",
+        "home.cta.title",
+        "¿Tiene un número de pieza a mano?",
       ],
+      [esCriticalMessages, "home.cta.requestQuote", "Solicitar una cotización"],
       [
         esCriticalMessages,
-        "home.footer.products.items.item2",
-        "[ES-TODO] RFQ Review Path",
+        "home.trust.scope",
+        "Solo membranas de repuesto aftermarket",
       ],
-      [
-        esCriticalMessages,
-        "home.showcase.title",
-        "[ES-TODO] Interface Preview",
-      ],
-      [
-        esCriticalMessages,
-        "home.showcase.subtitle",
-        "[ES-TODO] Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
-      ],
+      // underConstruction es copy is still [ES-TODO]-flagged in the merged
+      // messages; the parity-aware intent of this test is preserved.
       [
         esCriticalMessages,
         "underConstruction.pages.products.description",
