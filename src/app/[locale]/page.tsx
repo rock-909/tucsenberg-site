@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
 import { SlaCommitments } from "@/components/trust";
 import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
+import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -178,6 +179,7 @@ export default async function Home({ params }: HomePageProps) {
       <JsonLdGraphScript locale={locale as Locale} />
       <HeroSection t={t} searchIndex={searchIndex} />
       <HomeConfirmSection locale={locale as Locale} />
+      <HomeMembraneTypeSection locale={locale as Locale} />
       <OemGridSection t={t} />
       <section className="p-6">
         <div className="mx-auto max-w-[1080px]">

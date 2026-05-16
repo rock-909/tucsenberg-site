@@ -1,4 +1,5 @@
 import type { HomeConfirmSectionViewProps } from "@/components/sections/home-confirm-section-view";
+import type { HomeMembraneTypeSectionViewProps } from "@/components/sections/home-membrane-type-section-view";
 import type { FaqSectionItem } from "@/components/sections/faq-section-view";
 
 export const sectionStoryFaqItems = [
@@ -85,3 +86,43 @@ export const sectionStoryHomeConfirmChinese = {
     },
   ],
 } satisfies HomeConfirmSectionViewProps;
+
+export const sectionStoryHomeMembraneType = {
+  overline: "FIND BY MEMBRANE TYPE",
+  title: "Start from the membrane format you run",
+  cta: "See compatibility detail",
+  cards: [
+    {
+      key: "disc",
+      name: "Disc membranes",
+      body: "Fine-bubble disc diffusers on retainer rings — match the disc diameter and fastening to the compatibility record.",
+      href: "/membranes/9-inch-epdm-disc-replacement",
+    },
+    {
+      key: "tube",
+      name: "Tube membranes",
+      body: "Tube diffusers on a perforated core — match the tube length and end-fitting to the compatibility record.",
+      href: "/membranes/62-mm-epdm-tube-replacement",
+    },
+  ],
+} satisfies HomeMembraneTypeSectionViewProps;
+
+export const sectionStoryHomeMembraneTypeChinese = {
+  overline: "按膜片类型查找",
+  title: "从您所运行的膜片形式入手",
+  cta: "查看兼容性详情",
+  cards: [
+    {
+      key: "disc",
+      name: "盘式膜片",
+      body: "装在固定环上的细气泡盘式曝气器——请将盘径和固定方式对应到兼容性记录。",
+      href: "/membranes/9-inch-epdm-disc-replacement",
+    },
+    {
+      key: "tube",
+      name: "管式膜片",
+      body: "装在穿孔芯管上的管式曝气器——请将管长和端部接头对应到兼容性记录。",
+      href: "/membranes/62-mm-epdm-tube-replacement",
+    },
+  ],
+} satisfies HomeMembraneTypeSectionViewProps;

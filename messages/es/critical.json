@@ -169,6 +169,19 @@
         }
       }
     },
+    "membraneType": {
+      "overline": "BUSCAR POR TIPO DE MEMBRANA",
+      "title": "Empiece por el formato de membrana que opera",
+      "disc": {
+        "name": "Membranas de disco",
+        "body": "Difusores de disco de burbuja fina sobre anillos de retención: asocie el diámetro del disco y la fijación al registro de compatibilidad."
+      },
+      "tube": {
+        "name": "Membranas de tubo",
+        "body": "Difusores de tubo sobre un núcleo perforado: asocie la longitud del tubo y el acople terminal al registro de compatibilidad."
+      },
+      "cta": "Ver detalle de compatibilidad"
+    },
     "oemGrid": {
       "overline": "COMPATIBILIDAD OEM",
       "title": "Membranas de repuesto para las principales marcas",

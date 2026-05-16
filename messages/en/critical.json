@@ -169,6 +169,19 @@
         }
       }
     },
+    "membraneType": {
+      "overline": "FIND BY MEMBRANE TYPE",
+      "title": "Start from the membrane format you run",
+      "disc": {
+        "name": "Disc membranes",
+        "body": "Fine-bubble disc diffusers on retainer rings — match the disc diameter and fastening to the compatibility record."
+      },
+      "tube": {
+        "name": "Tube membranes",
+        "body": "Tube diffusers on a perforated core — match the tube length and end-fitting to the compatibility record."
+      },
+      "cta": "See compatibility detail"
+    },
     "oemGrid": {
       "overline": "OEM COMPATIBILITY",
       "title": "Replacement Membranes for Major Brands",
