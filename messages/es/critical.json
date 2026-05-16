@@ -1277,6 +1277,27 @@
       "noChecksRequired": "No se requiere verificación adicional",
       "requestQuote": "Solicitar cotización para esta pieza",
       "empty": "Ningún modelo coincide con los filtros seleccionados."
+    },
+    "boundary": {
+      "eyebrow": "QUÉ CUBRE ESTA PÁGINA",
+      "title": "Qué significa aquí “compatible con {brand}”",
+      "body": "Tucsenberg suministra membranas de reemplazo aftermarket dimensionadas para ajustar a los modelos de difusor {brand} referenciados. {brand} es una marca registrada de terceros; Tucsenberg no está afiliada a {brand} ni cuenta con su respaldo o patrocinio. Las referencias cruzadas describen únicamente el ajuste físico, no el equipo original. Cada cotización va precedida de una revisión de compatibilidad documentada frente a su pieza instalada."
+    },
+    "intake": {
+      "eyebrow": "ANTES DE SOLICITAR",
+      "title": "Confirme su configuración instalada",
+      "body": "El ajuste parte de la pieza que ya utiliza, no del nombre de catálogo. Tenga a mano el número de pieza {brand} moldeado, el diámetro del disco o tubo, la rosca o silla de montaje y el material de la membrana. Si un número está borrado, una foto del difusor y del soporte nos permite rastrearlo antes de cotizar."
+    },
+    "stats": {
+      "summary": "{paths} rutas de compatibilidad documentadas",
+      "epdm": "{epdm} EPDM",
+      "tpu": "{tpu} TPU"
+    },
+    "cta": {
+      "eyebrow": "SIGUIENTE PASO",
+      "title": "Solicite una revisión de compatibilidad",
+      "body": "Envíe la referencia {brand} instalada y la mapeamos al reemplazo dimensionado, enumeramos cada verificación que el comprador debe confirmar, y le respondemos desde sales@tucsenberg.com.",
+      "action": "Solicitar una revisión de compatibilidad"
     }
   },
   "quote": {

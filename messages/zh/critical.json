@@ -1277,6 +1277,27 @@
       "noChecksRequired": "无需额外核对",
       "requestQuote": "就此部件询价",
       "empty": "没有型号符合所选筛选条件。"
+    },
+    "boundary": {
+      "eyebrow": "本页说明范围",
+      "title": "这里的“兼容 {brand}”指什么",
+      "body": "Tucsenberg 提供按尺寸适配所列 {brand} 曝气器型号的副厂替换膜片。{brand} 为第三方商标；Tucsenberg 与 {brand} 无任何关联，亦未获其认可或赞助。交叉参考仅描述物理适配，不代表原厂设备。每次报价前都会针对您在用的部件做一次书面兼容性核对。"
+    },
+    "intake": {
+      "eyebrow": "询价前请确认",
+      "title": "确认您已安装的配置",
+      "body": "适配从您正在使用的部件出发，而非目录名称。请准备好模压的 {brand} 部件号、盘式或管式直径、安装螺纹或鞍座以及膜片材质。若编号已磨损，提供曝气器与卡座的照片即可在报价前完成溯源。"
+    },
+    "stats": {
+      "summary": "{paths} 条书面兼容路径",
+      "epdm": "{epdm} 条 EPDM",
+      "tpu": "{tpu} 条 TPU"
+    },
+    "cta": {
+      "eyebrow": "下一步",
+      "title": "申请兼容性核对",
+      "body": "发送您在用的 {brand} 参考编号，我们会将其对应到按尺寸适配的替换件，列出买方需确认的每一项核对项，并由 sales@tucsenberg.com 回复您。",
+      "action": "申请兼容性核对"
     }
   },
   "quote": {

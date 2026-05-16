@@ -1277,6 +1277,27 @@
       "noChecksRequired": "No additional verification required",
       "requestQuote": "Request Quote for This Part",
       "empty": "No models match the selected filters."
+    },
+    "boundary": {
+      "eyebrow": "WHAT THIS PAGE COVERS",
+      "title": "What “compatible with {brand}” means here",
+      "body": "Tucsenberg supplies aftermarket replacement membranes dimensioned to fit referenced {brand} diffuser models. {brand} is a third-party trademark; Tucsenberg is not affiliated with, endorsed by, or sponsored by {brand}. Cross-references describe physical fit only, not original equipment. A documented compatibility review against your installed part precedes every quote."
+    },
+    "intake": {
+      "eyebrow": "BEFORE YOU REQUEST",
+      "title": "Confirm your installed setup",
+      "body": "Match starts from the part you already run, not the catalog name. Have the molded {brand} part number, disc or tube diameter, mounting thread or saddle, and membrane material on hand. If a number is worn off, a photo of the diffuser and holder lets us trace it before quoting."
+    },
+    "stats": {
+      "summary": "{paths} documented compatibility paths",
+      "epdm": "{epdm} EPDM",
+      "tpu": "{tpu} TPU"
+    },
+    "cta": {
+      "eyebrow": "NEXT STEP",
+      "title": "Request a compatibility review",
+      "body": "Send the installed {brand} reference and we map it to the dimensioned replacement, list every check the buyer must confirm, and we reply from sales@tucsenberg.com.",
+      "action": "Request a compatibility review"
     }
   },
   "quote": {
