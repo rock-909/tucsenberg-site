@@ -7,12 +7,17 @@ vi.mock("@/lib/i18n/load-messages", () => ({
       trust: {
         material: {
           title: "Which membrane material fits your basin",
-          epdmLabel: "EPDM",
-          epdmBody:
-            "EPDM is the default starting point for municipal and standard industrial diffused aeration.",
-          tpuLabel: "TPU",
-          tpuBody:
-            "TPU is triggered by specific conditions: oils, solvents, or aggressive industrial chemistry in the wastewater.",
+          epdm: {
+            label: "EPDM — default starting point",
+            condition:
+              "EPDM is the default starting point for municipal and standard industrial diffused aeration.",
+          },
+          tpu: {
+            label: "TPU — selected by conditions",
+            condition:
+              "TPU is triggered by specific conditions: oils, solvents, or aggressive industrial chemistry in the wastewater.",
+          },
+          note: "Material is chosen by process conditions, not as a price tier.",
         },
       },
     }),
@@ -40,6 +45,14 @@ describe("Feature: MaterialDecisionCard primitive", () => {
     const root = screen.getByTestId("material-decision-card");
     expect(root).toHaveTextContent("default starting point");
     expect(root).toHaveTextContent("triggered by specific conditions");
+  });
+
+  it("renders the no-price-tier note", async () => {
+    await renderCard();
+    const root = screen.getByTestId("material-decision-card");
+    expect(root).toHaveTextContent(
+      "Material is chosen by process conditions, not as a price tier.",
+    );
   });
 
   it("marks the default material via data attribute", async () => {

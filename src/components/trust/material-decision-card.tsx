@@ -14,8 +14,12 @@ export interface MaterialDecisionCardProps {
   defaultMaterial?: MaterialDecisionDefault;
 }
 
-function readMaterialMessage(messages: MessageRecord, key: string): string {
-  return readMessagePath(messages, ["trust", "material", key], key);
+function readMaterialMessage(
+  messages: MessageRecord,
+  path: readonly string[],
+): string {
+  const fallback = path[path.length - 1] ?? "";
+  return readMessagePath(messages, ["trust", "material", ...path], fallback);
 }
 
 export async function MaterialDecisionCard({
@@ -26,11 +30,12 @@ export async function MaterialDecisionCard({
 
   return (
     <MaterialDecisionCardView
-      title={readMaterialMessage(messages, "title")}
-      epdmLabel={readMaterialMessage(messages, "epdmLabel")}
-      epdmBody={readMaterialMessage(messages, "epdmBody")}
-      tpuLabel={readMaterialMessage(messages, "tpuLabel")}
-      tpuBody={readMaterialMessage(messages, "tpuBody")}
+      title={readMaterialMessage(messages, ["title"])}
+      epdmLabel={readMaterialMessage(messages, ["epdm", "label"])}
+      epdmCondition={readMaterialMessage(messages, ["epdm", "condition"])}
+      tpuLabel={readMaterialMessage(messages, ["tpu", "label"])}
+      tpuCondition={readMaterialMessage(messages, ["tpu", "condition"])}
+      note={readMaterialMessage(messages, ["note"])}
       defaultMaterial={defaultMaterial}
     />
   );

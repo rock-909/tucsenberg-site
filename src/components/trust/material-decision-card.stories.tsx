@@ -11,12 +11,13 @@ const meta = {
   tags: ["autodocs"],
   args: {
     title: "Which membrane material fits your basin",
-    epdmLabel: "EPDM",
-    epdmBody:
+    epdmLabel: "EPDM — default starting point",
+    epdmCondition:
       "EPDM is the default starting point for municipal and standard industrial diffused aeration.",
-    tpuLabel: "TPU",
-    tpuBody:
+    tpuLabel: "TPU — selected by conditions",
+    tpuCondition:
       "TPU is triggered by specific conditions: oils, solvents, or aggressive industrial chemistry in the wastewater.",
+    note: "Material is chosen by process conditions, not as a price tier.",
   },
 } satisfies Meta<typeof MaterialDecisionCardView>;
 
