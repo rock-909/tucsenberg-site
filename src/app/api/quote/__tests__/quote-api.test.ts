@@ -337,6 +337,59 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
     );
   });
 
+  it("returns a processing error and sends no email when Airtable record creation fails", async () => {
+    // BC-026 / security.md lead contract: Airtable record creation is the
+    // business success condition. When the record is NOT created, processLead
+    // returns success:false with no referenceId and never sends the owner
+    // email (email is internal to processLead, which is failing here). The
+    // route must surface a non-validation processing failure (HTTP 500 /
+    // INQUIRY_PROCESSING_ERROR), expose NO referenceId to the buyer, and log a
+    // structured warning so a dropped RFQ is observable.
+    vi.mocked(processLead).mockResolvedValueOnce({
+      success: false,
+      emailSent: false,
+      ownerNotified: false,
+      recordCreated: false,
+      error: "AIRTABLE_ERROR",
+    });
+
+    const response = await POST(createRequest(validRfqData()));
+    const data = await response.json();
+
+    // Documented non-200: not a VALIDATION_ERROR, so it maps to the
+    // internal-error code/status (not 400, not 200). A regression that
+    // returned 200/INQUIRY_VALIDATION_FAILED would fail these assertions.
+    expect(response.status).toBe(500);
+    expect(data.success).toBe(false);
+    expect(data.errorCode).toBe("INQUIRY_PROCESSING_ERROR");
+
+    // No referenceId may leak to the buyer for an unrecorded RFQ. The error
+    // body shape has no `data`, so this also guards against a 200/success
+    // body regression.
+    expect(data.data).toBeUndefined();
+    expect(JSON.stringify(data)).not.toContain("referenceId");
+
+    // The dropped RFQ must be observable.
+    expect(logger.warn).toHaveBeenCalledWith(
+      "RFQ quote submission failed",
+      expect.objectContaining({ error: "AIRTABLE_ERROR" }),
+    );
+
+    // processLead owns the Airtable-first / owner-email order: an Airtable
+    // failure means it returned before sending. The route must not send any
+    // success notification on top of a failed result — assert success path
+    // logging did NOT run.
+    expect(processLead).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      "RFQ recorded but owner notification did not send",
+      expect.anything(),
+    );
+    expect(logger.info).not.toHaveBeenCalledWith(
+      "RFQ quote submitted successfully",
+      expect.anything(),
+    );
+  });
+
   it("never sends raw buyer part numbers as productName (keeps them only in requirements)", async () => {
     // resend-core logs `product: data.productName` on owner-email failure.
     // Buyer part numbers / OEM models are sensitive commercial info and must
