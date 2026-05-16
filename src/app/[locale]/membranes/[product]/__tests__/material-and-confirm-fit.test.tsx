@@ -1,11 +1,9 @@
 /**
- * CLAUDE.md #3 compliance: every OEM-compatibility page must carry a
- * page-level trademark disclaimer. The per-brand `brand-notice` disclaimers
- * inside `CompatibilitySection` are a separate, in-section concern and are
- * NOT the page-level one this test pins. We stub `CompatibilitySection`
- * away entirely so the only `TrademarkDisclaimer` that can render is the
- * page-level `variant="inline"` block, and assert it renders AFTER the
- * (stubbed) compatibility section.
+ * C5: a material-fit section mounts the frozen MaterialDecisionCard
+ * (defaultMaterial="epdm"), followed by a confirm-fit process section that
+ * lists all six membraneProduct.confirmFit.steps.* in fixed order. The
+ * confirm-fit copy carries no lead-time/quantity/temperature numbers
+ * (those belong to dedicated later sections / are struck).
  */
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
@@ -75,21 +73,18 @@ vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
 }));
 
-// Stub the whole compatibility section away — any in-section per-brand
-// disclaimer goes with it, so the only TrademarkDisclaimer rendered is the
-// page-level one.
 vi.mock("@/app/[locale]/membranes/[product]/compatibility-section", () => ({
   CompatibilitySection: () => <section data-testid="compatibility-section" />,
 }));
+
+const materialDecisionSpy = vi.fn();
 
 vi.mock("@/components/trust", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/components/trust")>();
   return {
     ...actual,
     TrademarkDisclaimer: ({ variant }: { variant: string }) => (
-      <div data-testid="trademark-disclaimer" data-variant={variant}>
-        Brand and model names are trademarks of their respective owners.
-      </div>
+      <div data-testid="trademark-disclaimer" data-variant={variant} />
     ),
     NarrativeSection: ({
       title,
@@ -106,9 +101,15 @@ vi.mock("@/components/trust", async (importOriginal) => {
         {children}
       </section>
     ),
-    MaterialDecisionCard: () => (
-      <section data-testid="material-decision-card" />
-    ),
+    MaterialDecisionCard: (props: { defaultMaterial?: string }) => {
+      materialDecisionSpy(props);
+      return (
+        <section
+          data-testid="material-decision-card"
+          data-default-material={props.defaultMaterial}
+        />
+      );
+    },
     BatchControlsBlock: () => <section data-testid="batch-controls-block" />,
     SlaCommitments: ({ layout }: { layout: string }) => (
       <ul data-testid="sla-commitments" data-layout={layout} />
@@ -120,28 +121,50 @@ vi.mock("@/components/trust", async (importOriginal) => {
 });
 
 const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
+const CONFIRM_FIT_KEYS = [
+  "partNumber",
+  "dimensions",
+  "mounting",
+  "material",
+  "perforation",
+  "release",
+] as const;
 
-describe("Membrane product page — trademark compliance", () => {
-  it("renders a page-level inline trademark disclaimer after the compatibility section", async () => {
+describe("Membrane product page — material fit + confirm fit", () => {
+  it("mounts MaterialDecisionCard(epdm) and the six confirm-fit steps in order", async () => {
+    materialDecisionSpy.mockClear();
     const Page = await ProductPage({
       params: Promise.resolve({ locale: "en", product: CANONICAL_D9_EPDM }),
     });
 
     const { container } = render(Page);
 
-    const disclaimer = screen.getByTestId("trademark-disclaimer");
-    expect(disclaimer).toBeInTheDocument();
-    expect(disclaimer).toHaveAttribute("data-variant", "inline");
-
-    const compat = screen.getByTestId("compatibility-section");
-
-    // Document order: the page-level disclaimer must come AFTER the
-    // compatibility section, proving it is the page-bottom one (not an
-    // in-section per-brand notice, which is stubbed out anyway).
-    const order = container.querySelectorAll(
-      '[data-testid="compatibility-section"],[data-testid="trademark-disclaimer"]',
+    const card = screen.getByTestId("material-decision-card");
+    expect(card).toHaveAttribute("data-default-material", "epdm");
+    expect(materialDecisionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultMaterial: "epdm" }),
     );
-    expect(order[0]).toBe(compat);
-    expect(order[order.length - 1]).toBe(disclaimer);
+
+    const steps = CONFIRM_FIT_KEYS.map((k) =>
+      resolveMessage("en", "membraneProduct", `confirmFit.steps.${k}`),
+    );
+    const listItems = Array.from(
+      container.querySelectorAll("ol li"),
+      (n) => n.textContent ?? "",
+    );
+    for (const step of steps) {
+      expect(listItems).toContain(step);
+    }
+    // Fixed order.
+    const indexes = steps.map((s) => listItems.indexOf(s));
+    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
+
+    // Confirm-fit copy must not carry lead-time / quantity / temperature.
+    const confirmRegion = steps.join(" ");
+    expect(confirmRegion).not.toMatch(
+      /\d+\s*(day|days|business day|week|weeks)\b/i,
+    );
+    expect(confirmRegion).not.toMatch(/500/);
+    expect(confirmRegion).not.toMatch(/°C/);
   });
 });

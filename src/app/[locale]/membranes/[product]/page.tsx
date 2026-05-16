@@ -12,7 +12,11 @@ import {
 import { getMembraneProductPath } from "@/config/paths/utils";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
-import { NarrativeSection, TrademarkDisclaimer } from "@/components/trust";
+import {
+  MaterialDecisionCard,
+  NarrativeSection,
+  TrademarkDisclaimer,
+} from "@/components/trust";
 import { CompatibilitySection } from "@/app/[locale]/membranes/[product]/compatibility-section";
 import { localizeText } from "@/lib/i18n/localize-text";
 import { Link, routing } from "@/i18n/routing";
@@ -64,6 +68,17 @@ function diameterFor(productVariantId: string): string | undefined {
   return productVariants.find((variant) => variant.id === productVariantId)
     ?.specs.diameter;
 }
+
+// Fixed confirm-fit input order. The MaterialDecisionCard owns the
+// EPDM/TPU trigger copy (Phase-A trust.*); this page never re-lists it.
+const CONFIRM_FIT_STEP_KEYS = [
+  "partNumber",
+  "dimensions",
+  "mounting",
+  "material",
+  "perforation",
+  "release",
+] as const;
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { locale, product } = await params;
@@ -154,6 +169,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
         title={t("useCase.title")}
         body={t("useCase.body")}
       />
+
+      <NarrativeSection
+        eyebrow={t("materialFit.eyebrow")}
+        title={t("materialFit.title")}
+        body={t("materialFit.body")}
+      >
+        <MaterialDecisionCard
+          locale={locale as Locale}
+          defaultMaterial="epdm"
+        />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("confirmFit.eyebrow")}
+        title={t("confirmFit.title")}
+        body={t("confirmFit.body")}
+      >
+        <ol className="space-y-3 text-muted-foreground">
+          {CONFIRM_FIT_STEP_KEYS.map((key) => (
+            <li key={key}>{t(`confirmFit.steps.${key}`)}</li>
+          ))}
+        </ol>
+      </NarrativeSection>
 
       <CompatibilitySection entry={entry} locale={locale} />
 
