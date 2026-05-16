@@ -298,6 +298,31 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
     );
   });
 
+  it("never sends raw buyer part numbers as productName (keeps them only in requirements)", async () => {
+    // resend-core logs `product: data.productName` on owner-email failure.
+    // Buyer part numbers / OEM models are sensitive commercial info and must
+    // never ride productName into centralized error logs. They stay only in
+    // `requirements` (Airtable + email body), so the owner still gets them.
+    const sensitiveParts = "00223, AFD270-E, WO-SECRET-9981";
+    await POST(
+      createRequest({ ...validRfqData(), partNumbers: sensitiveParts }),
+    );
+
+    const leadArg = vi.mocked(processLead).mock.calls[0]![0] as {
+      productName: string;
+      requirements: string;
+    };
+
+    expect(leadArg.productName).toBe("RFQ quote request");
+    expect(leadArg.productName).not.toContain("00223");
+    expect(leadArg.productName).not.toContain("AFD270-E");
+    expect(leadArg.productName).not.toContain("WO-SECRET-9981");
+    // Owner still receives the full part numbers via requirements.
+    expect(leadArg.requirements).toContain(
+      `Part number(s) / OEM model: ${sensitiveParts}`,
+    );
+  });
+
   it("returns 429 when the rate-limit gate trips first", async () => {
     const { checkDistributedRateLimit } =
       await import("@/lib/security/distributed-rate-limit");

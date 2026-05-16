@@ -595,6 +595,43 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       ).rejects.toThrow("Failed to send product inquiry email");
     });
 
+    it("does not log raw buyer part numbers on owner-email send failure", async () => {
+      // RFQ path now passes a fixed non-sensitive productName; the buyer's
+      // part numbers / OEM models / work-order details live only in
+      // `requirements`. On Resend failure the error log records
+      // `product: data.productName`, so it must carry the fixed label only —
+      // never the raw part numbers.
+      const { logger } = await import("../logger");
+      const rfqShapedData = {
+        ...validProductInquiryData,
+        productName: "RFQ quote request",
+        productSlug: "rfq-quote-request",
+        requirements:
+          "Part number(s) / OEM model: 00223, AFD270-E, WO-SECRET-9981\n" +
+          "Notes: confidential outage plan",
+      };
+
+      mockResendSend.mockRejectedValue(new Error("Resend down"));
+      const service = new ResendServiceClass();
+
+      await expect(
+        service.sendProductInquiryEmail(rfqShapedData),
+      ).rejects.toThrow("Failed to send product inquiry email");
+
+      expect(logger.error).toHaveBeenCalledWith(
+        "Failed to send product inquiry email",
+        expect.objectContaining({ product: "RFQ quote request" }),
+      );
+      const loggedContexts = vi
+        .mocked(logger.error)
+        .mock.calls.map(([, ctx]) => JSON.stringify(ctx ?? {}));
+      for (const ctx of loggedContexts) {
+        expect(ctx).not.toContain("00223");
+        expect(ctx).not.toContain("AFD270-E");
+        expect(ctx).not.toContain("WO-SECRET-9981");
+      }
+    });
+
     it("should return unknown when message ID is not available", async () => {
       const service = new ResendServiceClass();
 

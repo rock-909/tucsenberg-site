@@ -55,8 +55,11 @@ const TURNSTILE_SERVICE_FAILURE_CODES = new Set([
 ]);
 
 const RFQ_PRODUCT_SLUG = "rfq-quote-request";
-const RFQ_PRODUCT_NAME_PREFIX = "RFQ — ";
-const RFQ_PRODUCT_NAME_MAX = 200;
+// Fixed, non-sensitive product label. Buyer part numbers / OEM models are
+// sensitive commercial info: they must reach Airtable + the owner email body
+// (via `requirements`) but must NEVER ride `productName`, which the shared
+// email service writes into centralized error logs on Resend failure.
+const RFQ_PRODUCT_NAME = "RFQ quote request";
 const RFQ_QUANTITY_FALLBACK = "Not specified";
 
 const RFQ_FIELD_ERROR_KEYS: ValidationFieldErrorKeys = {
@@ -134,10 +137,10 @@ function composeProductLead(rfq: RfqLeadInput) {
     rfq.notes ? `Notes: ${rfq.notes}` : undefined,
   ].filter((line): line is string => line !== undefined);
 
-  const productName = `${RFQ_PRODUCT_NAME_PREFIX}${rfq.partNumbers}`.slice(
-    0,
-    RFQ_PRODUCT_NAME_MAX,
-  );
+  // Part numbers stay only in `requirements` (and thus Airtable + the email
+  // body); `productName` is a fixed label so raw buyer part numbers never
+  // reach the Resend-failure error log.
+  const productName = RFQ_PRODUCT_NAME;
 
   // Individually valid RFQ fields (partNumbers ≤500, notes ≤2000, plus label
   // lines) can compose past the product lead `requirements` cap. `processLead`
