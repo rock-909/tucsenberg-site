@@ -241,6 +241,38 @@ describe("RFQ quote page", () => {
 
     expect(screen.getByText("summary.empty")).toBeInTheDocument();
     expect(screen.getByText("summary.responseTimeValue")).toBeInTheDocument();
+    expect(screen.getByText("summary.leadTimeValue")).toBeInTheDocument();
+  });
+
+  it("echoes typed part numbers + name into the sticky summary", async () => {
+    // E5: the frozen SummaryPanel must reflect the buyer's live input.
+    // This pins its presentational contract without rewriting it.
+    await renderQuoteForm();
+
+    fireEvent.change(screen.getByLabelText(/form\.partNumbers/), {
+      target: { value: "TUC-D9-EPDM" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+
+    const summary = screen.getByTestId("quote-summary");
+    expect(summary).toHaveTextContent("TUC-D9-EPDM");
+    expect(summary).toHaveTextContent("Dana Ops");
+  });
+
+  it("pins the real SLA summary copy to a non-numeric promise", async () => {
+    // E5: the lead-time / response-time summary values must carry NO week
+    // or day count — they confirm at quote review, not on a fixed clock.
+    // Asserted against the real shipped critical bundles (not the
+    // key-string mock) so a numeric regression in copy is caught.
+    const { default: en } =
+      await import("../../../../../messages/en/critical.json");
+    const summary = (en as { quote: { summary: Record<string, string> } }).quote
+      .summary;
+    expect(summary.leadTimeValue).toBe("Confirmed during quote review");
+    expect(summary.responseTimeValue).toBe("Within 2 business days");
+    expect(summary.leadTimeValue).not.toMatch(/\b\d+\s*(weeks?|days?)\b/i);
   });
 
   it("pre-fills part numbers from ?sku and quantity from ?quantity", async () => {
