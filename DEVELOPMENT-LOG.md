@@ -243,3 +243,36 @@
 | 第二询价信箱（quote@ / quality@ / legal@） | cut | 单一 `sales@tucsenberg.com` |
 | 已索引非四页面 ES 占位（`[ES-TODO]` in legal/privacy/terms/about/capabilities/how-it-works namespaces） | 延（上线前 owner gate） | **明确不在 Step 4.1 范围**；Step 5 / 上线前 ES pass 处理（R8） |
 | `sales@tucsenberg.com` 实箱 | 上线前 owner gate | 公开发布前必须是可收件真实邮箱 |
+
+---
+
+## Step 4.1 — Phase B（首页重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。首页在 2026-05-14 design lock 时被静默 content-strip，Phase B 按 B1 叙事结构完整重建，组合 Phase-A 冻结 trust 原语，所有事实取自冻结 accessor。Hero+search 原样保留。
+
+**最终渲染顺序**（`src/app/[locale]/page.tsx`）：Hero+search → HomeConfirmSection → HomeMembraneTypeSection → OemGridSection（frozen facts + per-brand path count）→ SlaCommitments ribbon → HomeRisksSection → CompatibilityProofBox → MaterialDecisionCard → BatchControlsBlock → HomeFaqSection（Q01–Q06，复用 FaqSection direct mode，仍出 FAQPage JSON-LD）→ FinalCta（单一 → /quote）→ TrademarkDisclaimer footer。
+
+**B1–B9 提交：**
+- B1 `feat(home): replace coarse trust strip with shared sla commitments ribbon`
+- B2 `feat(home): add what-we-confirm narrative section`
+- B3 `feat(home): add find-by-membrane-type section linking real routes`
+- B4 `feat(home): drive oem grid from frozen brand facts with documented-path counts`
+- B5 `feat(home): add four-risks narrative section`
+- B6 `feat(home): mount frozen trust blocks, drop legacy materials section`
+- B7 `feat(home): add q01-q06 faq via reused faq-section`
+- B8 `feat(home): single quote cta and footer trademark disclaimer`
+- B9 `test(home): add spec §4 strike audit and record phase b completion`
+
+**事实绑定（R1/R11）：** disc href = `getFeaturedProductFacts().canonicalSlug`（`9-inch-epdm-disc-replacement`）；tube href 经 `canonicalProductSlugForVariantId("tuc-t62-epdm")` 解析（`62-mm-epdm-tube-replacement`，该 variant 数据层确实存在）；OEM 网格用 `getOemBrandFacts()` + `getBrandPathStats()`，冻结顺序 `[sanitaire(5), edi(7), ssi-aeration(5)]`，path count 直接取 accessor，无任何硬编码 slug/count/brand/SKU。`getFeaturedProductFacts()` 无 `.slug`，统一用 `.canonicalSlug`。
+
+**i18n parity：** en/es/zh 各 1091 leaf（795 critical + 296 deferred）。新增 `home.{confirm,membraneType,oemGrid.pathCount,risks,faq}`，删除 `home.{trust,materials,cta.viewMembranes}` 三语对等。`src/test/i18n-validation.ts` 的 `IDENTICAL_ACROSS_LOCALES` 旧 `home.materials.*` 条目随 materials section 一并清空。SLA 文案只经共享 `SlaCommitments`/`trust.sla.*`，不再有 home-local SLA 串。
+
+**契约：** `docs/specs/behavioral-contracts.md` 追加 `## Step 4.1 — Phase B`（append-only）更新 BC-001（单一 final CTA → quote；页面以 footer trademark disclaimer 收尾）。
+
+**已知问题 / 偏差（DONE_WITH_CONCERNS）：**
+
+1. **commit subject 长度妥协**：B6 计划字面 subject 88 字符、B7 计划 73 字符，均超过本仓库 commitlint `subject-max-length=72` 硬门。master rule 明令禁止 `--no-verify`，因此在保留语义前提下最小化缩短（B6 → 68 字符，B7 → 50 字符）。提交主题与计划字面不完全一致，但语义等价、门禁通过。
+
+2. **§4 strike-audit `\b24\b` token 精确化（非弱化）**：§4 strike 列表的 `24` 针对的是被 strip 掉的伪造 catalog/scope 计数（"24 documented paths / OEM families"），与相邻 token（`19 paths`/`6 families`）同类。但 B7 明确要求 FAQ Q01 镜像 Phase-A `trust.sla.review` 的"within 24 business hours" SLA 措辞——这是冻结 Phase-A 真值，不是伪造目录事实。strike test 将 `24` 限定在 count/scope 上下文（`24 (documented|compatibility|oem|paths|families|brands)`），其余所有 §4 token 全量未弱化。否则会误伤计划本身强制要求的 SLA 文案。已在 `home-strike-audit.test.tsx` 注释中完整记录该判断。
+
+3. **E2E 无法在本沙箱跑生产构建（环境限制，非代码缺陷）**：`tests/e2e/homepage.spec.ts` 的 playwright webServer 需 `pnpm build && pnpm start`；`pnpm build` 因 `src/app/[locale]/layout-fonts.ts` 的 `next/font/google`（Inter）在构建时需联网拉 Google Fonts，而沙箱断网而失败。该 font 文件最后修改于 Phase-B 之前的 `4fc8762`，与 Phase B 无关。已静态确认 e2e spec 仅断言本阶段保留/新增的契约（hero/search、OEM 网格 `/compatible/{slug}`、SLA ribbon testid+layout+`trust.sla.review` 文案、单一 quote CTA、footer disclaimer testid+variant+`legal.trademark.footer` 文案），且这些契约均由真实组件的单元/集成测试（`page.test.tsx` + `trust/__tests__/*`）证明。e2e 文案已更新为真实 Phase-A `trust.sla.*` / `legal.*` EN+ES 措辞。上线前需在有网环境补跑一次 e2e 全绿。
