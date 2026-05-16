@@ -12,6 +12,7 @@
  */
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { logger } from "@/lib/logger";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import {
@@ -267,6 +268,34 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
     >;
     expect(callArgs).not.toHaveProperty("turnstileToken");
     expect(callArgs).not.toHaveProperty("sourceBrand");
+  });
+
+  it("still returns success but warns when the owner notification did not send", async () => {
+    // security.md contract: Airtable record created = success; owner-email
+    // failure is internal-only. The buyer must still get success, but the
+    // degraded notification must be observable so RFQs are not lost silently.
+    vi.mocked(processLead).mockResolvedValueOnce({
+      success: true,
+      emailSent: false,
+      ownerNotified: false,
+      recordCreated: true,
+      referenceId: "ref-quote-degraded",
+    });
+
+    const response = await POST(createRequest(validRfqData()));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.referenceId).toBe("ref-quote-degraded");
+    expect(logger.warn).toHaveBeenCalledWith(
+      "RFQ recorded but owner notification did not send",
+      expect.objectContaining({
+        referenceId: "ref-quote-degraded",
+        emailSent: false,
+        ownerNotified: false,
+      }),
+    );
   });
 
   it("returns 429 when the rate-limit gate trips first", async () => {

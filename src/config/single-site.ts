@@ -81,7 +81,6 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
         "aeration replacement membranes",
         "OEM membrane family fit",
         "EPDM aeration membrane",
-        "silicone aeration membrane",
         "PTFE aeration membrane",
         "fine bubble diffuser membrane",
         "wastewater aeration replacement parts",

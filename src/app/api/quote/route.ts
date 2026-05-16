@@ -214,6 +214,21 @@ function createRfqSuccessResponse(
   clientIP: string,
   startTime: number,
 ) {
+  // Per security.md the lead contract is: Airtable record created = success;
+  // owner-email failure is internal-only and NOT a user-facing failure. We
+  // keep that contract intact, but a recorded RFQ whose owner notification did
+  // not send must not vanish silently — emit a structured warning so degraded
+  // notifications are observable and RFQs cannot pile up unnoticed.
+  if (result.emailSent === false || result.ownerNotified === false) {
+    logger.warn("RFQ recorded but owner notification did not send", {
+      referenceId: result.referenceId,
+      ip: sanitizeIP(clientIP),
+      emailSent: result.emailSent,
+      ownerNotified: result.ownerNotified,
+      processingTime: Date.now() - startTime,
+    });
+  }
+
   if (!isRuntimeProduction()) {
     logger.info("RFQ quote submitted successfully", {
       referenceId: result.referenceId,
