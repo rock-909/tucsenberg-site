@@ -161,6 +161,12 @@ describe("real i18n runtime message contract", () => {
     // locale (Step 4.1 Phase C product-page quote CTA).
     "membraneProduct.quote.email",
     "compatibleBrand.filter.material",
+    // Quote material-guidance eyebrow: the single technical word "Material"
+    // is identical in professional Spanish UI, exactly like
+    // `compatibleBrand.filter.material` above (Step 4.1 Phase E quote
+    // narrative wrap). The prose `materialGuidance.body`/`title` ARE
+    // translated and proven by `quote-i18n.test.ts`.
+    "quote.materialGuidance.eyebrow",
     // Brand-page stats chips: a dynamic ICU count plus the bare material
     // token (EPDM/TPU stay in English per content rules), so the Spanish
     // string is legitimately identical to English (Step 4.1 Phase D).

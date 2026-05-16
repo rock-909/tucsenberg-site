@@ -1344,6 +1344,39 @@
       "title": "Quote Request Submitted",
       "description": "We received your request and will respond to {email} within 2 business days.",
       "fileNotice": "Your file was not uploaded — only its name was recorded. We'll ask you to email it when we reply."
+    },
+    "intake": {
+      "eyebrow": "Replacement quote",
+      "title": "Request a Quote",
+      "body": "Tell us the part you are replacing. We confirm the compatibility path against your reviewed details and prepare a quote — no account, no sales call required."
+    },
+    "materialGuidance": {
+      "eyebrow": "Material",
+      "title": "Which membrane material to request",
+      "body": "EPDM is the default for municipal and standard wastewater. Choose TPU only when the basin sees oil, grease, solvents, or aggressive industrial chemistry — it is a workload match, not an upgrade. If you are unsure, leave it on \"advise me\" and we recommend against your conditions."
+    },
+    "whatHappensNext": {
+      "eyebrow": "After you submit",
+      "title": "What happens next"
+    },
+    "proof": {
+      "eyebrow": "How we confirm fit",
+      "title": "Every request is checked against documented dimensions",
+      "body": "Your part is reviewed against documented diffuser dimensions and reference photos before we quote. Pricing is not released against a brand-name match alone."
+    },
+    "batch": {
+      "eyebrow": "On larger orders",
+      "title": "Batch traceability and sample options"
+    },
+    "assurances": {
+      "nonBinding": "Quotes are non-binding until confirmed by a purchase order.",
+      "privacy": "We use your details only to review compatibility and prepare your quote. We do not sell or share your information."
+    },
+    "legal": {
+      "consent": "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink>.",
+      "consentWithReviewTerms": "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink> and <reviewTermsLink>Compatibility Review Terms</reviewTermsLink>.",
+      "privacyLinkLabel": "Privacy Policy",
+      "reviewTermsLinkLabel": "Compatibility Review Terms"
     }
   },
   "search": {

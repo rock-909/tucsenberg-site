@@ -1344,6 +1344,39 @@
       "title": "Solicitud de cotización enviada",
       "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles.",
       "fileNotice": "Su archivo no se subió; solo se registró su nombre. Le pediremos que lo envíe por correo cuando le respondamos."
+    },
+    "intake": {
+      "eyebrow": "Cotización de reemplazo",
+      "title": "Solicitar cotización",
+      "body": "Indíquenos la pieza que está reemplazando. Confirmamos la vía de compatibilidad con los datos que revisamos y preparamos una cotización: sin cuenta y sin llamada comercial."
+    },
+    "materialGuidance": {
+      "eyebrow": "Material",
+      "title": "Qué material de membrana solicitar",
+      "body": "El EPDM es la opción predeterminada para aguas residuales municipales y estándar. Elija TPU solo cuando la cuba reciba aceite, grasa, disolventes o química industrial agresiva: es una adecuación a la condición de servicio, no una mejora. Si no está seguro, déjelo en «asesórenme» y le recomendaremos según sus condiciones."
+    },
+    "whatHappensNext": {
+      "eyebrow": "Después de enviar",
+      "title": "Qué sucede a continuación"
+    },
+    "proof": {
+      "eyebrow": "Cómo confirmamos la compatibilidad",
+      "title": "Cada solicitud se coteja con dimensiones documentadas",
+      "body": "Su pieza se revisa frente a las dimensiones documentadas del difusor y fotos de referencia antes de cotizar. No se libera el precio solo con una coincidencia de marca."
+    },
+    "batch": {
+      "eyebrow": "En pedidos más grandes",
+      "title": "Trazabilidad de lote y opciones de muestra"
+    },
+    "assurances": {
+      "nonBinding": "Las cotizaciones no son vinculantes hasta que se confirmen mediante una orden de compra.",
+      "privacy": "Usamos sus datos únicamente para revisar la compatibilidad y preparar su cotización. No vendemos ni compartimos su información."
+    },
+    "legal": {
+      "consent": "Al enviar esta solicitud, acepta nuestra <privacyLink>Política de Privacidad</privacyLink>.",
+      "consentWithReviewTerms": "Al enviar esta solicitud, acepta nuestra <privacyLink>Política de Privacidad</privacyLink> y los <reviewTermsLink>Términos de Revisión de Compatibilidad</reviewTermsLink>.",
+      "privacyLinkLabel": "Política de Privacidad",
+      "reviewTermsLinkLabel": "Términos de Revisión de Compatibilidad"
     }
   },
   "search": {

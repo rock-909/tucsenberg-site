@@ -1344,6 +1344,39 @@
       "title": "询价请求已提交",
       "description": "我们已收到您的请求，将在 2 个工作日内回复至 {email}。",
       "fileNotice": "您的文件未上传——仅记录了文件名。我们回复时会请您通过邮件发送该文件。"
+    },
+    "intake": {
+      "eyebrow": "替换件询价",
+      "title": "询价",
+      "body": "请告诉我们您要替换的部件。我们会根据您提供并经核对的信息确认兼容路径并准备报价——无需注册账户，也无需销售电话。"
+    },
+    "materialGuidance": {
+      "eyebrow": "材质",
+      "title": "该选哪种膜片材质",
+      "body": "市政及常规污水默认选用 EPDM。仅当池体接触油、油脂、溶剂或强工业化学介质时才选 TPU——这是按工况匹配，而非升级。若不确定，请保留「请为我建议」，我们会根据您的工况给出推荐。"
+    },
+    "whatHappensNext": {
+      "eyebrow": "提交之后",
+      "title": "接下来会发生什么"
+    },
+    "proof": {
+      "eyebrow": "我们如何确认匹配",
+      "title": "每条请求都会与已记录的尺寸核对",
+      "body": "在报价前，我们会将您的部件与已记录的曝气器尺寸及参考照片进行核对。仅凭品牌名称匹配不会放出价格。"
+    },
+    "batch": {
+      "eyebrow": "大批量订单",
+      "title": "批次可追溯与样品选项"
+    },
+    "assurances": {
+      "nonBinding": "报价在采购订单确认前不具约束力。",
+      "privacy": "我们仅将您的信息用于核对兼容性并准备报价。我们不会出售或分享您的信息。"
+    },
+    "legal": {
+      "consent": "提交本请求即表示您同意我们的<privacyLink>隐私政策</privacyLink>。",
+      "consentWithReviewTerms": "提交本请求即表示您同意我们的<privacyLink>隐私政策</privacyLink>及<reviewTermsLink>兼容性核对条款</reviewTermsLink>。",
+      "privacyLinkLabel": "隐私政策",
+      "reviewTermsLinkLabel": "兼容性核对条款"
     }
   },
   "search": {
