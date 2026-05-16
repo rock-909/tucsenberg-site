@@ -474,12 +474,12 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 - **BC-019** (Untested): Custom project page
 
-## Step 4.1 — Phase B
+### Step 4.1 — Phase B
 
 This section is append-only. It records the Phase-B home-page rebuild
 amendments to existing contracts. It does not edit any prior contract text.
 
-### BC-001 update (Phase B home rebuild)
+#### BC-001 update (Phase B home rebuild)
 
 The homepage is now the full B1 narrative composition. The buyer-facing
 contract is extended as follows:

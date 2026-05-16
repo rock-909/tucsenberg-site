@@ -1,22 +1,26 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import enCritical from "../../../../messages/en/critical.json";
 import esCritical from "../../../../messages/es/critical.json";
 import zhCritical from "../../../../messages/zh/critical.json";
 
-vi.unmock("zod");
-
 /**
- * Spec §4 strike audit.
+ * Spec §4 strike audit — MESSAGE-BUNDLE scan (not a rendered-DOM audit).
  *
- * The home page is now a composition of home-owned `home.*` copy plus
- * Phase-A shared primitives that read `trust.*` / `legal.*`. Phase B owns and
- * may only change `home.*`; the shared SLA / legal strings are frozen
- * Phase-A truth rendered through `SlaCommitments` / `TrademarkDisclaimer`.
+ * This test statically scans the shipped `messages/{en,es,zh}/critical.json`
+ * `home.*` subtree — the home-owned copy the page composes itself — and does
+ * NOT render any component or DOM. It is intentionally a message-bundle audit
+ * over the launch copy, not a render audit; render/wiring coverage lives in
+ * `src/app/[locale]/__tests__/page.test.tsx` and the per-section suites.
  *
- * This audit therefore asserts the HOME-OWNED rendered copy (every leaf under
- * `home.*`, all three locales — the strings the page composes itself) matches
- * none of the spec §4 banned tokens, and that the only support address is
- * `sales@tucsenberg.com`.
+ * The home page is a composition of home-owned `home.*` copy plus Phase-A
+ * shared primitives that read `trust.*` / `legal.*`. Phase B owns and may
+ * only change `home.*`; the shared SLA / legal strings are frozen Phase-A
+ * truth rendered through `SlaCommitments` / `TrademarkDisclaimer` and are out
+ * of scope for this Phase-B copy audit.
+ *
+ * This audit therefore asserts the HOME-OWNED shipped copy (every leaf under
+ * `home.*`, all three locales) matches none of the spec §4 banned tokens, and
+ * that the only support address is `sales@tucsenberg.com`.
  *
  * Scoping note (non-weakening): the §4 `24` token targets the OLD fabricated
  * catalog/scope count (the stripped "24 documented paths / OEM families"
@@ -49,21 +53,23 @@ function collectHomeText(home: unknown): string {
   return "";
 }
 
-describe("Feature: spec §4 strike audit (home-owned copy)", () => {
+describe("Feature: spec §4 strike audit — message-bundle scan of shipped home.* copy (all 3 locales, no DOM render)", () => {
   for (const locale of ["en", "es", "zh"] as const) {
     describe(`locale: ${locale}`, () => {
       const home = (CRITICAL_BY_LOCALE[locale] as { home: unknown }).home;
       const text = collectHomeText(home);
 
-      it("matches none of the §4 banned tokens", () => {
+      it("shipped home.* message bundle matches none of the §4 banned tokens", () => {
         const match = text.match(STRIKE);
         expect(
           match,
-          match ? `forbidden token in home.${locale}: ${match[0]}` : "",
+          match
+            ? `forbidden §4 token in shipped messages/${locale}/critical.json home.* copy: ${match[0]}`
+            : "",
         ).toBeNull();
       });
 
-      it("references only sales@tucsenberg.com", () => {
+      it("shipped home.* message bundle references only sales@tucsenberg.com", () => {
         const emails = text.match(ANY_EMAIL) ?? [];
         for (const email of emails) {
           expect(email.toLowerCase()).toBe(ONLY_EMAIL);
