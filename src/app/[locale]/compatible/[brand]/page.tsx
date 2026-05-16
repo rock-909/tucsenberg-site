@@ -12,9 +12,13 @@ import {
   type FilterLabels,
   type ModelVM,
 } from "@/app/[locale]/compatible/[brand]/brand-compatibility-filter";
+import { getCompatibleBrandPath } from "@/config/paths/utils";
 import { localizeText } from "@/lib/i18n/localize-text";
 import { routing } from "@/i18n/routing";
-import type { Locale } from "@/lib/seo-metadata";
+import {
+  generateMetadataForDynamicPath,
+  type Locale,
+} from "@/lib/seo-metadata";
 
 interface BrandPageProps {
   params: Promise<{ locale: string; brand: string }>;
@@ -86,10 +90,14 @@ export async function generateMetadata({
 
   const t = await getTranslations({ locale, namespace: "compatibleBrand" });
 
-  return {
-    title: entry.brandName,
-    description: t("hero.description", { brand: entry.brandName }),
-  };
+  return generateMetadataForDynamicPath({
+    locale: locale as Locale,
+    path: getCompatibleBrandPath(entry.brandSlug),
+    config: {
+      title: entry.brandName,
+      description: t("hero.description", { brand: entry.brandName }),
+    },
+  });
 }
 
 export default async function BrandPage({ params }: BrandPageProps) {

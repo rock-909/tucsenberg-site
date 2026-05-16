@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import QuotePage, { generateStaticParams } from "../page";
+import QuotePage, { generateMetadata, generateStaticParams } from "../page";
 import { QuoteFormSection } from "../quote-form-section";
 
 vi.mock("@/i18n/routing", () => ({
@@ -106,6 +106,45 @@ describe("RFQ quote page", () => {
       { locale: "es" },
       { locale: "zh" },
     ]);
+  });
+
+  describe("generateMetadata", () => {
+    it("emits a route-specific canonical, OG url, and en+es hreflang for /quote", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      });
+
+      // A revert to `{ title, description }` drops alternates and fails here.
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/en/quote",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "https://example.com/en/quote",
+        es: "https://example.com/es/quote",
+        "x-default": "https://example.com/en/quote",
+      });
+      expect(metadata.alternates?.languages).not.toHaveProperty("zh");
+
+      const openGraph = metadata.openGraph as unknown as { url?: string };
+      expect(openGraph.url).toBe("https://example.com/en/quote");
+    });
+
+    it("keeps the localized title/description and stays indexable", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "es" }),
+        searchParams: Promise.resolve({}),
+      });
+
+      expect(metadata.title).toBe("hero.title");
+      expect(metadata.description).toBe("hero.description");
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/es/quote",
+      );
+      expect(metadata.robots).toEqual(
+        expect.objectContaining({ index: true, follow: true }),
+      );
+    });
   });
 
   it("renders the hero heading from the page shell", async () => {

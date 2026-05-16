@@ -6,7 +6,7 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import BrandPage, { generateStaticParams } from "../page";
+import BrandPage, { generateMetadata, generateStaticParams } from "../page";
 
 vi.unmock("zod");
 
@@ -99,5 +99,57 @@ describe("OEM compatibility brand page", () => {
         params: Promise.resolve({ locale: "en", brand: "not-a-brand" }),
       }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  describe("generateMetadata", () => {
+    it("emits a route-specific canonical and OG url for the resolved brand path", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en", brand: "sanitaire" }),
+      });
+
+      // A revert to `{ title, description }` drops alternates and fails here.
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/en/compatible/sanitaire",
+      );
+      const openGraph = metadata.openGraph as unknown as { url?: string };
+      expect(openGraph.url).toBe("https://example.com/en/compatible/sanitaire");
+    });
+
+    it("restricts hreflang to en + es (+ x-default) and never zh", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "es", brand: "sanitaire" }),
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "https://example.com/es/compatible/sanitaire",
+      );
+      expect(metadata.alternates?.languages).toEqual({
+        en: "https://example.com/en/compatible/sanitaire",
+        es: "https://example.com/es/compatible/sanitaire",
+        "x-default": "https://example.com/en/compatible/sanitaire",
+      });
+      expect(metadata.alternates?.languages).not.toHaveProperty("zh");
+    });
+
+    it("keeps the brandName title/description and stays indexable for public locales", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en", brand: "sanitaire" }),
+      });
+
+      expect(metadata.title).toBe("Sanitaire");
+      // The mock translator echoes `hero.description:<brandName>`.
+      expect(metadata.description).toBe("hero.description:Sanitaire");
+      expect(metadata.robots).toEqual(
+        expect.objectContaining({ index: true, follow: true }),
+      );
+    });
+
+    it("returns empty metadata for an unknown brand (no canonical added)", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en", brand: "not-a-brand" }),
+      });
+
+      expect(metadata).toEqual({});
+    });
   });
 });

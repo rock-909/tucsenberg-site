@@ -5,8 +5,9 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
+import { getLocalizedPath } from "@/config/paths";
 import { JsonLdGraphScript } from "@/components/seo";
-import type { Locale } from "@/lib/seo-metadata";
+import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { QuoteFormSection } from "@/app/[locale]/quote/quote-form-section";
 
 interface QuotePageProps {
@@ -24,10 +25,15 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "quote" });
 
-  return {
-    title: t("hero.title"),
-    description: t("hero.description"),
-  };
+  return generateMetadataForPath({
+    locale: locale as Locale,
+    pageType: "quote",
+    path: getLocalizedPath("quote", locale as Locale),
+    config: {
+      title: t("hero.title"),
+      description: t("hero.description"),
+    },
+  });
 }
 
 function QuoteFormSkeleton() {

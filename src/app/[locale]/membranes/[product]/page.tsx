@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   canonicalProductSlug,
+  canonicalProductSlugForVariantId,
   getProductCompatibilityByCanonicalSlug,
   productVariants,
   resolveCanonicalProductSlugFromSku,
@@ -13,7 +14,10 @@ import { JsonLdGraphScript } from "@/components/seo";
 import { CompatibilitySection } from "@/app/[locale]/membranes/[product]/compatibility-section";
 import { localizeText } from "@/lib/i18n/localize-text";
 import { Link, routing } from "@/i18n/routing";
-import type { Locale } from "@/lib/seo-metadata";
+import {
+  generateMetadataForDynamicPath,
+  type Locale,
+} from "@/lib/seo-metadata";
 
 interface ProductPageProps {
   params: Promise<{ locale: string; product: string }>;
@@ -38,10 +42,20 @@ export async function generateMetadata({
 
   const t = await getTranslations({ locale, namespace: "membraneProduct" });
 
-  return {
-    title: localizeText(entry.name, locale),
-    description: t("compatibility.description"),
-  };
+  // Canonical/hreflang must point at the descriptive-slug URL (the 308
+  // redirect target), never a SKU slug. Resolve from the variant id so the
+  // canonical is correct even if the route param ever differs.
+  const canonicalSlug =
+    canonicalProductSlugForVariantId(entry.productVariantId) ?? product;
+
+  return generateMetadataForDynamicPath({
+    locale: locale as Locale,
+    path: getMembraneProductPath(canonicalSlug),
+    config: {
+      title: localizeText(entry.name, locale),
+      description: t("compatibility.description"),
+    },
+  });
 }
 
 function diameterFor(productVariantId: string): string | undefined {
