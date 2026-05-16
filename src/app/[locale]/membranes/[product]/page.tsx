@@ -13,6 +13,7 @@ import { getMembraneProductPath } from "@/config/paths/utils";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
 import {
+  BatchControlsBlock,
   MaterialDecisionCard,
   NarrativeSection,
   TrademarkDisclaimer,
@@ -194,6 +195,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </NarrativeSection>
 
       <CompatibilitySection entry={entry} locale={locale} />
+
+      <NarrativeSection
+        eyebrow={t("leadTime.eyebrow")}
+        title={t("leadTime.title")}
+        body={t("leadTime.body")}
+      />
+
+      <NarrativeSection eyebrow={t("qc.eyebrow")} title={t("qc.title")}>
+        <BatchControlsBlock locale={locale as Locale} />
+        <p className="mt-6 text-muted-foreground">{t("qc.sampleNote")}</p>
+      </NarrativeSection>
 
       <section className="px-6 py-16 md:py-20">
         <div className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-4">
