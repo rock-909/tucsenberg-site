@@ -398,7 +398,9 @@ part-number cell:
 
 ## 7. 页面模板规则
 
-### 首屏（hero）模式 —— 决策：折中（保留 H1 + 兼容搜索条）
+> **[Step 4.1 锁定说明]** §7 的页面模板在 2026-05-14 设计锁定时被有意收窄。Step 4.1（四页事实对齐重建）恢复 PROJECT-BRIEF 要求的信任模块（TrademarkDisclaimer / SlaCommitments / CompatibilityProofBox / MaterialDecisionCard / BatchControlsBlock / NarrativeSection），但每一条事实都源自 `src/data/product-compatibility/**`（17 条兼容路径、3 个 OEM 品牌：Sanitaire / EDI / SSI Aeration），不取原型/示例数据。
+
+### 7.1 首屏（hero）模式 —— 决策：折中（保留 H1 + 兼容搜索条）
 
 **结构（从上到下）**：
 1. **H1 一行短主张**（≤14 字英文，~28 字符西语）— Display 01 60px / weight 300
@@ -413,26 +415,26 @@ part-number cell:
 - 居中堆叠两个 CTA 按钮
 - 任何装饰性插画 / 矢量图形
 
-### 兼容页 `/compatible/[brand]`
+### 7.2 兼容页 `/compatible/[brand]`
 
 - 左侧 facet 筛选（diameter / material / OEM model）
 - 右侧结果卡 grid，每张卡显示 OEM model + 兼容 Tucsenberg part + fit status badge
 - 顶部 trademark disclaimer（强制，CLAUDE.md 规则）
 
-### 产品页 `/membranes/[product]`
+### 7.3 产品页 `/membranes/[product]`
 
 - Hero：part image + 关键 spec stat 横条（diameter / material / orifice pattern / temp range）
 - 兼容性表（横向滚动表，OEM models 在左列）
 - Material decision callout（如适用）
 - Quote CTA + lead time + SLA 一个 panel
 
-### 报价页 `/quote`
+### 7.4 报价页 `/quote`
 
 - 双列：左 form / 右 sticky summary（你要的产品 + 数量 + 预估 lead time）
 - 表单字段最小化：part number(s) + 数量 + 公司 + 邮箱 + 国家。其他都 optional。
 - 文件上传：part list CSV / 拆下来的旧膜照片
 
-### 跨页交互模式 —— B 原型探索反哺（仅吸收交互，不吸收视觉）
+### 7.5 跨页交互模式 —— B 原型探索反哺（仅吸收交互，不吸收视觉）
 
 > 背景：B 版（Claude Design 探索）产出过一套 SaaS Dashboard 视觉皮 + 一组交互骨架。
 > 视觉皮（暗色优先 / Inter 做 display / 满屏 pill / 密度切换）**全部拒绝**，与第 2 节反面参考一致。

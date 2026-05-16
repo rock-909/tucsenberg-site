@@ -1,13 +1,13 @@
 # Tucsenberg Site — 开发进度
 
-> 最新更新：2026-05-15
+> 最新更新：2026-05-16
 > 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
 
 ---
 
 ## 当前阶段
 
-**Phase 1 Step 3 complete** — 产品数据层已建成（3 OEM 品牌 / 14 型号 / 5 产品族 / 7 变体 / 20 条兼容映射 / 三语翻译 / 50 个 QA 测试）。Step 2 收尾验证已通过。下一步 Step 4 四页样板。
+**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A（事实对齐 foundations）已落地；B–E 四页重建尚未开始。
 
 ---
 
@@ -214,3 +214,32 @@
 | 竞品拆解 | `aeration-brand/_reference/aerationstore-competitive-teardown.md` |
 | 业务指南 | `aeration-brand/docs/aeration-business-guide.md` |
 | 冷邮件方案 | `aeration-brand/docs/cold-email-setup-guide.md` |
+
+---
+
+## Step 4.1 — 四页事实对齐（Foundations 起步）
+
+从 `main@74e1d29` 起，在单分支 `step-4.1-four-page-rebuild` 上推进（Phase 0 已建分支并约定：本批 Phase-A commit 一并提交未跟踪的 Step 4.1 计划文档）。
+
+**为什么做 Step 4.1：** Step 4 四页虽已上线，但 DEV-LOG 顶部、PROJECT-BRIEF、DESIGN 三份文档互相矛盾，且与代码不符（早期文档写 20 条兼容映射，真实数据层为 17 条 / 3 个 OEM 品牌）。Step 4.1 把四页事实对齐到数据层，并恢复 PROJECT-BRIEF 要求、但 2026-05-14 设计锁定时被收窄的信任模块。
+
+**规范权威：** `docs/superpowers/plans/2026-05-16-step-4.1-fact-signoff.md`（事实签收口径）。阶段计划文档：`docs/superpowers/plans/2026-05-16-step-4.1-master.md` 以及 `…step-4.1-phase-a.md` / `-phase-b.md` / `-phase-c.md` / `-phase-d.md` / `-phase-e.md`。
+
+**Phase A 交付（已完成 foundations，B–E 四页重建尚未开始）：**
+
+- **A1** — 派生 `catalog-facts` SSOT（单一事实源）+ drift-guard，锁定 17 条兼容路径 / 3 个 OEM 品牌 / per-brand 计数，数据漂移即测试失败。
+- **A2** — 六个共享 trust 原语组件：TrademarkDisclaimer / SlaCommitments / CompatibilityProofBox / MaterialDecisionCard / BatchControlsBlock / NarrativeSection。
+- **A3** — 顶层 trust / legal i18n 三语补齐，MaterialDecisionCard 文案嵌套化。
+- **A4** — dead-layer 隔离 + 架构守卫（arch guard），防止已废弃数据层被重新引用。
+
+**结构与事实权威分工：** 页面 STRUCTURE 以 `DESIGN.md §7.1–§7.5` 为准；页面 FACTS 以 `src/data/product-compatibility/**` 为准（17 条兼容路径、3 个 OEM 品牌：Sanitaire / EDI / SSI Aeration）。PROJECT-BRIEF 历史叙事已加 `[Step 4.1 supersession]` 注记，保留不删。
+
+### Step 4.1 内容处置
+
+| 项目 | 处置（cut/延/上线） | 说明 |
+|------|----------------------|------|
+| CRR 条款页 | 延 | gate 到 Step 5（Phase E 出隐私-only consent，双链 key parity-safe 不渲染） |
+| 交期数字档（1–2 周 band / MOQ / 5–7 年） | cut | 统一改为"报价时确认"措辞，不写数字承诺 |
+| 第二询价信箱（quote@ / quality@ / legal@） | cut | 单一 `sales@tucsenberg.com` |
+| 已索引非四页面 ES 占位（`[ES-TODO]` in legal/privacy/terms/about/capabilities/how-it-works namespaces） | 延（上线前 owner gate） | **明确不在 Step 4.1 范围**；Step 5 / 上线前 ES pass 处理（R8） |
+| `sales@tucsenberg.com` 实箱 | 上线前 owner gate | 公开发布前必须是可收件真实邮箱 |
