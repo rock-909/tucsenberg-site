@@ -275,17 +275,35 @@ describe("load-messages runtime gating", () => {
     expect(esMessages.footer.copyright).toBe(expectedEnCopyright);
     expect(esMessages.navigation.siteName).not.toContain("[ES-TODO]");
     expect(esMessages.footer.copyright).not.toContain("[ES-TODO]");
-    // `critical.structured-data` ES leaves were intentionally LEFT `[ES-TODO]`
-    // by `8adbd43` (not public chrome; flagged for later translation), so these
-    // assertions still legitimately expect the `[ES-TODO]` prefix.
+    // `critical.structured-data` is emitted into PUBLIC JSON-LD on every
+    // public page. Its ES leaves were translated (and the pure ICU
+    // identity leaves de-`[ES-TODO]`-flagged) so crawlers no longer receive
+    // unfinished machine-readable brand data. `organization.name` /
+    // `website.name` / `article.defaultAuthor` are pure ICU placeholders
+    // ({companyName}/{siteName}) that resolve to the same factual brand
+    // values across locales by necessity — ES == EN here is intended. The
+    // no-`[ES-TODO]` invariant for every public-emitted structured-data leaf
+    // is enforced by tests/unit/i18n-public-es-placeholder.test.ts.
     expect(esMessages["structured-data"].organization.name).toBe(
-      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+      SINGLE_SITE_FACTS.company.name,
     );
     expect(esMessages["structured-data"].website.name).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
+      SINGLE_SITE_CONFIG.name,
     );
     expect(esMessages["structured-data"].article.defaultAuthor).toBe(
-      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+      SINGLE_SITE_FACTS.company.name,
+    );
+    expect(esMessages["structured-data"].organization.name).not.toContain(
+      "[ES-TODO]",
+    );
+    expect(esMessages["structured-data"].website.name).not.toContain(
+      "[ES-TODO]",
+    );
+    expect(
+      esMessages["structured-data"].organization.description,
+    ).not.toContain("[ES-TODO]");
+    expect(esMessages["structured-data"].website.description).not.toContain(
+      "[ES-TODO]",
     );
 
     expect(zhMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);

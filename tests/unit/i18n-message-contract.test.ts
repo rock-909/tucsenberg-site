@@ -160,6 +160,17 @@ describe("real i18n runtime message contract", () => {
     // Pure ICU passthrough tokens (rendered value is fully dynamic).
     "navigation.siteName",
     "footer.copyright",
+    // Structured-data identity leaves whose value is a pure ICU placeholder
+    // ({companyName}/{siteName}); the human-readable description leaves ARE
+    // translated. Public-emitted no-TODO state is enforced by
+    // tests/unit/i18n-public-es-placeholder.test.ts.
+    "structured-data.organization.name",
+    "structured-data.website.name",
+    "structured-data.article.defaultAuthor",
+    // Example social URLs: identical in every locale and stripped by
+    // normalizeSocialUrl/EXAMPLE_SOCIAL_URLS before reaching public JSON-LD.
+    "structured-data.organization.social.twitter",
+    "structured-data.organization.social.linkedin",
     // Language switcher endonyms (shown in their own language by convention).
     "language.english",
     "language.chinese",

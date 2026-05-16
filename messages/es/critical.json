@@ -415,26 +415,26 @@
   },
   "structured-data": {
     "organization": {
-      "name": "[ES-TODO] {companyName}",
-      "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths",
-      "phone": "[ES-TODO] Contact sales by email",
+      "name": "{companyName}",
+      "description": "Membranas de aireación de repuesto del mercado de recambios con revisión de compatibilidad, orientación de materiales y vías de solicitud listas para RFQ",
+      "phone": "Contacte con ventas por correo electrónico",
       "social": {
-        "twitter": "[ES-TODO] https://x.com/example",
-        "linkedin": "[ES-TODO] https://www.linkedin.com/company/example"
+        "twitter": "https://x.com/example",
+        "linkedin": "https://www.linkedin.com/company/example"
       }
     },
     "website": {
-      "name": "[ES-TODO] {siteName}",
-      "description": "[ES-TODO] Tucsenberg site for aftermarket aeration membrane compatibility review, material guidance, and RFQ-ready inquiry paths"
+      "name": "{siteName}",
+      "description": "Sitio de Tucsenberg para revisión de compatibilidad de membranas de aireación de recambio, orientación de materiales y vías de consulta listas para RFQ"
     },
     "article": {
-      "defaultTitle": "[ES-TODO] Article",
-      "defaultDescription": "[ES-TODO] Article description",
-      "defaultAuthor": "[ES-TODO] {companyName}"
+      "defaultTitle": "Artículo",
+      "defaultDescription": "Descripción del artículo",
+      "defaultAuthor": "{companyName}"
     },
     "product": {
-      "defaultName": "[ES-TODO] Product",
-      "defaultDescription": "[ES-TODO] Product description"
+      "defaultName": "Producto",
+      "defaultDescription": "Descripción del producto"
     }
   },
   "apiErrors": {

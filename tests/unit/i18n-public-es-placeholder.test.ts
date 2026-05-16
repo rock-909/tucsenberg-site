@@ -80,6 +80,44 @@ const GUARDED_NAMESPACES = [
 ] as const;
 
 /**
+ * Leaf message paths under the `structured-data` namespace that are emitted
+ * verbatim into PUBLIC machine-readable JSON-LD as human-readable text.
+ *
+ * - `organization.name` / `organization.description` and
+ *   `website.name` / `website.description` are rendered site-wide on every
+ *   public page (incl. all four Step-4 pages) via
+ *   `generatePageStructuredData` -> `generateOrganizationData` /
+ *   `generateWebSiteData` (`src/lib/structured-data-generators.ts`).
+ * - `article.default*` and `product.default*` are emitted as crawler-visible
+ *   fallbacks by `generateArticleData` / `generateProductData` when a page
+ *   does not supply its own title/description.
+ *
+ * Intentionally NOT listed:
+ * - `organization.phone` — not emitted; the generator sourced the telephone
+ *   from `getPublicContactPhone`, never this leaf.
+ * - `organization.social.twitter` / `organization.social.linkedin` — these are
+ *   example URLs (`https://x.com/example`, …) that
+ *   `normalizeSocialUrl`/`EXAMPLE_SOCIAL_URLS` strip before they can reach
+ *   `sameAs`, so they never surface publicly. Guarding them would only assert
+ *   placeholder-URL hygiene, not buyer/crawler exposure.
+ *
+ * A `[ES-TODO]` (or `[EN-TODO]`) in any listed leaf ships unfinished
+ * machine-readable brand data to search engines and LLM crawlers — a public
+ * regression even though it is not on-page rendered copy.
+ */
+const PUBLIC_STRUCTURED_DATA_LEAVES = [
+  "structured-data.organization.name",
+  "structured-data.organization.description",
+  "structured-data.website.name",
+  "structured-data.website.description",
+  "structured-data.article.defaultTitle",
+  "structured-data.article.defaultDescription",
+  "structured-data.article.defaultAuthor",
+  "structured-data.product.defaultName",
+  "structured-data.product.defaultDescription",
+] as const;
+
+/**
  * Non-public / legacy namespaces explicitly OUT of this guard. None of these
  * are reachable from the four public Step-4 pages or from global public
  * chrome, so a retained `[ES-TODO]` here is intentional legacy debt, not a
@@ -88,8 +126,13 @@ const GUARDED_NAMESPACES = [
  *
  * - `blog`, `catalog`, `underConstruction`: legacy/non-launched template
  *   surfaces, not linked from public Step-4 navigation.
- * - `structured-data`, `monitoring`: machine/JSON-LD and ops surfaces, not
- *   rendered buyer copy.
+ * - `monitoring`: ops surface, not rendered buyer copy and not emitted into
+ *   public JSON-LD.
+ * - `structured-data` as a whole namespace stays out of the on-page
+ *   `GUARDED_NAMESPACES` scan (it is machine data, not rendered prose), BUT
+ *   its public-emitted leaves are now guarded separately via
+ *   `PUBLIC_STRUCTURED_DATA_LEAVES` below — a `[ES-TODO]` there leaks to
+ *   crawlers, so it is no longer treated as out-of-scope debt.
  * - the remainder of `deferred.*` outside the guarded namespaces above:
  *   lazily-loaded non-public bundles.
  *
@@ -136,6 +179,26 @@ describe("public Spanish/English placeholder guard", () => {
           if (typeof value === "string" && TODO_MARKER.test(value)) {
             leaks.push(`${locale}:${leafPath} => ${value}`);
           }
+        }
+      }
+
+      expect(leaks).toEqual([]);
+    },
+  );
+
+  it.each(LOCALE_BUNDLES)(
+    "has zero TODO markers in any public-emitted structured-data leaf for %s",
+    (locale, messages) => {
+      const leaks: string[] = [];
+
+      for (const leafPath of PUBLIC_STRUCTURED_DATA_LEAVES) {
+        const value = getMessageValue(messages, leafPath);
+        // Every listed leaf must exist (key-parity guard) and be a string.
+        expect(typeof value, `${locale}:${leafPath} must be a string`).toBe(
+          "string",
+        );
+        if (typeof value === "string" && TODO_MARKER.test(value)) {
+          leaks.push(`${locale}:${leafPath} => ${value}`);
         }
       }
 
