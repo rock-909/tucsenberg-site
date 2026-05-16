@@ -1,4 +1,4 @@
-import type { LocalizedText } from "@/data/product-compatibility";
+import type { LocalizedText } from "@/data/product-compatibility/schemas";
 
 /**
  * Resolve a {@link LocalizedText} value for the active locale.

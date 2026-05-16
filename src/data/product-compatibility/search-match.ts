@@ -10,8 +10,9 @@
  *   `search-index`);
  * - no `zod` import — no `.parse()` runs on hydration.
  *
- * Only TYPE imports from the indexes module are used; types are erased at
- * compile time and never enter the client bundle.
+ * Only TYPE imports from the leaf `search-types` module are used; types are
+ * erased at compile time and never enter the client bundle, and that module
+ * imports nothing back into the data layer, so there is no cycle.
  *
  * The server builds a pre-validated, JSON-serializable index
  * (`buildClientSearchIndex()` in `search-index.ts`) whose entries already
@@ -25,12 +26,12 @@
 import type {
   ModelCompatibilityEntry,
   ProductCompatibilityEntry,
-} from "@/data/product-compatibility/indexes";
+} from "@/data/product-compatibility/search-types";
 
 export type {
   ModelCompatibilityEntry,
   ProductCompatibilityEntry,
-} from "@/data/product-compatibility/indexes";
+} from "@/data/product-compatibility/search-types";
 
 /**
  * One searchable model entry: the UI-consumed shape plus a precomputed list of

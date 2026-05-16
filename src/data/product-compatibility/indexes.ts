@@ -13,87 +13,25 @@ import {
 } from "@/data/product-compatibility/search-match";
 import type {
   CompatibilityMapping,
-  LocalizedText,
   OEMModel,
   ProductCategory,
   ProductVariant,
 } from "@/data/product-compatibility/schemas";
+import type {
+  BrandCompatibilityEntry,
+  CompatibilitySearchResults,
+  CompatibleOEMModelEntry,
+  CompatibleProductEntry,
+  ModelCompatibilityEntry,
+  ProductCompatibilityEntry,
+} from "@/data/product-compatibility/search-types";
 
-interface CompatibleProductEntry {
-  id: string;
-  slug: string;
-  sku: string;
-  name: LocalizedText;
-  material: ProductVariant["material"];
-  fitStatus: CompatibilityMapping["fitStatus"];
-  confidence: CompatibilityMapping["confidence"];
-  requiredChecks: LocalizedText[];
-  disclaimer: LocalizedText;
-}
-
-interface CompatibleOEMModelEntry {
-  modelId: string;
-  modelSlug: string;
-  modelName: string;
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  category: ProductCategory;
-  oemPartNumbers: string[];
-  searchAliases: string[];
-  specs: OEMModel["specs"];
-  fitStatus: CompatibilityMapping["fitStatus"];
-  confidence: CompatibilityMapping["confidence"];
-  requiredChecks: LocalizedText[];
-  disclaimer: LocalizedText;
-}
-
-export interface ModelCompatibilityEntry {
-  modelId: string;
-  modelSlug: string;
-  modelName: string;
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  category: ProductCategory;
-  oemPartNumbers: string[];
-  searchAliases: string[];
-  specs: OEMModel["specs"];
-  compatibleProducts: CompatibleProductEntry[];
-}
-
-export interface BrandCompatibilityEntry {
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  models: ModelCompatibilityEntry[];
-}
-
-export interface ProductCompatibilityEntry {
-  productVariantId: string;
-  productSlug: string;
-  /**
-   * Canonical descriptive buyer URL slug (`{dimension}-{unit}-{material}-
-   * {form}-replacement`). The product route renders this slug; `productSlug`
-   * (the legacy SKU slug) only 308-redirects to it. Computed server-side here
-   * so client search components link the canonical URL directly without
-   * importing the Zod-validated data barrel.
-   */
-  canonicalProductSlug: string;
-  sku: string;
-  name: LocalizedText;
-  material: ProductVariant["material"];
-  category: ProductCategory;
-  compatibleOemModels: CompatibleOEMModelEntry[];
-}
-
-export interface CompatibilitySearchResults {
-  models: ModelCompatibilityEntry[];
-  products: ProductCompatibilityEntry[];
-}
+export type {
+  BrandCompatibilityEntry,
+  CompatibilitySearchResults,
+  ModelCompatibilityEntry,
+  ProductCompatibilityEntry,
+} from "@/data/product-compatibility/search-types";
 
 const brandById = new Map(oemBrands.map((brand) => [brand.id, brand]));
 const modelById = new Map(oemModels.map((model) => [model.id, model]));
