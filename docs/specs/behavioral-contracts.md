@@ -504,3 +504,84 @@ contract is extended as follows:
 E2E proof: `tests/e2e/homepage.spec.ts` ("ends with a single quote CTA and a
 footer trademark disclaimer") for `/en` and `/es`. Unit/integration proof:
 `src/app/[locale]/__tests__/page.test.tsx`.
+
+### Step 4.1 — Phase C
+
+This section is append-only. It records the Phase-C
+`/membranes/[product]` rebuild. It does not edit any prior contract text,
+including the Phase-A/Phase-B blocks above.
+
+#### BC-027: Membrane product page renders the locked B1 narrative structure
+
+The `/[locale]/membranes/[product]` page composes frozen Phase-A
+`@/components/trust` primitives and `membraneProduct.*` copy in this exact
+document order:
+
+1. Hero spec strip — overline + product name + a data-only `<dl>` exposing
+   only Diameter / Material / Type / SKU. The featured variant's diameter is
+   sourced from `getFeaturedProductFacts()`; other variants use the
+   variant-spec lookup. No temperature band, mounting style, or other
+   non-data tokens.
+2. "What this product is for" narrative (`membraneProduct.useCase.*`).
+3. Material-fit narrative (`membraneProduct.materialFit.*`) mounting the
+   frozen `MaterialDecisionCard` with `defaultMaterial="epdm"`. The card owns
+   all EPDM/TPU trigger copy from Phase-A `trust.material.*`; the page never
+   re-lists it.
+4. Confirm-fit narrative (`membraneProduct.confirmFit.*`) rendering an
+   ordered list over the fixed keys
+   `[partNumber, dimensions, mounting, material, perforation, release]`.
+5. `CompatibilitySection` — unchanged; the per-brand in-section
+   `trademarkDisclaimer` notices stay inside this section and are not moved.
+6. Lead-time narrative (`membraneProduct.leadTime.*`) — text only, no table,
+   the unified word-form "typically ship within one to two weeks", no numeric
+   day/quantity band, no MOQ.
+7. QC narrative (`membraneProduct.qc.*`) mounting the frozen
+   `BatchControlsBlock` plus `qc.sampleNote`.
+8. Quote CTA panel — `membraneProduct.quote.*` plus the unchanged quote
+   `Button`/`Link`, a single `mailto:sales@tucsenberg.com`, the frozen
+   `CompatibilityProofBox`, and the frozen `SlaCommitments` with
+   `layout="stacked"`.
+9. The page **ends** with a page-level `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="inline"`) as the
+   final block, satisfying the CLAUDE.md #3 OEM-page compliance requirement.
+   This is distinct from the per-brand in-section notices in step 5.
+
+Global strike audit: the rendered page contains no `°C`, no `\d+ day`, no
+`500`, no `tear-down`, and no `quote@`/`quality@`/`legal@` mailbox. The
+single contact mailbox is `sales@tucsenberg.com`.
+
+Spec/proof files:
+`src/app/[locale]/membranes/[product]/page.tsx`,
+`src/app/[locale]/membranes/[product]/compatibility-section.tsx`,
+and the membrane test suite under
+`src/app/[locale]/membranes/[product]/__tests__/`
+(`page-structure-contract.test.tsx`, `trademark-compliance.test.tsx`,
+`spec-strip-contract.test.tsx`, `narrative-use-case.test.tsx`,
+`material-and-confirm-fit.test.tsx`, `compatibility-section.test.tsx`,
+`lead-time-and-qc.test.tsx`, `quote-cta-and-proof.test.tsx`,
+`page.test.tsx`).
+
+#### BC-028: Canonical-slug routing, SKU 308 redirect, and sitemap are unchanged
+
+The Phase-C rebuild does not change any routing/SEO behavior. The following
+remain exactly as before:
+
+- `generateStaticParams()` emits the canonical descriptive slug for every
+  variant across locales; the legacy SKU slug is never a generated param.
+- A legacy SKU slug permanently redirects (308) to
+  `/{locale}{getMembraneProductPath(canonicalSlug)}`, preserving the locale
+  prefix.
+- `generateMetadata()` emits the route-specific canonical/OG on the
+  descriptive-slug URL (never the SKU slug), restricts hreflang to en + es
+  (+ x-default, never zh), and keeps the localized title/description and
+  indexable robots for public locales.
+- The quote link href is byte-unchanged:
+  `/quote?sku=TUC-D9-EPDM&product=9-inch-epdm-disc-replacement`.
+- The sitemap continues to include only active public pages, en + es only.
+
+Proof files:
+`src/app/[locale]/membranes/[product]/__tests__/page.test.tsx` (11 frozen
+assertions), `src/data/product-compatibility/__tests__/product-slug.test.ts`,
+`src/app/__tests__/sitemap.test.ts`, and the navigation E2E specs
+(`tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts`,
+`tests/e2e/user-journeys.spec.ts`).
