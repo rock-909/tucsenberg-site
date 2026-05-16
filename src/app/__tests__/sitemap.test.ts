@@ -162,12 +162,11 @@ describe("sitemap.ts", () => {
         changeFrequency: "monthly",
         lastModified: new Date("2026-04-20T00:00:00Z"),
       });
-      expect(findEntry(result, "en", "/products/north-america")).toMatchObject({
-        url: "https://example.com/en/products/north-america",
-        priority: 0.8,
-        changeFrequency: "weekly",
-        lastModified: new Date("2024-11-01T00:00:00Z"),
-      });
+      // `/products/[market]` market landing pages are gated out while the
+      // `/products` overview is de-listed + noindex (Wave B). No entry.
+      expect(
+        findEntry(result, "en", "/products/north-america"),
+      ).toBeUndefined();
       expect(findEntry(result, "en", "/terms")).toMatchObject({
         url: "https://example.com/en/terms",
         priority: 0.7,
@@ -185,15 +184,20 @@ describe("sitemap.ts", () => {
       expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
 
-    it("should include product catalog market pages", async () => {
+    it("de-lists the starter `/products/[market]` catalog pages while the products overview is noindex", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
+      // The `/products` overview is de-listed + noindex (Wave B); its child
+      // market landing pages are starter-era surfaces and must NOT enter the
+      // public sitemap for any locale. Reverting the gate in
+      // generateCatalogEntries() makes these assertions fail.
+      expect(getAllMarketSlugs().length).toBeGreaterThan(0);
       for (const marketSlug of getAllMarketSlugs()) {
-        expect(urls).toContain(
+        expect(urls).not.toContain(
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
         );
-        expect(urls).toContain(
+        expect(urls).not.toContain(
           localizedUrl("es", getProductMarketPath(marketSlug)),
         );
         expect(urls).not.toContain(
@@ -357,14 +361,16 @@ describe("sitemap.ts", () => {
         howItWorksPath,
         expect.any(Map),
       );
-      // `/products` listing is de-listed: no entry, no lastmod lookup. Market
-      // landing pages remain public and still resolve sidecar dates.
+      // `/products` listing is de-listed: no entry, no lastmod lookup. Its
+      // child `/products/[market]` catalog pages are gated out by the same
+      // signal, so no market entry and no market lastmod lookup either.
       expect(products).toBeUndefined();
+      expect(market).toBeUndefined();
       expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         productsPath,
         expect.any(Map),
       );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+      expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         marketPath,
         expect.any(Map),
       );
@@ -374,7 +380,6 @@ describe("sitemap.ts", () => {
       expect(howItWorks?.lastModified).toEqual(
         new Date("2026-04-20T00:00:00Z"),
       );
-      expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
     });
 
     it("should keep terms page SEO defaults explicit", async () => {
@@ -492,6 +497,17 @@ describe("sitemap.ts", () => {
           expect(alt).not.toMatch(
             /\/(products|blog|custom-project-support|contact)$/,
           );
+        }
+      }
+
+      // The starter `/products/[market]` catalog pages are gated out for
+      // every market slug on every locale (same signal as `/products`).
+      // Reverting the gate in generateCatalogEntries() fails this block.
+      expect(getAllMarketSlugs().length).toBeGreaterThan(0);
+      for (const marketSlug of getAllMarketSlugs()) {
+        const marketPath = getProductMarketPath(marketSlug);
+        for (const locale of ["en", "es", "zh"]) {
+          expect(urls.has(localizedUrl(locale, marketPath))).toBe(false);
         }
       }
 

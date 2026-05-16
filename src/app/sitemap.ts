@@ -7,6 +7,7 @@ import {
   getStaticPageLastModified,
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
+import { isNoindexStaticPageType } from "@/config/pages.config";
 import { LOCALES_CONFIG, SITE_CONFIG } from "@/config/paths";
 import {
   getCompatibleBrandPath,
@@ -111,9 +112,26 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
-// Generate product catalog entries (market pages) for public SEO locales only
+// Generate product catalog entries (market pages) for public SEO locales only.
+//
+// The `/products/[market]` market landing pages are the starter-era catalog
+// surface that lives under the `/products` overview. While that overview is
+// de-listed + noindex (Wave B: `products` page type `sitemap.include: false`
+// in pages.config.ts, because it still leaks starter slop + `[ES-TODO]`),
+// emitting its child market URLs into the public sitemap would submit URLs
+// whose own page metadata is `noindex` — a self-contradicting SEO leak.
+//
+// Gate the whole catalog emission on the SAME source of truth Wave B uses
+// (`isNoindexStaticPageType("products")`). When a later Step rebuilds the
+// product overview as real Tucsenberg content and flips its `sitemap.include`
+// back to `true`, this function re-enables automatically — the generation
+// path is intentionally kept intact below.
 function generateCatalogEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
+
+  if (isNoindexStaticPageType("products")) {
+    return entries;
+  }
 
   // Market landing pages
   const marketConfig = getPageConfig("productMarket");
