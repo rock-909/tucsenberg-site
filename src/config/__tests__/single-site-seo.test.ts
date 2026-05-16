@@ -33,16 +33,25 @@ describe("single-site-seo", () => {
       Object.keys(PATHS_CONFIG).sort(),
     );
 
-    const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.map(
-      (pageType) => {
-        const canonicalPath = getCanonicalPath(pageType);
-        return canonicalPath === "/" ? "" : canonicalPath;
-      },
-    );
+    // The public sitemap page list excludes de-listed legacy starter pages
+    // (products / blog / customProject) whose en/es surface still leaks
+    // starter slop + [ES-TODO]; the route-type registry still lists them.
+    const deListed = new Set(["products", "blog", "customProject"]);
+    const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.filter(
+      (pageType) => !deListed.has(pageType),
+    ).map((pageType) => {
+      const canonicalPath = getCanonicalPath(pageType);
+      return canonicalPath === "/" ? "" : canonicalPath;
+    });
 
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toEqual(expectedPages);
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
       RETIRED_BENDING_MACHINES_PATH,
+    );
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/products");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/blog");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
+      "/custom-project-support",
     );
   });
 
@@ -57,10 +66,17 @@ describe("single-site-seo", () => {
       changeFrequency: "monthly",
       priority: 0.85,
     });
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("blog")]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.85,
-    });
+    // De-listed legacy starter pages drop out of the explicit sitemap
+    // config map (they are no longer emitted into the public sitemap).
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("blog")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("products")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("customProject")],
+    ).toBeUndefined();
     expect(
       SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("howItWorks")],
     ).toEqual({

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getPublicStaticPageDefinition } from "@/config/pages.config";
+import {
+  getPublicStaticPageDefinition,
+  isNoindexStaticPageType,
+} from "@/config/pages.config";
 import {
   LOCALES_CONFIG,
   SITE_CONFIG,
@@ -102,8 +105,14 @@ function buildLanguagesForPath(path: string): Record<string, string> {
   return Object.fromEntries(entries);
 }
 
-function buildRobotsForLocale(locale: Locale): Metadata["robots"] {
-  const shouldIndex = isPublicSeoLocale(locale);
+function buildRobotsForLocale(
+  locale: Locale,
+  pageType: PageType,
+): Metadata["robots"] {
+  // De-listed legacy starter pages are noindex for every locale; ZH is
+  // already noindex via the public-SEO-locale gate.
+  const shouldIndex =
+    isPublicSeoLocale(locale) && !isNoindexStaticPageType(pageType);
 
   return {
     index: shouldIndex,
@@ -293,7 +302,7 @@ export function generateLocalizedMetadata(
     },
 
     // 其他元数据
-    robots: buildRobotsForLocale(safeLocale),
+    robots: buildRobotsForLocale(safeLocale, pageType),
 
     // 验证标签
     verification: {

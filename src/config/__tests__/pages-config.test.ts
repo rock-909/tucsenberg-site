@@ -60,10 +60,25 @@ describe("pages.config static public page registry", () => {
         /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
       );
       expect(repoFileExists(definition.routeOwner)).toBe(true);
-      expect(definition.sitemap.include).toBe(true);
+      // De-listed legacy starter pages (products / blog / customProject)
+      // intentionally carry sitemap.include === false until their own Step
+      // rebuilds their en/es surface; all other pages stay included.
+      expect(typeof definition.sitemap.include).toBe("boolean");
       expect(definition.sitemap.priority).toBeGreaterThan(0);
       expect(definition.sitemap.priority).toBeLessThanOrEqual(1);
       expect(definition.lastmod.source).toMatch(/^(mdx|static)$/u);
+    }
+  });
+
+  it("locks the de-listed legacy starter pages out of the sitemap", () => {
+    const byType = getStaticPageDefinitionsByType();
+    const deListed: readonly PageType[] = ["products", "blog", "customProject"];
+    for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
+      const expectedIncluded = !deListed.includes(definition.pageType);
+      expect(definition.sitemap.include).toBe(expectedIncluded);
+    }
+    for (const pageType of deListed) {
+      expect(byType[pageType]?.sitemap.include).toBe(false);
     }
   });
 
@@ -77,17 +92,16 @@ describe("pages.config static public page registry", () => {
   });
 
   it("derives sitemap pages and route configs from the registry", () => {
+    // products / blog / custom-project-support are de-listed (still leak
+    // starter slop + [ES-TODO]) and must not appear in the public sitemap.
     expect(getStaticSitemapPages()).toEqual([
       "",
       "/about",
-      "/products",
-      "/blog",
       "/contact",
       "/privacy",
       "/terms",
       "/capabilities",
       "/how-it-works",
-      "/custom-project-support",
       "/quote",
     ]);
 
@@ -97,10 +111,9 @@ describe("pages.config static public page registry", () => {
       changeFrequency: "daily",
       priority: 1,
     });
-    expect(sitemapConfig["/products"]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.9,
-    });
+    expect(sitemapConfig["/products"]).toBeUndefined();
+    expect(sitemapConfig["/blog"]).toBeUndefined();
+    expect(sitemapConfig["/custom-project-support"]).toBeUndefined();
     expect(sitemapConfig["/capabilities"]).toEqual({
       changeFrequency: "monthly",
       priority: 0.85,

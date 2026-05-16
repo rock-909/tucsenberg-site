@@ -175,12 +175,12 @@ describe("sitemap.ts", () => {
       });
     });
 
-    it("should include the blog index but not old generated blog detail pages", async () => {
+    it("de-lists the legacy starter blog index (still leaks ES-TODO)", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/blog");
-      expect(urls).toContain("https://example.com/es/blog");
+      expect(urls).not.toContain("https://example.com/en/blog");
+      expect(urls).not.toContain("https://example.com/es/blog");
       expect(urls).not.toContain("https://example.com/en/blog/post-a");
       expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
@@ -297,13 +297,14 @@ describe("sitemap.ts", () => {
       expect(home?.priority).toBe(homeConfig.priority);
     });
 
-    it("should set products listing priority from sitemap config", async () => {
+    it("de-lists the legacy starter products listing (still leaks starter slop + ES-TODO)", async () => {
       const result = await sitemap();
       const productsPath = getCanonicalPath("products");
       const products = findEntry(result, defaultLocale, productsPath);
-      const productsConfig = getSingleSiteSitemapPageConfig(productsPath);
+      const productsEs = findEntry(result, "es", productsPath);
 
-      expect(products?.priority).toBe(productsConfig.priority);
+      expect(products).toBeUndefined();
+      expect(productsEs).toBeUndefined();
     });
 
     it("should set home page changeFrequency from sitemap config", async () => {
@@ -356,7 +357,10 @@ describe("sitemap.ts", () => {
         howItWorksPath,
         expect.any(Map),
       );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+      // `/products` listing is de-listed: no entry, no lastmod lookup. Market
+      // landing pages remain public and still resolve sidecar dates.
+      expect(products).toBeUndefined();
+      expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         productsPath,
         expect.any(Map),
       );
@@ -370,7 +374,6 @@ describe("sitemap.ts", () => {
       expect(howItWorks?.lastModified).toEqual(
         new Date("2026-04-20T00:00:00Z"),
       );
-      expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
       expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
     });
 
@@ -392,18 +395,14 @@ describe("sitemap.ts", () => {
       expect(uniqueUrls.size).toBe(urls.length);
     });
 
-    it("should include standalone pages with correct config", async () => {
+    it("de-lists the legacy starter custom-project-support page (starter slop + ES-TODO)", async () => {
       const result = await sitemap();
       const customProjectPath = getCanonicalPath("customProject");
-      const customProject = findEntry(result, defaultLocale, customProjectPath);
-      const customProjectConfig =
-        getSingleSiteSitemapPageConfig(customProjectPath);
 
-      expect(customProject).toBeDefined();
-      expect(customProject?.priority).toBe(customProjectConfig.priority);
-      expect(customProject?.changeFrequency).toBe(
-        customProjectConfig.changeFrequency,
-      );
+      expect(
+        findEntry(result, defaultLocale, customProjectPath),
+      ).toBeUndefined();
+      expect(findEntry(result, "es", customProjectPath)).toBeUndefined();
     });
 
     it("should include a canonical descriptive membrane URL per productVariant for public locales only", async () => {
@@ -460,6 +459,58 @@ describe("sitemap.ts", () => {
         "x-default": localizedUrl("en", variantPath),
       });
       expect(brandEntry?.alternates?.languages).not.toHaveProperty("zh");
+    });
+
+    it("locks de-listed legacy routes out and keeps Step-4 buyer routes in", async () => {
+      const result = await sitemap();
+      const urls = new Set(result.map((entry) => entry.url));
+
+      // De-listed legacy starter pages: no en/es entry, no zh entry.
+      for (const path of ["/products", "/blog", "/custom-project-support"]) {
+        for (const locale of ["en", "es", "zh"]) {
+          expect(urls.has(localizedUrl(locale, path))).toBe(false);
+        }
+      }
+      // De-listed routes must not leak via any alternates map either.
+      for (const entry of result) {
+        for (const alt of Object.values(entry.alternates?.languages ?? {})) {
+          expect(alt).not.toMatch(/\/(products|blog|custom-project-support)$/);
+        }
+      }
+
+      // Step-4 buyer surface + real kept legacy pages stay public on en/es.
+      const homePath = sitemapPathForCanonical(getCanonicalPath("home"));
+      const keptPaths = [
+        homePath,
+        getCanonicalPath("quote"),
+        getCanonicalPath("about"),
+        getCanonicalPath("contact"),
+        getCanonicalPath("capabilities"),
+        getCanonicalPath("howItWorks"),
+        getCanonicalPath("privacy"),
+        getCanonicalPath("terms"),
+      ];
+      for (const path of keptPaths) {
+        expect(urls.has(localizedUrl("en", path))).toBe(true);
+        expect(urls.has(localizedUrl("es", path))).toBe(true);
+        expect(urls.has(localizedUrl("zh", path))).toBe(false);
+      }
+
+      // Dynamic membrane/compatible buyer routes stay public.
+      const [variant] = productVariants;
+      const [brand] = oemBrands;
+      expect(variant).toBeDefined();
+      expect(brand).toBeDefined();
+      if (variant) {
+        const vPath = getMembraneProductPath(canonicalProductSlug(variant));
+        expect(urls.has(localizedUrl("en", vPath))).toBe(true);
+        expect(urls.has(localizedUrl("es", vPath))).toBe(true);
+      }
+      if (brand) {
+        const bPath = getCompatibleBrandPath(brand.slug);
+        expect(urls.has(localizedUrl("en", bPath))).toBe(true);
+        expect(urls.has(localizedUrl("es", bPath))).toBe(true);
+      }
     });
 
     it("maps every emitted sitemap URL to a real route pattern (no orphans)", async () => {

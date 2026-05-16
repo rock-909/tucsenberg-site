@@ -94,7 +94,10 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/products"),
       navigationKey: "navigation.products",
       seoKey: "catalog.overview",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.9 },
+      // De-listed + noindex: the public en/es catalog surface still leaks
+      // starter slop ("Replaceable catalog example") and 270 `[ES-TODO]`
+      // markers. Re-enable when its own Step rebuilds the catalog content.
+      sitemap: { include: false, changeFrequency: "weekly", priority: 0.9 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/products/page.tsx",
@@ -104,7 +107,9 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/blog"),
       navigationKey: "navigation.blog",
       seoKey: "blog.index",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.85 },
+      // De-listed + noindex: the public es blog surface still leaks
+      // `[ES-TODO]` markers. Re-enable when its own Step rebuilds the blog.
+      sitemap: { include: false, changeFrequency: "weekly", priority: 0.85 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/blog/page.tsx",
@@ -164,7 +169,11 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/custom-project-support"),
       navigationKey: null,
       seoKey: "content.pages.custom-project-support",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      // De-listed + noindex: the public en/es surface is still starter
+      // template slop ("Showcase Website Starter", "replaceable page
+      // example") with `[ES-TODO]` markers. Re-enable when its own Step
+      // rebuilds it as real Tucsenberg content.
+      sitemap: { include: false, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "custom-project-support" },
       routeOwner: "src/app/[locale]/custom-project-support/page.tsx",
@@ -202,6 +211,21 @@ export function getPublicStaticPageDefinition(
   pageType: PageType,
 ): PublicStaticPageDefinition | undefined {
   return getStaticPageDefinitionsByType()[pageType];
+}
+
+/**
+ * A static page is publicly indexable iff it is included in the public
+ * sitemap. De-listed legacy starter pages (sitemap.include === false) must
+ * also emit `robots: noindex,nofollow` until their own Step rebuilds them.
+ * Page types with no static definition (dynamic catalog/compatibility
+ * routes, home) are not gated here and stay indexable.
+ */
+export function isNoindexStaticPageType(pageType: PageType): boolean {
+  const definition = getStaticPageDefinitionsByType()[pageType];
+  if (definition === undefined) {
+    return false;
+  }
+  return !definition.sitemap.include;
 }
 
 export function getStaticSitemapPages(): string[] {
