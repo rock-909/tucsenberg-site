@@ -45,6 +45,15 @@ vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
 }));
 
+// Trust components are async Server Components (they load i18n via
+// `loadCompleteMessages`); they have dedicated Phase-A coverage. The page
+// fence stubs them through the shared harness exactly as the Phase-C
+// product-page fence does (`membranes/[product]/__tests__/page.test.tsx`),
+// keeping this file a composition + routing/SEO lock.
+vi.mock("@/components/trust", async (importOriginal) =>
+  (await import("./test-utils")).trustMockFactory(importOriginal as never),
+);
+
 describe("OEM compatibility brand page", () => {
   it("generates a param for every brand slug across locales", () => {
     const params = generateStaticParams();
@@ -63,7 +72,16 @@ describe("OEM compatibility brand page", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Sanitaire" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Xylem/)).toBeInTheDocument();
+    // Step 4.1 §6.2 variant A: brand-notice uses generic "respective owner"
+    // disclaimer (Xylem-naming copy superseded by owner-signed baseline).
+    // The generic wording itself is locked by the Phase-A TrademarkDisclaimer
+    // component test; here the compliance lock is the brand-scoped
+    // brand-notice variant being present on the page.
+    const brandNotice = screen
+      .getAllByTestId("trademark-disclaimer")
+      .find((node) => node.getAttribute("data-variant") === "brand-notice");
+    expect(brandNotice).toBeDefined();
+    expect(brandNotice?.getAttribute("data-brand")).toBe("Sanitaire");
 
     const quoteLink = screen.getAllByRole("link", {
       name: "results.requestQuote",
