@@ -1113,6 +1113,10 @@
         "diameter": "Diámetro",
         "material": "Material",
         "category": "Tipo",
+        "categoryValues": {
+          "disc": "Disco",
+          "tube": "Tubo"
+        },
         "sku": "SKU"
       }
     },

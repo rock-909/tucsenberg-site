@@ -77,7 +77,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { label: t("hero.specBar.material"), value: entry.material.toUpperCase() },
     {
       label: t("hero.specBar.category"),
-      value: entry.category === "disc" ? "Disc" : "Tube",
+      value:
+        entry.category === "disc"
+          ? t("hero.specBar.categoryValues.disc")
+          : t("hero.specBar.categoryValues.tube"),
     },
     { label: t("hero.specBar.sku"), value: entry.sku, mono: true },
   ];

@@ -1113,6 +1113,10 @@
         "diameter": "直径",
         "material": "材质",
         "category": "类型",
+        "categoryValues": {
+          "disc": "盘式",
+          "tube": "管式"
+        },
         "sku": "SKU"
       }
     },

@@ -39,8 +39,40 @@ vi.mock("@/i18n/routing", () => ({
   ),
 }));
 
+// Resolve real messages per locale from the canonical split bundles so the
+// spec-bar category assertion proves i18n resolution, not a hardcoded English
+// literal. A pass-through `(key) => key` mock could not catch a `"Disc"`/
+// `"Tube"` literal regression.
+import enCritical from "../../../../../../messages/en/critical.json";
+import esCritical from "../../../../../../messages/es/critical.json";
+import zhCritical from "../../../../../../messages/zh/critical.json";
+
+const CRITICAL_BY_LOCALE: Record<string, Record<string, unknown>> = {
+  en: enCritical as Record<string, unknown>,
+  es: esCritical as Record<string, unknown>,
+  zh: zhCritical as Record<string, unknown>,
+};
+
+function resolveMessage(
+  locale: string,
+  namespace: string,
+  key: string,
+): string {
+  const path = `${namespace}.${key}`.split(".");
+  let node: unknown = CRITICAL_BY_LOCALE[locale] ?? CRITICAL_BY_LOCALE.en;
+  for (const segment of path) {
+    if (typeof node !== "object" || node === null) return path.join(".");
+    node = (node as Record<string, unknown>)[segment];
+  }
+  return typeof node === "string" ? node : path.join(".");
+}
+
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(() => (key: string) => key),
+  getTranslations: vi.fn(
+    ({ locale, namespace }: { locale: string; namespace: string }) =>
+      (key: string) =>
+        resolveMessage(locale, namespace, key),
+  ),
   setRequestLocale: vi.fn(),
 }));
 
@@ -86,12 +118,38 @@ describe("Membrane product page", () => {
     expect(screen.getByText("TUC-D9-EPDM")).toBeInTheDocument();
     // `?sku=` keeps the real SKU for the RFQ; `?product=` uses the canonical slug.
     expect(
-      screen.getByRole("link", { name: "cta.requestQuote" }),
+      screen.getByRole("link", { name: "Request Quote for This Part" }),
     ).toHaveAttribute(
       "href",
       `/quote?sku=TUC-D9-EPDM&product=${CANONICAL_D9_EPDM}`,
     );
   });
+
+  it.each([
+    { locale: "en", expected: "Disc" },
+    { locale: "es", expected: "Disco" },
+    { locale: "zh", expected: "盘式" },
+  ])(
+    "renders the spec-bar category from i18n ($locale -> $expected), never a hardcoded English literal",
+    async ({ locale, expected }) => {
+      const Page = await ProductPage({
+        params: Promise.resolve({ locale, product: CANONICAL_D9_EPDM }),
+      });
+      const { container } = render(Page);
+
+      expect(screen.getByText(expected)).toBeInTheDocument();
+
+      if (locale !== "en") {
+        // A `entry.category === "disc" ? "Disc" : "Tube"` regression would
+        // leak the English literal onto /es and /zh.
+        const dds = Array.from(container.querySelectorAll("dd")).map(
+          (node) => node.textContent ?? "",
+        );
+        expect(dds).not.toContain("Disc");
+        expect(dds).not.toContain("Tube");
+      }
+    },
+  );
 
   it("permanently redirects the legacy SKU slug to the canonical descriptive URL", async () => {
     permanentRedirectMock.mockClear();
