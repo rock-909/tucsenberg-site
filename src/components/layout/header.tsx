@@ -37,7 +37,7 @@ interface HeaderProps {
   variant?: "default" | "minimal" | "transparent";
   sticky?: boolean;
   locale?: Locale;
-  contactSalesLabel?: string;
+  primaryCtaLabel?: string;
   openMenuLabel?: string;
   closeMenuLabel?: string;
   mobileLanguageLabel?: string;
@@ -65,7 +65,7 @@ export function Header({
   variant = "default",
   sticky = true,
   locale,
-  contactSalesLabel = "Contact Sales",
+  primaryCtaLabel = "Request a Quote",
   openMenuLabel = "Open navigation menu",
   closeMenuLabel = "Close navigation menu",
   mobileLanguageLabel = "Language",
@@ -104,7 +104,7 @@ export function Header({
           />
 
           <HeaderUtilityControls
-            contactSalesLabel={contactSalesLabel}
+            primaryCtaLabel={primaryCtaLabel}
             locale={locale}
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
@@ -162,13 +162,13 @@ function CenterNav({
 }
 
 function HeaderUtilityControls({
-  contactSalesLabel,
+  primaryCtaLabel,
   locale,
   openMenuLabel,
   closeMenuLabel,
   mobileLanguageLabel,
 }: {
-  contactSalesLabel: string;
+  primaryCtaLabel: string;
   locale: Locale | undefined;
   openMenuLabel: string;
   closeMenuLabel: string;
@@ -195,7 +195,7 @@ function HeaderUtilityControls({
               data-testid="header-cta"
             >
               <span data-testid="header-contact-sales-label" translate="no">
-                {contactSalesLabel}
+                {primaryCtaLabel}
               </span>
             </Link>
           </Button>
@@ -215,7 +215,7 @@ function HeaderUtilityControls({
                 data-testid="header-mobile-cta"
               >
                 <span data-testid="header-mobile-contact-label" translate="no">
-                  {contactSalesLabel}
+                  {primaryCtaLabel}
                 </span>
               </Link>
             </Button>
@@ -234,7 +234,7 @@ function HeaderUtilityControls({
               locale={locale}
             >
               <MobileNavigationLinks
-                contactSalesLabel={contactSalesLabel}
+                primaryCtaLabel={primaryCtaLabel}
                 data-testid="header-mobile-navigation-fallback-links"
               />
             </MobileNavigationIsland>

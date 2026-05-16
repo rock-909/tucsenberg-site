@@ -55,6 +55,7 @@
     "about": "关于",
     "contact": "联系我们",
     "contactSales": "报价",
+    "requestQuote": "请求报价",
     "customProject": "定制项目",
     "services": "服务",
     "products": "产品",
@@ -1189,8 +1190,8 @@
       "shutdownDate": "停机日期／紧急程度",
       "shutdownDateHint": "您需要在何时安装膜片？",
       "notes": "补充说明",
-      "fileUpload": "上传部件清单或照片",
-      "fileUploadHint": "CSV、PDF 或图片（最大 10MB）",
+      "fileUpload": "标注部件清单或照片",
+      "fileUploadHint": "我们仅记录文件名作为参考。文件不会随此表单发送——请准备好，在我们回复时通过邮件发送（CSV、PDF 或图片，最大 10MB）。",
       "submit": "提交询价请求",
       "submitting": "提交中..."
     },
@@ -1204,7 +1205,8 @@
     },
     "success": {
       "title": "询价请求已提交",
-      "description": "我们已收到您的请求，将在 2 个工作日内回复至 {email}。"
+      "description": "我们已收到您的请求，将在 2 个工作日内回复至 {email}。",
+      "fileNotice": "您的文件未上传——仅记录了文件名。我们回复时会请您通过邮件发送该文件。"
     }
   },
   "search": {

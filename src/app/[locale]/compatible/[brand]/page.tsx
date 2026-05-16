@@ -51,6 +51,7 @@ function buildProductVM(
     quoteHref:
       `/quote?brand=${encodeURIComponent(brandSlug)}` +
       `&model=${encodeURIComponent(model.modelSlug)}` +
+      `&product=${encodeURIComponent(localizeText(product.name, locale))}` +
       `&partNumber=${encodeURIComponent(
         model.oemPartNumbers[0] ?? model.modelSlug,
       )}`,

@@ -150,7 +150,7 @@ describe("Header Component", () => {
         "href",
         SINGLE_SITE_ROUTE_HREFS.comingSoon,
       );
-      expect(mobileContactCta).toHaveTextContent("Contact Sales");
+      expect(mobileContactCta).toHaveTextContent("Request a Quote");
       expect(
         mobileContactCta.compareDocumentPosition(menuButton) &
           Node.DOCUMENT_POSITION_FOLLOWING,

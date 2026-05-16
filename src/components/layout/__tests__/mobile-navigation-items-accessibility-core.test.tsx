@@ -79,6 +79,7 @@ describe("Mobile Navigation - Core Tests", () => {
           "navigation.quote": "Quote",
           "navigation.contact": "Contact",
           "navigation.contactSales": "Contact Sales",
+          "navigation.requestQuote": "Request a Quote",
           "navigation.products": "Products",
           "navigation.blog": "Blog",
           "navigation.customProject": "Custom",
@@ -172,7 +173,9 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: /materials/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /quote/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /^Quote$/i }),
+      ).toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: /products/i }),
       ).not.toBeInTheDocument();
@@ -183,7 +186,7 @@ describe("Mobile Navigation - Core Tests", () => {
         screen.queryByRole("link", { name: /custom/i }),
       ).not.toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /^Contact Sales$/i }),
+        screen.getByRole("link", { name: /^Request a Quote$/i }),
       ).toBeInTheDocument();
     });
 
@@ -313,7 +316,7 @@ describe("Mobile Navigation - Core Tests", () => {
         screen.queryByRole("link", { name: "Custom" }),
       ).not.toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Contact Sales" }),
+        screen.getByRole("link", { name: "Request a Quote" }),
       ).toBeInTheDocument();
     });
 

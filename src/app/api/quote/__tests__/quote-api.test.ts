@@ -17,6 +17,7 @@ import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import {
   MAX_LEAD_PART_NUMBERS_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
+  MAX_LEAD_SOURCE_CONTEXT_LENGTH,
 } from "@/constants";
 import { POST } from "../route";
 
@@ -186,6 +187,86 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
     expect(leadArg.requirements.length).toBeLessThanOrEqual(
       MAX_LEAD_REQUIREMENTS_LENGTH,
     );
+  });
+
+  it("folds source brand/model/product context into composed requirements", async () => {
+    const body = {
+      ...validRfqData(),
+      sourceBrand: "Sanitaire",
+      sourceModel: "Silver Series II 9 inch Disc",
+      sourceProduct: "Tucsenberg 9-inch EPDM Disc Membrane",
+    };
+
+    const response = await POST(createRequest(body));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+
+    const leadArg = vi.mocked(processLead).mock.calls[0]![0] as {
+      requirements: string;
+    };
+    expect(leadArg.requirements).toContain("Source brand: Sanitaire");
+    expect(leadArg.requirements).toContain(
+      "Source model: Silver Series II 9 inch Disc",
+    );
+    expect(leadArg.requirements).toContain(
+      "Source product: Tucsenberg 9-inch EPDM Disc Membrane",
+    );
+  });
+
+  it("omits source context lines when the buyer arrived without them", async () => {
+    const response = await POST(createRequest(validRfqData()));
+
+    expect(response.status).toBe(200);
+    const leadArg = vi.mocked(processLead).mock.calls[0]![0] as {
+      requirements: string;
+    };
+    expect(leadArg.requirements).not.toContain("Source brand:");
+    expect(leadArg.requirements).not.toContain("Source model:");
+    expect(leadArg.requirements).not.toContain("Source product:");
+  });
+
+  it("keeps the requirements cap with source context lines added", async () => {
+    const body = {
+      ...validRfqData(),
+      partNumbers: "A".repeat(MAX_LEAD_PART_NUMBERS_LENGTH),
+      notes: "B".repeat(MAX_LEAD_REQUIREMENTS_LENGTH),
+      sourceBrand: "C".repeat(MAX_LEAD_SOURCE_CONTEXT_LENGTH),
+      sourceModel: "D".repeat(MAX_LEAD_SOURCE_CONTEXT_LENGTH),
+      sourceProduct: "E".repeat(MAX_LEAD_SOURCE_CONTEXT_LENGTH),
+    };
+
+    const response = await POST(createRequest(body));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(processLead).toHaveBeenCalledTimes(1);
+
+    const leadArg = vi.mocked(processLead).mock.calls[0]![0] as {
+      requirements: string;
+    };
+    expect(leadArg.requirements.length).toBeLessThanOrEqual(
+      MAX_LEAD_REQUIREMENTS_LENGTH,
+    );
+  });
+
+  it("excludes the turnstile token even with source context present", async () => {
+    await POST(
+      createRequest({
+        ...validRfqData(),
+        sourceBrand: "Sanitaire",
+        sourceModel: "Silver Series II",
+        sourceProduct: "Tucsenberg Disc",
+      }),
+    );
+    const callArgs = vi.mocked(processLead).mock.calls[0]![0] as Record<
+      string,
+      unknown
+    >;
+    expect(callArgs).not.toHaveProperty("turnstileToken");
+    expect(callArgs).not.toHaveProperty("sourceBrand");
   });
 
   it("returns 429 when the rate-limit gate trips first", async () => {

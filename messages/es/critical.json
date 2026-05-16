@@ -55,6 +55,7 @@
     "about": "Acerca de",
     "contact": "Contacto",
     "contactSales": "Cotización",
+    "requestQuote": "Solicitar una cotización",
     "customProject": "Personalizado",
     "services": "Servicios",
     "products": "Productos",
@@ -1189,8 +1190,8 @@
       "shutdownDate": "Fecha de parada / Urgencia",
       "shutdownDateHint": "¿Cuándo necesita instalar las membranas?",
       "notes": "Notas adicionales",
-      "fileUpload": "Subir lista de piezas o fotos",
-      "fileUploadHint": "CSV, PDF o imágenes (máx. 10MB)",
+      "fileUpload": "Referencie una lista de piezas o una foto",
+      "fileUploadHint": "Registramos el nombre del archivo solo como referencia. El archivo no se envía con este formulario; téngalo listo para enviarlo por correo cuando le respondamos (CSV, PDF o imágenes, máx. 10 MB).",
       "submit": "Enviar solicitud de cotización",
       "submitting": "Enviando..."
     },
@@ -1204,7 +1205,8 @@
     },
     "success": {
       "title": "Solicitud de cotización enviada",
-      "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles."
+      "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles.",
+      "fileNotice": "Su archivo no se subió; solo se registró su nombre. Le pediremos que lo envíe por correo cuando le respondamos."
     }
   },
   "search": {

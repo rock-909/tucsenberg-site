@@ -55,6 +55,7 @@
     "about": "About",
     "contact": "Contact",
     "contactSales": "Quote",
+    "requestQuote": "Request a Quote",
     "customProject": "Custom",
     "services": "Services",
     "products": "Products",
@@ -1189,8 +1190,8 @@
       "shutdownDate": "Shutdown Date / Urgency",
       "shutdownDateHint": "When do you need the membranes installed?",
       "notes": "Additional Notes",
-      "fileUpload": "Upload Part List or Photos",
-      "fileUploadHint": "CSV, PDF, or images (max 10MB)",
+      "fileUpload": "Reference a Part List or Photo",
+      "fileUploadHint": "We record the file name for reference only. The file is not sent with this form — have it ready to email when we reply (CSV, PDF, or images, max 10MB).",
       "submit": "Submit Quote Request",
       "submitting": "Submitting..."
     },
@@ -1204,7 +1205,8 @@
     },
     "success": {
       "title": "Quote Request Submitted",
-      "description": "We received your request and will respond to {email} within 2 business days."
+      "description": "We received your request and will respond to {email} within 2 business days.",
+      "fileNotice": "Your file was not uploaded — only its name was recorded. We'll ask you to email it when we reply."
     }
   },
   "search": {

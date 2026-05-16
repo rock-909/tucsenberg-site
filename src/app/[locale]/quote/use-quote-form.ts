@@ -34,6 +34,7 @@ export interface QuoteFormValues {
 export interface QuoteContext {
   brand?: string;
   model?: string;
+  product?: string;
 }
 
 export interface QuoteSubmitState {
@@ -82,11 +83,19 @@ function buildNotes(notes: string, file: File | null): string | undefined {
   return trimmed.length > 0 ? `${trimmed}\n${fileLine}` : fileLine;
 }
 
-function buildRequestBody(
-  values: QuoteFormValues,
-  file: File | null,
-  turnstileToken: string,
-): Record<string, unknown> {
+interface RequestBodyArgs {
+  values: QuoteFormValues;
+  file: File | null;
+  turnstileToken: string;
+  context: QuoteContext;
+}
+
+function buildRequestBody({
+  values,
+  file,
+  turnstileToken,
+  context,
+}: RequestBodyArgs): Record<string, unknown> {
   const optional = (value: string) =>
     value.trim().length > 0 ? value.trim() : undefined;
 
@@ -102,6 +111,9 @@ function buildRequestBody(
     material: values.material === "" ? undefined : values.material,
     shutdownDate: optional(values.shutdownDate),
     notes: buildNotes(values.notes, file),
+    sourceBrand: context.brand ? context.brand.trim() : undefined,
+    sourceModel: context.model ? context.model.trim() : undefined,
+    sourceProduct: context.product ? context.product.trim() : undefined,
   };
 }
 
@@ -123,8 +135,11 @@ export interface UseQuoteFormResult {
   acceptedUploadTypes: string;
 }
 
+const EMPTY_QUOTE_CONTEXT: QuoteContext = {};
+
 export function useQuoteForm(
   prefill: Partial<QuoteFormValues>,
+  context: QuoteContext = EMPTY_QUOTE_CONTEXT,
 ): UseQuoteFormResult {
   const [values, setValues] = useState<QuoteFormValues>(() =>
     createInitialValues(prefill),
@@ -175,7 +190,9 @@ export function useQuoteForm(
         const response = await fetch("/api/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(buildRequestBody(values, file, turnstileToken)),
+          body: JSON.stringify(
+            buildRequestBody({ values, file, turnstileToken, context }),
+          ),
         });
         const payload = (await response.json()) as QuoteApiResponse;
 
@@ -202,7 +219,7 @@ export function useQuoteForm(
         inFlightRef.current = false;
       }
     },
-    [file, turnstileToken, values],
+    [context, file, turnstileToken, values],
   );
 
   return useMemo(

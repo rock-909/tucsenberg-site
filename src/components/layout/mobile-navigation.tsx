@@ -13,21 +13,21 @@ export interface MobileNavigationLinksProps extends Omit<
   ComponentProps<"nav">,
   "children"
 > {
-  contactSalesLabel?: string;
+  primaryCtaLabel?: string;
   currentPathname?: string;
   onNavigate?: () => void;
 }
 
 export function MobileNavigationLinks({
   className,
-  contactSalesLabel,
+  primaryCtaLabel,
   currentPathname,
   onNavigate,
   ...props
 }: MobileNavigationLinksProps) {
   const t = useTranslations();
-  const resolvedContactSalesLabel =
-    contactSalesLabel ?? t("navigation.contactSales");
+  const resolvedPrimaryCtaLabel =
+    primaryCtaLabel ?? t("navigation.requestQuote");
 
   return (
     <nav
@@ -67,7 +67,7 @@ export function MobileNavigationLinks({
             className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
             onClick={onNavigate}
           >
-            {resolvedContactSalesLabel}
+            {resolvedPrimaryCtaLabel}
           </Link>
         </li>
       </ul>

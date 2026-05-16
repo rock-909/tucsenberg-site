@@ -19,6 +19,7 @@ import {
   MAX_LEAD_PART_NUMBERS_LENGTH,
   MAX_LEAD_QUANTITY_LENGTH,
   MAX_LEAD_SHUTDOWN_LENGTH,
+  MAX_LEAD_SOURCE_CONTEXT_LENGTH,
   ONE,
 } from "@/constants";
 
@@ -170,6 +171,15 @@ export const rfqLeadSchema = z.object({
   material: z.enum(["epdm", "tpu", "not-sure"]).optional(),
   shutdownDate: sanitizedString().max(MAX_LEAD_SHUTDOWN_LENGTH).optional(),
   notes: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
+  // Origin context when the buyer arrived from a compatible-brand page
+  // (which OEM brand / model / Tucsenberg product they cross-referenced from).
+  // Validated inputs only: these fold into the composed `requirements` text,
+  // not into new Airtable columns or email-template fields.
+  sourceBrand: sanitizedString().max(MAX_LEAD_SOURCE_CONTEXT_LENGTH).optional(),
+  sourceModel: sanitizedString().max(MAX_LEAD_SOURCE_CONTEXT_LENGTH).optional(),
+  sourceProduct: sanitizedString()
+    .max(MAX_LEAD_SOURCE_CONTEXT_LENGTH)
+    .optional(),
   ...baseLeadFields,
 });
 

@@ -366,7 +366,7 @@ export function QuoteForm({ prefill, context }: QuoteFormProps) {
   const tErrors = useTranslations("errors");
   const tA11y = useTranslations("accessibility");
   const baseId = useId();
-  const form = useQuoteForm(prefill);
+  const form = useQuoteForm(prefill, context);
   const { values, submitState, canSubmit } = form;
 
   if (submitState.status === "success") {
@@ -376,6 +376,11 @@ export function QuoteForm({ prefill, context }: QuoteFormProps) {
         <p className="mt-1 text-sm">
           {tSuccess("description", { email: values.email })}
         </p>
+        {form.file ? (
+          <p className="mt-1 text-sm" data-testid="quote-success-file-notice">
+            {tSuccess("fileNotice")}
+          </p>
+        ) : null}
       </StatusCallout>
     );
   }

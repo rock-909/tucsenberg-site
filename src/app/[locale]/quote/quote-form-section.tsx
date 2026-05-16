@@ -40,6 +40,8 @@ export async function QuoteFormSection({
   if (brand) context.brand = brand;
   const model = readParam(resolvedSearchParams, "model");
   if (model) context.model = model;
+  const product = readParam(resolvedSearchParams, "product");
+  if (product) context.product = product;
 
   return <QuoteForm prefill={prefill} context={context} />;
 }

@@ -53,6 +53,14 @@ export const MAX_LEAD_QUANTITY_LENGTH = 100 as const;
 /** Max shutdown-date / urgency field length for RFQ quote leads. */
 export const MAX_LEAD_SHUTDOWN_LENGTH = 200 as const;
 
+/**
+ * Max length for an RFQ source-context field (originating brand, OEM model, or
+ * product the buyer came from via a compatible-brand page). These are short
+ * catalog identifiers, not free-text bands; they are validated inputs only and
+ * fold into the existing `requirements` block, not new Airtable/email fields.
+ */
+export const MAX_LEAD_SOURCE_CONTEXT_LENGTH = 200 as const;
+
 // ============================================================================
 // Cryptography Constants
 // ============================================================================

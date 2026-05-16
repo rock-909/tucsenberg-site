@@ -99,6 +99,9 @@ function validateRfqData(data: Record<string, unknown>): RfqValidationResult {
     material: data.material,
     shutdownDate: data.shutdownDate,
     notes: data.notes,
+    sourceBrand: data.sourceBrand,
+    sourceModel: data.sourceModel,
+    sourceProduct: data.sourceProduct,
     marketingConsent: data.marketingConsent,
   });
 
@@ -125,6 +128,9 @@ function composeProductLead(rfq: RfqLeadInput) {
     rfq.material ? `Preferred material: ${rfq.material}` : undefined,
     rfq.country ? `Country: ${rfq.country}` : undefined,
     rfq.shutdownDate ? `Shutdown / urgency: ${rfq.shutdownDate}` : undefined,
+    rfq.sourceBrand ? `Source brand: ${rfq.sourceBrand}` : undefined,
+    rfq.sourceModel ? `Source model: ${rfq.sourceModel}` : undefined,
+    rfq.sourceProduct ? `Source product: ${rfq.sourceProduct}` : undefined,
     rfq.notes ? `Notes: ${rfq.notes}` : undefined,
   ].filter((line): line is string => line !== undefined);
 
