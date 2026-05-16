@@ -27,6 +27,7 @@ interface LocaleCase {
   readonly searchLabel: string;
   readonly oemGridTitle: string;
   readonly firstBrandLink: string;
+  readonly finalCtaTitle: string;
   readonly requestQuote: string;
   readonly viewMembranes: string;
 }
@@ -39,6 +40,7 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Compatibility search",
     oemGridTitle: "Replacement Membranes for Major Brands",
     firstBrandLink: "View Sanitaire compatible parts",
+    finalCtaTitle: "Have a part number ready?",
     requestQuote: "Request a Quote",
     viewMembranes: "Browse All Membranes",
   },
@@ -48,6 +50,7 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Búsqueda de compatibilidad",
     oemGridTitle: "Membranas de repuesto para las principales marcas",
     firstBrandLink: "Ver piezas compatibles con Sanitaire",
+    finalCtaTitle: "¿Tiene un número de pieza a mano?",
     requestQuote: "Solicitar una cotización",
     viewMembranes: "Ver todas las membranas",
   },
@@ -168,7 +171,21 @@ for (const localeCase of LOCALE_CASES) {
     test("final CTA links to the quote page and a membranes product page", async ({
       page,
     }) => {
-      const quoteLink = page.getByRole("link", {
+      // The global header's primary CTA legitimately also reads "Request a
+      // Quote" and points at /quote, so a page-wide link lookup is ambiguous
+      // under Playwright strict mode. Scope to the in-page final-CTA section
+      // via its unique heading (the header is a separate `banner` landmark
+      // with no `cta.title` heading), so this still proves the IN-PAGE final
+      // CTA and would fail if that section's links regressed.
+      const finalCtaSection = page.locator("section", {
+        has: page.getByRole("heading", {
+          level: 2,
+          name: localeCase.finalCtaTitle,
+        }),
+      });
+      await expect(finalCtaSection).toBeVisible();
+
+      const quoteLink = finalCtaSection.getByRole("link", {
         name: localeCase.requestQuote,
       });
       await expect(quoteLink).toBeVisible();
@@ -177,7 +194,7 @@ for (const localeCase of LOCALE_CASES) {
         `/${localeCase.locale}/quote`,
       );
 
-      const membranesLink = page.getByRole("link", {
+      const membranesLink = finalCtaSection.getByRole("link", {
         name: localeCase.viewMembranes,
       });
       await expect(membranesLink).toBeVisible();
