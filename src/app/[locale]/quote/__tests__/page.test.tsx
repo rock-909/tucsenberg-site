@@ -7,6 +7,7 @@
  * form so the search-param pre-fill, live summary, and JSON POST submission
  * are exercised end to end.
  */
+import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import QuotePage, { generateStaticParams } from "../page";
@@ -39,18 +40,29 @@ vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
 }));
 
-// The Turnstile widget is a lazy network island with its own coverage; stub it
-// to a deterministic button that hands back a token on click so the
-// submit-gating and POST body assertions stay focused on the form.
-vi.mock("@/components/forms/lazy-turnstile", () => ({
-  LazyTurnstile: ({ onSuccess }: { onSuccess?: (token: string) => void }) => (
+// The Turnstile widget is a lazy network island with its own coverage. Stub
+// it to a deterministic button that hands back a fresh, mount-scoped token on
+// click. A module-level counter assigns each mounted instance a stable id on
+// first render (via lazy `useState` initializer, so re-renders keep the same
+// id). A React `key` bump unmounts/remounts and yields a new id; this lets a
+// test assert whether a remount actually re-issued a new token versus the
+// previous token surviving a buyer-correctable retry.
+let turnstileMountCount = 0;
+function MockTurnstile({ onSuccess }: { onSuccess?: (token: string) => void }) {
+  const [mountId] = useState(() => ++turnstileMountCount);
+  return (
     <button
       type="button"
       data-testid="mock-turnstile"
-      onClick={() => onSuccess?.("test-turnstile-token")}
+      onClick={() => onSuccess?.(`test-turnstile-token-${mountId}`)}
     >
       verify
     </button>
+  );
+}
+vi.mock("@/components/forms/lazy-turnstile", () => ({
+  LazyTurnstile: (props: { onSuccess?: (token: string) => void }) => (
+    <MockTurnstile {...props} />
   ),
 }));
 
@@ -79,6 +91,7 @@ async function renderQuotePage(): Promise<void> {
 
 describe("RFQ quote page", () => {
   beforeEach(() => {
+    turnstileMountCount = 0;
     vi.stubGlobal("fetch", vi.fn());
   });
 
@@ -196,7 +209,7 @@ describe("RFQ quote page", () => {
       partNumbers: "TUC-D9-EPDM",
       fullName: "Dana Ops",
       email: "dana@example.com",
-      turnstileToken: "test-turnstile-token",
+      turnstileToken: "test-turnstile-token-1",
     });
 
     await waitFor(() => {
@@ -424,6 +437,143 @@ describe("RFQ quote page", () => {
 
     await waitFor(() => {
       expect(screen.getByText("apiErrors.INVALID_REQUEST")).toBeInTheDocument();
+    });
+  });
+
+  it("lets the buyer fix a server-rejected field and resubmit on the same token", async () => {
+    // Conversion-path dead-end regression (Codex #6). `/api/quote` validates
+    // the body (Zod) BEFORE verifying Turnstile, so an INQUIRY_VALIDATION_FAILED
+    // means the single-use token was NOT consumed. The form must keep that
+    // token (and the solved widget) so the buyer can correct the field and
+    // resubmit. Reverting the fix (clearing the token / remounting on a
+    // validation error) makes the second submit no-op and this fails.
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            success: false,
+            errorCode: "INQUIRY_VALIDATION_FAILED",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ success: true, data: { referenceId: "RFQ-FIX" } }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("apiErrors.INQUIRY_VALIDATION_FAILED"),
+      ).toBeInTheDocument();
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    // Buyer corrects the email. Submit must be enabled WITHOUT re-clicking the
+    // widget — the unconsumed token is still valid.
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+    const submit = screen.getByRole("button", { name: "form.submit" });
+    expect(submit).toBeEnabled();
+
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    const firstBody = JSON.parse(
+      (fetchMock.mock.calls[0]?.[1] as RequestInit).body as string,
+    ) as Record<string, unknown>;
+    const secondBody = JSON.parse(
+      (fetchMock.mock.calls[1]?.[1] as RequestInit).body as string,
+    ) as Record<string, unknown>;
+    // Same single-use token survives the corrected resubmit (widget not
+    // remounted: still mount #1).
+    expect(secondBody.turnstileToken).toBe("test-turnstile-token-1");
+    expect(secondBody.turnstileToken).toBe(firstBody.turnstileToken);
+    expect(secondBody.email).toBe("dana@example.com");
+
+    await waitFor(() => {
+      expect(screen.getByText("success.title")).toBeInTheDocument();
+    });
+  });
+
+  it("remounts Turnstile after a security failure so the buyer can re-verify and resubmit", async () => {
+    // The complementary case: a post-validation security failure means the
+    // token is consumed/invalid. The widget must remount (key bump) so a fresh
+    // single-use token can be issued — otherwise submit stays disabled and the
+    // RFQ path dead-ends. Reverting the remount makes the re-verify hand back
+    // the SAME token / leaves submit disabled and this fails.
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            success: false,
+            errorCode: "INQUIRY_SECURITY_FAILED",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ success: true, data: { referenceId: "RFQ-SEC" } }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("apiErrors.INQUIRY_SECURITY_FAILED"),
+      ).toBeInTheDocument();
+    });
+
+    // Token cleared: submit is gated again until a fresh token is issued.
+    const submit = screen.getByRole("button", { name: "form.submit" });
+    expect(submit).toBeDisabled();
+
+    // Widget remounted -> re-verifying yields a NEW token (mount #2).
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    expect(submit).toBeEnabled();
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+    const secondBody = JSON.parse(
+      (fetchMock.mock.calls[1]?.[1] as RequestInit).body as string,
+    ) as Record<string, unknown>;
+    expect(secondBody.turnstileToken).toBe("test-turnstile-token-2");
+
+    await waitFor(() => {
+      expect(screen.getByText("success.title")).toBeInTheDocument();
     });
   });
 });

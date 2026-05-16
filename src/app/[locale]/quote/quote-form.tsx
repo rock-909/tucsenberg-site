@@ -404,12 +404,13 @@ export function QuoteForm({ prefill, context }: QuoteFormProps) {
         <QuoteFields baseId={baseId} t={t} form={form} />
 
         <LazyTurnstile
+          key={form.turnstileResetKey}
           action="rfq_quote"
           labels={TurnstileLabels(tA11y)}
           onSuccess={form.setTurnstileToken}
-          onError={() => form.setTurnstileToken("")}
-          onExpire={() => form.setTurnstileToken("")}
-          onLoad={() => form.setTurnstileToken("")}
+          onError={form.clearTurnstileToken}
+          onExpire={form.clearTurnstileToken}
+          onLoad={form.clearTurnstileToken}
         />
 
         <Button

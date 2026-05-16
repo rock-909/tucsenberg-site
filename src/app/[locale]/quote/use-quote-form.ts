@@ -2,7 +2,25 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { BYTES_PER_MB } from "@/constants";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
+
+/**
+ * Error codes the route returns BEFORE Cloudflare Turnstile is verified
+ * (`/api/quote` runs body parse + Zod validation, then Turnstile). A failure
+ * with one of these means the single-use token was NOT consumed server-side,
+ * so it stays valid: the buyer can fix the rejected field and resubmit with
+ * the same token. Any other failure (security/Turnstile errors, processing
+ * errors, network errors, the post-Turnstile composed-lead re-validation, or
+ * an unknown code) means the token is consumed or genuinely invalid and the
+ * widget must re-issue a fresh one.
+ */
+const TOKEN_PRESERVING_ERROR_CODES: ReadonlySet<string> = new Set([
+  API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+  API_ERROR_CODES.INVALID_JSON_BODY,
+  API_ERROR_CODES.INVALID_REQUEST,
+  API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+]);
 
 /**
  * RFQ quote form state.
@@ -129,6 +147,15 @@ export interface UseQuoteFormResult {
   selectFile: (file: File | null) => void;
   turnstileToken: string;
   setTurnstileToken: (token: string) => void;
+  /** Clear the token without remounting (widget lifecycle: expire/error/load). */
+  clearTurnstileToken: () => void;
+  /**
+   * Remount key for the Turnstile widget. Bumped only when a consumed/invalid
+   * token must be discarded so the widget unmounts and re-issues a fresh
+   * single-use token; left stable for buyer-correctable validation errors so
+   * the still-valid token (and the solved widget) survive the retry.
+   */
+  turnstileResetKey: number;
   submitState: QuoteSubmitState;
   canSubmit: boolean;
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
@@ -147,10 +174,28 @@ export function useQuoteForm(
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [submitState, setSubmitState] = useState<QuoteSubmitState>({
     status: "idle",
   });
   const inFlightRef = useRef(false);
+
+  /**
+   * Discard the current token AND force the Turnstile widget to remount so it
+   * issues a fresh single-use token. Used for every failure class where the
+   * existing token can no longer produce a successful submit.
+   */
+  const resetTurnstile = useCallback(() => {
+    setTurnstileToken("");
+    setTurnstileResetKey((key) => key + 1);
+  }, []);
+
+  // Widget-driven token loss (expire/error/load): clear the token so submit
+  // re-gates, but do NOT remount — the live widget owns its own re-challenge
+  // and bumping the key mid-challenge would fight it.
+  const clearTurnstileToken = useCallback(() => {
+    setTurnstileToken("");
+  }, []);
 
   const setField = useCallback(
     (field: keyof QuoteFormValues, value: string) => {
@@ -208,18 +253,31 @@ export function useQuoteForm(
           status: "error",
           ...(payload.errorCode ? { errorCode: payload.errorCode } : {}),
         });
-        setTurnstileToken("");
+        // The route validates the body (size + Zod) BEFORE verifying
+        // Turnstile. A pre-Turnstile rejection leaves the single-use token
+        // unconsumed, so keep it (and the solved widget) and let the buyer fix
+        // the field and resubmit. Any other failure means the token is
+        // consumed/invalid — remount the widget for a fresh token instead of
+        // stranding the buyer behind a disabled submit on the main RFQ path.
+        if (
+          !payload.errorCode ||
+          !TOKEN_PRESERVING_ERROR_CODES.has(payload.errorCode)
+        ) {
+          resetTurnstile();
+        }
       } catch (error) {
         logger.warn("RFQ quote submission failed", {
           error: error instanceof Error ? error.message : "Unknown error",
         });
         setSubmitState({ status: "error", errorCode: "FORM_NETWORK_ERROR" });
-        setTurnstileToken("");
+        // Request never reached server validation deterministically; treat the
+        // token as spent and re-issue so a retry is not blocked.
+        resetTurnstile();
       } finally {
         inFlightRef.current = false;
       }
     },
-    [context, file, turnstileToken, values],
+    [context, file, resetTurnstile, turnstileToken, values],
   );
 
   return useMemo(
@@ -231,6 +289,8 @@ export function useQuoteForm(
       selectFile,
       turnstileToken,
       setTurnstileToken,
+      clearTurnstileToken,
+      turnstileResetKey,
       submitState,
       canSubmit,
       handleSubmit,
@@ -243,6 +303,8 @@ export function useQuoteForm(
       fileError,
       selectFile,
       turnstileToken,
+      clearTurnstileToken,
+      turnstileResetKey,
       submitState,
       canSubmit,
       handleSubmit,
