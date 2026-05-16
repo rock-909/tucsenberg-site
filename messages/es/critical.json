@@ -150,6 +150,25 @@
       "searchLabel": "Búsqueda de compatibilidad",
       "searchButton": "Verificar compatibilidad"
     },
+    "confirm": {
+      "overline": "ANTES DE PEDIR",
+      "title": "Lo que le ayudamos a confirmar",
+      "body": "Resolvemos las solicitudes de membranas de repuesto frente a una revisión de compatibilidad documentada, no a una suposición por nombre de marca.",
+      "points": {
+        "compatibility": {
+          "title": "Ajuste OEM frente a su número de pieza",
+          "body": "Usted envía el número de pieza del difusor o el modelo OEM; lo asociamos a la variante de membrana que el registro de compatibilidad ya cubre, o le indicamos que requiere verificación dimensional."
+        },
+        "material": {
+          "title": "Material elegido para su agua residual",
+          "body": "EPDM y TPU se definen según el afluente que realmente recibe su cuba, de modo que la decisión del elastómero responde a las condiciones de operación y no a un valor por defecto del catálogo."
+        },
+        "fit": {
+          "title": "Dudas pendientes resueltas antes de la cotización",
+          "body": "Si una dimensión o un detalle de fijación queda sin resolver, lo señalamos en la revisión de compatibilidad para definirlo antes de que confirme un pedido."
+        }
+      }
+    },
     "oemGrid": {
       "overline": "COMPATIBILIDAD OEM",
       "title": "Membranas de repuesto para las principales marcas",

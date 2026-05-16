@@ -88,6 +88,14 @@ vi.mock("@/components/trust", async (importOriginal) => {
   };
 });
 
+vi.mock("@/components/sections/home-confirm-section", () => ({
+  HomeConfirmSection: () => (
+    <section data-testid="home-confirm-section">
+      <h2>What we help you confirm</h2>
+    </section>
+  ),
+}));
+
 vi.mock("@/components/search/home-hero-search", () => ({
   HomeHeroSearch: () => (
     <input
@@ -147,6 +155,16 @@ describe("Home Page", () => {
       expect(
         screen.getByRole("link", { name: /SSI Aeration compatible parts/ }),
       ).toHaveAttribute("href", "/compatible/ssi-aeration");
+    });
+
+    it("renders the what-we-confirm narrative section after the hero", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
+      expect(screen.getByTestId("home-confirm-section")).toBeInTheDocument();
     });
 
     it("renders the shared SLA commitments ribbon, not the old trust strip", async () => {

@@ -150,6 +150,25 @@
       "searchLabel": "Compatibility search",
       "searchButton": "Check Compatibility"
     },
+    "confirm": {
+      "overline": "BEFORE YOU ORDER",
+      "title": "What we help you confirm",
+      "body": "We resolve replacement membrane requests against a documented compatibility review, not a brand-name guess.",
+      "points": {
+        "compatibility": {
+          "title": "OEM fit against your part number",
+          "body": "You send the diffuser part number or OEM model; we match it to the membrane variant the compatibility record already covers, or tell you it needs dimensional verification."
+        },
+        "material": {
+          "title": "Material chosen for your wastewater",
+          "body": "EPDM and TPU are scoped to the influent your basin actually sees, so the elastomer decision follows operating conditions rather than a catalog default."
+        },
+        "fit": {
+          "title": "Open questions surfaced before the quote",
+          "body": "If a dimension or fastening detail is unresolved, we flag it in the compatibility review so it is settled before you commit to an order."
+        }
+      }
+    },
     "oemGrid": {
       "overline": "OEM COMPATIBILITY",
       "title": "Replacement Membranes for Major Brands",
