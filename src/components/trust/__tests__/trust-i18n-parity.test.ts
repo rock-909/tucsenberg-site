@@ -86,4 +86,36 @@ describe("Behavior: shared trust/legal i18n parity", () => {
       expect(footer).not.toMatch(/proforma|pro forma|\bPI\b|Co\.,? Ltd/i);
     }
   });
+
+  /**
+   * Hard CLAUDE.md #3 compliance lock against the REAL shipped copy
+   * (Step 4.1 §6.2 PROJECT-BRIEF variant A): both the brand-notice and
+   * the footer trademark disclaimer must express the generic
+   * "trademark of / property of their respective owner(s)" ownership
+   * concept in every runtime locale. The mocked-copy component test
+   * (`trademark-disclaimer.test.tsx`) proves the rendering path; this
+   * proves the actual `messages/{en,es,zh}/critical.json` ships
+   * §6.2-compliant wording. Per-locale substring/regex pins are robust
+   * to minor future copy edits (no brittle full-string equality):
+   * EN "respective owner", ES "respectivo(s) propietario(s)",
+   * ZH "各自所有者".
+   */
+  const RESPECTIVE_OWNER_BY_LOCALE = {
+    en: /respective owners?/i,
+    es: /respectivos? propietarios?/i,
+    zh: /各自所有者/,
+  } as const;
+
+  for (const leaf of ["footer", "brandNotice"] as const) {
+    for (const [locale, tree] of Object.entries(LOCALES)) {
+      it(`legal.trademark.${leaf} carries the §6.2 generic "respective owner" ownership wording in ${locale}`, () => {
+        const value = readLeaf(tree, ["legal", "trademark", leaf]) as string;
+        const pattern =
+          RESPECTIVE_OWNER_BY_LOCALE[
+            locale as keyof typeof RESPECTIVE_OWNER_BY_LOCALE
+          ];
+        expect(value).toMatch(pattern);
+      });
+    }
+  }
 });

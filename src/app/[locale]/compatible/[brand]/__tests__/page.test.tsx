@@ -45,11 +45,14 @@ vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
 }));
 
-// Trust components are async Server Components (they load i18n via
-// `loadCompleteMessages`); they have dedicated Phase-A coverage. The page
-// fence stubs them through the shared harness exactly as the Phase-C
-// product-page fence does (`membranes/[product]/__tests__/page.test.tsx`),
-// keeping this file a composition + routing/SEO lock.
+// Only the trust stub is shared: trust components are async Server
+// Components (they load i18n via `loadCompleteMessages`) with dedicated
+// Phase-A coverage, so this fence stubs them through the shared harness'
+// `trustMockFactory`. The next/navigation, @/i18n/routing, and
+// next-intl/server mocks above are intentionally inline (NOT the shared
+// harness factories): the frozen `generateMetadata` assertions pin the
+// echo-translator output shape (e.g. `hero.description:Sanitaire`), which
+// would break if the harness `resolveMessage` resolved real copy instead.
 vi.mock("@/components/trust", async (importOriginal) =>
   (await import("./test-utils")).trustMockFactory(importOriginal as never),
 );
