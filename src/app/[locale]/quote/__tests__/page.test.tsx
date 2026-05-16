@@ -197,6 +197,165 @@ describe("RFQ quote page", () => {
     ).toBeInTheDocument();
   });
 
+  it("propagates ?brand/?model/?product context into the RFQ POST body", async () => {
+    // Regression lock: the buyer's arrival context (which OEM brand/model and
+    // which Tucsenberg product they came from) must reach the lead pipeline.
+    // If QuoteFormSection stopped forwarding it, or use-quote-form dropped the
+    // source* fields, an RFQ would lose its provenance and this fails.
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ success: true, data: { referenceId: "RFQ-CTX" } }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    await renderQuoteForm({
+      sku: "TUC-D9-EPDM",
+      brand: "Sanitaire",
+      model: "Silver Series II 9 inch Disc",
+      product: "Tucsenberg 9-inch EPDM Disc Membrane",
+    });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/quote",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0]?.[1] as RequestInit).body as string,
+    ) as Record<string, unknown>;
+    expect(body).toMatchObject({
+      sourceBrand: "Sanitaire",
+      sourceModel: "Silver Series II 9 inch Disc",
+      sourceProduct: "Tucsenberg 9-inch EPDM Disc Membrane",
+    });
+  });
+
+  it("records an attached file as name/size text only and sends no file body", async () => {
+    // Phase-1 file handling is metadata-only: the JSON endpoint never receives
+    // file bytes. The selected file's name + size must ride `notes` as an
+    // "Attachment:" line and nothing in the request may be a Blob/File.
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ success: true, data: { referenceId: "RFQ-FILE" } }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+
+    const smallFile = new File(["part,qty\n00223,12"], "spec-list.csv", {
+      type: "text/csv",
+    });
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [smallFile] } });
+
+    expect(screen.getByText("spec-list.csv")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/quote",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    // A real upload would send FormData/Blob; Phase-1 must send a JSON string.
+    expect(typeof init.body).toBe("string");
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body.notes).toBe(
+      `Attachment: spec-list.csv (0 MB, ${smallFile.size} bytes)`,
+    );
+    // No File/Blob anywhere in the serialized payload.
+    for (const value of Object.values(body)) {
+      expect(value).not.toBeInstanceOf(File);
+      expect(value).not.toBeInstanceOf(Blob);
+    }
+  });
+
+  it("rejects an over-limit file: shows the error and never submits its info", async () => {
+    // The 10 MB cap (10 * BYTES_PER_MB) is enforced client-side in
+    // use-quote-form. An over-limit file must surface a field error and must
+    // NOT be recorded into the notes/Attachment line on submit.
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ success: true, data: { referenceId: "RFQ-BIG" } }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    await renderQuoteForm({ sku: "TUC-D9-EPDM" });
+
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.email/), {
+      target: { value: "dana@example.com" },
+    });
+
+    const overLimit = new File(["x"], "huge-dump.pdf", {
+      type: "application/pdf",
+    });
+    // 10 MB limit is 10 * 1048576 bytes; one byte over must be rejected.
+    Object.defineProperty(overLimit, "size", {
+      value: 10 * 1048576 + 1,
+    });
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [overLimit] } });
+
+    // The rejected file's name must not be rendered as an accepted attachment.
+    expect(screen.queryByText("huge-dump.pdf")).not.toBeInTheDocument();
+    // FileZone renders the hint normally (FieldHint) AND again as a
+    // FieldError when the file is rejected, so the count must rise to 2.
+    expect(screen.getAllByText("form.fileUploadHint")).toHaveLength(2);
+
+    fireEvent.click(screen.getByTestId("mock-turnstile"));
+    fireEvent.submit(screen.getByTestId("quote-form"));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/quote",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0]?.[1] as RequestInit).body as string,
+    ) as Record<string, unknown>;
+    expect(body.notes).toBeUndefined();
+    if (typeof body.notes === "string") {
+      expect(body.notes).not.toContain("huge-dump.pdf");
+    }
+  });
+
   it("shows the network error message when the POST rejects", async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockRejectedValue(new Error("offline"));
