@@ -34,10 +34,6 @@ const homeMessages: Record<string, string> = {
   "materials.tpu.name": "TPU",
   "materials.tpu.description":
     "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
-  "trust.scope": "Aftermarket replacement membranes only",
-  "trust.leadTime": "Lead time confirmed per quote",
-  "trust.sla": "Quote response within 2 business days",
-  "trust.noFit": "No-fit, no-charge review",
   "cta.title": "Have a part number ready?",
   "cta.description":
     "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
@@ -71,6 +67,26 @@ vi.mock("@/components/seo", () => ({
   JsonLdGraphScript: () => <script type="application/ld+json" />,
   JsonLdScript: () => <script type="application/ld+json" />,
 }));
+
+const SLA_RIBBON_ITEMS = [
+  "Compatibility review — within 24 business hours.",
+  "Standard RFQ — quote or missing-info request within 48 business hours.",
+  "Urgent shutdown cases — acknowledged the same business day.",
+] as const;
+
+vi.mock("@/components/trust", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/trust")>();
+  return {
+    ...actual,
+    SlaCommitments: ({ layout }: { layout: string }) => (
+      <ul data-testid="sla-commitments" data-layout={layout}>
+        {SLA_RIBBON_ITEMS.map((text) => (
+          <li key={text}>{text}</li>
+        ))}
+      </ul>
+    ),
+  };
+});
 
 vi.mock("@/components/search/home-hero-search", () => ({
   HomeHeroSearch: () => (
@@ -131,6 +147,27 @@ describe("Home Page", () => {
       expect(
         screen.getByRole("link", { name: /SSI Aeration compatible parts/ }),
       ).toHaveAttribute("href", "/compatible/ssi-aeration");
+    });
+
+    it("renders the shared SLA commitments ribbon, not the old trust strip", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
+      const ribbon = screen.getByTestId("sla-commitments");
+      expect(ribbon).toHaveAttribute("data-layout", "ribbon");
+      expect(ribbon.querySelectorAll("li")).toHaveLength(3);
+      expect(
+        screen.getByText("Compatibility review — within 24 business hours."),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("Aftermarket replacement membranes only"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Quote response within 2 business days"),
+      ).not.toBeInTheDocument();
     });
 
     it("presents condition-based material guidance without quality claims", async () => {

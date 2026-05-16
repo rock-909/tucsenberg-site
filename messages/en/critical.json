@@ -167,12 +167,6 @@
         "description": "Oil, chemical, and high-grease wastewater conditions where EPDM degrades."
       }
     },
-    "trust": {
-      "scope": "Aftermarket replacement membranes only",
-      "leadTime": "Lead time confirmed per quote",
-      "sla": "Quote response within 2 business days",
-      "noFit": "No-fit, no-charge review"
-    },
     "cta": {
       "title": "Have a part number ready?",
       "description": "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",

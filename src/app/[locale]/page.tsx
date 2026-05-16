@@ -11,6 +11,7 @@ import {
 } from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
+import { SlaCommitments } from "@/components/trust";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -26,7 +27,6 @@ interface HomePageProps {
   params: Promise<LocaleParam>;
 }
 
-const TRUST_ITEMS = ["scope", "leadTime", "sla", "noFit"] as const;
 const MATERIAL_ITEMS = ["epdm", "tpu"] as const;
 const BROWSE_ALL_MEMBRANES_HREF = FEATURED_MEMBRANE_HREF;
 
@@ -111,23 +111,6 @@ function OemGridSection({ t }: { t: HomeTranslator }) {
   );
 }
 
-function TrustRibbon({ t }: { t: HomeTranslator }) {
-  return (
-    <section className="p-6">
-      <ul className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-x-8 gap-y-2">
-        {TRUST_ITEMS.map((key) => (
-          <li
-            key={key}
-            className="text-sm text-muted-foreground before:mr-2 before:text-[var(--color-brand-accent)] before:content-['—']"
-          >
-            {t(`trust.${key}`)}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 function MaterialsSection({ t }: { t: HomeTranslator }) {
   return (
     <section className="bg-card px-6 py-16 md:py-20">
@@ -194,7 +177,11 @@ export default async function Home({ params }: HomePageProps) {
       <JsonLdGraphScript locale={locale as Locale} />
       <HeroSection t={t} searchIndex={searchIndex} />
       <OemGridSection t={t} />
-      <TrustRibbon t={t} />
+      <section className="p-6">
+        <div className="mx-auto max-w-[1080px]">
+          <SlaCommitments locale={locale as Locale} layout="ribbon" />
+        </div>
+      </section>
       <MaterialsSection t={t} />
       <FinalCta t={t} />
     </div>

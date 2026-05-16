@@ -167,12 +167,6 @@
         "description": "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada."
       }
     },
-    "trust": {
-      "scope": "Solo membranas de repuesto aftermarket",
-      "leadTime": "Plazo de entrega confirmado por cotización",
-      "sla": "Respuesta de cotización en un plazo de 2 días hábiles",
-      "noFit": "Revisión sin cargo si no hay ajuste"
-    },
     "cta": {
       "title": "¿Tiene un número de pieza a mano?",
       "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",

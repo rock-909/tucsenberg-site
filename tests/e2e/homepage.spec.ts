@@ -27,6 +27,7 @@ interface LocaleCase {
   readonly searchLabel: string;
   readonly oemGridTitle: string;
   readonly firstBrandLink: string;
+  readonly slaReview: string;
   readonly finalCtaTitle: string;
   readonly requestQuote: string;
   readonly viewMembranes: string;
@@ -40,6 +41,9 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Compatibility search",
     oemGridTitle: "Replacement Membranes for Major Brands",
     firstBrandLink: "View Sanitaire compatible parts",
+    // From messages/en/critical.json -> trust.sla.review (shared Phase-A copy
+    // rendered through the SlaCommitments ribbon).
+    slaReview: "Compatibility review — within 24 business hours.",
     finalCtaTitle: "Have a part number ready?",
     requestQuote: "Request a Quote",
     viewMembranes: "Browse All Membranes",
@@ -50,6 +54,8 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Búsqueda de compatibilidad",
     oemGridTitle: "Membranas de repuesto para las principales marcas",
     firstBrandLink: "Ver piezas compatibles con Sanitaire",
+    // From messages/es/critical.json -> trust.sla.review.
+    slaReview: "Revisión de compatibilidad: en un plazo de 24 horas hábiles.",
     finalCtaTitle: "¿Tiene un número de pieza a mano?",
     requestQuote: "Solicitar una cotización",
     viewMembranes: "Ver todas las membranas",
@@ -166,6 +172,15 @@ for (const localeCase of LOCALE_CASES) {
       await expect
         .poll(() => new URL(page.url()).pathname)
         .toBe(`/${localeCase.locale}/compatible/${FIRST_BRAND_SLUG}`);
+    });
+
+    test("renders the shared SLA commitments ribbon", async ({ page }) => {
+      const ribbon = page.getByTestId("sla-commitments");
+      await expect(ribbon).toBeVisible();
+      await expect(ribbon).toHaveAttribute("data-layout", "ribbon");
+      await expect(
+        ribbon.getByText(localeCase.slaReview, { exact: false }),
+      ).toBeVisible();
     });
 
     test("final CTA links to the quote page and a membranes product page", async ({
