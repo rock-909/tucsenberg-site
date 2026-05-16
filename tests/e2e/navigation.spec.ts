@@ -36,6 +36,42 @@ const NAV_EXPECTED_HREF: Record<string, string> = {
   ...NAV_LIVE_HREF,
   Materials: PLACEHOLDER_HREF,
 };
+
+// BC-002 backs *localized* nav, but most assertions above lock only `/en`.
+// `/es` is a public locale: prove the shipped buyer items resolve to the
+// current-locale live route and Materials stays the placeholder, using the
+// real merged `messages/es/critical.json` "navigation" labels (NOT invented
+// copy). Slugs are locale-agnostic; next-intl prefixes the active locale, so
+// the only delta from `/en` is the path prefix and the translated labels.
+interface LocaleNavExpectation {
+  readonly locale: "en" | "es";
+  // label -> expected href (live route on the current locale, or placeholder)
+  readonly expected: Record<string, string>;
+  // label -> live route, for the items that must NOT be #coming-soon
+  readonly live: Record<string, string>;
+}
+
+const LOCALE_NAV_TABLE: readonly LocaleNavExpectation[] = [
+  {
+    locale: "en",
+    expected: NAV_EXPECTED_HREF,
+    live: NAV_LIVE_HREF,
+  },
+  {
+    locale: "es",
+    expected: {
+      Membranas: "/es/membranes/9-inch-epdm-disc-replacement",
+      Compatibilidad: "/es/compatible/sanitaire",
+      Materiales: PLACEHOLDER_HREF,
+      Cotización: "/es/quote",
+    },
+    live: {
+      Membranas: "/es/membranes/9-inch-epdm-disc-replacement",
+      Compatibilidad: "/es/compatible/sanitaire",
+      Cotización: "/es/quote",
+    },
+  },
+];
 const REMOVED_STARTER_LINKS = [
   "Home",
   "Products",
@@ -46,6 +82,71 @@ const REMOVED_STARTER_LINKS = [
   "Custom",
   "Contact",
 ];
+
+// BC-002 localized-nav smoke: tight, locale-parameterized over en + es.
+// Resolves the P2#10 deferred backlog item with real coverage instead of a
+// doc note. Uses its own goto (no `/en` beforeEach) so the es row truly
+// renders the es header. Mirrors the i18n.spec.ts locator style.
+test.describe("Localized nav href smoke (BC-002)", () => {
+  for (const { locale, expected, live } of LOCALE_NAV_TABLE) {
+    test(`resolves shipped nav items to the ${locale} live route in header and mobile sheet`, async ({
+      page,
+    }) => {
+      await page.goto(`/${locale}`);
+      await page.waitForURL(`**/${locale}`);
+      await waitForLoadWithFallback(page, {
+        context: `localized nav smoke (${locale})`,
+        loadTimeout: 5_000,
+        fallbackDelay: 500,
+      });
+      await removeInterferingElements(page);
+      await waitForStablePage(page);
+
+      const labels = Object.keys(expected);
+
+      if (await isHeaderInMobileMode(page)) {
+        const mobileMenuButton = getHeaderMobileMenuButton(page);
+        await expect(mobileMenuButton).toBeVisible();
+        try {
+          await mobileMenuButton.tap();
+        } catch {
+          await mobileMenuButton.click();
+        }
+
+        const mobileNavSheet = page.getByRole("dialog", {
+          name: /mobile navigation/i,
+        });
+        await expect(mobileNavSheet).toBeVisible();
+
+        for (const label of labels) {
+          const link = mobileNavSheet
+            .getByRole("link", { exact: true, name: label })
+            .first();
+          await expect(link).toBeVisible();
+          await expect(link).toHaveAttribute("href", expected[label]!);
+          // Shipped items must point at the current-locale live route, never
+          // regress to #coming-soon or the wrong locale prefix.
+          if (label in live) {
+            await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+          }
+        }
+        return;
+      }
+
+      const nav = getNav(page);
+      await expect(nav).toBeVisible();
+
+      for (const label of labels) {
+        const link = nav.getByRole("link", { name: label });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", expected[label]!);
+        if (label in live) {
+          await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+        }
+      }
+    });
+  }
+});
 
 test.describe("Navigation System", () => {
   test.beforeEach(async ({ page }) => {
