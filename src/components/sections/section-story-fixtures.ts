@@ -1,5 +1,6 @@
 import type { HomeConfirmSectionViewProps } from "@/components/sections/home-confirm-section-view";
 import type { HomeMembraneTypeSectionViewProps } from "@/components/sections/home-membrane-type-section-view";
+import type { HomeRisksSectionViewProps } from "@/components/sections/home-risks-section-view";
 import type { FaqSectionItem } from "@/components/sections/faq-section-view";
 
 export const sectionStoryFaqItems = [
@@ -126,3 +127,59 @@ export const sectionStoryHomeMembraneTypeChinese = {
     },
   ],
 } satisfies HomeMembraneTypeSectionViewProps;
+
+export const sectionStoryHomeRisks = {
+  overline: "WHY THIS PAGE EXISTS",
+  title: "The four risks buyers avoid",
+  body: "Replacement membrane orders go wrong in a small number of repeatable ways. Each section of this page is built to close one of them.",
+  items: [
+    {
+      key: "wrongFit",
+      title: "Ordering a part that does not seat",
+      body: "A membrane that is close but not dimensionally matched to the diffuser body leaks or unseats; the compatibility review checks fit before the order, not after.",
+    },
+    {
+      key: "wrongMaterial",
+      title: "Running an elastomer the influent attacks",
+      body: "Where the basin sees BTEX, solvents, oil, or grease loading, an EPDM membrane chosen by default can swell or harden; the material decision follows the documented influent instead.",
+    },
+    {
+      key: "blindOrder",
+      title: "Quoting from a guessed cross-reference",
+      body: "A brand-name lookup with no recorded basis produces a number nobody can defend; here every match is tied to the compatibility record it came from.",
+    },
+    {
+      key: "shutdownSlip",
+      title: "Losing the basin window to a slow reply",
+      body: "When a line is down, an unanswered RFQ is the real cost; the SLA commitments set when a review and a quote come back.",
+    },
+  ],
+} satisfies HomeRisksSectionViewProps;
+
+export const sectionStoryHomeRisksChinese = {
+  overline: "本页面存在的原因",
+  title: "买家要规避的四类风险",
+  body: "替换膜片订单出错的方式屈指可数且会重复出现。本页面的每个部分都用于堵住其中一项。",
+  items: [
+    {
+      key: "wrongFit",
+      title: "订到无法贴合就位的零件",
+      body: "与曝气器本体尺寸接近但未精确匹配的膜片会渗漏或脱位；兼容性核对在下单前而非下单后检查贴合。",
+    },
+    {
+      key: "wrongMaterial",
+      title: "在进水会侵蚀的工况下使用错误弹性体",
+      body: "当池体存在 BTEX、溶剂、油类或油脂负荷时，按默认选用的 EPDM 膜片可能溶胀或硬化；材质取舍改为依据有据可查的进水工况。",
+    },
+    {
+      key: "blindOrder",
+      title: "凭猜测的交叉对照报价",
+      body: "无记录依据的品牌名称检索得出的是无人能站得住脚的型号；这里每一处匹配都关联到其来源的兼容性记录。",
+    },
+    {
+      key: "shutdownSlip",
+      title: "因回复迟缓错失池体检修窗口",
+      body: "当生产线停机时，未回复的询价才是真实成本；SLA 承诺界定核对与报价何时返回。",
+    },
+  ],
+} satisfies HomeRisksSectionViewProps;

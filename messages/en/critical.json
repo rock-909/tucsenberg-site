@@ -188,6 +188,29 @@
       "viewAll": "View {brand} compatible parts",
       "pathCount": "{count, plural, one {# documented compatibility path} other {# documented compatibility paths}}"
     },
+    "risks": {
+      "overline": "WHY THIS PAGE EXISTS",
+      "title": "The four risks buyers avoid",
+      "body": "Replacement membrane orders go wrong in a small number of repeatable ways. Each section of this page is built to close one of them.",
+      "items": {
+        "wrongFit": {
+          "title": "Ordering a part that does not seat",
+          "body": "A membrane that is close but not dimensionally matched to the diffuser body leaks or unseats; the compatibility review checks fit before the order, not after."
+        },
+        "wrongMaterial": {
+          "title": "Running an elastomer the influent attacks",
+          "body": "Where the basin sees BTEX, solvents, oil, or grease loading, an EPDM membrane chosen by default can swell or harden; the material decision follows the documented influent instead."
+        },
+        "blindOrder": {
+          "title": "Quoting from a guessed cross-reference",
+          "body": "A brand-name lookup with no recorded basis produces a number nobody can defend; here every match is tied to the compatibility record it came from."
+        },
+        "shutdownSlip": {
+          "title": "Losing the basin window to a slow reply",
+          "body": "When a line is down, an unanswered RFQ is the real cost; the SLA commitments set when a review and a quote come back."
+        }
+      }
+    },
     "materials": {
       "overline": "MATERIAL SELECTION",
       "title": "Choose the Material That Matches Your Conditions",

@@ -188,6 +188,29 @@
       "viewAll": "Ver piezas compatibles con {brand}",
       "pathCount": "{count, plural, one {# ruta de compatibilidad documentada} other {# rutas de compatibilidad documentadas}}"
     },
+    "risks": {
+      "overline": "POR QUÉ EXISTE ESTA PÁGINA",
+      "title": "Los cuatro riesgos que los compradores evitan",
+      "body": "Los pedidos de membranas de repuesto fallan de unas pocas formas repetibles. Cada sección de esta página está diseñada para cerrar una de ellas.",
+      "items": {
+        "wrongFit": {
+          "title": "Pedir una pieza que no asienta",
+          "body": "Una membrana parecida pero sin coincidencia dimensional con el cuerpo del difusor fuga o se desasienta; la revisión de compatibilidad verifica el ajuste antes del pedido, no después."
+        },
+        "wrongMaterial": {
+          "title": "Operar un elastómero que el afluente ataca",
+          "body": "Donde la cuba recibe BTEX, solventes, aceite o carga de grasas, una membrana EPDM elegida por defecto puede hincharse o endurecerse; la decisión del material sigue el afluente documentado en su lugar."
+        },
+        "blindOrder": {
+          "title": "Cotizar a partir de una referencia cruzada supuesta",
+          "body": "Una búsqueda por nombre de marca sin base registrada produce un número que nadie puede defender; aquí cada coincidencia se vincula al registro de compatibilidad del que proviene."
+        },
+        "shutdownSlip": {
+          "title": "Perder la ventana de la cuba por una respuesta lenta",
+          "body": "Cuando una línea está parada, una solicitud de cotización sin responder es el costo real; los compromisos de SLA definen cuándo regresan una revisión y una cotización."
+        }
+      }
+    },
     "materials": {
       "overline": "SELECCIÓN DE MATERIAL",
       "title": "Elija el material que se ajusta a sus condiciones",

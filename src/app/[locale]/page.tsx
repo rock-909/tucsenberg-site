@@ -15,6 +15,7 @@ import { JsonLdGraphScript } from "@/components/seo";
 import { SlaCommitments } from "@/components/trust";
 import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
 import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
+import { HomeRisksSection } from "@/components/sections/home-risks-section";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -192,6 +193,7 @@ export default async function Home({ params }: HomePageProps) {
           <SlaCommitments locale={locale as Locale} layout="ribbon" />
         </div>
       </section>
+      <HomeRisksSection locale={locale as Locale} />
       <MaterialsSection t={t} />
       <FinalCta t={t} />
     </div>

@@ -113,6 +113,14 @@ vi.mock("@/components/sections/home-membrane-type-section", () => ({
   ),
 }));
 
+vi.mock("@/components/sections/home-risks-section", () => ({
+  HomeRisksSection: () => (
+    <section data-testid="home-risks-section">
+      <h2>The four risks buyers avoid</h2>
+    </section>
+  ),
+}));
+
 vi.mock("@/components/search/home-hero-search", () => ({
   HomeHeroSearch: () => (
     <input
@@ -218,6 +226,7 @@ describe("Home Page", () => {
       expect(
         screen.getByTestId("home-membrane-type-section"),
       ).toBeInTheDocument();
+      expect(screen.getByTestId("home-risks-section")).toBeInTheDocument();
     });
 
     it("renders the shared SLA commitments ribbon, not the old trust strip", async () => {
