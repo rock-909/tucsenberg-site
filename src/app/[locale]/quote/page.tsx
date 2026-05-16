@@ -7,7 +7,7 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { getLocalizedPath } from "@/config/paths";
 import { JsonLdGraphScript } from "@/components/seo";
-import { NarrativeSection } from "@/components/trust";
+import { MaterialDecisionCard, NarrativeSection } from "@/components/trust";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { QuoteFormSection } from "@/app/[locale]/quote/quote-form-section";
 
@@ -103,6 +103,18 @@ export default async function QuotePage({
           </Suspense>
         </div>
       </section>
+
+      <NarrativeSection
+        eyebrow={t("materialGuidance.eyebrow")}
+        title={t("materialGuidance.title")}
+        body={t("materialGuidance.body")}
+        divider
+      >
+        <MaterialDecisionCard
+          locale={locale as Locale}
+          defaultMaterial="epdm"
+        />
+      </NarrativeSection>
     </div>
   );
 }

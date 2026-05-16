@@ -211,6 +211,31 @@ describe("RFQ quote page", () => {
     expect(order("intake.body")).toBeLessThan(order("softEntry.title"));
   });
 
+  it("renders the material-decision guidance card below the form", async () => {
+    // Phase-E E4: a NarrativeSection (materialGuidance.title) holding the
+    // shared MaterialDecisionCard, defaulting to EPDM, must render after
+    // the RFQ form. Deleting the card or the wrap fails here.
+    const { container } = render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(screen.getByText("materialGuidance.title")).toBeInTheDocument();
+    const card = screen.getByTestId("material-decision-card");
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAttribute("data-default-material", "epdm");
+
+    const order = (el: Element) =>
+      Array.prototype.indexOf.call(container.querySelectorAll("*"), el);
+    // The card sits below the suspended form region.
+    const formRegion = container.querySelector('[class*="grid"]');
+    if (formRegion) {
+      expect(order(card)).toBeGreaterThan(order(formRegion));
+    }
+  });
+
   it("renders an empty summary with response/lead-time defaults", async () => {
     await renderQuoteForm();
 
