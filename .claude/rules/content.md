@@ -29,6 +29,17 @@ Every content field has one authoring source.
 | Shared labels/nav/buttons/form chrome | `messages/{locale}/*.json` | MDX frontmatter |
 | Reusable catalog/card data | typed config + i18n namespace | page prose only |
 
+## Locale content boundary
+
+Runtime message bundles exist for `en`, `es`, and `zh`. Page MDX content is
+currently authored for `en` and `zh`; during Step 2, Spanish page prose falls
+back to English through `src/lib/content-locale-fallback.ts`.
+
+Keep this fallback explicit. Do not treat the absence of
+`content/pages/es/*.mdx` as a missing-file bug until the Spanish content phase
+starts. When Spanish MDX becomes a launch requirement, update this rule, the
+fallback map, and content validation in the same branch.
+
 ## Tucsenberg replacement order
 
 For Tucsenberg content work, replace in this order:

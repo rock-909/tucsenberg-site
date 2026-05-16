@@ -31,15 +31,18 @@ describe("CapabilitiesPage", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Starter Capabilities",
+        name: "Tucsenberg Capabilities",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Credible Public Pages" }),
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Membrane replacement paths in preparation",
+      }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Docs and checks keep sample identity, proof, legal copy, and deployment values from being treated as real launch truth.",
+        "Unconfirmed product data, legal terms, delivery promises, warranty language, and quote behavior must not be presented as launch-ready facts.",
       ),
     ).toBeInTheDocument();
   });
@@ -53,12 +56,13 @@ describe("CapabilitiesPage", () => {
     );
     expect(page.metadata.slug).toBe("capabilities");
     expect(page.metadata.seo?.keywords).toEqual([
-      "showcase website starter",
-      "B2B website capabilities",
-      "lead foundation",
-      "Cloudflare website starter",
+      "Tucsenberg capabilities",
+      "replacement membrane RFQ",
+      "OEM family membrane matching",
     ]);
-    expect(page.content).toContain("## Credible Public Pages");
+    expect(page.content).toContain(
+      "## Membrane replacement paths in preparation",
+    );
   });
 
   it("uses real MDX frontmatter for page SEO", async () => {
@@ -70,14 +74,13 @@ describe("CapabilitiesPage", () => {
       expect.objectContaining({
         pageType: "capabilities",
         config: {
-          title: "Starter Capabilities | Website and Lead Foundation",
+          title: "Tucsenberg Capabilities | Membrane Replacement RFQ Path",
           description:
-            "See the replaceable public pages, offer story, lead path, Cloudflare deployment proof, owner reporting visibility, and replacement guardrails included in this showcase website starter.",
+            "See how Tucsenberg is preparing replacement membrane paths around OEM-family evidence, material fit, and RFQ input quality.",
           keywords: [
-            "showcase website starter",
-            "B2B website capabilities",
-            "lead foundation",
-            "Cloudflare website starter",
+            "Tucsenberg capabilities",
+            "replacement membrane RFQ",
+            "OEM family membrane matching",
           ],
           image: "/images/og-image.jpg",
         },

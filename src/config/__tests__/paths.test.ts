@@ -277,6 +277,13 @@ describe("paths configuration", () => {
       expect(Array.isArray(SITE_CONFIG.seo.keywords)).toBe(true);
     });
 
+    it("should keep SEO material keywords aligned to confirmed Tucsenberg scope", () => {
+      expect(SITE_CONFIG.seo.keywords).toContain("PTFE aeration membrane");
+      expect(SITE_CONFIG.seo.keywords).not.toContain(
+        "silicone aeration membrane",
+      );
+    });
+
     it("should have social media links", () => {
       const { social } = SITE_CONFIG;
 

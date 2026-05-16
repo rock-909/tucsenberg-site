@@ -100,8 +100,8 @@ describe("Textarea", () => {
     const textarea = screen.getByPlaceholderText("Message");
     expect(textarea).toHaveAttribute("aria-invalid", "true");
     expect(getControlSurface(textarea)).toHaveClass(
-      "focus-within:ring-2",
-      "focus-within:ring-ring",
+      "focus-within:ring-[3px]",
+      "focus-within:ring-ring/20",
       "has-[textarea[aria-invalid=true]]:border-destructive",
       "has-[textarea[aria-invalid=true]]:ring-destructive/20",
     );

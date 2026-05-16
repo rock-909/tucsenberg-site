@@ -16,7 +16,7 @@ describe("Contact page MDX i18n basics", () => {
     const en = await getPageBySlug("contact", "en");
     const zh = await getPageBySlug("contact", "zh");
 
-    expect(en.metadata.title).toBe("Contact Us");
-    expect(zh.metadata.title).toBe("联系我们");
+    expect(en.metadata.title).toBe("Contact Tucsenberg");
+    expect(zh.metadata.title).toBe("联系 Tucsenberg");
   });
 });

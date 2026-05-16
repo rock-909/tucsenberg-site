@@ -233,17 +233,16 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders server links from each family to the Step 2 placeholder", async () => {
+    it("renders server links from each family to Contact with context", async () => {
       await renderPage("north-america");
 
       const sweepsLink = screen.getByRole("link", {
         name: /request quote for sample product shapes/i,
       });
 
-      expect(sweepsLink).toHaveAttribute("href", "#coming-soon");
-      expect(sweepsLink).not.toHaveAttribute(
+      expect(sweepsLink).toHaveAttribute(
         "href",
-        expect.stringContaining("intent=product-family"),
+        "/contact?intent=product-family&market=north-america&family=sample-product-shapes",
       );
       expect(sweepsLink).not.toHaveAttribute(
         "href",

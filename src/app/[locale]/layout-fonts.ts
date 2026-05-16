@@ -25,7 +25,7 @@ export const inter = Inter({
  */
 export const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin", "latin-ext"],
-  weight: ["400"],
+  weight: ["400", "500", "600"],
   display: "swap",
   variable: "--font-ibm-plex-mono",
 });

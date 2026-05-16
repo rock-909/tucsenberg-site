@@ -10,7 +10,7 @@ describe("Contact page rendering data", () => {
     expect(ids).toEqual([
       "response-time",
       "inquiry-details",
-      "samples-or-demos",
+      "unknown-model",
       "form-routing",
     ]);
   });

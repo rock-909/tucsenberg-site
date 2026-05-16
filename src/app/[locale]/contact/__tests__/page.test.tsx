@@ -43,13 +43,13 @@ const contactCopy = {
       phoneLabel: "Phone",
     },
     response: {
-      title: "Response Time",
-      responseTimeLabel: "Response",
-      responseTimeValue: "Within 24 hours",
+      title: "What to prepare",
+      responseTimeLabel: "Response window",
+      responseTimeValue: "To be confirmed before public launch",
       bestForLabel: "Best for",
-      bestForValue: "Quotes",
+      bestForValue: "Replacement membrane RFQs",
       prepareLabel: "Prepare",
-      prepareValue: "Product specs",
+      prepareValue: "OEM family and part number",
     },
     hours: {
       title: "Business Hours",
@@ -111,7 +111,7 @@ describe("ContactPage MDX migration", () => {
 
     expect(
       within(content).getByRole("heading", { level: 1 }),
-    ).toHaveTextContent("Contact Us");
+    ).toHaveTextContent("Contact Tucsenberg");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
@@ -162,9 +162,10 @@ describe("ContactPage MDX migration", () => {
       screen.getByRole("heading", { name: "联系方式" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "联系后会发生什么" }),
+      screen.getByRole("heading", { name: "建议准备" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
+    expect(screen.getByText("公开上线前确认")).toBeInTheDocument();
+    expect(screen.queryByText(/工作日 24 小时内/)).not.toBeInTheDocument();
     expect(screen.getByText("建议提供")).toBeInTheDocument();
   });
 
@@ -203,8 +204,10 @@ describe("ContactPage MDX migration", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Response Time" }));
-    expect(screen.getByText("Within 24 hours")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What to prepare" }));
+    expect(
+      screen.getByText("To be confirmed before public launch"),
+    ).toBeInTheDocument();
     expect(container.querySelector('[data-slot="data-card"]')).toHaveAttribute(
       "data-ui-pilot",
       "radix-themes-data-card",
@@ -219,7 +222,7 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(await screen.findByTestId("faq-section")).toHaveTextContent(
-      "How fast should a real site respond?",
+      "Is a response time guaranteed?",
     );
   });
 
@@ -236,8 +239,11 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(screen.getByText("You are asking about:")).toBeInTheDocument();
-    expect(screen.getByText(/Primary Offer Example/)).toBeInTheDocument();
-    expect(screen.getByText(/Support Packages/)).toBeInTheDocument();
+    expect(screen.getByText(/Membrane review path/)).toBeInTheDocument();
+    expect(screen.getByText(/Replacement membrane family/)).toBeInTheDocument();
+    expect(screen.queryByText(/Primary Offer Example/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Support Packages/)).not.toBeInTheDocument();
+    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
   it("ignores invalid product family context without rendering raw query text", async () => {
@@ -276,6 +282,32 @@ describe("ContactPage MDX migration", () => {
       screen.getByTestId("product-family-context-notice"),
     );
     expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
+    expect(formColumn).not.toHaveTextContent(/Primary Offer Example/);
+    expect(formColumn).not.toHaveTextContent(/Support Packages/);
+  });
+
+  it("does not render starter demo wording in the Contact panel", async () => {
+    const actualContactCopy = await vi.importActual<
+      typeof import("@/lib/contact/getContactCopy")
+    >("@/lib/contact/getContactCopy");
+    mockGetContactCopyFromMessages.mockImplementation(
+      actualContactCopy.getContactCopyFromMessages,
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    await renderAsyncPage(page as React.JSX.Element);
+
+    expect(
+      screen.getByText("To be confirmed before public launch"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/24 business hours/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/demos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/content replacement/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/target audience/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/needed pages/i)).not.toBeInTheDocument();
   });
 
   it("does not protect the entire Contact page from browser translation", async () => {
@@ -298,13 +330,15 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "zh" }),
     });
 
-    expect(enMetadata.title).toBe("Contact | Showcase Website Starter");
-    expect(enMetadata.description).toBe(
-      "Use this starter contact page as a quick action for inquiries, demo requests, or launch questions before connecting a real receiver.",
+    expect(enMetadata.title).toBe(
+      "Contact Tucsenberg | Replacement Membrane RFQ",
     );
-    expect(zhMetadata.title).toBe("联系 | Showcase Website Starter");
+    expect(enMetadata.description).toBe(
+      "Contact Tucsenberg with OEM family, part number, membrane dimensions, photos, material conditions, and quantity range for replacement membrane review.",
+    );
+    expect(zhMetadata.title).toBe("联系 Tucsenberg | 替换膜片 RFQ");
     expect(zhMetadata.description).toBe(
-      "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口；正式上线前请接入真实接收方。",
+      "向 Tucsenberg 提交 OEM family、part number、膜片尺寸、照片、材质工况和数量区间，用于替换膜片 review。",
     );
     expect(enMetadata.other?.google).not.toBe("notranslate");
     expect(zhMetadata.other?.google).not.toBe("notranslate");

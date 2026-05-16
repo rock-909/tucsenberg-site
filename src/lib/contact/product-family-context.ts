@@ -1,4 +1,4 @@
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-page-expression";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import {
   isValidMarketFamilyCombo,
   isValidMarketSlug,
@@ -29,12 +29,8 @@ export function buildProductFamilyContactHref({
   marketSlug: string;
   familySlug: string;
 }): LinkHref {
-  if (SINGLE_SITE_HOME_LINK_TARGETS.contact.startsWith("#")) {
-    return SINGLE_SITE_HOME_LINK_TARGETS.contact;
-  }
-
   return {
-    pathname: SINGLE_SITE_HOME_LINK_TARGETS.contact,
+    pathname: SINGLE_SITE_ROUTE_HREFS.contact,
     query: {
       intent: PRODUCT_FAMILY_CONTACT_INTENT,
       market: marketSlug,
@@ -70,13 +66,13 @@ export function parseProductFamilyContactContext({
     familySlug,
     marketLabel: readMessagePath(
       messages,
-      ["catalog", "markets", marketSlug, "label"],
-      marketSlug,
+      ["contact", "context", "marketFallbackLabel"],
+      "Membrane review path",
     ),
     familyLabel: readMessagePath(
       messages,
-      ["catalog", "families", marketSlug, familySlug, "label"],
-      familySlug,
+      ["contact", "context", "familyFallbackLabel"],
+      "Replacement membrane family",
     ),
   };
 }
