@@ -8,6 +8,7 @@ import type {
   WebSiteData,
 } from "@/lib/structured-data-types";
 import {
+  getPublicContactEmail,
   getPublicContactPhone,
   getPublicLogoPath,
 } from "@/config/public-trust";
@@ -111,6 +112,7 @@ export function generateOrganizationData(
   const telephone = getPublicContactPhone(
     data.phone ?? SITE_CONFIG.contact.phone,
   );
+  const email = getPublicContactEmail(data.email ?? SITE_CONFIG.contact.email);
 
   return {
     "@context": "https://schema.org",
@@ -129,11 +131,14 @@ export function generateOrganizationData(
     ...(logoPath
       ? { logo: new URL(logoPath, FALLBACK_BASE_URL).toString() }
       : {}),
+    ...(email ? { email } : {}),
+    areaServed: "Worldwide",
     contactPoint: {
       "@type": "ContactPoint",
       ...(telephone ? { telephone } : {}),
-      contactType: "customer service",
-      availableLanguage: LOCALES_CONFIG.publicLocales,
+      ...(email ? { email } : {}),
+      contactType: "sales",
+      availableLanguage: ["English", "Spanish"],
     },
     sameAs: collectConfirmedSocialUrls([
       t("organization.social.twitter", {

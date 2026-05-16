@@ -124,6 +124,10 @@
 | 2 个变体域名购买（Cloudflare Registrar） | 冷邮件域名隔离 | 用户 |
 | 实拍产品图 + 安装/拆装近景 | 视觉资产，hero / 产品页头图 | 用户 |
 
+### 上线前检查（launch-gate）
+
+- [ ] 发布前确认 `sales@tucsenberg.com` 真实可收信（footer 可见邮箱 + Organization JSON-LD `email`/`contactPoint` 均已引用此地址；A+ 非 RFQ 联系决策的唯一非 RFQ 收件箱，上线前必须是真实邮箱）。
+
 ### 跟进项（开发侧，待处理）
 
 - 本地 `main` 已与 `origin/main` 分叉，需要做一次 reset 对齐（本分支不处理，作为独立跟进项；处理前确认本地无未推送的有效改动；本轮 PR 流程的 rebase 由控制方统一处理）。
