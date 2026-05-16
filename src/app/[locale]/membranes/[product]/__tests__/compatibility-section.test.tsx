@@ -10,32 +10,17 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CompatibilitySection } from "../compatibility-section";
 import { getProductCompatibilityByCanonicalSlug } from "@/data/product-compatibility";
+import { CANONICAL_D9_EPDM, resolveMessage } from "./test-utils";
 
 vi.unmock("zod");
 
-import enCritical from "../../../../../../messages/en/critical.json";
-
-const en = enCritical as Record<string, unknown>;
-
-function resolveMessage(namespace: string, key: string): string {
-  const path = `${namespace}.${key}`.split(".");
-  let node: unknown = en;
-  for (const segment of path) {
-    if (typeof node !== "object" || node === null) return path.join(".");
-    node = (node as Record<string, unknown>)[segment];
-  }
-  return typeof node === "string" ? node : path.join(".");
-}
-
-vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(
-    ({ namespace }: { namespace: string }) =>
-      (key: string) =>
-        resolveMessage(namespace, key),
-  ),
-}));
-
-const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
+// This file renders CompatibilitySection directly (not ProductPage), so it
+// only needs the shared next-intl/server stub + the real-bundle
+// `resolveMessage` (2-arg `(namespace, key)` form, defaults to the en
+// bundle) from the shared harness.
+vi.mock("next-intl/server", async () =>
+  (await import("./test-utils")).nextIntlServerFactory(),
+);
 
 describe("CompatibilitySection — fabrication guard (spec §4)", () => {
   it("renders only canonical fit labels and real data, no fabricated tokens", async () => {
