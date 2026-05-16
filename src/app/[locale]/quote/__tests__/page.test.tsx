@@ -103,6 +103,16 @@ describe("RFQ quote page", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders the not-sure-of-spec soft-entry block above the form", async () => {
+    // A+ non-RFQ contact decision: buyers who do not know the exact spec must
+    // be invited into the single RFQ path here, not sent to a dead contact
+    // page. If the soft-entry copy is dropped, this fails.
+    await renderQuotePage();
+
+    expect(screen.getByText("softEntry.title")).toBeInTheDocument();
+    expect(screen.getByText("softEntry.body")).toBeInTheDocument();
+  });
+
   it("renders an empty summary with response/lead-time defaults", async () => {
     await renderQuoteForm();
 

@@ -226,6 +226,9 @@
         "terms": "服务条款"
       }
     },
+    "contact": {
+      "label": "一般、分销、媒体及非 RFQ 类咨询："
+    },
     "platform": {
       "products": {
         "title": "产品",
@@ -626,7 +629,7 @@
       "cta": {
         "heading": "需要了解 {marketLabel} 示例？",
         "description": "发送咨询或替换这里的规格、数量、时间和项目说明。",
-        "button": "获取报价"
+        "button": "申请报价或料号核对"
       },
       "familyInquiry": {
         "cta": "咨询 {familyLabel}"
@@ -1175,6 +1178,10 @@
     "hero": {
       "title": "询价",
       "description": "告诉我们您的需求。我们会审核您的请求并在 2 个工作日内回复。"
+    },
+    "softEntry": {
+      "title": "不确定该用哪款膜片？",
+      "body": "请提供您现用曝气器的品牌、型号和尺寸；如有照片或污水工况一并发来。我们会据此找出最接近的替换方案。"
     },
     "form": {
       "partNumbers": "部件编号或 OEM 型号",

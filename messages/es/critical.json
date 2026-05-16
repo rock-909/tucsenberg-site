@@ -226,6 +226,9 @@
         "terms": "Términos de servicio"
       }
     },
+    "contact": {
+      "label": "Consultas generales, de distribución, prensa y ajenas a RFQ:"
+    },
     "platform": {
       "products": {
         "title": "Productos",
@@ -626,7 +629,7 @@
       "cta": {
         "heading": "[ES-TODO] Need to review {marketLabel}?",
         "description": "[ES-TODO] Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
-        "button": "[ES-TODO] Request a Quote"
+        "button": "Solicitar cotización o verificación de número de pieza"
       },
       "familyInquiry": {
         "cta": "[ES-TODO] Request quote for {familyLabel}"
@@ -1175,6 +1178,10 @@
     "hero": {
       "title": "Solicitar cotización",
       "description": "Indíquenos lo que necesita. Revisamos su solicitud y respondemos en un plazo de 2 días hábiles."
+    },
+    "softEntry": {
+      "title": "¿No sabe qué membrana corresponde?",
+      "body": "Indíquenos la marca, el modelo y las dimensiones de su difusor actual; añada fotos o las condiciones del agua residual si las tiene. Usamos esos datos para identificar la vía de reemplazo más cercana."
     },
     "form": {
       "partNumbers": "Número(s) de pieza o modelo OEM",

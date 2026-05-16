@@ -226,6 +226,9 @@
         "terms": "Terms of Service"
       }
     },
+    "contact": {
+      "label": "General, distribution, media, and non-RFQ inquiries:"
+    },
     "platform": {
       "products": {
         "title": "Products",
@@ -626,7 +629,7 @@
       "cta": {
         "heading": "Need to review {marketLabel}?",
         "description": "Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
-        "button": "Request a Quote"
+        "button": "Request a quote or part-number check"
       },
       "familyInquiry": {
         "cta": "Request quote for {familyLabel}"
@@ -1175,6 +1178,10 @@
     "hero": {
       "title": "Request a Quote",
       "description": "Tell us what you need. We review your request and respond within 2 business days."
+    },
+    "softEntry": {
+      "title": "Not sure which membrane fits?",
+      "body": "Share your current diffuser brand, model, and dimensions — add photos or wastewater conditions if you have them. We use those details to identify the closest replacement path."
     },
     "form": {
       "partNumbers": "Part Number(s) or OEM Model",

@@ -1,6 +1,7 @@
 import React from "react";
 import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { renderAsyncPage } from "@/test/render-async-page";
 
 const { mockGetPageBySlug, mockGetTranslations } = vi.hoisted(() => ({
@@ -146,10 +147,16 @@ describe("Feature: Custom Project Support Page", () => {
     expect(await screen.findByTestId("faq-section")).toBeInTheDocument();
   });
 
-  it("CTA links to the Step 2 coming-soon placeholder", async () => {
+  it("routes the custom-project CTA to the RFQ quote path", async () => {
+    // A+ non-RFQ contact decision: this secondary CTA no longer stands in for
+    // the deleted generic-contact lane; it routes to /quote.
     await renderPage();
     const ctaLink = await screen.findByRole("link", { name: /cta\.button/i });
-    expect(ctaLink).toHaveAttribute("href", "#coming-soon");
+    expect(ctaLink).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.quote);
+    expect(ctaLink).not.toHaveAttribute(
+      "href",
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    );
   });
 
   it("renders in Chinese locale", async () => {

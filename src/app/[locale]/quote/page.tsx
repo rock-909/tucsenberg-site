@@ -73,7 +73,20 @@ export default async function QuotePage({
         </div>
       </section>
 
-      <section className="px-6 pt-8 pb-20">
+      <section className="px-6 pt-6 pb-2">
+        <div className="mx-auto max-w-[1080px]">
+          <div className="max-w-[68ch] rounded-[8px] border border-border bg-muted/40 p-5">
+            <p className="text-sm font-medium text-foreground">
+              {t("softEntry.title")}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t("softEntry.body")}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pt-6 pb-20">
         <div className="mx-auto max-w-[1080px]">
           <Suspense fallback={<QuoteFormSkeleton />}>
             <QuoteFormSection
