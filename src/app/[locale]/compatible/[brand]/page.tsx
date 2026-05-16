@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getBrandCompatibility, oemBrands } from "@/data/product-compatibility";
+import {
+  getBrandCompatibility,
+  getBrandPathStats,
+  getOemBrandFacts,
+} from "@/data/product-compatibility";
 import { JsonLdGraphScript } from "@/components/seo";
 import {
   CONFIDENCE_TONE,
@@ -76,7 +80,7 @@ function buildModelVM(model: BrandModel, ctx: BrandVMContext): ModelVM {
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
-    oemBrands.map((brand) => ({ locale, brand: brand.slug })),
+    getOemBrandFacts().map((brand) => ({ locale, brand: brand.slug })),
   );
 }
 
@@ -104,10 +108,20 @@ export default async function BrandPage({ params }: BrandPageProps) {
   const { locale, brand } = await params;
   setRequestLocale(locale);
 
+  // Resolve the frozen brand fact first: it owns the display name and the
+  // documented compatibility-path counts (single source of truth). The
+  // per-mapping `getBrandCompatibility` view still drives the model rows.
+  const brandFact = getOemBrandFacts().find((b) => b.slug === brand);
+  if (!brandFact) {
+    notFound();
+  }
+
   const entry = getBrandCompatibility(brand);
   if (!entry) {
     notFound();
   }
+
+  const stats = getBrandPathStats(brandFact.id);
 
   const [t, tProduct] = await Promise.all([
     getTranslations({ locale, namespace: "compatibleBrand" }),
@@ -115,7 +129,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
   ]);
 
   const vmContext: BrandVMContext = {
-    brandSlug: entry.brandSlug,
+    brandSlug: brandFact.slug,
     locale,
     tProduct,
   };
@@ -150,10 +164,18 @@ export default async function BrandPage({ params }: BrandPageProps) {
             {t("hero.overline")}
           </p>
           <h1 className="mt-3 text-[32px] leading-[1.1] font-light tracking-[-0.01em] text-primary md:text-[48px]">
-            {entry.brandName}
+            {brandFact.displayName}
           </h1>
           <p className="mt-3 max-w-[60ch] text-muted-foreground">
-            {t("hero.description", { brand: entry.brandName })}
+            {t("hero.description", { brand: brandFact.displayName })}
+          </p>
+          <p
+            data-testid="brand-stats"
+            className="mt-4 font-mono text-[13px] tabular-nums text-muted-foreground"
+          >
+            {t("stats.summary", { paths: stats.paths })} ·{" "}
+            {t("stats.epdm", { epdm: stats.epdm })} ·{" "}
+            {t("stats.tpu", { tpu: stats.tpu })}
           </p>
         </div>
       </section>
