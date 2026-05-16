@@ -585,3 +585,91 @@ assertions), `src/data/product-compatibility/__tests__/product-slug.test.ts`,
 `src/app/__tests__/sitemap.test.ts`, and the navigation E2E specs
 (`tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts`,
 `tests/e2e/user-journeys.spec.ts`).
+
+### Step 4.1 — Phase D
+
+This section is append-only. It records the Phase-D
+`/compatible/[brand]` rebuild. It does not edit any prior contract text,
+including the Phase-A/Phase-B/Phase-C blocks above.
+
+#### BC-029: OEM compatibility brand page renders the locked Phase-D structure
+
+The `/[locale]/compatible/[brand]` page composes frozen Phase-A
+`@/components/trust` primitives and `compatibleBrand.*` copy in this exact
+document order:
+
+1. Top brand-notice `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="brand-notice"`)
+   scoped to the resolved brand display name. This satisfies the
+   CLAUDE.md #3 OEM-page compliance requirement using the owner-signed
+   §6.2 PROJECT-BRIEF variant A wording (generic "respective owner"
+   form; parent trademark holders are explicitly not named). The former
+   per-mapping `entry.trademarkDisclaimer` ("…trademark of Xylem…")
+   buyer copy is superseded and is no longer rendered; the data-layer
+   field is retained but unused by this page.
+2. Hero — overline + `<h1>{brandFact.displayName}</h1>` + the ICU
+   `{brand}` description. The display name comes from
+   `getOemBrandFacts()`, never a hardcoded brand literal.
+3. "What 'compatible with {brand}' means here" narrative
+   (`compatibleBrand.boundary.*`).
+4. "Confirm your installed setup" narrative
+   (`compatibleBrand.intake.*`).
+5. Fact-driven stats line (`data-testid="brand-stats"`) rendering
+   `getBrandPathStats(brandFact.id)` numbers via the ICU
+   `compatibleBrand.stats.{summary,epdm,tpu}` keys (sanitaire =
+   5 paths / 3 EPDM / 2 TPU). No fabricated "6 documented"/"228"
+   literal. Immediately followed by the unchanged
+   `BrandCompatibilityFilter`.
+6. `MaterialDecisionCard` (frozen Phase-A trust primitive).
+7. `CompatibilityProofBox` + `BatchControlsBlock` (frozen Phase-A trust
+   primitives).
+8. "Request a compatibility review" CTA narrative
+   (`compatibleBrand.cta.*`) with a `Link` to
+   `/quote?brand=${encodeURIComponent(brandFact.slug)}` and the frozen
+   `SlaCommitments` with `layout="stacked"`.
+9. The page **ends** with a footer `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="footer"`) as
+   the final block. Both disclaimers are distinguishable by
+   `data-variant`; both are hard CLAUDE.md #3 compliance and are
+   test-locked.
+
+Facets are locked to exactly two: a 3-tab category tablist
+(All / Disc / Tube) and a single material combobox. No membrane-class,
+mount-style, or fit-status facet may be (re-)introduced. Every count is
+derived from `getBrandPathStats`/`CATALOG_FACTS`; every brand slug from
+`getOemBrandFacts()`. The single contact mailbox is
+`sales@tucsenberg.com`.
+
+Spec/proof files:
+`src/app/[locale]/compatible/[brand]/page.tsx` and the brand test suite
+under `src/app/[locale]/compatible/[brand]/__tests__/`
+(`page.test.tsx`, `brand-stats-and-params.test.tsx`,
+`trust-composition.test.tsx`, `facet-guard.test.tsx`), plus the shared
+harness `__tests__/test-utils.tsx` and
+`tests/unit/compatible-brand-i18n.test.ts`.
+
+#### BC-030: Brand-page canonical/hreflang and sitemap are unchanged
+
+The Phase-D rebuild does not change any routing/SEO behavior. The
+following remain exactly as before:
+
+- `generateStaticParams()` emits one `{locale, brand}` per runtime
+  locale (en, es, zh) for exactly the three real OEM brand slugs from
+  `getOemBrandFacts()` (`edi`, `sanitaire`, `ssi-aeration`). zh routes
+  are generated for runtime rendering only.
+- `generateMetadata()` emits the route-specific canonical/OG on the
+  brand path, restricts hreflang to en + es (+ x-default, never zh),
+  keeps the brand title/description and indexable robots for public
+  locales, and returns empty `{}` for an unknown brand.
+- The per-product quote link href continues to carry
+  `?brand=<slug>` (`/quote?brand=sanitaire`).
+- The sitemap continues to include one OEM URL per brand, en + es only,
+  never zh (BC-023).
+
+Proof files:
+`src/app/[locale]/compatible/[brand]/__tests__/page.test.tsx`
+(generateStaticParams + full `generateMetadata` block, all frozen),
+`src/app/__tests__/sitemap.test.ts` (BC-023), and the navigation E2E
+specs (`tests/e2e/navigation.spec.ts`), which assert only the brand-page
+`<h1>` visibility and the localized `/compatible/sanitaire` nav href —
+both preserved by the rebuild.
