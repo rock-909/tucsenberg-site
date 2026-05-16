@@ -211,6 +211,35 @@
         }
       }
     },
+    "faq": {
+      "sectionTitle": "Replacement membrane questions",
+      "items": {
+        "q01": {
+          "question": "How fast do you respond to a compatibility request?",
+          "answer": "A compatibility review is returned within 24 business hours, and a standard RFQ is quoted or answered with a missing-information request within 48 business hours. Urgent shutdown cases are acknowledged the same business day. We work from the documented compatibility-review record rather than promising a field outcome."
+        },
+        "q02": {
+          "question": "What do you need from me to confirm a match?",
+          "answer": "Send the diffuser part number or OEM model, the membrane format (disc or tube), and the diameter or tube length if you have it. If a dimension is missing we tell you exactly what to measure before the quote."
+        },
+        "q03": {
+          "question": "Do you actually carry the OEM brand I run?",
+          "answer": "We map your part number to the membrane variant the compatibility record already covers for that brand and tell you whether the match is exact or needs dimensional verification. We are an independent aftermarket manufacturer, not the OEM."
+        },
+        "q04": {
+          "question": "What is the lead time once compatibility is confirmed?",
+          "answer": "Confirmed orders typically ship within one to two weeks of confirmed compatibility and an accepted quote. We restate the exact window on the quote so it is tied to your specific item."
+        },
+        "q05": {
+          "question": "Is there a stock product or is everything made to order?",
+          "answer": "Membranes are made to order against the confirmed compatibility and material decision, so the build matches your diffuser body and influent rather than a generic shelf item."
+        },
+        "q06": {
+          "question": "What happens if the membrane still does not fit?",
+          "answer": "Raise it with the compatibility reference on your quote and we work from the documented compatibility-review record to resolve it. Reach us at sales@tucsenberg.com with the part number and basin conditions."
+        }
+      }
+    },
     "cta": {
       "title": "Have a part number ready?",
       "description": "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",

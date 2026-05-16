@@ -21,6 +21,7 @@ import {
 import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
 import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
 import { HomeRisksSection } from "@/components/sections/home-risks-section";
+import { HomeFaqSection } from "@/components/sections/home-faq-section";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -173,6 +174,7 @@ export default async function Home({ params }: HomePageProps) {
       <CompatibilityProofBox locale={locale as Locale} />
       <MaterialDecisionCard locale={locale as Locale} />
       <BatchControlsBlock locale={locale as Locale} />
+      <HomeFaqSection locale={locale as Locale} />
       <FinalCta t={t} />
     </div>
   );

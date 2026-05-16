@@ -120,6 +120,26 @@ vi.mock("@/components/sections/home-risks-section", () => ({
   ),
 }));
 
+vi.mock("@/components/sections/home-faq-section", () => ({
+  HomeFaqSection: () => (
+    <section data-testid="home-faq-section">
+      <h2>Replacement membrane questions</h2>
+      <h3>How fast do you respond to a compatibility request?</h3>
+      <script
+        type="application/ld+json"
+        data-testid="home-faq-jsonld"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [],
+          }),
+        }}
+      />
+    </section>
+  ),
+}));
+
 vi.mock("@/components/search/home-hero-search", () => ({
   HomeHeroSearch: () => (
     <input
@@ -284,6 +304,23 @@ describe("Home Page", () => {
       expect(
         screen.queryByText("Choose the Material That Matches Your Conditions"),
       ).not.toBeInTheDocument();
+    });
+
+    it("renders the home FAQ with Q01 and FAQPage structured data", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      const { container } = render(HomeComponent);
+
+      expect(screen.getByTestId("home-faq-section")).toBeInTheDocument();
+      expect(
+        screen.getByText("How fast do you respond to a compatibility request?"),
+      ).toBeInTheDocument();
+
+      const jsonLd = container.querySelector('[data-testid="home-faq-jsonld"]');
+      expect(jsonLd).not.toBeNull();
+      expect(jsonLd?.textContent ?? "").toContain('"@type":"FAQPage"');
     });
 
     it("routes the final CTAs to quote and the membrane catalog", async () => {

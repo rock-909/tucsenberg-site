@@ -211,6 +211,35 @@
         }
       }
     },
+    "faq": {
+      "sectionTitle": "Preguntas sobre membranas de repuesto",
+      "items": {
+        "q01": {
+          "question": "¿Con qué rapidez responden a una solicitud de compatibilidad?",
+          "answer": "Una revisión de compatibilidad se devuelve en un plazo de 24 horas hábiles, y una solicitud de cotización estándar se cotiza o se responde con una solicitud de información faltante en un plazo de 48 horas hábiles. Los casos de parada urgente se confirman el mismo día hábil. Trabajamos a partir del registro documentado de la revisión de compatibilidad en lugar de prometer un resultado en campo."
+        },
+        "q02": {
+          "question": "¿Qué necesitan de mí para confirmar una coincidencia?",
+          "answer": "Envíe el número de pieza del difusor o el modelo OEM, el formato de membrana (disco o tubo) y el diámetro o la longitud del tubo si los tiene. Si falta una dimensión, le indicamos exactamente qué medir antes de la cotización."
+        },
+        "q03": {
+          "question": "¿Realmente trabajan con la marca OEM que opero?",
+          "answer": "Asociamos su número de pieza a la variante de membrana que el registro de compatibilidad ya cubre para esa marca y le indicamos si la coincidencia es exacta o requiere verificación dimensional. Somos un fabricante independiente del mercado de posventa, no el OEM."
+        },
+        "q04": {
+          "question": "¿Cuál es el plazo de entrega una vez confirmada la compatibilidad?",
+          "answer": "Los pedidos confirmados normalmente se despachan en un plazo de una a dos semanas tras la compatibilidad confirmada y una cotización aceptada. Reafirmamos la ventana exacta en la cotización para vincularla a su artículo específico."
+        },
+        "q05": {
+          "question": "¿Hay un producto en stock o todo es bajo pedido?",
+          "answer": "Las membranas se fabrican bajo pedido según la compatibilidad confirmada y la decisión de material, de modo que la fabricación corresponde al cuerpo de su difusor y a su afluente y no a un artículo genérico de estantería."
+        },
+        "q06": {
+          "question": "¿Qué ocurre si la membrana aún no encaja?",
+          "answer": "Plantéelo con la referencia de compatibilidad de su cotización y trabajamos a partir del registro documentado de la revisión de compatibilidad para resolverlo. Contáctenos en sales@tucsenberg.com con el número de pieza y las condiciones de la cuba."
+        }
+      }
+    },
     "cta": {
       "title": "¿Tiene un número de pieza a mano?",
       "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",
