@@ -236,6 +236,24 @@ describe("RFQ quote page", () => {
     }
   });
 
+  it("renders the what-happens-next SLA commitments stacked", async () => {
+    // Phase-E E6: a whatHappensNext NarrativeSection holding the shared
+    // SlaCommitments in the `stacked` layout. The real component renders
+    // exactly 3 commitments (proven by the Phase-A trust suite + the E10
+    // build); here we pin the wrap, title, and stacked layout.
+    render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(screen.getByText("whatHappensNext.title")).toBeInTheDocument();
+    const sla = screen.getByTestId("sla-commitments");
+    expect(sla).toBeInTheDocument();
+    expect(sla).toHaveAttribute("data-layout", "stacked");
+  });
+
   it("renders an empty summary with response/lead-time defaults", async () => {
     await renderQuoteForm();
 
