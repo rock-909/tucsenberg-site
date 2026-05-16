@@ -60,11 +60,6 @@
     }
   },
   "contact": {
-    "context": {
-      "productFamilyLabel": "You are asking about:",
-      "marketFallbackLabel": "Membrane review path",
-      "familyFallbackLabel": "Replacement membrane family"
-    },
     "title": "Contact Us",
     "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
     "features": "Multiple ways to reach us and get the support you need",

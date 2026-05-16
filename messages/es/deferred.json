@@ -60,11 +60,6 @@
     }
   },
   "contact": {
-    "context": {
-      "productFamilyLabel": "[ES-TODO] You are asking about:",
-      "marketFallbackLabel": "[ES-TODO] Membrane review path",
-      "familyFallbackLabel": "[ES-TODO] Replacement membrane family"
-    },
     "title": "[ES-TODO] Contact Us",
     "description": "[ES-TODO] Get in touch with our team for inquiries, support, or partnership opportunities.",
     "features": "[ES-TODO] Multiple ways to reach us and get the support you need",

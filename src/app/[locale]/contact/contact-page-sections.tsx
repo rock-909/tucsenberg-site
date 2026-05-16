@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
-import { ProductFamilyContextNotice } from "@/components/contact/product-family-context-notice";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import {
   DataCard,
@@ -14,7 +13,6 @@ import {
   getPublicContactPhone,
 } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
-import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import type { FaqItem } from "@/types/content.types";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
@@ -178,23 +176,11 @@ export function ContactFaqSection({
   );
 }
 
-async function ContactFormColumn({
-  searchParams,
+function ContactFormColumn({
   messages,
 }: {
-  searchParams: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  const productFamilyContext = parseProductFamilyContactContext({
-    searchParams: resolvedSearchParams,
-    messages,
-  });
-  const productFamilyContextLabel = readRequiredMessagePath(messages, [
-    "contact",
-    "context",
-    "productFamilyLabel",
-  ]);
   const formLoadError = readRequiredMessagePath(messages, [
     "contact",
     "form",
@@ -208,10 +194,6 @@ async function ContactFormColumn({
 
   return (
     <div className="space-y-6" data-testid="contact-form-column">
-      <ProductFamilyContextNotice
-        context={productFamilyContext}
-        label={productFamilyContextLabel}
-      />
       <ContactFormIsland
         errorMessage={formLoadError}
         fallback={<ContactFormStaticFallback messages={messages} />}
@@ -222,15 +204,14 @@ async function ContactFormColumn({
 }
 
 export function ContactFormWithFallback({
-  searchParams,
   messages,
 }: {
-  searchParams: Promise<ContactSearchParams>;
+  searchParams?: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
   return (
     <Suspense fallback={<ContactFormStaticFallback messages={messages} />}>
-      <ContactFormColumn searchParams={searchParams} messages={messages} />
+      <ContactFormColumn messages={messages} />
     </Suspense>
   );
 }

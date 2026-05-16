@@ -226,64 +226,15 @@ describe("ContactPage MDX migration", () => {
     );
   });
 
-  it("renders validated product family context from Contact query params", async () => {
+  it("keeps the contact form column rendering without handoff query params", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
-        intent: "product-family",
-        market: "north-america",
-        family: "couplings",
-      }),
-    });
-
-    await renderAsyncPage(page as React.JSX.Element);
-
-    expect(screen.getByText("You are asking about:")).toBeInTheDocument();
-    expect(screen.getByText(/Membrane review path/)).toBeInTheDocument();
-    expect(screen.getByText(/Replacement membrane family/)).toBeInTheDocument();
-    expect(screen.queryByText(/Primary Offer Example/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Support Packages/)).not.toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
-  });
-
-  it("ignores invalid product family context without rendering raw query text", async () => {
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
-        intent: "product-family",
-        market: "north-america",
-        family: "<script>alert(1)</script>",
-      }),
-    });
-
-    await renderAsyncPage(page as React.JSX.Element);
-
-    expect(screen.queryByText("You are asking about:")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("<script>alert(1)</script>"),
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
-  });
-
-  it("keeps the product family notice in the same left column as the form", async () => {
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
-        intent: "product-family",
-        market: "north-america",
-        family: "couplings",
-      }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
 
     const formColumn = screen.getByTestId("contact-form-column");
-    expect(formColumn).toContainElement(
-      screen.getByTestId("product-family-context-notice"),
-    );
     expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
-    expect(formColumn).not.toHaveTextContent(/Primary Offer Example/);
-    expect(formColumn).not.toHaveTextContent(/Support Packages/);
   });
 
   it("does not render starter demo wording in the Contact panel", async () => {
