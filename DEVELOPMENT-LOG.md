@@ -137,6 +137,7 @@
   - Codex #12：quote 表单客户端做邮箱格式预校验。
   - footer `platform.*` starter 残留（Next.js / v0 / Turbo / Vercel-template 模板遗留的 footer 条目）。
   - 上线时真机验证 Turnstile + Resend owner 邮件投递（测试只证明了文档契约级，真机投递是部署期检查，不由测试证明）。
+  - P2#10：补 `/es` header/mobile nav href 冒烟（断言 `/es` 下 membranes/compatible/quote 链接 + 非 materials 不指向 `#coming-soon`）。终审标记的文档完整性缺口，仅记录为延后项，本轮不实现该冒烟测试。
 
 ---
 

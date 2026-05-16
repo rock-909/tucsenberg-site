@@ -9,6 +9,17 @@ const rawBaseUrl =
 
 const BASE_ORIGIN = new URL(rawBaseUrl).origin;
 
+// Expected strings are the REAL post-Step-4 merged runtime values:
+//   - skipLabel       -> `accessibility.skipToContent`
+//   - languageLabel   -> `language.selectLanguage` (mobile fallback label)
+//   - targetHomeHeading -> the home `home.hero.title` of the *target* locale
+//     the language fallback lands on (en case lands on /es, es case on /en)
+//   - contactHeading  -> contact MDX `title` (no es MDX yet -> EN fallback
+//     "Contact Tucsenberg" via content-locale-fallback)
+//   - fullNameLabel / optionalLabel -> contact form chrome lives in
+//     `messages/{locale}/deferred.json`, which Step-4 did NOT translate, so
+//     the es contact form genuinely still renders the `[ES-TODO]` prefix.
+// Kept in lockstep with tests/e2e/i18n.spec.ts HOME_COPY.
 const localeCases = [
   {
     locale: "en",
@@ -18,21 +29,19 @@ const localeCases = [
     currentLanguage: "English",
     targetFallbackHref: "/es",
     targetLocale: "es",
-    targetHomeHeading:
-      /\[ES-TODO\] Replacement membrane paths for installed aeration systems\./i,
+    targetHomeHeading: /Encuentre su membrana de repuesto/i,
     fullNameLabel: "Full name",
     optionalLabel: "optional",
   },
   {
     locale: "es",
-    skipLabel: "[ES-TODO] Skip to main content",
+    skipLabel: "Saltar al contenido principal",
     contactHeading: /Contact Tucsenberg/i,
-    languageLabel: "[ES-TODO] Select Language",
+    languageLabel: "Seleccionar idioma",
     currentLanguage: "Español",
     targetFallbackHref: "/en",
     targetLocale: "en",
-    targetHomeHeading:
-      /Replacement membrane paths for installed aeration systems\./i,
+    targetHomeHeading: /Find Your Replacement Membrane/i,
     fullNameLabel: "[ES-TODO] Full name",
     optionalLabel: "[ES-TODO] optional",
   },
