@@ -144,6 +144,45 @@ describe("/api/quote — RFQ submission (protection chain)", () => {
     expect(processLead).not.toHaveBeenCalled();
   });
 
+  it("rejects a normal Turnstile verification failure with 400 and never calls processLead", async () => {
+    // A returned-but-invalid token (e.g. user failed the challenge or the
+    // token is stale) is a client error. The route maps non-service Turnstile
+    // failure codes to HTTP 400 and must NOT enter the lead pipeline.
+    vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+      success: false,
+      errorCodes: ["invalid-input-response"],
+    });
+
+    const response = await POST(createRequest(validRfqData()));
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.errorCode).toBe("INQUIRY_SECURITY_FAILED");
+    expect(verifyTurnstileDetailed).toHaveBeenCalledTimes(1);
+    expect(processLead).not.toHaveBeenCalled();
+  });
+
+  it("maps a Turnstile service outage to 503 and never calls processLead", async () => {
+    // Cloudflare Turnstile being unreachable (network error / timeout /
+    // unconfigured) is an infrastructure failure, not a buyer mistake. The
+    // route maps these to HTTP 503 and must NOT enter the lead pipeline so a
+    // legitimate RFQ is not silently dropped against a broken anti-abuse hop.
+    vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
+      success: false,
+      errorCodes: ["network-error"],
+    });
+
+    const response = await POST(createRequest(validRfqData()));
+    const data = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(data.success).toBe(false);
+    expect(data.errorCode).toBe("SERVICE_UNAVAILABLE");
+    expect(verifyTurnstileDetailed).toHaveBeenCalledTimes(1);
+    expect(processLead).not.toHaveBeenCalled();
+  });
+
   it("rejects an invalid email", async () => {
     const response = await POST(
       createRequest({ ...validRfqData(), email: "not-an-email" }),
