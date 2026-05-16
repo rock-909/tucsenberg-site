@@ -62,7 +62,9 @@ describe("pages.config static public page registry", () => {
       expect(repoFileExists(definition.routeOwner)).toBe(true);
       // De-listed legacy starter pages (products / blog / customProject)
       // intentionally carry sitemap.include === false until their own Step
-      // rebuilds their en/es surface; all other pages stay included.
+      // rebuilds their en/es surface; `contact` is de-listed per the A+
+      // decision (single RFQ `/quote` path, no generic contact lead path);
+      // all other pages stay included.
       expect(typeof definition.sitemap.include).toBe("boolean");
       expect(definition.sitemap.priority).toBeGreaterThan(0);
       expect(definition.sitemap.priority).toBeLessThanOrEqual(1);
@@ -72,7 +74,16 @@ describe("pages.config static public page registry", () => {
 
   it("locks the de-listed legacy starter pages out of the sitemap", () => {
     const byType = getStaticPageDefinitionsByType();
-    const deListed: readonly PageType[] = ["products", "blog", "customProject"];
+    // `contact` is de-listed per the owner-approved A+ decision: Phase-1
+    // conversion is the single RFQ `/quote` path with the footer sales@
+    // email as the non-RFQ fallback — no standalone generic contact lead
+    // path, so the contact surface must not re-enter the public sitemap.
+    const deListed: readonly PageType[] = [
+      "products",
+      "blog",
+      "customProject",
+      "contact",
+    ];
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
       const expectedIncluded = !deListed.includes(definition.pageType);
       expect(definition.sitemap.include).toBe(expectedIncluded);
@@ -93,11 +104,11 @@ describe("pages.config static public page registry", () => {
 
   it("derives sitemap pages and route configs from the registry", () => {
     // products / blog / custom-project-support are de-listed (still leak
-    // starter slop + [ES-TODO]) and must not appear in the public sitemap.
+    // starter slop + [ES-TODO]); /contact is de-listed per the A+ decision
+    // (single RFQ /quote path) — none may appear in the public sitemap.
     expect(getStaticSitemapPages()).toEqual([
       "",
       "/about",
-      "/contact",
       "/privacy",
       "/terms",
       "/capabilities",
@@ -114,6 +125,7 @@ describe("pages.config static public page registry", () => {
     expect(sitemapConfig["/products"]).toBeUndefined();
     expect(sitemapConfig["/blog"]).toBeUndefined();
     expect(sitemapConfig["/custom-project-support"]).toBeUndefined();
+    expect(sitemapConfig["/contact"]).toBeUndefined();
     expect(sitemapConfig["/capabilities"]).toEqual({
       changeFrequency: "monthly",
       priority: 0.85,

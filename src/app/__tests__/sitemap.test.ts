@@ -405,6 +405,15 @@ describe("sitemap.ts", () => {
       expect(findEntry(result, "es", customProjectPath)).toBeUndefined();
     });
 
+    it("de-lists the /contact page per the A+ single-RFQ-path decision", async () => {
+      const result = await sitemap();
+      const contactPath = getCanonicalPath("contact");
+
+      expect(findEntry(result, defaultLocale, contactPath)).toBeUndefined();
+      expect(findEntry(result, "es", contactPath)).toBeUndefined();
+      expect(findEntry(result, "zh", contactPath)).toBeUndefined();
+    });
+
     it("should include a canonical descriptive membrane URL per productVariant for public locales only", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
@@ -465,8 +474,14 @@ describe("sitemap.ts", () => {
       const result = await sitemap();
       const urls = new Set(result.map((entry) => entry.url));
 
-      // De-listed legacy starter pages: no en/es entry, no zh entry.
-      for (const path of ["/products", "/blog", "/custom-project-support"]) {
+      // De-listed legacy starter pages + the A+ de-listed /contact path:
+      // no en/es entry, no zh entry.
+      for (const path of [
+        "/products",
+        "/blog",
+        "/custom-project-support",
+        "/contact",
+      ]) {
         for (const locale of ["en", "es", "zh"]) {
           expect(urls.has(localizedUrl(locale, path))).toBe(false);
         }
@@ -474,7 +489,9 @@ describe("sitemap.ts", () => {
       // De-listed routes must not leak via any alternates map either.
       for (const entry of result) {
         for (const alt of Object.values(entry.alternates?.languages ?? {})) {
-          expect(alt).not.toMatch(/\/(products|blog|custom-project-support)$/);
+          expect(alt).not.toMatch(
+            /\/(products|blog|custom-project-support|contact)$/,
+          );
         }
       }
 
@@ -484,7 +501,6 @@ describe("sitemap.ts", () => {
         homePath,
         getCanonicalPath("quote"),
         getCanonicalPath("about"),
-        getCanonicalPath("contact"),
         getCanonicalPath("capabilities"),
         getCanonicalPath("howItWorks"),
         getCanonicalPath("privacy"),

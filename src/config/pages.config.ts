@@ -119,7 +119,13 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/contact"),
       navigationKey: null,
       seoKey: "content.pages.contact",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      // De-listed + noindex per the owner-approved A+ decision
+      // (docs/superpowers/decision-brief-non-rfq-contact.md): Phase-1
+      // conversion is the single RFQ `/quote` path with the footer
+      // sales@ email as the non-RFQ fallback — there is NO standalone
+      // generic `/contact` lead path. Re-enable only if a later Step
+      // reintroduces an approved non-RFQ contact surface.
+      sitemap: { include: false, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "contact" },
       routeOwner: "src/app/[locale]/contact/page.tsx",

@@ -35,8 +35,10 @@ describe("single-site-seo", () => {
 
     // The public sitemap page list excludes de-listed legacy starter pages
     // (products / blog / customProject) whose en/es surface still leaks
-    // starter slop + [ES-TODO]; the route-type registry still lists them.
-    const deListed = new Set(["products", "blog", "customProject"]);
+    // starter slop + [ES-TODO]; `contact` is excluded per the A+ decision
+    // (single RFQ /quote path, no generic contact lead path). The
+    // route-type registry still lists all of them.
+    const deListed = new Set(["products", "blog", "customProject", "contact"]);
     const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.filter(
       (pageType) => !deListed.has(pageType),
     ).map((pageType) => {
@@ -53,6 +55,7 @@ describe("single-site-seo", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
       "/custom-project-support",
     );
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/contact");
   });
 
   it("keeps sitemap configs explicit for special page types", () => {
@@ -76,6 +79,9 @@ describe("single-site-seo", () => {
     ).toBeUndefined();
     expect(
       SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("customProject")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("contact")],
     ).toBeUndefined();
     expect(
       SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("howItWorks")],

@@ -201,8 +201,15 @@ describe("SEO Metadata", () => {
 
     it("marks de-listed legacy starter pages as noindex even for public locales", () => {
       // products / blog / customProject are de-listed (still leak starter
-      // slop + [ES-TODO]); their EN/ES surface must be noindex,nofollow.
-      for (const pageType of ["products", "blog", "customProject"] as const) {
+      // slop + [ES-TODO]); `contact` is de-listed per the owner-approved
+      // A+ decision (single RFQ /quote path, no generic contact lead
+      // path). All four must be noindex,nofollow on EN/ES.
+      for (const pageType of [
+        "products",
+        "blog",
+        "customProject",
+        "contact",
+      ] as const) {
         for (const locale of ["en", "es"] as const) {
           const metadata = generateLocalizedMetadata(locale, pageType);
           expect(metadata.robots).toEqual({
@@ -226,7 +233,6 @@ describe("SEO Metadata", () => {
         "home",
         "quote",
         "about",
-        "contact",
         "capabilities",
         "howItWorks",
         "privacy",
