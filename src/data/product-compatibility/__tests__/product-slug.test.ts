@@ -4,13 +4,16 @@
  * unmock it here for the catalog to initialize (mirrors accessors.test.ts).
  */
 import { describe, expect, it, vi } from "vitest";
-import { productVariants } from "@/data/product-compatibility";
+import { oemBrands, productVariants } from "@/data/product-compatibility";
 import {
   canonicalProductSlug,
   getProductCompatibilityByCanonicalSlug,
   resolveCanonicalProductSlugFromSku,
 } from "@/data/product-compatibility/product-slug";
-import { FEATURED_MEMBRANE_HREF } from "@/config/single-site-links";
+import {
+  FEATURED_COMPATIBLE_BRAND_HREF,
+  FEATURED_MEMBRANE_HREF,
+} from "@/config/single-site-links";
 
 vi.unmock("zod");
 
@@ -79,6 +82,15 @@ describe("featured membrane href config equivalence", () => {
     expect(FEATURED_MEMBRANE_HREF).toBe(
       `/membranes/${canonicalProductSlug(variant!)}`,
     );
+  });
+
+  it("the literal FEATURED_COMPATIBLE_BRAND_HREF matches a real oemBrands slug", () => {
+    // single-site-links.ts declares the Sanitaire slug as a literal for the
+    // same hot-import-chain / Zod-mock reason as the membrane slug. This guards
+    // that literal against drift from the real compatibility catalog.
+    const brandSlugs = oemBrands.map((brand) => brand.slug);
+    expect(brandSlugs).toContain("sanitaire");
+    expect(FEATURED_COMPATIBLE_BRAND_HREF).toBe("/compatible/sanitaire");
   });
 });
 

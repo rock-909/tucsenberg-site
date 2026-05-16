@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { SINGLE_SITE_FOOTER_COLUMNS } from "@/config/single-site";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_COMPATIBLE_BRAND_HREF,
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 
 describe("footer-links", () => {
@@ -27,23 +31,22 @@ describe("footer-links", () => {
     }
   });
 
-  it("keeps Tucsenberg placeholder links out of unfinished business pages", () => {
+  it("routes shipped Step-4 footer links to live pages and keeps only future scope on #coming-soon", () => {
     const footerLinks = FOOTER_COLUMNS.flatMap((column) => column.links);
+    const hrefByKey = (key: string) =>
+      footerLinks.find((link) => link.key === key)?.href;
 
-    expect(
-      footerLinks
-        .filter((link) =>
-          ["membranes", "compatibility", "materials", "quote"].includes(
-            link.key,
-          ),
-        )
-        .map((link) => link.href),
-    ).toEqual([
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-    ]);
+    // Shipped Step-4 pages: real routes, never the placeholder.
+    expect(hrefByKey("membranes")).toBe(FEATURED_MEMBRANE_HREF);
+    expect(hrefByKey("compatibility")).toBe(FEATURED_COMPATIBLE_BRAND_HREF);
+    expect(hrefByKey("quote")).toBe(SINGLE_SITE_ROUTE_HREFS.quote);
+
+    for (const key of ["membranes", "compatibility", "quote"]) {
+      expect(hrefByKey(key)).not.toBe(SINGLE_SITE_ROUTE_HREFS.comingSoon);
+    }
+
+    // Materials is genuinely future scope and intentionally stays placeholder.
+    expect(hrefByKey("materials")).toBe(SINGLE_SITE_ROUTE_HREFS.comingSoon);
   });
 
   it("does not expose unconfirmed Tucsenberg social URLs", () => {

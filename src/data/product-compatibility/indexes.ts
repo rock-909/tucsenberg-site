@@ -5,6 +5,7 @@ import {
   productVariants,
 } from "@/data/product-compatibility/catalog";
 import { compatibilityMappings } from "@/data/product-compatibility/mappings";
+import { buildCanonicalProductSlug } from "@/data/product-compatibility/slug-rule";
 import type {
   CompatibilityMapping,
   LocalizedText,
@@ -69,6 +70,14 @@ export interface BrandCompatibilityEntry {
 export interface ProductCompatibilityEntry {
   productVariantId: string;
   productSlug: string;
+  /**
+   * Canonical descriptive buyer URL slug (`{dimension}-{unit}-{material}-
+   * {form}-replacement`). The product route renders this slug; `productSlug`
+   * (the legacy SKU slug) only 308-redirects to it. Computed server-side here
+   * so client search components link the canonical URL directly without
+   * importing the Zod-validated data barrel.
+   */
+  canonicalProductSlug: string;
   sku: string;
   name: LocalizedText;
   material: ProductVariant["material"];
@@ -205,13 +214,16 @@ function modelEntryFor(model: OEMModel): ModelCompatibilityEntry {
 }
 
 function productEntryFor(variant: ProductVariant): ProductCompatibilityEntry {
+  const category = categoryForVariant(variant);
+
   return {
     productVariantId: variant.id,
     productSlug: variant.slug,
+    canonicalProductSlug: buildCanonicalProductSlug(variant, category),
     sku: variant.sku,
     name: variant.name,
     material: variant.material,
-    category: categoryForVariant(variant),
+    category,
     compatibleOemModels: mappingsForProduct(variant.id).map(
       compatibleOemModelFromMapping,
     ),

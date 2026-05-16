@@ -1,4 +1,5 @@
 import {
+  FEATURED_COMPATIBLE_BRAND_HREF,
   FEATURED_MEMBRANE_HREF,
   SINGLE_SITE_ROUTE_HREFS,
 } from "@/config/single-site-links";
@@ -14,7 +15,7 @@ export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] = [
   },
   {
     key: "compatibility",
-    href: "/compatible/sanitaire",
+    href: FEATURED_COMPATIBLE_BRAND_HREF,
     translationKey: "navigation.compatibility",
   },
   {

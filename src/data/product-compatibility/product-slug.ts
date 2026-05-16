@@ -17,6 +17,7 @@ import {
   type ProductCompatibilityEntry,
 } from "@/data/product-compatibility/indexes";
 import { productVariants } from "@/data/product-compatibility/catalog";
+import { buildCanonicalProductSlug } from "@/data/product-compatibility/slug-rule";
 import type { ProductVariant } from "@/data/product-compatibility/schemas";
 
 const variantById = new Map(
@@ -29,27 +30,6 @@ const groupCategoryByVariantId = new Map(
   ),
 );
 
-/**
- * The data-layer slug encodes the dimension token, e.g. `tuc-d9-epdm` → `9`,
- * `tuc-t62-epdm` → `62`. Disc dimensions are nominal inches; tube classes are
- * nominal millimetres (see `catalog.ts` `specs.diameter`). The dimension token
- * is parsed from the variant slug so the rule stays deterministic even though
- * `specs.diameter` is free-form prose.
- */
-const DIMENSION_TOKEN = /^tuc-[dt](\d+)-/;
-
-function dimensionToken(variant: ProductVariant): string {
-  const match = DIMENSION_TOKEN.exec(variant.slug);
-
-  if (!match?.[1]) {
-    // Defensive: every catalog variant matches today; fall back to the SKU so
-    // the slug stays unique and URL-safe rather than throwing at build time.
-    return variant.sku.toLowerCase();
-  }
-
-  return match[1];
-}
-
 function categoryFor(variant: ProductVariant): "disc" | "tube" {
   const category = groupCategoryByVariantId.get(variant.id);
 
@@ -61,27 +41,14 @@ function categoryFor(variant: ProductVariant): "disc" | "tube" {
 }
 
 /**
- * Pure, deterministic canonical slug.
- *
- * Rule: `{dimension}-{unit}-{material}-{form}-replacement`
- * - dimension: numeric token from the variant slug (`d9` → 9, `t62` → 62)
- * - unit: `inch` for disc, `mm` for tube
- * - material: variant material (`epdm` | `tpu`)
- * - form: group category (`disc` | `tube`)
+ * Pure, deterministic canonical slug. Delegates to the shared slug rule
+ * (`slug-rule.ts`) so the rule has exactly one definition; this wrapper only
+ * resolves the variant's group category from the compatibility index.
  *
  * Examples: `9-inch-epdm-disc-replacement`, `62-mm-epdm-tube-replacement`.
  */
 export function canonicalProductSlug(variant: ProductVariant): string {
-  const category = categoryFor(variant);
-  const unit = category === "disc" ? "inch" : "mm";
-
-  return [
-    dimensionToken(variant),
-    unit,
-    variant.material,
-    category,
-    "replacement",
-  ].join("-");
+  return buildCanonicalProductSlug(variant, categoryFor(variant));
 }
 
 interface CanonicalSlugMaps {

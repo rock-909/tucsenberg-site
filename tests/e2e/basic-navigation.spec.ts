@@ -33,15 +33,23 @@ test.describe("Basic Navigation", () => {
     await removeInterferingElements(page);
     await waitForStablePage(page);
 
-    // Step 2 public nav is Tucsenberg-specific placeholder IA; real content
-    // routes such as About remain reachable directly but are no longer nav items.
+    // Step-4 public nav routes Membranes to the live featured membrane product
+    // page. Real content routes such as About remain reachable directly but are
+    // no longer nav items. The shipped link must not regress to a placeholder.
     const nav = getNav(page);
     const membranesLink = nav.getByRole("link", { name: "Membranes" });
     await expect(membranesLink).toBeVisible({ timeout: 10_000 });
-    await expect(membranesLink).toHaveAttribute("href", "#coming-soon");
+    await expect(membranesLink).toHaveAttribute(
+      "href",
+      "/en/membranes/9-inch-epdm-disc-replacement",
+    );
+    await expect(membranesLink).not.toHaveAttribute("href", "#coming-soon");
 
     await membranesLink.click();
-    await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
+    await expect(page).toHaveURL(
+      /\/en\/membranes\/9-inch-epdm-disc-replacement$/,
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     const aboutResponse = await page.goto("/en/about");
     expect(aboutResponse?.status()).toBe(200);

@@ -3,7 +3,7 @@
  *
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
+import { SINGLE_SITE_PRIMARY_CTA_HREF } from "@/config/single-site-links";
 import type { Locale } from "@/i18n/routing-config";
 import { Link } from "@/i18n/routing";
 import { getRuntimeEnvString } from "@/lib/env";
@@ -190,7 +190,7 @@ function HeaderUtilityControls({
             className="header-cta-desktop-only"
           >
             <Link
-              href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+              href={SINGLE_SITE_PRIMARY_CTA_HREF}
               prefetch={false}
               data-testid="header-cta"
             >
@@ -210,7 +210,7 @@ function HeaderUtilityControls({
               className="h-9 px-3 text-xs font-semibold"
             >
               <Link
-                href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+                href={SINGLE_SITE_PRIMARY_CTA_HREF}
                 prefetch={false}
                 data-testid="header-mobile-cta"
               >

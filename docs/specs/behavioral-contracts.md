@@ -39,9 +39,16 @@ Membrane product URL contract: the canonical product detail URL is the descripti
 
 ---
 
-#### BC-002: Buyer can navigate to all main pages from the header
+#### BC-002: Buyer can navigate the Step-4 information architecture from the header
 
-Desktop/compact desktop: From 840px and above, the header shows direct primary links to Home, Products, Blog, and About. Contact is a separate quick action beside the language switcher, not a primary navigation item. Mobile: Below 840px, the hamburger menu opens a sheet with the same main links plus the contact action. Clicking any public link reaches its matching localized page and must not land on a 404.
+The public navigation is the Step-4 buyer IA: Membranes, Compatibility, Materials, Quote. Desktop/compact desktop: from 840px and above the header shows these items directly; the primary CTA beside the language switcher is a separate quick action that routes to the RFQ quote page (`/quote`), not a placeholder. Mobile: below 840px the hamburger menu opens a sheet with the same items plus the primary CTA. Clicking a shipped item reaches its live localized page and must not land on `#coming-soon` or a 404:
+
+- Membranes → the featured membrane product page (canonical descriptive slug, `/membranes/9-inch-epdm-disc-replacement`).
+- Compatibility → the Sanitaire OEM compatibility page (`/compatible/sanitaire`).
+- Quote → the RFQ quote page (`/quote`).
+- Materials → intentionally still `#coming-soon`; Materials is genuine future scope and performs only a stable in-page hash navigation that preserves query params and does not break the page.
+
+Removed starter links (Home, Products, Blog, About, Capabilities, How It Works, Custom, Contact) are no longer public nav items. Shipped Step-4 nav items must not regress back to the `#coming-soon` placeholder.
 
 | Field | Value |
 |-------|-------|
@@ -49,6 +56,8 @@ Desktop/compact desktop: From 840px and above, the header shows direct primary l
 | Test Type | E2E |
 | Test File | `tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts` |
 | Status | Covered |
+
+Notes: `navigation.spec.ts` asserts the live href targets for Membranes/Compatibility/Quote, clicks each to confirm it lands on the real route with an `<h1>`, asserts shipped items do not carry `href="#coming-soon"`, and keeps the Materials placeholder hash-nav (and query-param preservation) covered. Header/mobile primary-CTA → `/quote` is also covered at component level by `src/components/layout/__tests__/header.test.tsx` and `src/components/layout/__tests__/mobile-navigation.test.tsx`.
 
 ---
 
@@ -406,15 +415,30 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 ---
 
+#### BC-026: Buyer can submit an RFQ quote request
+
+A buyer reaching the RFQ quote page (`/quote`) can submit the rich RFQ form. The submission posts to `/api/quote`, which runs the standard browser anti-abuse chain (body-size gate, `rfqLeadSchema` Zod validation, rate limit, Turnstile), composes the RFQ into a product-inquiry lead, and rides the audited `processLead` pipeline (Airtable record first, then optional owner email). The documented success condition is Airtable record creation per `.claude/rules/security.md`; an owner-email failure after the record is created still returns user success and is logged internally only — "email delivered" is explicitly NOT part of the proof. Airtable failure returns failure and must not send email.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | `src/app/api/quote/__tests__/quote-api.test.ts` |
+| Status | Partial |
+
+Notes: Proof boundary — the `/quote` → `/api/quote` → `processLead` chain is covered at the route layer with only external services mocked (Turnstile + lead pipeline); the internal protection chain runs as real code. Component-level form behavior is covered by the `src/app/[locale]/quote/__tests__` suite. A production-like deployed RFQ submission (real Turnstile + deployed Airtable record) remains a manual launch gate, not automated proof; an end-to-end Playwright RFQ smoke is the remaining gap for full coverage.
+
+---
+
 ## Coverage Summary
 
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 5 | 1 | 0 | 0 |
-| Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
+| Inquiry & Conversion | 7 | 2 | 5 | 0 | 0 |
 | Content & Information | 6 | 4 | 1 | 1 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **15** | **8** | **1** | **1** |
+| **Total** | **25** | **15** | **9** | **1** | **1** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -429,6 +453,7 @@ Retired contracts are kept for historical traceability but excluded from active 
 ### High-priority gaps
 
 - **BC-010** (Partial): Contact submission proof is not production-like in both locales
+- **BC-026** (Partial): RFQ quote chain is route-level covered with external services mocked; no end-to-end Playwright RFQ smoke and no production-like deployed Airtable proof (manual launch gate)
 - No current high-priority gap for BC-024: starter route duplicate-submission behavior is now covered.
 
 ### Medium-priority gaps

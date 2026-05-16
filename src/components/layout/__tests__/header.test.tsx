@@ -8,6 +8,10 @@ import { cloneElement, isValidElement, type ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Header } from "@/components/layout/header";
+import {
+  SINGLE_SITE_PRIMARY_CTA_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 
 vi.mock("@/components/layout/mobile-navigation", () => ({
   MobileNavigationLinks: () => (
@@ -105,6 +109,15 @@ describe("Header Component", () => {
       const contactCta = screen.getByTestId("header-cta");
       const languageToggle = screen.getByTestId("language-toggle-button");
 
+      // The primary header CTA routes to the live RFQ quote page (Step-4
+      // conversion path), never the #coming-soon placeholder.
+      expect(contactCta).toHaveAttribute("href", SINGLE_SITE_PRIMARY_CTA_HREF);
+      expect(SINGLE_SITE_PRIMARY_CTA_HREF).toBe(SINGLE_SITE_ROUTE_HREFS.quote);
+      expect(contactCta).not.toHaveAttribute(
+        "href",
+        SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      );
+
       expect(utilityRegion.compareDocumentPosition(contactCta)).toBe(
         Node.DOCUMENT_POSITION_CONTAINED_BY | Node.DOCUMENT_POSITION_FOLLOWING,
       );
@@ -127,7 +140,16 @@ describe("Header Component", () => {
       const menuButton = screen.getByTestId("header-mobile-menu-button");
 
       expect(mobileContactWrapper).toHaveClass("header-mobile-only");
-      expect(mobileContactCta).toHaveAttribute("href", "#coming-soon");
+      // Mobile primary CTA mirrors the desktop CTA: live quote route, not a
+      // placeholder. Guards against re-introducing the #coming-soon dead-end.
+      expect(mobileContactCta).toHaveAttribute(
+        "href",
+        SINGLE_SITE_PRIMARY_CTA_HREF,
+      );
+      expect(mobileContactCta).not.toHaveAttribute(
+        "href",
+        SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      );
       expect(mobileContactCta).toHaveTextContent("Contact Sales");
       expect(
         mobileContactCta.compareDocumentPosition(menuButton) &

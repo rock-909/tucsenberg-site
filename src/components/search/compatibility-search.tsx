@@ -108,7 +108,7 @@ function ProductResults({
             className="rounded-[6px] p-2 hover:bg-accent/60"
           >
             <Link
-              href={`/membranes/${product.productSlug}` as "/"}
+              href={`/membranes/${product.canonicalProductSlug}` as "/"}
               prefetch={false}
               onClick={onClose}
               className="block"

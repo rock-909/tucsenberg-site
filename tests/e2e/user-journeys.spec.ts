@@ -33,12 +33,13 @@ test.describe("Journey: Browse Products (BC-013, BC-014)", () => {
     await removeInterferingElements(page);
     await waitForStablePage(page);
 
-    // Step 2 public nav uses Tucsenberg placeholder IA. Products remains a
-    // direct route for legacy/content coverage until later content replacement.
+    // Step-4 public nav routes Membranes to the live featured membrane product
+    // page (canonical descriptive slug). Products remains a direct route for
+    // legacy/content coverage until later content replacement.
     const nav = getNav(page);
     await expect(nav.getByRole("link", { name: "Membranes" })).toHaveAttribute(
       "href",
-      "#coming-soon",
+      "/en/membranes/9-inch-epdm-disc-replacement",
     );
 
     await page.goto("/en/products");

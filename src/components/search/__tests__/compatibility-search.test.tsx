@@ -102,6 +102,23 @@ describe("CompatibilitySearchModal", () => {
     });
   });
 
+  it("links product results to the canonical descriptive membrane URL, not the SKU slug", async () => {
+    renderModal(true);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "TUC-D9-EPDM" },
+    });
+
+    const productLink = await screen.findByRole("link", {
+      name: /9 inch disc EPDM membrane/i,
+    });
+    expect(productLink).toHaveAttribute(
+      "href",
+      "/membranes/9-inch-epdm-disc-replacement",
+    );
+    // The legacy SKU slug 308-redirects; search must never emit it directly.
+    expect(productLink.getAttribute("href")).not.toContain("tuc-d9-epdm");
+  });
+
   it("calls onClose when Escape is pressed", () => {
     const onClose = vi.fn();
     renderModal(true, onClose);

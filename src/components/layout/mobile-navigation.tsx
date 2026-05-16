@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import { useTranslations } from "next-intl";
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
+import { SINGLE_SITE_PRIMARY_CTA_HREF } from "@/config/single-site-links";
 import {
   isActivePath,
   mobileNavigation,
@@ -62,7 +62,7 @@ export function MobileNavigationLinks({
         })}
         <li className="pt-4">
           <Link
-            href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+            href={SINGLE_SITE_PRIMARY_CTA_HREF}
             prefetch={false}
             className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
             onClick={onNavigate}
