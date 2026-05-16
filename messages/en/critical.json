@@ -1311,9 +1311,9 @@
     },
     "form": {
       "partNumbers": "Part Number(s) or OEM Model",
-      "partNumbersHint": "Enter Tucsenberg SKU, OEM part number, or model name",
+      "partNumbersHint": "Enter a Tucsenberg SKU, OEM part number, or model name — the more specific, the faster we confirm the path.",
       "quantity": "Quantity",
-      "quantityHint": "Approximate quantity needed",
+      "quantityHint": "Approximate quantity for this order. Lead time and pricing are confirmed at quote against your reviewed part.",
       "company": "Company / Organization",
       "email": "Email",
       "name": "Full Name",
@@ -1325,7 +1325,7 @@
         "notSure": "Not sure — advise me"
       },
       "shutdownDate": "Shutdown Date / Urgency",
-      "shutdownDateHint": "When do you need the membranes installed?",
+      "shutdownDateHint": "When do you need the membranes on site? Tell us if a staged or partial delivery would help your shutdown window.",
       "notes": "Additional Notes",
       "fileUpload": "Reference a Part List or Photo",
       "fileUploadHint": "We record the file name for reference only. The file is not sent with this form — have it ready to email when we reply (CSV, PDF, or images, max 10MB).",

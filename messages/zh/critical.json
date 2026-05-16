@@ -1311,9 +1311,9 @@
     },
     "form": {
       "partNumbers": "部件编号或 OEM 型号",
-      "partNumbersHint": "请填写 Tucsenberg SKU、OEM 部件编号或型号名称",
+      "partNumbersHint": "请填写 Tucsenberg SKU、OEM 部件编号或型号名称——越具体，我们确认匹配路径越快。",
       "quantity": "数量",
-      "quantityHint": "所需的大致数量",
+      "quantityHint": "本次订单的大致数量。交期与价格在报价时根据已核对的部件确认。",
       "company": "公司／组织",
       "email": "邮箱",
       "name": "姓名",
@@ -1325,7 +1325,7 @@
         "notSure": "不确定 — 请为我建议"
       },
       "shutdownDate": "停机日期／紧急程度",
-      "shutdownDateHint": "您需要在何时安装膜片？",
+      "shutdownDateHint": "您需要膜片何时到现场？如分批或部分交付有助于您的停机窗口，请告知我们。",
       "notes": "补充说明",
       "fileUpload": "标注部件清单或照片",
       "fileUploadHint": "我们仅记录文件名作为参考。文件不会随此表单发送——请准备好，在我们回复时通过邮件发送（CSV、PDF 或图片，最大 10MB）。",

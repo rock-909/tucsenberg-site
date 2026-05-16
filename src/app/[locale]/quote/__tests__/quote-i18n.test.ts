@@ -151,9 +151,15 @@ describe("quote.* content compliance", () => {
 
   it("strikes any quantity-band / MOQ / lead-time-table concept from form copy", () => {
     const bandLike = /\b(band|moq|minimum\s*order|lead[\s-]?time\s*table)\b/i;
+    // E3: no `quote.form` KEY name may encode a band/MOQ/lead-time-table.
+    const bandKey = /band|moq|minimum|leadTimeTable/i;
     for (const [locale, tree] of Object.entries(LOCALES)) {
       const form = readPath(tree, "form") as Tree;
       for (const [key, value] of Object.entries(flatten(form, "form"))) {
+        expect(
+          bandKey.test(key),
+          `${locale}.quote.${key} is a struck band/MOQ/table key`,
+        ).toBe(false);
         expect(
           bandLike.test(value),
           `${locale}.quote.${key} reintroduced a struck band/MOQ/table`,
