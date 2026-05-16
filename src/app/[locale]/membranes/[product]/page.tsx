@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   canonicalProductSlug,
   canonicalProductSlugForVariantId,
+  getFeaturedProductFacts,
   getProductCompatibilityByCanonicalSlug,
   productVariants,
   resolveCanonicalProductSlugFromSku,
@@ -83,7 +84,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const t = await getTranslations({ locale, namespace: "membraneProduct" });
   const productName = localizeText(entry.name, locale);
-  const diameter = diameterFor(entry.productVariantId);
+
+  // The featured variant's diameter is owned by the frozen
+  // `getFeaturedProductFacts()` accessor (single source of truth for the
+  // launch hero spec). Other variants keep the variant-spec lookup.
+  const featured = getFeaturedProductFacts();
+  const diameter =
+    entry.sku === featured.sku
+      ? featured.diameter
+      : diameterFor(entry.productVariantId);
 
   const specs: { label: string; value: string; mono?: boolean }[] = [
     ...(diameter
