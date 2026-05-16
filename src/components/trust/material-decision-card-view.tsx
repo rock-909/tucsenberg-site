@@ -38,7 +38,10 @@ export function MaterialDecisionCardView({
           <dd className="mt-1 text-sm text-muted-foreground">{tpuCondition}</dd>
         </div>
       </dl>
-      <p data-material-note className="mt-4 text-sm text-muted-foreground">
+      <p
+        data-testid="material-note"
+        className="mt-4 text-sm text-muted-foreground"
+      >
         {note}
       </p>
     </div>

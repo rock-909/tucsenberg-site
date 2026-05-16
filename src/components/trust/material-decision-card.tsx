@@ -14,6 +14,9 @@ export interface MaterialDecisionCardProps {
   defaultMaterial?: MaterialDecisionDefault;
 }
 
+// Path-array shape (unlike the flat key:string readers in the sibling trust
+// components) because "material" is the only trust subtree with nested
+// epdm/tpu groups.
 function readMaterialMessage(
   messages: MessageRecord,
   path: readonly string[],

@@ -53,6 +53,7 @@ describe("Feature: MaterialDecisionCard primitive", () => {
     expect(root).toHaveTextContent(
       "Material is chosen by process conditions, not as a price tier.",
     );
+    expect(screen.getByTestId("material-note")).toBeInTheDocument();
   });
 
   it("marks the default material via data attribute", async () => {
