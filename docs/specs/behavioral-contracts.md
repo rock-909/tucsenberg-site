@@ -57,7 +57,7 @@ Removed starter links (Home, Products, Blog, About, Capabilities, How It Works, 
 | Test File | `tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts` |
 | Status | Covered |
 
-Notes: `navigation.spec.ts` asserts the live href targets for Membranes/Compatibility/Quote, clicks each to confirm it lands on the real route with an `<h1>`, asserts shipped items do not carry `href="#coming-soon"`, and keeps the Materials placeholder hash-nav (and query-param preservation) covered. Header/mobile primary-CTA → `/quote` is also covered at component level by `src/components/layout/__tests__/header.test.tsx` and `src/components/layout/__tests__/mobile-navigation.test.tsx`.
+Notes: `navigation.spec.ts` covers this for both public locales. The "Localized nav href smoke (BC-002)" describe block is parameterized over `en` AND `es`, navigating directly to each locale root (no `/en` `beforeEach`) and, in both header (desktop) and mobile-sheet modes, asserting each shipped item's `href` resolves to the current-locale live route (`/{locale}/membranes/9-inch-epdm-disc-replacement`, `/{locale}/compatible/sanitaire`, `/{locale}/quote`) using the real merged `messages/es` navigation labels, and that Materials stays `#coming-soon`. The `/en` desktop and mobile suites additionally click each shipped item to confirm it lands on the real route with an `<h1>`, assert removed starter links are absent, and keep the Materials placeholder hash-nav and query-param preservation covered. Localized coverage is en/es over desktop header + mobile sheet only — it does not assert post-click landing for `/es` (the es row proves resolved hrefs and label translation, not full click-through). Header/mobile primary-CTA → `/quote` is also covered at component level by `src/components/layout/__tests__/header.test.tsx` and `src/components/layout/__tests__/mobile-navigation.test.tsx`.
 
 ---
 
@@ -149,22 +149,20 @@ Notes: Required attribute presence is verified. Client-side validation UX (error
 
 ---
 
-#### BC-009: Product family inquiry handoff opens Contact with context
+#### BC-009: Retired — Product family inquiry handoff opens Contact with context
 
-On any `/products/[market]` page, each rendered product family has a server-rendered inquiry link. The route builds an i18n `Link` href object for Contact with selected market and family context preserved through validated query parameters. At runtime, next-intl localizes that internal href to the active locale path.
+The product-family → Contact handoff was retired in commit `244e095`. The handoff library (`src/lib/contact/product-family-context.ts`), the Contact context-notice component, and the `tests/e2e/product-family-contact-handoff.spec.ts` E2E proof were all deleted. There is no longer a standalone generic `/contact` lead path (`/contact` is de-listed + noindex per the A+ single-RFQ-path decision, BC-023).
 
-The current critical market-page path is Contact handoff, not an in-page drawer. `/api/inquiry` remains covered by API-level tests for the legacy/future product inquiry path, but it is not the required market-page user flow for this contract.
+Superseding behavior: each rendered product family on a `/products/[market]` page now exposes an inquiry CTA that links to the RFQ quote page (`/quote`) via `SINGLE_SITE_PRIMARY_CTA_HREF`. The CTA carries NO contact/market/family query context — it is a plain link to `/quote`. The market-level page CTA also points to `/quote`. The RFQ submission path itself is covered by BC-026; `/api/inquiry` remains covered by API-level tests (BC-011, BC-012, BC-024) for the legacy/future product inquiry path, but it is not a market-page user flow.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | E2E + Unit + Source Contract |
-| Test File | `tests/e2e/product-family-contact-handoff.spec.ts`, `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
-| Status | Covered |
+| Test Type | Unit |
+| Test File | `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx` |
+| Status | Retired |
 
-Notes: The handoff must pass only internal slugs in the URL. Contact must validate `intent`, `market`, and `family` before displaying labels. Invalid query values are ignored and are never rendered directly.
-
-Proof boundary: component/unit tests prove the internal href object and Contact validation. `tests/e2e/product-family-contact-handoff.spec.ts` proves local browser runtime renders `/en/contact?...` and `/zh/contact?...` URLs for the North America product family handoff and that clicking the links displays the validated Contact context notice. This is local browser/runtime proof, not Cloudflare deployed proof.
+Notes: The active proof is that the family inquiry CTA and the market CTA both resolve to `/quote` and carry no contact context (`market-landing.test.tsx` → "routes each family inquiry CTA to the RFQ quote path" and "market CTA routes to the RFQ quote path"). No tested behavior is claimed for a context-carrying handoff because none exists in the merged tree.
 
 ---
 
@@ -374,9 +372,23 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 ---
 
-#### BC-023: Sitemap includes all public pages in both locales
+#### BC-023: Sitemap includes only active public pages, en + es only
 
-/sitemap.xml lists all active public pages (homepage, about, contact, products, products/[market], custom-project-support, privacy, terms) with hreflang alternates for en and zh. Retired blog routes are explicitly excluded.
+/sitemap.xml lists only the active public surface for the two public SEO locales (`en`, `es`). `zh` is a dev/internal-only runtime locale and must never appear as a sitemap URL or in any hreflang alternates map (each entry's `alternates.languages` is `en` + `es` + `x-default` → `en`).
+
+Included:
+
+- Homepage.
+- Active public static pages — every `PUBLIC_STATIC_PAGE_DEFINITIONS` entry with `sitemap.include: true`: home, about, privacy, terms, capabilities, how-it-works, quote.
+- Dynamic Step-4 buyer routes: one canonical descriptive membrane URL per `productVariant` (`/membranes/[product]`; the legacy SKU slug is a redirect source and is NOT emitted) and one OEM compatibility URL per `oemBrand` (`/compatible/[brand]`).
+
+Excluded / de-listed (`sitemap.include: false`, also `robots: noindex,nofollow`):
+
+- Legacy starter `products` overview and its `/products/[market]` catalog children (the catalog child emission is gated on `isNoindexStaticPageType("products")`).
+- Legacy starter `blog` index and posts.
+- `custom-project-support`.
+- `contact` (de-listed + noindex per the A+ single-RFQ-path decision; see BC-009).
+- The retired `capabilities/bending-machines` route (BC-018).
 
 | Field | Value |
 |-------|-------|
@@ -384,6 +396,8 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 | Test Type | Unit |
 | Test File | `src/app/__tests__/sitemap.test.ts`, `src/lib/__tests__/sitemap-utils.test.ts` |
 | Status | Covered |
+
+Notes: `sitemap.test.ts` proves the en/es-only locale set, zh exclusion from URLs and alternates, the de-listing of products/products[market]/blog/custom-project-support/contact for every locale, the canonical-vs-SKU membrane slug rule, the OEM brand entries, and that every emitted URL maps to a real backing route (no orphans).
 
 ---
 
@@ -435,10 +449,10 @@ Notes: Proof boundary — the `/quote` → `/api/quote` → `processLead` chain 
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
 | Navigation & Discovery | 6 | 5 | 1 | 0 | 0 |
-| Inquiry & Conversion | 7 | 2 | 5 | 0 | 0 |
+| Inquiry & Conversion | 6 | 1 | 5 | 0 | 1 |
 | Content & Information | 6 | 4 | 1 | 1 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **25** | **15** | **9** | **1** | **1** |
+| **Total** | **24** | **14** | **9** | **1** | **2** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
