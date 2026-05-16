@@ -1229,5 +1229,41 @@
     "requestQuote": "Solicitar cotización",
     "openHint": "Buscar ⌘K",
     "close": "Cerrar"
+  },
+  "trust": {
+    "sla": {
+      "review": "Revisión de compatibilidad: en un plazo de 24 horas hábiles.",
+      "standardRfq": "Solicitud de cotización estándar: cotización o solicitud de información faltante en un plazo de 48 horas hábiles.",
+      "urgent": "Casos de parada urgente: confirmados el mismo día hábil."
+    },
+    "proof": {
+      "title": "Prueba de compatibilidad",
+      "body": "La compatibilidad se revisa con base en dimensiones y fotografías documentadas antes de cotizar."
+    },
+    "material": {
+      "title": "Elección del material de la membrana",
+      "epdm": {
+        "label": "EPDM: punto de partida predeterminado",
+        "condition": "Condiciones de aguas residuales municipales e industriales ligeras."
+      },
+      "tpu": {
+        "label": "TPU: seleccionado según las condiciones",
+        "condition": "Aguas residuales con aceites, productos químicos y alto contenido de grasa donde el EPDM se degrada."
+      },
+      "note": "El material se elige según las condiciones del proceso, no como una categoría de precio."
+    },
+    "batch": {
+      "title": "Controles de lote",
+      "traceability": "Cada envío se verifica antes del despacho y es trazable por pedido y lote de producción.",
+      "photos": "Los primeros pedidos de producción pueden incluir registros fotográficos de salida si se solicita.",
+      "sample": "Hay una muestra de verificación disponible antes del primer lote."
+    }
+  },
+  "legal": {
+    "trademark": {
+      "footer": "Tucsenberg fabrica membranas de repuesto de aireación del mercado de posventa. {brands} son marcas comerciales de sus respectivos propietarios. Tucsenberg no está afiliada a estas empresas ni cuenta con su autorización o respaldo. Las referencias a marcas y modelos describen únicamente la compatibilidad documentada.",
+      "brandNotice": "{brand} es una marca comercial de su respectivo propietario. Tucsenberg es un fabricante independiente del mercado de posventa y no está afiliada a {brand} ni cuenta con su autorización o respaldo. Las referencias describen únicamente la compatibilidad documentada.",
+      "inline": "Los nombres de marcas y modelos son marcas comerciales de sus respectivos propietarios, mencionados únicamente para describir la compatibilidad documentada."
+    }
   }
 }

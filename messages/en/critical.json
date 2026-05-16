@@ -1229,5 +1229,41 @@
     "requestQuote": "Request quote",
     "openHint": "Search ⌘K",
     "close": "Close"
+  },
+  "trust": {
+    "sla": {
+      "review": "Compatibility review — within 24 business hours.",
+      "standardRfq": "Standard RFQ — quote or missing-info request within 48 business hours.",
+      "urgent": "Urgent shutdown cases — acknowledged the same business day."
+    },
+    "proof": {
+      "title": "Compatibility proof",
+      "body": "Compatibility is reviewed against documented dimensions and photos before pricing."
+    },
+    "material": {
+      "title": "Choosing the membrane material",
+      "epdm": {
+        "label": "EPDM — default starting point",
+        "condition": "Municipal and light industrial wastewater conditions."
+      },
+      "tpu": {
+        "label": "TPU — selected by conditions",
+        "condition": "Oil, chemical, and high-grease wastewater where EPDM degrades."
+      },
+      "note": "Material is chosen by process conditions, not as a price tier."
+    },
+    "batch": {
+      "title": "Batch controls",
+      "traceability": "Each shipment is checked before dispatch and is traceable by order and production lot.",
+      "photos": "First production orders can include outgoing photo records on request.",
+      "sample": "A verification sample is available before the first batch."
+    }
+  },
+  "legal": {
+    "trademark": {
+      "footer": "Tucsenberg manufactures aftermarket aeration replacement membranes. {brands} are trademarks of their respective owners. Tucsenberg is not affiliated with, authorized, or endorsed by these companies. Brand and model references describe documented compatibility only.",
+      "brandNotice": "{brand} is a trademark of its respective owner. Tucsenberg is an independent aftermarket manufacturer and is not affiliated with, authorized, or endorsed by {brand}. References describe documented compatibility only.",
+      "inline": "Brand and model names are trademarks of their respective owners, referenced only to describe documented compatibility."
+    }
   }
 }
