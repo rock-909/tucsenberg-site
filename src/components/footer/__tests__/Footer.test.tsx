@@ -5,6 +5,11 @@
  */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import {
+  FEATURED_COMPATIBLE_BRAND_HREF,
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { Footer } from "../Footer";
 
 // Mock next-intl
@@ -75,24 +80,52 @@ describe("Footer Component", () => {
       text: link.textContent,
     }));
 
+    // Step-4 footer IA: Membranes/Compatibility route to live pages, only
+    // Materials stays the genuine-future #coming-soon placeholder.
     expect(navigationLinks).toEqual([
       { href: "/", text: "Home" },
-      { href: "#coming-soon", text: "Membranes" },
-      { href: "#coming-soon", text: "Compatibility" },
-      { href: "#coming-soon", text: "Materials" },
+      { href: FEATURED_MEMBRANE_HREF, text: "Membranes" },
+      { href: FEATURED_COMPATIBLE_BRAND_HREF, text: "Compatibility" },
+      { href: SINGLE_SITE_ROUTE_HREFS.comingSoon, text: "Materials" },
     ]);
+    // Shipped Step-4 footer links must not regress to the placeholder.
+    expect(navigationLinks).not.toContainEqual({
+      href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      text: "Membranes",
+    });
+    expect(navigationLinks).not.toContainEqual({
+      href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      text: "Compatibility",
+    });
     expect(navigationLinks).not.toContainEqual({
       href: "/contact",
       text: "Contact",
     });
     expect(supportLinks).toContainEqual({
-      href: "#coming-soon",
+      href: SINGLE_SITE_ROUTE_HREFS.quote,
+      text: "Quote",
+    });
+    expect(supportLinks).not.toContainEqual({
+      href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
       text: "Quote",
     });
     expect(supportLinks).not.toContainEqual({
       href: "/contact",
       text: "Contact",
     });
+  });
+
+  it("renders the real business email as visible copyable text", () => {
+    render(<Footer />);
+
+    // A+ non-RFQ contact decision: the footer must surface the literal
+    // business email as readable text (a mailto wrapper is an enhancement,
+    // not a substitute for the visible address).
+    const emailNode = screen.getByText("sales@tucsenberg.com");
+    expect(emailNode).toBeInTheDocument();
+    expect(emailNode.tagName).toBe("A");
+    expect(emailNode).toHaveAttribute("href", "mailto:sales@tucsenberg.com");
+    expect(emailNode.textContent).toBe("sales@tucsenberg.com");
   });
 
   it("renders social links section", () => {

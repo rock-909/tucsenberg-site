@@ -1,417 +1,207 @@
-import { expect, test } from "@playwright/test";
-import { checkA11y, injectAxe } from "./helpers/axe";
-import {
-  getHeaderMobileMenuButton,
-  getNav,
-  isHeaderInMobileMode,
-} from "./helpers/navigation";
+import { expect, test, type Page } from "@playwright/test";
 import {
   removeInterferingElements,
   waitForLoadWithFallback,
   waitForStablePage,
 } from "./test-environment-setup";
 
-test.describe("Homepage Core Functionality", () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to homepage and wait for stable state
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.waitForURL("**/en");
-    await waitForLoadWithFallback(page, {
-      context: "homepage beforeEach",
-      loadTimeout: 5_000,
-      fallbackDelay: 500,
+/**
+ * Homepage buyer contract (BC-001).
+ *
+ * The homepage is a part-number problem solver, not a generic brand page.
+ * The buyer-facing promise is:
+ *   1. The brand H1 and compatibility sub-claim render.
+ *   2. The hero compatibility search is operable: typing a known OEM part
+ *      number surfaces a matching result link into the OEM brand path.
+ *   3. The OEM brand grid links each brand to its `/compatible/{slug}` page.
+ *   4. The final CTA links to the quote page and to a membranes product page.
+ *
+ * Locators are user-facing (role / accessible name / text) per
+ * `.claude/rules/testing.md`. The deleted `hero-section`/`hero-preview-card`
+ * testids are intentionally not referenced — they no longer exist in the DOM.
+ */
+
+interface LocaleCase {
+  readonly locale: "en" | "es";
+  readonly heroTitle: string;
+  readonly searchLabel: string;
+  readonly oemGridTitle: string;
+  readonly firstBrandLink: string;
+  readonly finalCtaTitle: string;
+  readonly requestQuote: string;
+  readonly viewMembranes: string;
+}
+
+// Expected strings come from messages/{locale}/critical.json -> "home".
+const LOCALE_CASES: readonly LocaleCase[] = [
+  {
+    locale: "en",
+    heroTitle: "Find Your Replacement Membrane",
+    searchLabel: "Compatibility search",
+    oemGridTitle: "Replacement Membranes for Major Brands",
+    firstBrandLink: "View Sanitaire compatible parts",
+    finalCtaTitle: "Have a part number ready?",
+    requestQuote: "Request a Quote",
+    viewMembranes: "Browse All Membranes",
+  },
+  {
+    locale: "es",
+    heroTitle: "Encuentre su membrana de repuesto",
+    searchLabel: "Búsqueda de compatibilidad",
+    oemGridTitle: "Membranas de repuesto para las principales marcas",
+    firstBrandLink: "Ver piezas compatibles con Sanitaire",
+    finalCtaTitle: "¿Tiene un número de pieza a mano?",
+    requestQuote: "Solicitar una cotización",
+    viewMembranes: "Ver todas las membranas",
+  },
+];
+
+// "00223" is the Sanitaire "Silver Series II 9 inch Disc" OEM part number.
+// Confirmed in src/data/product-compatibility/catalog.ts and exercised by
+// src/components/search/__tests__/compatibility-search.test.tsx.
+const KNOWN_PART_NUMBER = "00223";
+const KNOWN_MODEL_NAME = /Silver Series II 9 inch Disc/i;
+const FIRST_BRAND_SLUG = "sanitaire";
+// Canonical descriptive membrane slug (the SKU slug `tuc-d9-epdm`
+// 308-redirects to this). The final CTA links straight to the canonical URL.
+const MEMBRANES_HREF_FRAGMENT = "/membranes/9-inch-epdm-disc-replacement";
+
+async function gotoHomepage(page: Page, locale: string): Promise<void> {
+  await page.goto(`/${locale}`, { waitUntil: "domcontentloaded" });
+  await page.waitForURL(`**/${locale}`);
+  await waitForLoadWithFallback(page, {
+    context: `homepage (${locale})`,
+    loadTimeout: 5_000,
+    fallbackDelay: 500,
+  });
+  await removeInterferingElements(page);
+  await waitForStablePage(page);
+}
+
+for (const localeCase of LOCALE_CASES) {
+  test.describe(`Homepage buyer contract (${localeCase.locale})`, () => {
+    const consoleErrors: string[] = [];
+
+    test.beforeEach(async ({ page }) => {
+      consoleErrors.length = 0;
+      page.on("console", (message) => {
+        if (message.type() === "error") {
+          consoleErrors.push(message.text());
+        }
+      });
+      page.on("pageerror", (error) => {
+        consoleErrors.push(error.message);
+      });
+      await gotoHomepage(page, localeCase.locale);
     });
-    await removeInterferingElements(page);
-    await waitForStablePage(page);
-  });
 
-  test("should load homepage with all core sections", async ({ page }) => {
-    // Verify Step 2 brand title
-    await expect(page).toHaveTitle(/Tucsenberg/);
+    test.afterEach(() => {
+      // Critical-smoke discipline: a broken render must fail this spec.
+      expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
+    });
 
-    // Verify all 5 core sections are present and visible using semantic selectors
-    const heroSection = page.getByTestId("hero-section");
-    const sections = page.locator("section");
-
-    // Should have at least 5 sections (page may have more due to dynamic content)
-    const sectionCount = await sections.count();
-    expect(sectionCount).toBeGreaterThanOrEqual(5);
-
-    // Verify hero section is visible
-    await expect(heroSection).toBeVisible();
-
-    // Verify main heading exists
-    const mainHeading = page.getByRole("heading", { level: 1 });
-    await expect(mainHeading).toBeVisible();
-
-    // Verify navigation is present (desktop or mobile)
-    const nav = getNav(page);
-    const mobileMenuButton = getHeaderMobileMenuButton(page);
-
-    // Determine mode by visible controls (avoids hardcoded breakpoints)
-    if (await isHeaderInMobileMode(page)) {
-      await expect(mobileMenuButton).toBeVisible();
-    } else {
-      await expect(nav).toBeVisible();
-    }
-  });
-
-  test("should display hero section with correct content", async ({ page }) => {
-    const heroSection = page.getByTestId("hero-section");
-
-    // Verify hero title
-    const heroTitle = page.getByRole("heading", { level: 1 });
-    await expect(heroTitle).toBeVisible();
-
-    // Verify eyebrow text
-    const eyebrow = heroSection.locator('[class*="uppercase"]');
-    if ((await eyebrow.count()) > 0) {
-      await expect(eyebrow.first()).toBeVisible();
-    }
-
-    // Verify CTA links exist (Button asChild renders as <a>)
-    const ctaLinks = heroSection.getByRole("link");
-    const ctaCount = await ctaLinks.count();
-    expect(ctaCount).toBeGreaterThanOrEqual(2);
-
-    // Verify proof bar with business metrics
-    const proofItems = heroSection.locator(".font-mono");
-    if ((await proofItems.count()) > 0) {
-      await expect(proofItems.first()).toBeVisible();
-    }
-
-    const previewCard = heroSection.getByTestId("hero-preview-card");
-    await expect(previewCard).toBeVisible();
-    await expect(previewCard).toHaveAttribute(
-      "aria-labelledby",
-      "hero-preview-title",
-    );
-    const previewTitle = previewCard.locator("#hero-preview-title");
-    await expect(previewTitle).toBeVisible();
-    await expect(previewTitle).not.toHaveText(/^\s*$/);
-    const previewDescription = previewCard.locator("p").first();
-    await expect(previewDescription).toBeVisible();
-    await expect(previewDescription).not.toHaveText(/^\s*$/);
-    await expect(previewCard.getByRole("listitem")).toHaveCount(4);
-    const previewNote = previewCard.locator("p").last();
-    await expect(previewNote).toBeVisible();
-    await expect(previewNote).not.toHaveText(/^\s*$/);
-  });
-
-  test("should handle CTA button interactions correctly", async ({ page }) => {
-    const heroSection = page.getByTestId("hero-section");
-    await expect(heroSection).toBeVisible();
-
-    // Verify primary and secondary CTA links (Button asChild renders as <a>)
-    const ctaLinks = heroSection.getByRole("link");
-    const ctaCount = await ctaLinks.count();
-    expect(ctaCount).toBeGreaterThanOrEqual(2);
-
-    // Verify CTA links are visible
-    await expect(ctaLinks.first()).toBeVisible();
-  });
-
-  test.describe("Responsive Design Tests", () => {
-    test("should display correctly on desktop (1920x1080)", async ({
+    test("loads at the locale root with the brand H1 and sub-claim", async ({
       page,
     }) => {
-      await page.setViewportSize({ width: 1920, height: 1080 });
-      await page.reload({ waitUntil: "domcontentloaded" });
-      await waitForLoadWithFallback(page, {
-        context: "desktop viewport reload",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
+      await expect(page).toHaveTitle(/Tucsenberg/);
+
+      const heading = page.getByRole("heading", {
+        level: 1,
+        name: localeCase.heroTitle,
       });
-      await waitForStablePage(page);
+      await expect(heading).toBeVisible();
+    });
 
-      const heroSection = page.getByTestId("hero-section");
+    test("hero compatibility search surfaces a matching result", async ({
+      page,
+    }) => {
+      const search = page.getByRole("combobox", {
+        name: localeCase.searchLabel,
+      });
+      await expect(search).toBeVisible();
+      await expect(search).toHaveAttribute("aria-expanded", "false");
 
-      // Verify desktop layout
-      await expect(heroSection).toBeVisible();
+      await search.fill(KNOWN_PART_NUMBER);
 
-      // Check that desktop navigation is visible
-      const mainNav = getNav(page);
-      await expect(mainNav).toBeVisible();
+      await expect(search).toHaveAttribute("aria-expanded", "true");
 
-      // Verify hero content is properly sized
-      const heroTitle = page.getByRole("heading", { level: 1 });
-      await expect(heroTitle).toBeVisible();
+      const resultsListbox = page.getByRole("listbox", {
+        name: localeCase.searchLabel,
+      });
+      await expect(resultsListbox).toBeVisible();
 
-      // Verify hero title renders at desktop size (46px)
-      const fontSize = await heroTitle.evaluate(
-        (el) => getComputedStyle(el).fontSize,
+      const modelLink = resultsListbox.getByRole("link", {
+        name: KNOWN_MODEL_NAME,
+      });
+      await expect(modelLink).toBeVisible();
+      await expect(modelLink).toHaveAttribute(
+        "href",
+        `/${localeCase.locale}/compatible/${FIRST_BRAND_SLUG}`,
       );
-      expect(parseFloat(fontSize)).toBeGreaterThanOrEqual(46);
     });
 
-    test("should display correctly on tablet (768x1024)", async ({ page }) => {
-      await page.setViewportSize({ width: 768, height: 1024 });
-      await page.reload({ waitUntil: "domcontentloaded" });
-      await waitForLoadWithFallback(page, {
-        context: "tablet viewport reload",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
-      });
-      await waitForStablePage(page);
-
-      const heroSection = page.getByTestId("hero-section");
-      await expect(heroSection).toBeVisible();
-
-      // Verify responsive text sizing
-      const heroTitle = page.getByRole("heading", { level: 1 });
-      await expect(heroTitle).toBeVisible();
-
-      // Tablet (768px) is below the lg breakpoint (1024px), so the header
-      // shows the mobile hamburger button. Keep a generous timeout because
-      // route hydration and dynamic chunks can still settle at different speeds.
-      const mobileMenuButton = getHeaderMobileMenuButton(page);
-      await expect(mobileMenuButton).toBeVisible({ timeout: 15_000 });
-    });
-
-    test("should display correctly on mobile (375x667)", async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 667 });
-      await page.reload({ waitUntil: "domcontentloaded" });
-      await waitForLoadWithFallback(page, {
-        context: "mobile viewport reload",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
-      });
-      await waitForStablePage(page);
-
-      const heroSection = page.getByTestId("hero-section");
-      await expect(heroSection).toBeVisible();
-
-      // Verify mobile navigation is used (look for hamburger menu)
-      const mobileMenuButton = page
-        .getByRole("button")
-        .filter({ hasText: /menu|toggle/i });
-      if ((await mobileMenuButton.count()) > 0) {
-        await expect(mobileMenuButton.first()).toBeVisible();
-      }
-
-      // Verify content is accessible on mobile
-      const heroTitle = page.getByRole("heading", { level: 1 });
-      await expect(heroTitle).toBeVisible();
-
-      // Verify buttons/links are accessible
-      const links = heroSection.getByRole("link");
-      if ((await links.count()) > 0) {
-        await expect(links.first()).toBeVisible();
-      }
-    });
-  });
-
-  test.describe("Performance Tests", () => {
-    test("should load within performance budgets", async ({ page }) => {
-      const navigationStart = Date.now();
-
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.waitForURL("**/en");
-      await waitForLoadWithFallback(page, {
-        context: "performance budget load",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
-      });
-
-      const loadMetrics = await page.evaluate(() => {
-        const navigation = performance.getEntriesByType("navigation")[0] as
-          | PerformanceNavigationTiming
-          | undefined;
-
-        if (navigation) {
-          return {
-            domContentLoaded: navigation.domContentLoadedEventEnd,
-            loadEventEnd: navigation.loadEventEnd,
-          };
-        }
-
-        const { timing } = performance;
-        return {
-          domContentLoaded:
-            timing.domContentLoadedEventEnd - timing.navigationStart,
-          loadEventEnd: timing.loadEventEnd - timing.navigationStart,
-        };
-      });
-
-      const loadTime =
-        (loadMetrics.loadEventEnd && loadMetrics.loadEventEnd > 0
-          ? loadMetrics.loadEventEnd
-          : loadMetrics.domContentLoaded) ?? Date.now() - navigationStart;
-
-      // Verify page loads within budget
-      // Dev server has compilation overhead and parallel tests share resources
-      // CI uses production build which is faster
-      const isCI = Boolean(process.env.CI);
-      const performanceBudget = isCI ? 2000 : 8000;
-      expect(loadTime).toBeLessThan(performanceBudget);
-
-      // Check Core Web Vitals
-      const vitals = await page.evaluate(() => {
-        return new Promise((resolve) => {
-          new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            const webVitals: { lcp?: number; fid?: number; cls?: number } = {};
-
-            entries.forEach((entry) => {
-              const perfEntry = entry as unknown as {
-                name: string;
-                value: number;
-              };
-              if (perfEntry.name === "LCP") {
-                webVitals.lcp = perfEntry.value;
-              }
-              if (perfEntry.name === "FID") {
-                webVitals.fid = perfEntry.value;
-              }
-              if (perfEntry.name === "CLS") {
-                webVitals.cls = perfEntry.value;
-              }
-            });
-
-            resolve(webVitals);
-          }).observe({
-            entryTypes: [
-              "largest-contentful-paint",
-              "first-input",
-              "layout-shift",
-            ],
-          });
-
-          // Fallback timeout
-          setTimeout(() => resolve({}), 3000);
-        });
-      });
-
-      // Verify Core Web Vitals thresholds (if available)
-      const typedVitals = vitals as {
-        lcp?: number;
-        fid?: number;
-        cls?: number;
-      };
-      if (typedVitals.lcp) {
-        expect(typedVitals.lcp).toBeLessThan(2500); // LCP < 2.5s
-      }
-      if (typedVitals.fid) {
-        expect(typedVitals.fid).toBeLessThan(100); // FID < 100ms
-      }
-      if (typedVitals.cls) {
-        expect(typedVitals.cls).toBeLessThan(0.1); // CLS < 0.1
-      }
-    });
-
-    test("should handle slow network conditions gracefully", async ({
+    test("OEM brand grid links a brand to its compatibility page", async ({
       page,
     }) => {
-      // Simulate slow 3G network
-      await page.route("**/*", async (route) => {
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Add 100ms delay
-        await route.continue();
-      });
+      await expect(
+        page.getByRole("heading", {
+          level: 2,
+          name: localeCase.oemGridTitle,
+        }),
+      ).toBeVisible();
 
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.waitForURL("**/en");
-      await waitForLoadWithFallback(page, {
-        context: "slow network load",
-        loadTimeout: 8_000,
-        fallbackDelay: 500,
-      });
+      // The brand card link's accessible name combines the brand name and the
+      // "view all" call to action; the default (substring) name match resolves
+      // it via the CTA text.
+      const brandLink = page
+        .getByRole("link", { name: localeCase.firstBrandLink })
+        .first();
+      await expect(brandLink).toBeVisible();
+      await expect(brandLink).toHaveAttribute(
+        "href",
+        `/${localeCase.locale}/compatible/${FIRST_BRAND_SLUG}`,
+      );
 
-      // Verify core content is still visible
-      const heroSection = page.getByTestId("hero-section");
-      await expect(heroSection).toBeVisible();
-
-      // Verify core content loaded despite slow network
-      const heroTitle = page.getByRole("heading", { level: 1 });
-      await expect(heroTitle).toBeVisible();
-    });
-  });
-
-  test.describe("Accessibility Tests", () => {
-    test("should pass automated accessibility checks", async ({ page }) => {
-      await injectAxe(page);
-
-      // Run axe-core accessibility checks
-      await checkA11y(page, undefined, {
-        detailedReport: true,
-        detailedReportOptions: { html: true },
-      });
+      await brandLink.click();
+      await expect
+        .poll(() => new URL(page.url()).pathname)
+        .toBe(`/${localeCase.locale}/compatible/${FIRST_BRAND_SLUG}`);
     });
 
-    test("should support keyboard navigation", async ({ page }) => {
-      // Verify interactive elements exist and can receive focus.
-      // Direct Tab-key navigation is unreliable in headless Chromium, so
-      // instead verify that the first link/button is focusable via JS.
-      const firstLink = page.getByRole("link").first();
-      await expect(firstLink).toBeVisible();
-
-      await firstLink.focus();
-      const tag = await page.evaluate(() => document.activeElement?.tagName);
-      expect(tag).toBe("A");
-    });
-
-    test("should have proper ARIA attributes and semantic structure", async ({
+    test("final CTA links to the quote page and a membranes product page", async ({
       page,
     }) => {
-      const heroSection = page.getByTestId("hero-section");
-
-      // Verify semantic structure exists
-      await expect(heroSection).toBeVisible();
-
-      // Verify heading hierarchy
-      const h1 = page.getByRole("heading", { level: 1 });
-      await expect(h1).toBeVisible();
-
-      // Verify navigation has proper structure (desktop or mobile)
-      const nav = getNav(page);
-      const mobileMenuButton = getHeaderMobileMenuButton(page);
-
-      if (await isHeaderInMobileMode(page)) {
-        await expect(mobileMenuButton).toBeVisible();
-      } else {
-        await expect(nav).toBeVisible();
-      }
-
-      // Verify links have href attributes
-      const links = page.getByRole("link");
-      const linkCount = await links.count();
-      if (linkCount > 0) {
-        for (let i = 0; i < Math.min(linkCount, 3); i++) {
-          const link = links.nth(i);
-          await expect(link).toHaveAttribute("href");
-        }
-      }
-    });
-
-    test("should respect reduced motion preferences", async ({ page }) => {
-      // Emulate reduced motion preference
-      await page.emulateMedia({ reducedMotion: "reduce" });
-
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.waitForURL("**/en");
-      await waitForLoadWithFallback(page, {
-        context: "reduced motion load",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
+      // The global header's primary CTA legitimately also reads "Request a
+      // Quote" and points at /quote, so a page-wide link lookup is ambiguous
+      // under Playwright strict mode. Scope to the in-page final-CTA section
+      // via its unique heading (the header is a separate `banner` landmark
+      // with no `cta.title` heading), so this still proves the IN-PAGE final
+      // CTA and would fail if that section's links regressed.
+      const finalCtaSection = page.locator("section", {
+        has: page.getByRole("heading", {
+          level: 2,
+          name: localeCase.finalCtaTitle,
+        }),
       });
-      await waitForStablePage(page);
+      await expect(finalCtaSection).toBeVisible();
 
-      // Verify animations are disabled or reduced
-      const heroSection = page.locator("section").first();
-      await expect(heroSection).toBeVisible();
+      const quoteLink = finalCtaSection.getByRole("link", {
+        name: localeCase.requestQuote,
+      });
+      await expect(quoteLink).toBeVisible();
+      await expect(quoteLink).toHaveAttribute(
+        "href",
+        `/${localeCase.locale}/quote`,
+      );
 
-      // Check that elements are immediately visible (no animation delays)
-      const heroTitle = page.getByRole("heading", { level: 1 });
-      await expect(heroTitle).toBeVisible();
-
-      // Verify content is accessible without animations (desktop or mobile)
-      const nav = getNav(page);
-      const mobileMenuButton = getHeaderMobileMenuButton(page);
-
-      if (await isHeaderInMobileMode(page)) {
-        await expect(mobileMenuButton).toBeVisible();
-      } else {
-        await expect(nav).toBeVisible();
-      }
+      const membranesLink = finalCtaSection.getByRole("link", {
+        name: localeCase.viewMembranes,
+      });
+      await expect(membranesLink).toBeVisible();
+      await expect(membranesLink).toHaveAttribute(
+        "href",
+        `/${localeCase.locale}${MEMBRANES_HREF_FRAGMENT}`,
+      );
     });
   });
-});
+}

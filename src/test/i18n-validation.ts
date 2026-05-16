@@ -409,6 +409,16 @@ function validateTranslationQuality(params: {
 }
 
 /**
+ * Keys whose value is intentionally identical across locales (technical
+ * material tokens like "EPDM" / "TPU" — kept in English per content rules),
+ * so the same-value heuristic must not flag them as untranslated.
+ */
+const IDENTICAL_ACROSS_LOCALES = new Set<string>([
+  "home.materials.epdm.name",
+  "home.materials.tpu.name",
+]);
+
+/**
  * 检查未翻译内容
  */
 function checkUntranslatedContent(params: {
@@ -423,7 +433,7 @@ function checkUntranslatedContent(params: {
   for (const otherLocale of otherLocales) {
     const otherTrans = getByLocale(translations, otherLocale) || {};
     const otherValue = getNestedValue(otherTrans, key);
-    if (value === otherValue && key !== "home.title") {
+    if (value === otherValue && !IDENTICAL_ACROSS_LOCALES.has(key)) {
       warnings.push({
         type: "untranslated",
         key,

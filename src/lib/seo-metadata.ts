@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getPublicStaticPageDefinition } from "@/config/pages.config";
+import {
+  getPublicStaticPageDefinition,
+  isNoindexStaticPageType,
+} from "@/config/pages.config";
 import {
   LOCALES_CONFIG,
   SITE_CONFIG,
@@ -102,8 +105,14 @@ function buildLanguagesForPath(path: string): Record<string, string> {
   return Object.fromEntries(entries);
 }
 
-function buildRobotsForLocale(locale: Locale): Metadata["robots"] {
-  const shouldIndex = isPublicSeoLocale(locale);
+function buildRobotsForLocale(
+  locale: Locale,
+  pageType: PageType,
+): Metadata["robots"] {
+  // De-listed legacy starter pages are noindex for every locale; ZH is
+  // already noindex via the public-SEO-locale gate.
+  const shouldIndex =
+    isPublicSeoLocale(locale) && !isNoindexStaticPageType(pageType);
 
   return {
     index: shouldIndex,
@@ -243,12 +252,20 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
   }
 }
 
-export function generateLocalizedMetadata(
-  locale: Locale,
-  pageType: PageType,
-  config: SEOConfig = {},
-): Metadata {
-  const safeLocale = resolveLocale(locale);
+/**
+ * Build the shared metadata object (title/description/OG/Twitter/verification).
+ *
+ * Canonical, hreflang, and robots are passed in so static-route and
+ * dynamic-route callers reuse the exact same chrome assembly instead of
+ * maintaining a parallel metadata builder.
+ */
+function buildMetadataObject(params: {
+  safeLocale: Locale;
+  config: SEOConfig;
+  alternates: NonNullable<Metadata["alternates"]>;
+  robots: Metadata["robots"];
+}): Metadata {
+  const { safeLocale, config, alternates, robots } = params;
   const title =
     config.title !== undefined && config.title.trim().length > 0
       ? interpolateSeoString(config.title)
@@ -259,7 +276,7 @@ export function generateLocalizedMetadata(
       : SITE_CONFIG.seo.defaultDescription;
   const siteName = SITE_CONFIG.name;
 
-  const metadata: Metadata = {
+  return {
     title,
     description,
     keywords: config.keywords ?? SITE_CONFIG.seo.keywords,
@@ -287,13 +304,10 @@ export function generateLocalizedMetadata(
     },
 
     // hreflang和canonical链接
-    alternates: {
-      canonical: generateCanonicalURL(pageType, safeLocale),
-      languages: generateLanguageAlternates(pageType),
-    },
+    alternates,
 
     // 其他元数据
-    robots: buildRobotsForLocale(safeLocale),
+    robots,
 
     // 验证标签
     verification: {
@@ -301,8 +315,24 @@ export function generateLocalizedMetadata(
       yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),
     },
   };
+}
 
-  return metadata;
+export function generateLocalizedMetadata(
+  locale: Locale,
+  pageType: PageType,
+  config: SEOConfig = {},
+): Metadata {
+  const safeLocale = resolveLocale(locale);
+
+  return buildMetadataObject({
+    safeLocale,
+    config,
+    alternates: {
+      canonical: generateCanonicalURL(pageType, safeLocale),
+      languages: generateLanguageAlternates(pageType),
+    },
+    robots: buildRobotsForLocale(safeLocale, pageType),
+  });
 }
 
 /**
@@ -335,6 +365,82 @@ export function generateMetadataForPath(
     canonical,
     languages,
   };
+
+  const { openGraph } = metadata;
+  if (openGraph && typeof openGraph === "object") {
+    (openGraph as { url?: string | URL }).url = canonical;
+    metadata.openGraph = openGraph;
+  } else {
+    metadata.openGraph = {
+      url: canonical,
+    } as unknown as Metadata["openGraph"];
+  }
+
+  return metadata;
+}
+
+/**
+ * Robots for dynamic catalog/compatibility detail routes.
+ *
+ * These routes have no static `PageType` definition. Per the documented
+ * contract in `isNoindexStaticPageType`, dynamic catalog/compatibility routes
+ * are NOT de-listed and stay indexable; only the internal `zh` locale is
+ * noindex (it is excluded from canonical/hreflang/sitemap, en/es only).
+ */
+function buildDynamicRouteRobots(locale: Locale): Metadata["robots"] {
+  const shouldIndex = isPublicSeoLocale(locale);
+
+  return {
+    index: shouldIndex,
+    follow: shouldIndex,
+    googleBot: {
+      index: shouldIndex,
+      follow: shouldIndex,
+      "max-video-preview": -ONE,
+      "max-image-preview": "large",
+      "max-snippet": -ONE,
+    },
+  };
+}
+
+/**
+ * Path-aware metadata for dynamic catalog/compatibility detail routes
+ * (`/membranes/[product]`, `/compatible/[brand]`) that have no static
+ * `PageType` definition.
+ *
+ * Reuses the SAME canonical/hreflang/OG primitives as
+ * `generateMetadataForPath`: canonical and `alternates.languages` are derived
+ * purely from the resolved route `path` and the public-SEO-locale source of
+ * truth (`LOCALES_CONFIG.publicLocales` → en + es + x-default, never zh).
+ * The caller MUST pass the canonical descriptive path (not a redirect-source
+ * SKU slug) so the emitted canonical matches the route's 308 redirect target.
+ */
+interface GenerateMetadataForDynamicPathParams {
+  locale: Locale;
+  path: string;
+  config?: Partial<SEOConfig>;
+}
+
+export function generateMetadataForDynamicPath(
+  params: GenerateMetadataForDynamicPathParams,
+): Metadata {
+  const { locale, path, config } = params;
+  const safeLocale = resolveLocale(locale);
+
+  const seoConfig = mergeSEOConfig(
+    { type: "website", keywords: SITE_CONFIG.seo.keywords },
+    config ?? {},
+  );
+
+  const canonical = buildCanonicalForPath(safeLocale, path);
+  const languages = buildLanguagesForPath(path);
+
+  const metadata = buildMetadataObject({
+    safeLocale,
+    config: seoConfig,
+    alternates: { canonical, languages },
+    robots: buildDynamicRouteRobots(safeLocale),
+  });
 
   const { openGraph } = metadata;
   if (openGraph && typeof openGraph === "object") {

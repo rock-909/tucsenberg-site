@@ -7,7 +7,10 @@ import {
   SINGLE_SITE_KEY,
   SINGLE_SITE_NAVIGATION,
 } from "@/config/single-site";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { siteFacts } from "@/config/site-facts";
 
 describe("site-facts", () => {
@@ -15,11 +18,11 @@ describe("site-facts", () => {
     expect(SINGLE_SITE_KEY).toBe("tucsenberg");
     expect(SINGLE_SITE_CONFIG.name).toBe("Tucsenberg");
     expect(siteFacts.company.name).toBe("Tucsenberg");
-    expect(siteFacts.contact.email).toBe("contact@tucsenberg.com");
+    expect(siteFacts.contact.email).toBe("sales@tucsenberg.com");
     expect(siteFacts.company.location.country).toBe("China");
   });
 
-  it("keeps the Step 2 main navigation on the safe placeholder", () => {
+  it("points main navigation at the Step 4 membranes, compatibility, and quote routes", () => {
     expect(SINGLE_SITE_NAVIGATION.map((item) => item.key)).toEqual([
       "membranes",
       "compatibility",
@@ -27,11 +30,15 @@ describe("site-facts", () => {
       "quote",
     ]);
     expect(SINGLE_SITE_NAVIGATION.map((item) => item.href)).toEqual([
+      FEATURED_MEMBRANE_HREF,
+      "/compatible/sanitaire",
       SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
-      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+      SINGLE_SITE_ROUTE_HREFS.quote,
     ]);
+    // The featured membrane nav target is the canonical descriptive slug.
+    expect(FEATURED_MEMBRANE_HREF).toBe(
+      "/membranes/9-inch-epdm-disc-replacement",
+    );
   });
 
   it("exports site facts with expected shape", () => {

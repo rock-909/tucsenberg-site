@@ -2,9 +2,9 @@
   "error": "[ES-TODO] An error occurred. Please try again.",
   "turnstileRequired": "[ES-TODO] Please complete the security verification.",
   "errorBoundary": {
-    "title": "[ES-TODO] An error occurred",
-    "description": "[ES-TODO] Something went wrong. Please try refreshing the page.",
-    "tryAgain": "[ES-TODO] Try Again"
+    "title": "Se produjo un error",
+    "description": "Algo salió mal. Pruebe a actualizar la página.",
+    "tryAgain": "Reintentar"
   },
   "legal": {
     "effectiveDate": "[ES-TODO] Effective Date",
@@ -60,11 +60,6 @@
     }
   },
   "contact": {
-    "context": {
-      "productFamilyLabel": "[ES-TODO] You are asking about:",
-      "marketFallbackLabel": "[ES-TODO] Membrane review path",
-      "familyFallbackLabel": "[ES-TODO] Replacement membrane family"
-    },
     "title": "[ES-TODO] Contact Us",
     "description": "[ES-TODO] Get in touch with our team for inquiries, support, or partnership opportunities.",
     "features": "[ES-TODO] Multiple ways to reach us and get the support you need",
@@ -456,7 +451,7 @@
     "cta": {
       "heading": "[ES-TODO] Start a Custom Project",
       "description": "[ES-TODO] Tell us the goal, audience, content, timeline, and replacement needs. This example should become your real intake path.",
-      "button": "[ES-TODO] Get Started"
+      "button": "Envíe los datos de su proyecto y de reemplazo"
     }
   }
 }

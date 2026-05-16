@@ -103,6 +103,7 @@ describe("Mobile Navigation - Basic Core Tests", () => {
           "navigation.customProject": "Custom",
           "navigation.contact": "Contact",
           "navigation.contactSales": "Contact",
+          "navigation.requestQuote": "Request a Quote",
           "seo.siteName": "Site Name",
           "seo.description": "Site Description",
           "accessibility.openMenu": "Open menu",

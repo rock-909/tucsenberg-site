@@ -74,6 +74,21 @@ export function getBlogArticlePath(articleSlug: string): string {
   return `${getCanonicalPath("blog")}/${articleSlug}`;
 }
 
+// 从动态路由 pattern 推导前缀（例如 "/membranes/[product]" -> "/membranes"），
+// 避免在 sitemap 等处硬编码路由字面量。
+function getDynamicRoutePrefix(pageType: DynamicPageType): string {
+  const { pattern } = DYNAMIC_PATHS_CONFIG[pageType];
+  return pattern.slice(0, pattern.indexOf("/["));
+}
+
+export function getMembraneProductPath(productSlug: string): string {
+  return `${getDynamicRoutePrefix("membraneProduct")}/${productSlug}`;
+}
+
+export function getCompatibleBrandPath(brandSlug: string): string {
+  return `${getDynamicRoutePrefix("compatibleBrand")}/${brandSlug}`;
+}
+
 /**
  * 获取所有页面的路径映射（用于next-intl routing）
  *

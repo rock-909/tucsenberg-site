@@ -1,6 +1,10 @@
 import { env } from "@/lib/env";
 import { defineSiteDefinition } from "@/config/site-definition-builder";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  FEATURED_COMPATIBLE_BRAND_HREF,
+  FEATURED_MEMBRANE_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import type {
@@ -49,7 +53,11 @@ const social = {
 
 const contact = {
   phone: "+86-518-0000-0000",
-  email: "contact@tucsenberg.com",
+  // Single real receiving inbox for the A+ non-RFQ contact decision: covers
+  // general / distribution / media / non-RFQ inquiries and is surfaced in the
+  // footer and Organization JSON-LD. PUBLISH-GATE: must be a real mailbox
+  // before public launch (tracked in DEVELOPMENT-LOG.md).
+  email: "sales@tucsenberg.com",
 } as const;
 
 const establishedYear = 2026;
@@ -158,14 +166,14 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
         {
           key: "membranes",
           label: "Membranes",
-          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+          href: FEATURED_MEMBRANE_HREF,
           external: false,
           translationKey: "navigation.membranes",
         },
         {
           key: "compatibility",
           label: "Compatibility",
-          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+          href: FEATURED_COMPATIBLE_BRAND_HREF,
           external: false,
           translationKey: "navigation.compatibility",
         },
@@ -186,7 +194,7 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
         {
           key: "quote",
           label: "Quote",
-          href: SINGLE_SITE_ROUTE_HREFS.comingSoon,
+          href: SINGLE_SITE_ROUTE_HREFS.quote,
           external: false,
           translationKey: "navigation.quote",
         },

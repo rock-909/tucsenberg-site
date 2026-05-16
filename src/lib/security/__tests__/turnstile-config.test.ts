@@ -134,6 +134,7 @@ describe("turnstile-config", () => {
       "contact_form",
       "newsletter_subscribe",
       "product_inquiry",
+      "rfq_quote",
     ]);
     expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
     expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);

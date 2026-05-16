@@ -1,49 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import {
+  SINGLE_SITE_PRIMARY_CTA_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
+import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
-  SINGLE_SITE_HOME_FINAL_TRUST_ITEMS,
-  SINGLE_SITE_HOME_GRID_SECTION_ORDER,
-  SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
   SINGLE_SITE_HOME_LINK_TARGETS,
-  SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS,
-  SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS,
-  SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS,
-  SINGLE_SITE_HOME_SCENARIO_ITEMS,
-  SINGLE_SITE_HOME_TRAILING_SECTION_ORDER,
   SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
 } from "@/config/single-site-page-expression";
 
 describe("single-site-page-expression", () => {
-  it("keeps homepage section order explicit and non-empty", () => {
-    expect(SINGLE_SITE_HOME_GRID_SECTION_ORDER).toEqual([
-      "hero",
-      "starterBoundary",
-      "chain",
-      "products",
-      "resources",
-      "sampleCta",
-      "scenarios",
-      "quality",
-    ]);
-    expect(SINGLE_SITE_HOME_TRAILING_SECTION_ORDER).toEqual(["finalCta"]);
+  it("keeps shared home link targets explicit", () => {
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({
       contact: "#coming-soon",
       products: "#coming-soon",
     });
   });
 
-  it("keeps homepage and about display item order explicit", () => {
-    expect(SINGLE_SITE_HOME_HERO_PROOF_ITEMS).toEqual([
-      "est",
-      "countries",
-      "range",
-      "production",
-    ]);
-    expect(SINGLE_SITE_HOME_FINAL_TRUST_ITEMS).toEqual(["countries"]);
+  it("keeps about display item order explicit", () => {
     expect(SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS).toEqual([
       "quality",
       "innovation",
@@ -76,29 +54,6 @@ describe("single-site-page-expression", () => {
         suffix: "",
       },
     ]);
-    expect(SINGLE_SITE_HOME_SCENARIO_ITEMS).toEqual([
-      "item1",
-      "item2",
-      "item3",
-    ]);
-    expect(SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS).toEqual([
-      "commitment1",
-      "commitment2",
-      "commitment3",
-      "commitment4",
-      "commitment5",
-    ]);
-    expect(SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS).toEqual([
-      "exampleA",
-      "exampleB",
-      "exampleC",
-      "exampleD",
-    ]);
-    expect(SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS).toEqual([
-      "iso9001",
-      "standards",
-      "countries",
-    ]);
   });
 
   it("keeps product page grouping aligned with the catalog", () => {
@@ -109,12 +64,21 @@ describe("single-site-page-expression", () => {
     ];
 
     expect(groupedMarketSlugs.sort()).toEqual(allMarketSlugs.sort());
-    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
-      "#coming-soon",
-    );
-    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("#coming-soon");
-    expect(SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.ctaHref).toBe(
-      "#coming-soon",
-    );
+  });
+
+  it("routes the dead-contact-lane CTAs to the RFQ quote path", () => {
+    // A+ non-RFQ contact decision: about / products / custom-project secondary
+    // CTAs no longer stand in for the deleted generic-contact lane; they route
+    // to the canonical /quote conversion path, never the #coming-soon stub.
+    expect(SINGLE_SITE_PRIMARY_CTA_HREF).toBe(SINGLE_SITE_ROUTE_HREFS.quote);
+
+    for (const ctaHref of [
+      SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref,
+      SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref,
+      SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.ctaHref,
+    ]) {
+      expect(ctaHref).toBe(SINGLE_SITE_ROUTE_HREFS.quote);
+      expect(ctaHref).not.toBe(SINGLE_SITE_ROUTE_HREFS.comingSoon);
+    }
   });
 });

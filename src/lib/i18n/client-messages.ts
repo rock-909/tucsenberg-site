@@ -13,8 +13,11 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "contact",
   "cookie",
   "errors",
+  "home",
   "language",
   "navigation",
+  "quote",
+  "search",
 ] as const;
 
 export function getClientMessageNamespaces(): readonly string[] {

@@ -1,5 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
+import {
+  getCanonicalPath,
+  getCompatibleBrandPath,
+  getMembraneProductPath,
+  getProductMarketPath,
+} from "@/config/paths/utils";
+import {
+  canonicalProductSlug,
+  oemBrands,
+  productVariants,
+} from "@/data/product-compatibility";
 import {
   getAllMarketFamilyCombos,
   getAllMarketSlugs,
@@ -11,6 +21,10 @@ import {
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
 import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap from "../sitemap";
+
+// The product-compatibility data layer parses fixtures with zod at module load;
+// the global zod mock would break those parses, so opt out for this suite.
+vi.unmock("zod");
 
 // Mock dependencies before imports
 vi.mock("@/config/paths", async (importOriginal) => {
@@ -148,12 +162,11 @@ describe("sitemap.ts", () => {
         changeFrequency: "monthly",
         lastModified: new Date("2026-04-20T00:00:00Z"),
       });
-      expect(findEntry(result, "en", "/products/north-america")).toMatchObject({
-        url: "https://example.com/en/products/north-america",
-        priority: 0.8,
-        changeFrequency: "weekly",
-        lastModified: new Date("2024-11-01T00:00:00Z"),
-      });
+      // `/products/[market]` market landing pages are gated out while the
+      // `/products` overview is de-listed + noindex (Wave B). No entry.
+      expect(
+        findEntry(result, "en", "/products/north-america"),
+      ).toBeUndefined();
       expect(findEntry(result, "en", "/terms")).toMatchObject({
         url: "https://example.com/en/terms",
         priority: 0.7,
@@ -161,25 +174,30 @@ describe("sitemap.ts", () => {
       });
     });
 
-    it("should include the blog index but not old generated blog detail pages", async () => {
+    it("de-lists the legacy starter blog index (still leaks ES-TODO)", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
-      expect(urls).toContain("https://example.com/en/blog");
-      expect(urls).toContain("https://example.com/es/blog");
+      expect(urls).not.toContain("https://example.com/en/blog");
+      expect(urls).not.toContain("https://example.com/es/blog");
       expect(urls).not.toContain("https://example.com/en/blog/post-a");
       expect(urls).not.toContain("https://example.com/zh/blog/post-a");
     });
 
-    it("should include product catalog market pages", async () => {
+    it("de-lists the starter `/products/[market]` catalog pages while the products overview is noindex", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
+      // The `/products` overview is de-listed + noindex (Wave B); its child
+      // market landing pages are starter-era surfaces and must NOT enter the
+      // public sitemap for any locale. Reverting the gate in
+      // generateCatalogEntries() makes these assertions fail.
+      expect(getAllMarketSlugs().length).toBeGreaterThan(0);
       for (const marketSlug of getAllMarketSlugs()) {
-        expect(urls).toContain(
+        expect(urls).not.toContain(
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
         );
-        expect(urls).toContain(
+        expect(urls).not.toContain(
           localizedUrl("es", getProductMarketPath(marketSlug)),
         );
         expect(urls).not.toContain(
@@ -283,13 +301,14 @@ describe("sitemap.ts", () => {
       expect(home?.priority).toBe(homeConfig.priority);
     });
 
-    it("should set products listing priority from sitemap config", async () => {
+    it("de-lists the legacy starter products listing (still leaks starter slop + ES-TODO)", async () => {
       const result = await sitemap();
       const productsPath = getCanonicalPath("products");
       const products = findEntry(result, defaultLocale, productsPath);
-      const productsConfig = getSingleSiteSitemapPageConfig(productsPath);
+      const productsEs = findEntry(result, "es", productsPath);
 
-      expect(products?.priority).toBe(productsConfig.priority);
+      expect(products).toBeUndefined();
+      expect(productsEs).toBeUndefined();
     });
 
     it("should set home page changeFrequency from sitemap config", async () => {
@@ -342,11 +361,16 @@ describe("sitemap.ts", () => {
         howItWorksPath,
         expect.any(Map),
       );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+      // `/products` listing is de-listed: no entry, no lastmod lookup. Its
+      // child `/products/[market]` catalog pages are gated out by the same
+      // signal, so no market entry and no market lastmod lookup either.
+      expect(products).toBeUndefined();
+      expect(market).toBeUndefined();
+      expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         productsPath,
         expect.any(Map),
       );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
+      expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         marketPath,
         expect.any(Map),
       );
@@ -356,8 +380,6 @@ describe("sitemap.ts", () => {
       expect(howItWorks?.lastModified).toEqual(
         new Date("2026-04-20T00:00:00Z"),
       );
-      expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
     });
 
     it("should keep terms page SEO defaults explicit", async () => {
@@ -378,18 +400,200 @@ describe("sitemap.ts", () => {
       expect(uniqueUrls.size).toBe(urls.length);
     });
 
-    it("should include standalone pages with correct config", async () => {
+    it("de-lists the legacy starter custom-project-support page (starter slop + ES-TODO)", async () => {
       const result = await sitemap();
       const customProjectPath = getCanonicalPath("customProject");
-      const customProject = findEntry(result, defaultLocale, customProjectPath);
-      const customProjectConfig =
-        getSingleSiteSitemapPageConfig(customProjectPath);
 
-      expect(customProject).toBeDefined();
-      expect(customProject?.priority).toBe(customProjectConfig.priority);
-      expect(customProject?.changeFrequency).toBe(
-        customProjectConfig.changeFrequency,
+      expect(
+        findEntry(result, defaultLocale, customProjectPath),
+      ).toBeUndefined();
+      expect(findEntry(result, "es", customProjectPath)).toBeUndefined();
+    });
+
+    it("de-lists the /contact page per the A+ single-RFQ-path decision", async () => {
+      const result = await sitemap();
+      const contactPath = getCanonicalPath("contact");
+
+      expect(findEntry(result, defaultLocale, contactPath)).toBeUndefined();
+      expect(findEntry(result, "es", contactPath)).toBeUndefined();
+      expect(findEntry(result, "zh", contactPath)).toBeUndefined();
+    });
+
+    it("should include a canonical descriptive membrane URL per productVariant for public locales only", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(productVariants.length).toBeGreaterThan(0);
+      for (const variant of productVariants) {
+        const path = getMembraneProductPath(canonicalProductSlug(variant));
+        expect(urls).toContain(localizedUrl("en", path));
+        expect(urls).toContain(localizedUrl("es", path));
+        expect(urls).not.toContain(localizedUrl("zh", path));
+
+        // The legacy SKU slug is a redirect source and must NOT be emitted.
+        const skuPath = getMembraneProductPath(variant.slug);
+        expect(urls).not.toContain(localizedUrl("en", skuPath));
+        expect(urls).not.toContain(localizedUrl("es", skuPath));
+      }
+    });
+
+    it("should include a compatible brand URL per oemBrand slug for public locales only", async () => {
+      const result = await sitemap();
+      const urls = result.map((entry) => entry.url);
+
+      expect(oemBrands.length).toBeGreaterThan(0);
+      for (const brand of oemBrands) {
+        const path = getCompatibleBrandPath(brand.slug);
+        expect(urls).toContain(localizedUrl("en", path));
+        expect(urls).toContain(localizedUrl("es", path));
+        expect(urls).not.toContain(localizedUrl("zh", path));
+      }
+    });
+
+    it("should expose membrane/brand alternates without zh", async () => {
+      const result = await sitemap();
+      const [variant] = productVariants;
+      const [brand] = oemBrands;
+
+      expect(variant).toBeDefined();
+      expect(brand).toBeDefined();
+      const variantPath = variant
+        ? getMembraneProductPath(canonicalProductSlug(variant))
+        : "";
+      const variantEntry = findEntry(result, defaultLocale, variantPath);
+      const brandEntry = findEntry(
+        result,
+        defaultLocale,
+        getCompatibleBrandPath(brand?.slug ?? ""),
       );
+
+      expect(variantEntry?.alternates?.languages).toEqual({
+        en: localizedUrl("en", variantPath),
+        es: localizedUrl("es", variantPath),
+        "x-default": localizedUrl("en", variantPath),
+      });
+      expect(brandEntry?.alternates?.languages).not.toHaveProperty("zh");
+    });
+
+    it("locks de-listed legacy routes out and keeps Step-4 buyer routes in", async () => {
+      const result = await sitemap();
+      const urls = new Set(result.map((entry) => entry.url));
+
+      // De-listed legacy starter pages + the A+ de-listed /contact path:
+      // no en/es entry, no zh entry.
+      for (const path of [
+        "/products",
+        "/blog",
+        "/custom-project-support",
+        "/contact",
+      ]) {
+        for (const locale of ["en", "es", "zh"]) {
+          expect(urls.has(localizedUrl(locale, path))).toBe(false);
+        }
+      }
+      // De-listed routes must not leak via any alternates map either.
+      for (const entry of result) {
+        for (const alt of Object.values(entry.alternates?.languages ?? {})) {
+          expect(alt).not.toMatch(
+            /\/(products|blog|custom-project-support|contact)$/,
+          );
+        }
+      }
+
+      // The starter `/products/[market]` catalog pages are gated out for
+      // every market slug on every locale (same signal as `/products`).
+      // Reverting the gate in generateCatalogEntries() fails this block.
+      expect(getAllMarketSlugs().length).toBeGreaterThan(0);
+      for (const marketSlug of getAllMarketSlugs()) {
+        const marketPath = getProductMarketPath(marketSlug);
+        for (const locale of ["en", "es", "zh"]) {
+          expect(urls.has(localizedUrl(locale, marketPath))).toBe(false);
+        }
+      }
+
+      // Step-4 buyer surface + real kept legacy pages stay public on en/es.
+      const homePath = sitemapPathForCanonical(getCanonicalPath("home"));
+      const keptPaths = [
+        homePath,
+        getCanonicalPath("quote"),
+        getCanonicalPath("about"),
+        getCanonicalPath("capabilities"),
+        getCanonicalPath("howItWorks"),
+        getCanonicalPath("privacy"),
+        getCanonicalPath("terms"),
+      ];
+      for (const path of keptPaths) {
+        expect(urls.has(localizedUrl("en", path))).toBe(true);
+        expect(urls.has(localizedUrl("es", path))).toBe(true);
+        expect(urls.has(localizedUrl("zh", path))).toBe(false);
+      }
+
+      // Dynamic membrane/compatible buyer routes stay public.
+      const [variant] = productVariants;
+      const [brand] = oemBrands;
+      expect(variant).toBeDefined();
+      expect(brand).toBeDefined();
+      if (variant) {
+        const vPath = getMembraneProductPath(canonicalProductSlug(variant));
+        expect(urls.has(localizedUrl("en", vPath))).toBe(true);
+        expect(urls.has(localizedUrl("es", vPath))).toBe(true);
+      }
+      if (brand) {
+        const bPath = getCompatibleBrandPath(brand.slug);
+        expect(urls.has(localizedUrl("en", bPath))).toBe(true);
+        expect(urls.has(localizedUrl("es", bPath))).toBe(true);
+      }
+    });
+
+    it("maps every emitted sitemap URL to a real route pattern (no orphans)", async () => {
+      const result = await sitemap();
+      const productsPath = getCanonicalPath("products");
+      const staticPaths = new Set(
+        SINGLE_SITE_PUBLIC_STATIC_PAGES.map((page) =>
+          page === "" ? "" : page,
+        ),
+      );
+      const marketPaths = new Set(
+        getAllMarketSlugs().map((slug) => getProductMarketPath(slug)),
+      );
+      const membranePaths = new Set(
+        productVariants.map((variant) =>
+          getMembraneProductPath(canonicalProductSlug(variant)),
+        ),
+      );
+      const brandPaths = new Set(
+        oemBrands.map((brand) => getCompatibleBrandPath(brand.slug)),
+      );
+
+      function isKnownRoute(path: string): boolean {
+        if (staticPaths.has(path)) {
+          return true;
+        }
+        if (path === productsPath || marketPaths.has(path)) {
+          return true;
+        }
+        return membranePaths.has(path) || brandPaths.has(path);
+      }
+
+      const localePrefixes = ["en", "es"].map(
+        (locale) => `${BASE_URL}/${locale}`,
+      );
+
+      for (const entry of result) {
+        const prefix = localePrefixes.find(
+          (candidate) =>
+            entry.url === candidate || entry.url.startsWith(`${candidate}/`),
+        );
+        expect(
+          prefix,
+          `URL not under a public locale: ${entry.url}`,
+        ).toBeDefined();
+        const path = entry.url.slice((prefix ?? "").length);
+        expect(
+          isKnownRoute(path),
+          `Orphan sitemap URL has no backing route: ${entry.url}`,
+        ).toBe(true);
+      }
     });
   });
 });

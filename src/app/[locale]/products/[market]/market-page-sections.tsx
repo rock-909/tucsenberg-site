@@ -7,7 +7,7 @@ import {
   ProductTradeInfo,
 } from "@/components/products/product-specs";
 import { Link } from "@/i18n/routing";
-import { buildProductFamilyContactHref } from "@/lib/contact/product-family-context";
+import { SINGLE_SITE_PRIMARY_CTA_HREF } from "@/config/single-site-links";
 import type { LinkHref } from "@/lib/i18n/route-parsing";
 import {
   buildTranslatedFamilySpecs,
@@ -128,10 +128,7 @@ export function FamilySections({
         familyLabel={familyLabel}
         familyDescription={familyDescription}
         inquiry={{
-          href: buildProductFamilyContactHref({
-            marketSlug,
-            familySlug: family.slug,
-          }),
+          href: SINGLE_SITE_PRIMARY_CTA_HREF,
           label: t("market.familyInquiry.cta", { familyLabel }),
         }}
       />

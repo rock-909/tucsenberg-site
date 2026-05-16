@@ -21,7 +21,8 @@ type PublicStaticPageSeoKey =
   | "content.pages.terms"
   | "content.pages.capabilities"
   | "content.pages.how-it-works"
-  | "content.pages.custom-project-support";
+  | "content.pages.custom-project-support"
+  | "content.pages.quote";
 
 interface PublicStaticPageSitemapConfig {
   include: boolean;
@@ -93,7 +94,10 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/products"),
       navigationKey: "navigation.products",
       seoKey: "catalog.overview",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.9 },
+      // De-listed + noindex: the public en/es catalog surface still leaks
+      // starter slop ("Replaceable catalog example") and 270 `[ES-TODO]`
+      // markers. Re-enable when its own Step rebuilds the catalog content.
+      sitemap: { include: false, changeFrequency: "weekly", priority: 0.9 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/products/page.tsx",
@@ -103,7 +107,9 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/blog"),
       navigationKey: "navigation.blog",
       seoKey: "blog.index",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.85 },
+      // De-listed + noindex: the public es blog surface still leaks
+      // `[ES-TODO]` markers. Re-enable when its own Step rebuilds the blog.
+      sitemap: { include: false, changeFrequency: "weekly", priority: 0.85 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/blog/page.tsx",
@@ -113,7 +119,13 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/contact"),
       navigationKey: null,
       seoKey: "content.pages.contact",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      // De-listed + noindex per the owner-approved A+ decision
+      // (docs/superpowers/decision-brief-non-rfq-contact.md): Phase-1
+      // conversion is the single RFQ `/quote` path with the footer
+      // sales@ email as the non-RFQ fallback — there is NO standalone
+      // generic `/contact` lead path. Re-enable only if a later Step
+      // reintroduces an approved non-RFQ contact surface.
+      sitemap: { include: false, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "contact" },
       routeOwner: "src/app/[locale]/contact/page.tsx",
@@ -163,10 +175,24 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/custom-project-support"),
       navigationKey: null,
       seoKey: "content.pages.custom-project-support",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      // De-listed + noindex: the public en/es surface is still starter
+      // template slop ("Showcase Website Starter", "replaceable page
+      // example") with `[ES-TODO]` markers. Re-enable when its own Step
+      // rebuilds it as real Tucsenberg content.
+      sitemap: { include: false, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "custom-project-support" },
       routeOwner: "src/app/[locale]/custom-project-support/page.tsx",
+    },
+    {
+      pageType: "quote",
+      localizedPaths: localizedPath("/quote"),
+      navigationKey: "navigation.quote",
+      seoKey: "content.pages.quote",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
+      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
+      mdxCollection: null,
+      routeOwner: "src/app/[locale]/quote/page.tsx",
     },
   ] as const satisfies readonly PublicStaticPageDefinition[]);
 
@@ -191,6 +217,21 @@ export function getPublicStaticPageDefinition(
   pageType: PageType,
 ): PublicStaticPageDefinition | undefined {
   return getStaticPageDefinitionsByType()[pageType];
+}
+
+/**
+ * A static page is publicly indexable iff it is included in the public
+ * sitemap. De-listed legacy starter pages (sitemap.include === false) must
+ * also emit `robots: noindex,nofollow` until their own Step rebuilds them.
+ * Page types with no static definition (dynamic catalog/compatibility
+ * routes, home) are not gated here and stay indexable.
+ */
+export function isNoindexStaticPageType(pageType: PageType): boolean {
+  const definition = getStaticPageDefinitionsByType()[pageType];
+  if (definition === undefined) {
+    return false;
+  }
+  return !definition.sitemap.include;
 }
 
 export function getStaticSitemapPages(): string[] {

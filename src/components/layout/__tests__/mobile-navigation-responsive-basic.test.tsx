@@ -248,8 +248,8 @@ describe("Mobile Navigation Responsive - Basic Tests", () => {
       const trigger = screen.getByRole("button");
       await user.click(trigger);
 
-      // Step 2 nav items share the same placeholder target.
-      mockPathname.current = "#coming-soon";
+      // Step 4 wires the membranes nav item to its real route.
+      mockPathname.current = "/membranes/9-inch-epdm-disc-replacement";
       rerender(<MobileNavigation />);
 
       const reopenedTrigger = screen.getByRole("button");

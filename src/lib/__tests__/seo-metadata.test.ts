@@ -199,6 +199,52 @@ describe("SEO Metadata", () => {
       expect(mockGenerateLanguageAlternates).toHaveBeenCalledWith("contact");
     });
 
+    it("marks de-listed legacy starter pages as noindex even for public locales", () => {
+      // products / blog / customProject are de-listed (still leak starter
+      // slop + [ES-TODO]); `contact` is de-listed per the owner-approved
+      // A+ decision (single RFQ /quote path, no generic contact lead
+      // path). All four must be noindex,nofollow on EN/ES.
+      for (const pageType of [
+        "products",
+        "blog",
+        "customProject",
+        "contact",
+      ] as const) {
+        for (const locale of ["en", "es"] as const) {
+          const metadata = generateLocalizedMetadata(locale, pageType);
+          expect(metadata.robots).toEqual({
+            index: false,
+            follow: false,
+            googleBot: {
+              index: false,
+              follow: false,
+              "max-video-preview": -1,
+              "max-image-preview": "large",
+              "max-snippet": -1,
+            },
+          });
+        }
+      }
+    });
+
+    it("keeps the Step-4 buyer + real legacy pages indexable for public locales", () => {
+      // home + the kept legacy pages stay indexed on en/es.
+      for (const pageType of [
+        "home",
+        "quote",
+        "about",
+        "capabilities",
+        "howItWorks",
+        "privacy",
+        "terms",
+      ] as const) {
+        for (const locale of ["en", "es"] as const) {
+          const metadata = generateLocalizedMetadata(locale, pageType);
+          expect(metadata.robots).toMatchObject({ index: true, follow: true });
+        }
+      }
+    });
+
     it("should fall back to SITE_CONFIG values for unknown pages", () => {
       const metadata = generateLocalizedMetadata("en", "unknown" as any);
 

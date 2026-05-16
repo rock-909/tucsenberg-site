@@ -15,6 +15,9 @@ import {
   type NavigationItem,
 } from "../navigation";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
+import { FEATURED_MEMBRANE_HREF } from "@/config/single-site-links";
+
+const CANONICAL_MEMBRANE_HREF = "/membranes/9-inch-epdm-disc-replacement";
 
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
@@ -56,16 +59,16 @@ describe("navigation", () => {
       expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
     });
 
-    it("should match the Tucsenberg placeholder navigation order", () => {
+    it("should match the Tucsenberg Step 4 navigation order", () => {
       expect(mainNavigation).toEqual([
         {
           key: "membranes",
-          href: "#coming-soon",
+          href: CANONICAL_MEMBRANE_HREF,
           translationKey: "navigation.membranes",
         },
         {
           key: "compatibility",
-          href: "#coming-soon",
+          href: "/compatible/sanitaire",
           translationKey: "navigation.compatibility",
         },
         {
@@ -75,7 +78,7 @@ describe("navigation", () => {
         },
         {
           key: "quote",
-          href: "#coming-soon",
+          href: "/quote",
           translationKey: "navigation.quote",
         },
       ]);
@@ -99,15 +102,15 @@ describe("navigation", () => {
         expect(item.key).toBeTruthy();
         expect(item.href).toBeTruthy();
         expect(item.translationKey).toBeTruthy();
-        expect(item.href).toBe("#coming-soon");
+        expect(item.href).toMatch(/^(\/|#coming-soon$)/);
         expect(item.translationKey).toMatch(/^navigation\./);
       });
     });
 
-    it("should have quote item pointing to the safe placeholder", () => {
+    it("should point the quote item at the quote route", () => {
       const quoteItem = mainNavigation.find((item) => item.key === "quote");
       expect(quoteItem).toBeDefined();
-      expect(quoteItem!.href).toBe("#coming-soon");
+      expect(quoteItem!.href).toBe("/quote");
     });
 
     it("should have unique keys", () => {
@@ -116,13 +119,15 @@ describe("navigation", () => {
       expect(keys.length).toBe(uniqueKeys.size);
     });
 
-    it("should keep all hrefs on the shared placeholder", () => {
+    it("should wire hrefs to the Step 4 routes with materials still pending", () => {
       expect(mainNavigation.map((item) => item.href)).toEqual([
+        CANONICAL_MEMBRANE_HREF,
+        "/compatible/sanitaire",
         "#coming-soon",
-        "#coming-soon",
-        "#coming-soon",
-        "#coming-soon",
+        "/quote",
       ]);
+      // Nav uses the centralized canonical featured-membrane href.
+      expect(FEATURED_MEMBRANE_HREF).toBe(CANONICAL_MEMBRANE_HREF);
     });
   });
 
@@ -326,12 +331,12 @@ describe("navigation", () => {
   });
 
   describe("integration tests", () => {
-    it("should work with the real placeholder navigation items", () => {
+    it("should work with the real Step 4 navigation items", () => {
       const quoteItem = mainNavigation.find((item) => item.key === "quote");
       expect(quoteItem).toBeDefined();
 
       const localizedHref = getLocalizedHref(quoteItem!.href, "en");
-      expect(localizedHref).toBe("#coming-soon");
+      expect(localizedHref).toBe("/en/quote");
 
       expect(quoteItem!.translationKey).toBe("navigation.quote");
     });
@@ -342,8 +347,13 @@ describe("navigation", () => {
         const enHref = getLocalizedHref(item.href, "en");
         const zhHref = getLocalizedHref(item.href, "zh");
 
-        expect(enHref).toBe("#coming-soon");
-        expect(zhHref).toBe("#coming-soon");
+        if (item.href === "#coming-soon") {
+          expect(enHref).toBe("#coming-soon");
+          expect(zhHref).toBe("#coming-soon");
+        } else {
+          expect(enHref).toBe(`/en${item.href}`);
+          expect(zhHref).toBe(`/zh${item.href}`);
+        }
       });
     });
   });

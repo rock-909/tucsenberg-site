@@ -6,6 +6,20 @@ export {
 } from "@/data/product-compatibility/catalog";
 export { compatibilityMappings } from "@/data/product-compatibility/mappings";
 export {
+  getBrandCompatibility,
+  getModelCompatibility,
+  getProductCompatibility,
+} from "@/data/product-compatibility/accessors";
+export {
+  allCanonicalProductSlugs,
+  canonicalProductSlug,
+  canonicalProductSlugForVariantId,
+  getProductCompatibilityByCanonicalSlug,
+  resolveCanonicalProductSlugFromSku,
+  toCanonicalProductSlug,
+} from "@/data/product-compatibility/product-slug";
+export {
+  buildClientSearchIndex,
   compatibilityByBrand,
   compatibilityByModel,
   compatibilityByProduct,
@@ -15,6 +29,10 @@ export {
   type ModelCompatibilityEntry,
   type ProductCompatibilityEntry,
 } from "@/data/product-compatibility/indexes";
+export type {
+  ClientSearchIndex,
+  ClientSearchResults,
+} from "@/data/product-compatibility/search-match";
 export {
   compatibilityMappingSchema,
   confidenceSchema,

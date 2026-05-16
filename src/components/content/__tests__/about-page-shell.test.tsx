@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AboutPageShell } from "../about-page-shell";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import type { PageMetadata } from "@/types/content.types";
 
 vi.mock("@/components/mdx/mdx-content", () => ({
@@ -211,7 +212,9 @@ describe("AboutPageShell", () => {
     expect(screen.queryByText(/faq:/)).not.toBeInTheDocument();
   });
 
-  it("renders CTA with the Step 2 coming-soon placeholder link", () => {
+  it("routes the about CTA to the RFQ quote path, not the dead contact stub", () => {
+    // A+ non-RFQ contact decision: the about secondary CTA no longer stands in
+    // for the deleted generic-contact lane; it routes to /quote.
     render(
       <AboutPageShell
         metadata={baseMetadata}
@@ -221,7 +224,11 @@ describe("AboutPageShell", () => {
     );
 
     const ctaLink = screen.getByRole("link", { name: /view products/i });
-    expect(ctaLink).toHaveAttribute("href", "#coming-soon");
+    expect(ctaLink).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.quote);
+    expect(ctaLink).not.toHaveAttribute(
+      "href",
+      SINGLE_SITE_ROUTE_HREFS.comingSoon,
+    );
   });
 
   it("falls back to title when heroTitle is absent", () => {

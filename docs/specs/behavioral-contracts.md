@@ -22,24 +22,33 @@
 
 ### Navigation & Discovery
 
-#### BC-001: Homepage loads and shows core value proposition
+#### BC-001: Homepage loads and routes the buyer into a part-number path
 
-A buyer landing on the homepage sees the hero section with a clear heading, proof metrics (countries, experience), and two CTA buttons leading to /contact and /products.
+A buyer landing on the homepage sees the brand H1 and compatibility sub-claim, an operable hero compatibility search (typing a known OEM part number surfaces a matching result link into the OEM compatibility path), an OEM brand grid where each brand links to its `/compatible/{slug}` page, and a final CTA that links to the quote page and to a membranes product page.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
 | Test Type | E2E |
 | Test File | `tests/e2e/homepage.spec.ts` |
-| Status | Partial |
+| Status | Covered |
 
-Notes: Hero section visibility and CTA link count are tested. CTA `href` targets (/contact, /products) are not explicitly verified.
+Notes: E2E runs for `/en` and `/es`. It verifies the brand H1, the hero compatibility search resolving a known OEM part number (`00223` → Sanitaire model) to a `/compatible/sanitaire` result link, an OEM brand card linking to `/compatible/sanitaire`, and the final CTA `href` targets (`/quote` and the canonical descriptive membrane product page `/membranes/9-inch-epdm-disc-replacement`) in the active locale. The spec fails on page runtime/console errors.
+
+Membrane product URL contract: the canonical product detail URL is the descriptive buyer slug `{diameter}-{unit}-{material}-{form}-replacement` (e.g. `/membranes/9-inch-epdm-disc-replacement`). The legacy data-layer SKU slug (`/membranes/tuc-d9-epdm`) issues a permanent (308) redirect to the canonical descriptive URL, preserving the locale prefix, so datasheet / QR / already-shared SKU links never 404. The sitemap emits only the canonical descriptive slug per public locale (ZH excluded). Proof: `src/data/product-compatibility/__tests__/product-slug.test.ts`, `src/app/[locale]/membranes/[product]/__tests__/page.test.tsx`, `src/app/__tests__/sitemap.test.ts`.
 
 ---
 
-#### BC-002: Buyer can navigate to all main pages from the header
+#### BC-002: Buyer can navigate the Step-4 information architecture from the header
 
-Desktop/compact desktop: From 840px and above, the header shows direct primary links to Home, Products, Blog, and About. Contact is a separate quick action beside the language switcher, not a primary navigation item. Mobile: Below 840px, the hamburger menu opens a sheet with the same main links plus the contact action. Clicking any public link reaches its matching localized page and must not land on a 404.
+The public navigation is the Step-4 buyer IA: Membranes, Compatibility, Materials, Quote. Desktop/compact desktop: from 840px and above the header shows these items directly; the primary CTA beside the language switcher is a separate quick action that routes to the RFQ quote page (`/quote`), not a placeholder. Mobile: below 840px the hamburger menu opens a sheet with the same items plus the primary CTA. Clicking a shipped item reaches its live localized page and must not land on `#coming-soon` or a 404:
+
+- Membranes → the featured membrane product page (canonical descriptive slug, `/membranes/9-inch-epdm-disc-replacement`).
+- Compatibility → the Sanitaire OEM compatibility page (`/compatible/sanitaire`).
+- Quote → the RFQ quote page (`/quote`).
+- Materials → intentionally still `#coming-soon`; Materials is genuine future scope and performs only a stable in-page hash navigation that preserves query params and does not break the page.
+
+Removed starter links (Home, Products, Blog, About, Capabilities, How It Works, Custom, Contact) are no longer public nav items. Shipped Step-4 nav items must not regress back to the `#coming-soon` placeholder.
 
 | Field | Value |
 |-------|-------|
@@ -47,6 +56,8 @@ Desktop/compact desktop: From 840px and above, the header shows direct primary l
 | Test Type | E2E |
 | Test File | `tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts` |
 | Status | Covered |
+
+Notes: `navigation.spec.ts` covers this for both public locales. The "Localized nav href smoke (BC-002)" describe block is parameterized over `en` AND `es`, navigating directly to each locale root (no `/en` `beforeEach`) and, in both header (desktop) and mobile-sheet modes, asserting each shipped item's `href` resolves to the current-locale live route (`/{locale}/membranes/9-inch-epdm-disc-replacement`, `/{locale}/compatible/sanitaire`, `/{locale}/quote`) using the real merged `messages/es` navigation labels, and that Materials stays `#coming-soon`. The `/en` desktop and mobile suites additionally click each shipped item to confirm it lands on the real route with an `<h1>`, assert removed starter links are absent, and keep the Materials placeholder hash-nav and query-param preservation covered. Localized coverage is en/es over desktop header + mobile sheet only — it does not assert post-click landing for `/es` (the es row proves resolved hrefs and label translation, not full click-through). Header/mobile primary-CTA → `/quote` is also covered at component level by `src/components/layout/__tests__/header.test.tsx` and `src/components/layout/__tests__/mobile-navigation.test.tsx`.
 
 ---
 
@@ -138,22 +149,20 @@ Notes: Required attribute presence is verified. Client-side validation UX (error
 
 ---
 
-#### BC-009: Product family inquiry handoff opens Contact with context
+#### BC-009: Retired — Product family inquiry handoff opens Contact with context
 
-On any `/products/[market]` page, each rendered product family has a server-rendered inquiry link. The route builds an i18n `Link` href object for Contact with selected market and family context preserved through validated query parameters. At runtime, next-intl localizes that internal href to the active locale path.
+The product-family → Contact handoff was retired in commit `244e095`. The handoff library (`src/lib/contact/product-family-context.ts`), the Contact context-notice component, and the `tests/e2e/product-family-contact-handoff.spec.ts` E2E proof were all deleted. There is no longer a standalone generic `/contact` lead path (`/contact` is de-listed + noindex per the A+ single-RFQ-path decision, BC-023).
 
-The current critical market-page path is Contact handoff, not an in-page drawer. `/api/inquiry` remains covered by API-level tests for the legacy/future product inquiry path, but it is not the required market-page user flow for this contract.
+Superseding behavior: each rendered product family on a `/products/[market]` page now exposes an inquiry CTA that links to the RFQ quote page (`/quote`) via `SINGLE_SITE_PRIMARY_CTA_HREF`. The CTA carries NO contact/market/family query context — it is a plain link to `/quote`. The market-level page CTA also points to `/quote`. The RFQ submission path itself is covered by BC-026; `/api/inquiry` remains covered by API-level tests (BC-011, BC-012, BC-024) for the legacy/future product inquiry path, but it is not a market-page user flow.
 
 | Field | Value |
 |-------|-------|
 | Priority | Critical |
-| Test Type | E2E + Unit + Source Contract |
-| Test File | `tests/e2e/product-family-contact-handoff.spec.ts`, `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`, `src/app/[locale]/contact/__tests__/page.test.tsx`, `src/app/[locale]/products/__tests__/interactive-islands-usage.test.ts` |
-| Status | Covered |
+| Test Type | Unit |
+| Test File | `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx` |
+| Status | Retired |
 
-Notes: The handoff must pass only internal slugs in the URL. Contact must validate `intent`, `market`, and `family` before displaying labels. Invalid query values are ignored and are never rendered directly.
-
-Proof boundary: component/unit tests prove the internal href object and Contact validation. `tests/e2e/product-family-contact-handoff.spec.ts` proves local browser runtime renders `/en/contact?...` and `/zh/contact?...` URLs for the North America product family handoff and that clicking the links displays the validated Contact context notice. This is local browser/runtime proof, not Cloudflare deployed proof.
+Notes: The active proof is that the family inquiry CTA and the market CTA both resolve to `/quote` and carry no contact context (`market-landing.test.tsx` → "routes each family inquiry CTA to the RFQ quote path" and "market CTA routes to the RFQ quote path"). No tested behavior is claimed for a context-carrying handoff because none exists in the merged tree.
 
 ---
 
@@ -363,9 +372,23 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 
 ---
 
-#### BC-023: Sitemap includes all public pages in both locales
+#### BC-023: Sitemap includes only active public pages, en + es only
 
-/sitemap.xml lists all active public pages (homepage, about, contact, products, products/[market], custom-project-support, privacy, terms) with hreflang alternates for en and zh. Retired blog routes are explicitly excluded.
+/sitemap.xml lists only the active public surface for the two public SEO locales (`en`, `es`). `zh` is a dev/internal-only runtime locale and must never appear as a sitemap URL or in any hreflang alternates map (each entry's `alternates.languages` is `en` + `es` + `x-default` → `en`).
+
+Included:
+
+- Homepage.
+- Active public static pages — every `PUBLIC_STATIC_PAGE_DEFINITIONS` entry with `sitemap.include: true`: home, about, privacy, terms, capabilities, how-it-works, quote.
+- Dynamic Step-4 buyer routes: one canonical descriptive membrane URL per `productVariant` (`/membranes/[product]`; the legacy SKU slug is a redirect source and is NOT emitted) and one OEM compatibility URL per `oemBrand` (`/compatible/[brand]`).
+
+Excluded / de-listed (`sitemap.include: false`, also `robots: noindex,nofollow`):
+
+- Legacy starter `products` overview and its `/products/[market]` catalog children (the catalog child emission is gated on `isNoindexStaticPageType("products")`).
+- Legacy starter `blog` index and posts.
+- `custom-project-support`.
+- `contact` (de-listed + noindex per the A+ single-RFQ-path decision; see BC-009).
+- The retired `capabilities/bending-machines` route (BC-018).
 
 | Field | Value |
 |-------|-------|
@@ -373,6 +396,8 @@ Notes: `tests/integration/api/health.test.ts` covers the route in-suite. Deploye
 | Test Type | Unit |
 | Test File | `src/app/__tests__/sitemap.test.ts`, `src/lib/__tests__/sitemap-utils.test.ts` |
 | Status | Covered |
+
+Notes: `sitemap.test.ts` proves the en/es-only locale set, zh exclusion from URLs and alternates, the de-listing of products/products[market]/blog/custom-project-support/contact for every locale, the canonical-vs-SKU membrane slug rule, the OEM brand entries, and that every emitted URL maps to a real backing route (no orphans).
 
 ---
 
@@ -404,15 +429,30 @@ All 5 market spec files contain required fields (product families, dimensions, s
 
 ---
 
+#### BC-026: Buyer can submit an RFQ quote request
+
+A buyer reaching the RFQ quote page (`/quote`) can submit the rich RFQ form. The submission posts to `/api/quote`, which runs the standard browser anti-abuse chain (body-size gate, `rfqLeadSchema` Zod validation, rate limit, Turnstile), composes the RFQ into a product-inquiry lead, and rides the audited `processLead` pipeline (Airtable record first, then optional owner email). The documented success condition is Airtable record creation per `.claude/rules/security.md`; an owner-email failure after the record is created still returns user success and is logged internally only — "email delivered" is explicitly NOT part of the proof. Airtable failure returns failure and must not send email.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Integration |
+| Test File | `src/app/api/quote/__tests__/quote-api.test.ts` |
+| Status | Partial |
+
+Notes: Proof boundary — the `/quote` → `/api/quote` → `processLead` chain is covered at the route layer with only external services mocked (Turnstile + lead pipeline); the internal protection chain (JSON parse, `rfqLeadSchema`, rate limit, Turnstile branching, `requirements` composition) runs as real code. Route-tested anti-abuse branches: missing Turnstile token → 400; a normal Turnstile verification failure → 400; a Turnstile service outage (`network-error`/`timeout`/`not-configured`) → 503; each rejection path is asserted to NOT call `processLead`. The success path asserts `processLead` is invoked with the composed product lead and that an owner-email failure after record creation still returns user success (logged internally only — "email delivered" is explicitly NOT proven). Component-level form behavior (search-param pre-fill, source-context propagation, file name/size-only handling, submit gating) is covered by the `src/app/[locale]/quote/__tests__` suite. NOT automated: a production-like deployed RFQ submission with a real Turnstile challenge and a real Airtable record write — that remains a manual launch gate. An end-to-end Playwright RFQ smoke is the remaining gap before this can move from Partial to Covered.
+
+---
+
 ## Coverage Summary
 
 | Category | Active Total | Covered | Partial | Untested | Retired |
 |----------|--------------|---------|---------|----------|---------|
-| Navigation & Discovery | 6 | 4 | 2 | 0 | 0 |
-| Inquiry & Conversion | 6 | 2 | 4 | 0 | 0 |
+| Navigation & Discovery | 6 | 5 | 1 | 0 | 0 |
+| Inquiry & Conversion | 6 | 1 | 5 | 0 | 1 |
 | Content & Information | 6 | 4 | 1 | 1 | 1 |
 | Resilience & Edge Cases | 6 | 4 | 2 | 0 | 0 |
-| **Total** | **24** | **14** | **9** | **1** | **1** |
+| **Total** | **24** | **14** | **9** | **1** | **2** |
 
 Retired contracts are kept for historical traceability but excluded from active coverage totals.
 
@@ -420,13 +460,14 @@ Retired contracts are kept for historical traceability but excluded from active 
 
 ### Critical gaps (no or partial coverage on Critical contracts)
 
-- **BC-001** (Partial): Hero CTA links need `href` verification for /contact and /products
+- No current critical gap for BC-001: the homepage compatibility-search entry, OEM brand grid, and quote/membranes CTA `href` targets are E2E-covered for `/en` and `/es`.
 - **BC-007** (Partial): End-to-end contact form submission flow not tested (Turnstile blocker)
 - No current critical content gap for BC-013: products overview now has focused unit coverage and an E2E navigation journey.
 
 ### High-priority gaps
 
 - **BC-010** (Partial): Contact submission proof is not production-like in both locales
+- **BC-026** (Partial): RFQ quote chain is route-level covered with external services mocked; no end-to-end Playwright RFQ smoke and no production-like deployed Airtable proof (manual launch gate)
 - No current high-priority gap for BC-024: starter route duplicate-submission behavior is now covered.
 
 ### Medium-priority gaps

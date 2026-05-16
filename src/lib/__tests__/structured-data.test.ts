@@ -186,10 +186,11 @@ describe("Structured Data Generation", () => {
         description:
           "Reusable showcase website starter for product or service presentation",
         url: "https://example.com",
+        areaServed: "Worldwide",
         contactPoint: {
           "@type": "ContactPoint",
-          contactType: "customer service",
-          availableLanguage: ["en", "es"],
+          contactType: "sales",
+          availableLanguage: ["English", "Spanish"],
         },
       });
       expect(JSON.stringify(schema)).not.toContain('"zh"');
@@ -197,6 +198,12 @@ describe("Structured Data Generation", () => {
         (schema.contactPoint as Record<string, unknown>).telephone,
       ).toBeUndefined();
       expect(JSON.stringify(schema)).not.toContain("+86-518-0000-0000");
+      // Placeholder example-domain email must be gated out of public schema.
+      expect((schema as Record<string, unknown>).email).toBeUndefined();
+      expect(
+        (schema.contactPoint as Record<string, unknown>).email,
+      ).toBeUndefined();
+      expect(JSON.stringify(schema)).not.toContain("contact@example.example");
       expect((schema as Record<string, unknown>).logo).toBeUndefined();
       expect(JSON.stringify(schema)).not.toContain("/images/logo.svg");
 
@@ -217,6 +224,25 @@ describe("Structured Data Generation", () => {
         locale: "zh",
         namespace: "structured-data",
       });
+    });
+
+    it("surfaces a real receiving email in organization + contactPoint", async () => {
+      const schema = await generateLocalizedStructuredData(
+        "en",
+        "Organization",
+        { email: "sales@tucsenberg.com" },
+      );
+
+      expect((schema as Record<string, unknown>).email).toBe(
+        "sales@tucsenberg.com",
+      );
+      expect((schema.contactPoint as Record<string, unknown>).email).toBe(
+        "sales@tucsenberg.com",
+      );
+      expect((schema.contactPoint as Record<string, unknown>).contactType).toBe(
+        "sales",
+      );
+      expect((schema as Record<string, unknown>).areaServed).toBe("Worldwide");
     });
 
     it("filters ES-TODO social placeholders from organization sameAs", async () => {

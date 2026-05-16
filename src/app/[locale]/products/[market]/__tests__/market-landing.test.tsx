@@ -233,16 +233,17 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders server links from each family to Contact with context", async () => {
+    it("routes each family inquiry CTA to the RFQ quote path", async () => {
       await renderPage("north-america");
 
       const sweepsLink = screen.getByRole("link", {
         name: /request quote for sample product shapes/i,
       });
 
-      expect(sweepsLink).toHaveAttribute(
+      expect(sweepsLink).toHaveAttribute("href", "/quote");
+      expect(sweepsLink).not.toHaveAttribute(
         "href",
-        "/contact?intent=product-family&market=north-america&family=sample-product-shapes",
+        expect.stringContaining("intent=product-family"),
       );
       expect(sweepsLink).not.toHaveAttribute(
         "href",
@@ -327,12 +328,15 @@ describe("Market Landing Page", () => {
     });
   });
 
-  describe("Scenario 1.7: CTA links to the Step 2 placeholder", () => {
-    it("renders CTA section with link to #coming-soon", async () => {
+  describe("Scenario 1.7: market CTA routes to the RFQ quote path", () => {
+    it("renders the market CTA linking to /quote, not the dead contact stub", async () => {
+      // A+ non-RFQ contact decision: the market-landing secondary CTA no
+      // longer stands in for the deleted generic-contact lane.
       await renderPage("north-america");
 
       const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "#coming-soon");
+      expect(ctaLink).toHaveAttribute("href", "/quote");
+      expect(ctaLink).not.toHaveAttribute("href", "#coming-soon");
     });
 
     it("renders CTA heading with market label", async () => {

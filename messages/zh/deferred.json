@@ -60,11 +60,6 @@
     }
   },
   "contact": {
-    "context": {
-      "productFamilyLabel": "你正在咨询：",
-      "marketFallbackLabel": "膜片 review 路径",
-      "familyFallbackLabel": "替换膜片系列"
-    },
     "title": "联系我们",
     "description": "联系我们的团队进行咨询、支持或合作机会。",
     "features": "多种联系方式，获得您需要的支持",
@@ -456,7 +451,7 @@
     "cta": {
       "heading": "开始定制项目",
       "description": "告诉我们目标、受众、内容、时间计划和替换需求。这个示例应改成你的真实需求入口。",
-      "button": "立即开始"
+      "button": "发送您的项目与替换需求"
     }
   }
 }

@@ -12,7 +12,7 @@ const LAYOUT_SOURCE_PATH = "src/app/[locale]/layout.tsx";
 describe("client message scoping", () => {
   it("keeps only namespaces needed by client islands", () => {
     const scoped = pickClientMessages({
-      home: { hero: "server-only" },
+      home: { hero: { searchLabel: "Compatibility search" } },
       faq: { sectionTitle: "server-only" },
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
@@ -24,6 +24,7 @@ describe("client message scoping", () => {
 
     expect(scoped).toEqual({
       apiErrors: { UNKNOWN_ERROR: "Unknown" },
+      home: { hero: { searchLabel: "Compatibility search" } },
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
       contact: { form: { title: "Contact" } },
@@ -39,8 +40,11 @@ describe("client message scoping", () => {
       "contact",
       "cookie",
       "errors",
+      "home",
       "language",
       "navigation",
+      "quote",
+      "search",
     ]);
   });
 
@@ -73,8 +77,8 @@ describe("client message scoping", () => {
     expect(scoped).toHaveProperty("errors");
     expect(scoped).toHaveProperty("language");
     expect(scoped).toHaveProperty("navigation");
+    expect(scoped).toHaveProperty("home");
     expect(scoped).not.toHaveProperty("footer");
-    expect(scoped).not.toHaveProperty("home");
     expect(scoped).not.toHaveProperty("faq");
     expect(scoped).not.toHaveProperty("products");
   });

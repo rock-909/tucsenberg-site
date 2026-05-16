@@ -1,4 +1,4 @@
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
+import { SINGLE_SITE_PRIMARY_CTA_HREF } from "@/config/single-site-links";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
@@ -19,56 +19,6 @@ export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
  * - `privacy` / `terms` heading-prefix constants
  * - `slugify`, heading parsers, JSON-LD object literals, and page-local helpers
  */
-
-export const SINGLE_SITE_HOME_GRID_SECTION_ORDER = [
-  "hero",
-  "starterBoundary",
-  "chain",
-  "products",
-  "resources",
-  "sampleCta",
-  "scenarios",
-  "quality",
-] as const;
-
-export const SINGLE_SITE_HOME_TRAILING_SECTION_ORDER = ["finalCta"] as const;
-
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS = [
-  "structure",
-  "content",
-  "deployment",
-  "inquiry",
-  "multilingual",
-] as const;
-
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS = [
-  "pageStructure",
-  "replacementSurface",
-  "inquiryPath",
-  "cloudflareFoundation",
-] as const;
-
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS = [
-  "brand",
-  "content",
-  "forms",
-  "deploy",
-] as const;
-
-export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
-  "est",
-  "countries",
-  "range",
-  "production",
-] as const;
-
-export const SINGLE_SITE_HOME_FINAL_TRUST_ITEMS = ["countries"] as const;
-
-export const SINGLE_SITE_HOME_SCENARIO_ITEMS = [
-  "item1",
-  "item2",
-  "item3",
-] as const;
 
 export const SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS = [
   "quality",
@@ -104,29 +54,16 @@ export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
   },
 ] as const;
 
-export const SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS = [
-  "commitment1",
-  "commitment2",
-  "commitment3",
-  "commitment4",
-  "commitment5",
-] as const;
-
-export const SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS = [
-  "exampleA",
-  "exampleB",
-  "exampleC",
-  "exampleD",
-] as const;
-
-export const SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS = [
-  "iso9001",
-  "standards",
-  "countries",
-] as const;
-
+/**
+ * Step-4 (A+) non-RFQ contact decision: the about / products / custom-project
+ * secondary CTAs previously pointed at the dead `#coming-soon` generic-contact
+ * placeholder. Phase-1 conversion is the single RFQ `/quote` path, so they now
+ * route to the canonical quote route (label semantics are compatibility /
+ * quote-help, not "Contact us"). Only genuinely-future surfaces such as the
+ * `materials` footer link stay `#coming-soon`.
+ */
 export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
-  ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.products,
+  ctaHref: SINGLE_SITE_PRIMARY_CTA_HREF,
 } as const;
 
 const SPECIALTY_MARKET_SLUG = "specialty-product-systems" as const;
@@ -139,7 +76,7 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   standardMarketSlugs,
   specialtyMarketSlug: SPECIALTY_MARKET_SLUG,
   marketLanding: {
-    ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
+    ctaHref: SINGLE_SITE_PRIMARY_CTA_HREF,
   },
 } as const;
 
@@ -157,5 +94,5 @@ export const SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION = {
     "qualityAssurance",
   ],
   processStepCount: 5,
-  ctaHref: SINGLE_SITE_HOME_LINK_TARGETS.contact,
+  ctaHref: SINGLE_SITE_PRIMARY_CTA_HREF,
 } as const;

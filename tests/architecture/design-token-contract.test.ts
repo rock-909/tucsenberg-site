@@ -11,9 +11,8 @@ const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/forms/contact-form-feedback.tsx",
   "src/components/forms/contact-form-container.tsx",
   "src/components/security/turnstile.tsx",
-  "src/components/sections/quality-section.tsx",
-  "src/components/sections/chain-section.tsx",
-  "src/components/sections/scenarios-section.tsx",
+  "src/app/[locale]/page.tsx",
+  "src/components/search/home-hero-search.tsx",
   FOOTER_COMPONENT_SOURCE,
 ] as const;
 
@@ -121,6 +120,46 @@ const FOOTER_SURFACE_TOKEN_EXPECTATIONS = {
 
 const FOOTER_STYLE_TOKEN_TAILWIND_SOURCE =
   '@source "../config/footer-style-tokens.ts";';
+
+// Step-4 flagship page sources whose teal accents regressed when they
+// referenced an undefined `--brand-teal` custom property. This guardrail keeps
+// every `var(--…)` they reference resolvable to a token defined in globals.css.
+const STEP_4_TOKEN_CONSUMER_FILES = [
+  "src/app/[locale]/page.tsx",
+  "src/app/[locale]/compatible/[brand]/brand-compatibility-filter.tsx",
+  "src/app/[locale]/membranes/[product]/compatibility-section.tsx",
+  "src/components/search/home-hero-search.tsx",
+] as const;
+
+function collectVarReferences(source: string) {
+  const references = new Set<string>();
+  const pattern = /var\(\s*(--[a-zA-Z0-9-]+)\s*[),]/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(source)) !== null) {
+    const token = match[1];
+    if (token) {
+      references.add(token);
+    }
+  }
+
+  return references;
+}
+
+function collectDefinedCustomProperties(css: string) {
+  const definitions = new Set<string>();
+  const pattern = /(--[a-zA-Z0-9-]+)\s*:/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(css)) !== null) {
+    const token = match[1];
+    if (token) {
+      definitions.add(token);
+    }
+  }
+
+  return definitions;
+}
 
 function readRepoFile(filePath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo files
@@ -396,6 +435,28 @@ describe("design token contract", () => {
       css.match(BANNED_INLINE_BRAND_PATTERN),
       `${GLOBALS_CSS} should not keep old brand hex or rgba values, including high-contrast overrides`,
     ).toBeNull();
+  });
+
+  it("resolves every var(--…) referenced by Step-4 pages to a defined custom property", () => {
+    const definedTokens = collectDefinedCustomProperties(
+      stripCssComments(readRepoFile(GLOBALS_CSS)),
+    );
+
+    for (const filePath of STEP_4_TOKEN_CONSUMER_FILES) {
+      const source = stripCssComments(readRepoFile(filePath));
+
+      expect(
+        source.includes("var(--brand-teal)"),
+        `${filePath} must not reference the undefined --brand-teal token (use --color-brand-accent)`,
+      ).toBe(false);
+
+      for (const token of collectVarReferences(source)) {
+        expect(
+          definedTokens.has(token),
+          `${filePath} references var(${token}) but ${GLOBALS_CSS} does not define ${token}`,
+        ).toBe(true);
+      }
+    }
   });
 
   it("keeps high contrast overrides off old brand values", () => {

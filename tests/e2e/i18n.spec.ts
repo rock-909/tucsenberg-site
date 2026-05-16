@@ -14,6 +14,39 @@ import {
 } from "./test-environment-setup";
 
 const PUBLIC_NAV_ITEMS = ["Membranes", "Compatibility", "Materials", "Quote"];
+// Nav labels are real next-intl strings and DO translate at runtime — the
+// merged `messages/es/critical.json` "nav" values. Asserting English nav copy
+// on an `/es` page is the same contract bug Gap-1 fixes (it passed even when
+// nothing translated). Kept in lockstep with the EN list order.
+const PUBLIC_NAV_ITEMS_ES = [
+  "Membranas",
+  "Compatibilidad",
+  "Materiales",
+  "Cotización",
+];
+
+/**
+ * Step-4 home is a compatibility-search hero, not the deleted starter home —
+ * there is no `hero-section` testid. These are the real merged values from
+ * `messages/{locale}/critical.json` ("home") and `messages/es/critical.json`
+ * ("nav"), reused so this i18n smoke proves locale-correct buyer copy without
+ * over-coupling to layout. Kept aligned with `homepage.spec.ts`.
+ */
+interface HomeLocaleCopy {
+  readonly heroTitle: string;
+  readonly searchLabel: string;
+}
+
+const HOME_COPY: Record<"en" | "es", HomeLocaleCopy> = {
+  en: {
+    heroTitle: "Find Your Replacement Membrane",
+    searchLabel: "Compatibility search",
+  },
+  es: {
+    heroTitle: "Encuentre su membrana de repuesto",
+    searchLabel: "Búsqueda de compatibilidad",
+  },
+};
 
 /**
  * Get the open language dropdown (avoids strict mode violation from closed instances)
@@ -55,9 +88,14 @@ test.describe("Internationalization (i18n)", () => {
     const htmlLang = await page.locator("html").getAttribute("lang");
     expect(htmlLang).toBe("en");
 
-    // Verify English content is displayed（严格模式下只使用第一个 hero section）
-    const heroSection = page.getByTestId("hero-section").first();
-    await expect(heroSection).toBeVisible();
+    // Verify English Step-4 home content: the compatibility-search hero H1
+    // and search combobox (no deleted `hero-section` testid).
+    await expect(
+      page.getByRole("heading", { level: 1, name: HOME_COPY.en.heroTitle }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: HOME_COPY.en.searchLabel }),
+    ).toBeVisible();
 
     // Check navigation per form factor
     if (await isHeaderInMobileMode(page)) {
@@ -111,52 +149,18 @@ test.describe("Internationalization (i18n)", () => {
       await waitForLoadWithFallback(page);
       await waitForStablePage(page);
 
-      // Prefer semantic verification with fallback for cross-browser timing
-      try {
-        await expect(page.locator("html")).toHaveAttribute("lang", "es");
-      } catch {
-        // Fallback: verify Spanish placeholder UI is present
-        const nav = getNav(page);
-        await expect(
-          nav.getByRole("link", { name: "Membranes" }),
-        ).toBeVisible();
-      }
-
-      // Verify Spanish navigation is displayed (per form factor)
-      {
-        const isMobile = await isHeaderInMobileMode(page);
-        if (isMobile) {
-          const mobileMenuButton = getHeaderMobileMenuButton(page);
-          await expect(mobileMenuButton).toBeVisible();
-          // Open mobile menu to inspect links
-          try {
-            await mobileMenuButton.tap();
-          } catch {
-            // Fallback to click if tap fails
-            await mobileMenuButton.click();
-          }
-          const mobileNavSheet = page.getByRole("dialog", {
-            name: /mobile navigation/i,
-          });
-          await expect(mobileNavSheet).toBeVisible();
-          await expect(
-            mobileNavSheet.getByRole("link", { name: "Membranes" }),
-          ).toBeVisible();
-          await expect(
-            mobileNavSheet.getByRole("link", { name: "Quote" }),
-          ).toBeVisible();
-        } else {
-          const nav = getNav(page);
-          await expect(
-            nav.getByRole("link", { name: "Membranes" }),
-          ).toBeVisible();
-          await expect(nav.getByRole("link", { name: "Quote" })).toBeVisible();
-        }
-      }
-
-      // Verify hero section content is rendered（页面存在多个 hero section 时仅断言第一个）
-      const heroSection = page.getByTestId("hero-section").first();
-      await expect(heroSection).toBeVisible();
+      // After switching locale the buyer-facing home copy must be Spanish.
+      // Assert the merged Spanish hero H1 and search combobox label (the
+      // previous assertions here checked ENGLISH nav copy + a deleted
+      // `hero-section` testid — they passed even with nothing translated, so
+      // they proved nothing about the Spanish render).
+      await waitForHtmlLang(page, "es");
+      await expect(
+        page.getByRole("heading", { level: 1, name: HOME_COPY.es.heroTitle }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("combobox", { name: HOME_COPY.es.searchLabel }),
+      ).toBeVisible();
     });
 
     test("should switch from Spanish back to English", async ({ page }) => {
@@ -279,12 +283,14 @@ test.describe("Internationalization (i18n)", () => {
       await page.waitForURL("**/es");
       await waitForLoadWithFallback(page);
 
-      // Prefer semantic verification with fallback due to mobile timing windows
+      // Prefer semantic verification with fallback due to mobile timing
+      // windows. The fallback asserts the Spanish-translated nav link
+      // ("Membranas"), since this page is now `/es`.
       const htmlLang = await page.locator("html").getAttribute("lang");
       if (htmlLang !== "es") {
         const nav = getNav(page);
         await expect(
-          nav.getByRole("link", { name: "Membranes" }),
+          nav.getByRole("link", { name: "Membranas" }),
         ).toBeVisible();
       } else {
         expect(htmlLang).toBe("es");
@@ -505,7 +511,7 @@ test.describe("Internationalization (i18n)", () => {
         }
       }
 
-      for (const item of PUBLIC_NAV_ITEMS) {
+      for (const item of PUBLIC_NAV_ITEMS_ES) {
         const candidate = container
           .getByRole("link", { name: item })
           .or(container.getByRole("button", { name: item }));
@@ -618,15 +624,20 @@ test.describe("Internationalization (i18n)", () => {
         name: /mobile navigation/i,
       });
       await expect(mobileNavSheetZh).toBeVisible();
+      // The mobile language button is also translated: merged
+      // `accessibility.languageSelector` ("Seleccionar idioma") + the active
+      // language name. Asserting the English label here was the same Gap-1
+      // contract bug.
       await expect(
         mobileNavSheetZh.getByRole("button", {
-          name: /select language español/i,
+          name: /seleccionar idioma español/i,
         }),
       ).toBeVisible();
 
-      // Verify Step 2 navigation items in mobile menu
+      // Verify the mobile nav renders the Spanish-translated buyer link
+      // (real merged "nav.membranes" = "Membranas", not English copy).
       await expect(
-        mobileNavSheetZh.getByRole("link", { name: "Membranes" }),
+        mobileNavSheetZh.getByRole("link", { name: "Membranas" }),
       ).toBeVisible();
     });
   });
@@ -690,7 +701,7 @@ test.describe("Internationalization (i18n)", () => {
         timeout: 30_000,
       });
       await expect(
-        page.getByRole("link", { name: "Membranes" }).first(),
+        page.getByRole("link", { name: "Membranas" }).first(),
       ).toBeVisible({ timeout: 30_000 });
       await waitForStablePage(page);
 
@@ -699,7 +710,7 @@ test.describe("Internationalization (i18n)", () => {
       if (htmlLang !== "es") {
         const nav = getNav(page);
         await expect(
-          nav.getByRole("link", { name: "Membranes" }),
+          nav.getByRole("link", { name: "Membranas" }),
         ).toBeVisible();
       } else {
         expect(htmlLang).toBe("es");

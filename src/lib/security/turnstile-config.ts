@@ -75,6 +75,7 @@ const DEFAULT_ALLOWED_ACTIONS = [
   "contact_form",
   "newsletter_subscribe",
   "product_inquiry",
+  "rfq_quote",
 ] as const;
 const DEFAULT_ALLOWED_ACTIONS_SET = new Set<string>(DEFAULT_ALLOWED_ACTIONS);
 

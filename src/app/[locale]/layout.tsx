@@ -77,7 +77,7 @@ async function AsyncLocaleLayoutContent({
     ]);
 
   const footerSystemStatus = tFooter("systemStatus");
-  const contactSalesLabel = tNavigation("contactSales");
+  const primaryCtaLabel = tNavigation("requestQuote");
   const openMenuLabel = tAccessibility("openMenu");
   const closeMenuLabel = tAccessibility("closeMenu");
   const skipToContentLabel = tAccessibility("skipToContent");
@@ -101,7 +101,7 @@ async function AsyncLocaleLayoutContent({
           {/* 导航栏 */}
           <Header
             locale={locale}
-            contactSalesLabel={contactSalesLabel}
+            primaryCtaLabel={primaryCtaLabel}
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
             mobileLanguageLabel={mobileLanguageLabel}

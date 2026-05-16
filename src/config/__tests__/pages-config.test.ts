@@ -24,6 +24,7 @@ const EXPECTED_STATIC_PUBLIC_PAGE_TYPES = [
   "capabilities",
   "howItWorks",
   "customProject",
+  "quote",
 ] as const satisfies readonly PageType[];
 
 const REPO_ROOT = process.cwd();
@@ -59,10 +60,36 @@ describe("pages.config static public page registry", () => {
         /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
       );
       expect(repoFileExists(definition.routeOwner)).toBe(true);
-      expect(definition.sitemap.include).toBe(true);
+      // De-listed legacy starter pages (products / blog / customProject)
+      // intentionally carry sitemap.include === false until their own Step
+      // rebuilds their en/es surface; `contact` is de-listed per the A+
+      // decision (single RFQ `/quote` path, no generic contact lead path);
+      // all other pages stay included.
+      expect(typeof definition.sitemap.include).toBe("boolean");
       expect(definition.sitemap.priority).toBeGreaterThan(0);
       expect(definition.sitemap.priority).toBeLessThanOrEqual(1);
       expect(definition.lastmod.source).toMatch(/^(mdx|static)$/u);
+    }
+  });
+
+  it("locks the de-listed legacy starter pages out of the sitemap", () => {
+    const byType = getStaticPageDefinitionsByType();
+    // `contact` is de-listed per the owner-approved A+ decision: Phase-1
+    // conversion is the single RFQ `/quote` path with the footer sales@
+    // email as the non-RFQ fallback — no standalone generic contact lead
+    // path, so the contact surface must not re-enter the public sitemap.
+    const deListed: readonly PageType[] = [
+      "products",
+      "blog",
+      "customProject",
+      "contact",
+    ];
+    for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
+      const expectedIncluded = !deListed.includes(definition.pageType);
+      expect(definition.sitemap.include).toBe(expectedIncluded);
+    }
+    for (const pageType of deListed) {
+      expect(byType[pageType]?.sitemap.include).toBe(false);
     }
   });
 
@@ -76,17 +103,17 @@ describe("pages.config static public page registry", () => {
   });
 
   it("derives sitemap pages and route configs from the registry", () => {
+    // products / blog / custom-project-support are de-listed (still leak
+    // starter slop + [ES-TODO]); /contact is de-listed per the A+ decision
+    // (single RFQ /quote path) — none may appear in the public sitemap.
     expect(getStaticSitemapPages()).toEqual([
       "",
       "/about",
-      "/products",
-      "/blog",
-      "/contact",
       "/privacy",
       "/terms",
       "/capabilities",
       "/how-it-works",
-      "/custom-project-support",
+      "/quote",
     ]);
 
     const sitemapConfig = getStaticSitemapPageConfigByPath();
@@ -95,10 +122,10 @@ describe("pages.config static public page registry", () => {
       changeFrequency: "daily",
       priority: 1,
     });
-    expect(sitemapConfig["/products"]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.9,
-    });
+    expect(sitemapConfig["/products"]).toBeUndefined();
+    expect(sitemapConfig["/blog"]).toBeUndefined();
+    expect(sitemapConfig["/custom-project-support"]).toBeUndefined();
+    expect(sitemapConfig["/contact"]).toBeUndefined();
     expect(sitemapConfig["/capabilities"]).toEqual({
       changeFrequency: "monthly",
       priority: 0.85,
@@ -110,6 +137,7 @@ describe("pages.config static public page registry", () => {
       "": "2026-04-26T00:00:00Z",
       "/products": "2026-04-26T00:00:00Z",
       "/blog": "2026-04-26T00:00:00Z",
+      "/quote": "2026-04-26T00:00:00Z",
     });
   });
 

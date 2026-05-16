@@ -36,6 +36,8 @@ export const SINGLE_SITE_SITEMAP_PAGE_CONFIG: Readonly<
 > = {
   ...getStaticSitemapPageConfigByPath(),
   productMarket: { changeFrequency: "weekly", priority: 0.8 },
+  membraneProduct: { changeFrequency: "weekly", priority: 0.8 },
+  compatibleBrand: { changeFrequency: "weekly", priority: 0.7 },
 } as const;
 
 export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
@@ -56,6 +58,12 @@ export const SINGLE_SITE_STATIC_PAGE_LASTMOD = {
   ...getStaticPageLastmodByPath(),
   ...SINGLE_SITE_PRODUCT_MARKET_LASTMOD,
 } as const satisfies Record<string, string>;
+
+// Stable lastmod for product-compatibility detail/brand routes. Kept here as a
+// single SEO-owned constant; the sitemap generator (which owns the data-layer
+// import) consumes it so config modules stay free of the zod-parsed data layer.
+export const SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO =
+  SINGLE_SITE_STATIC_LASTMOD_ISO;
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
   "/api/",

@@ -88,6 +88,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           "seo.siteName": "Site Name",
           "seo.description": "Site Description",
           "navigation.contactSales": "Contact Sales",
+          "navigation.requestQuote": "Request a Quote",
         };
         return translations[key] || key; // key 来自测试数据，安全
       },
@@ -224,7 +225,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         "Compatibility",
         "Materials",
         "Quote",
-        "Contact Sales",
+        "Request a Quote",
       ]);
 
       fireEvent.click(screen.getByRole("button", { name: "Language English" }));
@@ -433,8 +434,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
     });
 
     it("handles aria-current for navigation items", async () => {
-      // Set placeholder anchor path to test aria-current.
-      mockPathname.current = "#coming-soon";
+      // Membranes is wired to its real Step 4 route.
+      mockPathname.current = "/membranes/9-inch-epdm-disc-replacement";
 
       render(<MobileNavigation />);
 
@@ -444,7 +445,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       const membranesLink = screen.getByRole("link", { name: "Membranes" });
       expect(membranesLink).toHaveAttribute("aria-current", "page");
 
-      const contactLink = screen.getByRole("link", { name: "Contact Sales" });
+      const contactLink = screen.getByRole("link", {
+        name: "Request a Quote",
+      });
       expect(contactLink).not.toHaveAttribute("aria-current");
     });
 

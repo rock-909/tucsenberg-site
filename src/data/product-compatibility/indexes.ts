@@ -5,81 +5,33 @@ import {
   productVariants,
 } from "@/data/product-compatibility/catalog";
 import { compatibilityMappings } from "@/data/product-compatibility/mappings";
+import { buildCanonicalProductSlug } from "@/data/product-compatibility/slug-rule";
+import {
+  buildHaystack,
+  matchClientSearchIndex,
+  type ClientSearchIndex,
+} from "@/data/product-compatibility/search-match";
 import type {
   CompatibilityMapping,
-  LocalizedText,
   OEMModel,
   ProductCategory,
   ProductVariant,
 } from "@/data/product-compatibility/schemas";
+import type {
+  BrandCompatibilityEntry,
+  CompatibilitySearchResults,
+  CompatibleOEMModelEntry,
+  CompatibleProductEntry,
+  ModelCompatibilityEntry,
+  ProductCompatibilityEntry,
+} from "@/data/product-compatibility/search-types";
 
-interface CompatibleProductEntry {
-  id: string;
-  slug: string;
-  sku: string;
-  name: LocalizedText;
-  material: ProductVariant["material"];
-  fitStatus: CompatibilityMapping["fitStatus"];
-  confidence: CompatibilityMapping["confidence"];
-  requiredChecks: LocalizedText[];
-  disclaimer: LocalizedText;
-}
-
-interface CompatibleOEMModelEntry {
-  modelId: string;
-  modelSlug: string;
-  modelName: string;
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  category: ProductCategory;
-  oemPartNumbers: string[];
-  searchAliases: string[];
-  specs: OEMModel["specs"];
-  fitStatus: CompatibilityMapping["fitStatus"];
-  confidence: CompatibilityMapping["confidence"];
-  requiredChecks: LocalizedText[];
-  disclaimer: LocalizedText;
-}
-
-export interface ModelCompatibilityEntry {
-  modelId: string;
-  modelSlug: string;
-  modelName: string;
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  category: ProductCategory;
-  oemPartNumbers: string[];
-  searchAliases: string[];
-  specs: OEMModel["specs"];
-  compatibleProducts: CompatibleProductEntry[];
-}
-
-export interface BrandCompatibilityEntry {
-  brandId: string;
-  brandSlug: string;
-  brandName: string;
-  trademarkDisclaimer: LocalizedText;
-  models: ModelCompatibilityEntry[];
-}
-
-export interface ProductCompatibilityEntry {
-  productVariantId: string;
-  productSlug: string;
-  sku: string;
-  name: LocalizedText;
-  material: ProductVariant["material"];
-  category: ProductCategory;
-  compatibleOemModels: CompatibleOEMModelEntry[];
-}
-
-export interface CompatibilitySearchResults {
-  models: ModelCompatibilityEntry[];
-  products: ProductCompatibilityEntry[];
-}
+export type {
+  BrandCompatibilityEntry,
+  CompatibilitySearchResults,
+  ModelCompatibilityEntry,
+  ProductCompatibilityEntry,
+} from "@/data/product-compatibility/search-types";
 
 const brandById = new Map(oemBrands.map((brand) => [brand.id, brand]));
 const modelById = new Map(oemModels.map((model) => [model.id, model]));
@@ -205,13 +157,16 @@ function modelEntryFor(model: OEMModel): ModelCompatibilityEntry {
 }
 
 function productEntryFor(variant: ProductVariant): ProductCompatibilityEntry {
+  const category = categoryForVariant(variant);
+
   return {
     productVariantId: variant.id,
     productSlug: variant.slug,
+    canonicalProductSlug: buildCanonicalProductSlug(variant, category),
     sku: variant.sku,
     name: variant.name,
     material: variant.material,
-    category: categoryForVariant(variant),
+    category,
     compatibleOemModels: mappingsForProduct(variant.id).map(
       compatibleOemModelFromMapping,
     ),
@@ -245,23 +200,13 @@ export const compatibilityByBrand = Object.fromEntries(
   }),
 ) as Record<string, BrandCompatibilityEntry>;
 
-function normalizeSearchText(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function includesNormalized(haystack: readonly string[], query: string) {
-  const normalizedQuery = normalizeSearchText(query);
-
-  if (!normalizedQuery) {
-    return false;
-  }
-
-  return haystack.some((value) =>
-    normalizeSearchText(value).includes(normalizedQuery),
-  );
-}
-
-function modelSearchHaystack(entry: ModelCompatibilityEntry) {
+/**
+ * Raw searchable fields for a model entry. The single source of what a model
+ * is matched on; consumed by both the server-side `findCompatibilityMatches`
+ * and the serializable client search index (`search-index.ts`), so the
+ * client and server search the same fields.
+ */
+export function modelSearchHaystack(entry: ModelCompatibilityEntry) {
   return [
     entry.modelId,
     entry.modelSlug,
@@ -277,7 +222,11 @@ function modelSearchHaystack(entry: ModelCompatibilityEntry) {
   ];
 }
 
-function productSearchHaystack(entry: ProductCompatibilityEntry) {
+/**
+ * Raw searchable fields for a product entry. Single source shared by the
+ * server matcher and the serializable client search index.
+ */
+export function productSearchHaystack(entry: ProductCompatibilityEntry) {
   return [
     entry.productVariantId,
     entry.productSlug,
@@ -289,15 +238,37 @@ function productSearchHaystack(entry: ProductCompatibilityEntry) {
   ];
 }
 
+/**
+ * Build the serializable, pre-validated search index from the (already
+ * Zod-validated) compatibility indexes. Each entry carries a precomputed list
+ * of normalized haystack fields so the client never normalizes the catalog.
+ *
+ * This runs server-side (it touches the Zod-validated data layer). The home
+ * page Server Component calls it once and passes the plain result to the
+ * client hero search.
+ */
+export function buildClientSearchIndex(): ClientSearchIndex {
+  return {
+    models: Object.values(compatibilityByModel).map((entry) => ({
+      entry,
+      haystack: buildHaystack(modelSearchHaystack(entry)),
+    })),
+    products: Object.values(compatibilityByProduct).map((entry) => ({
+      entry,
+      haystack: buildHaystack(productSearchHaystack(entry)),
+    })),
+  };
+}
+
+const clientSearchIndex = buildClientSearchIndex();
+
+/**
+ * Server-side compatibility search. Delegates to the single pure matcher
+ * (`matchClientSearchIndex`) over the precomputed index, so server and client
+ * search results are byte-for-byte identical.
+ */
 export function findCompatibilityMatches(
   query: string,
 ): CompatibilitySearchResults {
-  const models = Object.values(compatibilityByModel).filter((entry) =>
-    includesNormalized(modelSearchHaystack(entry), query),
-  );
-  const products = Object.values(compatibilityByProduct).filter((entry) =>
-    includesNormalized(productSearchHaystack(entry), query),
-  );
-
-  return { models, products };
+  return matchClientSearchIndex(query, clientSearchIndex);
 }

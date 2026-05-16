@@ -27,22 +27,35 @@ describe("single-site-seo", () => {
       "capabilities",
       "howItWorks",
       "customProject",
+      "quote",
     ]);
     expect([...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES].sort()).toEqual(
       Object.keys(PATHS_CONFIG).sort(),
     );
 
-    const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.map(
-      (pageType) => {
-        const canonicalPath = getCanonicalPath(pageType);
-        return canonicalPath === "/" ? "" : canonicalPath;
-      },
-    );
+    // The public sitemap page list excludes de-listed legacy starter pages
+    // (products / blog / customProject) whose en/es surface still leaks
+    // starter slop + [ES-TODO]; `contact` is excluded per the A+ decision
+    // (single RFQ /quote path, no generic contact lead path). The
+    // route-type registry still lists all of them.
+    const deListed = new Set(["products", "blog", "customProject", "contact"]);
+    const expectedPages = SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES.filter(
+      (pageType) => !deListed.has(pageType),
+    ).map((pageType) => {
+      const canonicalPath = getCanonicalPath(pageType);
+      return canonicalPath === "/" ? "" : canonicalPath;
+    });
 
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toEqual(expectedPages);
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
       RETIRED_BENDING_MACHINES_PATH,
     );
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/products");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/blog");
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain(
+      "/custom-project-support",
+    );
+    expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).not.toContain("/contact");
   });
 
   it("keeps sitemap configs explicit for special page types", () => {
@@ -56,10 +69,20 @@ describe("single-site-seo", () => {
       changeFrequency: "monthly",
       priority: 0.85,
     });
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("blog")]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.85,
-    });
+    // De-listed legacy starter pages drop out of the explicit sitemap
+    // config map (they are no longer emitted into the public sitemap).
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("blog")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("products")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("customProject")],
+    ).toBeUndefined();
+    expect(
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("contact")],
+    ).toBeUndefined();
     expect(
       SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("howItWorks")],
     ).toEqual({

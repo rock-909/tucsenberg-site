@@ -1,131 +1,132 @@
 {
   "common": {
-    "loading": "[ES-TODO] Loading...",
-    "error": "[ES-TODO] An error occurred",
-    "close": "[ES-TODO] Close",
-    "success": "[ES-TODO] Success",
-    "cancel": "[ES-TODO] Cancel",
-    "confirm": "[ES-TODO] Confirm",
-    "save": "[ES-TODO] Save",
-    "edit": "[ES-TODO] Edit",
-    "delete": "[ES-TODO] Delete",
-    "search": "[ES-TODO] Search",
-    "filter": "[ES-TODO] Filter",
-    "sort": "[ES-TODO] Sort",
-    "next": "[ES-TODO] Next",
-    "previous": "[ES-TODO] Previous",
-    "open": "[ES-TODO] Open",
+    "loading": "Cargando...",
+    "error": "Se produjo un error",
+    "close": "Cerrar",
+    "success": "Listo",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "open": "Abrir",
     "toast": {
       "form": {
         "contact": {
-          "success": "[ES-TODO] Message sent successfully!",
-          "successDescription": "[ES-TODO] Thank you for your message. We'll get back to you soon.",
-          "error": "[ES-TODO] Failed to send message",
-          "errorDescription": "[ES-TODO] Please try again later or contact us directly.",
-          "loading": "[ES-TODO] Sending message..."
+          "success": "Mensaje enviado correctamente",
+          "successDescription": "Gracias por su mensaje. Le responderemos en breve.",
+          "error": "No se pudo enviar el mensaje",
+          "errorDescription": "Vuelva a intentarlo más tarde o contáctenos directamente.",
+          "loading": "Enviando mensaje..."
         },
         "newsletter": {
-          "success": "[ES-TODO] Successfully subscribed!",
-          "successDescription": "[ES-TODO] Thank you for subscribing to our newsletter.",
-          "error": "[ES-TODO] Subscription failed",
-          "errorDescription": "[ES-TODO] Please check your email and try again.",
-          "loading": "[ES-TODO] Subscribing..."
+          "success": "Suscripción confirmada",
+          "successDescription": "Gracias por suscribirse a nuestro boletín.",
+          "error": "No se pudo completar la suscripción",
+          "errorDescription": "Revise su correo electrónico e inténtelo de nuevo.",
+          "loading": "Suscribiendo..."
         },
         "feedback": {
-          "success": "[ES-TODO] Feedback submitted!",
-          "successDescription": "[ES-TODO] Thank you for your valuable feedback.",
-          "error": "[ES-TODO] Failed to submit feedback",
-          "errorDescription": "[ES-TODO] Please try again later.",
-          "loading": "[ES-TODO] Submitting feedback..."
+          "success": "Comentarios enviados",
+          "successDescription": "Gracias por sus comentarios.",
+          "error": "No se pudieron enviar los comentarios",
+          "errorDescription": "Vuelva a intentarlo más tarde.",
+          "loading": "Enviando comentarios..."
         }
       }
     }
   },
   "navigation": {
-    "siteName": "[ES-TODO] {siteName}",
-    "siteDescription": "[ES-TODO] Aftermarket aeration replacement membranes for OEM-family matching and RFQ fit.",
-    "home": "[ES-TODO] Home",
-    "membranes": "[ES-TODO] Membranes",
-    "compatibility": "[ES-TODO] Compatibility",
-    "materials": "[ES-TODO] Materials",
-    "quote": "[ES-TODO] Quote",
-    "more": "[ES-TODO] More",
-    "capabilities": "[ES-TODO] Capabilities",
-    "howItWorks": "[ES-TODO] How It Works",
-    "about": "[ES-TODO] About",
-    "contact": "[ES-TODO] Contact",
-    "contactSales": "[ES-TODO] Quote",
-    "customProject": "[ES-TODO] Custom",
-    "services": "[ES-TODO] Services",
-    "products": "[ES-TODO] Products",
-    "blog": "[ES-TODO] Blog",
-    "solutions": "[ES-TODO] Solutions",
-    "resources": "[ES-TODO] Resources",
-    "enterprise": "[ES-TODO] Enterprise",
-    "docs": "[ES-TODO] Docs",
-    "pricing": "[ES-TODO] Pricing",
-    "privacy": "[ES-TODO] Privacy Policy",
-    "login": "[ES-TODO] Login",
-    "logout": "[ES-TODO] Logout",
-    "profile": "[ES-TODO] Profile",
-    "settings": "[ES-TODO] Settings",
-    "frameworks": "[ES-TODO] Frameworks",
-    "infrastructure": "[ES-TODO] Infrastructure",
-    "security": "[ES-TODO] Security",
-    "aiApps": "[ES-TODO] AI Apps",
-    "webApps": "[ES-TODO] Web Apps",
-    "ecommerce": "[ES-TODO] Ecommerce",
-    "guides": "[ES-TODO] Guides",
-    "frameworksDescription": "[ES-TODO] Build with the best frameworks",
-    "infrastructureDescription": "[ES-TODO] Scalable and reliable infrastructure",
-    "securityDescription": "[ES-TODO] Enterprise-grade security",
-    "aiAppsDescription": "[ES-TODO] Deploy AI applications at scale",
-    "webAppsDescription": "[ES-TODO] Modern web application platform",
-    "ecommerceDescription": "[ES-TODO] Power your online store",
-    "docsDescription": "[ES-TODO] Complete documentation and guides",
-    "guidesDescription": "[ES-TODO] Step-by-step tutorials",
-    "blogDescription": "[ES-TODO] Latest updates and insights"
+    "siteName": "{siteName}",
+    "siteDescription": "Membranas de aireación de repuesto aftermarket para coincidencia con familias OEM y ajuste de RFQ.",
+    "home": "Inicio",
+    "membranes": "Membranas",
+    "compatibility": "Compatibilidad",
+    "materials": "Materiales",
+    "quote": "Cotización",
+    "more": "Más",
+    "capabilities": "Capacidades",
+    "howItWorks": "Cómo funciona",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "contactSales": "Cotización",
+    "requestQuote": "Solicitar una cotización",
+    "customProject": "Personalizado",
+    "services": "Servicios",
+    "products": "Productos",
+    "blog": "Blog",
+    "solutions": "Soluciones",
+    "resources": "Recursos",
+    "enterprise": "Empresas",
+    "docs": "Documentación",
+    "pricing": "Precios",
+    "privacy": "Política de privacidad",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "frameworks": "Frameworks",
+    "infrastructure": "Infraestructura",
+    "security": "Seguridad",
+    "aiApps": "Aplicaciones de IA",
+    "webApps": "Aplicaciones web",
+    "ecommerce": "Comercio electrónico",
+    "guides": "Guías",
+    "frameworksDescription": "Construya con los mejores frameworks",
+    "infrastructureDescription": "Infraestructura escalable y fiable",
+    "securityDescription": "Seguridad de nivel empresarial",
+    "aiAppsDescription": "Despliegue aplicaciones de IA a escala",
+    "webAppsDescription": "Plataforma moderna de aplicaciones web",
+    "ecommerceDescription": "Impulse su tienda en línea",
+    "docsDescription": "Documentación y guías completas",
+    "guidesDescription": "Tutoriales paso a paso",
+    "blogDescription": "Últimas novedades y análisis"
   },
   "theme": {
-    "toggle": "[ES-TODO] Toggle theme",
-    "toggleLabel": "[ES-TODO] Theme toggle",
-    "light": "[ES-TODO] Light",
-    "dark": "[ES-TODO] Dark",
-    "system": "[ES-TODO] System",
-    "selectTheme": "[ES-TODO] Select display theme",
-    "selectDisplayTheme": "[ES-TODO] Select a display theme:",
-    "switchToLight": "[ES-TODO] Switch to light theme",
-    "switchToDark": "[ES-TODO] Switch to dark theme",
-    "switchToSystem": "[ES-TODO] Switch to system theme"
+    "toggle": "Cambiar tema",
+    "toggleLabel": "Selector de tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema",
+    "selectTheme": "Seleccionar tema de visualización",
+    "selectDisplayTheme": "Seleccione un tema de visualización:",
+    "switchToLight": "Cambiar a tema claro",
+    "switchToDark": "Cambiar a tema oscuro",
+    "switchToSystem": "Cambiar a tema del sistema"
   },
   "language": {
-    "toggle": "[ES-TODO] Toggle language",
-    "selectLanguage": "[ES-TODO] Select Language",
-    "english": "[ES-TODO] English",
-    "chinese": "[ES-TODO] 中文",
-    "switching": "[ES-TODO] Switching language...",
-    "switchSuccess": "[ES-TODO] Language switched successfully",
-    "switchError": "[ES-TODO] Failed to switch language",
-    "fallbackWarning": "[ES-TODO] Some content may not be available in your selected language",
-    "detectionInfo": "[ES-TODO] Detection Info",
-    "source": "[ES-TODO] Source",
-    "confidence": "[ES-TODO] Confidence",
-    "userPreference": "[ES-TODO] User preference saved",
+    "toggle": "Cambiar idioma",
+    "selectLanguage": "Seleccionar idioma",
+    "english": "English",
+    "chinese": "中文",
+    "switching": "Cambiando de idioma...",
+    "switchSuccess": "Idioma cambiado correctamente",
+    "switchError": "No se pudo cambiar el idioma",
+    "fallbackWarning": "Es posible que parte del contenido no esté disponible en el idioma seleccionado",
+    "detectionInfo": "Información de detección",
+    "source": "Origen",
+    "confidence": "Confianza",
+    "userPreference": "Preferencia del usuario guardada",
     "detector": {
-      "title": "[ES-TODO] Detection Info",
-      "source": "[ES-TODO] Source",
-      "confidence": "[ES-TODO] Confidence",
-      "userSaved": "[ES-TODO] ✓ User preference saved",
+      "title": "Información de detección",
+      "source": "Origen",
+      "confidence": "Confianza",
+      "userSaved": "✓ Preferencia del usuario guardada",
       "sources": {
-        "browser": "[ES-TODO] Browser",
-        "cookie": "[ES-TODO] Cookie",
-        "url": "[ES-TODO] URL",
-        "header": "[ES-TODO] Header",
-        "default": "[ES-TODO] Default",
-        "user": "[ES-TODO] User",
-        "stored": "[ES-TODO] Stored",
-        "geo": "[ES-TODO] Geo",
-        "timezone": "[ES-TODO] Timezone"
+        "browser": "Navegador",
+        "cookie": "Cookie",
+        "url": "URL",
+        "header": "Encabezado",
+        "default": "Predeterminado",
+        "user": "Usuario",
+        "stored": "Almacenado",
+        "geo": "Geolocalización",
+        "timezone": "Zona horaria"
       }
     }
   },
@@ -143,685 +144,159 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "[ES-TODO] Aftermarket aeration membranes",
-      "title": "[ES-TODO] Replacement membrane paths for installed aeration systems.",
-      "subtitle": "[ES-TODO] Tucsenberg is preparing compatibility-led membrane pages for O&M teams that need OEM-family matching, material guidance, and RFQ-ready review inputs.",
-      "cta": {
-        "primary": "[ES-TODO] Review membrane paths",
-        "secondary": "[ES-TODO] Prepare a quote request"
+      "title": "Encuentre su membrana de repuesto",
+      "subtitle": "Introduzca un número de pieza, modelo OEM o marca de difusor para verificar la compatibilidad.",
+      "searchPlaceholder": "Buscar por número de pieza o modelo OEM...",
+      "searchLabel": "Búsqueda de compatibilidad",
+      "searchButton": "Verificar compatibilidad"
+    },
+    "oemGrid": {
+      "overline": "COMPATIBILIDAD OEM",
+      "title": "Membranas de repuesto para las principales marcas",
+      "viewAll": "Ver piezas compatibles con {brand}"
+    },
+    "materials": {
+      "overline": "SELECCIÓN DE MATERIAL",
+      "title": "Elija el material que se ajusta a sus condiciones",
+      "epdm": {
+        "name": "EPDM",
+        "description": "Aguas residuales municipales e industriales ligeras."
       },
-      "proof": {
-        "countries": "[ES-TODO] {countries}+",
-        "countriesLabel": "[ES-TODO] Countries",
-        "range": "[ES-TODO] 3+",
-        "rangeLabel": "[ES-TODO] Offer Types",
-        "production": "[ES-TODO] Ready",
-        "productionLabel": "[ES-TODO] Site Status",
-        "est": "[ES-TODO] {established}",
-        "estLabel": "[ES-TODO] Est."
-      },
-      "preview": {
-        "label": "[ES-TODO] What Tucsenberg is building",
-        "title": "[ES-TODO] Compatibility review first, broad catalog later",
-        "description": "[ES-TODO] The site is intentionally in a safe work-in-progress state until product data, compatibility records, and RFQ routing are owner-confirmed.",
-        "items": [
-          "[ES-TODO] Membranes, compatibility, materials, and quote paths",
-          "[ES-TODO] OEM-family and part-number review inputs",
-          "[ES-TODO] RFQ path with anti-abuse basics",
-          "[ES-TODO] Cloudflare-ready deployment direction"
-        ],
-        "pages": "[ES-TODO] Pages",
-        "components": "[ES-TODO] Components",
-        "storybook": "[ES-TODO] Storybook",
-        "workflow": "[ES-TODO] AI workflow",
-        "note": "[ES-TODO] Owner-confirmed product data arrives in the next steps"
+      "tpu": {
+        "name": "TPU",
+        "description": "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada."
       }
     },
-    "problems": {
-      "title": "[ES-TODO] Replacement membrane buyers usually arrive with partial evidence, not a clean catalog SKU.",
-      "description": "[ES-TODO] A maintenance team may have an OEM family, an old part number, a body photo, dimensions, wastewater conditions, or only a shutdown deadline.",
-      "items": {
-        "structure": {
-          "title": "[ES-TODO] No clean part path",
-          "description": "[ES-TODO] A buyer needs membrane diameter, diffuser body fit, OEM family, and review caveats before a quote is responsible."
-        },
-        "content": {
-          "title": "[ES-TODO] Incomplete evidence",
-          "description": "[ES-TODO] Photos, old membranes, dimensions, wastewater conditions, and quantity bands often arrive in different formats."
-        },
-        "deployment": {
-          "title": "[ES-TODO] Unclear material risk",
-          "description": "[ES-TODO] EPDM, TPU/PU, and later PTFE-coated EPDM need condition-based guidance instead of vague quality claims."
-        },
-        "inquiry": {
-          "title": "[ES-TODO] RFQ friction",
-          "description": "[ES-TODO] Quote review is slower when part numbers, installed model, quantity, and shutdown timing are not collected together."
-        },
-        "multilingual": {
-          "title": "[ES-TODO] Regional review path",
-          "description": "[ES-TODO] English and Spanish public pages must keep the same review logic while Chinese stays internal preview only."
-        }
-      }
-    },
-    "answer": {
-      "title": "[ES-TODO] Tucsenberg starts with compatibility review before quote.",
-      "description": "[ES-TODO] The site is being shaped around part-number matching, material decision support, RFQ intake, and clear OEM trademark boundaries.",
-      "items": {
-        "pageStructure": {
-          "title": "[ES-TODO] Membrane path structure",
-          "description": "[ES-TODO] Membranes, compatibility, materials, quote, quality, procurement, and legal boundaries each have a defined place."
-        },
-        "replacementSurface": {
-          "title": "[ES-TODO] Review input surface",
-          "description": "[ES-TODO] Part numbers, photos, dimensions, wastewater conditions, quantity bands, and shutdown timing are treated as explicit RFQ inputs."
-        },
-        "inquiryPath": {
-          "title": "[ES-TODO] Quote review path",
-          "description": "[ES-TODO] The quote flow will ask for enough evidence to return a responsible membrane recommendation, not a brand-name match alone."
-        },
-        "cloudflareFoundation": {
-          "title": "[ES-TODO] Cloudflare-ready foundation",
-          "description": "[ES-TODO] Cloudflare/OpenNext remains the deployment path while Tucsenberg content and lead routing are confirmed."
-        }
-      }
-    },
-    "startPath": {
-      "title": "[ES-TODO] A practical path from membrane evidence to RFQ.",
-      "description": "[ES-TODO] Use the current placeholder IA to lock the flow, then fill it with confirmed product, compatibility, material, and quote data.",
-      "items": {
-        "brand": {
-          "title": "[ES-TODO] Confirm product facts",
-          "description": "[ES-TODO] Membrane families, materials, legal entity, domain, contact channels, and brand assets become owner-confirmed facts."
-        },
-        "content": {
-          "title": "[ES-TODO] Replace page content",
-          "description": "[ES-TODO] Membrane pages, compatibility guides, material guidance, quality proof, images, and legal pages become Tucsenberg launch content."
-        },
-        "forms": {
-          "title": "[ES-TODO] Connect quote flow",
-          "description": "[ES-TODO] RFQ submissions, Turnstile, lead destinations, email delivery, and response ownership point to real accounts."
-        },
-        "deploy": {
-          "title": "[ES-TODO] Deploy and verify",
-          "description": "[ES-TODO] Cloudflare preview, form canary, content readiness, and owner signoff prove readiness separately from local checks."
-        }
-      }
-    },
-    "starterBoundary": {
-      "title": "[ES-TODO] This site is unfinished by design until Tucsenberg facts are confirmed.",
-      "description": "[ES-TODO] The current shell shows the intended website shape while keeping unconfirmed product data and RFQ behavior out of production claims.",
-      "listLabel": "[ES-TODO] Tucsenberg launch requirements",
-      "items": [
-        {
-          "title": "[ES-TODO] Replace the business identity",
-          "description": "[ES-TODO] Company name, domain, contact details, legal body, logo, and social links must become owner-confirmed facts."
-        },
-        {
-          "title": "[ES-TODO] Replace the offer story",
-          "description": "[ES-TODO] Products, services, proof, images, and response promises must match the real business."
-        },
-        {
-          "title": "[ES-TODO] Connect the lead path",
-          "description": "[ES-TODO] Inquiry forms, email, Airtable or CRM destinations, Turnstile, and canary checks must use the real environment."
-        },
-        {
-          "title": "[ES-TODO] Prove the deployment",
-          "description": "[ES-TODO] Cloudflare build, preview smoke, dashboard credentials, and owner signoff stay separate from local test results."
-        }
-      ],
-      "primary": "[ES-TODO] See the review path",
-      "secondary": "[ES-TODO] Prepare quote inputs"
-    },
-    "chain": {
-      "title": "[ES-TODO] From part evidence to RFQ, one controlled flow.",
-      "subtitle": "[ES-TODO] Tucsenberg keeps compatibility review, material guidance, quote intake, and deployment proof connected while the site moves toward launch.",
-      "step1": {
-        "title": "[ES-TODO] Input Review",
-        "desc": "[ES-TODO] Clarify what part number, OEM family, photo, dimensions, or wastewater evidence the buyer has"
-      },
-      "step2": {
-        "title": "[ES-TODO] Content Setup",
-        "desc": "[ES-TODO] Replace membrane facts, compatibility paths, material guidance, proof, images, and RFQ copy in the right source files"
-      },
-      "step3": {
-        "title": "[ES-TODO] Component Reuse",
-        "desc": "[ES-TODO] Use existing sections and Storybook previews before creating new UI"
-      },
-      "step4": {
-        "title": "[ES-TODO] Page Assembly",
-        "desc": "[ES-TODO] Build a complete site from Tucsenberg sections, translations, and page content"
-      },
-      "step5": {
-        "title": "[ES-TODO] Verification",
-        "desc": "[ES-TODO] Run brand, content, component, type, test, and build checks before launch"
-      },
-      "stat1": "[ES-TODO] Single content model",
-      "stat2": "[ES-TODO] 5-step replacement flow",
-      "stat3": "[ES-TODO] AI reuse guardrails"
-    },
-    "products": {
-      "title": "[ES-TODO] Offer Examples",
-      "subtitle": "[ES-TODO] Temporary product, compatibility, material, and RFQ examples for the Tucsenberg build-out.",
-      "cta": "[ES-TODO] View All Products",
-      "item1": {
-        "tag": "[ES-TODO] Product Example",
-        "title": "[ES-TODO] Membrane Paths",
-        "spec1": "[ES-TODO] Categories, highlights, and specs",
-        "spec2": "[ES-TODO] Cards, market pages, and detail sections",
-        "spec3": "[ES-TODO] Replace with real product data",
-        "standard": "[ES-TODO] Example Catalog",
-        "link": "[ES-TODO] /products"
-      },
-      "item2": {
-        "tag": "[ES-TODO] Service Example",
-        "title": "[ES-TODO] RFQ Review Path",
-        "spec1": "[ES-TODO] Use cases, process, and outcomes",
-        "spec2": "[ES-TODO] Proof, resources, and FAQs",
-        "spec3": "[ES-TODO] Replace with real service scope",
-        "standard": "[ES-TODO] Example Service",
-        "link": "[ES-TODO] /products/specialty-product-systems"
-      },
-      "item3": {
-        "tag": "[ES-TODO] Service",
-        "title": "[ES-TODO] Custom Project Support",
-        "spec1": "[ES-TODO] Discovery, proposal, and delivery",
-        "spec2": "[ES-TODO] Brand adaptation and configuration",
-        "spec3": "[ES-TODO] Replace with real custom workflow",
-        "standard": "[ES-TODO] Per project scope",
-        "link": "[ES-TODO] /custom-project-support"
-      }
-    },
-    "resources": {
-      "title": "[ES-TODO] Resource Examples",
-      "subtitle": "[ES-TODO] Replaceable resources for buyers, clients, partners, or visitors who need more detail before contacting you.",
-      "item1": {
-        "title": "[ES-TODO] Product Catalog",
-        "desc": "[ES-TODO] Example listing structure for products, services, packages, or solution groups.",
-        "link": "[ES-TODO] /contact"
-      },
-      "item2": {
-        "title": "[ES-TODO] Technical Specifications",
-        "desc": "[ES-TODO] Example detail page for specifications, scope, requirements, or service levels.",
-        "link": "[ES-TODO] /contact"
-      },
-      "item3": {
-        "title": "[ES-TODO] Downloadable Assets",
-        "desc": "[ES-TODO] Placeholder for brochures, decks, technical files, checklists, or media kits.",
-        "link": "[ES-TODO] /contact"
-      },
-      "item4": {
-        "title": "[ES-TODO] Proof Assets",
-        "desc": "[ES-TODO] Placeholder for certifications, case studies, testimonials, audits, or references.",
-        "link": "[ES-TODO] /contact"
-      }
-    },
-    "sample": {
-      "title": "[ES-TODO] Preview Before You Commit.",
-      "description": "[ES-TODO] Use the example pages and Storybook components to review structure, copy, and UI states before turning this into a real website.",
-      "cta": "[ES-TODO] Review Contact Flow"
-    },
-    "scenarios": {
-      "title": "[ES-TODO] Where Tucsenberg Fits",
-      "subtitle": "[ES-TODO] Focused on aftermarket aeration membrane replacement paths. Current examples stay provisional until confirmed data lands.",
-      "cardEyebrow": "[ES-TODO] Use Case {count}",
-      "countryBadge": "[ES-TODO] {countries}+ countries",
-      "proofLabel": "[ES-TODO] Replaceable use cases",
-      "item1": {
-        "title": "[ES-TODO] Membrane Paths",
-        "desc": "[ES-TODO] Use cards, spec tables, resources, and inquiry CTAs to help visitors evaluate an offer quickly.",
-        "quote": "[ES-TODO] \"Replace this with a real customer quote only after it is verified.\""
-      },
-      "item2": {
-        "title": "[ES-TODO] Service Business",
-        "desc": "[ES-TODO] Explain process, deliverables, proof, and next steps without rebuilding the page system.",
-        "quote": "[ES-TODO] \"Use this area for a real service result, testimonial, or case note.\""
-      },
-      "item3": {
-        "title": "[ES-TODO] Custom Project",
-        "desc": "[ES-TODO] Show discovery, proposal, configuration, approval, and delivery steps for tailored work.",
-        "quote": "[ES-TODO] \"Add real project proof here after the new site has evidence.\""
-      }
-    },
-    "quality": {
-      "title": "[ES-TODO] Our Commitments",
-      "subtitle": "[ES-TODO] Launch promises that must stay evidence-backed before public release.",
-      "commitment1": {
-        "title": "[ES-TODO] Clear Response Window",
-        "desc": "[ES-TODO] State the real response time visitors can expect after submitting an inquiry."
-      },
-      "commitment2": {
-        "title": "[ES-TODO] Verified Proof Only",
-        "desc": "[ES-TODO] Replace placeholder claims with evidence your real project can support."
-      },
-      "commitment3": {
-        "title": "[ES-TODO] Reusable Page System",
-        "desc": "[ES-TODO] Keep page sections modular so future AI work can reuse them safely."
-      },
-      "commitment4": {
-        "title": "[ES-TODO] Simple Contact Path",
-        "desc": "[ES-TODO] Keep the primary inquiry path visible and easy to complete."
-      },
-      "commitment5": {
-        "title": "[ES-TODO] Replaceable Content",
-        "desc": "[ES-TODO] Keep example content useful for preview, but clearly replace it before a real launch."
-      },
-      "certifications": {
-        "title": "[ES-TODO] Certifications & Standards",
-        "certified": "[ES-TODO] Certified",
-        "compliant": "[ES-TODO] Compliant",
-        "applying": "[ES-TODO] Applying",
-        "iso9001": "[ES-TODO] ISO 9001:2015",
-        "iso9001Num": "[ES-TODO] 240021Q09730R0S"
-      },
-      "standards": {
-        "exampleA": "[ES-TODO] Example Standard A",
-        "exampleB": "[ES-TODO] Example Standard B",
-        "exampleC": "[ES-TODO] Example Standard C",
-        "exampleD": "[ES-TODO] Example Standard D"
-      },
-      "logoWall": "[ES-TODO] Replaceable proof and reference area",
-      "proofStrip": {
-        "note": "[ES-TODO] Use this proof strip only for verified certifications, references, and project evidence in a real website.",
-        "standards": "[ES-TODO] Example standards",
-        "countries": "[ES-TODO] Example markets"
-      }
-    },
-    "finalCta": {
-      "title": "[ES-TODO] Prepare the membrane evidence, then request a responsible quote.",
-      "description": "[ES-TODO] Use the current placeholder path to understand what Tucsenberg will ask for before issuing a compatibility-led quote.",
-      "primary": "[ES-TODO] Review membrane paths",
-      "secondary": "[ES-TODO] Prepare a quote request",
-      "trustAriaLabel": "[ES-TODO] Homepage trust facts",
-      "trust": "[ES-TODO] Example response promise · Replace proof before launch · {countries}+ placeholder markets"
-    },
-    "comingSoon": {
-      "title": "[ES-TODO] Tucsenberg product pages are being prepared.",
-      "description": "[ES-TODO] Membrane family, compatibility, material, and RFQ details will stay on this safe placeholder until owner-confirmed content is ready.",
-      "quoteNote": "[ES-TODO] Need a membrane quote? Please use this placeholder until the RFQ route is connected.",
-      "backHome": "[ES-TODO] Back to home"
-    },
-    "footer": {
-      "about": {
-        "title": "[ES-TODO] {siteName}",
-        "desc": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths."
-      },
-      "products": {
-        "title": "[ES-TODO] Products",
-        "items": {
-          "item1": "[ES-TODO] Membrane Paths",
-          "item2": "[ES-TODO] RFQ Review Path",
-          "item3": "[ES-TODO] Resource Examples",
-          "item4": "[ES-TODO] Custom Projects"
-        }
-      },
-      "resources": {
-        "title": "[ES-TODO] Resources",
-        "items": {
-          "item1": "[ES-TODO] Product Catalog",
-          "item2": "[ES-TODO] Technical Specs",
-          "item3": "[ES-TODO] CAD Downloads",
-          "item4": "[ES-TODO] Certifications"
-        }
-      },
-      "contact": {
-        "title": "[ES-TODO] Contact",
-        "items": {
-          "item1": "[ES-TODO] Request a Quote",
-          "item2": "[ES-TODO] Free Sample Request",
-          "item3": "[ES-TODO] Technical Support",
-          "item4": "[ES-TODO] Project Review"
-        }
-      },
-      "copyright": "[ES-TODO] {copyright}",
-      "location": "[ES-TODO] Replace with real dispatch point"
+    "trust": {
+      "scope": "Solo membranas de repuesto aftermarket",
+      "leadTime": "Plazo de entrega confirmado por cotización",
+      "sla": "Respuesta de cotización en un plazo de 2 días hábiles",
+      "noFit": "Revisión sin cargo si no hay ajuste"
     },
     "cta": {
-      "message": "[ES-TODO] Contact us for samples or technical support",
-      "button": "[ES-TODO] Get Quote"
-    },
-    "techStack": {
-      "title": "[ES-TODO] Technology Stack",
-      "subtitle": "[ES-TODO] Built with cutting-edge technologies for enterprise-grade performance and scalability.",
-      "learnMore": "[ES-TODO] Learn More",
-      "learnMoreLabel": "[ES-TODO] Learn more about {target}",
-      "categories": {
-        "core": "[ES-TODO] Core Frameworks",
-        "ui": "[ES-TODO] UI System",
-        "i18n": "[ES-TODO] Internationalization",
-        "tools": "[ES-TODO] Tooling",
-        "testing": "[ES-TODO] Testing",
-        "dev": "[ES-TODO] Dev Tools",
-        "performance": "[ES-TODO] Performance Monitoring",
-        "security": "[ES-TODO] Security",
-        "animation": "[ES-TODO] Animation",
-        "deployment": "[ES-TODO] Deployment",
-        "quality": "[ES-TODO] Code Quality",
-        "docs": "[ES-TODO] Documentation",
-        "data": "[ES-TODO] Data Fetching",
-        "state": "[ES-TODO] State Management"
-      },
-      "technologies": {
-        "nextjs": "[ES-TODO] React full-stack framework with SSR/SSG",
-        "react": "[ES-TODO] Modern user interface library",
-        "typescript": "[ES-TODO] Type-safe JavaScript superset",
-        "tailwindcss": "[ES-TODO] Utility-first CSS framework",
-        "shadcn-ui": "[ES-TODO] Copy-paste component library",
-        "radix-ui": "[ES-TODO] Unstyled, accessible component primitives",
-        "next-intl": "[ES-TODO] Next.js internationalization solution",
-        "eslint": "[ES-TODO] JavaScript/TypeScript code linter",
-        "prettier": "[ES-TODO] Code formatting tool",
-        "lefthook": "[ES-TODO] Git hooks management tool",
-        "vitest": "[ES-TODO] Fast unit testing framework",
-        "playwright": "[ES-TODO] End-to-end testing framework",
-        "husky": "[ES-TODO] Git hooks management tool",
-        "jest": "[ES-TODO] JavaScript testing framework",
-        "testing-library": "[ES-TODO] React component testing tool",
-        "pnpm": "[ES-TODO] Fast, disk space efficient package manager",
-        "turbo": "[ES-TODO] High-performance build system",
-        "lighthouse": "[ES-TODO] Web performance audit tool",
-        "semgrep": "[ES-TODO] Static code security analysis tool",
-        "embla-carousel": "[ES-TODO] Lightweight carousel component library",
-        "cloudflare": "[ES-TODO] Cloudflare Workers deployment platform",
-        "sonarqube": "[ES-TODO] Code quality and security analysis platform",
-        "storybook": "[ES-TODO] Component development and documentation tool",
-        "swr": "[ES-TODO] Data fetching and caching library",
-        "zustand": "[ES-TODO] Lightweight state management library"
-      },
-      "stats": {
-        "totalTech": "[ES-TODO] Total Technologies",
-        "categories": "[ES-TODO] Categories",
-        "modern": "[ES-TODO] Modern Stack",
-        "quality": "[ES-TODO] Quality Score"
-      }
-    },
-    "showcase": {
-      "title": "[ES-TODO] Interface Preview",
-      "subtitle": "[ES-TODO] Preview the interface pieces used for membrane paths, RFQ intake, and launch readiness.",
-      "tabs": {
-        "components": "[ES-TODO] Components",
-        "themes": "[ES-TODO] Themes",
-        "responsive": "[ES-TODO] Responsive"
-      },
-      "components": {
-        "buttons": {
-          "title": "[ES-TODO] Button Components",
-          "description": "[ES-TODO] Various button styles and sizes for different use cases.",
-          "primary": "[ES-TODO] Primary",
-          "secondary": "[ES-TODO] Secondary",
-          "outline": "[ES-TODO] Outline",
-          "ghost": "[ES-TODO] Ghost",
-          "small": "[ES-TODO] Small",
-          "default": "[ES-TODO] Default",
-          "large": "[ES-TODO] Large"
-        },
-        "forms": {
-          "title": "[ES-TODO] Form Components",
-          "description": "[ES-TODO] Input fields and form controls with validation support.",
-          "name": "[ES-TODO] Full Name",
-          "namePlaceholder": "[ES-TODO] Enter your full name",
-          "email": "[ES-TODO] Email Address",
-          "emailPlaceholder": "[ES-TODO] Enter your email",
-          "submit": "[ES-TODO] Submit Form"
-        },
-        "interactive": {
-          "title": "[ES-TODO] Interactive Elements",
-          "description": "[ES-TODO] Buttons and controls with dynamic behavior and state management.",
-          "likes": "[ES-TODO] Likes",
-          "star": "[ES-TODO] Star",
-          "download": "[ES-TODO] Download",
-          "share": "[ES-TODO] Share"
-        },
-        "badges": {
-          "title": "[ES-TODO] Badge Components",
-          "description": "[ES-TODO] Status indicators and labels for various content types.",
-          "default": "[ES-TODO] Default",
-          "secondary": "[ES-TODO] Secondary",
-          "outline": "[ES-TODO] Outline",
-          "destructive": "[ES-TODO] Error",
-          "success": "[ES-TODO] Success",
-          "warning": "[ES-TODO] Warning",
-          "info": "[ES-TODO] Info"
-        }
-      },
-      "themes": {
-        "title": "[ES-TODO] Theme System",
-        "description": "[ES-TODO] Dynamic theme switching with light and dark mode support.",
-        "toggle": "[ES-TODO] Theme Toggle",
-        "language": "[ES-TODO] Language Switch",
-        "colors": {
-          "title": "[ES-TODO] Color Palette"
-        },
-        "typography": {
-          "title": "[ES-TODO] Typography",
-          "bold": "[ES-TODO] Bold Text",
-          "medium": "[ES-TODO] Medium Text",
-          "normal": "[ES-TODO] Normal Text",
-          "muted": "[ES-TODO] Muted Text"
-        }
-      },
-      "responsive": {
-        "title": "[ES-TODO] Responsive Design",
-        "description": "[ES-TODO] Optimized layouts for all device sizes and screen resolutions.",
-        "mobile": {
-          "title": "[ES-TODO] Mobile First",
-          "description": "[ES-TODO] Optimized for mobile devices with touch-friendly interfaces."
-        },
-        "tablet": {
-          "title": "[ES-TODO] Tablet Ready",
-          "description": "[ES-TODO] Perfect layout adaptation for tablet screens and orientations."
-        },
-        "desktop": {
-          "title": "[ES-TODO] Desktop Enhanced",
-          "description": "[ES-TODO] Full-featured desktop experience with advanced interactions."
-        }
-      }
-    },
-    "overview": {
-      "title": "[ES-TODO] Tucsenberg Site Capabilities",
-      "subtitle": "[ES-TODO] A Tucsenberg website base with content ownership, component governance, visual review, and deployment checks.",
-      "features": {
-        "performance": {
-          "title": "[ES-TODO] Content Ownership",
-          "description": "[ES-TODO] Brand facts, page prose, and shared UI text each have a clear editing surface."
-        },
-        "security": {
-          "title": "[ES-TODO] Quality Checks",
-          "description": "[ES-TODO] Validation commands help catch broken content, translations, components, types, tests, and builds."
-        },
-        "i18n": {
-          "title": "[ES-TODO] Multilingual Ready",
-          "description": "[ES-TODO] The site includes English, Spanish, and internal Chinese content paths with translation validation.",
-          "languageUnit": "[ES-TODO] Locales"
-        },
-        "themes": {
-          "title": "[ES-TODO] Customizable Sections",
-          "description": "[ES-TODO] Homepage, about, product/service, custom project, contact, privacy, and terms pages are ready to adapt.",
-          "multiTheme": "[ES-TODO] Flexible"
-        },
-        "typescript": {
-          "title": "[ES-TODO] Design Tokens",
-          "description": "[ES-TODO] Color, spacing, and component rules keep UI changes easier for AI to manage."
-        },
-        "deployment": {
-          "title": "[ES-TODO] Deployment Path",
-          "description": "[ES-TODO] Next.js, Cloudflare/OpenNext, Turnstile, email, and form basics stay wired for later replacement."
-        }
-      },
-      "highlights": {
-        "title": "[ES-TODO] Core Capabilities",
-        "subtitle": "[ES-TODO] What makes this site easier for future AI-assisted Tucsenberg website work.",
-        "modern": "[ES-TODO] Component Governance",
-        "scalable": "[ES-TODO] Reusable Page Sections",
-        "accessible": "[ES-TODO] Storybook Review",
-        "performant": "[ES-TODO] Build Verification",
-        "secure": "[ES-TODO] ISO 9001 Certified",
-        "maintainable": "[ES-TODO] AI Workflow Rules"
-      },
-      "architecture": {
-        "title": "[ES-TODO] Product Lines",
-        "frontend": {
-          "title": "[ES-TODO] Product Example",
-          "description": "[ES-TODO] Replaceable catalog pages, cards, specs, and inquiry CTAs for product-led websites."
-        },
-        "ui": {
-          "title": "[ES-TODO] Service Example",
-          "description": "[ES-TODO] Reusable structure for explaining compatibility process, material guidance, proof, and next steps."
-        },
-        "tooling": {
-          "title": "[ES-TODO] Custom Project Example",
-          "description": "[ES-TODO] A structured page for project scope, collaboration steps, quality review, and intake."
-        }
-      },
-      "cta": {
-        "title": "[ES-TODO] Ready to Build the Tucsenberg Site?",
-        "description": "[ES-TODO] Replace provisional examples with owner-confirmed membrane, compatibility, proof, content, images, and deployment settings.",
-        "getStarted": "[ES-TODO] Start Inquiry",
-        "viewSource": "[ES-TODO] View Offerings"
-      }
-    },
-    "title": "[ES-TODO] Tucsenberg",
-    "subtitle": "[ES-TODO] Aftermarket Aeration Replacement Membranes",
-    "description": "[ES-TODO] Aftermarket aeration replacement membrane site for compatibility review, material guidance, and RFQ-ready inquiry paths.",
-    "getStarted": "[ES-TODO] Get Started",
-    "learnMore": "[ES-TODO] Learn More",
-    "welcome": "[ES-TODO] Welcome to Tucsenberg",
-    "modernApp": "[ES-TODO] A modern web application built with Next.js 16 and React 19",
-    "features": {
-      "title": "[ES-TODO] Features",
-      "performance": {
-        "title": "[ES-TODO] High Performance",
-        "description": "[ES-TODO] Optimized for speed and efficiency with modern web technologies."
-      },
-      "scalable": {
-        "title": "[ES-TODO] Scalable Architecture",
-        "description": "[ES-TODO] Built to grow with your business needs and requirements."
-      },
-      "secure": {
-        "title": "[ES-TODO] Enterprise Security",
-        "description": "[ES-TODO] Industry-standard security practices and compliance."
-      }
-    },
-    "modernStack": "[ES-TODO] Modern Stack",
-    "modernStackDesc": "[ES-TODO] Built with the latest technologies",
-    "internationalization": "[ES-TODO] Internationalization",
-    "internationalizationDesc": "[ES-TODO] Multi-language support with next-intl",
-    "testingReady": "[ES-TODO] Testing Ready",
-    "testingReadyDesc": "[ES-TODO] Comprehensive E2E testing setup"
+      "title": "¿Tiene un número de pieza a mano?",
+      "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",
+      "requestQuote": "Solicitar una cotización",
+      "viewMembranes": "Ver todas las membranas"
+    }
   },
   "monitoring": {
     "loadError": "[ES-TODO] Monitoring component failed to load"
   },
   "footer": {
-    "systemStatus": "[ES-TODO] All systems normal.",
+    "systemStatus": "Todos los sistemas funcionan con normalidad.",
     "sections": {
       "product": {
-        "title": "[ES-TODO] Product",
-        "home": "[ES-TODO] Home",
-        "enterprise": "[ES-TODO] Enterprise",
-        "pricing": "[ES-TODO] Pricing"
+        "title": "Producto",
+        "home": "Inicio",
+        "enterprise": "Empresas",
+        "pricing": "Precios"
       },
       "company": {
-        "title": "[ES-TODO] Company",
-        "terms": "[ES-TODO] Terms",
-        "aiPolicy": "[ES-TODO] AI Policy",
-        "privacy": "[ES-TODO] Privacy"
+        "title": "Empresa",
+        "terms": "Términos",
+        "aiPolicy": "Política de IA",
+        "privacy": "Privacidad"
       },
       "resources": {
-        "title": "[ES-TODO] Resources",
-        "faqs": "[ES-TODO] FAQs",
-        "docs": "[ES-TODO] Docs",
-        "ambassadors": "[ES-TODO] Ambassadors",
-        "community": "[ES-TODO] Community",
-        "platform": "[ES-TODO] Platform"
+        "title": "Recursos",
+        "faqs": "Preguntas frecuentes",
+        "docs": "Documentación",
+        "ambassadors": "Embajadores",
+        "community": "Comunidad",
+        "platform": "Plataforma"
       },
       "navigation": {
-        "title": "[ES-TODO] Navigation",
-        "home": "[ES-TODO] Home",
-        "about": "[ES-TODO] About",
-        "products": "[ES-TODO] Products",
-        "blog": "[ES-TODO] Blog",
-        "contact": "[ES-TODO] Contact"
+        "title": "Navegación",
+        "home": "Inicio",
+        "about": "Acerca de",
+        "products": "Productos",
+        "blog": "Blog",
+        "contact": "Contacto"
       },
       "social": {
-        "title": "[ES-TODO] Social",
-        "twitter": "[ES-TODO] Twitter",
-        "linkedin": "[ES-TODO] LinkedIn"
+        "title": "Redes sociales",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn"
       },
       "support": {
-        "title": "[ES-TODO] Support",
-        "contact": "[ES-TODO] Contact",
-        "privacy": "[ES-TODO] Privacy Policy",
-        "terms": "[ES-TODO] Terms of Service"
+        "title": "Soporte",
+        "contact": "Contacto",
+        "privacy": "Política de privacidad",
+        "terms": "Términos de servicio"
       }
+    },
+    "contact": {
+      "label": "Consultas generales, de distribución, prensa y ajenas a RFQ:"
     },
     "platform": {
       "products": {
-        "title": "[ES-TODO] Products",
-        "ai": "[ES-TODO] AI",
-        "enterprise": "[ES-TODO] Enterprise",
-        "fluidCompute": "[ES-TODO] Fluid Compute",
-        "nextjs": "[ES-TODO] Next.js",
-        "observability": "[ES-TODO] Observability",
-        "previews": "[ES-TODO] Previews",
-        "rendering": "[ES-TODO] Rendering",
-        "security": "[ES-TODO] Security",
-        "turbo": "[ES-TODO] Turbo",
-        "domains": "[ES-TODO] Domains",
-        "v0": "[ES-TODO] v0"
+        "title": "Productos",
+        "ai": "IA",
+        "enterprise": "Empresas",
+        "fluidCompute": "Fluid Compute",
+        "nextjs": "Next.js",
+        "observability": "Observabilidad",
+        "previews": "Vistas previas",
+        "rendering": "Renderizado",
+        "security": "Seguridad",
+        "turbo": "Turbo",
+        "domains": "Dominios",
+        "v0": "v0"
       },
       "resources": {
-        "title": "[ES-TODO] Resources",
-        "community": "[ES-TODO] Community",
-        "docs": "[ES-TODO] Docs",
-        "guides": "[ES-TODO] Guides",
-        "academy": "[ES-TODO] Academy",
-        "help": "[ES-TODO] Help",
-        "integrations": "[ES-TODO] Integrations",
-        "pricing": "[ES-TODO] Pricing",
-        "resources": "[ES-TODO] Resources",
-        "solutionPartners": "[ES-TODO] Solution Partners",
-        "startups": "[ES-TODO] Startups",
-        "templates": "[ES-TODO] Templates",
-        "sdks": "[ES-TODO] SDKs"
+        "title": "Recursos",
+        "community": "Comunidad",
+        "docs": "Documentación",
+        "guides": "Guías",
+        "academy": "Academia",
+        "help": "Ayuda",
+        "integrations": "Integraciones",
+        "pricing": "Precios",
+        "resources": "Recursos",
+        "solutionPartners": "Socios de soluciones",
+        "startups": "Startups",
+        "templates": "Plantillas",
+        "sdks": "SDK"
       },
       "company": {
-        "title": "[ES-TODO] Company",
-        "about": "[ES-TODO] About",
-        "careers": "[ES-TODO] Careers",
-        "changelog": "[ES-TODO] Changelog",
-        "contact": "[ES-TODO] Contact Us",
-        "customers": "[ES-TODO] Customers",
-        "events": "[ES-TODO] Events",
-        "partners": "[ES-TODO] Partners",
-        "shipped": "[ES-TODO] Shipped",
-        "privacy": "[ES-TODO] Privacy Policy",
-        "legal": "[ES-TODO] Legal"
+        "title": "Empresa",
+        "about": "Acerca de",
+        "careers": "Empleo",
+        "changelog": "Registro de cambios",
+        "contact": "Contáctenos",
+        "customers": "Clientes",
+        "events": "Eventos",
+        "partners": "Socios",
+        "shipped": "Lanzamientos",
+        "privacy": "Política de privacidad",
+        "legal": "Aviso legal"
       },
       "social": {
-        "title": "[ES-TODO] Social",
-        "linkedin": "[ES-TODO] LinkedIn",
-        "twitter": "[ES-TODO] Twitter",
-        "youtube": "[ES-TODO] YouTube"
+        "title": "Redes sociales",
+        "linkedin": "LinkedIn",
+        "twitter": "Twitter",
+        "youtube": "YouTube"
       }
     },
-    "learn": "[ES-TODO] Learn",
-    "examples": "[ES-TODO] Examples",
-    "goToNextjs": "[ES-TODO] Go to nextjs.org",
-    "copyright": "[ES-TODO] {copyright}",
-    "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths."
+    "learn": "Aprender",
+    "examples": "Ejemplos",
+    "goToNextjs": "Ir a nextjs.org",
+    "copyright": "{copyright}",
+    "description": "Membranas de aireación de repuesto aftermarket con revisión de compatibilidad, orientación de materiales y rutas de admisión listas para RFQ."
   },
   "accessibility": {
-    "skipToContent": "[ES-TODO] Skip to main content",
-    "openMenu": "[ES-TODO] Open navigation menu",
-    "closeMenu": "[ES-TODO] Close navigation menu",
-    "loading": "[ES-TODO] Content is loading",
-    "error": "[ES-TODO] An error has occurred",
-    "languageSelector": "[ES-TODO] Select language",
-    "themeSelector": "[ES-TODO] Select theme",
-    "securityVerificationUnavailable": "[ES-TODO] Security verification is temporarily unavailable.",
-    "turnstileDevBypass": "[ES-TODO] Dev mode: Turnstile verification bypassed",
-    "turnstileTestMode": "[ES-TODO] Bot protection disabled in test mode",
-    "turnstileLoadFailed": "[ES-TODO] Security verification failed to load."
+    "skipToContent": "Saltar al contenido principal",
+    "openMenu": "Abrir el menú de navegación",
+    "closeMenu": "Cerrar el menú de navegación",
+    "loading": "El contenido se está cargando",
+    "error": "Se ha producido un error",
+    "languageSelector": "Seleccionar idioma",
+    "themeSelector": "Seleccionar tema",
+    "securityVerificationUnavailable": "La verificación de seguridad no está disponible temporalmente.",
+    "turnstileDevBypass": "Modo de desarrollo: verificación de Turnstile omitida",
+    "turnstileTestMode": "Protección contra bots desactivada en modo de prueba",
+    "turnstileLoadFailed": "No se pudo cargar la verificación de seguridad."
   },
   "underConstruction": {
     "title": "[ES-TODO] Under Construction",
@@ -916,145 +391,145 @@
     }
   },
   "cookie": {
-    "title": "[ES-TODO] Cookie Preferences",
-    "description": "[ES-TODO] We use cookies to enhance your browsing experience and analyze site traffic.",
-    "learnMore": "[ES-TODO] Privacy policy",
-    "acceptAll": "[ES-TODO] Accept All",
-    "rejectAll": "[ES-TODO] Reject All",
-    "manage": "[ES-TODO] Manage",
-    "close": "[ES-TODO] Close",
-    "cancel": "[ES-TODO] Cancel",
-    "savePreferences": "[ES-TODO] Save Preferences",
+    "title": "Preferencias de cookies",
+    "description": "Usamos cookies para mejorar su experiencia de navegación y analizar el tráfico del sitio.",
+    "learnMore": "Política de privacidad",
+    "acceptAll": "Aceptar todas",
+    "rejectAll": "Rechazar todas",
+    "manage": "Gestionar",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "savePreferences": "Guardar preferencias",
     "preferences": {
-      "title": "[ES-TODO] Cookie Preferences",
-      "description": "[ES-TODO] Choose which cookies you want to allow. Essential cookies are always enabled."
+      "title": "Preferencias de cookies",
+      "description": "Elija qué cookies desea permitir. Las cookies esenciales están siempre activadas."
     },
     "categories": {
-      "necessary": "[ES-TODO] Essential",
-      "necessaryDesc": "[ES-TODO] Required for the website to function properly. Cannot be disabled.",
-      "analytics": "[ES-TODO] Analytics",
-      "analyticsDesc": "[ES-TODO] Help us understand how visitors interact with our website.",
-      "marketing": "[ES-TODO] Marketing",
-      "marketingDesc": "[ES-TODO] Used to deliver personalized content and advertisements."
+      "necessary": "Esenciales",
+      "necessaryDesc": "Necesarias para el funcionamiento correcto del sitio web. No se pueden desactivar.",
+      "analytics": "Analíticas",
+      "analyticsDesc": "Nos ayudan a entender cómo interactúan los visitantes con nuestro sitio web.",
+      "marketing": "Publicidad y marketing",
+      "marketingDesc": "Se utilizan para ofrecer contenido y anuncios personalizados."
     }
   },
   "structured-data": {
     "organization": {
-      "name": "[ES-TODO] {companyName}",
-      "description": "[ES-TODO] Aftermarket aeration replacement membranes with compatibility review, material guidance, and RFQ-ready intake paths",
-      "phone": "[ES-TODO] Contact sales by email",
+      "name": "{companyName}",
+      "description": "Membranas de aireación de repuesto del mercado de recambios con revisión de compatibilidad, orientación de materiales y vías de solicitud listas para RFQ",
+      "phone": "Contacte con ventas por correo electrónico",
       "social": {
-        "twitter": "[ES-TODO] https://x.com/example",
-        "linkedin": "[ES-TODO] https://www.linkedin.com/company/example"
+        "twitter": "https://x.com/example",
+        "linkedin": "https://www.linkedin.com/company/example"
       }
     },
     "website": {
-      "name": "[ES-TODO] {siteName}",
-      "description": "[ES-TODO] Tucsenberg site for aftermarket aeration membrane compatibility review, material guidance, and RFQ-ready inquiry paths"
+      "name": "{siteName}",
+      "description": "Sitio de Tucsenberg para revisión de compatibilidad de membranas de aireación de recambio, orientación de materiales y vías de consulta listas para RFQ"
     },
     "article": {
-      "defaultTitle": "[ES-TODO] Article",
-      "defaultDescription": "[ES-TODO] Article description",
-      "defaultAuthor": "[ES-TODO] {companyName}"
+      "defaultTitle": "Artículo",
+      "defaultDescription": "Descripción del artículo",
+      "defaultAuthor": "{companyName}"
     },
     "product": {
-      "defaultName": "[ES-TODO] Product",
-      "defaultDescription": "[ES-TODO] Product description"
+      "defaultName": "Producto",
+      "defaultDescription": "Descripción del producto"
     }
   },
   "apiErrors": {
-    "RATE_LIMIT_EXCEEDED": "[ES-TODO] Too many requests. Please try again later.",
-    "UNAUTHORIZED": "[ES-TODO] Unauthorized access.",
-    "FORBIDDEN": "[ES-TODO] This request is not allowed.",
-    "INTERNAL_SERVER_ERROR": "[ES-TODO] An unexpected error occurred. Please try again later.",
-    "INVALID_JSON_BODY": "[ES-TODO] Invalid request format.",
-    "INVALID_REQUEST": "[ES-TODO] Some required fields are missing or invalid.",
-    "PAYLOAD_TOO_LARGE": "[ES-TODO] The request payload is too large.",
-    "UNSUPPORTED_MEDIA_TYPE": "[ES-TODO] Unsupported content type.",
-    "CONFIRMATION_REQUIRED": "[ES-TODO] Please add confirm=true parameter to confirm this action.",
-    "INVALID_LOCALE_PARAMETER": "[ES-TODO] Invalid locale parameter.",
-    "SUBSCRIBE_SUCCESS": "[ES-TODO] Successfully subscribed to notifications.",
-    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "[ES-TODO] Email is required.",
-    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "[ES-TODO] Invalid email address.",
-    "SUBSCRIBE_SECURITY_REQUIRED": "[ES-TODO] Security verification required.",
-    "SUBSCRIBE_SECURITY_FAILED": "[ES-TODO] Security verification failed. Please try again.",
-    "SUBSCRIBE_PROCESSING_ERROR": "[ES-TODO] An error occurred. Please try again.",
-    "CONTACT_SUCCESS": "[ES-TODO] Your message was sent successfully.",
-    "CONTACT_VALIDATION_FAILED": "[ES-TODO] Please check the highlighted fields and try again.",
-    "CONTACT_PROCESSING_ERROR": "[ES-TODO] We could not submit your message right now. Please try again later.",
-    "CONTACT_STATS_ERROR": "[ES-TODO] Failed to load contact form statistics.",
-    "CONTACT_SUBMISSION_EXPIRED": "[ES-TODO] This form expired. Please refresh the page and try again.",
-    "INQUIRY_SUCCESS": "[ES-TODO] Inquiry submitted successfully.",
-    "INQUIRY_SECURITY_REQUIRED": "[ES-TODO] Security verification required.",
-    "INQUIRY_SECURITY_FAILED": "[ES-TODO] Security verification failed. Please try again.",
-    "INQUIRY_VALIDATION_FAILED": "[ES-TODO] Please review your inquiry details and try again.",
-    "INQUIRY_PROCESSING_ERROR": "[ES-TODO] We could not send your inquiry right now. Please try again later.",
-    "TURNSTILE_SUCCESS": "[ES-TODO] Verification successful.",
-    "TURNSTILE_MISSING_TOKEN": "[ES-TODO] Security verification required.",
-    "TURNSTILE_VERIFICATION_FAILED": "[ES-TODO] Security verification failed. Please try again.",
-    "TURNSTILE_NETWORK_ERROR": "[ES-TODO] Failed to communicate with the verification service.",
-    "TURNSTILE_NOT_CONFIGURED": "[ES-TODO] Security verification is not configured on the server.",
-    "WEB_VITALS_RECORDED": "[ES-TODO] Web Vitals data recorded successfully.",
-    "WEB_VITALS_INVALID_FORMAT": "[ES-TODO] The provided data does not match the expected Web Vitals format.",
-    "WEB_VITALS_PROCESS_FAILED": "[ES-TODO] Failed to process Web Vitals data.",
-    "WEB_VITALS_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve Web Vitals statistics.",
-    "WEB_VITALS_DELETED": "[ES-TODO] Web Vitals data deleted successfully.",
-    "WEB_VITALS_DELETE_FAILED": "[ES-TODO] Failed to delete Web Vitals data.",
-    "I18N_ANALYTICS_RECORDED": "[ES-TODO] i18n analytics data recorded successfully.",
-    "I18N_ANALYTICS_INVALID_FORMAT": "[ES-TODO] The provided data does not match the expected i18n analytics format.",
-    "I18N_ANALYTICS_PROCESS_FAILED": "[ES-TODO] Failed to process i18n analytics data.",
-    "I18N_ANALYTICS_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve i18n analytics statistics.",
-    "I18N_ANALYTICS_DELETED": "[ES-TODO] i18n analytics data deleted successfully.",
-    "I18N_ANALYTICS_DELETE_FAILED": "[ES-TODO] Failed to delete i18n analytics data.",
-    "MONITORING_DATA_RECEIVED": "[ES-TODO] Monitoring data received successfully.",
-    "MONITORING_INVALID_FORMAT": "[ES-TODO] Required fields: source, metrics, timestamp.",
-    "MONITORING_PROCESS_FAILED": "[ES-TODO] Failed to process monitoring dashboard data.",
-    "MONITORING_RETRIEVE_FAILED": "[ES-TODO] Failed to retrieve monitoring dashboard data.",
-    "MONITORING_DELETED": "[ES-TODO] Monitoring data deleted successfully.",
-    "MONITORING_DELETE_FAILED": "[ES-TODO] Failed to delete monitoring dashboard data.",
-    "MONITORING_CONFIG_UPDATED": "[ES-TODO] Monitoring configuration updated successfully.",
-    "MONITORING_CONFIG_INVALID": "[ES-TODO] Configuration object is required.",
-    "MONITORING_CONFIG_UPDATE_FAILED": "[ES-TODO] Failed to update monitoring configuration.",
-    "CACHE_INVALIDATED": "[ES-TODO] Cache invalidated successfully.",
-    "CACHE_LOCALE_REQUIRED": "[ES-TODO] Locale is required for this cache invalidation.",
-    "CACHE_INVALID_DOMAIN": "[ES-TODO] Invalid cache domain.",
-    "CACHE_INVALIDATION_FAILED": "[ES-TODO] Failed to invalidate cache.",
-    "UNKNOWN_ERROR": "[ES-TODO] An unknown error occurred."
+    "RATE_LIMIT_EXCEEDED": "Demasiadas solicitudes. Inténtelo de nuevo más tarde.",
+    "UNAUTHORIZED": "Acceso no autorizado.",
+    "FORBIDDEN": "Esta solicitud no está permitida.",
+    "INTERNAL_SERVER_ERROR": "Se produjo un error inesperado. Inténtelo de nuevo más tarde.",
+    "INVALID_JSON_BODY": "Formato de solicitud no válido.",
+    "INVALID_REQUEST": "Faltan campos obligatorios o no son válidos.",
+    "PAYLOAD_TOO_LARGE": "El contenido de la solicitud es demasiado grande.",
+    "UNSUPPORTED_MEDIA_TYPE": "Tipo de contenido no admitido.",
+    "CONFIRMATION_REQUIRED": "Añada el parámetro confirm=true para confirmar esta acción.",
+    "INVALID_LOCALE_PARAMETER": "Parámetro de idioma no válido.",
+    "SUBSCRIBE_SUCCESS": "Suscripción a las notificaciones realizada correctamente.",
+    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "El correo electrónico es obligatorio.",
+    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "Dirección de correo electrónico no válida.",
+    "SUBSCRIBE_SECURITY_REQUIRED": "Se requiere verificación de seguridad.",
+    "SUBSCRIBE_SECURITY_FAILED": "La verificación de seguridad falló. Inténtelo de nuevo.",
+    "SUBSCRIBE_PROCESSING_ERROR": "Se produjo un error. Inténtelo de nuevo.",
+    "CONTACT_SUCCESS": "Su mensaje se envió correctamente.",
+    "CONTACT_VALIDATION_FAILED": "Revise los campos resaltados e inténtelo de nuevo.",
+    "CONTACT_PROCESSING_ERROR": "No pudimos enviar su mensaje en este momento. Inténtelo de nuevo más tarde.",
+    "CONTACT_STATS_ERROR": "No se pudieron cargar las estadísticas del formulario de contacto.",
+    "CONTACT_SUBMISSION_EXPIRED": "Este formulario caducó. Actualice la página e inténtelo de nuevo.",
+    "INQUIRY_SUCCESS": "Solicitud enviada correctamente.",
+    "INQUIRY_SECURITY_REQUIRED": "Se requiere verificación de seguridad.",
+    "INQUIRY_SECURITY_FAILED": "La verificación de seguridad falló. Inténtelo de nuevo.",
+    "INQUIRY_VALIDATION_FAILED": "Revise los datos de su solicitud e inténtelo de nuevo.",
+    "INQUIRY_PROCESSING_ERROR": "No pudimos enviar su solicitud en este momento. Inténtelo de nuevo más tarde.",
+    "TURNSTILE_SUCCESS": "Verificación correcta.",
+    "TURNSTILE_MISSING_TOKEN": "Se requiere verificación de seguridad.",
+    "TURNSTILE_VERIFICATION_FAILED": "La verificación de seguridad falló. Inténtelo de nuevo.",
+    "TURNSTILE_NETWORK_ERROR": "No se pudo establecer comunicación con el servicio de verificación.",
+    "TURNSTILE_NOT_CONFIGURED": "La verificación de seguridad no está configurada en el servidor.",
+    "WEB_VITALS_RECORDED": "Datos de Web Vitals registrados correctamente.",
+    "WEB_VITALS_INVALID_FORMAT": "Los datos proporcionados no coinciden con el formato esperado de Web Vitals.",
+    "WEB_VITALS_PROCESS_FAILED": "No se pudieron procesar los datos de Web Vitals.",
+    "WEB_VITALS_RETRIEVE_FAILED": "No se pudieron recuperar las estadísticas de Web Vitals.",
+    "WEB_VITALS_DELETED": "Datos de Web Vitals eliminados correctamente.",
+    "WEB_VITALS_DELETE_FAILED": "No se pudieron eliminar los datos de Web Vitals.",
+    "I18N_ANALYTICS_RECORDED": "Datos de analítica de i18n registrados correctamente.",
+    "I18N_ANALYTICS_INVALID_FORMAT": "Los datos proporcionados no coinciden con el formato esperado de analítica de i18n.",
+    "I18N_ANALYTICS_PROCESS_FAILED": "No se pudieron procesar los datos de analítica de i18n.",
+    "I18N_ANALYTICS_RETRIEVE_FAILED": "No se pudieron recuperar las estadísticas de analítica de i18n.",
+    "I18N_ANALYTICS_DELETED": "Datos de analítica de i18n eliminados correctamente.",
+    "I18N_ANALYTICS_DELETE_FAILED": "No se pudieron eliminar los datos de analítica de i18n.",
+    "MONITORING_DATA_RECEIVED": "Datos de monitoreo recibidos correctamente.",
+    "MONITORING_INVALID_FORMAT": "Campos obligatorios: source, metrics, timestamp.",
+    "MONITORING_PROCESS_FAILED": "No se pudieron procesar los datos del panel de monitoreo.",
+    "MONITORING_RETRIEVE_FAILED": "No se pudieron recuperar los datos del panel de monitoreo.",
+    "MONITORING_DELETED": "Datos de monitoreo eliminados correctamente.",
+    "MONITORING_DELETE_FAILED": "No se pudieron eliminar los datos del panel de monitoreo.",
+    "MONITORING_CONFIG_UPDATED": "Configuración de monitoreo actualizada correctamente.",
+    "MONITORING_CONFIG_INVALID": "Se requiere el objeto de configuración.",
+    "MONITORING_CONFIG_UPDATE_FAILED": "No se pudo actualizar la configuración de monitoreo.",
+    "CACHE_INVALIDATED": "Caché invalidada correctamente.",
+    "CACHE_LOCALE_REQUIRED": "Se requiere el idioma para esta invalidación de caché.",
+    "CACHE_INVALID_DOMAIN": "Dominio de caché no válido.",
+    "CACHE_INVALIDATION_FAILED": "No se pudo invalidar la caché.",
+    "UNKNOWN_ERROR": "Se produjo un error desconocido."
   },
   "errors": {
     "global": {
-      "title": "[ES-TODO] Something went wrong!",
-      "description": "[ES-TODO] We apologize for the inconvenience. An unexpected error has occurred.",
-      "tryAgain": "[ES-TODO] Try again",
-      "goHome": "[ES-TODO] Go to homepage",
-      "devDetails": "[ES-TODO] Error Details (Development Only)"
+      "title": "Algo salió mal",
+      "description": "Lamentamos las molestias. Se ha producido un error inesperado.",
+      "tryAgain": "Intentar de nuevo",
+      "goHome": "Ir a la página de inicio",
+      "devDetails": "Detalles del error (solo en desarrollo)"
     },
     "products": {
-      "title": "[ES-TODO] Failed to load product information",
-      "description": "[ES-TODO] We couldn't load the product details. Please try again or return to the homepage to browse other content.",
-      "tryAgain": "[ES-TODO] Try again",
-      "goHome": "[ES-TODO] Back to homepage"
+      "title": "No se pudo cargar la información del producto",
+      "description": "No pudimos cargar los detalles del producto. Vuelva a intentarlo o regrese a la página de inicio para ver otro contenido.",
+      "tryAgain": "Intentar de nuevo",
+      "goHome": "Volver a la página de inicio"
     },
     "contact": {
-      "title": "[ES-TODO] Contact form temporarily unavailable",
-      "description": "[ES-TODO] Our team will look into this issue immediately. You can try again later or contact us through other channels.",
-      "tryAgain": "[ES-TODO] Try again",
-      "goHome": "[ES-TODO] Back to homepage"
+      "title": "Formulario de contacto temporalmente no disponible",
+      "description": "Nuestro equipo revisará este problema de inmediato. Puede volver a intentarlo más tarde o contactarnos por otros canales.",
+      "tryAgain": "Intentar de nuevo",
+      "goHome": "Volver a la página de inicio"
     },
     "notFound": {
-      "title": "[ES-TODO] Page not found",
-      "description": "[ES-TODO] The page you're looking for doesn't exist or has been moved.",
-      "goHome": "[ES-TODO] Back to homepage"
+      "title": "Página no encontrada",
+      "description": "La página que busca no existe o se ha movido.",
+      "goHome": "Volver a la página de inicio"
     },
-    "serverError": "[ES-TODO] Internal server error",
-    "networkError": "[ES-TODO] Network connection error",
-    "validationError": "[ES-TODO] Please check your input",
-    "unauthorized": "[ES-TODO] You are not authorized to access this page",
-    "forbidden": "[ES-TODO] Access to this resource is forbidden",
-    "timeout": "[ES-TODO] Request timeout - please try again",
-    "generic": "[ES-TODO] Something went wrong. Please try again later.",
-    "translationMissing": "[ES-TODO] Translation not available",
-    "loadingFailed": "[ES-TODO] Failed to load content"
+    "serverError": "Error interno del servidor",
+    "networkError": "Error de conexión de red",
+    "validationError": "Revise los datos introducidos",
+    "unauthorized": "No tiene autorización para acceder a esta página",
+    "forbidden": "El acceso a este recurso está prohibido",
+    "timeout": "Tiempo de espera agotado: vuelva a intentarlo",
+    "generic": "Algo salió mal. Vuelva a intentarlo más tarde.",
+    "translationMissing": "Traducción no disponible",
+    "loadingFailed": "No se pudo cargar el contenido"
   },
   "catalog": {
     "breadcrumb": {
@@ -1154,7 +629,7 @@
       "cta": {
         "heading": "[ES-TODO] Need to review {marketLabel}?",
         "description": "[ES-TODO] Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
-        "button": "[ES-TODO] Request a Quote"
+        "button": "Solicitar cotización o verificación de número de pieza"
       },
       "familyInquiry": {
         "cta": "[ES-TODO] Request quote for {familyLabel}"
@@ -1633,5 +1108,126 @@
       "specialty": "[ES-TODO] Specialty Example",
       "custom": "[ES-TODO] Custom"
     }
+  },
+  "membraneProduct": {
+    "hero": {
+      "overline": "MEMBRANA DE REEMPLAZO",
+      "specBar": {
+        "diameter": "Diámetro",
+        "material": "Material",
+        "category": "Tipo",
+        "categoryValues": {
+          "disc": "Disco",
+          "tube": "Tubo"
+        },
+        "sku": "SKU"
+      }
+    },
+    "compatibility": {
+      "title": "Modelos OEM compatibles",
+      "description": "Esta membrana es un reemplazo previsto para los siguientes modelos de difusores OEM. Confirme las dimensiones y los herrajes antes de pedir.",
+      "crossRefNote": "Los números mostrados son números OEM o números de referencia cruzada / intercambio publicados, no números vendidos por el OEM.",
+      "fitStatus": {
+        "exact": "Ajuste exacto",
+        "verify-dimensions": "Verificar dimensiones",
+        "custom": "Personalizado"
+      },
+      "confidence": {
+        "high": "Confianza alta",
+        "medium": "Confianza media",
+        "low": "Confianza baja"
+      },
+      "requiredChecks": "El comprador debe verificar",
+      "noChecksRequired": "No se requiere verificación adicional",
+      "modelColumn": "Modelo OEM",
+      "partNumbersColumn": "Números OEM / de referencia cruzada",
+      "fitColumn": "Ajuste",
+      "confidenceColumn": "Confianza",
+      "checksColumn": "Verificaciones requeridas"
+    },
+    "cta": {
+      "requestQuote": "Solicitar cotización para esta pieza",
+      "viewGroup": "Ver todos los tamaños"
+    }
+  },
+  "compatibleBrand": {
+    "hero": {
+      "overline": "COMPATIBILIDAD OEM",
+      "description": "Membranas de reemplazo para difusores de aireación {brand}."
+    },
+    "disclaimer": "Aviso de marca registrada",
+    "filter": {
+      "all": "Todos",
+      "disc": "Modelos de disco",
+      "tube": "Modelos de tubo",
+      "material": "Material",
+      "materialAll": "Todos los materiales"
+    },
+    "results": {
+      "compatibleProduct": "Reemplazo Tucsenberg compatible",
+      "partNumbers": "Números OEM / de referencia cruzada",
+      "fitStatus": "Estado de ajuste",
+      "confidence": "Confianza",
+      "requiredChecks": "El comprador debe verificar",
+      "noChecksRequired": "No se requiere verificación adicional",
+      "requestQuote": "Solicitar cotización para esta pieza",
+      "empty": "Ningún modelo coincide con los filtros seleccionados."
+    }
+  },
+  "quote": {
+    "hero": {
+      "title": "Solicitar cotización",
+      "description": "Indíquenos lo que necesita. Revisamos su solicitud y respondemos en un plazo de 2 días hábiles."
+    },
+    "softEntry": {
+      "title": "¿No sabe qué membrana corresponde?",
+      "body": "Indíquenos la marca, el modelo y las dimensiones de su difusor actual; añada fotos o las condiciones del agua residual si las tiene. Usamos esos datos para identificar la vía de reemplazo más cercana."
+    },
+    "form": {
+      "partNumbers": "Número(s) de pieza o modelo OEM",
+      "partNumbersHint": "Ingrese el SKU de Tucsenberg, el número de pieza OEM o el nombre del modelo",
+      "quantity": "Cantidad",
+      "quantityHint": "Cantidad aproximada requerida",
+      "company": "Empresa / Organización",
+      "email": "Correo electrónico",
+      "name": "Nombre completo",
+      "country": "País",
+      "material": "Material preferido",
+      "materialOptions": {
+        "epdm": "EPDM",
+        "tpu": "TPU",
+        "notSure": "No estoy seguro — asesórenme"
+      },
+      "shutdownDate": "Fecha de parada / Urgencia",
+      "shutdownDateHint": "¿Cuándo necesita instalar las membranas?",
+      "notes": "Notas adicionales",
+      "fileUpload": "Referencie una lista de piezas o una foto",
+      "fileUploadHint": "Registramos el nombre del archivo solo como referencia. El archivo no se envía con este formulario; téngalo listo para enviarlo por correo cuando le respondamos (CSV, PDF o imágenes, máx. 10 MB).",
+      "submit": "Enviar solicitud de cotización",
+      "submitting": "Enviando..."
+    },
+    "summary": {
+      "title": "Resumen de su solicitud",
+      "empty": "Agregue detalles para ver el resumen de su solicitud",
+      "leadTime": "Plazo de entrega",
+      "leadTimeValue": "Confirmado durante la revisión de la cotización",
+      "responseTime": "Tiempo de respuesta",
+      "responseTimeValue": "En un plazo de 2 días hábiles"
+    },
+    "success": {
+      "title": "Solicitud de cotización enviada",
+      "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles.",
+      "fileNotice": "Su archivo no se subió; solo se registró su nombre. Le pediremos que lo envíe por correo cuando le respondamos."
+    }
+  },
+  "search": {
+    "placeholder": "Busque por número de pieza, modelo OEM o marca...",
+    "label": "Búsqueda de compatibilidad",
+    "noResults": "Sin resultados para \"{query}\"",
+    "modelsHeading": "Modelos OEM",
+    "productsHeading": "Membranas Tucsenberg",
+    "requestQuote": "Solicitar cotización",
+    "openHint": "Buscar ⌘K",
+    "close": "Cerrar"
   }
 }

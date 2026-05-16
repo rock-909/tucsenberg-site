@@ -24,13 +24,15 @@
 - [x] 建站骨架落地：已从 `showcase-website-starter` 复制代码，保留本项目主文档，`package.json` 已改名为 `tucsenberg-site`，本目录已初始化 git，`pnpm install` + `pnpm dev` 冒烟通过
 - [x] repo config 初步对齐：`.env.example`、Wrangler、CI URL、CODEOWNERS、CodeRabbit、public security files、OG 图和 runtime env defaults 已切到 Tucsenberg
 - [x] Step 3 产品兼容数据层：`src/data/product-compatibility/` 已提供 Zod schema、静态产品/OEM 数据、三套查询索引和 part-number 搜索。
+- [x] Step 4 四页样板：首页、产品详情页、OEM 兼容页、Quote 询价页全部跑在 `src/data/product-compatibility/` 数据层上；part-number / 西语 / 中文数据已清理；全站 ⌘K 兼容性搜索（任意页面唤起）已接入；英 + 西公开、中文仅内部预览；产品详情页 / OEM 页的动态路由现已按公开语言进 sitemap（每个产品 slug 出 `/membranes/{slug}`，每个 OEM 品牌 slug 出 `/compatible/{brand}`，中文不进、不索引）；RFQ 走 `/api/quote`。
+- [x] Step 4 收尾（独立 review-swarm + Codex 验收双复核后落修）：C2 询盘掉量 cap、A1 teal token 还原、C1 首页 e2e/BC-001 重写、公开西语 `[ES-TODO]` 清零、产品 canonical 改为描述性 membrane slug（SKU slug 308 重定向）、load-messages 治理对齐、买家入口全部指向真实页面（header/footer/搜索 canonical/BC-002/BC-026/导航 e2e）、文件上传与 quote CTA 文案改诚实、RFQ 来源上下文、公开西语占位 guard、`rfq_quote` Turnstile 契约、SEO 关键词移除 silicone、RFQ owner 邮件失败可观测；并完成本轮首页去 Zod 改动——把 Zod 校验的兼容数据层移出首页客户端 bundle。
 
 ---
 
 ## 进行中
 
 - [ ] 活入口去 starter 化：README、CLAUDE、PRODUCT、PROJECT-BRIEF、docs/website、`.claude/rules`、governance docs、public static surfaces。
-- [ ] Step 4 四页样板：首页、产品页样板、Sanitaire 兼容页样板、Quote 表单页。
+- [ ] Step 5：剩余 11 页英文版（Step 4 已收尾，下一步进入 Step 5）。
 
 ---
 
@@ -122,6 +124,20 @@
 | 2 个变体域名购买（Cloudflare Registrar） | 冷邮件域名隔离 | 用户 |
 | 实拍产品图 + 安装/拆装近景 | 视觉资产，hero / 产品页头图 | 用户 |
 
+### 上线前检查（launch-gate）
+
+- [ ] 发布前确认 `sales@tucsenberg.com` 真实可收信（footer 可见邮箱 + Organization JSON-LD `email`/`contactPoint` 均已引用此地址；A+ 非 RFQ 联系决策的唯一非 RFQ 收件箱，上线前必须是真实邮箱）。
+
+### 跟进项（开发侧，待处理）
+
+- 本地 `main` 已与 `origin/main` 分叉，需要做一次 reset 对齐（本分支不处理，作为独立跟进项；处理前确认本地无未推送的有效改动；本轮 PR 流程的 rebase 由控制方统一处理）。
+- **post-PR backlog（非 Step 4 阻塞项，已记录避免遗失）：**
+  - Codex #10：把 `home` / `quote` 客户端 messages 从根 `NextIntlClientProvider` 拆出去（当前全站客户端都带这两个 namespace；本轮明确不动，`search` 作为全局 ⌘K namespace 保持全局）。
+  - Codex #11：预计算归一化搜索索引 + top-N（更激进、无买家流程收益、PR 前回归风险，故本轮不做；本轮已做 server/client 拆分但未做 top-N 截断）。
+  - Codex #12：quote 表单客户端做邮箱格式预校验。
+  - footer `platform.*` starter 残留（Next.js / v0 / Turbo / Vercel-template 模板遗留的 footer 条目）。
+  - 上线时真机验证 Turnstile + Resend owner 邮件投递（测试只证明了文档契约级，真机投递是部署期检查，不由测试证明）。
+
 ---
 
 ## 卡点
@@ -134,6 +150,10 @@
 
 ### 2026-05-15
 
+- **首页客户端 bundle 去 Zod** — 首页第一屏的兼容搜索（`HomeHeroSearch`）原来在客户端静态 import `@/data/product-compatibility` barrel，把 Zod + 整个被 Zod 校验的数据层打进首页客户端 bundle，并在 hydration 时重跑 `.parse()`。本轮做 server/client 拆分：服务端 `buildClientSearchIndex()`（定义在 `indexes.ts`，经 `search-index.ts` 暴露）一次性产出 JSON 可序列化、已校验、预归一化的搜索索引，首页 Server Component 构建后作为 prop 下发；客户端只 import 纯函数 `matchClientSearchIndex`（`search-match.ts`，零 Zod、零数据 barrel 的值 import）。`findCompatibilityMatches` 改为复用同一个纯匹配器，保证服务端/客户端结果逐字一致（行为不变：同样的命中、同样排序、同样 canonical slug 与三语字段、同样 ⌘K 不受影响）。bundle 证据：首页 hero 搜索 chunk 4.0k，`ZodObject/makeIssue`=0、catalog 数据标记=0、旧 `findCompatibilityMatches`=0、仅含 `matchClientSearchIndex`；首页 client-reference manifest 不再引用数据 chunk。全站 ⌘K（`compatibility-search.tsx`，layout 里 `lazy()` 加载）仍走 barrel，属可接受范围、本轮不动。
+- **权威 slug / RFQ / 文件上传 / SEO 关键词决策落定**：(a) 产品-兼容唯一权威数据层是 `src/data/product-compatibility/`；(b) 描述性 membrane slug 为 canonical，SKU slug 永久 308 重定向到它；(c) RFQ 成功的判定 = 写入 Airtable 记录（按 `security.md`，owner 通知邮件失败只记日志、不算用户失败）——Step 4 的"验证 Resend"在文档契约级别已满足，真机 Resend / Turnstile 投递是部署期检查，不由测试证明；(d) Phase 1 文件上传刻意不做真实上传，UI/文案改诚实（只记录文件名）；(e) 按 PROJECT-BRIEF 把 silicone 从 SEO 关键词移除（silicone 仅作定制 RFQ，不进标准品 SEO）。
+- **Step 4 四页样板完成** — 首页、产品详情页、OEM 兼容页、Quote 询价页全部上线并跑在产品-兼容数据层上；全站 ⌘K 搜索、三语数据清理、公开语言动态路由进 sitemap。代码侧唯一新增改动是把产品/品牌动态路由按公开语言（仅英 + 西，中文不进）写入 sitemap，并补回 `quote` 路由的存在性断言。全套门禁顺序通过（type-check / lint / 3269 测试全绿 / brand / content / component / react:doctor 90 / build / Cloudflare build 全 exit 0）。
+- **权威数据层定案** — 产品-兼容的唯一权威数据层是 `src/data/product-compatibility/`（Zod schema + 静态数据 + 索引 + part-number 搜索）。`src/data/` 下当前只有这一个目录；早期探索阶段提到的本地 `src/data/` 变体 A 实际并未落库（已核实不存在该目录），按"不使用、不引用"对待，后续不要再新建并行数据层。
 - **A/B 设计方向反哺定案** — B 版（Claude Design 探索）的视觉皮（暗色优先 / Inter 做 display / 满屏 pill / 密度切换）**全部拒绝**，与 DESIGN.md 第 2 节反面参考一致；只吸收其三个交互骨架反哺进 DESIGN.md v1.1：(1) 全局兼容性搜索（首页第一屏主入口 + 全站 ⌘K 可唤起，用 A 视觉 token 实现，不是暗色 palette）；(2) 深层页上下文条（复用 hero Trust ribbon 槽位形态）；(3) `/compatible/[brand]` 的 OEM 系列下划线 tab。视觉锁定不变，仍是 A 体系（IBM Plex Sans 300 / Navy / Teal / 6px / 无 pill）。用户决策点：兼容搜索定位 = 首页第一屏主入口。
 - **进度认知校正** — 跨会话曾误判项目已到 Step 4；核实后真实状态为 **Phase 1 Step 2 收尾**：当前可访问页面仍是 starter 演示页套 Tucsenberg 品牌字，PROJECT-BRIEF 规划的 Tucsenberg 页面（兼容搜索首页 / `/membranes` / `/compatible/sanitaire` / 真实 `/quote`）尚未落地；Step 3 数据层、Step 4 四页样板均未开始。组件库与 Radix governed adoption 计划的 wrapper 已建但 6 个切片验收闸门尚未跑（计划文档勾选框仍全空）。当前在 `radix-governed-full-adoption` 分支，工作区干净。
 

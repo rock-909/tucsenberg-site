@@ -7,10 +7,21 @@ import {
   getStaticPageLastModified,
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
+import { isNoindexStaticPageType } from "@/config/pages.config";
 import { LOCALES_CONFIG, SITE_CONFIG } from "@/config/paths";
-import { getProductMarketPath } from "@/config/paths/utils";
+import {
+  getCompatibleBrandPath,
+  getMembraneProductPath,
+  getProductMarketPath,
+} from "@/config/paths/utils";
+import {
+  canonicalProductSlug,
+  oemBrands,
+  productVariants,
+} from "@/data/product-compatibility";
 import {
   getSingleSiteSitemapPageConfig,
+  SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
   type SingleSiteSitemapPageConfig,
@@ -101,9 +112,26 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
-// Generate product catalog entries (market pages) for public SEO locales only
+// Generate product catalog entries (market pages) for public SEO locales only.
+//
+// The `/products/[market]` market landing pages are the starter-era catalog
+// surface that lives under the `/products` overview. While that overview is
+// de-listed + noindex (Wave B: `products` page type `sitemap.include: false`
+// in pages.config.ts, because it still leaks starter slop + `[ES-TODO]`),
+// emitting its child market URLs into the public sitemap would submit URLs
+// whose own page metadata is `noindex` — a self-contradicting SEO leak.
+//
+// Gate the whole catalog emission on the SAME source of truth Wave B uses
+// (`isNoindexStaticPageType("products")`). When a later Step rebuilds the
+// product overview as real Tucsenberg content and flips its `sitemap.include`
+// back to `true`, this function re-enables automatically — the generation
+// path is intentionally kept intact below.
 function generateCatalogEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
+
+  if (isNoindexStaticPageType("products")) {
+    return entries;
+  }
 
   // Market landing pages
   const marketConfig = getPageConfig("productMarket");
@@ -126,13 +154,58 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
+// Generate product-compatibility entries (membrane product detail pages and
+// OEM compatibility pages) for public SEO locales only.
+function generateCompatibilityEntries(): MetadataRoute.Sitemap {
+  const entries: MetadataRoute.Sitemap = [];
+  const lastModified = new Date(SINGLE_SITE_COMPATIBILITY_LASTMOD_ISO);
+
+  const membraneConfig = getPageConfig("membraneProduct");
+  // Emit ONLY the canonical descriptive slug. The legacy SKU slug is a
+  // permanent-redirect source, not an indexable URL.
+  for (const variant of productVariants) {
+    const path = getMembraneProductPath(canonicalProductSlug(variant));
+
+    for (const locale of PUBLIC_LOCALES) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified,
+          config: membraneConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  const brandConfig = getPageConfig("compatibleBrand");
+  for (const brand of oemBrands) {
+    const path = getCompatibleBrandPath(brand.slug);
+
+    for (const locale of PUBLIC_LOCALES) {
+      entries.push(
+        createSitemapEntry({
+          url: `${BASE_URL}/${locale}${path}`,
+          lastModified,
+          config: brandConfig,
+          alternates: buildAlternateLanguages(path),
+        }),
+      );
+    }
+  }
+
+  return entries;
+}
+
 /**
  * Dynamic sitemap generation for Next.js.
- * Includes static pages and product catalog pages with i18n alternates.
+ * Includes static pages, product catalog pages, and product-compatibility
+ * detail/brand pages with i18n alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = await generateStaticPageEntries();
   const catalogEntries = generateCatalogEntries();
+  const compatibilityEntries = generateCompatibilityEntries();
 
-  return [...staticEntries, ...catalogEntries];
+  return [...staticEntries, ...catalogEntries, ...compatibilityEntries];
 }

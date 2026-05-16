@@ -15,6 +15,11 @@ import {
   MIN_LEAD_MESSAGE_LENGTH,
   MAX_LEAD_SUBJECT_LENGTH,
   MIN_LEAD_SUBJECT_LENGTH,
+  MAX_LEAD_COUNTRY_LENGTH,
+  MAX_LEAD_PART_NUMBERS_LENGTH,
+  MAX_LEAD_QUANTITY_LENGTH,
+  MAX_LEAD_SHUTDOWN_LENGTH,
+  MAX_LEAD_SOURCE_CONTEXT_LENGTH,
   ONE,
 } from "@/constants";
 
@@ -25,6 +30,7 @@ export const LEAD_TYPES = {
   CONTACT: "contact",
   PRODUCT: "product",
   NEWSLETTER: "newsletter",
+  RFQ: "rfq",
 } as const;
 
 export type LeadType = (typeof LEAD_TYPES)[keyof typeof LEAD_TYPES];
@@ -145,6 +151,39 @@ export const newsletterLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.NEWSLETTER),
   email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
 });
+
+/**
+ * RFQ quote lead schema
+ *
+ * Used by the public `/quote` page (`POST /api/quote`). It is intentionally
+ * standalone (not part of the `leadSchema` discriminated union): the quote
+ * route validates the rich RFQ input here, then composes a contact-shaped
+ * payload for the audited `processLead` pipeline. File uploads are handled
+ * client-side only for now; the server endpoint accepts JSON, so uploaded
+ * file name/size metadata rides in `notes`.
+ */
+export const rfqLeadSchema = z.object({
+  type: z.literal(LEAD_TYPES.RFQ),
+  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
+  country: sanitizedString().max(MAX_LEAD_COUNTRY_LENGTH).optional(),
+  partNumbers: sanitizedString().min(ONE).max(MAX_LEAD_PART_NUMBERS_LENGTH),
+  quantity: sanitizedString().max(MAX_LEAD_QUANTITY_LENGTH).optional(),
+  material: z.enum(["epdm", "tpu", "not-sure"]).optional(),
+  shutdownDate: sanitizedString().max(MAX_LEAD_SHUTDOWN_LENGTH).optional(),
+  notes: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
+  // Origin context when the buyer arrived from a compatible-brand page
+  // (which OEM brand / model / Tucsenberg product they cross-referenced from).
+  // Validated inputs only: these fold into the composed `requirements` text,
+  // not into new Airtable columns or email-template fields.
+  sourceBrand: sanitizedString().max(MAX_LEAD_SOURCE_CONTEXT_LENGTH).optional(),
+  sourceModel: sanitizedString().max(MAX_LEAD_SOURCE_CONTEXT_LENGTH).optional(),
+  sourceProduct: sanitizedString()
+    .max(MAX_LEAD_SOURCE_CONTEXT_LENGTH)
+    .optional(),
+  ...baseLeadFields,
+});
+
+export type RfqLeadInput = z.infer<typeof rfqLeadSchema>;
 
 /**
  * Unified lead schema using discriminated union

@@ -90,6 +90,7 @@ describe("Mobile Navigation - Main Tests", () => {
           "navigation.blog": "Blog",
           "navigation.customProject": "Custom",
           "navigation.contactSales": "Contact",
+          "navigation.requestQuote": "Request a Quote",
           "navigation.menu": "Menu",
           "navigation.close": "Close",
           "accessibility.openMenu": "Open menu",

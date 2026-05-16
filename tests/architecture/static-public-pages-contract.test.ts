@@ -60,6 +60,7 @@ describe("static public pages architecture contract", () => {
       "capabilities",
       "howItWorks",
       "customProject",
+      "quote",
     ] as const satisfies readonly PageType[];
 
     expect(PUBLIC_STATIC_PAGE_TYPES).toEqual(expected);

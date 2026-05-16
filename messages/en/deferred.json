@@ -60,11 +60,6 @@
     }
   },
   "contact": {
-    "context": {
-      "productFamilyLabel": "You are asking about:",
-      "marketFallbackLabel": "Membrane review path",
-      "familyFallbackLabel": "Replacement membrane family"
-    },
     "title": "Contact Us",
     "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
     "features": "Multiple ways to reach us and get the support you need",
@@ -456,7 +451,7 @@
     "cta": {
       "heading": "Start a Custom Project",
       "description": "Tell us the goal, audience, content, timeline, and replacement needs. This example should become your real intake path.",
-      "button": "Get Started"
+      "button": "Send your project and replacement details"
     }
   }
 }

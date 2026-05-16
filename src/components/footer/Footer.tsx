@@ -11,6 +11,7 @@ import {
   type FooterColumnConfig,
   type FooterStyleTokens,
 } from "@/config/footer-links";
+import { getPublicContactEmail } from "@/config/public-trust";
 import { Link } from "@/i18n/routing";
 
 export interface FooterProps {
@@ -118,6 +119,8 @@ export function Footer({
     }
   };
 
+  const publicEmail = getPublicContactEmail();
+
   const { layout, typography, colors, hover } = tokens;
 
   const containerStyle: CSSProperties = {
@@ -196,6 +199,14 @@ export function Footer({
             />
           ))}
         </nav>
+        {publicEmail ? (
+          <p className="mt-8 text-sm text-[var(--footer-text)]">
+            <span>{translateWithFallback("footer.contact.label", "")} </span>
+            <a className={linkClassName} href={`mailto:${publicEmail}`}>
+              {publicEmail}
+            </a>
+          </p>
+        ) : null}
         {(statusSlot || themeToggleSlot) && (
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[var(--footer-text)]">

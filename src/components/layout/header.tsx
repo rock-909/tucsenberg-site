@@ -3,7 +3,7 @@
  *
  * 服务端渲染的头部，交互部件以客户端小岛方式注入，减少首屏 JS 体积。
  */
-import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
+import { SINGLE_SITE_PRIMARY_CTA_HREF } from "@/config/single-site-links";
 import type { Locale } from "@/i18n/routing-config";
 import { Link } from "@/i18n/routing";
 import { getRuntimeEnvString } from "@/lib/env";
@@ -15,6 +15,7 @@ import {
 } from "@/components/layout/header-client";
 import { Logo } from "@/components/layout/logo";
 import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
+import { SearchLauncher } from "@/components/search/search-launcher";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -36,7 +37,7 @@ interface HeaderProps {
   variant?: "default" | "minimal" | "transparent";
   sticky?: boolean;
   locale?: Locale;
-  contactSalesLabel?: string;
+  primaryCtaLabel?: string;
   openMenuLabel?: string;
   closeMenuLabel?: string;
   mobileLanguageLabel?: string;
@@ -64,7 +65,7 @@ export function Header({
   variant = "default",
   sticky = true,
   locale,
-  contactSalesLabel = "Contact Sales",
+  primaryCtaLabel = "Request a Quote",
   openMenuLabel = "Open navigation menu",
   closeMenuLabel = "Close navigation menu",
   mobileLanguageLabel = "Language",
@@ -103,7 +104,7 @@ export function Header({
           />
 
           <HeaderUtilityControls
-            contactSalesLabel={contactSalesLabel}
+            primaryCtaLabel={primaryCtaLabel}
             locale={locale}
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
@@ -161,13 +162,13 @@ function CenterNav({
 }
 
 function HeaderUtilityControls({
-  contactSalesLabel,
+  primaryCtaLabel,
   locale,
   openMenuLabel,
   closeMenuLabel,
   mobileLanguageLabel,
 }: {
-  contactSalesLabel: string;
+  primaryCtaLabel: string;
   locale: Locale | undefined;
   openMenuLabel: string;
   closeMenuLabel: string;
@@ -189,12 +190,12 @@ function HeaderUtilityControls({
             className="header-cta-desktop-only"
           >
             <Link
-              href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+              href={SINGLE_SITE_PRIMARY_CTA_HREF}
               prefetch={false}
               data-testid="header-cta"
             >
               <span data-testid="header-contact-sales-label" translate="no">
-                {contactSalesLabel}
+                {primaryCtaLabel}
               </span>
             </Link>
           </Button>
@@ -209,15 +210,18 @@ function HeaderUtilityControls({
               className="h-9 px-3 text-xs font-semibold"
             >
               <Link
-                href={SINGLE_SITE_HOME_LINK_TARGETS.contact}
+                href={SINGLE_SITE_PRIMARY_CTA_HREF}
                 prefetch={false}
                 data-testid="header-mobile-cta"
               >
                 <span data-testid="header-mobile-contact-label" translate="no">
-                  {contactSalesLabel}
+                  {primaryCtaLabel}
                 </span>
               </Link>
             </Button>
+          </div>
+          <div className="header-full-desktop-only h-10 items-center justify-end">
+            <SearchLauncher />
           </div>
           <div className="header-full-desktop-only h-10 w-28 items-center justify-end">
             <LanguageToggleIsland locale={locale} />
@@ -230,7 +234,7 @@ function HeaderUtilityControls({
               locale={locale}
             >
               <MobileNavigationLinks
-                contactSalesLabel={contactSalesLabel}
+                primaryCtaLabel={primaryCtaLabel}
                 data-testid="header-mobile-navigation-fallback-links"
               />
             </MobileNavigationIsland>

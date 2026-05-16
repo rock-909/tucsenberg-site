@@ -44,14 +44,6 @@ interface FactualCriticalMessages {
   navigation: {
     siteName: string;
   };
-  home: {
-    footer: {
-      about: {
-        title: string;
-      };
-      copyright: string;
-    };
-  };
   footer: {
     copyright: string;
   };
@@ -112,8 +104,6 @@ function assertFactualCriticalMessages(
   value: unknown,
 ): asserts value is FactualCriticalMessages {
   expectStringPath(value, ["navigation", "siteName"]);
-  expectStringPath(value, ["home", "footer", "about", "title"]);
-  expectStringPath(value, ["home", "footer", "copyright"]);
   expectStringPath(value, ["footer", "copyright"]);
   expectStringPath(value, ["structured-data", "organization", "name"]);
   expectStringPath(value, ["structured-data", "website", "name"]);
@@ -261,9 +251,7 @@ describe("load-messages runtime gating", () => {
     assertFactualCriticalMessages(zhMessages);
 
     expect(enMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(enMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(enMessages.footer.copyright).toBe(expectedEnCopyright);
-    expect(enMessages.home.footer.copyright).toBe(expectedEnCopyright);
     expect(enMessages["structured-data"].organization.name).toBe(
       SINGLE_SITE_FACTS.company.name,
     );
@@ -274,35 +262,52 @@ describe("load-messages runtime gating", () => {
       SINGLE_SITE_FACTS.company.name,
     );
 
-    expect(esMessages.navigation.siteName).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
-    );
-    expect(esMessages.home.footer.about.title).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
-    );
-    expect(esMessages.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEnCopyright}`,
-    );
-    expect(esMessages.home.footer.copyright).toBe(
-      `[ES-TODO] ${expectedEnCopyright}`,
-    );
-    expect(esMessages.footer.copyright).not.toContain(
-      "Todos los derechos reservados",
-    );
+    // Phase-1 public-ES posture: ES publishes publicly, so public chrome must
+    // NOT leak `[ES-TODO]`. `navigation.siteName` and `footer.copyright` are
+    // pure ICU/brand leaves (`{siteName}` / `{copyright}`) that resolve to the
+    // same factual brand values across all locales by necessity. Commit
+    // `8adbd43` correctly removed the `[ES-TODO]` flag from these and curated
+    // them into the documented `ES_IDENTICAL_ALLOWLIST` of
+    // `tests/unit/i18n-message-contract.test.ts`; ES == EN here is intended,
+    // not a translation miss. These assertions still enforce that the runtime
+    // loader resolves concrete factual brand values for public ES chrome.
+    expect(esMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
+    expect(esMessages.footer.copyright).toBe(expectedEnCopyright);
+    expect(esMessages.navigation.siteName).not.toContain("[ES-TODO]");
+    expect(esMessages.footer.copyright).not.toContain("[ES-TODO]");
+    // `critical.structured-data` is emitted into PUBLIC JSON-LD on every
+    // public page. Its ES leaves were translated (and the pure ICU
+    // identity leaves de-`[ES-TODO]`-flagged) so crawlers no longer receive
+    // unfinished machine-readable brand data. `organization.name` /
+    // `website.name` / `article.defaultAuthor` are pure ICU placeholders
+    // ({companyName}/{siteName}) that resolve to the same factual brand
+    // values across locales by necessity — ES == EN here is intended. The
+    // no-`[ES-TODO]` invariant for every public-emitted structured-data leaf
+    // is enforced by tests/unit/i18n-public-es-placeholder.test.ts.
     expect(esMessages["structured-data"].organization.name).toBe(
-      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+      SINGLE_SITE_FACTS.company.name,
     );
     expect(esMessages["structured-data"].website.name).toBe(
-      `[ES-TODO] ${SINGLE_SITE_CONFIG.name}`,
+      SINGLE_SITE_CONFIG.name,
     );
     expect(esMessages["structured-data"].article.defaultAuthor).toBe(
-      `[ES-TODO] ${SINGLE_SITE_FACTS.company.name}`,
+      SINGLE_SITE_FACTS.company.name,
+    );
+    expect(esMessages["structured-data"].organization.name).not.toContain(
+      "[ES-TODO]",
+    );
+    expect(esMessages["structured-data"].website.name).not.toContain(
+      "[ES-TODO]",
+    );
+    expect(
+      esMessages["structured-data"].organization.description,
+    ).not.toContain("[ES-TODO]");
+    expect(esMessages["structured-data"].website.description).not.toContain(
+      "[ES-TODO]",
     );
 
     expect(zhMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(zhMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(zhMessages.footer.copyright).toBe(expectedZhCopyright);
-    expect(zhMessages.home.footer.copyright).toBe(expectedZhCopyright);
     expect(JSON.stringify(enMessages)).not.toMatch(factualPlaceholderPattern);
     expect(JSON.stringify(esMessages)).not.toMatch(factualPlaceholderPattern);
     expect(JSON.stringify(zhMessages)).not.toMatch(factualPlaceholderPattern);
@@ -358,12 +363,8 @@ describe("load-messages runtime gating", () => {
 
     expect(enCritical.navigation.siteName).toBe("{siteName}");
     expect(zhCritical.navigation.siteName).toBe("{siteName}");
-    expect(enCritical.home.footer.about.title).toBe("{siteName}");
-    expect(zhCritical.home.footer.about.title).toBe("{siteName}");
     expect(enCritical.footer.copyright).toBe("{copyright}");
     expect(zhCritical.footer.copyright).toBe("{copyright}");
-    expect(enCritical.home.footer.copyright).toBe("{copyright}");
-    expect(zhCritical.home.footer.copyright).toBe("{copyright}");
 
     expect(enCritical["structured-data"].organization.name).toBe(
       "{companyName}",

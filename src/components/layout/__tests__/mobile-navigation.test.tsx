@@ -8,7 +8,10 @@ import {
   MobileMenuButton,
   MobileNavigationInteractive as MobileNavigation,
 } from "@/components/layout/mobile-navigation-interactive";
-import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  SINGLE_SITE_PRIMARY_CTA_HREF,
+  SINGLE_SITE_ROUTE_HREFS,
+} from "@/config/single-site-links";
 import { createMockTranslations, renderWithIntl } from "@/test/utils";
 
 const mockLocale = { current: "en" as "en" | "es" | "zh" };
@@ -253,10 +256,15 @@ describe("MobileNavigation Component", () => {
       expect(html).not.toContain("aria-expanded");
     });
 
-    it("renders the mobile CTA as the stable placeholder hash link", () => {
+    it("routes the mobile CTA to the live quote page, not a placeholder", () => {
       const html = renderToStaticMarkup(<MobileNavigationLinks />);
 
-      expect(html).toContain(`href="${SINGLE_SITE_ROUTE_HREFS.comingSoon}"`);
+      expect(html).toContain(`href="${SINGLE_SITE_PRIMARY_CTA_HREF}"`);
+      expect(SINGLE_SITE_PRIMARY_CTA_HREF).toBe(SINGLE_SITE_ROUTE_HREFS.quote);
+      // The shipped Step-4 CTA must not regress to the #coming-soon dead-end.
+      expect(html).not.toContain(
+        `href="${SINGLE_SITE_ROUTE_HREFS.comingSoon}"`,
+      );
       expect(html).not.toContain("mobile_nav_cta");
       expect(html).not.toContain("%23coming-soon");
     });

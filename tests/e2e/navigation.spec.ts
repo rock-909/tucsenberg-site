@@ -22,6 +22,56 @@ const rawBaseUrl =
 
 const BASE_ORIGIN = new URL(rawBaseUrl).origin;
 const PUBLIC_NAV_ITEMS = ["Membranes", "Compatibility", "Materials", "Quote"];
+
+// Step-4 information architecture: every buyer nav item except Materials
+// reaches a live page. Materials is genuinely future scope and stays the
+// #coming-soon placeholder. Hrefs are locale-prefixed by next-intl routing.
+const PLACEHOLDER_HREF = "#coming-soon";
+const NAV_LIVE_HREF: Record<string, string> = {
+  Membranes: "/en/membranes/9-inch-epdm-disc-replacement",
+  Compatibility: "/en/compatible/sanitaire",
+  Quote: "/en/quote",
+};
+const NAV_EXPECTED_HREF: Record<string, string> = {
+  ...NAV_LIVE_HREF,
+  Materials: PLACEHOLDER_HREF,
+};
+
+// BC-002 backs *localized* nav, but most assertions above lock only `/en`.
+// `/es` is a public locale: prove the shipped buyer items resolve to the
+// current-locale live route and Materials stays the placeholder, using the
+// real merged `messages/es/critical.json` "navigation" labels (NOT invented
+// copy). Slugs are locale-agnostic; next-intl prefixes the active locale, so
+// the only delta from `/en` is the path prefix and the translated labels.
+interface LocaleNavExpectation {
+  readonly locale: "en" | "es";
+  // label -> expected href (live route on the current locale, or placeholder)
+  readonly expected: Record<string, string>;
+  // label -> live route, for the items that must NOT be #coming-soon
+  readonly live: Record<string, string>;
+}
+
+const LOCALE_NAV_TABLE: readonly LocaleNavExpectation[] = [
+  {
+    locale: "en",
+    expected: NAV_EXPECTED_HREF,
+    live: NAV_LIVE_HREF,
+  },
+  {
+    locale: "es",
+    expected: {
+      Membranas: "/es/membranes/9-inch-epdm-disc-replacement",
+      Compatibilidad: "/es/compatible/sanitaire",
+      Materiales: PLACEHOLDER_HREF,
+      Cotización: "/es/quote",
+    },
+    live: {
+      Membranas: "/es/membranes/9-inch-epdm-disc-replacement",
+      Compatibilidad: "/es/compatible/sanitaire",
+      Cotización: "/es/quote",
+    },
+  },
+];
 const REMOVED_STARTER_LINKS = [
   "Home",
   "Products",
@@ -32,6 +82,71 @@ const REMOVED_STARTER_LINKS = [
   "Custom",
   "Contact",
 ];
+
+// BC-002 localized-nav smoke: tight, locale-parameterized over en + es.
+// Resolves the P2#10 deferred backlog item with real coverage instead of a
+// doc note. Uses its own goto (no `/en` beforeEach) so the es row truly
+// renders the es header. Mirrors the i18n.spec.ts locator style.
+test.describe("Localized nav href smoke (BC-002)", () => {
+  for (const { locale, expected, live } of LOCALE_NAV_TABLE) {
+    test(`resolves shipped nav items to the ${locale} live route in header and mobile sheet`, async ({
+      page,
+    }) => {
+      await page.goto(`/${locale}`);
+      await page.waitForURL(`**/${locale}`);
+      await waitForLoadWithFallback(page, {
+        context: `localized nav smoke (${locale})`,
+        loadTimeout: 5_000,
+        fallbackDelay: 500,
+      });
+      await removeInterferingElements(page);
+      await waitForStablePage(page);
+
+      const labels = Object.keys(expected);
+
+      if (await isHeaderInMobileMode(page)) {
+        const mobileMenuButton = getHeaderMobileMenuButton(page);
+        await expect(mobileMenuButton).toBeVisible();
+        try {
+          await mobileMenuButton.tap();
+        } catch {
+          await mobileMenuButton.click();
+        }
+
+        const mobileNavSheet = page.getByRole("dialog", {
+          name: /mobile navigation/i,
+        });
+        await expect(mobileNavSheet).toBeVisible();
+
+        for (const label of labels) {
+          const link = mobileNavSheet
+            .getByRole("link", { exact: true, name: label })
+            .first();
+          await expect(link).toBeVisible();
+          await expect(link).toHaveAttribute("href", expected[label]!);
+          // Shipped items must point at the current-locale live route, never
+          // regress to #coming-soon or the wrong locale prefix.
+          if (label in live) {
+            await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+          }
+        }
+        return;
+      }
+
+      const nav = getNav(page);
+      await expect(nav).toBeVisible();
+
+      for (const label of labels) {
+        const link = nav.getByRole("link", { name: label });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", expected[label]!);
+        if (label in live) {
+          await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+        }
+      }
+    });
+  }
+});
 
 test.describe("Navigation System", () => {
   test.beforeEach(async ({ page }) => {
@@ -101,7 +216,11 @@ test.describe("Navigation System", () => {
       for (const label of PUBLIC_NAV_ITEMS) {
         const link = nav.getByRole("link", { name: label });
         await expect(link).toBeVisible();
-        await expect(link).toHaveAttribute("href", "#coming-soon");
+        await expect(link).toHaveAttribute("href", NAV_EXPECTED_HREF[label]);
+        // Shipped Step-4 pages must never regress to the placeholder href.
+        if (label !== "Materials") {
+          await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+        }
       }
 
       for (const label of REMOVED_STARTER_LINKS) {
@@ -109,7 +228,41 @@ test.describe("Navigation System", () => {
       }
     });
 
-    test("should keep Step 2 placeholder navigation stable and non-breaking", async ({
+    test("should navigate buyer nav items to their live Step-4 pages", async ({
+      page,
+    }) => {
+      if (await isHeaderInMobileMode(page)) {
+        const mobileMenuButton = getHeaderMobileMenuButton(page);
+        await expect(mobileMenuButton).toBeVisible();
+        return;
+      }
+
+      // Click each shipped buyer nav item and assert it lands on the real
+      // route, not a #coming-soon dead-end.
+      for (const [label, href] of Object.entries(NAV_LIVE_HREF)) {
+        await page.goto("/en");
+        await waitForLoadWithFallback(page, {
+          context: `navigation live target (${label})`,
+          loadTimeout: 5_000,
+          fallbackDelay: 500,
+        });
+        await removeInterferingElements(page);
+        await waitForStablePage(page);
+
+        const nav = getNav(page);
+        const link = nav.getByRole("link", { name: label });
+        await expect(link).toHaveAttribute("href", href);
+
+        await link.click({ noWaitAfter: true });
+        await page.waitForURL(`**${href}`);
+        await expect.poll(() => new URL(page.url()).pathname).toBe(href);
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+          timeout: 30_000,
+        });
+      }
+    });
+
+    test("should keep the Materials placeholder stable and non-breaking", async ({
       page,
     }) => {
       // Dismiss cookie consent dialog if present to avoid click interception
@@ -132,14 +285,12 @@ test.describe("Navigation System", () => {
       }
 
       const nav = getNav(page);
-      for (const label of PUBLIC_NAV_ITEMS) {
-        const link = nav.getByRole("link", { name: label });
-        await expect(link).toHaveAttribute("href", "#coming-soon");
-      }
+      const materialsLink = nav.getByRole("link", { name: "Materials" });
+      await expect(materialsLink).toHaveAttribute("href", PLACEHOLDER_HREF);
 
       const clickedRoute = await safeClick(
         page,
-        'nav a[href="#coming-soon"]:visible',
+        `nav a[href="${PLACEHOLDER_HREF}"]:visible`,
       );
       expect(clickedRoute).toBe(true);
       await waitForStablePage(page);
@@ -155,9 +306,6 @@ test.describe("Navigation System", () => {
 
       await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
-        timeout: 30_000,
-      });
-      await expect(page.getByTestId("hero-section")).toBeVisible({
         timeout: 30_000,
       });
       await waitForStablePage(page);
@@ -189,7 +337,8 @@ test.describe("Navigation System", () => {
         attempts++;
       }
 
-      // Verify we can focus and activate the first placeholder link.
+      // Verify we can focus and activate the first buyer nav link, which now
+      // navigates to the live featured membrane page (not a placeholder).
       const firstNavLink = nav.getByRole("link", { name: "Membranes" });
       await firstNavLink.focus();
       await expect(firstNavLink).toBeFocused();
@@ -202,7 +351,10 @@ test.describe("Navigation System", () => {
         fallbackDelay: 500,
       });
 
-      await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
+      await expect(page).toHaveURL(
+        /\/en\/membranes\/9-inch-epdm-disc-replacement$/,
+      );
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
 
     test("should handle external links correctly", async ({ page }) => {
@@ -265,7 +417,8 @@ test.describe("Navigation System", () => {
       // Verify sheet content
       await expect(mobileNavSheet.getByRole("heading").first()).toBeVisible();
 
-      // Verify navigation links in mobile menu (match Step 2 placeholder IA)
+      // Verify navigation links in mobile menu (Step-4 IA: live pages except
+      // the genuinely-future Materials placeholder).
       for (const linkText of PUBLIC_NAV_ITEMS) {
         const links = mobileNavSheet.getByRole("link", {
           exact: true,
@@ -277,7 +430,13 @@ test.describe("Navigation System", () => {
         for (let index = 0; index < count; index += 1) {
           const link = links.nth(index);
           await expect(link).toBeVisible();
-          await expect(link).toHaveAttribute("href", "#coming-soon");
+          await expect(link).toHaveAttribute(
+            "href",
+            NAV_EXPECTED_HREF[linkText],
+          );
+          if (linkText !== "Materials") {
+            await expect(link).not.toHaveAttribute("href", PLACEHOLDER_HREF);
+          }
         }
       }
       for (const linkText of REMOVED_STARTER_LINKS) {
@@ -325,7 +484,7 @@ test.describe("Navigation System", () => {
       await expect(mobileMenuButton).toBeFocused();
     });
 
-    test("should expose placeholder links from mobile menu without dead routes", async ({
+    test("should route mobile menu buyer links to live pages and keep only Materials a placeholder", async ({
       page,
     }) => {
       const mobileMenuButton = getHeaderMobileMenuButton(page);
@@ -349,19 +508,27 @@ test.describe("Navigation System", () => {
         for (let index = 0; index < count; index += 1) {
           await expect(links.nth(index)).toHaveAttribute(
             "href",
-            "#coming-soon",
+            NAV_EXPECTED_HREF[label],
           );
+          // Shipped Step-4 pages must not regress to the placeholder.
+          if (label !== "Materials") {
+            await expect(links.nth(index)).not.toHaveAttribute(
+              "href",
+              PLACEHOLDER_HREF,
+            );
+          }
         }
       }
 
+      // The Materials placeholder still performs a stable in-page hash nav
+      // (sheet auto-closes, page does not break).
       const clickedRoute = await safeClick(
         page,
-        `${MOBILE_MENU_CONTENT_SELECTOR} a[href="#coming-soon"]`,
+        `${MOBILE_MENU_CONTENT_SELECTOR} a[href="${PLACEHOLDER_HREF}"]`,
       );
       expect(clickedRoute).toBe(true);
       await waitForStablePage(page);
 
-      // Sheet should auto-close after hash navigation.
       await expect(mobileNavSheet).not.toBeVisible({ timeout: 10_000 });
 
       await expect(page).toHaveURL(/\/en\/?#coming-soon$/);
@@ -417,6 +584,9 @@ test.describe("Navigation System", () => {
     }) => {
       await page.goto("/en?utm_source=test&utm_medium=e2e");
 
+      // Use the Materials placeholder: it is the in-page hash navigation that
+      // must preserve query params. Shipped buyer links now route to real
+      // pages and are covered by the dedicated live-navigation test.
       if (await isHeaderInMobileMode(page)) {
         const mobileMenuButton = getHeaderMobileMenuButton(page);
         await expect(mobileMenuButton).toBeVisible();
@@ -425,13 +595,13 @@ test.describe("Navigation System", () => {
           name: /mobile navigation/i,
         });
         await mobileNavSheet
-          .getByRole("link", { name: "Membranes" })
+          .getByRole("link", { name: "Materials" })
           .first()
           .click();
       } else {
         const nav = getNav(page);
-        const membranesLink = nav.getByRole("link", { name: "Membranes" });
-        await membranesLink.click();
+        const materialsLink = nav.getByRole("link", { name: "Materials" });
+        await materialsLink.click();
       }
       await expect
         .poll(() => {
@@ -657,11 +827,11 @@ test.describe("Navigation System", () => {
 
       const membranesLink = nav.getByRole("link", { name: "Membranes" });
       await membranesLink.click({ noWaitAfter: true });
-      await page.waitForURL("**/en#coming-soon");
+      await page.waitForURL("**/en/membranes/9-inch-epdm-disc-replacement");
 
       const navigationTime = Date.now() - startTime;
 
-      console.log(`Placeholder navigation time: ${navigationTime}ms`);
+      console.log(`Membranes navigation time: ${navigationTime}ms`);
 
       // Navigation should be fast (CI runners can be slightly slower than local machines)
       const budgetMs = process.env.CI ? 1500 : 1000;

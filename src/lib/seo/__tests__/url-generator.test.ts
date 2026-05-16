@@ -156,8 +156,8 @@ describe("URLGenerator", () => {
       const entries = generator.generateAllSitemapEntries();
       const urls = entries.map((entry) => entry.loc);
 
-      // 10 live static page types x 2 public SEO languages = 20 entries.
-      expect(entries).toHaveLength(20);
+      // 11 live static page types x 2 public SEO languages = 22 entries.
+      expect(entries).toHaveLength(22);
       expect(
         entries.some((entry) => entry.loc.includes("/bending-machines")),
       ).toBe(false);
