@@ -12,7 +12,7 @@ import {
 import { getMembraneProductPath } from "@/config/paths/utils";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
-import { TrademarkDisclaimer } from "@/components/trust";
+import { NarrativeSection, TrademarkDisclaimer } from "@/components/trust";
 import { CompatibilitySection } from "@/app/[locale]/membranes/[product]/compatibility-section";
 import { localizeText } from "@/lib/i18n/localize-text";
 import { Link, routing } from "@/i18n/routing";
@@ -148,6 +148,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </dl>
         </div>
       </section>
+
+      <NarrativeSection
+        eyebrow={t("useCase.eyebrow")}
+        title={t("useCase.title")}
+        body={t("useCase.body")}
+      />
 
       <CompatibilitySection entry={entry} locale={locale} />
 
