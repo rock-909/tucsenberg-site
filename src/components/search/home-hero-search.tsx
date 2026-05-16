@@ -62,6 +62,8 @@ function ModelRows({
                 href={
                   `/quote?partNumber=${encodeURIComponent(
                     firstPart,
+                  )}&brand=${encodeURIComponent(
+                    model.brandName,
                   )}&model=${encodeURIComponent(model.modelSlug)}` as "/"
                 }
                 prefetch={false}

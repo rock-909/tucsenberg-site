@@ -119,6 +119,30 @@ describe("CompatibilitySearchModal", () => {
     expect(productLink.getAttribute("href")).not.toContain("tuc-d9-epdm");
   });
 
+  it("request-quote link carries the OEM brand display name so the RFQ keeps brand context", async () => {
+    renderModal(true);
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "00223" },
+    });
+
+    const quoteLinks = await screen.findAllByRole("link", {
+      name: /request quote/i,
+    });
+    const sanitaireQuoteLink = quoteLinks.find((link) =>
+      (link.getAttribute("href") ?? "").includes(
+        `brand=${encodeURIComponent("Sanitaire")}`,
+      ),
+    );
+    // Brand display name (not a raw slug) must reach the quote form so the
+    // owner's RFQ record shows "Sanitaire", not "sanitaire" or nothing.
+    expect(sanitaireQuoteLink).toBeDefined();
+    const href = sanitaireQuoteLink?.getAttribute("href") ?? "";
+    expect(href).toContain("/quote?");
+    expect(href).not.toContain("brand=sanitaire&");
+    expect(href).toContain("partNumber=");
+    expect(href).toContain("model=");
+  });
+
   it("calls onClose when Escape is pressed", () => {
     const onClose = vi.fn();
     renderModal(true, onClose);
