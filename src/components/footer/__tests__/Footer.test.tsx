@@ -115,6 +115,19 @@ describe("Footer Component", () => {
     });
   });
 
+  it("renders the real business email as visible copyable text", () => {
+    render(<Footer />);
+
+    // A+ non-RFQ contact decision: the footer must surface the literal
+    // business email as readable text (a mailto wrapper is an enhancement,
+    // not a substitute for the visible address).
+    const emailNode = screen.getByText("sales@tucsenberg.com");
+    expect(emailNode).toBeInTheDocument();
+    expect(emailNode.tagName).toBe("A");
+    expect(emailNode).toHaveAttribute("href", "mailto:sales@tucsenberg.com");
+    expect(emailNode.textContent).toBe("sales@tucsenberg.com");
+  });
+
   it("renders social links section", () => {
     render(<Footer />);
 

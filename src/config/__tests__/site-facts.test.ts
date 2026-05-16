@@ -18,7 +18,7 @@ describe("site-facts", () => {
     expect(SINGLE_SITE_KEY).toBe("tucsenberg");
     expect(SINGLE_SITE_CONFIG.name).toBe("Tucsenberg");
     expect(siteFacts.company.name).toBe("Tucsenberg");
-    expect(siteFacts.contact.email).toBe("contact@tucsenberg.com");
+    expect(siteFacts.contact.email).toBe("sales@tucsenberg.com");
     expect(siteFacts.company.location.country).toBe("China");
   });
 

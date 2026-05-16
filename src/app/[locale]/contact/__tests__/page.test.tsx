@@ -184,7 +184,7 @@ describe("ContactPage MDX migration", () => {
     );
 
     expect(screen.queryByText("sales@example.com")).not.toBeInTheDocument();
-    expect(screen.getByText("contact@tucsenberg.com")).toBeInTheDocument();
+    expect(screen.getByText("sales@tucsenberg.com")).toBeInTheDocument();
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
     expect(container.querySelector('[data-slot="data-card"]')).toHaveAttribute(

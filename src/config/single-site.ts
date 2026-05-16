@@ -53,7 +53,11 @@ const social = {
 
 const contact = {
   phone: "+86-518-0000-0000",
-  email: "contact@tucsenberg.com",
+  // Single real receiving inbox for the A+ non-RFQ contact decision: covers
+  // general / distribution / media / non-RFQ inquiries and is surfaced in the
+  // footer and Organization JSON-LD. PUBLISH-GATE: must be a real mailbox
+  // before public launch (tracked in DEVELOPMENT-LOG.md).
+  email: "sales@tucsenberg.com",
 } as const;
 
 const establishedYear = 2026;
