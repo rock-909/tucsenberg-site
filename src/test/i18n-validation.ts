@@ -412,11 +412,12 @@ function validateTranslationQuality(params: {
  * Keys whose value is intentionally identical across locales (technical
  * material tokens like "EPDM" / "TPU" — kept in English per content rules),
  * so the same-value heuristic must not flag them as untranslated.
+ *
+ * The former `home.materials.*` EPDM/TPU tokens were removed when the home
+ * page dropped its local materials section in favor of the shared
+ * `MaterialDecisionCard` trust primitive (Step 4.1 Phase B).
  */
-const IDENTICAL_ACROSS_LOCALES = new Set<string>([
-  "home.materials.epdm.name",
-  "home.materials.tpu.name",
-]);
+const IDENTICAL_ACROSS_LOCALES = new Set<string>();
 
 /**
  * 检查未翻译内容

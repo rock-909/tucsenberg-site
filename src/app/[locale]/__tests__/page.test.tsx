@@ -30,14 +30,6 @@ const homeMessages: Record<string, string> = {
     "Enter a part number, OEM model, or diffuser brand to check compatibility.",
   "oemGrid.overline": "OEM COMPATIBILITY",
   "oemGrid.title": "Replacement Membranes for Major Brands",
-  "materials.overline": "MATERIAL SELECTION",
-  "materials.title": "Choose the Material That Matches Your Conditions",
-  "materials.epdm.name": "EPDM",
-  "materials.epdm.description":
-    "Municipal and light industrial wastewater conditions.",
-  "materials.tpu.name": "TPU",
-  "materials.tpu.description":
-    "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
   "cta.title": "Have a part number ready?",
   "cta.description":
     "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
@@ -94,6 +86,13 @@ vi.mock("@/components/trust", async (importOriginal) => {
         ))}
       </ul>
     ),
+    CompatibilityProofBox: () => (
+      <section data-testid="compatibility-proof-box" />
+    ),
+    MaterialDecisionCard: () => (
+      <section data-testid="material-decision-card" />
+    ),
+    BatchControlsBlock: () => <section data-testid="batch-controls-block" />,
   };
 });
 
@@ -250,22 +249,40 @@ describe("Home Page", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("presents condition-based material guidance without quality claims", async () => {
+    it("mounts the frozen proof, material, and batch blocks in order", async () => {
       const HomeComponent = await Home({
         params: Promise.resolve({ locale: "en" }),
       });
 
-      render(HomeComponent);
+      const { container } = render(HomeComponent);
 
-      expect(screen.getByText("EPDM")).toBeInTheDocument();
-      expect(screen.getByText("TPU")).toBeInTheDocument();
+      const proof = screen.getByTestId("compatibility-proof-box");
+      const material = screen.getByTestId("material-decision-card");
+      const batch = screen.getByTestId("batch-controls-block");
+
+      expect(proof).toBeInTheDocument();
+      expect(material).toBeInTheDocument();
+      expect(batch).toBeInTheDocument();
+
+      const order = Array.from(
+        container.querySelectorAll(
+          "[data-testid='compatibility-proof-box'], [data-testid='material-decision-card'], [data-testid='batch-controls-block']",
+        ),
+      ).map((el) => el.getAttribute("data-testid"));
+      expect(order).toEqual([
+        "compatibility-proof-box",
+        "material-decision-card",
+        "batch-controls-block",
+      ]);
+
+      // The legacy home-local materials section is gone.
       expect(
-        screen.getByText(
+        screen.queryByText(
           "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
         ),
-      ).toBeInTheDocument();
+      ).not.toBeInTheDocument();
       expect(
-        screen.queryByText(/premium|high quality|better than/i),
+        screen.queryByText("Choose the Material That Matches Your Conditions"),
       ).not.toBeInTheDocument();
     });
 

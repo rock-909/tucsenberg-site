@@ -12,7 +12,12 @@ import {
 } from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
-import { SlaCommitments } from "@/components/trust";
+import {
+  BatchControlsBlock,
+  CompatibilityProofBox,
+  MaterialDecisionCard,
+  SlaCommitments,
+} from "@/components/trust";
 import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
 import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
 import { HomeRisksSection } from "@/components/sections/home-risks-section";
@@ -31,7 +36,6 @@ interface HomePageProps {
   params: Promise<LocaleParam>;
 }
 
-const MATERIAL_ITEMS = ["epdm", "tpu"] as const;
 const BROWSE_ALL_MEMBRANES_HREF = FEATURED_MEMBRANE_HREF;
 
 export function generateStaticParams() {
@@ -120,34 +124,6 @@ function OemGridSection({ t }: { t: HomeTranslator }) {
   );
 }
 
-function MaterialsSection({ t }: { t: HomeTranslator }) {
-  return (
-    <section className="bg-card px-6 py-16 md:py-20">
-      <div className="mx-auto max-w-[1080px]">
-        <Overline>{t("materials.overline")}</Overline>
-        <h2 className="mt-3 text-[28px] leading-tight font-light tracking-[-0.01em] text-foreground md:text-[32px]">
-          {t("materials.title")}
-        </h2>
-        <div className="mt-9 grid gap-4 md:grid-cols-2">
-          {MATERIAL_ITEMS.map((key) => (
-            <article
-              key={key}
-              className="rounded-[8px] border border-border bg-background p-6 shadow-border"
-            >
-              <h3 className="font-mono text-sm font-semibold tracking-[0.5px] text-foreground">
-                {t(`materials.${key}.name`)}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {t(`materials.${key}.description`)}
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function FinalCta({ t }: { t: HomeTranslator }) {
   return (
     <section className="bg-primary px-6 py-20 text-primary-foreground md:py-24">
@@ -194,7 +170,9 @@ export default async function Home({ params }: HomePageProps) {
         </div>
       </section>
       <HomeRisksSection locale={locale as Locale} />
-      <MaterialsSection t={t} />
+      <CompatibilityProofBox locale={locale as Locale} />
+      <MaterialDecisionCard locale={locale as Locale} />
+      <BatchControlsBlock locale={locale as Locale} />
       <FinalCta t={t} />
     </div>
   );

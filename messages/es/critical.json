@@ -211,18 +211,6 @@
         }
       }
     },
-    "materials": {
-      "overline": "SELECCIÓN DE MATERIAL",
-      "title": "Elija el material que se ajusta a sus condiciones",
-      "epdm": {
-        "name": "EPDM",
-        "description": "Aguas residuales municipales e industriales ligeras."
-      },
-      "tpu": {
-        "name": "TPU",
-        "description": "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada."
-      }
-    },
     "cta": {
       "title": "¿Tiene un número de pieza a mano?",
       "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",

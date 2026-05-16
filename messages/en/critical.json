@@ -211,18 +211,6 @@
         }
       }
     },
-    "materials": {
-      "overline": "MATERIAL SELECTION",
-      "title": "Choose the Material That Matches Your Conditions",
-      "epdm": {
-        "name": "EPDM",
-        "description": "Municipal and light industrial wastewater conditions."
-      },
-      "tpu": {
-        "name": "TPU",
-        "description": "Oil, chemical, and high-grease wastewater conditions where EPDM degrades."
-      }
-    },
     "cta": {
       "title": "Have a part number ready?",
       "description": "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
