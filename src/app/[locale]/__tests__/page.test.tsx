@@ -4,13 +4,17 @@
  * unmock it here for the catalog to initialize.
  */
 import type { AnchorHTMLAttributes, ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Home, { generateStaticParams } from "../page";
 import {
   FEATURED_MEMBRANE_HREF,
   SINGLE_SITE_ROUTE_HREFS,
 } from "@/config/single-site-links";
+import {
+  getBrandPathStats,
+  getOemBrandFacts,
+} from "@/data/product-compatibility";
 
 vi.unmock("zod");
 
@@ -55,10 +59,15 @@ vi.mock("@/i18n/routing", () => ({
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(
-    () => (key: string, values?: Record<string, string>) =>
-      values?.brand
-        ? `View ${values.brand} compatible parts`
-        : (homeMessages[key] ?? key),
+    () => (key: string, values?: Record<string, string | number>) => {
+      if (values?.brand) {
+        return `View ${values.brand} compatible parts`;
+      }
+      if (key === "oemGrid.pathCount" && values?.count !== undefined) {
+        return `${values.count} documented compatibility paths`;
+      }
+      return homeMessages[key] ?? key;
+    },
   ),
   setRequestLocale: vi.fn(),
 }));
@@ -163,6 +172,39 @@ describe("Home Page", () => {
       expect(
         screen.getByRole("link", { name: /SSI Aeration compatible parts/ }),
       ).toHaveAttribute("href", "/compatible/ssi-aeration");
+    });
+
+    it("drives the OEM grid from frozen brand facts with documented-path counts", async () => {
+      const HomeComponent = await Home({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      render(HomeComponent);
+
+      const brands = getOemBrandFacts();
+      expect(brands.map((b) => b.id)).toEqual([
+        "sanitaire",
+        "edi",
+        "ssi-aeration",
+      ]);
+
+      for (const brand of brands) {
+        const link = screen
+          .getAllByRole("link")
+          .find(
+            (el) => el.getAttribute("href") === `/compatible/${brand.slug}`,
+          );
+        expect(link).toBeDefined();
+        expect(link?.textContent).toContain(brand.displayName);
+        expect(link?.textContent).toContain("compatible parts");
+
+        const paths = getBrandPathStats(brand.id).paths;
+        expect(
+          within(link as HTMLElement).getByText(
+            `${paths} documented compatibility paths`,
+          ),
+        ).toBeInTheDocument();
+      }
     });
 
     it("renders the what-we-confirm narrative section after the hero", async () => {

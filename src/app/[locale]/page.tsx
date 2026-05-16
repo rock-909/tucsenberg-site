@@ -6,7 +6,8 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import {
   buildClientSearchIndex,
-  oemBrands,
+  getBrandPathStats,
+  getOemBrandFacts,
   type ClientSearchIndex,
 } from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
@@ -93,17 +94,22 @@ function OemGridSection({ t }: { t: HomeTranslator }) {
           {t("oemGrid.title")}
         </h2>
         <div className="mt-9 grid gap-4 md:grid-cols-3">
-          {oemBrands.map((brand) => (
+          {getOemBrandFacts().map((brand) => (
             <Link
               key={brand.id}
               href={`/compatible/${brand.slug}` as "/"}
               className="group rounded-[8px] border border-border bg-background p-6 shadow-border transition-shadow hover:shadow-[0_0_0_1px_var(--color-brand-accent)]"
             >
               <span className="text-lg font-semibold text-foreground">
-                {brand.name}
+                {brand.displayName}
+              </span>
+              <span className="mt-2 block text-sm text-muted-foreground">
+                {t("oemGrid.pathCount", {
+                  count: getBrandPathStats(brand.id).paths,
+                })}
               </span>
               <span className="mt-3 block text-sm font-medium text-[var(--color-brand-accent)] group-hover:underline">
-                {t("oemGrid.viewAll", { brand: brand.name })}
+                {t("oemGrid.viewAll", { brand: brand.displayName })}
               </span>
             </Link>
           ))}

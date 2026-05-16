@@ -185,7 +185,8 @@
     "oemGrid": {
       "overline": "OEM COMPATIBILITY",
       "title": "Replacement Membranes for Major Brands",
-      "viewAll": "View {brand} compatible parts"
+      "viewAll": "View {brand} compatible parts",
+      "pathCount": "{count, plural, one {# documented compatibility path} other {# documented compatibility paths}}"
     },
     "materials": {
       "overline": "MATERIAL SELECTION",

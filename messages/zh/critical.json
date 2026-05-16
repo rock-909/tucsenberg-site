@@ -185,7 +185,8 @@
     "oemGrid": {
       "overline": "OEM 兼容",
       "title": "面向主流品牌的替换膜片",
-      "viewAll": "查看 {brand} 兼容件"
+      "viewAll": "查看 {brand} 兼容件",
+      "pathCount": "{count, plural, other {# 条已记录的兼容路径}}"
     },
     "materials": {
       "overline": "材质选择",

@@ -185,7 +185,8 @@
     "oemGrid": {
       "overline": "COMPATIBILIDAD OEM",
       "title": "Membranas de repuesto para las principales marcas",
-      "viewAll": "Ver piezas compatibles con {brand}"
+      "viewAll": "Ver piezas compatibles con {brand}",
+      "pathCount": "{count, plural, one {# ruta de compatibilidad documentada} other {# rutas de compatibilidad documentadas}}"
     },
     "materials": {
       "overline": "SELECCIÓN DE MATERIAL",
