@@ -7,15 +7,35 @@
  * form so the search-param pre-fill, live summary, and JSON POST submission
  * are exercised end to end.
  */
+/**
+ * Phase-E adds the shared `@/components/trust` barrel to the page. That
+ * barrel imports `@/data/product-compatibility`, which runs Zod
+ * `.parse()` at module load; the global test setup mocks zod, so it must
+ * be unmocked here for the catalog (and the real trust components, which
+ * we stub via the shared harness) to initialize. The frozen RFQ form's
+ * own i18n/turnstile/fetch mocks below are unchanged — they keep proving
+ * the byte-frozen pipeline exactly as before.
+ */
 import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import QuotePage, { generateMetadata, generateStaticParams } from "../page";
 import { QuoteFormSection } from "../quote-form-section";
 
+vi.unmock("zod");
+
 vi.mock("@/i18n/routing", () => ({
   routing: { locales: ["en", "es", "zh"], defaultLocale: "en" },
 }));
+
+// Phase-E wrap: the page composes the six async trust Server Components.
+// They have dedicated Phase-A coverage + E10 build proof, so the page
+// test stubs them via the shared R13 harness (data-variant / data-layout
+// surfaced, title/eyebrow echoed). NarrativeSection is synchronous and
+// renders the mocked translator key-strings the existing assertions use.
+vi.mock("@/components/trust", async (importOriginal) =>
+  (await import("./test-utils")).trustMockFactory(importOriginal),
+);
 
 function makeTranslator(namespace?: string) {
   const scope = namespace ? namespace.replace(/^quote\.?/, "") : "";
@@ -163,6 +183,32 @@ describe("RFQ quote page", () => {
 
     expect(screen.getByText("softEntry.title")).toBeInTheDocument();
     expect(screen.getByText("softEntry.body")).toBeInTheDocument();
+  });
+
+  it("frames the hero in a narrative intake section above everything", async () => {
+    // Phase-E wrap: the inline hero <section> is replaced by the shared
+    // NarrativeSection (eyebrow + H1 from hero.title + intake.body). The H1
+    // copy key is unchanged (frozen hero.title); the intake eyebrow/body
+    // must render and the soft-entry block must stay below the intake and
+    // above the form. Deleting the wrap or reordering fails here.
+    const { container } = render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    const h1 = screen.getByRole("heading", { level: 1, name: "hero.title" });
+    expect(h1).toBeInTheDocument();
+    expect(screen.getByText("intake.body")).toBeInTheDocument();
+
+    const order = (text: string) => {
+      const el = screen.getByText(text);
+      return Array.prototype.indexOf.call(container.querySelectorAll("*"), el);
+    };
+    // intake body sits above the soft-entry block which sits above the
+    // suspended form skeleton/region.
+    expect(order("intake.body")).toBeLessThan(order("softEntry.title"));
   });
 
   it("renders an empty summary with response/lead-time defaults", async () => {

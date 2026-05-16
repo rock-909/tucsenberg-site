@@ -7,6 +7,7 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { getLocalizedPath } from "@/config/paths";
 import { JsonLdGraphScript } from "@/components/seo";
+import { NarrativeSection } from "@/components/trust";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { QuoteFormSection } from "@/app/[locale]/quote/quote-form-section";
 
@@ -70,27 +71,28 @@ export default async function QuotePage({
 
       <section className="px-6 pt-16 pb-4">
         <div className="mx-auto max-w-[1080px]">
-          <h1 className="text-[32px] leading-[1.1] font-light tracking-[-0.01em] text-primary md:text-[48px]">
+          <span className="block text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("intake.eyebrow")}
+          </span>
+          <h1 className="mt-2 text-[32px] leading-[1.1] font-light tracking-[-0.01em] text-primary md:text-[48px]">
             {t("hero.title")}
           </h1>
-          <p className="mt-3 max-w-[60ch] text-muted-foreground">
-            {t("hero.description")}
+          <p className="mt-4 max-w-[640px] text-muted-foreground">
+            {t("intake.body")}
           </p>
         </div>
       </section>
 
-      <section className="px-6 pt-6 pb-2">
-        <div className="mx-auto max-w-[1080px]">
-          <div className="max-w-[68ch] rounded-[8px] border border-border bg-muted/40 p-5">
-            <p className="text-sm font-medium text-foreground">
-              {t("softEntry.title")}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("softEntry.body")}
-            </p>
-          </div>
+      <NarrativeSection title={t("intake.title")} divider>
+        <div className="max-w-[68ch] rounded-[8px] border border-border bg-muted/40 p-5">
+          <p className="text-sm font-medium text-foreground">
+            {t("softEntry.title")}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("softEntry.body")}
+          </p>
         </div>
-      </section>
+      </NarrativeSection>
 
       <section className="px-6 pt-6 pb-20">
         <div className="mx-auto max-w-[1080px]">
