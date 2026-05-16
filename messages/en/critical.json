@@ -1214,6 +1214,45 @@
     "cta": {
       "requestQuote": "Request Quote for This Part",
       "viewGroup": "View All Sizes"
+    },
+    "useCase": {
+      "eyebrow": "What this product is for",
+      "title": "A drop-in aeration membrane replacement",
+      "body": "This part is for maintenance and procurement teams replacing worn aeration membranes on an installed diffuser without changing the diffuser body or holder. It is reviewed against your documented part, not sold as a generic spare."
+    },
+    "materialFit": {
+      "eyebrow": "Choosing the membrane material",
+      "title": "EPDM is the starting point for most municipal duty",
+      "body": "Material is selected by the wastewater conditions, not as a price tier. Use the decision below to see when EPDM is the right starting point and which conditions move the review toward TPU."
+    },
+    "confirmFit": {
+      "eyebrow": "What to confirm before ordering",
+      "title": "We confirm fit from your documented inputs",
+      "body": "We do not guess compatibility. Send the inputs below and each one is reviewed before a quote is issued.",
+      "steps": {
+        "partNumber": "OEM or cross-reference part number of the membrane currently installed.",
+        "dimensions": "Active diameter and overall dimensions measured from the installed membrane.",
+        "mounting": "How the membrane seats and retains on the diffuser body.",
+        "material": "The wastewater conditions the membrane operates in.",
+        "perforation": "Perforation pattern and slit layout from a clear photo.",
+        "release": "Whether the existing membrane shows scaling, fouling, or chemical attack."
+      }
+    },
+    "leadTime": {
+      "eyebrow": "Lead time",
+      "title": "Lead time follows confirmed compatibility",
+      "body": "Reviewed replacement membranes typically ship within one to two weeks of confirmed compatibility and an accepted quote. Staged delivery for shutdown windows can be arranged on request."
+    },
+    "qc": {
+      "eyebrow": "QC and traceability",
+      "title": "Each shipment is checked and traceable",
+      "sampleNote": "A verification sample can be reviewed before the first batch so the fit is confirmed on your equipment, not on a datasheet."
+    },
+    "quote": {
+      "eyebrow": "Request a quote",
+      "title": "Send your part number or photos",
+      "body": "Send the installed part number, dimensions, and a photo. We review compatibility and reply with a quote or the specific missing information.",
+      "email": "sales@tucsenberg.com"
     }
   },
   "compatibleBrand": {

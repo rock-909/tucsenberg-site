@@ -1214,6 +1214,45 @@
     "cta": {
       "requestQuote": "Solicitar cotización para esta pieza",
       "viewGroup": "Ver todos los tamaños"
+    },
+    "useCase": {
+      "eyebrow": "Para qué sirve este producto",
+      "title": "Una membrana de aireación de reemplazo directo",
+      "body": "Esta pieza es para equipos de mantenimiento y compras que reemplazan membranas de aireación desgastadas en un difusor instalado sin cambiar el cuerpo ni el soporte del difusor. Se revisa frente a su pieza documentada, no se vende como repuesto genérico."
+    },
+    "materialFit": {
+      "eyebrow": "Elección del material de la membrana",
+      "title": "El EPDM es el punto de partida para la mayoría del servicio municipal",
+      "body": "El material se elige según las condiciones del agua residual, no como una categoría de precio. Use la decisión siguiente para ver cuándo el EPDM es el punto de partida correcto y qué condiciones llevan la revisión hacia el TPU."
+    },
+    "confirmFit": {
+      "eyebrow": "Qué confirmar antes de pedir",
+      "title": "Confirmamos el ajuste a partir de sus datos documentados",
+      "body": "No suponemos la compatibilidad. Envíe los datos siguientes y cada uno se revisa antes de emitir una cotización.",
+      "steps": {
+        "partNumber": "Número de pieza OEM o de referencia cruzada de la membrana instalada actualmente.",
+        "dimensions": "Diámetro activo y dimensiones generales medidos en la membrana instalada.",
+        "mounting": "Cómo se asienta y se retiene la membrana en el cuerpo del difusor.",
+        "material": "Las condiciones del agua residual en las que opera la membrana.",
+        "perforation": "Patrón de perforación y disposición de las ranuras a partir de una foto clara.",
+        "release": "Si la membrana existente muestra incrustaciones, ensuciamiento o ataque químico."
+      }
+    },
+    "leadTime": {
+      "eyebrow": "Plazo de entrega",
+      "title": "El plazo de entrega sigue a la compatibilidad confirmada",
+      "body": "Las membranas de reemplazo revisadas suelen enviarse en una a dos semanas tras confirmar la compatibilidad y aceptar la cotización. La entrega escalonada para ventanas de parada puede coordinarse a solicitud."
+    },
+    "qc": {
+      "eyebrow": "Control de calidad y trazabilidad",
+      "title": "Cada envío se verifica y es trazable",
+      "sampleNote": "Se puede revisar una muestra de verificación antes del primer lote para confirmar el ajuste en su equipo, no en una ficha técnica."
+    },
+    "quote": {
+      "eyebrow": "Solicitar una cotización",
+      "title": "Envíe su número de pieza o fotos",
+      "body": "Envíe el número de pieza instalado, las dimensiones y una foto. Revisamos la compatibilidad y respondemos con una cotización o con la información concreta que falta.",
+      "email": "sales@tucsenberg.com"
     }
   },
   "compatibleBrand": {

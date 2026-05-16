@@ -157,6 +157,9 @@ describe("real i18n runtime message contract", () => {
     // emptied for the same reason.
     "membraneProduct.hero.specBar.material",
     "membraneProduct.hero.specBar.sku",
+    // Shared sales address — a technical contact token, identical in every
+    // locale (Step 4.1 Phase C product-page quote CTA).
+    "membraneProduct.quote.email",
     "compatibleBrand.filter.material",
     "quote.form.materialOptions.epdm",
     "quote.form.materialOptions.tpu",
