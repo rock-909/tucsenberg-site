@@ -254,6 +254,24 @@ describe("RFQ quote page", () => {
     expect(sla).toHaveAttribute("data-layout", "stacked");
   });
 
+  it("renders the compatibility-proof and batch-controls blocks", async () => {
+    // Phase-E E7: a proof NarrativeSection (proof.title) holding the
+    // shared CompatibilityProofBox, then a batch NarrativeSection
+    // (batch.title) holding the shared BatchControlsBlock. No extraChecks
+    // are passed. Deleting either block or its wrap fails here.
+    render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(screen.getByText("proof.title")).toBeInTheDocument();
+    expect(screen.getByTestId("compatibility-proof-box")).toBeInTheDocument();
+    expect(screen.getByText("batch.title")).toBeInTheDocument();
+    expect(screen.getByTestId("batch-controls-block")).toBeInTheDocument();
+  });
+
   it("renders an empty summary with response/lead-time defaults", async () => {
     await renderQuoteForm();
 

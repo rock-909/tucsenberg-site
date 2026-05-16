@@ -8,6 +8,8 @@ import {
 import { getLocalizedPath } from "@/config/paths";
 import { JsonLdGraphScript } from "@/components/seo";
 import {
+  BatchControlsBlock,
+  CompatibilityProofBox,
   MaterialDecisionCard,
   NarrativeSection,
   SlaCommitments,
@@ -126,6 +128,23 @@ export default async function QuotePage({
         divider
       >
         <SlaCommitments locale={locale as Locale} layout="stacked" />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("proof.eyebrow")}
+        title={t("proof.title")}
+        body={t("proof.body")}
+        divider
+      >
+        <CompatibilityProofBox locale={locale as Locale} />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("batch.eyebrow")}
+        title={t("batch.title")}
+        divider
+      >
+        <BatchControlsBlock locale={locale as Locale} />
       </NarrativeSection>
     </div>
   );
