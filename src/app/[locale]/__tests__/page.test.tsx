@@ -122,6 +122,11 @@ vi.mock("@/components/sections/home-risks-section", () => ({
 }));
 
 vi.mock("@/components/sections/home-faq-section", () => ({
+  getHomeFaqItems: vi.fn(() =>
+    Promise.resolve([
+      { id: "q01", question: "Q01 question?", answer: "Q01 answer." },
+    ]),
+  ),
   HomeFaqSection: () => (
     <section data-testid="home-faq-section">
       <h2>Replacement membrane questions</h2>

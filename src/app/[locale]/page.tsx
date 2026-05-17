@@ -22,11 +22,15 @@ import {
 import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
 import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
 import { HomeRisksSection } from "@/components/sections/home-risks-section";
-import { HomeFaqSection } from "@/components/sections/home-faq-section";
+import {
+  getHomeFaqItems,
+  HomeFaqSection,
+} from "@/components/sections/home-faq-section";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
+import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 
 type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
@@ -148,10 +152,14 @@ export default async function Home({ params }: HomePageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
   const searchIndex = buildClientSearchIndex();
+  const homeFaqSchema = generateFaqSchemaFromItems(
+    await getHomeFaqItems(locale as Locale),
+    locale,
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <JsonLdGraphScript locale={locale as Locale} />
+      <JsonLdGraphScript locale={locale as Locale} data={[homeFaqSchema]} />
       <HeroSection t={t} searchIndex={searchIndex} />
       <HomeConfirmSection locale={locale as Locale} />
       <HomeMembraneTypeSection locale={locale as Locale} />
@@ -165,7 +173,7 @@ export default async function Home({ params }: HomePageProps) {
       <CompatibilityProofBox locale={locale as Locale} />
       <MaterialDecisionCard locale={locale as Locale} />
       <BatchControlsBlock locale={locale as Locale} />
-      <HomeFaqSection locale={locale as Locale} />
+      <HomeFaqSection locale={locale as Locale} renderJsonLd={false} />
       <FinalCta t={t} />
       <TrademarkDisclaimer locale={locale as Locale} variant="footer" />
     </div>
