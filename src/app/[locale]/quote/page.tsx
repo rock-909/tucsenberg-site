@@ -14,6 +14,7 @@ import {
   NarrativeSection,
   SlaCommitments,
 } from "@/components/trust";
+import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { QuoteFormSection } from "@/app/[locale]/quote/quote-form-section";
 
@@ -146,6 +147,29 @@ export default async function QuotePage({
       >
         <BatchControlsBlock locale={locale as Locale} />
       </NarrativeSection>
+
+      <section className="section-divider px-6 py-14 md:py-[72px]">
+        <div className="mx-auto max-w-[1080px] space-y-3">
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t("assurances.nonBinding")}
+          </p>
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t("assurances.privacy")}
+          </p>
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t.rich("legal.consent", {
+              privacyLink: (chunks) => (
+                <Link
+                  href={getLocalizedPath("privacy", locale as Locale)}
+                  className="underline underline-offset-2"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

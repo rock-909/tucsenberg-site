@@ -24,9 +24,9 @@ import { QuoteFormSection } from "../quote-form-section";
 
 vi.unmock("zod");
 
-vi.mock("@/i18n/routing", () => ({
-  routing: { locales: ["en", "es", "zh"], defaultLocale: "en" },
-}));
+vi.mock("@/i18n/routing", async () =>
+  (await import("./test-utils")).i18nRoutingFactory(),
+);
 
 // Phase-E wrap: the page composes the six async trust Server Components.
 // They have dedicated Phase-A coverage + E10 build proof, so the page
@@ -39,10 +39,47 @@ vi.mock("@/components/trust", async (importOriginal) =>
 
 function makeTranslator(namespace?: string) {
   const scope = namespace ? namespace.replace(/^quote\.?/, "") : "";
-  return (key: string, values?: Record<string, string>) => {
+  const t = (key: string, values?: Record<string, string>) => {
     const composed = scope ? `${scope}.${key}` : key;
     return values?.email ? `${composed}:${values.email}` : composed;
   };
+  // Phase-E E8 consent line uses `t.rich`. The frozen assertions stay on
+  // key-strings; only the real `legal.consent` template is resolved so
+  // the privacy <Link> chunk can be rendered + asserted. The dual-link
+  // (`consentWithReviewTerms`) template is intentionally NOT rendered by
+  // the page (R5), so a plain key-string here is enough.
+  const richTemplates: Record<string, string> = {
+    "legal.consent":
+      "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink>.",
+  };
+  const rich = (
+    key: string,
+    handlers: Record<string, (chunks: React.ReactNode) => React.ReactNode>,
+  ) => {
+    const composed = scope ? `${scope}.${key}` : key;
+    const template = richTemplates[composed];
+    if (!template) return composed;
+    const parts: React.ReactNode[] = [];
+    const re = /<(\w+)>(.*?)<\/\1>/g;
+    let last = 0;
+    let m: RegExpExecArray | null;
+    let i = 0;
+    while ((m = re.exec(template)) !== null) {
+      if (m.index > last) parts.push(template.slice(last, m.index));
+      const handler = handlers[m[1] as string];
+      parts.push(
+        handler ? (
+          <span key={`r${(i += 1)}`}>{handler(m[2] as string)}</span>
+        ) : (
+          (m[2] as string)
+        ),
+      );
+      last = re.lastIndex;
+    }
+    if (last < template.length) parts.push(template.slice(last));
+    return <>{parts}</>;
+  };
+  return Object.assign(t, { rich });
 }
 
 vi.mock("next-intl/server", () => ({
@@ -270,6 +307,33 @@ describe("RFQ quote page", () => {
     expect(screen.getByTestId("compatibility-proof-box")).toBeInTheDocument();
     expect(screen.getByText("batch.title")).toBeInTheDocument();
     expect(screen.getByTestId("batch-controls-block")).toBeInTheDocument();
+  });
+
+  it("renders non-binding + privacy assurances and a privacy-only consent", async () => {
+    // Phase-E E8 (R5): the two assurances lines render, and the consent
+    // line links ONLY the real privacy page. The CRR review-terms link
+    // is intentionally NOT rendered in Phase E (Step 5 owns the CRR
+    // page); its label must be absent and no link may target it.
+    render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(screen.getByText("assurances.nonBinding")).toBeInTheDocument();
+    expect(screen.getByText("assurances.privacy")).toBeInTheDocument();
+
+    const privacyLink = screen.getByRole("link", { name: "Privacy Policy" });
+    expect(privacyLink).toHaveAttribute("href", "/privacy");
+
+    // R5: the dual-link review-terms label/link must NOT be present.
+    expect(
+      screen.queryByText("Compatibility Review Terms"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Compatibility Review Terms" }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders an empty summary with response/lead-time defaults", async () => {
