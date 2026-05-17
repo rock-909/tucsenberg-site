@@ -22,6 +22,7 @@ import esCritical from "../../../../../../messages/es/critical.json";
 import zhCritical from "../../../../../../messages/zh/critical.json";
 
 export const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
+export const CANONICAL_D9_TPU = "9-inch-tpu-disc-replacement";
 
 type MockLinkHref = string | { pathname: string };
 type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {

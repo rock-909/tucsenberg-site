@@ -1222,8 +1222,14 @@
     },
     "materialFit": {
       "eyebrow": "Elección del material de la membrana",
-      "title": "El EPDM es el punto de partida para la mayoría del servicio municipal",
-      "body": "El material se elige según las condiciones del agua residual, no como una categoría de precio. Use la decisión siguiente para ver cuándo el EPDM es el punto de partida correcto y qué condiciones llevan la revisión hacia el TPU."
+      "epdm": {
+        "title": "El EPDM es el punto de partida para la mayoría del servicio municipal",
+        "body": "El material se elige según las condiciones del agua residual, no como una categoría de precio. Use la decisión siguiente para ver cuándo el EPDM es el punto de partida correcto y qué condiciones llevan la revisión hacia el TPU."
+      },
+      "tpu": {
+        "title": "El TPU se elige cuando las condiciones del tanque lo requieren",
+        "body": "Esta membrana de TPU también se revisa frente a las condiciones del agua residual y el ajuste documentado. Use la decisión siguiente para confirmar cuándo el TPU es la opción correcta para la carga de trabajo, no una categoría de precio."
+      }
     },
     "confirmFit": {
       "eyebrow": "Qué confirmar antes de pedir",
@@ -1370,7 +1376,7 @@
     },
     "assurances": {
       "nonBinding": "Las cotizaciones no son vinculantes hasta que se confirmen mediante una orden de compra.",
-      "privacy": "Usamos sus datos únicamente para revisar la compatibilidad y preparar su cotización. No vendemos ni compartimos su información."
+      "privacy": "Usamos sus datos para revisar la compatibilidad y preparar su cotización. No vendemos su información y solo la compartimos con los proveedores de servicio necesarios para procesar la solicitud."
     },
     "legal": {
       "consent": "Al enviar esta solicitud, acepta nuestra <privacyLink>Política de Privacidad</privacyLink>.",
