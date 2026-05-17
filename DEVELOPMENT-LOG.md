@@ -7,7 +7,7 @@
 
 ## 当前阶段
 
-**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A（事实对齐 foundations）已落地；B–E 四页重建尚未开始。
+**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A–E 已完成（foundations + 首页 / 产品页 / OEM 兼容页 / quote 四页按 B1 叙事重建，RFQ 管线 byte-frozen）；当前进行 Phase F 跨切面只读复审 + merge。
 
 ---
 
@@ -276,3 +276,29 @@
 2. **§4 strike-audit `\b24\b` token 精确化（非弱化）**：§4 strike 列表的 `24` 针对的是被 strip 掉的伪造 catalog/scope 计数（"24 documented paths / OEM families"），与相邻 token（`19 paths`/`6 families`）同类。但 B7 明确要求 FAQ Q01 镜像 Phase-A `trust.sla.review` 的"within 24 business hours" SLA 措辞——这是冻结 Phase-A 真值，不是伪造目录事实。strike test 将 `24` 限定在 count/scope 上下文（`24 (documented|compatibility|oem|paths|families|brands)`），其余所有 §4 token 全量未弱化。否则会误伤计划本身强制要求的 SLA 文案。已在 `home-strike-audit.test.tsx` 注释中完整记录该判断。
 
 3. **E2E 无法在本沙箱跑生产构建（环境限制，非代码缺陷）**：`tests/e2e/homepage.spec.ts` 的 playwright webServer 需 `pnpm build && pnpm start`；`pnpm build` 因 `src/app/[locale]/layout-fonts.ts` 的 `next/font/google`（Inter）在构建时需联网拉 Google Fonts，而沙箱断网而失败。该 font 文件最后修改于 Phase-B 之前的 `4fc8762`，与 Phase B 无关。已静态确认 e2e spec 仅断言本阶段保留/新增的契约（hero/search、OEM 网格 `/compatible/{slug}`、SLA ribbon testid+layout+`trust.sla.review` 文案、单一 quote CTA、footer disclaimer testid+variant+`legal.trademark.footer` 文案），且这些契约均由真实组件的单元/集成测试（`page.test.tsx` + `trust/__tests__/*`）证明。e2e 文案已更新为真实 Phase-A `trust.sla.*` / `legal.*` EN+ES 措辞。上线前需在有网环境补跑一次 e2e 全绿。
+
+## Step 4.1 — Phase C（/membranes/[product] 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。产品详情页按 B1 叙事结构重建，spec strip 锁到真实数据层字段（`getFeaturedProductFacts()`，无任何硬编码 SKU/diameter/material），组合 Phase-A 冻结 trust 原语。
+
+**最终渲染顺序**：Hero → spec strip（真实 facts）→ what-this-product-is-for 叙事 → material-fit card + confirm-fit 流程 → 统一交期措辞 + QC/sample 区块 → quote CTA 面板（stacked SLA + CompatibilityProofBox + 单一销售邮箱）→ page-bottom inline trademark disclaimer（OEM 合规硬规则 #3）。
+
+**C 提交：** `feat(membranes): lock spec strip to real data fields via featured-product facts`、`add what-this-product-is-for narrative section`、`add material-fit card and confirm-fit process section`、`replace lead-time table with unified wording and qc/sample block`、`add quote cta panel with stacked sla, proof box and single sales email`、`fix(membranes): add page-bottom inline trademark disclaimer`、`feat(i18n): add membraneproduct narrative, material and qc keys`、`test(membranes): pin canonical fit labels and forbid fabricated compatibility tokens`、`pin phase 4.1 product-page structure and update behavioral contract`。
+
+**契约 / 修正：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase C`（append-only）。质量复审 M1/M2/M3（测试桩重复、冗余结构重断言、裸 `/500/`）通过共享 `test-utils.tsx`（dependency-inverted、vitest 排除）修复并编码为 R13（`docs(plan): add shared test-harness binding`、`test(membranes): extract shared product-page harness and scope guards`）。
+
+## Step 4.1 — Phase D（/compatible/[brand] 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。OEM 兼容页按 B1 叙事重建，brand stats 全部取自冻结 fact 层（`getOemBrandFacts()` / `getBrandPathStats()`），facet 锁到 category + material 两维。
+
+**D 提交：** `test(compatible): lock facets to category and material only`、`feat(compatible): compose trust blocks and narrative sections`、`drive brand stats from frozen fact layer`、`feat(i18n): add compatible-brand narrative, stats and cta keys`、`docs(compatible): record phase-d contract and verify gates`、`test(compatible): pin real-json trademark wording and fix fence mock comment`。
+
+**契约 / 关键决策：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase D`。BLOCKED 处置：旧 buyer-copy `/Xylem/` regression-fence pin 与 owner-signed fact-signoff §6.2（variant A 最短合规，父公司 Xylem 显式不具名）冲突，按 §6.2 为权威裁定——仅改该断言并引用 §6.2，所有 SEO/redirect 断言 byte-identical 保留；closing commit `d7cccb5` 用真实 JSON §6.2 文案锁硬化。
+
+## Step 4.1 — Phase E（/quote wrap-only 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。**RFQ 管线 byte-frozen（R7）**：`git log d7cccb5..HEAD -- src/app/api/quote src/lib/lead-pipeline quote-form.tsx use-quote-form.ts` 全程为空，已验证。Quote 页仅做 wrap 重建：hero/intake 叙事框架、path-adaptive 表单文案、material decision card、what-happens-next stacked SLA、CompatibilityProofBox + BatchControlsBlock、non-binding/privacy assurances、隐私-only consent（CRR 双链 key parity-safe 不渲染，gate 到 Step 5 / R5）、inline + footer trademark disclaimer、单一销售邮箱锁定。
+
+**E 提交：** `feat(quote): frame hero and intake with narrative section`、`path-adaptive form copy, strike quantity-band table`、`add material decision card guidance`、`test(quote): pin sticky rfq summary to real fields and sla copy`、`feat(quote): add what-happens-next sla commitments (stacked)`、`add compatibility-proof and batch-controls blocks`、`add non-binding/privacy assurances and privacy-only consent`、`add inline/footer trademark disclaimers, lock single sales inbox`、`feat(i18n): add quote page narrative and trust copy keys`。
+
+**契约 / 收尾：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase E`（BC-026 仍 Partial / RFQ 冻结说明 + BC-031 锁 Phase-E wrap 结构）。E10 出阶段门：full `pnpm test` 343 files / 3816 tests 全绿（含冻结 `quote-api.test.ts` 的 §393 redaction 测试 / R9）、R7 freeze-proof 空、i18n parity 三语 1148 leaf。已知问题：offline-build blocker（`layout-fonts.ts` 的 `next/font/google` 断网失败，非本阶段代码缺陷，留 Phase F 在有网环境验证）。
