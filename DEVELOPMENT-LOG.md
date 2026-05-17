@@ -7,7 +7,7 @@
 
 ## 当前阶段
 
-**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A–E 已完成（foundations + 首页 / 产品页 / OEM 兼容页 / quote 四页按 B1 叙事重建，RFQ 管线 byte-frozen）；当前进行 Phase F 跨切面只读复审 + merge。
+**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建收尾** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A–E 已完成（foundations + 首页 / 产品页 / OEM 兼容页 / quote 四页按 B1 叙事重建，RFQ 管线 byte-frozen）；Phase F 本地终审发现并修复 footer 窄屏横向溢出，下一步是 PR / CI / merge 收口。
 
 ---
 
@@ -302,3 +302,22 @@
 **E 提交：** `feat(quote): frame hero and intake with narrative section`、`path-adaptive form copy, strike quantity-band table`、`add material decision card guidance`、`test(quote): pin sticky rfq summary to real fields and sla copy`、`feat(quote): add what-happens-next sla commitments (stacked)`、`add compatibility-proof and batch-controls blocks`、`add non-binding/privacy assurances and privacy-only consent`、`add inline/footer trademark disclaimers, lock single sales inbox`、`feat(i18n): add quote page narrative and trust copy keys`。
 
 **契约 / 收尾：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase E`（BC-026 仍 Partial / RFQ 冻结说明 + BC-031 锁 Phase-E wrap 结构）。E10 出阶段门：full `pnpm test` 343 files / 3816 tests 全绿（含冻结 `quote-api.test.ts` 的 §393 redaction 测试 / R9）、R7 freeze-proof 空、i18n parity 三语 1148 leaf。已知问题：offline-build blocker（`layout-fonts.ts` 的 `next/font/google` 断网失败，非本阶段代码缺陷，留 Phase F 在有网环境验证）。
+
+## Step 4.1 — Phase F（跨切面终审）本地完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。Phase F 不再新增四页功能，目标是确认 A–E 的事实、RFQ 冻结面、i18n、SEO、layout 和文档合同没有互相打架。
+
+**本地终审结果：**
+
+- **关键修复**：F9 三语视觉 smoke 发现 390px / 768px 下四页均有横向 overflow。根因是 `src/components/footer/Footer.tsx` 的内层容器同时使用 `w-full` 和 tokenized `marginInline: clamp(24px, 12vw, 184px)`，实际宽度变成 100% + 左右 margin。修复为 `box-border`，并在 `src/components/footer/__tests__/Footer.test.tsx` 加回归测试，防止再次把 `w-full` 和 inline gutter 混用。
+- **F9 三语视觉 smoke**：`/`、`/membranes/9-inch-epdm-disc-replacement`、`/compatible/sanitaire`、`/quote` × `en/es/zh` × `390/768/1280`，共 36 张截图，保存到 `reports/step-4.1-f9-smoke`。复跑通过：无横向 overflow，OEM 相关页 trademark disclaimer 可见。
+- **RFQ 冻结面**：`src/app/api/quote/route.ts`、`src/lib/lead-pipeline/lead-schema.ts`、`quote-form.tsx`、`use-quote-form.ts` 在 Phase E 后未被改动；`quote-api.test.ts` 的 raw part-number redaction 测试仍作为 R9 证据。
+- **i18n**：`pnpm content:check` 通过，en/es/zh 均为 1148 leaf。四页公开 ES guard 通过；已索引但非四页的 ES placeholder 仍按 R8 留给 Step 5 / pre-launch ES pass。
+- **source-token audit 说明**：四页页面树、`src/components/trust`、Step 4.1 挂载的 `src/components/sections`、以及 `home` / `membraneProduct` / `compatibleBrand` / `quote` / `trust` / `legal` namespaces 均无 Step 4.1 strike tokens。计划里的原始全 `messages/*/critical.json` grep 会命中旧 `/products` starter catalog 的 internal `moq` key 和 `Premium Tier` 文案；这些不是四页重建 surface，也不在 Step 4.1 修复范围，留作 Step 5 / starter cleanup 侧债，不在本轮为通过 grep 大规模改 schema key。
+- **完整本地门禁**：type-check、lint、full test、content、brand、component、client-boundary、Next build、OpenNext Cloudflare build、full Playwright 已在 Phase F 跑通。`middleware` deprecation、Resend key missing、`DYNAMIC_SERVER_USAGE` digest、Storybook CSS import warning、OpenNext `-0 === 0` 属当前已知非阻断 warning。
+
+**上线前 / 下一阶段 owner gates：**
+
+- `sales@tucsenberg.com` 必须是真实可收件邮箱。
+- CRR / Compatibility Review Terms 页面仍是 Step 5，不在 Step 4.1 造 stub。
+- `legal/privacy/terms/about/capabilities/how-it-works` 的公开 ES placeholder 仍是 Step 5 / pre-launch ES pass。

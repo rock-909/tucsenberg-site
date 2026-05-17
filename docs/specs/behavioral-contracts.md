@@ -724,3 +724,47 @@ Proof files:
 `src/app/[locale]/quote/__tests__/page.test.tsx`,
 `src/app/[locale]/quote/__tests__/quote-i18n.test.ts`, and the shared
 harness `src/app/[locale]/quote/__tests__/test-utils.tsx`.
+
+### Step 4.1 — Phase F
+
+This section is append-only. It records final cross-cutting review evidence
+after Phases A-E and does not upgrade any existing behavioral-contract status.
+
+#### BC-032: Step-4.1 rebuilt buyer pages do not horizontally overflow at narrow widths
+
+The rebuilt buyer path (`/`, `/membranes/[product]`, `/compatible/[brand]`,
+and `/quote`) must remain readable at small viewport widths. Phase-F visual
+smoke found a real regression in the shared footer: the footer inner container
+combined `w-full` with tokenized `marginInline` gutters, producing a layout
+wider than the viewport on 390px and 768px captures. The fix removes the
+full-width class from the margin-bearing container and keeps the tokenized
+gutter contract intact.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Unit + Controller-run visual smoke |
+| Test File | `src/components/footer/__tests__/Footer.test.tsx`; screenshots in `reports/step-4.1-f9-smoke` |
+| Status | Covered |
+
+Notes: The unit guard asserts that the footer container keeps
+`marginInline: clamp(24px, 12vw, 184px)` but does not carry the `w-full` class.
+The Phase-F controller-run smoke captured 36 cells: four pages x three locales
+(`en`, `es`, `zh`) x three viewport widths (390, 768, 1280). The smoke is not a
+committed flaky visual test; it is retained as local review evidence.
+
+#### Final Step-4.1 proof boundary
+
+- BC-001 / BC-027 / BC-029 / BC-031 remain the page-structure contracts for
+  home, membrane product, OEM compatibility, and quote respectively.
+- BC-023 remains the SEO/sitemap boundary: public URLs are en + es, never zh.
+- BC-026 remains **Partial**. Phase F re-verified the route-level RFQ proof and
+  the Phase-E frozen-surface boundary, but it did not add a Playwright RFQ
+  submission smoke or a production-like deployed Airtable write.
+- The single visible mailbox remains `sales@tucsenberg.com`; its live mailbox
+  status is an owner launch gate, not a local test claim.
+- CRR / Compatibility Review Terms remains deferred to Step 5. The parity-safe
+  i18n keys exist, but no `/quote` surface renders a CRR link and no CRR page is
+  created in Step 4.1.
+- The indexed non-four-page Spanish placeholders tracked by R8 remain a Step 5
+  / pre-launch ES pass gate, not a four-page rebuild blocker.

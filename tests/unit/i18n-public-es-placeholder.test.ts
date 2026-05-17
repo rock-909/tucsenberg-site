@@ -124,6 +124,11 @@ const PUBLIC_STRUCTURED_DATA_LEAVES = [
  * buyer-visible regression. Documented here so widening this set is a
  * deliberate, reviewable decision rather than a silent allowlist drift.
  *
+ * Step 4.1 R8 also tracks, but does not fix, indexed non-four-page Spanish
+ * placeholders in "legal", "privacy", "terms", "about", "capabilities", and
+ * "howItWorks". Those remain a Step 5 / pre-launch owner gate rather than a
+ * four-page rebuild blocker.
+ *
  * - `blog`, `catalog`, `underConstruction`: legacy/non-launched template
  *   surfaces, not linked from public Step-4 navigation.
  * - `monitoring`: ops surface, not rendered buyer copy and not emitted into
