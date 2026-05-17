@@ -57,7 +57,10 @@ export function resolveMessage(
   const locale = key === undefined ? "en" : localeOrNamespace;
   const namespace = key === undefined ? localeOrNamespace : namespaceOrKey;
   const leaf = key === undefined ? namespaceOrKey : key;
-  const path = `${namespace}.${leaf}`.split(".");
+  // `makeQuoteTranslator` passes the combined `namespace.key` as
+  // `namespace` with an empty `leaf`; drop empty segments so a trailing
+  // "" does not break resolution of a real string leaf.
+  const path = `${namespace}.${leaf}`.split(".").filter(Boolean);
   let node: unknown = CRITICAL_BY_LOCALE[locale] ?? CRITICAL_BY_LOCALE.en;
   for (const segment of path) {
     if (typeof node !== "object" || node === null) return path.join(".");
@@ -198,7 +201,7 @@ type TrustModule = typeof import("@/components/trust");
  */
 export async function trustMockFactory(
   importOriginal: () => Promise<TrustModule>,
-  overrides: Partial<Record<string, unknown>> = {},
+  overrides: Partial<TrustModule> = {},
 ) {
   const actual = await importOriginal();
   return {
