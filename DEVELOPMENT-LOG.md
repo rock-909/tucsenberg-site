@@ -1,13 +1,13 @@
 # Tucsenberg Site — 开发进度
 
-> 最新更新：2026-05-16
+> 最新更新：2026-05-17
 > 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
 
 ---
 
 ## 当前阶段
 
-**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建收尾** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A–E 已完成（foundations + 首页 / 产品页 / OEM 兼容页 / quote 四页按 B1 叙事重建，RFQ 管线 byte-frozen）；Phase F 本地终审发现并修复 footer 窄屏横向溢出，下一步是 PR / CI / merge 收口。
+**Phase 1 Step 4.1 四页事实对齐重建已完成并合并** —— 功能收口 PR #9 已 squash merge 到 `main`，merge commit `049f3886ef250d8cffe6d60619c56a85d7c413c2`。真实兼容映射以数据层为准 **17 条**、3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。当前主线进入 **Step 5：剩余页面英文版 + 已登记的 pre-launch gates**。
 
 ---
 
@@ -26,13 +26,14 @@
 - [x] Step 3 产品兼容数据层：`src/data/product-compatibility/` 已提供 Zod schema、静态产品/OEM 数据、三套查询索引和 part-number 搜索。
 - [x] Step 4 四页样板：首页、产品详情页、OEM 兼容页、Quote 询价页全部跑在 `src/data/product-compatibility/` 数据层上；part-number / 西语 / 中文数据已清理；全站 ⌘K 兼容性搜索（任意页面唤起）已接入；英 + 西公开、中文仅内部预览；产品详情页 / OEM 页的动态路由现已按公开语言进 sitemap（每个产品 slug 出 `/membranes/{slug}`，每个 OEM 品牌 slug 出 `/compatible/{brand}`，中文不进、不索引）；RFQ 走 `/api/quote`。
 - [x] Step 4 收尾（独立 review-swarm + Codex 验收双复核后落修）：C2 询盘掉量 cap、A1 teal token 还原、C1 首页 e2e/BC-001 重写、公开西语 `[ES-TODO]` 清零、产品 canonical 改为描述性 membrane slug（SKU slug 308 重定向）、load-messages 治理对齐、买家入口全部指向真实页面（header/footer/搜索 canonical/BC-002/BC-026/导航 e2e）、文件上传与 quote CTA 文案改诚实、RFQ 来源上下文、公开西语占位 guard、`rfq_quote` Turnstile 契约、SEO 关键词移除 silicone、RFQ owner 邮件失败可观测；并完成本轮首页去 Zod 改动——把 Zod 校验的兼容数据层移出首页客户端 bundle。
+- [x] Step 4.1 四页事实对齐重建：foundations + 首页 / 产品页 / OEM 兼容页 / quote 页按 B1 叙事重建，事实统一来自 `src/data/product-compatibility/` 和 owner-signed baseline；RFQ 管线 byte-frozen；Phase F 修复 footer 窄屏横向溢出；PR #9 已合并，CI 全绿。
 
 ---
 
 ## 进行中
 
 - [ ] 活入口去 starter 化：README、CLAUDE、PRODUCT、PROJECT-BRIEF、docs/website、`.claude/rules`、governance docs、public static surfaces。
-- [ ] Step 5：剩余 11 页英文版（Step 4 已收尾，下一步进入 Step 5）。
+- [ ] Step 5：剩余页面英文版 + CRR / ES placeholder / starter cleanup gates。
 
 ---
 
@@ -86,7 +87,7 @@
 - 中文混排字体回落正常
 - 表单 / 上传 / Turnstile / Resend / 兼容查询交互全通
 
-### Step 5: 剩余 11 页英文版
+### Step 5: 剩余页面英文版 + pre-launch gates
 
 1. `/membranes/` + `/membranes/disc/` + `/membranes/tube/`
 2. 4 个核心产品页（9" TPU / tube EPDM / tube TPU / 12" disc）
@@ -96,8 +97,11 @@
 6. `/quality`
 7. `/procurement`
 8. `/about`
+9. CRR / Compatibility Review Terms 页面（Step 4.1 只保留 parity-safe keys，不渲染 CRR link）
+10. 公开索引但非四页的 ES placeholder：`legal/privacy/terms/about/capabilities/how-it-works`
+11. 旧 `/products` starter catalog 侧债：internal `moq` key / `Premium Tier` 文案等，后续 starter cleanup 时处理
 
-### Step 6: 剩余 11 页批量翻译
+### Step 6: 剩余页面批量翻译
 
 英文 stable 后一次性翻完 es + zh。
 
@@ -130,7 +134,6 @@
 
 ### 跟进项（开发侧，待处理）
 
-- 本地 `main` 已与 `origin/main` 分叉，需要做一次 reset 对齐（本分支不处理，作为独立跟进项；处理前确认本地无未推送的有效改动；本轮 PR 流程的 rebase 由控制方统一处理）。
 - **post-PR backlog（非 Step 4 阻塞项，已记录避免遗失）：**
   - Codex #10：把 `home` / `quote` 客户端 messages 从根 `NextIntlClientProvider` 拆出去（当前全站客户端都带这两个 namespace；本轮明确不动，`search` 作为全局 ⌘K namespace 保持全局）。
   - Codex #11：预计算归一化搜索索引 + top-N（更激进、无买家流程收益、PR 前回归风险，故本轮不做；本轮已做 server/client 拆分但未做 top-N 截断）。
@@ -176,7 +179,7 @@
 ### 2026-05-12
 
 - **第二公开语种确定为 Spanish** — 覆盖 5 亿母语者 + 20+ 国家，LATAM 工业市场 TPU 匹配度高，竞争密度最低。
-- **翻译节奏** — 先做 4 页样板（英 + 西 + 中 同步）做 i18n 冒烟测试，剩余 11 页英文先完成后批量翻译。
+- **翻译节奏** — 先做 4 页样板（英 + 西 + 中 同步）做 i18n 冒烟测试，剩余页面英文先完成后批量翻译。
 - **中文不公开索引** — 仅本地 dev / 内部预览用，不进 sitemap，hreflang 仅声明 en ↔ es。
 - **CWF 不强制走** — 直接用 Deep Research 产出的 outline 写文案，需要时单独调 copy-editing / seo-page skill 检查。
 
@@ -217,15 +220,15 @@
 
 ---
 
-## Step 4.1 — 四页事实对齐（Foundations 起步）
+## Step 4.1 — 四页事实对齐（已完成并合并）
 
-从 `main@74e1d29` 起，在单分支 `step-4.1-four-page-rebuild` 上推进（Phase 0 已建分支并约定：本批 Phase-A commit 一并提交未跟踪的 Step 4.1 计划文档）。
+从 `main@74e1d29` 起，在单分支 `step-4.1-four-page-rebuild` 上推进。PR #9 已于 2026-05-17 squash merge，功能合并点为 `049f3886ef250d8cffe6d60619c56a85d7c413c2`。
 
 **为什么做 Step 4.1：** Step 4 四页虽已上线，但 DEV-LOG 顶部、PROJECT-BRIEF、DESIGN 三份文档互相矛盾，且与代码不符（早期文档写 20 条兼容映射，真实数据层为 17 条 / 3 个 OEM 品牌）。Step 4.1 把四页事实对齐到数据层，并恢复 PROJECT-BRIEF 要求、但 2026-05-14 设计锁定时被收窄的信任模块。
 
 **规范权威：** `docs/superpowers/plans/2026-05-16-step-4.1-fact-signoff.md`（事实签收口径）。阶段计划文档：`docs/superpowers/plans/2026-05-16-step-4.1-master.md` 以及 `…step-4.1-phase-a.md` / `-phase-b.md` / `-phase-c.md` / `-phase-d.md` / `-phase-e.md`。
 
-**Phase A 交付（已完成 foundations，B–E 四页重建尚未开始）：**
+**Phase A 交付（foundations）：**
 
 - **A1** — 派生 `catalog-facts` SSOT（单一事实源）+ drift-guard，锁定 17 条兼容路径 / 3 个 OEM 品牌 / per-brand 计数，数据漂移即测试失败。
 - **A2** — 六个共享 trust 原语组件：TrademarkDisclaimer / SlaCommitments / CompatibilityProofBox / MaterialDecisionCard / BatchControlsBlock / NarrativeSection。
@@ -303,9 +306,9 @@
 
 **契约 / 收尾：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase E`（BC-026 仍 Partial / RFQ 冻结说明 + BC-031 锁 Phase-E wrap 结构）。E10 出阶段门：full `pnpm test` 343 files / 3816 tests 全绿（含冻结 `quote-api.test.ts` 的 §393 redaction 测试 / R9）、R7 freeze-proof 空、i18n parity 三语 1148 leaf。已知问题：offline-build blocker（`layout-fonts.ts` 的 `next/font/google` 断网失败，非本阶段代码缺陷，留 Phase F 在有网环境验证）。
 
-## Step 4.1 — Phase F（跨切面终审）本地完成 — 2026-05-16
+## Step 4.1 — Phase F（跨切面终审 + PR #9 合并）完成 — 2026-05-17
 
-分支 `step-4.1-four-page-rebuild`。Phase F 不再新增四页功能，目标是确认 A–E 的事实、RFQ 冻结面、i18n、SEO、layout 和文档合同没有互相打架。
+分支 `step-4.1-four-page-rebuild` 已通过 PR #9 合并到 `main`。Phase F 不再新增四页功能，目标是确认 A–E 的事实、RFQ 冻结面、i18n、SEO、layout 和文档合同没有互相打架。
 
 **本地终审结果：**
 
@@ -315,6 +318,7 @@
 - **i18n**：`pnpm content:check` 通过，en/es/zh 均为 1148 leaf。四页公开 ES guard 通过；已索引但非四页的 ES placeholder 仍按 R8 留给 Step 5 / pre-launch ES pass。
 - **source-token audit 说明**：四页页面树、`src/components/trust`、Step 4.1 挂载的 `src/components/sections`、以及 `home` / `membraneProduct` / `compatibleBrand` / `quote` / `trust` / `legal` namespaces 均无 Step 4.1 strike tokens。计划里的原始全 `messages/*/critical.json` grep 会命中旧 `/products` starter catalog 的 internal `moq` key 和 `Premium Tier` 文案；这些不是四页重建 surface，也不在 Step 4.1 修复范围，留作 Step 5 / starter cleanup 侧债，不在本轮为通过 grep 大规模改 schema key。
 - **完整本地门禁**：type-check、lint、full test、content、brand、component、client-boundary、Next build、OpenNext Cloudflare build、full Playwright 已在 Phase F 跑通。`middleware` deprecation、Resend key missing、`DYNAMIC_SERVER_USAGE` digest、Storybook CSS import warning、OpenNext `-0 === 0` 属当前已知非阻断 warning。
+- **PR / CI / merge**：PR #9 已合并。GitHub CI 全绿：基础质量、单元与集成测试、浏览器冒烟、Semgrep 安全扫描、Cloudflare 构建证明、CI 汇总。功能合并点：`049f3886ef250d8cffe6d60619c56a85d7c413c2`。
 
 **上线前 / 下一阶段 owner gates：**
 
