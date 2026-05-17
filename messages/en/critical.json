@@ -1222,8 +1222,14 @@
     },
     "materialFit": {
       "eyebrow": "Choosing the membrane material",
-      "title": "EPDM is the starting point for most municipal duty",
-      "body": "Material is selected by the wastewater conditions, not as a price tier. Use the decision below to see when EPDM is the right starting point and which conditions move the review toward TPU."
+      "epdm": {
+        "title": "EPDM is the starting point for most municipal duty",
+        "body": "Material is selected by the wastewater conditions, not as a price tier. Use the decision below to see when EPDM is the right starting point and which conditions move the review toward TPU."
+      },
+      "tpu": {
+        "title": "TPU is selected when basin conditions require it",
+        "body": "This TPU membrane is still reviewed against wastewater conditions and documented fit. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier."
+      }
     },
     "confirmFit": {
       "eyebrow": "What to confirm before ordering",
@@ -1370,7 +1376,7 @@
     },
     "assurances": {
       "nonBinding": "Quotes are non-binding until confirmed by a purchase order.",
-      "privacy": "We use your details only to review compatibility and prepare your quote. We do not sell or share your information."
+      "privacy": "We use your details to review compatibility and prepare your quote. We do not sell your information, and we only share it with the service providers needed to process the request."
     },
     "legal": {
       "consent": "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink>.",

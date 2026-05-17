@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 import ProductPage from "../page";
 import {
   CANONICAL_D9_EPDM,
+  CANONICAL_D9_TPU,
   renderProductPage,
   resolveMessage,
 } from "./test-utils";
@@ -97,5 +98,27 @@ describe("Membrane product page — material fit + confirm fit", () => {
     );
     expect(confirmRegion).not.toMatch(/500\+?\s*(piece|pcs|pieces)/i);
     expect(confirmRegion).not.toMatch(/°C/);
+  });
+
+  it("aligns TPU product pages with TPU material guidance", async () => {
+    materialDecisionSpy.mockClear();
+    await renderProductPage(ProductPage, "en", CANONICAL_D9_TPU);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "TPU is selected when basin conditions require it",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This TPU membrane is still reviewed against wastewater conditions and documented fit. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier.",
+      ),
+    ).toBeInTheDocument();
+
+    const card = screen.getByTestId("material-decision-card");
+    expect(card).toHaveAttribute("data-default-material", "tpu");
+    expect(materialDecisionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultMaterial: "tpu" }),
+    );
   });
 });

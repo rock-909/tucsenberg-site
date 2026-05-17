@@ -55,7 +55,7 @@ const BATCH_TITLE = "Batch traceability and sample options";
 const ASSURANCE_NON_BINDING =
   "Quotes are non-binding until confirmed by a purchase order.";
 const ASSURANCE_PRIVACY =
-  "We use your details only to review compatibility and prepare your quote. We do not sell or share your information.";
+  "We use your details to review compatibility and prepare your quote. We do not sell your information, and we only share it with the service providers needed to process the request.";
 
 describe("RFQ quote page — Phase-E narrative/trust wrap", () => {
   afterEach(() => {
@@ -131,6 +131,7 @@ describe("RFQ quote page — Phase-E narrative/trust wrap", () => {
 
     expect(screen.getByText(ASSURANCE_NON_BINDING)).toBeInTheDocument();
     expect(screen.getByText(ASSURANCE_PRIVACY)).toBeInTheDocument();
+    expect(screen.queryByText(/do not sell or share/i)).not.toBeInTheDocument();
 
     const privacyLink = screen.getByRole("link", { name: "Privacy Policy" });
     expect(privacyLink).toHaveAttribute("href", "/privacy");

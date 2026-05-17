@@ -182,6 +182,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const quoteHref =
     `/quote?sku=${encodeURIComponent(entry.sku)}` +
     `&product=${encodeURIComponent(product)}`;
+  const materialFitKey = `materialFit.${entry.material}` as const;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -201,12 +202,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <NarrativeSection
         eyebrow={t("materialFit.eyebrow")}
-        title={t("materialFit.title")}
-        body={t("materialFit.body")}
+        title={t(`${materialFitKey}.title`)}
+        body={t(`${materialFitKey}.body`)}
       >
         <MaterialDecisionCard
           locale={locale as Locale}
-          defaultMaterial="epdm"
+          defaultMaterial={entry.material}
         />
       </NarrativeSection>
 
