@@ -150,34 +150,100 @@
       "searchLabel": "Compatibility search",
       "searchButton": "Check Compatibility"
     },
+    "confirm": {
+      "overline": "BEFORE YOU ORDER",
+      "title": "What we help you confirm",
+      "body": "We resolve replacement membrane requests against a documented compatibility review, not a brand-name guess.",
+      "points": {
+        "compatibility": {
+          "title": "OEM fit against your part number",
+          "body": "You send the diffuser part number or OEM model; we match it to the membrane variant the compatibility record already covers, or tell you it needs dimensional verification."
+        },
+        "material": {
+          "title": "Material chosen for your wastewater",
+          "body": "EPDM and TPU are scoped to the influent your basin actually sees, so the elastomer decision follows operating conditions rather than a catalog default."
+        },
+        "fit": {
+          "title": "Open questions surfaced before the quote",
+          "body": "If a dimension or fastening detail is unresolved, we flag it in the compatibility review so it is settled before you commit to an order."
+        }
+      }
+    },
+    "membraneType": {
+      "overline": "FIND BY MEMBRANE TYPE",
+      "title": "Start from the membrane format you run",
+      "disc": {
+        "name": "Disc membranes",
+        "body": "Fine-bubble disc diffusers on retainer rings — match the disc diameter and fastening to the compatibility record."
+      },
+      "tube": {
+        "name": "Tube membranes",
+        "body": "Tube diffusers on a perforated core — match the tube length and end-fitting to the compatibility record."
+      },
+      "cta": "See compatibility detail"
+    },
     "oemGrid": {
       "overline": "OEM COMPATIBILITY",
       "title": "Replacement Membranes for Major Brands",
-      "viewAll": "View {brand} compatible parts"
+      "viewAll": "View {brand} compatible parts",
+      "pathCount": "{count, plural, one {# documented compatibility path} other {# documented compatibility paths}}"
     },
-    "materials": {
-      "overline": "MATERIAL SELECTION",
-      "title": "Choose the Material That Matches Your Conditions",
-      "epdm": {
-        "name": "EPDM",
-        "description": "Municipal and light industrial wastewater conditions."
-      },
-      "tpu": {
-        "name": "TPU",
-        "description": "Oil, chemical, and high-grease wastewater conditions where EPDM degrades."
+    "risks": {
+      "overline": "WHY THIS PAGE EXISTS",
+      "title": "The four risks buyers avoid",
+      "body": "Replacement membrane orders go wrong in a small number of repeatable ways. Each section of this page is built to close one of them.",
+      "items": {
+        "wrongFit": {
+          "title": "Ordering a part that does not seat",
+          "body": "A membrane that is close but not dimensionally matched to the diffuser body leaks or unseats; the compatibility review checks fit before the order, not after."
+        },
+        "wrongMaterial": {
+          "title": "Running an elastomer the influent attacks",
+          "body": "Where the basin sees BTEX, solvents, oil, or grease loading, an EPDM membrane chosen by default can swell or harden; the material decision follows the documented influent instead."
+        },
+        "blindOrder": {
+          "title": "Quoting from a guessed cross-reference",
+          "body": "A brand-name lookup with no recorded basis produces a number nobody can defend; here every match is tied to the compatibility record it came from."
+        },
+        "shutdownSlip": {
+          "title": "Losing the basin window to a slow reply",
+          "body": "When a line is down, an unanswered RFQ is the real cost; the SLA commitments set when a review and a quote come back."
+        }
       }
     },
-    "trust": {
-      "scope": "Aftermarket replacement membranes only",
-      "leadTime": "Lead time confirmed per quote",
-      "sla": "Quote response within 2 business days",
-      "noFit": "No-fit, no-charge review"
+    "faq": {
+      "sectionTitle": "Replacement membrane questions",
+      "items": {
+        "q01": {
+          "question": "How fast do you respond to a compatibility request?",
+          "answer": "A compatibility review is returned within 24 business hours, and a standard RFQ is quoted or answered with a missing-information request within 48 business hours. Urgent shutdown cases are acknowledged the same business day. We work from the documented compatibility-review record rather than promising a field outcome."
+        },
+        "q02": {
+          "question": "What do you need from me to confirm a match?",
+          "answer": "Send the diffuser part number or OEM model, the membrane format (disc or tube), and the diameter or tube length if you have it. If a dimension is missing we tell you exactly what to measure before the quote."
+        },
+        "q03": {
+          "question": "Do you actually carry the OEM brand I run?",
+          "answer": "We map your part number to the membrane variant the compatibility record already covers for that brand and tell you whether the match is exact or needs dimensional verification. We are an independent aftermarket manufacturer, not the OEM."
+        },
+        "q04": {
+          "question": "What is the lead time once compatibility is confirmed?",
+          "answer": "Confirmed orders typically ship within one to two weeks of confirmed compatibility and an accepted quote. We restate the exact window on the quote so it is tied to your specific item."
+        },
+        "q05": {
+          "question": "Is there a stock product or is everything made to order?",
+          "answer": "Membranes are made to order against the confirmed compatibility and material decision, so the build matches your diffuser body and influent rather than a generic shelf item."
+        },
+        "q06": {
+          "question": "What happens if the membrane still does not fit?",
+          "answer": "Raise it with the compatibility reference on your quote and we work from the documented compatibility-review record to resolve it. Reach us at sales@tucsenberg.com with the part number and basin conditions."
+        }
+      }
     },
     "cta": {
       "title": "Have a part number ready?",
       "description": "Send it over and we confirm the compatible Tucsenberg membrane and lead time.",
-      "requestQuote": "Request a Quote",
-      "viewMembranes": "Browse All Membranes"
+      "requestQuote": "Request a Quote"
     }
   },
   "monitoring": {
@@ -1148,6 +1214,45 @@
     "cta": {
       "requestQuote": "Request Quote for This Part",
       "viewGroup": "View All Sizes"
+    },
+    "useCase": {
+      "eyebrow": "What this product is for",
+      "title": "A drop-in aeration membrane replacement",
+      "body": "This part is for maintenance and procurement teams replacing worn aeration membranes on an installed diffuser without changing the diffuser body or holder. It is reviewed against your documented part, not sold as a generic spare."
+    },
+    "materialFit": {
+      "eyebrow": "Choosing the membrane material",
+      "title": "EPDM is the starting point for most municipal duty",
+      "body": "Material is selected by the wastewater conditions, not as a price tier. Use the decision below to see when EPDM is the right starting point and which conditions move the review toward TPU."
+    },
+    "confirmFit": {
+      "eyebrow": "What to confirm before ordering",
+      "title": "We confirm fit from your documented inputs",
+      "body": "We do not guess compatibility. Send the inputs below and each one is reviewed before a quote is issued.",
+      "steps": {
+        "partNumber": "OEM or cross-reference part number of the membrane currently installed.",
+        "dimensions": "Active diameter and overall dimensions measured from the installed membrane.",
+        "mounting": "How the membrane seats and retains on the diffuser body.",
+        "material": "The wastewater conditions the membrane operates in.",
+        "perforation": "Perforation pattern and slit layout from a clear photo.",
+        "release": "Whether the existing membrane shows scaling, fouling, or chemical attack."
+      }
+    },
+    "leadTime": {
+      "eyebrow": "Lead time",
+      "title": "Lead time follows confirmed compatibility",
+      "body": "Reviewed replacement membranes typically ship within one to two weeks of confirmed compatibility and an accepted quote. Staged delivery for shutdown windows can be arranged on request."
+    },
+    "qc": {
+      "eyebrow": "QC and traceability",
+      "title": "Each shipment is checked and traceable",
+      "sampleNote": "A verification sample can be reviewed before the first batch so the fit is confirmed on your equipment, not on a datasheet."
+    },
+    "quote": {
+      "eyebrow": "Request a quote",
+      "title": "Send your part number or photos",
+      "body": "Send the installed part number, dimensions, and a photo. We review compatibility and reply with a quote or the specific missing information.",
+      "email": "sales@tucsenberg.com"
     }
   },
   "compatibleBrand": {
@@ -1172,6 +1277,27 @@
       "noChecksRequired": "No additional verification required",
       "requestQuote": "Request Quote for This Part",
       "empty": "No models match the selected filters."
+    },
+    "boundary": {
+      "eyebrow": "WHAT THIS PAGE COVERS",
+      "title": "What “compatible with {brand}” means here",
+      "body": "Tucsenberg supplies aftermarket replacement membranes dimensioned to fit referenced {brand} diffuser models. {brand} is a third-party trademark; Tucsenberg is not affiliated with, endorsed by, or sponsored by {brand}. Cross-references describe physical fit only, not original equipment. A documented compatibility review against your installed part precedes every quote."
+    },
+    "intake": {
+      "eyebrow": "BEFORE YOU REQUEST",
+      "title": "Confirm your installed setup",
+      "body": "Match starts from the part you already run, not the catalog name. Have the molded {brand} part number, disc or tube diameter, mounting thread or saddle, and membrane material on hand. If a number is worn off, a photo of the diffuser and holder lets us trace it before quoting."
+    },
+    "stats": {
+      "summary": "{paths} documented compatibility paths",
+      "epdm": "{epdm} EPDM",
+      "tpu": "{tpu} TPU"
+    },
+    "cta": {
+      "eyebrow": "NEXT STEP",
+      "title": "Request a compatibility review",
+      "body": "Send the installed {brand} reference and we map it to the dimensioned replacement, list every check the buyer must confirm, and we reply from sales@tucsenberg.com.",
+      "action": "Request a compatibility review"
     }
   },
   "quote": {
@@ -1185,9 +1311,9 @@
     },
     "form": {
       "partNumbers": "Part Number(s) or OEM Model",
-      "partNumbersHint": "Enter Tucsenberg SKU, OEM part number, or model name",
+      "partNumbersHint": "Enter a Tucsenberg SKU, OEM part number, or model name — the more specific, the faster we confirm the path.",
       "quantity": "Quantity",
-      "quantityHint": "Approximate quantity needed",
+      "quantityHint": "Approximate quantity for this order. Lead time and pricing are confirmed at quote against your reviewed part.",
       "company": "Company / Organization",
       "email": "Email",
       "name": "Full Name",
@@ -1199,7 +1325,7 @@
         "notSure": "Not sure — advise me"
       },
       "shutdownDate": "Shutdown Date / Urgency",
-      "shutdownDateHint": "When do you need the membranes installed?",
+      "shutdownDateHint": "When do you need the membranes on site? Tell us if a staged or partial delivery would help your shutdown window.",
       "notes": "Additional Notes",
       "fileUpload": "Reference a Part List or Photo",
       "fileUploadHint": "We record the file name for reference only. The file is not sent with this form — have it ready to email when we reply (CSV, PDF, or images, max 10MB).",
@@ -1218,6 +1344,39 @@
       "title": "Quote Request Submitted",
       "description": "We received your request and will respond to {email} within 2 business days.",
       "fileNotice": "Your file was not uploaded — only its name was recorded. We'll ask you to email it when we reply."
+    },
+    "intake": {
+      "eyebrow": "Replacement quote",
+      "title": "Request a Quote",
+      "body": "Tell us the part you are replacing. We confirm the compatibility path against your reviewed details and prepare a quote — no account, no sales call required."
+    },
+    "materialGuidance": {
+      "eyebrow": "Material",
+      "title": "Which membrane material to request",
+      "body": "EPDM is the default for municipal and standard wastewater. Choose TPU only when the basin sees oil, grease, solvents, or aggressive industrial chemistry — it is a workload match, not an upgrade. If you are unsure, leave it on \"advise me\" and we recommend against your conditions."
+    },
+    "whatHappensNext": {
+      "eyebrow": "After you submit",
+      "title": "What happens next"
+    },
+    "proof": {
+      "eyebrow": "How we confirm fit",
+      "title": "Every request is checked against documented dimensions",
+      "body": "Your part is reviewed against documented diffuser dimensions and reference photos before we quote. Pricing is not released against a brand-name match alone."
+    },
+    "batch": {
+      "eyebrow": "On larger orders",
+      "title": "Batch traceability and sample options"
+    },
+    "assurances": {
+      "nonBinding": "Quotes are non-binding until confirmed by a purchase order.",
+      "privacy": "We use your details only to review compatibility and prepare your quote. We do not sell or share your information."
+    },
+    "legal": {
+      "consent": "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink>.",
+      "consentWithReviewTerms": "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink> and <reviewTermsLink>Compatibility Review Terms</reviewTermsLink>.",
+      "privacyLinkLabel": "Privacy Policy",
+      "reviewTermsLinkLabel": "Compatibility Review Terms"
     }
   },
   "search": {
@@ -1229,5 +1388,41 @@
     "requestQuote": "Request quote",
     "openHint": "Search ⌘K",
     "close": "Close"
+  },
+  "trust": {
+    "sla": {
+      "review": "Compatibility review — within 24 business hours.",
+      "standardRfq": "Standard RFQ — quote or missing-info request within 48 business hours.",
+      "urgent": "Urgent shutdown cases — acknowledged the same business day."
+    },
+    "proof": {
+      "title": "Compatibility proof",
+      "body": "Compatibility is reviewed against documented dimensions and photos before pricing."
+    },
+    "material": {
+      "title": "Choosing the membrane material",
+      "epdm": {
+        "label": "EPDM — default starting point",
+        "condition": "Municipal and light industrial wastewater conditions."
+      },
+      "tpu": {
+        "label": "TPU — selected by conditions",
+        "condition": "Oil, chemical, and high-grease wastewater where EPDM degrades."
+      },
+      "note": "Material is chosen by process conditions, not as a price tier."
+    },
+    "batch": {
+      "title": "Batch controls",
+      "traceability": "Each shipment is checked before dispatch and is traceable by order and production lot.",
+      "photos": "First production orders can include outgoing photo records on request.",
+      "sample": "A verification sample is available before the first batch."
+    }
+  },
+  "legal": {
+    "trademark": {
+      "footer": "Tucsenberg manufactures aftermarket aeration replacement membranes. {brands} are trademarks of their respective owners. Tucsenberg is not affiliated with, authorized, or endorsed by these companies. Brand and model references describe documented compatibility only.",
+      "brandNotice": "{brand} is a trademark of its respective owner. Tucsenberg is an independent aftermarket manufacturer and is not affiliated with, authorized, or endorsed by {brand}. References describe documented compatibility only.",
+      "inline": "Brand and model names are trademarks of their respective owners, referenced only to describe documented compatibility."
+    }
   }
 }

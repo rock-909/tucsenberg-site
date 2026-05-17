@@ -473,3 +473,298 @@ Retired contracts are kept for historical traceability but excluded from active 
 ### Medium-priority gaps
 
 - **BC-019** (Untested): Custom project page
+
+### Step 4.1 — Phase B
+
+This section is append-only. It records the Phase-B home-page rebuild
+amendments to existing contracts. It does not edit any prior contract text.
+
+#### BC-001 update (Phase B home rebuild)
+
+The homepage is now the full B1 narrative composition. The buyer-facing
+contract is extended as follows:
+
+- The page renders, in order: hero + compatibility search → what-we-confirm
+  narrative → find-by-membrane-type (links resolve to real descriptive
+  `/membranes/{canonical-slug}` routes from the frozen data layer) → OEM brand
+  grid (driven by `getOemBrandFacts()` / `getBrandPathStats()`, frozen brand
+  order `[sanitaire, edi, ssi-aeration]`, each card showing its documented
+  compatibility-path count) → shared SLA commitments ribbon
+  (`trust.sla.*`) → four-risks narrative → frozen compatibility proof box →
+  material decision card → batch controls block → home FAQ (Q01–Q06 via the
+  reused `FaqSection` in direct `faqItems` mode, still emitting FAQPage
+  JSON-LD) → final CTA → footer trademark disclaimer.
+- The final CTA is now **single**: it links only to the quote page
+  (`SINGLE_SITE_ROUTE_HREFS.quote`). The previous secondary
+  "Browse All Membranes" link is removed.
+- The page **ends** with the footer `TrademarkDisclaimer`
+  (`data-testid="trademark-disclaimer"`, `data-variant="footer"`) as the last
+  child of the page root, carrying the Phase-A `legal.trademark.footer` copy.
+
+E2E proof: `tests/e2e/homepage.spec.ts` ("ends with a single quote CTA and a
+footer trademark disclaimer") for `/en` and `/es`. Unit/integration proof:
+`src/app/[locale]/__tests__/page.test.tsx`.
+
+### Step 4.1 — Phase C
+
+This section is append-only. It records the Phase-C
+`/membranes/[product]` rebuild. It does not edit any prior contract text,
+including the Phase-A/Phase-B blocks above.
+
+#### BC-027: Membrane product page renders the locked B1 narrative structure
+
+The `/[locale]/membranes/[product]` page composes frozen Phase-A
+`@/components/trust` primitives and `membraneProduct.*` copy in this exact
+document order:
+
+1. Hero spec strip — overline + product name + a data-only `<dl>` exposing
+   only Diameter / Material / Type / SKU. The featured variant's diameter is
+   sourced from `getFeaturedProductFacts()`; other variants use the
+   variant-spec lookup. No temperature band, mounting style, or other
+   non-data tokens.
+2. "What this product is for" narrative (`membraneProduct.useCase.*`).
+3. Material-fit narrative (`membraneProduct.materialFit.*`) mounting the
+   frozen `MaterialDecisionCard` with `defaultMaterial="epdm"`. The card owns
+   all EPDM/TPU trigger copy from Phase-A `trust.material.*`; the page never
+   re-lists it.
+4. Confirm-fit narrative (`membraneProduct.confirmFit.*`) rendering an
+   ordered list over the fixed keys
+   `[partNumber, dimensions, mounting, material, perforation, release]`.
+5. `CompatibilitySection` — unchanged; the per-brand in-section
+   `trademarkDisclaimer` notices stay inside this section and are not moved.
+6. Lead-time narrative (`membraneProduct.leadTime.*`) — text only, no table,
+   the unified word-form "typically ship within one to two weeks", no numeric
+   day/quantity band, no MOQ.
+7. QC narrative (`membraneProduct.qc.*`) mounting the frozen
+   `BatchControlsBlock` plus `qc.sampleNote`.
+8. Quote CTA panel — `membraneProduct.quote.*` plus the unchanged quote
+   `Button`/`Link`, a single `mailto:sales@tucsenberg.com`, the frozen
+   `CompatibilityProofBox`, and the frozen `SlaCommitments` with
+   `layout="stacked"`.
+9. The page **ends** with a page-level `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="inline"`) as the
+   final block, satisfying the CLAUDE.md #3 OEM-page compliance requirement.
+   This is distinct from the per-brand in-section notices in step 5.
+
+Global strike audit: the rendered page contains no `°C`, no `\d+ day`, no
+`500`, no `tear-down`, and no `quote@`/`quality@`/`legal@` mailbox. The
+single contact mailbox is `sales@tucsenberg.com`.
+
+Spec/proof files:
+`src/app/[locale]/membranes/[product]/page.tsx`,
+`src/app/[locale]/membranes/[product]/compatibility-section.tsx`,
+and the membrane test suite under
+`src/app/[locale]/membranes/[product]/__tests__/`
+(`page-structure-contract.test.tsx`, `trademark-compliance.test.tsx`,
+`spec-strip-contract.test.tsx`, `narrative-use-case.test.tsx`,
+`material-and-confirm-fit.test.tsx`, `compatibility-section.test.tsx`,
+`lead-time-and-qc.test.tsx`, `quote-cta-and-proof.test.tsx`,
+`page.test.tsx`).
+
+#### BC-028: Canonical-slug routing, SKU 308 redirect, and sitemap are unchanged
+
+The Phase-C rebuild does not change any routing/SEO behavior. The following
+remain exactly as before:
+
+- `generateStaticParams()` emits the canonical descriptive slug for every
+  variant across locales; the legacy SKU slug is never a generated param.
+- A legacy SKU slug permanently redirects (308) to
+  `/{locale}{getMembraneProductPath(canonicalSlug)}`, preserving the locale
+  prefix.
+- `generateMetadata()` emits the route-specific canonical/OG on the
+  descriptive-slug URL (never the SKU slug), restricts hreflang to en + es
+  (+ x-default, never zh), and keeps the localized title/description and
+  indexable robots for public locales.
+- The quote link href is byte-unchanged:
+  `/quote?sku=TUC-D9-EPDM&product=9-inch-epdm-disc-replacement`.
+- The sitemap continues to include only active public pages, en + es only.
+
+Proof files:
+`src/app/[locale]/membranes/[product]/__tests__/page.test.tsx` (11 frozen
+assertions), `src/data/product-compatibility/__tests__/product-slug.test.ts`,
+`src/app/__tests__/sitemap.test.ts`, and the navigation E2E specs
+(`tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts`,
+`tests/e2e/user-journeys.spec.ts`).
+
+### Step 4.1 — Phase D
+
+This section is append-only. It records the Phase-D
+`/compatible/[brand]` rebuild. It does not edit any prior contract text,
+including the Phase-A/Phase-B/Phase-C blocks above.
+
+#### BC-029: OEM compatibility brand page renders the locked Phase-D structure
+
+The `/[locale]/compatible/[brand]` page composes frozen Phase-A
+`@/components/trust` primitives and `compatibleBrand.*` copy in this exact
+document order:
+
+1. Top brand-notice `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="brand-notice"`)
+   scoped to the resolved brand display name. This satisfies the
+   CLAUDE.md #3 OEM-page compliance requirement using the owner-signed
+   §6.2 PROJECT-BRIEF variant A wording (generic "respective owner"
+   form; parent trademark holders are explicitly not named). The former
+   per-mapping `entry.trademarkDisclaimer` ("…trademark of Xylem…")
+   buyer copy is superseded and is no longer rendered; the data-layer
+   field is retained but unused by this page.
+2. Hero — overline + `<h1>{brandFact.displayName}</h1>` + the ICU
+   `{brand}` description. The display name comes from
+   `getOemBrandFacts()`, never a hardcoded brand literal.
+3. "What 'compatible with {brand}' means here" narrative
+   (`compatibleBrand.boundary.*`).
+4. "Confirm your installed setup" narrative
+   (`compatibleBrand.intake.*`).
+5. Fact-driven stats line (`data-testid="brand-stats"`) rendering
+   `getBrandPathStats(brandFact.id)` numbers via the ICU
+   `compatibleBrand.stats.{summary,epdm,tpu}` keys (sanitaire =
+   5 paths / 3 EPDM / 2 TPU). No fabricated "6 documented"/"228"
+   literal. Immediately followed by the unchanged
+   `BrandCompatibilityFilter`.
+6. `MaterialDecisionCard` (frozen Phase-A trust primitive).
+7. `CompatibilityProofBox` + `BatchControlsBlock` (frozen Phase-A trust
+   primitives).
+8. "Request a compatibility review" CTA narrative
+   (`compatibleBrand.cta.*`) with a `Link` to
+   `/quote?brand=${encodeURIComponent(brandFact.slug)}` and the frozen
+   `SlaCommitments` with `layout="stacked"`.
+9. The page **ends** with a footer `TrademarkDisclaimer`
+   (`data-testid="trademark-disclaimer"`, `data-variant="footer"`) as
+   the final block. Both disclaimers are distinguishable by
+   `data-variant`; both are hard CLAUDE.md #3 compliance and are
+   test-locked.
+
+Facets are locked to exactly two: a 3-tab category tablist
+(All / Disc / Tube) and a single material combobox. No membrane-class,
+mount-style, or fit-status facet may be (re-)introduced. Every count is
+derived from `getBrandPathStats`/`CATALOG_FACTS`; every brand slug from
+`getOemBrandFacts()`. The single contact mailbox is
+`sales@tucsenberg.com`.
+
+Spec/proof files:
+`src/app/[locale]/compatible/[brand]/page.tsx` and the brand test suite
+under `src/app/[locale]/compatible/[brand]/__tests__/`
+(`page.test.tsx`, `brand-stats-and-params.test.tsx`,
+`trust-composition.test.tsx`, `facet-guard.test.tsx`), plus the shared
+harness `__tests__/test-utils.tsx` and
+`tests/unit/compatible-brand-i18n.test.ts`.
+
+#### BC-030: Brand-page canonical/hreflang and sitemap are unchanged
+
+The Phase-D rebuild does not change any routing/SEO behavior. The
+following remain exactly as before:
+
+- `generateStaticParams()` emits one `{locale, brand}` per runtime
+  locale (en, es, zh) for exactly the three real OEM brand slugs from
+  `getOemBrandFacts()` (`edi`, `sanitaire`, `ssi-aeration`). zh routes
+  are generated for runtime rendering only.
+- `generateMetadata()` emits the route-specific canonical/OG on the
+  brand path, restricts hreflang to en + es (+ x-default, never zh),
+  keeps the brand title/description and indexable robots for public
+  locales, and returns empty `{}` for an unknown brand.
+- The per-product quote link href continues to carry
+  `?brand=<slug>` (`/quote?brand=sanitaire`).
+- The sitemap continues to include one OEM URL per brand, en + es only,
+  never zh (BC-023).
+
+Proof files:
+`src/app/[locale]/compatible/[brand]/__tests__/page.test.tsx`
+(generateStaticParams + full `generateMetadata` block, all frozen),
+`src/app/__tests__/sitemap.test.ts` (BC-023), and the navigation E2E
+specs (`tests/e2e/navigation.spec.ts`), which assert only the brand-page
+`<h1>` visibility and the localized `/compatible/sanitaire` nav href —
+both preserved by the rebuild.
+
+### Step 4.1 — Phase E
+
+#### BC-026 update (Phase E quote wrap-only)
+
+The `/quote` page now wraps the **byte-frozen** RFQ form with the
+Phase-A narrative/trust modules. The form and backend behavior, and the
+BC-026 proof boundary, are **unchanged**:
+
+- `src/app/api/quote/route.ts`, `src/lib/lead-pipeline/lead-schema.ts`,
+  `quote-form.tsx`, and `use-quote-form.ts` are byte-unchanged by every
+  Phase-E commit (verified by `git log` over those paths showing no
+  Phase-E commit). The RFQ chain (safeParseJson → Zod → Turnstile →
+  Airtable-first `processLead`) and the part-number log-redaction
+  property (`productName === "RFQ quote request"`) are still proven only
+  at the route layer by `src/app/api/quote/__tests__/quote-api.test.ts`,
+  unchanged and green.
+- The page composition (intake NarrativeSection → soft-entry → frozen
+  form + sticky summary → MaterialDecisionCard → stacked SlaCommitments
+  → CompatibilityProofBox → BatchControlsBlock → non-binding/privacy
+  assurances → privacy-only consent → inline then footer
+  TrademarkDisclaimer) is proven by
+  `src/app/[locale]/quote/__tests__/page.test.tsx` and the i18n/content
+  guards in `src/app/[locale]/quote/__tests__/quote-i18n.test.ts`.
+- **BC-026 stays Partial**: no end-to-end Playwright RFQ smoke and no
+  production-like deployed-Airtable proof were added (still a manual
+  launch gate). Phase E did not upgrade the BC-026 status.
+- The privacy-only consent links the existing privacy page only. The
+  Compatibility Review Terms (CRR) link is **deferred to Step 5**: the
+  dual-link i18n keys (`quote.legal.consentWithReviewTerms`,
+  `reviewTermsLink*`) exist parity-safe but are not rendered, and no CRR
+  terms page (or stub) is created in Phase E.
+
+#### BC-031: Quote page renders the locked Phase-E wrap structure
+
+The OEM-referencing `/quote` page renders, in order, the structured
+intake framing, the frozen RFQ form with its sticky summary (response
+time "Within 2 business days", lead time "Confirmed during quote
+review" — no week/day number), the material-guidance card, the stacked
+3-item SLA commitments, the compatibility-proof and batch-controls
+blocks, the non-binding + privacy assurances, the privacy-only consent
+line, and the page-bottom **inline** then **footer**
+`TrademarkDisclaimer` (CLAUDE.md #3 OEM-page compliance). A single sales
+inbox (`sales@tucsenberg.com`) is used; no `quote@`/`quality@`/`legal@`
+routing address appears in any `quote.*` value, and no quantity-band /
+MOQ / numeric lead-time promise is present.
+
+Proof files:
+`src/app/[locale]/quote/__tests__/page.test.tsx`,
+`src/app/[locale]/quote/__tests__/quote-i18n.test.ts`, and the shared
+harness `src/app/[locale]/quote/__tests__/test-utils.tsx`.
+
+### Step 4.1 — Phase F
+
+This section is append-only. It records final cross-cutting review evidence
+after Phases A-E and does not upgrade any existing behavioral-contract status.
+
+#### BC-032: Step-4.1 rebuilt buyer pages do not horizontally overflow at narrow widths
+
+The rebuilt buyer path (`/`, `/membranes/[product]`, `/compatible/[brand]`,
+and `/quote`) must remain readable at small viewport widths. Phase-F visual
+smoke found a real regression in the shared footer: the footer inner container
+combined `w-full` with tokenized `marginInline` gutters, producing a layout
+wider than the viewport on 390px and 768px captures. The fix removes the
+full-width class from the margin-bearing container and keeps the tokenized
+gutter contract intact.
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Test Type | Unit + Controller-run visual smoke |
+| Test File | `src/components/footer/__tests__/Footer.test.tsx`; screenshots in `reports/step-4.1-f9-smoke` |
+| Status | Covered |
+
+Notes: The unit guard asserts that the footer container keeps
+`marginInline: clamp(24px, 12vw, 184px)` but does not carry the `w-full` class.
+The Phase-F controller-run smoke captured 36 cells: four pages x three locales
+(`en`, `es`, `zh`) x three viewport widths (390, 768, 1280). The smoke is not a
+committed flaky visual test; it is retained as local review evidence.
+
+#### Final Step-4.1 proof boundary
+
+- BC-001 / BC-027 / BC-029 / BC-031 remain the page-structure contracts for
+  home, membrane product, OEM compatibility, and quote respectively.
+- BC-023 remains the SEO/sitemap boundary: public URLs are en + es, never zh.
+- BC-026 remains **Partial**. Phase F re-verified the route-level RFQ proof and
+  the Phase-E frozen-surface boundary, but it did not add a Playwright RFQ
+  submission smoke or a production-like deployed Airtable write.
+- The single visible mailbox remains `sales@tucsenberg.com`; its live mailbox
+  status is an owner launch gate, not a local test claim.
+- CRR / Compatibility Review Terms remains deferred to Step 5. The parity-safe
+  i18n keys exist, but no `/quote` surface renders a CRR link and no CRR page is
+  created in Step 4.1.
+- The indexed non-four-page Spanish placeholders tracked by R8 remain a Step 5
+  / pre-launch ES pass gate, not a four-page rebuild blocker.

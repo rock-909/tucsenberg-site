@@ -4,6 +4,17 @@ export {
   productGroups,
   productVariants,
 } from "@/data/product-compatibility/catalog";
+export {
+  CATALOG_FACTS,
+  getBrandPathStats,
+  getFeaturedProductFacts,
+  getOemBrandFacts,
+  type BrandPathStats,
+  type CatalogFacts,
+  type FeaturedProductFacts,
+  type FitStatusTotals,
+  type OemBrandFacts,
+} from "@/data/product-compatibility/catalog-facts";
 export { compatibilityMappings } from "@/data/product-compatibility/mappings";
 export {
   getBrandCompatibility,

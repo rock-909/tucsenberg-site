@@ -1,13 +1,13 @@
 # Tucsenberg Site — 开发进度
 
-> 最新更新：2026-05-15
+> 最新更新：2026-05-16
 > 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
 
 ---
 
 ## 当前阶段
 
-**Phase 1 Step 3 complete** — 产品数据层已建成（3 OEM 品牌 / 14 型号 / 5 产品族 / 7 变体 / 20 条兼容映射 / 三语翻译 / 50 个 QA 测试）。Step 2 收尾验证已通过。下一步 Step 4 四页样板。
+**Phase 1 Step 4 四页样板 + 收尾 已完成**（详见下方「已完成」section）。**当前进行：Step 4.1 四页事实对齐重建收尾** —— 从 `main@74e1d29` 起的单分支 `step-4.1-four-page-rebuild`。真实兼容映射以数据层为准 **17 条**（非早期文档写的 20 条），3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。Phase A–E 已完成（foundations + 首页 / 产品页 / OEM 兼容页 / quote 四页按 B1 叙事重建，RFQ 管线 byte-frozen）；Phase F 本地终审发现并修复 footer 窄屏横向溢出，下一步是 PR / CI / merge 收口。
 
 ---
 
@@ -214,3 +214,110 @@
 | 竞品拆解 | `aeration-brand/_reference/aerationstore-competitive-teardown.md` |
 | 业务指南 | `aeration-brand/docs/aeration-business-guide.md` |
 | 冷邮件方案 | `aeration-brand/docs/cold-email-setup-guide.md` |
+
+---
+
+## Step 4.1 — 四页事实对齐（Foundations 起步）
+
+从 `main@74e1d29` 起，在单分支 `step-4.1-four-page-rebuild` 上推进（Phase 0 已建分支并约定：本批 Phase-A commit 一并提交未跟踪的 Step 4.1 计划文档）。
+
+**为什么做 Step 4.1：** Step 4 四页虽已上线，但 DEV-LOG 顶部、PROJECT-BRIEF、DESIGN 三份文档互相矛盾，且与代码不符（早期文档写 20 条兼容映射，真实数据层为 17 条 / 3 个 OEM 品牌）。Step 4.1 把四页事实对齐到数据层，并恢复 PROJECT-BRIEF 要求、但 2026-05-14 设计锁定时被收窄的信任模块。
+
+**规范权威：** `docs/superpowers/plans/2026-05-16-step-4.1-fact-signoff.md`（事实签收口径）。阶段计划文档：`docs/superpowers/plans/2026-05-16-step-4.1-master.md` 以及 `…step-4.1-phase-a.md` / `-phase-b.md` / `-phase-c.md` / `-phase-d.md` / `-phase-e.md`。
+
+**Phase A 交付（已完成 foundations，B–E 四页重建尚未开始）：**
+
+- **A1** — 派生 `catalog-facts` SSOT（单一事实源）+ drift-guard，锁定 17 条兼容路径 / 3 个 OEM 品牌 / per-brand 计数，数据漂移即测试失败。
+- **A2** — 六个共享 trust 原语组件：TrademarkDisclaimer / SlaCommitments / CompatibilityProofBox / MaterialDecisionCard / BatchControlsBlock / NarrativeSection。
+- **A3** — 顶层 trust / legal i18n 三语补齐，MaterialDecisionCard 文案嵌套化。
+- **A4** — dead-layer 隔离 + 架构守卫（arch guard），防止已废弃数据层被重新引用。
+
+**结构与事实权威分工：** 页面 STRUCTURE 以 `DESIGN.md §7.1–§7.5` 为准；页面 FACTS 以 `src/data/product-compatibility/**` 为准（17 条兼容路径、3 个 OEM 品牌：Sanitaire / EDI / SSI Aeration）。PROJECT-BRIEF 历史叙事已加 `[Step 4.1 supersession]` 注记，保留不删。
+
+### Step 4.1 内容处置
+
+| 项目 | 处置（cut/延/上线） | 说明 |
+|------|----------------------|------|
+| CRR 条款页 | 延 | gate 到 Step 5（Phase E 出隐私-only consent，双链 key parity-safe 不渲染） |
+| 交期数字档（1–2 周 band / MOQ / 5–7 年） | cut | 统一改为"报价时确认"措辞，不写数字承诺 |
+| 第二询价信箱（quote@ / quality@ / legal@） | cut | 单一 `sales@tucsenberg.com` |
+| 已索引非四页面 ES 占位（`[ES-TODO]` in legal/privacy/terms/about/capabilities/how-it-works namespaces） | 延（上线前 owner gate） | **明确不在 Step 4.1 范围**；Step 5 / 上线前 ES pass 处理（R8） |
+| `sales@tucsenberg.com` 实箱 | 上线前 owner gate | 公开发布前必须是可收件真实邮箱 |
+
+---
+
+## Step 4.1 — Phase B（首页重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。首页在 2026-05-14 design lock 时被静默 content-strip，Phase B 按 B1 叙事结构完整重建，组合 Phase-A 冻结 trust 原语，所有事实取自冻结 accessor。Hero+search 原样保留。
+
+**最终渲染顺序**（`src/app/[locale]/page.tsx`）：Hero+search → HomeConfirmSection → HomeMembraneTypeSection → OemGridSection（frozen facts + per-brand path count）→ SlaCommitments ribbon → HomeRisksSection → CompatibilityProofBox → MaterialDecisionCard → BatchControlsBlock → HomeFaqSection（Q01–Q06，复用 FaqSection direct mode，仍出 FAQPage JSON-LD）→ FinalCta（单一 → /quote）→ TrademarkDisclaimer footer。
+
+**B1–B9 提交：**
+- B1 `feat(home): replace coarse trust strip with shared sla commitments ribbon`
+- B2 `feat(home): add what-we-confirm narrative section`
+- B3 `feat(home): add find-by-membrane-type section linking real routes`
+- B4 `feat(home): drive oem grid from frozen brand facts with documented-path counts`
+- B5 `feat(home): add four-risks narrative section`
+- B6 `feat(home): mount frozen trust blocks, drop legacy materials section`
+- B7 `feat(home): add q01-q06 faq via reused faq-section`
+- B8 `feat(home): single quote cta and footer trademark disclaimer`
+- B9 `test(home): add spec §4 strike audit and record phase b completion`
+
+**事实绑定（R1/R11）：** disc href = `getFeaturedProductFacts().canonicalSlug`（`9-inch-epdm-disc-replacement`）；tube href 经 `canonicalProductSlugForVariantId("tuc-t62-epdm")` 解析（`62-mm-epdm-tube-replacement`，该 variant 数据层确实存在）；OEM 网格用 `getOemBrandFacts()` + `getBrandPathStats()`，冻结顺序 `[sanitaire(5), edi(7), ssi-aeration(5)]`，path count 直接取 accessor，无任何硬编码 slug/count/brand/SKU。`getFeaturedProductFacts()` 无 `.slug`，统一用 `.canonicalSlug`。
+
+**i18n parity：** en/es/zh 各 1091 leaf（795 critical + 296 deferred）。新增 `home.{confirm,membraneType,oemGrid.pathCount,risks,faq}`，删除 `home.{trust,materials,cta.viewMembranes}` 三语对等。`src/test/i18n-validation.ts` 的 `IDENTICAL_ACROSS_LOCALES` 旧 `home.materials.*` 条目随 materials section 一并清空。SLA 文案只经共享 `SlaCommitments`/`trust.sla.*`，不再有 home-local SLA 串。
+
+**契约：** `docs/specs/behavioral-contracts.md` 追加 `## Step 4.1 — Phase B`（append-only）更新 BC-001（单一 final CTA → quote；页面以 footer trademark disclaimer 收尾）。
+
+**已知问题 / 偏差（DONE_WITH_CONCERNS）：**
+
+1. **commit subject 长度妥协**：B6 计划字面 subject 88 字符、B7 计划 73 字符，均超过本仓库 commitlint `subject-max-length=72` 硬门。master rule 明令禁止 `--no-verify`，因此在保留语义前提下最小化缩短（B6 → 68 字符，B7 → 50 字符）。提交主题与计划字面不完全一致，但语义等价、门禁通过。
+
+2. **§4 strike-audit `\b24\b` token 精确化（非弱化）**：§4 strike 列表的 `24` 针对的是被 strip 掉的伪造 catalog/scope 计数（"24 documented paths / OEM families"），与相邻 token（`19 paths`/`6 families`）同类。但 B7 明确要求 FAQ Q01 镜像 Phase-A `trust.sla.review` 的"within 24 business hours" SLA 措辞——这是冻结 Phase-A 真值，不是伪造目录事实。strike test 将 `24` 限定在 count/scope 上下文（`24 (documented|compatibility|oem|paths|families|brands)`），其余所有 §4 token 全量未弱化。否则会误伤计划本身强制要求的 SLA 文案。已在 `home-strike-audit.test.tsx` 注释中完整记录该判断。
+
+3. **E2E 无法在本沙箱跑生产构建（环境限制，非代码缺陷）**：`tests/e2e/homepage.spec.ts` 的 playwright webServer 需 `pnpm build && pnpm start`；`pnpm build` 因 `src/app/[locale]/layout-fonts.ts` 的 `next/font/google`（Inter）在构建时需联网拉 Google Fonts，而沙箱断网而失败。该 font 文件最后修改于 Phase-B 之前的 `4fc8762`，与 Phase B 无关。已静态确认 e2e spec 仅断言本阶段保留/新增的契约（hero/search、OEM 网格 `/compatible/{slug}`、SLA ribbon testid+layout+`trust.sla.review` 文案、单一 quote CTA、footer disclaimer testid+variant+`legal.trademark.footer` 文案），且这些契约均由真实组件的单元/集成测试（`page.test.tsx` + `trust/__tests__/*`）证明。e2e 文案已更新为真实 Phase-A `trust.sla.*` / `legal.*` EN+ES 措辞。上线前需在有网环境补跑一次 e2e 全绿。
+
+## Step 4.1 — Phase C（/membranes/[product] 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。产品详情页按 B1 叙事结构重建，spec strip 锁到真实数据层字段（`getFeaturedProductFacts()`，无任何硬编码 SKU/diameter/material），组合 Phase-A 冻结 trust 原语。
+
+**最终渲染顺序**：Hero → spec strip（真实 facts）→ what-this-product-is-for 叙事 → material-fit card + confirm-fit 流程 → 统一交期措辞 + QC/sample 区块 → quote CTA 面板（stacked SLA + CompatibilityProofBox + 单一销售邮箱）→ page-bottom inline trademark disclaimer（OEM 合规硬规则 #3）。
+
+**C 提交：** `feat(membranes): lock spec strip to real data fields via featured-product facts`、`add what-this-product-is-for narrative section`、`add material-fit card and confirm-fit process section`、`replace lead-time table with unified wording and qc/sample block`、`add quote cta panel with stacked sla, proof box and single sales email`、`fix(membranes): add page-bottom inline trademark disclaimer`、`feat(i18n): add membraneproduct narrative, material and qc keys`、`test(membranes): pin canonical fit labels and forbid fabricated compatibility tokens`、`pin phase 4.1 product-page structure and update behavioral contract`。
+
+**契约 / 修正：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase C`（append-only）。质量复审 M1/M2/M3（测试桩重复、冗余结构重断言、裸 `/500/`）通过共享 `test-utils.tsx`（dependency-inverted、vitest 排除）修复并编码为 R13（`docs(plan): add shared test-harness binding`、`test(membranes): extract shared product-page harness and scope guards`）。
+
+## Step 4.1 — Phase D（/compatible/[brand] 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。OEM 兼容页按 B1 叙事重建，brand stats 全部取自冻结 fact 层（`getOemBrandFacts()` / `getBrandPathStats()`），facet 锁到 category + material 两维。
+
+**D 提交：** `test(compatible): lock facets to category and material only`、`feat(compatible): compose trust blocks and narrative sections`、`drive brand stats from frozen fact layer`、`feat(i18n): add compatible-brand narrative, stats and cta keys`、`docs(compatible): record phase-d contract and verify gates`、`test(compatible): pin real-json trademark wording and fix fence mock comment`。
+
+**契约 / 关键决策：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase D`。BLOCKED 处置：旧 buyer-copy `/Xylem/` regression-fence pin 与 owner-signed fact-signoff §6.2（variant A 最短合规，父公司 Xylem 显式不具名）冲突，按 §6.2 为权威裁定——仅改该断言并引用 §6.2，所有 SEO/redirect 断言 byte-identical 保留；closing commit `d7cccb5` 用真实 JSON §6.2 文案锁硬化。
+
+## Step 4.1 — Phase E（/quote wrap-only 重建）已完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。**RFQ 管线 byte-frozen（R7）**：`git log d7cccb5..HEAD -- src/app/api/quote src/lib/lead-pipeline quote-form.tsx use-quote-form.ts` 全程为空，已验证。Quote 页仅做 wrap 重建：hero/intake 叙事框架、path-adaptive 表单文案、material decision card、what-happens-next stacked SLA、CompatibilityProofBox + BatchControlsBlock、non-binding/privacy assurances、隐私-only consent（CRR 双链 key parity-safe 不渲染，gate 到 Step 5 / R5）、inline + footer trademark disclaimer、单一销售邮箱锁定。
+
+**E 提交：** `feat(quote): frame hero and intake with narrative section`、`path-adaptive form copy, strike quantity-band table`、`add material decision card guidance`、`test(quote): pin sticky rfq summary to real fields and sla copy`、`feat(quote): add what-happens-next sla commitments (stacked)`、`add compatibility-proof and batch-controls blocks`、`add non-binding/privacy assurances and privacy-only consent`、`add inline/footer trademark disclaimers, lock single sales inbox`、`feat(i18n): add quote page narrative and trust copy keys`。
+
+**契约 / 收尾：** `behavioral-contracts.md` 追加 `### Step 4.1 — Phase E`（BC-026 仍 Partial / RFQ 冻结说明 + BC-031 锁 Phase-E wrap 结构）。E10 出阶段门：full `pnpm test` 343 files / 3816 tests 全绿（含冻结 `quote-api.test.ts` 的 §393 redaction 测试 / R9）、R7 freeze-proof 空、i18n parity 三语 1148 leaf。已知问题：offline-build blocker（`layout-fonts.ts` 的 `next/font/google` 断网失败，非本阶段代码缺陷，留 Phase F 在有网环境验证）。
+
+## Step 4.1 — Phase F（跨切面终审）本地完成 — 2026-05-16
+
+分支 `step-4.1-four-page-rebuild`。Phase F 不再新增四页功能，目标是确认 A–E 的事实、RFQ 冻结面、i18n、SEO、layout 和文档合同没有互相打架。
+
+**本地终审结果：**
+
+- **关键修复**：F9 三语视觉 smoke 发现 390px / 768px 下四页均有横向 overflow。根因是 `src/components/footer/Footer.tsx` 的内层容器同时使用 `w-full` 和 tokenized `marginInline: clamp(24px, 12vw, 184px)`，实际宽度变成 100% + 左右 margin。修复为 `box-border`，并在 `src/components/footer/__tests__/Footer.test.tsx` 加回归测试，防止再次把 `w-full` 和 inline gutter 混用。
+- **F9 三语视觉 smoke**：`/`、`/membranes/9-inch-epdm-disc-replacement`、`/compatible/sanitaire`、`/quote` × `en/es/zh` × `390/768/1280`，共 36 张截图，保存到 `reports/step-4.1-f9-smoke`。复跑通过：无横向 overflow，OEM 相关页 trademark disclaimer 可见。
+- **RFQ 冻结面**：`src/app/api/quote/route.ts`、`src/lib/lead-pipeline/lead-schema.ts`、`quote-form.tsx`、`use-quote-form.ts` 在 Phase E 后未被改动；`quote-api.test.ts` 的 raw part-number redaction 测试仍作为 R9 证据。
+- **i18n**：`pnpm content:check` 通过，en/es/zh 均为 1148 leaf。四页公开 ES guard 通过；已索引但非四页的 ES placeholder 仍按 R8 留给 Step 5 / pre-launch ES pass。
+- **source-token audit 说明**：四页页面树、`src/components/trust`、Step 4.1 挂载的 `src/components/sections`、以及 `home` / `membraneProduct` / `compatibleBrand` / `quote` / `trust` / `legal` namespaces 均无 Step 4.1 strike tokens。计划里的原始全 `messages/*/critical.json` grep 会命中旧 `/products` starter catalog 的 internal `moq` key 和 `Premium Tier` 文案；这些不是四页重建 surface，也不在 Step 4.1 修复范围，留作 Step 5 / starter cleanup 侧债，不在本轮为通过 grep 大规模改 schema key。
+- **完整本地门禁**：type-check、lint、full test、content、brand、component、client-boundary、Next build、OpenNext Cloudflare build、full Playwright 已在 Phase F 跑通。`middleware` deprecation、Resend key missing、`DYNAMIC_SERVER_USAGE` digest、Storybook CSS import warning、OpenNext `-0 === 0` 属当前已知非阻断 warning。
+
+**上线前 / 下一阶段 owner gates：**
+
+- `sales@tucsenberg.com` 必须是真实可收件邮箱。
+- CRR / Compatibility Review Terms 页面仍是 Step 5，不在 Step 4.1 造 stub。
+- `legal/privacy/terms/about/capabilities/how-it-works` 的公开 ES placeholder 仍是 Step 5 / pre-launch ES pass。

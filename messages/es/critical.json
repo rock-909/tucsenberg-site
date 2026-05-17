@@ -150,34 +150,100 @@
       "searchLabel": "Búsqueda de compatibilidad",
       "searchButton": "Verificar compatibilidad"
     },
+    "confirm": {
+      "overline": "ANTES DE PEDIR",
+      "title": "Lo que le ayudamos a confirmar",
+      "body": "Resolvemos las solicitudes de membranas de repuesto frente a una revisión de compatibilidad documentada, no a una suposición por nombre de marca.",
+      "points": {
+        "compatibility": {
+          "title": "Ajuste OEM frente a su número de pieza",
+          "body": "Usted envía el número de pieza del difusor o el modelo OEM; lo asociamos a la variante de membrana que el registro de compatibilidad ya cubre, o le indicamos que requiere verificación dimensional."
+        },
+        "material": {
+          "title": "Material elegido para su agua residual",
+          "body": "EPDM y TPU se definen según el afluente que realmente recibe su cuba, de modo que la decisión del elastómero responde a las condiciones de operación y no a un valor por defecto del catálogo."
+        },
+        "fit": {
+          "title": "Dudas pendientes resueltas antes de la cotización",
+          "body": "Si una dimensión o un detalle de fijación queda sin resolver, lo señalamos en la revisión de compatibilidad para definirlo antes de que confirme un pedido."
+        }
+      }
+    },
+    "membraneType": {
+      "overline": "BUSCAR POR TIPO DE MEMBRANA",
+      "title": "Empiece por el formato de membrana que opera",
+      "disc": {
+        "name": "Membranas de disco",
+        "body": "Difusores de disco de burbuja fina sobre anillos de retención: asocie el diámetro del disco y la fijación al registro de compatibilidad."
+      },
+      "tube": {
+        "name": "Membranas de tubo",
+        "body": "Difusores de tubo sobre un núcleo perforado: asocie la longitud del tubo y el acople terminal al registro de compatibilidad."
+      },
+      "cta": "Ver detalle de compatibilidad"
+    },
     "oemGrid": {
       "overline": "COMPATIBILIDAD OEM",
       "title": "Membranas de repuesto para las principales marcas",
-      "viewAll": "Ver piezas compatibles con {brand}"
+      "viewAll": "Ver piezas compatibles con {brand}",
+      "pathCount": "{count, plural, one {# ruta de compatibilidad documentada} other {# rutas de compatibilidad documentadas}}"
     },
-    "materials": {
-      "overline": "SELECCIÓN DE MATERIAL",
-      "title": "Elija el material que se ajusta a sus condiciones",
-      "epdm": {
-        "name": "EPDM",
-        "description": "Aguas residuales municipales e industriales ligeras."
-      },
-      "tpu": {
-        "name": "TPU",
-        "description": "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada."
+    "risks": {
+      "overline": "POR QUÉ EXISTE ESTA PÁGINA",
+      "title": "Los cuatro riesgos que los compradores evitan",
+      "body": "Los pedidos de membranas de repuesto fallan de unas pocas formas repetibles. Cada sección de esta página está diseñada para cerrar una de ellas.",
+      "items": {
+        "wrongFit": {
+          "title": "Pedir una pieza que no asienta",
+          "body": "Una membrana parecida pero sin coincidencia dimensional con el cuerpo del difusor fuga o se desasienta; la revisión de compatibilidad verifica el ajuste antes del pedido, no después."
+        },
+        "wrongMaterial": {
+          "title": "Operar un elastómero que el afluente ataca",
+          "body": "Donde la cuba recibe BTEX, solventes, aceite o carga de grasas, una membrana EPDM elegida por defecto puede hincharse o endurecerse; la decisión del material sigue el afluente documentado en su lugar."
+        },
+        "blindOrder": {
+          "title": "Cotizar a partir de una referencia cruzada supuesta",
+          "body": "Una búsqueda por nombre de marca sin base registrada produce un número que nadie puede defender; aquí cada coincidencia se vincula al registro de compatibilidad del que proviene."
+        },
+        "shutdownSlip": {
+          "title": "Perder la ventana de la cuba por una respuesta lenta",
+          "body": "Cuando una línea está parada, una solicitud de cotización sin responder es el costo real; los compromisos de SLA definen cuándo regresan una revisión y una cotización."
+        }
       }
     },
-    "trust": {
-      "scope": "Solo membranas de repuesto aftermarket",
-      "leadTime": "Plazo de entrega confirmado por cotización",
-      "sla": "Respuesta de cotización en un plazo de 2 días hábiles",
-      "noFit": "Revisión sin cargo si no hay ajuste"
+    "faq": {
+      "sectionTitle": "Preguntas sobre membranas de repuesto",
+      "items": {
+        "q01": {
+          "question": "¿Con qué rapidez responden a una solicitud de compatibilidad?",
+          "answer": "Una revisión de compatibilidad se devuelve en un plazo de 24 horas hábiles, y una solicitud de cotización estándar se cotiza o se responde con una solicitud de información faltante en un plazo de 48 horas hábiles. Los casos de parada urgente se confirman el mismo día hábil. Trabajamos a partir del registro documentado de la revisión de compatibilidad en lugar de prometer un resultado en campo."
+        },
+        "q02": {
+          "question": "¿Qué necesitan de mí para confirmar una coincidencia?",
+          "answer": "Envíe el número de pieza del difusor o el modelo OEM, el formato de membrana (disco o tubo) y el diámetro o la longitud del tubo si los tiene. Si falta una dimensión, le indicamos exactamente qué medir antes de la cotización."
+        },
+        "q03": {
+          "question": "¿Realmente trabajan con la marca OEM que opero?",
+          "answer": "Asociamos su número de pieza a la variante de membrana que el registro de compatibilidad ya cubre para esa marca y le indicamos si la coincidencia es exacta o requiere verificación dimensional. Somos un fabricante independiente del mercado de posventa, no el OEM."
+        },
+        "q04": {
+          "question": "¿Cuál es el plazo de entrega una vez confirmada la compatibilidad?",
+          "answer": "Los pedidos confirmados normalmente se despachan en un plazo de una a dos semanas tras la compatibilidad confirmada y una cotización aceptada. Reafirmamos la ventana exacta en la cotización para vincularla a su artículo específico."
+        },
+        "q05": {
+          "question": "¿Hay un producto en stock o todo es bajo pedido?",
+          "answer": "Las membranas se fabrican bajo pedido según la compatibilidad confirmada y la decisión de material, de modo que la fabricación corresponde al cuerpo de su difusor y a su afluente y no a un artículo genérico de estantería."
+        },
+        "q06": {
+          "question": "¿Qué ocurre si la membrana aún no encaja?",
+          "answer": "Plantéelo con la referencia de compatibilidad de su cotización y trabajamos a partir del registro documentado de la revisión de compatibilidad para resolverlo. Contáctenos en sales@tucsenberg.com con el número de pieza y las condiciones de la cuba."
+        }
+      }
     },
     "cta": {
       "title": "¿Tiene un número de pieza a mano?",
       "description": "Envíelo y confirmamos la membrana Tucsenberg compatible y el plazo de entrega.",
-      "requestQuote": "Solicitar una cotización",
-      "viewMembranes": "Ver todas las membranas"
+      "requestQuote": "Solicitar una cotización"
     }
   },
   "monitoring": {
@@ -1148,6 +1214,45 @@
     "cta": {
       "requestQuote": "Solicitar cotización para esta pieza",
       "viewGroup": "Ver todos los tamaños"
+    },
+    "useCase": {
+      "eyebrow": "Para qué sirve este producto",
+      "title": "Una membrana de aireación de reemplazo directo",
+      "body": "Esta pieza es para equipos de mantenimiento y compras que reemplazan membranas de aireación desgastadas en un difusor instalado sin cambiar el cuerpo ni el soporte del difusor. Se revisa frente a su pieza documentada, no se vende como repuesto genérico."
+    },
+    "materialFit": {
+      "eyebrow": "Elección del material de la membrana",
+      "title": "El EPDM es el punto de partida para la mayoría del servicio municipal",
+      "body": "El material se elige según las condiciones del agua residual, no como una categoría de precio. Use la decisión siguiente para ver cuándo el EPDM es el punto de partida correcto y qué condiciones llevan la revisión hacia el TPU."
+    },
+    "confirmFit": {
+      "eyebrow": "Qué confirmar antes de pedir",
+      "title": "Confirmamos el ajuste a partir de sus datos documentados",
+      "body": "No suponemos la compatibilidad. Envíe los datos siguientes y cada uno se revisa antes de emitir una cotización.",
+      "steps": {
+        "partNumber": "Número de pieza OEM o de referencia cruzada de la membrana instalada actualmente.",
+        "dimensions": "Diámetro activo y dimensiones generales medidos en la membrana instalada.",
+        "mounting": "Cómo se asienta y se retiene la membrana en el cuerpo del difusor.",
+        "material": "Las condiciones del agua residual en las que opera la membrana.",
+        "perforation": "Patrón de perforación y disposición de las ranuras a partir de una foto clara.",
+        "release": "Si la membrana existente muestra incrustaciones, ensuciamiento o ataque químico."
+      }
+    },
+    "leadTime": {
+      "eyebrow": "Plazo de entrega",
+      "title": "El plazo de entrega sigue a la compatibilidad confirmada",
+      "body": "Las membranas de reemplazo revisadas suelen enviarse en una a dos semanas tras confirmar la compatibilidad y aceptar la cotización. La entrega escalonada para ventanas de parada puede coordinarse a solicitud."
+    },
+    "qc": {
+      "eyebrow": "Control de calidad y trazabilidad",
+      "title": "Cada envío se verifica y es trazable",
+      "sampleNote": "Se puede revisar una muestra de verificación antes del primer lote para confirmar el ajuste en su equipo, no en una ficha técnica."
+    },
+    "quote": {
+      "eyebrow": "Solicitar una cotización",
+      "title": "Envíe su número de pieza o fotos",
+      "body": "Envíe el número de pieza instalado, las dimensiones y una foto. Revisamos la compatibilidad y respondemos con una cotización o con la información concreta que falta.",
+      "email": "sales@tucsenberg.com"
     }
   },
   "compatibleBrand": {
@@ -1172,6 +1277,27 @@
       "noChecksRequired": "No se requiere verificación adicional",
       "requestQuote": "Solicitar cotización para esta pieza",
       "empty": "Ningún modelo coincide con los filtros seleccionados."
+    },
+    "boundary": {
+      "eyebrow": "QUÉ CUBRE ESTA PÁGINA",
+      "title": "Qué significa aquí “compatible con {brand}”",
+      "body": "Tucsenberg suministra membranas de reemplazo aftermarket dimensionadas para ajustar a los modelos de difusor {brand} referenciados. {brand} es una marca registrada de terceros; Tucsenberg no está afiliada a {brand} ni cuenta con su respaldo o patrocinio. Las referencias cruzadas describen únicamente el ajuste físico, no el equipo original. Cada cotización va precedida de una revisión de compatibilidad documentada frente a su pieza instalada."
+    },
+    "intake": {
+      "eyebrow": "ANTES DE SOLICITAR",
+      "title": "Confirme su configuración instalada",
+      "body": "El ajuste parte de la pieza que ya utiliza, no del nombre de catálogo. Tenga a mano el número de pieza {brand} moldeado, el diámetro del disco o tubo, la rosca o silla de montaje y el material de la membrana. Si un número está borrado, una foto del difusor y del soporte nos permite rastrearlo antes de cotizar."
+    },
+    "stats": {
+      "summary": "{paths} rutas de compatibilidad documentadas",
+      "epdm": "{epdm} EPDM",
+      "tpu": "{tpu} TPU"
+    },
+    "cta": {
+      "eyebrow": "SIGUIENTE PASO",
+      "title": "Solicite una revisión de compatibilidad",
+      "body": "Envíe la referencia {brand} instalada y la mapeamos al reemplazo dimensionado, enumeramos cada verificación que el comprador debe confirmar, y le respondemos desde sales@tucsenberg.com.",
+      "action": "Solicitar una revisión de compatibilidad"
     }
   },
   "quote": {
@@ -1185,9 +1311,9 @@
     },
     "form": {
       "partNumbers": "Número(s) de pieza o modelo OEM",
-      "partNumbersHint": "Ingrese el SKU de Tucsenberg, el número de pieza OEM o el nombre del modelo",
+      "partNumbersHint": "Ingrese un SKU de Tucsenberg, un número de pieza OEM o el nombre del modelo: cuanto más específico, más rápido confirmamos la vía.",
       "quantity": "Cantidad",
-      "quantityHint": "Cantidad aproximada requerida",
+      "quantityHint": "Cantidad aproximada para este pedido. El plazo de entrega y el precio se confirman en la cotización según la pieza revisada.",
       "company": "Empresa / Organización",
       "email": "Correo electrónico",
       "name": "Nombre completo",
@@ -1199,7 +1325,7 @@
         "notSure": "No estoy seguro — asesórenme"
       },
       "shutdownDate": "Fecha de parada / Urgencia",
-      "shutdownDateHint": "¿Cuándo necesita instalar las membranas?",
+      "shutdownDateHint": "¿Cuándo necesita las membranas en sitio? Indíquenos si una entrega escalonada o parcial ayudaría a su ventana de parada.",
       "notes": "Notas adicionales",
       "fileUpload": "Referencie una lista de piezas o una foto",
       "fileUploadHint": "Registramos el nombre del archivo solo como referencia. El archivo no se envía con este formulario; téngalo listo para enviarlo por correo cuando le respondamos (CSV, PDF o imágenes, máx. 10 MB).",
@@ -1218,6 +1344,39 @@
       "title": "Solicitud de cotización enviada",
       "description": "Recibimos su solicitud y responderemos a {email} en un plazo de 2 días hábiles.",
       "fileNotice": "Su archivo no se subió; solo se registró su nombre. Le pediremos que lo envíe por correo cuando le respondamos."
+    },
+    "intake": {
+      "eyebrow": "Cotización de reemplazo",
+      "title": "Solicitar cotización",
+      "body": "Indíquenos la pieza que está reemplazando. Confirmamos la vía de compatibilidad con los datos que revisamos y preparamos una cotización: sin cuenta y sin llamada comercial."
+    },
+    "materialGuidance": {
+      "eyebrow": "Material",
+      "title": "Qué material de membrana solicitar",
+      "body": "El EPDM es la opción predeterminada para aguas residuales municipales y estándar. Elija TPU solo cuando la cuba reciba aceite, grasa, disolventes o química industrial agresiva: es una adecuación a la condición de servicio, no una mejora. Si no está seguro, déjelo en «asesórenme» y le recomendaremos según sus condiciones."
+    },
+    "whatHappensNext": {
+      "eyebrow": "Después de enviar",
+      "title": "Qué sucede a continuación"
+    },
+    "proof": {
+      "eyebrow": "Cómo confirmamos la compatibilidad",
+      "title": "Cada solicitud se coteja con dimensiones documentadas",
+      "body": "Su pieza se revisa frente a las dimensiones documentadas del difusor y fotos de referencia antes de cotizar. No se libera el precio solo con una coincidencia de marca."
+    },
+    "batch": {
+      "eyebrow": "En pedidos más grandes",
+      "title": "Trazabilidad de lote y opciones de muestra"
+    },
+    "assurances": {
+      "nonBinding": "Las cotizaciones no son vinculantes hasta que se confirmen mediante una orden de compra.",
+      "privacy": "Usamos sus datos únicamente para revisar la compatibilidad y preparar su cotización. No vendemos ni compartimos su información."
+    },
+    "legal": {
+      "consent": "Al enviar esta solicitud, acepta nuestra <privacyLink>Política de Privacidad</privacyLink>.",
+      "consentWithReviewTerms": "Al enviar esta solicitud, acepta nuestra <privacyLink>Política de Privacidad</privacyLink> y los <reviewTermsLink>Términos de Revisión de Compatibilidad</reviewTermsLink>.",
+      "privacyLinkLabel": "Política de Privacidad",
+      "reviewTermsLinkLabel": "Términos de Revisión de Compatibilidad"
     }
   },
   "search": {
@@ -1229,5 +1388,41 @@
     "requestQuote": "Solicitar cotización",
     "openHint": "Buscar ⌘K",
     "close": "Cerrar"
+  },
+  "trust": {
+    "sla": {
+      "review": "Revisión de compatibilidad: en un plazo de 24 horas hábiles.",
+      "standardRfq": "Solicitud de cotización estándar: cotización o solicitud de información faltante en un plazo de 48 horas hábiles.",
+      "urgent": "Casos de parada urgente: confirmados el mismo día hábil."
+    },
+    "proof": {
+      "title": "Prueba de compatibilidad",
+      "body": "La compatibilidad se revisa con base en dimensiones y fotografías documentadas antes de cotizar."
+    },
+    "material": {
+      "title": "Elección del material de la membrana",
+      "epdm": {
+        "label": "EPDM: punto de partida predeterminado",
+        "condition": "Condiciones de aguas residuales municipales e industriales ligeras."
+      },
+      "tpu": {
+        "label": "TPU: seleccionado según las condiciones",
+        "condition": "Aguas residuales con aceites, productos químicos y alto contenido de grasa donde el EPDM se degrada."
+      },
+      "note": "El material se elige según las condiciones del proceso, no como una categoría de precio."
+    },
+    "batch": {
+      "title": "Controles de lote",
+      "traceability": "Cada envío se verifica antes del despacho y es trazable por pedido y lote de producción.",
+      "photos": "Los primeros pedidos de producción pueden incluir registros fotográficos de salida si se solicita.",
+      "sample": "Hay una muestra de verificación disponible antes del primer lote."
+    }
+  },
+  "legal": {
+    "trademark": {
+      "footer": "Tucsenberg fabrica membranas de repuesto de aireación del mercado de posventa. {brands} son marcas comerciales de sus respectivos propietarios. Tucsenberg no está afiliada a estas empresas ni cuenta con su autorización o respaldo. Las referencias a marcas y modelos describen únicamente la compatibilidad documentada.",
+      "brandNotice": "{brand} es una marca comercial de su respectivo propietario. Tucsenberg es un fabricante independiente del mercado de posventa y no está afiliada a {brand} ni cuenta con su autorización o respaldo. Las referencias describen únicamente la compatibilidad documentada.",
+      "inline": "Los nombres de marcas y modelos son marcas comerciales de sus respectivos propietarios, mencionados únicamente para describir la compatibilidad documentada."
+    }
   }
 }

@@ -6,18 +6,31 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import {
   buildClientSearchIndex,
-  oemBrands,
+  getBrandPathStats,
+  getOemBrandFacts,
   type ClientSearchIndex,
 } from "@/data/product-compatibility";
 import { Button } from "@/components/ui/button";
 import { JsonLdGraphScript } from "@/components/seo";
+import {
+  BatchControlsBlock,
+  CompatibilityProofBox,
+  MaterialDecisionCard,
+  SlaCommitments,
+  TrademarkDisclaimer,
+} from "@/components/trust";
+import { HomeConfirmSection } from "@/components/sections/home-confirm-section";
+import { HomeMembraneTypeSection } from "@/components/sections/home-membrane-type-section";
+import { HomeRisksSection } from "@/components/sections/home-risks-section";
+import {
+  getHomeFaqItems,
+  HomeFaqSection,
+} from "@/components/sections/home-faq-section";
 import { HomeHeroSearch } from "@/components/search/home-hero-search";
 import { getLocalizedPath } from "@/config/paths";
-import {
-  FEATURED_MEMBRANE_HREF,
-  SINGLE_SITE_ROUTE_HREFS,
-} from "@/config/single-site-links";
+import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
+import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 
 type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
@@ -25,10 +38,6 @@ type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
 interface HomePageProps {
   params: Promise<LocaleParam>;
 }
-
-const TRUST_ITEMS = ["scope", "leadTime", "sla", "noFit"] as const;
-const MATERIAL_ITEMS = ["epdm", "tpu"] as const;
-const BROWSE_ALL_MEMBRANES_HREF = FEATURED_MEMBRANE_HREF;
 
 export function generateStaticParams() {
   return generateLocaleStaticParams();
@@ -91,64 +100,24 @@ function OemGridSection({ t }: { t: HomeTranslator }) {
           {t("oemGrid.title")}
         </h2>
         <div className="mt-9 grid gap-4 md:grid-cols-3">
-          {oemBrands.map((brand) => (
+          {getOemBrandFacts().map((brand) => (
             <Link
               key={brand.id}
               href={`/compatible/${brand.slug}` as "/"}
               className="group rounded-[8px] border border-border bg-background p-6 shadow-border transition-shadow hover:shadow-[0_0_0_1px_var(--color-brand-accent)]"
             >
               <span className="text-lg font-semibold text-foreground">
-                {brand.name}
+                {brand.displayName}
+              </span>
+              <span className="mt-2 block text-sm text-muted-foreground">
+                {t("oemGrid.pathCount", {
+                  count: getBrandPathStats(brand.id).paths,
+                })}
               </span>
               <span className="mt-3 block text-sm font-medium text-[var(--color-brand-accent)] group-hover:underline">
-                {t("oemGrid.viewAll", { brand: brand.name })}
+                {t("oemGrid.viewAll", { brand: brand.displayName })}
               </span>
             </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TrustRibbon({ t }: { t: HomeTranslator }) {
-  return (
-    <section className="p-6">
-      <ul className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-x-8 gap-y-2">
-        {TRUST_ITEMS.map((key) => (
-          <li
-            key={key}
-            className="text-sm text-muted-foreground before:mr-2 before:text-[var(--color-brand-accent)] before:content-['—']"
-          >
-            {t(`trust.${key}`)}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function MaterialsSection({ t }: { t: HomeTranslator }) {
-  return (
-    <section className="bg-card px-6 py-16 md:py-20">
-      <div className="mx-auto max-w-[1080px]">
-        <Overline>{t("materials.overline")}</Overline>
-        <h2 className="mt-3 text-[28px] leading-tight font-light tracking-[-0.01em] text-foreground md:text-[32px]">
-          {t("materials.title")}
-        </h2>
-        <div className="mt-9 grid gap-4 md:grid-cols-2">
-          {MATERIAL_ITEMS.map((key) => (
-            <article
-              key={key}
-              className="rounded-[8px] border border-border bg-background p-6 shadow-border"
-            >
-              <h3 className="font-mono text-sm font-semibold tracking-[0.5px] text-foreground">
-                {t(`materials.${key}.name`)}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {t(`materials.${key}.description`)}
-              </p>
-            </article>
           ))}
         </div>
       </div>
@@ -166,15 +135,10 @@ function FinalCta({ t }: { t: HomeTranslator }) {
         <p className="mt-4 max-w-[52ch] text-primary-foreground/85">
           {t("cta.description")}
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-8">
           <Button variant="on-dark" size="lg" asChild>
             <Link href={SINGLE_SITE_ROUTE_HREFS.quote}>
               {t("cta.requestQuote")}
-            </Link>
-          </Button>
-          <Button variant="ghost-dark" size="lg" asChild>
-            <Link href={BROWSE_ALL_MEMBRANES_HREF as "/"}>
-              {t("cta.viewMembranes")}
             </Link>
           </Button>
         </div>
@@ -188,15 +152,30 @@ export default async function Home({ params }: HomePageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
   const searchIndex = buildClientSearchIndex();
+  const homeFaqSchema = generateFaqSchemaFromItems(
+    await getHomeFaqItems(locale as Locale),
+    locale,
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <JsonLdGraphScript locale={locale as Locale} />
+      <JsonLdGraphScript locale={locale as Locale} data={[homeFaqSchema]} />
       <HeroSection t={t} searchIndex={searchIndex} />
+      <HomeConfirmSection locale={locale as Locale} />
+      <HomeMembraneTypeSection locale={locale as Locale} />
       <OemGridSection t={t} />
-      <TrustRibbon t={t} />
-      <MaterialsSection t={t} />
+      <section className="p-6">
+        <div className="mx-auto max-w-[1080px]">
+          <SlaCommitments locale={locale as Locale} layout="ribbon" />
+        </div>
+      </section>
+      <HomeRisksSection locale={locale as Locale} />
+      <CompatibilityProofBox locale={locale as Locale} />
+      <MaterialDecisionCard locale={locale as Locale} />
+      <BatchControlsBlock locale={locale as Locale} />
+      <HomeFaqSection locale={locale as Locale} renderJsonLd={false} />
       <FinalCta t={t} />
+      <TrademarkDisclaimer locale={locale as Locale} variant="footer" />
     </div>
   );
 }

@@ -150,11 +150,28 @@ describe("real i18n runtime message contract", () => {
   // marker. This list curates legitimate-identical leaves only; the assertion
   // logic below is unchanged.
   const ES_IDENTICAL_ALLOWLIST = new Set<string>([
-    "home.materials.epdm.name",
-    "home.materials.tpu.name",
+    // The former `home.materials.{epdm,tpu}.name` EPDM/TPU tokens were removed
+    // when the home page dropped its local materials section in favor of the
+    // shared `MaterialDecisionCard` trust primitive (Step 4.1 Phase B); the
+    // twin `IDENTICAL_ACROSS_LOCALES` set in `src/test/i18n-validation.ts` was
+    // emptied for the same reason.
     "membraneProduct.hero.specBar.material",
     "membraneProduct.hero.specBar.sku",
+    // Shared sales address — a technical contact token, identical in every
+    // locale (Step 4.1 Phase C product-page quote CTA).
+    "membraneProduct.quote.email",
     "compatibleBrand.filter.material",
+    // Quote material-guidance eyebrow: the single technical word "Material"
+    // is identical in professional Spanish UI, exactly like
+    // `compatibleBrand.filter.material` above (Step 4.1 Phase E quote
+    // narrative wrap). The prose `materialGuidance.body`/`title` ARE
+    // translated and proven by `quote-i18n.test.ts`.
+    "quote.materialGuidance.eyebrow",
+    // Brand-page stats chips: a dynamic ICU count plus the bare material
+    // token (EPDM/TPU stay in English per content rules), so the Spanish
+    // string is legitimately identical to English (Step 4.1 Phase D).
+    "compatibleBrand.stats.epdm",
+    "compatibleBrand.stats.tpu",
     "quote.form.materialOptions.epdm",
     "quote.form.materialOptions.tpu",
     // Pure ICU passthrough tokens (rendered value is fully dynamic).
@@ -233,19 +250,25 @@ describe("real i18n runtime message contract", () => {
         "home.oemGrid.title",
         "Replacement Membranes for Major Brands",
       ],
-      [enCriticalMessages, "home.materials.epdm.name", "EPDM"],
+      // Phase B replaced the home-local materials section and coarse trust
+      // strip with composed narrative sections + shared trust primitives.
+      // These pins re-point to the home-owned copy that actually ships now,
+      // keeping the parity-aware intent (same buyer-visible launch surface,
+      // all three locales).
+      [enCriticalMessages, "home.confirm.title", "What we help you confirm"],
+      [enCriticalMessages, "home.risks.title", "The four risks buyers avoid"],
       [
         enCriticalMessages,
-        "home.materials.tpu.description",
-        "Oil, chemical, and high-grease wastewater conditions where EPDM degrades.",
+        "home.faq.sectionTitle",
+        "Replacement membrane questions",
+      ],
+      [
+        enCriticalMessages,
+        "home.oemGrid.pathCount",
+        "{count, plural, one {# documented compatibility path} other {# documented compatibility paths}}",
       ],
       [enCriticalMessages, "home.cta.title", "Have a part number ready?"],
       [enCriticalMessages, "home.cta.requestQuote", "Request a Quote"],
-      [
-        enCriticalMessages,
-        "home.trust.scope",
-        "Aftermarket replacement membranes only",
-      ],
       [
         enCriticalMessages,
         "underConstruction.pages.products.description",
@@ -263,15 +286,16 @@ describe("real i18n runtime message contract", () => {
         "输入零件号、OEM 型号或曝气器品牌以核对兼容性。",
       ],
       [zhCriticalMessages, "home.oemGrid.title", "面向主流品牌的替换膜片"],
-      [zhCriticalMessages, "home.materials.epdm.name", "EPDM"],
+      [zhCriticalMessages, "home.confirm.title", "我们帮您确认什么"],
+      [zhCriticalMessages, "home.risks.title", "买家要规避的四类风险"],
+      [zhCriticalMessages, "home.faq.sectionTitle", "替换膜片相关问题"],
       [
         zhCriticalMessages,
-        "home.materials.tpu.description",
-        "含油、化学品或高油脂废水工况，此类工况下 EPDM 会劣化。",
+        "home.oemGrid.pathCount",
+        "{count, plural, other {# 条已记录的兼容路径}}",
       ],
       [zhCriticalMessages, "home.cta.title", "已经有零件号了吗？"],
       [zhCriticalMessages, "home.cta.requestQuote", "请求报价"],
-      [zhCriticalMessages, "home.trust.scope", "仅提供售后替换膜片"],
       [
         zhCriticalMessages,
         "underConstruction.pages.products.description",
@@ -299,11 +323,25 @@ describe("real i18n runtime message contract", () => {
         "home.oemGrid.title",
         "Membranas de repuesto para las principales marcas",
       ],
-      [esCriticalMessages, "home.materials.epdm.name", "EPDM"],
       [
         esCriticalMessages,
-        "home.materials.tpu.description",
-        "Aguas residuales con aceite, productos químicos o alto contenido de grasa donde el EPDM se degrada.",
+        "home.confirm.title",
+        "Lo que le ayudamos a confirmar",
+      ],
+      [
+        esCriticalMessages,
+        "home.risks.title",
+        "Los cuatro riesgos que los compradores evitan",
+      ],
+      [
+        esCriticalMessages,
+        "home.faq.sectionTitle",
+        "Preguntas sobre membranas de repuesto",
+      ],
+      [
+        esCriticalMessages,
+        "home.oemGrid.pathCount",
+        "{count, plural, one {# ruta de compatibilidad documentada} other {# rutas de compatibilidad documentadas}}",
       ],
       [
         esCriticalMessages,
@@ -311,11 +349,6 @@ describe("real i18n runtime message contract", () => {
         "¿Tiene un número de pieza a mano?",
       ],
       [esCriticalMessages, "home.cta.requestQuote", "Solicitar una cotización"],
-      [
-        esCriticalMessages,
-        "home.trust.scope",
-        "Solo membranas de repuesto aftermarket",
-      ],
       // underConstruction es copy is still [ES-TODO]-flagged in the merged
       // messages; the parity-aware intent of this test is preserved.
       [

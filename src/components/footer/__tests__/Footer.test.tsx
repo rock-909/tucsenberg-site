@@ -185,6 +185,21 @@ describe("Footer Component", () => {
     );
   });
 
+  it("does not combine full-width layout with tokenized inline margins", () => {
+    render(<Footer />);
+
+    const footerNav = screen.getByRole("navigation", {
+      name: /footer navigation/i,
+    });
+    const container = footerNav.parentElement;
+
+    // A full-width box plus margin-inline gutters overflows small viewports.
+    expect(container).not.toHaveClass("w-full");
+    expect(container).toHaveStyle({
+      marginInline: "clamp(24px, 12vw, 184px)",
+    });
+  });
+
   it("renders with default FOOTER_COLUMNS config", () => {
     render(<Footer />);
 

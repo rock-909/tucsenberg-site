@@ -3,91 +3,42 @@
  * `.parse()` at module load. The global test setup mocks zod, so we must
  * unmock it here for the catalog to initialize.
  */
-import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import ProductPage, { generateMetadata, generateStaticParams } from "../page";
+import { CANONICAL_D9_EPDM, resolveMessage } from "./test-utils";
 
 vi.unmock("zod");
 
-type MockLinkHref = string | { pathname: string };
-type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
-  children: ReactNode;
-  href: MockLinkHref;
-};
-
-const notFoundError = new Error("NEXT_NOT_FOUND");
-const permanentRedirectError = new Error("NEXT_REDIRECT");
-
-const permanentRedirectMock = vi.fn((_url: string) => {
-  throw permanentRedirectError;
-});
-
-vi.mock("next/navigation", () => ({
-  notFound: vi.fn(() => {
-    throw notFoundError;
-  }),
-  permanentRedirect: (url: string) => permanentRedirectMock(url),
+// Local to the regression fence: this file (and only this file) asserts the
+// SKU->canonical 308 target, so it owns a `permanentRedirect` spy. The
+// shared harness `nextNavigationFactory` forwards the url to this spy then
+// throws "NEXT_REDIRECT" — byte-identical behavior to the previous inline
+// mock.
+const { permanentRedirectMock } = vi.hoisted(() => ({
+  permanentRedirectMock: vi.fn((_url: string) => {}),
 }));
 
-vi.mock("@/i18n/routing", () => ({
-  routing: { locales: ["en", "es", "zh"], defaultLocale: "en" },
-  Link: ({ children, href, ...props }: MockLinkProps) => (
-    <a href={typeof href === "string" ? href : href.pathname} {...props}>
-      {children}
-    </a>
+vi.mock("next/navigation", async () =>
+  (await import("./test-utils")).nextNavigationFactory((url) =>
+    permanentRedirectMock(url),
   ),
-}));
-
-// Resolve real messages per locale from the canonical split bundles so the
-// spec-bar category assertion proves i18n resolution, not a hardcoded English
-// literal. A pass-through `(key) => key` mock could not catch a `"Disc"`/
-// `"Tube"` literal regression.
-import enCritical from "../../../../../../messages/en/critical.json";
-import esCritical from "../../../../../../messages/es/critical.json";
-import zhCritical from "../../../../../../messages/zh/critical.json";
-
-const CRITICAL_BY_LOCALE: Record<string, Record<string, unknown>> = {
-  en: enCritical as Record<string, unknown>,
-  es: esCritical as Record<string, unknown>,
-  zh: zhCritical as Record<string, unknown>,
-};
-
-function resolveMessage(
-  locale: string,
-  namespace: string,
-  key: string,
-): string {
-  const path = `${namespace}.${key}`.split(".");
-  let node: unknown = CRITICAL_BY_LOCALE[locale] ?? CRITICAL_BY_LOCALE.en;
-  for (const segment of path) {
-    if (typeof node !== "object" || node === null) return path.join(".");
-    node = (node as Record<string, unknown>)[segment];
-  }
-  return typeof node === "string" ? node : path.join(".");
-}
-
-vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(
-    ({ locale, namespace }: { locale: string; namespace: string }) =>
-      (key: string) =>
-        resolveMessage(locale, namespace, key),
-  ),
-  setRequestLocale: vi.fn(),
-}));
-
-vi.mock("@/components/seo", () => ({
-  JsonLdGraphScript: () => <script type="application/ld+json" />,
-}));
-
-// CompatibilitySection is its own async Server Component with dedicated
-// coverage; stub it so this test stays focused on page orchestration
-// (slug resolution, 404, spec bar, quote pre-fill).
-vi.mock("@/app/[locale]/membranes/[product]/compatibility-section", () => ({
-  CompatibilitySection: () => <section data-testid="compatibility-section" />,
-}));
-
-const CANONICAL_D9_EPDM = "9-inch-epdm-disc-replacement";
+);
+vi.mock("@/i18n/routing", async () =>
+  (await import("./test-utils")).i18nRoutingFactory(),
+);
+vi.mock("next-intl/server", async () =>
+  (await import("./test-utils")).nextIntlServerFactory(),
+);
+vi.mock("@/components/seo", async () =>
+  (await import("./test-utils")).seoFactory(),
+);
+vi.mock("@/app/[locale]/membranes/[product]/compatibility-section", async () =>
+  (await import("./test-utils")).compatibilitySectionFactory(),
+);
+vi.mock("@/components/trust", async (importOriginal) =>
+  (await import("./test-utils")).trustMockFactory(importOriginal),
+);
 
 describe("Membrane product page", () => {
   it("generates a canonical descriptive param for every variant across locales", () => {

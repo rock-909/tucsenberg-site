@@ -7,6 +7,15 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { getLocalizedPath } from "@/config/paths";
 import { JsonLdGraphScript } from "@/components/seo";
+import {
+  BatchControlsBlock,
+  CompatibilityProofBox,
+  MaterialDecisionCard,
+  NarrativeSection,
+  SlaCommitments,
+  TrademarkDisclaimer,
+} from "@/components/trust";
+import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { QuoteFormSection } from "@/app/[locale]/quote/quote-form-section";
 
@@ -70,27 +79,28 @@ export default async function QuotePage({
 
       <section className="px-6 pt-16 pb-4">
         <div className="mx-auto max-w-[1080px]">
-          <h1 className="text-[32px] leading-[1.1] font-light tracking-[-0.01em] text-primary md:text-[48px]">
+          <span className="block text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("intake.eyebrow")}
+          </span>
+          <h1 className="mt-2 text-[32px] leading-[1.1] font-light tracking-[-0.01em] text-primary md:text-[48px]">
             {t("hero.title")}
           </h1>
-          <p className="mt-3 max-w-[60ch] text-muted-foreground">
-            {t("hero.description")}
+          <p className="mt-4 max-w-[640px] text-muted-foreground">
+            {t("intake.body")}
           </p>
         </div>
       </section>
 
-      <section className="px-6 pt-6 pb-2">
-        <div className="mx-auto max-w-[1080px]">
-          <div className="max-w-[68ch] rounded-[8px] border border-border bg-muted/40 p-5">
-            <p className="text-sm font-medium text-foreground">
-              {t("softEntry.title")}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("softEntry.body")}
-            </p>
-          </div>
+      <NarrativeSection title={t("intake.title")} divider>
+        <div className="max-w-[68ch] rounded-[8px] border border-border bg-muted/40 p-5">
+          <p className="text-sm font-medium text-foreground">
+            {t("softEntry.title")}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("softEntry.body")}
+          </p>
         </div>
-      </section>
+      </NarrativeSection>
 
       <section className="px-6 pt-6 pb-20">
         <div className="mx-auto max-w-[1080px]">
@@ -101,6 +111,78 @@ export default async function QuotePage({
           </Suspense>
         </div>
       </section>
+
+      <NarrativeSection
+        eyebrow={t("materialGuidance.eyebrow")}
+        title={t("materialGuidance.title")}
+        body={t("materialGuidance.body")}
+        divider
+      >
+        <MaterialDecisionCard
+          locale={locale as Locale}
+          defaultMaterial="epdm"
+        />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("whatHappensNext.eyebrow")}
+        title={t("whatHappensNext.title")}
+        divider
+      >
+        <SlaCommitments locale={locale as Locale} layout="stacked" />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("proof.eyebrow")}
+        title={t("proof.title")}
+        body={t("proof.body")}
+        divider
+      >
+        <CompatibilityProofBox locale={locale as Locale} />
+      </NarrativeSection>
+
+      <NarrativeSection
+        eyebrow={t("batch.eyebrow")}
+        title={t("batch.title")}
+        divider
+      >
+        <BatchControlsBlock locale={locale as Locale} />
+      </NarrativeSection>
+
+      <section className="section-divider px-6 py-14 md:py-[72px]">
+        <div className="mx-auto max-w-[1080px] space-y-3">
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t("assurances.nonBinding")}
+          </p>
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t("assurances.privacy")}
+          </p>
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            {t.rich("legal.consent", {
+              privacyLink: (chunks) => (
+                <Link
+                  href={getLocalizedPath("privacy", locale as Locale)}
+                  className="underline underline-offset-2"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        </div>
+      </section>
+
+      <section className="px-6 pb-10">
+        <div className="mx-auto max-w-[1080px]">
+          <TrademarkDisclaimer locale={locale as Locale} variant="inline" />
+        </div>
+      </section>
+
+      <footer className="border-t border-border px-6 py-10">
+        <div className="mx-auto max-w-[1080px]">
+          <TrademarkDisclaimer locale={locale as Locale} variant="footer" />
+        </div>
+      </footer>
     </div>
   );
 }

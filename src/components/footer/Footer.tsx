@@ -180,7 +180,7 @@ export function Footer({
     >
       <div
         className={cn(
-          "w-full",
+          "box-border",
           // 内边距跟随 token，且与布局 px-4/6/8 对齐
           "px-4 md:px-6 lg:px-8",
           "py-12 md:py-14 lg:py-16",

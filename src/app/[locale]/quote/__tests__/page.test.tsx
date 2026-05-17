@@ -7,22 +7,79 @@
  * form so the search-param pre-fill, live summary, and JSON POST submission
  * are exercised end to end.
  */
+/**
+ * Phase-E adds the shared `@/components/trust` barrel to the page. That
+ * barrel imports `@/data/product-compatibility`, which runs Zod
+ * `.parse()` at module load; the global test setup mocks zod, so it must
+ * be unmocked here for the catalog (and the real trust components, which
+ * we stub via the shared harness) to initialize. The frozen RFQ form's
+ * own i18n/turnstile/fetch mocks below are unchanged — they keep proving
+ * the byte-frozen pipeline exactly as before.
+ */
 import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import QuotePage, { generateMetadata, generateStaticParams } from "../page";
 import { QuoteFormSection } from "../quote-form-section";
 
-vi.mock("@/i18n/routing", () => ({
-  routing: { locales: ["en", "es", "zh"], defaultLocale: "en" },
-}));
+vi.unmock("zod");
+
+vi.mock("@/i18n/routing", async () =>
+  (await import("./test-utils")).i18nRoutingFactory(),
+);
+
+// Phase-E wrap: the page composes the six async trust Server Components.
+// They have dedicated Phase-A coverage + E10 build proof, so the page
+// test stubs them via the shared R13 harness (data-variant / data-layout
+// surfaced, title/eyebrow echoed). NarrativeSection is synchronous and
+// renders the mocked translator key-strings the existing assertions use.
+vi.mock("@/components/trust", async (importOriginal) =>
+  (await import("./test-utils")).trustMockFactory(importOriginal),
+);
 
 function makeTranslator(namespace?: string) {
   const scope = namespace ? namespace.replace(/^quote\.?/, "") : "";
-  return (key: string, values?: Record<string, string>) => {
+  const t = (key: string, values?: Record<string, string>) => {
     const composed = scope ? `${scope}.${key}` : key;
     return values?.email ? `${composed}:${values.email}` : composed;
   };
+  // Phase-E E8 consent line uses `t.rich`. The frozen assertions stay on
+  // key-strings; only the real `legal.consent` template is resolved so
+  // the privacy <Link> chunk can be rendered + asserted. The dual-link
+  // (`consentWithReviewTerms`) template is intentionally NOT rendered by
+  // the page (R5), so a plain key-string here is enough.
+  const richTemplates: Record<string, string> = {
+    "legal.consent":
+      "By submitting this request you agree to our <privacyLink>Privacy Policy</privacyLink>.",
+  };
+  const rich = (
+    key: string,
+    handlers: Record<string, (chunks: React.ReactNode) => React.ReactNode>,
+  ) => {
+    const composed = scope ? `${scope}.${key}` : key;
+    const template = richTemplates[composed];
+    if (!template) return composed;
+    const parts: React.ReactNode[] = [];
+    const re = /<(\w+)>(.*?)<\/\1>/g;
+    let last = 0;
+    let m: RegExpExecArray | null;
+    let i = 0;
+    while ((m = re.exec(template)) !== null) {
+      if (m.index > last) parts.push(template.slice(last, m.index));
+      const handler = handlers[m[1] as string];
+      parts.push(
+        handler ? (
+          <span key={`r${(i += 1)}`}>{handler(m[2] as string)}</span>
+        ) : (
+          (m[2] as string)
+        ),
+      );
+      last = re.lastIndex;
+    }
+    if (last < template.length) parts.push(template.slice(last));
+    return <>{parts}</>;
+  };
+  return Object.assign(t, { rich });
 }
 
 vi.mock("next-intl/server", () => ({
@@ -170,6 +227,38 @@ describe("RFQ quote page", () => {
 
     expect(screen.getByText("summary.empty")).toBeInTheDocument();
     expect(screen.getByText("summary.responseTimeValue")).toBeInTheDocument();
+    expect(screen.getByText("summary.leadTimeValue")).toBeInTheDocument();
+  });
+
+  it("echoes typed part numbers + name into the sticky summary", async () => {
+    // E5: the frozen SummaryPanel must reflect the buyer's live input.
+    // This pins its presentational contract without rewriting it.
+    await renderQuoteForm();
+
+    fireEvent.change(screen.getByLabelText(/form\.partNumbers/), {
+      target: { value: "TUC-D9-EPDM" },
+    });
+    fireEvent.change(screen.getByLabelText(/form\.name/), {
+      target: { value: "Dana Ops" },
+    });
+
+    const summary = screen.getByTestId("quote-summary");
+    expect(summary).toHaveTextContent("TUC-D9-EPDM");
+    expect(summary).toHaveTextContent("Dana Ops");
+  });
+
+  it("pins the real SLA summary copy to a non-numeric promise", async () => {
+    // E5: the lead-time / response-time summary values must carry NO week
+    // or day count — they confirm at quote review, not on a fixed clock.
+    // Asserted against the real shipped critical bundles (not the
+    // key-string mock) so a numeric regression in copy is caught.
+    const { default: en } =
+      await import("../../../../../messages/en/critical.json");
+    const summary = (en as { quote: { summary: Record<string, string> } }).quote
+      .summary;
+    expect(summary.leadTimeValue).toBe("Confirmed during quote review");
+    expect(summary.responseTimeValue).toBe("Within 2 business days");
+    expect(summary.leadTimeValue).not.toMatch(/\b\d+\s*(weeks?|days?)\b/i);
   });
 
   it("pre-fills part numbers from ?sku and quantity from ?quantity", async () => {

@@ -27,9 +27,10 @@ interface LocaleCase {
   readonly searchLabel: string;
   readonly oemGridTitle: string;
   readonly firstBrandLink: string;
+  readonly slaReview: string;
   readonly finalCtaTitle: string;
   readonly requestQuote: string;
-  readonly viewMembranes: string;
+  readonly footerDisclaimer: string;
 }
 
 // Expected strings come from messages/{locale}/critical.json -> "home".
@@ -40,9 +41,15 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Compatibility search",
     oemGridTitle: "Replacement Membranes for Major Brands",
     firstBrandLink: "View Sanitaire compatible parts",
+    // From messages/en/critical.json -> trust.sla.review (shared Phase-A copy
+    // rendered through the SlaCommitments ribbon).
+    slaReview: "Compatibility review — within 24 business hours.",
     finalCtaTitle: "Have a part number ready?",
     requestQuote: "Request a Quote",
-    viewMembranes: "Browse All Membranes",
+    // From messages/en/critical.json -> legal.trademark.footer (Phase-A copy
+    // rendered through the footer TrademarkDisclaimer).
+    footerDisclaimer:
+      "Tucsenberg manufactures aftermarket aeration replacement membranes.",
   },
   {
     locale: "es",
@@ -50,9 +57,13 @@ const LOCALE_CASES: readonly LocaleCase[] = [
     searchLabel: "Búsqueda de compatibilidad",
     oemGridTitle: "Membranas de repuesto para las principales marcas",
     firstBrandLink: "Ver piezas compatibles con Sanitaire",
+    // From messages/es/critical.json -> trust.sla.review.
+    slaReview: "Revisión de compatibilidad: en un plazo de 24 horas hábiles.",
     finalCtaTitle: "¿Tiene un número de pieza a mano?",
     requestQuote: "Solicitar una cotización",
-    viewMembranes: "Ver todas las membranas",
+    // From messages/es/critical.json -> legal.trademark.footer.
+    footerDisclaimer:
+      "Tucsenberg fabrica membranas de repuesto de aireación del mercado de posventa.",
   },
 ];
 
@@ -62,9 +73,6 @@ const LOCALE_CASES: readonly LocaleCase[] = [
 const KNOWN_PART_NUMBER = "00223";
 const KNOWN_MODEL_NAME = /Silver Series II 9 inch Disc/i;
 const FIRST_BRAND_SLUG = "sanitaire";
-// Canonical descriptive membrane slug (the SKU slug `tuc-d9-epdm`
-// 308-redirects to this). The final CTA links straight to the canonical URL.
-const MEMBRANES_HREF_FRAGMENT = "/membranes/9-inch-epdm-disc-replacement";
 
 async function gotoHomepage(page: Page, locale: string): Promise<void> {
   await page.goto(`/${locale}`, { waitUntil: "domcontentloaded" });
@@ -168,7 +176,16 @@ for (const localeCase of LOCALE_CASES) {
         .toBe(`/${localeCase.locale}/compatible/${FIRST_BRAND_SLUG}`);
     });
 
-    test("final CTA links to the quote page and a membranes product page", async ({
+    test("renders the shared SLA commitments ribbon", async ({ page }) => {
+      const ribbon = page.getByTestId("sla-commitments");
+      await expect(ribbon).toBeVisible();
+      await expect(ribbon).toHaveAttribute("data-layout", "ribbon");
+      await expect(
+        ribbon.getByText(localeCase.slaReview, { exact: false }),
+      ).toBeVisible();
+    });
+
+    test("ends with a single quote CTA and a footer trademark disclaimer", async ({
       page,
     }) => {
       // The global header's primary CTA legitimately also reads "Request a
@@ -194,14 +211,17 @@ for (const localeCase of LOCALE_CASES) {
         `/${localeCase.locale}/quote`,
       );
 
-      const membranesLink = finalCtaSection.getByRole("link", {
-        name: localeCase.viewMembranes,
-      });
-      await expect(membranesLink).toBeVisible();
-      await expect(membranesLink).toHaveAttribute(
-        "href",
-        `/${localeCase.locale}${MEMBRANES_HREF_FRAGMENT}`,
-      );
+      // BC-001 (Step 4.1 Phase B): the final CTA is single — the old
+      // "Browse All Membranes" secondary link is gone.
+      await expect(
+        finalCtaSection.getByRole("link", { name: "Browse All Membranes" }),
+      ).toHaveCount(0);
+
+      // The page ends with the footer trademark disclaimer.
+      const disclaimer = page.getByTestId("trademark-disclaimer");
+      await expect(disclaimer).toBeVisible();
+      await expect(disclaimer).toHaveAttribute("data-variant", "footer");
+      await expect(disclaimer).toContainText(localeCase.footerDisclaimer);
     });
   });
 }
