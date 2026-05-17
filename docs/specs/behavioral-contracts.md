@@ -673,3 +673,54 @@ Proof files:
 specs (`tests/e2e/navigation.spec.ts`), which assert only the brand-page
 `<h1>` visibility and the localized `/compatible/sanitaire` nav href —
 both preserved by the rebuild.
+
+### Step 4.1 — Phase E
+
+#### BC-026 update (Phase E quote wrap-only)
+
+The `/quote` page now wraps the **byte-frozen** RFQ form with the
+Phase-A narrative/trust modules. The form and backend behavior, and the
+BC-026 proof boundary, are **unchanged**:
+
+- `src/app/api/quote/route.ts`, `src/lib/lead-pipeline/lead-schema.ts`,
+  `quote-form.tsx`, and `use-quote-form.ts` are byte-unchanged by every
+  Phase-E commit (verified by `git log` over those paths showing no
+  Phase-E commit). The RFQ chain (safeParseJson → Zod → Turnstile →
+  Airtable-first `processLead`) and the part-number log-redaction
+  property (`productName === "RFQ quote request"`) are still proven only
+  at the route layer by `src/app/api/quote/__tests__/quote-api.test.ts`,
+  unchanged and green.
+- The page composition (intake NarrativeSection → soft-entry → frozen
+  form + sticky summary → MaterialDecisionCard → stacked SlaCommitments
+  → CompatibilityProofBox → BatchControlsBlock → non-binding/privacy
+  assurances → privacy-only consent → inline then footer
+  TrademarkDisclaimer) is proven by
+  `src/app/[locale]/quote/__tests__/page.test.tsx` and the i18n/content
+  guards in `src/app/[locale]/quote/__tests__/quote-i18n.test.ts`.
+- **BC-026 stays Partial**: no end-to-end Playwright RFQ smoke and no
+  production-like deployed-Airtable proof were added (still a manual
+  launch gate). Phase E did not upgrade the BC-026 status.
+- The privacy-only consent links the existing privacy page only. The
+  Compatibility Review Terms (CRR) link is **deferred to Step 5**: the
+  dual-link i18n keys (`quote.legal.consentWithReviewTerms`,
+  `reviewTermsLink*`) exist parity-safe but are not rendered, and no CRR
+  terms page (or stub) is created in Phase E.
+
+#### BC-031: Quote page renders the locked Phase-E wrap structure
+
+The OEM-referencing `/quote` page renders, in order, the structured
+intake framing, the frozen RFQ form with its sticky summary (response
+time "Within 2 business days", lead time "Confirmed during quote
+review" — no week/day number), the material-guidance card, the stacked
+3-item SLA commitments, the compatibility-proof and batch-controls
+blocks, the non-binding + privacy assurances, the privacy-only consent
+line, and the page-bottom **inline** then **footer**
+`TrademarkDisclaimer` (CLAUDE.md #3 OEM-page compliance). A single sales
+inbox (`sales@tucsenberg.com`) is used; no `quote@`/`quality@`/`legal@`
+routing address appears in any `quote.*` value, and no quantity-band /
+MOQ / numeric lead-time promise is present.
+
+Proof files:
+`src/app/[locale]/quote/__tests__/page.test.tsx`,
+`src/app/[locale]/quote/__tests__/quote-i18n.test.ts`, and the shared
+harness `src/app/[locale]/quote/__tests__/test-utils.tsx`.

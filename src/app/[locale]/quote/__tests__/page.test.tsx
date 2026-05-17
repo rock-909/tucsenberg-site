@@ -336,6 +336,28 @@ describe("RFQ quote page", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders the inline then footer trademark disclaimers at page bottom", async () => {
+    // Phase-E E9 (R2): the OEM-referencing quote page ends with the
+    // page-level inline trademark disclaimer followed by the footer one.
+    // Both are the shared Phase-A primitive, distinguished by variant.
+    render(
+      await QuotePage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    const disclaimers = screen.getAllByTestId("trademark-disclaimer");
+    const variants = disclaimers.map((el) => el.getAttribute("data-variant"));
+    expect(variants).toEqual(["inline", "footer"]);
+
+    // Footer disclaimer is the last of the two (document order).
+    const [inline, footer] = disclaimers;
+    expect(
+      inline.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("renders an empty summary with response/lead-time defaults", async () => {
     await renderQuoteForm();
 

@@ -13,6 +13,7 @@ import {
   MaterialDecisionCard,
   NarrativeSection,
   SlaCommitments,
+  TrademarkDisclaimer,
 } from "@/components/trust";
 import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
@@ -170,6 +171,18 @@ export default async function QuotePage({
           </p>
         </div>
       </section>
+
+      <section className="px-6 pb-10">
+        <div className="mx-auto max-w-[1080px]">
+          <TrademarkDisclaimer locale={locale as Locale} variant="inline" />
+        </div>
+      </section>
+
+      <footer className="border-t border-border px-6 py-10">
+        <div className="mx-auto max-w-[1080px]">
+          <TrademarkDisclaimer locale={locale as Locale} variant="footer" />
+        </div>
+      </footer>
     </div>
   );
 }
