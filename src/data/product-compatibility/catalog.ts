@@ -161,9 +161,9 @@ const oemBrandData = [
     slug: "sanitaire",
     name: "Sanitaire",
     trademarkDisclaimer: {
-      en: "Sanitaire is a registered trademark of Xylem. Tucsenberg is not affiliated with or endorsed by Xylem.",
-      es: "Sanitaire es una marca registrada de Xylem. Tucsenberg no está afiliada a Xylem ni cuenta con su respaldo.",
-      zh: "Sanitaire 是 Xylem 的注册商标。Tucsenberg 与 Xylem 无任何关联，也未获得 Xylem 的认可。",
+      en: "Sanitaire is a trademark of its respective owner. Tucsenberg is an independent aftermarket manufacturer and is not affiliated with, authorized, or endorsed by Sanitaire. References describe documented compatibility only.",
+      es: "Sanitaire es una marca comercial de su respectivo propietario. Tucsenberg es un fabricante independiente del mercado de posventa y no está afiliada a Sanitaire ni cuenta con su autorización o respaldo. Las referencias describen únicamente la compatibilidad documentada.",
+      zh: "Sanitaire 为其各自所有者的商标。Tucsenberg 是独立的售后制造商，与 Sanitaire 无任何隶属、授权或背书关系。相关引用仅用于说明已记录的兼容性。",
     },
     modelIds: [
       "sanitaire-silver-series-ii-9-inch-disc",
@@ -176,9 +176,9 @@ const oemBrandData = [
     slug: "edi",
     name: "EDI",
     trademarkDisclaimer: {
-      en: "EDI is a registered trademark of Environmental Dynamics International. Tucsenberg is not affiliated with or endorsed by Environmental Dynamics International.",
-      es: "EDI es una marca registrada de Environmental Dynamics International. Tucsenberg no está afiliada a Environmental Dynamics International ni cuenta con su respaldo.",
-      zh: "EDI 是 Environmental Dynamics International 的注册商标。Tucsenberg 与 Environmental Dynamics International 无任何关联，也未获得其认可。",
+      en: "EDI is a trademark of its respective owner. Tucsenberg is an independent aftermarket manufacturer and is not affiliated with, authorized, or endorsed by EDI. References describe documented compatibility only.",
+      es: "EDI es una marca comercial de su respectivo propietario. Tucsenberg es un fabricante independiente del mercado de posventa y no está afiliada a EDI ni cuenta con su autorización o respaldo. Las referencias describen únicamente la compatibilidad documentada.",
+      zh: "EDI 为其各自所有者的商标。Tucsenberg 是独立的售后制造商，与 EDI 无任何隶属、授权或背书关系。相关引用仅用于说明已记录的兼容性。",
     },
     modelIds: [
       "edi-flexair-threaded-disc-7-inch",
@@ -193,9 +193,9 @@ const oemBrandData = [
     slug: "ssi-aeration",
     name: "SSI Aeration",
     trademarkDisclaimer: {
-      en: "SSI Aeration is a registered trademark of SSI Aeration. Tucsenberg is not affiliated with or endorsed by SSI Aeration.",
-      es: "SSI Aeration es una marca registrada de SSI Aeration. Tucsenberg no está afiliada a SSI Aeration ni cuenta con su respaldo.",
-      zh: "SSI Aeration 是 SSI Aeration 的注册商标。Tucsenberg 与 SSI Aeration 无任何关联，也未获得 SSI Aeration 的认可。",
+      en: "SSI Aeration is a trademark of its respective owner. Tucsenberg is an independent aftermarket manufacturer and is not affiliated with, authorized, or endorsed by SSI Aeration. References describe documented compatibility only.",
+      es: "SSI Aeration es una marca comercial de su respectivo propietario. Tucsenberg es un fabricante independiente del mercado de posventa y no está afiliada a SSI Aeration ni cuenta con su autorización o respaldo. Las referencias describen únicamente la compatibilidad documentada.",
+      zh: "SSI Aeration 为其各自所有者的商标。Tucsenberg 是独立的售后制造商，与 SSI Aeration 无任何隶属、授权或背书关系。相关引用仅用于说明已记录的兼容性。",
     },
     modelIds: [
       "ssi-afd270-9-inch-disc",

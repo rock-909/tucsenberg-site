@@ -216,7 +216,9 @@ describe("product compatibility data", () => {
         expect.objectContaining({
           brandName: "Sanitaire",
           trademarkDisclaimer: expect.objectContaining({
-            en: expect.stringContaining("Tucsenberg is not affiliated"),
+            en: expect.stringContaining(
+              "not affiliated with, authorized, or endorsed by",
+            ),
           }),
         }),
       ]),
@@ -257,5 +259,55 @@ describe("product compatibility data", () => {
         expect.objectContaining({ sku: "TUC-T62-EPDM" }),
       ]),
     );
+  });
+
+  /**
+   * Codex PR #12 Finding 4 / §6.2 owner-signed baseline lock.
+   *
+   * The repo-level trademark BC (behavioral-contracts.md BC-033) forbids
+   * parent-company / formal-legal-name re-introduction in any OEM brand
+   * disclaimer across en/es/zh. The earlier Sanitaire-only spot-check
+   * (above) proves the en wording on a single brand; this data-wide guard
+   * forbids the historically-struck names on every brand × locale pair
+   * AND requires every disclaimer to carry the §6.2 ownership /
+   * no-affiliation / no-endorsement semantics in each locale's wording.
+   */
+  it("forbids parent-company / formal-name re-introduction in any OEM brand disclaimer (BC-033 / §6.2)", () => {
+    const FORBIDDEN_PATTERN =
+      /Xylem|Environmental Dynamics International|registered trademark/i;
+    for (const brand of oemBrands) {
+      for (const locale of locales) {
+        const disclaimer = brand.trademarkDisclaimer[locale];
+        expect(
+          disclaimer,
+          `${brand.slug}/${locale} must not name parent/formal entity`,
+        ).not.toMatch(FORBIDDEN_PATTERN);
+      }
+    }
+  });
+
+  it("requires every per-brand disclaimer to carry §6.2 independent-aftermarket + no-affiliation semantics in each locale", () => {
+    const REQUIRED_PER_LOCALE = {
+      en: [
+        /independent aftermarket/i,
+        /not affiliated with, authorized, or endorsed by/i,
+      ],
+      es: [
+        /fabricante independiente/i,
+        /no está afiliada.*ni cuenta con su autorización/i,
+      ],
+      zh: [/独立的售后/, /无任何隶属、授权或背书/],
+    } as const;
+    for (const brand of oemBrands) {
+      for (const locale of locales) {
+        const disclaimer = brand.trademarkDisclaimer[locale];
+        for (const pattern of REQUIRED_PER_LOCALE[locale]) {
+          expect(
+            disclaimer,
+            `${brand.slug}/${locale} must match ${String(pattern)}`,
+          ).toMatch(pattern);
+        }
+      }
+    }
   });
 });
