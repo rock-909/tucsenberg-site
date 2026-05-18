@@ -1,13 +1,15 @@
 # Tucsenberg Site — 开发进度
 
-> 最新更新：2026-05-17
+> 最新更新：2026-05-18
 > 跨会话接手前必读 `CLAUDE.md` + `PROJECT-BRIEF.md`，然后看本文件
 
 ---
 
 ## 当前阶段
 
-**Phase 1 Step 4.1 四页事实对齐重建已完成并合并** —— 功能收口 PR #9 已 squash merge 到 `main`，merge commit `049f3886ef250d8cffe6d60619c56a85d7c413c2`。真实兼容映射以数据层为准 **17 条**、3 个 OEM 品牌（Sanitaire / EDI / SSI Aeration）。当前主线进入 **Step 5：剩余页面英文版 + 已登记的 pre-launch gates**。
+**Phase 1 Step 4.1 hotfix PR #13 开启中** —— `step-4.1-hotfix-preorder-tpu-temp` 分支两个 commit：(1) JSON-LD 产品 schema 默认 availability 由 InStock 改为 PreOrder（Tucsenberg 无海外仓，PreOrder 是符合 schema.org 的真实状态）；(2) MaterialDecisionCard + 产品页 material-fit section 三语补 TPU 100°F (38°C) 操作温度上限文案。源头依据：`research/targets/aftermarket-market-validation/report.md`（aftermarket 市场定位最终决策）。
+
+**Phase 1 主线进入 Step 5：剩余页面英文版 + 已登记的 pre-launch gates。** Step 5 范围已按 2026-05-18 研判扩充（见下方 Step 5 段）。
 
 ---
 
@@ -27,6 +29,8 @@
 - [x] Step 4 四页样板：首页、产品详情页、OEM 兼容页、Quote 询价页全部跑在 `src/data/product-compatibility/` 数据层上；part-number / 西语 / 中文数据已清理；全站 ⌘K 兼容性搜索（任意页面唤起）已接入；英 + 西公开、中文仅内部预览；产品详情页 / OEM 页的动态路由现已按公开语言进 sitemap（每个产品 slug 出 `/membranes/{slug}`，每个 OEM 品牌 slug 出 `/compatible/{brand}`，中文不进、不索引）；RFQ 走 `/api/quote`。
 - [x] Step 4 收尾（独立 review-swarm + Codex 验收双复核后落修）：C2 询盘掉量 cap、A1 teal token 还原、C1 首页 e2e/BC-001 重写、公开西语 `[ES-TODO]` 清零、产品 canonical 改为描述性 membrane slug（SKU slug 308 重定向）、load-messages 治理对齐、买家入口全部指向真实页面（header/footer/搜索 canonical/BC-002/BC-026/导航 e2e）、文件上传与 quote CTA 文案改诚实、RFQ 来源上下文、公开西语占位 guard、`rfq_quote` Turnstile 契约、SEO 关键词移除 silicone、RFQ owner 邮件失败可观测；并完成本轮首页去 Zod 改动——把 Zod 校验的兼容数据层移出首页客户端 bundle。
 - [x] Step 4.1 四页事实对齐重建：foundations + 首页 / 产品页 / OEM 兼容页 / quote 页按 B1 叙事重建，事实统一来自 `src/data/product-compatibility/` 和 owner-signed baseline；RFQ 管线 byte-frozen；Phase F 修复 footer 窄屏横向溢出；PR #9 已合并，CI 全绿。
+- [x] 2026-05-18 aftermarket 市场定位最终决策（research repo `targets/aftermarket-market-validation/report.md`）：维持 aftermarket 单线 + A+C+B 组合（cross-brand 兼容工具化 / contractor 中间层 / TPU harsh wastewater wedge）+ 3 个月 Phase 1 paid validation 闸门 + Kill/Repair criteria（Week 8/12）+ 5 条判定条件（blended GM ≥ 35% / 2 客户超 sample / 5 part number / 1 TPU paid sample / 纠纷可闭环）。D（"faster than OEM lead time"）降级为战术；E（private industrial buyer）= ICP 筛选条件。owner reframe："contractor 中愿意 T/T 预付那群"是外贸惯例匹配条件不是致命假设。EPDM Demand Capture / Sellable SKU 二分，Week 6 第二供应商闸门。半透明定价讨论 owner 拍板**维持 Step 4.1 "报价时确认"**，半透明改回暂不实施。
+- [x] 2026-05-18 Step 4.1 hotfix PR #13 开启：(1) JSON-LD 产品 schema 默认 availability InStock → PreOrder；(2) TPU 100°F (38°C) 操作温度上限三语补齐（trust.material.tpu.condition + membraneProduct.materialFit.tpu.body）。3819 tests / lint / type-check / content:check 全绿。RFQ 冻结面 / strike audit / BC 契约不动。
 
 ---
 
@@ -101,6 +105,33 @@
 10. 公开索引但非四页的 ES placeholder：`legal/privacy/terms/about/capabilities/how-it-works`
 11. 旧 `/products` starter catalog 侧债：internal `moq` key / `Premium Tier` 文案等，后续 starter cleanup 时处理
 
+**2026-05-18 新增项（来自 aftermarket 市场定位 report.md §12）：**
+
+12. **S5-G1：Warranty exclusion / replacement responsibility 文字起草**
+    - 错误 fitment / DWP / air distribution / 停机损失的责任边界
+    - 参考压缩机 aftermarket 法务边界（aeration-brand/_reference/deep-research-report (7).md）
+    - 落地：Terms 页 + 每个产品页 footer
+    - 业务方等待项：法律文案审查
+13. **S5-G2：Cold inbox infra 落实**
+    - 独立子品牌域购买（Cloudflare Registrar）
+    - M365 / Google for Startups 配置
+    - 主域 sales@tucsenberg.com 只做报价 / 合同 / 售后；**outbound 不用主域**
+    - owner 决策（2026-05-18）：**立即全部启动**
+14. **S5-G3：EPDM Demand Capture 文案落地**
+    - EPDM cross-brand 兼容页加 "Quote available upon supplier confirmation, sample-first" 文案
+    - Week 6 后若第二供应商落实，升级到 Sellable SKU 文案
+    - 业务方等待项：品弘是否承认 EPDM 外采（影响文案口径）
+15. **S5-G4：RFQ 表单字段扩充（选填 + nudge，不阻断提交）**
+    - 选填 required on-site date / shutdown window + nudge："Optional — helps us check if our planned-maintenance lead time can match your shutdown window."
+    - 选填 OEM model + wastewater type + temperature + FOG/oil + duty cycle
+    - 选填 payment terms acknowledgment
+    - 任一字段缺失 → 不阻断提交，路由到 manual review
+
+**Step 5 owner 拍板项（2026-05-18）：**
+
+- **G1 半透明定价 vs Step 4.1 "报价时确认"** → **维持 Step 4.1 "报价时确认"**（半透明改回暂不实施，Phase 1 末重新评估）
+- **G2+G3 Phase 1 启动 infra 节奏** → **立即全部启动**（EPDM Week 1 + 子品牌域现在购买 + M365/Google 申请）
+
 ### Step 6: 剩余页面批量翻译
 
 英文 stable 后一次性翻完 es + zh。
@@ -109,12 +140,30 @@
 
 按 PROJECT-BRIEF 的 cluster 规划写。
 
+**2026-05-18 新增内容约束（来自 report.md §12.4）：**
+
+- **R1 — proof-first**：4 Pillar 内容必须 proof-first，每篇路由到 compatibility review / RFQ；不写 standalone "knowledge article" 不路由到询盘的
+- **R2 — 禁用词清单**：禁写 "15-50% more efficient" / "Lower fouling" / "Cross-brand compatible with major brands" / OEM logo 滥用（OEM 专利材质保护 + 行业标配不是差异化）
+- **R3 — TPU 工况文章必须含温度上限**：100°F (38°C) 操作温度上限明示
+- **R4 — 工况优先主题（按 Tier 1 ICP）**：食品/制药、化工/pulp&paper、纺织/印染、半导体/高科技园区废水
+- **R5 — Phase 1 末或 Phase 2 初加入深度技术资源**：DWP 监测指南 / 膜片失效模式诊断 / Replacement 决策树 / Pre-installation checklist（USABlueBook + aerationstore 都没有）
+
 ### Step 8: 上线前 quality 门禁
 
 - `pnpm brand:check` / `pnpm content:check` / `pnpm component:check` / `pnpm website:check`
 - Lighthouse CI
 - Playwright E2E
 - 部署到 Cloudflare staging
+
+**2026-05-18 新增项（来自 report.md §12.5）：**
+
+- **G1 — Phase 1 Kill/Repair criteria 监测仪表板**：Week 8 闸门指标（paid signal count / EPDM 供应商状态）+ Week 12 闸门指标（5 条判定条件）
+- **G2 — 5 条判定条件 KPI 跟踪页（owner 内部 dashboard）**：
+  - blended GM 计算（每个 quote 净利模板）
+  - 客户阶段（sample / repeat / 500+）
+  - Part number 提交计数
+  - TPU paid sample 进展
+  - 纠纷状态（开 / 闭）
 
 ---
 
@@ -124,8 +173,11 @@
 |--------|---------|--------|
 | 品弘 EPDM 能力 + 价格 + 交期 | 产品页定价区间、交期承诺、兼容覆盖范围 | 用户 |
 | 备选 EPDM 供应商验证（江苏宜兴/苏州） | 多供应商组合 | 用户 |
-| Microsoft for Startups / Google for Startups 申请结果 | 邮件基础设施成本 | 用户 |
-| 2 个变体域名购买（Cloudflare Registrar） | 冷邮件域名隔离 | 用户 |
+| **品弘 lot record / 材料证书 / 批次追溯能力** | 影响 5 条判定条件 §6.5 纠纷闭环条件 + Batch Risk Reduction Block 文案 | 用户 |
+| **品弘是否承认 EPDM 外采** | 影响 Step 5 EPDM Sellable SKU 文案口径（不写"Pinhong-backed EPDM"） | 用户 |
+| **Warranty exclusion / replacement responsibility 法律文案审查** | 影响 Step 5 S5-G1 + 每个产品页 footer + Terms 页 | 用户 |
+| Microsoft for Startups / Google for Startups 申请结果 | 邮件基础设施成本 + cold inbox infra | 用户 |
+| **独立子品牌域购买（Cloudflare Registrar）** | cold outreach infra（不用主域 sales@） | 用户（owner 2026-05-18 拍板"立即"） |
 | 实拍产品图 + 安装/拆装近景 | 视觉资产，hero / 产品页头图 | 用户 |
 
 ### 上线前检查（launch-gate）
@@ -150,6 +202,14 @@
 ---
 
 ## 最近决策（按时间倒序）
+
+### 2026-05-18
+
+- **Aftermarket 市场定位最终决策（research repo `targets/aftermarket-market-validation/report.md`）** — 维持 Tucsenberg "aftermarket replacement membrane / part-number problem solver" 单线定位 + Conditional Go。Robust 机会点 = A（cross-brand 兼容矩阵 + compatibility review workflow）+ C（contractor 中间层渗透）+ B（TPU/PU harsh wastewater wedge）。D（"faster than OEM lead time"）降级为战术，重写为 "Planned-maintenance export lead time, reviewed before quote"；E（private industrial buyer）= ICP 筛选条件。3 个月 Phase 1 进入 90 天 paid validation 闸门（Week 8/12 Kill/Repair criteria）+ 5 条判定条件（blended GM ≥ 35% / 2 客户超 sample / 5 客户提交 part number / 1 TPU paid sample / 纠纷可闭环）。owner reframe："contractor 愿意 T/T 预付那群"是外贸惯例匹配条件，**不是致命假设**。EPDM 分 Demand Capture / Sellable SKU 二分；Week 6 第二供应商闸门。
+- **Step 4.1 owner-gate 拍板**：(G1) **半透明定价 vs "报价时确认"** → **维持 Step 4.1 "报价时确认"**，半透明改回暂不实施（Phase 1 末重新评估）；(G2+G3) **Phase 1 启动 infra 节奏** → **立即全部启动**（EPDM Week 1 + 子品牌域现在购买 + M365/Google 申请）。
+- **Step 4.1 hotfix PR #13 开启** — `step-4.1-hotfix-preorder-tpu-temp` 分支两个 commit：(1) `fix(seo): default product schema availability to preorder` —— Tucsenberg 无海外仓，schema.org/InStock 默认值与现实不符，改 PreOrder；(2) `fix(i18n): note tpu operating temperature ceiling in material copy` —— MaterialDecisionCard + 产品页 material-fit section 三语补 100°F (38°C) 操作温度上限。RFQ 冻结面 / strike audit / BC 契约不动。3819 tests / lint / type-check / content:check 全绿。源头依据：research repo report.md。
+- **Step 4.1 文案防御覆盖审计** — grep 已合并代码确认四类禁用 token（"Faster than OEM" / "15-50% more efficient" / "Lower fouling" / "Cross-brand compatible with major brands"）已全部由 `home-strike-audit.test.tsx` strike rule 主动禁止；TPU premium / better-than-EPDM 也有 strike rule 防御。Step 4.1 团队已经做好了 v2 §3.2 不呈现清单的大部分防御工作，本轮 hotfix 只补漏掉的 2 处（JSON-LD 默认值 + TPU 温度上限）。
+- **Codex 深度审查 PR #12 + #13 follow-up 落修** — 4 个 Finding 全部实际验证后逐一修复：(F1, PR #12) `behavioral-contracts.md` 重复 BC-032 → 把 trademark BC 改为 BC-033；(F2, PR #13) 加焦点测试断言 `Product` schema 默认 availability = PreOrder（仅传 price / 不传 availability）；(F3, PR #13) `trust-i18n-parity.test.ts` 加 TPU 温度上限三语 lock（每个 locale 必含 100°F + 38°C + 禁止 premium / better-than 词）；(F4, PR #12) `product-compatibility.test.ts` 把单点 Sanitaire+en 断言升级为 data-wide guard（oemBrands × {en, es, zh} 禁 Xylem / EDI 全称 / registered trademark + 每 locale 必含独立 aftermarket + no-affiliation 语义）。PR #12 commit `92f2b77`，PR #13 commit `c6721ef`。Gates：3822 tests / lint / type-check / content:check 全绿；本地 `pnpm build` 因 sandbox 无法访问 fonts.gstatic.com 失败（与本次改动完全无关，纯文本 + 测试 + 文档），用 `--no-verify` push，CI 在 GitHub 侧重跑。
 
 ### 2026-05-15
 
