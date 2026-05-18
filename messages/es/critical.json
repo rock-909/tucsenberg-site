@@ -1228,7 +1228,7 @@
       },
       "tpu": {
         "title": "El TPU se elige cuando las condiciones del tanque lo requieren",
-        "body": "Esta membrana de TPU también se revisa frente a las condiciones del agua residual y el ajuste documentado. Use la decisión siguiente para confirmar cuándo el TPU es la opción correcta para la carga de trabajo, no una categoría de precio."
+        "body": "Esta membrana de TPU también se revisa frente a las condiciones del agua residual y el ajuste documentado. La temperatura de operación debe mantenerse por debajo de 100°F (38°C); por encima de eso, el EPDM es el material correcto, no el TPU. Use la decisión siguiente para confirmar cuándo el TPU es la opción correcta para la carga de trabajo, no una categoría de precio."
       }
     },
     "confirmFit": {
@@ -1413,7 +1413,7 @@
       },
       "tpu": {
         "label": "TPU: seleccionado según las condiciones",
-        "condition": "Aguas residuales con aceites, productos químicos y alto contenido de grasa donde el EPDM se degrada."
+        "condition": "Aguas residuales con aceites, productos químicos y alto contenido de grasa donde el EPDM se degrada. La temperatura de operación debe mantenerse por debajo de 100°F (38°C)."
       },
       "note": "El material se elige según las condiciones del proceso, no como una categoría de precio."
     },

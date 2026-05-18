@@ -111,7 +111,7 @@ describe("Membrane product page — material fit + confirm fit", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "This TPU membrane is still reviewed against wastewater conditions and documented fit. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier.",
+        "This TPU membrane is still reviewed against wastewater conditions and documented fit. Operating temperature must remain under 100°F (38°C); above that, EPDM is the correct material rather than TPU. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier.",
       ),
     ).toBeInTheDocument();
 
