@@ -422,6 +422,33 @@ describe("Structured Data Generation", () => {
         offers: undefined, // This should cover the undefined case on line 170
       });
     });
+
+    /**
+     * Phase 1 site policy (CLAUDE.md + aftermarket validation report §3.2)
+     * bans implicit "In Stock" claims because Tucsenberg has no overseas
+     * warehouse and ships planned-maintenance orders 4-6 weeks DDP / 1-2 weeks
+     * air freight after RFQ + compatibility review. The Product schema
+     * generator must default to https://schema.org/PreOrder when a caller
+     * provides price but omits availability; this lock prevents a future
+     * regression that silently restores the historical InStock default.
+     */
+    it("defaults offers.availability to PreOrder when price is set but availability is omitted", async () => {
+      const productData = {
+        name: "Tucsenberg 9 inch EPDM Disc",
+        description: "Aftermarket replacement membrane",
+        price: "10.00",
+        currency: "USD",
+        brand: "Tucsenberg",
+        sku: "TUC-D9-EPDM",
+        // availability deliberately omitted — must fall back to PreOrder
+      };
+
+      const schema = (await generateProductSchema(productData, "en")) as {
+        offers?: { availability?: string };
+      };
+
+      expect(schema.offers?.availability).toBe("https://schema.org/PreOrder");
+    });
   });
 
   describe("generateLocalBusinessSchema", () => {

@@ -119,3 +119,50 @@ describe("Behavior: shared trust/legal i18n parity", () => {
     }
   }
 });
+
+/**
+ * Phase 1 aftermarket validation v2 §3.1 + CLAUDE.md hard-rule:
+ *
+ *   "TPU 不写成 'premium' 或 'better than EPDM'，只写工况适配"
+ *
+ * USABlueBook public material guidance (cross-validated against EDI Aftermarket
+ * Parts Shop and the aftermarket-market-validation Pro meta-synthesis) names
+ * the explicit 100°F (38°C) operating temperature ceiling above which EPDM
+ * (not TPU) is the correct material. Without this ceiling on the public
+ * copy surface, a high-temperature wastewater buyer (textile dyeing, chemical
+ * hot streams, food hot-side) could place a TPU order that fails in service —
+ * exactly the after-sales dispute Phase 1 cannot afford.
+ *
+ * MaterialDecisionCard renders trust.material.tpu.condition on multiple pages
+ * (home, product, compatible/[brand], quote). The product page also renders
+ * membraneProduct.materialFit.tpu.body as the dedicated material-fit narrative.
+ * Both surfaces share the same ceiling contract and the same premium/better-
+ * than ban. The component-level MaterialDecisionCard test mocks copy and
+ * cannot enforce shipped messages, so this guard pins the real
+ * messages/{en,es,zh}/critical.json shipped to buyers.
+ */
+const TPU_SHARED_COPY_PATHS: readonly (readonly string[])[] = [
+  ["trust", "material", "tpu", "condition"],
+  ["membraneProduct", "materialFit", "tpu", "body"],
+];
+
+describe("Behavior: TPU operating temperature ceiling on shared public copy", () => {
+  for (const path of TPU_SHARED_COPY_PATHS) {
+    for (const [locale, tree] of Object.entries(LOCALES)) {
+      it(`${locale}: ${path.join(".")} names the 100°F operating ceiling`, () => {
+        const copy = readLeaf(tree, path) as string;
+        expect(copy).toMatch(/100°F/);
+      });
+
+      it(`${locale}: ${path.join(".")} names the 38°C operating ceiling`, () => {
+        const copy = readLeaf(tree, path) as string;
+        expect(copy).toMatch(/38°C/);
+      });
+
+      it(`${locale}: ${path.join(".")} bans premium/better-than framing`, () => {
+        const copy = readLeaf(tree, path) as string;
+        expect(copy).not.toMatch(/premium|better than/i);
+      });
+    }
+  }
+});
