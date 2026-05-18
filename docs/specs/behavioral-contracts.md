@@ -780,7 +780,7 @@ companies in en/es/zh (most notably "Xylem" for Sanitaire). The owner-signed
 fact-signoff §6.2 ("variant A 最短合规") explicitly forbids naming parent
 holders, and Phase D had already enforced this on `/compatible/[brand]`.
 
-#### BC-032: Per-brand trademark disclaimers align to the §6.2 owner-signed baseline
+#### BC-033: Per-brand trademark disclaimers align to the §6.2 owner-signed baseline
 
 The three OEM brand entries in `catalog.ts` (`sanitaire`, `edi`,
 `ssi-aeration`) now ship the same single-brand variant of the
