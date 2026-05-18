@@ -267,7 +267,7 @@ export function generateProductData(
           "@type": "Offer",
           price: data.price,
           priceCurrency: data.currency || "USD",
-          availability: data.availability || "https://schema.org/InStock",
+          availability: data.availability || "https://schema.org/PreOrder",
         }
       : undefined,
     sku: data.sku,

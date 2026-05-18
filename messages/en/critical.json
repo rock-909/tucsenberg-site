@@ -1228,7 +1228,7 @@
       },
       "tpu": {
         "title": "TPU is selected when basin conditions require it",
-        "body": "This TPU membrane is still reviewed against wastewater conditions and documented fit. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier."
+        "body": "This TPU membrane is still reviewed against wastewater conditions and documented fit. Operating temperature must remain under 100°F (38°C); above that, EPDM is the correct material rather than TPU. Use the decision below to confirm when TPU is the correct workload match rather than treating it as a price tier."
       }
     },
     "confirmFit": {
@@ -1413,7 +1413,7 @@
       },
       "tpu": {
         "label": "TPU — selected by conditions",
-        "condition": "Oil, chemical, and high-grease wastewater where EPDM degrades."
+        "condition": "Oil, chemical, and high-grease wastewater where EPDM degrades. Operating temperature must remain under 100°F (38°C)."
       },
       "note": "Material is chosen by process conditions, not as a price tier."
     },
