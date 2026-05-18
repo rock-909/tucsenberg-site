@@ -768,3 +768,33 @@ committed flaky visual test; it is retained as local review evidence.
   created in Step 4.1.
 - The indexed non-four-page Spanish placeholders tracked by R8 remain a Step 5
   / pre-launch ES pass gate, not a four-page rebuild blocker.
+
+### Step 4.1 follow-up — trademark §6.2 alignment
+
+The merged Step 4.1 branch left a pre-existing contradiction live on a
+public, indexed page: `/membranes/[product]` rendered the Phase-C-added
+§6.2-compliant page-level disclaimer (no parent-company name) **and** a
+per-brand `brand.trademarkDisclaimer` sourced from
+`src/data/product-compatibility/catalog.ts` that explicitly named parent
+companies in en/es/zh (most notably "Xylem" for Sanitaire). The owner-signed
+fact-signoff §6.2 ("variant A 最短合规") explicitly forbids naming parent
+holders, and Phase D had already enforced this on `/compatible/[brand]`.
+
+#### BC-032: Per-brand trademark disclaimers align to the §6.2 owner-signed baseline
+
+The three OEM brand entries in `catalog.ts` (`sanitaire`, `edi`,
+`ssi-aeration`) now ship the same single-brand variant of the
+`legal.trademark.brandNotice` template in en/es/zh: each disclaimer names
+only the brand itself ("X is a trademark of its respective owner"),
+declares Tucsenberg as an independent aftermarket manufacturer, and asserts
+no affiliation/authorization/endorsement. No parent or holding company is
+named anywhere in the rebuilt-page render path; "Xylem" / "Environmental
+Dynamics International" / similar parent-or-formal-name strings have been
+removed from `catalog.ts:trademarkDisclaimer`.
+
+**Proof:** `src/data/product-compatibility/__tests__/product-compatibility.test.ts`
+asserts each per-brand disclaimer contains the §6.2 anchor phrase
+"not affiliated with, authorized, or endorsed by"; a repo-wide grep
+(`grep -rnE "Xylem" src/ messages/` minus pre-existing historical doc /
+test-comment references) is clean; the four rebuilt page suites + the
+Playwright `seo-validation.spec.ts` homepage JSON-LD count remain green.

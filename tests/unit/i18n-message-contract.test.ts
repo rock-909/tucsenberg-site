@@ -142,6 +142,20 @@ describe("real i18n runtime message contract", () => {
     );
   });
 
+  // ZH is internal/dev-only (excluded from public SEO per CLAUDE.md) but the
+  // four-page rebuild still ships ZH copy through trust/membraneProduct/
+  // compatibleBrand/quote namespaces. Lock the same structural parity guard
+  // so a future ZH drift in any namespace fails the contract immediately
+  // rather than surfacing as a silent runtime fallback.
+  it("keeps Chinese split message keys structurally aligned with English", () => {
+    expect(collectLeafPaths(zhCriticalMessages).sort()).toEqual(
+      collectLeafPaths(enCriticalMessages).sort(),
+    );
+    expect(collectLeafPaths(zhDeferredMessages).sort()).toEqual(
+      collectLeafPaths(enDeferredMessages).sort(),
+    );
+  });
+
   // Spanish leaves that are legitimately identical to English (technical
   // material tokens kept in English per content rules, pure ICU passthrough
   // tokens, brand/platform proper nouns, language endonyms, and accepted

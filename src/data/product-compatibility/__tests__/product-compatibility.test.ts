@@ -216,7 +216,9 @@ describe("product compatibility data", () => {
         expect.objectContaining({
           brandName: "Sanitaire",
           trademarkDisclaimer: expect.objectContaining({
-            en: expect.stringContaining("Tucsenberg is not affiliated"),
+            en: expect.stringContaining(
+              "not affiliated with, authorized, or endorsed by",
+            ),
           }),
         }),
       ]),
