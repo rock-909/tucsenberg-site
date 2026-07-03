@@ -46,7 +46,7 @@ describe("Footer Component", () => {
     });
   });
 
-  it("keeps footer navigation aligned with the default company-site public IA", () => {
+  it("keeps footer navigation aligned with the Tucsenberg catalog IA", () => {
     render(<Footer />);
 
     const footerNav = screen.getByRole("navigation", {
@@ -78,8 +78,11 @@ describe("Footer Component", () => {
     expect(navigationLinks).toEqual([
       { href: "/", text: "Home" },
       { href: "/products", text: "Products" },
-      { href: "/blog", text: "Blog" },
-      { href: "/resources", text: "Resources" },
+      { href: "/oem-wholesale", text: "OEM & Wholesale" },
+      {
+        href: "/guides/flood-barrier-materials-guide",
+        text: "Materials Guide",
+      },
       { href: "/about", text: "About" },
     ]);
     expect(navigationLinks).not.toContainEqual({
@@ -87,8 +90,8 @@ describe("Footer Component", () => {
       text: "Contact",
     });
     expect(supportLinks).toContainEqual({
-      href: "/contact",
-      text: "Contact",
+      href: "/request-quote",
+      text: "Request a Quote",
     });
   });
 

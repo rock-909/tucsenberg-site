@@ -72,7 +72,8 @@ const navigationMessages = {
   home: "Home",
   about: "About",
   contact: "Contact",
-  contactSales: "Contact",
+  contactSales: "Request a Quote",
+  oemWholesale: "OEM & Wholesale",
   siteName: "Example Showcase Company",
   siteDescription:
     "Reusable showcase website starter for product or service presentation.",

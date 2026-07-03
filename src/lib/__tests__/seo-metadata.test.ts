@@ -40,8 +40,8 @@ describe("SEO Metadata", () => {
 
     mockGenerateCanonicalURL.mockReturnValue("https://example.com/canonical");
     mockGenerateLanguageAlternates.mockReturnValue({
-      en: "https://example.com/en",
-      zh: "https://example.com/zh",
+      en: "https://example.com/",
+      "x-default": "https://example.com/",
     });
 
     // Mock environment variables
@@ -99,7 +99,7 @@ describe("SEO Metadata", () => {
         section: "Technology",
       };
 
-      const metadata = generateLocalizedMetadata("zh", "products", config);
+      const metadata = generateLocalizedMetadata("en", "products", config);
 
       expect(metadata.title).toBe("Custom Title");
       expect(metadata.description).toBe("Custom Description");
@@ -125,9 +125,9 @@ describe("SEO Metadata", () => {
           "Exports to {countries}+ countries with {employees}+ staff",
       });
 
-      expect(metadata.title).toBe("Established in 2018");
+      expect(metadata.title).toBe("Established in 2021");
       expect(metadata.description).toBe(
-        "Exports to 20+ countries with 60+ staff",
+        "Exports to 0+ countries with 0+ staff",
       );
     });
 
@@ -146,7 +146,7 @@ describe("SEO Metadata", () => {
       const metadataZh = generateLocalizedMetadata("zh", "about");
       const metadataEn = generateLocalizedMetadata("en", "about");
 
-      expect(metadataZh.openGraph?.locale).toBe("zh");
+      expect(metadataZh.openGraph?.locale).toBe("en");
       expect(metadataZh.title).toBe("Default Title");
       expect(metadataZh.openGraph?.siteName).toBe("Test Site");
 
@@ -200,16 +200,16 @@ describe("SEO Metadata", () => {
   });
 
   describe("generateMetadataForPath", () => {
-    it("should keep default company-site pages indexable", () => {
+    it("should keep default Tucsenberg catalog pages indexable", () => {
       const productsMetadata = generateMetadataForPath({
         locale: "en",
         pageType: "products",
         path: "/products",
       });
-      const blogMetadata = generateMetadataForPath({
+      const requestQuoteMetadata = generateMetadataForPath({
         locale: "en",
-        pageType: "blog",
-        path: "/blog",
+        pageType: "requestQuote",
+        path: "/request-quote",
       });
 
       expect(productsMetadata.robots).toMatchObject({
@@ -220,22 +220,22 @@ describe("SEO Metadata", () => {
           follow: true,
         },
       });
-      expect(blogMetadata.robots).toMatchObject({
+      expect(requestQuoteMetadata.robots).toMatchObject({
         index: true,
         follow: true,
       });
     });
 
-    it("should noindex product market pages outside the default public SEO profile", () => {
+    it("should index product market pages in the default public SEO profile", () => {
       const metadata = generateMetadataForPath({
         locale: "en",
         pageType: "products",
-        path: "/products/north-america",
+        path: "/products/abs-flood-barriers",
       });
 
       expect(metadata.robots).toMatchObject({
-        index: false,
-        follow: false,
+        index: true,
+        follow: true,
       });
     });
 
@@ -287,17 +287,14 @@ describe("SEO Metadata", () => {
         },
       });
 
-      expect(metadata.alternates?.canonical).toBe(
-        "https://example.com/en/about",
-      );
+      expect(metadata.alternates?.canonical).toBe("https://example.com/about");
       expect(metadata.alternates?.languages).toEqual({
-        en: "https://example.com/en/about",
-        zh: "https://example.com/zh/about",
-        "x-default": "https://example.com/en/about",
+        en: "https://example.com/about",
+        "x-default": "https://example.com/about",
       });
 
       const openGraph = metadata.openGraph as unknown as { url?: string };
-      expect(openGraph.url).toBe("https://example.com/en/about");
+      expect(openGraph.url).toBe("https://example.com/about");
     });
   });
 
@@ -399,18 +396,20 @@ describe("SEO Metadata", () => {
 
       expect(config).toEqual({
         type: "website",
-        keywords: ["Products", "Solutions", "Enterprise", "B2B"],
+        keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
       });
     });
 
-    it("should return public demo starter page configs", () => {
+    it("should fall retired public demo pages back to home config", () => {
       expect(createPageSEOConfig("capabilities")).toEqual({
         type: "website",
-        keywords: ["Capabilities", "Website Starter", "Lead Foundation", "B2B"],
+        keywords: ["test", "site", "B2B Solution"],
+        image: "/images/og-image.jpg",
       });
       expect(createPageSEOConfig("howItWorks")).toEqual({
         type: "website",
-        keywords: ["How It Works", "Setup", "Launch", "Website Starter"],
+        keywords: ["test", "site", "B2B Solution"],
+        image: "/images/og-image.jpg",
       });
     });
 
@@ -507,7 +506,7 @@ describe("SEO Metadata", () => {
 
       expect(config).toEqual({
         type: "website",
-        keywords: ["Products", "Solutions", "Enterprise", "B2B"],
+        keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
       });
     });
 

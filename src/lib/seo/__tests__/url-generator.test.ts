@@ -22,38 +22,28 @@ describe("URLGenerator", () => {
   describe("generatePageURL", () => {
     it("should generate correct URL for home page in English", () => {
       const url = generator.generatePageURL("home", "en");
-      expect(url).toBe("/en");
-    });
-
-    it("should generate correct URL for home page in Chinese", () => {
-      const url = generator.generatePageURL("home", "zh");
-      expect(url).toBe("/zh");
+      expect(url).toBe("/");
     });
 
     it("should generate correct URL for about page in English", () => {
       const url = generator.generatePageURL("about", "en");
-      expect(url).toBe("/en/about");
-    });
-
-    it("should generate correct URL for about page in Chinese", () => {
-      const url = generator.generatePageURL("about", "zh");
-      expect(url).toBe("/zh/about");
+      expect(url).toBe("/about");
     });
 
     it("should generate absolute URL when requested", () => {
       const url = generator.generatePageURL("about", "en", { absolute: true });
-      expect(url).toBe("https://example.com/en/about");
+      expect(url).toBe("https://example.com/about");
     });
 
     it("should add trailing slash when requested", () => {
       const url = generator.generatePageURL("about", "en", {
         trailingSlash: true,
       });
-      expect(url).toBe("/en/about/");
+      expect(url).toBe("/about/");
     });
 
     it("should exclude locale when requested", () => {
-      const url = generator.generatePageURL("about", "zh", {
+      const url = generator.generatePageURL("about", "en", {
         includeLocale: false,
       });
       expect(url).toBe("/about");
@@ -63,17 +53,12 @@ describe("URLGenerator", () => {
   describe("generateCanonicalURL", () => {
     it("should generate correct canonical URL for English pages", () => {
       const url = generator.generateCanonicalURL("about", "en");
-      expect(url).toBe("https://example.com/en/about");
-    });
-
-    it("should generate correct canonical URL for Chinese pages", () => {
-      const url = generator.generateCanonicalURL("about", "zh");
-      expect(url).toBe("https://example.com/zh/about");
+      expect(url).toBe("https://example.com/about");
     });
 
     it("should generate correct canonical URL for home page", () => {
       const url = generator.generateCanonicalURL("home", "en");
-      expect(url).toBe("https://example.com/en");
+      expect(url).toBe("https://example.com/");
     });
   });
 
@@ -82,16 +67,15 @@ describe("URLGenerator", () => {
       const alternates = generator.generateLanguageAlternates("about");
 
       expect(alternates).toEqual({
-        en: "https://example.com/en/about",
-        zh: "https://example.com/zh/about",
-        "x-default": "https://example.com/en/about",
+        en: "https://example.com/about",
+        "x-default": "https://example.com/about",
       });
     });
 
     it("should have x-default pointing to default locale", () => {
       const alternates = generator.generateLanguageAlternates("home");
 
-      expect(alternates["x-default"]).toBe("https://example.com/en");
+      expect(alternates["x-default"]).toBe("https://example.com/");
       expect(alternates["x-default"]).toBe(alternates["en"]);
     });
   });
@@ -100,17 +84,13 @@ describe("URLGenerator", () => {
     it("should generate hreflang links including x-default", () => {
       const links = generator.generateHreflangLinks("about");
 
-      expect(links).toHaveLength(3); // en, zh, x-default
+      expect(links).toHaveLength(2); // en, x-default
       expect(links).toContainEqual({
-        href: "https://example.com/en/about",
+        href: "https://example.com/about",
         hreflang: "en",
       });
       expect(links).toContainEqual({
-        href: "https://example.com/zh/about",
-        hreflang: "zh",
-      });
-      expect(links).toContainEqual({
-        href: "https://example.com/en/about",
+        href: "https://example.com/about",
         hreflang: "x-default",
       });
     });
@@ -121,12 +101,12 @@ describe("URLGenerator", () => {
       const entry = generator.generateSitemapEntry("about", "en");
 
       expect(entry).toMatchObject({
-        loc: "https://example.com/en/about",
+        loc: "https://example.com/about",
         changefreq: "weekly",
         priority: SEO_CONSTANTS.URL_GENERATION.DEFAULT_PAGE_PRIORITY,
         alternateRefs: expect.arrayContaining([
           expect.objectContaining({
-            href: "https://example.com/en/about",
+            href: "https://example.com/about",
             hreflang: "en",
           }),
         ]),
@@ -153,20 +133,18 @@ describe("URLGenerator", () => {
     it("should generate entries for all pages and languages", () => {
       const entries = generator.generateAllSitemapEntries();
 
-      // 11 live static page types x 2 languages = 22 entries.
-      expect(entries).toHaveLength(22);
+      // 11 live static page types x 1 language = 11 entries.
+      expect(entries).toHaveLength(11);
       expect(
         entries.some((entry) => entry.loc.includes("/bending-machines")),
       ).toBe(false);
-      expect(entries.some((entry) => entry.loc.includes("/blog"))).toBe(true);
+      expect(entries.some((entry) => entry.loc.includes("/blog"))).toBe(false);
 
       // 检查是否包含主页条目
       const homeEntries = entries.filter(
-        (entry) =>
-          entry.loc === "https://example.com/en" ||
-          entry.loc === "https://example.com/zh",
+        (entry) => entry.loc === "https://example.com/",
       );
-      expect(homeEntries).toHaveLength(2);
+      expect(homeEntries).toHaveLength(1);
 
       // 检查主页优先级
       homeEntries.forEach((entry) => {
@@ -178,7 +156,7 @@ describe("URLGenerator", () => {
 
   describe("parseURLToPageInfo", () => {
     it("should parse English URLs correctly", () => {
-      const info = generator.parseURLToPageInfo("https://example.com/en/about");
+      const info = generator.parseURLToPageInfo("https://example.com/about");
 
       expect(info).toEqual({
         pageType: "about",
@@ -187,18 +165,8 @@ describe("URLGenerator", () => {
       });
     });
 
-    it("should parse Chinese URLs correctly", () => {
-      const info = generator.parseURLToPageInfo("https://example.com/zh/about");
-
-      expect(info).toEqual({
-        pageType: "about",
-        locale: "zh",
-        isValid: true,
-      });
-    });
-
     it("should parse home page URLs correctly", () => {
-      const info = generator.parseURLToPageInfo("https://example.com/en");
+      const info = generator.parseURLToPageInfo("https://example.com/");
 
       expect(info).toEqual({
         pageType: "home",
@@ -219,7 +187,7 @@ describe("URLGenerator", () => {
 
     it("should handle URLs with query parameters", () => {
       const info = generator.parseURLToPageInfo(
-        "https://example.com/en/about?param=value#anchor",
+        "https://example.com/about?param=value#anchor",
       );
 
       expect(info).toEqual({
@@ -232,16 +200,13 @@ describe("URLGenerator", () => {
 
   describe("isValidURL", () => {
     it("should validate correct URLs", () => {
-      expect(generator.isValidURL("https://example.com/en")).toBe(true);
-      expect(generator.isValidURL("https://example.com/en/about")).toBe(true);
-      expect(generator.isValidURL("https://example.com/zh/about")).toBe(true);
+      expect(generator.isValidURL("https://example.com/")).toBe(true);
+      expect(generator.isValidURL("https://example.com/about")).toBe(true);
     });
 
     it("should reject invalid URLs", () => {
       expect(generator.isValidURL("https://example.com/invalid")).toBe(false);
-      expect(generator.isValidURL("https://example.com/zh/invalid")).toBe(
-        false,
-      );
+      expect(generator.isValidURL("https://example.com/en/about")).toBe(false);
     });
   });
 
@@ -252,7 +217,7 @@ describe("URLGenerator", () => {
 
     it("should return supported locales", () => {
       const locales = generator.getSupportedLocales();
-      expect(locales).toEqual(["en", "zh"]);
+      expect(locales).toEqual(["en"]);
     });
 
     it("should return default locale", () => {
@@ -263,11 +228,11 @@ describe("URLGenerator", () => {
 
 describe("Exported functions", () => {
   it("should work as standalone functions", () => {
-    expect(generatePageURL("about", "en")).toBe("/en/about");
+    expect(generatePageURL("about", "en")).toBe("/about");
     expect(generateCanonicalURL("about", "en")).toBe(
-      "https://example.com/en/about",
+      "https://example.com/about",
     );
-    expect(isValidURL("https://example.com/en/about")).toBe(true);
+    expect(isValidURL("https://example.com/about")).toBe(true);
   });
 });
 
@@ -291,41 +256,39 @@ describe("URLGeneratorOptions edge cases", () => {
       protocol: "http",
       host: "localhost:3000",
     });
-    // With localePrefix: 'always', all URLs include locale prefix
-    expect(url).toBe("http://localhost:3000/en/about");
+    expect(url).toBe("http://localhost:3000/about");
   });
 
   it("should handle empty path with trailing slash", () => {
     const url = generator.generatePageURL("home", "en", {
       trailingSlash: true,
     });
-    // With localePrefix: 'always', English home page is /en/
-    expect(url).toBe("/en/");
+    expect(url).toBe("/");
   });
 
-  it("should handle Chinese home page with trailing slash", () => {
-    const url = generator.generatePageURL("home", "zh", {
+  it("should handle English home page with trailing slash", () => {
+    const url = generator.generatePageURL("home", "en", {
       trailingSlash: true,
     });
-    expect(url).toBe("/zh/");
+    expect(url).toBe("/");
   });
 
   it("should handle absolute URL without custom host", () => {
-    const url = generator.generatePageURL("about", "zh", {
+    const url = generator.generatePageURL("about", "en", {
       absolute: true,
     });
-    expect(url).toBe("https://example.com/zh/about");
+    expect(url).toBe("https://example.com/about");
   });
 
   it("should handle all options combined", () => {
-    const url = generator.generatePageURL("about", "zh", {
+    const url = generator.generatePageURL("about", "en", {
       absolute: true,
       includeLocale: true,
       trailingSlash: true,
       protocol: "https",
       host: "example.com",
     });
-    expect(url).toBe("https://example.com/zh/about/");
+    expect(url).toBe("https://example.com/about/");
   });
 });
 
@@ -371,10 +334,10 @@ describe("Error handling and edge cases", () => {
   });
 
   it("should handle URL with only locale", () => {
-    const info = generator.parseURLToPageInfo("/zh");
-    expect(info.pageType).toBe("home");
-    expect(info.locale).toBe("zh");
-    expect(info.isValid).toBe(true);
+    const info = generator.parseURLToPageInfo("/en");
+    expect(info.pageType).toBe(null);
+    expect(info.locale).toBe("en");
+    expect(info.isValid).toBe(false);
   });
 });
 
@@ -407,16 +370,11 @@ describe("Comprehensive sitemap generation", () => {
   it("should have correct priorities for different page types", () => {
     const entries = generator.generateAllSitemapEntries();
 
-    // With localePrefix: 'always', home URLs are /en and /zh (no trailing slash)
     const homeEntries = entries.filter(
-      (entry) =>
-        entry.loc === "https://example.com/en" ||
-        entry.loc === "https://example.com/zh",
+      (entry) => entry.loc === "https://example.com/",
     );
     const otherEntries = entries.filter(
-      (entry) =>
-        entry.loc !== "https://example.com/en" &&
-        entry.loc !== "https://example.com/zh",
+      (entry) => entry.loc !== "https://example.com/",
     );
 
     homeEntries.forEach((entry) => {

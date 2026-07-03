@@ -1,5 +1,4 @@
 import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
-import type { PageType } from "@/config/paths/types";
 import {
   getActiveStaticPageDefinitions,
   getPublicStaticPageDefinition,
@@ -10,15 +9,17 @@ import type { StarterProfileId } from "@/config/starter-profiles";
 
 export type { SiteNavigationItem } from "@/config/site-types";
 
+type SingleSiteRoutePageType = keyof typeof SINGLE_SITE_ROUTE_HREFS;
+
 const MAIN_NAVIGATION_PAGE_TYPES = [
   "home",
   "products",
-  "blog",
-  "resources",
+  "oemWholesale",
+  "materialsGuide",
   "about",
-] as const satisfies readonly PageType[];
+] as const satisfies readonly SingleSiteRoutePageType[];
 
-function requireNavigationKey(pageType: PageType): string {
+function requireNavigationKey(pageType: SingleSiteRoutePageType): string {
   const definition = getPublicStaticPageDefinition(pageType);
 
   if (definition === undefined) {
@@ -34,7 +35,7 @@ function requireNavigationKey(pageType: PageType): string {
   return navigationKey;
 }
 
-function requireRouteHref(pageType: PageType): string {
+function requireRouteHref(pageType: SingleSiteRoutePageType): string {
   const href = SINGLE_SITE_ROUTE_HREFS[pageType];
 
   if (href === undefined) {

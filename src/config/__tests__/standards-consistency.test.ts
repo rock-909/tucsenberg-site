@@ -90,21 +90,21 @@ describe("starter example standard wording", () => {
     expect(offendingFiles).toEqual([]);
   });
 
-  it("keeps generic starter standards aligned across copy and spec data", () => {
+  it("keeps materialized Tucsenberg catalog copy free of generic starter standards", () => {
     const enCriticalMessages = readProjectFile("messages/en/critical.json");
-    const zhCriticalMessages = readProjectFile("messages/zh/critical.json");
-    const auNzSpecs = readProjectFile(
-      "profile-fixtures/catalog/product-specs/australia-new-zealand.ts",
+    const tucsenbergSpecs = readProjectFile(
+      "src/constants/product-specs/tucsenberg-product-lines.ts",
     );
-    const europeSpecs = readProjectFile(
-      "profile-fixtures/catalog/product-specs/europe.ts",
+    const tucsenbergPages = readProjectFile(
+      "src/constants/tucsenberg-product-pages.ts",
     );
+    const materializedCopy = [
+      enCriticalMessages,
+      tucsenbergSpecs,
+      tucsenbergPages,
+    ].join("\n");
 
-    expect(enCriticalMessages).toContain("Example Standard B");
-    expect(enCriticalMessages).toContain("Example Standard D");
-    expect(zhCriticalMessages).toContain("示例标准 B");
-    expect(zhCriticalMessages).toContain("示例标准 D");
-    expect(auNzSpecs).toContain("Example Standard B");
-    expect(europeSpecs).toContain("Example Standard D");
+    expect(materializedCopy).not.toContain("Example Standard");
+    expect(materializedCopy).not.toContain("示例标准");
   });
 });

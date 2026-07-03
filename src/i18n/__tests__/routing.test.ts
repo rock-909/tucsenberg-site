@@ -7,9 +7,9 @@ const mockCreateNavigation = vi.fn();
 const mockDefineRouting = vi.fn();
 
 const CURRENT_ROUTING_CONTRACT = {
-  locales: ["en", "zh"],
+  locales: ["en"],
   defaultLocale: "en",
-  localePrefix: "always",
+  localePrefix: "never",
 } as const;
 
 vi.mock("next-intl/navigation", () => ({
@@ -61,13 +61,19 @@ describe("i18n Routing Configuration", () => {
           pathnames: expect.objectContaining({
             "/": "/",
             "/about": "/about",
-            "/blog": "/blog",
-            "/resources": "/resources",
             "/contact": "/contact",
             "/products": "/products",
+            "/products/[market]": "/products/[market]",
+            "/oem-wholesale": "/oem-wholesale",
+            "/guides/flood-barrier-materials-guide":
+              "/guides/flood-barrier-materials-guide",
+            "/guides/flood-barrier-specifications":
+              "/guides/flood-barrier-specifications",
+            "/request-quote": "/request-quote",
+            "/warranty": "/warranty",
           }),
           alternateLinks: true,
-          localeDetection: true,
+          localeDetection: false,
         }),
       );
       expect(mockDefineRouting).toHaveBeenCalledWith(
@@ -83,12 +89,14 @@ describe("i18n Routing Configuration", () => {
       const expectedPaths = [
         "/",
         "/about",
-        "/blog",
-        "/blog/[slug]",
-        "/resources",
         "/contact",
         "/products",
         "/products/[market]",
+        "/oem-wholesale",
+        "/guides/flood-barrier-materials-guide",
+        "/guides/flood-barrier-specifications",
+        "/request-quote",
+        "/warranty",
         "/privacy",
         "/terms",
       ];
@@ -110,9 +118,9 @@ describe("i18n Routing Configuration", () => {
       expect(config?.alternateLinks).toBe(true);
     });
 
-    it("应该启用localeDetection", async () => {
+    it("应该禁用localeDetection", async () => {
       const config = await getRoutingDefinition();
-      expect(config?.localeDetection).toBe(true);
+      expect(config?.localeDetection).toBe(false);
     });
   });
 
@@ -175,10 +183,10 @@ describe("i18n Routing Configuration", () => {
       const mainPages = [
         "/",
         "/about",
-        "/blog",
-        "/resources",
         "/contact",
         "/products",
+        "/oem-wholesale",
+        "/request-quote",
       ];
       mainPages.forEach((page) => {
         expect(pathnames).toHaveProperty(page);
@@ -231,9 +239,9 @@ describe("i18n Routing Configuration", () => {
       expect(config.alternateLinks).toBe(true);
     });
 
-    it("应该启用智能语言检测", async () => {
+    it("应该禁用智能语言检测", async () => {
       const config = await getRoutingDefinition();
-      expect(config.localeDetection).toBe(true);
+      expect(config.localeDetection).toBe(false);
     });
   });
 

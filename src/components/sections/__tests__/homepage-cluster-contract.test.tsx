@@ -6,7 +6,6 @@ import { FinalCTA } from "@/components/sections/final-cta";
 import { HeroSection } from "@/components/sections/hero-section";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 import { ProductsSection } from "@/components/sections/products-section";
-import { ResourcesSection } from "@/components/sections/resources-section";
 import { SampleCTA } from "@/components/sections/sample-cta";
 import { ScenariosSection } from "@/components/sections/scenarios-section";
 import { StarterBoundarySection } from "@/components/sections/starter-boundary-section";
@@ -34,13 +33,6 @@ const HOMEPAGE_SERVER_SECTION_SOURCES = [
     filePath: "src/components/sections/starter-boundary-section-view.tsx",
     source: readFileSync(
       "src/components/sections/starter-boundary-section-view.tsx",
-      "utf8",
-    ),
-  },
-  {
-    filePath: "src/components/sections/resources-section.tsx",
-    source: readFileSync(
-      "src/components/sections/resources-section.tsx",
       "utf8",
     ),
   },
@@ -105,7 +97,7 @@ describe("Homepage section cluster contract", () => {
     );
     expect(screen.getByText("hero.cta.secondary").closest("a")).toHaveAttribute(
       "href",
-      "/contact",
+      "/oem-wholesale",
     );
 
     await renderAsyncComponent(SampleCTA());
@@ -121,11 +113,11 @@ describe("Homepage section cluster contract", () => {
     expect(within(finalTrustList).getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByText("primary").closest("a")).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.primaryCta,
+      HOMEPAGE_SECTION_LINKS.products,
     );
     expect(screen.getByText("secondary").closest("a")).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.secondaryCta,
+      HOMEPAGE_SECTION_LINKS.requestQuote,
     );
   });
 
@@ -139,13 +131,8 @@ describe("Homepage section cluster contract", () => {
     expect(
       within(starterBoundary.container).getByRole("heading", {
         level: 2,
-        name: "title",
+        name: "startPath.title",
       }),
-    ).toBeInTheDocument();
-
-    await renderAsyncComponent(ResourcesSection());
-    expect(
-      screen.getByRole("heading", { level: 2, name: "resources.title" }),
     ).toBeInTheDocument();
 
     const scenarios = await renderAsyncComponent(ScenariosSection());
@@ -155,5 +142,11 @@ describe("Homepage section cluster contract", () => {
         name: "title",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("does not mount the retired resources section wrapper on the active homepage", () => {
+    const homepageSource = readFileSync("src/app/[locale]/page.tsx", "utf8");
+
+    expect(homepageSource).not.toContain("ResourcesSection");
   });
 });

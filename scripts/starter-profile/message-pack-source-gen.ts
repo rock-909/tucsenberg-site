@@ -4,7 +4,7 @@ import {
   type MessagePackId,
 } from "../../src/lib/i18n/message-pack-config";
 
-const LOCALES = ["en", "zh"] as const;
+const LOCALES = ["en"] as const;
 const MESSAGE_TYPES = ["critical", "deferred"] as const;
 
 function packIdToImportStem(packId: MessagePackId): string {

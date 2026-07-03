@@ -2,11 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PATHS_CONFIG, type PageType } from "@/config/paths";
-import {
-  getContentEntry,
-  getProfileFixtureContentEntry,
-} from "@/lib/content-manifest";
-import { getStarterProfile } from "@/config/starter-profiles";
+import { getContentEntry } from "@/lib/content-manifest";
 import {
   PUBLIC_STATIC_PAGE_DEFINITIONS,
   PUBLIC_STATIC_PAGE_TYPES,
@@ -28,14 +24,14 @@ const EXPECTED_STATIC_PUBLIC_PAGE_TYPES = [
   "home",
   "about",
   "products",
-  "blog",
-  "resources",
+  "oemWholesale",
+  "materialsGuide",
+  "specificationsGuide",
+  "requestQuote",
   "contact",
+  "warranty",
   "privacy",
   "terms",
-  "capabilities",
-  "howItWorks",
-  "customProject",
 ] as const satisfies readonly PageType[];
 
 const REPO_ROOT = process.cwd();
@@ -47,6 +43,24 @@ function repoFileExists(relativePath: string): boolean {
 
 function toExpectedStaticPath(path: string): string {
   return path === "/" ? "" : path;
+}
+
+function expectStaticRouteOwner(routeOwner: string): void {
+  expect(routeOwner.startsWith("src/app/[locale]/")).toBe(true);
+  expect(routeOwner.endsWith("page.tsx")).toBe(true);
+
+  const relativePath = routeOwner.slice("src/app/[locale]/".length);
+  const segments = relativePath.split("/");
+  expect(segments.at(-1)).toBe("page.tsx");
+
+  const routeSegments = segments.slice(0, -1);
+  const allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789-";
+  for (const segment of routeSegments) {
+    expect(segment.length).toBeGreaterThan(0);
+    for (const character of segment) {
+      expect(allowedCharacters).toContain(character);
+    }
+  }
 }
 
 describe("pages.config static public page registry", () => {
@@ -64,11 +78,8 @@ describe("pages.config static public page registry", () => {
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
       expect(definition.pageType).toBeTruthy();
       expect(definition.localizedPaths).toHaveProperty("en");
-      expect(definition.localizedPaths).toHaveProperty("zh");
       expect(definition.seoKey).toMatch(/^[a-z][a-zA-Z0-9.:-]*$/);
-      expect(definition.routeOwner).toMatch(
-        /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
-      );
+      expectStaticRouteOwner(definition.routeOwner);
       expect(repoFileExists(definition.routeOwner)).toBe(true);
       expect(definition.sitemap.include).toBe(true);
       expect(definition.sitemap.priority).toBeGreaterThan(0);
@@ -91,14 +102,14 @@ describe("pages.config static public page registry", () => {
       "",
       "/about",
       "/products",
-      "/blog",
-      "/resources",
+      "/oem-wholesale",
+      "/guides/flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications",
+      "/request-quote",
       "/contact",
+      "/warranty",
       "/privacy",
       "/terms",
-      "/capabilities",
-      "/how-it-works",
-      "/custom-project-support",
     ]);
 
     const sitemapConfig = getStaticSitemapPageConfigByPath();
@@ -111,9 +122,9 @@ describe("pages.config static public page registry", () => {
       changeFrequency: "weekly",
       priority: 0.9,
     });
-    expect(sitemapConfig["/capabilities"]).toEqual({
+    expect(sitemapConfig["/request-quote"]).toEqual({
       changeFrequency: "monthly",
-      priority: 0.85,
+      priority: 0.9,
     });
   });
 
@@ -121,20 +132,20 @@ describe("pages.config static public page registry", () => {
     expect(getStaticPageLastmodByPath()).toEqual({
       "": "2026-04-26T00:00:00Z",
       "/products": "2026-04-26T00:00:00Z",
-      "/blog": "2026-04-26T00:00:00Z",
-      "/resources": "2026-04-26T00:00:00Z",
+      "/request-quote": "2026-04-26T00:00:00Z",
     });
   });
 
   it("derives MDX page slugs for content/pages backed routes", () => {
     expect(getMdxPageSlugByStaticPath()).toEqual({
       "/about": "about",
-      "/capabilities": "capabilities",
+      "/oem-wholesale": "oem-wholesale",
+      "/guides/flood-barrier-materials-guide": "flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications": "flood-barrier-specifications",
       "/contact": "contact",
-      "/how-it-works": "how-it-works",
+      "/warranty": "warranty",
       "/privacy": "privacy",
       "/terms": "terms",
-      "/custom-project-support": "custom-project-support",
     });
   });
 
@@ -153,50 +164,24 @@ describe("pages.config static public page registry", () => {
 
       const slug = definition.mdxCollection.slug;
       expect(mdxSlugsByPath[staticPath]).toBe(slug);
-      const enEntry = [
-        "capabilities",
-        "how-it-works",
-        "custom-project-support",
-      ].includes(slug)
-        ? getProfileFixtureContentEntry("showcase-full", "pages", "en", slug)
-        : getContentEntry("pages", "en", slug);
-      const zhEntry = [
-        "capabilities",
-        "how-it-works",
-        "custom-project-support",
-      ].includes(slug)
-        ? getProfileFixtureContentEntry("showcase-full", "pages", "zh", slug)
-        : getContentEntry("pages", "zh", slug);
+      const enEntry = getContentEntry("pages", "en", slug);
 
       expect(enEntry, `missing en manifest entry for ${slug}`).toBeDefined();
-      expect(zhEntry, `missing zh manifest entry for ${slug}`).toBeDefined();
-
-      if (
-        ["capabilities", "how-it-works", "custom-project-support"].includes(
-          slug,
-        )
-      ) {
-        expect(enEntry?.relativePath).toBe(
-          `profile-fixtures/showcase-full/content/pages/en/${slug}.mdx`,
-        );
-        expect(zhEntry?.relativePath).toBe(
-          `profile-fixtures/showcase-full/content/pages/zh/${slug}.mdx`,
-        );
-      } else {
-        expect(enEntry?.relativePath).toBe(`content/pages/en/${slug}.mdx`);
-        expect(zhEntry?.relativePath).toBe(`content/pages/zh/${slug}.mdx`);
-      }
+      expect(enEntry?.relativePath).toBe(`content/pages/en/${slug}.mdx`);
     }
   });
 
-  it("derives the default active static pages from company-site profile ownership", () => {
+  it("derives the default active static pages from the Tucsenberg catalog profile", () => {
     expect(getActiveStaticPageTypes()).toEqual([
       "home",
-      "about",
       "products",
-      "blog",
-      "resources",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
     ]);
@@ -204,29 +189,30 @@ describe("pages.config static public page registry", () => {
       getActiveStaticPageDefinitions().map((definition) => definition.pageType),
     ).toEqual([
       "home",
-      "about",
       "products",
-      "blog",
-      "resources",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
     ]);
     expect(getActiveStaticSitemapPages()).toEqual([
       "",
-      "/about",
       "/products",
-      "/blog",
-      "/resources",
+      "/oem-wholesale",
+      "/guides/flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications",
+      "/about",
+      "/request-quote",
       "/contact",
+      "/warranty",
       "/privacy",
       "/terms",
     ]);
-    expect(getActiveStaticSitemapPages()).not.toContain("/capabilities");
-    expect(getActiveStaticSitemapPages()).not.toContain("/how-it-works");
-    expect(getActiveStaticSitemapPages()).not.toContain(
-      "/custom-project-support",
-    );
 
     expect(getActiveStaticSitemapPageConfigByPath()).toMatchObject({
       "": { changeFrequency: "daily", priority: 1 },
@@ -242,72 +228,51 @@ describe("pages.config static public page registry", () => {
     expect(getActiveStaticPageLastmodByPath()).toEqual({
       "": "2026-04-26T00:00:00Z",
       "/products": "2026-04-26T00:00:00Z",
-      "/blog": "2026-04-26T00:00:00Z",
-      "/resources": "2026-04-26T00:00:00Z",
+      "/request-quote": "2026-04-26T00:00:00Z",
     });
     expect(getActiveMdxPageSlugByStaticPath()).toEqual({
       "/about": "about",
+      "/oem-wholesale": "oem-wholesale",
+      "/guides/flood-barrier-materials-guide": "flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications": "flood-barrier-specifications",
       "/contact": "contact",
+      "/warranty": "warranty",
       "/privacy": "privacy",
       "/terms": "terms",
     });
   });
 
-  it("derives optional active static pages for catalog, content-marketing, and showcase-full profiles", () => {
+  it("derives the explicit catalog static pages from the same registry", () => {
     expect(getActiveStaticPageTypes("catalog")).toEqual([
       "home",
       "products",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
     ]);
     expect(getActiveStaticSitemapPages("catalog")).toEqual([
       "",
       "/products",
+      "/oem-wholesale",
+      "/guides/flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications",
+      "/about",
+      "/request-quote",
       "/contact",
+      "/warranty",
       "/privacy",
       "/terms",
     ]);
     expect(getActiveStaticPageLastmodByPath("catalog")).toEqual({
       "": "2026-04-26T00:00:00Z",
       "/products": "2026-04-26T00:00:00Z",
+      "/request-quote": "2026-04-26T00:00:00Z",
     });
-
-    expect(getActiveStaticPageTypes("content-marketing")).toEqual([
-      "home",
-      "blog",
-      "about",
-      "contact",
-      "privacy",
-      "terms",
-    ]);
-    expect(getActiveStaticSitemapPages("content-marketing")).toEqual([
-      "",
-      "/blog",
-      "/about",
-      "/contact",
-      "/privacy",
-      "/terms",
-    ]);
-
-    expect(getActiveStaticPageTypes("showcase-full")).toEqual([
-      ...getStarterProfile("showcase-full").staticPages,
-    ]);
-    expect(getActiveStaticSitemapPages("showcase-full")).toEqual([
-      "",
-      "/about",
-      "/products",
-      "/blog",
-      "/resources",
-      "/contact",
-      "/privacy",
-      "/terms",
-      "/capabilities",
-      "/how-it-works",
-      "/custom-project-support",
-    ]);
-    expect(getActiveMdxPageSlugByStaticPath("showcase-full")).toEqual(
-      getMdxPageSlugByStaticPath(),
-    );
   });
 });

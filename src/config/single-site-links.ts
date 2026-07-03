@@ -6,32 +6,33 @@ import type { StarterProfileId } from "@/config/starter-profiles";
 export const SINGLE_SITE_ROUTE_HREFS = {
   home: getCanonicalPath("home"),
   about: getCanonicalPath("about"),
-  capabilities: getCanonicalPath("capabilities"),
   contact: getCanonicalPath("contact"),
-  howItWorks: getCanonicalPath("howItWorks"),
+  oemWholesale: getCanonicalPath("oemWholesale"),
+  materialsGuide: getCanonicalPath("materialsGuide"),
+  specificationsGuide: getCanonicalPath("specificationsGuide"),
+  requestQuote: getCanonicalPath("requestQuote"),
+  warranty: getCanonicalPath("warranty"),
   products: getCanonicalPath("products"),
-  blog: getCanonicalPath("blog"),
-  resources: getCanonicalPath("resources"),
   privacy: getCanonicalPath("privacy"),
   terms: getCanonicalPath("terms"),
-  customProject: getCanonicalPath("customProject"),
 } as const;
 
 export interface SingleSiteHomeLinkTargets {
   primaryCta: string;
   secondaryCta: string;
   contact?: string;
+  oemWholesale?: string;
+  requestQuote?: string;
   products?: string;
-  blog?: string;
   about?: string;
 }
 
 export interface SingleSiteActiveRouteTargets {
   about?: string;
-  blog?: string;
   contact?: string;
+  oemWholesale?: string;
   products?: string;
-  resources?: string;
+  requestQuote?: string;
 }
 
 export interface SingleSiteHomeFinalCtaTarget {
@@ -51,42 +52,28 @@ export function getSingleSiteActiveRouteTargets(
 ): SingleSiteActiveRouteTargets {
   const active = new Set(getActiveStaticPageTypes(profileId));
   const about = activeHref(active, "about");
-  const blog = activeHref(active, "blog");
   const contact = activeHref(active, "contact");
+  const oemWholesale = activeHref(active, "oemWholesale");
   const products = activeHref(active, "products");
-  const resources = activeHref(active, "resources");
+  const requestQuote = activeHref(active, "requestQuote");
 
   return {
     ...(about !== undefined ? { about } : {}),
-    ...(blog !== undefined ? { blog } : {}),
     ...(contact !== undefined ? { contact } : {}),
+    ...(oemWholesale !== undefined ? { oemWholesale } : {}),
     ...(products !== undefined ? { products } : {}),
-    ...(resources !== undefined ? { resources } : {}),
+    ...(requestQuote !== undefined ? { requestQuote } : {}),
   };
 }
 
 export function getSingleSiteHomeLinkTargets(
   profileId: StarterProfileId = getRuntimeMessageProfileId(),
 ): SingleSiteHomeLinkTargets {
-  const { about, blog, contact, products } =
-    getSingleSiteActiveRouteTargets(profileId);
+  const activeTargets = getSingleSiteActiveRouteTargets(profileId);
+  const { about, contact, products } = activeTargets;
 
   if (products !== undefined) {
-    return {
-      ...(contact !== undefined ? { contact } : {}),
-      products,
-      primaryCta: products,
-      secondaryCta: contact ?? SINGLE_SITE_ROUTE_HREFS.home,
-    };
-  }
-
-  if (blog !== undefined) {
-    return {
-      ...(contact !== undefined ? { contact } : {}),
-      blog,
-      primaryCta: blog,
-      secondaryCta: contact ?? SINGLE_SITE_ROUTE_HREFS.home,
-    };
+    return getProductHomeLinkTargets({ ...activeTargets, products });
   }
 
   if (contact !== undefined && about !== undefined) {
@@ -124,16 +111,33 @@ export const SINGLE_SITE_HOME_LINK_TARGETS = getSingleSiteHomeLinkTargets(
   getRuntimeMessageProfileId(),
 );
 
+function getProductHomeLinkTargets(
+  targets: SingleSiteActiveRouteTargets & { products: string },
+): SingleSiteHomeLinkTargets {
+  const { contact, oemWholesale, products, requestQuote } = targets;
+
+  return {
+    ...(contact !== undefined ? { contact } : {}),
+    ...(oemWholesale !== undefined ? { oemWholesale } : {}),
+    products,
+    ...(requestQuote !== undefined ? { requestQuote } : {}),
+    primaryCta: requestQuote ?? products,
+    secondaryCta: oemWholesale ?? contact ?? SINGLE_SITE_ROUTE_HREFS.home,
+  };
+}
+
 export function getSingleSiteHomeFinalCtaTargetsFromLinks(
   targets: SingleSiteHomeLinkTargets,
 ): SingleSiteHomeFinalCtaTarget[] {
   return [
-    ...(targets.contact !== undefined
-      ? [{ href: targets.contact, labelKey: "secondary" as const }]
-      : []),
     ...(targets.products !== undefined
       ? [{ href: targets.products, labelKey: "primary" as const }]
       : []),
+    ...(targets.requestQuote !== undefined
+      ? [{ href: targets.requestQuote, labelKey: "secondary" as const }]
+      : targets.contact !== undefined
+        ? [{ href: targets.contact, labelKey: "secondary" as const }]
+        : []),
   ];
 }
 

@@ -135,8 +135,7 @@ describe("GlobalError", () => {
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
-      // Global error navigates to locale-prefixed homepage
-      expect(window.location.href).toBe("/en");
+      expect(window.location.href).toBe("/");
     });
   });
 
@@ -238,7 +237,7 @@ describe("GlobalError", () => {
       });
     });
 
-    it("should detect Chinese locale from browser language", () => {
+    it("should keep English copy for Chinese browser language", () => {
       Object.defineProperty(global, "navigator", {
         writable: true,
         value: { language: "zh-CN" },
@@ -246,13 +245,12 @@ describe("GlobalError", () => {
 
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      // Should show Chinese translations
-      expect(screen.getByText("出错了！")).toBeInTheDocument();
-      expect(screen.getByText("重试")).toBeInTheDocument();
-      expect(screen.getByText("返回首页")).toBeInTheDocument();
+      expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
+      expect(screen.getByText("Try again")).toBeInTheDocument();
+      expect(screen.getByText("Go to homepage")).toBeInTheDocument();
     });
 
-    it("should detect Chinese locale from zh-TW", () => {
+    it("should keep English copy for zh-TW browser language", () => {
       Object.defineProperty(global, "navigator", {
         writable: true,
         value: { language: "zh-TW" },
@@ -260,10 +258,10 @@ describe("GlobalError", () => {
 
       render(<GlobalError error={mockError} reset={mockReset} />);
 
-      expect(screen.getByText("出错了！")).toBeInTheDocument();
+      expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
     });
 
-    it("should navigate to Chinese homepage when locale is zh", () => {
+    it("should navigate to the unprefixed homepage for Chinese browser language", () => {
       Object.defineProperty(global, "navigator", {
         writable: true,
         value: { language: "zh-CN" },
@@ -273,7 +271,7 @@ describe("GlobalError", () => {
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
-      expect(window.location.href).toBe("/zh");
+      expect(window.location.href).toBe("/");
     });
 
     it("should default to English for non-Chinese languages", () => {

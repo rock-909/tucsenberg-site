@@ -31,6 +31,10 @@ const B2B_LEAD_INCLUDED_ROUTE_ROOTS = [
 
 const OPTIONAL_ROUTE_ROOTS = [
   "src/app/[locale]/products",
+  "src/app/[locale]/guides",
+  "src/app/[locale]/oem-wholesale",
+  "src/app/[locale]/request-quote",
+  "src/app/[locale]/warranty",
   "src/app/[locale]/blog",
   "src/app/[locale]/capabilities",
   "src/app/[locale]/how-it-works",
@@ -66,24 +70,6 @@ const B2B_LEAD_REQUIRED_MESSAGE_NAMESPACES = [
   "privacy",
   "terms",
   "legal",
-] as const;
-
-const COMPANY_SITE_REQUIRED_MESSAGE_NAMESPACES = [
-  "navigation",
-  "footer",
-  "home",
-  "contact",
-  "privacy",
-  "terms",
-  "catalog",
-  "blog",
-  "article",
-  "resources",
-] as const;
-
-const COMPANY_SITE_EXCLUDED_MESSAGE_NAMESPACES = [
-  "customProject",
-  "themeDemo",
 ] as const;
 
 function repoPath(relativePath: string): string {
@@ -193,36 +179,39 @@ function expectProfileIncludesPath(
 }
 
 describe("profile materialization dry-run plan", () => {
-  it("selects default company-site route roots and excludes optional demo routes and fixtures", () => {
-    const plan = buildPlan("company-site");
+  it("selects the materialized catalog route roots and excludes retired demo routes and fixtures", () => {
+    const plan = buildPlan("catalog");
 
-    expect(plan.profileId).toBe("company-site");
+    expect(plan.profileId).toBe("catalog");
     expectRouteRootsIncluded(plan, [
       ...B2B_LEAD_INCLUDED_ROUTE_ROOTS,
       "src/app/[locale]/products",
-      "src/app/[locale]/blog",
-      "src/app/[locale]/resources",
+      "src/app/[locale]/guides",
+      "src/app/[locale]/oem-wholesale",
+      "src/app/[locale]/request-quote",
+      "src/app/[locale]/warranty",
     ]);
     expectRouteRootsExcluded(plan, [
+      "src/app/[locale]/blog",
+      "src/app/[locale]/resources",
       "src/app/[locale]/capabilities",
       "src/app/[locale]/how-it-works",
       "src/app/[locale]/custom-project-support",
     ]);
-    expectFixtureRootsExcluded(plan, OPTIONAL_FIXTURE_ROOTS);
+    expectFixtureRootsIncluded(plan, ["profile-fixtures/catalog"]);
+    expectFixtureRootsExcluded(plan, [
+      "profile-fixtures/content-marketing",
+      "profile-fixtures/showcase-full",
+    ]);
     expect(plan.includedMessagePackRoots).toEqual([
       "messages/base",
-      "messages/profiles/minimal",
       "messages/profiles/b2b-lead",
-      "messages/profiles/company-site",
+      "messages/profiles/catalog",
     ]);
-    expect(plan.excludedMessagePackRoots).toEqual(
-      expect.arrayContaining([
-        "messages/profiles/catalog",
-        "messages/profiles/content-marketing",
-        "messages/profiles/showcase-full",
-        "messages/examples/ui-demo",
-      ]),
-    );
+    expect(plan.excludedMessagePackRoots).toEqual([
+      "messages/profiles/minimal",
+      "messages/examples/ui-demo",
+    ]);
   });
 
   it("selects b2b-lead route roots and excludes optional demo routes and fixtures", () => {
@@ -240,9 +229,6 @@ describe("profile materialization dry-run plan", () => {
     expect(plan.excludedMessagePackRoots).toEqual(
       expect.arrayContaining([
         "messages/profiles/catalog",
-        "messages/profiles/content-marketing",
-        "messages/profiles/company-site",
-        "messages/profiles/showcase-full",
         "messages/examples/ui-demo",
       ]),
     );
@@ -385,7 +371,7 @@ describe("profile materialization dry-run plan", () => {
       repoRoot: REPO_ROOT,
       outputDirectory,
       includedFiles: ["missing-source-fixture.txt"],
-      profileId: "company-site",
+      profileId: "catalog",
       warnings,
     });
 
@@ -401,11 +387,11 @@ describe("profile materialization dry-run plan", () => {
     const previousExitCode = process.exitCode;
     const result: MaterializationResult = {
       plan: {
-        ...buildPlan("company-site"),
+        ...buildPlan("catalog"),
         warnings,
       },
       fileSet: {
-        profileId: "company-site",
+        profileId: "catalog",
         includedFiles: ["missing-source-fixture.txt"],
         excludedFiles: [],
         warnings,
@@ -457,73 +443,21 @@ describe("profile materialization message composition", () => {
     }
   });
 
-  it("composes company-site compatibility messages with default company-site surfaces and without showcase/demo namespaces", () => {
-    const criticalEn = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "company-site",
-      relativePath: "messages/en/critical.json",
-    });
-    const deferredEn = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "company-site",
-      relativePath: "messages/en/deferred.json",
-    });
-
-    for (const namespace of COMPANY_SITE_REQUIRED_MESSAGE_NAMESPACES) {
-      expect(
-        criticalEn[namespace] ?? deferredEn[namespace],
-        `company-site should include ${namespace} in critical or deferred compose`,
-      ).toBeDefined();
-    }
-
-    for (const namespace of COMPANY_SITE_EXCLUDED_MESSAGE_NAMESPACES) {
-      expect(criticalEn).not.toHaveProperty(namespace);
-      expect(deferredEn).not.toHaveProperty(namespace);
-    }
-
-    expect(criticalEn.article).toMatchObject({
-      meta: { section: "Company-site guide" },
-    });
-    expect(deferredEn.article).toMatchObject({
-      defaultAuthor: "{companyName}",
-    });
-
-    const criticalZh = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "company-site",
-      relativePath: "messages/zh/critical.json",
-    });
-    const deferredZh = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "company-site",
-      relativePath: "messages/zh/deferred.json",
-    });
-    expect(criticalZh.article).toMatchObject({
-      meta: { section: "企业站指南" },
-    });
-    expect(deferredZh.article).toMatchObject({
-      defaultAuthor: "{companyName}",
-    });
-  });
-
-  it("composes content-marketing article metadata messages used by blog pages", () => {
-    const criticalEn = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "content-marketing",
-      relativePath: "messages/en/critical.json",
-    });
-    const criticalZh = composeMessagesForProfileFromFiles({
-      repoRoot: REPO_ROOT,
-      profileId: "content-marketing",
-      relativePath: "messages/zh/critical.json",
-    });
-
-    expect(criticalEn.article).toMatchObject({
-      meta: { section: "Starter guide" },
-    });
-    expect(criticalZh.article).toMatchObject({
-      meta: { section: "模板指南" },
-    });
+  it("keeps retired company-site and content-marketing packs unavailable in the materialized site", () => {
+    expect(() =>
+      composeMessagesForProfileFromFiles({
+        repoRoot: REPO_ROOT,
+        profileId: "company-site",
+        relativePath: "messages/en/critical.json",
+      }),
+    ).toThrow();
+    expect(() =>
+      composeMessagesForProfileFromFiles({
+        repoRoot: REPO_ROOT,
+        profileId: "content-marketing",
+        relativePath: "messages/en/critical.json",
+      }),
+    ).toThrow();
   });
 
   it("still prunes broad showcase-full compatibility files when using namespace pruning helper", () => {
@@ -560,28 +494,23 @@ describe("profile materialization message composition", () => {
     expect(nextIntl).not.toContain("enShowcaseFullDeferred");
   });
 
-  it("rewrites message pack source files to match materialized company-site pack selection", () => {
+  it("rewrites message pack source files to match materialized catalog pack selection", () => {
     const loader = transformMaterializedFileContent(
       "src/lib/i18n/message-pack-loader.ts",
       readRepoFile("src/lib/i18n/message-pack-loader.ts"),
-      "company-site",
+      "catalog",
     );
 
-    expect(loader).toContain(
-      "@messages/profiles/company-site/en/critical.json",
-    );
-    expect(loader).not.toContain("@messages/profiles/catalog/");
+    expect(loader).toContain("@messages/profiles/catalog/en/critical.json");
     expect(loader).not.toContain("@messages/profiles/content-marketing/");
     expect(loader).not.toContain("@messages/profiles/showcase-full/");
 
     const activeProfile = transformMaterializedFileContent(
       "src/config/active-starter-profile.ts",
       readRepoFile("src/config/active-starter-profile.ts"),
-      "company-site",
+      "catalog",
     );
 
-    expect(activeProfile).toContain(
-      '"company-site" satisfies StarterProfileId',
-    );
+    expect(activeProfile).toContain('"catalog" satisfies StarterProfileId');
   });
 });

@@ -18,15 +18,15 @@ export type PublicStaticPageChangeFrequency =
 type PublicStaticPageSeoKey =
   | "home"
   | "content.pages.about"
+  | "content.pages.oem-wholesale"
+  | "content.pages.flood-barrier-materials-guide"
+  | "content.pages.flood-barrier-specifications"
+  | "content.pages.request-quote"
+  | "content.pages.warranty"
   | "catalog.overview"
-  | "blog.index"
-  | "resources.index"
   | "content.pages.contact"
   | "content.pages.privacy"
-  | "content.pages.terms"
-  | "content.pages.capabilities"
-  | "content.pages.how-it-works"
-  | "content.pages.custom-project-support";
+  | "content.pages.terms";
 
 interface PublicStaticPageSitemapConfig {
   include: boolean;
@@ -62,7 +62,6 @@ export interface PublicStaticPageDefinition {
 function localizedPath(path: string): LocalizedPath {
   return Object.freeze({
     en: path,
-    zh: path,
   });
 }
 
@@ -103,24 +102,52 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       routeOwner: "src/app/[locale]/products/page.tsx",
     },
     {
-      pageType: "blog",
-      localizedPaths: localizedPath("/blog"),
-      navigationKey: "navigation.blog",
-      seoKey: "blog.index",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.85 },
-      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
-      mdxCollection: null,
-      routeOwner: "src/app/[locale]/blog/page.tsx",
+      pageType: "oemWholesale",
+      localizedPaths: localizedPath("/oem-wholesale"),
+      navigationKey: "navigation.oemWholesale",
+      seoKey: "content.pages.oem-wholesale",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
+      lastmod: { source: "mdx" },
+      mdxCollection: { collection: "pages", slug: "oem-wholesale" },
+      routeOwner: "src/app/[locale]/oem-wholesale/page.tsx",
     },
     {
-      pageType: "resources",
-      localizedPaths: localizedPath("/resources"),
-      navigationKey: "navigation.resources",
-      seoKey: "resources.index",
-      sitemap: { include: true, changeFrequency: "weekly", priority: 0.8 },
+      pageType: "materialsGuide",
+      localizedPaths: localizedPath("/guides/flood-barrier-materials-guide"),
+      navigationKey: "navigation.guides",
+      seoKey: "content.pages.flood-barrier-materials-guide",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      lastmod: { source: "mdx" },
+      mdxCollection: {
+        collection: "pages",
+        slug: "flood-barrier-materials-guide",
+      },
+      routeOwner:
+        "src/app/[locale]/guides/flood-barrier-materials-guide/page.tsx",
+    },
+    {
+      pageType: "specificationsGuide",
+      localizedPaths: localizedPath("/guides/flood-barrier-specifications"),
+      navigationKey: null,
+      seoKey: "content.pages.flood-barrier-specifications",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      lastmod: { source: "mdx" },
+      mdxCollection: {
+        collection: "pages",
+        slug: "flood-barrier-specifications",
+      },
+      routeOwner:
+        "src/app/[locale]/guides/flood-barrier-specifications/page.tsx",
+    },
+    {
+      pageType: "requestQuote",
+      localizedPaths: localizedPath("/request-quote"),
+      navigationKey: null,
+      seoKey: "content.pages.request-quote",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.9 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
-      routeOwner: "src/app/[locale]/resources/page.tsx",
+      routeOwner: "src/app/[locale]/request-quote/page.tsx",
     },
     {
       pageType: "contact",
@@ -131,6 +158,16 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "contact" },
       routeOwner: "src/app/[locale]/contact/page.tsx",
+    },
+    {
+      pageType: "warranty",
+      localizedPaths: localizedPath("/warranty"),
+      navigationKey: null,
+      seoKey: "content.pages.warranty",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
+      lastmod: { source: "mdx" },
+      mdxCollection: { collection: "pages", slug: "warranty" },
+      routeOwner: "src/app/[locale]/warranty/page.tsx",
     },
     {
       pageType: "privacy",
@@ -151,36 +188,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "terms" },
       routeOwner: "src/app/[locale]/terms/page.tsx",
-    },
-    {
-      pageType: "capabilities",
-      localizedPaths: localizedPath("/capabilities"),
-      navigationKey: null,
-      seoKey: "content.pages.capabilities",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
-      lastmod: { source: "mdx" },
-      mdxCollection: { collection: "pages", slug: "capabilities" },
-      routeOwner: "src/app/[locale]/capabilities/page.tsx",
-    },
-    {
-      pageType: "howItWorks",
-      localizedPaths: localizedPath("/how-it-works"),
-      navigationKey: null,
-      seoKey: "content.pages.how-it-works",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
-      lastmod: { source: "mdx" },
-      mdxCollection: { collection: "pages", slug: "how-it-works" },
-      routeOwner: "src/app/[locale]/how-it-works/page.tsx",
-    },
-    {
-      pageType: "customProject",
-      localizedPaths: localizedPath("/custom-project-support"),
-      navigationKey: null,
-      seoKey: "content.pages.custom-project-support",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
-      mdxCollection: { collection: "pages", slug: "custom-project-support" },
-      routeOwner: "src/app/[locale]/custom-project-support/page.tsx",
     },
   ] as const satisfies readonly PublicStaticPageDefinition[]);
 

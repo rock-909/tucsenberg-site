@@ -77,8 +77,7 @@ export interface StarterProfileDefinition {
   examplePacks: readonly StarterExamplePackId[];
 }
 
-export const DEFAULT_STARTER_PROFILE_ID =
-  "company-site" satisfies StarterProfileId;
+export const DEFAULT_STARTER_PROFILE_ID = "catalog" satisfies StarterProfileId;
 
 const SHOWCASE_FULL_STATIC_PAGES = [
   "home",
@@ -204,7 +203,19 @@ export const STARTER_PROFILES = {
   },
   catalog: {
     id: "catalog",
-    staticPages: ["home", "products", "contact", "privacy", "terms"],
+    staticPages: [
+      "home",
+      "products",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
+      "contact",
+      "warranty",
+      "privacy",
+      "terms",
+    ],
     dynamicSurfaces: ["productMarket"],
     messageNamespaces: [
       ...CORE_MESSAGE_NAMESPACES,

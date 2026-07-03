@@ -59,6 +59,7 @@ function buildProofItems(
 
 export async function QualitySection() {
   const t = await getTranslations("home.quality");
+  const translateQuality = (key: string) => t(key as Parameters<typeof t>[0]);
 
   const content = {
     title: t("title"),
@@ -80,7 +81,7 @@ export async function QualitySection() {
 
       return {
         key,
-        label: t(`standards.${key}`),
+        label: translateQuality(`standards.${key}`),
         status,
       };
     }),

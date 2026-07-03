@@ -3,6 +3,10 @@ import {
   LANGUAGE_OPTION_LABELS,
   type SiteLanguage,
 } from "@/config/language-display";
+import {
+  LOCALES_CONFIG,
+  type ConfiguredLocale,
+} from "@/config/paths/locales-config";
 import { Link } from "@/i18n/routing";
 
 interface MobileNavigationFallbackProps {
@@ -20,7 +24,11 @@ function MobileLanguageFallback({
   languageLabel: string;
   locale: SiteLanguage;
 }) {
-  const currentLanguageName = LANGUAGE_OPTION_LABELS[locale];
+  const configuredLocales = LOCALES_CONFIG.locales as readonly string[];
+  const currentLocale = configuredLocales.includes(locale)
+    ? (locale as ConfiguredLocale)
+    : LOCALES_CONFIG.defaultLocale;
+  const currentLanguageName = LOCALES_CONFIG.displayNames[currentLocale];
 
   return (
     <details className="mt-3 border-t border-border pt-3">
@@ -32,24 +40,18 @@ function MobileLanguageFallback({
         <span translate="no">{currentLanguageName}</span>
       </summary>
       <div className="mt-1 space-y-1">
-        <Link
-          href="/"
-          className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          hrefLang="en"
-          locale="en"
-          prefetch={false}
-        >
-          <span translate="no">English</span>
-        </Link>
-        <Link
-          href="/"
-          className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          hrefLang="zh"
-          locale="zh"
-          prefetch={false}
-        >
-          <span translate="no">简体中文</span>
-        </Link>
+        {LOCALES_CONFIG.locales.map((optionLocale) => (
+          <Link
+            key={optionLocale}
+            href="/"
+            className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            hrefLang={optionLocale}
+            locale={optionLocale}
+            prefetch={false}
+          >
+            <span translate="no">{LANGUAGE_OPTION_LABELS[optionLocale]}</span>
+          </Link>
+        ))}
       </div>
     </details>
   );

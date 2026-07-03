@@ -185,8 +185,7 @@ export const SINGLE_SITE_RESOURCES_PAGE_EXPRESSION = {
     brochure: singleSiteContactFallbackHref,
     productSheet:
       singleSiteActiveRouteTargets.products ?? singleSiteContactFallbackHref,
-    buyerGuide:
-      singleSiteActiveRouteTargets.blog ?? singleSiteContactFallbackHref,
+    buyerGuide: singleSiteContactFallbackHref,
   } satisfies Record<(typeof SINGLE_SITE_RESOURCES_CARD_KEYS)[number], string>,
   ctaHref: singleSiteContactFallbackHref,
 } as const;

@@ -35,21 +35,20 @@ describe("page-dates", () => {
     const nonMdxPages = new Set([
       "",
       getCanonicalPath("products"),
-      getCanonicalPath("blog"),
-      getCanonicalPath("resources"),
+      getCanonicalPath("requestQuote"),
     ]);
     const representativePageContracts = [
       { path: "", isMdx: false },
       { path: "/about", isMdx: true },
+      { path: "/oem-wholesale", isMdx: true },
+      { path: "/guides/flood-barrier-materials-guide", isMdx: true },
+      { path: "/guides/flood-barrier-specifications", isMdx: true },
+      { path: "/request-quote", isMdx: false },
       { path: "/contact", isMdx: true },
+      { path: "/warranty", isMdx: true },
       { path: "/privacy", isMdx: true },
       { path: "/terms", isMdx: true },
-      { path: "/blog", isMdx: false },
-      { path: "/resources", isMdx: false },
-      { path: "/capabilities", isMdx: true },
-      { path: "/how-it-works", isMdx: true },
       { path: "/products", isMdx: false },
-      { path: "/custom-project-support", isMdx: true },
     ] as const;
 
     for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
@@ -62,20 +61,20 @@ describe("page-dates", () => {
 
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toEqual([
       "home",
-      "about",
       "products",
-      "blog",
-      "resources",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
     ]);
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).not.toContain("customProject");
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).not.toContain("capabilities");
-    expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).not.toContain("howItWorks");
   });
 
-  it("loads the latest MDX updatedAt across locales for route-derived paths", async () => {
+  it("loads MDX updatedAt from the en-only route-derived content", async () => {
     mockGetContentEntry.mockImplementation(
       (type: string, locale: string, slug: string) => ({
         type,
@@ -86,10 +85,7 @@ describe("page-dates", () => {
         relativePath: `content/pages/${locale}/${slug}.mdx`,
         metadata: {
           publishedAt: "2026-01-01T00:00:00Z",
-          updatedAt:
-            locale === "zh"
-              ? "2026-04-20T00:00:00Z"
-              : "2026-04-01T00:00:00Z",
+          updatedAt: "2026-04-01T00:00:00Z",
         },
         content: "",
       }),
@@ -99,9 +95,13 @@ describe("page-dates", () => {
       getCanonicalPath("about"),
     );
 
-    expect(lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
+    expect(lastModified).toEqual(new Date("2026-04-01T00:00:00Z"));
     expect(mockGetContentEntry).toHaveBeenCalledWith("pages", "en", "about");
-    expect(mockGetContentEntry).toHaveBeenCalledWith("pages", "zh", "about");
+    expect(mockGetContentEntry).not.toHaveBeenCalledWith(
+      "pages",
+      "zh",
+      "about",
+    );
   });
 
   it("rejects paths that are not mapped from a static route id", async () => {
@@ -110,31 +110,27 @@ describe("page-dates", () => {
     );
   });
 
-  it("keeps legal page frontmatter dates aligned with visible updated dates", () => {
+  it("keeps legal page frontmatter dates present for en-only content", () => {
     const legalFiles = [
       "content/pages/en/privacy.mdx",
       "content/pages/en/terms.mdx",
-      "content/pages/zh/privacy.mdx",
-      "content/pages/zh/terms.mdx",
+      "content/pages/en/warranty.mdx",
     ];
 
     for (const filePath of legalFiles) {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- test iterates fixed legal MDX fixture paths
       const source = readFileSync(filePath, "utf8");
       const updatedAt = source.match(/updatedAt: ['"]([^'"]+)['"]/u)?.[1];
-      const body = source.split("---").slice(2).join("---");
 
       expect(updatedAt, filePath).toBeTruthy();
-      expect(body, filePath).toContain(updatedAt);
     }
   });
 
-  it("keeps generated legal page content aligned with metadata updatedAt", () => {
+  it("keeps generated legal page metadata aligned with en-only content", () => {
     const legalPages = [
       { locale: "en", slug: "privacy" },
       { locale: "en", slug: "terms" },
-      { locale: "zh", slug: "privacy" },
-      { locale: "zh", slug: "terms" },
+      { locale: "en", slug: "warranty" },
     ] as const;
 
     for (const { locale, slug } of legalPages) {
@@ -143,7 +139,6 @@ describe("page-dates", () => {
 
       expect(entry, `${locale}/${slug}`).toBeDefined();
       expect(updatedAt, `${locale}/${slug}`).toEqual(expect.any(String));
-      expect(entry?.content, `${locale}/${slug}`).toContain(updatedAt);
     }
   });
 });

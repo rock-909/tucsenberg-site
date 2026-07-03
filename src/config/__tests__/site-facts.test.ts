@@ -46,7 +46,7 @@ describe("site-facts", () => {
     expect(missingCertificationFiles).toEqual([]);
   });
 
-  it("keeps owner-dependent public trust assets in a safe interim state", async () => {
+  it("keeps owner-dependent public trust assets explicit during cutover", async () => {
     const {
       getPublicContactEmail,
       getPublicContactPhone,
@@ -73,8 +73,10 @@ describe("site-facts", () => {
     expect(getPublicContactPhone("+86-138-0013-8000")).toBe(
       "+86-138-0013-8000",
     );
-    expect(siteFacts.brandAssets.logo.status).toBe("pending");
-    expect(getPublicLogoPath(siteFacts.brandAssets.logo)).toBeUndefined();
+    expect(siteFacts.brandAssets.logo.status).toBe("ready");
+    expect(getPublicLogoPath(siteFacts.brandAssets.logo)).toBe(
+      "/images/tucsenberg-logo.png",
+    );
     expect(siteFacts.brandAssets.productPhotos.status).toBe("pending");
   });
 });

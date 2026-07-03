@@ -155,7 +155,7 @@ export function transformMaterializedFileContent(
 
   if (normalizedPath === "src/config/active-starter-profile.ts") {
     return content.replace(
-      '"showcase-full" satisfies StarterProfileId',
+      /"(?:minimal|company-site|b2b-lead|catalog|content-marketing|showcase-full)" satisfies StarterProfileId/u,
       `"${profileId}" satisfies StarterProfileId`,
     );
   }

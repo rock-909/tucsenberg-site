@@ -5,7 +5,7 @@ const { glob } = require("glob");
 const yaml = require("js-yaml");
 
 const DEFAULT_COLLECTIONS = ["posts", "pages", "products"];
-const DEFAULT_LOCALES = ["en", "zh"];
+const FALLBACK_LOCALES = ["en", "zh"];
 const DEFAULT_CONTENT_EXTENSIONS = ["md", "mdx"];
 const DEFAULT_CONTENT_ROOTS = ["content"];
 const CONTENT_SLUG_SYNC_ROOTS = [
@@ -37,6 +37,29 @@ const matterOptions = {
     },
   },
 };
+
+function loadDefaultLocales(rootDir = process.cwd()) {
+  const localeConfigPath = path.join(rootDir, "i18n-locales.config.js");
+
+  if (!fs.existsSync(localeConfigPath)) {
+    return FALLBACK_LOCALES;
+  }
+
+  const configSource = fs.readFileSync(localeConfigPath, "utf8");
+  const localesMatch = configSource.match(/locales:\s*\[([^\]]*)\]/u);
+  if (!localesMatch) {
+    return FALLBACK_LOCALES;
+  }
+
+  const locales = localesMatch[1].split(",").flatMap((rawLocale) => {
+    const locale = rawLocale.trim().replace(/^["']|["']$/gu, "");
+    return locale ? [locale] : [];
+  });
+
+  return locales.length > 0 ? locales : FALLBACK_LOCALES;
+}
+
+const DEFAULT_LOCALES = loadDefaultLocales();
 
 function buildKey(rootDir, filePath, contentRoot, collection, locale) {
   const localeRoot = path.join(rootDir, contentRoot, collection, locale);
@@ -472,6 +495,7 @@ function parseContentSlugArgs(args) {
     strictFrontmatter: false,
     collections: DEFAULT_COLLECTIONS,
     locales: DEFAULT_LOCALES,
+    localesExplicit: false,
   };
 
   for (const arg of args) {
@@ -492,6 +516,7 @@ function parseContentSlugArgs(args) {
           return trimmed ? [trimmed] : [];
         });
     } else if (arg.startsWith("--locales=")) {
+      options.localesExplicit = true;
       options.locales = arg
         .split("=")[1]
         .split(",")
@@ -515,7 +540,7 @@ Usage:
 Options:
   --json              Output JSON report to reports/content-slug-sync-report.json
   --collections=x,y   Collections to check (default: posts,pages,products)
-  --locales=x,y       Locales to check (default: en,zh)
+  --locales=x,y       Locales to check (default: ${DEFAULT_LOCALES.join(",")})
   --strict-frontmatter Run opt-in frontmatter/SEO contract checks
   --quiet             Only output errors
   --help, -h          Show this help
@@ -675,6 +700,17 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
     return false;
   }
   if (options.locales.length < 2) {
+    if (!options.localesExplicit) {
+      console.log("\nMDX Slug Sync Validation");
+      console.log("========================\n");
+      console.log(`Collections: ${options.collections.join(", ")}`);
+      console.log(`Locales: ${options.locales.join(", ")}`);
+      console.log(
+        "Single locale site: localized slug pair comparison skipped.",
+      );
+      return true;
+    }
+
     console.error("Error: At least 2 locales are required for comparison");
     return false;
   }

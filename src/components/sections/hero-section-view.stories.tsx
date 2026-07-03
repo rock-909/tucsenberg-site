@@ -40,7 +40,7 @@ export const ChineseCopy: Story = {
     previewTitleId: "hero-view-preview-title-chinese-copy-story",
   },
   globals: {
-    locale: "zh",
+    locale: "en",
   },
 };
 

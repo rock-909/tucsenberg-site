@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  getBlogArticlePath,
-  getCanonicalPath,
-  getProductMarketPath,
-} from "@/config/paths";
+import { getCanonicalPath, getProductMarketPath } from "@/config/paths";
 import {
   getAllMarketFamilyCombos,
   getAllMarketSlugs,
@@ -13,17 +9,8 @@ import {
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
 } from "@/config/single-site-seo";
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
-import {
-  getStarterBlogArticle,
-  getStarterBlogArticleModifiedAt,
-  getStarterBlogArticleSlugs,
-} from "@/lib/blog/starter-blog";
 import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap, { generateSitemapForProfile } from "../sitemap";
-
-const mockBlogArticleOverrides = vi.hoisted(
-  () => new Map<string, { readonly updatedAt?: string }>(),
-);
 
 // Mock dependencies before imports
 vi.mock("@/config/paths", async (importOriginal) => {
@@ -40,7 +27,7 @@ vi.mock("@/config/paths", async (importOriginal) => {
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -48,14 +35,7 @@ vi.mock("@/i18n/routing", () => ({
 vi.mock("@/lib/sitemap-utils", async () => {
   const { getCanonicalPath } = await import("@/config/paths/utils");
   const productsPath = getCanonicalPath("products");
-  const blogPath = getCanonicalPath("blog");
-  const resourcesPath = getCanonicalPath("resources");
-  const staticLastmodPaths = new Set([
-    "",
-    productsPath,
-    blogPath,
-    resourcesPath,
-  ]);
+  const staticLastmodPaths = new Set(["", productsPath, "/request-quote"]);
 
   return {
     getStaticPageLastModified: vi.fn((page: string) => {
@@ -87,30 +67,17 @@ vi.mock("@/lib/content/page-dates", async () => {
   };
 });
 
-vi.mock("@/lib/blog/starter-blog", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/lib/blog/starter-blog")>();
-
-  return {
-    ...actual,
-    getStarterBlogArticle: (locale: "en" | "zh", slug: string) => ({
-      ...actual.getStarterBlogArticle(locale, slug),
-      ...mockBlogArticleOverrides.get(`${locale}:${slug}`),
-    }),
-  };
-});
-
 describe("sitemap.ts", () => {
   const BASE_URL = "https://example.com";
-  const RETIRED_BENDING_MACHINES_URL = `${BASE_URL}/en/capabilities/bending-machines`;
+  const RETIRED_BENDING_MACHINES_URL = `${BASE_URL}/capabilities/bending-machines`;
   const defaultLocale = "en";
 
   function sitemapPathForCanonical(path: string): string {
     return path === "/" ? "" : path;
   }
 
-  function localizedUrl(locale: string, path: string): string {
-    return `${BASE_URL}/${locale}${path}`;
+  function localizedUrl(_locale: string, path: string): string {
+    return new URL(path === "" ? "/" : path, BASE_URL).toString();
   }
 
   function findEntry(
@@ -129,17 +96,15 @@ describe("sitemap.ts", () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it("should include default company-site static pages for all locales", async () => {
+    it("should include current catalog static pages for the English site", async () => {
       const result = await sitemap();
 
-      for (const locale of ["en", "zh"]) {
-        for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
-          expect(findEntry(result, locale, pagePath)).toBeDefined();
-        }
+      for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
+        expect(findEntry(result, defaultLocale, pagePath)).toBeDefined();
       }
     });
 
-    it("should exclude optional demo static pages by default", async () => {
+    it("should exclude retired demo static pages by default", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
@@ -148,11 +113,8 @@ describe("sitemap.ts", () => {
       }
       expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
       expect(findEntry(result, "en", "/products")).toBeDefined();
-      expect(findEntry(result, "zh", "/products")).toBeDefined();
-      expect(findEntry(result, "en", "/blog")).toBeDefined();
-      expect(findEntry(result, "zh", "/blog")).toBeDefined();
-      expect(findEntry(result, "en", "/resources")).toBeDefined();
-      expect(findEntry(result, "zh", "/resources")).toBeDefined();
+      expect(urls).not.toContain(localizedUrl(defaultLocale, "/blog"));
+      expect(urls).not.toContain(localizedUrl(defaultLocale, "/resources"));
       expect(urls).not.toContain(localizedUrl(defaultLocale, "/capabilities"));
       expect(urls).not.toContain(localizedUrl(defaultLocale, "/how-it-works"));
       expect(urls).not.toContain(
@@ -164,98 +126,41 @@ describe("sitemap.ts", () => {
       const result = await sitemap();
 
       expect(findEntry(result, "en", "")).toMatchObject({
-        url: "https://example.com/en",
+        url: "https://example.com/",
         priority: 1.0,
         changeFrequency: "daily",
       });
-      expect(findEntry(result, "zh", "/about")).toMatchObject({
-        url: "https://example.com/zh/about",
+      expect(findEntry(result, "en", "/about")).toMatchObject({
+        url: "https://example.com/about",
         priority: 0.8,
         changeFrequency: "monthly",
         lastModified: new Date("2026-04-20T00:00:00Z"),
       });
       expect(findEntry(result, "en", "/contact")).toMatchObject({
-        url: "https://example.com/en/contact",
+        url: "https://example.com/contact",
         priority: 0.8,
         changeFrequency: "monthly",
         lastModified: new Date("2026-04-20T00:00:00Z"),
       });
       expect(findEntry(result, "en", "/terms")).toMatchObject({
-        url: "https://example.com/en/terms",
+        url: "https://example.com/terms",
         priority: 0.7,
         changeFrequency: "monthly",
       });
       expect(findEntry(result, "en", "/capabilities")).toBeUndefined();
       expect(findEntry(result, "en", "/how-it-works")).toBeUndefined();
       expect(
-        findEntry(result, "en", "/products/north-america"),
-      ).toBeUndefined();
+        findEntry(result, "en", "/products/abs-flood-barriers"),
+      ).toBeDefined();
     });
 
-    it("includes starter blog article pages by default and keeps old generated pages absent", async () => {
-      const result = await sitemap();
-      const urls = result.map((entry) => entry.url);
-
-      expect(urls).toContain("https://example.com/en/blog");
-      expect(urls).toContain("https://example.com/zh/blog");
-
-      for (const slug of getStarterBlogArticleSlugs()) {
-        const articlePath = getBlogArticlePath(slug);
-
-        expect(urls).toContain(localizedUrl("en", articlePath));
-        expect(urls).toContain(localizedUrl("zh", articlePath));
-      }
-
-      const [contractSlug] = getStarterBlogArticleSlugs();
-
-      expect(contractSlug).toBeDefined();
-      if (!contractSlug) {
-        throw new Error("Expected at least one starter blog article");
-      }
-
-      const contractPath = getBlogArticlePath(contractSlug);
-      for (const locale of ["en", "zh"] as const) {
-        const article = getStarterBlogArticle(locale, contractSlug);
-
-        expect(findEntry(result, locale, contractPath)).toMatchObject({
-          changeFrequency: "weekly",
-          priority: 0.7,
-          lastModified: new Date(getStarterBlogArticleModifiedAt(article)),
-        });
-      }
-
-      expect(urls).not.toContain("https://example.com/en/blog/post-a");
-      expect(urls).not.toContain("https://example.com/zh/blog/post-a");
-    });
-
-    it("uses blog article updatedAt for sitemap lastModified when present", async () => {
-      mockBlogArticleOverrides.set("en:prepare-before-launch", {
-        updatedAt: "2026-05-20",
-      });
-
-      const result = await sitemap();
-      const articlePath = getBlogArticlePath("prepare-before-launch");
-
-      expect(findEntry(result, "en", articlePath)).toMatchObject({
-        lastModified: new Date("2026-05-20"),
-      });
-      expect(findEntry(result, "zh", articlePath)).toMatchObject({
-        lastModified: new Date("2026-05-05"),
-      });
-
-      mockBlogArticleOverrides.clear();
-    });
-
-    it("should exclude product catalog market pages by default", async () => {
+    it("should include current product catalog market pages by default", async () => {
       const result = await sitemap();
       const urls = result.map((entry) => entry.url);
 
       for (const marketSlug of getAllMarketSlugs()) {
-        expect(urls).not.toContain(
+        expect(urls).toContain(
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
-        );
-        expect(urls).not.toContain(
-          localizedUrl("zh", getProductMarketPath(marketSlug)),
         );
       }
     });
@@ -380,15 +285,13 @@ describe("sitemap.ts", () => {
       const aboutPath = getCanonicalPath("about");
       const contactPath = getCanonicalPath("contact");
       const productsPath = getCanonicalPath("products");
-      const blogPath = getCanonicalPath("blog");
-      const resourcesPath = getCanonicalPath("resources");
+      const requestQuotePath = getCanonicalPath("requestQuote");
       const [marketSlug] = getAllMarketSlugs();
       const marketPath = getProductMarketPath(marketSlug ?? "");
       const about = findEntry(result, defaultLocale, aboutPath);
       const contact = findEntry(result, defaultLocale, contactPath);
       const products = findEntry(result, defaultLocale, productsPath);
-      const blog = findEntry(result, defaultLocale, blogPath);
-      const resources = findEntry(result, defaultLocale, resourcesPath);
+      const requestQuote = findEntry(result, defaultLocale, requestQuotePath);
       const market = findEntry(result, defaultLocale, marketPath);
 
       expect(marketSlug).toBeDefined();
@@ -399,23 +302,20 @@ describe("sitemap.ts", () => {
         expect.any(Map),
       );
       expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        blogPath,
+        requestQuotePath,
         expect.any(Map),
       );
       expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        resourcesPath,
-        expect.any(Map),
-      );
-      expect(getStaticPageLastModified).not.toHaveBeenCalledWith(
         marketPath,
         expect.any(Map),
       );
       expect(about?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
       expect(contact?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
       expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(blog?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(resources?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(market).toBeUndefined();
+      expect(requestQuote?.lastModified).toEqual(
+        new Date("2024-11-01T00:00:00Z"),
+      );
+      expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
     });
 
     it("should keep terms page SEO defaults explicit", async () => {
@@ -438,57 +338,13 @@ describe("sitemap.ts", () => {
 
     it("should exclude custom-project-support from the default sitemap", async () => {
       const result = await sitemap();
-      const customProjectPath = getCanonicalPath("customProject");
-      const customProject = findEntry(result, defaultLocale, customProjectPath);
-
-      expect(customProject).toBeUndefined();
-    });
-
-    it("can generate showcase-full sitemap entries for demo static pages and product markets", async () => {
-      const result = await generateSitemapForProfile("showcase-full");
-      const urls = result.map((entry) => entry.url);
-
-      expect(urls).toContain(localizedUrl(defaultLocale, "/products"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/blog"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/capabilities"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/how-it-works"));
-      expect(urls).toContain(
-        localizedUrl(defaultLocale, "/custom-project-support"),
+      const customProject = findEntry(
+        result,
+        defaultLocale,
+        "/custom-project-support",
       );
 
-      for (const marketSlug of getAllMarketSlugs()) {
-        expect(urls).toContain(
-          localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
-        );
-        expect(urls).toContain(
-          localizedUrl("zh", getProductMarketPath(marketSlug)),
-        );
-      }
-    });
-
-    it("can generate content-marketing sitemap entries with blog but without products", async () => {
-      const result = await generateSitemapForProfile("content-marketing");
-      const urls = result.map((entry) => entry.url);
-
-      expect(urls).toContain(localizedUrl(defaultLocale, "/blog"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/about"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/contact"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/privacy"));
-      expect(urls).toContain(localizedUrl(defaultLocale, "/terms"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/products"));
-
-      for (const marketSlug of getAllMarketSlugs()) {
-        expect(urls).not.toContain(
-          localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
-        );
-      }
-
-      for (const slug of getStarterBlogArticleSlugs()) {
-        const articlePath = getBlogArticlePath(slug);
-
-        expect(urls).toContain(localizedUrl("en", articlePath));
-        expect(urls).toContain(localizedUrl("zh", articlePath));
-      }
+      expect(customProject).toBeUndefined();
     });
 
     it("can generate catalog sitemap entries with product markets but without blog", async () => {
@@ -497,19 +353,12 @@ describe("sitemap.ts", () => {
 
       expect(urls).toContain(localizedUrl(defaultLocale, "/products"));
       expect(urls).not.toContain(localizedUrl(defaultLocale, "/blog"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/about"));
+      expect(urls).toContain(localizedUrl(defaultLocale, "/about"));
 
       for (const marketSlug of getAllMarketSlugs()) {
         expect(urls).toContain(
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
         );
-      }
-
-      for (const slug of getStarterBlogArticleSlugs()) {
-        const articlePath = getBlogArticlePath(slug);
-
-        expect(urls).not.toContain(localizedUrl("en", articlePath));
-        expect(urls).not.toContain(localizedUrl("zh", articlePath));
       }
     });
   });

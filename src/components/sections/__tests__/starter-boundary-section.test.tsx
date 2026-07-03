@@ -13,41 +13,39 @@ async function renderAsyncComponent(
 }
 
 describe("StarterBoundarySection", () => {
-  it("explains that the polished site is still a replaceable starter", async () => {
+  it("renders the current Tucsenberg buying path copy", async () => {
     await renderAsyncComponent(StarterBoundarySection());
 
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "title",
+        name: "startPath.title",
       }),
     ).toBeInTheDocument();
 
     const list = screen.getByRole("list", {
-      name: "listLabel",
+      name: "startPath.title",
     });
     expect(within(list).getAllByRole("listitem")).toHaveLength(4);
-    expect(screen.getByRole("link", { name: "primary" })).toHaveAttribute(
-      "href",
-      SINGLE_SITE_ROUTE_HREFS.howItWorks,
-    );
-    expect(screen.getByRole("link", { name: "secondary" })).toHaveAttribute(
-      "href",
-      SINGLE_SITE_ROUTE_HREFS.contact,
-    );
+    expect(
+      screen.getByRole("link", { name: "finalCta.primary" }),
+    ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.products);
+    expect(
+      screen.getByRole("link", { name: "finalCta.secondary" }),
+    ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.requestQuote);
   });
 
-  it("keeps starter boundary translation keys wired to real copy", () => {
-    const copy = enCriticalMessages.home.starterBoundary;
+  it("keeps buying path translation keys wired to real copy", () => {
+    const copy = enCriticalMessages.home.startPath;
+    const finalCtaCopy = enCriticalMessages.home.finalCta;
 
     expect(copy.title.trim().length).toBeGreaterThan(0);
     expect(copy.description.trim().length).toBeGreaterThan(0);
-    expect(copy.listLabel.trim().length).toBeGreaterThan(0);
-    expect(copy.items).toHaveLength(4);
-    expect(copy.primary.trim().length).toBeGreaterThan(0);
-    expect(copy.secondary.trim().length).toBeGreaterThan(0);
+    expect(Object.keys(copy.items)).toHaveLength(4);
+    expect(finalCtaCopy.primary.trim().length).toBeGreaterThan(0);
+    expect(finalCtaCopy.secondary.trim().length).toBeGreaterThan(0);
 
-    for (const item of copy.items) {
+    for (const item of Object.values(copy.items)) {
       expect(item.title.trim().length).toBeGreaterThan(0);
       expect(item.description.trim().length).toBeGreaterThan(0);
     }

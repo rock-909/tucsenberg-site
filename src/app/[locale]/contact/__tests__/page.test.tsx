@@ -149,7 +149,7 @@ describe("ContactPage MDX migration", () => {
     expect(vi.mocked(setRequestLocale)).toHaveBeenCalledWith("en");
   });
 
-  it("renders localized contact panel copy from the top-level contact namespace", async () => {
+  it("renders English contact panel copy from the top-level contact namespace", async () => {
     const actualContactCopy = await vi.importActual<
       typeof import("@/lib/contact/getContactCopy")
     >("@/lib/contact/getContactCopy");
@@ -158,22 +158,22 @@ describe("ContactPage MDX migration", () => {
     );
 
     const page = await ContactPage({
-      params: Promise.resolve({ locale: "zh" }),
+      params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(
-      screen.getByRole("heading", { name: "联系方式" }),
+      screen.getByRole("heading", { name: "Contact Methods" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "联系后会发生什么" }),
+      screen.getByRole("heading", { name: "What to expect" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("工作日 24 小时内")).toBeInTheDocument();
-    expect(screen.getByText("建议提供")).toBeInTheDocument();
+    expect(screen.getByText("Within 24 business hours")).toBeInTheDocument();
+    expect(screen.getByText("Helpful details")).toBeInTheDocument();
   });
 
-  it("does not render placeholder contact details while public contact facts are not configured", async () => {
+  it("renders the public email and hides the owner TODO phone", async () => {
     const { ContactMethodsCard } = await import("../contact-page-sections");
 
     render(
@@ -188,13 +188,9 @@ describe("ContactPage MDX migration", () => {
       />,
     );
 
-    expect(screen.queryByText("sales@example.com")).not.toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Use the form on this page; configure a real receiver before public launch.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText("sales@tucsenberg.com")).toBeInTheDocument();
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
+    expect(screen.queryByText("TODO-OWNER")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
   });
 
@@ -302,16 +298,18 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
         intent: "product-family",
-        market: "north-america",
-        family: "couplings",
+        market: "abs-flood-barriers",
+        family: "abs-boxwall",
       }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(screen.getByText("You are asking about:")).toBeInTheDocument();
-    expect(screen.getByText(/Primary Offer Example/)).toBeInTheDocument();
-    expect(screen.getByText(/Support Packages/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/ABS Interlocking Boxwall Flood Barriers/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/ABS boxwall units/)).toBeInTheDocument();
   });
 
   it("ignores invalid product family context without rendering raw query text", async () => {
@@ -319,7 +317,7 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
         intent: "product-family",
-        market: "north-america",
+        market: "abs-flood-barriers",
         family: "<script>alert(1)</script>",
       }),
     });
@@ -338,8 +336,8 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({
         intent: "product-family",
-        market: "north-america",
-        family: "couplings",
+        market: "abs-flood-barriers",
+        family: "abs-boxwall",
       }),
     });
 
@@ -368,48 +366,39 @@ describe("ContactPage MDX migration", () => {
     const enMetadata = await generateMetadata({
       params: Promise.resolve({ locale: "en" }),
     });
-    const zhMetadata = await generateMetadata({
-      params: Promise.resolve({ locale: "zh" }),
-    });
 
     expect(enMetadata.title).toBe("Contact");
     expect(enMetadata.description).toBe(
       "Use this starter contact page as a quick action for inquiries, demo requests, or launch questions before connecting a real receiver.",
     );
-    expect(zhMetadata.title).toBe("联系");
-    expect(zhMetadata.description).toBe(
-      "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口；正式上线前请接入真实接收方。",
-    );
     expect(enMetadata.other?.google).not.toBe("notranslate");
-    expect(zhMetadata.other?.google).not.toBe("notranslate");
   });
 
   it("generates runtime SEO metadata for the actual localized contact route", async () => {
     const metadata = await generateMetadata({
-      params: Promise.resolve({ locale: "zh" }),
+      params: Promise.resolve({ locale: "en" }),
     });
 
     expect(metadata.alternates).toEqual(
       expect.objectContaining({
-        canonical: "https://example.com/zh/contact",
+        canonical: "https://example.com/contact",
         languages: expect.objectContaining({
-          en: "https://example.com/en/contact",
-          zh: "https://example.com/zh/contact",
-          "x-default": "https://example.com/en/contact",
+          en: "https://example.com/contact",
+          "x-default": "https://example.com/contact",
         }),
       }),
     );
     expect(metadata.openGraph).toEqual(
       expect.objectContaining({
-        url: "https://example.com/zh/contact",
-        locale: "zh",
+        url: "https://example.com/contact",
+        locale: "en",
         type: "website",
       }),
     );
     expect(metadata.twitter).toEqual(
       expect.objectContaining({
         card: "summary_large_image",
-        title: "联系",
+        title: "Contact",
       }),
     );
     expect(metadata.robots).toEqual(

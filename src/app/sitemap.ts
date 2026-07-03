@@ -9,6 +9,7 @@ import {
 } from "@/lib/sitemap-utils";
 import {
   getBlogArticlePath,
+  LOCALES_CONFIG,
   getProductMarketPath,
   SITE_CONFIG,
 } from "@/config/paths";
@@ -49,14 +50,28 @@ function getPageConfig(path: string, profileId?: StarterProfileId): PageConfig {
   return getSingleSiteSitemapPageConfig(path, profileId);
 }
 
+function buildLocalePath(locale: string, path: string): string {
+  const normalizedPath = path === "" ? "/" : path;
+
+  if (LOCALES_CONFIG.localePrefix === "never") {
+    return normalizedPath;
+  }
+
+  return normalizedPath === "/" ? `/${locale}` : `/${locale}${normalizedPath}`;
+}
+
+function buildAbsoluteUrl(locale: string, path: string): string {
+  return new URL(buildLocalePath(locale, path), BASE_URL).toString();
+}
+
 // Build alternate languages object for a URL path
 function buildAlternateLanguages(path: string): Record<string, string> {
   const entries = routing.locales.map((locale) => [
     locale,
-    `${BASE_URL}/${locale}${path}`,
+    buildAbsoluteUrl(locale, path),
   ]);
   // x-default 指向默认语言版本，帮助搜索引擎识别语言选择器页面
-  entries.push(["x-default", `${BASE_URL}/${routing.defaultLocale}${path}`]);
+  entries.push(["x-default", buildAbsoluteUrl(routing.defaultLocale, path)]);
   return Object.fromEntries(entries);
 }
 
@@ -101,7 +116,7 @@ async function generateStaticPageEntries(
   for (const locale of routing.locales) {
     for (const page of publicStaticPages) {
       const config = getPageConfig(page, profileId);
-      const url = `${BASE_URL}/${locale}${page}`;
+      const url = buildAbsoluteUrl(locale, page);
       const alternates = buildAlternateLanguages(page);
       const lastModified =
         mdxDates.get(page) ??
@@ -135,7 +150,7 @@ function generateCatalogEntries(
     for (const locale of routing.locales) {
       entries.push(
         createSitemapEntry({
-          url: `${BASE_URL}/${locale}${path}`,
+          url: buildAbsoluteUrl(locale, path),
           lastModified,
           config: marketConfig,
           alternates: buildAlternateLanguages(path),
@@ -165,7 +180,7 @@ function generateBlogArticleEntries(
 
       entries.push(
         createSitemapEntry({
-          url: `${BASE_URL}/${locale}${path}`,
+          url: buildAbsoluteUrl(locale, path),
           lastModified: new Date(getStarterBlogArticleModifiedAt(article)),
           config: articleConfig,
           alternates: buildAlternateLanguages(path),

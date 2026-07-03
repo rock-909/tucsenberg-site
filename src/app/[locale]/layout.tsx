@@ -18,6 +18,7 @@ import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 import { loadClientMessages } from "@/lib/i18n/client-messages";
 import { mainNavigation } from "@/lib/navigation";
+import type { Locale } from "@/i18n/routing-config";
 
 // Client analytics are rendered as an island to avoid impacting LCP
 
@@ -29,7 +30,7 @@ interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 interface AsyncLocaleLayoutContentProps {
-  locale: "en" | "zh";
+  locale: Locale;
   children: ReactNode;
 }
 

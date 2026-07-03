@@ -31,7 +31,9 @@ const mockTranslations: Record<string, string> = {
   "navigation.about": "About",
   "navigation.services": "Services",
   "navigation.products": "Products",
+  "navigation.oemWholesale": "OEM & Wholesale",
   "navigation.contact": "Contact",
+  "navigation.contactSales": "Request a Quote",
 };
 
 vi.mock("next-intl", () => ({
@@ -73,18 +75,38 @@ vi.mock("next-intl/server", () => ({
 // Mock @/i18n/routing - 提供完整的路由Mock配置
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
+    localePrefix: "never",
     pathnames: {
       "/": "/",
       "/about": "/about",
       "/contact": "/contact",
       "/products": "/products",
+      "/products/[market]": "/products/[market]",
+      "/oem-wholesale": "/oem-wholesale",
+      "/guides/flood-barrier-materials-guide":
+        "/guides/flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications":
+        "/guides/flood-barrier-specifications",
+      "/request-quote": "/request-quote",
+      "/warranty": "/warranty",
       "/privacy": "/privacy",
+      "/terms": "/terms",
     },
   },
-  Link: ({ children, href, ...props }: any) =>
-    React.createElement("a", { href, ...props }, children),
+  Link: ({ children, href, ...props }: any) => {
+    const resolvedHref =
+      typeof href === "string"
+        ? href
+        : `${href.pathname}${
+            href.query === undefined
+              ? ""
+              : `?${new URLSearchParams(href.query)}`
+          }`;
+
+    return React.createElement("a", { href: resolvedHref, ...props }, children);
+  },
   useRouter: vi.fn(() => ({
     push: vi.fn(),
     replace: vi.fn(),

@@ -2,6 +2,10 @@
 
 import { Check, Globe } from "lucide-react";
 import { useLocale } from "next-intl";
+import {
+  LOCALES_CONFIG,
+  type ConfiguredLocale,
+} from "@/config/paths/locales-config";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,10 +18,14 @@ interface MobileLanguageSwitcherProps {
   pathname: string;
 }
 
-const LANGUAGES = [
-  { locale: "en" as const, label: "English" },
-  { locale: "zh" as const, label: "简体中文" },
-];
+const LANGUAGES = LOCALES_CONFIG.locales.map((locale) => ({
+  locale,
+  label: LOCALES_CONFIG.displayNames[locale],
+}));
+
+function isConfiguredLocale(locale: string): locale is ConfiguredLocale {
+  return (LOCALES_CONFIG.locales as readonly string[]).includes(locale);
+}
 
 export function MobileLanguageSwitcher({
   isExpanded,
@@ -27,8 +35,10 @@ export function MobileLanguageSwitcher({
   onNavigate,
 }: MobileLanguageSwitcherProps) {
   const activeLocale = useLocale();
-  const currentLocale = activeLocale === "zh" ? "zh" : "en";
-  const currentLanguageLabel = currentLocale === "zh" ? "简体中文" : "English";
+  const currentLocale = isConfiguredLocale(activeLocale)
+    ? activeLocale
+    : LOCALES_CONFIG.defaultLocale;
+  const currentLanguageLabel = LOCALES_CONFIG.displayNames[currentLocale];
 
   const handleNavigate = () => {
     onExpandedChange(false);

@@ -14,6 +14,24 @@ function readRepoFile(relativePath: string): string {
   return readFileSync(join(REPO_ROOT, relativePath), "utf8");
 }
 
+function expectStaticRouteOwner(routeOwner: string): void {
+  expect(routeOwner.startsWith("src/app/[locale]/")).toBe(true);
+  expect(routeOwner.endsWith("page.tsx")).toBe(true);
+
+  const relativePath = routeOwner.slice("src/app/[locale]/".length);
+  const segments = relativePath.split("/");
+  expect(segments.at(-1)).toBe("page.tsx");
+
+  const routeSegments = segments.slice(0, -1);
+  const allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789-";
+  for (const segment of routeSegments) {
+    expect(segment.length).toBeGreaterThan(0);
+    for (const character of segment) {
+      expect(allowedCharacters).toContain(character);
+    }
+  }
+}
+
 describe("static public pages architecture contract", () => {
   it("keeps pages.config.ts as the static public pages truth source", () => {
     const docs = [
@@ -38,9 +56,7 @@ describe("static public pages architecture contract", () => {
 
   it("keeps route owners static, literal, and backed by real files", () => {
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
-      expect(definition.routeOwner).toMatch(
-        /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
-      );
+      expectStaticRouteOwner(definition.routeOwner);
       expect(definition.routeOwner).not.toContain("[market]");
       expect(definition.routeOwner).not.toContain("[slug]");
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed repo-local routeOwner paths from the registry contract
@@ -53,14 +69,14 @@ describe("static public pages architecture contract", () => {
       "home",
       "about",
       "products",
-      "blog",
-      "resources",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
-      "capabilities",
-      "howItWorks",
-      "customProject",
     ] as const satisfies readonly PageType[];
 
     expect(PUBLIC_STATIC_PAGE_TYPES).toEqual(expected);

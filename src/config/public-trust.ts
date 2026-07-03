@@ -5,7 +5,7 @@ const PLACEHOLDER_EMAIL_VALUES = new Set([
   "sales@example.com",
   "starter-contact@example.com",
 ]);
-const PLACEHOLDER_PHONE_VALUES = new Set(["+86-518-0000-0000"]);
+const PLACEHOLDER_PHONE_VALUES = new Set(["+86-518-0000-0000", "TODO-OWNER"]);
 const PHONE_ZERO_BLOCK_PATTERN = /(?:^|[-\s])0{3,}(?:[-\s]|$)/;
 const EXAMPLE_EMAIL_DOMAIN_PATTERN =
   /@(?:example\.com|example\.org|example\.net|[\w.-]+\.example)$/iu;

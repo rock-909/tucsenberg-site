@@ -24,14 +24,14 @@ describe("FinalCTA", () => {
     expect(screen.getByText("description")).toBeInTheDocument();
   });
 
-  it("renders default company-site final CTAs with /products primary", async () => {
+  it("renders Tucsenberg final CTAs with products primary and RFQ secondary", async () => {
     await renderAsyncComponent(FinalCTA());
     const primaryLink = screen.getByText("primary").closest("a");
     const secondaryLink = screen.getByText("secondary").closest("a");
-    expect(HOMEPAGE_SECTION_LINKS.primaryCta).toBe("/products");
-    expect(HOMEPAGE_SECTION_LINKS.secondaryCta).toBe("/contact");
+    expect(HOMEPAGE_SECTION_LINKS.products).toBe("/products");
+    expect(HOMEPAGE_SECTION_LINKS.requestQuote).toBe("/request-quote");
     expect(primaryLink).toHaveAttribute("href", "/products");
-    expect(secondaryLink).toHaveAttribute("href", "/contact");
+    expect(secondaryLink).toHaveAttribute("href", "/request-quote");
   });
 
   it("renders trust facts as a semantic list", async () => {

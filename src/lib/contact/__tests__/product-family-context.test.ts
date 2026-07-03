@@ -7,14 +7,14 @@ import {
 const messages = {
   catalog: {
     markets: {
-      "north-america": {
-        label: "Primary Offer Example",
+      "abs-flood-barriers": {
+        label: "ABS Interlocking Boxwall Flood Barriers",
       },
     },
     families: {
-      "north-america": {
-        couplings: {
-          label: "Support Packages",
+      "abs-flood-barriers": {
+        "abs-boxwall": {
+          label: "ABS boxwall units",
         },
       },
     },
@@ -25,15 +25,15 @@ describe("product-family contact context", () => {
   it("builds a Contact href object with internal slugs only", () => {
     expect(
       buildProductFamilyContactHref({
-        marketSlug: "north-america",
-        familySlug: "couplings",
+        marketSlug: "abs-flood-barriers",
+        familySlug: "abs-boxwall",
       }),
     ).toEqual({
       pathname: "/contact",
       query: {
         intent: "product-family",
-        market: "north-america",
-        family: "couplings",
+        market: "abs-flood-barriers",
+        family: "abs-boxwall",
       },
     });
   });
@@ -42,18 +42,18 @@ describe("product-family contact context", () => {
     const context = parseProductFamilyContactContext({
       searchParams: {
         intent: "product-family",
-        market: "north-america",
-        family: "couplings",
+        market: "abs-flood-barriers",
+        family: "abs-boxwall",
       },
       messages,
     });
 
     expect(context).toEqual({
       intent: "product-family",
-      marketSlug: "north-america",
-      familySlug: "couplings",
-      marketLabel: "Primary Offer Example",
-      familyLabel: "Support Packages",
+      marketSlug: "abs-flood-barriers",
+      familySlug: "abs-boxwall",
+      marketLabel: "ABS Interlocking Boxwall Flood Barriers",
+      familyLabel: "ABS boxwall units",
     });
   });
 
@@ -61,7 +61,7 @@ describe("product-family contact context", () => {
     const context = parseProductFamilyContactContext({
       searchParams: {
         intent: "product-family",
-        market: "north-america",
+        market: "abs-flood-barriers",
         family: "<script>alert(1)</script>",
       },
       messages,
@@ -74,8 +74,8 @@ describe("product-family contact context", () => {
     const context = parseProductFamilyContactContext({
       searchParams: {
         intent: "raw-message",
-        market: "north-america",
-        family: "couplings",
+        market: "abs-flood-barriers",
+        family: "abs-boxwall",
       },
       messages,
     });

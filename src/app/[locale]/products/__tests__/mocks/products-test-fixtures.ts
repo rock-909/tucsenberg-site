@@ -2,56 +2,66 @@ import { screen } from "@testing-library/react";
 import { expect } from "vitest";
 
 export const mockCatalogTranslationsEn = {
-  "overview.title": "Product overview",
+  "overview.title": "Flood Barrier Product Lines",
   "overview.description":
-    "Use this page to introduce the main product lines or offer groups visitors should understand before they contact you.",
-  "overview.cardsTitle": "What visitors should learn here",
+    "Five flood barrier lines for dealers, importers, brands, contractors and small business buyers: ABS boxwall, aluminum flood gates, absorbent flood bags, tube dams and FRP composite planks.",
+  "overview.cardsTitle": "Start with the product line",
   "overview.cardsDescription":
-    "Keep the default overview short. Replace these cards with real product groups, proof materials, and buying steps.",
-  "overview.boundaryTitle": "Replace before launch",
+    "Match the opening, ground type and order size before asking for exact quotation details.",
+  "overview.boundaryTitle": "No published-price games",
   "overview.boundaryDescription":
-    "The structure is ready, but the business facts must come from the real company.",
+    "The quote is the price conversation. Send dimensions, quantity, market and delivery port so the line can be checked properly.",
   "overview.pathTitle": "How this overview should work",
   "overview.pathDescription":
-    "Keep the page as a simple map: show offer groups, point to proof, then route the visitor to resources or contact.",
-  "overview.detailTitle": "Use detail pages only when needed",
+    "Scan the five lines, compare where each one fits, then send an RFQ with dimensions, quantity and market.",
+  "overview.detailTitle": "When to open a product page",
   "overview.detailDescription":
-    "Stay with this lightweight overview until the real business has product families, comparison rules, and quote logic ready.",
-  "overviewCards.mainOffer.title": "Product groups",
-  "overviewCards.mainOffer.description":
-    "Summarize the main categories, packages, or product lines a visitor needs to compare.",
-  "overviewCards.proofMaterials.title": "Proof materials",
-  "overviewCards.proofMaterials.description":
-    "Point to brochures, photos, examples, or documents that help a buyer trust the offer.",
-  "overviewCards.nextStep.title": "Buying next step",
-  "overviewCards.nextStep.description":
-    "Make it clear when visitors should read resources, ask a question, or request a quote.",
-  "boundary.items.content": "Replace product names and descriptions",
-  "boundary.items.assets": "Replace images, brochures, and proof",
-  "boundary.items.details": "Add real availability, pricing, or quote rules",
-  "path.items.scan.title": "Scan product groups",
+    "Use the detail pages when the buying question depends on material, opening type, deployment method or OEM/private label options.",
+  "boundary.items.content": "Prices stay in the quotation, not on public pages",
+  "boundary.items.assets": "Photos and drawings are welcome with the RFQ",
+  "boundary.items.details":
+    "Custom-cut and private label details are confirmed per order",
+  "path.items.scan.title": "Scan the five lines",
   "path.items.scan.description":
-    "Help visitors understand the offer families before they ask for specifics.",
-  "path.items.compare.title": "Check proof materials",
+    "ABS boxwall, aluminum gates, flood bags, tube dams and FRP planks cover different site conditions.",
+  "path.items.compare.title": "Check the fit",
   "path.items.compare.description":
-    "Send visitors to resources when they need brochures, photos, or buyer guidance.",
-  "path.items.ask.title": "Ask for fit",
+    "Defined openings, perimeters, emergency stock, rough ground and corrosive sites need different materials.",
+  "path.items.ask.title": "Send the RFQ",
   "path.items.ask.description":
-    "Move visitors to contact when they need pricing, availability, or project fit.",
-  "detail.items.families": "Real product families and priorities are confirmed",
+    "Standard items are quoted in 12 hours; custom configurations within 48.",
+  "detail.items.families":
+    "Product family, material and deployment method affect the recommendation",
   "detail.items.comparison":
-    "Specifications or comparison rules affect buying decisions",
+    "Specification tables and drawings decide custom-cut configurations",
   "detail.items.markets":
-    "Markets, standards, or availability need separate pages",
+    "OEM/private label, cartons, pallets, LCL, container and project schedules are quoted differently",
   "cta.title": "Need more detail before contacting?",
   "cta.description":
-    "Use Resources for supporting materials, or contact the team when the visitor is ready for the next step.",
-  "cta.resources": "View resources",
-  "cta.contact": "Contact",
+    "Send an RFQ with openings, quantity, market and delivery port.",
+  "cta.resources": "View guides",
+  "cta.contact": "Request a Quote",
+  "markets.abs-flood-barriers.label": "ABS Interlocking Boxwall Flood Barriers",
+  "markets.abs-flood-barriers.description":
+    "Freestanding ABS interlocking flood barriers for driveways, doorways and paved perimeters.",
+  "markets.aluminum-flood-gates.label":
+    "Aluminum Flood Gates & Demountable Barrier Systems",
+  "markets.aluminum-flood-gates.description":
+    "Demountable plank systems for doors, garages, loading docks and shopfronts.",
+  "markets.absorbent-flood-bags.label":
+    "Absorbent Flood Bags (Sandless Sandbags)",
+  "markets.absorbent-flood-bags.description":
+    "Water-activated sandless flood bags for low-level freshwater leaks, thresholds and reseller stock.",
+  "markets.flood-tube-dams.label": "Water & Air-Filled Tube Dams",
+  "markets.flood-tube-dams.description":
+    "Inflatable PVC tube dams for long runs, rough ground and planned emergency stock.",
+  "markets.frp-flood-barriers.label": "FRP Composite Planks",
+  "markets.frp-flood-barriers.description":
+    "Order-driven pultruded FRP flood planks for coastal, industrial and electrical sites.",
 } as const;
 
 export const mockCatalogTranslationsZh = {
-  "overview.title": "产品概览",
+  "overview.title": "防洪产品线",
   "overview.description":
     "用这个页面介绍访客在联系前需要了解的主要产品线或业务组合。",
   "overview.cardsTitle": "访客应该在这里了解什么",
@@ -66,15 +76,6 @@ export const mockCatalogTranslationsZh = {
   "overview.detailTitle": "只有真正需要时才使用详情页",
   "overview.detailDescription":
     "在真实业务的产品系列、比较规则和报价逻辑准备好前，先保持轻量概览。",
-  "overviewCards.mainOffer.title": "产品组合",
-  "overviewCards.mainOffer.description":
-    "概括访客需要比较的主要类别、套餐或产品线。",
-  "overviewCards.proofMaterials.title": "证明材料",
-  "overviewCards.proofMaterials.description":
-    "指向手册、图片、示例或资料，帮助买家判断可信度。",
-  "overviewCards.nextStep.title": "购买下一步",
-  "overviewCards.nextStep.description":
-    "说明访客什么时候该看资料、提问题或提交询价。",
   "boundary.items.content": "替换产品名称和介绍",
   "boundary.items.assets": "替换图片、手册和证明材料",
   "boundary.items.details": "补充真实供货、价格或报价规则",
@@ -91,8 +92,23 @@ export const mockCatalogTranslationsZh = {
   "detail.items.markets": "市场、标准或供货情况需要独立页面",
   "cta.title": "联系前需要更多资料？",
   "cta.description": "可以先查看资料页，也可以在访客准备好时直接联系。",
-  "cta.resources": "查看资料",
-  "cta.contact": "联系",
+  "cta.resources": "查看指南",
+  "cta.contact": "提交询价",
+  "markets.abs-flood-barriers.label": "ABS 拼接式挡水板",
+  "markets.abs-flood-barriers.description":
+    "用于车道、门口和硬质地面周界的免固定 ABS 拼接式挡水板。",
+  "markets.aluminum-flood-gates.label": "铝合金挡水闸与可拆卸挡水系统",
+  "markets.aluminum-flood-gates.description":
+    "用于门口、车库、装卸口和店面的可拆卸铝合金挡水板系统。",
+  "markets.absorbent-flood-bags.label": "吸水膨胀防洪袋",
+  "markets.absorbent-flood-bags.description":
+    "用于低水位淡水渗漏、门槛和经销备货的遇水膨胀防洪袋。",
+  "markets.flood-tube-dams.label": "水/气填充管式防洪坝",
+  "markets.flood-tube-dams.description":
+    "用于长距离、粗糙地面和应急备货的 PVC 充气/充水管坝。",
+  "markets.frp-flood-barriers.label": "FRP 复合挡水板",
+  "markets.frp-flood-barriers.description":
+    "面向沿海、工业和电气场景的订单制拉挤 FRP 挡水板。",
 } as const;
 
 export function createCatalogTranslator(

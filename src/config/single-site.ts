@@ -44,23 +44,25 @@ function resolveSingleSiteBaseUrl(fallback: string): string {
   return fallback;
 }
 
-const baseUrl = resolveSingleSiteBaseUrl("https://example.com");
+const baseUrl = resolveSingleSiteBaseUrl("https://tucsenberg.com");
 
 const social = {
-  twitter: "https://x.com/example",
-  linkedin: "https://www.linkedin.com/company/example",
+  twitter: "",
+  linkedin: "",
 } as const;
 
 const FOOTER_NAVIGATION_PAGE_TYPES = [
   "home",
   "products",
-  "blog",
-  "resources",
+  "oemWholesale",
+  "materialsGuide",
   "about",
 ] as const satisfies readonly PageType[];
 
 const FOOTER_SUPPORT_PAGE_TYPES = [
+  "requestQuote",
   "contact",
+  "warranty",
   "privacy",
   "terms",
 ] as const satisfies readonly PageType[];
@@ -72,10 +74,12 @@ type FooterLinkPageType =
 const FOOTER_LABELS = {
   home: "Home",
   products: "Products",
-  blog: "Blog",
-  resources: "Resources",
+  oemWholesale: "OEM & Wholesale",
+  materialsGuide: "Materials Guide",
   about: "About",
+  requestQuote: "Request a Quote",
   contact: "Contact",
+  warranty: "Warranty Policy",
   privacy: "Privacy Policy",
   terms: "Terms of Service",
 } as const satisfies Record<FooterLinkPageType, string>;
@@ -83,10 +87,12 @@ const FOOTER_LABELS = {
 const FOOTER_TRANSLATION_KEYS = {
   home: "footer.sections.navigation.home",
   products: "footer.sections.navigation.products",
-  blog: "footer.sections.navigation.blog",
-  resources: "footer.sections.navigation.resources",
+  oemWholesale: "footer.sections.navigation.oemWholesale",
+  materialsGuide: "footer.sections.navigation.materialsGuide",
   about: "footer.sections.navigation.about",
+  requestQuote: "footer.sections.support.requestQuote",
   contact: "footer.sections.support.contact",
+  warranty: "footer.sections.support.warranty",
   privacy: "footer.sections.support.privacy",
   terms: "footer.sections.support.terms",
 } as const satisfies Record<FooterLinkPageType, string>;
@@ -150,36 +156,18 @@ export function getSingleSiteFooterColumns(
       translationKey: "footer.sections.support.title",
       links: supportLinks,
     },
-    {
-      key: "social",
-      title: "Social",
-      translationKey: "footer.sections.social.title",
-      links: [
-        {
-          key: "twitter",
-          label: "Twitter",
-          href: social.twitter,
-          external: true,
-          translationKey: "footer.sections.social.twitter",
-        },
-        {
-          key: "linkedin",
-          label: "LinkedIn",
-          href: social.linkedin,
-          external: true,
-          translationKey: "footer.sections.social.linkedin",
-        },
-      ],
-    },
   ];
 }
 
+export const TUCSENBERG_REGISTERED_ADDRESS =
+  "No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China";
+
 const contact = {
-  phone: "+86-518-0000-0000",
-  email: "starter-contact@example.com",
+  phone: "TODO-OWNER",
+  email: "sales@tucsenberg.com",
 } as const;
 
-const establishedYear = 2018;
+const establishedYear = 2021;
 const siteFactSnapshotYear = 2026;
 
 /**
@@ -190,24 +178,21 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
   key: SINGLE_SITE_KEY,
   config: {
     baseUrl,
-    name: "Showcase Website Starter",
-    description:
-      "Public demo starter for launching a showcase website foundation",
+    name: "Tucsenberg",
+    description: "Factory-direct flood barrier supply from China",
     seo: {
-      titleTemplate: "%s | Showcase Website Starter",
-      defaultTitle: "Showcase Website Starter - Public Demo Starter Site",
+      titleTemplate: "%s | Tucsenberg",
+      defaultTitle:
+        "Flood Barrier Manufacturer & Supplier from China | Tucsenberg",
       defaultDescription:
-        "A public demo starter site for teams that need a deployable showcase website foundation before they have a real website.",
+        "Factory-direct flood barriers from China: ABS boxwall, aluminum flood gates, sandless flood bags and tube dams. OEM & private label. Quotes in 12 hours.",
       keywords: [
-        "showcase website starter",
-        "public demo starter site",
-        "company website starter",
-        "product showcase website",
-        "service showcase website",
-        "inquiry website starter",
-        "multilingual website starter",
-        "component governance",
-        "storybook website starter",
+        "flood barrier manufacturer",
+        "flood barrier supplier China",
+        "ABS flood barrier",
+        "aluminum flood gates",
+        "sandless flood bags",
+        "OEM flood barriers",
       ],
     },
     social,
@@ -215,60 +200,48 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
   },
   facts: {
     company: {
-      name: "Showcase Website Starter",
+      name: "Jiangsu Tucson Borg Technology Co., Ltd. (trading as Tucsenberg)",
       established: establishedYear,
       yearsInBusiness: siteFactSnapshotYear - establishedYear,
-      employees: 60,
+      employees: 0,
       location: {
-        country: "Replace before launch",
-        city: "Replace before launch",
-        address: "Replace before launch",
+        country: "China",
+        city: "Lianyungang, Jiangsu",
+        address: TUCSENBERG_REGISTERED_ADDRESS,
       },
     },
     contact: {
       phone: contact.phone,
       email: contact.email,
       businessHours: {
-        weekdays: "8:00 - 17:30",
-        saturday: "8:00 - 12:00",
+        weekdays: "UTC+8",
+        saturday: "By appointment",
         sundayClosed: true,
       },
     },
-    certifications: [
-      {
-        name: "ISO 9001:2015",
-        certificateNumber: "EXAMPLE-CERT-ID",
-        validUntil: "2027-03",
-      },
-    ],
+    certifications: [],
     stats: {
-      exportCountries: 20,
+      exportCountries: 0,
       annualCapacity:
-        "Example product, service, resource, and inquiry presentation",
-      clientsServed: 60,
-      exampleFootprint: 100,
-      onTimeDeliveryRate: 98,
+        "ABS boxwall, aluminum gates, flood bags, tube dams, and FRP planks",
+      clientsServed: 0,
+      exampleFootprint: 0,
+      onTimeDeliveryRate: 0,
     },
-    social: {
-      linkedin: social.linkedin,
-      twitter: social.twitter,
-    },
-    // These paths are intentional starter placeholders.
-    // Derived projects should provide real brand files before enabling them.
-    // Do NOT convert logo.tsx to next/image static import until files exist.
+    social,
     brandAssets: {
       logo: {
-        status: "pending",
-        horizontal: "/images/logo.svg",
-        horizontalPng: "/images/logo.png",
-        square: "/images/logo-square.svg",
-        width: 200,
-        height: 60,
+        status: "ready",
+        horizontal: "/images/tucsenberg-logo.png",
+        horizontalPng: "/images/tucsenberg-logo.png",
+        square: "/images/tucsenberg-logo-square.png",
+        width: 240,
+        height: 72,
       },
       productPhotos: {
         status: "pending",
       },
-      ogImage: "/images/og-image.jpg",
+      ogImage: "/images/tucsenberg-og.png",
       favicon: "/favicon.ico",
     },
   },

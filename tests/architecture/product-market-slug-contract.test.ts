@@ -5,7 +5,6 @@ import {
   MARKET_SPECS_BY_SLUG,
 } from "@/constants/product-specs/market-spec-registry";
 import enCriticalMessages from "@messages/en/critical.json";
-import zhCriticalMessages from "@messages/zh/critical.json";
 
 function sorted(values: readonly string[]): string[] {
   return values.toSorted();
@@ -97,7 +96,7 @@ describe("product market slug contract", () => {
     }
   });
 
-  it("keeps every market family labeled in English and Chinese critical messages", () => {
+  it("keeps every market family labeled in English critical messages", () => {
     for (const family of PRODUCT_CATALOG.families) {
       const basePath = ["catalog", "families", family.marketSlug, family.slug];
       const labelPath = [...basePath, "label"];
@@ -112,16 +111,6 @@ describe("product market slug contract", () => {
         enCriticalMessages,
         descriptionPath,
         `missing English family description for ${family.marketSlug}/${family.slug}`,
-      );
-      expectNonEmptyMessage(
-        zhCriticalMessages,
-        labelPath,
-        `missing Chinese family label for ${family.marketSlug}/${family.slug}`,
-      );
-      expectNonEmptyMessage(
-        zhCriticalMessages,
-        descriptionPath,
-        `missing Chinese family description for ${family.marketSlug}/${family.slug}`,
       );
     }
   });

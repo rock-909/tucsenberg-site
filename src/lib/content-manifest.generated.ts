@@ -38,80 +38,27 @@ const _entries: ContentEntry[] = [
     "source": "active-content",
     "metadata": {
       "locale": "en",
-      "title": "About this showcase website starter",
-      "description": "Learn why this starter exists, who it fits, who it does not fit, and what must be replaced before launch.",
+      "title": "Who you're actually buying from",
+      "description": "Tucsenberg is the trading name of Jiangsu Tucson Borg Technology Co., Ltd., a factory-direct flood barrier supply brand from Lianyungang, Jiangsu.",
       "slug": "about",
-      "publishedAt": "2024-01-10",
-      "updatedAt": "2026-05-05",
-      "author": "Showcase Website Starter Team",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2026-05-05",
+      "lastReviewed": "2026-07-02",
       "draft": false,
-      "heroTitle": "A showcase website starter designed for real public launch preparation",
-      "heroSubtitle": "Not a fictional company profile",
-      "heroDescription": "This page explains what the starter is, who it fits, and what must still become real before a public launch.",
       "seo": {
-        "title": "About this showcase website starter",
-        "description": "Starter identity, fit, boundaries, and replacement requirements for a public showcase website foundation.",
+        "title": "About Tucsenberg — Factory-Direct Flood Barrier Supply from China",
+        "description": "Tucsenberg is the trading name of Jiangsu Tucson Borg Technology Co., Ltd., coordinating flood barrier designs, specifications and QC through a specialised factory pool.",
         "keywords": [
-          "showcase website starter",
-          "starter boundary",
-          "public launch website"
-        ],
-        "ogImage": "/images/about-og.jpg"
-      },
-      "aboutSections": {
-        "valuesTitle": "What this starter is designed to protect",
-        "values": {
-          "quality": {
-            "title": "Launch structure",
-            "description": "The starter keeps pages, navigation, inquiry paths, and replacement work in one clear public-site structure."
-          },
-          "innovation": {
-            "title": "Reusable foundation",
-            "description": "It provides a working foundation that can be adapted without rebuilding every route and component from zero."
-          },
-          "service": {
-            "title": "Owner clarity",
-            "description": "The site makes visible what a real owner must confirm before launch."
-          },
-          "integrity": {
-            "title": "Honest boundary",
-            "description": "It is not an empty shell, but it is also not a finished client website."
-          }
-        },
-        "statLabels": {
-          "yearsExperience": "Starter baseline",
-          "countriesServed": "Locales",
-          "happyClients": "Replacement surfaces",
-          "productsDelivered": "Launch path"
-        },
-        "cta": {
-          "title": "Review the starter capabilities",
-          "description": "See what the starter includes before replacing it with real business facts and assets.",
-          "button": "View products"
-        }
-      },
-      "faq": [
-        {
-          "id": "starter-purpose",
-          "question": "Is this a finished client website?",
-          "answer": "No. This is a reusable starter demo with working structure and replaceable example content."
-        },
-        {
-          "id": "who-fits",
-          "question": "Who is this starter for?",
-          "answer": "It fits projects that do not yet have a public website and need a fast, clear showcase-site foundation."
-        },
-        {
-          "id": "what-to-replace",
-          "question": "What must be replaced before launch?",
-          "answer": "Replace business facts, page content, images, legal copy, form routing, secrets, and deployment settings."
-        }
-      ]
+          "Tucsenberg",
+          "flood barrier supplier China",
+          "factory-direct flood barriers"
+        ]
+      }
     },
-    "content": "\n## Why this starter exists\n\nMany projects do not just lack pages. They lack a complete public launch foundation: a clear site structure, content ownership, inquiry flow, deployment path, and owner-facing visibility.\n\nThis starter gives those pieces a working shape before a real project replaces the example content.\n\n## Who it fits\n\n- Projects with no current website.\n- Teams that need a public showcase foundation quickly.\n- Sites that need multilingual content, inquiry flow, and Cloudflare deployment basics.\n- Owners who want a reusable starting point instead of a blank visual shell.\n\n## Who it does not fit\n\n- Projects with a complete custom brand system already finished.\n- Sites that need complex commerce, accounts, or backend workflows in the first version.\n- Teams looking for a design-only template with no launch workflow.\n\n## Honest boundary\n\nThis starter is not an empty shell. It has real routes, components, content structure, form paths, and deployment assumptions.\n\nIt is also not a finished client website. A real launch still needs confirmed business facts, real images, legal copy, form destinations, secrets, Cloudflare settings, and deployed smoke proof.\n"
+    "content": "\nTucsenberg is the trading name of **Jiangsu Tucson Borg Technology Co., Ltd.**, founded in 2021 and based in **Lianyungang, Jiangsu — one of China's major coastal port cities**, within reach of the Yangtze Delta manufacturing cluster where our factory pool operates: ABS injection moulding, aluminum extrusion, PVC welding and technical textiles. One spec system, one QC standard, one contact. This page is the due-diligence shortcut: who we are, how the pool works, and how to verify both.\n\n### Why a young company, on purpose\n\nWe won't pretend to decades of history — the factories in our pool carry the manufacturing years. What's ours: the product designs and specifications, the QC standard every factory ships against, and a front end that answers in your time zone and treats a one-carton buyer like a future container buyer. Ask why any number on our spec sheets is what it is — why the 85 cm barrier stops 75 cm of water, why the bag cores are rated fresh-water only — and you'll get the engineering reason, not a brochure. That's what the design work buys you, and it's the part of China sourcing that most often goes missing.\n\n### The person behind it\n\nTODO-OWNER: Owner English name, photo and first-person paragraph.\n\n### How the factory pool works\n\nSpecialised factories, coordinated under one spec sheet per product — your reorder next year matches your order this year. Mixed containers across lines. Spare parts stay orderable for years.\n\n### Quality control, concretely\n\n- Pre-production sample confirmation against the spec sheet\n- In-production checks at the factory\n- Pre-shipment inspection with photo/video report to your inbox before anything sails\n- Third-party inspection (SGS/BV) welcome at buyer's option — we'll coordinate it\n\n### Verify us\n\n- **Factory audits welcome** — in person or live video, any factory in the pool\n- **References on request**\n- **Paid samples before volume** — judge the product, not the website\n- Company registration details available on request for your compliance file\n\nWe don't ask buyers to trust a badge. We expect samples, photos and inspections to do the work — that's what they're for.\n"
   },
   {
     "type": "pages",
@@ -162,6 +109,103 @@ const _entries: ContentEntry[] = [
   {
     "type": "pages",
     "locale": "en",
+    "slug": "flood-barrier-materials-guide",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/flood-barrier-materials-guide.mdx",
+    "relativePath": "content/pages/en/flood-barrier-materials-guide.mdx",
+    "source": "active-content",
+    "metadata": {
+      "locale": "en",
+      "title": "ABS vs Aluminum vs FRP vs Water-Filled Flood Barriers: How to Choose",
+      "description": "An honest comparison of five flood barrier material classes — strength, lifespan, deployment, reuse, cost — including when a barrier is the wrong tool.",
+      "slug": "flood-barrier-materials-guide",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2026-07-02",
+      "draft": false,
+      "seo": {
+        "title": "ABS vs Aluminum vs FRP vs Water-Filled Flood Barriers — 2026 Guide",
+        "description": "An honest comparison of five flood barrier material classes — strength, lifespan, deployment, reuse, cost — including when a barrier is the wrong tool.",
+        "keywords": [
+          "ABS flood barriers",
+          "aluminum flood gates",
+          "FRP flood planks",
+          "water filled flood barriers"
+        ]
+      }
+    },
+    "content": "\nWe manufacture and supply all five material classes below, so we don't need to talk you into any one of them. What follows is the comparison we walk buyers through on calls — including where each material is the wrong choice.\n\n## The five classes at a glance\n\n| | ABS boxwall (TB-BW) | Aluminum gates (TB-AG) | FRP composite (TB-CP) | Water/air tube dams (TB-TD) | Absorbent bags (TB-FB) |\n|---|---|---|---|---|---|\n| Best at | perimeters, no-fixing sites | defined openings, repeat use | corrosive/coastal sites | long runs, rough ground | leaks, thresholds, low points |\n| Protection height | ~0.5–0.75 m | up to 1.8 m standard (higher on review) | as aluminum, per span data | ~1 m per tube | ~12 cm/layer, stack 2 |\n| Fixing to building | none | posts/rails (wall or ground) | as aluminum | none | none |\n| Deployment | tool-free, fast | plank-by-plank, needs the opening prepared once | as aluminum | pump/hose fill | activate in 3–4 min |\n| Reuse | repeated seasons | 20+ year service class | longest — no corrosion | repeated, repair kits exist | **single event** |\n| Weight logic | light units, water self-seals | 4.5–6.5 kg/m class per plank | lighter than aluminum per span | heavy when filled, light to store | 0.23 kg → 20 kg |\n| Watch out for | very rough/sloped ground | corrosion at coastal sites over decades | mould cost on new profiles | needs fill water source & time | **fresh water only** |\n\n## Before you compare barriers: is a barrier even the fix?\n\nThe most-repeated advice from people who have actually been flooded isn't a product name. Three questions come before any material comparison:\n\n1. **Where does the water actually come in?** If it rises through the slab, the soil or the drains — not through an opening — a surface barrier can't help. That's a drainage, regrading or site-work problem, and money spent on barriers there is wasted.\n2. **What happens to rain that falls behind the barrier?** Any sealed line needs a pump or a drain on the dry side. Barrier + pump is a system; a barrier alone is half of one.\n3. **Is the opening the problem, or the path to it?** A trench drain across a sloped driveway sometimes beats any barrier you could put at the garage door.\n\nWe sell barriers, not drainage. So when your site photos say \"drainage problem,\" we'll tell you to spend your money there first — that's what the honest version of this guide costs us, and what it's worth to you.\n\n## Class by class — including when NOT to buy it\n\n### ABS interlocking boxwall\n\nThe L-shaped freestanding units: water pressure seals them harder against the ground. No drilling, no rails, deployable on driveways and around whole buildings.\n**Don't buy it for**: heavily broken or steep ground (tube dams cope better), or protection above ~1 m.\n→ [TB-BW series specs](/products/abs-flood-barriers/)\n\n### Aluminum flood gates (demountable barriers)\n\nStacked planks between posts across doors, garages, loading docks. The trade standard for defined openings: one measured installation, then minutes to deploy every season after. 6063-T6 profiles with EPDM seals are the class benchmark — ask any supplier for the alloy and seal spec; refusing to name them is a red flag.\n**Don't buy it for**: sites where nothing may be fixed to the structure (choose boxwall), or one-off emergency response (rental/tubes).\n→ [TB-AG series specs](/products/aluminum-flood-gates/)\n\n### FRP composite planks\n\nPultruded fiberglass planks in the same stacked-plank logic as aluminum — but corrosion-free and non-conductive. The natural spec for coastal, chemical and substation sites where aluminum's only real weakness (long-term corrosion in salt air) matters.\n**Honest status**: this is our newest line, produced order-driven with mould setup per profile. If your project justifies it, [register interest](/products/frp-flood-barriers/) and we'll share span and deflection data as testing completes.\n**Don't buy it for**: small one-opening jobs — mould economics need volume.\n\n### Water- and air-filled tube dams\n\nPVC tubes you fill on site: the fastest way to protect long runs and uneven ground where rigid barriers can't seal. Store on a pallet, deploy by the hundred metres.\n**Don't buy it for**: narrow doorways (overkill), sites without a fill source and time before the flood arrives, or plans that involve repositioning after filling — a filled tube stays where you set it.\n→ [TB-TD series specs](/products/flood-tube-dams/)\n\n### Absorbent flood bags (sandless sandbags)\n\n0.23 kg flat, 20 kg deployed in 3–4 minutes. The consumable layer: leaks, thresholds, gaps under and around hard barriers.\n**Don't buy it for**: salt or brackish water (SAP cores don't activate — coastal buyers pair bags with hard barriers), anything above shin height, fast-moving water (a swollen bag is near neutral buoyancy — current shifts it where sand stays put), or reuse plans (single event by design).\n→ [TB-FB series specs](/products/absorbent-flood-bags/)\n\n## Choose by scenario\n\n| Your situation | First choice | Backed by |\n|---|---|---|\n| Shop/home doorways, flood-prone every year | TB-AG gates | TB-FB bags for thresholds |\n| Warehouse or campus perimeter, no drilling allowed | TB-BW boxwall | TB-TD for the rough sections |\n| Coastal facility, salt air, decades-long spec | TB-CP composite (or TB-AG accepting maintenance) | hard barriers only — no bags |\n| Municipal/emergency stock, unknown future sites | TB-TD + TB-FB | fastest to deploy anywhere |\n| Building a retail flood-protection product line | start TB-FB + TB-BW | add TB-AG as your installed base grows |\n\n## Choose by how you buy\n\n- **Dealers & distributors**: start with the consumable (bags) and the no-install line (boxwall) — they sell without site surveys. Add gates when you're ready to handle opening measurements; our RFQ form and measuring guide do most of that work.\n- **Contractors & projects**: mixed-material is normal — one site often needs gates on openings, boxwall on the perimeter, bags for the drains. One RFQ, one consolidated container.\n- **First-time / small buyers**: a carton of bags or a boxwall sample kit is the cheap way to judge our quality before a pallet order. Sample fees are credited against your first order.\n\n## How the price is built (what we quote and why)\n\nWe don't publish list prices — here's what moves the number, so you can read any supplier's quote (including ours) intelligently:\n\n1. **Material class** — the table above is roughly the cost order: bags < boxwall < tubes < aluminum < FRP (first order, before mould amortisation).\n2. **Quantity tier** — carton → pallet → container. Unit price falls at each step; **freight per unit falls faster**, which is why single-unit retail orders don't work from China.\n3. **Configuration** — custom-cut planks, corner units, custom colours and moulded logos each add a defined cost, quoted line by line, not \"custom = expensive\".\n4. **Delivery terms** — EXW/FOB/CIF/DDP change who carries freight and risk; we quote whichever you name.\n\nSend quantities and your port — standard configurations are quoted within 12 hours, custom within 48.\n\n## FAQ\n\n### Which single product covers everything?\n\nNone — that's the honest answer and the reason this guide exists. Every \"universal\" flood product trades away performance somewhere. Match the material to the failure point.\n\n### Aluminum vs FRP — which should I spec?\n\nInland and standard sites: aluminum, proven and cheaper per opening. Salt air, chemical exposure, electrical infrastructure: FRP earns its premium over the service life.\n\n### Can I mix materials in one container?\n\nYes — that's the point of our factory pool. Gates, boxwall, tubes and bag cartons consolidate into one shipment with one QC standard.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "flood-barrier-specifications",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/flood-barrier-specifications.mdx",
+    "relativePath": "content/pages/en/flood-barrier-specifications.mdx",
+    "source": "active-content",
+    "metadata": {
+      "locale": "en",
+      "title": "Demountable Flood Barrier Specifications, Explained",
+      "description": "How to read a flood barrier spec sheet — profiles, alloys, EPDM seals, post types, span rules — plus the 10 questions to ask any supplier before you buy.",
+      "slug": "flood-barrier-specifications",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2026-07-02",
+      "draft": false,
+      "seo": {
+        "title": "Demountable Flood Barrier Specifications Explained | Tucsenberg",
+        "description": "How to read a flood barrier spec sheet — profiles, alloys, EPDM seals, post types, span rules — plus the 10 questions to ask any supplier before you buy.",
+        "keywords": [
+          "demountable flood barrier specifications",
+          "aluminum flood gate planks",
+          "EPDM flood barrier seals"
+        ]
+      }
+    },
+    "content": "\nEvery demountable flood barrier quote looks similar until you read the spec sheet — and most buyers have never been shown how. This guide walks through the four subsystems of a plank barrier, what each number means, and the questions that separate a serious supplier from a photo with a price. We supply these systems ourselves; the fastest way to check whether we pass our own test is [our spec sheet](/products/aluminum-flood-gates/).\n\n## Question zero: is the opening actually your problem?\n\nBefore any spec sheet matters, answer this: **is the door or garage really where the water comes in?** Water also rises through slabs, soils and drains, tracks through porous masonry, and falls as rain behind whatever you seal. A perfectly specified barrier on the wrong failure point protects nothing.\n\nAnd one structural honesty most suppliers skip: in deep, sustained flooding, a fully sealed building starts to behave like a boat — groundwater pushes up on the slab, and slabs aren't designed to be hull bottoms. That's why serious protection above roughly waist depth is an engineering question, not a shopping question. Demountable barriers earn their keep in the metre-and-below range on sound openings — a boundary worth stating before any spec sheet, including ours.\n\n## 1. Planks: the profile is the product\n\nThe extruded aluminum plank is where the engineering lives.\n\n- **Profile height** — how much protection each plank adds. Common classes run 150–200 mm. Fewer, taller planks deploy faster; more, shorter planks pack tighter.\n- **Alloy and temper** — the category standard is 6063-T6: extrudes cleanly, resists corrosion, holds strength. If a spec sheet says just \"aluminum\", ask. If the answer doesn't come back with a temper designation, walk.\n- **Wall thickness** — drives stiffness and dent resistance. Ask for the number in millimetres, not \"heavy duty\".\n- **Weight per metre** — matters twice: deployment (who lifts it) and freight (what shipping costs). A spec sheet without kg/m makes container math impossible — that's usually not an accident.\n\n**Ask any supplier:** profile height, alloy + temper, wall thickness, kg/m. Four numbers. A factory has them on file; a reseller has to go ask.\n\n## 2. Seals: where barriers actually fail\n\nWater doesn't break planks; it finds gaps. Sealing is compression-based:\n\n- **Horizontal joints** — EPDM rubber between planks, compressed by the stack's own weight plus top clamps.\n- **Base seal** — the bottom plank against the ground; the most stressed seal in the system and the reason surface condition surveys matter.\n- **Vertical ends** — plank ends against post channels; compression here comes from the channel design.\n\n**What to check:** seal material (EPDM is the standard for weathering; cheaper rubbers age fast), whether seals are **replaceable** (they're consumables over a decade), and whether the supplier sells seals separately. A system whose seals can't be reordered has a built-in expiry date.\n\n## 3. Posts and fixings: three ways to hold a wall\n\n| Post type | Where it fits | Off-season footprint |\n|---|---|---|\n| Wall-mounted channel | openings with sound reveals either side | channels stay on the wall |\n| Ground-socket post | wide openings, spans needing mid-posts | flush socket, nothing above ground |\n| Freestanding post | runs where drilling isn't allowed | none — but check ballast/bracing spec |\n\n- **Span rule of thumb**: single spans run to roughly 3 m in most systems; beyond that, intermediate posts split the load. Suppliers should quote post count from your opening width — if a quote for a 6 m door shows no mid-post, ask why.\n- **Fixings** are site-specific: masonry, concrete, steel and timber each take different anchors. A serious supplier asks what your mounting surface is before quoting. (Ours does — it's a field on [our RFQ form](/request-quote/).)\n\n## 4. Height vs span: reading the limits\n\nWater load grows with the **square** of depth — a 1.2 m barrier carries roughly four times the load of a 0.6 m one, not two. That's why:\n\n- Taller stacks need stiffer profiles, tighter clamp systems, and sometimes narrower spans.\n- A supplier quoting the same span limit at every height hasn't done the math — or isn't showing it.\n- Deflection data (how much the span bows under load) is the honest way to publish limits. Few suppliers do; ask for it and watch what comes back.\n\n## The 10-question supplier checklist\n\n1. Plank profile height, alloy, temper, wall thickness, kg/m?\n2. Seal material — and are replacement seals orderable separately?\n3. Which post types, what's the span limit *at my protection height* — and what hardware stays visible off-season?\n4. What fixings for my mounting surface?\n5. Deflection or test data at height?\n6. Custom-cut to my opening list, or standard lengths only?\n7. What exactly is in the box per opening (planks, seals, clamps, labels)?\n8. Spare parts availability in 3 years?\n9. Warranty — duration and what voids it?\n10. Lead time for cut-to-order vs stock?\n\n[Download this checklist (PDF)](/downloads/supplier-checklist.pdf)\n\nWe answer all ten on one page: [Aluminum flood gates — specifications](/products/aluminum-flood-gates/). Or skip ahead — send your opening schedule and get real numbers instead of a brochure: standard items quoted within 12 hours.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
+    "slug": "oem-wholesale",
+    "extension": ".mdx",
+    "filePath": "/content/pages/en/oem-wholesale.mdx",
+    "relativePath": "content/pages/en/oem-wholesale.mdx",
+    "source": "active-content",
+    "metadata": {
+      "locale": "en",
+      "title": "OEM, Private Label & Wholesale Supply",
+      "description": "One factory pool for five flood barrier lines: private label on every line, mixed-container consolidation, one QC standard.",
+      "slug": "oem-wholesale",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "default",
+      "showToc": true,
+      "lastReviewed": "2026-07-02",
+      "draft": false,
+      "seo": {
+        "title": "OEM & Private Label Flood Barriers — Wholesale from China | Tucsenberg",
+        "description": "One factory pool for five flood barrier lines: private label on every line, mixed-container consolidation, one QC standard. Trade quotes in 12 hours.",
+        "keywords": [
+          "OEM flood barriers",
+          "private label flood barriers",
+          "wholesale flood barriers China"
+        ]
+      }
+    },
+    "content": "\nMost flood protection importers juggle three or four Chinese factories — one for aluminum, one for plastics, one for bags and seals. We run a coordinated factory pool so you don't have to: five product lines, one contact, one QC standard, one mixed container.\n\n## How the factory pool works\n\nWe are not a trading company reselling whatever's available, and not a single factory pushing one material. The product designs and specifications are ours; production runs in a fixed set of specialised partner factories — extrusion, injection moulding, PVC welding, technical sewing — each doing the process it's actually built for, under one spec system:\n\n- **One spec sheet per product**, whichever factory produces it. Your reorder next year matches your order this year.\n- **One QC standard.** Pre-shipment inspection across all lines, one report to your inbox before anything sails.\n- **Mixed-container consolidation.** Gates + boxwall + bag cartons + spares in one 40'HQ — the freight math that makes smaller trade orders work.\n- **Spare-parts continuity.** Seals, joints, fins, end-caps stay available across years — your installed base stays serviceable, your customers stay yours.\n\n## Five lines, one supplier\n\n| Line | OEM / private label | Typical trade entry |\n|---|---|---|\n| ABS boxwall (TB-BW/BWF) | moulded-in logo, printed label, custom colour | pallet |\n| Aluminum flood gates (TB-AG) | custom-cut per your drawings, your branding on planks & docs | per opening schedule |\n| Absorbent flood bags (TB-FB) | printed shell, your carton & insert — no mould cost | carton (MOQ 300) |\n| Tube dams (TB-TD) | printed sleeve, custom lengths | small lot |\n| FRP planks (TB-CP) | joint development, order-driven tooling | project |\n\n## What private label actually includes\n\nNot just a sticker. Depending on the line:\n\n- **On-product**: moulded-in logo (ABS), printed shells and sleeves (bags, tubes), plank marking (aluminum)\n- **Packaging**: your carton artwork, pallet presentation, inserts and manuals in your layout\n- **Documentation**: spec sheets and QC reports issued under your brand, ready to hand to your customers\n- **Boundaries, stated plainly**: custom-branded and custom-cut items are final sale; moulded logos carry a one-time mould contribution, quoted before you commit.\n\n## Dealer economics, protected\n\n- **We don't retail.** No published prices anywhere on this site, no direct-to-consumer channel undercutting you.\n- **Consumables anchor reorders.** Flood bags are single-event products — the line that keeps your customers coming back through you.\n- **Sample fees credit against your first order.** Qualifying us costs you freight and a refundable fee, not a leap of faith.\n\n## How to verify us\n\nWe're a Chinese supplier asking for your trust, so here's how to check instead of hoping:\n\n- **Factory audits welcome** — in person or live video walk-through of any factory in the pool.\n- **References on request** — we'll connect you with buyers who've shipped with us.\n- **Paid samples before any volume** — judge the product, not the website.\n- **Third-party inspection accepted** — appoint SGS, TÜV, QIMA or your own agent for pre-shipment inspection; we schedule around them, not against them.\n- **Your spec on the paperwork.** Model, material, dimensions and packing written into the quotation and invoice — so what you approved is what's enforceable, not what a listing photo implied.\n- **Production evidence before it sails**: photos and video of your actual order at packing, plus the QC report — the sample you approved is the bulk you get.\n- **Start small.** Our minimums are cartons and pallets, not containers. Scale when the product earns it.\n\n## FAQ\n\n### Are you a factory or a trading company?\n\nNeither — and the honest answer is more useful than either label. We're the product company: the designs, material specifications and test requirements are ours. Manufacturing runs in specialised partner factories, each chosen for its process — absorbent bags on a technical sewing line, ABS units off dedicated injection moulds, aluminum planks from an extrusion line. Five lines span four different processes; no single factory masters them all, and anyone claiming otherwise is outsourcing too, just not telling you. Splitting production by process is a quality decision, not a shortcut. What we never outsource: the design, the spec on your paperwork, and the QC standard every factory ships against — all verifiable before you order (see above).\n\n### What are your payment terms?\n\n30% deposit, 70% before shipment (T/T). For custom orders, terms are agreed per order and confirmed with your quotation.\n\n### Can you produce to our existing spec / match our current supplier's product?\n\nSend drawings or a sample. If it's within the pool's tooling, we'll quote it; if it needs new tooling, we'll quote that honestly (one-time cost, yours to approve). We custom-cut from tested profiles — we don't do site engineering or stamped drawings.\n\n### Who handles installation and local liability?\n\nYou do — we're supply-only, and we say so on every page. What we provide: drawings, manuals, spec documentation and responsive technical support for your installers.\n\n### What's the lead time on trade orders?\n\nIn-stock configurations ship in 2–7 days. Production and private-label runs are confirmed at quotation.\n\n### Exclusivity?\n\nNot off the shelf. Territory arrangements are a conversation once there's order history — we don't sell promises before product.\n\n## Request a trade quote\n\nTell us your product mix, quantities, market and whether you need private label. Standard configurations quoted within 12 hours, custom within 48.\n"
+  },
+  {
+    "type": "pages",
+    "locale": "en",
     "slug": "privacy",
     "extension": ".mdx",
     "filePath": "/content/pages/en/privacy.mdx",
@@ -170,28 +214,24 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "en",
       "title": "Privacy Policy",
+      "description": "How Tucsenberg uses RFQ and contact information for quote processing and buyer communication.",
       "slug": "privacy",
-      "description": "Review the starter privacy page and the data-handling areas a real site owner must replace before launch.",
-      "publishedAt": "2024-01-01",
-      "updatedAt": "2026-04-26",
-      "author": "Legal Team",
-      "layout": "default",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "legal",
       "showToc": true,
-      "lastReviewed": "2026-04-26",
+      "lastReviewed": "2026-07-02",
       "draft": false,
       "seo": {
-        "title": "Privacy Policy | Data Protection and Your Rights",
-        "description": "Our privacy policy explains how we collect, use, and protect your personal data. Learn about your rights under GDPR and CCPA.",
+        "title": "Privacy Policy | Tucsenberg",
+        "description": "How Tucsenberg uses RFQ and contact information for quote processing and buyer communication.",
         "keywords": [
-          "privacy policy",
-          "data protection",
-          "GDPR",
-          "CCPA",
-          "personal data"
+          "Tucsenberg privacy policy"
         ]
       }
     },
-    "content": "\n**Effective Date:** January 1, 2024\n**Last Updated:** 2026-04-26\n\n## Introduction \\{#introduction\\}\n\nShowcase Website Starter includes this privacy page so a public demo site has a visible legal-content surface. This page is not final legal advice. Before a real launch, the site owner must replace it with the correct legal entity, contact channel, service providers, data retention rules, and jurisdiction-specific requirements.\n\nPlease read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.\n\n## Information We Collect \\{#info-collect\\}\n\n### Information You Provide to Us\n\nWe may collect information that you voluntarily provide when you:\n\n- Fill out inquiry or contact forms\n- Request a quotation\n- Subscribe to our newsletter\n- Use any account or portal features the real site owner enables\n- Communicate with us via email, phone, or chat\n\nThis information may include:\n\n- **Contact Information**: Name, email address, phone number, company name, job title\n- **Business Information**: Company address, industry, purchasing requirements\n- **Communication Records**: Correspondence history, inquiry details\n- **Portal Information**: Login or access details if the real site owner enables account features\n\n### Information Automatically Collected\n\nWhen you visit our website, we automatically collect certain information about your device and usage patterns:\n\n- **Device Information**: IP address, browser type, operating system, device identifiers\n- **Usage Data**: Pages visited, time spent on pages, click patterns, referring URLs\n- **Location Data**: Country and city based on IP address (not precise location)\n\n### Cookies and Tracking Technologies\n\nWe use cookies and similar tracking technologies to enhance your experience:\n\n| Cookie Type | Purpose | Duration |\n|-------------|---------|----------|\n| Essential | Website functionality | Session |\n| Preference | Remember your settings | 1 year |\n| Analytics | Understand usage patterns | 2 years |\n| Marketing | Personalized content (if enabled) | 1 year |\n\nYou can control cookie preferences through your browser settings or our cookie consent banner.\n\n## How We Use Your Information \\{#how-we-use\\}\n\nWe use the information we collect for the following purposes:\n\n### Business Operations\n\n- Process and respond to your inquiries\n- Provide quotations and facilitate orders\n- Communicate about products and services\n- Manage customer relationships\n\n### Website Improvement\n\n- Analyze website usage and performance\n- Improve user experience and navigation\n- Develop new features and content\n- Troubleshoot technical issues\n\n### Marketing (With Your Consent)\n\n- Send newsletters and product updates\n- Provide personalized recommendations\n- Conduct customer surveys\n\n### Legal and Compliance\n\n- Comply with legal obligations\n- Protect against fraud and abuse\n- Enforce our terms of service\n\n## Legal Basis for Processing (GDPR) \\{#legal-basis\\}\n\nFor users in the European Economic Area (EEA), we process your personal data based on:\n\n- **Consent**: When you opt-in to marketing communications\n- **Contract Performance**: To fulfill business transactions\n- **Legitimate Interests**: For business operations and website improvement\n- **Legal Obligation**: To comply with applicable laws\n\n## Information Sharing and Disclosure \\{#sharing\\}\n\nWe do not sell your personal information. We may share your information with:\n\n### Service Providers\n\nThird parties who assist our business operations:\n\n- Website hosting providers\n- Email service providers\n- Analytics services\n- Customer relationship management (CRM) systems\n\nThese providers are contractually obligated to protect your data.\n\n### Business Partners\n\nWith your consent, we may share information with:\n\n- Logistics and shipping partners (for order fulfillment)\n- Payment processors (for transaction processing)\n\n### Legal Requirements\n\nWe may disclose information when required by:\n\n- Court orders or legal processes\n- Government requests\n- Protection of our legal rights\n- Emergency situations involving safety\n\n## International Data Transfers \\{#international-transfers\\}\n\nDepending on the real deployment and service providers, your data may be transferred to and processed in countries outside your residence. The real site owner must document those transfers and implement appropriate safeguards:\n\n- Standard contractual clauses\n- Data processing agreements\n- Security measures compliant with international standards\n\n## Data Security \\{#security\\}\n\nWe implement industry-standard security measures:\n\n- **Encryption**: SSL/TLS for data in transit\n- **Access Controls**: Role-based access to data\n- **Monitoring**: Regular security audits and monitoring\n- **Employee Training**: Data protection awareness programs\n\nHowever, no method of transmission over the Internet is 100% secure. We cannot guarantee absolute security.\n\n## Data Retention \\{#retention\\}\n\nWe retain your personal information for:\n\n- **Active Business Relationships**: Duration of relationship plus 5 years\n- **Inquiry Data**: 2 years from last contact\n- **Analytics Data**: 26 months (aggregated)\n- **Marketing Preferences**: Until withdrawal of consent\n\nAfter retention periods expire, data is securely deleted or anonymized.\n\n## Your Privacy Rights \\{#your-rights\\}\n\n### For All Users\n\nYou have the right to:\n\n- **Access**: Request a copy of your personal data\n- **Correction**: Update inaccurate information\n- **Deletion**: Request deletion of your data\n- **Objection**: Object to certain processing activities\n- **Portability**: Receive your data in a portable format\n\n### For EEA Residents (GDPR)\n\nAdditional rights include:\n\n- Withdraw consent at any time\n- Lodge a complaint with a supervisory authority\n- Restrict processing in certain circumstances\n\n### For California Residents (CCPA)\n\nYou have the right to:\n\n- Know what personal information is collected\n- Know if personal information is sold or disclosed\n- Say no to the sale of personal information\n- Access your personal information\n- Equal service and price (non-discrimination)\n\nTo exercise these rights, contact us using the information below.\n\n## Children's Privacy \\{#children\\}\n\nOur website is not intended for individuals under 16 years of age. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately.\n\n## Third-Party Links \\{#third-party-links\\}\n\nOur website may contain links to third-party websites. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies.\n\n## Changes to This Policy \\{#changes\\}\n\nWe may update this Privacy Policy periodically. Changes will be posted on this page with an updated \"Last Updated\" date. Significant changes will be communicated via email or website notice.\n\n## Contact Us \\{#contact\\}\n\nIf you have questions about this Privacy Policy or wish to exercise your rights, please contact us:\n\n**Data Protection Contact**\nShowcase Website Starter\nUse the contact form on this site until a real data protection contact is configured.\nAddress: Replace with the real legal address before launch.\n\nFor EU residents, please contact us through the same data protection contact above.\n\n---\n\n**Document Version:** 2.0\n**Approved By:** Legal Department\n**Review Cycle:** Annual\n"
+    "content": "\n## Who we are\n\nThis website is operated by Jiangsu Tucson Borg Technology Co., Ltd. (trading as Tucsenberg).\n\nRegistered address: No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China.\n\nContact: sales@tucsenberg.com.\n\n## What we collect\n\nWhen you send an RFQ or contact enquiry, we collect the information you provide: name, email, company, WhatsApp if supplied, product interest, quantity, market, delivery port, timeline, photos, drawings and message content.\n\n## How we use it\n\nWe use enquiry data for quote processing only: reviewing product fit, preparing quotations, coordinating samples, arranging production and answering follow-up questions.\n\nWe do not sell enquiry lists.\n\n## Files and drawings\n\nPhotos and drawings are used to understand openings, dimensions, mounting surfaces and product fit. Do not upload files you are not authorised to share.\n\n## Cookies and analytics\n\nThe site may use essential cookies for security, language, attribution and form operation. If analytics is enabled later, it must be used to understand website performance and enquiry flow, not to sell personal information.\n\nTODO-OWNER: Confirm final analytics/cookie setup before launch.\n\n## Retention\n\nWe keep enquiry records for quotation follow-up, order history, compliance and customer service. If you need a record corrected or removed, contact sales@tucsenberg.com.\n\n## Updates\n\nWe may update this policy when the website, form routing or operational tools change.\n"
   },
   {
     "type": "pages",
@@ -204,239 +244,67 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "en",
       "title": "Terms of Service",
+      "description": "Terms for using the Tucsenberg website and requesting flood barrier quotations.",
       "slug": "terms",
-      "description": "Read the placeholder terms and conditions for using this example website and requesting products or services. Replace this page with real legal terms before launch.",
-      "publishedAt": "2024-01-01",
-      "updatedAt": "2026-04-26",
-      "author": "Legal Team",
-      "layout": "default",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "legal",
       "showToc": true,
-      "lastReviewed": "2026-04-26",
+      "lastReviewed": "2026-07-02",
       "draft": false,
       "seo": {
-        "title": "Terms of Service | Business Terms and Conditions",
-        "description": "Placeholder terms for the showcase website starter. Replace payment, delivery, warranty, dispute, and legal language before using this for a real business.",
+        "title": "Terms of Service | Tucsenberg",
+        "description": "Terms for using the Tucsenberg website and requesting flood barrier quotations.",
         "keywords": [
-          "terms of service",
-          "terms and conditions",
-          "website starter terms",
-          "placeholder legal page",
-          "business terms"
+          "Tucsenberg terms"
         ]
       }
     },
-    "content": "\n**Effective Date:** January 1, 2024\n**Last Updated:** 2026-04-26\n\n## Introduction \\{#introduction\\}\n\nWelcome to Showcase Website Starter. These Terms of Service (\"Terms\") explain the starter legal surface for this public demo website. They must be reviewed and replaced by the real site owner before the starter is used for a real business, product, or service.\n\nPlease read these Terms carefully before using our services. If you do not agree to these Terms, please do not use our website or services.\n\n## Acceptance of Terms \\{#acceptance\\}\n\nBy accessing or using our website, placing an order, or engaging in any business transaction with us, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy.\n\nIf you are entering into these Terms on behalf of a company or other legal entity, you represent that you have the authority to bind such entity to these Terms.\n\n## Services Description \\{#services\\}\n\nShowcase Website Starter is a public demo starter, not the legal identity of a real client business. A real project should replace this section with the actual products or services it provides, such as:\n\n- Product or service presentation\n- Custom project support\n- Technical consultation and support\n- Resource or documentation access\n- Inquiry handling\n\nDetailed product specifications and service offerings are available upon request.\n\n## Orders and Contracts \\{#orders\\}\n\n### Inquiry and Quotation\n\n- All inquiries should include detailed specifications and quantity requirements\n- Quotations are valid for 30 days unless otherwise stated\n- Prices are subject to change based on market conditions and order specifications\n\n### Order Confirmation\n\nAn order is confirmed when:\n\n1. Written purchase order is received\n2. We issue a Proforma Invoice (PI)\n3. Deposit payment is received (if applicable)\n4. We provide written order confirmation\n\n### Contract Formation\n\nA binding contract is formed upon our written acceptance of your order. Order modifications require mutual written consent.\n\n## Payment Terms \\{#payment\\}\n\n### Accepted Payment Methods\n\nReal projects must replace this placeholder with the payment methods, minimums,\ntiming, and risk controls they actually offer.\n\n### Standard Payment Terms\n\n- Payment schedule must be defined in the final quotation or agreement.\n- Deposits, milestones, retainers, or final balances should match the real business model.\n- Custom payment terms should be documented in writing before work begins.\n\n### Late Payment\n\nLate payments may incur:\n\n- the late-payment fees, pauses, or prepayment requirements defined by the real agreement\n- suspension of pending work only if the final agreement allows it\n- other remedies the real site owner documents before launch\n\n## Shipping and Delivery \\{#shipping\\}\n\n### Trade Terms (Incoterms® 2020)\n\nIf the real business uses shipping, delivery, or implementation terms, list them\nin the quotation and contract. Do not ship this placeholder as a commitment.\n\n### Delivery Schedule\n\n- Standard timing: replace with the real project timeline before launch\n- Custom orders: timeline provided at quotation stage\n- Delivery dates are estimates and not guaranteed\n\n### Risk Transfer\n\nRisk transfer should be defined in the final agreement.\n\n## Warranty and Returns \\{#warranty\\}\n\n### Product Warranty\n\n- Warranty period: replace with the real warranty or support policy before launch\n- Warranty covers confirmed defects or service issues defined in the final agreement\n- Excludes damage from misuse, modification, or improper storage\n\n### Claims Process\n\n1. Replace this placeholder with the real claim window before launch\n2. Define how hidden defects or service issues should be reported\n3. List the evidence the real project requires for review\n4. Replace this placeholder with the real review timing or service SLA\n\n### Remedies\n\nAt our discretion, we will:\n\n- Repair or replace defective products\n- Provide credit for future orders\n- Refund the affected portion where the final agreement allows it\n\n## Limitation of Liability \\{#liability\\}\n\n### Maximum Liability\n\nOur total liability for any claim shall not exceed the amount paid by you for the specific products or services giving rise to the claim.\n\n### Exclusions\n\nWe are not liable for:\n\n- Indirect, incidental, or consequential damages\n- Lost profits or business opportunities\n- Damages arising from improper use\n- Delays caused by force majeure events\n\n### Force Majeure\n\nNeither party shall be liable for delays or failures caused by circumstances beyond reasonable control, including but not limited to:\n\n- Natural disasters\n- War, terrorism, or civil unrest\n- Government actions or regulations\n- Epidemics or pandemics\n- Shipping or logistics disruptions\n\n## Intellectual Property \\{#ip\\}\n\n### Our Property\n\nAll starter content on this demo website is provided as replaceable example material. A real project must replace ownership language for its text, images, logos, product designs, service materials, and licensed assets.\n\n### Customer Specifications\n\n- Custom designs provided by customers remain their property\n- We will maintain confidentiality of customer specifications\n- Delivery of custom work does not transfer design rights to us\n\n### Usage Rights\n\nYou may not:\n\n- Reproduce our materials without written permission\n- Reverse engineer our products, services, or website materials\n- Use our trademarks without authorization\n\n## Confidentiality \\{#confidentiality\\}\n\nBoth parties agree to:\n\n- Protect confidential information received from the other party\n- Use confidential information only for the purpose of the business relationship\n- Not disclose confidential information to third parties without consent\n\nConfidentiality obligations survive termination of the business relationship for 5 years.\n\n## Termination \\{#termination\\}\n\n### By Either Party\n\nEither party may terminate the business relationship by providing 30 days written notice.\n\n### Immediate Termination\n\nWe may terminate immediately if:\n\n- Payment defaults occur\n- Material breach of these Terms\n- Insolvency or bankruptcy proceedings\n- Violation of applicable laws\n\n### Effect of Termination\n\nUpon termination:\n\n- Outstanding payments become immediately due\n- Pending orders may be cancelled or completed at our discretion\n- Confidentiality obligations continue\n\n## Governing Law and Disputes \\{#governing-law\\}\n\n### Governing Law\n\nThese Terms are governed by the laws of the People's Republic of China.\n\n### Dispute Resolution\n\n1. **Negotiation**: Parties shall first attempt to resolve disputes through good-faith negotiation\n2. **Mediation**: If negotiation fails within 30 days, parties may attempt mediation\n3. **Arbitration**: Unresolved disputes shall be submitted to:\n\n**China International Economic and Trade Arbitration Commission (CIETAC)**\n- Rules: CIETAC Arbitration Rules\n- Location: Hong Kong or Beijing (mutual agreement)\n- Language: English or Chinese (mutual agreement)\n\nThe arbitral award shall be final and binding on both parties.\n\n## Export Compliance \\{#export-compliance\\}\n\n### Regulations\n\nBoth parties shall comply with all applicable export control laws and regulations, including:\n\n- Export Administration Regulations (EAR)\n- International Traffic in Arms Regulations (ITAR)\n- Applicable UN and national sanctions\n\n### Buyer's Obligations\n\nBuyer warrants that:\n\n- Products will not be used for prohibited purposes\n- Products will not be re-exported in violation of export laws\n- Buyer is not on any denied party list\n\n## General Provisions \\{#general\\}\n\n### Entire Agreement\n\nThese Terms, together with any quotations, orders, and written agreements, constitute the entire agreement between the parties.\n\n### Severability\n\nIf any provision is found invalid or unenforceable, the remaining provisions shall continue in effect.\n\n### Waiver\n\nFailure to enforce any right or provision shall not constitute a waiver of such right or provision.\n\n### Assignment\n\nYou may not assign your rights or obligations without our prior written consent.\n\n### Amendments\n\nWe reserve the right to modify these Terms. Changes will be effective upon posting to our website.\n\n## Contact Information \\{#contact\\}\n\nFor questions about these Terms of Service:\n\n**Showcase Website Starter**\nUse the contact form on this site until a real legal contact is configured.\nAddress: Replace with the real legal address before launch.\n\nFor order-related inquiries:\nUse the contact form on this site until a real receiver is configured.\nPhone: Configure a real phone number before public launch if phone support is offered.\n\n---\n\n**Document Version:** 2.0\n**Approved By:** Legal Department\n**Review Cycle:** Annual\n"
+    "content": "\n## Company\n\nThis website is operated by Jiangsu Tucson Borg Technology Co., Ltd. (trading as Tucsenberg).\n\nRegistered address: No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China.\n\nContact: sales@tucsenberg.com.\n\n## Website information\n\nThe website introduces flood barrier product lines, trade supply scope, quotation requirements, warranty boundaries and contact options. Website content is not a final quotation, engineering design, installation instruction or performance guarantee for a specific flood event.\n\n## Quotations\n\nPrices, lead times, product configuration, packaging, delivery terms and custom options are confirmed only in a written quotation. Standard items are quoted within 12 hours where enough information is supplied; custom configurations are quoted within 48 hours where enough information is supplied.\n\n## Supply-only boundary\n\nTucsenberg is a supply-only manufacturer/supplier. Installation, site assessment, local code compliance and flood-event deployment remain the responsibility of the buyer, installer or project owner.\n\n## Custom items\n\nCustom-cut, custom-coloured and custom-branded items are made to approved drawings, dimensions or artwork. They are final sale once confirmed for production.\n\n## Downloads\n\nSpec sheets, checklists and catalog files are provided to support product evaluation. They may change as product data is updated. Open downloads do not create a contract or warranty beyond the written quotation and warranty policy.\n\n## Updates\n\nWe may update these terms when the website, products, quotation flow or operating details change.\n\nTODO-OWNER: Legal final review before launch.\n"
   },
   {
     "type": "pages",
-    "locale": "zh",
-    "slug": "about",
+    "locale": "en",
+    "slug": "warranty",
     "extension": ".mdx",
-    "filePath": "/content/pages/zh/about.mdx",
-    "relativePath": "content/pages/zh/about.mdx",
+    "filePath": "/content/pages/en/warranty.mdx",
+    "relativePath": "content/pages/en/warranty.mdx",
     "source": "active-content",
     "metadata": {
-      "locale": "zh",
-      "title": "关于这个展示型网站 starter",
-      "description": "了解这个 starter 为什么存在、适合谁、不适合谁，以及公开上线前必须替换什么。",
-      "slug": "about",
-      "publishedAt": "2024-01-10",
-      "updatedAt": "2026-05-05",
-      "author": "Showcase Website Starter Team",
-      "layout": "default",
+      "locale": "en",
+      "title": "Warranty Policy",
+      "description": "Warranty boundaries for standard Tucsenberg flood barrier lines, consumables, custom items, exclusions and supply-only responsibility.",
+      "slug": "warranty",
+      "publishedAt": "2026-07-02",
+      "updatedAt": "2026-07-02",
+      "author": "Tucsenberg",
+      "layout": "legal",
       "showToc": true,
-      "lastReviewed": "2026-05-05",
+      "lastReviewed": "2026-07-02",
       "draft": false,
-      "heroTitle": "一个面向真实公开上线准备的展示型网站 starter",
-      "heroSubtitle": "不是虚构公司介绍",
-      "heroDescription": "这个页面解释 starter 是什么、适合谁，以及公开上线前哪些内容必须变成真实事实。",
       "seo": {
-        "title": "关于这个展示型网站 starter",
-        "description": "展示型网站 starter 的身份、适用对象、边界和公开上线前替换要求。",
+        "title": "Warranty Policy | Tucsenberg",
+        "description": "Warranty boundaries for standard Tucsenberg flood barrier lines, consumables, custom items, exclusions and supply-only responsibility.",
         "keywords": [
-          "展示型网站 starter",
-          "starter 边界",
-          "公开上线网站"
-        ],
-        "ogImage": "/images/about-og.jpg"
-      },
-      "aboutSections": {
-        "valuesTitle": "这个 starter 保护什么",
-        "values": {
-          "quality": {
-            "title": "上线结构",
-            "description": "starter 把页面、导航、询盘路径和替换工作放进一套清楚的公开网站结构里。"
-          },
-          "innovation": {
-            "title": "可复用基础",
-            "description": "它提供一套可运行基础，真实项目可以在此基础上替换，而不是每条路由和组件都从零开始。"
-          },
-          "service": {
-            "title": "Owner 清晰度",
-            "description": "网站把真实 owner 上线前必须确认的事项摆在明面上。"
-          },
-          "integrity": {
-            "title": "诚实边界",
-            "description": "它不是空壳模板，但也不是已经完成的客户网站。"
-          }
-        },
-        "statLabels": {
-          "yearsExperience": "Starter 基线",
-          "countriesServed": "语言版本",
-          "happyClients": "替换面",
-          "productsDelivered": "上线链路"
-        },
-        "cta": {
-          "title": "查看 starter 能力",
-          "description": "先了解 starter 包含什么，再把它替换成真实业务事实和资产。",
-          "button": "查看产品"
-        }
-      },
-      "faq": [
-        {
-          "id": "starter-purpose",
-          "question": "这是已经完成的客户官网吗？",
-          "answer": "不是。这是带可运行结构和可替换示例内容的 starter demo。"
-        },
-        {
-          "id": "who-fits",
-          "question": "这个 starter 适合谁？",
-          "answer": "适合还没有公开网站、需要快速获得展示型网站基础的项目。"
-        },
-        {
-          "id": "what-to-replace",
-          "question": "上线前必须替换什么？",
-          "answer": "要替换业务事实、页面内容、图片、法务文案、表单流向、密钥和部署设置。"
-        }
-      ]
-    },
-    "content": "\n## 为什么需要这个 starter\n\n很多项目缺的不是一个页面，而是一套完整的公开上线基础：清楚的网站结构、内容归属、询盘流程、部署路径和 owner 可见的信息。\n\n这个 starter 先把这些部分做成可运行形态，再让真实项目替换示例内容。\n\n## 适合谁\n\n- 当前还没有网站的项目。\n- 需要快速获得公开展示基础的团队。\n- 需要多语言内容、询盘路径和 Cloudflare 部署基础的网站。\n- 想从可复用基础开始，而不是从空白视觉壳开始的 owner。\n\n## 不适合谁\n\n- 已经有完整定制品牌系统的项目。\n- 第一版就需要复杂交易、账号或后台工作流的网站。\n- 只想要视觉模板、不需要上线工作流的团队。\n\n## 诚实边界\n\n这个 starter 不是空壳。它有真实路由、组件、内容结构、表单路径和部署假设。\n\n但它也不是最终客户网站。真实上线仍然需要确认过的业务事实、真实图片、法务文案、表单接收方、密钥、Cloudflare 设置和部署 smoke 证明。\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "contact",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/contact.mdx",
-    "relativePath": "content/pages/zh/contact.mdx",
-    "source": "active-content",
-    "metadata": {
-      "locale": "zh",
-      "title": "联系我们",
-      "description": "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口。",
-      "slug": "contact",
-      "publishedAt": "2024-01-01",
-      "updatedAt": "2026-05-05",
-      "lastReviewed": "2026-05-05",
-      "draft": false,
-      "seo": {
-        "title": "联系",
-        "description": "这个 starter 联系页可作为询盘、演示预约或上线问题的快速入口；正式上线前请接入真实接收方。"
-      },
-      "faq": [
-        {
-          "id": "response-time",
-          "question": "真实网站应该多久回复？",
-          "answer": "这里应替换成真实响应预期，比如一个工作日内回复，或具体客服时间。"
-        },
-        {
-          "id": "inquiry-details",
-          "question": "访客应该提供哪些信息？",
-          "answer": "请根据真实团队需要填写提示，例如产品或服务兴趣、数量或范围、时间计划、目的地、预算或项目说明。"
-        },
-        {
-          "id": "samples-or-demos",
-          "question": "这个页面可以支持样品、演示或咨询预约吗？",
-          "answer": "可以。把 CTA 和字段改成真实项目需要的转化路径即可。"
-        },
-        {
-          "id": "form-routing",
-          "question": "表单会把询盘发送到哪里？",
-          "answer": "上线前请配置真实接收方，例如邮箱、Airtable、CRM 或其他线索管理系统。"
-        }
-      ]
-    },
-    "content": "\n## 联系方式\n\n这是 public demo starter 的快速联系入口。真实项目接入接收方后，可以用它收集询盘、演示预约或上线相关问题。\n\n用于真实业务前，请替换文案、表单流向、响应预期和接收方信息。\n\n## 响应预期\n\n- **一般咨询**：替换成真实响应时间。\n- **报价或项目请求**：说明哪些信息有助于团队回复。\n- **技术或服务问题**：说明会由销售、支持还是专业人员处理。\n- **演示、样品或咨询预约**：按项目真实下一步调整这一段。\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "privacy",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/privacy.mdx",
-    "relativePath": "content/pages/zh/privacy.mdx",
-    "source": "active-content",
-    "metadata": {
-      "locale": "zh",
-      "title": "隐私政策",
-      "slug": "privacy",
-      "description": "查看 starter 隐私页面，以及真实网站上线前必须替换的数据处理内容。",
-      "publishedAt": "2024-01-01",
-      "updatedAt": "2026-04-26",
-      "author": "法务团队",
-      "layout": "default",
-      "showToc": true,
-      "lastReviewed": "2026-04-26",
-      "draft": false,
-      "seo": {
-        "title": "隐私政策 | 数据保护与您的权利",
-        "description": "我们的隐私政策说明如何收集、使用和保护您的个人数据。了解您在GDPR和CCPA下的权利。",
-        "keywords": [
-          "隐私政策",
-          "数据保护",
-          "GDPR",
-          "CCPA",
-          "个人数据"
+          "Tucsenberg warranty",
+          "flood barrier warranty"
         ]
       }
     },
-    "content": "\n**生效日期：** 2024年1月1日\n**最后更新：** 2026-04-26\n\n## 引言 \\{#introduction\\}\n\nShowcase Website Starter 保留这个隐私页面，是为了让公开 demo 站点具备可见的法务内容替换面。这个页面不是最终法律意见。真实上线前，网站 owner 必须替换真实法律主体、联系方式、服务提供商、数据保留规则和适用司法辖区要求。\n\n请仔细阅读本隐私政策。如果您不同意本隐私政策的条款，请勿访问本网站。\n\n## 我们收集的信息 \\{#info-collect\\}\n\n### 您主动提供的信息\n\n当您进行以下操作时，我们可能收集您自愿提供的信息：\n\n- 填写询价或联系表单\n- 请求报价\n- 订阅我们的新闻通讯\n- 创建账户\n- 通过电子邮件、电话或在线聊天与我们沟通\n\n这些信息可能包括：\n\n- **联系信息**：姓名、电子邮件地址、电话号码、公司名称、职位\n- **业务信息**：公司地址、行业、采购需求\n- **通信记录**：往来通信历史、询价详情\n- **账户信息**：用户名、密码（加密存储）\n\n### 自动收集的信息\n\n当您访问我们的网站时，我们会自动收集有关您设备和使用模式的某些信息：\n\n- **设备信息**：IP地址、浏览器类型、操作系统、设备标识符\n- **使用数据**：访问的页面、页面停留时间、点击模式、来源URL\n- **位置数据**：基于IP地址的国家和城市（非精确位置）\n\n### Cookie和跟踪技术\n\n我们使用Cookie和类似的跟踪技术来增强您的体验：\n\n| Cookie类型 | 用途 | 有效期 |\n|-----------|------|-------|\n| 必要性 | 网站功能 | 会话期间 |\n| 偏好设置 | 记住您的设置 | 1年 |\n| 分析 | 了解使用模式 | 2年 |\n| 营销 | 个性化内容（如启用） | 1年 |\n\n您可以通过浏览器设置或我们的Cookie同意横幅控制Cookie偏好。\n\n## 我们如何使用您的信息 \\{#how-we-use\\}\n\n我们将收集的信息用于以下目的：\n\n### 业务运营\n\n- 处理和回复您的询价\n- 提供报价并促成订单\n- 就产品和服务进行沟通\n- 管理客户关系\n\n### 网站改进\n\n- 分析网站使用情况和性能\n- 改善用户体验和导航\n- 开发新功能和内容\n- 排除技术问题\n\n### 营销（经您同意）\n\n- 发送新闻通讯和产品更新\n- 提供个性化推荐\n- 进行客户调查\n\n### 法律与合规\n\n- 遵守法律义务\n- 防范欺诈和滥用\n- 执行我们的服务条款\n\n## 处理的法律依据（GDPR） \\{#legal-basis\\}\n\n对于欧洲经济区（EEA）的用户，我们基于以下依据处理您的个人数据：\n\n- **同意**：当您选择接收营销通讯时\n- **合同履行**：为完成商业交易\n- **合法利益**：用于业务运营和网站改进\n- **法律义务**：遵守适用法律\n\n## 信息共享与披露 \\{#sharing\\}\n\n我们不会出售您的个人信息。我们可能与以下方共享您的信息：\n\n### 服务提供商\n\n协助我们业务运营的第三方：\n\n- 网站托管服务商\n- 电子邮件服务提供商\n- 分析服务\n- 客户关系管理（CRM）系统\n\n这些服务商在合同上有义务保护您的数据。\n\n### 业务合作伙伴\n\n经您同意，我们可能与以下方共享信息：\n\n- 交付或履约合作伙伴（用于项目执行）\n- 支付处理商（用于交易处理）\n\n### 法律要求\n\n在以下情况下，我们可能披露信息：\n\n- 法院命令或法律程序\n- 政府要求\n- 保护我们的合法权益\n- 涉及安全的紧急情况\n\n## 国际数据传输 \\{#international-transfers\\}\n\n根据真实部署方式和服务提供商，您的数据可能被传输至并在您居住地以外的国家/地区处理。真实网站 owner 必须说明这些传输并落实适当保障措施：\n\n- 标准合同条款\n- 数据处理协议\n- 符合国际标准的安全措施\n\n## 数据安全 \\{#security\\}\n\n我们实施行业标准的安全措施：\n\n- **加密**：数据传输使用SSL/TLS加密\n- **访问控制**：基于角色的数据访问权限\n- **监控**：定期安全审计和监控\n- **员工培训**：数据保护意识培训计划\n\n然而，任何互联网传输方式都不是100%安全的。我们无法保证绝对安全。\n\n## 数据保留 \\{#retention\\}\n\n我们按以下期限保留您的个人信息：\n\n- **活跃业务关系**：关系存续期间加5年\n- **询价数据**：最后联系起2年\n- **分析数据**：26个月（汇总数据）\n- **营销偏好**：直至撤回同意\n\n保留期限届满后，数据将被安全删除或匿名化处理。\n\n## 您的隐私权利 \\{#your-rights\\}\n\n### 所有用户\n\n您有权：\n\n- **访问**：请求获取您个人数据的副本\n- **更正**：更新不准确的信息\n- **删除**：请求删除您的数据\n- **反对**：反对某些处理活动\n- **可携带性**：以可移植格式接收您的数据\n\n### 欧洲经济区居民（GDPR）\n\n额外权利包括：\n\n- 随时撤回同意\n- 向监管机构投诉\n- 在特定情况下限制处理\n\n### 加州居民（CCPA）\n\n您有权：\n\n- 了解收集了哪些个人信息\n- 了解个人信息是否被出售或披露\n- 拒绝出售个人信息\n- 访问您的个人信息\n- 获得平等的服务和价格（不受歧视）\n\n如需行使这些权利，请使用以下信息联系我们。\n\n## 儿童隐私 \\{#children\\}\n\n我们的网站不面向16岁以下的个人。我们不会故意收集儿童的个人信息。如果您认为我们收集了儿童的信息，请立即联系我们。\n\n## 第三方链接 \\{#third-party-links\\}\n\n我们的网站可能包含第三方网站的链接。我们对这些外部网站的隐私实践不承担责任。我们建议您查阅它们的隐私政策。\n\n## 本政策的变更 \\{#changes\\}\n\n我们可能会定期更新本隐私政策。变更将在本页面发布，并更新\"最后更新\"日期。重大变更将通过电子邮件或网站通知告知您。\n\n## 联系我们 \\{#contact\\}\n\n如果您对本隐私政策有疑问或希望行使您的权利，请联系我们：\n\n**数据保护联系方式**\nShowcase Website Starter\n真实数据保护联系人配置前，请使用本站联系表单。\n地址：公开上线前替换真实法律地址。\n\n对于欧盟居民，也请通过上述数据保护联系方式与我们联系。\n\n---\n\n**文档版本：** 2.0\n**批准部门：** 法务部\n**审核周期：** 每年\n"
-  },
-  {
-    "type": "pages",
-    "locale": "zh",
-    "slug": "terms",
-    "extension": ".mdx",
-    "filePath": "/content/pages/zh/terms.mdx",
-    "relativePath": "content/pages/zh/terms.mdx",
-    "source": "active-content",
-    "metadata": {
-      "locale": "zh",
-      "title": "服务条款",
-      "slug": "terms",
-      "description": "阅读这个示例网站的占位服务条款和产品或服务请求条件。用于真实项目之前，请替换成正式法律条款。",
-      "publishedAt": "2024-01-01",
-      "updatedAt": "2026-04-26",
-      "author": "法务团队",
-      "layout": "default",
-      "showToc": true,
-      "lastReviewed": "2026-04-26",
-      "draft": false,
-      "seo": {
-        "title": "服务条款 | 业务条款与条件",
-        "description": "展示型网站 starter 的占位服务条款。真实使用前，请替换付款、交付、保修、争议和法律语言。",
-        "keywords": [
-          "服务条款",
-          "业务条款",
-          "网站 starter 条款",
-          "占位法律页面",
-          "业务条款"
-        ]
-      }
-    },
-    "content": "\n**生效日期：** 2024年1月1日\n**最后更新：** 2026-04-26\n\n## 引言 \\{#introduction\\}\n\n欢迎访问 Showcase Website Starter。本服务条款（以下简称\"条款\"）用于说明这个公开 demo 网站的法务内容替换面。真实项目用于正式业务、产品或服务前，网站 owner 必须审核并替换这份条款。\n\n请在使用我们的服务前仔细阅读本条款。如果您不同意本条款，请勿使用我们的网站或服务。\n\n## 条款接受 \\{#acceptance\\}\n\n访问或使用我们的网站、下订单或与我们进行任何业务交易，即表示您确认已阅读、理解并同意受本条款及我们的隐私政策的约束。\n\n如果您代表公司或其他法律实体签订本条款，您声明您有权使该实体受本条款约束。\n\n## 服务说明 \\{#services\\}\n\nShowcase Website Starter 是公开 demo starter，不是真实客户业务的法律主体。真实项目应把本节替换成实际提供的产品或服务，例如：\n\n- 产品或服务展示\n- 定制项目支持\n- 技术咨询和支持\n- 资源或文档访问\n- 询盘处理\n\n详细的产品规格和服务内容可应要求提供。\n\n## 订单与合同 \\{#orders\\}\n\n### 询价与报价\n\n- 所有询价应包括详细的规格和数量要求\n- 报价有效期为30天，除非另有说明\n- 价格可能根据市场条件和订单规格进行调整\n\n### 订单确认\n\n订单在以下情况下确认：\n\n1. 收到书面采购订单\n2. 我们开具形式发票（PI）\n3. 收到定金（如适用）\n4. 我们提供书面订单确认\n\n### 合同成立\n\n合同在我们书面接受您的订单时成立。订单变更需双方书面同意。\n\n## 付款条款 \\{#payment\\}\n\n### 接受的付款方式\n\n真实项目必须把这里替换成自己实际支持的付款方式、最低要求、处理时间和风险控制规则。\n\n### 标准付款条款\n\n- 付款节点必须在最终报价或协议中定义。\n- 定金、里程碑付款、预留款或尾款安排应匹配真实业务模式。\n- 自定义付款条款应在工作开始前以书面方式确认。\n\n### 逾期付款\n\n逾期付款可能产生：\n\n- 真实协议中定义的逾期费用、暂停安排或预付款要求\n- 仅在最终协议允许时暂停待处理工作\n- 真实网站 owner 上线前写明的其他补救方式\n\n## 运输与交货 \\{#shipping\\}\n\n### 贸易术语（Incoterms® 2020）\n\n如果真实业务涉及运输、交付或实施条款，请在报价和合同中列明。不要把这段占位文案作为承诺发布。\n\n### 交货时间\n\n- 标准周期：公开上线前替换成真实项目时间\n- 定制订单：报价阶段提供时间表\n- 交货日期为预估时间，不作保证\n\n### 风险转移\n\n风险转移规则应在最终协议中定义。\n\n## 保修与退换 \\{#warranty\\}\n\n### 产品保修\n\n- 保修或支持周期：公开上线前替换成真实政策\n- 保修范围以最终协议中确认的缺陷或服务问题为准\n- 不包括因误用、改装或不当存储造成的损坏\n\n### 索赔流程\n\n1. 公开上线前替换成真实索赔窗口\n2. 定义隐性缺陷或服务问题的报告方式\n3. 列出真实项目审核所需的证明材料\n4. 公开上线前替换成真实审核时间或服务 SLA\n\n### 补救措施\n\n我们将酌情：\n\n- 修理或更换有缺陷的产品\n- 提供未来订单的抵扣额度\n- 在最终协议允许的情况下，退还受影响部分的款项\n\n## 责任限制 \\{#liability\\}\n\n### 最大责任\n\n我们对任何索赔的总责任不超过您为引起索赔的特定产品或服务所支付的金额。\n\n### 免责范围\n\n我们不对以下情况负责：\n\n- 间接、附带或后果性损害\n- 利润损失或商机损失\n- 不当使用造成的损害\n- 不可抗力事件造成的延误\n\n### 不可抗力\n\n任何一方均不对超出合理控制范围的情况造成的延误或失败承担责任，包括但不限于：\n\n- 自然灾害\n- 战争、恐怖主义或内乱\n- 政府行为或法规\n- 流行病或疫情\n- 运输或履约中断\n\n## 知识产权 \\{#ip\\}\n\n### 我方财产\n\n本 demo 网站中的 starter 内容是可替换示例材料。真实项目必须替换文字、图像、标志、产品设计、服务材料和授权资产的所有权说明。\n\n### 客户规格\n\n- 客户提供的定制设计仍归客户所有\n- 我们将对客户规格保密\n- 定制产品的生产不会将设计权转让给我们\n\n### 使用权\n\n您不得：\n\n- 未经书面许可复制我们的材料\n- 对我们的产品、服务或网站材料进行逆向工程\n- 未经授权使用我们的商标\n\n## 保密条款 \\{#confidentiality\\}\n\n双方同意：\n\n- 保护从对方收到的保密信息\n- 仅将保密信息用于业务关系目的\n- 未经同意不向第三方披露保密信息\n\n保密义务在业务关系终止后5年内继续有效。\n\n## 终止条款 \\{#termination\\}\n\n### 任一方终止\n\n任何一方可提前30天书面通知终止业务关系。\n\n### 立即终止\n\n在以下情况下，我们可立即终止：\n\n- 发生付款违约\n- 严重违反本条款\n- 破产或清算程序\n- 违反适用法律\n\n### 终止效力\n\n终止后：\n\n- 所有未付款项立即到期\n- 待处理订单可由我方酌情取消或完成\n- 保密义务继续有效\n\n## 适用法律与争议解决 \\{#governing-law\\}\n\n### 适用法律\n\n本条款受中华人民共和国法律管辖。\n\n### 争议解决\n\n1. **协商**：双方应首先通过善意协商解决争议\n2. **调解**：如协商在30天内失败，双方可尝试调解\n3. **仲裁**：未解决的争议应提交至：\n\n**中国国际经济贸易仲裁委员会（CIETAC）**\n- 规则：CIETAC仲裁规则\n- 地点：香港或北京（双方协商）\n- 语言：英文或中文（双方协商）\n\n仲裁裁决为最终裁决，对双方均有约束力。\n\n## 出口合规 \\{#export-compliance\\}\n\n### 法规\n\n双方应遵守所有适用的出口管制法律法规，包括：\n\n- 出口管理条例（EAR）\n- 国际武器运输条例（ITAR）\n- 适用的联合国和国家制裁\n\n### 买方义务\n\n买方保证：\n\n- 产品不会用于禁止用途\n- 产品不会违反出口法律再出口\n- 买方未列入任何禁止交易名单\n\n## 一般条款 \\{#general\\}\n\n### 完整协议\n\n本条款连同任何报价、订单和书面协议，构成双方之间的完整协议。\n\n### 可分割性\n\n如任何条款被认定为无效或不可执行，其余条款将继续有效。\n\n### 弃权\n\n未能执行任何权利或条款不构成对该权利或条款的放弃。\n\n### 转让\n\n未经我方事先书面同意，您不得转让您的权利或义务。\n\n### 修订\n\n我们保留修改本条款的权利。变更将在发布到我们网站后生效。\n\n## 联系方式 \\{#contact\\}\n\n如对本服务条款有任何疑问：\n\n**Showcase Website Starter**\n真实法务联系人配置前，请使用本站联系表单。\n地址：公开上线前替换真实法律地址。\n\n订单相关咨询：\n真实接收方配置前，请使用本站联系表单。\n电话：如果提供电话支持，公开上线前配置真实电话号码。\n\n---\n\n**文件版本：** 2.0\n**审批：** 法务部\n**审核周期：** 年度\n"
+    "content": "\n## Standard product lines (TB-BW, TB-AG, TB-TD, TB-CP)\n\n- **3 years from date of delivery**, materials and workmanship, to the original purchaser.\n- Remedy: replacement of defective items (or replacement parts where the defect is a component), following written notice with photos/video and, where requested, return of a representative sample.\n\n## Consumables (TB-FB absorbent bags; accessory kits: seals, patches, nails)\n\n- Warranted to conform to published specifications and arrive free of defects. Shelf-life for unused bags: 3 years in original vacuum packaging, stored cool and dry. Activation is single-use by design and not a defect.\n\n## Custom items\n\n- Custom-cut, custom-coloured and custom-branded items are **final sale** (made to your approved drawings/artwork) — please use our quotation review before confirming.\n\n## Not covered\n\n- Failure to deploy before a flood event; overtopping beyond barrier height\n- Misuse, deployment outside published parameters, unauthorised modification\n- Damage in shipment (claim against carrier — we assist with documentation), storage or handling\n- Improper installation; site conditions outside those described at quotation\n- Normal wear of consumable components (seals, patches)\n\n## Boundaries, plainly\n\nWe are a supply-only manufacturer/supplier. Installation, site assessment and local code compliance rest with the buyer/installer. We support with drawings, manuals and responsive technical help — we do not provide site engineering or performance guarantees for specific flood events.\n\nTODO-OWNER: Legal final review before launch.\n"
   }
 ];
 
 const _byKeyIndex: Record<string, number> = {
   "pages/en/about": 0,
   "pages/en/contact": 1,
-  "pages/en/privacy": 2,
-  "pages/en/terms": 3,
-  "pages/zh/about": 4,
-  "pages/zh/contact": 5,
-  "pages/zh/privacy": 6,
-  "pages/zh/terms": 7
+  "pages/en/flood-barrier-materials-guide": 2,
+  "pages/en/flood-barrier-specifications": 3,
+  "pages/en/oem-wholesale": 4,
+  "pages/en/privacy": 5,
+  "pages/en/terms": 6,
+  "pages/en/warranty": 7
 };
 
 const _byKey: Record<string, ContentEntry> = Object.fromEntries(

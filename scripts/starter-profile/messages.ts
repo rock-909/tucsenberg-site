@@ -10,7 +10,7 @@ import type { MessagePackId } from "../../src/lib/i18n/message-pack-config";
 import profileMessagePacks from "../../messages/message-packs.json";
 import type { MaterializedMessageSet } from "./types";
 
-const MESSAGE_LOCALES = ["en", "zh"] as const;
+const MESSAGE_LOCALES = ["en"] as const;
 const MESSAGE_TYPES = ["critical", "deferred"] as const;
 
 function getMessagePackRoot(packId: MessagePackId): string {
@@ -53,7 +53,7 @@ export function composeMessagesForProfileFromFiles(options: {
 }): Record<string, unknown> {
   const { repoRoot, profileId, relativePath } = options;
   const match = relativePath.match(
-    /^messages\/(en|zh)\/(critical|deferred)\.json$/,
+    /^messages\/(en)\/(critical|deferred)\.json$/,
   );
 
   if (!match) {

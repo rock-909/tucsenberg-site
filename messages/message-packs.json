@@ -1,17 +1,5 @@
 {
-  "minimal": [
-    "base",
-    "minimal"
-  ],
-  "b2b-lead": [
-    "base",
-    "minimal",
-    "b2b-lead"
-  ],
-  "catalog": [
-    "base",
-    "minimal",
-    "b2b-lead",
-    "catalog"
-  ]
+  "minimal": ["base", "minimal"],
+  "b2b-lead": ["base", "minimal", "b2b-lead"],
+  "catalog": ["base", "b2b-lead", "catalog"]
 }

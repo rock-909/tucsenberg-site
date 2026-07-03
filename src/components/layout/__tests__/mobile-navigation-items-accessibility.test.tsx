@@ -10,6 +10,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 import { createMockUseTranslations } from "@/test/utils";
 
+type MockLinkHref =
+  | string
+  | { pathname: string; query?: Record<string, string> };
+
+function stringifyMockHref(href: MockLinkHref): string {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  const query =
+    href.query === undefined ? "" : `?${new URLSearchParams(href.query)}`;
+
+  return `${href.pathname}${query}`;
+}
+
 // Mock next-intl - 完整的Mock配置
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
@@ -35,7 +50,12 @@ const mockPathname = { current: "/" };
 // Mock @/i18n/routing
 vi.mock("@/i18n/routing", () => ({
   Link: ({ children, href, className, onClick, ...props }: any) => (
-    <a href={href} className={className} onClick={onClick} {...props}>
+    <a
+      href={stringifyMockHref(href)}
+      className={className}
+      onClick={onClick}
+      {...props}
+    >
       {children}
     </a>
   ),
@@ -199,10 +219,10 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       expect(linkTexts).toEqual([
         "Home",
         "Products",
-        "Blog",
-        "Resources",
+        "OEM & Wholesale",
+        "Guides",
         "About",
-        "Contact",
+        "Request a Quote",
       ]);
 
       fireEvent.click(screen.getByRole("button", { name: "Language English" }));
@@ -210,8 +230,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         screen.getByTestId("mobile-language-option-label-en"),
       ).toBeInTheDocument();
       expect(
-        screen.getByTestId("mobile-language-option-label-zh"),
-      ).toBeInTheDocument();
+        screen.queryByTestId("mobile-language-option-label-zh"),
+      ).not.toBeInTheDocument();
     });
 
     it("applies consistent styling to navigation items", async () => {
@@ -430,7 +450,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
           "navigation.home": "首页",
           "navigation.about": "关于我们",
           "navigation.products": "产品",
-          "navigation.blog": "博客",
+          "navigation.oemWholesale": "OEM 与批发",
+          "navigation.guides": "指南",
+          "navigation.contactSales": "询价",
           "accessibility.openMenu": "打开菜单",
           "accessibility.closeMenu": "关闭菜单",
           "navigation.siteName": "网站名称",

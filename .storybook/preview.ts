@@ -69,10 +69,7 @@ const preview: Preview = {
       toolbar: {
         title: "Locale",
         icon: "globe",
-        items: [
-          { value: "en", title: "English" },
-          { value: "zh", title: "中文" },
-        ],
+        items: [{ value: "en", title: "English" }],
         dynamicTitle: true,
       },
     },

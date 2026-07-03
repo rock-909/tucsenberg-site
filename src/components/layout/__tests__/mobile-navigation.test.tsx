@@ -14,6 +14,7 @@ interface MockHomeLinkTargets {
   primaryCta: string;
   secondaryCta: string;
   contact?: string;
+  requestQuote?: string;
   products?: string;
 }
 
@@ -26,13 +27,14 @@ const mockSingleSiteHomeLinkTargets = vi.hoisted(
     current: {
       contact: "/contact",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     },
   }),
 );
 
-const mockLocale = { current: "en" as "en" | "zh" };
+const mockLocale = { current: "en" };
 const mockTranslationOverrides: { current?: Record<string, string> } = {};
 
 function stringifyMockHref(href: MockLinkHref): string {
@@ -93,18 +95,22 @@ vi.mock("@/config/single-site-links", () => ({
 vi.mock("@/lib/navigation", () => {
   const mockItems = [
     { key: "home", href: "/", translationKey: "navigation.home" },
-    { key: "about", href: "/about", translationKey: "navigation.about" },
-    {
-      key: "services",
-      href: "/services",
-      translationKey: "navigation.services",
-    },
     {
       key: "products",
       href: "/products",
       translationKey: "navigation.products",
     },
-    { key: "contact", href: "/contact", translationKey: "navigation.contact" },
+    {
+      key: "oemWholesale",
+      href: "/oem-wholesale",
+      translationKey: "navigation.oemWholesale",
+    },
+    {
+      key: "materialsGuide",
+      href: "/guides/flood-barrier-materials-guide",
+      translationKey: "navigation.guides",
+    },
+    { key: "about", href: "/about", translationKey: "navigation.about" },
   ];
 
   return {
@@ -290,8 +296,9 @@ describe("MobileNavigation Component", () => {
     mockSingleSiteHomeLinkTargets.current = {
       contact: "/contact",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     };
   });
 
@@ -346,17 +353,16 @@ describe("MobileNavigation Component", () => {
       expect(container).toBeInTheDocument();
     });
 
-    it("uses localized site description instead of the English default", () => {
-      mockLocale.current = "zh";
+    it("uses translated site description instead of the default mock copy", () => {
       mockTranslationOverrides.current = {
-        "navigation.siteName": "示例展示型公司",
-        "navigation.siteDescription": "可复用展示型网站 starter。",
+        "navigation.siteName": "Tucsenberg",
+        "navigation.siteDescription": "Factory-direct flood barrier supply.",
       };
 
       renderWithIntl(<MobileNavigation />);
 
       expect(screen.getByTestId("sheet-description")).toHaveTextContent(
-        "可复用展示型网站 starter。",
+        "Factory-direct flood barrier supply.",
       );
       expect(screen.getByTestId("sheet-description")).not.toHaveTextContent(
         "Reusable showcase website starter for product or service presentation.",
@@ -424,8 +430,8 @@ describe("MobileNavigation Component", () => {
         screen.getByTestId("mobile-language-option-label-en"),
       ).toHaveAttribute("translate", "no");
       expect(
-        screen.getByTestId("mobile-language-option-label-zh"),
-      ).toHaveAttribute("translate", "no");
+        screen.queryByTestId("mobile-language-option-label-zh"),
+      ).not.toBeInTheDocument();
     });
 
     it("displays all navigation items when open", async () => {
@@ -438,12 +444,15 @@ describe("MobileNavigation Component", () => {
 
       // Should show all navigation links
       expect(within(mobileMenu).getByText("Home")).toBeInTheDocument();
-      expect(within(mobileMenu).getByText("About")).toBeInTheDocument();
-      expect(within(mobileMenu).getByText("Services")).toBeInTheDocument();
       expect(within(mobileMenu).getByText("Products")).toBeInTheDocument();
       expect(
-        within(mobileMenu).getAllByRole("link", { name: "Contact" }).length,
-      ).toBeGreaterThanOrEqual(1);
+        within(mobileMenu).getByText("OEM & Wholesale"),
+      ).toBeInTheDocument();
+      expect(within(mobileMenu).getByText("Guides")).toBeInTheDocument();
+      expect(within(mobileMenu).getByText("About")).toBeInTheDocument();
+      expect(
+        within(mobileMenu).getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", "/request-quote?source=mobile_nav_cta");
     });
 
     it("closes menu when navigation item is clicked", async () => {
@@ -740,8 +749,8 @@ describe("MobileLanguageSwitcher Integration", () => {
       screen.getByTestId("mobile-language-option-label-en"),
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("mobile-language-option-label-zh"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("mobile-language-option-label-zh"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders mobile navigation links before the language row", async () => {
@@ -761,20 +770,19 @@ describe("MobileLanguageSwitcher Integration", () => {
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("detects current locale from next-intl locale context", async () => {
+  it("falls back to English when locale context is unsupported", async () => {
     mockLocale.current = "zh";
 
     renderWithIntl(<MobileNavigation />);
 
     const trigger = screen.getByRole("button", { name: /menu/i });
     await user.click(trigger);
-    await user.click(screen.getByRole("button", { name: "Language 简体中文" }));
+    await user.click(screen.getByRole("button", { name: "Language English" }));
 
-    // Chinese should be marked as active (has check icon)
-    const chineseLink = screen
-      .getByTestId("mobile-language-option-label-zh")
+    const englishLink = screen
+      .getByTestId("mobile-language-option-label-en")
       .closest("a");
-    expect(chineseLink).toHaveClass("bg-accent");
+    expect(englishLink).toHaveClass("bg-accent");
   });
 
   it("defaults to English when locale context is not zh", async () => {
@@ -800,9 +808,8 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
     await user.click(screen.getByRole("button", { name: "Language English" }));
 
-    // Click on a language link
-    const chineseLink = screen.getByTestId("mobile-language-option-label-zh");
-    await user.click(chineseLink);
+    const englishLink = screen.getByTestId("mobile-language-option-label-en");
+    await user.click(englishLink);
 
     // Menu should close
     await waitFor(() => {
@@ -818,7 +825,7 @@ describe("MobileLanguageSwitcher Integration", () => {
     await user.click(trigger);
     await user.click(screen.getByRole("button", { name: "Language English" }));
     expect(
-      screen.getByTestId("mobile-language-option-label-zh"),
+      screen.getByTestId("mobile-language-option-label-en"),
     ).toBeInTheDocument();
 
     await user.click(trigger);
@@ -831,7 +838,7 @@ describe("MobileLanguageSwitcher Integration", () => {
       screen.getByRole("button", { name: "Language English" }),
     ).toHaveAttribute("aria-expanded", "false");
     expect(
-      screen.queryByTestId("mobile-language-option-label-zh"),
+      screen.queryByTestId("mobile-language-option-label-en"),
     ).not.toBeInTheDocument();
   });
 

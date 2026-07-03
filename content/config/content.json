@@ -1,6 +1,6 @@
 {
   "defaultLocale": "en",
-  "supportedLocales": ["en", "zh"],
+  "supportedLocales": ["en"],
   "postsPerPage": 12,
   "enableDrafts": false,
   "enableSearch": true,

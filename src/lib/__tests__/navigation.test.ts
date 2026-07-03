@@ -61,7 +61,7 @@ describe("navigation", () => {
     });
 
     it("should use the source runtime profile for singleton navigation", () => {
-      expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("showcase-full");
+      expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
       expect(SINGLE_SITE_NAVIGATION).toEqual(
         getSingleSiteNavigation(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
       );
@@ -72,18 +72,22 @@ describe("navigation", () => {
           href: "/products",
           translationKey: "navigation.products",
         },
-        { key: "blog", href: "/blog", translationKey: "navigation.blog" },
         {
-          key: "resources",
-          href: "/resources",
-          translationKey: "navigation.resources",
+          key: "oemWholesale",
+          href: "/oem-wholesale",
+          translationKey: "navigation.oemWholesale",
+        },
+        {
+          key: "materialsGuide",
+          href: "/guides/flood-barrier-materials-guide",
+          translationKey: "navigation.guides",
         },
         { key: "about", href: "/about", translationKey: "navigation.about" },
       ]);
     });
 
-    it("can derive the default generated company-site navigation explicitly", () => {
-      expect(DEFAULT_STARTER_PROFILE_ID).toBe("company-site");
+    it("can derive the default materialized catalog navigation explicitly", () => {
+      expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
       expect(getSingleSiteNavigation(DEFAULT_STARTER_PROFILE_ID)).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
@@ -91,11 +95,15 @@ describe("navigation", () => {
           href: "/products",
           translationKey: "navigation.products",
         },
-        { key: "blog", href: "/blog", translationKey: "navigation.blog" },
         {
-          key: "resources",
-          href: "/resources",
-          translationKey: "navigation.resources",
+          key: "oemWholesale",
+          href: "/oem-wholesale",
+          translationKey: "navigation.oemWholesale",
+        },
+        {
+          key: "materialsGuide",
+          href: "/guides/flood-barrier-materials-guide",
+          translationKey: "navigation.guides",
         },
         { key: "about", href: "/about", translationKey: "navigation.about" },
       ]);
@@ -110,19 +118,23 @@ describe("navigation", () => {
       expect(actualKeys).not.toContain("privacy");
     });
 
-    it("can still derive the showcase-full demo navigation", () => {
-      expect(getSingleSiteNavigation("showcase-full")).toEqual([
+    it("can derive the catalog navigation", () => {
+      expect(getSingleSiteNavigation("catalog")).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
           key: "products",
           href: "/products",
           translationKey: "navigation.products",
         },
-        { key: "blog", href: "/blog", translationKey: "navigation.blog" },
         {
-          key: "resources",
-          href: "/resources",
-          translationKey: "navigation.resources",
+          key: "oemWholesale",
+          href: "/oem-wholesale",
+          translationKey: "navigation.oemWholesale",
+        },
+        {
+          key: "materialsGuide",
+          href: "/guides/flood-barrier-materials-guide",
+          translationKey: "navigation.guides",
         },
         { key: "about", href: "/about", translationKey: "navigation.about" },
       ]);
@@ -139,7 +151,7 @@ describe("navigation", () => {
         expect(item.key).toBeTruthy();
         expect(item.href).toBeTruthy();
         expect(item.translationKey).toBeTruthy();
-        expect(item.href).toMatch(/^\/[a-z-]*$/);
+        expect(item.href).toMatch(/^\/[a-z-/]*$/);
         expect(item.translationKey).toMatch(/^navigation\./);
       });
     });

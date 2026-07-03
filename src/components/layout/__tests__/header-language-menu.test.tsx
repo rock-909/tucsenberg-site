@@ -16,8 +16,8 @@ describe("HeaderLanguageMenu", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    vi.mocked(usePathname).mockReturnValue("/en/products/north-america");
-    setBrowserPathname("/en/products/north-america");
+    vi.mocked(usePathname).mockReturnValue("/products/abs-flood-barriers");
+    setBrowserPathname("/products/abs-flood-barriers");
   });
 
   afterEach(() => {
@@ -49,7 +49,7 @@ describe("HeaderLanguageMenu", () => {
     expect(source).toContain("isOpen: initialOpen");
   });
 
-  it("mounts open and builds locale links from the current pathname", () => {
+  it("mounts open and builds configured locale links from the current pathname", () => {
     render(<HeaderLanguageMenu initialOpen locale="en" />);
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -66,56 +66,48 @@ describe("HeaderLanguageMenu", () => {
     );
     expect(screen.getByTestId("language-link-en")).toHaveAttribute(
       "href",
-      "/en/products/north-america",
+      "/products/abs-flood-barriers",
     );
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
-      "href",
-      "/zh/products/north-america",
-    );
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
   });
 
-  it("keeps locale root links clean without duplicate slashes", () => {
+  it("normalizes stale locale root paths to the unprefixed English root", () => {
     setBrowserPathname("/zh");
 
-    render(<HeaderLanguageMenu initialOpen locale="zh" />);
+    render(<HeaderLanguageMenu initialOpen locale="en" />);
 
-    expect(screen.getByTestId("language-link-en")).toHaveAttribute(
-      "href",
-      "/en",
-    );
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
-      "href",
-      "/zh",
-    );
+    expect(screen.getByTestId("language-link-en")).toHaveAttribute("href", "/");
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
   });
 
   it("refreshes locale links from the browser path each time the menu opens", () => {
     render(<HeaderLanguageMenu locale="en" />);
 
-    setBrowserPathname("/en/about");
+    setBrowserPathname("/about");
     fireEvent.pointerDown(screen.getByTestId("language-toggle-button"), {
       button: 0,
       ctrlKey: false,
     });
 
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-en")).toHaveAttribute(
       "href",
-      "/zh/about",
+      "/about",
     );
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
 
     fireEvent.pointerDown(screen.getByTestId("language-toggle-button"), {
       button: 0,
       ctrlKey: false,
     });
-    setBrowserPathname("/en/contact");
+    setBrowserPathname("/contact");
     fireEvent.pointerDown(screen.getByTestId("language-toggle-button"), {
       button: 0,
       ctrlKey: false,
     });
 
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-en")).toHaveAttribute(
       "href",
-      "/zh/contact",
+      "/contact",
     );
   });
 
@@ -126,12 +118,13 @@ describe("HeaderLanguageMenu", () => {
     render(<HeaderLanguageMenu initialOpen locale="en" />);
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
-    expect(screen.getByTestId("language-link-zh")).toHaveAttribute(
+    expect(screen.getByTestId("language-link-en")).toHaveAttribute(
       "href",
-      "/zh/products/north-america",
+      "/products/abs-flood-barriers",
     );
+    expect(screen.queryByTestId("language-link-zh")).not.toBeInTheDocument();
 
-    await user.click(screen.getByTestId("language-link-zh"));
+    await user.click(screen.getByTestId("language-link-en"));
 
     await waitFor(() => {
       expect(screen.queryByRole("menu")).not.toBeInTheDocument();

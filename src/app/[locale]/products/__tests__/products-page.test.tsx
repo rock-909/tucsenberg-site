@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
-import ProductsPage from "../page";
+import ProductsPage, { generateStaticParams } from "../page";
 import {
   assertNoHeavyCatalogOrDeveloperDemoCopy,
   createCatalogTranslator,
@@ -16,7 +16,7 @@ const {
 } = vi.hoisted(() => ({
   mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
   mockGetTranslations: vi.fn(),
-  mockGetRuntimeMessageProfileId: vi.fn(() => "showcase-full"),
+  mockGetRuntimeMessageProfileId: vi.fn(() => "catalog"),
 }));
 
 vi.mock("@/config/active-starter-profile", () => ({
@@ -46,7 +46,7 @@ vi.mock("@/i18n/routing", () => ({
     </a>
   ),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -84,7 +84,7 @@ vi.mock("next/image", () => ({
 }));
 
 vi.mock("@/app/[locale]/generate-static-params", () => ({
-  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
+  generateLocaleStaticParams: () => [{ locale: "en" }],
 }));
 
 async function renderAsyncComponent(
@@ -111,10 +111,23 @@ async function flushPendingMicrotasks() {
 describe("Feature: Product Overview Page", () => {
   const mockParams: LocaleParam = { locale: "en" };
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
+  const PRODUCT_LINE_LINKS = [
+    ["ABS Interlocking Boxwall Flood Barriers", "/products/abs-flood-barriers"],
+    [
+      "Aluminum Flood Gates & Demountable Barrier Systems",
+      "/products/aluminum-flood-gates",
+    ],
+    [
+      "Absorbent Flood Bags (Sandless Sandbags)",
+      "/products/absorbent-flood-bags",
+    ],
+    ["Water & Air-Filled Tube Dams", "/products/flood-tube-dams"],
+    ["FRP Composite Planks", "/products/frp-flood-barriers"],
+  ] as const;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRuntimeMessageProfileId.mockReturnValue("showcase-full");
+    mockGetRuntimeMessageProfileId.mockReturnValue("catalog");
     mockGetTranslations.mockImplementation(
       async ({ locale }: { locale: string }) => createCatalogTranslator(locale),
     );
@@ -132,18 +145,21 @@ describe("Feature: Product Overview Page", () => {
       );
 
       expect(
-        screen.getByText("What visitors should learn here"),
+        screen.getByText("Start with the product line"),
       ).toBeInTheDocument();
     });
 
-    it("renders all three product overview cards", async () => {
+    it("renders all five Tucsenberg product-line cards", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(screen.getByText("Product groups")).toBeInTheDocument();
-      expect(screen.getByText("Proof materials")).toBeInTheDocument();
-      expect(screen.getByText("Buying next step")).toBeInTheDocument();
+      for (const [label, href] of PRODUCT_LINE_LINKS) {
+        expect(screen.getByRole("link", { name: label })).toHaveAttribute(
+          "href",
+          href,
+        );
+      }
     });
 
     it("does not render market overview cards or heavy catalog demo copy", async () => {
@@ -163,57 +179,40 @@ describe("Feature: Product Overview Page", () => {
   });
 
   describe("Scenario 2.1b: Prioritized product-system composition leads to inquiry", () => {
-    it("renders one lead product-system card ahead of supporting proof and next-step cards", async () => {
+    it("renders product-line cards in the approved P1-P5 order", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      const leadHeading = screen.getByRole("heading", {
-        level: 3,
-        name: "Product groups",
-      });
-      const proofHeading = screen.getByRole("heading", {
-        level: 3,
-        name: "Proof materials",
-      });
-      const nextStepHeading = screen.getByRole("heading", {
-        level: 3,
-        name: "Buying next step",
-      });
+      const lineHeadings = PRODUCT_LINE_LINKS.map(([label]) =>
+        screen.getByRole("heading", { level: 3, name: label }),
+      );
 
-      // Lead explanation comes first, then supporting proof/next-step cards.
-      expect(
-        leadHeading.compareDocumentPosition(proofHeading) &
-          Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
-      expect(
-        proofHeading.compareDocumentPosition(nextStepHeading) &
-          Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
+      for (let index = 0; index < lineHeadings.length - 1; index += 1) {
+        expect(
+          lineHeadings[index].compareDocumentPosition(lineHeadings[index + 1]) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      }
     });
 
-    it("shows application and fit supporting text near the products before the inquiry CTA", async () => {
+    it("shows product-fit guidance before the RFQ CTA", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      // Application/proof routing guidance sits between the products and the CTA.
+      expect(screen.getByText("Scan the five lines")).toBeInTheDocument();
+      expect(screen.getByText("Check the fit")).toBeInTheDocument();
+      expect(screen.getByText("Send the RFQ")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "Help visitors understand the offer families before they ask for specifics.",
-        ),
-      ).toBeInTheDocument();
-      expect(screen.getByText("Ask for fit")).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "Move visitors to contact when they need pricing, availability, or project fit.",
+          "Standard items are quoted in 12 hours; custom configurations within 48.",
         ),
       ).toBeInTheDocument();
 
-      // The path ends at an inquiry CTA whose href resolves to the contact route.
-      const contactLink = screen.getByRole("link", { name: "Contact" });
-      expect(contactLink.getAttribute("href")).toBe("/contact");
-      expect(contactLink.getAttribute("href")).toMatch(/\/contact$/);
+      const rfqLink = screen.getByRole("link", { name: "Request a Quote" });
+      expect(rfqLink.getAttribute("href")).toBe("/request-quote");
+      expect(rfqLink.getAttribute("href")).toMatch(/\/request-quote$/);
     });
   });
 
@@ -223,12 +222,14 @@ describe("Feature: Product Overview Page", () => {
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(screen.getByText("Replace before launch")).toBeInTheDocument();
+      expect(screen.getByText("No published-price games")).toBeInTheDocument();
       expect(
-        screen.getByText("Replace product names and descriptions"),
+        screen.getByText("Prices stay in the quotation, not on public pages"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Add real availability, pricing, or quote rules"),
+        screen.getByText(
+          "Custom-cut and private label details are confirmed per order",
+        ),
       ).toBeInTheDocument();
 
       assertNoHeavyCatalogOrDeveloperDemoCopy();
@@ -260,17 +261,19 @@ describe("Feature: Product Overview Page", () => {
           name: "How this overview should work",
         }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Scan product groups")).toBeInTheDocument();
-      expect(screen.getByText("Check proof materials")).toBeInTheDocument();
-      expect(screen.getByText("Ask for fit")).toBeInTheDocument();
+      expect(screen.getByText("Scan the five lines")).toBeInTheDocument();
+      expect(screen.getByText("Check the fit")).toBeInTheDocument();
+      expect(screen.getByText("Send the RFQ")).toBeInTheDocument();
       expect(
         screen.getByRole("heading", {
           level: 2,
-          name: "Use detail pages only when needed",
+          name: "When to open a product page",
         }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Real product families and priorities are confirmed"),
+        screen.getByText(
+          "Product family, material and deployment method affect the recommendation",
+        ),
       ).toBeInTheDocument();
     });
 
@@ -283,8 +286,15 @@ describe("Feature: Product Overview Page", () => {
         .getAllByRole("link")
         .map((link) => link.getAttribute("href"));
 
-      expect(hrefs).toEqual(expect.arrayContaining(["/resources", "/contact"]));
-      expect(hrefs.some((href) => href?.startsWith("/products/"))).toBe(false);
+      expect(hrefs).toEqual(
+        expect.arrayContaining([
+          "/guides/flood-barrier-materials-guide",
+          "/request-quote",
+        ]),
+      );
+      for (const [, href] of PRODUCT_LINE_LINKS) {
+        expect(hrefs).toContain(href);
+      }
       expect(hrefs.some((href) => href?.includes("download"))).toBe(false);
       expect(hrefs.some((href) => href?.endsWith(".pdf"))).toBe(false);
       expect(hrefs.some((href) => href?.startsWith("/api/"))).toBe(false);
@@ -311,7 +321,10 @@ describe("Feature: Product Overview Page", () => {
       );
 
       expect(
-        screen.getByRole("heading", { level: 1, name: "Product overview" }),
+        screen.getByRole("heading", {
+          level: 1,
+          name: "Flood Barrier Product Lines",
+        }),
       ).toBeInTheDocument();
     });
 
@@ -330,47 +343,48 @@ describe("Feature: Product Overview Page", () => {
 
       expect(
         screen.getByText(
-          "Use this page to introduce the main product lines or offer groups visitors should understand before they contact you.",
+          "Five flood barrier lines for dealers, importers, brands, contractors and small business buyers: ABS boxwall, aluminum flood gates, absorbent flood bags, tube dams and FRP composite planks.",
         ),
       ).toBeInTheDocument();
     });
 
-    it("renders resources and contact CTAs without blog cross-link", async () => {
+    it("renders guide and RFQ CTAs without retired blog/resources/contact links", async () => {
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(
-        screen.getByRole("link", { name: "View resources" }),
-      ).toHaveAttribute("href", "/resources");
-      expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: "View guides" })).toHaveAttribute(
         "href",
-        "/contact",
+        "/guides/flood-barrier-materials-guide",
       );
+      expect(
+        screen.getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", "/request-quote");
 
       const hrefs = screen
         .getAllByRole("link")
         .map((link) => link.getAttribute("href"));
 
       expect(hrefs).not.toContain("/blog");
+      expect(hrefs).not.toContain("/resources");
+      expect(hrefs).not.toContain("/contact");
       expect(hrefs).not.toContain("/products/north-america");
-      expect(hrefs.some((href) => href?.startsWith("/products/"))).toBe(false);
     });
 
-    it("renders contact only when the active profile excludes resources", async () => {
+    it("keeps the same guide and RFQ CTAs across active profiles", async () => {
       mockGetRuntimeMessageProfileId.mockReturnValueOnce("catalog");
 
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(
-        screen.queryByRole("link", { name: "View resources" }),
-      ).not.toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: "View guides" })).toHaveAttribute(
         "href",
-        "/contact",
+        "/guides/flood-barrier-materials-guide",
       );
+      expect(
+        screen.getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", "/request-quote");
     });
   });
 
@@ -380,16 +394,8 @@ describe("Feature: Product Overview Page", () => {
       expect(result).toBeInstanceOf(Promise);
     });
 
-    it("handles zh locale", async () => {
-      await renderAsyncComponent(
-        ProductsPage({ params: Promise.resolve({ locale: "zh" }) }),
-      );
-
-      expect(
-        screen.getByRole("heading", { level: 1, name: "产品概览" }),
-      ).toBeInTheDocument();
-
-      assertNoHeavyCatalogOrDeveloperDemoCopy();
+    it("generates only the active English locale", () => {
+      expect(generateStaticParams()).toEqual([{ locale: "en" }]);
     });
   });
 

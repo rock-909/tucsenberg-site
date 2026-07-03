@@ -44,14 +44,6 @@ interface FactualCriticalMessages {
   navigation: {
     siteName: string;
   };
-  home: {
-    footer: {
-      about: {
-        title: string;
-      };
-      copyright: string;
-    };
-  };
   footer: {
     copyright: string;
   };
@@ -74,9 +66,6 @@ interface FactualDeferredMessages {
   };
   website: {
     name: string;
-  };
-  article: {
-    defaultAuthor: string;
   };
 }
 
@@ -165,8 +154,6 @@ function assertFactualCriticalMessages(
   value: unknown,
 ): asserts value is FactualCriticalMessages {
   expectStringPath(value, ["navigation", "siteName"]);
-  expectStringPath(value, ["home", "footer", "about", "title"]);
-  expectStringPath(value, ["home", "footer", "copyright"]);
   expectStringPath(value, ["footer", "copyright"]);
   expectStringPath(value, ["structured-data", "organization", "name"]);
   expectStringPath(value, ["structured-data", "website", "name"]);
@@ -179,7 +166,6 @@ function assertFactualCompleteMessages(
   assertFactualCriticalMessages(value);
   expectStringPath(value, ["organization", "name"]);
   expectStringPath(value, ["website", "name"]);
-  expectStringPath(value, ["article", "defaultAuthor"]);
 }
 
 function readMessageJson(relativePath: string): unknown {
@@ -245,7 +231,7 @@ describe("load-messages runtime gating", () => {
     expect(unstableCache.mock.calls[0]?.[1]).toEqual([
       "i18n-critical",
       "en",
-      "showcase-full",
+      "catalog",
     ]);
     expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
       tags: ["i18n:critical:en", "i18n:all"],
@@ -287,11 +273,11 @@ describe("load-messages runtime gating", () => {
     expect(unstableCache).toHaveBeenCalledTimes(1);
     expect(unstableCache.mock.calls[0]?.[1]).toEqual([
       "i18n-deferred",
-      "zh",
-      "showcase-full",
+      "en",
+      "catalog",
     ]);
     expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
-      tags: ["i18n:deferred:zh", "i18n:all"],
+      tags: ["i18n:deferred:en", "i18n:all"],
     });
   });
 
@@ -330,19 +316,11 @@ describe("load-messages runtime gating", () => {
         SINGLE_SITE_FACTS.company.yearsInBusiness,
     );
     const expectedEnCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}. All rights reserved.`;
-    const expectedZhCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}。保留所有权利。`;
-
-    const [enMessages, zhMessages] = await Promise.all([
-      loadCriticalMessages("en"),
-      loadCriticalMessages("zh"),
-    ]);
+    const enMessages = await loadCriticalMessages("en");
     assertFactualCriticalMessages(enMessages);
-    assertFactualCriticalMessages(zhMessages);
 
     expect(enMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(enMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
     expect(enMessages.footer.copyright).toBe(expectedEnCopyright);
-    expect(enMessages.home.footer.copyright).toBe(expectedEnCopyright);
     expect(enMessages["structured-data"].organization.name).toBe(
       SINGLE_SITE_FACTS.company.name,
     );
@@ -353,12 +331,7 @@ describe("load-messages runtime gating", () => {
       SINGLE_SITE_FACTS.company.name,
     );
 
-    expect(zhMessages.navigation.siteName).toBe(SINGLE_SITE_CONFIG.name);
-    expect(zhMessages.home.footer.about.title).toBe(SINGLE_SITE_CONFIG.name);
-    expect(zhMessages.footer.copyright).toBe(expectedZhCopyright);
-    expect(zhMessages.home.footer.copyright).toBe(expectedZhCopyright);
     expect(JSON.stringify(enMessages)).not.toMatch(factualPlaceholderPattern);
-    expect(JSON.stringify(zhMessages)).not.toMatch(factualPlaceholderPattern);
   });
 
   it("keeps homepage B2B proof copy in complete runtime messages", async () => {
@@ -369,29 +342,16 @@ describe("load-messages runtime gating", () => {
 
     const { loadCompleteMessages } = await import("@/lib/i18n/load-messages");
 
-    const [enMessages, zhMessages] = await Promise.all([
-      loadCompleteMessages("en"),
-      loadCompleteMessages("zh"),
-    ]);
+    const enMessages = await loadCompleteMessages("en");
 
     expect(getPathValue(enMessages, ["home", "hero", "proofAriaLabel"])).toBe(
-      "Homepage proof categories",
-    );
-    expect(getPathValue(zhMessages, ["home", "hero", "proofAriaLabel"])).toBe(
-      "首页证明分类",
+      "Tucsenberg quote, warranty and factory-pool facts",
     );
 
     const enPreview = expectRecordPath(enMessages, ["home", "hero", "preview"]);
-    const zhPreview = expectRecordPath(zhMessages, ["home", "hero", "preview"]);
 
     for (const previewKey of heroPreviewKeys) {
       expectNonEmptyStringPath(enMessages, [
-        "home",
-        "hero",
-        "preview",
-        previewKey,
-      ]);
-      expectNonEmptyStringPath(zhMessages, [
         "home",
         "hero",
         "preview",
@@ -401,12 +361,10 @@ describe("load-messages runtime gating", () => {
 
     for (const obsoleteKey of obsoleteHeroPreviewKeys) {
       expect(obsoleteKey in enPreview).toBe(false);
-      expect(obsoleteKey in zhPreview).toBe(false);
     }
 
     for (const path of homeB2BSectionPaths) {
       expectNonEmptyStringPath(enMessages, path);
-      expectNonEmptyStringPath(zhMessages, path);
     }
   });
 
@@ -440,7 +398,6 @@ describe("load-messages runtime gating", () => {
     );
     expect(messages.organization.name).toBe(SINGLE_SITE_FACTS.company.name);
     expect(messages.website.name).toBe(SINGLE_SITE_CONFIG.name);
-    expect(messages.article.defaultAuthor).toBe(SINGLE_SITE_FACTS.company.name);
     expect(JSON.stringify(messages)).not.toMatch(factualPlaceholderPattern);
   });
 
@@ -448,45 +405,22 @@ describe("load-messages runtime gating", () => {
     const enCritical = readMessageJson(
       "messages/en/critical.json",
     ) as FactualCriticalMessages;
-    const zhCritical = readMessageJson(
-      "messages/zh/critical.json",
-    ) as FactualCriticalMessages;
     const enDeferred = readMessageJson(
       "messages/en/deferred.json",
     ) as FactualDeferredMessages;
-    const zhDeferred = readMessageJson(
-      "messages/zh/deferred.json",
-    ) as FactualDeferredMessages;
 
     expect(enCritical.navigation.siteName).toBe("{siteName}");
-    expect(zhCritical.navigation.siteName).toBe("{siteName}");
-    expect(enCritical.home.footer.about.title).toBe("{siteName}");
-    expect(zhCritical.home.footer.about.title).toBe("{siteName}");
     expect(enCritical.footer.copyright).toBe("{copyright}");
-    expect(zhCritical.footer.copyright).toBe("{copyright}");
-    expect(enCritical.home.footer.copyright).toBe("{copyright}");
-    expect(zhCritical.home.footer.copyright).toBe("{copyright}");
 
     expect(enCritical["structured-data"].organization.name).toBe(
       "{companyName}",
     );
-    expect(zhCritical["structured-data"].organization.name).toBe(
-      "{companyName}",
-    );
     expect(enCritical["structured-data"].website.name).toBe("{siteName}");
-    expect(zhCritical["structured-data"].website.name).toBe("{siteName}");
     expect(enCritical["structured-data"].article.defaultAuthor).toBe(
-      "{companyName}",
-    );
-    expect(zhCritical["structured-data"].article.defaultAuthor).toBe(
       "{companyName}",
     );
 
     expect(enDeferred.organization.name).toBe("{companyName}");
-    expect(zhDeferred.organization.name).toBe("{companyName}");
     expect(enDeferred.website.name).toBe("{siteName}");
-    expect(zhDeferred.website.name).toBe("{siteName}");
-    expect(enDeferred.article.defaultAuthor).toBe("{companyName}");
-    expect(zhDeferred.article.defaultAuthor).toBe("{companyName}");
   });
 });

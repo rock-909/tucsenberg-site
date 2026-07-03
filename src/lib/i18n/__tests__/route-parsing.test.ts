@@ -12,9 +12,9 @@ describe("route-parsing", () => {
       expect("/en/about".replace(LOCALE_PREFIX_RE, "")).toBe("/about");
     });
 
-    it("matches /zh prefix", () => {
+    it("does not match retired /zh prefix in en-only mode", () => {
       expect("/zh/products/europe".replace(LOCALE_PREFIX_RE, "")).toBe(
-        "/products/europe",
+        "/zh/products/europe",
       );
     });
 
@@ -71,9 +71,9 @@ describe("route-parsing", () => {
       expect(normalizePathnameForLink("/en/about")).toBe("/about");
     });
 
-    it("strips /zh locale prefix", () => {
+    it("preserves retired /zh locale-like prefix in en-only mode", () => {
       expect(normalizePathnameForLink("/zh/products/europe")).toBe(
-        "/products/europe",
+        "/zh/products/europe",
       );
     });
 
@@ -83,7 +83,7 @@ describe("route-parsing", () => {
 
     it("handles root path with locale", () => {
       expect(normalizePathnameForLink("/en")).toBe("/");
-      expect(normalizePathnameForLink("/zh")).toBe("/");
+      expect(normalizePathnameForLink("/zh")).toBe("/zh");
     });
 
     it("preserves paths without locale prefix", () => {
@@ -108,7 +108,7 @@ describe("route-parsing", () => {
       });
 
       it("returns static path as string for /contact", () => {
-        expect(parsePathnameForLink("/zh/contact")).toBe("/contact");
+        expect(parsePathnameForLink("/contact")).toBe("/contact");
       });
 
       it("returns root path for locale-only URL", () => {
@@ -142,8 +142,14 @@ describe("route-parsing", () => {
         });
       });
 
-      it("handles blog article route with locale prefix", () => {
-        expect(parsePathnameForLink("/zh/blog/my-post")).toEqual({
+      it("preserves retired locale-like blog article paths", () => {
+        expect(parsePathnameForLink("/zh/blog/my-post")).toBe(
+          "/zh/blog/my-post",
+        );
+      });
+
+      it("handles blog article route without locale prefix", () => {
+        expect(parsePathnameForLink("/blog/my-post")).toEqual({
           pathname: "/blog/[slug]",
           params: { slug: "my-post" },
         });
@@ -160,7 +166,7 @@ describe("route-parsing", () => {
       });
 
       it("does not match /products without market", () => {
-        expect(parsePathnameForLink("/zh/products")).toBe("/products");
+        expect(parsePathnameForLink("/products")).toBe("/products");
       });
     });
   });

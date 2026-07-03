@@ -2,8 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import enCriticalMessages from "../../../../../messages/en/critical.json";
 import enDeferredMessages from "../../../../../messages/en/deferred.json";
-import zhCriticalMessages from "../../../../../messages/zh/critical.json";
-import zhDeferredMessages from "../../../../../messages/zh/deferred.json";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 
@@ -34,13 +32,6 @@ describe("ContactFormStaticFallback", () => {
       fullNameLabel: "Full name",
       optionalLabel: "optional",
       submitLabel: "Send Message",
-    },
-    {
-      locale: "zh",
-      messages: { ...zhCriticalMessages, ...zhDeferredMessages },
-      fullNameLabel: "姓名",
-      optionalLabel: "选填",
-      submitLabel: "发送消息",
     },
   ] as const;
 

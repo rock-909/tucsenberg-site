@@ -19,11 +19,10 @@ export const routing = defineRouting({
   // 注意：仅包含已实现的页面路径，避免 404 错误
   pathnames: PATHNAMES,
 
-  // 启用hreflang链接
+  // English-only site: keep self canonical / x-default behavior predictable.
   alternateLinks: true,
 
-  // 启用智能语言检测
-  localeDetection: true,
+  localeDetection: false,
 
   // 配置locale cookie - 持久化用户语言偏好
   localeCookie: {

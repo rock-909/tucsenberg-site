@@ -7,6 +7,22 @@ import { SOURCE_RUNTIME_MESSAGE_PROFILE_ID } from "@/config/active-starter-profi
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
+const EXPECTED_TUCSENBERG_NAVIGATION_LINKS = [
+  "home",
+  "products",
+  "oemWholesale",
+  "materialsGuide",
+  "about",
+] as const;
+
+const EXPECTED_TUCSENBERG_SUPPORT_LINKS = [
+  "requestQuote",
+  "contact",
+  "warranty",
+  "privacy",
+  "terms",
+] as const;
+
 describe("footer-links", () => {
   it("exports footer columns with valid structure", () => {
     expect(Array.isArray(FOOTER_COLUMNS)).toBe(true);
@@ -32,7 +48,7 @@ describe("footer-links", () => {
   });
 
   it("uses the source runtime profile for singleton footer links", () => {
-    expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("showcase-full");
+    expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
     expect(SINGLE_SITE_FOOTER_COLUMNS).toEqual(
       getSingleSiteFooterColumns(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
     );
@@ -45,21 +61,15 @@ describe("footer-links", () => {
     );
 
     expect(navigationColumn?.links.map((link) => link.key)).toEqual([
-      "home",
-      "products",
-      "blog",
-      "resources",
-      "about",
+      ...EXPECTED_TUCSENBERG_NAVIGATION_LINKS,
     ]);
     expect(supportColumn?.links.map((link) => link.key)).toEqual([
-      "contact",
-      "privacy",
-      "terms",
+      ...EXPECTED_TUCSENBERG_SUPPORT_LINKS,
     ]);
   });
 
-  it("can derive the default generated company-site footer links explicitly", () => {
-    expect(DEFAULT_STARTER_PROFILE_ID).toBe("company-site");
+  it("can derive the default materialized catalog footer links explicitly", () => {
+    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
     const columns = getSingleSiteFooterColumns(DEFAULT_STARTER_PROFILE_ID);
     const navigationColumn = columns.find(
       (column) => column.key === "navigation",
@@ -67,31 +77,21 @@ describe("footer-links", () => {
     const supportColumn = columns.find((column) => column.key === "support");
 
     expect(navigationColumn?.links.map((link) => link.key)).toEqual([
-      "home",
-      "products",
-      "blog",
-      "resources",
-      "about",
+      ...EXPECTED_TUCSENBERG_NAVIGATION_LINKS,
     ]);
     expect(supportColumn?.links.map((link) => link.key)).toEqual([
-      "contact",
-      "privacy",
-      "terms",
+      ...EXPECTED_TUCSENBERG_SUPPORT_LINKS,
     ]);
   });
 
-  it("can still derive showcase-full footer navigation links", () => {
-    const columns = getSingleSiteFooterColumns("showcase-full");
+  it("can derive the catalog footer navigation links", () => {
+    const columns = getSingleSiteFooterColumns("catalog");
     const navigationColumn = columns.find(
       (column) => column.key === "navigation",
     );
 
     expect(navigationColumn?.links.map((link) => link.key)).toEqual([
-      "home",
-      "products",
-      "blog",
-      "resources",
-      "about",
+      ...EXPECTED_TUCSENBERG_NAVIGATION_LINKS,
     ]);
   });
 

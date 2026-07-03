@@ -39,9 +39,9 @@ export async function ProductsSection() {
 
   return (
     <ProductsSectionView
-      title={t("products.title")}
-      subtitle={t("products.subtitle")}
-      ctaLabel={t("products.cta")}
+      title={translateHome("products.title")}
+      subtitle={translateHome("products.subtitle")}
+      ctaLabel={translateHome("products.cta")}
       ctaHref={productsCtaHref}
       products={products}
     />
