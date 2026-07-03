@@ -32,6 +32,15 @@ const PROTECTION_OPTIONS: readonly RfqOption[] = [
   { value: "other", label: "Other" },
 ];
 
+const MOUNTING_SURFACE_OPTIONS: readonly RfqOption[] = [
+  { value: "concrete", label: "Concrete" },
+  { value: "masonry", label: "Masonry" },
+  { value: "steel", label: "Steel" },
+  { value: "timber", label: "Timber" },
+  { value: "ground-soil", label: "Ground / soil" },
+  { value: "other", label: "Other" },
+];
+
 const MATERIAL_OPTIONS: readonly RfqOption[] = [
   { value: "advise-me", label: "Advise me" },
   { value: "abs-flood-barriers", label: "ABS flood barriers" },
@@ -74,7 +83,8 @@ export async function generateMetadata({
     pageType: "requestQuote",
     path: getLocalizedPath("requestQuote", locale as Locale),
     config: {
-      title: "Request a Quote — 12-Hour Response on Standard Items",
+      title:
+        "Request a Quote — 12-Hour Response on Standard Items | Tucsenberg",
       description:
         "Send dimensions, quantities, market and timeline. Standard flood barrier items quoted within 12 hours; custom configurations within 48.",
     },
@@ -216,10 +226,11 @@ function RequestQuoteForm() {
             label="Opening width × height / run length"
             name="dimensions"
           />
-          <RfqTextField
+          <RfqSelectField
             id="rfq-mounting"
             label="Mounting surface / ground type"
             name="mounting"
+            options={MOUNTING_SURFACE_OPTIONS}
           />
           <RfqSelectField
             defaultValue="advise-me"

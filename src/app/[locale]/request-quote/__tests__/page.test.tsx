@@ -1,19 +1,42 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import RequestQuotePage from "../page";
+import { render, screen, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import RequestQuotePage, { generateMetadata } from "../page";
+
+const { mockGenerateMetadataForPath } = vi.hoisted(() => ({
+  mockGenerateMetadataForPath: vi.fn(async () => ({
+    title: "Request a Quote",
+    description: "Request a quote",
+  })),
+}));
 
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 
 vi.mock("@/lib/seo-metadata", () => ({
-  generateMetadataForPath: vi.fn(async () => ({
-    title: "Request a Quote",
-    description: "Request a quote",
-  })),
+  generateMetadataForPath: mockGenerateMetadataForPath,
 }));
 
 describe("RequestQuotePage", () => {
+  beforeEach(() => {
+    mockGenerateMetadataForPath.mockClear();
+  });
+
+  it("uses the owner-approved RFQ meta title", async () => {
+    await generateMetadata({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    expect(mockGenerateMetadataForPath).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          title:
+            "Request a Quote — 12-Hour Response on Standard Items | Tucsenberg",
+        }),
+      }),
+    );
+  });
+
   it("renders the owner-approved RFQ form fields and success copy", async () => {
     const page = await RequestQuotePage({
       params: Promise.resolve({ locale: "en" }),
@@ -33,8 +56,12 @@ describe("RequestQuotePage", () => {
     expect(
       screen.getByLabelText("Opening width × height / run length"),
     ).toBeInTheDocument();
+    const mountingSurface = screen.getByRole("combobox", {
+      name: "Mounting surface / ground type",
+    });
+    expect(mountingSurface).toBeInTheDocument();
     expect(
-      screen.getByLabelText("Mounting surface / ground type"),
+      within(mountingSurface).getByRole("option", { name: "Other" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Material preference")).toBeInTheDocument();
     expect(screen.getByLabelText("Quantity")).toBeInTheDocument();
