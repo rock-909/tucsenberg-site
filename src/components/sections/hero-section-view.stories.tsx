@@ -1,0 +1,60 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MINIMAL_VIEWPORTS } from "storybook/viewport";
+
+import {
+  homepageStoryHero,
+  homepageStoryHeroLongCopy,
+  homepageStoryHeroZh,
+} from "@/components/sections/homepage-section.fixtures";
+import { HeroSectionView } from "@/components/sections/hero-section-view";
+
+const meta = {
+  title: "Sections/HeroSectionView",
+  component: HeroSectionView,
+  parameters: {
+    layout: "fullscreen",
+  },
+  tags: ["autodocs"],
+  args: {
+    content: homepageStoryHero,
+    previewTitleId: "hero-view-preview-title-default-story",
+  },
+} satisfies Meta<typeof HeroSectionView>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+
+export const LongCopy: Story = {
+  args: {
+    content: homepageStoryHeroLongCopy,
+    previewTitleId: "hero-view-preview-title-long-copy-story",
+  },
+};
+
+export const ChineseCopy: Story = {
+  args: {
+    content: homepageStoryHeroZh,
+    previewTitleId: "hero-view-preview-title-chinese-copy-story",
+  },
+  globals: {
+    locale: "zh",
+  },
+};
+
+export const NarrowCanvas: Story = {
+  args: {
+    content: homepageStoryHeroLongCopy,
+    previewTitleId: "hero-view-preview-title-narrow-canvas-story",
+  },
+  globals: {
+    viewport: { value: "mobile1", isRotated: false },
+  },
+  parameters: {
+    viewport: {
+      options: MINIMAL_VIEWPORTS,
+    },
+  },
+};

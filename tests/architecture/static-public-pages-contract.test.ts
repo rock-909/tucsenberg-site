@@ -1,0 +1,68 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import type { PageType } from "@/config/paths";
+import {
+  PUBLIC_STATIC_PAGE_DEFINITIONS,
+  PUBLIC_STATIC_PAGE_TYPES,
+} from "@/config/pages.config";
+
+const REPO_ROOT = process.cwd();
+
+function readRepoFile(relativePath: string): string {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo-local docs from explicit call sites
+  return readFileSync(join(REPO_ROOT, relativePath), "utf8");
+}
+
+describe("static public pages architecture contract", () => {
+  it("keeps pages.config.ts as the static public pages truth source", () => {
+    const docs = [
+      readRepoFile("docs/use/replace.md"),
+      readRepoFile("docs/use/content.md"),
+    ].join("\n");
+
+    expect(docs).toContain("src/config/pages.config.ts");
+    expect(docs).toContain("static public pages");
+    expect(docs).toContain("content/pages/{locale}");
+    expect(docs).toContain("messages/{locale}");
+  });
+
+  it("does not include dynamic route page types in the first registry", () => {
+    const disallowed = ["productMarket", "blogArticle"] as const;
+    const actual = PUBLIC_STATIC_PAGE_TYPES as readonly string[];
+
+    for (const pageType of disallowed) {
+      expect(actual).not.toContain(pageType);
+    }
+  });
+
+  it("keeps route owners static, literal, and backed by real files", () => {
+    for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
+      expect(definition.routeOwner).toMatch(
+        /^src\/app\/\[locale\]\/(?:page|[a-z0-9-]+\/page)\.tsx$/u,
+      );
+      expect(definition.routeOwner).not.toContain("[market]");
+      expect(definition.routeOwner).not.toContain("[slug]");
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed repo-local routeOwner paths from the registry contract
+      expect(existsSync(join(REPO_ROOT, definition.routeOwner))).toBe(true);
+    }
+  });
+
+  it("keeps the current PageType set represented by the registry", () => {
+    const expected = [
+      "home",
+      "about",
+      "products",
+      "blog",
+      "resources",
+      "contact",
+      "privacy",
+      "terms",
+      "capabilities",
+      "howItWorks",
+      "customProject",
+    ] as const satisfies readonly PageType[];
+
+    expect(PUBLIC_STATIC_PAGE_TYPES).toEqual(expected);
+  });
+});

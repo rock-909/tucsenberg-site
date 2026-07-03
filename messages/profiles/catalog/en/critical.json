@@ -1,0 +1,639 @@
+{
+  "catalog": {
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
+    "overview": {
+      "title": "Product overview",
+      "description": "Introduce the main product lines or market groups visitors should understand before they contact you.",
+      "cardsTitle": "What visitors should learn here",
+      "cardsDescription": "Keep the overview short. Replace these cards with real product groups, proof materials, and buying steps.",
+      "boundaryTitle": "Replace before launch",
+      "boundaryDescription": "The structure is ready, but market facts, specifications, and proof must come from the real catalog.",
+      "pathTitle": "How this overview should work",
+      "pathDescription": "Keep the page as a simple map: show offer groups, point to proof, then route the visitor to resources or contact.",
+      "detailTitle": "Use detail pages only when needed",
+      "detailDescription": "Stay with this lightweight overview until the real business has product families, comparison rules, and quote logic ready."
+    },
+    "overviewCards": {
+      "mainOffer": {
+        "title": "Product groups",
+        "description": "Summarize the main categories, families, or market groups a visitor needs to compare."
+      },
+      "proofMaterials": {
+        "title": "Proof materials",
+        "description": "Point to brochures, photos, examples, or documents that help a buyer trust the offer."
+      },
+      "nextStep": {
+        "title": "Buying next step",
+        "description": "Make it clear when visitors should review market detail, ask a question, or request a quote."
+      }
+    },
+    "boundary": {
+      "items": {
+        "content": "Replace product names and market descriptions",
+        "assets": "Replace images, brochures, and proof",
+        "details": "Add real availability, pricing, or quote rules"
+      }
+    },
+    "path": {
+      "items": {
+        "scan": {
+          "title": "Scan product groups",
+          "description": "Help visitors understand the offer families before they ask for specifics."
+        },
+        "compare": {
+          "title": "Check proof materials",
+          "description": "Send visitors to resources when they need brochures, photos, or buyer guidance."
+        },
+        "ask": {
+          "title": "Ask for fit",
+          "description": "Move visitors to contact when they need pricing, availability, or project fit."
+        }
+      }
+    },
+    "detail": {
+      "items": {
+        "families": "Real product families and priorities are confirmed",
+        "comparison": "Specifications or comparison rules affect buying decisions",
+        "markets": "Markets, standards, or availability need separate pages"
+      }
+    },
+    "cta": {
+      "title": "Need market or specification detail?",
+      "description": "Contact the team for catalogs, specifications, or a quote.",
+      "resources": "View resources",
+      "contact": "Contact"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "Jump to"
+      },
+      "technical": {
+        "title": "Technical Properties"
+      },
+      "certifications": {
+        "title": "Certifications & Compliance"
+      },
+      "trade": {
+        "title": "Trade Information",
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      },
+      "specsComingSoon": "Specifications coming soon. Contact us for detailed product data.",
+      "cta": {
+        "heading": "Need to review {marketLabel}?",
+        "description": "Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
+        "button": "Request a Quote"
+      },
+      "familyInquiry": {
+        "cta": "Request quote for {familyLabel}"
+      }
+    },
+    "specTable": {
+      "size": "Size",
+      "angle": "Angle",
+      "wallThickness": "Wall Thickness",
+      "endType": "End Type",
+      "radius": "Radius",
+      "type": "Type",
+      "length": "Length",
+      "schedule": "Schedule",
+      "bendRadius": "Bend Radius",
+      "connection": "Connection",
+      "duty": "Duty",
+      "material": "Material",
+      "outerDiameter": "Outer Diameter"
+    },
+    "familyCount": "{count} product families",
+    "markets": {
+      "north-america": {
+        "label": "Primary Offer Example",
+        "description": "Replaceable catalog example for a standards-based product or service group."
+      },
+      "australia-new-zealand": {
+        "label": "Secondary Offer Example",
+        "description": "Replaceable catalog example for a second market, service tier, or regional offer."
+      },
+      "mexico": {
+        "label": "Regional Offer Example",
+        "description": "Replaceable catalog example for a regional or compliance-based offer."
+      },
+      "europe": {
+        "label": "Platform Offer Example",
+        "description": "Replaceable catalog example for another market, platform, or standards group."
+      },
+      "specialty-product-systems": {
+        "label": "Specialty Examples",
+        "description": "Replaceable specialty examples for niche product, service, or project workflows."
+      }
+    },
+    "families": {
+      "north-america": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for versions, shapes, packages, or service variants."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for add-ons, bundles, or supporting services."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples with size, standard, or package details."
+        }
+      },
+      "australia-new-zealand": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for a second market or service variant."
+        },
+        "bellmouths": {
+          "label": "Resource Kits",
+          "description": "Replaceable accessory examples for a product, service, or resource variant."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for a second market or service variant."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for a second market or service variant."
+        }
+      },
+      "mexico": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for a regional or compliance-based offer."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for a regional offer."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for a regional offer."
+        }
+      },
+      "europe": {
+        "sample-product-shapes": {
+          "label": "Sample Product Shapes",
+          "description": "Replaceable item examples for another market or standards group."
+        },
+        "couplings": {
+          "label": "Support Packages",
+          "description": "Replaceable companion examples for another market group."
+        },
+        "sample-product-runs": {
+          "label": "Sample Product Runs",
+          "description": "Replaceable item examples for another market group."
+        }
+      },
+      "specialty-product-systems": {
+        "specialty-units": {
+          "label": "Specialty Units",
+          "description": "Replaceable specialty examples for niche products, services, or workflows."
+        },
+        "fittings": {
+          "label": "Integration Examples",
+          "description": "Integration examples for product, service, or workflow systems."
+        }
+      }
+    },
+    "technicalLabels": {
+      "material": "Material",
+      "surface": "Surface",
+      "uvResistance": "Outdoor Readiness",
+      "temperatureRange": "Operating Range",
+      "lifespan": "Lifecycle Claim",
+      "fireRating": "Safety Claim",
+      "standard": "Example Standard",
+      "transparency": "Visibility Layer",
+      "maxWorkingPressure": "Project Limit",
+      "impactResistance": "Durability Claim"
+    },
+    "specs": {
+      "north-america": {
+        "technical": {
+          "material": "Replaceable core material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard A ready",
+              "1": "Configurable material",
+              "2": "Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Bundle-ready structure",
+              "1": "Secure handoff path",
+              "2": "Multi-size range"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Basic and advanced tiers",
+              "1": "Standard package lengths",
+              "2": "Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "Basic Option"
+              },
+              "1": {
+                "label": "Advanced Option"
+              }
+            }
+          }
+        }
+      },
+      "australia-new-zealand": {
+        "technical": {
+          "material": "Replaceable secondary material",
+          "surface": "Example finish or content layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim",
+          "standard": "Example Standard B"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard B ready",
+              "1": "Standard and premium tiers",
+              "2": "Multiple layout options"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "bellmouths": {
+            "highlights": {
+              "0": "Resource entry support",
+              "1": "Example Standard B compatible",
+              "2": "Visitor guidance ready"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Bundle-ready structure",
+              "1": "Example Standard B compatible",
+              "2": "Standard and premium tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Standard and premium tiers",
+              "1": "Reusable package lengths",
+              "2": "Straightforward example entries"
+            },
+            "groups": {
+              "0": {
+                "label": "Standard Tier"
+              },
+              "1": {
+                "label": "Premium Tier"
+              }
+            }
+          }
+        }
+      },
+      "mexico": {
+        "technical": {
+          "material": "Replaceable regional material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Reusable size set",
+              "2": "Light and heavy tiers"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Bundle-ready structure",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Example Standard C ready",
+              "1": "Standard package lengths",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "europe": {
+        "technical": {
+          "material": "Replaceable platform material",
+          "surface": "Example finish or presentation layer",
+          "uvResistance": "Outdoor-ready placeholder attribute",
+          "temperatureRange": "Project-specific operating range",
+          "lifespan": "Replace with real lifecycle claim",
+          "fireRating": "Replace with real safety claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Three service tiers",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Bundle-ready structure",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "Example Standard D ready",
+              "1": "Standard package lengths",
+              "2": "Reusable size set"
+            },
+            "groups": {
+              "0": {
+                "label": "Light Tier"
+              },
+              "1": {
+                "label": "Medium Tier"
+              },
+              "2": {
+                "label": "Heavy Tier"
+              }
+            }
+          }
+        }
+      },
+      "specialty-product-systems": {
+        "technical": {
+          "material": "Specialty example material",
+          "transparency": "Optional visibility or reporting layer",
+          "maxWorkingPressure": "Project-specific limit",
+          "temperatureRange": "Project-specific operating range",
+          "surface": "Example finish or experience layer",
+          "impactResistance": "Replace with real durability claim"
+        },
+        "trade": {
+          "moq": "Example minimum order",
+          "leadTime": "Replace with real timeline",
+          "supplyCapacity": "Replace with real monthly capacity",
+          "packaging": "Replace with real packaging or delivery model",
+          "portOfLoading": "Replace with real dispatch point"
+        },
+        "families": {
+          "specialty-units": {
+            "highlights": {
+              "0": "Specialty example material",
+              "1": "Quiet experience option",
+              "2": "Controlled handoff points"
+            },
+            "groups": {
+              "0": {
+                "label": "Compact Format"
+              },
+              "1": {
+                "label": "Extended Format"
+              }
+            }
+          },
+          "fittings": {
+            "highlights": {
+              "0": "Impact-aware example",
+              "1": "High-requirement scenario",
+              "2": "Multiple connection options"
+            },
+            "groups": {
+              "0": {
+                "label": "Compact Integrations"
+              },
+              "1": {
+                "label": "Extended Integrations"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rowValues": {
+      "bellEnd": "Default",
+      "plainEnd": "Default",
+      "standardCoupling": "Standard Bundle",
+      "expansionCoupling": "Extended Bundle",
+      "standardBellmouth": "Resource Kit",
+      "heavyDutyBellmouth": "Extended Resource Kit",
+      "mediumDuty": "Standard Tier",
+      "heavyDuty": "Premium Tier",
+      "pushFit": "Default",
+      "flange": "Custom",
+      "connector": "Connector",
+      "bend90": "90° Bend",
+      "bend45": "45° Bend",
+      "yDiverter": "Y-Diverter",
+      "accessPanel": "Access Panel",
+      "specialty": "Specialty Example",
+      "custom": "Custom"
+    }
+  },
+  "navigation": {
+    "products": "Products"
+  },
+  "footer": {
+    "sections": {
+      "navigation": {
+        "products": "Products"
+      }
+    },
+    "platform": {
+      "products": {
+        "title": "Products",
+        "ai": "AI",
+        "enterprise": "Enterprise",
+        "fluidCompute": "Fluid Compute",
+        "nextjs": "Next.js",
+        "observability": "Observability",
+        "previews": "Previews",
+        "rendering": "Rendering",
+        "security": "Security",
+        "turbo": "Turbo",
+        "domains": "Domains",
+        "v0": "v0"
+      }
+    }
+  },
+  "home": {
+    "products": {
+      "title": "Offer Examples",
+      "subtitle": "Replaceable product, service, resource, and custom-project examples for a real showcase website.",
+      "cta": "View All Products",
+      "item1": {
+        "tag": "Product Example",
+        "title": "Product Showcase",
+        "spec1": "Categories, highlights, and specs",
+        "spec2": "Cards, market pages, and detail sections",
+        "spec3": "Replace with real product data",
+        "standard": "Example Catalog",
+        "link": "/products"
+      },
+      "item2": {
+        "tag": "Service Example",
+        "title": "Service Showcase",
+        "spec1": "Use cases, process, and outcomes",
+        "spec2": "Proof, resources, and FAQs",
+        "spec3": "Replace with real service scope",
+        "standard": "Example Service",
+        "link": "/products/specialty-product-systems"
+      },
+      "item3": {
+        "tag": "Service",
+        "title": "Custom Project Support",
+        "spec1": "Discovery, proposal, and delivery",
+        "spec2": "Brand adaptation and configuration",
+        "spec3": "Replace with real custom workflow",
+        "standard": "Per project scope",
+        "link": "/custom-project-support"
+      }
+    },
+    "quality": {
+      "standards": {
+        "exampleA": "Example Standard A",
+        "exampleB": "Example Standard B",
+        "exampleC": "Example Standard C",
+        "exampleD": "Example Standard D"
+      }
+    }
+  }
+}

@@ -1,0 +1,187 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+const EMAIL_TEMPLATE_FILES = [
+  "src/emails/ConfirmationEmail.tsx",
+  "src/emails/ContactFormEmail.tsx",
+  "src/emails/ProductInquiryEmail.tsx",
+] as const;
+
+const COPY_BEARING_LOCAL_CONSTANT_PATTERN = /\bconst\s+([A-Z][A-Z0-9_]*)\s*=/g;
+
+const COPY_BEARING_LOCAL_CONSTANT_TOKENS = new Set([
+  "COPY",
+  "TEXT",
+  "TITLE",
+  "SUBJECT",
+  "PREVIEW",
+  "FOOTER",
+  "MESSAGE",
+  "INTRO",
+  "SIGNOFF",
+]);
+
+const TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE = [
+  "messages/base/{en,zh}/deferred.json",
+  "emailTemplates",
+  "src/emails/email-copy.ts",
+  "src/lib/email/runtime-email-content.ts",
+  "src/emails/ConfirmationEmail.tsx",
+  "src/emails/ContactFormEmail.tsx",
+  "src/emails/ProductInquiryEmail.tsx",
+  "src/lib/resend-utils.ts",
+] as const;
+
+function readJsonFile(path: string): unknown {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- tests read fixed repository files
+  return JSON.parse(readFileSync(path, "utf8")) as unknown;
+}
+
+function getObjectKeys(value: unknown): string[] {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(
+      "Expected object while checking email template message keys",
+    );
+  }
+
+  return Object.keys(value as Record<string, unknown>).sort();
+}
+
+function getNestedKeys(value: unknown, prefix = ""): string[] {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return [prefix];
+  }
+
+  return Object.entries(value as Record<string, unknown>).flatMap(
+    ([key, nestedValue]) =>
+      getNestedKeys(nestedValue, prefix ? `${prefix}.${key}` : key),
+  );
+}
+
+function hasCopyBearingLocalConstant(source: string): boolean {
+  for (const match of source.matchAll(COPY_BEARING_LOCAL_CONSTANT_PATTERN)) {
+    const constantName = match[1];
+    const constantTokens = constantName?.split("_") ?? [];
+
+    if (
+      constantTokens.some(
+        (token) =>
+          token !== "TEXT" && COPY_BEARING_LOCAL_CONSTANT_TOKENS.has(token),
+      )
+    ) {
+      return true;
+    }
+
+    if (constantName === "TEXT" || constantName?.endsWith("_TEXT")) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+describe("email copy boundary", () => {
+  it("detects copy-bearing local constants, including unsuffixed template copy names", () => {
+    const copyBearingExamples = [
+      "const TITLE =",
+      "const SUBJECT =",
+      "const PREVIEW =",
+      "const COPY =",
+      "const MESSAGE =",
+      "const INTRO =",
+      "const SIGNOFF =",
+      "const FOOTER =",
+      "const BODY_COPY =",
+      "const FOOTER_TEXT =",
+      "const PREVIEW_TITLE =",
+    ] as const;
+
+    const nonCopyExamples = [
+      "const CARD_STYLE =",
+      "const PRIMARY_COLOR =",
+      "const BODY_TEXT_STYLE =",
+      "const TEXT_COLOR =",
+    ] as const;
+
+    for (const copyBearingExample of copyBearingExamples) {
+      expect(hasCopyBearingLocalConstant(copyBearingExample)).toBe(true);
+    }
+
+    for (const nonCopyExample of nonCopyExamples) {
+      expect(hasCopyBearingLocalConstant(nonCopyExample)).toBe(false);
+    }
+  });
+
+  it("routes email templates through the shared copy layer", () => {
+    for (const file of EMAIL_TEMPLATE_FILES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test iterates over a fixed email template allowlist
+      const source = readFileSync(file, "utf8");
+
+      expect(source).toContain("@/emails/email-copy");
+      expect(source).not.toContain("const PREVIEW_TEXT =");
+      expect(source).not.toContain("const PREVIEW_PREFIX =");
+      expect(source).not.toContain("const FOOTER_TEXT =");
+      expect(hasCopyBearingLocalConstant(source)).toBe(false);
+    }
+  });
+
+  it("documents transactional email copy as a replacement surface", () => {
+    const replaceGuide = readFileSync("docs/use/replace.md", "utf8");
+    const messagesGuide = readFileSync("docs/ref/messages.md", "utf8");
+    const surfacesGuide = readFileSync("docs/ref/surfaces.md", "utf8");
+    const replacementSurfaceDocs = [
+      replaceGuide,
+      messagesGuide,
+      surfacesGuide,
+    ].join("\n");
+
+    expect(replaceGuide).toContain("Transactional email copy");
+    expect(replaceGuide).toContain("src/emails/email-copy.ts");
+    expect(replaceGuide).toContain("src/lib/email/runtime-email-content.ts");
+    expect(replaceGuide).toContain("production sending path");
+    expect(replaceGuide).toContain("preview/reference");
+    expect(replaceGuide).toContain("confirmation");
+    expect(replaceGuide).toContain("contact owner notification");
+    expect(replaceGuide).toContain("product inquiry owner notification");
+
+    expect(messagesGuide).toContain("emailTemplates");
+    expect(messagesGuide).toContain("transactional email");
+    expect(messagesGuide).toContain(
+      "runtime email rendering still defaults to English",
+    );
+
+    expect(surfacesGuide).toContain("email copy");
+    expect(surfacesGuide).toContain("src/emails/email-copy.ts");
+
+    for (const replacementSurface of TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE) {
+      expect(replacementSurfaceDocs).toContain(replacementSurface);
+    }
+  });
+
+  it("keeps transactional email message-pack keys aligned across default locales", () => {
+    const english = readJsonFile("messages/base/en/deferred.json") as {
+      emailTemplates?: unknown;
+    };
+    const chinese = readJsonFile("messages/base/zh/deferred.json") as {
+      emailTemplates?: unknown;
+    };
+
+    expect(english.emailTemplates).toBeDefined();
+    expect(chinese.emailTemplates).toBeDefined();
+    expect(getObjectKeys(chinese.emailTemplates)).toEqual(
+      getObjectKeys(english.emailTemplates),
+    );
+    expect(getNestedKeys(chinese.emailTemplates).sort()).toEqual(
+      getNestedKeys(english.emailTemplates).sort(),
+    );
+  });
+
+  it("keeps runtime email copy independent from next-intl and page components", () => {
+    const source = readFileSync("src/emails/email-copy.ts", "utf8");
+
+    expect(source).toContain("@messages/base/en/deferred.json");
+    expect(source).not.toContain("next-intl");
+    expect(source).not.toContain("@/components/");
+    expect(source).not.toContain("@/app/");
+  });
+});

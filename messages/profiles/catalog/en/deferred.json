@@ -1,0 +1,52 @@
+{
+  "products": {
+    "pageTitle": "Products",
+    "pageDescription": "Explore our comprehensive range of high-quality products for your business needs.",
+    "emptyState": "No products available. Please check back later.",
+    "viewDetails": "View Details",
+    "requestQuote": "Request Quote",
+    "allCategories": "All Categories",
+    "allStandards": "All Standards",
+    "standardsFilterAriaLabel": "Filter by standards",
+    "featured": "Featured",
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
+    "card": {
+      "moq": "MOQ",
+      "leadTime": "Lead Time",
+      "supplyCapacity": "Capacity"
+    },
+    "detail": {
+      "specifications": "Specifications",
+      "tradeInfo": "Trade Information",
+      "certifications": "Certifications",
+      "relatedProducts": "Related Products",
+      "downloadPdf": "Download product PDF",
+      "labels": {
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      }
+    },
+    "inquiry": {
+      "title": "Product Inquiry",
+      "description": "Interested in this product? Send us an inquiry for pricing and availability.",
+      "productName": "Product",
+      "quantity": "Quantity Required",
+      "quantityPlaceholder": "e.g., 500 pieces",
+      "targetPrice": "Target Price (optional)",
+      "targetPricePlaceholder": "e.g., $10 per unit",
+      "requirements": "Special Requirements",
+      "requirementsPlaceholder": "Please describe any special requirements such as customization, packaging, or certifications...",
+      "submit": "Send Inquiry",
+      "submitting": "Sending...",
+      "success": "Your inquiry has been sent successfully! We will get back to you within 24 hours.",
+      "error": "Failed to send inquiry. Please try again later.",
+      "turnstileRequired": "Please complete the security verification."
+    }
+  }
+}

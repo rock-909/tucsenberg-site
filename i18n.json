@@ -1,0 +1,28 @@
+{
+  "sourceLocale": "en",
+  "targetLocales": ["zh"],
+  "buckets": [
+    {
+      "include": ["messages/**/*.json"],
+      "exclude": []
+    },
+    {
+      "include": ["src/**/*.{ts,tsx,js,jsx}"],
+      "exclude": [
+        "src/**/*.test.{ts,tsx,js,jsx}",
+        "src/**/*.spec.{ts,tsx,js,jsx}"
+      ]
+    },
+    {
+      "include": ["content/**/*.{md,mdx}"],
+      "exclude": []
+    }
+  ],
+  "llm": {
+    "engine": "google",
+    "model": "gemini-2.5-pro"
+  },
+  "experimental": {
+    "incremental": true
+  }
+}

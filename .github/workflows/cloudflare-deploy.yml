@@ -1,0 +1,255 @@
+name: Cloudflare Workers 部署
+
+# ============================================================================
+# 职责：Cloudflare Workers 部署 + MISSING_MESSAGE 检测 + 健康检查
+# 触发：手动触发（workflow_dispatch）
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+      preview_url:
+        description: 'preview 环境要验证的公开 URL（environment=preview 时必填）'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: 构建并部署到 Cloudflare Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      deployment_url: ${{ steps.resolve_deployment_url.outputs.deployment-url }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: 检查 Cloudflare 凭据
+        if: ${{ inputs.environment == 'production' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "❌ Cloudflare secrets 未配置"
+            echo "需要: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID"
+            exit 1
+          fi
+          echo "✅ Cloudflare 凭据已配置"
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+          standalone: true
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: "pnpm"
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 安装 Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: 阻断：production 只能从 main 部署
+        if: ${{ inputs.environment == 'production' }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "❌ production 部署只能从 main 分支触发，当前分支: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: 运行环境对应的证明链
+        id: proof
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            PREVIEW_URL="${{ inputs.preview_url }}"
+            if [ -z "$PREVIEW_URL" ]; then
+              echo "❌ preview 证明需要填写 preview_url" >&2
+              exit 1
+            fi
+            node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"
+          else
+            pnpm release:verify
+          fi
+        env:
+          CI: true
+          NODE_ENV: production
+          APP_ENV: ${{ inputs.environment }}
+          RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+      - name: 构建（Cloudflare Workers）
+        if: ${{ inputs.environment == 'production' }}
+        id: build
+        run: |
+          set -euo pipefail
+          pnpm website:build:cf 2>&1 | tee cf_build.log
+          echo "log-path=$(pwd)/cf_build.log" >> "$GITHUB_OUTPUT"
+        env:
+          CI: true
+          NODE_ENV: production
+          APP_ENV: ${{ inputs.environment }}
+          RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+      - name: 阻断：检测 next-intl MISSING_MESSAGE
+        if: ${{ inputs.environment == 'production' }}
+        run: |
+          set -euo pipefail
+          if grep -E -i "MISSING_MESSAGE" cf_build.log; then
+            echo "❌ Detected next-intl MISSING_MESSAGE in build logs"
+            exit 1
+          else
+            echo "✅ No MISSING_MESSAGE found"
+          fi
+
+      - name: 上传构建日志
+        if: ${{ always() && inputs.environment == 'production' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: cf-build-log-${{ inputs.environment }}
+          path: cf_build.log
+          if-no-files-found: ignore
+
+      - name: 部署到 Cloudflare Workers（production）
+        if: ${{ inputs.environment == 'production' }}
+        id: deploy_production
+        run: |
+          set -euo pipefail
+          DEPLOY_OUTPUT=$(pnpm exec opennextjs-cloudflare deploy --env production 2>&1) || {
+            echo "❌ 部署失败"
+            echo "$DEPLOY_OUTPUT"
+            exit 1
+          }
+          echo "$DEPLOY_OUTPUT"
+          DEPLOY_URL=$(printf '%s\n' "$DEPLOY_OUTPUT" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | tail -1 || true)
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "❌ 未从部署输出中提取到 workers.dev URL"
+            exit 1
+          fi
+          echo "production-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+          echo "✅ 部署成功"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NODE_ENV: production
+
+      - name: 汇总部署 URL
+        id: resolve_deployment_url
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            DEPLOY_URL="${{ inputs.preview_url }}"
+            if [ -z "$DEPLOY_URL" ]; then
+              echo "❌ preview_url 为空，无法导出预览 URL" >&2
+              exit 1
+            fi
+          else
+            DEPLOY_URL='${{ steps.deploy_production.outputs.production-url }}'
+            if [ -z "$DEPLOY_URL" ]; then
+              echo "❌ production 部署没有输出 deployment URL" >&2
+              exit 1
+            fi
+          fi
+          echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: 部署总结
+        run: |
+          echo "## ☁️ Cloudflare Workers 部署总结" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **环境**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **提交**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **触发者**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.resolve_deployment_url.outputs.deployment-url }}" ]; then
+            echo "- **部署 URL**: ${{ steps.resolve_deployment_url.outputs.deployment-url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  post-deploy-verification:
+    name: 部署后验证
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    timeout-minutes: 10
+    if: ${{ inputs.environment == 'production' && needs.build-and-deploy.outputs.deployment_url != '' }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+
+      - name: 等待部署就绪
+        run: |
+          set -euo pipefail
+          url="${{ needs.build-and-deploy.outputs.deployment_url }}"
+          echo "等待部署就绪: $url"
+
+          max_tries=30
+          delay=5
+
+          for i in $(seq 1 $max_tries); do
+            status=$(curl -s -o /dev/null -w "%{http_code}" -I "$url" || echo "000")
+            if [ "$status" = "000" ]; then
+              status=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            fi
+
+            echo "第 $i 次探测: $status"
+            if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+              echo "部署已就绪"
+              exit 0
+            fi
+
+            if [ $((i % 10)) -eq 0 ] && [ "$delay" -lt 15 ]; then
+              delay=$((delay + 5))
+            fi
+            sleep "$delay"
+          done
+          echo "等待超时" >&2
+          exit 1
+
+      - name: 健康检查
+        run: |
+          set -euo pipefail
+          echo "Cloudflare deployed proof: running final post-deploy smoke against the deployed URL"
+          if [ ! -f ./scripts/starter-checks.js ]; then
+            echo "❌ Missing ./scripts/starter-checks.js in workflow checkout" >&2
+            ls -la ./scripts || true
+            ls -la ./scripts/deploy || true
+            exit 1
+          fi
+          node ./scripts/starter-checks.js deployed-smoke --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"

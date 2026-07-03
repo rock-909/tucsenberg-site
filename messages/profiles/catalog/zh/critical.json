@@ -1,0 +1,639 @@
+{
+  "catalog": {
+    "breadcrumb": {
+      "home": "首页",
+      "products": "产品中心"
+    },
+    "overview": {
+      "title": "产品概览",
+      "description": "介绍访客在联系前需要了解的主要产品线或市场分组。",
+      "cardsTitle": "访客应该在这里了解什么",
+      "cardsDescription": "概览要短。把这些卡片替换成真实产品组、证明材料和购买下一步。",
+      "boundaryTitle": "上线前需要替换",
+      "boundaryDescription": "结构已经准备好，但市场事实、规格和证明材料必须来自真实 catalog。",
+      "pathTitle": "这个概览页应该怎么发挥作用",
+      "pathDescription": "把页面保持成简单地图：展示业务组合、指向证明材料，再把访客引导到资料或联系入口。",
+      "detailTitle": "只有真正需要时才使用详情页",
+      "detailDescription": "在真实业务的产品系列、比较规则和报价逻辑准备好前，先保持轻量概览。"
+    },
+    "overviewCards": {
+      "mainOffer": {
+        "title": "产品组合",
+        "description": "概括访客需要比较的主要类别、系列或市场分组。"
+      },
+      "proofMaterials": {
+        "title": "证明材料",
+        "description": "指向手册、图片、示例或资料，帮助买家判断可信度。"
+      },
+      "nextStep": {
+        "title": "购买下一步",
+        "description": "说明访客什么时候该看市场详情、提问题或提交报价。"
+      }
+    },
+    "boundary": {
+      "items": {
+        "content": "替换产品名称和市场介绍",
+        "assets": "替换图片、手册和证明材料",
+        "details": "补充真实供货、价格或报价规则"
+      }
+    },
+    "path": {
+      "items": {
+        "scan": {
+          "title": "浏览产品组合",
+          "description": "让访客先理解业务系列，再询问具体细节。"
+        },
+        "compare": {
+          "title": "查看证明材料",
+          "description": "当访客需要手册、图片或买家指南时，引导到资料页。"
+        },
+        "ask": {
+          "title": "询问适配性",
+          "description": "当访客需要价格、供货或项目适配判断时，引导到联系页。"
+        }
+      }
+    },
+    "detail": {
+      "items": {
+        "families": "真实产品系列和优先级已经确认",
+        "comparison": "规格或比较规则会影响采购判断",
+        "markets": "市场、标准或供货情况需要独立页面"
+      }
+    },
+    "cta": {
+      "title": "需要市场或规格详情？",
+      "description": "联系团队索取 catalog、规格或报价。",
+      "resources": "查看资料",
+      "contact": "联系"
+    },
+    "market": {
+      "familyNav": {
+        "jumpTo": "跳转至"
+      },
+      "technical": {
+        "title": "技术参数"
+      },
+      "certifications": {
+        "title": "认证与合规"
+      },
+      "trade": {
+        "title": "贸易信息",
+        "moq": "最小数量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供应能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港"
+      },
+      "specsComingSoon": "规格参数即将上线，如需详细产品数据请联系我们。",
+      "cta": {
+        "heading": "需要了解 {marketLabel} 示例？",
+        "description": "发送咨询或替换这里的规格、数量、时间和项目说明。",
+        "button": "获取报价"
+      },
+      "familyInquiry": {
+        "cta": "咨询 {familyLabel}"
+      }
+    },
+    "specTable": {
+      "size": "尺寸",
+      "angle": "角度",
+      "wallThickness": "壁厚",
+      "endType": "端口类型",
+      "radius": "弯曲半径",
+      "type": "类型",
+      "length": "长度",
+      "schedule": "壁厚等级",
+      "bendRadius": "弯曲半径",
+      "connection": "连接方式",
+      "duty": "强度等级",
+      "material": "材料",
+      "outerDiameter": "外径"
+    },
+    "familyCount": "{count} 个产品系列",
+    "families": {
+      "australia-new-zealand": {
+        "bellmouths": {
+          "description": "用于说明某个产品、服务或资源变体的可替换示例。",
+          "label": "资源包"
+        },
+        "sample-product-shapes": {
+          "description": "用于第二个市场或服务变体的可替换项目示例。",
+          "label": "示例形态"
+        },
+        "sample-product-runs": {
+          "description": "用于第二个市场或服务变体的可替换项目示例。",
+          "label": "示例条目"
+        },
+        "couplings": {
+          "description": "用于第二个市场或服务变体的可替换组合示例。",
+          "label": "支持套餐"
+        }
+      },
+      "europe": {
+        "sample-product-shapes": {
+          "description": "用于另一个市场或标准分组的可替换项目示例。",
+          "label": "示例形态"
+        },
+        "sample-product-runs": {
+          "description": "用于另一个市场分组的可替换条目示例。",
+          "label": "示例条目"
+        },
+        "couplings": {
+          "description": "用于另一个市场分组的可替换组合示例。",
+          "label": "支持套餐"
+        }
+      },
+      "mexico": {
+        "sample-product-shapes": {
+          "description": "用于区域或合规型业务的可替换项目示例。",
+          "label": "示例形态"
+        },
+        "sample-product-runs": {
+          "description": "用于区域业务的可替换条目示例。",
+          "label": "示例条目"
+        },
+        "couplings": {
+          "description": "用于区域业务的可替换组合示例。",
+          "label": "支持套餐"
+        }
+      },
+      "north-america": {
+        "sample-product-runs": {
+          "description": "带尺寸、标准或套餐信息的可替换项目示例。",
+          "label": "示例条目"
+        },
+        "sample-product-shapes": {
+          "description": "带角度、版本或配置说明的可替换项目示例。",
+          "label": "示例形态"
+        },
+        "couplings": {
+          "description": "用于说明附加项、组合包或配套服务的可替换示例。",
+          "label": "支持套餐"
+        }
+      },
+      "specialty-product-systems": {
+        "fittings": {
+          "description": "用于产品、服务或流程系统的可替换集成示例。",
+          "label": "集成示例"
+        },
+        "specialty-units": {
+          "description": "用于小众产品、服务或流程的可替换特色示例。",
+          "label": "特色示例"
+        }
+      }
+    },
+    "markets": {
+      "australia-new-zealand": {
+        "label": "第二业务示例",
+        "description": "用于第二个市场、服务层级或区域业务的可替换分类示例。"
+      },
+      "europe": {
+        "label": "平台业务示例",
+        "description": "用于另一个市场、平台或标准分组的可替换分类示例。"
+      },
+      "mexico": {
+        "label": "区域业务示例",
+        "description": "用于区域或合规型业务的可替换分类示例。"
+      },
+      "north-america": {
+        "label": "主要业务示例",
+        "description": "用于产品或服务展示的可替换分类示例，可展示标准、规格或套餐差异。"
+      },
+      "specialty-product-systems": {
+        "label": "特色示例",
+        "description": "用于小众产品、服务或项目流程的可替换特色示例。"
+      }
+    },
+    "rowValues": {
+      "accessPanel": "访问面板",
+      "bellEnd": "默认",
+      "bend45": "45°示例",
+      "bend90": "90°示例",
+      "connector": "连接器",
+      "custom": "自定义",
+      "expansionCoupling": "扩展组合",
+      "flange": "自定义",
+      "heavyDuty": "高级层级",
+      "heavyDutyBellmouth": "扩展资源包",
+      "mediumDuty": "标准层级",
+      "specialty": "特色示例",
+      "plainEnd": "默认",
+      "pushFit": "默认",
+      "standardBellmouth": "资源包",
+      "standardCoupling": "标准组合",
+      "yDiverter": "Y型分支"
+    },
+    "specs": {
+      "north-america": {
+        "technical": {
+          "material": "可替换核心材料",
+          "surface": "示例表面或展示层",
+          "uvResistance": "户外适配占位属性",
+          "temperatureRange": "按项目替换的运行范围",
+          "lifespan": "替换成真实生命周期说明",
+          "fireRating": "替换成真实安全说明"
+        },
+        "trade": {
+          "moq": "示例最小数量",
+          "leadTime": "替换成真实周期",
+          "supplyCapacity": "替换成真实月度能力",
+          "packaging": "替换成真实包装或交付方式",
+          "portOfLoading": "替换成真实发货点"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "示例标准 A 就绪",
+              "1": "材料可配置",
+              "2": "多种展示选项"
+            },
+            "groups": {
+              "0": {
+                "label": "基础选项"
+              },
+              "1": {
+                "label": "进阶选项"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "适合组合展示",
+              "1": "清晰的交接路径",
+              "2": "多尺寸范围"
+            },
+            "groups": {
+              "0": {
+                "label": "基础选项"
+              },
+              "1": {
+                "label": "进阶选项"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "基础与进阶层级",
+              "1": "标准套餐长度",
+              "2": "直观示例条目"
+            },
+            "groups": {
+              "0": {
+                "label": "基础选项"
+              },
+              "1": {
+                "label": "进阶选项"
+              }
+            }
+          }
+        }
+      },
+      "australia-new-zealand": {
+        "technical": {
+          "material": "可替换第二材料",
+          "surface": "示例表面或内容层",
+          "uvResistance": "户外适配占位属性",
+          "temperatureRange": "按项目替换的运行范围",
+          "lifespan": "替换成真实生命周期说明",
+          "fireRating": "替换成真实安全说明",
+          "standard": "示例标准 B"
+        },
+        "trade": {
+          "moq": "示例最小数量",
+          "leadTime": "替换成真实周期",
+          "supplyCapacity": "替换成真实月度能力",
+          "packaging": "替换成真实包装或交付方式",
+          "portOfLoading": "替换成真实发货点"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "示例标准 B 就绪",
+              "1": "标准与高级层级",
+              "2": "多种展示选项"
+            },
+            "groups": {
+              "0": {
+                "label": "标准层级"
+              },
+              "1": {
+                "label": "高级层级"
+              }
+            }
+          },
+          "bellmouths": {
+            "highlights": {
+              "0": "资源入口支持",
+              "1": "兼容示例标准 B",
+              "2": "访客引导就绪"
+            },
+            "groups": {
+              "0": {
+                "label": "标准层级"
+              },
+              "1": {
+                "label": "高级层级"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "适合组合展示",
+              "1": "兼容示例标准 B",
+              "2": "标准与高级层级"
+            },
+            "groups": {
+              "0": {
+                "label": "标准层级"
+              },
+              "1": {
+                "label": "高级层级"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "标准与高级层级",
+              "1": "可复用套餐长度",
+              "2": "直观示例条目"
+            },
+            "groups": {
+              "0": {
+                "label": "标准层级"
+              },
+              "1": {
+                "label": "高级层级"
+              }
+            }
+          }
+        }
+      },
+      "mexico": {
+        "technical": {
+          "material": "可替换区域材料",
+          "surface": "示例表面或展示层",
+          "uvResistance": "户外适配占位属性",
+          "temperatureRange": "按项目替换的运行范围",
+          "lifespan": "替换成真实生命周期说明",
+          "fireRating": "替换成真实安全说明"
+        },
+        "trade": {
+          "moq": "示例最小数量",
+          "leadTime": "替换成真实周期",
+          "supplyCapacity": "替换成真实月度能力",
+          "packaging": "替换成真实包装或交付方式",
+          "portOfLoading": "替换成真实发货点"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "示例标准 C 就绪",
+              "1": "可复用尺寸组",
+              "2": "轻型与重型层级"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "重型层级"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "示例标准 C 就绪",
+              "1": "适合组合展示",
+              "2": "可复用尺寸组"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "重型层级"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "示例标准 C 就绪",
+              "1": "标准套餐长度",
+              "2": "可复用尺寸组"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "重型层级"
+              }
+            }
+          }
+        }
+      },
+      "europe": {
+        "technical": {
+          "material": "可替换平台材料",
+          "surface": "示例表面或展示层",
+          "uvResistance": "户外适配占位属性",
+          "temperatureRange": "按项目替换的运行范围",
+          "lifespan": "替换成真实生命周期说明",
+          "fireRating": "替换成真实安全说明"
+        },
+        "trade": {
+          "moq": "示例最小数量",
+          "leadTime": "替换成真实周期",
+          "supplyCapacity": "替换成真实月度能力",
+          "packaging": "替换成真实包装或交付方式",
+          "portOfLoading": "替换成真实发货点"
+        },
+        "families": {
+          "sample-product-shapes": {
+            "highlights": {
+              "0": "示例标准 D 就绪",
+              "1": "三个服务层级",
+              "2": "可复用尺寸组"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "中型层级"
+              },
+              "2": {
+                "label": "重型层级"
+              }
+            }
+          },
+          "couplings": {
+            "highlights": {
+              "0": "示例标准 D 就绪",
+              "1": "适合组合展示",
+              "2": "可复用尺寸组"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "中型层级"
+              },
+              "2": {
+                "label": "重型层级"
+              }
+            }
+          },
+          "sample-product-runs": {
+            "highlights": {
+              "0": "示例标准 D 就绪",
+              "1": "标准套餐长度",
+              "2": "可复用尺寸组"
+            },
+            "groups": {
+              "0": {
+                "label": "轻型层级"
+              },
+              "1": {
+                "label": "中型层级"
+              },
+              "2": {
+                "label": "重型层级"
+              }
+            }
+          }
+        }
+      },
+      "specialty-product-systems": {
+        "technical": {
+          "material": "特色示例材料",
+          "transparency": "可选可视或报告层",
+          "maxWorkingPressure": "按项目替换的限制值",
+          "temperatureRange": "按项目替换的运行范围",
+          "surface": "示例表面或体验层",
+          "impactResistance": "替换成真实耐用性说明"
+        },
+        "trade": {
+          "moq": "示例最小数量",
+          "leadTime": "替换成真实周期",
+          "supplyCapacity": "替换成真实月度能力",
+          "packaging": "替换成真实包装或交付方式",
+          "portOfLoading": "替换成真实发货点"
+        },
+        "families": {
+          "specialty-units": {
+            "highlights": {
+              "0": "特色示例材料",
+              "1": "安静体验选项",
+              "2": "受控交接点"
+            },
+            "groups": {
+              "0": {
+                "label": "紧凑格式"
+              },
+              "1": {
+                "label": "扩展格式"
+              }
+            }
+          },
+          "fittings": {
+            "highlights": {
+              "0": "考虑冲击的示例",
+              "1": "高要求场景",
+              "2": "多种连接选项"
+            },
+            "groups": {
+              "0": {
+                "label": "紧凑集成"
+              },
+              "1": {
+                "label": "扩展集成"
+              }
+            }
+          }
+        }
+      }
+    },
+    "technicalLabels": {
+      "fireRating": "安全说明",
+      "impactResistance": "耐用性说明",
+      "lifespan": "生命周期说明",
+      "material": "材料",
+      "maxWorkingPressure": "项目限制",
+      "standard": "示例标准",
+      "surface": "表面/展示层",
+      "temperatureRange": "运行范围",
+      "transparency": "可视层",
+      "uvResistance": "户外适配"
+    }
+  },
+  "navigation": {
+    "products": "产品"
+  },
+  "footer": {
+    "sections": {
+      "navigation": {
+        "products": "产品"
+      }
+    },
+    "platform": {
+      "products": {
+        "title": "产品",
+        "ai": "AI",
+        "enterprise": "企业版",
+        "fluidCompute": "弹性算力",
+        "nextjs": "Next.js",
+        "observability": "可观测性",
+        "previews": "预览",
+        "rendering": "渲染",
+        "security": "安全",
+        "turbo": "Turbo",
+        "domains": "域名",
+        "v0": "v0"
+      }
+    }
+  },
+  "home": {
+    "products": {
+      "title": "业务示例",
+      "subtitle": "可替换的产品、服务、资源和定制项目示例，用于快速搭出真实展示型网站。",
+      "cta": "查看全部产品",
+      "item1": {
+        "tag": "产品示例",
+        "title": "产品展示",
+        "spec1": "分类、亮点和规格",
+        "spec2": "卡片、市场页和详情区块",
+        "spec3": "替换成真实产品数据",
+        "standard": "示例目录",
+        "link": "/products"
+      },
+      "item2": {
+        "tag": "服务示例",
+        "title": "服务展示",
+        "spec1": "使用场景、流程和结果",
+        "spec2": "证据、资源和 FAQ",
+        "spec3": "替换成真实服务范围",
+        "standard": "示例服务",
+        "link": "/products/specialty-product-systems"
+      },
+      "item3": {
+        "tag": "服务",
+        "title": "定制项目支持",
+        "spec1": "需求沟通、方案和交付",
+        "spec2": "品牌适配和配置",
+        "spec3": "替换成真实定制流程",
+        "standard": "按项目范围",
+        "link": "/custom-project-support"
+      }
+    },
+    "quality": {
+      "standards": {
+        "exampleA": "示例标准 A",
+        "exampleB": "示例标准 B",
+        "exampleC": "示例标准 C",
+        "exampleD": "示例标准 D"
+      }
+    }
+  }
+}

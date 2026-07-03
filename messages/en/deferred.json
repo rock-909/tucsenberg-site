@@ -1,0 +1,438 @@
+{
+  "error": "An error occurred. Please try again.",
+  "turnstileRequired": "Please complete the security verification.",
+  "errorBoundary": {
+    "title": "An error occurred",
+    "description": "Something went wrong. Please try refreshing the page.",
+    "tryAgain": "Try Again"
+  },
+  "legal": {
+    "effectiveDate": "Effective Date",
+    "lastUpdated": "Last Updated",
+    "tableOfContents": "Table of Contents"
+  },
+  "instructions": {
+    "getStarted": "Get started by editing",
+    "saveChanges": "Save and see your changes instantly."
+  },
+  "actions": {
+    "deployNow": "Deploy now",
+    "readDocs": "Read our docs"
+  },
+  "formatting": {
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "tomorrow": "Tomorrow",
+      "lastUpdated": "Last updated on {date}",
+      "publishedOn": "Published on {date}"
+    },
+    "number": {
+      "currency": "${amount}",
+      "percentage": "{value}%",
+      "fileSize": "{size} {unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "No items",
+        "one": "One item",
+        "other": "{count} items"
+      },
+      "users": {
+        "zero": "No users online",
+        "one": "One user online",
+        "other": "{count} users online"
+      },
+      "notifications": {
+        "zero": "No new notifications",
+        "one": "One new notification",
+        "other": "{count} new notifications"
+      }
+    }
+  },
+  "progress": {
+    "title": "Development Progress",
+    "status": "Development Progress",
+    "nearCompletion": "Nearly Complete",
+    "planning": "Planning",
+    "development": "Development",
+    "testing": "Testing",
+    "launch": "Launch",
+    "ariaLabel": "Project development progress indicator",
+    "completed": "Completed",
+    "current": "Current step",
+    "upcoming": "Upcoming"
+  },
+  "themes": {
+    "title": "Theme System",
+    "description": "Dynamic theme switching with light and dark mode support.",
+    "toggle": "Theme Toggle",
+    "language": "Language Switch",
+    "colors": {
+      "title": "Color Palette"
+    },
+    "typography": {
+      "title": "Typography",
+      "bold": "Bold Text",
+      "medium": "Medium Text",
+      "normal": "Normal Text",
+      "muted": "Muted Text"
+    }
+  },
+  "title": "Showcase Website Starter",
+  "privacy": {
+    "pageTitle": "Privacy Policy",
+    "pageDescription": "Learn how we collect, use, and protect your personal information.",
+    "lastUpdated": "Last Updated",
+    "effectiveDate": "Effective Date",
+    "tableOfContents": "Table of Contents",
+    "sections": {
+      "introduction": "Introduction",
+      "informationCollected": "Information We Collect",
+      "howWeUse": "How We Use Your Information",
+      "sharing": "Information Sharing",
+      "security": "Data Security",
+      "retention": "Data Retention",
+      "rights": "Your Privacy Rights",
+      "children": "Children's Privacy",
+      "changes": "Changes to This Policy",
+      "contact": "Contact Us"
+    }
+  },
+  "terms": {
+    "pageTitle": "Terms of Service",
+    "pageDescription": "Read our terms and conditions for using our services and purchasing products.",
+    "lastUpdated": "Last Updated",
+    "effectiveDate": "Effective Date",
+    "tableOfContents": "Table of Contents",
+    "sections": {
+      "introduction": "Introduction",
+      "acceptance": "Acceptance of Terms",
+      "services": "Services Description",
+      "orders": "Orders & Contracts",
+      "payment": "Payment Terms",
+      "shipping": "Shipping & Delivery",
+      "warranty": "Warranty & Returns",
+      "liability": "Limitation of Liability",
+      "ip": "Intellectual Property",
+      "confidentiality": "Confidentiality",
+      "termination": "Termination",
+      "governing": "Governing Law",
+      "disputes": "Dispute Resolution",
+      "contact": "Contact Information"
+    }
+  },
+  "emailTemplates": {
+    "runtimeDefaultLocale": "en",
+    "common": {
+      "unknownSubmissionTime": "Unknown submission time",
+      "marketingConsentAccepted": "Yes, agreed to receive marketing communications",
+      "fields": {
+        "name": "Name",
+        "contactName": "Contact Name",
+        "email": "Email",
+        "company": "Company",
+        "phone": "Phone",
+        "subject": "Subject",
+        "message": "Message",
+        "submittedAt": "Submitted At",
+        "marketingConsent": "Marketing Consent",
+        "product": "Product",
+        "quantity": "Quantity",
+        "requirements": "Requirements"
+      }
+    },
+    "confirmation": {
+      "title": "Thank You for Contacting Us",
+      "preview": "We received your message and will reply within 24 hours.",
+      "receivedMessage": "Thank you for reaching out to us. We have received your message and will get back to you within 24 hours.",
+      "summaryIntro": "Here is a summary of your submission:",
+      "urgentHelp": "If you have any urgent questions, please do not hesitate to contact us directly.",
+      "signoff": "Best regards,",
+      "greeting": "Dear {firstName},",
+      "teamName": "The {siteName} Team",
+      "footer": "© {year} {siteName}. All rights reserved.",
+      "subject": "Thank you for contacting us - {siteName}",
+      "summaryLines": {
+        "name": "Name: {firstName} {lastName}",
+        "company": "Company: {company}",
+        "email": "Email: {email}",
+        "subject": "Subject: {subject}",
+        "submitted": "Submitted: {submittedAt}"
+      }
+    },
+    "contact": {
+      "title": "New Contact Form Submission",
+      "preview": "New contact form submission from {firstName} {lastName}",
+      "footer": "This email was sent from the {siteName} website contact form.",
+      "subjectWithTopic": "Contact Form: {subject}",
+      "subjectWithoutTopic": "New Contact from {firstName} {lastName}"
+    },
+    "productInquiry": {
+      "title": "New Product Inquiry",
+      "preview": "New product inquiry received.",
+      "footer": "This inquiry was submitted from the product page: {productSlug}",
+      "subject": "Product Inquiry: {productName} (Qty: {quantity})"
+    }
+  },
+  "contact": {
+    "context": {
+      "productFamilyLabel": "You are asking about:"
+    },
+    "title": "Contact Us",
+    "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+    "features": "Multiple ways to reach us and get the support you need",
+    "inquiryHandoff": {
+      "title": "Before you submit",
+      "description": "Use this page when you are ready to ask for confirmation. Tell the team what you already reviewed and what still needs an answer.",
+      "items": {
+        "need": {
+          "title": "What you need",
+          "description": "Say whether you need a quote, brochure, product detail, demo, sample, or launch help."
+        },
+        "context": {
+          "title": "Useful context",
+          "description": "Share the product, service, page, market, quantity, audience, or asset you are asking about."
+        },
+        "timing": {
+          "title": "Decision timing",
+          "description": "Mention your timeline, response urgency, and who should receive the follow-up."
+        }
+      }
+    },
+    "panel": {
+      "contactTitle": "Contact Methods",
+      "email": "Email",
+      "emailUnavailable": "Use the form on this page; configure a real receiver before public launch.",
+      "phone": "Phone",
+      "hoursTitle": "Business Hours",
+      "weekdays": "Mon - Fri",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "responseTitle": "What to expect",
+      "responseTimeLabel": "Typical response",
+      "responseTimeValue": "Within 24 business hours",
+      "bestForLabel": "Best for",
+      "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
+      "prepareLabel": "Helpful details",
+      "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+    },
+    "form": {
+      "title": "Contact Us",
+      "description": "Get in touch with us. We'd love to hear from you.",
+      "optional": "optional",
+      "fullName": "Full name",
+      "email": "Email Address",
+      "company": "Company Name",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Message",
+      "fullNamePlaceholder": "Enter your full name",
+      "emailPlaceholder": "your@email.com",
+      "companyPlaceholder": "Your company name",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "subjectPlaceholder": "What can we help you with?",
+      "messagePlaceholder": "Please describe your needs or questions...",
+      "acceptPrivacy": "I agree to the privacy policy and terms of service",
+      "marketingConsent": "I would like to receive marketing communications",
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "submitSuccess": "Message sent successfully!",
+      "submitError": "We couldn't send your message. Please try again shortly.",
+      "networkError": "We could not submit the form. Please try again.",
+      "turnstilePending": "Security verification is loading. You can send the form once it is ready.",
+      "turnstileFailed": "Security verification did not complete. Please try again.",
+      "turnstileExpired": "Security verification expired. Please complete it again.",
+      "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
+      "error": "Sorry, there was an error sending your message. Please try again later.",
+      "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
+      "retryLoad": "Retry loading form",
+      "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
+      "errors": {
+        "generic": "Please review the highlighted fields and try again.",
+        "fullName": {
+          "required": "Full name is required",
+          "tooShort": "Full name is required",
+          "tooLong": "Full name must be less than 50 characters",
+          "invalid": "Full name contains invalid characters"
+        },
+        "email": {
+          "required": "Email address is required",
+          "invalid": "Please enter a valid email address",
+          "tooLong": "Email must be less than 100 characters"
+        },
+        "company": {
+          "tooShort": "Company name must be at least 2 characters",
+          "tooLong": "Company name must be less than 100 characters",
+          "invalid": "Company name contains invalid characters"
+        },
+        "productSlug": {
+          "required": "Please choose a product before sending your inquiry",
+          "invalid": "The selected product is not recognized"
+        },
+        "productName": {
+          "required": "Product name is required",
+          "tooShort": "Product name must be at least 2 characters",
+          "tooLong": "Product name must be less than 100 characters",
+          "invalid": "Product name contains invalid characters"
+        },
+        "quantity": {
+          "required": "Quantity is required",
+          "invalid": "Quantity must be a valid amount"
+        },
+        "requirements": {
+          "tooLong": "Requirements must be less than 1000 characters",
+          "invalid": "Requirements contain invalid characters"
+        },
+        "message": {
+          "required": "Message is required",
+          "tooShort": "Message must be at least 10 characters",
+          "tooLong": "Message must be less than 1000 characters"
+        },
+        "phone": {
+          "invalid": "Please enter a valid phone number"
+        },
+        "subject": {
+          "length": "Subject must be between 5 and 100 characters"
+        },
+        "acceptPrivacy": {
+          "required": "You must accept the privacy policy"
+        },
+        "website": {
+          "shouldBeEmpty": "This field should be empty"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "Full name is required",
+        "fullNameTooShort": "Full name is required",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "messageRequired": "Message is required",
+        "messageTooShort": "Message must be at least 10 characters"
+      }
+    }
+  },
+  "formTemplate": {
+    "form": {
+      "success": "Success",
+      "error": "Unknown error",
+      "submitting": "Submitting...",
+      "submit": "Submit",
+      "selectOption": "Select an option"
+    },
+    "example": {
+      "fields": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Enter your name"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Enter your email"
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "Enter your message"
+        }
+      }
+    }
+  },
+  "stats": {
+    "technologies": "Technologies",
+    "typescript": "TypeScript Coverage",
+    "performance": "Performance Score",
+    "languages": "Languages"
+  },
+  "email": "Email Address",
+  "emailPlaceholder": "your@email.com",
+  "phone": "Phone Number",
+  "organization": {
+    "name": "{companyName}",
+    "description": "Reusable showcase website starter for products, services, proof, and inquiry paths",
+    "phone": "Contact sales by email",
+    "social": {
+      "twitter": "https://x.com/example",
+      "linkedin": "https://www.linkedin.com/company/example"
+    }
+  },
+  "website": {
+    "name": "{siteName}",
+    "description": "Reusable showcase website starter for products, services, proof, and inquiry paths"
+  },
+  "trust": {
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Trusted by businesses worldwide"
+    },
+    "partners": {
+      "title": "Our Partners",
+      "subtitle": "Collaborating with industry leaders"
+    },
+    "certifications": {
+      "title": "Certifications & Standards",
+      "subtitle": "Quality you can trust"
+    },
+    "stats": {
+      "title": "By the Numbers",
+      "yearsInBusiness": "Years in Business",
+      "countriesServed": "Countries Served",
+      "satisfactionRate": "Client Satisfaction",
+      "projectsCompleted": "Projects Delivered"
+    }
+  },
+  "faq": {
+    "sectionTitle": "Frequently Asked Questions",
+    "items": {}
+  },
+  "products": {
+    "pageTitle": "Products",
+    "pageDescription": "Explore our comprehensive range of high-quality products for your business needs.",
+    "emptyState": "No products available. Please check back later.",
+    "viewDetails": "View Details",
+    "requestQuote": "Request Quote",
+    "allCategories": "All Categories",
+    "allStandards": "All Standards",
+    "standardsFilterAriaLabel": "Filter by standards",
+    "featured": "Featured",
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products"
+    },
+    "card": {
+      "moq": "MOQ",
+      "leadTime": "Lead Time",
+      "supplyCapacity": "Capacity"
+    },
+    "detail": {
+      "specifications": "Specifications",
+      "tradeInfo": "Trade Information",
+      "certifications": "Certifications",
+      "relatedProducts": "Related Products",
+      "downloadPdf": "Download product PDF",
+      "labels": {
+        "moq": "Minimum Order",
+        "leadTime": "Lead Time",
+        "supplyCapacity": "Supply Capacity",
+        "packaging": "Packaging",
+        "portOfLoading": "Port of Loading"
+      }
+    },
+    "inquiry": {
+      "title": "Product Inquiry",
+      "description": "Interested in this product? Send us an inquiry for pricing and availability.",
+      "productName": "Product",
+      "quantity": "Quantity Required",
+      "quantityPlaceholder": "e.g., 500 pieces",
+      "targetPrice": "Target Price (optional)",
+      "targetPricePlaceholder": "e.g., $10 per unit",
+      "requirements": "Special Requirements",
+      "requirementsPlaceholder": "Please describe any special requirements such as customization, packaging, or certifications...",
+      "submit": "Send Inquiry",
+      "submitting": "Sending...",
+      "success": "Your inquiry has been sent successfully! We will get back to you within 24 hours.",
+      "error": "Failed to send inquiry. Please try again later.",
+      "turnstileRequired": "Please complete the security verification."
+    }
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "close": "Close",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "open": "Open",
+    "toast": {
+      "form": {
+        "contact": {
+          "success": "Message sent successfully!",
+          "successDescription": "Thank you for your message. We'll get back to you soon.",
+          "error": "Failed to send message",
+          "errorDescription": "Please try again later or contact us directly.",
+          "loading": "Sending message..."
+        },
+        "newsletter": {
+          "success": "Successfully subscribed!",
+          "successDescription": "Thank you for subscribing to our newsletter.",
+          "error": "Subscription failed",
+          "errorDescription": "Please check your email and try again.",
+          "loading": "Subscribing..."
+        },
+        "feedback": {
+          "success": "Feedback submitted!",
+          "successDescription": "Thank you for your valuable feedback.",
+          "error": "Failed to submit feedback",
+          "errorDescription": "Please try again later.",
+          "loading": "Submitting feedback..."
+        }
+      }
+    }
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "toggleLabel": "Theme toggle",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "selectTheme": "Select display theme",
+    "selectDisplayTheme": "Select a display theme:",
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "switchToSystem": "Switch to system theme"
+  },
+  "language": {
+    "toggle": "Toggle language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "chinese": "中文",
+    "switching": "Switching language...",
+    "switchSuccess": "Language switched successfully",
+    "switchError": "Failed to switch language",
+    "fallbackWarning": "Some content may not be available in your selected language",
+    "detectionInfo": "Detection Info",
+    "source": "Source",
+    "confidence": "Confidence",
+    "userPreference": "User preference saved",
+    "detector": {
+      "title": "Detection Info",
+      "source": "Source",
+      "confidence": "Confidence",
+      "userSaved": "✓ User preference saved",
+      "sources": {
+        "browser": "Browser",
+        "cookie": "Cookie",
+        "url": "URL",
+        "header": "Header",
+        "default": "Default",
+        "user": "User",
+        "stored": "Stored",
+        "geo": "Geo",
+        "timezone": "Timezone"
+      }
+    }
+  },
+  "monitoring": {
+    "loadError": "Monitoring component failed to load"
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "loading": "Content is loading",
+    "error": "An error has occurred",
+    "languageSelector": "Select language",
+    "themeSelector": "Select theme",
+    "securityVerificationUnavailable": "Security verification is temporarily unavailable.",
+    "turnstileDevBypass": "Dev mode: Turnstile verification bypassed",
+    "turnstileTestMode": "Bot protection disabled in test mode",
+    "turnstileLoadFailed": "Security verification failed to load."
+  },
+  "underConstruction": {
+    "title": "Under Construction",
+    "subtitle": "We're working hard to bring you something amazing",
+    "description": "This page is currently under development. We're building something great and will have it ready soon.",
+    "backToHome": "Back to Home",
+    "comingSoon": "Coming Soon",
+    "expectedCompletion": "Expected completion: {date}",
+    "expectedLaunch": "Expected launch: {date}",
+    "dates": {
+      "q2_2024": "Q2 2024",
+      "q3_2024": "Q3 2024"
+    },
+    "stayTuned": "Stay tuned for updates",
+    "contactUs": "Contact us for more information",
+    "progress": {
+      "title": "Development Progress"
+    },
+    "pages": {
+      "products": {
+        "title": "Products - Under Construction",
+        "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
+        "features": "Product features and specifications coming soon"
+      },
+      "about": {
+        "title": "About Us - Under Construction",
+        "description": "Learn more about our story, mission, and the team behind our innovative solutions.",
+        "features": "Company story, team profiles, and mission statement coming soon"
+      },
+      "contact": {
+        "title": "Contact Us",
+        "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
+        "features": "Multiple ways to reach us and get the support you need",
+        "panel": {
+          "contactTitle": "Contact Methods",
+          "email": "Email",
+          "emailUnavailable": "Use the form on this page; configure a real receiver before public launch.",
+          "phone": "Phone",
+          "hoursTitle": "Business Hours",
+          "weekdays": "Mon - Fri",
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "closed": "Closed",
+          "responseTitle": "What to expect",
+          "responseTimeLabel": "Typical response",
+          "responseTimeValue": "Within 24 business hours",
+          "bestForLabel": "Best for",
+          "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
+          "prepareLabel": "Helpful details",
+          "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+        }
+      }
+    },
+    "animation": {
+      "loading": "Loading animation",
+      "construction": "Construction in progress"
+    },
+    "status": {
+      "inProgress": "In Progress"
+    },
+    "features": {
+      "title": "Feature Preview",
+      "performance": "High Performance",
+      "performanceDesc": "Optimized performance and fast loading experience",
+      "collaboration": "Team Collaboration",
+      "collaborationDesc": "Powerful team collaboration and project management features",
+      "quality": "Quality Assurance",
+      "qualityDesc": "Strict quality control and testing processes"
+    },
+    "social": {
+      "followUs": "Follow us for the latest updates"
+    },
+    "subscription": {
+      "title": "Get Launch Notifications",
+      "description": "Be the first to know about our latest updates",
+      "placeholder": "Enter your email address",
+      "submit": "Subscribe",
+      "submitting": "Submitting...",
+      "success": "Successfully subscribed! We'll notify you soon"
+    },
+    "emailSubscription": {
+      "title": "Stay in the Loop",
+      "description": "Subscribe to receive updates about our launch timeline and new features.",
+      "success": "You're subscribed! We'll keep you posted.",
+      "placeholder": "Enter your email address",
+      "button": "Notify Me"
+    },
+    "contact": {
+      "title": "Need Assistance?",
+      "description": "Reach out to our team for tailored support and partnership opportunities.",
+      "button": "Contact Support"
+    }
+  },
+  "cookie": {
+    "title": "Cookie Preferences",
+    "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
+    "learnMore": "Privacy policy",
+    "acceptAll": "Accept All",
+    "rejectAll": "Reject All",
+    "manage": "Manage",
+    "close": "Close",
+    "cancel": "Cancel",
+    "savePreferences": "Save Preferences",
+    "preferences": {
+      "title": "Cookie Preferences",
+      "description": "Choose which cookies you want to allow. Essential cookies are always enabled."
+    },
+    "categories": {
+      "necessary": "Essential",
+      "necessaryDesc": "Required for the website to function properly. Cannot be disabled.",
+      "analytics": "Analytics",
+      "analyticsDesc": "Help us understand how visitors interact with our website.",
+      "marketing": "Marketing",
+      "marketingDesc": "Used to deliver personalized content and advertisements."
+    }
+  },
+  "structured-data": {
+    "organization": {
+      "name": "{companyName}",
+      "description": "Reusable showcase website starter for products, services, proof, and inquiry paths",
+      "phone": "Contact sales by email",
+      "social": {
+        "twitter": "https://x.com/example",
+        "linkedin": "https://www.linkedin.com/company/example"
+      }
+    },
+    "website": {
+      "name": "{siteName}",
+      "description": "Reusable showcase website starter for products, services, proof, and inquiry paths"
+    },
+    "article": {
+      "defaultTitle": "Article",
+      "defaultDescription": "Article description",
+      "defaultAuthor": "{companyName}"
+    },
+    "product": {
+      "defaultName": "Product",
+      "defaultDescription": "Product description"
+    }
+  },
+  "apiErrors": {
+    "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again later.",
+    "UNAUTHORIZED": "Unauthorized access.",
+    "FORBIDDEN": "This request is not allowed.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
+    "INVALID_JSON_BODY": "Invalid request format.",
+    "INVALID_REQUEST": "Some required fields are missing or invalid.",
+    "PAYLOAD_TOO_LARGE": "The request payload is too large.",
+    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
+    "CONFIRMATION_REQUIRED": "Please add confirm=true parameter to confirm this action.",
+    "INVALID_LOCALE_PARAMETER": "Invalid locale parameter.",
+    "SUBSCRIBE_SUCCESS": "Successfully subscribed to notifications.",
+    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "Email is required.",
+    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "Invalid email address.",
+    "SUBSCRIBE_SECURITY_REQUIRED": "Security verification required.",
+    "SUBSCRIBE_SECURITY_FAILED": "Security verification failed. Please try again.",
+    "SUBSCRIBE_PROCESSING_ERROR": "An error occurred. Please try again.",
+    "CONTACT_SUCCESS": "Your message was sent successfully.",
+    "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
+    "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
+    "CONTACT_STATS_ERROR": "Failed to load contact form statistics.",
+    "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
+    "INQUIRY_SUCCESS": "Inquiry submitted successfully.",
+    "INQUIRY_SECURITY_REQUIRED": "Security verification required.",
+    "INQUIRY_SECURITY_FAILED": "Security verification failed. Please try again.",
+    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
+    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later.",
+    "TURNSTILE_SUCCESS": "Verification successful.",
+    "TURNSTILE_MISSING_TOKEN": "Security verification required.",
+    "TURNSTILE_VERIFICATION_FAILED": "Security verification failed. Please try again.",
+    "TURNSTILE_NETWORK_ERROR": "Failed to communicate with the verification service.",
+    "TURNSTILE_NOT_CONFIGURED": "Security verification is not configured on the server.",
+    "WEB_VITALS_RECORDED": "Web Vitals data recorded successfully.",
+    "WEB_VITALS_INVALID_FORMAT": "The provided data does not match the expected Web Vitals format.",
+    "WEB_VITALS_PROCESS_FAILED": "Failed to process Web Vitals data.",
+    "WEB_VITALS_RETRIEVE_FAILED": "Failed to retrieve Web Vitals statistics.",
+    "WEB_VITALS_DELETED": "Web Vitals data deleted successfully.",
+    "WEB_VITALS_DELETE_FAILED": "Failed to delete Web Vitals data.",
+    "I18N_ANALYTICS_RECORDED": "i18n analytics data recorded successfully.",
+    "I18N_ANALYTICS_INVALID_FORMAT": "The provided data does not match the expected i18n analytics format.",
+    "I18N_ANALYTICS_PROCESS_FAILED": "Failed to process i18n analytics data.",
+    "I18N_ANALYTICS_RETRIEVE_FAILED": "Failed to retrieve i18n analytics statistics.",
+    "I18N_ANALYTICS_DELETED": "i18n analytics data deleted successfully.",
+    "I18N_ANALYTICS_DELETE_FAILED": "Failed to delete i18n analytics data.",
+    "MONITORING_DATA_RECEIVED": "Monitoring data received successfully.",
+    "MONITORING_INVALID_FORMAT": "Required fields: source, metrics, timestamp.",
+    "MONITORING_PROCESS_FAILED": "Failed to process monitoring dashboard data.",
+    "MONITORING_RETRIEVE_FAILED": "Failed to retrieve monitoring dashboard data.",
+    "MONITORING_DELETED": "Monitoring data deleted successfully.",
+    "MONITORING_DELETE_FAILED": "Failed to delete monitoring dashboard data.",
+    "MONITORING_CONFIG_UPDATED": "Monitoring configuration updated successfully.",
+    "MONITORING_CONFIG_INVALID": "Configuration object is required.",
+    "MONITORING_CONFIG_UPDATE_FAILED": "Failed to update monitoring configuration.",
+    "CACHE_INVALIDATED": "Cache invalidated successfully.",
+    "CACHE_LOCALE_REQUIRED": "Locale is required for this cache invalidation.",
+    "CACHE_INVALID_DOMAIN": "Invalid cache domain.",
+    "CACHE_INVALIDATION_FAILED": "Failed to invalidate cache.",
+    "UNKNOWN_ERROR": "An unknown error occurred."
+  },
+  "errors": {
+    "global": {
+      "title": "Something went wrong!",
+      "description": "We apologize for the inconvenience. An unexpected error has occurred.",
+      "tryAgain": "Try again",
+      "goHome": "Go to homepage",
+      "devDetails": "Error Details (Development Only)"
+    },
+    "products": {
+      "title": "Failed to load product information",
+      "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "contact": {
+      "title": "Contact form temporarily unavailable",
+      "description": "Our team will look into this issue immediately. You can try again later or contact us through other channels.",
+      "tryAgain": "Try again",
+      "goHome": "Back to homepage"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Back to homepage"
+    },
+    "serverError": "Internal server error",
+    "networkError": "Network connection error",
+    "validationError": "Please check your input",
+    "unauthorized": "You are not authorized to access this page",
+    "forbidden": "Access to this resource is forbidden",
+    "timeout": "Request timeout - please try again",
+    "generic": "Something went wrong. Please try again later.",
+    "translationMissing": "Translation not available",
+    "loadingFailed": "Failed to load content"
+  }
+}

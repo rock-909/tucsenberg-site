@@ -1,0 +1,174 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import enCriticalMessages from "../../../../../messages/en/critical.json";
+import enDeferredMessages from "../../../../../messages/en/deferred.json";
+import zhCriticalMessages from "../../../../../messages/zh/critical.json";
+import zhDeferredMessages from "../../../../../messages/zh/deferred.json";
+import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
+import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
+
+const messages = {
+  contact: {
+    form: {
+      title: "Contact form",
+      fullName: "Full name",
+      email: "Email",
+      company: "Company Name",
+      subject: "Subject",
+      optional: "optional",
+      message: "Message",
+      acceptPrivacy: "I agree to the privacy policy",
+      marketingConsent: "I would like to receive marketing communications",
+      submit: "Submit",
+      turnstilePending:
+        "Security verification is loading. You can send the form once it is ready.",
+    },
+  },
+};
+
+describe("ContactFormStaticFallback", () => {
+  const actualLocaleMessages = [
+    {
+      locale: "en",
+      messages: { ...enCriticalMessages, ...enDeferredMessages },
+      fullNameLabel: "Full name",
+      optionalLabel: "optional",
+      submitLabel: "Send Message",
+    },
+    {
+      locale: "zh",
+      messages: { ...zhCriticalMessages, ...zhDeferredMessages },
+      fullNameLabel: "姓名",
+      optionalLabel: "选填",
+      submitLabel: "发送消息",
+    },
+  ] as const;
+
+  it("renders a disabled progressive-enhancement form shell before the client island loads", () => {
+    render(<ContactFormStaticFallback messages={messages} />);
+
+    const fallback = document.querySelector(
+      '[data-contact-form-fallback="static"]',
+    );
+
+    expect(fallback).toBeInTheDocument();
+    expect(fallback?.tagName).toBe("FORM");
+    expect(fallback?.closest('[data-slot="data-card"]')).toHaveClass(
+      "mx-auto",
+      "w-full",
+      "max-w-2xl",
+    );
+    expect(
+      fallback?.closest('[data-ui-pilot="radix-themes-data-card"]'),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Full name")).toBeDisabled();
+    expect(screen.getByLabelText("Full name")).toBeRequired();
+    expect(screen.getByLabelText("Email")).toBeDisabled();
+    expect(screen.getByLabelText(/Company Name/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Company Name/i)).not.toBeRequired();
+    expect(screen.getByLabelText("Message")).toBeDisabled();
+    expect(
+      document.querySelector('[data-contact-form-field-optional="company"]'),
+    ).toHaveTextContent("optional");
+    expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: /privacy policy/i }),
+    ).toBeRequired();
+  });
+
+  it("keeps the static honeypot hidden and serialized while explaining the disabled security gate", () => {
+    const { container } = render(
+      <ContactFormStaticFallback messages={messages} />,
+    );
+    const form = container.querySelector("form");
+    const honeypot = container.querySelector<HTMLInputElement>(
+      'input[name="website"]',
+    );
+
+    if (!form || !honeypot) {
+      throw new Error("Expected the static form and website honeypot.");
+    }
+
+    expect(honeypot).toHaveAttribute("id", "website");
+    expect(honeypot).toHaveAttribute("type", "hidden");
+    expect(honeypot).toHaveAttribute("hidden");
+    expect(honeypot).not.toHaveClass("sr-only");
+    expect(
+      screen.queryByRole("textbox", { name: /website/i }),
+    ).not.toBeInTheDocument();
+
+    honeypot.value = "bot-filled";
+    expect(new FormData(form).get("website")).toBe("bot-filled");
+    expect(
+      screen.getByText(
+        "Security verification is loading. You can send the form once it is ready.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("renders fallback consent checkboxes with mobile-friendly touch targets", () => {
+    render(<ContactFormStaticFallback messages={messages} />);
+
+    for (const name of ["acceptPrivacy", "marketingConsent"]) {
+      const checkbox = document.querySelector<HTMLInputElement>(
+        `input[name="${name}"]`,
+      );
+
+      if (!checkbox) {
+        throw new Error(`Expected ${name} fallback checkbox to render.`);
+      }
+
+      const row = checkbox.parentElement;
+
+      expect(checkbox).toBeDisabled();
+      expect(checkbox).toHaveAttribute("type", "checkbox");
+      expect(checkbox).toHaveClass("size-6");
+      expect(checkbox).not.toHaveClass("size-4");
+      expect(row).toHaveClass("min-h-11", "gap-3");
+      expect(
+        document.querySelector(`label[for="${checkbox.id}"]`),
+      ).toBeInTheDocument();
+    }
+  });
+
+  it("protects fallback labels at the leaf level", () => {
+    render(<ContactFormStaticFallback messages={messages} />);
+
+    const fullNameLabel = screen.getByText("Full name");
+
+    expect(fullNameLabel).toHaveAttribute("translate", "no");
+  });
+
+  it.each(actualLocaleMessages)(
+    "uses actual $locale fallback copy and shows company as optional",
+    ({
+      messages: localeMessages,
+      fullNameLabel,
+      optionalLabel,
+      submitLabel,
+    }) => {
+      render(<ContactFormStaticFallback messages={localeMessages} />);
+
+      expect(screen.getByLabelText(fullNameLabel)).toBeDisabled();
+      expect(
+        document.querySelector('[data-contact-form-field-optional="company"]'),
+      ).toHaveTextContent(optionalLabel);
+      expect(screen.getByRole("button", { name: submitLabel })).toBeDisabled();
+      expect(
+        screen.getByText(
+          readRequiredMessagePath(localeMessages, [
+            "contact",
+            "form",
+            "turnstilePending",
+          ]),
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("fails fast when required fallback copy is missing", () => {
+    expect(() =>
+      ContactFormStaticFallback({ messages: { contact: { form: {} } } }),
+    ).toThrow("Missing required message: contact.form.optional");
+  });
+});

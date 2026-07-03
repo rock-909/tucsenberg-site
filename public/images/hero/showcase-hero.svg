@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Showcase website placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)" />
+
+  <circle cx="220" cy="220" r="220" fill="#0f3460" opacity="0.25" />
+  <circle cx="1040" cy="700" r="260" fill="#0f3460" opacity="0.18" />
+
+  <rect x="120" y="150" width="960" height="600" rx="28" fill="#0f3460" opacity="0.38" />
+  <rect x="160" y="190" width="880" height="520" rx="22" fill="#0b1220" opacity="0.55" />
+
+  <rect x="160" y="190" width="880" height="10" fill="url(#accent)" opacity="0.9" />
+
+  <!-- Showcase layout icon -->
+  <g transform="translate(600 380)">
+    <rect x="-150" y="20" width="300" height="30" rx="4" fill="#334155" />
+    <rect x="-120" y="-40" width="60" height="60" rx="8" fill="#1f2937" stroke="#f59e0b" stroke-width="2" />
+    <rect x="-30" y="-40" width="60" height="60" rx="8" fill="#1f2937" stroke="#f59e0b" stroke-width="2" />
+    <rect x="60" y="-40" width="60" height="60" rx="8" fill="#1f2937" stroke="#f59e0b" stroke-width="2" />
+    <circle cx="-90" cy="-10" r="8" fill="#f59e0b" opacity="0.8" />
+    <circle cx="0" cy="-10" r="8" fill="#f59e0b" opacity="0.8" />
+    <circle cx="90" cy="-10" r="8" fill="#f59e0b" opacity="0.8" />
+  </g>
+
+  <text x="600" y="560" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="48" font-weight="700" fill="#e5e7eb" text-anchor="middle">
+    Showcase Website
+  </text>
+  <text x="600" y="620" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">
+    Replace this image with project-specific visuals
+  </text>
+</svg>

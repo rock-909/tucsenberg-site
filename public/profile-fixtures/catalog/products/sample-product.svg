@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Sample product placeholder image">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e94560" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)" />
+
+  <circle cx="220" cy="220" r="220" fill="#0f3460" opacity="0.25" />
+  <circle cx="1040" cy="700" r="260" fill="#0f3460" opacity="0.18" />
+
+  <rect x="120" y="150" width="960" height="600" rx="28" fill="#0f3460" opacity="0.38" />
+  <rect x="160" y="190" width="880" height="520" rx="22" fill="#0b1220" opacity="0.55" />
+
+  <rect x="160" y="190" width="880" height="10" fill="url(#accent)" opacity="0.9" />
+
+  <!-- Simple product icon -->
+  <g transform="translate(560 320)">
+    <rect x="-70" y="-70" width="140" height="140" rx="18" fill="#111827" stroke="#334155" stroke-width="2" />
+    <path d="M-28 -12h56v56h-56z" fill="#0f3460" />
+    <path d="M-38 -28h76v12h-76z" fill="#1f2937" />
+    <path d="M-38 52h76v12h-76z" fill="#1f2937" />
+  </g>
+
+  <text x="600" y="520" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="700" fill="#e5e7eb" text-anchor="middle">
+    Sample Product
+  </text>
+  <text x="600" y="590" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">
+    Replace this image with your real product photo
+  </text>
+</svg>
+

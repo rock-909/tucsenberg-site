@@ -1,0 +1,178 @@
+{
+  "error": "发生错误，请重试。",
+  "turnstileRequired": "请完成安全验证。",
+  "errorBoundary": {
+    "title": "发生错误",
+    "description": "出现了一些问题，请尝试刷新页面。",
+    "tryAgain": "重试"
+  },
+  "legal": {
+    "effectiveDate": "生效日期",
+    "lastUpdated": "最后更新",
+    "tableOfContents": "目录"
+  },
+  "instructions": {
+    "getStarted": "开始编辑",
+    "saveChanges": "保存并立即查看您的更改"
+  },
+  "actions": {
+    "deployNow": "立即部署",
+    "readDocs": "阅读文档"
+  },
+  "formatting": {
+    "date": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "tomorrow": "明天",
+      "lastUpdated": "最后更新于 {date}",
+      "publishedOn": "发布于 {date}"
+    },
+    "number": {
+      "currency": "¥{amount}",
+      "percentage": "{value}％",
+      "fileSize": "{size}{unit}"
+    },
+    "plurals": {
+      "items": {
+        "zero": "暂无项目",
+        "one": "1个项目",
+        "other": "{count}个项目"
+      },
+      "users": {
+        "zero": "暂无在线用户",
+        "one": "1位用户在线",
+        "other": "{count}位用户在线"
+      },
+      "notifications": {
+        "zero": "暂无新通知",
+        "one": "1条新通知",
+        "other": "{count}条新通知"
+      }
+    }
+  },
+  "progress": {
+    "title": "开发进度",
+    "status": "开发进度",
+    "nearCompletion": "即将完成",
+    "planning": "规划中",
+    "development": "开发中",
+    "testing": "测试中",
+    "launch": "即将发布",
+    "ariaLabel": "项目开发进度指示器",
+    "completed": "已完成",
+    "current": "当前步骤",
+    "upcoming": "即将开始"
+  },
+  "themes": {
+    "title": "主题系统",
+    "description": "支持明暗模式切换的动态主题系统。",
+    "toggle": "主题切换",
+    "language": "语言切换",
+    "colors": {
+      "title": "色彩调色板"
+    },
+    "typography": {
+      "title": "排版",
+      "bold": "加粗文本",
+      "medium": "中等粗细文本",
+      "normal": "正常文本",
+      "muted": "辅助文本"
+    }
+  },
+  "title": "Showcase Website Starter",
+  "privacy": {
+    "pageTitle": "隐私政策",
+    "pageDescription": "了解我们如何收集、使用和保护您的个人信息。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "informationCollected": "我们收集的信息",
+      "howWeUse": "我们如何使用您的信息",
+      "sharing": "信息共享",
+      "security": "数据安全",
+      "retention": "数据保留",
+      "rights": "您的隐私权利",
+      "children": "儿童隐私",
+      "changes": "政策变更",
+      "contact": "联系我们"
+    }
+  },
+  "terms": {
+    "pageTitle": "服务条款",
+    "pageDescription": "阅读我们的服务使用条款和产品采购条件。",
+    "lastUpdated": "最后更新",
+    "effectiveDate": "生效日期",
+    "tableOfContents": "目录",
+    "sections": {
+      "introduction": "引言",
+      "acceptance": "条款接受",
+      "services": "服务说明",
+      "orders": "订单与合同",
+      "payment": "付款条款",
+      "shipping": "运输与交付",
+      "warranty": "保修与退换",
+      "liability": "责任限制",
+      "ip": "知识产权",
+      "confidentiality": "保密条款",
+      "termination": "终止条款",
+      "governing": "适用法律",
+      "disputes": "争议解决",
+      "contact": "联系方式"
+    }
+  },
+  "emailTemplates": {
+    "runtimeDefaultLocale": "en",
+    "common": {
+      "unknownSubmissionTime": "未知提交时间",
+      "marketingConsentAccepted": "是，同意接收营销沟通",
+      "fields": {
+        "name": "姓名",
+        "contactName": "联系人姓名",
+        "email": "邮箱",
+        "company": "公司",
+        "phone": "电话",
+        "subject": "主题",
+        "message": "留言",
+        "submittedAt": "提交时间",
+        "marketingConsent": "营销同意",
+        "product": "产品",
+        "quantity": "数量",
+        "requirements": "需求"
+      }
+    },
+    "confirmation": {
+      "title": "感谢您联系我们",
+      "preview": "我们已收到您的留言，并会在24小时内回复。",
+      "receivedMessage": "感谢您联系我们。我们已收到您的留言，并会在24小时内回复。",
+      "summaryIntro": "以下是您的提交摘要：",
+      "urgentHelp": "如果您有紧急问题，请直接联系我们。",
+      "signoff": "此致，",
+      "greeting": "尊敬的 {firstName}：",
+      "teamName": "{siteName} 团队",
+      "footer": "© {year} {siteName}. 保留所有权利。",
+      "subject": "感谢您联系 {siteName}",
+      "summaryLines": {
+        "name": "姓名：{firstName} {lastName}",
+        "company": "公司：{company}",
+        "email": "邮箱：{email}",
+        "subject": "主题：{subject}",
+        "submitted": "提交时间：{submittedAt}"
+      }
+    },
+    "contact": {
+      "title": "新的联系表单提交",
+      "preview": "来自 {firstName} {lastName} 的新联系表单提交",
+      "footer": "此邮件由 {siteName} 网站联系表单发送。",
+      "subjectWithTopic": "联系表单：{subject}",
+      "subjectWithoutTopic": "来自 {firstName} {lastName} 的新联系"
+    },
+    "productInquiry": {
+      "title": "新的产品询盘",
+      "preview": "收到新的产品询盘。",
+      "footer": "此询盘来自产品页面：{productSlug}",
+      "subject": "产品询盘：{productName}（数量：{quantity}）"
+    }
+  }
+}

@@ -1,0 +1,259 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, "pr/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: 基础质量
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint 检查
+        run: pnpm lint:check
+
+      - name: React Doctor
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm react:doctor --base "origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            pnpm react:doctor --base "${{ github.event.before }}"
+          else
+            pnpm react:doctor --base "$(git rev-parse HEAD^)"
+          fi
+
+      - name: TypeScript 检查
+        run: pnpm type-check
+
+      - name: 品牌替换检查
+        run: pnpm brand:check
+
+      - name: 内容结构检查
+        run: pnpm content:check
+
+      - name: Client boundary 检查
+        run: node scripts/starter-checks.js client-boundary
+
+      - name: Component governance tests
+        run: pnpm component:governance:test
+
+      - name: Component governance scan
+        run: pnpm component:governance
+
+      - name: Storybook build check
+        run: pnpm exec storybook build
+
+      - name: Dependency cruiser architecture check
+        run: pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
+
+  tests:
+    name: 单元与集成测试
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 运行测试
+        run: pnpm test
+
+      - name: Lead API family proof
+        run: pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts tests/integration/api/subscribe.test.ts
+
+  e2e:
+    name: 浏览器冒烟
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 35
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 安装 Playwright 浏览器
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: 生产构建
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          APP_ENV: preview
+          PLAYWRIGHT_TEST: "true"
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+      - name: 运行 E2E
+        run: pnpm exec playwright test
+
+  semgrep:
+    name: Semgrep 安全扫描
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 10
+    container: semgrep/semgrep:1.162.0
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 运行 Semgrep
+        run: semgrep scan --error --severity ERROR --config semgrep.yml src
+
+  cloudflare-build:
+    name: Cloudflare 构建证明
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建检查
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          APP_ENV: preview
+          NEXT_PUBLIC_SITE_URL: https://showcase-website-starter.test
+
+      - name: Cloudflare/OpenNext 构建
+        run: pnpm website:build:cf
+        env:
+          NODE_ENV: production
+          APP_ENV: preview
+          NEXT_PUBLIC_SITE_URL: https://showcase-website-starter.test
+
+      - name: Cloudflare/Wrangler dry-run
+        if: ${{ github.event_name != 'pull_request' }}
+        run: pnpm exec wrangler deploy --dry-run --env preview
+        env:
+          NODE_ENV: production
+          APP_ENV: preview
+          NEXT_PUBLIC_SITE_URL: https://showcase-website-starter.test
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Cloudflare Free budget note
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          {
+            echo "## Cloudflare Free budget"
+            echo
+            echo "Pull request CI does not prove the Cloudflare Free gzip budget."
+            echo "This run proves the Next.js and Cloudflare/OpenNext build path only."
+            echo "Before merge, record a workflow_dispatch CI run or pnpm release:verify result on the exact head SHA."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ci-summary:
+    name: CI 汇总
+    runs-on: ubuntu-latest
+    needs: [quality, tests, e2e, semgrep, cloudflare-build]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 检查所有作业状态
+        run: |
+          {
+            echo "## CI Jobs"
+            echo
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| 基础质量 | ${{ needs.quality.result }} |"
+            echo "| 单元与集成测试 | ${{ needs.tests.result }} |"
+            echo "| 浏览器冒烟 | ${{ needs.e2e.result }} |"
+            echo "| Semgrep 安全扫描 | ${{ needs.semgrep.result }} |"
+            echo "| Cloudflare 构建证明 | ${{ needs.cloudflare-build.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${{ needs.quality.result }}" != "success" ||
+                "${{ needs.tests.result }}" != "success" ||
+                "${{ needs.e2e.result }}" != "success" ||
+                "${{ needs.semgrep.result }}" != "success" ||
+                "${{ needs.cloudflare-build.result }}" != "success" ]]; then
+            echo "CI failed"
+            exit 1
+          fi

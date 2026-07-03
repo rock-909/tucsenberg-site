@@ -1,0 +1,45 @@
+# Repository default owner
+# The repository default is primary-only. This file encodes enforceable review routing, not diversified maintainer headcount.
+* @Alx-707
+
+# Tier A: runtime entry + locale routing
+# Tier A paths require the primary owner and the backup review path.
+# The backup path is a review fallback, not a second enforceable repository owner identity.
+/src/middleware.ts @Alx-707 developer@flood-control.com
+/src/i18n/ @Alx-707 developer@flood-control.com
+/src/app/[locale]/layout.tsx @Alx-707 developer@flood-control.com
+/src/app/[locale]/head.tsx @Alx-707 developer@flood-control.com
+
+# Tier A: lead/contact pipeline
+/src/app/api/contact/ @Alx-707 developer@flood-control.com
+/src/app/api/inquiry/ @Alx-707 developer@flood-control.com
+/src/app/api/subscribe/ @Alx-707 developer@flood-control.com
+/src/lib/lead-pipeline/ @Alx-707 developer@flood-control.com
+/src/components/forms/ @Alx-707 developer@flood-control.com
+
+# Tier A: security + abuse protection
+/src/config/security.ts @Alx-707 developer@flood-control.com
+/src/lib/security/ @Alx-707 developer@flood-control.com
+/src/app/api/verify-turnstile/ @Alx-707 developer@flood-control.com
+/src/app/api/csp-report/ @Alx-707 developer@flood-control.com
+
+# Tier A: platform build + deployment chain
+/open-next.config.ts @Alx-707 developer@flood-control.com
+/next.config.ts @Alx-707 developer@flood-control.com
+/.github/workflows/ @Alx-707 developer@flood-control.com
+/scripts/quality/checks/cloudflare-*.js @Alx-707 developer@flood-control.com
+/scripts/quality/checks/release-verify.js @Alx-707 developer@flood-control.com
+/scripts/quality/checks/production-config.js @Alx-707 developer@flood-control.com
+/scripts/quality/release-proof-manifest.js @Alx-707 developer@flood-control.com
+/wrangler.jsonc @Alx-707 developer@flood-control.com
+
+# Tier A: translation critical path
+/messages/en/critical.json @Alx-707 developer@flood-control.com
+/messages/en/deferred.json @Alx-707 developer@flood-control.com
+/messages/zh/critical.json @Alx-707 developer@flood-control.com
+/messages/zh/deferred.json @Alx-707 developer@flood-control.com
+/scripts/starter-checks.js @Alx-707 developer@flood-control.com
+
+# Tier A: cache utilities + health
+/src/lib/cache/ @Alx-707 developer@flood-control.com
+/src/app/api/health/ @Alx-707 developer@flood-control.com

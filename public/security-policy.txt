@@ -1,0 +1,14 @@
+Security Disclosure Policy
+
+How to report:
+- Replace this line with the real security contact before public launch
+- Include reproduction steps, impact, and any proof-of-concept material
+
+What to expect:
+- We aim to acknowledge receipt within 5 business days
+- We will validate the report and follow up if more detail is needed
+- We will coordinate on disclosure timing for confirmed issues
+
+Good-faith research:
+- Please avoid privacy violations, destructive testing, or service disruption
+- Please do not publicly disclose an issue before we have had a reasonable chance to investigate and remediate it

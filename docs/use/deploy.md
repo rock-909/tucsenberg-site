@@ -1,0 +1,73 @@
+# Deploy
+
+这里说明派生项目上线前需要替换哪些部署和环境配置。Cloudflare/OpenNext 机制细节看 `../ref/tech.md`。
+
+## Replace before launch
+
+- Cloudflare account、worker name、route、正式域名。
+- Turnstile site key / secret key / allowed hosts / actions。
+- Resend 或邮件服务配置。
+- Airtable / CRM / 表单接收配置。
+- rate limit pepper 和生产限流后端。
+- owner dashboard hostname、zone、access key。
+- preview / production secrets。
+
+真实 secret 不入库。只提交 `.env.example`、`.dev.vars.example`、`.mcp.example.json` 这类占位示例。
+
+## Env rules
+
+- `NEXT_PUBLIC_*` 会进浏览器，不能放 secret。
+- API token、邮件密钥、Airtable token、Turnstile secret、Cloudflare analytics token、rate-limit pepper 必须 server-only。
+- 本地开发/测试没有配置 Upstash 时会自动使用内存限流；`ALLOW_MEMORY_RATE_LIMIT=true` 是 release/proof blocker，不是启用 fallback 的开关。
+- production strict gate 当前要求 Upstash Redis；不要把 KV-only 当作生产替代方案。
+- `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` 在 preview/production 要配置稳定值。
+
+## Common env groups
+
+| Group | Examples |
+| --- | --- |
+| public identity | `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_NAME` |
+| runtime mode | `APP_ENV`, `DEPLOYMENT_PLATFORM`, `NEXT_PUBLIC_DEPLOYMENT_PLATFORM` |
+| Turnstile | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` |
+| email | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` |
+| Airtable | `AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`, `AIRTABLE_TABLE_NAME` |
+| Cloudflare deploy | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_ANALYTICS_HOSTNAME`, `CLOUDFLARE_ANALYTICS_API_TOKEN` |
+| security / rate limit | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, `RATE_LIMIT_PEPPER`, `RATE_LIMIT_PEPPER_PREVIOUS`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `KV_REST_API_TOKEN`, `OPS_DASHBOARD_ACCESS_KEY` |
+| CI / GitHub | `GITHUB_TOKEN` |
+| compatibility | `DEPLOY_TARGET` legacy alias; canonical is `DEPLOYMENT_PLATFORM` |
+| proof-only | `DEPLOY_SMOKE_BASE_URL`, `PLAYWRIGHT_BASE_URL`, `STAGING_URL` |
+
+## Build proof
+
+```bash
+pnpm build
+pnpm website:build:cf
+pnpm exec wrangler deploy --dry-run --env preview
+```
+
+These do not prove public launch readiness. For launch proof, continue with `../proof/launch.md`.
+
+## Preview proof
+
+The manual Cloudflare workflow can verify an already-public preview URL without
+Cloudflare deploy credentials:
+
+```bash
+gh workflow run "Cloudflare Workers 部署" --ref main -f environment=preview -f preview_url="$DEPLOYED_BASE_URL"
+```
+
+This checks public page reachability through `public-preview-smoke`. It does
+not create a new Cloudflare Worker deployment and does not prove Workers
+runtime/API health. Use `deployed-smoke` only for a real Workers runtime URL
+that should serve `/api/health` and locale redirects. Production still requires
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`.
+
+## Image delivery
+
+Cloudflare image delivery strategy:
+
+- starter baseline: default; no Cloudflare Image Optimization, Images, Transformations, Polish, Mirage, R2, or custom loader required.
+- customer upgrade lane: use Cloudflare Transformations only after zone, plan, quota, billing, URL behavior, and proof are confirmed.
+- customer upgrade lane: use Cloudflare Images only when the project needs upload workflows, variants, or CMS-like image management.
+
+Do not claim Cloudflare image transformation proof until a deployed Cloudflare URL and a buyer-visible transformed image URL are checked.

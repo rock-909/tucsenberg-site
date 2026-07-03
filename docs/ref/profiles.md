@@ -1,0 +1,132 @@
+# Profiles
+
+默认派生 profile 是 `company-site`。`showcase-full` 是完整 demo/reference；`b2b-lead` 是 thin opt-in；`catalog` 和 `content-marketing` 是可选扩展。
+
+## Default generated routes
+
+`company-site` 输出应包含：
+
+```text
+/
+/about
+/products
+/blog
+/blog/[slug]
+/resources
+/contact
+/privacy
+/terms
+/not-found
+```
+
+默认输出不应包含：
+
+```text
+/services
+/capabilities
+/how-it-works
+/custom-project-support
+/products/[market]
+fake market/spec catalog demo
+fake standards
+SaaS app surfaces
+```
+
+## Default runtime budget
+
+The source checkout Cloudflare deploy-artifact proof is the maintained
+Cloudflare Workers Free runtime guardrail for this starter repository:
+
+```bash
+pnpm website:build:cf
+pnpm exec wrangler deploy --dry-run --env preview
+```
+
+The Worker upload should stay below **3000 KiB gzip**, with a preferred
+engineering target below **2700 KiB** for headroom.
+
+This source-checkout proof is stricter than a materialized `company-site`
+project in some ways because the repository can retain optional demo and
+profile material for maintainers. It does not replace the materialized
+`company-site` boundary proof below. If a future branch needs to claim the exact
+materialized `company-site` Worker size, it must run the Cloudflare build and
+Wrangler dry-run inside that generated output as a separate proof lane.
+
+Optional profiles may exceed the default runtime cost only when that cost is
+explicitly selected and separately proved. A `catalog`, `content-marketing`, or
+`showcase-full` addition must not silently move the default `company-site`
+Worker over the Free-plan baseline.
+
+## Active surface
+
+一个 surface 只要进入默认输出依赖，就算 active：
+
+- route files
+- navigation / footer links
+- sitemap / metadata
+- message namespaces
+- default tests / E2E / proof lanes
+- replacement checklist
+- public assets used by the default app
+
+只从导航里删链接不够；route、sitemap、message、test 或 proof 仍在时，派生项目还在维护它。
+
+## Profile owners
+
+| Profile | Owns | Not default |
+| --- | --- | --- |
+| `company-site` | Home、about、products overview、blog、resources、contact、privacy、terms、lead pipeline、基础部署 proof | market detail、capabilities、how-it-works、custom project support |
+| `b2b-lead` | Home、薄 about、contact/quote、privacy、terms、lead pipeline | products、blog、resources、catalog |
+| `minimal` | Home、privacy、terms、not-found | catalog、blog、contact、full governance proof |
+| `catalog` | product routes、market detail、specs、catalog messages、product inquiry | blog |
+| `content-marketing` | blog/resource routes、article content、blog metadata | product catalog |
+| `showcase-full` | complete demo、demo products/blog、capabilities、how-it-works、custom project support | ordinary default projects |
+
+## Visual inheritance by profile
+
+All profiles inherit the Modern Technical B2B baseline, but each profile adapts
+the proof surface differently:
+
+| Profile | Visual inheritance |
+| --- | --- |
+| `company-site` | Keep product system, application fit, delivery proof, and inquiry path visible across the core pages. |
+| `catalog` | Emphasize product systems, standards, specifications, and quote-ready inquiry paths. |
+| `content-marketing` | Emphasize resource credibility, article usefulness, and paths back to product or inquiry evaluation. |
+| `showcase-full` | Treat the complete demo as a reference surface, not the default visual requirement for ordinary projects. |
+
+Do not rely on fake proof, badge walls, card walls, or traditional export-site
+density dumps. No profile should become a Vercel clone. For the full boundary,
+see `docs/design/truth.md`.
+
+## Fixtures and examples
+
+Optional source may remain in the source repo:
+
+```text
+profile-fixtures/catalog
+profile-fixtures/content-marketing
+profile-fixtures/showcase-full
+public/profile-fixtures
+docs/archive/examples/current
+template-recipes
+```
+
+Default `company-site` output must not depend on optional fixture packs. Default blog data comes from `src/lib/blog/starter-blog.ts`, not `profile-fixtures/content-marketing/**`.
+
+## Current source repo caveat
+
+The source checkout can still contain optional route files and demo material for maintainers. The clean user path is materialized output:
+
+The source checkout runtime intentionally loads `showcase-full` message packs so
+maintainers can exercise the complete demo/reference surface. That does not
+change the default generated starter: new projects should still start from
+`company-site` unless they explicitly opt into another profile.
+
+Seeing an optional route in the source checkout is not a derived project obligation by itself. Default obligations are decided by the selected profile's materialized output, message packs, tests, proof lanes, and replacement checklist.
+
+```bash
+pnpm profile:dry-run -- --profile company-site
+pnpm profile:materialize -- --profile company-site --out /path/to/new-project
+```
+
+See `../use/start.md` for commands and `../proof/dry-run.md` for proof.

@@ -1,0 +1,52 @@
+{
+  "products": {
+    "pageTitle": "产品中心",
+    "pageDescription": "探索我们为您的业务需求提供的全系列优质产品。",
+    "emptyState": "暂无产品，请稍后再来查看。",
+    "viewDetails": "查看详情",
+    "requestQuote": "询价",
+    "allCategories": "全部分类",
+    "allStandards": "全部标准",
+    "standardsFilterAriaLabel": "按标准筛选",
+    "featured": "精选",
+    "breadcrumb": {
+      "home": "首页",
+      "products": "产品中心"
+    },
+    "card": {
+      "moq": "数量",
+      "leadTime": "交货期",
+      "supplyCapacity": "供货能力"
+    },
+    "detail": {
+      "specifications": "产品规格",
+      "tradeInfo": "贸易信息",
+      "certifications": "产品认证",
+      "relatedProducts": "相关产品",
+      "downloadPdf": "下载产品 PDF 资料",
+      "labels": {
+        "moq": "最小数量",
+        "leadTime": "交货周期",
+        "supplyCapacity": "供货能力",
+        "packaging": "包装方式",
+        "portOfLoading": "装运港口"
+      }
+    },
+    "inquiry": {
+      "title": "产品询价",
+      "description": "对此产品感兴趣？发送询价获取报价和货期信息。",
+      "productName": "产品名称",
+      "quantity": "需求数量",
+      "quantityPlaceholder": "例如：500 件",
+      "targetPrice": "目标价格（选填）",
+      "targetPricePlaceholder": "例如：每件 10 美元",
+      "requirements": "特殊要求",
+      "requirementsPlaceholder": "请描述您的特殊需求，如定制、包装或认证要求...",
+      "submit": "发送询价",
+      "submitting": "发送中...",
+      "success": "询价已成功发送！我们将在 24 小时内回复您。",
+      "error": "询价发送失败，请稍后重试。",
+      "turnstileRequired": "请完成安全验证。"
+    }
+  }
+}

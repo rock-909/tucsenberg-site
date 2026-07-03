@@ -1,0 +1,40 @@
+# Brand
+
+Brand facts live in config and content, not page components.
+
+## Edit first
+
+- `src/config/single-site.ts`: company identity, contact, social links, default SEO.
+- `src/config/single-site-seo.ts`: sitemap, robots, crawl/index truth.
+- `src/config/single-site-navigation.ts`: navigation labels and active links.
+- `src/config/single-site-links.ts`: shared hrefs.
+- `src/config/single-site-page-expression.ts`: homepage/page expression.
+
+If selected profile is `catalog`, also review:
+
+- `src/config/single-site-product-catalog.ts`
+- `src/constants/product-standards.ts`
+- `src/constants/product-specs/**`
+
+## Then edit
+
+- `content/pages/{locale}/*.mdx`
+- `messages/base/**`
+- `messages/profiles/**`
+- `public/images/**`
+
+## Do not
+
+- Do not hardcode company facts in components.
+- Do not add a second site-definition mirror.
+- Do not treat starter placeholder facts as real client claims.
+
+## Navigation breakpoints
+
+```text
+< 840px       mobile menu
+840-1199px   compact desktop nav
+>= 1200px    full desktop nav
+```
+
+The rule is not device name. The rule is: show main navigation as early as possible without crowding brand, language switcher, or CTA.

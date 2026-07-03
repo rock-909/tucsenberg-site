@@ -1,0 +1,277 @@
+import { NextRequest, type NextResponse } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { processLead } from "@/lib/lead-pipeline/process-lead";
+import * as inquiryRoute from "@/app/api/inquiry/route";
+import * as subscribeRoute from "@/app/api/subscribe/route";
+
+/**
+ * Auxiliary response contract checks only.
+ *
+ * This suite intentionally mocks the core protection and submission pipeline so
+ * it can verify response shape. It is not full lead-chain protection proof.
+ * Route/action protection suites and deployed canaries own that proof boundary.
+ */
+vi.mock("@/lib/security/distributed-rate-limit", () => ({
+  checkDistributedRateLimit: vi.fn(async () => ({
+    allowed: true,
+    remaining: 5,
+    resetTime: Date.now() + 60000,
+    retryAfter: null,
+  })),
+  createRateLimitHeaders: vi.fn(() => new Headers()),
+}));
+
+vi.mock("@/lib/security/turnstile", () => ({
+  verifyTurnstile: vi.fn(async () => true),
+  verifyTurnstileDetailed: vi.fn(async () => ({ success: true })),
+}));
+
+vi.mock("@/lib/lead-pipeline/process-lead", () => ({
+  processLead: vi.fn(async () => ({
+    success: true,
+    emailSent: true,
+    ownerNotified: true,
+    recordCreated: true,
+    referenceId: "lead-ref-001",
+  })),
+}));
+
+vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
+  LEAD_TYPES: {
+    PRODUCT: "product",
+    CONTACT: "contact",
+    NEWSLETTER: "newsletter",
+  },
+  productLeadSchema: {
+    safeParse: vi.fn((input: Record<string, unknown>) => ({
+      success: true,
+      data: {
+        ...input,
+        type: "product",
+      },
+    })),
+  },
+  newsletterLeadSchema: {
+    safeParse: vi.fn((input: Record<string, unknown>) => ({
+      success: true,
+      data: {
+        ...input,
+        type: "newsletter",
+      },
+    })),
+  },
+}));
+
+function makeRequest(
+  pathname: string,
+  body: unknown,
+  extraHeaders: HeadersInit = {},
+) {
+  return new NextRequest(
+    new Request(`http://localhost${pathname}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+        ...(extraHeaders as Record<string, string>),
+      },
+    }),
+  );
+}
+
+function expectNoLeadObservabilityHeaders(response: Response) {
+  expect(response.headers.get("x-request-id")).toBeNull();
+  expect(response.headers.get("x-observability-surface")).toBeNull();
+}
+
+async function expectRouteError(
+  response: NextResponse,
+  status: number,
+  errorCode: string,
+) {
+  expect(response.status).toBe(status);
+  expectNoLeadObservabilityHeaders(response);
+  await expect(response.json()).resolves.toEqual({
+    success: false,
+    errorCode,
+  });
+}
+
+describe("lead API family response contract (auxiliary)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("inquiry success uses the family success contract", async () => {
+    const response = await inquiryRoute.POST(
+      makeRequest("/api/inquiry", {
+        turnstileToken: "valid-token",
+        email: "buyer@example.com",
+        fullName: "Buyer",
+        company: "Buyer Co",
+        productSlug: "north-america",
+        productName: "North America",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expectNoLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: true,
+      data: {
+        referenceId: "lead-ref-001",
+      },
+    });
+  });
+
+  it("subscribe success uses the family success contract", async () => {
+    const response = await subscribeRoute.POST(
+      makeRequest("/api/subscribe", {
+        email: "newsletter@example.com",
+        turnstileToken: "valid-token",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expectNoLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: true,
+      data: {
+        referenceId: "lead-ref-001",
+      },
+    });
+  });
+
+  it("inquiry missing turnstile uses the family error contract", async () => {
+    const response = await inquiryRoute.POST(
+      makeRequest("/api/inquiry", {
+        email: "buyer@example.com",
+        fullName: "Buyer",
+        company: "Buyer Co",
+        productSlug: "north-america",
+        productName: "North America",
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expectNoLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: false,
+      errorCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+    });
+  });
+
+  it("subscribe missing email uses the family error contract", async () => {
+    const response = await subscribeRoute.POST(
+      makeRequest("/api/subscribe", {
+        turnstileToken: "valid-token",
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expectNoLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: false,
+      errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
+      details: ["errors.email.required"],
+    });
+  });
+
+  it("inquiry invalid JSON uses the family error contract", async () => {
+    const response = await inquiryRoute.POST(
+      new NextRequest(
+        new Request("http://localhost/api/inquiry", {
+          method: "POST",
+          body: "not-json",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(400);
+    expectNoLeadObservabilityHeaders(response);
+    const body = await response.json();
+    expect(body).toEqual({
+      success: false,
+      errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
+    });
+  });
+
+  it("inquiry and subscribe map pipeline validation failures to route-specific validation errors", async () => {
+    vi.mocked(processLead).mockResolvedValue({
+      success: false,
+      error: "VALIDATION_ERROR",
+      emailSent: false,
+      ownerNotified: false,
+      recordCreated: false,
+    });
+
+    await expectRouteError(
+      await inquiryRoute.POST(
+        makeRequest("/api/inquiry", {
+          turnstileToken: "valid-token",
+          email: "buyer@example.com",
+          fullName: "Buyer",
+          company: "Buyer Co",
+          productSlug: "north-america",
+          productName: "North America",
+        }),
+      ),
+      400,
+      API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+    );
+    await expectRouteError(
+      await subscribeRoute.POST(
+        makeRequest("/api/subscribe", {
+          email: "newsletter@example.com",
+          turnstileToken: "valid-token",
+        }),
+      ),
+      400,
+      API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID,
+    );
+  });
+
+  it("inquiry and subscribe map pipeline processing failures to route-specific processing errors", async () => {
+    vi.mocked(processLead).mockResolvedValue({
+      success: false,
+      error: "PROCESSING_FAILED",
+      emailSent: false,
+      ownerNotified: false,
+      recordCreated: false,
+      referenceId: "lead-ref-failed",
+    });
+
+    await expectRouteError(
+      await inquiryRoute.POST(
+        makeRequest("/api/inquiry", {
+          turnstileToken: "valid-token",
+          email: "buyer@example.com",
+          fullName: "Buyer",
+          company: "Buyer Co",
+          productSlug: "north-america",
+          productName: "North America",
+        }),
+      ),
+      500,
+      API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+    );
+    await expectRouteError(
+      await subscribeRoute.POST(
+        makeRequest("/api/subscribe", {
+          email: "newsletter@example.com",
+          turnstileToken: "valid-token",
+        }),
+      ),
+      500,
+      API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
+    );
+  });
+});
