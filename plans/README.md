@@ -23,13 +23,12 @@ conditions, and update your row when done.
 | 012  | Narrow doc-prose governance checks/tests to machine facts | P2 | M | — | DONE (`c261d5c`) |
 | 014  | Prune process-pinning tests and unwired governance scripts (~3,000 lines) | P2 | M | 012 (soft) | DONE (`0815e2b`..`86aa37c`) |
 
-Remaining execution (011 → 012 → 014) is handed off to Codex: see
-`plans/CODEX-HANDOFF.md` for the working directory, pre-approved drift
-annotations, and finishing gate.
+The rows below are historical execution records, not active work orders.
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (reason) | REJECTED (rationale)
 
-Notes: branch ready for merge review, full gate green at `4993395`.
+Notes: current Tucsenberg work is tracked by `goal-tucsenberg-site.md`,
+`implementation-tucsenberg-site.md`, and `handoff-report.md`.
 
 ## Dependency notes
 
@@ -41,10 +40,11 @@ Notes: branch ready for merge review, full gate green at `4993395`.
   `src/lib/security/__tests__/` (010 trims client-ip tests; 013 does not
   touch them, but both branches edit under `src/app/api` adjacent areas).
 
-## Backlog — confirmed findings worth doing, no plan written yet
+## Historical backlog — re-check before acting
 
 Ordered roughly by value. Evidence file:line references were verified by the
-advisor at `338df844`.
+advisor at `338df844`, before the Tucsenberg conversion. Treat every item below
+as a stale lead until current code and tests prove it still applies.
 
 1. **Draft flag is inert (APP-02)** — `content.json.enableDrafts` is read by
    nothing on the live path; the manifest generator

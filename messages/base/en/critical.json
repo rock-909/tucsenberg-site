@@ -129,26 +129,26 @@
         "features": "Company story, team profiles, and mission statement coming soon"
       },
       "contact": {
-        "title": "Contact Us",
-        "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
-        "features": "Multiple ways to reach us and get the support you need",
+        "title": "Contact",
+        "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
+        "features": "Email, WhatsApp and RFQ routing for Tucsenberg buyers",
         "panel": {
-          "contactTitle": "Contact Methods",
+          "contactTitle": "Email & WhatsApp",
           "email": "Email",
-          "emailUnavailable": "Use the form on this page; configure a real receiver before public launch.",
+          "emailUnavailable": "Use the RFQ form if email is unavailable.",
           "phone": "Phone",
-          "hoursTitle": "Business Hours",
-          "weekdays": "Mon - Fri",
-          "saturday": "Saturday",
-          "sunday": "Sunday",
+          "hoursTitle": "Time zone",
+          "weekdays": "China",
+          "saturday": "Follow-up",
+          "sunday": "US/EU hours",
           "closed": "Closed",
-          "responseTitle": "What to expect",
-          "responseTimeLabel": "Typical response",
-          "responseTimeValue": "Within 24 business hours",
-          "bestForLabel": "Best for",
-          "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
-          "prepareLabel": "Helpful details",
-          "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+          "responseTitle": "Quote response",
+          "responseTimeLabel": "Standard items",
+          "responseTimeValue": "12 hours",
+          "bestForLabel": "Custom configurations",
+          "bestForValue": "48 hours",
+          "prepareLabel": "Fastest route",
+          "prepareValue": "Use the RFQ form; it asks the questions we'd ask anyway."
         }
       }
     },

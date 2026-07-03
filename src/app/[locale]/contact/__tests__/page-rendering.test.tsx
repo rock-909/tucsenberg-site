@@ -3,15 +3,10 @@ import { getPageBySlug } from "@/lib/content-query/queries";
 import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 
 describe("Contact page rendering data", () => {
-  it("keeps FAQ ids kebab-case safe for direct FaqSection mode", async () => {
+  it("does not keep starter FAQ ids on the Tucsenberg contact page", async () => {
     const page = await getPageBySlug("contact", "en");
     const ids = extractFaqFromMetadata(page.metadata).map((item) => item.id);
 
-    expect(ids).toEqual([
-      "response-time",
-      "inquiry-details",
-      "samples-or-demos",
-      "form-routing",
-    ]);
+    expect(ids).toEqual([]);
   });
 });

@@ -131,7 +131,7 @@
 
     <rect x="502" y="818" width="176" height="124" rx="18" class="box"/>
     <text x="526" y="850" class="box-title">Messages</text>
-    <text x="526" y="877" class="box-copy">Split i18n JSON for en and zh</text>
+    <text x="526" y="877" class="box-copy">English UI message packs and compat JSON</text>
     <text x="526" y="900" class="code">messages/{locale}/*.json</text>
 
     <path d="M206 818 L206 690" class="flow-soft"/>
