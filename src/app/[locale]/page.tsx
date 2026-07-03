@@ -48,15 +48,10 @@ export async function generateMetadata({
   params,
 }: HomePageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home" });
-
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "home",
     path: getLocalizedPath("home", locale as Locale),
-    config: {
-      description: t("hero.subtitle"),
-    },
   });
 }
 
