@@ -89,6 +89,8 @@ Start at `release-proof` for:
 - critical translation/runtime locale behavior
 - contact / inquiry / abuse-protection production behavior
 - tests/architecture/component-governance.test.ts and `pnpm component:check`
-- starter smoke: tests/e2e/navigation.spec.ts, tests/e2e/i18n.spec.ts, tests/e2e/contact-form-smoke.spec.ts, tests/e2e/smoke/
+- Tucsenberg browser smoke: `tests/e2e/tucsenberg-site-smoke.spec.ts`
+- local contact-form smoke: `tests/e2e/contact-form-smoke.spec.ts`
+- real service canary: `tests/e2e/smoke/`
 
 Release order lives in `release.md`.
