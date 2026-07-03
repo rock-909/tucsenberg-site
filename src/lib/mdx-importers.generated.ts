@@ -27,8 +27,12 @@ export const pageImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
     'about': () => import('../../content/pages/en/about.mdx'),
     'contact': () => import('../../content/pages/en/contact.mdx'),
+    'flood-barrier-materials-guide': () => import('../../content/pages/en/flood-barrier-materials-guide.mdx'),
+    'flood-barrier-specifications': () => import('../../content/pages/en/flood-barrier-specifications.mdx'),
+    'oem-wholesale': () => import('../../content/pages/en/oem-wholesale.mdx'),
     'privacy': () => import('../../content/pages/en/privacy.mdx'),
     'terms': () => import('../../content/pages/en/terms.mdx'),
+    'warranty': () => import('../../content/pages/en/warranty.mdx'),
   },
   zh: {
   },

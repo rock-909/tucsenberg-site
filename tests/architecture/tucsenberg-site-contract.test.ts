@@ -27,6 +27,31 @@ const TARGET_PRODUCT_SLUGS = [
   "frp-flood-barriers",
 ] as const;
 
+const TARGET_ROUTE_FILES = [
+  "src/app/[locale]/page.tsx",
+  "src/app/[locale]/products/page.tsx",
+  "src/app/[locale]/products/[market]/page.tsx",
+  "src/app/[locale]/oem-wholesale/page.tsx",
+  "src/app/[locale]/guides/flood-barrier-materials-guide/page.tsx",
+  "src/app/[locale]/guides/flood-barrier-specifications/page.tsx",
+  "src/app/[locale]/about/page.tsx",
+  "src/app/[locale]/request-quote/page.tsx",
+  "src/app/[locale]/contact/page.tsx",
+  "src/app/[locale]/warranty/page.tsx",
+  "src/app/[locale]/privacy/page.tsx",
+  "src/app/[locale]/terms/page.tsx",
+] as const;
+
+const TARGET_MDX_PAGES = [
+  "content/pages/en/about.mdx",
+  "content/pages/en/oem-wholesale.mdx",
+  "content/pages/en/flood-barrier-materials-guide.mdx",
+  "content/pages/en/flood-barrier-specifications.mdx",
+  "content/pages/en/warranty.mdx",
+  "content/pages/en/privacy.mdx",
+  "content/pages/en/terms.mdx",
+] as const;
+
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
 const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".ts",
@@ -118,6 +143,20 @@ describe("Tucsenberg Phase 1 site contract", () => {
 
   it("maps catalog market slugs to the five Tucsenberg product lines", () => {
     expect(getAllMarketSlugs()).toEqual(TARGET_PRODUCT_SLUGS);
+  });
+
+  it("has route owners for every Phase 1 page family", () => {
+    for (const routeFile of TARGET_ROUTE_FILES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed route owner file list
+      expect(() => statSync(routeFile), routeFile).not.toThrow();
+    }
+  });
+
+  it("keeps required long-form pages in English MDX content files", () => {
+    for (const contentFile of TARGET_MDX_PAGES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed content file list
+      expect(() => statSync(contentFile), contentFile).not.toThrow();
+    }
   });
 
   it("does not keep Chinese public content directories", () => {
