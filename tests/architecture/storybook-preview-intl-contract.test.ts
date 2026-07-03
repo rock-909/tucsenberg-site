@@ -10,8 +10,7 @@ describe("Storybook preview i18n contract", () => {
 
     expect(messageSource).toContain('from "@messages/en/critical.json"');
     expect(messageSource).toContain('from "@messages/en/deferred.json"');
-    expect(messageSource).toContain('from "@messages/zh/critical.json"');
-    expect(messageSource).toContain('from "@messages/zh/deferred.json"');
+    expect(messageSource).not.toContain("@messages/zh/");
     expect(messageSource).not.toMatch(
       /messages\/profiles|\.env|server-only|@\/lib\/env|NEXT_SERVER/u,
     );
@@ -37,14 +36,20 @@ describe("Storybook preview i18n contract", () => {
       await import("@/lib/i18n/storybook-messages");
 
     const englishMessages = getStorybookMessages("en") as {
-      article?: { defaultAuthor?: string; meta?: { section?: string } };
+      "structured-data"?: {
+        article?: { defaultAuthor?: string; defaultTitle?: string };
+      };
     };
 
-    expect(englishMessages.article?.meta?.section).toBe("Company-site guide");
-    expect(englishMessages.article?.defaultAuthor).toBe("{companyName}");
+    expect(englishMessages["structured-data"]?.article?.defaultTitle).toBe(
+      "Article",
+    );
+    expect(englishMessages["structured-data"]?.article?.defaultAuthor).toBe(
+      "{companyName}",
+    );
   });
 
-  it("supports Chinese locale context for Chinese story states", async () => {
+  it("keeps Storybook previews on the active English locale", async () => {
     const { getStorybookMessages } =
       await import("@/lib/i18n/storybook-messages");
     const preview = readFileSync(".storybook/preview.ts", "utf8");
@@ -56,15 +61,18 @@ describe("Storybook preview i18n contract", () => {
       "src/components/sections/hero-section.stories.tsx",
       "utf8",
     );
-    const chineseMessages = getStorybookMessages("zh") as {
-      article?: { defaultAuthor?: string; meta?: { section?: string } };
+    const englishMessages = getStorybookMessages("en") as {
+      "structured-data"?: { article?: { defaultAuthor?: string } };
     };
 
     expect(preview).toContain("context.globals.locale");
     expect(preview).toContain("getStorybookMessages(storybookLocale)");
-    expect(chineseMessages.article?.meta?.section).toBe("企业站指南");
-    expect(chineseMessages.article?.defaultAuthor).toBe("{companyName}");
-    expect(heroViewStories).toContain('locale: "zh"');
-    expect(heroStories).toContain('locale: "zh"');
+    expect(preview).toContain('{ value: "en", title: "English" }');
+    expect(preview).not.toContain('{ value: "zh", title: "中文" }');
+    expect(englishMessages["structured-data"]?.article?.defaultAuthor).toBe(
+      "{companyName}",
+    );
+    expect(heroViewStories).not.toContain('locale: "zh"');
+    expect(heroStories).not.toContain('locale: "zh"');
   });
 });

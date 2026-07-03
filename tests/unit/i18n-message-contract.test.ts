@@ -1,7 +1,5 @@
 import enCriticalMessages from "../../messages/en/critical.json";
 import enDeferredMessages from "../../messages/en/deferred.json";
-import zhCriticalMessages from "../../messages/zh/critical.json";
-import zhDeferredMessages from "../../messages/zh/deferred.json";
 import { describe, expect, it } from "vitest";
 
 type JsonObject = Record<string, unknown>;
@@ -71,10 +69,11 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
 }
 
 describe("real i18n runtime message contract", () => {
-  it.each([
+  const runtimeMessageCases = [
     ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  ] as const;
+
+  it.each(runtimeMessageCases)(
     "keeps degraded-state form keys in the real %s split message bundle",
     (_locale, messages) => {
       for (const keyPath of REQUIRED_RUNTIME_KEYS) {
@@ -86,10 +85,7 @@ describe("real i18n runtime message contract", () => {
     },
   );
 
-  it.each([
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  it.each(runtimeMessageCases)(
     "keeps inquiry API validation detail keys in the real %s contact form bundle",
     (_locale, messages) => {
       for (const detailKey of INQUIRY_API_VALIDATION_DETAIL_KEYS) {
@@ -102,10 +98,7 @@ describe("real i18n runtime message contract", () => {
     },
   );
 
-  it.each([
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-    ["zh", mergeMessages(zhCriticalMessages, zhDeferredMessages)],
-  ] as const)(
+  it.each(runtimeMessageCases)(
     "keeps contact API validation detail keys in the real %s contact form bundle",
     (_locale, messages) => {
       for (const detailKey of CONTACT_API_VALIDATION_DETAIL_KEYS) {

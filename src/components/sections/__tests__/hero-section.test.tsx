@@ -3,7 +3,6 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import enCriticalMessages from "../../../../messages/en/critical.json";
-import zhCriticalMessages from "../../../../messages/zh/critical.json";
 import { HeroSection } from "@/components/sections/hero-section";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
@@ -19,40 +18,20 @@ const heroMessageCases = [
     locale: "en",
     hero: enCriticalMessages.home.hero,
     proof: {
-      est: "Product",
-      estLabel: "systems",
-      countries: "Application",
-      countriesLabel: "fit",
-      range: "Delivery",
-      rangeLabel: "proof",
-      production: "Inquiry",
-      productionLabel: "ready",
+      est: "Standard items",
+      estLabel: "quoted in 12 hours",
+      countries: "3-year warranty",
+      countriesLabel: "on all standard lines",
+      range: "Factory pool",
+      rangeLabel: "supplies established brands",
+      production: "OEM",
+      productionLabel: "private label ready",
     },
     preview: {
-      productSystem: "Product system",
-      applicationFit: "Application fit",
-      deliveryProof: "Delivery proof",
-      inquiryPath: "Inquiry path",
-    },
-  },
-  {
-    locale: "zh",
-    hero: zhCriticalMessages.home.hero,
-    proof: {
-      est: "产品",
-      estLabel: "体系",
-      countries: "应用",
-      countriesLabel: "场景",
-      range: "交付",
-      rangeLabel: "证明",
-      production: "询盘",
-      productionLabel: "就绪",
-    },
-    preview: {
-      productSystem: "产品体系",
-      applicationFit: "应用适配",
-      deliveryProof: "交付证据",
-      inquiryPath: "询盘路径",
+      productSystem: "ABS boxwall",
+      applicationFit: "Aluminum gates",
+      deliveryProof: "Flood bags",
+      inquiryPath: "Tube dams & FRP",
     },
   },
 ] as const;
@@ -131,7 +110,6 @@ describe("HeroSection", () => {
         preview.applicationFit,
         preview.deliveryProof,
         preview.inquiryPath,
-        preview.note,
       ]) {
         expect(copy.trim().length).toBeGreaterThan(0);
         expect(copy).not.toMatch(/^hero\.preview\./);
@@ -159,7 +137,7 @@ describe("HeroSection", () => {
     expect(source).not.toContain('ariaLabel="Homepage proof facts"');
   });
 
-  it("renders default company-site homepage CTAs with /products primary", async () => {
+  it("renders Tucsenberg homepage CTAs with RFQ primary", async () => {
     await renderAsyncComponent(HeroSection());
     const primaryLink = screen.getByText("hero.cta.primary").closest("a");
     const secondaryLink = screen.getByText("hero.cta.secondary").closest("a");
@@ -167,12 +145,12 @@ describe("HeroSection", () => {
       "href",
       HOMEPAGE_SECTION_LINKS.primaryCta,
     );
-    expect(primaryLink).toHaveAttribute("href", "/products");
+    expect(primaryLink).toHaveAttribute("href", "/request-quote");
     expect(secondaryLink).toHaveAttribute(
       "href",
       HOMEPAGE_SECTION_LINKS.secondaryCta,
     );
-    expect(secondaryLink).toHaveAttribute("href", "/contact");
+    expect(secondaryLink).toHaveAttribute("href", "/oem-wholesale");
   });
 
   it("user sees proof list showing product, application, delivery, and inquiry categories", async () => {
