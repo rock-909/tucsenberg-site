@@ -13,8 +13,8 @@ export type { SiteNavigationItem } from "@/config/site-types";
 const MAIN_NAVIGATION_PAGE_TYPES = [
   "home",
   "products",
-  "blog",
-  "resources",
+  "oemWholesale",
+  "materialsGuide",
   "about",
 ] as const satisfies readonly PageType[];
 

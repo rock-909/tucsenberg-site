@@ -17,14 +17,6 @@ import enB2bLeadCritical from "@messages/profiles/b2b-lead/en/critical.json";
 import enB2bLeadDeferred from "@messages/profiles/b2b-lead/en/deferred.json";
 import enCatalogCritical from "@messages/profiles/catalog/en/critical.json";
 import enCatalogDeferred from "@messages/profiles/catalog/en/deferred.json";
-import zhBaseCritical from "@messages/base/zh/critical.json";
-import zhBaseDeferred from "@messages/base/zh/deferred.json";
-import zhMinimalCritical from "@messages/profiles/minimal/zh/critical.json";
-import zhMinimalDeferred from "@messages/profiles/minimal/zh/deferred.json";
-import zhB2bLeadCritical from "@messages/profiles/b2b-lead/zh/critical.json";
-import zhB2bLeadDeferred from "@messages/profiles/b2b-lead/zh/deferred.json";
-import zhCatalogCritical from "@messages/profiles/catalog/zh/critical.json";
-import zhCatalogDeferred from "@messages/profiles/catalog/zh/deferred.json";
 
 type StaticMessages = Record<string, unknown>;
 type StaticPack = { critical: StaticMessages; deferred: StaticMessages };
@@ -46,24 +38,6 @@ const STATIC_PACKS: Record<Locale, Record<MessagePackId, StaticPack>> = {
     catalog: {
       critical: enCatalogCritical,
       deferred: enCatalogDeferred,
-    },
-  },
-  zh: {
-    base: {
-      critical: zhBaseCritical,
-      deferred: zhBaseDeferred,
-    },
-    minimal: {
-      critical: zhMinimalCritical,
-      deferred: zhMinimalDeferred,
-    },
-    "b2b-lead": {
-      critical: zhB2bLeadCritical,
-      deferred: zhB2bLeadDeferred,
-    },
-    catalog: {
-      critical: zhCatalogCritical,
-      deferred: zhCatalogDeferred,
     },
   },
 };

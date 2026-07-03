@@ -31,10 +31,6 @@ export const pageImporters: Record<string, Record<string, ContentImporter>> = {
     'terms': () => import('../../content/pages/en/terms.mdx'),
   },
   zh: {
-    'about': () => import('../../content/pages/zh/about.mdx'),
-    'contact': () => import('../../content/pages/zh/contact.mdx'),
-    'privacy': () => import('../../content/pages/zh/privacy.mdx'),
-    'terms': () => import('../../content/pages/zh/terms.mdx'),
   },
 };
 

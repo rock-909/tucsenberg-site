@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Compose showcase-full profile packs into broad compatibility files.
+ * Compose the active materialized profile packs into broad compatibility files.
  * No runtime TypeScript imports — fs/path/JSON only.
  */
 import fs from "node:fs";
@@ -9,16 +9,17 @@ import path from "node:path";
 import { composeMessagesForProfileFromFiles } from "./messages";
 
 const ROOT = process.cwd();
-const LOCALES = ["en", "zh"] as const;
+const LOCALES = ["en"] as const;
 const MESSAGE_TYPES = ["critical", "deferred"] as const;
+const COMPATIBILITY_PROFILE_ID = "catalog" as const;
 
-function composeShowcaseFullMessages(
+function composeCompatibilityMessages(
   locale: (typeof LOCALES)[number],
   type: (typeof MESSAGE_TYPES)[number],
 ): Record<string, unknown> {
   return composeMessagesForProfileFromFiles({
     repoRoot: ROOT,
-    profileId: "showcase-full",
+    profileId: COMPATIBILITY_PROFILE_ID,
     relativePath: `messages/${locale}/${type}.json`,
   });
 }
@@ -37,7 +38,7 @@ function getCompatibilityOutputPath(
 function runWrite(): void {
   for (const locale of LOCALES) {
     for (const type of MESSAGE_TYPES) {
-      const composed = composeShowcaseFullMessages(locale, type);
+      const composed = composeCompatibilityMessages(locale, type);
       const outputPath = getCompatibilityOutputPath(locale, type);
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       fs.writeFileSync(outputPath, formatJson(composed));

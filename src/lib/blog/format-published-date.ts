@@ -4,7 +4,7 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export function formatBlogPublishedDate(
   isoDate: string,
-  locale: Locale,
+  _locale: Locale,
 ): string {
   if (!ISO_DATE_PATTERN.test(isoDate)) {
     return isoDate;
@@ -26,9 +26,9 @@ export function formatBlogPublishedDate(
     return isoDate;
   }
 
-  return new Intl.DateTimeFormat(locale === "zh" ? "zh-CN" : "en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
-    month: locale === "zh" ? "long" : "short",
+    month: "short",
     day: "numeric",
     timeZone: "UTC",
   }).format(date);

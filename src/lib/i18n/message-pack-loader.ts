@@ -33,24 +33,6 @@ const MESSAGE_PACK_LOADERS: Record<
       deferred: () => import("@messages/profiles/catalog/en/deferred.json"),
     },
   },
-  zh: {
-    base: {
-      critical: () => import("@messages/base/zh/critical.json"),
-      deferred: () => import("@messages/base/zh/deferred.json"),
-    },
-    minimal: {
-      critical: () => import("@messages/profiles/minimal/zh/critical.json"),
-      deferred: () => import("@messages/profiles/minimal/zh/deferred.json"),
-    },
-    "b2b-lead": {
-      critical: () => import("@messages/profiles/b2b-lead/zh/critical.json"),
-      deferred: () => import("@messages/profiles/b2b-lead/zh/deferred.json"),
-    },
-    catalog: {
-      critical: () => import("@messages/profiles/catalog/zh/critical.json"),
-      deferred: () => import("@messages/profiles/catalog/zh/deferred.json"),
-    },
-  },
 };
 
 export async function loadRawMessagePack(

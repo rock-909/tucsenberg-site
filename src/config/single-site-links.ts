@@ -8,6 +8,11 @@ export const SINGLE_SITE_ROUTE_HREFS = {
   about: getCanonicalPath("about"),
   capabilities: getCanonicalPath("capabilities"),
   contact: getCanonicalPath("contact"),
+  oemWholesale: getCanonicalPath("oemWholesale"),
+  materialsGuide: getCanonicalPath("materialsGuide"),
+  specificationsGuide: getCanonicalPath("specificationsGuide"),
+  requestQuote: getCanonicalPath("requestQuote"),
+  warranty: getCanonicalPath("warranty"),
   howItWorks: getCanonicalPath("howItWorks"),
   products: getCanonicalPath("products"),
   blog: getCanonicalPath("blog"),
@@ -21,6 +26,8 @@ export interface SingleSiteHomeLinkTargets {
   primaryCta: string;
   secondaryCta: string;
   contact?: string;
+  oemWholesale?: string;
+  requestQuote?: string;
   products?: string;
   blog?: string;
   about?: string;
@@ -30,7 +37,9 @@ export interface SingleSiteActiveRouteTargets {
   about?: string;
   blog?: string;
   contact?: string;
+  oemWholesale?: string;
   products?: string;
+  requestQuote?: string;
   resources?: string;
 }
 
@@ -53,14 +62,18 @@ export function getSingleSiteActiveRouteTargets(
   const about = activeHref(active, "about");
   const blog = activeHref(active, "blog");
   const contact = activeHref(active, "contact");
+  const oemWholesale = activeHref(active, "oemWholesale");
   const products = activeHref(active, "products");
+  const requestQuote = activeHref(active, "requestQuote");
   const resources = activeHref(active, "resources");
 
   return {
     ...(about !== undefined ? { about } : {}),
     ...(blog !== undefined ? { blog } : {}),
     ...(contact !== undefined ? { contact } : {}),
+    ...(oemWholesale !== undefined ? { oemWholesale } : {}),
     ...(products !== undefined ? { products } : {}),
+    ...(requestQuote !== undefined ? { requestQuote } : {}),
     ...(resources !== undefined ? { resources } : {}),
   };
 }
@@ -68,16 +81,11 @@ export function getSingleSiteActiveRouteTargets(
 export function getSingleSiteHomeLinkTargets(
   profileId: StarterProfileId = getRuntimeMessageProfileId(),
 ): SingleSiteHomeLinkTargets {
-  const { about, blog, contact, products } =
-    getSingleSiteActiveRouteTargets(profileId);
+  const activeTargets = getSingleSiteActiveRouteTargets(profileId);
+  const { about, blog, contact, products } = activeTargets;
 
   if (products !== undefined) {
-    return {
-      ...(contact !== undefined ? { contact } : {}),
-      products,
-      primaryCta: products,
-      secondaryCta: contact ?? SINGLE_SITE_ROUTE_HREFS.home,
-    };
+    return getProductHomeLinkTargets({ ...activeTargets, products });
   }
 
   if (blog !== undefined) {
@@ -123,6 +131,21 @@ export function getSingleSiteHomeLinkTargets(
 export const SINGLE_SITE_HOME_LINK_TARGETS = getSingleSiteHomeLinkTargets(
   getRuntimeMessageProfileId(),
 );
+
+function getProductHomeLinkTargets(
+  targets: SingleSiteActiveRouteTargets & { products: string },
+): SingleSiteHomeLinkTargets {
+  const { contact, oemWholesale, products, requestQuote } = targets;
+
+  return {
+    ...(contact !== undefined ? { contact } : {}),
+    ...(oemWholesale !== undefined ? { oemWholesale } : {}),
+    products,
+    ...(requestQuote !== undefined ? { requestQuote } : {}),
+    primaryCta: requestQuote ?? products,
+    secondaryCta: oemWholesale ?? contact ?? SINGLE_SITE_ROUTE_HREFS.home,
+  };
+}
 
 export function getSingleSiteHomeFinalCtaTargetsFromLinks(
   targets: SingleSiteHomeLinkTargets,

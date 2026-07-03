@@ -5,18 +5,14 @@ const ROOT = process.cwd();
 const I18N_LOCALES = require("../../../i18n-locales.config").locales;
 const MESSAGES_DIR = path.join(ROOT, "messages");
 const MESSAGE_TYPES = ["critical", "deferred"];
+const PROFILE_MESSAGE_PACKS = require("../../../messages/message-packs.json");
 
 const MESSAGE_PACK_IDS = [
-  "base",
-  "minimal",
-  "b2b-lead",
-  "company-site",
-  "catalog",
-  "content-marketing",
-  "showcase-full",
+  ...new Set(Object.values(PROFILE_MESSAGE_PACKS).flat()),
 ];
-
-const PROFILE_MESSAGE_PACKS = require("../../../messages/message-packs.json");
+const COMPATIBILITY_PROFILE_ID = PROFILE_MESSAGE_PACKS.catalog
+  ? "catalog"
+  : Object.keys(PROFILE_MESSAGE_PACKS)[0];
 
 const REQUIRED_PACK_FILES = MESSAGE_PACK_IDS.flatMap((packId) =>
   I18N_LOCALES.flatMap((locale) =>
@@ -240,12 +236,12 @@ function validateComposedProfileParity() {
 
 function validateCompatibilityFiles() {
   console.log(
-    "\nValidating compatibility files against showcase-full packs...",
+    `\nValidating compatibility files against ${COMPATIBILITY_PROFILE_ID} packs...`,
   );
   let allMatch = true;
 
   for (const locale of I18N_LOCALES) {
-    const composed = composeProfileMessages("showcase-full", locale);
+    const composed = composeProfileMessages(COMPATIBILITY_PROFILE_ID, locale);
     const { critical: criticalPath, deferred: deferredPath } =
       getLocaleSplitPaths(locale);
 
@@ -271,13 +267,15 @@ function validateCompatibilityFiles() {
 
       if (expectedText !== actualText) {
         console.error(
-          `   Error: ${relativePath} does not match composed showcase-full ${type} packs`,
+          `   Error: ${relativePath} does not match composed ${COMPATIBILITY_PROFILE_ID} ${type} packs`,
         );
         allMatch = false;
         continue;
       }
 
-      console.log(`   ${relativePath} matches composed showcase-full ${type}`);
+      console.log(
+        `   ${relativePath} matches composed ${COMPATIBILITY_PROFILE_ID} ${type}`,
+      );
     }
   }
 

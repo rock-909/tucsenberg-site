@@ -49,7 +49,7 @@ interface StaticPageMetadataConfigOptions {
 const FALLBACK_LOCALE: Locale = "en";
 
 function resolveLocale(locale: Locale): Locale {
-  return locale === "zh" ? "zh" : FALLBACK_LOCALE;
+  return locale === FALLBACK_LOCALE ? locale : FALLBACK_LOCALE;
 }
 
 /** Replace ICU-style {placeholders} with siteFacts values in SEO strings. */
@@ -75,10 +75,10 @@ function normalizePath(path: string): string {
 }
 
 function buildCanonicalForPath(locale: Locale, path: string): string {
-  const safeLocale = resolveLocale(locale);
+  resolveLocale(locale);
   const normalizedPath = normalizePath(path);
   return new URL(
-    `/${safeLocale}${normalizedPath}`,
+    normalizedPath === "" ? "/" : normalizedPath,
     SITE_CONFIG.baseUrl,
   ).toString();
 }
@@ -88,12 +88,15 @@ function buildLanguagesForPath(path: string): Record<string, string> {
 
   const entries: Array<[string, string]> = routing.locales.map((locale) => [
     locale,
-    new URL(`/${locale}${normalizedPath}`, SITE_CONFIG.baseUrl).toString(),
+    new URL(
+      normalizedPath === "" ? "/" : normalizedPath,
+      SITE_CONFIG.baseUrl,
+    ).toString(),
   ]);
   entries.push([
     "x-default",
     new URL(
-      `/${routing.defaultLocale}${normalizedPath}`,
+      normalizedPath === "" ? "/" : normalizedPath,
       SITE_CONFIG.baseUrl,
     ).toString(),
   ]);

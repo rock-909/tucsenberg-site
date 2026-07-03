@@ -1,17 +1,19 @@
-import { AUSTRALIA_NZ_SPECS } from "@/constants/product-specs/australia-new-zealand";
-import { EUROPE_SPECS } from "@/constants/product-specs/europe";
-import { MEXICO_SPECS } from "@/constants/product-specs/mexico";
-import { NORTH_AMERICA_SPECS } from "@/constants/product-specs/north-america";
-import { SPECIALTY_PRODUCT_SPECS } from "@/constants/product-specs/specialty-product-systems";
 import type { MarketSpecs } from "@/constants/product-specs/types";
+import {
+  ABSORBENT_FLOOD_BAG_SPECS,
+  ABS_FLOOD_BARRIER_SPECS,
+  ALUMINUM_FLOOD_GATE_SPECS,
+  FLOOD_TUBE_DAM_SPECS,
+  FRP_FLOOD_BARRIER_SPECS,
+} from "@/constants/product-specs/tucsenberg-product-lines";
 import type { ProductMarketSlug } from "@/config/single-site-product-catalog";
 
 export const MARKET_SPECS_BY_SLUG = Object.freeze({
-  "north-america": NORTH_AMERICA_SPECS,
-  "australia-new-zealand": AUSTRALIA_NZ_SPECS,
-  mexico: MEXICO_SPECS,
-  europe: EUROPE_SPECS,
-  "specialty-product-systems": SPECIALTY_PRODUCT_SPECS,
+  "abs-flood-barriers": ABS_FLOOD_BARRIER_SPECS,
+  "aluminum-flood-gates": ALUMINUM_FLOOD_GATE_SPECS,
+  "absorbent-flood-bags": ABSORBENT_FLOOD_BAG_SPECS,
+  "flood-tube-dams": FLOOD_TUBE_DAM_SPECS,
+  "frp-flood-barriers": FRP_FLOOD_BARRIER_SPECS,
 } as const satisfies Record<ProductMarketSlug, MarketSpecs>);
 
 export type MarketSpecSlug = keyof typeof MARKET_SPECS_BY_SLUG;

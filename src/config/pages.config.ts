@@ -18,6 +18,11 @@ export type PublicStaticPageChangeFrequency =
 type PublicStaticPageSeoKey =
   | "home"
   | "content.pages.about"
+  | "content.pages.oem-wholesale"
+  | "content.pages.flood-barrier-materials-guide"
+  | "content.pages.flood-barrier-specifications"
+  | "content.pages.request-quote"
+  | "content.pages.warranty"
   | "catalog.overview"
   | "blog.index"
   | "resources.index"
@@ -62,7 +67,6 @@ export interface PublicStaticPageDefinition {
 function localizedPath(path: string): LocalizedPath {
   return Object.freeze({
     en: path,
-    zh: path,
   });
 }
 
@@ -101,6 +105,54 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/products/page.tsx",
+    },
+    {
+      pageType: "oemWholesale",
+      localizedPaths: localizedPath("/oem-wholesale"),
+      navigationKey: "navigation.oemWholesale",
+      seoKey: "content.pages.oem-wholesale",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
+      lastmod: { source: "mdx" },
+      mdxCollection: { collection: "pages", slug: "oem-wholesale" },
+      routeOwner: "src/app/[locale]/oem-wholesale/page.tsx",
+    },
+    {
+      pageType: "materialsGuide",
+      localizedPaths: localizedPath("/guides/flood-barrier-materials-guide"),
+      navigationKey: "navigation.guides",
+      seoKey: "content.pages.flood-barrier-materials-guide",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      lastmod: { source: "mdx" },
+      mdxCollection: {
+        collection: "pages",
+        slug: "flood-barrier-materials-guide",
+      },
+      routeOwner:
+        "src/app/[locale]/guides/flood-barrier-materials-guide/page.tsx",
+    },
+    {
+      pageType: "specificationsGuide",
+      localizedPaths: localizedPath("/guides/flood-barrier-specifications"),
+      navigationKey: null,
+      seoKey: "content.pages.flood-barrier-specifications",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      lastmod: { source: "mdx" },
+      mdxCollection: {
+        collection: "pages",
+        slug: "flood-barrier-specifications",
+      },
+      routeOwner:
+        "src/app/[locale]/guides/flood-barrier-specifications/page.tsx",
+    },
+    {
+      pageType: "requestQuote",
+      localizedPaths: localizedPath("/request-quote"),
+      navigationKey: null,
+      seoKey: "content.pages.request-quote",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.9 },
+      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
+      mdxCollection: null,
+      routeOwner: "src/app/[locale]/request-quote/page.tsx",
     },
     {
       pageType: "blog",
@@ -151,6 +203,16 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "terms" },
       routeOwner: "src/app/[locale]/terms/page.tsx",
+    },
+    {
+      pageType: "warranty",
+      localizedPaths: localizedPath("/warranty"),
+      navigationKey: null,
+      seoKey: "content.pages.warranty",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
+      lastmod: { source: "mdx" },
+      mdxCollection: { collection: "pages", slug: "warranty" },
+      routeOwner: "src/app/[locale]/warranty/page.tsx",
     },
     {
       pageType: "capabilities",
