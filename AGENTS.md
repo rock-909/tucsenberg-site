@@ -2,25 +2,26 @@
 
 ## Project
 
-**Showcase Website Starter** - reusable website starter for company, product, or service presentation.
+**tucsenberg-site** - derived English B2B website for Tucsenberg flood barrier products.
 
-**Goal**: Provide a high-quality starting point for showcase websites: clear page structure, multilingual content, inquiry conversion, component governance, security basics, and Cloudflare deployment.
+**Goal**: Maintain the current Tucsenberg flood barrier website: English-only product discovery, OEM / wholesale inquiry conversion, specification evaluation, PDF download, and Cloudflare/OpenNext deployment.
 
-This is a starter project, not a finished client website. Keep examples generic and replaceable.
+It is not a generic starter anymore. The inherited starter/profile machinery remains only where it supports checks, compatibility, or history.
 
 ## Communication
 
 The owner is non-technical. Communicate in business language, not technical jargon.
 
-## Website Starter Docs
+## Tucsenberg Site Docs
 
 Before making broad project changes, read:
 
 1. `docs/README.md`
-2. `docs/use/replace.md`
-3. `docs/use/ai.md`
+2. `docs/ref/project.md`
+3. `docs/use/content.md`
+4. `docs/use/ai.md`
 
-Do not rely on chat memory for project truth. If a decision must survive sessions, write it into the appropriate file under `docs/use/` or the relevant rule file.
+Do not rely on chat memory for project truth. If a decision must survive sessions, write it into `docs/use/`, `docs/ref/`, `docs/proof/`, or the relevant rule file.
 
 ## Stack
 
@@ -51,13 +52,12 @@ tests/
 
 content/
 - pages/en/                   # English content pages
-- pages/zh/                   # Chinese content pages
 - config/content.json         # Content behavior and readiness configuration
 
 messages/
 - base/                       # Base physical message packs
 - profiles/                   # Profile-specific physical message packs
-- en/, zh/                    # Generated compatibility message JSON
+- en/                         # Generated compatibility message JSON
 ```
 
 ## Reference Sources
@@ -168,9 +168,9 @@ over-engineering review layer. Use `ponytail` full mode for every project task
 unless the user explicitly says `stop ponytail`, `normal mode`, or asks for a
 different Ponytail intensity.
 
-Ponytail is not a replacement for this starter's product boundaries. It must not
+Ponytail is not a replacement for this derived site's product boundaries. It must not
 override i18n, security, accessibility, Cloudflare/OpenNext, content ownership,
-or component governance rules. In this starter, "less code" is only better when
+or component governance rules. In this site, "less code" is only better when
 the replacement still preserves the documented replacement surface and
 owner-facing workflow.
 

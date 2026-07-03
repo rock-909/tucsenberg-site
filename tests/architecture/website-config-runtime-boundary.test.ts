@@ -67,6 +67,36 @@ function findWebsiteConfigImports(source: string) {
 }
 
 describe("website config runtime boundary", () => {
+  it("keeps root agent project summaries aligned with Tucsenberg", () => {
+    const instructionFiles = ["AGENTS.md", "CLAUDE.md"] as const;
+    const staleProjectMarkers = [
+      "**Showcase Website Starter** - reusable website starter for company, product, or service presentation.",
+      "This is a starter project, not a finished client website. Keep examples generic and replaceable.",
+    ] as const;
+    const requiredProjectMarkers = [
+      "**tucsenberg-site** - derived English B2B website for Tucsenberg flood barrier products.",
+      "It is not a generic starter anymore.",
+    ] as const;
+
+    for (const instructionFile of instructionFiles) {
+      const source = read(instructionFile);
+
+      for (const staleMarker of staleProjectMarkers) {
+        expect(
+          source,
+          `${instructionFile} should not present the derived site as a reusable starter`,
+        ).not.toContain(staleMarker);
+      }
+
+      for (const requiredMarker of requiredProjectMarkers) {
+        expect(
+          source,
+          `${instructionFile} should state current Tucsenberg project truth`,
+        ).toContain(requiredMarker);
+      }
+    }
+  });
+
   it("keeps root agent structure maps aligned with existing source directories", () => {
     const instructionFiles = ["AGENTS.md", "CLAUDE.md"] as const;
     const staleStructureEntries = [
@@ -75,13 +105,15 @@ describe("website config runtime boundary", () => {
       "styles/",
       "templates/",
       "test/, testing/",
+      "content/pages/zh",
+      "messages/en/, zh/",
     ] as const;
     const requiredStructureEntries = [
       "config/             # Runtime config and starter replacement surfaces",
       "test/               # Source-level test helpers",
       "- base/                       # Base physical message packs",
       "- profiles/                   # Profile-specific physical message packs",
-      "- en/, zh/                    # Generated compatibility message JSON",
+      "- en/                         # Generated compatibility message JSON",
     ] as const;
 
     for (const instructionFile of instructionFiles) {
