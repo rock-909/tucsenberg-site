@@ -44,6 +44,7 @@ const TARGET_ROUTE_FILES = [
 
 const TARGET_MDX_PAGES = [
   "content/pages/en/about.mdx",
+  "content/pages/en/contact.mdx",
   "content/pages/en/oem-wholesale.mdx",
   "content/pages/en/flood-barrier-materials-guide.mdx",
   "content/pages/en/flood-barrier-specifications.mdx",
@@ -104,6 +105,9 @@ const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /north-america/iu,
   /australia-new-zealand/iu,
   /specialty-product-systems/iu,
+  /content replacement questions/iu,
+  /configure a real receiver before public launch/iu,
+  /support, or partnership opportunities/iu,
   /[$€£]\s*\d/u,
 ];
 
@@ -305,5 +309,28 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it("uses the approved Tucsenberg contact page copy", () => {
+    const contactPage = readRepoFile("content/pages/en/contact.mdx");
+
+    expect(contactPage).toContain(
+      "seo:\n  title: 'Contact Tucsenberg — Flood Barrier Supplier, China'",
+    );
+    expect(contactPage).toContain("title: 'Contact'");
+    expect(contactPage).toContain(
+      "**Fastest route**: the [RFQ form](/request-quote/) — it asks the questions we'd ask anyway, so your quote comes back faster.",
+    );
+    expect(contactPage).toContain(
+      "**Email**: sales@tucsenberg.com — standard items quoted within 12 hours, custom within 48. You'll hear from a person, not a sequence.",
+    );
+    expect(contactPage).toContain(
+      "**WhatsApp**: @Tucsenberg (business account) — same quote commitment as email: standard items 12 hours, custom 48.",
+    );
+    expect(contactPage).toContain(
+      "No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China",
+    );
+    expect(contactPage).not.toContain("public demo starter");
+    expect(contactPage).not.toContain("replace with your real response window");
   });
 });

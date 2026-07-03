@@ -31,7 +31,7 @@ describe("ContactFormStaticFallback", () => {
       messages: { ...enCriticalMessages, ...enDeferredMessages },
       fullNameLabel: "Full name",
       optionalLabel: "optional",
-      submitLabel: "Send Message",
+      submitLabel: "Send Enquiry",
     },
   ] as const;
 

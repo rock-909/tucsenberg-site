@@ -179,48 +179,48 @@
     "context": {
       "productFamilyLabel": "You are asking about:"
     },
-    "title": "Contact Us",
-    "description": "Get in touch with our team for inquiries, support, or partnership opportunities.",
-    "features": "Multiple ways to reach us and get the support you need",
+    "title": "Contact",
+    "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
+    "features": "Email, WhatsApp and RFQ routing for Tucsenberg buyers",
     "inquiryHandoff": {
-      "title": "Before you submit",
-      "description": "Use this page when you are ready to ask for confirmation. Tell the team what you already reviewed and what still needs an answer.",
+      "title": "Fastest route",
+      "description": "The RFQ form asks the questions we would ask anyway, so your quote comes back faster.",
       "items": {
         "need": {
-          "title": "What you need",
-          "description": "Say whether you need a quote, brochure, product detail, demo, sample, or launch help."
+          "title": "What you are protecting",
+          "description": "Door, garage, driveway, loading dock, perimeter, stock or resale order, or other."
         },
         "context": {
-          "title": "Useful context",
-          "description": "Share the product, service, page, market, quantity, audience, or asset you are asking about."
+          "title": "Dimensions",
+          "description": "Opening width x height or run length, mounting surface or ground type, plus photos or drawings if available."
         },
         "timing": {
-          "title": "Decision timing",
-          "description": "Mention your timeline, response urgency, and who should receive the follow-up."
+          "title": "Market and port",
+          "description": "Quantity, market, delivery port and timeline help us quote standard items within 12 hours and custom configurations within 48."
         }
       }
     },
     "panel": {
-      "contactTitle": "Contact Methods",
+      "contactTitle": "Email & WhatsApp",
       "email": "Email",
-      "emailUnavailable": "Use the form on this page; configure a real receiver before public launch.",
+      "emailUnavailable": "Use the RFQ form if email is unavailable.",
       "phone": "Phone",
-      "hoursTitle": "Business Hours",
-      "weekdays": "Mon - Fri",
-      "saturday": "Saturday",
-      "sunday": "Sunday",
+      "hoursTitle": "Time zone",
+      "weekdays": "China",
+      "saturday": "Follow-up",
+      "sunday": "US/EU hours",
       "closed": "Closed",
-      "responseTitle": "What to expect",
-      "responseTimeLabel": "Typical response",
-      "responseTimeValue": "Within 24 business hours",
-      "bestForLabel": "Best for",
-      "bestForValue": "Inquiries, quotes, demos, project scope, and content replacement questions",
-      "prepareLabel": "Helpful details",
-      "prepareValue": "Share your offer type, target audience, needed pages, timeline, and current assets"
+      "responseTitle": "Quote response",
+      "responseTimeLabel": "Standard items",
+      "responseTimeValue": "12 hours",
+      "bestForLabel": "Custom configurations",
+      "bestForValue": "48 hours",
+      "prepareLabel": "Fastest route",
+      "prepareValue": "Use the RFQ form; it asks the questions we'd ask anyway."
     },
     "form": {
-      "title": "Contact Us",
-      "description": "Get in touch with us. We'd love to hear from you.",
+      "title": "Send an enquiry",
+      "description": "For the fastest quote, use Request a Quote. This form still reaches Tucsenberg.",
       "optional": "optional",
       "fullName": "Full name",
       "email": "Email Address",
@@ -231,20 +231,20 @@
       "fullNamePlaceholder": "Enter your full name",
       "emailPlaceholder": "your@email.com",
       "companyPlaceholder": "Your company name",
-      "phonePlaceholder": "+1 (555) 123-4567",
-      "subjectPlaceholder": "What can we help you with?",
-      "messagePlaceholder": "Please describe your needs or questions...",
+      "phonePlaceholder": "WhatsApp or phone number",
+      "subjectPlaceholder": "Product line, quantity, or site question",
+      "messagePlaceholder": "Share product interest, quantity, market, delivery port, timeline, dimensions, or photos/drawings you can provide.",
       "acceptPrivacy": "I agree to the privacy policy and terms of service",
       "marketingConsent": "I would like to receive marketing communications",
-      "submit": "Send Message",
+      "submit": "Send Enquiry",
       "submitting": "Sending...",
-      "submitSuccess": "Message sent successfully!",
+      "submitSuccess": "Received. You'll hear from a person, not a sequence.",
       "submitError": "We couldn't send your message. Please try again shortly.",
       "networkError": "We could not submit the form. Please try again.",
       "turnstilePending": "Security verification is loading. You can send the form once it is ready.",
       "turnstileFailed": "Security verification did not complete. Please try again.",
       "turnstileExpired": "Security verification expired. Please complete it again.",
-      "success": "Thank you! Your message has been sent successfully. We will get back to you soon.",
+      "success": "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
       "error": "Sorry, there was an error sending your message. Please try again later.",
       "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
       "retryLoad": "Retry loading form",

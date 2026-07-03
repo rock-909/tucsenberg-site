@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { getPageBySlug } from "@/lib/content-query/queries";
-import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 
 describe("Contact page MDX i18n", () => {
-  it("stores contact FAQ copy in English MDX frontmatter", async () => {
-    const en = extractFaqFromMetadata(
-      (await getPageBySlug("contact", "en")).metadata as unknown as Record<
-        string,
-        unknown
-      >,
-    );
+  it("stores Tucsenberg contact copy in English MDX", async () => {
+    const en = await getPageBySlug("contact", "en");
 
-    expect(en[0]?.question).toContain("How fast should a real site respond?");
+    expect(en.metadata.seo?.title).toBe(
+      "Contact Tucsenberg — Flood Barrier Supplier, China",
+    );
+    expect(en.content).toContain(
+      "**Fastest route**: the [RFQ form](/request-quote/)",
+    );
   });
 });

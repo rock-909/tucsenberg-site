@@ -38,24 +38,24 @@ const contactCopy = {
   },
   panel: {
     contact: {
-      title: "Contact Methods",
+      title: "Email & WhatsApp",
       emailLabel: "Email",
       phoneLabel: "Phone",
     },
     response: {
-      title: "Response Time",
-      responseTimeLabel: "Response",
-      responseTimeValue: "Within 24 hours",
-      bestForLabel: "Best for",
-      bestForValue: "Quotes",
-      prepareLabel: "Prepare",
-      prepareValue: "Product specs",
+      title: "Quote response",
+      responseTimeLabel: "Standard items",
+      responseTimeValue: "12 hours",
+      bestForLabel: "Custom configurations",
+      bestForValue: "48 hours",
+      prepareLabel: "Fastest route",
+      prepareValue: "Use the RFQ form; it asks the questions we'd ask anyway.",
     },
     hours: {
-      title: "Business Hours",
-      weekdaysLabel: "Weekdays",
-      saturdayLabel: "Saturday",
-      sundayLabel: "Sunday",
+      title: "Time zone",
+      weekdaysLabel: "China",
+      saturdayLabel: "Follow-up",
+      sundayLabel: "US/EU hours",
       closedLabel: "Closed",
     },
   },
@@ -111,7 +111,7 @@ describe("ContactPage MDX migration", () => {
 
     expect(
       within(content).getByRole("heading", { level: 1 }),
-    ).toHaveTextContent("Contact Us");
+    ).toHaveTextContent("Contact");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
@@ -132,7 +132,7 @@ describe("ContactPage MDX migration", () => {
     expect(staticForm).not.toBeNull();
     expect(staticForm?.tagName).toBe("FORM");
     expect(
-      within(fallback).getByRole("button", { name: /send message/i }),
+      within(fallback).getByRole("button", { name: /send enquiry/i }),
     ).toBeDisabled();
     expect(
       screen.queryByTestId("contact-page-fallback"),
@@ -164,13 +164,13 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(
-      screen.getByRole("heading", { name: "Contact Methods" }),
+      screen.getByRole("heading", { name: "Email & WhatsApp" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "What to expect" }),
+      screen.getByRole("heading", { name: "Quote response" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Within 24 business hours")).toBeInTheDocument();
-    expect(screen.getByText("Helpful details")).toBeInTheDocument();
+    expect(screen.getByText("Standard items")).toBeInTheDocument();
+    expect(screen.getByText("12 hours")).toBeInTheDocument();
   });
 
   it("renders the public email and hides the owner TODO phone", async () => {
@@ -194,19 +194,17 @@ describe("ContactPage MDX migration", () => {
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
   });
 
-  it("renders FAQ from MDX frontmatter", async () => {
+  it("does not render starter FAQ from MDX frontmatter", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    expect(await screen.findByTestId("faq-section")).toHaveTextContent(
-      "How fast should a real site respond?",
-    );
+    expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
   });
 
-  it("renders the starter inquiry handoff before the form", async () => {
+  it("renders the Tucsenberg inquiry handoff before the form", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
     });
@@ -219,16 +217,16 @@ describe("ContactPage MDX migration", () => {
     expect(
       within(handoff).getByRole("heading", {
         level: 2,
-        name: "Before you submit",
+        name: "Fastest route",
       }),
     ).toBeInTheDocument();
     expect(handoff).toHaveTextContent(
-      "Use this page when you are ready to ask for confirmation",
+      "The RFQ form asks the questions we would ask anyway",
     );
     expect(handoff).not.toHaveTextContent("Products, Resources, or Blog");
-    expect(handoff).toHaveTextContent("What you need");
-    expect(handoff).toHaveTextContent("Useful context");
-    expect(handoff).toHaveTextContent("Decision timing");
+    expect(handoff).toHaveTextContent("What you are protecting");
+    expect(handoff).toHaveTextContent("Dimensions");
+    expect(handoff).toHaveTextContent("Market and port");
     expect(formColumn.compareDocumentPosition(handoff)).toBe(
       Node.DOCUMENT_POSITION_PRECEDING,
     );
@@ -260,16 +258,10 @@ describe("ContactPage MDX migration", () => {
     // Response / expect / prepare confidence copy the page actually renders
     // from existing contact panel content, scoped to the confidence column.
     expect(
-      within(confidenceColumn).getAllByText(
-        /response|handoff|expect|prepare|回复|准备/i,
-      ).length,
+      within(confidenceColumn).getAllByText(/standard|custom|quote/i).length,
     ).toBeGreaterThan(0);
-    expect(
-      within(confidenceColumn).getByText("Within 24 hours"),
-    ).toBeInTheDocument();
-    expect(
-      within(confidenceColumn).getByText("Product specs"),
-    ).toBeInTheDocument();
+    expect(within(confidenceColumn).getByText("12 hours")).toBeInTheDocument();
+    expect(within(confidenceColumn).getByText("48 hours")).toBeInTheDocument();
     expect(confidenceColumn).not.toContainElement(
       screen.getByTestId("contact-form"),
     );
@@ -367,9 +359,11 @@ describe("ContactPage MDX migration", () => {
       params: Promise.resolve({ locale: "en" }),
     });
 
-    expect(enMetadata.title).toBe("Contact");
+    expect(enMetadata.title).toBe(
+      "Contact Tucsenberg — Flood Barrier Supplier, China",
+    );
     expect(enMetadata.description).toBe(
-      "Use this starter contact page as a quick action for inquiries, demo requests, or launch questions before connecting a real receiver.",
+      "Fastest route: the RFQ form — it asks the questions we'd ask anyway, so your quote comes back faster.",
     );
     expect(enMetadata.other?.google).not.toBe("notranslate");
   });
@@ -398,7 +392,7 @@ describe("ContactPage MDX migration", () => {
     expect(metadata.twitter).toEqual(
       expect.objectContaining({
         card: "summary_large_image",
-        title: "Contact",
+        title: "Contact Tucsenberg — Flood Barrier Supplier, China",
       }),
     );
     expect(metadata.robots).toEqual(
