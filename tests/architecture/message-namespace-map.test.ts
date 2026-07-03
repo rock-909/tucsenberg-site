@@ -5,41 +5,14 @@ import type { MessagePackId } from "@/lib/i18n/message-pack-config";
 import profileMessagePacks from "@messages/message-packs.json";
 
 const MESSAGE_MAP_DOC = "docs/ref/messages.md";
+const ACTIVE_PROFILE_ID = "catalog";
 const RETIRED_REACT_SCAN_DEMO_NAMESPACE = ["React", "ScanDemo"].join("");
 
-const SHOWCASE_FULL_EN_PACKS = (
-  profileMessagePacks["showcase-full"] as readonly MessagePackId[]
+const ACTIVE_EN_PACKS = (
+  profileMessagePacks[ACTIVE_PROFILE_ID] as readonly MessagePackId[]
 ).map((packId) =>
   packId === "base" ? "messages/base/en" : `messages/profiles/${packId}/en`,
 );
-
-function expectProfileNamespaces(
-  profileId: keyof typeof STARTER_PROFILES,
-  expectedNamespaces: readonly string[],
-): void {
-  const namespaces = new Set(STARTER_PROFILES[profileId].messageNamespaces);
-
-  for (const namespace of expectedNamespaces) {
-    expect(
-      namespaces.has(namespace),
-      `${profileId} should own ${namespace}`,
-    ).toBe(true);
-  }
-}
-
-function expectProfileNotToOwnNamespaces(
-  profileId: keyof typeof STARTER_PROFILES,
-  unexpectedNamespaces: readonly string[],
-): void {
-  const namespaces = new Set(STARTER_PROFILES[profileId].messageNamespaces);
-
-  for (const namespace of unexpectedNamespaces) {
-    expect(
-      namespaces.has(namespace),
-      `${profileId} should not own ${namespace}`,
-    ).toBe(false);
-  }
-}
 
 function mergeTopLevelNamespaces(
   packPaths: readonly string[],
@@ -47,7 +20,7 @@ function mergeTopLevelNamespaces(
 ): Record<string, unknown> {
   return packPaths.reduce<Record<string, unknown>>((merged, packPath) => {
     const packMessages = JSON.parse(
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test composes fixed showcase-full pack paths
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test composes fixed active catalog pack paths
       readFileSync(`${packPath}/${type}.json`, "utf8"),
     ) as Record<string, unknown>;
 
@@ -56,27 +29,20 @@ function mergeTopLevelNamespaces(
 }
 
 describe("message namespace map", () => {
-  it("documents every current top-level message namespace", () => {
+  it("documents every current active top-level message namespace", () => {
     const doc = readFileSync(MESSAGE_MAP_DOC, "utf8");
-    const criticalMessages = mergeTopLevelNamespaces(
-      SHOWCASE_FULL_EN_PACKS,
-      "critical",
-    );
-    const deferredMessages = mergeTopLevelNamespaces(
-      SHOWCASE_FULL_EN_PACKS,
-      "deferred",
-    );
+    const criticalMessages = mergeTopLevelNamespaces(ACTIVE_EN_PACKS, "critical");
+    const deferredMessages = mergeTopLevelNamespaces(ACTIVE_EN_PACKS, "deferred");
     const criticalNamespaces = Object.keys(criticalMessages);
     const deferredNamespaces = Object.keys(deferredMessages);
 
     for (const expected of [
       "messages/base",
+      "messages/profiles/minimal",
       "messages/profiles/b2b-lead",
       "messages/profiles/catalog",
-      "messages/profiles/content-marketing",
-      "messages/profiles/company-site",
-      "messages/profiles/showcase-full",
       "Physical message packs are the authoring truth",
+      "Active Tucsenberg catalog uses",
     ]) {
       expect(doc).toContain(expected);
     }
@@ -99,78 +65,40 @@ describe("message namespace map", () => {
     expect(replacementIndex).toContain("messages/profiles/**");
   });
 
-  it("records profile ownership for demo-heavy message namespaces", () => {
+  it("records active catalog ownership and retired optional message surfaces", () => {
     const doc = readFileSync(MESSAGE_MAP_DOC, "utf8");
+    const catalogNamespaces = new Set(
+      STARTER_PROFILES[ACTIVE_PROFILE_ID].messageNamespaces,
+    );
 
-    for (const expected of [
-      "Default company-site owns only the light products overview",
-      "Namespace exceptions live in `src/config/starter-profiles.ts`",
-      "Readiness pointer exclusions live in `scripts/quality/checks/content-readiness.js`",
-      "`catalog` | default company-site reviews overview only; market/spec/detail is optional catalog",
-      "`blog` / `article` | default company-site reviews starter articles and labels",
-      "`customProject` | showcase-full or explicit custom-project only",
-      "`themeDemo` | examples-only",
-      "Default `company-site` uses",
-    ]) {
-      expect(doc).toContain(expected);
+    for (const expected of ["catalog", "products", "home", "contact"]) {
+      expect(catalogNamespaces.has(expected), `catalog should own ${expected}`).toBe(
+        true,
+      );
     }
 
-    expect(doc).not.toContain(RETIRED_REACT_SCAN_DEMO_NAMESPACE);
-  });
-
-  it("keeps documented profile namespace ownership aligned with starter profiles", () => {
-    const doc = readFileSync(MESSAGE_MAP_DOC, "utf8");
-
-    expectProfileNamespaces("company-site", [
-      "catalog",
-      "blog",
-      "article",
-      "resources",
-    ]);
-    expectProfileNotToOwnNamespaces("company-site", [
-      "customProject",
-      "themeDemo",
-    ]);
-    expect(doc).toContain(
-      "`catalog` | default company-site reviews overview only; market/spec/detail is optional catalog",
-    );
-    expect(doc).toContain(
-      "`blog` / `article` | default company-site reviews starter articles and labels",
-    );
-    expect(doc).toContain(
-      "`resources` | default company-site must replace resource cards/CTA",
-    );
-
-    expectProfileNamespaces("catalog", ["catalog", "products"]);
-    expectProfileNotToOwnNamespaces("catalog", [
-      "blog",
-      "article",
-      "resources",
-      "customProject",
-      "themeDemo",
-    ]);
-
-    expectProfileNamespaces("content-marketing", ["blog", "article"]);
-    expectProfileNotToOwnNamespaces("content-marketing", [
-      "catalog",
-      "products",
-      "resources",
-      "customProject",
-      "themeDemo",
-    ]);
-
-    expectProfileNamespaces("showcase-full", ["customProject"]);
-    expect(doc).toContain(
-      "`customProject` | showcase-full or explicit custom-project only",
-    );
-
-    for (const profile of Object.values(STARTER_PROFILES)) {
-      expect(profile.messageNamespaces).not.toContain("themeDemo");
+    for (const unexpected of ["blog", "article", "resources", "customProject"]) {
+      expect(
+        catalogNamespaces.has(unexpected),
+        `catalog should not own ${unexpected}`,
+      ).toBe(false);
     }
-    expect(doc).toContain("`themeDemo` | examples-only");
+
+    expect(doc).toContain(
+      "`catalog` | active product-line, market/spec/detail, and product hub copy",
+    );
+    expect(doc).toContain(
+      "`blog` / `article` | not active in the Tucsenberg catalog materialization",
+    );
+    expect(doc).toContain(
+      "`resources` | not active; buyer guidance moved to guide pages",
+    );
+    expect(doc).toContain(
+      "`customProject` | not active; source-starter showcase-full surface only",
+    );
   });
 
-  it("does not keep the retired React Scan demo namespace in active starter contracts", () => {
+  it("does not keep retired demo namespaces in active starter contracts", () => {
     const activeContractFiles = [
       "src/config/starter-profiles.ts",
       "messages/message-packs.json",
@@ -184,14 +112,17 @@ describe("message namespace map", () => {
     }
   });
 
-  it("qualifies demo-heavy namespaces by profile ownership in detail tables", () => {
-    const doc = readFileSync(MESSAGE_MAP_DOC, "utf8");
+  it("keeps optional source-starter profiles out of the active pack graph", () => {
+    const activeProfileIds = Object.keys(profileMessagePacks);
 
-    expect(doc).toContain("message packs are the authoring truth");
-    expect(doc).not.toMatch(/\| `catalog` \| `must-replace`/);
-    expect(doc).not.toMatch(/\| `products` \| `must-replace`/);
-    expect(doc).not.toMatch(/\| `customProject` \| `must-replace`/);
-    expect(doc).toContain("optional catalog");
-    expect(doc).toContain("showcase-full");
+    expect(activeProfileIds).toEqual(["minimal", "b2b-lead", "catalog"]);
+    expect(profileMessagePacks[ACTIVE_PROFILE_ID]).toEqual([
+      "base",
+      "b2b-lead",
+      "catalog",
+    ]);
+    expect(profileMessagePacks).not.toHaveProperty("company-site");
+    expect(profileMessagePacks).not.toHaveProperty("showcase-full");
+    expect(profileMessagePacks).not.toHaveProperty("content-marketing");
   });
 });

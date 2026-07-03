@@ -4,25 +4,34 @@ Physical message packs are the authoring truth. Compat files under `messages/{lo
 
 ## Pack graph
 
-Default `company-site` uses:
+Active Tucsenberg catalog uses:
 
 ```text
 messages/base
-messages/profiles/minimal
 messages/profiles/b2b-lead
-messages/profiles/company-site
+messages/profiles/catalog
 ```
 
-Default excludes:
+Available materialized pack graphs are limited to:
 
 ```text
-messages/profiles/catalog
+minimal -> messages/base + messages/profiles/minimal
+b2b-lead -> messages/base + messages/profiles/minimal + messages/profiles/b2b-lead
+catalog -> messages/base + messages/profiles/b2b-lead + messages/profiles/catalog
+```
+
+This derived site does not ship optional source-starter pack directories for:
+
+```text
 messages/profiles/content-marketing
+messages/profiles/company-site
 messages/profiles/showcase-full
 messages/examples/ui-demo
 ```
 
-Heavy catalog market/spec/detail copy lives in `catalog` / `showcase-full`. Default company-site owns only the light products overview, blog, article, and resources starter copy.
+Heavy catalog market/spec/detail copy now lives in the active `catalog` pack.
+The old company-site blog/article/resources starter surfaces are not part of
+this Tucsenberg materialization.
 
 ## Authoring layout
 
@@ -50,12 +59,12 @@ Namespace exceptions live in `src/config/starter-profiles.ts`. Readiness pointer
 | `contact` | must replace receiver, response promise, form helper copy |
 | `footer` / `navigation` | must review after route changes |
 | `privacy` / `terms` | must replace legal owner facts |
-| `catalog` | default company-site reviews overview only; market/spec/detail is optional catalog |
-| `blog` / `article` | default company-site reviews starter articles and labels |
-| `resources` | default company-site must replace resource cards/CTA |
-| `products` | heavy product blocks only for catalog/showcase-full |
+| `catalog` | active product-line, market/spec/detail, and product hub copy |
+| `blog` / `article` | not active in the Tucsenberg catalog materialization |
+| `resources` | not active; buyer guidance moved to guide pages |
+| `products` | active catalog product blocks |
 | `emailTemplates` | must review confirmation, contact owner notification, and product inquiry owner notification before launch |
-| `customProject` | showcase-full or explicit custom-project only |
+| `customProject` | not active; source-starter showcase-full surface only |
 | `themeDemo` | examples-only |
 | `apiErrors` / `errors` / `accessibility` / `language` / `theme` | do not edit first |
 

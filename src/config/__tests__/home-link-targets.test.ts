@@ -10,26 +10,30 @@ import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
 describe("single-site home link targets", () => {
   it("uses the source runtime profile for singleton home link targets", () => {
-    expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("showcase-full");
+    expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual(
       getSingleSiteHomeLinkTargets(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
     );
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({
       contact: "/contact",
+      oemWholesale: "/oem-wholesale",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
     expect(SINGLE_SITE_HOME_LINK_TARGETS.blog).toBeUndefined();
   });
 
-  it("keeps company-site as the default generated starter profile", () => {
-    expect(DEFAULT_STARTER_PROFILE_ID).toBe("company-site");
+  it("keeps catalog as the default materialized profile", () => {
+    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
     expect(getSingleSiteHomeLinkTargets(DEFAULT_STARTER_PROFILE_ID)).toEqual({
       contact: "/contact",
+      oemWholesale: "/oem-wholesale",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
   });
 
@@ -52,9 +56,11 @@ describe("single-site home link targets", () => {
   it("can still derive catalog and showcase-full product CTAs", () => {
     expect(getSingleSiteHomeLinkTargets("catalog")).toEqual({
       contact: "/contact",
+      oemWholesale: "/oem-wholesale",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
     expect(getSingleSiteHomeLinkTargets("showcase-full")).toEqual({
       contact: "/contact",
@@ -89,12 +95,12 @@ describe("single-site home link targets", () => {
 
   it("derives final CTA targets from semantic route availability", () => {
     expect(getSingleSiteHomeFinalCtaTargets("company-site")).toEqual([
-      { href: "/contact", labelKey: "secondary" },
       { href: "/products", labelKey: "primary" },
+      { href: "/contact", labelKey: "secondary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("catalog")).toEqual([
-      { href: "/contact", labelKey: "secondary" },
       { href: "/products", labelKey: "primary" },
+      { href: "/request-quote", labelKey: "secondary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("b2b-lead")).toEqual([
       { href: "/contact", labelKey: "secondary" },

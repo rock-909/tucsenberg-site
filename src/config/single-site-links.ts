@@ -151,12 +151,14 @@ export function getSingleSiteHomeFinalCtaTargetsFromLinks(
   targets: SingleSiteHomeLinkTargets,
 ): SingleSiteHomeFinalCtaTarget[] {
   return [
-    ...(targets.contact !== undefined
-      ? [{ href: targets.contact, labelKey: "secondary" as const }]
-      : []),
     ...(targets.products !== undefined
       ? [{ href: targets.products, labelKey: "primary" as const }]
       : []),
+    ...(targets.requestQuote !== undefined
+      ? [{ href: targets.requestQuote, labelKey: "secondary" as const }]
+      : targets.contact !== undefined
+        ? [{ href: targets.contact, labelKey: "secondary" as const }]
+        : []),
   ];
 }
 
