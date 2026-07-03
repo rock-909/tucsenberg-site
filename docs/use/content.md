@@ -48,7 +48,8 @@ tsx scripts/starter-profile/sync-message-compat.ts --write
 
 Compat 新鲜度由 `pnpm content:check` 校验。
 
-Historical split note: `../archive/superseded/messages-split-feasibility.md`.
+Historical split notes from the starter were not retained in this derived
+checkout. Current message ownership lives in `../ref/messages.md`.
 
 ## Proof
 

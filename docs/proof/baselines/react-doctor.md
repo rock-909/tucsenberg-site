@@ -52,4 +52,4 @@ npx --loglevel=error -y react-doctor@latest --json --no-score --blocking none
   documented in `docs/proof/baselines/react-doctor-policy.md`.
 
 Detailed policy: `docs/proof/baselines/react-doctor-policy.md`.
-Historical exception list: `docs/archive/superseded/react-doctor-exceptions.md`.
+Historical starter exception lists were not retained in this derived checkout.

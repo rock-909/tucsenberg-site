@@ -16,7 +16,7 @@ Canonical path: `docs/ref/tech.md`.
 - Wrangler 4.100.0。
 - `pnpm`: 11.1.0。
 
-不要把 `docs/superpowers/**` 里的旧版本号当当前真相。
+不要把 `plans/**`、`docs/superpowers/**` 或旧 handoff 里的版本号当当前真相。
 
 ## Runtime model
 
@@ -100,4 +100,4 @@ pnpm website:build:cf
 - Localized 404 prerender 可能输出已知 `DYNAMIC_SERVER_USAGE` 日志；如果扩散到正常页面再按回归处理。
 - Local Cloudflare preview 比 deployed proof 弱；冲突时以 deployed runtime evidence 优先。
 
-旧长文已归档到 `../archive/superseded/ref-stack.md`、`ref-deployment.md`、`ref-cache.md`、`ref-dependency-policy.md`、`ref-nonce-csp.md`、`ref-proxy-migration.md`。
+如果旧长文或历史 proof 被恢复到 `docs/archive/**`，只作追溯材料，不作当前技术真相。

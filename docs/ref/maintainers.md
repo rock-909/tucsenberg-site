@@ -80,7 +80,8 @@ Active smoke and component proof markers: `tests/e2e/navigation.spec.ts`, `tests
 - `ref/**` owns mechanisms, boundaries, runtime truth, and maintainer rules.
 - `proof/**` owns proof levels, release order, and baselines.
 - `design/**` owns design truth.
-- `archive/**` is not current truth.
-- `superpowers/**` is active AI workflow workspace, not product truth.
+- `plans/**` is historical execution material, not product truth.
+- `docs/archive/**` and `docs/superpowers/**`, if restored, are not current truth.
 
-旧长文已归档到 `../archive/superseded/ref-docs-ownership.md`、`ref-source-policy.md`、`ref-truth-registry.md`、`ref-tier-a.md`、`ref-change-clusters.md`、`ref-guardrails.md`、`ref-replacement-owners.md`。
+Starter-era longform docs were not retained in this derived checkout. Recreate
+only the current rule that still needs to be enforced.

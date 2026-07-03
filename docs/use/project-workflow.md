@@ -1,5 +1,10 @@
 # 项目网站生产工作流程
 
+> Historical starter workflow note. This file explains how the original
+> starter was intended to be operated. For current Tucsenberg site maintenance,
+> start with `docs/README.md`, `docs/ref/project.md`, `docs/use/content.md`,
+> and `docs/use/deploy.md`.
+
 这份文档记录当前确认下来的项目工作流程。它描述 `showcase-website-starter` 如何作为
 外贸 / B2B / 企业官网的多语言低摩擦派生系统使用。
 

@@ -12,7 +12,9 @@ Both should point back to `docs/README.md`; do not maintain two competing encycl
 
 ## Superpowers
 
-`docs/superpowers/` is active workflow space, not product docs. Old plans/specs may contain stale profile or version facts.
+This derived site currently keeps historical execution material under
+`plans/`. Treat those files as run records, not product docs. They may contain
+stale starter/profile facts.
 
 ## UI motion changes
 
@@ -51,13 +53,15 @@ node scripts/starter-checks.js content-manifest --check
 
 ## Workflow outputs
 
-CWF/DWF workflow capability can stay. Generated workflow outputs belong under:
+CWF/DWF workflow capability can stay. If generated workflow outputs are added
+again, keep them out of current product docs and put them under an explicit
+workflow/history path, for example:
 
 ```text
 docs/superpowers/workflows/cwf/
 ```
 
-Do not treat old workflow outputs as starter content.
+Do not treat old workflow outputs or old plans as Tucsenberg product truth.
 
 ## Do not commit
 

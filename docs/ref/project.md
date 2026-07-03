@@ -1,40 +1,44 @@
 # Project
 
-`showcase-website-starter` is a reusable showcase website starter.
+`tucsenberg-site` is the derived English B2B website for Tucsenberg flood barrier products.
 
 It is for:
 
-- company websites
-- product/service showcase sites
-- multilingual inquiry sites
-- small brand sites
-- Cloudflare/OpenNext deployments
+- factory-direct flood barrier product discovery
+- OEM / wholesale inquiry conversion
+- product specification evaluation
+- PDF download and quote preparation
+- Cloudflare/OpenNext deployment
 
-It is not a finished client website. `Example Showcase Company` is placeholder identity.
+It is not a generic starter anymore. The inherited starter/profile machinery remains in the repository only where it still supports checks, compatibility, or history.
 
-## Default target
+## Current public surface
 
-The default profile is `company-site`: a normal company website with Home, About, Products overview, Blog, Resources, Contact, Privacy, and Terms.
+- Single locale: `en`
+- Canonical public paths have no locale prefix.
+- Product detail routes reuse the inherited `/products/[market]` implementation, but public slugs are Tucsenberg product-line slugs.
+- PDF downloads under `public/downloads/**` must stay noindex.
 
-## Replace in derived projects
+## Current product lines
 
-- company and brand name
-- domain
-- contact email / phone / address
-- product or service facts
-- images and proof assets
-- legal owner facts
-- form recipient and integrations
-- deployment accounts and secrets
+- ABS flood barriers
+- Aluminum flood gates
+- Absorbent flood bags
+- Flood tube dams
+- FRP flood barriers
 
 ## Where to edit
 
 - brand facts: `src/config/single-site.ts`
 - page expression: `src/config/single-site-page-expression.ts`
 - SEO/crawl: `src/config/single-site-seo.ts`
-- page body: `content/pages/{locale}/*.mdx`
-- UI copy: message packs under `messages/**`
-- images: `public/images/**`
-- replacement steps: `../use/replace.md`
+- navigation and links: `src/config/single-site-navigation.ts`, `src/config/single-site-links.ts`
+- page body: `content/pages/en/*.mdx`
+- product catalog: `src/config/single-site-product-catalog.ts`
+- product specs: `src/constants/product-specs/**`
+- product page copy: `src/constants/tucsenberg-product-pages.ts`
+- UI copy authoring packs: `messages/base/**`, `messages/profiles/catalog/**`
+- generated compat messages: `messages/en/*.json`
+- launch handoff: `plans/handoff-report.md`
 
-Do not treat archive docs, old Superpowers plans, or placeholder content as current product truth.
+Do not treat old starter docs, old Superpowers plans, profile fixtures, or placeholder message packs as current business truth.
