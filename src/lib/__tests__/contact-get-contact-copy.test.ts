@@ -22,27 +22,26 @@ vi.mock("@/lib/logger", () => ({
 
 describe("getContactCopy", () => {
   const defaultTranslations = {
-    title: "Contact Us",
-    description: "Get in touch with our team",
-    "panel.contactTitle": "Contact Methods",
+    title: "Contact",
+    description:
+      "Fastest route: the RFQ form asks the questions we would ask anyway.",
+    "panel.contactTitle": "Email & WhatsApp",
     "panel.email": "Email",
-    "panel.emailUnavailable":
-      "Use the form on this page; configure a real receiver before public launch.",
+    "panel.emailUnavailable": "Use the RFQ form if email is unavailable.",
     "panel.phone": "Phone",
-    "panel.hoursTitle": "Business Hours",
-    "panel.weekdays": "Mon - Fri",
-    "panel.saturday": "Saturday",
-    "panel.sunday": "Sunday",
+    "panel.hoursTitle": "Time zone",
+    "panel.weekdays": "China",
+    "panel.saturday": "Follow-up",
+    "panel.sunday": "US/EU hours",
     "panel.closed": "Closed",
-    "panel.responseTitle": "What to expect",
-    "panel.responseTimeLabel": "Typical response",
-    "panel.responseTimeValue": "Within 24 business hours",
-    "panel.bestForLabel": "Best for",
-    "panel.bestForValue":
-      "RFQs, product specs, MOQ, samples, and lead-time questions",
-    "panel.prepareLabel": "Helpful details",
+    "panel.responseTitle": "Quote response",
+    "panel.responseTimeLabel": "Standard items",
+    "panel.responseTimeValue": "12 hours",
+    "panel.bestForLabel": "Custom configurations",
+    "panel.bestForValue": "48 hours",
+    "panel.prepareLabel": "Fastest route",
     "panel.prepareValue":
-      "Share product type, size/standard, quantity, destination market, and timeline",
+      "Use the RFQ form; it asks the questions we'd ask anyway.",
   } as const;
 
   const defaultMessages = {
@@ -82,11 +81,13 @@ describe("getContactCopy", () => {
 
     expect(mockLoadCompleteMessages).toHaveBeenCalledWith(locale);
 
-    expect(copy.header.title).toBe("Contact Us");
-    expect(copy.header.description).toBe("Get in touch with our team");
-    expect(copy.panel.contact.title).toBe("Contact Methods");
+    expect(copy.header.title).toBe("Contact");
+    expect(copy.header.description).toBe(
+      "Fastest route: the RFQ form asks the questions we would ask anyway.",
+    );
+    expect(copy.panel.contact.title).toBe("Email & WhatsApp");
     expect(copy.panel.response.prepareValue).toBe(
-      "Share product type, size/standard, quantity, destination market, and timeline",
+      "Use the RFQ form; it asks the questions we'd ask anyway.",
     );
     expect(mockLoggerWarn).not.toHaveBeenCalled();
   });
@@ -179,26 +180,24 @@ describe("getContactCopy", () => {
       },
     });
 
-    expect(copy.header.title).toBe("Contact Us");
+    expect(copy.header.title).toBe("Contact");
     expect(copy.header.description).toBe(
-      "Get in touch with our team for inquiries, support, or partnership opportunities.",
+      "Fastest route: the RFQ form asks the questions we would ask anyway.",
     );
 
-    expect(copy.panel.contact.title).toBe("Contact Methods");
+    expect(copy.panel.contact.title).toBe("Email & WhatsApp");
     expect(copy.panel.contact.emailLabel).toBe("Email");
     expect(copy.panel.contact.phoneLabel).toBe("Phone");
 
-    expect(copy.panel.hours.title).toBe("Business Hours");
-    expect(copy.panel.hours.weekdaysLabel).toBe("Mon - Fri");
-    expect(copy.panel.hours.saturdayLabel).toBe("Saturday");
-    expect(copy.panel.hours.sundayLabel).toBe("Sunday");
+    expect(copy.panel.hours.title).toBe("Time zone");
+    expect(copy.panel.hours.weekdaysLabel).toBe("China");
+    expect(copy.panel.hours.saturdayLabel).toBe("Follow-up");
+    expect(copy.panel.hours.sundayLabel).toBe("US/EU hours");
     expect(copy.panel.hours.closedLabel).toBe("Closed");
-    expect(copy.panel.response.title).toBe("What to expect");
-    expect(copy.panel.response.responseTimeValue).toBe(
-      "Within 24 business hours",
-    );
-    expect(copy.panel.response.bestForLabel).toBe("Best for");
-    expect(copy.panel.response.prepareLabel).toBe("Helpful details");
+    expect(copy.panel.response.title).toBe("Quote response");
+    expect(copy.panel.response.responseTimeValue).toBe("12 hours");
+    expect(copy.panel.response.bestForLabel).toBe("Custom configurations");
+    expect(copy.panel.response.prepareLabel).toBe("Fastest route");
     expect(mockLoggerWarn).toHaveBeenCalled();
     expect(mockLoggerWarn).toHaveBeenCalledWith(
       "Missing contact page copy; using fallback",
@@ -209,8 +208,8 @@ describe("getContactCopy", () => {
   it("falls back to user-readable copy when static messages miss keys", () => {
     const copy = getContactCopyFromMessages({});
 
-    expect(copy.header.title).toBe("Contact Us");
-    expect(copy.header.description).toContain("Get in touch");
+    expect(copy.header.title).toBe("Contact");
+    expect(copy.header.description).toContain("RFQ form");
     expect(copy.panel.hours.closedLabel).toBe("Closed");
     expect(mockLoggerWarn).toHaveBeenCalled();
   });

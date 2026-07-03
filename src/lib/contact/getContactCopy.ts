@@ -43,28 +43,26 @@ export interface ContactCopyModel {
 }
 
 const CONTACT_COPY_FALLBACKS = {
-  title: "Contact Us",
+  title: "Contact",
   description:
-    "Get in touch with our team for inquiries, support, or partnership opportunities.",
-  "panel.contactTitle": "Contact Methods",
+    "Fastest route: the RFQ form asks the questions we would ask anyway.",
+  "panel.contactTitle": "Email & WhatsApp",
   "panel.email": "Email",
-  "panel.emailUnavailable":
-    "Use the form on this page; configure a real receiver before public launch.",
+  "panel.emailUnavailable": "Use the RFQ form if email is unavailable.",
   "panel.phone": "Phone",
-  "panel.hoursTitle": "Business Hours",
-  "panel.weekdays": "Mon - Fri",
-  "panel.saturday": "Saturday",
-  "panel.sunday": "Sunday",
+  "panel.hoursTitle": "Time zone",
+  "panel.weekdays": "China",
+  "panel.saturday": "Follow-up",
+  "panel.sunday": "US/EU hours",
   "panel.closed": "Closed",
-  "panel.responseTitle": "What to expect",
-  "panel.responseTimeLabel": "Typical response",
-  "panel.responseTimeValue": "Within 24 business hours",
-  "panel.bestForLabel": "Best for",
-  "panel.bestForValue":
-    "RFQs, product specs, MOQ, samples, and lead-time questions",
-  "panel.prepareLabel": "Helpful details",
+  "panel.responseTitle": "Quote response",
+  "panel.responseTimeLabel": "Standard items",
+  "panel.responseTimeValue": "12 hours",
+  "panel.bestForLabel": "Custom configurations",
+  "panel.bestForValue": "48 hours",
+  "panel.prepareLabel": "Fastest route",
   "panel.prepareValue":
-    "Share product type, size/standard, quantity, destination market, and timeline",
+    "Use the RFQ form; it asks the questions we'd ask anyway.",
 } satisfies Record<string, string>;
 
 const CONTACT_MESSAGE_ROOTS = [["contact"]] as const;
