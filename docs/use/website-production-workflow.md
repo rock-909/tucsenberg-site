@@ -1,5 +1,10 @@
 # Website Production Workflow
 
+> Historical starter workflow note. This file explains the original
+> research-to-design handoff model. It is not current Tucsenberg product truth.
+> For current Tucsenberg site maintenance, start with `docs/README.md`,
+> `docs/ref/project.md`, `docs/use/content.md`, and `docs/use/deploy.md`.
+
 这份文档把网站生产拆成一条线性流水线。它不是单纯的思维导图，而是可执行的
 handoff 流程：每一步都有作用、输入、产物和进入下一步的 gate。
 

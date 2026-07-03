@@ -52,6 +52,7 @@
 - `plans/009-*`、`plans/010-*`、`plans/011-*`、`plans/012-*`、`plans/013-*`、`plans/014-*`：starter 质量清理历史记录。
 - `plans/CODEX-HANDOFF.md`：旧执行交接，不是当前任务入口。
 - `docs/use/start.md`、`docs/use/replace.md`：继承的 starter/profile 说明，不是 Tucsenberg 业务内容入口。
+- `docs/use/project-workflow.md`、`docs/use/website-production-workflow.md`：继承的 starter workflow 说明，不是当前 Tucsenberg 产品真相。
 - `docs/archive/**`、`docs/superpowers/**`：如果存在，只用于追溯。
 
 版本真相看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md` 和 `ref/tech.md`。
