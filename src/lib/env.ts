@@ -143,7 +143,7 @@ export const clientEnvSchema = {
 
   // Internationalization
   NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default("en"),
-  NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en,zh"),
+  NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en"),
   NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET: z
     .string()
     .optional()

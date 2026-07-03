@@ -96,6 +96,7 @@ const {
   runDeployedSmoke,
   runPublicPreviewSmoke,
 } = require("./quality/checks/cloudflare-smoke");
+const i18nLocalesConfig = require("../i18n-locales.config.js");
 
 const ROOT = process.cwd();
 
@@ -122,7 +123,7 @@ function getLineNumber(content, index) {
 // ---------------------------------------------------------------------------
 
 const CONTENT_TYPES = ["posts", "pages", "products"];
-const CONTENT_MANIFEST_LOCALES = ["en", "zh"];
+const CONTENT_MANIFEST_LOCALES = i18nLocalesConfig.locales;
 const CONTENT_MANIFEST_SOURCES = [
   {
     source: "active-content",

@@ -81,9 +81,9 @@ the same surface.
 - `src/emails/email-copy.ts` is the runtime email copy API used by templates and
   subject helpers.
 
-runtime email rendering still defaults to English in this wave. Chinese
-`emailTemplates` entries exist for authoring parity and derived-project
-replacement, not automatic locale selection.
+runtime email rendering still defaults to English in this wave. Additional
+locale `emailTemplates` entries require a deliberate `LOCALES_CONFIG` change
+and derived-project replacement, not automatic locale selection.
 
 ## Proof
 

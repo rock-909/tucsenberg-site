@@ -5,13 +5,20 @@ import {
   type StarterMessageNamespace,
   type StarterProfileId,
 } from "../../src/config/starter-profiles";
+import { LOCALES_CONFIG } from "../../src/config/paths/locales-config";
 import { mergeObjects } from "../../src/lib/merge-objects";
 import type { MessagePackId } from "../../src/lib/i18n/message-pack-config";
 import profileMessagePacks from "../../messages/message-packs.json";
 import type { MaterializedMessageSet } from "./types";
 
-const MESSAGE_LOCALES = ["en"] as const;
+const MESSAGE_LOCALES = LOCALES_CONFIG.locales;
 const MESSAGE_TYPES = ["critical", "deferred"] as const;
+const MESSAGE_LOCALE_PATTERN = MESSAGE_LOCALES.map((locale) =>
+  locale.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+).join("|");
+const COMPAT_MESSAGE_PATH_PATTERN = new RegExp(
+  `^messages\\/(${MESSAGE_LOCALE_PATTERN})\\/(critical|deferred)\\.json$`,
+);
 
 function getMessagePackRoot(packId: MessagePackId): string {
   return packId === "base" ? "messages/base" : `messages/profiles/${packId}`;
@@ -52,9 +59,7 @@ export function composeMessagesForProfileFromFiles(options: {
   relativePath: string;
 }): Record<string, unknown> {
   const { repoRoot, profileId, relativePath } = options;
-  const match = relativePath.match(
-    /^messages\/(en)\/(critical|deferred)\.json$/,
-  );
+  const match = relativePath.match(COMPAT_MESSAGE_PATH_PATTERN);
 
   if (!match) {
     throw new Error(`Unsupported compatibility message path: ${relativePath}`);
@@ -126,6 +131,18 @@ export function materializedMessageRelativePaths(
       }
     }
   }
+
+  for (const locale of MESSAGE_LOCALES) {
+    for (const messageType of MESSAGE_TYPES) {
+      paths.push(`messages/${locale}/${messageType}.json`);
+    }
+  }
+
+  return paths;
+}
+
+export function materializedCompatMessageRelativePaths(): readonly string[] {
+  const paths: string[] = [];
 
   for (const locale of MESSAGE_LOCALES) {
     for (const messageType of MESSAGE_TYPES) {

@@ -5,6 +5,7 @@
  */
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
+import type { Locale } from "@/i18n/routing-config";
 import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ interface HeaderProps {
   className?: string;
   variant?: "default" | "minimal" | "transparent";
   sticky?: boolean;
-  locale?: "en" | "zh";
+  locale?: Locale;
   contactSalesLabel?: string;
   openMenuLabel?: string;
   closeMenuLabel?: string;
@@ -120,7 +121,7 @@ function CenterNav({
   mainNavItems,
 }: {
   isMinimal: boolean;
-  locale?: "en" | "zh" | undefined;
+  locale?: Locale | undefined;
   mainNavItems: Array<{
     key: string;
     href: string;
@@ -167,7 +168,7 @@ function HeaderUtilityControls({
   mobileLanguageLabel,
 }: {
   contactSalesLabel: string;
-  locale: "en" | "zh" | undefined;
+  locale: Locale | undefined;
   openMenuLabel: string;
   closeMenuLabel: string;
   mobileLanguageLabel: string;

@@ -11,12 +11,32 @@ const DEFAULT_PUBLIC_PREVIEW_SMOKE_BASE_URL = DEFAULT_DEPLOY_SMOKE_BASE_URL;
 const DEPLOY_SMOKE_REQUEST_TIMEOUT_MS = 30000;
 const DEPLOY_SMOKE_REQUEST_RETRIES = 2;
 const DEPLOY_SMOKE_RETRY_DELAY_MS = 1000;
-const PUBLIC_PREVIEW_SMOKE_PATHS = [
-  "/",
-  "/en/",
-  "/zh/",
-  "/en/contact/",
-  "/zh/contact/",
+const PUBLIC_PREVIEW_SMOKE_EXPECTATIONS = [
+  { pathname: "/", status: 200 },
+  { pathname: "/products", status: 200 },
+  { pathname: "/contact", status: 200 },
+  { pathname: "/request-quote", status: 200 },
+  { pathname: "/zh", status: 404 },
+  { pathname: "/zh/contact", status: 404 },
+];
+const CF_PREVIEW_SMOKE_EXPECTATIONS = [
+  { pathname: "/", status: 200 },
+  { pathname: "/invalid/contact", status: 404 },
+  { pathname: "/products", status: 200 },
+  { pathname: "/contact", status: 200 },
+  { pathname: "/request-quote", status: 200 },
+  { pathname: "/zh", status: 404 },
+  { pathname: "/zh/contact", status: 404 },
+];
+const DEPLOYED_SMOKE_EXPECTATIONS = [
+  { pathname: "/", status: 200 },
+  { pathname: "/invalid/contact", status: 404 },
+  { pathname: "/products", status: 200 },
+  { pathname: "/contact", status: 200 },
+  { pathname: "/request-quote", status: 200 },
+  { pathname: "/api/health", status: 200 },
+  { pathname: "/zh", status: 404 },
+  { pathname: "/zh/contact", status: 404 },
 ];
 const CF_PREVIEW_PROOF_OUTPUT_PATH = path.join(
   ROOT,
@@ -64,17 +84,6 @@ function parseCloudflarePreviewSmokeArgs(args) {
   return parsed;
 }
 
-function normalizeSetCookieFlags(cookieHeader) {
-  return cookieHeader
-    .split(";")
-    .slice(1)
-    .flatMap((part) => {
-      const flag = part.trim().toLowerCase();
-      return flag && !flag.startsWith("expires=") ? [flag] : [];
-    })
-    .sort();
-}
-
 async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
   const url = new URL(pathname, baseUrl);
   const response = await fetch(url, {
@@ -96,6 +105,14 @@ async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
 
 function pushFailureUnless(condition, message, failures) {
   if (!condition) failures.push(message);
+}
+
+function pushExpectedStatus(response, expectedStatus, failures) {
+  pushFailureUnless(
+    response.status === expectedStatus,
+    `Expected ${response.pathname} to return ${expectedStatus}, got ${response.status}`,
+    failures,
+  );
 }
 
 function parsePublicPreviewSmokeArgs(args) {
@@ -147,14 +164,14 @@ async function runPublicPreviewSmoke(args = []) {
   console.log(`[public-preview-smoke] Probing ${baseUrl}`);
 
   const responses = [];
-  for (const pathname of PUBLIC_PREVIEW_SMOKE_PATHS) {
+  for (const { pathname } of PUBLIC_PREVIEW_SMOKE_EXPECTATIONS) {
     responses.push(await requestPublicPreviewSmoke(baseUrl, pathname));
   }
 
-  for (const response of responses) {
-    pushFailureUnless(
-      response.status === 200,
-      `Expected ${response.pathname} to return 200, got ${response.status}`,
+  for (const [index, response] of responses.entries()) {
+    pushExpectedStatus(
+      response,
+      PUBLIC_PREVIEW_SMOKE_EXPECTATIONS[index].status,
       failures,
     );
     pushFailureUnless(
@@ -189,64 +206,16 @@ async function runCloudflarePreviewSmoke(args = []) {
     `[cf-preview-smoke] Probing ${baseUrl} (${includeApiHealth ? "strict" : "page/header"} mode)`,
   );
 
-  const rootResponse = await requestCloudflarePreviewSmoke(baseUrl, "/");
-  const invalidLocaleResponse = await requestCloudflarePreviewSmoke(
-    baseUrl,
-    "/invalid/contact",
+  const pageResponses = await Promise.all(
+    CF_PREVIEW_SMOKE_EXPECTATIONS.map(({ pathname }) =>
+      requestCloudflarePreviewSmoke(baseUrl, pathname),
+    ),
   );
-  const invalidLocaleDynamicResponse = await requestCloudflarePreviewSmoke(
-    baseUrl,
-    "/fr/products/eu/fittings",
-  );
-  const pageResponses = await Promise.all([
-    requestCloudflarePreviewSmoke(baseUrl, "/en"),
-    requestCloudflarePreviewSmoke(baseUrl, "/zh"),
-    requestCloudflarePreviewSmoke(baseUrl, "/en/contact"),
-    requestCloudflarePreviewSmoke(baseUrl, "/zh/contact"),
-  ]);
   const apiHealthResponse = includeApiHealth
     ? await requestCloudflarePreviewSmoke(baseUrl, "/api/health")
     : null;
 
-  pushFailureUnless(
-    [200, 307, 308].includes(rootResponse.status),
-    `Expected / to return 200/307/308, got ${rootResponse.status}`,
-    failures,
-  );
-
-  if ([307, 308].includes(rootResponse.status)) {
-    pushFailureUnless(
-      rootResponse.location === "/en",
-      `Expected / redirect location to be /en, got ${rootResponse.location ?? "(missing)"}`,
-      failures,
-    );
-  }
-
-  pushFailureUnless(
-    [307, 308].includes(invalidLocaleResponse.status),
-    `Expected /invalid/contact to redirect, got ${invalidLocaleResponse.status}`,
-    failures,
-  );
-  pushFailureUnless(
-    invalidLocaleResponse.location === "/en/contact",
-    `Expected /invalid/contact redirect location to be /en/contact, got ${invalidLocaleResponse.location ?? "(missing)"}`,
-    failures,
-  );
-  pushFailureUnless(
-    [307, 308].includes(invalidLocaleDynamicResponse.status),
-    `Expected /fr/products/eu/fittings to redirect, got ${invalidLocaleDynamicResponse.status}`,
-    failures,
-  );
-  pushFailureUnless(
-    invalidLocaleDynamicResponse.location === "/en/products/eu/fittings",
-    `Expected /fr/products/eu/fittings redirect location to be /en/products/eu/fittings, got ${invalidLocaleDynamicResponse.location ?? "(missing)"}`,
-    failures,
-  );
-
   for (const response of [
-    rootResponse,
-    invalidLocaleResponse,
-    invalidLocaleDynamicResponse,
     ...pageResponses,
     ...(apiHealthResponse ? [apiHealthResponse] : []),
   ]) {
@@ -257,10 +226,15 @@ async function runCloudflarePreviewSmoke(args = []) {
     );
   }
 
-  for (const response of pageResponses) {
+  for (const [index, response] of pageResponses.entries()) {
+    pushExpectedStatus(
+      response,
+      CF_PREVIEW_SMOKE_EXPECTATIONS[index].status,
+      failures,
+    );
     pushFailureUnless(
-      response.status === 200,
-      `Expected ${response.pathname} to return 200, got ${response.status}`,
+      !response.body.includes("Application error"),
+      `Unexpected application error surfaced on ${response.pathname}`,
       failures,
     );
     pushFailureUnless(
@@ -289,30 +263,6 @@ async function runCloudflarePreviewSmoke(args = []) {
       "[cf-preview-smoke] Policy: local preview proves page/header/cookie behavior. API proof belongs to deployed smoke.",
     );
     console.log("[cf-preview-smoke] Reference: .claude/rules/cloudflare.md");
-  }
-
-  if (
-    rootResponse.setCookie &&
-    invalidLocaleResponse.setCookie &&
-    invalidLocaleDynamicResponse.setCookie
-  ) {
-    const rootFlags = normalizeSetCookieFlags(rootResponse.setCookie);
-    const invalidFlags = normalizeSetCookieFlags(
-      invalidLocaleResponse.setCookie,
-    );
-    const invalidDynamicFlags = normalizeSetCookieFlags(
-      invalidLocaleDynamicResponse.setCookie,
-    );
-    pushFailureUnless(
-      JSON.stringify(rootFlags) === JSON.stringify(invalidFlags),
-      `NEXT_LOCALE cookie flags differ between / and /invalid/contact (${rootFlags.join(", ") || "none"} vs ${invalidFlags.join(", ") || "none"})`,
-      failures,
-    );
-    pushFailureUnless(
-      JSON.stringify(rootFlags) === JSON.stringify(invalidDynamicFlags),
-      `NEXT_LOCALE cookie flags differ between / and /fr/products/eu/fittings (${rootFlags.join(", ") || "none"} vs ${invalidDynamicFlags.join(", ") || "none"})`,
-      failures,
-    );
   }
 
   if (failures.length > 0) {
@@ -477,61 +427,18 @@ async function runDeployedSmoke(args = []) {
 
   console.log(`[post-deploy-smoke] Probing ${baseUrl}`);
 
-  const rootResponse = await requestDeployedSmoke(
-    baseUrl,
-    "/",
-    headers,
-    retryEvents,
-  );
-  const invalidLocaleResponse = await requestDeployedSmoke(
-    baseUrl,
-    "/invalid/contact",
-    headers,
-    retryEvents,
-  );
-  const pages = [];
+  const responses = [];
 
-  for (const pathname of [
-    "/en",
-    "/zh",
-    "/api/health",
-    "/en/contact",
-    "/zh/contact",
-  ]) {
-    pages.push(
+  for (const { pathname } of DEPLOYED_SMOKE_EXPECTATIONS) {
+    responses.push(
       await requestDeployedSmoke(baseUrl, pathname, headers, retryEvents),
     );
   }
 
-  pushFailureUnless(
-    [200, 307, 308].includes(rootResponse.status),
-    `Expected / to return 200/307/308, got ${rootResponse.status}`,
-    failures,
-  );
-
-  if ([307, 308].includes(rootResponse.status)) {
-    pushFailureUnless(
-      rootResponse.location === "/en",
-      `Expected / redirect location to be /en, got ${rootResponse.location ?? "(missing)"}`,
-      failures,
-    );
-  }
-
-  pushFailureUnless(
-    [307, 308].includes(invalidLocaleResponse.status),
-    `Expected /invalid/contact to redirect, got ${invalidLocaleResponse.status}`,
-    failures,
-  );
-  pushFailureUnless(
-    invalidLocaleResponse.location === "/en/contact",
-    `Expected /invalid/contact redirect location to be /en/contact, got ${invalidLocaleResponse.location ?? "(missing)"}`,
-    failures,
-  );
-
-  for (const response of pages) {
-    pushFailureUnless(
-      response.status === 200,
-      `Expected ${response.pathname} to return 200, got ${response.status}`,
+  for (const [index, response] of responses.entries()) {
+    pushExpectedStatus(
+      response,
+      DEPLOYED_SMOKE_EXPECTATIONS[index].status,
       failures,
     );
   }

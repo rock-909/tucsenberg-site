@@ -80,7 +80,7 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly DynamicRoutePattern[] = (
  *
  * @example
  * "/en/about".replace(LOCALE_PREFIX_RE, "") // → "/about"
- * "/zh/products/europe".replace(LOCALE_PREFIX_RE, "") // → "/products/europe"
+ * "/fr/products/europe".replace(LOCALE_PREFIX_RE, "") // → "/fr/products/europe" when fr is not configured
  * "/about".replace(LOCALE_PREFIX_RE, "") // → "/about" (no change)
  */
 function escapeRegExp(input: string): string {
@@ -106,7 +106,7 @@ export const LOCALE_PREFIX_RE = new RegExp(
  *
  * @example
  * normalizePathnameForLink("/en/about")  // → "/about"
- * normalizePathnameForLink("/zh/")       // → "/"
+ * normalizePathnameForLink("/fr/")       // → "/fr/" when fr is not configured
  * normalizePathnameForLink("")           // → "/"
  * normalizePathnameForLink("/about")     // → "/about"
  */
@@ -135,7 +135,7 @@ export function normalizePathnameForLink(pathname: string): string {
  * // → "/about"
  *
  * // Dynamic route
- * parsePathnameForLink("/zh/products/europe")
+ * parsePathnameForLink("/fr/products/europe")
  * // → { pathname: "/products/[market]", params: { market: "europe" } }
  */
 export function parsePathnameForLink(currentPathname: string): LinkHref {

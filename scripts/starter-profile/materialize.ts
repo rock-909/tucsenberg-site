@@ -156,7 +156,7 @@ function formatDryRunReport(result: MaterializationResult): string {
     `Selected files: ${fileSet.includedFiles.length}`,
     `Skipped files: ${fileSet.excludedFiles.length}`,
     `Message pack files: ${materializedMessageRelativePaths(plan.profileId).length}`,
-    `Compatibility files (composed on write): messages/{en,zh}/{critical,deferred}.json`,
+    `Compatibility files (composed on write): messages/{locale}/{critical,deferred}.json`,
     `Locales: ${messageSet.locales.join(", ")}`,
   ];
 

@@ -19,8 +19,6 @@ type ContentImporter = () => Promise<MDXContentModule>;
 export const postImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
   },
-  zh: {
-  },
 };
 
 export const pageImporters: Record<string, Record<string, ContentImporter>> = {
@@ -34,13 +32,9 @@ export const pageImporters: Record<string, Record<string, ContentImporter>> = {
     'terms': () => import('../../content/pages/en/terms.mdx'),
     'warranty': () => import('../../content/pages/en/warranty.mdx'),
   },
-  zh: {
-  },
 };
 
 export const productImporters: Record<string, Record<string, ContentImporter>> = {
   en: {
-  },
-  zh: {
   },
 };

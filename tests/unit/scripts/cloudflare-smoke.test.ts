@@ -38,24 +38,16 @@ function createPreviewFetchMock() {
   return vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
     const pathname = getRequestPath(input);
 
-    if (pathname === "/") {
-      return response(307, "", { location: "/en" });
-    }
-
-    if (pathname === "/invalid/contact") {
-      return response(307, "", { location: "/en/contact" });
-    }
-
-    if (pathname === "/fr/products/eu/fittings") {
-      return response(307, "", { location: "/en/products/eu/fittings" });
-    }
-
     if (
-      ["/en", "/zh", "/en/contact", "/zh/contact", "/api/health"].includes(
+      ["/", "/products", "/contact", "/request-quote", "/api/health"].includes(
         pathname,
       )
     ) {
       return response(200, "healthy page");
+    }
+
+    if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
+      return response(404, "not found");
     }
 
     return response(404, "not found");
@@ -66,10 +58,12 @@ function createPublicPreviewFetchMock() {
   return vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
     const pathname = getRequestPath(input);
 
-    if (
-      ["/", "/en/", "/zh/", "/en/contact/", "/zh/contact/"].includes(pathname)
-    ) {
+    if (["/", "/products", "/contact", "/request-quote"].includes(pathname)) {
       return response(200, "healthy public preview page");
+    }
+
+    if (["/zh", "/zh/contact"].includes(pathname)) {
+      return response(404, "not found");
     }
 
     return response(404, "not found");
@@ -86,20 +80,20 @@ function createDeployedFetchMock() {
         return response(401, "missing proof header");
       }
 
-      if (pathname === "/") {
-        return response(307, "", { location: "/en" });
-      }
-
-      if (pathname === "/invalid/contact") {
-        return response(307, "", { location: "/en/contact" });
-      }
-
       if (
-        ["/en", "/zh", "/api/health", "/en/contact", "/zh/contact"].includes(
-          pathname,
-        )
+        [
+          "/",
+          "/products",
+          "/contact",
+          "/request-quote",
+          "/api/health",
+        ].includes(pathname)
       ) {
         return response(200, "healthy deployed page");
+      }
+
+      if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
+        return response(404, "not found");
       }
 
       return response(404, "not found");
@@ -117,11 +111,15 @@ function listenForPublicPreviewSmoke(): Promise<{
       const pathname = request.url ?? "/";
       paths.push(pathname);
 
-      if (
-        ["/", "/en/", "/zh/", "/en/contact/", "/zh/contact/"].includes(pathname)
-      ) {
+      if (["/", "/products", "/contact", "/request-quote"].includes(pathname)) {
         serverResponse.writeHead(200, { "content-type": "text/plain" });
         serverResponse.end("ok");
+        return;
+      }
+
+      if (["/zh", "/zh/contact"].includes(pathname)) {
+        serverResponse.writeHead(404, { "content-type": "text/plain" });
+        serverResponse.end("not found");
         return;
       }
 
@@ -157,25 +155,23 @@ function listenForDeployedSmoke(): Promise<{
       const pathname = request.url ?? "/";
       paths.push(pathname);
 
-      if (pathname === "/") {
-        serverResponse.writeHead(307, { location: "/en" });
-        serverResponse.end();
-        return;
-      }
-
-      if (pathname === "/invalid/contact") {
-        serverResponse.writeHead(307, { location: "/en/contact" });
-        serverResponse.end();
-        return;
-      }
-
       if (
-        ["/en", "/zh", "/api/health", "/en/contact", "/zh/contact"].includes(
-          pathname,
-        )
+        [
+          "/",
+          "/products",
+          "/contact",
+          "/request-quote",
+          "/api/health",
+        ].includes(pathname)
       ) {
         serverResponse.writeHead(200, { "content-type": "text/plain" });
         serverResponse.end("ok");
+        return;
+      }
+
+      if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
+        serverResponse.writeHead(404, { "content-type": "text/plain" });
+        serverResponse.end("not found");
         return;
       }
 
@@ -254,7 +250,14 @@ describe("public preview smoke", () => {
 
     expect(
       fetchMock.mock.calls.map(([input]) => getRequestPath(input)),
-    ).toEqual(["/", "/en/", "/zh/", "/en/contact/", "/zh/contact/"]);
+    ).toEqual([
+      "/",
+      "/products",
+      "/contact",
+      "/request-quote",
+      "/zh",
+      "/zh/contact",
+    ]);
   });
 
   it("keeps the starter-checks facade wired to the public-preview-smoke CLI", async () => {
@@ -270,17 +273,18 @@ describe("public preview smoke", () => {
     expect(result.status).toBe(0);
     expect(paths).toEqual([
       "/",
-      "/en/",
-      "/zh/",
-      "/en/contact/",
-      "/zh/contact/",
+      "/products",
+      "/contact",
+      "/request-quote",
+      "/zh",
+      "/zh/contact",
     ]);
     expect(result.stdout).toContain("[public-preview-smoke] All checks passed");
   });
 });
 
 describe("cloudflare preview smoke", () => {
-  it("proves preview page, redirect, and optional api-health probes", async () => {
+  it("proves preview pages, removed locale routes, and optional api-health probes", async () => {
     const fetchMock = createPreviewFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
@@ -297,21 +301,26 @@ describe("cloudflare preview smoke", () => {
     ).toEqual([
       "/",
       "/invalid/contact",
-      "/fr/products/eu/fittings",
-      "/en",
+      "/products",
+      "/contact",
+      "/request-quote",
       "/zh",
-      "/en/contact",
       "/zh/contact",
       "/api/health",
     ]);
   });
 
-  it("fails when the invalid-locale redirect contract changes", async () => {
-    const fetchMock = createPreviewFetchMock();
-    fetchMock.mockImplementationOnce(async () =>
-      response(307, "", { location: "/en" }),
+  it("fails when the removed Chinese route becomes live again", async () => {
+    const previewFetchMock = createPreviewFetchMock();
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL): Promise<Response> => {
+        if (getRequestPath(input) === "/zh") {
+          return response(200, "wrong status");
+        }
+
+        return previewFetchMock(input);
+      },
     );
-    fetchMock.mockImplementationOnce(async () => response(200, "wrong status"));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
@@ -341,10 +350,11 @@ describe("deployed smoke", () => {
     ).toEqual([
       "/",
       "/invalid/contact",
-      "/en",
-      "/zh",
+      "/products",
+      "/contact",
+      "/request-quote",
       "/api/health",
-      "/en/contact",
+      "/zh",
       "/zh/contact",
     ]);
     expect(
@@ -359,7 +369,7 @@ describe("deployed smoke", () => {
   it("retries transient deployed 5xx responses before failing the proof", async () => {
     vi.useFakeTimers();
 
-    let enAttempts = 0;
+    let productsAttempts = 0;
     const deployedFetchMock = createDeployedFetchMock();
     const fetchMock = vi.fn(
       async (
@@ -368,9 +378,9 @@ describe("deployed smoke", () => {
       ): Promise<Response> => {
         const pathname = getRequestPath(input);
 
-        if (pathname === "/en") {
-          enAttempts += 1;
-          return enAttempts === 1
+        if (pathname === "/products") {
+          productsAttempts += 1;
+          return productsAttempts === 1
             ? response(500, "temporary failure")
             : response(200, "recovered");
         }
@@ -392,7 +402,7 @@ describe("deployed smoke", () => {
     await vi.runAllTimersAsync();
 
     await expect(smokePromise).resolves.toBe(true);
-    expect(enAttempts).toBe(2);
+    expect(productsAttempts).toBe(2);
   });
 
   it("keeps the starter-checks facade wired to the deployed-smoke CLI", async () => {
@@ -409,10 +419,11 @@ describe("deployed smoke", () => {
     expect(paths).toEqual([
       "/",
       "/invalid/contact",
-      "/en",
-      "/zh",
+      "/products",
+      "/contact",
+      "/request-quote",
       "/api/health",
-      "/en/contact",
+      "/zh",
       "/zh/contact",
     ]);
     expect(result.stdout).toContain("[post-deploy-smoke] All checks passed");

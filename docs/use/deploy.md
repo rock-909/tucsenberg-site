@@ -47,6 +47,12 @@ pnpm exec wrangler deploy --dry-run --env preview
 
 These do not prove public launch readiness. For launch proof, continue with `../proof/launch.md`.
 
+During the current development phase, Cloudflare build proof must use a public
+Cloudflare preview URL. Do not use `https://tucsenberg.com` as
+`NEXT_PUBLIC_SITE_URL` until the production domain has a separate launch
+sign-off. In GitHub Actions, set the repository variable
+`CLOUDFLARE_PREVIEW_URL` to the current public preview URL.
+
 ## Preview proof
 
 The manual Cloudflare workflow can verify an already-public preview URL without
@@ -59,7 +65,7 @@ gh workflow run "Cloudflare Workers 部署" --ref main -f environment=preview -f
 This checks public page reachability through `public-preview-smoke`. It does
 not create a new Cloudflare Worker deployment and does not prove Workers
 runtime/API health. Use `deployed-smoke` only for a real Workers runtime URL
-that should serve `/api/health` and locale redirects. Production still requires
+that should serve `/api/health` and current public routes. Production still requires
 `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`.
 
 ## Image delivery

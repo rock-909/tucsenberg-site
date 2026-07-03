@@ -22,7 +22,7 @@ const COPY_BEARING_LOCAL_CONSTANT_TOKENS = new Set([
 ]);
 
 const TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE = [
-  "messages/base/{en,zh}/deferred.json",
+  "messages/base/{locale}/deferred.json",
   "emailTemplates",
   "src/emails/email-copy.ts",
   "src/lib/email/runtime-email-content.ts",
