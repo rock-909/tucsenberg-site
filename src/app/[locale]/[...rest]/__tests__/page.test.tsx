@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
   },
 }));
 
@@ -19,7 +19,6 @@ describe("CatchAllNotFound", () => {
   it("returns placeholder static params for every locale", () => {
     expect(generateStaticParams()).toEqual([
       { locale: "en", rest: ["__not-found-placeholder"] },
-      { locale: "zh", rest: ["__not-found-placeholder"] },
     ]);
   });
 

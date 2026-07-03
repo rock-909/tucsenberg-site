@@ -72,7 +72,7 @@ Review these as clusters, not isolated files:
 
 Lead API family contract tests are auxiliary contract proof; route-level protection proof remains the anti-abuse proof boundary.
 
-Active smoke and component proof markers: `tests/e2e/navigation.spec.ts`, `tests/e2e/i18n.spec.ts`, `tests/e2e/contact-form-smoke.spec.ts`, `tests/e2e/smoke/`, `tests/architecture/component-governance.test.ts`, `pnpm component:check`.
+Active smoke and component proof markers: `tests/e2e/tucsenberg-site-smoke.spec.ts`, `tests/e2e/contact-form-smoke.spec.ts`, `tests/e2e/smoke/`, `tests/architecture/component-governance.test.ts`, `pnpm component:check`.
 
 ## Docs ownership
 

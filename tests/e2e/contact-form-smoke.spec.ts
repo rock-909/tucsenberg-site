@@ -15,67 +15,27 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
 test.describe.configure({ mode: "serial" });
 
 test.describe("Contact Form - Test-Mode Smoke", () => {
-  const getExpectedContactTitle = (locale: "en" | "zh"): RegExp => {
-    return locale === "zh"
-      ? /联系.*Showcase Website Starter|获取报价|联系我们/i
-      : /Contact.*Showcase Website Starter|Get a Quote/i;
-  };
+  const expectedContactTitle = /Contact Tucsenberg/i;
 
-  const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
-    .split(",")
-    .map((locale) => locale.trim())
-    .filter(Boolean);
-  const knownLocales = supportedLocales.length > 0 ? supportedLocales : ["en"];
-
-  const resolveContactUrl = (info: TestInfo, locale: "en" | "zh"): string => {
-    const stagingBase = process.env.STAGING_URL;
+  const resolveSiteUrl = (info: TestInfo, path: string): string => {
     const base =
-      stagingBase ||
+      process.env.STAGING_URL ||
       info.project?.use?.baseURL ||
       process.env.PLAYWRIGHT_BASE_URL ||
-      "http://localhost:3000/en";
+      "http://localhost:3000";
 
     try {
-      const url = new URL(base);
-      const segments = url.pathname.split("/").filter(Boolean);
-      const localeIndex = segments.findIndex((segment) =>
-        knownLocales.includes(segment),
-      );
-
-      if (stagingBase) {
-        segments.push(locale);
-      } else if (localeIndex >= 0) {
-        segments[localeIndex] = locale;
-      } else {
-        segments.push(locale);
-      }
-
-      segments.push("contact");
-      url.pathname = `/${segments.join("/")}`;
-      return url.toString();
+      return new URL(path, base).toString();
     } catch {
-      const normalizedBase = base.replace(/\/$/, "");
-      if (stagingBase) {
-        return `${normalizedBase}/${locale}/contact`;
-      }
-
-      const matchedLocale = knownLocales.find((candidate) =>
-        normalizedBase.endsWith(`/${candidate}`),
-      );
-      const baseWithoutLocale = matchedLocale
-        ? normalizedBase.slice(0, -1 * (matchedLocale.length + 1))
-        : normalizedBase;
-      const root = baseWithoutLocale || normalizedBase;
-      return `${root.replace(/\/$/, "")}/${locale}/contact`;
+      return `${base.replace(/\/$/, "")}${path}`;
     }
   };
 
-  const gotoContactPage = async (
-    page: Page,
-    info: TestInfo,
-    locale: "en" | "zh" = "en",
-  ): Promise<void> => {
-    const targetUrl = resolveContactUrl(info, locale);
+  const resolveContactUrl = (info: TestInfo): string =>
+    resolveSiteUrl(info, "/contact");
+
+  const gotoContactPage = async (page: Page, info: TestInfo): Promise<void> => {
+    const targetUrl = resolveContactUrl(info);
     await page.goto(targetUrl, {
       waitUntil: "domcontentloaded",
     });
@@ -90,9 +50,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     // 检查是否存在错误状态（Error Boundary 渲染的错误提示）
     // 使用多种选择器确保检测到错误状态
     const errorIndicators = [
-      page.getByText("联系表单暂时不可用"),
       page.getByText("Contact form temporarily unavailable"),
-      page.getByRole("button", { name: "重试" }),
       page.getByRole("button", { name: "Retry" }),
     ];
 
@@ -125,7 +83,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       throw new Error(`Contact form did not render: ${targetUrl}`);
     }
 
-    await expect(page).toHaveTitle(getExpectedContactTitle(locale));
+    await expect(page).toHaveTitle(expectedContactTitle);
     await expectInteractiveContactForm(page);
   };
 
@@ -154,7 +112,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
   test.describe("1. Turnstile 验证流程", () => {
     test("应该加载 Turnstile widget（英文页面）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查表单存在
       const form = page.locator("form").first();
@@ -200,19 +158,11 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await expect(form).toBeVisible();
     });
 
-    test("应该加载 Turnstile widget（中文页面）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "zh");
-
-      // 检查表单存在
-      const form = page.locator("form").first();
-      await expect(form).toBeVisible();
-    });
-
     test("提交按钮初始状态应该被禁用", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       const submitButton = page.getByRole("button", {
-        name: /send message|submit/i,
+        name: /send enquiry|send inquiry|submit/i,
       });
       await expect(submitButton).toBeDisabled();
     });
@@ -220,7 +170,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
   test.describe("2. 表单验证与错误信息", () => {
     test("应该显示必填字段错误（英文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查所有必填字段的 required 属性
       // 注意：必填标记 (*) 使用 CSS ::after 伪元素，Playwright 无法直接检测
@@ -247,27 +197,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       );
     });
 
-    test("应该显示必填字段错误（中文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "zh");
-
-      // 检查所有必填字段的 required 属性
-      const requiredInputs = page.locator(
-        "input[required], textarea[required]",
-      );
-      const count = await requiredInputs.count();
-      expect(count).toBeGreaterThan(0);
-
-      // 验证关键必填字段
-      await expect(page.locator('input[name="fullName"]')).toHaveAttribute(
-        "required",
-      );
-      await expect(page.locator('input[name="email"]')).toHaveAttribute(
-        "required",
-      );
-    });
-
     test("应该验证邮箱格式", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       const emailInput = page.locator('input[name="email"]');
       await expect(emailInput).toHaveAttribute("type", "email");
@@ -276,7 +207,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
   test.describe("3. 表单字段渲染", () => {
     test("应该渲染所有必需字段（英文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查所有必需字段
       await expect(page.locator('input[name="fullName"]')).toBeVisible();
@@ -287,21 +218,11 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 检查隐私政策复选框
       await expect(page.locator('input[name="acceptPrivacy"]')).toBeVisible();
     });
-
-    test("应该渲染所有必需字段（中文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "zh");
-
-      // 检查所有必需字段
-      await expect(page.locator('input[name="fullName"]')).toBeVisible();
-      await expect(page.locator('input[name="email"]')).toBeVisible();
-      await expect(page.locator('input[name="company"]')).toBeVisible();
-      await expect(page.locator('textarea[name="message"]')).toBeVisible();
-    });
   });
 
-  test.describe("4. 国际化（i18n）验证", () => {
+  test.describe("4. 英文单语言验证", () => {
     test("英文页面应该显示英文标签", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查英文标签
       await expect(page.getByText(/full name/i).first()).toBeVisible();
@@ -309,13 +230,30 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await expect(page.getByText(/company/i).first()).toBeVisible();
     });
 
-    test("中文页面应该显示中文标签", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "zh");
+    test("联系页不暴露中文语言入口", async ({ page }) => {
+      await gotoContactPage(page, test.info());
 
-      // 检查中文标签
-      await expect(page.getByText(/姓名/).first()).toBeVisible();
-      await expect(page.getByText(/邮箱/).first()).toBeVisible();
-      await expect(page.getByText(/公司/).first()).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      await expect(page.getByText("简体中文")).toHaveCount(0);
+      await expect(page.getByText("中文")).toHaveCount(0);
+      await expect(page.locator('a[hreflang="zh"]')).toHaveCount(0);
+      await expect(page.locator('a[href="/zh"]')).toHaveCount(0);
+    });
+
+    test("/zh/contact 是已移除语言路由", async ({ page }) => {
+      const response = await page.goto(
+        resolveSiteUrl(test.info(), "/zh/contact"),
+        {
+          waitUntil: "domcontentloaded",
+        },
+      );
+
+      expect(response?.status(), "/zh/contact should return HTTP 404").toBe(
+        404,
+      );
+      await expect(page.locator("html")).not.toHaveAttribute("lang", "zh");
+      await expect(page.getByText("简体中文")).toHaveCount(0);
+      await expect(page.locator('a[href="/zh"]')).toHaveCount(0);
     });
   });
 
@@ -324,7 +262,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const startTime = Date.now();
 
       // 性能测试不需要表单可用，只需页面加载
-      const targetUrl = resolveContactUrl(test.info(), "en");
+      const targetUrl = resolveContactUrl(test.info());
       await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
 
       const loadTime = Date.now() - startTime;
@@ -336,7 +274,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     });
 
     test("表单字段应该有可读标签和正确输入类型", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
@@ -371,7 +309,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 设置移动设备视口
       await page.setViewportSize({ width: 375, height: 667 });
 
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查表单在移动设备上可见
       const form = page.locator("form").first();
@@ -379,7 +317,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
       // 检查提交按钮可见
       const submitButton = page.getByRole("button", {
-        name: /send message|submit/i,
+        name: /send enquiry|send inquiry|submit/i,
       });
       await expect(submitButton).toBeVisible();
     });
@@ -388,7 +326,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 设置桌面设备视口
       await page.setViewportSize({ width: 1920, height: 1080 });
 
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // 检查表单在桌面设备上可见
       const form = page.locator("form").first();
@@ -405,7 +343,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       });
 
       // 网络请求验证不需要表单可用
-      const targetUrl = resolveContactUrl(test.info(), "en");
+      const targetUrl = resolveContactUrl(test.info());
       await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
 
       // 检查是否有失败的关键资源请求
@@ -427,7 +365,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("英文页面应该保持真实表单可编辑，而不是只停留在备用壳子", async ({
       page,
     }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       await page.fill('input[name="fullName"]', "Test User");
       await page.fill('input[name="email"]', "test@example.com");
@@ -454,39 +392,11 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         "Test message for rate limiting",
       );
     });
-
-    test("中文页面应该保持真实表单可编辑，而不是只停留在备用壳子", async ({
-      page,
-    }) => {
-      await gotoContactPage(page, test.info(), "zh");
-
-      await page.fill('input[name="fullName"]', "测试用户");
-      await page.fill('input[name="email"]', "test@example.com");
-      await page.fill('input[name="company"]', "测试公司");
-      await page.fill('textarea[name="message"]', "用于速率限制验证的测试消息");
-
-      const privacyCheckbox = page.getByRole("checkbox", {
-        name: /隐私政策|同意/i,
-      });
-      if (await privacyCheckbox.isVisible()) {
-        await privacyCheckbox.check();
-      }
-
-      await expect(page.locator('input[name="fullName"]')).toHaveValue(
-        "测试用户",
-      );
-      await expect(page.locator('input[name="email"]')).toHaveValue(
-        "test@example.com",
-      );
-      await expect(page.locator('textarea[name="message"]')).toHaveValue(
-        "用于速率限制验证的测试消息",
-      );
-    });
   });
 
   test.describe("9. 本地表单填写 smoke 验证", () => {
     test("完整填写后提交入口可见（英文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "en");
+      await gotoContactPage(page, test.info());
 
       // Local smoke only: Playwright uses test-mode Turnstile and does not submit to the deployed lead pipeline.
       await page.waitForTimeout(2000);
@@ -500,8 +410,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         "This is a test message from E2E tests.",
       );
 
-      // 勾选隐私政策 checkbox（必填字段，与中文版测试保持一致）
-      // 注意：acceptPrivacy 是必填字段，不勾选会导致表单验证失败
+      // 勾选隐私政策 checkbox（必填字段，不勾选会导致表单验证失败）
       const privacyCheckbox = page.getByRole("checkbox", {
         name: /privacy|accept/i,
       });
@@ -511,33 +420,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
       // 检查提交入口。本地 smoke 不声明真实提交成功。
       const submitButton = page.getByRole("button", {
-        name: /send message|submit/i,
+        name: /send enquiry|send inquiry|submit/i,
       });
-      await expect(submitButton).toBeVisible();
-    });
-
-    test("完整填写后提交入口可见（中文）", async ({ page }) => {
-      await gotoContactPage(page, test.info(), "zh");
-
-      // Local smoke only: Playwright uses test-mode Turnstile and does not submit to the deployed lead pipeline.
-      await page.waitForTimeout(2000);
-
-      // 填写完整表单，验证本地 UI 可填写和提交入口可见。
-      await page.fill('input[name="fullName"]', "张三");
-      await page.fill('input[name="email"]', "zhangsan@example.com");
-      await page.fill('input[name="company"]', "测试公司");
-      await page.fill('textarea[name="message"]', "这是来自 E2E 测试的消息。");
-
-      // 勾选隐私政策 checkbox（必填）
-      const privacyCheckbox = page.getByRole("checkbox", {
-        name: /隐私政策|同意/i,
-      });
-      if (await privacyCheckbox.isVisible()) {
-        await privacyCheckbox.check();
-      }
-
-      // 检查提交入口。本地 smoke 不声明真实提交成功。
-      const submitButton = page.getByRole("button", { name: /发送|提交/i });
       await expect(submitButton).toBeVisible();
     });
   });

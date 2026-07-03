@@ -6,12 +6,12 @@ User-visible behavior contracts. If one changes, update tests and proof in the s
 
 | ID | Promise | Proof |
 | --- | --- | --- |
-| BC-001 | Homepage loads and shows core value proposition. | `tests/e2e/homepage.spec.ts` |
-| BC-002 | Header/mobile menu navigate to Home, Products, Blog, Resources, About; Contact is CTA. | `tests/e2e/navigation.spec.ts`, `tests/e2e/basic-navigation.spec.ts` |
+| BC-001 | Tucsenberg Phase 1 pages load and show current page headings. | `tests/e2e/tucsenberg-site-smoke.spec.ts` |
+| BC-002 | Header/mobile menu use the current Tucsenberg IA: Products, OEM/Wholesale, Guides, About, RFQ, and Contact. | layout/navigation component tests and `tests/e2e/tucsenberg-site-smoke.spec.ts` |
 | BC-003 | Current public site is English-only: `html[lang]` is `en`, Chinese links are not exposed, and `/zh` returns 404. | `tests/e2e/tucsenberg-site-smoke.spec.ts` |
 | BC-004 | Root serves the default English site without a locale prefix. | `tests/e2e/tucsenberg-site-smoke.spec.ts` |
-| BC-005 | Unknown routes return localized 404. | `tests/e2e/user-journeys.spec.ts` |
-| BC-006 | Mobile menu opens, navigates, auto-closes, and handles Escape. | `tests/e2e/navigation.spec.ts` |
+| BC-005 | Unknown routes return the current not-found boundary and retired `/zh` routes stay 404. | catch-all route tests, Cloudflare smoke tests, and `tests/e2e/tucsenberg-site-smoke.spec.ts` |
+| BC-006 | Mobile menu opens, renders current navigation items, and closes through the component interaction path. | mobile navigation component tests |
 
 ## Conversion
 
@@ -41,7 +41,7 @@ Proof:
 ```bash
 pnpm content:check
 node scripts/starter-checks.js translations
-CI=1 pnpm exec playwright test tests/e2e/seo-validation.spec.ts --project=chromium
+CI=1 pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts --project=chromium
 ```
 
 ## Lead pipeline details
