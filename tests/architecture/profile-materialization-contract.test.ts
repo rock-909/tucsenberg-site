@@ -163,7 +163,12 @@ describe("profile materialization contract", () => {
     const companySitePlan =
       buildStarterProfileMaterializationPlan("company-site");
 
-    for (const keptPath of [".mcp.example.json", "semgrep.yml"]) {
+    for (const keptPath of [
+      ".mcp.example.json",
+      "semgrep.yml",
+      "AGENTS.md",
+      "CLAUDE.md",
+    ]) {
       expect(
         shouldIncludeRepoPath(keptPath, companySitePlan),
         `${keptPath} should stay in materialized output when docs classify it as derived-site tooling`,
@@ -177,6 +182,8 @@ describe("profile materialization contract", () => {
     expect(lifecycleDocs).toContain("site-long-term");
     expect(lifecycleDocs).not.toContain("`.mcp.example.json` | later decision");
     expect(lifecycleDocs).not.toContain("`semgrep.yml` | later decision");
+    expect(lifecycleDocs).not.toContain("`AGENTS.md` | later decision");
+    expect(lifecycleDocs).not.toContain("`CLAUDE.md` | later decision");
     expect(surfacesDocs).toContain("Materialization keeps these files");
     expect(startDocs).toContain(".mcp.example.json");
     expect(startDocs).toContain("semgrep.yml");

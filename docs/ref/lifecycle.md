@@ -70,8 +70,8 @@ These checks belong to the concrete website, not to the starter factory.
 | `.mcp.example.json` | `derive-once` | Safe example developer integration config; keep in generated output as a handoff example, then replace or remove if the concrete website does not use MCP tooling. |
 | `semgrep.yml` | `site-long-term` | Security scan config paired with `.github/workflows/**`; keep when the derived website keeps the Semgrep CI job, or rewrite/remove both together. |
 | `.github/**` | later decision | CI/release ownership still needs a separate handoff decision. |
-| `AGENTS.md` | later decision | Cross-tool project instructions; keep until generated-site guidance is explicitly split. |
-| `CLAUDE.md` | later decision | Agent guidance surface; keep until generated-site guidance is explicitly split. |
+| `AGENTS.md` | `site-long-term` | Cross-tool current Tucsenberg project instructions; keep aligned with `docs/README.md` and `docs/ref/project.md`. |
+| `CLAUDE.md` | `site-long-term` | Claude current Tucsenberg project instructions; keep aligned with `AGENTS.md` and `docs/README.md`. |
 
 ## Check lifecycle matrix
 
