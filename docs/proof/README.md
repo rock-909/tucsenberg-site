@@ -9,6 +9,7 @@
 - `release.md`：release-sensitive 改动的串行命令顺序。
 - `dry-run.md`：继承的 starter `company-site` materialized output 边界证明。
 - `baselines/`：warning、route mode、React Doctor、client boundary 等证明基线。
+- `performance/`：历史 starter 性能证明和基线；不是当前 Tucsenberg 上线证明。
 
 当前 Tucsenberg 上线证明以 `launch.md` 为准；starter/profile 证明只在维护
 继承工具时使用，不能替代当前站证明。
