@@ -172,6 +172,12 @@ const nextConfig: NextConfig = {
         value: "public, max-age=31536000, immutable",
       },
     ];
+    const pdfNoindexHeaders = [
+      {
+        key: "X-Robots-Tag",
+        value: "noindex",
+      },
+    ];
 
     const headerConfigs = [
       // 安全头部应用到所有路径
@@ -183,9 +189,14 @@ const nextConfig: NextConfig = {
             },
           ]
         : []),
+      // PDF downloads are buyer aids, not SEO landing pages.
+      {
+        source: "/downloads/:path*.pdf",
+        headers: pdfNoindexHeaders,
+      },
       // CDN 缓存策略应用到静态资源
       {
-        source: "/:all*(svg|jpg|jpeg|png|webp|woff|woff2|ttf|otf)",
+        source: "/:all*(svg|jpg|jpeg|png|webp|pdf|woff|woff2|ttf|otf)",
         headers: cdnCacheHeaders,
       },
     ];

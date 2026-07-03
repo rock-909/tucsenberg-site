@@ -52,6 +52,21 @@ const TARGET_MDX_PAGES = [
   "content/pages/en/terms.mdx",
 ] as const;
 
+const TARGET_DOWNLOADS = [
+  "public/downloads/product-catalog.pdf",
+  "public/downloads/quotation-template.pdf",
+  "public/downloads/supplier-checklist.pdf",
+  "public/downloads/spec-sheet-tb-ag.pdf",
+  "public/downloads/spec-sheet-tb-bw.pdf",
+  "public/downloads/spec-sheet-tb-fb.pdf",
+  "public/downloads/spec-sheet-tb-td.pdf",
+] as const;
+
+const ACTIVE_MESSAGE_FILES = [
+  "messages/profiles/catalog/en/critical.json",
+  "messages/en/critical.json",
+] as const;
+
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
 const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".ts",
@@ -74,6 +89,15 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /FM\s*2510/iu,
   /\bFEMA\b/iu,
   /keeps your house dry/iu,
+];
+const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
+  /Showcase Website Starter/iu,
+  /Modern B2B showcase starter/iu,
+  /Replaceable catalog example/iu,
+  /Replace example content/iu,
+  /north-america/iu,
+  /australia-new-zealand/iu,
+  /specialty-product-systems/iu,
 ];
 
 function toRepoPath(absolutePath: string): string {
@@ -114,6 +138,17 @@ function walkPublicSourceFiles(dir: string, results: string[] = []): string[] {
 function readRepoFile(repoPath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads paths produced by fixed repo-local scan roots
   return readFileSync(repoPath, "utf8");
+}
+
+function readRepoJson(repoPath: string): unknown {
+  return JSON.parse(readRepoFile(repoPath)) as unknown;
+}
+
+function getObject(value: unknown, label: string): Record<string, unknown> {
+  expect(value, label).toBeTruthy();
+  expect(typeof value, label).toBe("object");
+  expect(Array.isArray(value), label).toBe(false);
+  return value as Record<string, unknown>;
 }
 
 describe("Tucsenberg Phase 1 site contract", () => {
@@ -159,6 +194,21 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
+  it("copies approved PDF downloads into the public download surface", () => {
+    for (const downloadFile of TARGET_DOWNLOADS) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed download file list
+      expect(() => statSync(downloadFile), downloadFile).not.toThrow();
+    }
+  });
+
+  it("sets PDF downloads to noindex at the response-header layer", () => {
+    const nextConfig = readRepoFile("next.config.ts");
+
+    expect(nextConfig).toContain('source: "/downloads/:path*.pdf"');
+    expect(nextConfig).toContain('key: "X-Robots-Tag"');
+    expect(nextConfig).toContain('value: "noindex"');
+  });
+
   it("does not keep Chinese public content directories", () => {
     expect(() => statSync("content/pages/zh")).toThrow();
     expect(() => statSync("messages/base/zh")).toThrow();
@@ -177,6 +227,48 @@ describe("Tucsenberg Phase 1 site contract", () => {
       for (const pattern of FORBIDDEN_PUBLIC_PATTERNS) {
         if (pattern.test(source)) {
           offenders.push(`${filePath} :: ${pattern}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("uses Tucsenberg-owned active homepage and catalog messages", () => {
+    for (const messageFile of ACTIVE_MESSAGE_FILES) {
+      const messages = getObject(readRepoJson(messageFile), messageFile);
+      const home = getObject(messages.home, `${messageFile} home`);
+      const hero = getObject(home.hero, `${messageFile} home.hero`);
+      const catalog = getObject(messages.catalog, `${messageFile} catalog`);
+      const overview = getObject(
+        catalog.overview,
+        `${messageFile} catalog.overview`,
+      );
+      const markets = getObject(
+        catalog.markets,
+        `${messageFile} catalog.markets`,
+      );
+
+      expect(hero.title, messageFile).toBe(
+        "Factory-Direct Flood Barriers from China",
+      );
+      expect(hero.subtitle, messageFile).toContain(
+        "Five product lines, one coordinated factory pool, one QC standard.",
+      );
+      expect(overview.title, messageFile).toBe("Flood Barrier Product Lines");
+      expect(Object.keys(markets), messageFile).toEqual(TARGET_PRODUCT_SLUGS);
+    }
+  });
+
+  it("keeps starter and old catalog wording out of active message surfaces", () => {
+    const offenders: string[] = [];
+
+    for (const messageFile of ACTIVE_MESSAGE_FILES) {
+      const source = readRepoFile(messageFile);
+
+      for (const pattern of FORBIDDEN_ACTIVE_MESSAGE_PATTERNS) {
+        if (pattern.test(source)) {
+          offenders.push(`${messageFile} :: ${pattern}`);
         }
       }
     }

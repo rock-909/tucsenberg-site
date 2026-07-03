@@ -1,70 +1,213 @@
 {
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "oemWholesale": "OEM & Wholesale",
+    "guides": "Guides",
+    "about": "About",
+    "contact": "Contact",
+    "contactSales": "Request a Quote",
+    "siteName": "{siteName}",
+    "siteDescription": "Factory-direct flood barrier supply from China."
+  },
+  "footer": {
+    "systemStatus": "Tucsenberg · Jiangsu Tucson Borg Technology Co., Ltd. · sales@tucsenberg.com",
+    "sections": {
+      "navigation": {
+        "title": "Navigation",
+        "home": "Home",
+        "products": "Products",
+        "oemWholesale": "OEM & Wholesale",
+        "materialsGuide": "Materials Guide",
+        "about": "About"
+      },
+      "support": {
+        "title": "Support",
+        "requestQuote": "Request a Quote",
+        "contact": "Contact",
+        "warranty": "Warranty Policy",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service"
+      }
+    },
+    "copyright": "{copyright}",
+    "description": "Factory-direct flood barrier supply from China."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "OEM · Private Label · Custom-Cut",
+      "title": "Factory-Direct Flood Barriers from China",
+      "subtitle": "Five product lines, one coordinated factory pool, one QC standard. Sandbag alternatives, garage flood barriers and removable flood gates — for dealers, importers, brands and businesses, from a single carton to mixed full containers.",
+      "cta": {
+        "primary": "Request a Quote",
+        "secondary": "Wholesale & OEM"
+      },
+      "proof": {
+        "est": "Standard items",
+        "estLabel": "quoted in 12 hours",
+        "countries": "3-year warranty",
+        "countriesLabel": "on all standard lines",
+        "range": "Factory pool",
+        "rangeLabel": "supplies established brands",
+        "production": "OEM",
+        "productionLabel": "private label ready"
+      },
+      "preview": {
+        "label": "Product line map",
+        "title": "ABS, aluminum, flood bags, tube dams and FRP",
+        "description": "Start with the opening, the ground and the order size. The same RFQ can route to standard stock, custom-cut openings, private label packaging or mixed-line consolidation.",
+        "productSystem": "ABS boxwall",
+        "applicationFit": "Aluminum gates",
+        "deliveryProof": "Flood bags",
+        "inquiryPath": "Tube dams & FRP"
+      },
+      "proofAriaLabel": "Tucsenberg quote, warranty and factory-pool facts"
+    },
+    "problems": {
+      "title": "Five product lines",
+      "description": "Sandbag alternatives, garage flood barriers and removable flood gates for dealers, importers, brands and businesses.",
+      "items": {
+        "structure": {
+          "title": "ABS Interlocking Boxwall — TB-BW series",
+          "description": "Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own."
+        },
+        "content": {
+          "title": "Aluminum Flood Gates — TB-AG series",
+          "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule."
+        },
+        "deployment": {
+          "title": "Absorbent Flood Bags — TB-FB series",
+          "description": "Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order in our range."
+        },
+        "inquiry": {
+          "title": "Water & Air-Filled Tube Dams — TB-TD series",
+          "description": "Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock."
+        },
+        "multilingual": {
+          "title": "FRP Composite Planks — TB-CP series",
+          "description": "Pultruded composite planks: corrosion-free, non-conductive, built for coastal and industrial sites. In development with our pultrusion partners."
+        }
+      }
+    },
+    "answer": {
+      "title": "Who we supply",
+      "description": "The same product range supports trade stock, private label programs, custom-cut project schedules and small-batch first orders.",
+      "items": {
+        "pageStructure": {
+          "title": "Dealers & Distributors",
+          "description": "Stable specs, spare-parts continuity, margin room protected by our no-retail-pricing policy."
+        },
+        "replacementSurface": {
+          "title": "Importers & Brands (OEM)",
+          "description": "Private label across all five lines; moulded logos, custom packaging, your documentation."
+        },
+        "inquiryPath": {
+          "title": "Contractors & Projects",
+          "description": "Custom-cut per approved drawings, mixed-material supply for one site, spec sheets your engineer can read."
+        },
+        "cloudflareFoundation": {
+          "title": "Small Business Buyers",
+          "description": "Carton and pallet orders welcome. First time importing? We'll walk you through it."
+        }
+      }
+    },
+    "startPath": {
+      "title": "How we work",
+      "description": "From RFQ to mixed-line shipment, the buying path is built for standard stock, custom-cut openings and OEM/private label supply.",
+      "items": {
+        "brand": {
+          "title": "Send your RFQ",
+          "description": "Openings, quantities, market. Photos and drawings welcome."
+        },
+        "content": {
+          "title": "Quote in 12 hours",
+          "description": "Standard items quoted in 12 hours; custom configurations within 48."
+        },
+        "forms": {
+          "title": "Paid sample",
+          "description": "Sample fee credited against your first order."
+        },
+        "deploy": {
+          "title": "Production & QC",
+          "description": "One QC standard across the factory pool; inspection report before shipment."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Protecting openings or building a product line — either way, start with the numbers.",
+      "description": "Send your requirement; standard items quoted in 12 hours.",
+      "primary": "View product lines",
+      "secondary": "Request a Quote",
+      "trustAriaLabel": "Homepage trust facts",
+      "trust": "Standard items quoted in 12 hours · 3-year warranty on all standard lines · Factory pool supplies established brands"
+    }
+  },
   "catalog": {
     "breadcrumb": {
       "home": "Home",
       "products": "Products"
     },
     "overview": {
-      "title": "Product overview",
-      "description": "Introduce the main product lines or market groups visitors should understand before they contact you.",
-      "cardsTitle": "What visitors should learn here",
-      "cardsDescription": "Keep the overview short. Replace these cards with real product groups, proof materials, and buying steps.",
-      "boundaryTitle": "Replace before launch",
-      "boundaryDescription": "The structure is ready, but market facts, specifications, and proof must come from the real catalog.",
+      "title": "Flood Barrier Product Lines",
+      "description": "Five flood barrier lines for dealers, importers, brands, contractors and small business buyers: ABS boxwall, aluminum flood gates, absorbent flood bags, tube dams and FRP composite planks.",
+      "cardsTitle": "Start with the product line",
+      "cardsDescription": "Match the opening, ground type and order size before asking for exact quotation details.",
+      "boundaryTitle": "No published-price games",
+      "boundaryDescription": "The quote is the price conversation. Send dimensions, quantity, market and delivery port so the line can be checked properly.",
       "pathTitle": "How this overview should work",
-      "pathDescription": "Keep the page as a simple map: show offer groups, point to proof, then route the visitor to resources or contact.",
-      "detailTitle": "Use detail pages only when needed",
-      "detailDescription": "Stay with this lightweight overview until the real business has product families, comparison rules, and quote logic ready."
+      "pathDescription": "Scan the five lines, compare where each one fits, then send an RFQ with dimensions, quantity and market.",
+      "detailTitle": "When to open a product page",
+      "detailDescription": "Use the detail pages when the buying question depends on material, opening type, deployment method or OEM/private label options."
     },
     "overviewCards": {
       "mainOffer": {
-        "title": "Product groups",
-        "description": "Summarize the main categories, families, or market groups a visitor needs to compare."
+        "title": "ABS, aluminum, bags, tube dams and FRP",
+        "description": "Five product lines, one coordinated factory pool, one QC standard."
       },
       "proofMaterials": {
-        "title": "Proof materials",
-        "description": "Point to brochures, photos, examples, or documents that help a buyer trust the offer."
+        "title": "Specs and supply boundaries",
+        "description": "Tables show typical product parameters and where final values must be confirmed at quotation."
       },
       "nextStep": {
-        "title": "Buying next step",
-        "description": "Make it clear when visitors should review market detail, ask a question, or request a quote."
+        "title": "RFQ-ready next step",
+        "description": "Openings, quantities, market and delivery port are enough to start. Photos and drawings help."
       }
     },
     "boundary": {
       "items": {
-        "content": "Replace product names and market descriptions",
-        "assets": "Replace images, brochures, and proof",
-        "details": "Add real availability, pricing, or quote rules"
+        "content": "Prices stay in the quotation, not on public pages",
+        "assets": "Photos and drawings are welcome with the RFQ",
+        "details": "Custom-cut and private label details are confirmed per order"
       }
     },
     "path": {
       "items": {
         "scan": {
-          "title": "Scan product groups",
-          "description": "Help visitors understand the offer families before they ask for specifics."
+          "title": "Scan the five lines",
+          "description": "ABS boxwall, aluminum gates, flood bags, tube dams and FRP planks cover different site conditions."
         },
         "compare": {
-          "title": "Check proof materials",
-          "description": "Send visitors to resources when they need brochures, photos, or buyer guidance."
+          "title": "Check the fit",
+          "description": "Defined openings, perimeters, emergency stock, rough ground and corrosive sites need different materials."
         },
         "ask": {
-          "title": "Ask for fit",
-          "description": "Move visitors to contact when they need pricing, availability, or project fit."
+          "title": "Send the RFQ",
+          "description": "Standard items are quoted in 12 hours; custom configurations within 48."
         }
       }
     },
     "detail": {
       "items": {
-        "families": "Real product families and priorities are confirmed",
-        "comparison": "Specifications or comparison rules affect buying decisions",
-        "markets": "Markets, standards, or availability need separate pages"
+        "families": "Product family, material and deployment method affect the recommendation",
+        "comparison": "Specification tables and drawings decide custom-cut configurations",
+        "markets": "OEM/private label, cartons, pallets, LCL, container and project schedules are quoted differently"
       }
     },
     "cta": {
-      "title": "Need market or specification detail?",
-      "description": "Contact the team for catalogs, specifications, or a quote.",
-      "resources": "View resources",
-      "contact": "Contact"
+      "title": "Need exact line, quantity or configuration detail?",
+      "description": "Send an RFQ with openings, quantity, market and delivery port.",
+      "resources": "View guides",
+      "contact": "Request a Quote"
     },
     "market": {
       "familyNav": {
@@ -79,7 +222,7 @@
       "trade": {
         "title": "Trade Information",
         "moq": "Minimum Order",
-        "leadTime": "Lead Time",
+        "leadTime": "Quote Timing",
         "supplyCapacity": "Supply Capacity",
         "packaging": "Packaging",
         "portOfLoading": "Port of Loading"
@@ -87,7 +230,7 @@
       "specsComingSoon": "Specifications coming soon. Contact us for detailed product data.",
       "cta": {
         "heading": "Need to review {marketLabel}?",
-        "description": "Send an inquiry or replace this prompt with the real specs, scope, quantity, timeline, or project notes.",
+        "description": "Send an inquiry with dimensions, quantity, market, timeline and photos or drawings if available.",
         "button": "Request a Quote"
       },
       "familyInquiry": {
@@ -95,544 +238,245 @@
       }
     },
     "specTable": {
-      "size": "Size",
-      "angle": "Angle",
-      "wallThickness": "Wall Thickness",
-      "endType": "End Type",
-      "radius": "Radius",
-      "type": "Type",
-      "length": "Length",
-      "schedule": "Schedule",
-      "bendRadius": "Bend Radius",
-      "connection": "Connection",
-      "duty": "Duty",
-      "material": "Material",
-      "outerDiameter": "Outer Diameter"
+      "Height": "Height",
+      "Model": "Model",
+      "Straight unit": "Straight unit",
+      "Curve units (in/out)": "Curve units (in/out)",
+      "Wall thickness": "Wall thickness",
+      "Parameter": "Parameter",
+      "Value": "Value",
+      "": "",
+      "Dry size": "Dry size",
+      "Dry weight": "Dry weight",
+      "Deployed weight": "Deployed weight",
+      "Activation time": "Activation time",
+      "Deployed height": "Deployed height",
+      "Packing": "Packing",
+      "Carton (NW/GW)": "Carton (NW/GW)",
+      "Colours": "Colours",
+      "Section length": "Section length",
+      "Protection height": "Protection height",
+      "Tube wall": "Tube wall",
+      "Ground mat": "Ground mat",
+      "Fabric weight": "Fabric weight",
+      "Section weight": "Section weight",
+      "Tear strength": "Tear strength",
+      "Tensile strength": "Tensile strength",
+      "Flex durability": "Flex durability",
+      "Fire rating": "Fire rating",
+      "Working temperature": "Working temperature",
+      "Inflation": "Inflation",
+      "Area": "Area",
+      "Status": "Status"
     },
     "familyCount": "{count} product families",
     "markets": {
-      "north-america": {
-        "label": "Primary Offer Example",
-        "description": "Replaceable catalog example for a standards-based product or service group."
+      "abs-flood-barriers": {
+        "label": "ABS Interlocking Boxwall Flood Barriers",
+        "description": "Freestanding ABS interlocking flood barriers for driveways, doorways and paved perimeters."
       },
-      "australia-new-zealand": {
-        "label": "Secondary Offer Example",
-        "description": "Replaceable catalog example for a second market, service tier, or regional offer."
+      "aluminum-flood-gates": {
+        "label": "Aluminum Flood Gates & Demountable Barrier Systems",
+        "description": "Demountable plank systems for doors, garages, loading docks and shopfronts."
       },
-      "mexico": {
-        "label": "Regional Offer Example",
-        "description": "Replaceable catalog example for a regional or compliance-based offer."
+      "absorbent-flood-bags": {
+        "label": "Absorbent Flood Bags (Sandless Sandbags)",
+        "description": "Water-activated sandless flood bags for low-level freshwater leaks, thresholds and reseller stock."
       },
-      "europe": {
-        "label": "Platform Offer Example",
-        "description": "Replaceable catalog example for another market, platform, or standards group."
+      "flood-tube-dams": {
+        "label": "Water & Air-Filled Tube Dams",
+        "description": "Inflatable PVC tube dams for long runs, rough ground and planned emergency stock."
       },
-      "specialty-product-systems": {
-        "label": "Specialty Examples",
-        "description": "Replaceable specialty examples for niche product, service, or project workflows."
+      "frp-flood-barriers": {
+        "label": "FRP Composite Planks",
+        "description": "Order-driven pultruded FRP flood planks for coastal, industrial and electrical sites."
       }
     },
     "families": {
-      "north-america": {
-        "sample-product-shapes": {
-          "label": "Sample Product Shapes",
-          "description": "Replaceable item examples for versions, shapes, packages, or service variants."
-        },
-        "couplings": {
-          "label": "Support Packages",
-          "description": "Replaceable companion examples for add-ons, bundles, or supporting services."
-        },
-        "sample-product-runs": {
-          "label": "Sample Product Runs",
-          "description": "Replaceable item examples with size, standard, or package details."
+      "abs-flood-barriers": {
+        "abs-boxwall": {
+          "label": "ABS boxwall units",
+          "description": "Straight, curved and gable-end ABS units for freestanding runs."
         }
       },
-      "australia-new-zealand": {
-        "sample-product-shapes": {
-          "label": "Sample Product Shapes",
-          "description": "Replaceable item examples for a second market or service variant."
-        },
-        "bellmouths": {
-          "label": "Resource Kits",
-          "description": "Replaceable accessory examples for a product, service, or resource variant."
-        },
-        "couplings": {
-          "label": "Support Packages",
-          "description": "Replaceable companion examples for a second market or service variant."
-        },
-        "sample-product-runs": {
-          "label": "Sample Product Runs",
-          "description": "Replaceable item examples for a second market or service variant."
+      "aluminum-flood-gates": {
+        "aluminum-gates": {
+          "label": "Aluminum demountable systems",
+          "description": "Planks, posts, seals and spares custom-cut to each opening schedule."
         }
       },
-      "mexico": {
-        "sample-product-shapes": {
-          "label": "Sample Product Shapes",
-          "description": "Replaceable item examples for a regional or compliance-based offer."
-        },
-        "couplings": {
-          "label": "Support Packages",
-          "description": "Replaceable companion examples for a regional offer."
-        },
-        "sample-product-runs": {
-          "label": "Sample Product Runs",
-          "description": "Replaceable item examples for a regional offer."
+      "absorbent-flood-bags": {
+        "absorbent-bags": {
+          "label": "Water-activated flood bags",
+          "description": "Flat-packed SAP-core bags for rain and inland freshwater flooding."
         }
       },
-      "europe": {
-        "sample-product-shapes": {
-          "label": "Sample Product Shapes",
-          "description": "Replaceable item examples for another market or standards group."
-        },
-        "couplings": {
-          "label": "Support Packages",
-          "description": "Replaceable companion examples for another market group."
-        },
-        "sample-product-runs": {
-          "label": "Sample Product Runs",
-          "description": "Replaceable item examples for another market group."
+      "flood-tube-dams": {
+        "tube-dams": {
+          "label": "Inflatable tube dam sections",
+          "description": "Five and ten metre PVC sections with pump, skirt, nails and repair kit."
         }
       },
-      "specialty-product-systems": {
-        "specialty-units": {
-          "label": "Specialty Units",
-          "description": "Replaceable specialty examples for niche products, services, or workflows."
-        },
-        "fittings": {
-          "label": "Integration Examples",
-          "description": "Integration examples for product, service, or workflow systems."
+      "frp-flood-barriers": {
+        "frp-planks": {
+          "label": "Pultruded composite planks",
+          "description": "Order-driven FRP plank profiles with span and deflection data compiled per first runs."
         }
       }
     },
     "technicalLabels": {
       "material": "Material",
-      "surface": "Surface",
-      "uvResistance": "Outdoor Readiness",
-      "temperatureRange": "Operating Range",
-      "lifespan": "Lifecycle Claim",
-      "fireRating": "Safety Claim",
-      "standard": "Example Standard",
-      "transparency": "Visibility Layer",
-      "maxWorkingPressure": "Project Limit",
-      "impactResistance": "Durability Claim"
+      "workingTemperature": "Working temperature",
+      "configurations": "Configurations",
+      "plankProfileHeight": "Plank profile height",
+      "postOptions": "Post options",
+      "useBoundary": "Use boundary",
+      "shelfLife": "Shelf life",
+      "protectionHeight": "Protection height",
+      "fillMode": "Fill mode",
+      "profileClass": "Profile class",
+      "status": "Status"
     },
     "specs": {
-      "north-america": {
+      "abs-flood-barriers": {
         "technical": {
-          "material": "Replaceable core material",
-          "surface": "Example finish or presentation layer",
-          "uvResistance": "Outdoor-ready placeholder attribute",
-          "temperatureRange": "Project-specific operating range",
-          "lifespan": "Replace with real lifecycle claim",
-          "fireRating": "Replace with real safety claim"
+          "material": "UV-stabilised ABS",
+          "workingTemperature": "-40 °C to +95 °C",
+          "configurations": "Straight, inward/outward curve, gable end"
         },
         "trade": {
-          "moq": "Example minimum order",
-          "leadTime": "Replace with real timeline",
-          "supplyCapacity": "Replace with real monthly capacity",
-          "packaging": "Replace with real packaging or delivery model",
-          "portOfLoading": "Replace with real dispatch point"
+          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
+          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
+          "supplyCapacity": "Confirmed with each quotation.",
+          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
+          "portOfLoading": "China port confirmed at quotation."
         },
         "families": {
-          "sample-product-shapes": {
+          "abs-boxwall": {
             "highlights": {
-              "0": "Example Standard A ready",
-              "1": "Configurable material",
-              "2": "Multiple layout options"
+              "0": "Freestanding L-profile; no anchors, no drilling, no damage to the surface.",
+              "1": "Mechanical locking-and-coupling joint; no tools, no loose pins.",
+              "2": "Straight, inward/outward curve and gable-end units available at every height."
             },
             "groups": {
               "0": {
-                "label": "Basic Option"
-              },
-              "1": {
-                "label": "Advanced Option"
-              }
-            }
-          },
-          "couplings": {
-            "highlights": {
-              "0": "Bundle-ready structure",
-              "1": "Secure handoff path",
-              "2": "Multi-size range"
-            },
-            "groups": {
-              "0": {
-                "label": "Basic Option"
-              },
-              "1": {
-                "label": "Advanced Option"
-              }
-            }
-          },
-          "sample-product-runs": {
-            "highlights": {
-              "0": "Basic and advanced tiers",
-              "1": "Standard package lengths",
-              "2": "Straightforward example entries"
-            },
-            "groups": {
-              "0": {
-                "label": "Basic Option"
-              },
-              "1": {
-                "label": "Advanced Option"
+                "label": "TB-BW series"
               }
             }
           }
         }
       },
-      "australia-new-zealand": {
+      "aluminum-flood-gates": {
         "technical": {
-          "material": "Replaceable secondary material",
-          "surface": "Example finish or content layer",
-          "uvResistance": "Outdoor-ready placeholder attribute",
-          "temperatureRange": "Project-specific operating range",
-          "lifespan": "Replace with real lifecycle claim",
-          "fireRating": "Replace with real safety claim",
-          "standard": "Example Standard B"
+          "material": "6063-T6 aluminum with EPDM seals",
+          "plankProfileHeight": "180 mm",
+          "postOptions": "wall-mount / ground-socket / freestanding"
         },
         "trade": {
-          "moq": "Example minimum order",
-          "leadTime": "Replace with real timeline",
-          "supplyCapacity": "Replace with real monthly capacity",
-          "packaging": "Replace with real packaging or delivery model",
-          "portOfLoading": "Replace with real dispatch point"
+          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
+          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
+          "supplyCapacity": "Confirmed with each quotation.",
+          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
+          "portOfLoading": "China port confirmed at quotation."
         },
         "families": {
-          "sample-product-shapes": {
+          "aluminum-gates": {
             "highlights": {
-              "0": "Example Standard B ready",
-              "1": "Standard and premium tiers",
-              "2": "Multiple layout options"
+              "0": "Custom-cut to your opening schedule from tested profiles.",
+              "1": "Replacement seals, clamps and single planks stay orderable for years.",
+              "2": "Wall-mounted channels, ground-socket posts and freestanding posts."
             },
             "groups": {
               "0": {
-                "label": "Standard Tier"
-              },
-              "1": {
-                "label": "Premium Tier"
-              }
-            }
-          },
-          "bellmouths": {
-            "highlights": {
-              "0": "Resource entry support",
-              "1": "Example Standard B compatible",
-              "2": "Visitor guidance ready"
-            },
-            "groups": {
-              "0": {
-                "label": "Standard Tier"
-              },
-              "1": {
-                "label": "Premium Tier"
-              }
-            }
-          },
-          "couplings": {
-            "highlights": {
-              "0": "Bundle-ready structure",
-              "1": "Example Standard B compatible",
-              "2": "Standard and premium tiers"
-            },
-            "groups": {
-              "0": {
-                "label": "Standard Tier"
-              },
-              "1": {
-                "label": "Premium Tier"
-              }
-            }
-          },
-          "sample-product-runs": {
-            "highlights": {
-              "0": "Standard and premium tiers",
-              "1": "Reusable package lengths",
-              "2": "Straightforward example entries"
-            },
-            "groups": {
-              "0": {
-                "label": "Standard Tier"
-              },
-              "1": {
-                "label": "Premium Tier"
+                "label": "TB-AG series"
               }
             }
           }
         }
       },
-      "mexico": {
+      "absorbent-flood-bags": {
         "technical": {
-          "material": "Replaceable regional material",
-          "surface": "Example finish or presentation layer",
-          "uvResistance": "Outdoor-ready placeholder attribute",
-          "temperatureRange": "Project-specific operating range",
-          "lifespan": "Replace with real lifecycle claim",
-          "fireRating": "Replace with real safety claim"
+          "material": "PP non-woven shell with SAP core",
+          "useBoundary": "Fresh water only",
+          "shelfLife": "3 years vacuum-packed, stored cool and dry"
         },
         "trade": {
-          "moq": "Example minimum order",
-          "leadTime": "Replace with real timeline",
-          "supplyCapacity": "Replace with real monthly capacity",
-          "packaging": "Replace with real packaging or delivery model",
-          "portOfLoading": "Replace with real dispatch point"
+          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
+          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
+          "supplyCapacity": "Confirmed with each quotation.",
+          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
+          "portOfLoading": "China port confirmed at quotation."
         },
         "families": {
-          "sample-product-shapes": {
+          "absorbent-bags": {
             "highlights": {
-              "0": "Example Standard C ready",
-              "1": "Reusable size set",
-              "2": "Light and heavy tiers"
+              "0": "Ships flat and activates to deployed weight in 3-4 minutes.",
+              "1": "Private label from the first order: printed shell, carton design and instruction insert.",
+              "2": "Built for rain and inland freshwater flooding, not salt or brackish water."
             },
             "groups": {
               "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Heavy Tier"
-              }
-            }
-          },
-          "couplings": {
-            "highlights": {
-              "0": "Example Standard C ready",
-              "1": "Bundle-ready structure",
-              "2": "Reusable size set"
-            },
-            "groups": {
-              "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Heavy Tier"
-              }
-            }
-          },
-          "sample-product-runs": {
-            "highlights": {
-              "0": "Example Standard C ready",
-              "1": "Standard package lengths",
-              "2": "Reusable size set"
-            },
-            "groups": {
-              "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Heavy Tier"
+                "label": "TB-FB series"
               }
             }
           }
         }
       },
-      "europe": {
+      "flood-tube-dams": {
         "technical": {
-          "material": "Replaceable platform material",
-          "surface": "Example finish or presentation layer",
-          "uvResistance": "Outdoor-ready placeholder attribute",
-          "temperatureRange": "Project-specific operating range",
-          "lifespan": "Replace with real lifecycle claim",
-          "fireRating": "Replace with real safety claim"
+          "material": "0.9 mm PVC tarpaulin, thermally moulded",
+          "protectionHeight": "1 m",
+          "fillMode": "Air standard; water-fill supported where practical"
         },
         "trade": {
-          "moq": "Example minimum order",
-          "leadTime": "Replace with real timeline",
-          "supplyCapacity": "Replace with real monthly capacity",
-          "packaging": "Replace with real packaging or delivery model",
-          "portOfLoading": "Replace with real dispatch point"
+          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
+          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
+          "supplyCapacity": "Confirmed with each quotation.",
+          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
+          "portOfLoading": "China port confirmed at quotation."
         },
         "families": {
-          "sample-product-shapes": {
+          "tube-dams": {
             "highlights": {
-              "0": "Example Standard D ready",
-              "1": "Three service tiers",
-              "2": "Reusable size set"
+              "0": "Roll out, inflate, pin and connect sections for longer perimeters.",
+              "1": "Works on grass, soil and broken ground where rigid barriers cannot seal.",
+              "2": "Full accessory kit ships in the bag."
             },
             "groups": {
               "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Medium Tier"
-              },
-              "2": {
-                "label": "Heavy Tier"
-              }
-            }
-          },
-          "couplings": {
-            "highlights": {
-              "0": "Example Standard D ready",
-              "1": "Bundle-ready structure",
-              "2": "Reusable size set"
-            },
-            "groups": {
-              "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Medium Tier"
-              },
-              "2": {
-                "label": "Heavy Tier"
-              }
-            }
-          },
-          "sample-product-runs": {
-            "highlights": {
-              "0": "Example Standard D ready",
-              "1": "Standard package lengths",
-              "2": "Reusable size set"
-            },
-            "groups": {
-              "0": {
-                "label": "Light Tier"
-              },
-              "1": {
-                "label": "Medium Tier"
-              },
-              "2": {
-                "label": "Heavy Tier"
+                "label": "TB-TD series"
               }
             }
           }
         }
       },
-      "specialty-product-systems": {
+      "frp-flood-barriers": {
         "technical": {
-          "material": "Specialty example material",
-          "transparency": "Optional visibility or reporting layer",
-          "maxWorkingPressure": "Project-specific limit",
-          "temperatureRange": "Project-specific operating range",
-          "surface": "Example finish or experience layer",
-          "impactResistance": "Replace with real durability claim"
+          "material": "Pultruded fiberglass (FRP)",
+          "profileClass": "180 mm plank profile class",
+          "status": "Order-driven production; testing data being compiled"
         },
         "trade": {
-          "moq": "Example minimum order",
-          "leadTime": "Replace with real timeline",
-          "supplyCapacity": "Replace with real monthly capacity",
-          "packaging": "Replace with real packaging or delivery model",
-          "portOfLoading": "Replace with real dispatch point"
+          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
+          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
+          "supplyCapacity": "Confirmed with each quotation.",
+          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
+          "portOfLoading": "China port confirmed at quotation."
         },
         "families": {
-          "specialty-units": {
+          "frp-planks": {
             "highlights": {
-              "0": "Specialty example material",
-              "1": "Quiet experience option",
-              "2": "Controlled handoff points"
+              "0": "Corrosion-free and non-conductive for coastal, chemical and electrical sites.",
+              "1": "Same stacked-plank, post-and-seal logic as aluminum gates.",
+              "2": "Order-driven tooling with span and deflection data compiled per produced profile."
             },
             "groups": {
               "0": {
-                "label": "Compact Format"
-              },
-              "1": {
-                "label": "Extended Format"
-              }
-            }
-          },
-          "fittings": {
-            "highlights": {
-              "0": "Impact-aware example",
-              "1": "High-requirement scenario",
-              "2": "Multiple connection options"
-            },
-            "groups": {
-              "0": {
-                "label": "Compact Integrations"
-              },
-              "1": {
-                "label": "Extended Integrations"
+                "label": "TB-CP series"
               }
             }
           }
         }
-      }
-    },
-    "rowValues": {
-      "bellEnd": "Default",
-      "plainEnd": "Default",
-      "standardCoupling": "Standard Bundle",
-      "expansionCoupling": "Extended Bundle",
-      "standardBellmouth": "Resource Kit",
-      "heavyDutyBellmouth": "Extended Resource Kit",
-      "mediumDuty": "Standard Tier",
-      "heavyDuty": "Premium Tier",
-      "pushFit": "Default",
-      "flange": "Custom",
-      "connector": "Connector",
-      "bend90": "90° Bend",
-      "bend45": "45° Bend",
-      "yDiverter": "Y-Diverter",
-      "accessPanel": "Access Panel",
-      "specialty": "Specialty Example",
-      "custom": "Custom"
-    }
-  },
-  "navigation": {
-    "products": "Products"
-  },
-  "footer": {
-    "sections": {
-      "navigation": {
-        "products": "Products"
-      }
-    },
-    "platform": {
-      "products": {
-        "title": "Products",
-        "ai": "AI",
-        "enterprise": "Enterprise",
-        "fluidCompute": "Fluid Compute",
-        "nextjs": "Next.js",
-        "observability": "Observability",
-        "previews": "Previews",
-        "rendering": "Rendering",
-        "security": "Security",
-        "turbo": "Turbo",
-        "domains": "Domains",
-        "v0": "v0"
-      }
-    }
-  },
-  "home": {
-    "products": {
-      "title": "Offer Examples",
-      "subtitle": "Replaceable product, service, resource, and custom-project examples for a real showcase website.",
-      "cta": "View All Products",
-      "item1": {
-        "tag": "Product Example",
-        "title": "Product Showcase",
-        "spec1": "Categories, highlights, and specs",
-        "spec2": "Cards, market pages, and detail sections",
-        "spec3": "Replace with real product data",
-        "standard": "Example Catalog",
-        "link": "/products"
-      },
-      "item2": {
-        "tag": "Service Example",
-        "title": "Service Showcase",
-        "spec1": "Use cases, process, and outcomes",
-        "spec2": "Proof, resources, and FAQs",
-        "spec3": "Replace with real service scope",
-        "standard": "Example Service",
-        "link": "/products/specialty-product-systems"
-      },
-      "item3": {
-        "tag": "Service",
-        "title": "Custom Project Support",
-        "spec1": "Discovery, proposal, and delivery",
-        "spec2": "Brand adaptation and configuration",
-        "spec3": "Replace with real custom workflow",
-        "standard": "Per project scope",
-        "link": "/custom-project-support"
-      }
-    },
-    "quality": {
-      "standards": {
-        "exampleA": "Example Standard A",
-        "exampleB": "Example Standard B",
-        "exampleC": "Example Standard C",
-        "exampleD": "Example Standard D"
       }
     }
   }
