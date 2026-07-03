@@ -110,7 +110,27 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: "docs/ref/architecture-diagram.svg",
-    forbidden: ["scripts/cloudflare/**"],
+    forbidden: [
+      "scripts/cloudflare/**",
+      "Showcase Website Starter Project Architecture Diagram",
+      "Showcase Website Starter - Current Project Architecture",
+      "bilingual content",
+    ],
+  },
+  {
+    file: "docs/ref/lifecycle.md",
+    forbidden: ["This starter has two lifecycle contexts:"],
+  },
+  {
+    file: "docs/design/impeccable/system/COLOR-SYSTEM.md",
+    forbidden: [
+      "# Showcase Website Starter Color System",
+      "The starter should look clear, credible, modern, and easy to replace.",
+    ],
+  },
+  {
+    file: "docs/design/impeccable/system/COMPONENT-GOVERNANCE.md",
+    forbidden: ["This starter is built for AI-assisted development."],
   },
   {
     file: ".claude/rules/content.md",

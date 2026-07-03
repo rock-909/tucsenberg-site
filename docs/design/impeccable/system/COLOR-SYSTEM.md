@@ -1,10 +1,13 @@
-# Showcase Website Starter Color System
+# Tucsenberg Site Color System
 
 ## Current status
 
-The role-based color architecture is current. Exact color values are provisional and replaceable.
+The inherited role-based color architecture is current for the Tucsenberg site.
+Exact color values are provisional and replaceable.
 
-This means agents may rely on the token roles, but must not treat the current blue palette or `#004D9E` as final brand identity for any derived project.
+This means agents may rely on the token roles, but must not treat the current
+blue palette or `#004D9E` as final Tucsenberg brand identity unless the owner
+approves it.
 
 ## Runtime source
 
@@ -92,10 +95,10 @@ typography variables must map back to project-owned roles in
 `src/app/globals.css`.
 
 Do not let Radix default blue, gray, radius, typography, or focus choices become
-the starter brand by accident.
+the site brand by accident.
 
 ## Visual intent
 
-The starter should look clear, credible, modern, and easy to replace.
+The Tucsenberg site should look clear, credible, modern, and easy to maintain.
 
 The color system should reduce owner decision load and keep AI-generated UI from drifting across pages.
