@@ -12,6 +12,7 @@
 4. `ai.md`：Codex / Claude 协作边界。
 5. `replace.md`：继承的 starter 替换面说明；只在追溯时看。
 6. `start.md`：继承的 materialize/profile 说明；不是当前站日常入口。
+7. `project-workflow.md` / `website-production-workflow.md`：继承的 starter workflow 说明；不是当前产品真相。
 
 ## Do not start by deleting inherited files
 

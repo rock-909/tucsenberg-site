@@ -158,4 +158,23 @@ describe("proof lane labels", () => {
       expect(doc).toContain("tests/e2e/navigation.spec.ts");
     }
   });
+
+  it("labels inherited workflow docs outside current product truth", () => {
+    const docsReadme = readFileSync("docs/README.md", "utf8");
+    const useReadme = readFileSync("docs/use/README.md", "utf8");
+    const workflowDocs = [
+      readFileSync("docs/use/project-workflow.md", "utf8"),
+      readFileSync("docs/use/website-production-workflow.md", "utf8"),
+    ];
+
+    expect(docsReadme).toContain("docs/use/project-workflow.md");
+    expect(docsReadme).toContain("docs/use/website-production-workflow.md");
+    expect(useReadme).toContain("project-workflow.md");
+    expect(useReadme).toContain("website-production-workflow.md");
+
+    for (const doc of workflowDocs) {
+      expect(doc).toContain("Historical starter workflow");
+      expect(doc).toContain("not current Tucsenberg product truth");
+    }
+  });
 });
