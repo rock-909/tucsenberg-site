@@ -2,7 +2,7 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SINGLE_SITE_HOME_SECTION_ORDER } from "@/config/single-site-page-expression";
-import Home, { generateStaticParams } from "../page";
+import Home, { generateMetadata, generateStaticParams } from "../page";
 
 type MockLinkHref = string | { pathname: string };
 type MockLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
@@ -157,6 +157,22 @@ describe("Home Page", () => {
     it("should return params for all locales", () => {
       const params = generateStaticParams();
       expect(params).toEqual([{ locale: "en" }, { locale: "zh" }]);
+    });
+  });
+
+  describe("generateMetadata", () => {
+    it("uses the owner-approved source meta description, not the hero subtitle", async () => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en" }),
+      });
+
+      expect(metadata.title).toBe(
+        "Flood Barrier Manufacturer & Supplier from China | Tucsenberg",
+      );
+      expect(metadata.description).toBe(
+        "Factory-direct flood barriers from China: ABS boxwall, aluminum flood gates, sandless flood bags and tube dams. OEM & private label. Quotes in 12 hours.",
+      );
+      expect(metadata.description).not.toBe(homeMessages["hero.subtitle"]);
     });
   });
 
