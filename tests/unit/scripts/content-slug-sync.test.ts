@@ -297,7 +297,7 @@ describe("content-slug-sync CLI", () => {
       expect(report.version).toBe("1.0.0");
       expect(Number.isNaN(Date.parse(report.timestamp))).toBe(false);
       expect(report.checkedCollections).toEqual(["posts", "pages", "products"]);
-      expect(report.checkedLocales).toEqual(["en", "zh"]);
+      expect(report.checkedLocales).toEqual(["en"]);
       expect(typeof report.ok).toBe("boolean");
       expect(Array.isArray(report.issues)).toBe(true);
       expect(result.code).toBe(report.ok ? 0 : 1);

@@ -24,8 +24,9 @@ import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
   mockLocalesConfig: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
+    localePrefix: "never",
   },
 }));
 
@@ -185,7 +186,7 @@ describe("navigation", () => {
     it("should return true for exact root path match", () => {
       expect(isActivePath("/", "/")).toBe(true);
       expect(isActivePath("/en", "/")).toBe(true);
-      expect(isActivePath("/zh", "/")).toBe(true);
+      expect(isActivePath("/zh", "/")).toBe(false);
     });
 
     it("should return false for root path when current path is not root", () => {
@@ -197,13 +198,13 @@ describe("navigation", () => {
     it("should return true for matching paths", () => {
       expect(isActivePath("/about", "/about")).toBe(true);
       expect(isActivePath("/en/about", "/about")).toBe(true);
-      expect(isActivePath("/zh/about", "/about")).toBe(true);
+      expect(isActivePath("/zh/about", "/about")).toBe(false);
     });
 
     it("should return true for sub-paths", () => {
       expect(isActivePath("/about/team", "/about")).toBe(true);
       expect(isActivePath("/en/about/team", "/about")).toBe(true);
-      expect(isActivePath("/zh/products/enterprise", "/products")).toBe(true);
+      expect(isActivePath("/zh/products/enterprise", "/products")).toBe(false);
     });
 
     it("should return false for non-matching paths", () => {
@@ -220,7 +221,7 @@ describe("navigation", () => {
     it("should handle edge cases", () => {
       expect(isActivePath("", "/")).toBe(true);
       expect(isActivePath("/en", "/")).toBe(true);
-      expect(isActivePath("/zh", "/")).toBe(true);
+      expect(isActivePath("/zh", "/")).toBe(false);
     });
 
     it("should not match partial path segments", () => {
@@ -232,7 +233,7 @@ describe("navigation", () => {
       // This test covers line 85 where cleanItemPath already ends with '/'
       expect(isActivePath("/about/team", "/about/")).toBe(true);
       expect(isActivePath("/en/about/team", "/about/")).toBe(true);
-      expect(isActivePath("/zh/products/enterprise", "/products/")).toBe(true);
+      expect(isActivePath("/zh/products/enterprise", "/products/")).toBe(false);
     });
   });
 
@@ -241,7 +242,7 @@ describe("navigation", () => {
       expect(getLocalizedHref("https://example.com", "en")).toBe(
         "https://example.com",
       );
-      expect(getLocalizedHref("http://example.com", "zh")).toBe(
+      expect(getLocalizedHref("http://example.com", "en")).toBe(
         "http://example.com",
       );
     });
@@ -256,33 +257,23 @@ describe("navigation", () => {
       expect(getLocalizedHref("tel:+1234567890", "en")).toBe("tel:+1234567890");
     });
 
-    it("should localize root path", () => {
-      expect(getLocalizedHref("/", "en")).toBe("/en");
-      expect(getLocalizedHref("/", "zh")).toBe("/zh");
+    it("should keep root path unprefixed for the current locale strategy", () => {
+      expect(getLocalizedHref("/", "en")).toBe("/");
     });
 
-    it("should localize internal paths", () => {
-      expect(getLocalizedHref("/about", "en")).toBe("/en/about");
-      expect(getLocalizedHref("/about", "zh")).toBe("/zh/about");
+    it("should keep internal paths unprefixed for the current locale strategy", () => {
+      expect(getLocalizedHref("/about", "en")).toBe("/about");
       expect(getLocalizedHref("/products/enterprise", "en")).toBe(
-        "/en/products/enterprise",
+        "/products/enterprise",
       );
     });
 
     it("should handle paths with query parameters", () => {
-      expect(getLocalizedHref("/search?q=test", "en")).toBe(
-        "/en/search?q=test",
-      );
-      expect(getLocalizedHref("/products?category=web", "zh")).toBe(
-        "/zh/products?category=web",
-      );
+      expect(getLocalizedHref("/search?q=test", "en")).toBe("/search?q=test");
     });
 
     it("should handle paths with hash fragments", () => {
-      expect(getLocalizedHref("/about#team", "en")).toBe("/en/about#team");
-      expect(getLocalizedHref("/docs#installation", "zh")).toBe(
-        "/zh/docs#installation",
-      );
+      expect(getLocalizedHref("/about#team", "en")).toBe("/about#team");
     });
   });
 
@@ -373,20 +364,18 @@ describe("navigation", () => {
       expect(aboutItem).toBeDefined();
 
       const localizedHref = getLocalizedHref(aboutItem!.href, "en");
-      expect(localizedHref).toBe("/en/about");
+      expect(localizedHref).toBe("/about");
 
-      const isActive = isActivePath("/en/about", aboutItem!.href);
+      const isActive = isActivePath("/about", aboutItem!.href);
       expect(isActive).toBe(true);
     });
 
     it("should handle all navigation items correctly", () => {
       mainNavigation.forEach((item) => {
-        // Test localization
+        // Test locale-aware href generation
         const enHref = getLocalizedHref(item.href, "en");
-        const zhHref = getLocalizedHref(item.href, "zh");
 
-        expect(enHref).toMatch(/^\/en/);
-        expect(zhHref).toMatch(/^\/zh/);
+        expect(enHref).toBe(item.href);
 
         // Test active path detection
         const isActive = isActivePath(enHref, item.href);

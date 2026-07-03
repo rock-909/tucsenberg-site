@@ -67,6 +67,10 @@ export function getLocalizedHref(href: string, locale: Locale): string {
     return href;
   }
 
+  if (LOCALES_CONFIG.localePrefix === "never") {
+    return href;
+  }
+
   // For root path, return just the locale
   if (href === "/") {
     return `/${locale}`;

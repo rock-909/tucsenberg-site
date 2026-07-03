@@ -4,16 +4,12 @@ import { getStubOverrideForPath } from "./dependency-closure";
 import { REPO_ROOT } from "./file-sets";
 import { shouldSkipCopyDirectory } from "./path-rules";
 import { transformMaterializedFileContent } from "./transforms";
-import { composeMessagesForProfileFromFiles } from "./messages";
+import {
+  composeMessagesForProfileFromFiles,
+  materializedCompatMessageRelativePaths,
+} from "./messages";
 import type { MaterializationWarning } from "./types";
 import type { StarterProfileId } from "../../src/config/starter-profiles";
-
-const MESSAGE_RELATIVE_PATHS = [
-  "messages/en/critical.json",
-  "messages/en/deferred.json",
-  "messages/zh/critical.json",
-  "messages/zh/deferred.json",
-] as const;
 
 interface CopySelectedFilesOptions {
   repoRoot: string;
@@ -163,7 +159,9 @@ export function collectMissingSourceWarnings(
   options: MissingSourceWarningOptions,
 ): void {
   const { repoRoot, includedFiles, profileId, warnings } = options;
-  const messagePaths = new Set<string>(MESSAGE_RELATIVE_PATHS);
+  const messagePaths = new Set<string>(
+    materializedCompatMessageRelativePaths(),
+  );
 
   for (const relativePath of includedFiles) {
     if (
@@ -191,7 +189,9 @@ export function copySelectedFilesToOutput(
   assertSafeOutputDirectory(repoRoot, resolvedOutput);
   fs.mkdirSync(resolvedOutput, { recursive: true });
 
-  const messagePaths = new Set<string>(MESSAGE_RELATIVE_PATHS);
+  const messagePaths = new Set<string>(
+    materializedCompatMessageRelativePaths(),
+  );
 
   for (const relativePath of includedFiles) {
     if (shouldSkipCopyDirectory(relativePath)) {

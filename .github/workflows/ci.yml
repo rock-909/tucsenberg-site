@@ -197,14 +197,14 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: https://tucsenberg.com
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
 
       - name: Cloudflare/OpenNext 构建
         run: pnpm website:build:cf
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: https://tucsenberg.com
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
 
       - name: Cloudflare/Wrangler dry-run
         if: ${{ github.event_name != 'pull_request' }}
@@ -212,7 +212,7 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: https://tucsenberg.com
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 

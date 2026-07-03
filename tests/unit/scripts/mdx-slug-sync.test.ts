@@ -801,7 +801,7 @@ describe("content-slug-sync core", () => {
       );
     });
 
-    it("accepts valid paired page frontmatter into manifest keys", () => {
+    it("accepts valid single-locale page frontmatter into manifest keys", () => {
       createMdxFile("pages", "en", "about.mdx", {
         locale: "en",
         title: "About",
@@ -815,25 +815,12 @@ describe("content-slug-sync core", () => {
           description: "About SEO description",
         },
       });
-      createMdxFile("pages", "zh", "about.mdx", {
-        locale: "zh",
-        title: "关于",
-        description: "关于页面描述",
-        slug: "about",
-        publishedAt: "2026-01-01",
-        updatedAt: "2026-01-02",
-        draft: false,
-        seo: {
-          title: "关于 SEO",
-          description: "关于 SEO 描述",
-        },
-      });
 
       const context = createContentManifestContext(tmpDir);
       const manifest = generateContentManifest(context);
 
       expect(manifest.byKey["pages/en/about"]).toBeDefined();
-      expect(manifest.byKey["pages/zh/about"]).toBeDefined();
+      expect(manifest.byKey["pages/zh/about"]).toBeUndefined();
     });
 
     it("check mode fails when generated artifacts are stale without rewriting them", () => {

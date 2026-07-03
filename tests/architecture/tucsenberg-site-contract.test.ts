@@ -223,6 +223,30 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(() => statSync("messages/zh")).toThrow();
   });
 
+  it("does not advertise Chinese or starter domains in active operator config", () => {
+    const envExample = readRepoFile(".env.example");
+    const codeowners = readRepoFile(".github/CODEOWNERS");
+    const wranglerConfig = readRepoFile("wrangler.jsonc");
+    const singleSiteConfig = readRepoFile("src/config/single-site.ts");
+
+    expect(envExample).toContain("NEXT_PUBLIC_SUPPORTED_LOCALES=en");
+    expect(envExample).not.toContain("NEXT_PUBLIC_SUPPORTED_LOCALES=en,zh");
+    expect(envExample).not.toContain("Showcase Website Starter");
+    expect(envExample).not.toContain(
+      "NEXT_PUBLIC_SITE_URL=https://example.com",
+    );
+    expect(codeowners).not.toContain("/messages/zh/");
+    expect(wranglerConfig).toContain('"name": "tucsenberg-site"');
+    expect(wranglerConfig).toContain("tucsenberg-site-preview.workers.dev");
+    expect(wranglerConfig).not.toContain("preview.example.com");
+    expect(singleSiteConfig).toContain(
+      '"https://tucsenberg-site-preview.workers.dev"',
+    );
+    expect(singleSiteConfig).not.toContain(
+      'resolveSingleSiteBaseUrl("https://tucsenberg.com")',
+    );
+  });
+
   it("keeps forbidden claims out of public-rendered source surfaces", () => {
     const offenders: string[] = [];
 

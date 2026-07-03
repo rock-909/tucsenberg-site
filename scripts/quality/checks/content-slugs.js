@@ -5,7 +5,7 @@ const { glob } = require("glob");
 const yaml = require("js-yaml");
 
 const DEFAULT_COLLECTIONS = ["posts", "pages", "products"];
-const FALLBACK_LOCALES = ["en", "zh"];
+const FALLBACK_LOCALES = ["en"];
 const DEFAULT_CONTENT_EXTENSIONS = ["md", "mdx"];
 const DEFAULT_CONTENT_ROOTS = ["content"];
 const CONTENT_SLUG_SYNC_ROOTS = [
@@ -549,7 +549,7 @@ Examples:
   node scripts/starter-checks.js content-slugs
   node scripts/starter-checks.js content-slugs --json
   node scripts/starter-checks.js content-slugs --strict-frontmatter
-  node scripts/starter-checks.js content-slugs --collections=products --locales=en,zh,ja
+  node scripts/starter-checks.js content-slugs --collections=products --locales=en,ja
 `);
 }
 
@@ -699,20 +699,14 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
     console.error("Error: No collections specified");
     return false;
   }
-  if (options.locales.length < 2) {
-    if (!options.localesExplicit) {
-      console.log("\nMDX Slug Sync Validation");
-      console.log("========================\n");
-      console.log(`Collections: ${options.collections.join(", ")}`);
-      console.log(`Locales: ${options.locales.join(", ")}`);
-      console.log(
-        "Single locale site: localized slug pair comparison skipped.",
-      );
-      return true;
-    }
+  const isImplicitSingleLocale =
+    options.locales.length < 2 && !options.localesExplicit;
 
-    console.error("Error: At least 2 locales are required for comparison");
-    return false;
+  if (options.locales.length < 2) {
+    if (options.localesExplicit) {
+      console.error("Error: At least 2 locales are required for comparison");
+      return false;
+    }
   }
 
   const result = validateMdxSlugSync({
@@ -721,7 +715,15 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
     locales: options.locales,
     contentRoots: CONTENT_SLUG_SYNC_ROOTS,
   });
-  printContentSlugSummary(result, options);
+  if (isImplicitSingleLocale) {
+    console.log("\nMDX Slug Sync Validation");
+    console.log("========================\n");
+    console.log(`Collections: ${options.collections.join(", ")}`);
+    console.log(`Locales: ${options.locales.join(", ")}`);
+    console.log("Single locale site: localized slug pair comparison skipped.");
+  } else {
+    printContentSlugSummary(result, options);
+  }
   let finalResult = result;
 
   if (options.strictFrontmatter) {

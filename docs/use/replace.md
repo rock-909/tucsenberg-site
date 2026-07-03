@@ -138,7 +138,7 @@ Review or replace:
 
 Current ownership:
 
-- authoring/reference copy: `messages/base/{en,zh}/deferred.json` under
+- authoring/reference copy: `messages/base/{locale}/deferred.json` under
   `emailTemplates`
 - runtime copy helpers: `src/emails/email-copy.ts`
 - production sending path: `src/lib/email/runtime-email-content.ts`
@@ -162,8 +162,9 @@ Default language behavior:
   then rendered without translation or placeholder expansion.
 
 Wave 3 does not add automatic per-locale email rendering. If a derived project
-needs localized transactional emails, design that as a separate email-runtime
-lane instead of adding ad hoc `next-intl` calls inside templates.
+needs localized transactional emails, add the target locale through
+`LOCALES_CONFIG` and design that as a separate email-runtime lane instead of
+adding ad hoc `next-intl` calls inside templates.
 
 ## 6. Contact form behavior
 

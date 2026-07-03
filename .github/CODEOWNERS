@@ -36,8 +36,6 @@
 # Tier A: translation critical path
 /messages/en/critical.json @Alx-707 developer@flood-control.com
 /messages/en/deferred.json @Alx-707 developer@flood-control.com
-/messages/zh/critical.json @Alx-707 developer@flood-control.com
-/messages/zh/deferred.json @Alx-707 developer@flood-control.com
 /scripts/starter-checks.js @Alx-707 developer@flood-control.com
 
 # Tier A: cache utilities + health

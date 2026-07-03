@@ -44,7 +44,9 @@ function resolveSingleSiteBaseUrl(fallback: string): string {
   return fallback;
 }
 
-const baseUrl = resolveSingleSiteBaseUrl("https://tucsenberg.com");
+const baseUrl = resolveSingleSiteBaseUrl(
+  "https://tucsenberg-site-preview.workers.dev",
+);
 
 const social = {
   twitter: "",

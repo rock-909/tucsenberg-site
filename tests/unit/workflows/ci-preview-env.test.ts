@@ -25,13 +25,29 @@ function readCiWorkflow(): Workflow {
 }
 
 describe("CI preview environment contract", () => {
-  it("does not run preview performance builds with the reserved example.com site URL", () => {
+  it("runs Cloudflare build proof against a public preview URL, not the launch domain", () => {
     const workflow = readCiWorkflow();
-    const buildStep = workflow.jobs?.["cloudflare-build"]?.steps?.find(
-      (step) => step.name === "构建检查",
-    );
+    const cloudflareBuildSteps = workflow.jobs?.["cloudflare-build"]?.steps;
+    const previewSiteUrl =
+      "${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}";
 
-    expect(buildStep?.env?.APP_ENV).toBe("preview");
-    expect(buildStep?.env?.NEXT_PUBLIC_SITE_URL).not.toContain("example.com");
+    for (const stepName of [
+      "构建检查",
+      "Cloudflare/OpenNext 构建",
+      "Cloudflare/Wrangler dry-run",
+    ]) {
+      const step = cloudflareBuildSteps?.find(
+        (candidate) => candidate.name === stepName,
+      );
+
+      expect(step?.env?.APP_ENV, stepName).toBe("preview");
+      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).toBe(previewSiteUrl);
+      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
+        "example.com",
+      );
+      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
+        "tucsenberg.com",
+      );
+    }
   });
 });
