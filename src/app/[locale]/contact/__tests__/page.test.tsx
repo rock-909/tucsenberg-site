@@ -179,10 +179,9 @@ describe("ContactPage MDX migration", () => {
     render(
       <ContactMethodsCard
         copy={{
-          title: "Contact Methods",
+          title: "Email & WhatsApp",
           emailLabel: "Email",
-          emailUnavailable:
-            "Use the form on this page; configure a real receiver before public launch.",
+          emailUnavailable: "Use the RFQ form if email is unavailable.",
           phoneLabel: "Phone",
         }}
       />,

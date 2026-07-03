@@ -96,6 +96,8 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /FM\s*2510/iu,
   /\bFEMA\b/iu,
   /keeps your house dry/iu,
+  /support, or partnership opportunities/iu,
+  /configure a real receiver before public launch/iu,
 ];
 const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /Showcase Website Starter/iu,
