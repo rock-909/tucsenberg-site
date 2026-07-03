@@ -1,3 +1,5 @@
+import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+
 export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
 
 export interface TucsenbergProductCta {
@@ -25,6 +27,7 @@ export interface TucsenbergProductFaq {
 
 export interface TucsenbergProductPage {
   slug: string;
+  meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
   eyebrow: string;
   title: string;
   subtitle: string;
@@ -38,6 +41,7 @@ export interface TucsenbergProductPage {
 export const TUCSENBERG_PRODUCT_PAGES = {
   "abs-flood-barriers": {
     slug: "abs-flood-barriers",
+    meta: TUCSENBERG_PRODUCT_META["abs-flood-barriers"],
     eyebrow: "TB-BW series",
     title: "ABS Interlocking Boxwall Flood Barriers",
     subtitle:
@@ -163,6 +167,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   },
   "aluminum-flood-gates": {
     slug: "aluminum-flood-gates",
+    meta: TUCSENBERG_PRODUCT_META["aluminum-flood-gates"],
     eyebrow: "TB-AG series",
     title: "Aluminum Flood Gates & Demountable Barrier Systems",
     subtitle:
@@ -252,6 +257,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   },
   "absorbent-flood-bags": {
     slug: "absorbent-flood-bags",
+    meta: TUCSENBERG_PRODUCT_META["absorbent-flood-bags"],
     eyebrow: "TB-FB series",
     title: "Absorbent Flood Bags (Sandless Sandbags) — Bulk & Private Label",
     subtitle:
@@ -337,6 +343,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   },
   "flood-tube-dams": {
     slug: "flood-tube-dams",
+    meta: TUCSENBERG_PRODUCT_META["flood-tube-dams"],
     eyebrow: "TB-TD series",
     title: "Water & Air-Filled Flood Tube Dams",
     subtitle:
@@ -417,6 +424,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   },
   "frp-flood-barriers": {
     slug: "frp-flood-barriers",
+    meta: TUCSENBERG_PRODUCT_META["frp-flood-barriers"],
     eyebrow: "TB-CP series",
     title: "FRP Composite Flood Barrier Planks",
     subtitle:

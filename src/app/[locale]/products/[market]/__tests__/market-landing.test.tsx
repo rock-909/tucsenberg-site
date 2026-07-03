@@ -306,10 +306,9 @@ describe("Market Landing Page", () => {
 
       expect(metadata).toMatchObject({
         title:
-          "ABS Interlocking Boxwall Flood Barriers | Example Showcase Company",
-        description: expect.stringContaining(
-          "A freestanding flood barrier that needs no bolts",
-        ),
+          "ABS Interlocking Flood Barriers — Freestanding Boxwall | Tucsenberg",
+        description:
+          "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Quoted within 12 hours.",
         alternates: {
           canonical: "https://www.example.com/products/abs-flood-barriers",
           languages: {

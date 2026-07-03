@@ -156,15 +156,15 @@ export async function generateMetadata({
 
   if (!market) return {};
 
-  const title = productPage?.title ?? market.label;
-  const description = productPage?.lead ?? market.description;
+  const title = productPage?.meta.title ?? market.label;
+  const description = productPage?.meta.description ?? market.description;
 
   return generateMetadataForPath({
     locale: locale as Locale,
     pageType: "products",
     path: getProductMarketPath(market.slug),
     config: {
-      title: `${title} | ${SITE_CONFIG.name}`,
+      title,
       description,
     },
   });
