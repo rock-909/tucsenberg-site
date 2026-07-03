@@ -93,4 +93,8 @@ Start at `release-proof` for:
 - local contact-form smoke: `tests/e2e/contact-form-smoke.spec.ts`
 - real service canary: `tests/e2e/smoke/`
 
+Default Playwright discovery is intentionally limited to current Tucsenberg and
+local proof files. Explicitly named starter/profile/historical E2E files remain
+separate proof lanes and are not current launch proof.
+
 Release order lives in `release.md`.

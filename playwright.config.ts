@@ -28,6 +28,18 @@ const defaultGrepInvertPatterns = [
   ...(isCI && !isDaily ? [/debug|diagnosis/i] : []),
   ...(profileLane === "default" ? [/@profile:/i] : []),
 ];
+const currentSiteTestMatch = [
+  "**/tucsenberg-site-smoke.spec.ts",
+  "**/contact-form-smoke.spec.ts",
+  "**/no-js-html-contract.spec.ts",
+  "**/smoke/**/*.spec.ts",
+] as const;
+const hasExplicitE2eFileSelection = process.argv.some(
+  (arg) =>
+    arg.startsWith("tests/e2e/") ||
+    arg.startsWith("./tests/e2e/") ||
+    arg.includes("/tests/e2e/"),
+);
 
 const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
   .split(",")
@@ -107,6 +119,7 @@ const extendedProjects = [
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  ...(hasExplicitE2eFileSelection ? {} : { testMatch: currentSiteTestMatch }),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

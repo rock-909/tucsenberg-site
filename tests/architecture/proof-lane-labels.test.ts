@@ -17,6 +17,27 @@ const RETAINED_STARTER_PROFILES = [
   "showcase-full",
 ] as const;
 
+const CURRENT_PLAYWRIGHT_DEFAULT_MATCHES = [
+  "**/tucsenberg-site-smoke.spec.ts",
+  "**/contact-form-smoke.spec.ts",
+  "**/no-js-html-contract.spec.ts",
+  "**/smoke/**/*.spec.ts",
+] as const;
+
+const RETIRED_PLAYWRIGHT_DEFAULT_FILES = [
+  "about-page-rendering.spec.ts",
+  "basic-navigation.spec.ts",
+  "button-runtime-token-pilot.spec.ts",
+  "core-page-visual-calibration.spec.ts",
+  "homepage.spec.ts",
+  "i18n-redirect-validation.spec.ts",
+  "i18n.spec.ts",
+  "navigation.spec.ts",
+  "safe-navigation.spec.ts",
+  "seo-validation.spec.ts",
+  "user-journeys.spec.ts",
+] as const;
+
 describe("proof lane labels", () => {
   it("documents the shared proof lane vocabulary", () => {
     const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
@@ -84,5 +105,24 @@ describe("proof lane labels", () => {
     expect(playwrightConfig).toContain("local/test-mode");
     expect(localContactSmoke).toContain("Proof lane: local/test-mode");
     expect(postDeploySmoke).toContain("Proof lane: real-service-canary");
+  });
+
+  it("limits default Playwright discovery to current Tucsenberg proof", () => {
+    const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
+    const proofLevels = readFileSync("docs/proof/levels.md", "utf8");
+
+    expect(playwrightConfig).toContain("hasExplicitE2eFileSelection");
+    expect(playwrightConfig).toContain("testMatch: currentSiteTestMatch");
+    for (const match of CURRENT_PLAYWRIGHT_DEFAULT_MATCHES) {
+      expect(playwrightConfig).toContain(match);
+    }
+
+    for (const file of RETIRED_PLAYWRIGHT_DEFAULT_FILES) {
+      expect(playwrightConfig).not.toContain(file);
+    }
+
+    expect(proofLevels).toContain(
+      "Default Playwright discovery is intentionally limited",
+    );
   });
 });
