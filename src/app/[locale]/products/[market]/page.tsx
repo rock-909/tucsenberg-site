@@ -7,10 +7,11 @@ import {
   isValidMarketSlug,
 } from "@/constants/product-catalog";
 import { getProductMarketPath, SITE_CONFIG } from "@/config/paths";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
-import { Link, routing } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import type { Locale } from "@/types/content.types";
 import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/market-jsonld";
 import { getMarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
@@ -25,7 +26,7 @@ import {
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
-  return routing.locales.flatMap((locale) =>
+  return LOCALES_CONFIG.locales.flatMap((locale) =>
     markets.map((market) => ({ locale, market })),
   );
 }

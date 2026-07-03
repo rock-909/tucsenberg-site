@@ -54,9 +54,9 @@ describe("i18n locale truth parity", () => {
     );
   });
 
-  it("keeps blog article static params tied to canonical locales", () => {
+  it("keeps product detail static params tied to canonical locales", () => {
     const source = readFileSync(
-      "src/app/[locale]/blog/[slug]/page.tsx",
+      "src/app/[locale]/products/[market]/page.tsx",
       "utf8",
     );
 
