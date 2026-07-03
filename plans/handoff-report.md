@@ -129,7 +129,7 @@ rg -n -i "Western|tariff|customs data|BS\s*851188|FM\s*2510|FEMA|keeps your hous
 上线前至少需要确认：
 
 1. 域名 DNS / Cloudflare 站点配置。
-2. `NEXT_PUBLIC_SITE_URL=https://tucsenberg.com` 生产环境值。
+2. 生产域名上线签署后，再把生产环境 `NEXT_PUBLIC_SITE_URL` 指向 `https://tucsenberg.com`；开发/CI 阶段继续用公开 Cloudflare preview URL。
 3. `sales@tucsenberg.com` 是否已经能收发。
 4. WhatsApp 可点击号码或 username 深链上线口径。
 5. Turnstile site key / secret key。

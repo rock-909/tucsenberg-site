@@ -1,6 +1,7 @@
 # Launch Proof
 
-Use this to prove a derived website is ready to continue toward launch. A green build is not a launch claim.
+Use this to prove the Tucsenberg site is ready to continue toward launch. A
+green build, green CI, or public preview URL is not a production launch claim.
 
 ## Proof labels
 
@@ -8,67 +9,63 @@ Use this to prove a derived website is ready to continue toward launch. A green 
 - `public-preview-smoke`: already-public preview pages respond; no Workers runtime/API claim.
 - `deployed-smoke`: preview/staging/production URL responds and key pages load.
 - `real-service-canary`: real non-production or launch-target service chain works and owner notification/record is checked.
-- Profile proof lanes: `core-starter`, `company-site`, `b2b-lead`, `catalog`, `content-marketing`, `showcase-full`.
 
-## Default `company-site` first-pass
+Inherited starter/profile proof lanes are not Tucsenberg launch proof. Use
+`dry-run.md` and `../ref/lifecycle.md` only when maintaining retained starter
+machinery.
 
-```bash
-pnpm brand:check
-pnpm content:check
-node scripts/starter-checks.js translations
-node scripts/starter-checks.js content-readiness --profile company-site
-pnpm exec vitest run tests/architecture/website-config-runtime-boundary.test.ts
-CI=1 pnpm exec playwright test tests/e2e/homepage.spec.ts tests/e2e/navigation.spec.ts tests/e2e/no-js-html-contract.spec.ts tests/e2e/seo-validation.spec.ts tests/e2e/user-journeys.spec.ts tests/e2e/contact-form-smoke.spec.ts --project=chromium
-```
+## Tucsenberg local proof
 
-This proves the default company-site lane only. It must not fail because `/products/[market]`, capabilities, how-it-works, or custom-project-support are absent.
-`company-site` proof must not fail because `/products/north-america` is absent.
-
-Default source-checkout Cloudflare runtime budget proof remains the Wrangler
-preview dry-run: `pnpm exec wrangler deploy --dry-run --env preview` after
-`pnpm website:build:cf`. The Worker upload must stay below **3000 KiB gzip**,
-with preferred headroom below **2700 KiB**. This does not claim the exact
-materialized `company-site` Worker size; prove that in the generated output if a
-launch needs that number. Optional profile lanes may carry their own cost, but
-that cost is not allowed to silently redefine the default Free-plan baseline.
-Pull request CI does not prove the Cloudflare Free gzip budget; use
-`workflow_dispatch` or `pnpm release:verify` on the exact head SHA before
-merge when the change is Cloudflare-size-sensitive.
-
-## Optional profile lanes
-
-Run only when selected:
-
-```bash
-node scripts/starter-checks.js content-readiness --profile minimal
-node scripts/starter-checks.js content-readiness --profile b2b-lead
-
-node scripts/starter-checks.js content-readiness --profile catalog --strict-client-launch
-PLAYWRIGHT_PROFILE_LANE=optional CI=1 pnpm exec playwright test --grep "@profile:" tests/e2e/catalog-profile.spec.ts tests/e2e/product-family-contact-handoff.spec.ts --project=chromium
-
-node scripts/starter-checks.js content-readiness --profile content-marketing --strict-client-launch
-PLAYWRIGHT_PROFILE_LANE=optional CI=1 pnpm exec playwright test --grep "@profile:" tests/e2e/content-marketing-profile.spec.ts --project=chromium
-
-node scripts/starter-checks.js content-readiness --profile showcase-full --strict-client-launch
-PLAYWRIGHT_PROFILE_LANE=optional CI=1 pnpm exec playwright test --grep "@profile:" tests/e2e/showcase-full-profile.spec.ts --project=chromium
-```
-
-## Full-repo local proof
-
-Use this as current full-repo proof when validating the source repo, not as a substitute for derived-project launch proof:
+Use this as the current local readiness proof for source changes:
 
 ```bash
 pnpm brand:check
 pnpm content:check
-node scripts/starter-checks.js content-readiness
-node scripts/starter-checks.js client-boundary
-pnpm component:check
-pnpm website:check
-pnpm website:build:cf
-node scripts/starter-checks.js cf-static-asset-headers
+pnpm type-check
+pnpm lint:check
+pnpm test
+pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts
 ```
 
-React Doctor is an error gate: error blocks CI, and the full report target is zero diagnostics. Baseline notes live under `baselines/`. It is not a separate CI governance layer.
+When the change touches Cloudflare/OpenNext output, add the Cloudflare build
+proof with the current public preview URL:
+
+```bash
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm build
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm website:build:cf
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm exec wrangler deploy --dry-run --env preview
+```
+
+The Wrangler dry-run is a local/non-publishing proof. Do not use
+`https://tucsenberg.com` as `NEXT_PUBLIC_SITE_URL` until the production domain
+has a separate launch signoff.
+
+React Doctor is an error gate: error blocks CI, and the full report target is
+zero diagnostics. Baseline notes live under `baselines/`. It is not a separate
+CI governance layer.
+
+## Tucsenberg content and claim proof
+
+Before calling the site launch-ready, prove:
+
+- Phase 1 pages render: `/`, `/products`, five product detail pages,
+  `/oem-wholesale`, two guides, `/about`, `/request-quote`, `/contact`,
+  `/warranty`, `/privacy`, and `/terms`.
+- The public site is English-only: root serves English, `/zh` returns 404, and
+  no Chinese language entry is exposed.
+- Page copy and product specifications match the owner source files under
+  `/Users/Data/workspace/tucsenberg/内容/文案/`, except owner-recorded conflicts
+  in `plans/handoff-report.md`.
+- Public source has zero forbidden-claim hits:
+
+```bash
+rg -n -i "Western|tariff|customs data|BS\s*851188|FM\s*2510|FEMA|keeps your house dry|[$€£]\s*[0-9]" src content messages public \
+  --glob '!**/*.test.ts' \
+  --glob '!**/*.test.tsx' \
+  --glob '!**/__tests__/**' \
+  --glob '!src/lib/content-manifest.generated.ts' \
+  --glob '!public/downloads/*.pdf'
+```
 
 ## Public launch still needs
 
@@ -107,6 +104,14 @@ credentials.
 - Proxy migration decision lives in `docs/ref/tech.md` as an official-doc-only check.
 - Post-deploy form canary records `recordCreated` and `ownerNotified`; owner notification still needs target-system confirmation.
 
-Key launch truth surfaces: `src/config/single-site.ts`, `src/config/single-site-seo.ts`, `src/config/single-site-navigation.ts`, `src/config/single-site-links.ts`, `src/config/single-site-page-expression.ts`, `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, `src/constants/product-specs/**`. Product catalog truth is profile-gated; crawl / indexing truth lives in SEO config; canonical authoring source comes before compat/generated files. starter 示例可以存在于 starter 仓库.
+Key launch truth surfaces: `src/config/single-site.ts`,
+`src/config/single-site-seo.ts`, `src/config/single-site-navigation.ts`,
+`src/config/single-site-links.ts`, `src/config/single-site-page-expression.ts`,
+`src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`,
+`src/constants/product-specs/**`, `content/pages/en/**`,
+`messages/base/en/**`, and `messages/profiles/catalog/en/**`. Crawl /
+indexing truth lives in SEO config; canonical authoring source comes before
+compat/generated files. Retained starter material is historical/tooling context,
+not current Tucsenberg launch truth.
 
 Detailed proof levels: `levels.md`. Release-sensitive command order: `release.md`. Baselines: `baselines/`.

@@ -8,10 +8,10 @@ const REQUIRED_PROOF_LANES = [
   "real-service-canary",
 ] as const;
 
-const REQUIRED_PROFILE_PROOF_LANES = [
-  "core-starter",
+const RETAINED_STARTER_PROFILES = [
   "company-site",
   "b2b-lead",
+  "minimal",
   "catalog",
   "content-marketing",
   "showcase-full",
@@ -27,50 +27,39 @@ describe("proof lane labels", () => {
   });
 
   it("documents profile-scoped proof lanes", () => {
-    const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
+    const starterProof = [
+      readFileSync("docs/proof/dry-run.md", "utf8"),
+      readFileSync("docs/ref/lifecycle.md", "utf8"),
+      readFileSync("docs/ref/profiles.md", "utf8"),
+    ].join("\n");
 
-    for (const lane of REQUIRED_PROFILE_PROOF_LANES) {
-      expect(qualityProof).toContain(lane);
+    for (const profile of RETAINED_STARTER_PROFILES) {
+      expect(starterProof).toContain(profile);
     }
 
-    expect(qualityProof).toContain(
-      "`company-site` proof must not fail because `/products/north-america` is absent.",
-    );
+    expect(starterProof).toContain("Lifecycle: `starter-only`.");
   });
 
-  it("separates current full-repo proof from default company-site profile proof", () => {
+  it("separates current Tucsenberg proof from starter profile proof", () => {
     const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
 
-    expect(qualityProof).toMatch(
-      /current full-repo|当前完整仓库|full-repo proof|完整仓库证明/,
+    expect(qualityProof).toContain("## Tucsenberg local proof");
+    expect(qualityProof).toContain(
+      "Inherited starter/profile proof lanes are not Tucsenberg launch proof.",
     );
-    expect(qualityProof).toMatch(
-      /Default `company-site` first-pass|默认 `company-site` 首轮/,
-    );
-    expect(qualityProof).toContain("Profile proof lanes");
+    expect(qualityProof).not.toContain("Default `company-site` first-pass");
+    expect(qualityProof).not.toContain("Profile proof lanes:");
   });
 
-  it("documents profile-scoped content-readiness commands in quality-proof.md", () => {
+  it("keeps profile-scoped content-readiness commands out of launch proof", () => {
     const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
 
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile minimal",
-    );
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile company-site",
-    );
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile b2b-lead",
-    );
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile catalog",
-    );
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile content-marketing",
-    );
-    expect(qualityProof).toContain(
-      "node scripts/starter-checks.js content-readiness --profile showcase-full",
-    );
+    for (const lane of RETAINED_STARTER_PROFILES) {
+      expect(qualityProof).not.toContain(
+        `node scripts/starter-checks.js content-readiness --profile ${lane}`,
+      );
+    }
+    expect(qualityProof).toContain("pnpm content:check");
   });
 
   it("labels release proof output with the shared proof lane vocabulary", () => {
