@@ -45,7 +45,7 @@ vi.mock("@/lib/i18n/performance", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -181,15 +181,16 @@ describe("Structured Data Generation", () => {
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",
-          availableLanguage: ["en", "zh"],
+          availableLanguage: ["en"],
         },
       });
       expect(
         (schema.contactPoint as Record<string, unknown>).telephone,
       ).toBeUndefined();
       expect(JSON.stringify(schema)).not.toContain("+86-518-0000-0000");
-      expect((schema as Record<string, unknown>).logo).toBeUndefined();
-      expect(JSON.stringify(schema)).not.toContain("/images/logo.svg");
+      expect((schema as Record<string, unknown>).logo).toBe(
+        "https://example.com/images/tucsenberg-logo.png",
+      );
 
       const sameAs = schema["sameAs"] as string[];
       expect(sameAs).toEqual([
@@ -219,7 +220,7 @@ describe("Structured Data Generation", () => {
         name: "Example Showcase Company",
         description: "Reusable showcase website starter",
         url: "https://example.com",
-        inLanguage: ["en", "zh"],
+        inLanguage: ["en"],
       });
       expect(schema).not.toHaveProperty("potentialAction");
       expect(JSON.stringify(schema)).not.toContain("SearchAction");
@@ -459,7 +460,7 @@ describe("Structured Data Generation", () => {
       expect(data).toHaveProperty("@type", "Article");
     });
 
-    it("does not emit a pending logo in article publisher schema", async () => {
+    it("emits the ready logo in article publisher schema", async () => {
       const data = await generateLocalizedStructuredData("en", "Article", {
         title: "Test Article",
         description: "Test Description",
@@ -468,8 +469,10 @@ describe("Structured Data Generation", () => {
       });
       const publisher = data.publisher as Record<string, unknown>;
 
-      expect(publisher.logo).toBeUndefined();
-      expect(JSON.stringify(data)).not.toContain("/images/logo.svg");
+      expect(publisher.logo).toEqual({
+        "@type": "ImageObject",
+        url: "https://example.com/images/tucsenberg-logo.png",
+      });
     });
 
     it("should handle malformed product data", async () => {

@@ -14,6 +14,7 @@ import {
   LANGUAGE_TRIGGER_LABELS,
   type SiteLanguage,
 } from "@/config/language-display";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { HEADER_UTILITY_CONTROL_CLASS } from "@/components/layout/header-utility-control";
 import { cn } from "@/lib/utils";
 
@@ -40,10 +41,11 @@ const CHEVRON_ICON_CLASS_NAME =
 const LANGUAGE_OPTIONS: Array<{
   locale: HeaderLanguageLocale;
   label: string;
-}> = [
-  { locale: "en", label: LANGUAGE_OPTION_LABELS.en },
-  { locale: "zh", label: LANGUAGE_OPTION_LABELS.zh },
-];
+}> = LOCALES_CONFIG.locales.map((locale) => ({
+  locale,
+  label: LANGUAGE_OPTION_LABELS[locale],
+}));
+const KNOWN_LANGUAGE_PREFIXES = Object.keys(LANGUAGE_OPTION_LABELS);
 
 const TRIGGER_CLASS_NAME = HEADER_UTILITY_CONTROL_CLASS;
 const MENU_CLASS_NAME =
@@ -134,8 +136,8 @@ function normalizeHeaderPathname(pathname: string) {
     ? normalized
     : `/${normalized}`;
 
-  for (const option of LANGUAGE_OPTIONS) {
-    const localePrefix = `/${option.locale}`;
+  for (const locale of KNOWN_LANGUAGE_PREFIXES) {
+    const localePrefix = `/${locale}`;
 
     if (withLeadingSlash === localePrefix) {
       return "/";
@@ -151,6 +153,10 @@ function normalizeHeaderPathname(pathname: string) {
 
 function getLanguageHref(pathname: string, locale: HeaderLanguageLocale) {
   const normalizedPathname = normalizeHeaderPathname(pathname);
+  if (LOCALES_CONFIG.localePrefix === "never") {
+    return normalizedPathname;
+  }
+
   return normalizedPathname === "/"
     ? `/${locale}`
     : `/${locale}${normalizedPathname}`;
@@ -218,10 +224,13 @@ export function HeaderLanguageMenu({
   const currentLanguageName = LANGUAGE_OPTION_LABELS[locale];
   const currentTriggerLabel = LANGUAGE_TRIGGER_LABELS[locale];
   const languageHrefs = useMemo(
-    () => ({
-      en: getLanguageHref(pathname, "en"),
-      zh: getLanguageHref(pathname, "zh"),
-    }),
+    () =>
+      new Map(
+        LANGUAGE_OPTIONS.map((option) => [
+          option.locale,
+          getLanguageHref(pathname, option.locale),
+        ]),
+      ),
     [pathname],
   );
 
@@ -266,7 +275,7 @@ export function HeaderLanguageMenu({
               <div data-testid="language-dropdown-item" key={option.locale}>
                 <DropdownMenuItem asChild className={LANGUAGE_ITEM_CLASS_NAME}>
                   <a
-                    href={languageHrefs[option.locale]}
+                    href={languageHrefs.get(option.locale) ?? "/"}
                     className={cn(
                       LANGUAGE_LINK_CLASS_NAME,
                       isSwitchingToOption && "pointer-events-none",

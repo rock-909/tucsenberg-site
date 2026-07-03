@@ -54,9 +54,9 @@ describe("MDX manifest-only runtime contract", () => {
     );
   });
 
-  it("supports profile-fixture MDX imports outside the @content alias", () => {
+  it("does not ship retired showcase-full fixture MDX imports in the materialized site", () => {
     const source = readSource("src/lib/mdx-importers.generated.ts");
-    expect(source).toContain(
+    expect(source).not.toContain(
       "../../profile-fixtures/showcase-full/content/pages/en/capabilities.mdx",
     );
     expect(source).not.toMatch(

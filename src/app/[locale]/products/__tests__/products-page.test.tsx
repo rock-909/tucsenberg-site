@@ -16,7 +16,7 @@ const {
 } = vi.hoisted(() => ({
   mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
   mockGetTranslations: vi.fn(),
-  mockGetRuntimeMessageProfileId: vi.fn(() => "showcase-full"),
+  mockGetRuntimeMessageProfileId: vi.fn(() => "catalog"),
 }));
 
 vi.mock("@/config/active-starter-profile", () => ({
@@ -46,7 +46,7 @@ vi.mock("@/i18n/routing", () => ({
     </a>
   ),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -112,10 +112,7 @@ describe("Feature: Product Overview Page", () => {
   const mockParams: LocaleParam = { locale: "en" };
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
   const PRODUCT_LINE_LINKS = [
-    [
-      "ABS Interlocking Boxwall Flood Barriers",
-      "/products/abs-flood-barriers",
-    ],
+    ["ABS Interlocking Boxwall Flood Barriers", "/products/abs-flood-barriers"],
     [
       "Aluminum Flood Gates & Demountable Barrier Systems",
       "/products/aluminum-flood-gates",
@@ -130,7 +127,7 @@ describe("Feature: Product Overview Page", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRuntimeMessageProfileId.mockReturnValue("showcase-full");
+    mockGetRuntimeMessageProfileId.mockReturnValue("catalog");
     mockGetTranslations.mockImplementation(
       async ({ locale }: { locale: string }) => createCatalogTranslator(locale),
     );
@@ -147,7 +144,9 @@ describe("Feature: Product Overview Page", () => {
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(screen.getByText("Start with the product line")).toBeInTheDocument();
+      expect(
+        screen.getByText("Start with the product line"),
+      ).toBeInTheDocument();
     });
 
     it("renders all five Tucsenberg product-line cards", async () => {
@@ -354,9 +353,10 @@ describe("Feature: Product Overview Page", () => {
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(
-        screen.getByRole("link", { name: "View guides" }),
-      ).toHaveAttribute("href", "/guides/flood-barrier-materials-guide");
+      expect(screen.getByRole("link", { name: "View guides" })).toHaveAttribute(
+        "href",
+        "/guides/flood-barrier-materials-guide",
+      );
       expect(
         screen.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/request-quote");
@@ -378,9 +378,10 @@ describe("Feature: Product Overview Page", () => {
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );
 
-      expect(
-        screen.getByRole("link", { name: "View guides" }),
-      ).toHaveAttribute("href", "/guides/flood-barrier-materials-guide");
+      expect(screen.getByRole("link", { name: "View guides" })).toHaveAttribute(
+        "href",
+        "/guides/flood-barrier-materials-guide",
+      );
       expect(
         screen.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/request-quote");

@@ -60,7 +60,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
         ],
       },
       {
-        title: "Not the $30 kit you saw on Amazon",
+        title: "Not the disposable kit you saw on Amazon",
         kind: "table",
         paragraphs: [
           "Cheap ABS flood kits exist. They are thinner, degrade in sunlight, and are sold as disposable. Professional boxwall systems differ in ways you can measure:",
@@ -85,7 +85,11 @@ export const TUCSENBERG_PRODUCT_PAGES = {
               "straight only",
               "straight, inward/outward curve, gable end",
             ],
-            ["Spares", "none", "joints, seals and single units sold separately"],
+            [
+              "Spares",
+              "none",
+              "joints, seals and single units sold separately",
+            ],
           ],
         },
       },

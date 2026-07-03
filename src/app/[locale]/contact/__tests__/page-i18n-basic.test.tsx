@@ -3,20 +3,20 @@ import { getPageBySlug } from "@/lib/content-query/queries";
 import { extractFaqFromMetadata } from "@/lib/content/mdx-faq";
 
 describe("Contact page MDX i18n basics", () => {
-  it("keeps en and zh contact FAQ ids aligned", async () => {
+  it("keeps contact FAQ ids in English MDX", async () => {
     const en = await getPageBySlug("contact", "en");
-    const zh = await getPageBySlug("contact", "zh");
 
-    expect(extractFaqFromMetadata(en.metadata).map((item) => item.id)).toEqual(
-      extractFaqFromMetadata(zh.metadata).map((item) => item.id),
-    );
+    expect(extractFaqFromMetadata(en.metadata).map((item) => item.id)).toEqual([
+      "response-time",
+      "inquiry-details",
+      "samples-or-demos",
+      "form-routing",
+    ]);
   });
 
-  it("keeps translated hero metadata in MDX", async () => {
+  it("keeps English hero metadata in MDX", async () => {
     const en = await getPageBySlug("contact", "en");
-    const zh = await getPageBySlug("contact", "zh");
 
     expect(en.metadata.title).toBe("Contact Us");
-    expect(zh.metadata.title).toBe("联系我们");
   });
 });

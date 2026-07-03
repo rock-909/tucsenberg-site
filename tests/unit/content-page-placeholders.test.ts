@@ -25,18 +25,14 @@ const FORBIDDEN_PLACEHOLDERS = [
 
 const PUBLIC_LEGAL_AND_SECURITY_FILES = [
   join(process.cwd(), "content/pages/en/privacy.mdx"),
-  join(process.cwd(), "content/pages/zh/privacy.mdx"),
   join(process.cwd(), "content/pages/en/terms.mdx"),
-  join(process.cwd(), "content/pages/zh/terms.mdx"),
   join(process.cwd(), "public/security-policy.txt"),
 ] as const;
 
 const CANONICAL_PLACEHOLDER_FILES = [
   join(process.cwd(), "src/config/single-site.ts"),
   join(process.cwd(), "messages/profiles/minimal/en/critical.json"),
-  join(process.cwd(), "messages/profiles/minimal/zh/critical.json"),
   join(process.cwd(), "messages/en/critical.json"),
-  join(process.cwd(), "messages/zh/critical.json"),
 ] as const;
 
 const FORBIDDEN_PUBLIC_LEGAL_AND_SECURITY_CLAIMS = [

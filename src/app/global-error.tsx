@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { coerceLocale } from "@/i18n/locale-utils";
 import { isPublicRuntimeDevelopment } from "@/lib/public-runtime-env";
 
 interface GlobalErrorProps {
@@ -9,35 +8,17 @@ interface GlobalErrorProps {
   reset: () => void;
 }
 
-/**
- * Static translations for global error page.
- * Global error boundary runs outside [locale] route, so we use static translations
- * with browser language detection as fallback.
- */
+const GLOBAL_ERROR_LOCALE = "en" as const;
+const HOME_HREF = "/";
+
 const translations = {
-  en: {
-    title: "Something went wrong!",
-    description:
-      "We apologize for the inconvenience. An unexpected error has occurred.",
-    tryAgain: "Try again",
-    goHome: "Go to homepage",
-    devDetails: "Error Details (Development Only)",
-  },
-  zh: {
-    title: "出错了！",
-    description: "非常抱歉给您带来不便。发生了意外错误。",
-    tryAgain: "重试",
-    goHome: "返回首页",
-    devDetails: "错误详情（仅开发环境）",
-  },
+  title: "Something went wrong!",
+  description:
+    "We apologize for the inconvenience. An unexpected error has occurred.",
+  tryAgain: "Try again",
+  goHome: "Go to homepage",
+  devDetails: "Error Details (Development Only)",
 } as const;
-
-function getLocaleFromBrowser(): "en" | "zh" {
-  if (typeof window === "undefined") return coerceLocale(undefined);
-
-  const browserLang = navigator.language?.toLowerCase() || "";
-  return coerceLocale(browserLang.startsWith("zh") ? "zh" : "en");
-}
 
 function isDevelopmentRuntime(): boolean {
   return isPublicRuntimeDevelopment();
@@ -49,27 +30,25 @@ async function reportGlobalError(error: Error): Promise<void> {
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
-  const locale = getLocaleFromBrowser();
-  // Safe: locale is strictly typed as 'en' | 'zh' from getLocaleFromBrowser()
-  const t = translations[locale];
-
   useEffect(() => {
     reportGlobalError(error).catch(() => undefined);
   }, [error]);
 
   return (
-    <html lang={locale}>
+    <html lang={GLOBAL_ERROR_LOCALE}>
       <body>
         <div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4">
           <div className="mx-auto max-w-md text-center">
             <h1 className="mb-4 text-2xl font-bold text-foreground">
-              {t.title}
+              {translations.title}
             </h1>
-            <p className="mb-6 text-muted-foreground">{t.description}</p>
+            <p className="mb-6 text-muted-foreground">
+              {translations.description}
+            </p>
             {isDevelopmentRuntime() && (
               <details className="mb-6 text-left">
                 <summary className="cursor-pointer text-sm font-medium">
-                  {t.devDetails}
+                  {translations.devDetails}
                 </summary>
                 <pre className="mt-2 overflow-auto rounded bg-muted p-2 text-xs">
                   {error.message}
@@ -89,17 +68,17 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[var(--primary-dark)]"
                 data-testid="try-again-button"
               >
-                {t.tryAgain}
+                {translations.tryAgain}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = `/${locale}`;
+                  window.location.href = HOME_HREF;
                 }}
                 className="inline-flex h-[38px] w-full shrink-0 items-center justify-center rounded-[6px] border-2 border-primary bg-transparent px-5 py-2.5 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/10"
                 data-testid="go-home-button"
               >
-                {t.goHome}
+                {translations.goHome}
               </button>
             </div>
           </div>

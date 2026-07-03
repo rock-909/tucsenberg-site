@@ -20,7 +20,7 @@ describe("load-messages canonical runtime source", () => {
   });
 
   it("loads deferred messages from split source", async () => {
-    const messages = await loadDeferredMessages("zh");
+    const messages = await loadDeferredMessages("en");
 
     expect(messages).toBeTruthy();
     expect(typeof messages).toBe("object");
@@ -43,8 +43,8 @@ describe("load-messages canonical runtime source", () => {
   });
 
   it("keeps cached and direct source loading shape-compatible", async () => {
-    const direct = await loadCompleteMessagesFromSource("zh");
-    const cached = await loadCompleteMessages("zh");
+    const direct = await loadCompleteMessagesFromSource("en");
+    const cached = await loadCompleteMessages("en");
 
     expect(cached).toEqual(direct);
   });
@@ -63,7 +63,7 @@ describe("load-messages canonical runtime source", () => {
     expect(messages.home?.hero?.title).toBeTruthy();
   });
 
-  it("keeps explicit b2b-lead and showcase-full profile loading separate", async () => {
+  it("keeps explicit b2b-lead and catalog profile loading separate", async () => {
     const [{ loadCompleteMessagesForProfile }] = await Promise.all([
       import("@/lib/i18n/load-messages"),
     ]);
@@ -72,14 +72,14 @@ describe("load-messages canonical runtime source", () => {
       "en",
       "b2b-lead",
     )) as Record<string, unknown>;
-    const showcaseFull = (await loadCompleteMessagesForProfile(
+    const catalog = (await loadCompleteMessagesForProfile(
       "en",
-      "showcase-full",
+      "catalog",
     )) as Record<string, unknown>;
 
     expect(b2bLead).not.toHaveProperty("catalog");
     expect(b2bLead).not.toHaveProperty("blog");
-    expect(showcaseFull).toHaveProperty("catalog");
-    expect(showcaseFull).toHaveProperty("blog");
+    expect(catalog).toHaveProperty("catalog");
+    expect(catalog).not.toHaveProperty("blog");
   });
 });

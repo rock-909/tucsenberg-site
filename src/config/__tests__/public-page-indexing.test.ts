@@ -4,40 +4,40 @@ import { shouldIndexPublicPageForProfile } from "@/config/single-site-seo";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 
 describe("public page indexing by starter profile", () => {
-  it("indexes company-site static pages but not showcase-full demo pages by default", () => {
+  it("indexes Tucsenberg catalog static pages by default", () => {
     expect(
       shouldIndexPublicPageForProfile("products", getCanonicalPath("products")),
     ).toBe(true);
     expect(
-      shouldIndexPublicPageForProfile("blog", getCanonicalPath("blog")),
+      shouldIndexPublicPageForProfile("about", getCanonicalPath("about")),
     ).toBe(true);
     expect(
       shouldIndexPublicPageForProfile(
-        "resources",
-        getCanonicalPath("resources"),
+        "oemWholesale",
+        getCanonicalPath("oemWholesale"),
       ),
     ).toBe(true);
     expect(
       shouldIndexPublicPageForProfile(
-        "capabilities",
-        getCanonicalPath("capabilities"),
+        "materialsGuide",
+        getCanonicalPath("materialsGuide"),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       shouldIndexPublicPageForProfile(
-        "howItWorks",
-        getCanonicalPath("howItWorks"),
+        "specificationsGuide",
+        getCanonicalPath("specificationsGuide"),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       shouldIndexPublicPageForProfile(
-        "customProject",
-        getCanonicalPath("customProject"),
+        "requestQuote",
+        getCanonicalPath("requestQuote"),
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("does not index product market pages under the default profile", () => {
+  it("indexes product market pages under the default catalog profile", () => {
     const [marketSlug] = getAllMarketSlugs();
 
     expect(marketSlug).toBeDefined();
@@ -46,59 +46,24 @@ describe("public page indexing by starter profile", () => {
         "products",
         getProductMarketPath(marketSlug ?? ""),
       ),
+    ).toBe(true);
+  });
+
+  it("does not index retired blog or demo paths", () => {
+    expect(shouldIndexPublicPageForProfile("blog", "/blog")).toBe(false);
+    expect(
+      shouldIndexPublicPageForProfile("capabilities", "/capabilities"),
     ).toBe(false);
   });
 
-  it("indexes showcase-full demo pages and product markets", () => {
-    expect(
-      shouldIndexPublicPageForProfile(
-        "products",
-        getCanonicalPath("products"),
-        "showcase-full",
-      ),
-    ).toBe(true);
-    expect(
-      shouldIndexPublicPageForProfile(
-        "blog",
-        getCanonicalPath("blog"),
-        "showcase-full",
-      ),
-    ).toBe(true);
-
+  it("keeps product markets disabled for non-catalog profiles", () => {
     const [marketSlug] = getAllMarketSlugs();
     expect(marketSlug).toBeDefined();
     expect(
       shouldIndexPublicPageForProfile(
         "products",
         getProductMarketPath(marketSlug ?? ""),
-        "showcase-full",
-      ),
-    ).toBe(true);
-  });
-
-  it("indexes content-marketing blog pages but not products", () => {
-    expect(
-      shouldIndexPublicPageForProfile(
-        "blog",
-        getCanonicalPath("blog"),
-        "content-marketing",
-      ),
-    ).toBe(true);
-    expect(
-      shouldIndexPublicPageForProfile(
-        "products",
-        getCanonicalPath("products"),
-        "content-marketing",
-      ),
-    ).toBe(false);
-
-    const [marketSlug] = getAllMarketSlugs();
-    expect(marketSlug).toBeDefined();
-    expect(
-      shouldIndexPublicPageForProfile(
-        "products",
-        getProductMarketPath(marketSlug ?? ""),
-        "content-marketing",
+        "minimal",
       ),
     ).toBe(false);
   });

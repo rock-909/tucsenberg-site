@@ -95,7 +95,6 @@ export function shouldIndexPublicPageForProfile(
 ): boolean {
   const normalizedPath = normalizePublicPagePath(path);
   const productsPath = getCanonicalPath("products");
-  const blogPath = getCanonicalPath("blog");
   const activeTypes = new Set(getActiveStaticPageTypes(profileId));
 
   if (pageType === "products") {
@@ -111,14 +110,6 @@ export function shouldIndexPublicPageForProfile(
   }
 
   if (pageType === "blog") {
-    if (normalizedPath === blogPath) {
-      return activeTypes.has("blog");
-    }
-
-    if (normalizedPath.startsWith(`${blogPath}/`)) {
-      return hasSingleSiteDynamicSurface("blogArticle", profileId);
-    }
-
     return false;
   }
 

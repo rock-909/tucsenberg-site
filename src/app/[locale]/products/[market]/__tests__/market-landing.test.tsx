@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockNotFound = vi.fn();
@@ -56,7 +56,7 @@ vi.mock("@/i18n/routing", () => ({
     </a>
   ),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -72,7 +72,7 @@ vi.mock("@/config/paths", () => ({
     },
   },
   LOCALES_CONFIG: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
   PATHS_CONFIG: {
@@ -179,21 +179,15 @@ vi.mock("@/components/products/product-specs", () => ({
 }));
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
-  "markets.north-america.label": "Primary Offer Example",
-  "markets.north-america.description":
-    "Replaceable catalog example for a standards-based product or service group.",
-  "markets.australia-new-zealand.label": "Secondary Offer Example",
-  "markets.australia-new-zealand.description":
-    "Replaceable catalog example for a second market, service tier, or regional offer.",
-  "markets.mexico.label": "Regional Offer Example",
-  "markets.mexico.description":
-    "Replaceable catalog example for a regional or compliance-based offer.",
-  "markets.europe.label": "Platform Offer Example",
-  "markets.europe.description":
-    "Replaceable catalog example for another market, platform, or standards group.",
-  "markets.specialty-product-systems.label": "Specialty Examples",
-  "markets.specialty-product-systems.description":
-    "High-performance specialty products designed for configured transfer systems.",
+  "markets.abs-flood-barriers.label": "ABS Interlocking Boxwall",
+  "markets.abs-flood-barriers.description":
+    "Freestanding ABS interlocking flood barriers for driveways, doorways and paved perimeters.",
+  "markets.aluminum-flood-gates.label": "Aluminum Flood Gates",
+  "markets.aluminum-flood-gates.description":
+    "Demountable aluminum plank systems for doors, garages, loading docks and shopfronts.",
+  "markets.flood-tube-dams.label": "Water & Air-Filled Tube Dams",
+  "markets.flood-tube-dams.description":
+    "Inflatable PVC tube dams for long runs, rough ground and planned emergency stock.",
   "market.technical.title": "Technical Properties",
   "market.certifications.title": "Certifications & Compliance",
   "market.trade.title": "Trade Information",
@@ -207,9 +201,9 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
     "Request a quote or ask about specifications, MOQ, and lead times.",
   "market.cta.button": "Request a Quote",
   "market.familyInquiry.cta": "Request quote for {familyLabel}",
-  "families.north-america.sample-product-shapes.label": "Sample Product Shapes",
-  "families.north-america.sample-product-shapes.description":
-    "Replaceable item examples for versions, shapes, packages, or service variants.",
+  "families.abs-flood-barriers.abs-boxwall.label": "ABS boxwall units",
+  "families.abs-flood-barriers.abs-boxwall.description":
+    "Straight, curved and gable-end ABS units for freestanding runs.",
 };
 
 describe("Market Landing Page", () => {
@@ -252,54 +246,46 @@ describe("Market Landing Page", () => {
 
   describe("Scenario 1.1: Page renders with title and standard label", () => {
     it("renders the market title as h1 and standard label badge", async () => {
-      await renderPage("north-america");
+      await renderPage("abs-flood-barriers");
 
       const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toHaveTextContent("Primary Offer Example");
-      expect(screen.getByText("Example Standard A")).toBeInTheDocument();
-    });
+      expect(heading).toHaveTextContent(
+        "ABS Interlocking Boxwall Flood Barriers",
+      );
 
-    it("renders the market description", async () => {
-      await renderPage("north-america");
-
+      const header = heading.closest("header");
+      expect(header).not.toBeNull();
       expect(
-        screen.getByText(/Replaceable catalog example for a standards-based/),
+        within(header as HTMLElement).getByText("TB-BW series"),
       ).toBeInTheDocument();
     });
 
-    it("renders server links from each family to Contact with context", async () => {
-      await renderPage("north-america");
+    it("renders the market description", async () => {
+      await renderPage("abs-flood-barriers");
 
-      const sweepsLink = screen.getByRole("link", {
-        name: /request quote for sample product shapes/i,
+      expect(
+        screen.getByText(/A freestanding flood barrier that needs no bolts/),
+      ).toBeInTheDocument();
+    });
+
+    it("renders product CTA links to the RFQ page", async () => {
+      await renderPage("abs-flood-barriers");
+
+      const quoteLinks = screen.getAllByRole("link", {
+        name: /request a quote/i,
       });
 
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("/contact"),
-      );
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("intent=product-family"),
-      );
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("market=north-america"),
-      );
-      expect(sweepsLink).toHaveAttribute(
-        "href",
-        expect.stringContaining("family=sample-product-shapes"),
-      );
+      expect(quoteLinks[0]).toHaveAttribute("href", "/request-quote");
     });
 
     it("does not render shared FAQ on market landing pages", async () => {
-      await renderPage("north-america");
+      await renderPage("abs-flood-barriers");
 
       expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
     });
 
     it("adds ProductGroup and BreadcrumbList JSON-LD through the shared graph script", async () => {
-      await renderPage("north-america");
+      await renderPage("abs-flood-barriers");
 
       const graphCall = mockJsonLdGraphScript.mock.calls.at(-1)?.[0] as
         | { readonly locale: string; readonly data: readonly unknown[] }
@@ -309,119 +295,127 @@ describe("Market Landing Page", () => {
       expect(graphCall?.data).toEqual([
         expect.objectContaining({ "@type": "ProductGroup" }),
         expect.objectContaining({ "@type": "BreadcrumbList" }),
+        expect.objectContaining({ "@type": "FAQPage" }),
       ]);
     });
   });
 
   describe("metadata", () => {
     it("uses central path-aware metadata with x-default alternates", async () => {
-      const metadata = await generatePageMetadata("north-america");
+      const metadata = await generatePageMetadata("abs-flood-barriers");
 
       expect(metadata).toMatchObject({
-        title: "Primary Offer Example | Example Showcase Company",
-        description:
-          "Replaceable catalog example for a standards-based product or service group.",
+        title:
+          "ABS Interlocking Boxwall Flood Barriers | Example Showcase Company",
+        description: expect.stringContaining(
+          "A freestanding flood barrier that needs no bolts",
+        ),
         alternates: {
-          canonical: "https://www.example.com/en/products/north-america",
+          canonical: "https://www.example.com/products/abs-flood-barriers",
           languages: {
-            en: "https://www.example.com/en/products/north-america",
-            zh: "https://www.example.com/zh/products/north-america",
-            "x-default": "https://www.example.com/en/products/north-america",
+            en: "https://www.example.com/products/abs-flood-barriers",
+            "x-default": "https://www.example.com/products/abs-flood-barriers",
           },
         },
       });
     });
   });
 
-  describe("Scenario 1.2: Family sections rendered", () => {
-    it("renders 3 family sections for north-america", async () => {
-      await renderPage("north-america");
+  describe("Scenario 1.2: Product content sections rendered", () => {
+    it("renders current Tucsenberg product sections", async () => {
+      await renderPage("abs-flood-barriers");
 
       expect(
-        screen.getByTestId("family-sample-product-shapes"),
+        screen.getByRole("heading", { name: "How it works" }),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("family-couplings")).toBeInTheDocument();
       expect(
-        screen.getByTestId("family-sample-product-runs"),
+        screen.getByRole("heading", { name: "Specifications" }),
       ).toBeInTheDocument();
+      expect(screen.getByText("TB-BW50")).toBeInTheDocument();
     });
 
-    it("renders sticky family nav", async () => {
-      await renderPage("north-america");
-      expect(screen.getByTestId("sticky-nav")).toBeInTheDocument();
+    it("does not render the retired sticky family nav", async () => {
+      await renderPage("abs-flood-barriers");
+      expect(screen.queryByTestId("sticky-nav")).not.toBeInTheDocument();
     });
   });
 
   describe("Scenario 1.6: Trust signals are present", () => {
-    it("renders technical specs section for market with spec data", async () => {
-      await renderPage("north-america");
-      expect(screen.getByTestId("product-specs")).toHaveTextContent(
-        "Technical Properties",
-      );
+    it("renders product specification tables from the Tucsenberg page copy", async () => {
+      await renderPage("abs-flood-barriers");
+
+      const specificationsSection = screen
+        .getByRole("heading", { name: "Specifications" })
+        .closest("section");
+      expect(specificationsSection).not.toBeNull();
+
+      expect(
+        within(specificationsSection as HTMLElement).getByText(
+          "Wall thickness",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(specificationsSection as HTMLElement).getByText("4 mm"),
+      ).toBeInTheDocument();
     });
 
-    it("renders certifications section for market with spec data", async () => {
-      await renderPage("north-america");
-      expect(screen.getByTestId("product-certifications")).toHaveTextContent(
-        "Certifications & Compliance",
-      );
+    it("renders buyer guidance sections from the Tucsenberg page copy", async () => {
+      await renderPage("abs-flood-barriers");
+
+      expect(
+        screen.getByRole("heading", {
+          name: "Small orders, samples, first-time buyers",
+        }),
+      ).toBeInTheDocument();
     });
 
-    it("renders trade info section for market with spec data", async () => {
-      await renderPage("north-america");
-      expect(screen.getByTestId("product-trade-info")).toHaveTextContent(
-        "Trade Information",
+    it("renders a second current product line", async () => {
+      await renderPage("aluminum-flood-gates");
+
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Aluminum Flood Gates",
       );
-    });
-
-    it("renders trust signals for mexico market", async () => {
-      await renderPage("mexico");
-
-      expect(screen.getByTestId("product-specs")).toBeInTheDocument();
-      expect(screen.getByTestId("product-certifications")).toBeInTheDocument();
-      expect(screen.getByTestId("product-trade-info")).toBeInTheDocument();
+      expect(screen.getByText("6063-T6")).toBeInTheDocument();
     });
   });
 
-  describe("Scenario 1.7: CTA links to /contact", () => {
-    it("renders CTA section with link to /contact", async () => {
-      await renderPage("north-america");
+  describe("Scenario 1.7: CTA links to /request-quote", () => {
+    it("renders CTA section with link to /request-quote", async () => {
+      await renderPage("abs-flood-barriers");
 
-      const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "/contact");
+      const ctaLink = screen.getAllByRole("link", {
+        name: /request a quote/i,
+      })[0];
+      expect(ctaLink).toHaveAttribute("href", "/request-quote");
     });
 
-    it("opts product detail contact links out of automatic prefetch", async () => {
-      await renderPage("north-america");
-
-      const familyLink = screen.getByRole("link", {
-        name: /request quote for sample product shapes/i,
-      });
-      expect(familyLink).toHaveAttribute(
-        "href",
-        "/contact?intent=product-family&market=north-america&family=sample-product-shapes",
-      );
-      expect(familyLink).toHaveAttribute("data-prefetch", "false");
-
-      const ctaLink = screen.getByRole("link", { name: /request a quote/i });
-      expect(ctaLink).toHaveAttribute("href", "/contact");
-      expect(ctaLink).toHaveAttribute("data-prefetch", "false");
-    });
-
-    it("renders CTA heading with market label", async () => {
-      await renderPage("north-america");
+    it("renders the spec-sheet download link without gating", async () => {
+      await renderPage("abs-flood-barriers");
 
       expect(
-        screen.getByText("Need Primary Offer Example products?"),
+        screen.getByRole("link", { name: "Download spec sheet" }),
+      ).toHaveAttribute("href", "/downloads/spec-sheet-tb-bw.pdf");
+    });
+
+    it("renders the final CTA heading", async () => {
+      await renderPage("abs-flood-barriers");
+
+      expect(
+        screen.getByRole("heading", { name: "Request a quote" }),
       ).toBeInTheDocument();
     });
   });
 
-  describe("Scenario: Product market FAQ is not mounted", () => {
-    it("does not render a shared FAQ section on market pages", async () => {
-      await renderPage("north-america");
+  describe("Scenario: Product market FAQ is mounted from product copy", () => {
+    it("renders FAQ questions as h3 headings", async () => {
+      await renderPage("abs-flood-barriers");
 
-      expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", {
+          level: 3,
+          name: /Can one person deploy it/i,
+        }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -436,18 +430,18 @@ describe("Market Landing Page", () => {
 
   describe("Breadcrumb", () => {
     it("renders breadcrumb navigation", async () => {
-      await renderPage("north-america");
+      await renderPage("abs-flood-barriers");
       expect(screen.getByLabelText("breadcrumb")).toBeInTheDocument();
     });
 
     it("opts product detail breadcrumb route links out of automatic prefetch", async () => {
-      await renderPage("north-america");
+      await renderPage("abs-flood-barriers");
 
       expect(mockCatalogBreadcrumb).toHaveBeenCalledWith(
         expect.objectContaining({
           homePrefetch: false,
-          market: expect.objectContaining({ slug: "north-america" }),
-          marketLabel: "Primary Offer Example",
+          market: expect.objectContaining({ slug: "abs-flood-barriers" }),
+          marketLabel: "ABS Interlocking Boxwall Flood Barriers",
           productsPrefetch: false,
           renderJsonLd: false,
         }),
@@ -456,28 +450,22 @@ describe("Market Landing Page", () => {
     });
   });
 
-  describe("Scenario: AU/NZ market renders with spec data", () => {
-    it("renders family sections for AU/NZ", async () => {
-      await renderPage("australia-new-zealand");
+  describe("Scenario: Another product line renders with product copy", () => {
+    it("renders family sections for flood tube dams", async () => {
+      await renderPage("flood-tube-dams");
+
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Water & Air-Filled Flood Tube Dams",
+      );
+      expect(screen.getByText("TB-TD series")).toBeInTheDocument();
+    });
+
+    it("renders trust/spec content for flood tube dams", async () => {
+      await renderPage("flood-tube-dams");
 
       expect(
-        screen.getByTestId("family-sample-product-shapes"),
+        screen.getByText("0.9 mm PVC tarpaulin, thermally moulded"),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("family-bellmouths")).toBeInTheDocument();
-    });
-
-    it("renders trust signals for AU/NZ", async () => {
-      await renderPage("australia-new-zealand");
-
-      expect(screen.getByTestId("product-specs")).toBeInTheDocument();
-      expect(screen.getByTestId("product-certifications")).toBeInTheDocument();
-      expect(screen.getByTestId("product-trade-info")).toBeInTheDocument();
-    });
-
-    it("renders sticky family navigation when spec data exists", async () => {
-      await renderPage("australia-new-zealand");
-
-      expect(screen.getByTestId("sticky-nav")).toBeInTheDocument();
     });
   });
 });

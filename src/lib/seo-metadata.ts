@@ -175,30 +175,40 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
         type: "website",
         keywords: ["About", "Company", "Team", "Enterprise"],
       };
-    case "content.pages.capabilities":
+    case "content.pages.oem-wholesale":
       return {
         type: "website",
-        keywords: ["Capabilities", "Website Starter", "Lead Foundation", "B2B"],
+        keywords: ["OEM", "Wholesale", "Private Label", "Flood Barriers"],
       };
     case "content.pages.contact":
       return {
         type: "website",
         keywords: ["Contact", "Support", "Business"],
       };
-    case "content.pages.how-it-works":
+    case "content.pages.flood-barrier-materials-guide":
       return {
         type: "website",
-        keywords: ["How It Works", "Setup", "Launch", "Website Starter"],
+        keywords: ["Flood Barrier Materials", "ABS", "Aluminum", "FRP"],
       };
     case "catalog.overview":
       return {
         type: "website",
-        keywords: ["Products", "Solutions", "Enterprise", "B2B"],
+        keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
       };
-    case "blog.index":
+    case "content.pages.flood-barrier-specifications":
       return {
         type: "website",
-        keywords: ["Blog", "Launch Guide", "Website Starter", "Cloudflare"],
+        keywords: ["Flood Barrier Specifications", "Product Tables", "RFQ"],
+      };
+    case "content.pages.request-quote":
+      return {
+        type: "website",
+        keywords: ["Request Quote", "RFQ", "Flood Barrier Supply"],
+      };
+    case "content.pages.warranty":
+      return {
+        type: "website",
+        keywords: ["Warranty", "Product Support", "Flood Barriers"],
       };
     case "content.pages.privacy":
       return {
@@ -209,16 +219,6 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
       return {
         type: "website",
         keywords: ["Terms", "Conditions", "Legal"],
-      };
-    case "content.pages.custom-project-support":
-      return {
-        type: "website",
-        keywords: [
-          "Custom Project",
-          "Website Starter",
-          "Brand Adaptation",
-          "Implementation Support",
-        ],
       };
     default:
       return {

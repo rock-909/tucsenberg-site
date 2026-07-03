@@ -28,9 +28,11 @@ describe("single-site-page-expression", () => {
     ]);
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({
       contact: "/contact",
+      oemWholesale: "/oem-wholesale",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
   });
 
@@ -128,7 +130,7 @@ describe("single-site-page-expression", () => {
       cardHrefs: {
         brochure: "/contact",
         productSheet: "/products",
-        buyerGuide: "/blog",
+        buyerGuide: "/contact",
       },
       ctaHref: "/contact",
     });

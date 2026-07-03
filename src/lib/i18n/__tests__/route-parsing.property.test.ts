@@ -13,8 +13,6 @@ const STATIC_ROUTE_FIXTURES = [
   "/contact",
   "/en/about",
   "/en/blog",
-  "/zh/contact",
-  "/zh/blog",
 ] as const;
 
 const DYNAMIC_ROUTE_FIXTURES = [
@@ -26,7 +24,7 @@ const DYNAMIC_ROUTE_FIXTURES = [
     },
   },
   {
-    input: "/zh/products/europe",
+    input: "/products/europe",
     expected: {
       pathname: "/products/[market]",
       params: { market: "europe" },
@@ -40,7 +38,7 @@ const DYNAMIC_ROUTE_FIXTURES = [
     },
   },
   {
-    input: "/zh/blog/why-cloudflare",
+    input: "/blog/why-cloudflare",
     expected: {
       pathname: "/blog/[slug]",
       params: { slug: "why-cloudflare" },

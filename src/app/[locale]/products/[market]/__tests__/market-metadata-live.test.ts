@@ -7,12 +7,12 @@ import {
 } from "@/config/single-site-seo";
 
 describe("market metadata live integration", () => {
-  it("noindexes north-america outside the default public SEO profile", async () => {
-    const path = getProductMarketPath("north-america");
+  it("indexes current catalog product markets in the public SEO profile", async () => {
+    const path = getProductMarketPath("abs-flood-barriers");
     const profileId = getSingleSitePublicSeoProfileId();
 
     expect(shouldIndexPublicPageForProfile("products", path, profileId)).toBe(
-      false,
+      true,
     );
 
     const metadata = generateMetadataForPath({
@@ -25,21 +25,15 @@ describe("market metadata live integration", () => {
       },
     });
 
-    expect(metadata.robots).toMatchObject({
-      index: false,
-      follow: false,
-    });
+    expect(metadata.robots).toMatchObject({ index: true, follow: true });
   });
 
   it("page generateMetadata matches path-aware helper", async () => {
     const { generateMetadata } = await import("../page");
     const metadata = await generateMetadata({
-      params: Promise.resolve({ locale: "en", market: "north-america" }),
+      params: Promise.resolve({ locale: "en", market: "abs-flood-barriers" }),
     });
 
-    expect(metadata.robots).toMatchObject({
-      index: false,
-      follow: false,
-    });
+    expect(metadata.robots).toMatchObject({ index: true, follow: true });
   });
 });

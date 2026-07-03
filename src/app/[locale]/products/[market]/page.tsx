@@ -6,8 +6,11 @@ import {
   getMarketBySlug,
   isValidMarketSlug,
 } from "@/constants/product-catalog";
-import { getProductMarketPath, SITE_CONFIG } from "@/config/paths";
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import {
+  getProductMarketPath,
+  LOCALES_CONFIG,
+  SITE_CONFIG,
+} from "@/config/paths";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
@@ -16,13 +19,13 @@ import type { Locale } from "@/types/content.types";
 import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/market-jsonld";
 import { getMarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
 import { Button } from "@/components/ui/button";
-import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import {
   getTucsenbergProductPage,
   type TucsenbergProductPage,
   type TucsenbergProductSection,
   type TucsenbergProductTable,
 } from "@/constants/tucsenberg-product-pages";
+import { buildTucsenbergProductFaqSchema } from "@/constants/tucsenberg-product-faq-schema";
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
@@ -191,14 +194,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(
     pageData.market.slug,
   )}`;
-  const faqSchema = generateFaqSchemaFromItems(
-    productPage.faqs.map((faq, index) => ({
-      id: `${productPage.slug}-faq-${index + 1}`,
-      question: faq.question,
-      answer: faq.answer,
-    })),
-    locale,
-  );
+  const faqSchema = buildTucsenbergProductFaqSchema(productPage, locale);
   const jsonLdData = await buildMarketPageJsonLdData({
     data: {
       families: pageData.families,

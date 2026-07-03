@@ -40,12 +40,6 @@ describe("message pack loader", () => {
       "showcase-full",
     ]);
     expect(getMessagePackIdsForProfile("minimal")).toEqual(["base", "minimal"]);
-    expect(getMessagePackIdsForProfile("company-site")).toEqual([
-      "base",
-      "minimal",
-      "b2b-lead",
-      "company-site",
-    ]);
     expect(getMessagePackIdsForProfile("b2b-lead")).toEqual([
       "base",
       "minimal",
@@ -53,31 +47,24 @@ describe("message pack loader", () => {
     ]);
     expect(getMessagePackIdsForProfile("catalog")).toEqual([
       "base",
-      "minimal",
       "b2b-lead",
       "catalog",
     ]);
-    expect(getMessagePackIdsForProfile("content-marketing")).toEqual([
-      "base",
-      "minimal",
-      "b2b-lead",
-      "content-marketing",
-    ]);
-    expect(getMessagePackIdsForProfile("showcase-full")).toEqual([
-      "base",
-      "minimal",
-      "b2b-lead",
-      "catalog",
-      "content-marketing",
-      "company-site",
-      "showcase-full",
-    ]);
+    expect(() => getMessagePackIdsForProfile("company-site")).toThrow(
+      /not available in this materialized starter/u,
+    );
+    expect(() => getMessagePackIdsForProfile("content-marketing")).toThrow(
+      /not available in this materialized starter/u,
+    );
+    expect(() => getMessagePackIdsForProfile("showcase-full")).toThrow(
+      /not available in this materialized starter/u,
+    );
   });
 
-  it("loads company-site messages with default product, blog, and resources namespaces", async () => {
+  it("loads catalog messages with Tucsenberg product namespaces", async () => {
     const messages = (await loadCompleteMessagesForProfile(
       "en",
-      "company-site",
+      "catalog",
     )) as Record<string, unknown>;
 
     expectHasNamespaces(messages, [
@@ -86,17 +73,20 @@ describe("message pack loader", () => {
       "footer",
       "home",
       "catalog",
-      "blog",
-      "article",
-      "resources",
+      "products",
       "contact",
       "privacy",
       "terms",
     ]);
-    expectMissingNamespaces(messages, ["customProject", "themeDemo"]);
+    expectMissingNamespaces(messages, [
+      "blog",
+      "article",
+      "resources",
+      "customProject",
+      "themeDemo",
+    ]);
     expect(JSON.stringify(messages)).not.toContain("Primary Offer Example");
     expect(JSON.stringify(messages)).not.toContain("Example Standard");
-    expect(JSON.stringify(messages)).not.toContain("catalog.markets");
     expect(JSON.stringify(messages)).not.toContain("platform.resources");
     expect(JSON.stringify(messages)).not.toContain("Starter launch articles");
     expect(JSON.stringify(messages)).not.toContain("solutionPartners");
@@ -132,12 +122,8 @@ describe("message pack loader", () => {
     expect(JSON.stringify(messages)).not.toContain("Primary Offer Example");
   });
 
-  it("loads optional catalog, content-marketing, and showcase-full packs only for owning profiles", async () => {
-    const [catalog, contentMarketing, showcaseFull] = await Promise.all([
-      loadCompleteMessagesForProfile("en", "catalog"),
-      loadCompleteMessagesForProfile("en", "content-marketing"),
-      loadCompleteMessagesForProfile("en", "showcase-full"),
-    ]);
+  it("loads the catalog pack and rejects retired optional packs", async () => {
+    const catalog = await loadCompleteMessagesForProfile("en", "catalog");
 
     expectHasNamespaces(catalog as Record<string, unknown>, [
       "catalog",
@@ -150,24 +136,11 @@ describe("message pack loader", () => {
       "customProject",
     ]);
 
-    expectHasNamespaces(contentMarketing as Record<string, unknown>, [
-      "blog",
-      "article",
-    ]);
-    expectMissingNamespaces(contentMarketing as Record<string, unknown>, [
-      "catalog",
-      "products",
-      "resources",
-      "customProject",
-    ]);
-
-    expectHasNamespaces(showcaseFull as Record<string, unknown>, [
-      "catalog",
-      "products",
-      "blog",
-      "article",
-      "resources",
-      "customProject",
-    ]);
+    await expect(
+      loadCompleteMessagesForProfile("en", "content-marketing"),
+    ).rejects.toThrow(/not available in this materialized starter/u);
+    await expect(
+      loadCompleteMessagesForProfile("en", "showcase-full"),
+    ).rejects.toThrow(/not available in this materialized starter/u);
   });
 });

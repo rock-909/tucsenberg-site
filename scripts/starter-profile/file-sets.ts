@@ -46,6 +46,12 @@ export const B2B_LEAD_LOCALE_ROUTE_ROOTS = [
 ] as const;
 
 export const CATALOG_ROUTE_ROOTS = [`${LOCALE_APP_BASE}/products`] as const;
+export const CATALOG_EXTRA_ROUTE_ROOTS = [
+  `${LOCALE_APP_BASE}/guides`,
+  `${LOCALE_APP_BASE}/oem-wholesale`,
+  `${LOCALE_APP_BASE}/request-quote`,
+  `${LOCALE_APP_BASE}/warranty`,
+] as const;
 
 export const CONTENT_MARKETING_ROUTE_ROOTS = [
   `${LOCALE_APP_BASE}/blog`,
@@ -64,6 +70,7 @@ const SHOWCASE_FULL_ROUTE_ROOTS = [
 export const ALL_OPTIONAL_ROUTE_ROOTS = [
   ...B2B_LEAD_LOCALE_ROUTE_ROOTS,
   ...CATALOG_ROUTE_ROOTS,
+  ...CATALOG_EXTRA_ROUTE_ROOTS,
   ...CONTENT_MARKETING_ROUTE_ROOTS,
   ...COMPANY_SITE_ROUTE_ROOTS,
   ...SHOWCASE_FULL_ROUTE_ROOTS,
@@ -114,10 +121,9 @@ function routeRootsForProfile(profileId: StarterProfileId): readonly string[] {
     case "catalog":
       return [
         ...core,
-        `${LOCALE_APP_BASE}/contact`,
-        `${LOCALE_APP_BASE}/privacy`,
-        `${LOCALE_APP_BASE}/terms`,
+        ...B2B_LEAD_LOCALE_ROUTE_ROOTS,
         ...CATALOG_ROUTE_ROOTS,
+        ...CATALOG_EXTRA_ROUTE_ROOTS,
       ];
     case "content-marketing":
       return [

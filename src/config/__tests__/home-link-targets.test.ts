@@ -53,7 +53,7 @@ describe("single-site home link targets", () => {
     });
   });
 
-  it("can still derive catalog and showcase-full product CTAs", () => {
+  it("can derive catalog product CTAs", () => {
     expect(getSingleSiteHomeLinkTargets("catalog")).toEqual({
       contact: "/contact",
       oemWholesale: "/oem-wholesale",
@@ -62,31 +62,13 @@ describe("single-site home link targets", () => {
       primaryCta: "/request-quote",
       secondaryCta: "/oem-wholesale",
     });
-    expect(getSingleSiteHomeLinkTargets("showcase-full")).toEqual({
-      contact: "/contact",
-      products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
-    });
-  });
-
-  it("derives content-marketing homepage CTAs without products", () => {
-    expect(getSingleSiteHomeLinkTargets("content-marketing")).toEqual({
-      contact: "/contact",
-      blog: "/blog",
-      primaryCta: "/blog",
-      secondaryCta: "/contact",
-    });
-    expect(
-      getSingleSiteHomeLinkTargets("content-marketing").products,
-    ).toBeUndefined();
   });
 
   it("can expose active route targets separately from homepage CTA choices", () => {
-    expect(getSingleSiteActiveRouteTargets("company-site")).toMatchObject({
+    expect(getSingleSiteActiveRouteTargets("catalog")).toMatchObject({
       products: "/products",
-      blog: "/blog",
-      resources: "/resources",
+      oemWholesale: "/oem-wholesale",
+      requestQuote: "/request-quote",
       contact: "/contact",
       about: "/about",
     });
@@ -94,18 +76,11 @@ describe("single-site home link targets", () => {
   });
 
   it("derives final CTA targets from semantic route availability", () => {
-    expect(getSingleSiteHomeFinalCtaTargets("company-site")).toEqual([
-      { href: "/products", labelKey: "primary" },
-      { href: "/contact", labelKey: "secondary" },
-    ]);
     expect(getSingleSiteHomeFinalCtaTargets("catalog")).toEqual([
       { href: "/products", labelKey: "primary" },
       { href: "/request-quote", labelKey: "secondary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("b2b-lead")).toEqual([
-      { href: "/contact", labelKey: "secondary" },
-    ]);
-    expect(getSingleSiteHomeFinalCtaTargets("content-marketing")).toEqual([
       { href: "/contact", labelKey: "secondary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("minimal")).toEqual([]);

@@ -21,29 +21,35 @@ import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-regi
 describe("single-site-seo", () => {
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
 
-  it("makes company-site the explicit default public SEO profile", () => {
-    expect(SINGLE_SITE_PUBLIC_SEO_PROFILE_ID).toBe("company-site");
-    expect(getSingleSitePublicSeoProfileId()).toBe("company-site");
+  it("makes catalog the explicit default public SEO profile", () => {
+    expect(SINGLE_SITE_PUBLIC_SEO_PROFILE_ID).toBe("catalog");
+    expect(getSingleSitePublicSeoProfileId()).toBe("catalog");
   });
 
-  it("uses company-site public static sitemap pages by default", () => {
+  it("uses Tucsenberg catalog public static sitemap pages by default", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toEqual([
       "home",
-      "about",
       "products",
-      "blog",
-      "resources",
+      "oemWholesale",
+      "materialsGuide",
+      "specificationsGuide",
+      "about",
+      "requestQuote",
       "contact",
+      "warranty",
       "privacy",
       "terms",
     ]);
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGES).toEqual([
       "",
-      "/about",
       "/products",
-      "/blog",
-      "/resources",
+      "/oem-wholesale",
+      "/guides/flood-barrier-materials-guide",
+      "/guides/flood-barrier-specifications",
+      "/about",
+      "/request-quote",
       "/contact",
+      "/warranty",
       "/privacy",
       "/terms",
     ]);
@@ -67,36 +73,40 @@ describe("single-site-seo", () => {
       changeFrequency: "weekly",
       priority: 0.9,
     });
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("blog")]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.85,
-    });
     expect(
-      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("resources")],
+      SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("requestQuote")],
     ).toEqual({
+      changeFrequency: "monthly",
+      priority: 0.9,
+    });
+    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG.productMarket).toEqual({
       changeFrequency: "weekly",
       priority: 0.8,
     });
-    expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG.productMarket).toBeUndefined();
     expect(SINGLE_SITE_SITEMAP_DEFAULT_CONFIG).toEqual({
       changeFrequency: "weekly",
       priority: 0.5,
     });
   });
 
-  it("keeps default sidecar lastmod scoped to company-site static pages", () => {
+  it("keeps default sidecar lastmod scoped to catalog static and product pages", () => {
+    const expectedProductLastmod = Object.fromEntries(
+      getAllMarketSlugs().map((marketSlug) => [
+        getProductMarketPath(marketSlug),
+        getMarketSpecsBySlug(marketSlug)?.updatedAt,
+      ]),
+    );
+
     expect(SINGLE_SITE_STATIC_PAGE_LASTMOD).toEqual({
       "": "2026-04-26T00:00:00Z",
       "/products": "2026-04-26T00:00:00Z",
-      "/blog": "2026-04-26T00:00:00Z",
-      "/resources": "2026-04-26T00:00:00Z",
+      "/request-quote": "2026-04-26T00:00:00Z",
+      ...expectedProductLastmod,
     });
     expect(SINGLE_SITE_STATIC_PAGE_LASTMOD[getCanonicalPath("products")]).toBe(
       "2026-04-26T00:00:00Z",
     );
-    expect(
-      SINGLE_SITE_STATIC_PAGE_LASTMOD[getCanonicalPath("capabilities")],
-    ).toBeUndefined();
+    expect(SINGLE_SITE_STATIC_PAGE_LASTMOD["/capabilities"]).toBeUndefined();
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
       "/api/",
       "/_next/",
@@ -105,94 +115,60 @@ describe("single-site-seo", () => {
     ]);
   });
 
-  it("can derive showcase-full static pages and product market sidecar lastmod", () => {
-    expect(getSingleSitePublicStaticPageRoutes("showcase-full")).toEqual([
-      "home",
-      "about",
-      "products",
-      "blog",
-      "resources",
-      "contact",
-      "privacy",
-      "terms",
-      "capabilities",
-      "howItWorks",
-      "customProject",
+  it("can derive explicit catalog static pages and product market sidecar lastmod", () => {
+    expect(getSingleSitePublicStaticPageRoutes("catalog")).toEqual([
+      ...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
     ]);
-    expect(getSingleSitePublicStaticPages("showcase-full")).toContain(
+    expect(getSingleSitePublicStaticPages("catalog")).toContain(
       getCanonicalPath("products"),
     );
-    expect(getSingleSitePublicStaticPages("showcase-full")).toContain(
-      getCanonicalPath("blog"),
-    );
     expect(
-      getSingleSiteSitemapPageConfigByPath("showcase-full").productMarket,
+      getSingleSiteSitemapPageConfigByPath("catalog").productMarket,
     ).toEqual({
       changeFrequency: "weekly",
       priority: 0.8,
     });
 
-    const showcaseLastmod = getSingleSiteStaticPageLastmod("showcase-full");
+    const catalogLastmod = getSingleSiteStaticPageLastmod("catalog");
     for (const marketSlug of getAllMarketSlugs()) {
       const specs = getMarketSpecsBySlug(marketSlug);
 
       expect(specs, `${marketSlug} should have market specs`).toBeDefined();
-      expect(showcaseLastmod[getProductMarketPath(marketSlug)]).toBe(
+      expect(catalogLastmod[getProductMarketPath(marketSlug)]).toBe(
         specs?.updatedAt,
       );
     }
   });
 
-  it("derives content-marketing static sitemap pages without products", () => {
-    expect(getSingleSitePublicStaticPageRoutes("content-marketing")).toEqual([
+  it("derives minimal static sitemap pages without product markets", () => {
+    expect(getSingleSitePublicStaticPageRoutes("minimal")).toEqual([
       "home",
-      "blog",
-      "about",
-      "contact",
       "privacy",
       "terms",
     ]);
-    expect(getSingleSitePublicStaticPages("content-marketing")).toEqual([
+    expect(getSingleSitePublicStaticPages("minimal")).toEqual([
       "",
-      "/blog",
-      "/about",
-      "/contact",
       "/privacy",
       "/terms",
     ]);
-    expect(getSingleSitePublicStaticPages("content-marketing")).not.toContain(
+    expect(getSingleSitePublicStaticPages("minimal")).not.toContain(
       "/products",
     );
     expect(
-      getSingleSiteSitemapPageConfigByPath("content-marketing").productMarket,
+      getSingleSiteSitemapPageConfigByPath("minimal").productMarket,
     ).toBeUndefined();
     expect(
-      getSingleSiteStaticPageLastmod("content-marketing")[
-        getCanonicalPath("products")
-      ],
+      getSingleSiteStaticPageLastmod("minimal")[getCanonicalPath("products")],
     ).toBeUndefined();
   });
 
   it("derives dynamic surface ownership by profile", () => {
-    expect(hasSingleSiteDynamicSurface("productMarket")).toBe(false);
+    expect(hasSingleSiteDynamicSurface("productMarket")).toBe(true);
     expect(hasSingleSiteDynamicSurface("productMarket", "catalog")).toBe(true);
-    expect(hasSingleSiteDynamicSurface("productMarket", "showcase-full")).toBe(
-      true,
-    );
+    expect(hasSingleSiteDynamicSurface("productMarket", "minimal")).toBe(false);
+    expect(hasSingleSiteDynamicSurface("blogArticle", "catalog")).toBe(false);
     expect(
-      hasSingleSiteDynamicSurface("productMarket", "content-marketing"),
-    ).toBe(false);
-    expect(
-      hasSingleSiteDynamicSurface("blogArticle", "content-marketing"),
-    ).toBe(true);
-    expect(
-      getSingleSiteSitemapPageConfigByPath("company-site").blogArticle,
-    ).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.7,
-    });
-    expect(getSingleSiteSitemapPageConfigByPath("catalog").blogArticle).toBe(
-      undefined,
-    );
+      getSingleSiteSitemapPageConfigByPath("catalog").blogArticle,
+    ).toBeUndefined();
   });
 });

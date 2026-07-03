@@ -577,66 +577,54 @@ afterAll(() => {
 }, 120_000);
 
 describe("profile materialization output integration", () => {
-  it("materializes clean company-site output without local caches or tool bundles", () => {
-    const outputDirectory = materializeProfile("company-site", {
+  it("materializes clean catalog output without local caches or tool bundles", () => {
+    const outputDirectory = materializeProfile("catalog", {
       linkNodeModules: false,
     });
 
-    assertCompanySiteMaterializedBoundaries(outputDirectory);
+    assertCatalogMaterializedBoundaries(outputDirectory);
   }, 120_000);
 
-  it("includes resources route only for company-site and showcase-full materialized output", () => {
+  it("keeps the retired resources route out of available materialized profiles", () => {
     const resourcesRouteRoot = "src/app/[locale]/resources";
     const resourcesPage = `${resourcesRouteRoot}/page.tsx`;
     const resourcesTest = `${resourcesRouteRoot}/__tests__/page.test.tsx`;
 
     for (const profileId of [
-      "company-site",
-      "showcase-full",
-    ] as const satisfies readonly StarterProfileId[]) {
-      expect(
-        buildStarterProfileMaterializationPlan(profileId).includedRouteRoots,
-      ).toContain(resourcesRouteRoot);
-    }
-
-    for (const profileId of [
       "minimal",
       "b2b-lead",
       "catalog",
-      "content-marketing",
     ] as const satisfies readonly StarterProfileId[]) {
       expect(
         buildStarterProfileMaterializationPlan(profileId).excludedRouteRoots,
       ).toContain(resourcesRouteRoot);
     }
 
-    expect(planIncludesRouteFile("company-site", resourcesPage)).toBe(true);
-    expect(planIncludesRouteFile("company-site", resourcesTest)).toBe(true);
     expect(planIncludesRouteFile("b2b-lead", resourcesPage)).toBe(false);
     expect(planIncludesRouteFile("b2b-lead", resourcesTest)).toBe(false);
+    expect(planIncludesRouteFile("catalog", resourcesPage)).toBe(false);
+    expect(planIncludesRouteFile("catalog", resourcesTest)).toBe(false);
   });
 
-  it("documents showcase-full dry-run includes optional demo routes and fixture packs", () => {
-    const plan = buildStarterProfileMaterializationPlan("showcase-full");
+  it("keeps retired showcase-full demo routes and fixture packs out of catalog dry-run", () => {
+    const plan = buildStarterProfileMaterializationPlan("catalog");
 
     for (const routeRoot of [
       "src/app/[locale]/capabilities",
       "src/app/[locale]/how-it-works",
       "src/app/[locale]/custom-project-support",
-      "src/app/[locale]/products",
       "src/app/[locale]/blog",
       "src/app/[locale]/resources",
     ]) {
-      expect(plan.includedRouteRoots.join("\n")).toContain(routeRoot);
+      expect(plan.excludedRouteRoots.join("\n")).toContain(routeRoot);
     }
 
     for (const fixtureRoot of [
-      "profile-fixtures/catalog",
       "profile-fixtures/content-marketing",
       "profile-fixtures/showcase-full",
       "public/profile-fixtures",
     ]) {
-      expect(plan.includedFixtureRoots.join("\n")).toContain(fixtureRoot);
+      expect(plan.excludedFixtureRoots.join("\n")).toContain(fixtureRoot);
     }
   });
 

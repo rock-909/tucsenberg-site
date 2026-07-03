@@ -91,8 +91,7 @@ export class URLGenerator {
     includeLocale: boolean,
   ): string {
     let path = "";
-    // Always include locale prefix when localePrefix: 'always' is configured
-    if (includeLocale) {
+    if (includeLocale && LOCALES_CONFIG.localePrefix !== "never") {
       path += `/${locale}`;
     }
     if (localizedPath !== "/" || path === "") {
@@ -269,7 +268,10 @@ export class URLGenerator {
     let cleanPath = path;
 
     // 检查是否有语言前缀
-    const localeMatch = path.match(/^\/([a-z]{2})(?=\/|$)/);
+    const localeMatch =
+      LOCALES_CONFIG.localePrefix === "never"
+        ? null
+        : path.match(/^\/([a-z]{2})(?=\/|$)/);
     if (localeMatch && this.locales.includes(localeMatch[1] as Locale)) {
       locale = localeMatch[1] as Locale;
       cleanPath = path.replace(/^\/[a-z]{2}/, "") || "/";

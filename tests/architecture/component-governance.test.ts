@@ -14,8 +14,6 @@ const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const UI_COMPONENT_PLAYBOOK_PATH = "docs/ref/ui-components.md";
 const UI_COMPONENT_INDEX_PATH = "docs/ref/ui-component-index.md";
-const AIFS_REPLACEMENT_PROOF_PATH =
-  "docs/superpowers/audits/2026-05-22-aifs-registry-playbook-replacement-proof.md";
 const AGENTS_MD_PATH = "AGENTS.md";
 const CLAUDE_MD_PATH = "CLAUDE.md";
 const REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE =
@@ -636,15 +634,13 @@ describe("component governance", () => {
     expect(hasStoryImport("export { Example };", importerPath)).toBe(false);
   });
 
-  it("keeps Registry and Playbook active through shrink-prep proof", () => {
+  it("keeps Registry and Playbook active in the materialized site docs", () => {
     expect(existsSync(COMPONENT_GOVERNANCE_REGISTRY_PATH)).toBe(true);
     expect(existsSync(UI_COMPONENT_PLAYBOOK_PATH)).toBe(true);
     expect(existsSync(UI_COMPONENT_INDEX_PATH)).toBe(true);
-    expect(existsSync(AIFS_REPLACEMENT_PROOF_PATH)).toBe(true);
 
     const playbook = readFixedText(UI_COMPONENT_PLAYBOOK_PATH);
     const index = readFixedText(UI_COMPONENT_INDEX_PATH);
-    const proof = readFixedText(AIFS_REPLACEMENT_PROOF_PATH);
     const agents = readFixedText(AGENTS_MD_PATH);
     const claude = readFixedText(CLAUDE_MD_PATH);
 
@@ -662,13 +658,6 @@ describe("component governance", () => {
     expect(playbook).toContain("Do not delete, archive, or shrink");
     expect(index).toContain("maintained mirror");
     expect(index).toContain("durable component discovery source for agents");
-    expect(proof).toContain(
-      "This file is not a retirement approval and does not satisfy the Registry / Playbook deletion or shrink precondition.",
-    );
-    expect(proof).toContain("This document does not approve deletion");
-    expect(proof).toContain("Registry and Playbook must remain active for now");
-    expect(proof).toContain("Storybook MCP is not installed");
-    expect(proof).toContain("not a CI hard dependency");
     expect(agents).toContain(REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE);
     expect(claude).toContain(REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE);
     expect(agents).not.toContain("until replacement proof exists");

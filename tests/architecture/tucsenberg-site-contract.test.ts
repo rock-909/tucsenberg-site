@@ -62,9 +62,15 @@ const TARGET_DOWNLOADS = [
   "public/downloads/spec-sheet-tb-td.pdf",
 ] as const;
 
-const ACTIVE_MESSAGE_FILES = [
+const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
   "messages/profiles/catalog/en/critical.json",
   "messages/en/critical.json",
+] as const;
+
+const ACTIVE_MESSAGE_FILES = [
+  ...ACTIVE_HOMEPAGE_MESSAGE_FILES,
+  "messages/profiles/catalog/en/deferred.json",
+  "messages/en/deferred.json",
 ] as const;
 
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
@@ -98,6 +104,7 @@ const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /north-america/iu,
   /australia-new-zealand/iu,
   /specialty-product-systems/iu,
+  /[$€£]\s*\d/u,
 ];
 
 function toRepoPath(absolutePath: string): string {
@@ -235,7 +242,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
   });
 
   it("uses Tucsenberg-owned active homepage and catalog messages", () => {
-    for (const messageFile of ACTIVE_MESSAGE_FILES) {
+    for (const messageFile of ACTIVE_HOMEPAGE_MESSAGE_FILES) {
       const messages = getObject(readRepoJson(messageFile), messageFile);
       const home = getObject(messages.home, `${messageFile} home`);
       const hero = getObject(home.hero, `${messageFile} home.hero`);

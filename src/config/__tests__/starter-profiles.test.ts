@@ -18,11 +18,11 @@ const EXPECTED_PROFILE_IDS = [
 ] as const;
 
 describe("starter profile registry", () => {
-  it("keeps company-site as the default profile", () => {
+  it("keeps catalog as the materialized default profile", () => {
     expect(STARTER_PROFILE_IDS).toEqual(EXPECTED_PROFILE_IDS);
-    expect(DEFAULT_STARTER_PROFILE_ID).toBe("company-site");
-    expect(getStarterProfile().id).toBe("company-site");
-    expect(isStarterProfileId("company-site")).toBe(true);
+    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
+    expect(getStarterProfile().id).toBe("catalog");
+    expect(isStarterProfileId("catalog")).toBe(true);
     expect(isStarterProfileId("unknown")).toBe(false);
   });
 
@@ -120,7 +120,19 @@ describe("starter profile registry", () => {
 
   it("maps optional catalog and content-marketing surfaces to opt-in profiles", () => {
     expect(getStarterProfile("catalog")).toMatchObject({
-      staticPages: ["home", "products", "contact", "privacy", "terms"],
+      staticPages: [
+        "home",
+        "products",
+        "oemWholesale",
+        "materialsGuide",
+        "specificationsGuide",
+        "about",
+        "requestQuote",
+        "contact",
+        "warranty",
+        "privacy",
+        "terms",
+      ],
       dynamicSurfaces: ["productMarket"],
       proofLanes: ["core-starter", "catalog"],
       examplePacks: ["catalog-examples"],
@@ -163,7 +175,7 @@ describe("starter profile registry", () => {
       "howItWorks",
       "customProject",
     ]);
-    expect(PUBLIC_STATIC_PAGE_TYPES).toContain("resources");
+    expect(PUBLIC_STATIC_PAGE_TYPES).not.toContain("resources");
     expect(profile.dynamicSurfaces).toEqual(["productMarket", "blogArticle"]);
     expect(profile.messageNamespaces).toEqual(
       expect.arrayContaining([

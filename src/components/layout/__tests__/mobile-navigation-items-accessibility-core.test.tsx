@@ -11,6 +11,21 @@ import { mobileNavigation } from "@/lib/navigation";
 import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 import { createMockUseTranslations } from "@/test/utils";
 
+type MockLinkHref =
+  | string
+  | { pathname: string; query?: Record<string, string> };
+
+function stringifyMockHref(href: MockLinkHref): string {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  const query =
+    href.query === undefined ? "" : `?${new URLSearchParams(href.query)}`;
+
+  return `${href.pathname}${query}`;
+}
+
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
@@ -36,7 +51,12 @@ vi.mock("@/i18n/routing", () => ({
       if (onClick) onClick(e);
     };
     return (
-      <a href={href} className={className} onClick={handleClick} {...props}>
+      <a
+        href={stringifyMockHref(href)}
+        className={className}
+        onClick={handleClick}
+        {...props}
+      >
         {children}
       </a>
     );
@@ -146,16 +166,19 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: /products/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /blog/i })).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /resources/i }),
+        screen.getByRole("link", { name: /oem & wholesale/i }),
       ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /guides/i })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /about/i })).toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: /custom/i }),
       ).not.toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: /^Contact$/i }),
+        screen.queryByRole("link", { name: /^Contact$/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /request a quote/i }),
       ).toBeInTheDocument();
     });
 
@@ -275,15 +298,17 @@ describe("Mobile Navigation - Core Tests", () => {
       expect(
         screen.getByRole("link", { name: "Products" }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Blog" })).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Resources" }),
+        screen.getByRole("link", { name: "OEM & Wholesale" }),
       ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Guides" })).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: "Custom" }),
       ).not.toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Request a Quote" }),
+      ).toBeInTheDocument();
     });
 
     it("should handle missing translations gracefully", async () => {

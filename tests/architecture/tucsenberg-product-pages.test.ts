@@ -9,14 +9,17 @@ describe("Tucsenberg product page copy contract", () => {
 
   it("keeps each product page RFQ-ready without public price or price offers", () => {
     for (const [slug, page] of Object.entries(TUCSENBERG_PRODUCT_PAGES)) {
+      const pagePayload = JSON.stringify(page);
+
       expect(page.title, slug).toBeTruthy();
       expect(page.lead, slug).toBeTruthy();
       expect(page.cta.label, slug).toMatch(/quote|interest/iu);
       expect(page.sections.length, slug).toBeGreaterThanOrEqual(4);
       expect(page.faqs.length, slug).toBeGreaterThanOrEqual(3);
       expect(page.downloadHref, slug).toMatch(/^\/downloads\/.+\.pdf$/u);
-      expect(JSON.stringify(page), slug).not.toMatch(/offers"\s*:\s*\{/iu);
-      expect(JSON.stringify(page), slug).not.toMatch(/price"\s*:/iu);
+      expect(pagePayload, slug).not.toMatch(/offers"\s*:\s*\{/iu);
+      expect(pagePayload, slug).not.toMatch(/price"\s*:/iu);
+      expect(pagePayload, slug).not.toMatch(/[$€£]\s*\d/u);
     }
   });
 

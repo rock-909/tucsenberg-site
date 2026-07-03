@@ -22,6 +22,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 import { createMockUseTranslations } from "@/test/utils";
 
+type MockLinkHref =
+  | string
+  | { pathname: string; query?: Record<string, string> };
+
+function stringifyMockHref(href: MockLinkHref): string {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  const query =
+    href.query === undefined ? "" : `?${new URLSearchParams(href.query)}`;
+
+  return `${href.pathname}${query}`;
+}
+
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
@@ -44,7 +59,12 @@ vi.mock("@/i18n/routing", () => ({
       if (onClick) onClick(e);
     };
     return (
-      <a href={href} className={className} onClick={handleClick} {...props}>
+      <a
+        href={stringifyMockHref(href)}
+        className={className}
+        onClick={handleClick}
+        {...props}
+      >
         {children}
       </a>
     );
@@ -228,9 +248,10 @@ describe("Mobile Navigation - Main Tests", () => {
 
       expect(screen.getByText("Home")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
-      expect(screen.getByText("Resources")).toBeInTheDocument();
+      expect(screen.getByText("OEM & Wholesale")).toBeInTheDocument();
+      expect(screen.getByText("Guides")).toBeInTheDocument();
       expect(screen.getByText("About")).toBeInTheDocument();
+      expect(screen.getByText("Request a Quote")).toBeInTheDocument();
       expect(screen.queryByText("Custom")).not.toBeInTheDocument();
     });
 

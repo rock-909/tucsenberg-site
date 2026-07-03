@@ -38,15 +38,13 @@ function pageExpressionImporters(): string[] {
 describe("page-expression consumption boundary", () => {
   it("keeps page-expression consumers discoverable instead of allowlisted", () => {
     expect(pageExpressionImporters()).toEqual([
-      "src/app/[locale]/custom-project-support/page.tsx",
       "src/app/[locale]/page.tsx",
-      "src/app/[locale]/products/[market]/page.tsx",
-      "src/app/[locale]/resources/page.tsx",
       "src/components/content/about-page-shell.tsx",
       "src/components/sections/final-cta.tsx",
       "src/components/sections/hero-section.tsx",
       "src/components/sections/quality-section.tsx",
       "src/components/sections/scenarios-section.tsx",
+      "src/components/sections/starter-boundary-section.tsx",
     ]);
   });
 

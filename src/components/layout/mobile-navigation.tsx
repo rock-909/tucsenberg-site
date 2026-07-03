@@ -27,7 +27,9 @@ export function MobileNavigationLinks({
 }: MobileNavigationLinksProps) {
   const t = useTranslations("navigation");
   const resolvedContactSalesLabel = contactSalesLabel ?? t("contactSales");
-  const contactHref = SINGLE_SITE_HOME_LINK_TARGETS.contact;
+  const contactHref =
+    SINGLE_SITE_HOME_LINK_TARGETS.requestQuote ??
+    SINGLE_SITE_HOME_LINK_TARGETS.contact;
 
   return (
     <nav

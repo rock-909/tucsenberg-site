@@ -48,19 +48,14 @@ describe("message pack graph contract", () => {
     }
   });
 
-  it("keeps showcase-full as a superset of every profile pack list", () => {
-    const showcaseFullPacks = new Set(PROFILE_PACK_MAP["showcase-full"]);
-
-    for (const [profileId, packIds] of Object.entries(PROFILE_PACK_MAP) as [
-      StarterProfileId,
-      readonly MessagePackId[],
-    ][]) {
-      for (const packId of packIds) {
-        expect(
-          showcaseFullPacks.has(packId),
-          `showcase-full includes ${profileId}/${packId}`,
-        ).toBe(true);
-      }
-    }
+  it("keeps the materialized Tucsenberg profile graph scoped to en-only catalog runtime", () => {
+    expect(Object.keys(PROFILE_PACK_MAP).sort()).toEqual([
+      "b2b-lead",
+      "catalog",
+      "minimal",
+    ]);
+    expect(PROFILE_PACK_MAP).not.toHaveProperty("company-site");
+    expect(PROFILE_PACK_MAP).not.toHaveProperty("content-marketing");
+    expect(PROFILE_PACK_MAP).not.toHaveProperty("showcase-full");
   });
 });

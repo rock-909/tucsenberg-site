@@ -158,21 +158,31 @@ describe("email copy boundary", () => {
     }
   });
 
-  it("keeps transactional email message-pack keys aligned across default locales", () => {
+  it("keeps transactional email message-pack keys present in the en-only runtime pack", () => {
     const english = readJsonFile("messages/base/en/deferred.json") as {
-      emailTemplates?: unknown;
-    };
-    const chinese = readJsonFile("messages/base/zh/deferred.json") as {
       emailTemplates?: unknown;
     };
 
     expect(english.emailTemplates).toBeDefined();
-    expect(chinese.emailTemplates).toBeDefined();
-    expect(getObjectKeys(chinese.emailTemplates)).toEqual(
-      getObjectKeys(english.emailTemplates),
-    );
-    expect(getNestedKeys(chinese.emailTemplates).sort()).toEqual(
-      getNestedKeys(english.emailTemplates).sort(),
+    expect(getObjectKeys(english.emailTemplates)).toEqual([
+      "common",
+      "confirmation",
+      "contact",
+      "productInquiry",
+      "runtimeDefaultLocale",
+    ]);
+    expect(getNestedKeys(english.emailTemplates).sort()).toEqual(
+      expect.arrayContaining([
+        "confirmation.footer",
+        "confirmation.preview",
+        "confirmation.subject",
+        "contact.footer",
+        "contact.preview",
+        "contact.subjectWithTopic",
+        "productInquiry.footer",
+        "productInquiry.preview",
+        "productInquiry.subject",
+      ]),
     );
   });
 

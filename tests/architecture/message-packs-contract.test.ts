@@ -2,49 +2,29 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { StarterProfileId } from "@/config/starter-profiles";
 import {
+  PROFILE_MESSAGE_PACKS,
   getMessagePackIdsForProfile,
   type MessagePackId,
   type MessageType,
 } from "@/lib/i18n/message-pack-config";
 import { mergeObjects } from "@/lib/merge-objects";
 
-const REQUIRED_PACK_FILES = [
-  "messages/base/en/critical.json",
-  "messages/base/en/deferred.json",
-  "messages/base/zh/critical.json",
-  "messages/base/zh/deferred.json",
-  "messages/profiles/minimal/en/critical.json",
-  "messages/profiles/minimal/en/deferred.json",
-  "messages/profiles/minimal/zh/critical.json",
-  "messages/profiles/minimal/zh/deferred.json",
-  "messages/profiles/b2b-lead/en/critical.json",
-  "messages/profiles/b2b-lead/en/deferred.json",
-  "messages/profiles/b2b-lead/zh/critical.json",
-  "messages/profiles/b2b-lead/zh/deferred.json",
-  "messages/profiles/catalog/en/critical.json",
-  "messages/profiles/catalog/en/deferred.json",
-  "messages/profiles/catalog/zh/critical.json",
-  "messages/profiles/catalog/zh/deferred.json",
-  "messages/profiles/content-marketing/en/critical.json",
-  "messages/profiles/content-marketing/en/deferred.json",
-  "messages/profiles/content-marketing/zh/critical.json",
-  "messages/profiles/content-marketing/zh/deferred.json",
-  "messages/profiles/company-site/en/critical.json",
-  "messages/profiles/company-site/en/deferred.json",
-  "messages/profiles/company-site/zh/critical.json",
-  "messages/profiles/company-site/zh/deferred.json",
-  "messages/profiles/showcase-full/en/critical.json",
-  "messages/profiles/showcase-full/en/deferred.json",
-  "messages/profiles/showcase-full/zh/critical.json",
-  "messages/profiles/showcase-full/zh/deferred.json",
-  "messages/examples/ui-demo/en/critical.json",
-  "messages/examples/ui-demo/en/deferred.json",
-  "messages/examples/ui-demo/zh/critical.json",
-  "messages/examples/ui-demo/zh/deferred.json",
-];
-
-const LOCALES = ["en", "zh"] as const;
+const LOCALES = ["en"] as const;
 const MESSAGE_TYPES = ["critical", "deferred"] as const;
+const AVAILABLE_PROFILE_IDS = Object.keys(
+  PROFILE_MESSAGE_PACKS,
+) as StarterProfileId[];
+const REQUIRED_PACK_FILES = [
+  ...new Set(
+    AVAILABLE_PROFILE_IDS.flatMap((profileId) =>
+      getMessagePackIdsForProfile(profileId).flatMap((packId) =>
+        LOCALES.flatMap((locale) =>
+          MESSAGE_TYPES.map((type) => getPackPath(packId, locale, type)),
+        ),
+      ),
+    ),
+  ),
+];
 
 function packFileExists(relativePath: string): boolean {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test checks fixed pack paths from REQUIRED_PACK_FILES
@@ -123,11 +103,11 @@ describe("physical message packs", () => {
     expect(currentTruthDocs).toContain("messages/profiles/**");
   });
 
-  it("keeps generated compatibility messages synced from showcase-full physical packs", () => {
+  it("keeps generated compatibility messages synced from the active catalog physical packs", () => {
     for (const locale of LOCALES) {
       for (const type of MESSAGE_TYPES) {
         expect(readJson(`messages/${locale}/${type}.json`)).toEqual(
-          composeProfileMessages("showcase-full", locale, type),
+          composeProfileMessages("catalog", locale, type),
         );
       }
     }

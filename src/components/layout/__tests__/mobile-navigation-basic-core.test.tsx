@@ -22,6 +22,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileNavigationInteractive as MobileNavigation } from "@/components/layout/mobile-navigation-interactive";
 import { createMockUseTranslations } from "@/test/utils";
 
+type MockLinkHref =
+  | string
+  | { pathname: string; query?: Record<string, string> };
+
+function stringifyMockHref(href: MockLinkHref): string {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  const query =
+    href.query === undefined ? "" : `?${new URLSearchParams(href.query)}`;
+
+  return `${href.pathname}${query}`;
+}
+
 // Mock next-intl - 完整的Mock配置
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn(),
@@ -49,7 +64,7 @@ vi.mock("next/navigation", () => ({
 // Mock @/i18n/routing
 vi.mock("@/i18n/routing", () => ({
   Link: ({ children, href, className, ...props }: any) => (
-    <a href={href} className={className} {...props}>
+    <a href={stringifyMockHref(href)} className={className} {...props}>
       {children}
     </a>
   ),
@@ -63,7 +78,7 @@ vi.mock("@/i18n/routing", () => ({
   })),
   usePathname: vi.fn(() => "/"),
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
     pathnames: {
       "/": "/",
@@ -240,9 +255,10 @@ describe("Mobile Navigation - Basic Core Tests", () => {
 
       expect(screen.getByText("Home")).toBeInTheDocument();
       expect(screen.getByText("Products")).toBeInTheDocument();
-      expect(screen.getByText("Blog")).toBeInTheDocument();
-      expect(screen.getByText("Resources")).toBeInTheDocument();
+      expect(screen.getByText("OEM & Wholesale")).toBeInTheDocument();
+      expect(screen.getByText("Guides")).toBeInTheDocument();
       expect(screen.getByText("About")).toBeInTheDocument();
+      expect(screen.getByText("Request a Quote")).toBeInTheDocument();
       expect(screen.queryByText("Custom")).not.toBeInTheDocument();
     });
 

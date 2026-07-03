@@ -211,56 +211,20 @@ describe("profile materialization runtime output", () => {
         profileId: "catalog",
         expectedHome: {
           contact: "/contact",
+          oemWholesale: "/oem-wholesale",
           products: "/products",
-          primaryCta: "/products",
-          secondaryCta: "/contact",
+          requestQuote: "/request-quote",
+          primaryCta: "/request-quote",
+          secondaryCta: "/oem-wholesale",
         },
         expectedAboutCta: "/products",
         expectedFinalCtaLinks: [
-          { href: "/contact", label: "Contact" },
           { href: "/products", label: "View product capabilities" },
+          { href: "/request-quote", label: "Contact" },
         ],
         forbiddenHrefs: [
           "/blog",
           "/resources",
-          "/about",
-          "/capabilities",
-          "/how-it-works",
-          "/custom-project-support",
-        ],
-      },
-      {
-        profileId: "content-marketing",
-        expectedHome: {
-          contact: "/contact",
-          blog: "/blog",
-          primaryCta: "/blog",
-          secondaryCta: "/contact",
-        },
-        expectedAboutCta: "/contact",
-        expectedFinalCtaLinks: [{ href: "/contact", label: "Contact" }],
-        forbiddenHrefs: [
-          "/products",
-          "/resources",
-          "/capabilities",
-          "/how-it-works",
-          "/custom-project-support",
-        ],
-      },
-      {
-        profileId: "company-site",
-        expectedHome: {
-          contact: "/contact",
-          products: "/products",
-          primaryCta: "/products",
-          secondaryCta: "/contact",
-        },
-        expectedAboutCta: "/products",
-        expectedFinalCtaLinks: [
-          { href: "/contact", label: "Contact" },
-          { href: "/products", label: "View product capabilities" },
-        ],
-        forbiddenHrefs: [
           "/capabilities",
           "/how-it-works",
           "/custom-project-support",
@@ -303,8 +267,8 @@ describe("profile materialization runtime output", () => {
     }
   }, 120_000);
 
-  it("keeps materialized company-site page expression aligned with catalog stubs", () => {
-    const outputDirectory = materializeProfile("company-site");
+  it("keeps materialized catalog page expression aligned with catalog data", () => {
+    const outputDirectory = materializeProfile("catalog");
     const surface = readMaterializedCatalogExpressionSurface(outputDirectory);
 
     expect(surface.groupedMarketSlugs).toEqual(surface.catalogMarketSlugs);

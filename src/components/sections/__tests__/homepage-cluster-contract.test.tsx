@@ -131,7 +131,7 @@ describe("Homepage section cluster contract", () => {
     expect(
       within(starterBoundary.container).getByRole("heading", {
         level: 2,
-        name: "title",
+        name: "startPath.title",
       }),
     ).toBeInTheDocument();
 

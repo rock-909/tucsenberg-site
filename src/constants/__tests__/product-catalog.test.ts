@@ -13,12 +13,18 @@ describe("product-catalog wrapper", () => {
   });
 
   it("keeps market lookups aligned with the single-site catalog", () => {
-    expect(getMarketBySlug("north-america")?.standardLabel).toBe(
-      "Example Standard A",
+    expect(getMarketBySlug("abs-flood-barriers")?.standardLabel).toBe(
+      "TB-BW series",
     );
-    expect(getAllMarketSlugs()).toContain("specialty-product-systems");
+    expect(getAllMarketSlugs()).toEqual([
+      "abs-flood-barriers",
+      "aluminum-flood-gates",
+      "absorbent-flood-bags",
+      "flood-tube-dams",
+      "frp-flood-barriers",
+    ]);
     expect(
-      getFamiliesForMarket("north-america").map((family) => family.slug),
-    ).toContain("sample-product-shapes");
+      getFamiliesForMarket("abs-flood-barriers").map((family) => family.slug),
+    ).toEqual(["abs-boxwall"]);
   });
 });

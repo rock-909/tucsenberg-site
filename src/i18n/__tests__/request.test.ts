@@ -5,7 +5,6 @@ import {
 } from "@/config/paths/locales-config";
 
 const EN_LOCALE = "en" satisfies ConfiguredLocale;
-const ZH_LOCALE = "zh" satisfies ConfiguredLocale;
 
 interface RequestConfigResult {
   locale: ConfiguredLocale;
@@ -88,16 +87,6 @@ describe("i18n Request Configuration", () => {
     expect(result.strictMessageTypeSafety).toBe(true);
     expect(result.messages).toBeDefined();
     expect(result.metadata.error).toBeUndefined();
-  });
-
-  it("returns chinese request config", async () => {
-    const result = await runConfig(ZH_LOCALE);
-
-    expect(result.locale).toBe(ZH_LOCALE);
-    expect(result.timeZone).toBe("Asia/Shanghai");
-    expect(result.formats.number.currency.currency).toBe("CNY");
-    expect(result.strictMessageTypeSafety).toBe(true);
-    expect(result.messages).toBeDefined();
   });
 
   it("falls back to default locale when requestLocale is invalid", async () => {
