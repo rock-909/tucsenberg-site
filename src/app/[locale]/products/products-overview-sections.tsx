@@ -1,13 +1,11 @@
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
+import {
+  singleSiteProductCatalog,
+  type ProductMarketSlug,
+} from "@/config/single-site-product-catalog";
+import { getProductMarketPath } from "@/config/paths";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
-
-const PRODUCT_OVERVIEW_LEAD_CARD_KEY = "mainOffer" as const;
-
-const PRODUCT_OVERVIEW_SUPPORTING_CARD_KEYS = [
-  "proofMaterials",
-  "nextStep",
-] as const;
 
 const PRODUCT_OVERVIEW_PATH_KEYS = ["scan", "compare", "ask"] as const;
 
@@ -19,9 +17,6 @@ const PRODUCT_DETAIL_UPGRADE_KEYS = [
 
 const PRODUCT_BOUNDARY_KEYS = ["content", "assets", "details"] as const;
 
-type ProductOverviewCardKey =
-  | typeof PRODUCT_OVERVIEW_LEAD_CARD_KEY
-  | (typeof PRODUCT_OVERVIEW_SUPPORTING_CARD_KEYS)[number];
 type ProductOverviewPathKey = (typeof PRODUCT_OVERVIEW_PATH_KEYS)[number];
 type ProductDetailUpgradeKey = (typeof PRODUCT_DETAIL_UPGRADE_KEYS)[number];
 type ProductBoundaryKey = (typeof PRODUCT_BOUNDARY_KEYS)[number];
@@ -35,8 +30,8 @@ type ProductsTextKey =
   | "overview.detailDescription"
   | "overview.boundaryTitle"
   | "overview.boundaryDescription"
-  | `overviewCards.${ProductOverviewCardKey}.title`
-  | `overviewCards.${ProductOverviewCardKey}.description`
+  | `markets.${ProductMarketSlug}.label`
+  | `markets.${ProductMarketSlug}.description`
   | `path.items.${ProductOverviewPathKey}.title`
   | `path.items.${ProductOverviewPathKey}.description`
   | `detail.items.${ProductDetailUpgradeKey}`
@@ -46,13 +41,9 @@ interface ProductsText {
   (key: ProductsTextKey): string;
 }
 
-export function ProductOverviewCards({
-  translate,
-}: {
-  translate: ProductsText;
-}) {
+export function ProductLineCards({ translate }: { translate: ProductsText }) {
   return (
-    <section data-section="product-overview-cards" className="mb-16">
+    <section data-section="product-line-cards" className="mb-16">
       <div className="max-w-2xl">
         <h2 className="text-[32px] font-semibold leading-tight">
           {translate("overview.cardsTitle")}
@@ -62,33 +53,27 @@ export function ProductOverviewCards({
         </p>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <article className="surface-card flex flex-col p-6 md:p-8">
-          <h3 className="mb-4 text-2xl font-semibold">
-            {translate(`overviewCards.${PRODUCT_OVERVIEW_LEAD_CARD_KEY}.title`)}
-          </h3>
-          <p className="text-base leading-7 text-muted-foreground">
-            {translate(
-              `overviewCards.${PRODUCT_OVERVIEW_LEAD_CARD_KEY}.description`,
-            )}
-          </p>
-        </article>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-          {PRODUCT_OVERVIEW_SUPPORTING_CARD_KEYS.map((key) => (
-            <article
-              key={key}
-              className="rounded-3xl border border-border bg-muted/30 p-6"
-            >
-              <h3 className="mb-3 text-lg font-semibold">
-                {translate(`overviewCards.${key}.title`)}
-              </h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {translate(`overviewCards.${key}.description`)}
-              </p>
-            </article>
-          ))}
-        </div>
+      <div className="mt-8 grid gap-5 md:grid-cols-2">
+        {singleSiteProductCatalog.markets.map((market, index) => (
+          <article
+            key={market.slug}
+            className="surface-card flex min-w-0 flex-col p-6"
+          >
+            <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span>P{index + 1}</span>
+              <span aria-hidden="true">/</span>
+              <span>{market.standardLabel}</span>
+            </div>
+            <h3 className="text-xl font-semibold leading-tight">
+              <Link href={getProductMarketPath(market.slug)}>
+                {translate(`markets.${market.slug}.label`)}
+              </Link>
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              {translate(`markets.${market.slug}.description`)}
+            </p>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -182,17 +167,15 @@ export function ProductLaunchBoundary({
 }
 
 export function ProductsPageCta({
-  showResourcesCta,
   title,
   description,
-  resourcesLabel,
-  contactLabel,
+  guideLabel,
+  requestQuoteLabel,
 }: {
-  showResourcesCta: boolean;
   title: string;
   description: string;
-  resourcesLabel: string;
-  contactLabel: string;
+  guideLabel: string;
+  requestQuoteLabel: string;
 }) {
   return (
     <section className="surface-card px-6 py-10 md:px-10 md:py-12">
@@ -201,15 +184,15 @@ export function ProductsPageCta({
         <p className="mt-3 text-muted-foreground">{description}</p>
       </div>
       <div className="mt-8 flex flex-wrap gap-3">
-        {showResourcesCta ? (
-          <Button size="lg" asChild>
-            <Link href={SINGLE_SITE_ROUTE_HREFS.resources}>
-              {resourcesLabel}
-            </Link>
-          </Button>
-        ) : null}
+        <Button size="lg" asChild>
+          <Link href={SINGLE_SITE_ROUTE_HREFS.materialsGuide}>
+            {guideLabel}
+          </Link>
+        </Button>
         <Button variant="secondary" size="lg" asChild>
-          <Link href={SINGLE_SITE_ROUTE_HREFS.contact}>{contactLabel}</Link>
+          <Link href={SINGLE_SITE_ROUTE_HREFS.requestQuote}>
+            {requestQuoteLabel}
+          </Link>
         </Button>
       </div>
     </section>

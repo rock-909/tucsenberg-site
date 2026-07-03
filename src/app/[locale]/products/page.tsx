@@ -10,12 +10,10 @@ import {
 } from "@/lib/seo-metadata";
 import {
   ProductLaunchBoundary,
-  ProductOverviewCards,
+  ProductLineCards,
   ProductOverviewPath,
   ProductsPageCta,
 } from "@/app/[locale]/products/products-overview-sections";
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
-import { getActiveStaticPageTypes } from "@/config/pages.config";
 import { getLocalizedPath } from "@/config/paths";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { buildCatalogBreadcrumbJsonLd } from "@/components/products/catalog-breadcrumb-jsonld";
@@ -53,11 +51,6 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
     getTranslations({ locale, namespace: "catalog" }),
     buildCatalogBreadcrumbJsonLd({}),
   ]);
-  const activePageTypes = getActiveStaticPageTypes(
-    getRuntimeMessageProfileId(),
-  );
-  const showResourcesCta = activePageTypes.includes("resources");
-
   return (
     <div className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
       <JsonLdGraphScript
@@ -73,15 +66,14 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         </p>
       </header>
 
-      <ProductOverviewCards translate={t} />
+      <ProductLineCards translate={t} />
       <ProductOverviewPath translate={t} />
       <ProductLaunchBoundary translate={t} />
       <ProductsPageCta
-        showResourcesCta={showResourcesCta}
         title={t("cta.title")}
         description={t("cta.description")}
-        resourcesLabel={t("cta.resources")}
-        contactLabel={t("cta.contact")}
+        guideLabel={t("cta.resources")}
+        requestQuoteLabel={t("cta.contact")}
       />
     </div>
   );
