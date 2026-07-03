@@ -1,11 +1,12 @@
 # Lifecycle
 
-This starter has two lifecycle contexts:
+This repository keeps two lifecycle contexts because Tucsenberg was derived from
+the starter foundation:
 
-1. The source repository is a template factory.
-2. A derived project is a concrete website.
+1. The inherited starter foundation is a template factory.
+2. The current Tucsenberg project is a concrete website.
 
-Do not make derived projects carry starter-only proof after handoff.
+Do not make concrete websites carry starter-only proof after handoff.
 
 ## `starter-only`
 

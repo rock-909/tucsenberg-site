@@ -4,7 +4,10 @@ This document is the source of truth for how agents should create, reuse, previe
 
 ## Why this exists
 
-This starter is built for AI-assisted development. Without explicit component rules, agents may create duplicate buttons, cards, form fields, or Radix wrappers instead of reusing the project system. That makes the site harder to maintain and makes visual quality drift over time.
+This inherited component system supports AI-assisted development for Tucsenberg.
+Without explicit component rules, agents may create duplicate buttons, cards,
+form fields, or Radix wrappers instead of reusing the project system. That makes
+the site harder to maintain and makes visual quality drift over time.
 
 Storybook shows the approved component states. This document explains when to reuse, extend, or create components.
 
