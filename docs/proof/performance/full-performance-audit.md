@@ -1,5 +1,10 @@
 # Full Performance Audit
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary. It preserves old `/zh` routes and starter/profile performance evidence
+for audit history only.
+
 Date: 2026-06-21 local / 2026-06-22 UTC
 Mode: read-only source audit; proof document only
 Branch: `docs/vercel-absorption-enhancement-spec`
@@ -7,10 +12,10 @@ Commit: `4d743d9e82f6ce14ca14cde4054234101bbd9aca`
 
 ## Outcome
 
-The current starter is in a healthy performance state. The fresh 14-page mobile
-Lighthouse sweep passed with no assertion results, all routes stayed under the
-490 KB `total-byte-weight` warning line, TBT stayed low, and CLS was zero across
-the audited surface.
+At the time of this starter audit, the audited baseline was in a healthy
+performance state. The fresh 14-page mobile Lighthouse sweep passed with no
+assertion results, all routes stayed under the 490 KB `total-byte-weight`
+warning line, TBT stayed low, and CLS was zero across the audited surface.
 
 There is no P1 performance defect in this baseline.
 

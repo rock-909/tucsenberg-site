@@ -133,6 +133,11 @@ const TRUTH_DOC_CHECKS = [
     forbidden: ["This starter is built for AI-assisted development."],
   },
   {
+    file: "docs/proof/performance/full-performance-audit.md",
+    required: ["Historical starter proof."],
+    forbidden: ["The current starter is in a healthy performance state."],
+  },
+  {
     file: ".claude/rules/content.md",
     required: [
       "src/config/single-site-page-expression.ts",
