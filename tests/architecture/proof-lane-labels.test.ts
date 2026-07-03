@@ -125,4 +125,37 @@ describe("proof lane labels", () => {
       "Default Playwright discovery is intentionally limited",
     );
   });
+
+  it("marks retired navigation E2E proof docs as historical", () => {
+    const proofReadme = readFileSync("docs/proof/README.md", "utf8");
+    const performanceReadme = readFileSync(
+      "docs/proof/performance/README.md",
+      "utf8",
+    );
+
+    expect(proofReadme).toContain("performance/");
+    expect(performanceReadme).toContain("不是当前 Tucsenberg 上线证明");
+
+    const historicalDocs = [
+      readFileSync(
+        "docs/proof/performance/lighthouse-shared-payload.md",
+        "utf8",
+      ),
+      readFileSync(
+        "docs/proof/performance/lighthouse-product-detail-payload.md",
+        "utf8",
+      ),
+      readFileSync(
+        "docs/proof/performance/lighthouse-prefetch-policy.md",
+        "utf8",
+      ),
+      readFileSync("docs/proof/next16-activity-state-audit.md", "utf8"),
+    ];
+
+    for (const doc of historicalDocs) {
+      expect(doc).toContain("Historical starter proof");
+      expect(doc).toContain("not current Tucsenberg launch proof");
+      expect(doc).toContain("tests/e2e/navigation.spec.ts");
+    }
+  });
 });

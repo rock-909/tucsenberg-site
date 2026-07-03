@@ -1,5 +1,8 @@
 # Next.js 16 Activity State Audit
 
+Historical starter proof. This file records a pre-Tucsenberg shared-navigation
+lane. This file is not current Tucsenberg launch proof.
+
 ## Scope
 
 This audit checks the practical risk behind the common Next.js App Router pitfall:
