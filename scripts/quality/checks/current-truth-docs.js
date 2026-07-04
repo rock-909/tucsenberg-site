@@ -193,6 +193,50 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/design/impeccable/system/COMPONENT-GOVERNANCE.md",
     forbidden: ["This starter is built for AI-assisted development."],
   },
+  {
+    file: "docs/design/truth.md",
+    required: [
+      "Tucsenberg current site design truth",
+      "当前公开站点是 English-only，没有 `/zh` 设计入口。",
+      "inherited starter design baseline",
+    ],
+    forbidden: [
+      "这份文档只记录 starter 当前已经确认的设计真相。",
+      "Current truth: starter uses a replaceable role-based color system.",
+    ],
+  },
+  {
+    file: "docs/ref/motion.md",
+    required: ["canonical motion rulebook for the Tucsenberg site"],
+    forbidden: [
+      "canonical motion rulebook for the starter",
+      "Motion in this starter",
+    ],
+  },
+  {
+    file: "docs/design/impeccable/README.md",
+    required: [
+      "Tucsenberg inherited design governance workspace",
+      "必须服从 `docs/design/truth.md` 与当前运行态",
+    ],
+    forbidden: [
+      "external/",
+      "不作为 starter 当前真相源",
+      "恢复为 starter baseline",
+    ],
+  },
+  {
+    file: "docs/design/impeccable/system/PAGE-PATTERNS.md",
+    required: [
+      "pattern reference, not a route-by-route current-state report",
+      "Historical gap snapshot",
+      "verify current code before creating cleanup work",
+    ],
+    forbidden: [
+      "所有新页面和存量页面重构必须遵循此文件",
+      "当前其他页面与本规范的偏差",
+    ],
+  },
   ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({
     file,
     required: ["Historical starter proof."],

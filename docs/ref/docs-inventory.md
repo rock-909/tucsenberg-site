@@ -27,8 +27,8 @@ review, not the current product truth. Start current work from `../README.md`.
 | `docs/proof/` | `current-entry`, `current-proof`, `historical-proof` | Owns proof levels, launch/release checks, baselines, and archived evidence. | Current launch truth is `launch.md` and `release.md`; archive proof cannot replace them. |
 | `docs/proof/baselines/` | `current-proof`, `method-workflow`, `review-needed` | Keeps warning and governance baselines used during review. | Keep, but link or merge zero-reference baselines if they stay useful. |
 | `docs/proof/performance/` | `historical-proof` | Preserves starter-era Lighthouse and performance audit evidence. | Every markdown file here must say it is historical starter proof. |
-| `docs/design/` | `current-entry`, `current-reference`, `method-workflow` | Owns current design truth and Impeccable design references. | Keep design truth current; treat workflow material as method, not product truth. |
-| `docs/design/impeccable/` | `current-reference`, `method-workflow` | Keeps the design system workbench and component governance references. | Keep while UI governance and Storybook/component checks still depend on this layer. |
+| `docs/design/` | `current-entry`, `current-reference`, `method-workflow` | Owns current design truth and Impeccable design references. | Keep design truth current for Tucsenberg; treat workflow material as method, not product truth. |
+| `docs/design/impeccable/` | `current-reference`, `method-workflow` | Keeps the inherited design system workbench and component governance references. | Keep while UI governance and Storybook/component checks still depend on this layer; old workflow notes must not override runtime truth. |
 
 ## File review
 
@@ -96,15 +96,15 @@ review, not the current product truth. Start current work from `../README.md`.
 | `docs/proof/performance/performance-governance-candidate-audit.md` | `historical-proof` | Starter-era performance governance candidate audit. | Keep as archive only. |
 | `docs/proof/performance/seo-public-surface-performance-headroom.md` | `historical-proof` | Starter-era SEO public surface performance headroom proof. | Keep as archive only. |
 | `docs/design/README.md` | `current-entry` | Entry for design docs. | Keep. |
-| `docs/design/truth.md` | `current-reference` | Current design truth and inherited design boundaries. | Keep canonical. |
-| `docs/design/impeccable/README.md` | `current-entry`, `method-workflow` | Entry for the Impeccable design workbench. | Keep. |
+| `docs/design/truth.md` | `current-reference` | Current Tucsenberg design truth and inherited design boundaries. | Keep canonical; current runtime and English-only site boundary must stay explicit. |
+| `docs/design/impeccable/README.md` | `current-entry`, `method-workflow` | Entry for the inherited Impeccable design workbench. | Keep; it must list only live directories and defer to design truth/runtime. |
 | `docs/design/impeccable/design-workflow.md` | `method-workflow` | Reusable DWF design workflow. | Keep as method, not current product truth. |
 | `docs/design/impeccable/system/COLOR-SYSTEM.md` | `current-reference` | Color system reference. | Keep. |
 | `docs/design/impeccable/system/COMPONENT-GOVERNANCE.md` | `current-reference` | Component governance reference. | Keep. |
 | `docs/design/impeccable/system/DESIGN-TOKENS.md` | `current-reference` | Design token notes. | Keep. |
 | `docs/design/impeccable/system/GRID-SYSTEM.md` | `current-reference` | Grid system reference. | Keep. |
 | `docs/design/impeccable/system/MOTION-PRINCIPLES.md` | `current-reference` | Motion design principles. | Keep with `docs/ref/motion.md`. |
-| `docs/design/impeccable/system/PAGE-PATTERNS.md` | `current-reference`, `review-needed` | Page pattern reference with broad mandates. | Keep, but later verify its mandates still match the current Tucsenberg site. |
+| `docs/design/impeccable/system/PAGE-PATTERNS.md` | `current-reference` | Page pattern reference extracted from early homepage work. | Keep as a reference, not a route-by-route current-state report; its historical gap table requires current code verification before cleanup work. |
 | `docs/design/impeccable/system/SECTION-REDESIGN-CHECKLIST.md` | `current-reference` | Checklist for section redesign. | Keep. |
 | `docs/design/impeccable/system/STORYBOOK-COVERAGE-MAP.md` | `current-reference` | Maps Storybook coverage expectations. | Keep while component governance and Storybook examples remain. |
 
@@ -115,5 +115,6 @@ review, not the current product truth. Start current work from `../README.md`.
    mock guidance.
 2. Decide whether `docs/性能实验优化方法论.md` should move under
    `docs/proof/performance/` or stay as a root-level method note.
-3. Review design workflow and page-pattern mandates after the current site
-   design direction stabilizes.
+3. Review lower-frequency design system notes (`GRID-SYSTEM.md`,
+   `MOTION-PRINCIPLES.md`, Storybook coverage notes) if future UI work finds
+   conflicts with current runtime behavior.

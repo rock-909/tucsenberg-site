@@ -1,11 +1,19 @@
 # Design Truth
 
-这份文档只记录 starter 当前已经确认的设计真相。  
-它不是某个客户项目的最终品牌规范。
+Tucsenberg current site design truth.
+
+这份文档记录 Tucsenberg 当前英文站的设计真相。它会沿用有用的
+starter 治理规则，但不是通用 starter 说明，也不是最终品牌规范。
+
+Current boundary:
+
+- 当前公开站点是 English-only，没有 `/zh` 设计入口。
+- 当前运行态组件、tokens、内容和 proof 优先于旧 starter 记录。
+- starter 设计材料只解释继承来源；不能覆盖 Tucsenberg 当前页面真相。
 
 ## 当前设计定位
 
-`showcase-website-starter` 的默认设计方向是：
+Tucsenberg 当前沿用的 inherited starter design baseline 是：
 
 - 清晰
 - 可信
@@ -14,7 +22,7 @@
 - 易替换
 - 便于 AI 复用和维护
 
-当前更具体的方向是 **Modern Technical B2B**，也可以描述为
+当前站点更具体的方向是 **Modern Technical B2B**，也可以描述为
 **Product-led Industrial B2B**。
 
 含义：
@@ -30,12 +38,12 @@
 
 ## 当前品牌表达
 
-当前视觉只是 starter 基线，不是派生项目的最终品牌。
+当前视觉是 Tucsenberg 从 starter 继承的可替换基线，不是最终品牌。
 
 设计上要做到：
 
-- 示例内容看起来完整可运行；
-- 新品牌替换时不需要逐个组件改颜色；
+- 当前业务内容看起来完整可运行；
+- 后续品牌微调时不需要逐个组件改颜色；
 - 组件状态、表单、卡片、导航等有统一规则；
 - Storybook 可以作为组件预览和审核面。
 
@@ -46,7 +54,7 @@
 
 ### 色彩
 
-- Current truth: starter uses a replaceable role-based color system.
+- Current truth: Tucsenberg uses the inherited replaceable role-based color system.
 - Stable interface: semantic roles and token architecture.
 - Provisional value: current blue/neutral palette.
 
@@ -86,8 +94,8 @@
 - Calibration is not a visual migration by itself.
 - 吸收 Vercel 的清晰层级、克制留白、组件状态、排版纪律和短促动效。
 - 不复制 Vercel 的黑白开发者平台身份。
-- Do not adopt Geist as the default starter font.
-- Do not copy Vercel token names into the starter contract.
+- Do not adopt Geist as the default site font.
+- Do not copy Vercel token names into the project contract.
 - Do not bundle Apple proprietary font files.
 - Apple-first system typography 只作为评审语言：当前仍使用跨平台 system
   stack，在 Apple 设备上自然使用 Apple 系统字；评审重点是清晰、稳定、可读。
@@ -127,10 +135,11 @@ Not allowed in this pilot:
 1. Alibaba-style density：产品瓦片、徽章、供应商信息和 trust icons 抢注意力。
 2. SaaS-style emptiness：抽象 slogan、通用卡片和漂亮 surface 缺少产品事实。
 
-## Derived project visual adaptation
+## Inherited starter visual adaptation boundary
 
-Derived projects inherit the starter's structure discipline, not the demo
-company's surface details and not Vercel's identity.
+This section remains useful for inherited starter surfaces and future derivation
+work. It is not a license to replace Tucsenberg current page truth with demo
+company details or Vercel's identity.
 
 Preserve:
 

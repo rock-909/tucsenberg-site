@@ -1,7 +1,8 @@
 # Page Pattern Reference
 
-> 从首页 v1 实现中提取的页面级设计模式。
-> 所有新页面和存量页面重构必须遵循此文件。
+> 从早期首页 v1 实现中提取的页面级设计模式。
+> This is a pattern reference, not a route-by-route current-state report.
+> 新页面和大改版可以参考它；落地前必须先看当前运行态组件、内容和 proof。
 > Token 值定义在 `src/app/globals.css`，此文件只记录**用法约定**。
 
 ---
@@ -50,7 +51,7 @@
 
 ## 2. Container 约定
 
-**唯一写法：**
+**默认写法：**
 
 ```tsx
 <div className="mx-auto max-w-[1080px] px-6">
@@ -62,7 +63,7 @@
 | padding-x | `px-6` (24px) | 两侧留白 |
 | 居中 | `mx-auto` | |
 
-**禁止使用：**
+**新页面或重构页面默认避免：**
 - ~~`container mx-auto px-4`~~ (Tailwind 默认 container，宽度不可控)
 - ~~`max-w-4xl`~~ / ~~`max-w-3xl`~~ (与 1080px 不一致)
 - ~~`max-w-screen-xl`~~ (Container 组件默认值 1280px，过宽)
@@ -108,7 +109,7 @@ Hero 的 top padding 比标准小（py-10 = 40px），底部对齐标准。
 
 ## 4. 排版阶梯
 
-从首页提取的标题参数。所有页面标题使用相同阶梯。
+从早期首页提取的标题参数。常规营销页面标题优先使用相同阶梯。
 
 ### H1 — 页面主标题
 
@@ -133,7 +134,8 @@ desktop: 48px / extrabold (800) / line-height 1.0 / tracking -0.05em
 <h2 className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em]">
 ```
 
-由 `SectionHead` 组件提供。所有 section 标题通过 `<SectionHead>` 渲染。
+由 `SectionHead` 组件提供。新建或重构的 marketing section 标题优先通过
+`<SectionHead>` 渲染。
 
 **SectionHead 用法：**
 
@@ -438,7 +440,8 @@ Footer 列标题样式：
 
 ## 13. 存量页面差距速查
 
-当前其他页面与本规范的偏差，供逐步对齐参考：
+Historical gap snapshot from the early page-pattern pass. Do not treat this
+table as current route truth; verify current code before creating cleanup work.
 
 | 页面 | Container | Section 间距 | H1 | 卡片 |
 |------|-----------|-------------|----|----- |
