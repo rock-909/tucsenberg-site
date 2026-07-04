@@ -1,5 +1,9 @@
 # Lighthouse Yellow Debt Attribution
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 **Date:** 2026-05-23
 **Baseline branch:** `perf/lighthouse-yellow-debt-wave-1` (Wave 1A read-only attribution)
 **Repair branch:** `perf/lighthouse-public-env-split` (Task 3 addendum + review-fix)

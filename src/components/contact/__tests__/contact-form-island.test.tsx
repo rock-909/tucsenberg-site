@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -23,6 +23,17 @@ async function renderIsland() {
       />,
     ),
   };
+}
+
+async function triggerObservedIntersection() {
+  await waitFor(() => expect(intersectionCallbacks).toHaveLength(1));
+  await act(async () => {
+    intersectionCallbacks[0]?.(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+  });
+  await vi.dynamicImportSettled();
 }
 
 function mockContactFormModule() {
@@ -144,14 +155,9 @@ describe("ContactFormIsland", () => {
     });
     expect(contactFormModule.loadAttempts).toHaveLength(0);
 
-    await act(async () => {
-      intersectionCallbacks[0]?.(
-        [{ isIntersecting: true } as IntersectionObserverEntry],
-        {} as IntersectionObserver,
-      );
-      await vi.dynamicImportSettled();
-    });
+    await triggerObservedIntersection();
 
+    await waitFor(() => expect(contactFormModule.loadAttempts).toHaveLength(1));
     expect(
       await screen.findByRole("form", { name: "Contact form" }),
     ).toBeInTheDocument();
@@ -163,14 +169,9 @@ describe("ContactFormIsland", () => {
     const user = userEvent.setup();
 
     await renderIsland();
-    await act(async () => {
-      intersectionCallbacks[0]?.(
-        [{ isIntersecting: true } as IntersectionObserverEntry],
-        {} as IntersectionObserver,
-      );
-      await vi.dynamicImportSettled();
-    });
+    await triggerObservedIntersection();
 
+    await waitFor(() => expect(contactFormModule.loadAttempts).toHaveLength(1));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The form could not load.",
     );
@@ -189,11 +190,13 @@ describe("ContactFormIsland", () => {
   });
 
   it("does not require browser reportError to render the visible retry state", async () => {
-    vi.unstubAllGlobals();
-    mockContactFormModuleWithRetry();
+    vi.stubGlobal("reportError", undefined);
+    vi.stubGlobal("IntersectionObserver", undefined);
+    const contactFormModule = mockContactFormModuleWithRetry();
 
     await renderIsland();
 
+    await waitFor(() => expect(contactFormModule.loadAttempts).toHaveLength(1));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The form could not load.",
     );

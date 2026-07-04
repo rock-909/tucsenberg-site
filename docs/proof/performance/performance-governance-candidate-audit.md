@@ -1,5 +1,9 @@
 # Performance Governance Candidate Audit
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 Date: 2026-05-26
 Branch: `governance/performance-rules-audit`
 Mode: read-only candidate audit

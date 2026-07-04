@@ -1,5 +1,9 @@
 # LCP first-paint motion boundary
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 Branch: `perf/lcp-before-after`
 Base: `perf/lcp-cloudflare-size`
 

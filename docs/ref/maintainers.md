@@ -85,3 +85,30 @@ Active smoke and component proof markers: `tests/e2e/tucsenberg-site-smoke.spec.
 
 Starter-era longform docs were not retained in this derived checkout. Recreate
 only the current rule that still needs to be enforced.
+
+## Docs existence review
+
+Every tracked file under `docs/` needs an existence reason in
+`docs/ref/docs-inventory.md`.
+
+Allowed lifecycle labels:
+
+- `current-entry`
+- `current-reference`
+- `current-proof`
+- `inherited-starter-reference`
+- `historical-proof`
+- `method-workflow`
+- `candidate-backlog`
+- `review-needed`
+
+Rules:
+
+- Weakly referenced docs are not automatically dead. First decide whether they
+  should be linked from an index, merged into a canonical doc, marked
+  historical, or archived later.
+- Old `/zh`, old starter routes, old branch names, or stale commands may remain
+  only inside docs that clearly say they are historical or inherited context.
+- Current Tucsenberg truth must stay reachable from `docs/README.md`.
+- Do not delete docs only because they look old. Confirm references, tests,
+  scripts, proof value, and user approval first.
