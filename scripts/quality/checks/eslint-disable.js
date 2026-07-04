@@ -4,7 +4,7 @@ const path = require("node:path");
 
 const ROOT = process.cwd();
 
-const GUARDRAIL_REGISTER_PATH = "docs/ref/maintainers.md";
+const GUARDRAIL_REGISTER_PATH = "docs/项目基础/维护规则.md";
 const GUARDRAIL_EXCEPTION_PATTERN =
   /\bguardrail-exception\s+(GSE-\d{8}-[a-z0-9-]+):\s*(\S.+)$/i;
 const ACTIVE_GUARDRAIL_EXCEPTION_HEADING =

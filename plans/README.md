@@ -164,14 +164,14 @@ as a stale lead until current code and tests prove it still applies.
 
 - **Thin UI wrappers in `src/components/ui/*`** (label = Radix + `cn()`,
   separator = styled div): the wrapper-only import boundary is a documented
-  decision in `docs/ref/decisions/ui-foundation.md` — by design, not debt.
+  decision in `docs/决策记录/UI基础方案.md` — by design, not debt.
 - **`src/lib/env.ts` vs `public-runtime-env.ts` overlap**: the server/client
   env split is mandated by the repo's own security rules — deliberate
   boundary.
 - **Blog as TS data source, plain-html production emails, generated
   content-manifest/mdx-importers, adapter re-exports from profile-fixtures
   (as a pattern), placeholder/example content**: all documented decisions in
-  `docs/use/replace.md` / `docs/ref/**` — settled tradeoffs.
+  `docs/项目基础/替换顺序.md` / `docs/项目基础/**` — settled tradeoffs.
 - **`distributed-rate-limit.test.ts` (1,367 lines) as bloat**: examined and
   cleared — it tests real atomicity/failure-mode behavior on a
   security-critical module with fake timers; only minor preset-case overlap

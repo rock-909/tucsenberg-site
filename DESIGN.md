@@ -141,7 +141,7 @@ components:
 
 ## Modern Technical B2B calibration
 
-The durable direction lives in `docs/design/truth.md`: Modern Technical B2B,
+The durable direction lives in `docs/design/设计真相.md`: Modern Technical B2B,
 also usable as Product-led Industrial B2B.
 
 This calibration improves the starter's B2B clarity without adopting another
@@ -210,7 +210,7 @@ motion needs separate visual proof.
 Use CSS and existing state attributes before JavaScript orchestration. Do not
 gate content visibility on animation. Always preserve reduced-motion behavior.
 
-The canonical motion governance rulebook lives in `docs/ref/motion.md`. This
+The canonical motion governance rulebook lives in `docs/design/动效治理.md`. This
 starter treats motion as a state, hierarchy, and path clarification tool, not as
 decoration. Do not add full-site reveal, page choreography, long durations, or
 new animation dependencies without separate proof.
@@ -382,8 +382,8 @@ new animation dependencies without separate proof.
 starter 的"运行时真相"在代码里，不在文档里。修改任何颜色 / 字体 / 圆角前，先读：
 
 - **颜色 / token 运行时**：`src/app/globals.css`（包括 light / dark 两套）
-- **颜色合同**：`docs/design/truth.md` 与 `docs/impeccable/system/COLOR-SYSTEM.md`
-- **组件治理**：`docs/impeccable/system/COMPONENT-GOVERNANCE.md`
+- **颜色合同**：`docs/design/设计真相.md` 与 `docs/design/色彩系统.md`
+- **组件治理**：`docs/design/组件治理.md`
 - **网站替换面**：`docs/website/`（业主换皮第一站）
 - **产品上下文**：`PRODUCT.md`
 

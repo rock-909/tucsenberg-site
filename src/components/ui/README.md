@@ -6,7 +6,7 @@ vendor UI foundations.
 ## Current decision
 
 The project uses the hybrid / governed Radix control layer described in
-`docs/ref/decisions/ui-foundation.md`.
+`docs/决策记录/UI基础方案.md`.
 
 - Radix Primitives are the default for complex interactions.
 - Radix-style 1-12 color roles guide token decisions.
@@ -19,7 +19,7 @@ The project uses the hybrid / governed Radix control layer described in
   tabs, tooltip, and popover primitive wrappers.
 
 For user-request-to-agent-coding work, start with
-`docs/ref/ui-components.md` before adding or choosing a UI wrapper.
+`docs/design/组件使用手册.md` before adding or choosing a UI wrapper.
 
 ## Allowed here
 

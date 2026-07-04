@@ -46,7 +46,7 @@ Verified at commit `338df844`:
 
   ```js
   {
-    file: "docs/use/replace.md",
+    file: "docs/项目基础/替换顺序.md",
     required: [ "src/config/single-site-page-expression.ts", …,
       "Do not replace first", "does not own the step-by-step replacement order",
       "Minimum proof references" ],
@@ -62,7 +62,7 @@ Verified at commit `338df844`:
 - Same file, ~lines 371-419: reads `scripts/release-proof.sh`;
   **that file does not exist** (verified `ls`), so every branch guarded by
   `releaseScript !== null` is dead. The runbook-vs-manifest command-block
-  comparison against `docs/proof/release.md` (via
+  comparison against `docs/项目基础/发布验证.md` (via
   `getReleaseProofDocsCommandBlock()` from
   `scripts/quality/release-proof-manifest.js`) is live and valuable.
 - `tests/unit/scripts/current-truth-docs.test.ts` (753 lines, 24 `toContain`)

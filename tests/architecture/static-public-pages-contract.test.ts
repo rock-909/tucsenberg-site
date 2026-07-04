@@ -35,8 +35,8 @@ function expectStaticRouteOwner(routeOwner: string): void {
 describe("static public pages architecture contract", () => {
   it("keeps pages.config.ts as the static public pages truth source", () => {
     const docs = [
-      readRepoFile("docs/use/replace.md"),
-      readRepoFile("docs/use/content.md"),
+      readRepoFile("docs/项目基础/替换顺序.md"),
+      readRepoFile("docs/项目基础/内容.md"),
     ].join("\n");
 
     expect(docs).toContain("src/config/pages.config.ts");

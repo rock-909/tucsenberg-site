@@ -68,7 +68,7 @@ Do not rename `src/middleware.ts` to `src/proxy.ts` in this starter. Cloudflare/
 Next.js warns that `middleware` is deprecated, but this repo treats that as a known
 platform-transition warning, not as a reason to risk the locale-routing entrypoint.
 Current decision record:
-`docs/ref/tech.md` (`official-doc-only check`).
+`docs/项目基础/技术栈.md` (`official-doc-only check`).
 No runtime migration test was run for that decision.
 
 The matcher must remain static string literals.

@@ -4,7 +4,7 @@ import { STARTER_PROFILES } from "@/config/starter-profiles";
 import type { MessagePackId } from "@/lib/i18n/message-pack-config";
 import profileMessagePacks from "@messages/message-packs.json";
 
-const MESSAGE_MAP_DOC = "docs/ref/messages.md";
+const MESSAGE_MAP_DOC = "docs/项目基础/消息文案.md";
 const ACTIVE_PROFILE_ID = "catalog";
 const RETIRED_REACT_SCAN_DEMO_NAMESPACE = ["React", "ScanDemo"].join("");
 
@@ -60,7 +60,7 @@ describe("message namespace map", () => {
 
   it("keeps adopter-facing categories and proof command visible", () => {
     const doc = readFileSync(MESSAGE_MAP_DOC, "utf8");
-    const replacementIndex = readFileSync("docs/ref/surfaces.md", "utf8");
+    const replacementIndex = readFileSync("docs/项目基础/替换边界.md", "utf8");
 
     expect(doc).toContain("must replace");
     expect(doc).toContain("must review");
@@ -114,7 +114,7 @@ describe("message namespace map", () => {
     const activeContractFiles = [
       "src/config/starter-profiles.ts",
       "messages/message-packs.json",
-      "docs/ref/messages.md",
+      "docs/项目基础/消息文案.md",
     ];
 
     for (const file of activeContractFiles) {

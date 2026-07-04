@@ -1,6 +1,6 @@
 # Tucsenberg 站点建设 —— /goal 执行规格（2026-07-02）
 
-> 本文件是 /goal 的完整规格。开工前先读本 repo 的 `AGENTS.md` 与 `docs/use/{replace,brand,content}.md`。
+> 本文件是 /goal 的完整规格。开工前先读本 repo 的 `AGENTS.md`、`docs/项目基础/替换顺序.md`、`docs/项目基础/品牌.md` 与 `docs/项目基础/内容.md`。
 
 ## 唯一事实源（全部只读，禁止改动源文件）
 

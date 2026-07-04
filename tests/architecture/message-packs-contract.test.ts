@@ -80,8 +80,8 @@ describe("physical message packs", () => {
 
   it("documents physical packs as authoring truth instead of generated compat files", () => {
     const readme = readFileSync("README.md", "utf8");
-    const replace = readFileSync("docs/use/replace.md", "utf8");
-    const messages = readFileSync("docs/ref/messages.md", "utf8");
+    const replace = readFileSync("docs/项目基础/替换顺序.md", "utf8");
+    const messages = readFileSync("docs/项目基础/消息文案.md", "utf8");
     const currentTruthDocs = readFileSync(
       "scripts/quality/checks/current-truth-docs.js",
       "utf8",

@@ -17,11 +17,11 @@ The owner is non-technical. Communicate in business language, not technical jarg
 Before making broad project changes, read:
 
 1. `docs/README.md`
-2. `docs/ref/project.md`
-3. `docs/use/content.md`
-4. `docs/use/ai.md`
+2. `docs/项目基础/项目基础.md`
+3. `docs/项目基础/内容.md`
+4. `docs/项目基础/AI协作边界.md`
 
-Do not rely on chat memory for project truth. If a decision must survive sessions, write it into `docs/use/`, `docs/ref/`, `docs/proof/`, or the relevant rule file.
+Do not rely on chat memory for project truth. If a decision must survive sessions, write it into `docs/项目基础/`, `docs/design/`, `docs/技术难题/`, `docs/决策记录/`, or the relevant rule file.
 
 ## Stack
 
@@ -98,7 +98,7 @@ Use the smallest validation that proves the change:
 - Next.js/runtime changes: `pnpm build`
 - Cloudflare/OpenNext changes: run `pnpm build` before `pnpm website:build:cf`
 - Broad local app checks: `pnpm website:check`
-- Release-facing changes: follow `docs/proof/launch.md` and `pnpm release:verify`
+- Release-facing changes: follow `docs/项目基础/上线验证.md` and `pnpm release:verify`
 
 ## Constraints
 
@@ -118,7 +118,7 @@ Before fixing a bug, diagnose why the current structure allowed it to happen and
 ## UI Foundation
 
 The project uses the hybrid / pilot-first UI foundation in
-`docs/ref/decisions/ui-foundation.md`.
+`docs/决策记录/UI基础方案.md`.
 
 - Radix Primitives are the default for complex interactions.
 - Radix-style 1-12 color roles are the long-term color discipline.
@@ -135,8 +135,8 @@ sections, footers, or page narrative structure.
 ## AI-assisted Frontend System
 
 The project uses the AI-assisted Frontend System summarized by the stable UI
-governance docs: `docs/ref/ui-components.md`,
-`docs/design/truth.md`, `.claude/rules/ui.md`, and the component governance
+governance docs: `docs/design/组件使用手册.md`,
+`docs/design/设计真相.md`, `.claude/rules/ui.md`, and the component governance
 tests.
 
 - Rules are the project boundary and judgment layer.
@@ -147,9 +147,11 @@ tests.
 - Storybook stories provide owner-visible states and agent examples.
 - Tests and `pnpm component:check` remain the hard gate.
 
-Historical plans/specs under `docs/superpowers/specs/**` are design and
-execution records. Treat them as background only unless a stable `docs/ref/**`
-or `docs/design/**` page explicitly promotes the same rule.
+Historical specs and plans under `docs/superpowers/specs/**` and
+`docs/superpowers/plans/**` are design and execution records. Treat them as
+background only unless a stable `docs/项目基础/**`,
+`docs/design/**`, `docs/技术难题/**`, or `docs/决策记录/**` page explicitly promotes
+the same rule.
 
 Do not delete, archive, or shrink Registry / Playbook until a later approved retirement proof explicitly authorizes it and confirms equal-or-stronger AI discoverability and machine governance.
 
@@ -189,7 +191,7 @@ Before editing, use this routing table and read only the matching files under `.
 | i18n, translations, locale routing, message loading | `i18n.md` |
 | API routes, forms, validation, rate limits, CSP, sensitive server code | `security.md` |
 | UI components, Tailwind, shadcn/ui, `next/image`, `next/font` | `ui.md` |
-| Design tokens, brand color, theme, visual system, color migration | `ui.md` + `DESIGN.md` + `docs/design/truth.md` + `docs/design/impeccable/system/COLOR-SYSTEM.md` |
+| Design tokens, brand color, theme, visual system, color migration | `ui.md` + `DESIGN.md` + `docs/design/设计真相.md` + `docs/design/色彩系统.md` |
 | MDX, page content, content ownership, frontmatter | `content.md` |
 | Tests, mocks, Vitest, Playwright, coverage gates | `testing.md` |
 | JSON-LD, schema.org, structured data builders | `structured-data.md` |

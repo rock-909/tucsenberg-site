@@ -44,7 +44,7 @@ describe("i18n locale truth parity", () => {
   });
 
   it("documents LOCALES_CONFIG as runtime truth and content config as validation settings", () => {
-    const replace = readFileSync("docs/use/replace.md", "utf8");
+    const replace = readFileSync("docs/项目基础/替换顺序.md", "utf8");
 
     expect(replace).toContain("LOCALES_CONFIG");
     expect(replace).toContain("runtime locale truth");

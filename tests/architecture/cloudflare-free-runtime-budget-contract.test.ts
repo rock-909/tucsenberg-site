@@ -35,11 +35,11 @@ function loadReleaseProofManifest(): ReleaseProofManifestModule {
 describe("Cloudflare Free runtime budget contract", () => {
   it("keeps docs and release manifest aligned on the source-checkout Cloudflare budget", () => {
     const docs = [
-      "docs/ref/profiles.md",
-      "docs/proof/levels.md",
-      "docs/proof/launch.md",
-      "docs/proof/release.md",
-      "docs/proof/dry-run.md",
+      "docs/项目基础/派生配置.md",
+      "docs/项目基础/验证等级.md",
+      "docs/项目基础/上线验证.md",
+      "docs/项目基础/发布验证.md",
+      "docs/项目基础/派生干跑验证.md",
     ]
       .map(readRepoFile)
       .join("\n");
@@ -78,9 +78,9 @@ describe("Cloudflare Free runtime budget contract", () => {
   it("makes the PR CI budget-proof boundary explicit", () => {
     const workflow = readRepoFile(".github/workflows/ci.yml");
     const docs = [
-      "docs/proof/release.md",
-      "docs/proof/launch.md",
-      "docs/proof/dry-run.md",
+      "docs/项目基础/发布验证.md",
+      "docs/项目基础/上线验证.md",
+      "docs/项目基础/派生干跑验证.md",
     ]
       .map(readRepoFile)
       .join("\n");
@@ -108,8 +108,8 @@ describe("Cloudflare Free runtime budget contract", () => {
     const headersPath = "public/_headers";
     const wrangler = readRepoFile("wrangler.jsonc");
     const docs = [
-      "docs/proof/release.md",
-      "docs/proof/launch.md",
+      "docs/项目基础/发布验证.md",
+      "docs/项目基础/上线验证.md",
       ".claude/rules/cloudflare.md",
     ]
       .map(readRepoFile)

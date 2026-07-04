@@ -56,8 +56,8 @@ function createValidFiles(): Record<string, string> {
       .join("\n");
   }
 
-  files["docs/proof/release.md"] = [
-    files["docs/proof/release.md"],
+  files["docs/项目基础/发布验证.md"] = [
+    files["docs/项目基础/发布验证.md"],
     "## Current sequence",
     "```bash",
     getReleaseProofDocsCommandBlock(),
@@ -87,18 +87,39 @@ describe("current-truth docs guard", () => {
     expect(CHECKS).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: "docs/design/truth.md",
+          file: "docs/design/设计真相.md",
           required: expect.arrayContaining([
             "Tucsenberg current site design truth",
           ]),
         }),
         expect.objectContaining({
-          file: "docs/design/impeccable/README.md",
+          file: "docs/design/设计系统说明.md",
           forbidden: expect.arrayContaining(["external/"]),
         }),
         expect.objectContaining({
-          file: "docs/design/impeccable/system/PAGE-PATTERNS.md",
+          file: "docs/design/页面模式.md",
           required: expect.arrayContaining(["Historical gap snapshot"]),
+        }),
+      ]),
+    );
+  });
+
+  it("keeps docs existence review closed instead of leaving review-needed buckets", () => {
+    expect(CHECKS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: "docs/项目基础/文档清单.md",
+          required: expect.arrayContaining(["Docs existence closeout"]),
+          forbidden: expect.arrayContaining([
+            "review-needed",
+            "Follow-up buckets",
+          ]),
+        }),
+        expect.objectContaining({
+          file: "docs/技术难题/性能实验优化方法论.md",
+          required: expect.arrayContaining([
+            "这是方法笔记，不是当前 Tucsenberg launch proof。",
+          ]),
         }),
       ]),
     );
@@ -106,7 +127,7 @@ describe("current-truth docs guard", () => {
 
   it("flags missing required path markers and forbidden stale path markers", () => {
     const files = createValidFiles();
-    files["docs/ref/maintainers.md"] = [
+    files["docs/项目基础/维护规则.md"] = [
       "src/config/single-site-page-expression.ts",
       "src/sites/message-overrides.ts",
     ].join("\n");
@@ -117,12 +138,12 @@ describe("current-truth docs guard", () => {
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: "docs/ref/maintainers.md",
+          file: "docs/项目基础/维护规则.md",
           error:
             'missing current-truth pattern "src/config/single-site-seo.ts"',
         }),
         expect.objectContaining({
-          file: "docs/ref/maintainers.md",
+          file: "docs/项目基础/维护规则.md",
           error:
             'forbidden current-truth pattern "src/sites/message-overrides.ts"',
         }),
@@ -174,7 +195,7 @@ describe("current-truth docs guard", () => {
 
   it("flags release runbook command block drift from the manifest", () => {
     const files = createValidFiles();
-    files["docs/proof/release.md"] = [
+    files["docs/项目基础/发布验证.md"] = [
       "scripts/quality/release-proof-manifest.js",
       "## Current sequence",
       "```bash",
@@ -187,7 +208,7 @@ describe("current-truth docs guard", () => {
 
     expect(collectCurrentTruthDocFindings(repoDir)).toContainEqual(
       expect.objectContaining({
-        file: "docs/proof/release.md",
+        file: "docs/项目基础/发布验证.md",
         error: "release-proof runbook command block drift from manifest",
       }),
     );

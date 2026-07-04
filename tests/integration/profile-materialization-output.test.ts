@@ -371,7 +371,11 @@ function assertCompanySiteMaterializedBoundaries(
   for (const forbiddenLocalPath of COMPANY_SITE_FORBIDDEN_LOCAL_OUTPUT_PATHS) {
     expectMaterializedPathExists(outputDirectory, forbiddenLocalPath, false);
   }
-  expectMaterializedPathExists(outputDirectory, "docs/ref/lifecycle.md", true);
+  expectMaterializedPathExists(
+    outputDirectory,
+    "docs/项目基础/生命周期.md",
+    true,
+  );
   expectMaterializedPathExists(
     outputDirectory,
     "docs/superpowers/specs",

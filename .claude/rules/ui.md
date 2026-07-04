@@ -61,7 +61,7 @@ into `src/components/ui/*` with local stories, tests, docs, and governance.
 ## Radix UI foundation
 
 The project uses a hybrid / pilot-first UI foundation. Read
-`docs/ref/decisions/ui-foundation.md` before adding Radix Themes or changing
+`docs/决策记录/UI基础方案.md` before adding Radix Themes or changing
 the UI foundation.
 
 - Radix Primitives are approved for complex interactions.
@@ -188,9 +188,9 @@ Design values live in `src/app/globals.css`.
 Before changing brand color, theme, or token structure, read:
 
 1. `DESIGN.md`
-2. `docs/design/truth.md`
-3. `docs/design/impeccable/system/COLOR-SYSTEM.md`
-4. `docs/ref/maintainers.md`
+2. `docs/design/设计真相.md`
+3. `docs/design/色彩系统.md`
+4. `docs/项目基础/维护规则.md`
 
 ## Tailwind CSS v4
 

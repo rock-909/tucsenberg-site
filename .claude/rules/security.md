@@ -113,7 +113,7 @@ requires route-local ordering.
 - A nonce CSP lane needs a proxy-generated nonce plus Cloudflare/OpenNext proof;
   do not mix that into ordinary security cleanup.
 - Current nonce CSP feasibility decision lives in
-  `docs/ref/tech.md`.
+  `docs/项目基础/技术栈.md`.
 - CSP reports go to `/api/csp-report`.
 - Do not use unfiltered `dangerouslySetInnerHTML`.
 - URL values must allow only `https://`, `http://`, or site-relative `/`.

@@ -18,7 +18,7 @@ import { isDeployedCanaryUrl } from "./post-deploy-canary-url";
  *
  * Skip policy:
  * - Owner: release proof / launch owner.
- * - Tracking: docs/proof/launch.md and docs/proof/release.md real-service-canary lane.
+ * - Tracking: docs/项目基础/上线验证.md and docs/项目基础/发布验证.md real-service-canary lane.
  * - Expiry: none. This is a permanent manual launch gate, not a temporary skip.
  */
 
