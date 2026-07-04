@@ -12,3 +12,6 @@
 Every markdown proof file in this directory should start with
 `Historical starter proof.` so old routes and old Lighthouse evidence cannot be
 mistaken for current Tucsenberg launch proof.
+
+Performance experiment method lives at `../../性能实验优化方法论.md`. That file is
+a reusable method note, not current launch proof.

@@ -17,3 +17,8 @@
 - `decisions/content-as-code-cms.md`：CMS、D1、Git-backed 内容、多语言运营边界。
 
 低频细节仍可保留为独立文件，但 README 和主入口只链接上面的 canonical 文件。
+
+## Low-frequency references
+
+- `architecture-diagram.svg` / `architecture-tree.md`：架构图和文字 fallback。
+- `integrations.md`：候选集成 backlog；不是已批准接入清单。

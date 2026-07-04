@@ -41,6 +41,36 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
+    file: "docs/ref/README.md",
+    required: ["architecture-tree.md", "integrations.md"],
+  },
+  {
+    file: "docs/ref/decisions/radix-contact-form-pilot.md",
+    required: [
+      "Historical route/build artifact note",
+      "Current Tucsenberg is English-only",
+      "not a current route promise",
+    ],
+  },
+  {
+    file: "docs/proof/README.md",
+    required: [
+      "baselines/cloudflare-warning.md",
+      "baselines/react-doctor.md",
+      "baselines/route-mode.md",
+      "baselines/storybook-warning.md",
+      "baselines/testing/icon-mock-best-practices.md",
+      "baselines/testing/mock-config-standard.md",
+    ],
+  },
+  {
+    file: "docs/proof/performance/README.md",
+    required: [
+      "../../性能实验优化方法论.md",
+      "a reusable method note, not current launch proof",
+    ],
+  },
+  {
     file: "docs/ref/maintainers.md",
     required: [
       "src/config/single-site-page-expression.ts",
