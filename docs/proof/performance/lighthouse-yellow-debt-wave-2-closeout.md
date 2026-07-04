@@ -1,5 +1,9 @@
 # Lighthouse Yellow Debt Wave 2 Closeout
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 Date: 2026-05-24
 Branch: `perf/lighthouse-wave-2-surface-optimization`
 

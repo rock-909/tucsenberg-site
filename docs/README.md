@@ -45,6 +45,7 @@
 | proof level | `proof/levels.md` |
 | 检查和脚本生命周期 | `ref/lifecycle.md` |
 | 维护者审查规则 | `ref/maintainers.md` |
+| 文档存在审视 | `ref/docs-inventory.md` |
 | 设计真相 | `design/truth.md` |
 
 ## Not current product truth

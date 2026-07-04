@@ -1,5 +1,9 @@
 # Lighthouse Yellow Debt Baseline
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 **Date:** 2026-05-23
 **Branch:** perf/lighthouse-yellow-debt-wave-1
 **Phase:** Wave 1A — read-only attribution only (Task 3 not executed)

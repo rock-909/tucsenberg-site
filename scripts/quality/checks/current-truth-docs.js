@@ -7,8 +7,39 @@ const {
 
 const ROOT = process.cwd();
 const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
+const PERFORMANCE_ARCHIVE_DOCS = [
+  "docs/proof/performance/full-performance-audit.md",
+  "docs/proof/performance/lcp-first-paint-motion-boundary.md",
+  "docs/proof/performance/lighthouse-budget-governance.md",
+  "docs/proof/performance/lighthouse-prefetch-policy.md",
+  "docs/proof/performance/lighthouse-product-detail-payload.md",
+  "docs/proof/performance/lighthouse-shared-payload.md",
+  "docs/proof/performance/lighthouse-yellow-debt-attribution.md",
+  "docs/proof/performance/lighthouse-yellow-debt-baseline.md",
+  "docs/proof/performance/lighthouse-yellow-debt-wave-1-closeout.md",
+  "docs/proof/performance/lighthouse-yellow-debt-wave-2-baseline.md",
+  "docs/proof/performance/lighthouse-yellow-debt-wave-2-closeout.md",
+  "docs/proof/performance/lighthouse-zero-yellow-attribution.md",
+  "docs/proof/performance/performance-governance-candidate-audit.md",
+  "docs/proof/performance/seo-public-surface-performance-headroom.md",
+];
 
 const TRUTH_DOC_CHECKS = [
+  {
+    file: "docs/ref/docs-inventory.md",
+    required: [
+      "current-entry",
+      "current-reference",
+      "current-proof",
+      "inherited-starter-reference",
+      "historical-proof",
+      "method-workflow",
+      "candidate-backlog",
+      "review-needed",
+      "docs/proof/performance/",
+      "docs/性能实验优化方法论.md",
+    ],
+  },
   {
     file: "docs/ref/maintainers.md",
     required: [
@@ -132,11 +163,15 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/design/impeccable/system/COMPONENT-GOVERNANCE.md",
     forbidden: ["This starter is built for AI-assisted development."],
   },
-  {
-    file: "docs/proof/performance/full-performance-audit.md",
+  ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({
+    file,
     required: ["Historical starter proof."],
-    forbidden: ["The current starter is in a healthy performance state."],
-  },
+    ...(file === "docs/proof/performance/full-performance-audit.md"
+      ? {
+          forbidden: ["The current starter is in a healthy performance state."],
+        }
+      : {}),
+  })),
   {
     file: ".claude/rules/content.md",
     required: [

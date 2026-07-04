@@ -1,5 +1,9 @@
 # Lighthouse 黄债治理 Wave 1 closeout
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 结论：建议关闭 Wave 1，不继续 Task 4 小修。Wave 2 应另开规划和分支，本文件不执行 Wave 2。
 
 ## 当前基线

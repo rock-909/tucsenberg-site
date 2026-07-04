@@ -1,5 +1,9 @@
 # Lighthouse Budget Governance
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 Date: 2026-05-24
 Branch: `perf/lighthouse-wave-3-budget-governance`
 Entry baseline: Wave 2 closeout, merged through PR #66 at `9c55bc2`

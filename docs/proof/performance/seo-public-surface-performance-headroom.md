@@ -1,5 +1,9 @@
 # SEO Public Surface Performance Headroom
 
+Historical starter proof. This file is not current Tucsenberg launch proof; see
+`../launch.md`, `../release.md`, `../levels.md`, and `README.md` for the current
+boundary.
+
 **Date:** 2026-05-26
 **Scope:** SEO public surface and blog article structured-data closeout.
 

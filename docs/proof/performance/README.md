@@ -8,3 +8,7 @@
 
 当前 Tucsenberg 上线证明以 `../launch.md`、`../release.md` 和
 `../levels.md` 为准。
+
+Every markdown proof file in this directory should start with
+`Historical starter proof.` so old routes and old Lighthouse evidence cannot be
+mistaken for current Tucsenberg launch proof.
