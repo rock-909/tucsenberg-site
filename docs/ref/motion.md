@@ -1,9 +1,9 @@
 # Motion Governance
 
-This file is the canonical motion rulebook for the starter. It governs animation,
-transitions, page reveal, loading motion, and reduced-motion behavior.
+This file is the canonical motion rulebook for the Tucsenberg site. It governs
+animation, transitions, page reveal, loading motion, and reduced-motion behavior.
 
-Motion in this starter is a governance layer, not a decoration layer. It should
+Motion in this site is a governance layer, not a decoration layer. It should
 make state, hierarchy, or navigation easier to understand. If motion does not
 explain a change, default to no motion.
 
@@ -82,7 +82,7 @@ Use calm ease-out curves. Motion should feel placed, not bouncy.
 - Do not use `--ease-spring` for hover, focus, menu, form, or panel states unless
   a specific component proof approves that exception.
 - Do not copy external token names or brand-specific easing names into this
-  starter.
+  project.
 
 ## Implementation rules
 

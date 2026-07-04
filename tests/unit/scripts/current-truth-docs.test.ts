@@ -83,6 +83,27 @@ describe("current-truth docs guard", () => {
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
   });
 
+  it("keeps design docs bounded to Tucsenberg and historical workflow truth", () => {
+    expect(CHECKS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: "docs/design/truth.md",
+          required: expect.arrayContaining([
+            "Tucsenberg current site design truth",
+          ]),
+        }),
+        expect.objectContaining({
+          file: "docs/design/impeccable/README.md",
+          forbidden: expect.arrayContaining(["external/"]),
+        }),
+        expect.objectContaining({
+          file: "docs/design/impeccable/system/PAGE-PATTERNS.md",
+          required: expect.arrayContaining(["Historical gap snapshot"]),
+        }),
+      ]),
+    );
+  });
+
   it("flags missing required path markers and forbidden stale path markers", () => {
     const files = createValidFiles();
     files["docs/ref/maintainers.md"] = [
