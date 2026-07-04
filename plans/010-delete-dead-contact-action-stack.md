@@ -23,7 +23,7 @@
 
 The live contact flow is browser form → `/api/contact` →
 `submitCanonicalContactSubmission` (`src/lib/contact/submit-canonical-contact.ts`).
-This is a documented contract (docs/use/replace.md §6). A parallel, older
+This is a documented contract (docs/项目基础/替换顺序.md §6). A parallel, older
 Server Action stack still exists and is fully dead: `contactFormAction` in
 `src/lib/actions/contact.ts` is wired to no form or route. It drags three
 liabilities along:
@@ -185,7 +185,7 @@ grep -rn "contactFormAction\|getClientIPFromHeaders\|x-internal-client-ip" docs 
 
 Fix any dangling doc sentence (smallest possible edit). Note:
 `scripts/quality/checks/current-truth-docs.js` FORBIDS the phrase
-"Contact page Server Action" in `docs/ref/maintainers.md` — this deletion is
+"Contact page Server Action" in `docs/项目基础/维护规则.md` — this deletion is
 aligned with that rule, so no governance conflict is expected.
 
 **Verify**: `pnpm test` → all pass; `pnpm build` → exit 0;

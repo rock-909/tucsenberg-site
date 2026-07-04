@@ -126,9 +126,9 @@ describe("email copy boundary", () => {
   });
 
   it("documents transactional email copy as a replacement surface", () => {
-    const replaceGuide = readFileSync("docs/use/replace.md", "utf8");
-    const messagesGuide = readFileSync("docs/ref/messages.md", "utf8");
-    const surfacesGuide = readFileSync("docs/ref/surfaces.md", "utf8");
+    const replaceGuide = readFileSync("docs/项目基础/替换顺序.md", "utf8");
+    const messagesGuide = readFileSync("docs/项目基础/消息文案.md", "utf8");
+    const surfacesGuide = readFileSync("docs/项目基础/替换边界.md", "utf8");
     const replacementSurfaceDocs = [
       replaceGuide,
       messagesGuide,

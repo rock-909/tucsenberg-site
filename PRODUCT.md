@@ -93,21 +93,21 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 
 - `README.md`
 - `docs/README.md`
-- `docs/ref/project.md`
-- `docs/use/content.md`
-- `docs/use/deploy.md`
+- `docs/项目基础/项目基础.md`
+- `docs/项目基础/内容.md`
+- `docs/项目基础/部署.md`
 - `plans/handoff-report.md`
 
 设计与组件治理：
 
 - `DESIGN.md`
-- `docs/design/truth.md`
-- `docs/design/impeccable/system/COMPONENT-GOVERNANCE.md`
-- `docs/design/impeccable/system/COLOR-SYSTEM.md`
+- `docs/design/设计真相.md`
+- `docs/design/组件治理.md`
+- `docs/design/色彩系统.md`
 
 继承 starter/profile 边界：
 
-- `docs/use/start.md`
-- `docs/use/replace.md`
-- `docs/ref/profiles.md`
-- `docs/ref/surfaces.md`
+- `docs/项目基础/派生起步.md`
+- `docs/项目基础/替换顺序.md`
+- `docs/项目基础/派生配置.md`
+- `docs/项目基础/替换边界.md`

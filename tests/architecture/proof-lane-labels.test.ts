@@ -40,7 +40,7 @@ const RETIRED_PLAYWRIGHT_DEFAULT_FILES = [
 
 describe("proof lane labels", () => {
   it("documents the shared proof lane vocabulary", () => {
-    const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
+    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
 
     for (const lane of REQUIRED_PROOF_LANES) {
       expect(qualityProof).toContain(lane);
@@ -49,9 +49,9 @@ describe("proof lane labels", () => {
 
   it("documents profile-scoped proof lanes", () => {
     const starterProof = [
-      readFileSync("docs/proof/dry-run.md", "utf8"),
-      readFileSync("docs/ref/lifecycle.md", "utf8"),
-      readFileSync("docs/ref/profiles.md", "utf8"),
+      readFileSync("docs/项目基础/派生干跑验证.md", "utf8"),
+      readFileSync("docs/项目基础/生命周期.md", "utf8"),
+      readFileSync("docs/项目基础/派生配置.md", "utf8"),
     ].join("\n");
 
     for (const profile of RETAINED_STARTER_PROFILES) {
@@ -62,7 +62,7 @@ describe("proof lane labels", () => {
   });
 
   it("separates current Tucsenberg proof from starter profile proof", () => {
-    const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
+    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
 
     expect(qualityProof).toContain("## Tucsenberg local proof");
     expect(qualityProof).toContain(
@@ -73,7 +73,7 @@ describe("proof lane labels", () => {
   });
 
   it("keeps profile-scoped content-readiness commands out of launch proof", () => {
-    const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
+    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
 
     for (const lane of RETAINED_STARTER_PROFILES) {
       expect(qualityProof).not.toContain(
@@ -109,7 +109,7 @@ describe("proof lane labels", () => {
 
   it("limits default Playwright discovery to current Tucsenberg proof", () => {
     const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
-    const proofLevels = readFileSync("docs/proof/levels.md", "utf8");
+    const proofLevels = readFileSync("docs/项目基础/验证等级.md", "utf8");
 
     expect(playwrightConfig).toContain("hasExplicitE2eFileSelection");
     expect(playwrightConfig).toContain("testMatch: currentSiteTestMatch");
@@ -127,29 +127,17 @@ describe("proof lane labels", () => {
   });
 
   it("marks retired navigation E2E proof docs as historical", () => {
-    const proofReadme = readFileSync("docs/proof/README.md", "utf8");
-    const performanceReadme = readFileSync(
-      "docs/proof/performance/README.md",
-      "utf8",
-    );
+    const proofReadme = readFileSync("docs/技术难题/验证入口.md", "utf8");
+    const performanceReadme = readFileSync("docs/技术难题/性能记录.md", "utf8");
 
-    expect(proofReadme).toContain("performance/");
+    expect(proofReadme).toContain("性能记录.md");
     expect(performanceReadme).toContain("不是当前 Tucsenberg 上线证明");
 
     const historicalDocs = [
-      readFileSync(
-        "docs/proof/performance/lighthouse-shared-payload.md",
-        "utf8",
-      ),
-      readFileSync(
-        "docs/proof/performance/lighthouse-product-detail-payload.md",
-        "utf8",
-      ),
-      readFileSync(
-        "docs/proof/performance/lighthouse-prefetch-policy.md",
-        "utf8",
-      ),
-      readFileSync("docs/proof/next16-activity-state-audit.md", "utf8"),
+      readFileSync("docs/技术难题/Lighthouse共享负载.md", "utf8"),
+      readFileSync("docs/技术难题/Lighthouse产品详情负载.md", "utf8"),
+      readFileSync("docs/技术难题/Lighthouse预取策略.md", "utf8"),
+      readFileSync("docs/技术难题/Next16行为审计.md", "utf8"),
     ];
 
     for (const doc of historicalDocs) {
@@ -159,22 +147,14 @@ describe("proof lane labels", () => {
     }
   });
 
-  it("labels inherited workflow docs outside current product truth", () => {
+  it("keeps inherited workflow docs out of current docs truth", () => {
     const docsReadme = readFileSync("docs/README.md", "utf8");
-    const useReadme = readFileSync("docs/use/README.md", "utf8");
-    const workflowDocs = [
-      readFileSync("docs/use/project-workflow.md", "utf8"),
-      readFileSync("docs/use/website-production-workflow.md", "utf8"),
-    ];
+    const useReadme = readFileSync("docs/项目基础/维护入口.md", "utf8");
 
-    expect(docsReadme).toContain("docs/use/project-workflow.md");
-    expect(docsReadme).toContain("docs/use/website-production-workflow.md");
-    expect(useReadme).toContain("project-workflow.md");
-    expect(useReadme).toContain("website-production-workflow.md");
-
-    for (const doc of workflowDocs) {
-      expect(doc).toContain("Historical starter workflow");
-      expect(doc).toContain("not current Tucsenberg product truth");
-    }
+    expect(docsReadme).toContain("docs/superpowers/specs/**");
+    expect(docsReadme).toContain("docs/superpowers/plans/**");
+    expect(useReadme).toContain("旧 starter workflow 说明已经移出 `docs/`");
+    expect(useReadme).not.toContain("project-workflow.md");
+    expect(useReadme).not.toContain("website-production-workflow.md");
   });
 });

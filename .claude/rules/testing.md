@@ -66,7 +66,7 @@ React Doctor is part of the React quality signal, not a replacement for tests.
 The repo-level user-facing behavior anchor is:
 
 ```text
-docs/ref/contracts.md
+docs/项目基础/行为合约.md
 ```
 
 Read it before changing routing, navigation, locale switching, 404 behavior,

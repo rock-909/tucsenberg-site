@@ -105,6 +105,8 @@ reviews/
 .codex/*.sqlite*
 .codex/agents/
 .codex/shell_snapshots/
+
+# Superpowers local state only; committed records use docs/superpowers/specs/ or docs/superpowers/plans/.
 .superpowers/
 .omx/
 .eslintcache-audit

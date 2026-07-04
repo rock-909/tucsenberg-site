@@ -93,7 +93,7 @@ Facts about the toolchain you will rely on:
   `profile:dry-run` / `profile:materialize`) and can import from `src/`.
 - `scripts/quality/checks/*.js` are CommonJS run by plain `node` and CANNOT
   import TS — they CAN `require()` a JSON file.
-- `docs/use/replace.md` documents
+- `docs/项目基础/替换顺序.md` documents
   `tsx scripts/starter-profile/sync-message-compat.ts --write` as the manual
   compat-sync workflow — the `--write` mode must keep working.
 - The compat freshness CHECK that runs in CI is
@@ -137,7 +137,7 @@ Facts about the toolchain you will rely on:
 - EDIT: `scripts/starter-profile/safe-copy.ts`,
   `scripts/starter-profile/file-sets.ts`,
   `scripts/starter-profile/materialize.ts` — make missing-source skips loud.
-- EDIT: `docs/ref/messages.md` / `docs/use/replace.md` ONLY if they reference
+- EDIT: `docs/项目基础/消息文案.md` / `docs/项目基础/替换顺序.md` ONLY if they reference
   `split-message-packs.mjs` (smallest edit).
 
 **Out of scope**:

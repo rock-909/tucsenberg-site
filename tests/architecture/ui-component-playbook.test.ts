@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const DOCS_README_PATH = "docs/README.md";
-const UI_COMPONENT_PLAYBOOK_PATH = "docs/ref/ui-components.md";
+const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
 
 function readText(filePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo docs by relative path
@@ -13,8 +13,8 @@ describe("UI component playbook", () => {
   it("is part of the website docs required reading path", () => {
     const readme = readText(DOCS_README_PATH);
 
-    expect(readme).toContain("ref/ui-components.md");
-    expect(readme).toContain("design/truth.md");
+    expect(readme).toContain("design/组件使用手册.md");
+    expect(readme).toContain("design/设计真相.md");
   });
 
   it("states its retained AIFS responsibility", () => {
@@ -26,7 +26,7 @@ describe("UI component playbook", () => {
     expect(playbook).toContain("Project-level");
     expect(playbook).toContain(".claude/rules/ui.md");
     expect(playbook).toContain("full maintained wrapper inventory");
-    expect(playbook).toContain("ui-component-index.md");
+    expect(playbook).toContain("组件索引.md");
     expect(playbook).toContain("Registry and Playbook are retained");
     expect(playbook).toContain(
       "AI discoverability and machine governance will not get weaker",
@@ -111,10 +111,10 @@ describe("UI component playbook", () => {
     expect(playbook).toContain("`themeBoundary`");
     expect(playbook).toContain("`useWhen`");
     expect(playbook).toContain("`avoidWhen`");
-    expect(playbook).toContain("`ui-component-index.md` row");
+    expect(playbook).toContain("`组件索引.md` row");
     expect(playbook).toContain("this doc update");
     expect(playbook).toContain("pnpm component:governance:test");
-    expect(playbook).toContain("ui-component-index.md` mirror checks");
+    expect(playbook).toContain("组件索引.md` mirror checks");
   });
 
   it("keeps data-ui-pilot on the theme boundary only", () => {

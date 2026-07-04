@@ -30,7 +30,7 @@ function readRepoFile(relativePath: string): string {
 
 describe("profile materialization contract", () => {
   it("keeps materialization tooling under scripts/starter-profile with copy-by-selection semantics", () => {
-    const profileDocs = readRepoFile("docs/ref/profiles.md");
+    const profileDocs = readRepoFile("docs/项目基础/派生配置.md");
 
     for (const modulePath of [
       "scripts/starter-profile/types.ts",
@@ -40,7 +40,7 @@ describe("profile materialization contract", () => {
       expect(exists(modulePath), `${modulePath} should exist`).toBe(true);
     }
 
-    const materializationDocs = readRepoFile("docs/use/start.md");
+    const materializationDocs = readRepoFile("docs/项目基础/派生起步.md");
 
     for (const expectedPhrase of [
       "pnpm profile:dry-run",
@@ -59,7 +59,7 @@ describe("profile materialization contract", () => {
     expect(exists("scripts/starter-profile/dependency-closure.ts")).toBe(true);
     expect(exists("scripts/starter-profile/transforms.ts")).toBe(true);
 
-    expect(exists("docs/use/start.md")).toBe(true);
+    expect(exists("docs/项目基础/派生起步.md")).toBe(true);
     expect(profileDocs).toContain("pnpm profile:materialize");
     expect(profileDocs).toContain("默认输出不应包含");
     expect(profileDocs).toContain("/products");
@@ -157,9 +157,9 @@ describe("profile materialization contract", () => {
   });
 
   it("keeps generated-site tooling decisions explicit for root config files", () => {
-    const lifecycleDocs = readRepoFile("docs/ref/lifecycle.md");
-    const surfacesDocs = readRepoFile("docs/ref/surfaces.md");
-    const startDocs = readRepoFile("docs/use/start.md");
+    const lifecycleDocs = readRepoFile("docs/项目基础/生命周期.md");
+    const surfacesDocs = readRepoFile("docs/项目基础/替换边界.md");
+    const startDocs = readRepoFile("docs/项目基础/派生起步.md");
     const companySitePlan =
       buildStarterProfileMaterializationPlan("company-site");
 
@@ -217,10 +217,10 @@ describe("profile materialization contract", () => {
 
     for (const includedPath of [
       "docs/README.md",
-      "docs/use/replace.md",
-      "docs/ref/surfaces.md",
-      "docs/proof/launch.md",
-      "docs/design/truth.md",
+      "docs/项目基础/替换顺序.md",
+      "docs/项目基础/替换边界.md",
+      "docs/项目基础/上线验证.md",
+      "docs/design/设计真相.md",
     ]) {
       expect(
         shouldIncludeRepoPath(includedPath, plan),

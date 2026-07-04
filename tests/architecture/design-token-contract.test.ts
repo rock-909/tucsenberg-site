@@ -258,7 +258,7 @@ describe("design token contract", () => {
   it("keeps runtime font truth aligned across design docs and footer tokens", () => {
     const globals = readRepoFile(GLOBALS_CSS);
     const design = readRepoFile("DESIGN.md");
-    const truth = readRepoFile("docs/design/truth.md");
+    const truth = readRepoFile("docs/design/设计真相.md");
     const footerTokens = readRepoFile(FOOTER_STYLE_TOKEN_SOURCE);
 
     expect(globals).toContain("--font-sans");
@@ -389,8 +389,8 @@ describe("design token contract", () => {
     expect(readCssVariable(css, "--input-radius")).toBe("var(--radius-md)");
     expect(readCssVariable(css, "--section-radius")).toBeUndefined();
 
-    const truth = readRepoFile("docs/design/truth.md");
-    const uiComponents = readRepoFile("docs/ref/ui-components.md");
+    const truth = readRepoFile("docs/design/设计真相.md");
+    const uiComponents = readRepoFile("docs/design/组件使用手册.md");
 
     expect(truth).toContain("Runtime Button pilot");
     expect(truth).toContain("Card, Input, or section radius migration");
