@@ -108,6 +108,11 @@ Turnstile widget is unavailable locally and the submit button is disabled.
 
 ## Build and size proof
 
+Historical route/build artifact note: this section preserves the 2026-05-14
+starter-era build output. Current Tucsenberg is English-only; `/zh` is a retired
+route and must stay 404. The old `/zh/contact` artifact below is historical
+pilot evidence only, not a current route promise.
+
 - Command: `pnpm build`
 - Result: pass.
 - Contact route line from build output:

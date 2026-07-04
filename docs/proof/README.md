@@ -13,3 +13,14 @@
 
 当前 Tucsenberg 上线证明以 `launch.md` 为准；starter/profile 证明只在维护
 继承工具时使用，不能替代当前站证明。
+
+## Baseline index
+
+- `baselines/client-boundary-budget.json`：client boundary 机器预算。
+- `baselines/cloudflare-warning.md`：OpenNext / Wrangler 生成物 warning 基线。
+- `baselines/react-doctor.md`：React Doctor 当前执行基线。
+- `baselines/react-doctor-policy.md`：React Doctor policy 和例外说明。
+- `baselines/route-mode.md`：Next.js build route mode 观察基线。
+- `baselines/storybook-warning.md`：Storybook warning 基线。
+- `baselines/testing/icon-mock-best-practices.md`：图标 mock 测试方法。
+- `baselines/testing/mock-config-standard.md`：mock 配置测试方法。

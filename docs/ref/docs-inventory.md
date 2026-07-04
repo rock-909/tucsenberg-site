@@ -35,7 +35,7 @@ review, not the current product truth. Start current work from `../README.md`.
 | File | Label | Exists because | Next handling |
 | --- | --- | --- | --- |
 | `docs/README.md` | `current-entry` | Main doc entry for the Tucsenberg site. | Keep canonical. |
-| `docs/性能实验优化方法论.md` | `method-workflow`, `review-needed` | Records the performance experiment method in Chinese. | Keep for now; later link from `proof/performance/README.md` or move under a clearer proof/method path. |
+| `docs/性能实验优化方法论.md` | `method-workflow`, `review-needed` | Records the performance experiment method in Chinese. | Linked from `proof/performance/README.md`; later decide whether to move under a clearer proof/method path. |
 | `docs/use/README.md` | `current-entry` | Explains current maintenance docs and inherited starter docs. | Keep. |
 | `docs/use/ai.md` | `current-reference` | Sets durable truth boundaries for Codex/Claude collaboration and generated workflow output. | Keep. |
 | `docs/use/brand.md` | `current-reference` | Explains brand/domain/contact replacement for the current site. | Keep. |
@@ -61,10 +61,10 @@ review, not the current product truth. Start current work from `../README.md`.
 | `docs/ref/ui-components.md` | `current-reference` | Defines UI component governance and approved wrapper boundaries. | Keep. |
 | `docs/ref/ui-component-index.md` | `current-reference` | Indexes UI wrappers, surfaces, and agent selection rules. | Keep. |
 | `docs/ref/architecture-diagram.svg` | `current-reference` | Visual architecture reference. | Keep. |
-| `docs/ref/architecture-tree.md` | `current-reference`, `review-needed` | Text fallback for the architecture diagram. | Keep for now; later link from `ref/README.md` or merge into `project.md` / `tech.md`. |
-| `docs/ref/integrations.md` | `candidate-backlog`, `review-needed` | Holds possible future integrations and rejected/paused candidates. | Keep as backlog if it remains useful; otherwise merge into a decision/backlog note later. |
+| `docs/ref/architecture-tree.md` | `current-reference`, `review-needed` | Text fallback for the architecture diagram. | Linked from `ref/README.md`; later decide whether to keep separate or merge into `project.md` / `tech.md`. |
+| `docs/ref/integrations.md` | `candidate-backlog`, `review-needed` | Holds possible future integrations and rejected/paused candidates. | Linked from `ref/README.md` as backlog; later merge into a decision/backlog note if it grows. |
 | `docs/ref/decisions/content-as-code-cms.md` | `current-reference` | Accepted ADR for content-as-code and CMS boundary. | Keep; locale examples are future-capable content modeling, not a current `/zh` route promise. |
-| `docs/ref/decisions/radix-contact-form-pilot.md` | `current-reference`, `historical-proof`, `review-needed` | Accepted Radix contact pilot result with old build proof. | Keep; later add a short historical proof boundary around the retired `/zh/contact` evidence. |
+| `docs/ref/decisions/radix-contact-form-pilot.md` | `current-reference`, `historical-proof`, `review-needed` | Accepted Radix contact pilot result with old build proof. | Keep; retired `/zh/contact` build output is now marked as historical route evidence. |
 | `docs/ref/decisions/ui-foundation.md` | `current-reference` | Accepted UI foundation ADR. | Keep canonical for Radix/Tailwind split. |
 | `docs/proof/README.md` | `current-entry` | Entry for proof boundaries. | Keep. |
 | `docs/proof/launch.md` | `current-proof` | Current launch proof for Tucsenberg. | Keep canonical; `/zh` appears only as a current 404 requirement. |
@@ -73,13 +73,13 @@ review, not the current product truth. Start current work from `../README.md`.
 | `docs/proof/dry-run.md` | `current-proof`, `inherited-starter-reference` | Proves inherited `company-site` materialized output boundaries. | Keep while starter/profile tooling remains. |
 | `docs/proof/next16-activity-state-audit.md` | `historical-proof`, `current-reference` | Preserves a Next.js 16 behavior audit that still informs rules. | Keep unless the rule is fully absorbed elsewhere. |
 | `docs/proof/baselines/client-boundary-budget.json` | `current-proof` | Machine-readable client boundary budget. | Keep. |
-| `docs/proof/baselines/cloudflare-warning.md` | `current-proof`, `review-needed` | Baseline for expected Cloudflare warning behavior. | Keep; later link from `proof/README.md` if still active. |
+| `docs/proof/baselines/cloudflare-warning.md` | `current-proof`, `review-needed` | Baseline for expected Cloudflare warning behavior. | Linked from `proof/README.md`; keep while Cloudflare/OpenNext warning baselines are useful. |
 | `docs/proof/baselines/react-doctor-policy.md` | `current-proof` | Policy for React Doctor findings. | Keep. |
-| `docs/proof/baselines/react-doctor.md` | `current-proof`, `review-needed` | Captures the React Doctor baseline. | Keep; later merge or link with `react-doctor-policy.md` if duplicated. |
-| `docs/proof/baselines/route-mode.md` | `current-proof`, `review-needed` | Baseline for route rendering mode expectations. | Keep; later link from proof index if still active. |
-| `docs/proof/baselines/storybook-warning.md` | `current-proof`, `review-needed` | Baseline for Storybook warning behavior. | Keep while Storybook/component governance remains. |
-| `docs/proof/baselines/testing/icon-mock-best-practices.md` | `method-workflow`, `review-needed` | Testing guidance for icon mocks. | Keep until tests confirm it is obsolete or it is merged into testing rules. |
-| `docs/proof/baselines/testing/mock-config-standard.md` | `method-workflow`, `review-needed` | Testing guidance for mock configuration. | Keep until tests confirm it is obsolete or it is merged into testing rules. |
+| `docs/proof/baselines/react-doctor.md` | `current-proof`, `review-needed` | Captures the React Doctor baseline. | Linked from `proof/README.md`; later merge with `react-doctor-policy.md` only if duplicated. |
+| `docs/proof/baselines/route-mode.md` | `current-proof`, `review-needed` | Baseline for route rendering mode expectations. | Linked from `proof/README.md`; keep while route-mode drift remains useful to inspect. |
+| `docs/proof/baselines/storybook-warning.md` | `current-proof`, `review-needed` | Baseline for Storybook warning behavior. | Linked from `proof/README.md`; keep while Storybook/component governance remains. |
+| `docs/proof/baselines/testing/icon-mock-best-practices.md` | `method-workflow`, `review-needed` | Testing guidance for icon mocks. | Linked from `proof/README.md`; later merge into testing rules if it remains broadly useful. |
+| `docs/proof/baselines/testing/mock-config-standard.md` | `method-workflow`, `review-needed` | Testing guidance for mock configuration. | Linked from `proof/README.md`; later merge into testing rules if it remains broadly useful. |
 | `docs/proof/performance/README.md` | `historical-proof` | Entry for archived starter performance proof. | Keep archive boundary. |
 | `docs/proof/performance/full-performance-audit.md` | `historical-proof` | Starter-era full performance audit. | Keep as archive only. |
 | `docs/proof/performance/lcp-first-paint-motion-boundary.md` | `historical-proof` | Starter-era LCP/motion proof. | Keep as archive only. |
@@ -110,12 +110,10 @@ review, not the current product truth. Start current work from `../README.md`.
 
 ## Follow-up buckets
 
-1. Link-or-merge weak reference docs:
+1. Decide whether linked weak-reference docs should stay separate or be merged:
    `architecture-tree.md`, `integrations.md`, baseline warning docs, and testing
    mock guidance.
-2. Add historical boundary notes where current ADRs preserve old proof snippets,
-   especially `decisions/radix-contact-form-pilot.md`.
-3. Decide whether `docs/性能实验优化方法论.md` should move under
+2. Decide whether `docs/性能实验优化方法论.md` should move under
    `docs/proof/performance/` or stay as a root-level method note.
-4. Review design workflow and page-pattern mandates after the current site
+3. Review design workflow and page-pattern mandates after the current site
    design direction stabilizes.
