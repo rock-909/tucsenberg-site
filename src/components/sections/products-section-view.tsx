@@ -29,30 +29,30 @@ function ProductCard({
   link,
 }: ProductsSectionProductItem) {
   return (
-    <div className="group surface-card p-6 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 focus-within:-translate-y-0.5">
-      <span className="inline-block rounded bg-[var(--primary-light)] px-2.5 py-1 text-xs font-semibold text-primary">
+    <div className="group surface-card p-6 transition-[transform,border-color] duration-150 focus-within:-translate-y-0.5 hover:-translate-y-0.5">
+      <span className="text-primary inline-block rounded bg-[var(--primary-light)] px-2.5 py-1 text-xs font-semibold">
         {tag}
       </span>
-      <h3 className="mt-3 text-lg font-semibold leading-snug">{title}</h3>
+      <h3 className="mt-3 text-lg leading-snug font-semibold">{title}</h3>
       <ul className="mt-3 space-y-1.5">
         {specs.map((spec, index) => (
           <li
             key={`${id}-spec-${String(index)}`}
-            className="flex items-start gap-2 text-sm text-muted-foreground"
+            className="text-muted-foreground flex items-start gap-2 text-sm"
           >
-            <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+            <span className="bg-muted-foreground/40 mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full" />
             {spec}
           </li>
         ))}
       </ul>
       <div className="mt-4 flex items-center justify-between border-t pt-4">
-        <span className="text-xs font-medium tracking-[0.04em] text-muted-foreground">
+        <span className="text-muted-foreground text-xs font-medium tracking-[0.04em]">
           {meta}
         </span>
         <Link
           href={link}
           prefetch={false}
-          className="text-sm font-medium text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-sm"
+          className="text-primary focus-visible:ring-primary rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           {title} &rarr;
         </Link>
@@ -85,7 +85,7 @@ export function ProductsSectionView({
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {products.map((product) => (
-          <ProductCard key={product.id} {...product} />
+          <ProductCard {...product} key={product.id} />
         ))}
       </div>
     </HomepageSectionShell>

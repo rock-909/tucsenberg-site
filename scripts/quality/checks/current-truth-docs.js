@@ -7,10 +7,107 @@ const {
 
 const ROOT = process.cwd();
 const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
+const PERFORMANCE_ARCHIVE_DOCS = [
+  "docs/技术难题/全量性能审计.md",
+  "docs/技术难题/LCP首屏动效边界.md",
+  "docs/技术难题/Lighthouse预算治理.md",
+  "docs/技术难题/Lighthouse预取策略.md",
+  "docs/技术难题/Lighthouse产品详情负载.md",
+  "docs/技术难题/Lighthouse共享负载.md",
+  "docs/技术难题/Lighthouse黄色债务归因.md",
+  "docs/技术难题/Lighthouse黄色债务基线.md",
+  "docs/技术难题/Lighthouse黄色债务第一轮收口.md",
+  "docs/技术难题/Lighthouse黄色债务第二轮基线.md",
+  "docs/技术难题/Lighthouse黄色债务第二轮收口.md",
+  "docs/技术难题/Lighthouse零黄色归因.md",
+  "docs/技术难题/性能治理候选审计.md",
+  "docs/技术难题/SEO公开页面性能余量.md",
+];
 
 const TRUTH_DOC_CHECKS = [
   {
-    file: "docs/ref/maintainers.md",
+    file: "docs/项目基础/文档清单.md",
+    required: [
+      "current-entry",
+      "current-reference",
+      "current-proof",
+      "inherited-starter-reference",
+      "historical-proof",
+      "method-workflow",
+      "candidate-backlog",
+      "Docs existence closeout",
+      "docs/技术难题/",
+      "docs/design/",
+      "docs/决策记录/",
+      "docs/superpowers/",
+      "specs/**",
+      "plans/**",
+      "docs/技术难题/性能实验优化方法论.md",
+    ],
+    forbidden: ["review-needed", "Follow-up buckets"],
+  },
+  {
+    file: "docs/README.md",
+    required: [
+      "性能实验优化方法论.md",
+      "Superpowers 上游当前默认输出路径",
+      "docs/superpowers/specs/**",
+      "docs/superpowers/plans/**",
+    ],
+  },
+  {
+    file: "docs/项目基础/AI协作边界.md",
+    required: [
+      "Upstream `obra/superpowers` currently writes specs and implementation plans",
+      "docs/superpowers/specs/**",
+      "docs/superpowers/plans/**",
+      "Older upstream history used `docs/plans/**`",
+      "Local `.superpowers/**` state is not a repo document path",
+    ],
+  },
+  {
+    file: "docs/项目基础/维护入口.md",
+    required: ["旧 starter workflow 说明已经移出 `docs/`"],
+    forbidden: ["website-production-workflow.excalidraw"],
+  },
+  {
+    file: "docs/技术难题/性能实验优化方法论.md",
+    required: [
+      "这是方法笔记，不是当前 Tucsenberg launch proof。",
+      "docs/项目基础/上线验证.md",
+    ],
+  },
+  {
+    file: "docs/项目基础/项目基础索引.md",
+    required: ["架构树.md", "集成.md"],
+  },
+  {
+    file: "docs/决策记录/Radix联系表单试点.md",
+    required: [
+      "Historical route/build artifact note",
+      "Current Tucsenberg is English-only",
+      "not a current route promise",
+    ],
+  },
+  {
+    file: "docs/技术难题/验证入口.md",
+    required: [
+      "Cloudflare构建警告.md",
+      "ReactDoctor基线.md",
+      "路由模式基线.md",
+      "Storybook警告基线.md",
+      "旧 mock 方法笔记已经移出 `docs/`",
+    ],
+  },
+  {
+    file: "docs/技术难题/性能记录.md",
+    required: [
+      "性能实验优化方法论.md",
+      "a reusable method note, not current launch proof",
+    ],
+  },
+  {
+    file: "docs/项目基础/维护规则.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
@@ -20,10 +117,14 @@ const TRUTH_DOC_CHECKS = [
       "messages/base/**",
       "messages/profiles/**",
     ],
-    forbidden: ["src/sites/message-overrides.ts", "src/sites/**/messages/**"],
+    forbidden: [
+      "src/sites/message-overrides.ts",
+      "src/sites/**/messages/**",
+      "review-needed",
+    ],
   },
   {
-    file: "docs/use/replace.md",
+    file: "docs/项目基础/替换顺序.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
@@ -31,24 +132,24 @@ const TRUTH_DOC_CHECKS = [
       "src/constants/product-standards.ts",
       "src/constants/product-specs/**",
       "content/config/content.json",
-      "docs/use/replace.md",
+      "docs/项目基础/替换顺序.md",
     ],
     forbidden: ["pnpm ci:local", "pnpm review:translation-quartet"],
   },
   {
-    file: "docs/use/content.md",
+    file: "docs/项目基础/内容.md",
     required: ["content/config/content.json"],
   },
   {
-    file: "docs/ref/surfaces.md",
+    file: "docs/项目基础/替换边界.md",
     required: ["content/config/content.json", "`content/pages/{locale}/*.mdx`"],
   },
   {
-    file: "docs/ref/config.md",
+    file: "docs/项目基础/配置.md",
     required: ["content/config/content.json"],
   },
   {
-    file: "docs/ref/maintainers.md",
+    file: "docs/项目基础/维护规则.md",
     forbidden: [
       "src/sites/message-overrides.ts",
       "src/sites/**/messages/**",
@@ -59,7 +160,7 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/proof/release.md",
+    file: "docs/项目基础/发布验证.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
@@ -78,7 +179,7 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/proof/levels.md",
+    file: "docs/项目基础/验证等级.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
@@ -86,7 +187,7 @@ const TRUTH_DOC_CHECKS = [
     forbidden: ["src/sites/**", "pnpm ci:local", "pnpm quality:gate"],
   },
   {
-    file: "docs/ref/maintainers.md",
+    file: "docs/项目基础/维护规则.md",
     forbidden: [
       "src/sites/message-overrides.ts",
       "src/sites/**/messages/**",
@@ -101,7 +202,7 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/ref/maintainers.md",
+    file: "docs/项目基础/维护规则.md",
     forbidden: [
       "pnpm quality:gate",
       "src/lib/lead-pipeline/metrics.ts",
@@ -109,16 +210,89 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/ref/architecture-diagram.svg",
-    forbidden: ["scripts/cloudflare/**"],
+    file: "docs/项目基础/架构图.svg",
+    forbidden: [
+      "scripts/cloudflare/**",
+      "Showcase Website Starter Project Architecture Diagram",
+      "Showcase Website Starter - Current Project Architecture",
+      "bilingual content",
+    ],
   },
+  {
+    file: "docs/项目基础/生命周期.md",
+    forbidden: ["This starter has two lifecycle contexts:"],
+  },
+  {
+    file: "docs/design/色彩系统.md",
+    forbidden: [
+      "# Showcase Website Starter Color System",
+      "The starter should look clear, credible, modern, and easy to replace.",
+    ],
+  },
+  {
+    file: "docs/design/组件治理.md",
+    forbidden: ["This starter is built for AI-assisted development."],
+  },
+  {
+    file: "docs/design/设计真相.md",
+    required: [
+      "Tucsenberg current site design truth",
+      "当前公开站点是 English-only，没有 `/zh` 设计入口。",
+      "inherited starter design baseline",
+    ],
+    forbidden: [
+      "这份文档只记录 starter 当前已经确认的设计真相。",
+      "Current truth: starter uses a replaceable role-based color system.",
+    ],
+  },
+  {
+    file: "docs/design/动效治理.md",
+    required: ["canonical motion rulebook for the Tucsenberg site"],
+    forbidden: [
+      "canonical motion rulebook for the starter",
+      "Motion in this starter",
+    ],
+  },
+  {
+    file: "docs/design/设计系统说明.md",
+    required: [
+      "Tucsenberg inherited design governance workspace",
+      "必须服从 `docs/design/设计真相.md` 与当前运行态",
+    ],
+    forbidden: [
+      "external/",
+      "不作为 starter 当前真相源",
+      "恢复为 starter baseline",
+    ],
+  },
+  {
+    file: "docs/design/页面模式.md",
+    required: [
+      "pattern reference, not a route-by-route current-state report",
+      "Historical gap snapshot",
+      "verify current code before creating cleanup work",
+    ],
+    forbidden: [
+      "所有新页面和存量页面重构必须遵循此文件",
+      "当前其他页面与本规范的偏差",
+    ],
+  },
+  ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({
+    file,
+    required: ["Historical starter proof."],
+    ...(file === "docs/技术难题/全量性能审计.md"
+      ? {
+          forbidden: ["The current starter is in a healthy performance state."],
+        }
+      : {}),
+  })),
   {
     file: ".claude/rules/content.md",
     required: [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
       "content/config/content.json",
-      "docs/superpowers/workflows/cwf/**",
+      "docs/superpowers/plans/workflows/cwf/**",
     ],
   },
   {
@@ -131,20 +305,20 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: ".claude/rules/testing.md",
-    required: ["docs/ref/contracts.md"],
+    required: ["docs/项目基础/行为合约.md"],
   },
 ];
 
 const CURRENT_TRUTH_COMMAND_DOCS = [
-  "docs/ref/maintainers.md",
-  "docs/use/replace.md",
-  "docs/proof/release.md",
-  "docs/proof/levels.md",
-  "docs/proof/launch.md",
-  "docs/use/replace.md",
-  "docs/use/deploy.md",
-  "docs/ref/tech.md",
-  "docs/design/impeccable/system/SECTION-REDESIGN-CHECKLIST.md",
+  "docs/项目基础/维护规则.md",
+  "docs/项目基础/替换顺序.md",
+  "docs/项目基础/发布验证.md",
+  "docs/项目基础/验证等级.md",
+  "docs/项目基础/上线验证.md",
+  "docs/项目基础/替换顺序.md",
+  "docs/项目基础/部署.md",
+  "docs/项目基础/技术栈.md",
+  "docs/design/区块重设检查清单.md",
 ];
 
 const ROOT_INSTRUCTION_COMMAND_DOCS = [
@@ -291,22 +465,22 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
     }
   }
 
-  const runbookPath = path.join(rootDir, "docs/proof/release.md");
+  const runbookPath = path.join(rootDir, "docs/项目基础/发布验证.md");
   if (fs.existsSync(runbookPath)) {
-    const runbook = readTruthFile(rootDir, "docs/proof/release.md");
+    const runbook = readTruthFile(rootDir, "docs/项目基础/发布验证.md");
     const runbookCommandBlock = extractBashBlockAfterHeading(
       runbook,
       "## Current sequence",
     );
     if (runbookCommandBlock === null) {
       failures.push({
-        file: "docs/proof/release.md",
+        file: "docs/项目基础/发布验证.md",
         error:
           'missing release-proof runbook command block after "## Current sequence"',
       });
     } else if (runbookCommandBlock !== getReleaseProofDocsCommandBlock()) {
       failures.push({
-        file: "docs/proof/release.md",
+        file: "docs/项目基础/发布验证.md",
         error: "release-proof runbook command block drift from manifest",
       });
     }
@@ -318,7 +492,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
     for (const command of RELEASE_PROOF_SEQUENCE) {
       if (!runbookCommandLines.includes(command)) {
         failures.push({
-          file: "docs/proof/release.md",
+          file: "docs/项目基础/发布验证.md",
           error: `missing release-proof runbook command "${command}"`,
         });
       }
@@ -330,7 +504,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
     );
     if (runbookOutOfOrder) {
       failures.push({
-        file: "docs/proof/release.md",
+        file: "docs/项目基础/发布验证.md",
         error: `release-proof runbook command order drift at "${runbookOutOfOrder}"`,
       });
     }

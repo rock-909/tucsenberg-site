@@ -16,7 +16,7 @@ surface.
 
 ## Visual adaptation
 
-See `docs/design/truth.md` for the shared derived-project design boundary.
+See `docs/design/设计真相.md` for the shared derived-project design boundary.
 
 Replace before launch: demo product families, standards, specification claims,
 product images, and quote requirements. Catalog-derived projects should make

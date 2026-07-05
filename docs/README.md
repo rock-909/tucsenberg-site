@@ -1,57 +1,36 @@
 # Tucsenberg Site Docs
 
-这里是 Tucsenberg 当前英文官网的维护入口。
+这里是 Tucsenberg 当前英文官网的项目知识库。读者是 owner 和 agent。
 
-本仓已经从 `showcase-website-starter` 派生成具体站点。当前业务真相看 Tucsenberg 页面、内容、配置和 proof；starter/profile 文档只用于解释继承工具和历史边界。
+`docs/` 只保留长期有用的项目基础、技术难题、设计约束和决策记录。Superpowers 只使用当前上游默认的 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**` 两个输出口。
 
-## Start here
+Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`。早期上游历史曾使用 `docs/plans/**`；本项目不恢复这个旧路径，也不把本地 `.superpowers/**` 当作可提交文档路径。
+
+## 先看哪里
 
 | 你要做什么 | 读这些 |
 | --- | --- |
-| 了解当前 Tucsenberg 站 | `ref/project.md` -> `use/content.md` -> `use/deploy.md` |
-| 查当前内容和配置面 | `use/content.md` -> `ref/config.md` -> `ref/messages.md` |
-| 查上线证明 | `proof/launch.md` -> `proof/release.md` -> `proof/dry-run.md` |
-| 查检查/脚本属于源仓还是派生项目 | `ref/lifecycle.md` -> `proof/levels.md` |
-| 维护仓库规则 | `ref/maintainers.md` -> `ref/config.md` -> `proof/levels.md` |
-| 做 UI / 设计调整 | `design/truth.md` -> `ref/ui-components.md` -> `design/impeccable/README.md` |
-| 使用 AI / 看历史执行材料 | `use/ai.md` -> `plans/README.md` |
-| 查继承的 starter/profile 边界 | `use/start.md` -> `use/replace.md` -> `ref/profiles.md` |
+| 了解当前项目 | `项目基础/项目基础.md` -> `项目基础/技术栈.md` |
+| 维护内容、品牌、配置 | `项目基础/内容.md` -> `项目基础/品牌.md` -> `项目基础/配置.md` |
+| 配 Cloudflare / 预览 / 发布 | `项目基础/部署.md` -> `项目基础/上线验证.md` -> `项目基础/发布验证.md` |
+| 看 CI 和质量门 | `项目基础/发布验证.md` -> `项目基础/验证等级.md` -> `项目基础/ReactDoctor政策.md` |
+| 做 UI / 设计调整 | `design/设计真相.md` -> `design/组件治理.md` -> `design/组件使用手册.md` |
+| 查性能、路由、Cloudflare 等难题 | `技术难题/性能记录.md` -> `技术难题/性能实验优化方法论.md` |
+| 查已经确认的取舍 | `决策记录/UI基础方案.md` -> `决策记录/Content-as-code与CMS边界.md` |
+| 查 docs 为什么保留 | `项目基础/文档清单.md` |
 
-## Main tree
+## 当前目录
 
-- `use/`：当前站维护、内容、部署和 inherited starter 使用说明。
-- `ref/`：项目、配置、message、技术栈、合同和维护规则。
-- `proof/`：本地、CI、发布和部署证明。
-- `design/`：设计真相和 Impeccable 工作盘。
-- `plans/`：历史执行计划和 Tucsenberg 构建交接材料，不是长期产品文档入口。
+- `项目基础/`：项目怎么维护、怎么部署、技术栈、配置、内容、品牌、CI/验证和继承边界。
+- `design/`：设计真相、设计系统、组件治理、Storybook 和视觉规则。
+- `技术难题/`：性能、Cloudflare、Next.js 16、路由模式、客户端边界预算等问题记录。
+- `决策记录/`：已经确认过的架构或产品技术决策。
+- `superpowers/`：Superpowers 上游当前默认输出根目录；只放 `specs/**` 和 `plans/**`，不是当前产品真相。
 
-如果以后恢复 `docs/archive/**` 或 `docs/superpowers/**`，默认仍按历史材料处理，不能覆盖当前站真相。
+## 不当作当前真相
 
-## Canonical map
+- `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`：Superpowers spec / plan 过程记录。
+- `plans/**`：旧执行计划和构建交接材料。
+- 任何旧 `/zh` 路由、旧 starter 域名、旧 branch 名称：只能作为历史证据，不能覆盖当前 English-only 站点事实。
 
-| 主题 | Canonical |
-| --- | --- |
-| 当前项目边界 | `ref/project.md` |
-| 当前内容维护 | `use/content.md` |
-| 当前部署维护 | `use/deploy.md` |
-| 继承的 profile / demo 边界 | `ref/profiles.md` |
-| 继承的替换文件面 | `ref/surfaces.md` |
-| messages / i18n ownership | `ref/messages.md` |
-| 配置真相源 | `ref/config.md` |
-| 技术栈 / Cloudflare / cache / CSP | `ref/tech.md` |
-| 行为合同 | `ref/contracts.md` |
-| 上线证明 | `proof/launch.md` |
-| release-proof 顺序 | `proof/release.md` |
-| proof level | `proof/levels.md` |
-| 检查和脚本生命周期 | `ref/lifecycle.md` |
-| 维护者审查规则 | `ref/maintainers.md` |
-| 设计真相 | `design/truth.md` |
-
-## Not current product truth
-
-- `plans/009-*`、`plans/010-*`、`plans/011-*`、`plans/012-*`、`plans/013-*`、`plans/014-*`：starter 质量清理历史记录。
-- `plans/CODEX-HANDOFF.md`：旧执行交接，不是当前任务入口。
-- `docs/use/start.md`、`docs/use/replace.md`：继承的 starter/profile 说明，不是 Tucsenberg 业务内容入口。
-- `docs/archive/**`、`docs/superpowers/**`：如果存在，只用于追溯。
-
-版本真相看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md` 和 `ref/tech.md`。
+当前版本和运行事实看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md`、当前配置和测试结果。

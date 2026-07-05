@@ -26,22 +26,22 @@ function ProcessStep({
         <>
           <span
             aria-hidden="true"
-            className="absolute left-[calc(50%+24px)] top-5 hidden h-0.5 w-[calc(100%-48px)] bg-border md:block"
+            className="bg-border absolute top-5 left-[calc(50%+24px)] hidden h-0.5 w-[calc(100%-48px)] md:block"
           />
           <span
             aria-hidden="true"
-            className="absolute bottom-0 left-[19px] top-[52px] w-0.5 bg-border md:hidden"
+            className="bg-border absolute top-[52px] bottom-0 left-[19px] w-0.5 md:hidden"
           />
         </>
       ) : null}
 
-      <div className="relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-card font-mono text-sm font-semibold text-primary">
+      <div className="border-primary bg-card text-primary relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 font-mono text-sm font-semibold">
         {num}
       </div>
 
       <div className="md:mt-3">
-        <h3 className="text-[15px] font-semibold leading-snug">{title}</h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+        <h3 className="text-[15px] leading-snug font-semibold">{title}</h3>
+        <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
           {desc}
         </p>
       </div>
@@ -75,9 +75,9 @@ export function ChainSectionView({
       <div className="flex flex-col md:flex-row">
         {steps.map((step, index) => (
           <ProcessStep
-            key={step.num}
             {...step}
             isLast={index === steps.length - 1}
+            key={step.num}
           />
         ))}
       </div>

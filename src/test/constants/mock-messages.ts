@@ -74,9 +74,8 @@ const navigationMessages = {
   contact: "Contact",
   contactSales: "Request a Quote",
   oemWholesale: "OEM & Wholesale",
-  siteName: "Example Showcase Company",
-  siteDescription:
-    "Reusable showcase website starter for product or service presentation.",
+  siteName: "Tucsenberg",
+  siteDescription: "Factory-direct flood barrier supplier for B2B buyers.",
   services: "Services",
   products: "Products",
   solutions: "Solutions",
@@ -198,36 +197,37 @@ const errorBoundaryMessages = {
  * 用于测试 metadata 生成和 SEO 组件
  */
 const seoMessages = {
-  title: "Example Showcase Company",
+  title: "Tucsenberg",
   description:
-    "Reusable showcase website starter for product or service presentation",
-  siteName: "Example Showcase Company",
+    "Factory-direct flood barriers from China for flood control projects and wholesale supply.",
+  siteName: "Tucsenberg",
   keywords:
-    "showcase website, product presentation, service presentation, inquiry website",
+    "flood barriers, flood gates, flood control products, China flood barrier supplier",
   pages: {
     home: {
-      title: "Example Showcase Company - Showcase Website Example",
+      title: "Tucsenberg - Factory-Direct Flood Barriers from China",
       description:
-        "Reusable showcase website starter for product, service, and inquiry presentation.",
+        "Compare Tucsenberg flood barrier product lines and request a prepared quote.",
     },
     about: {
-      title: "About Us - Example Showcase Company",
+      title: "About Tucsenberg",
       description:
-        "Learn how Example Showcase Company presents replaceable proof, resources, and inquiry paths.",
+        "Learn how Tucsenberg supplies flood barrier products from China.",
     },
     contact: {
-      title: "Contact Us - Example Showcase Company",
+      title: "Contact Tucsenberg",
       description:
-        "Get in touch with our team for product inquiries and support.",
+        "Use the RFQ path or contact Tucsenberg for flood barrier product inquiries.",
     },
     products: {
-      title: "Products - Example Showcase Company",
+      title: "Flood Barrier Product Lines",
       description:
-        "Discover replaceable product and service examples for showcase website pages.",
+        "Review ABS, aluminum, FRP, absorbent, and tube-dam flood barrier options.",
     },
     blog: {
-      title: "Blog - Example Showcase Company",
-      description: "Latest insights and updates from Example Showcase Company.",
+      title: "Guides - Tucsenberg",
+      description:
+        "Flood barrier material and specification guides for buyers.",
     },
   },
 } as const;
@@ -298,7 +298,7 @@ const footerMessages = {
       blog: "Blog",
       careers: "Careers",
       changelog: "Changelog",
-      contact: "Contact Us",
+      contact: "Contact",
       customers: "Customers",
       events: "Events",
       partners: "Partners",
@@ -333,10 +333,10 @@ const underConstructionMessages = {
   contactUs: "Contact us for more information",
   pages: {
     contact: {
-      title: "Contact Us",
+      title: "Contact",
       description:
-        "Get in touch with our team for inquiries, support, or partnership opportunities.",
-      features: "Multiple ways to reach us and get the support you need",
+        "Fastest route: the RFQ form asks the questions we would ask anyway.",
+      features: "Prepare application, opening size, quantity, and timeline",
     },
   },
 } as const;

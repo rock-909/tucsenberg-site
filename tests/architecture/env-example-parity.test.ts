@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 const ENV_SOURCE_PATH = "src/lib/env.ts";
 const ENV_EXAMPLE_PATH = ".env.example";
 const DEV_VARS_EXAMPLE_PATH = ".dev.vars.example";
-const ENV_DOC_PATH = "docs/use/deploy.md";
-const DEPLOY_DOC_PATH = "docs/use/deploy.md";
-const QUALITY_PROOF_DOC_PATH = "docs/proof/launch.md";
+const ENV_DOC_PATH = "docs/项目基础/部署.md";
+const DEPLOY_DOC_PATH = "docs/项目基础/部署.md";
+const QUALITY_PROOF_DOC_PATH = "docs/项目基础/上线验证.md";
 const SENSITIVE_ENV_KEY_PATTERN =
   /(?:_API_KEY|_TOKEN|_SECRET(?:_KEY)?|_ACCESS_KEY|_ENCRYPTION_KEY|_PEPPER(?:_PREVIOUS)?)$/u;
 const SENSITIVE_ENV_KEYS = [
@@ -363,7 +363,7 @@ describe(".env.example parity", () => {
   it("points local dev vars readers at the current deploy docs", () => {
     const devVarsExample = readRepoFile(DEV_VARS_EXAMPLE_PATH);
 
-    expect(devVarsExample).toContain("docs/use/deploy.md");
+    expect(devVarsExample).toContain("docs/项目基础/部署.md");
     expect(devVarsExample).not.toContain("docs/website/env 设置.md");
   });
 

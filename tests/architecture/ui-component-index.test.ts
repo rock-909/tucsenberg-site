@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
-const UI_COMPONENT_INDEX_PATH = "docs/ref/ui-component-index.md";
-const UI_COMPONENT_PLAYBOOK_PATH = "docs/ref/ui-components.md";
-const REF_README_PATH = "docs/ref/README.md";
+const UI_COMPONENT_INDEX_PATH = "docs/design/组件索引.md";
+const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
+const DESIGN_README_PATH = "docs/design/设计.md";
 
 interface ComponentGovernanceRegistry {
   components: Record<string, ComponentGovernanceRegistryItem>;
@@ -123,10 +123,10 @@ describe("UI component registry docs index", () => {
 
   it("links the registry index from UI reference docs", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-    const refReadme = readText(REF_README_PATH);
+    const designReadme = readText(DESIGN_README_PATH);
 
-    expect(playbook).toContain("ui-component-index.md");
-    expect(refReadme).toContain("ui-component-index.md");
+    expect(playbook).toContain("组件索引.md");
+    expect(designReadme).toContain("组件索引.md");
   });
 
   it("describes itself as a maintained mirror instead of generated output", () => {

@@ -27,25 +27,25 @@ dwf = 设计编排器
 | 资源 | 路径 |
 |------|------|
 | 网站说明 | `docs/README.md` |
-| 起步/替换 | `docs/use/start.md` + `docs/use/replace.md` |
-| 品牌设置 | `docs/use/brand.md` + `src/config/single-site*.ts` |
-| 内容设置 | `docs/use/content.md` |
-| CWF 定稿 | `docs/superpowers/workflows/cwf/{page}/v{N}-final.md` |
+| 起步/替换 | `docs/项目基础/派生起步.md` + `docs/项目基础/替换顺序.md` |
+| 品牌设置 | `docs/项目基础/品牌.md` + `src/config/single-site*.ts` |
+| 内容设置 | `docs/项目基础/内容.md` |
+| CWF 定稿 | `docs/superpowers/plans/workflows/cwf/{page}/v{N}-final.md` |
 | 生产 Token（权威） | `src/app/globals.css` |
-| Token 规范 | `docs/design/impeccable/system/DESIGN-TOKENS.md` |
-| 动效约束 | `docs/design/impeccable/system/MOTION-PRINCIPLES.md` |
-| 栅格系统 | `docs/design/impeccable/system/GRID-SYSTEM.md` |
-| 页面模式 | `docs/design/impeccable/system/PAGE-PATTERNS.md` |
+| Token 规范 | `docs/design/设计令牌.md` |
+| 动效约束 | `docs/design/动效原则.md` |
+| 栅格系统 | `docs/design/网格系统.md` |
+| 页面模式 | `docs/design/页面模式.md` |
 | Design Context | `DESIGN.md` |
 
 **询问用户：**
 
-1. 页面？（对应 `docs/superpowers/workflows/cwf/` 下的目录）
-2. 文案版本？（对应 `docs/superpowers/workflows/cwf/{page}/` 下的定稿文件）
+1. 页面？（对应 `docs/superpowers/plans/workflows/cwf/` 下的目录）
+2. 文案版本？（对应 `docs/superpowers/plans/workflows/cwf/{page}/` 下的定稿文件）
 3. 风格备注？（可选）
 4. Token 约束级别？（参考 / 约束，默认参考）
 
-**自动处理：** 检测 `docs/design/impeccable/{page}/prototype/` 已有版本 → 确定 v{N} → 创建输出目录。
+**自动处理：** 检测 `docs/superpowers/plans/workflows/dwf/{page}/prototype/` 已有版本 → 确定 v{N} → 创建输出目录。
 
 ---
 
@@ -53,14 +53,14 @@ dwf = 设计编排器
 
 生成单文件 HTML 原型，以设计系统文档为约束：
 
-- 读取 `globals.css` Token + `DESIGN-TOKENS.md`
-- 读取 `MOTION-PRINCIPLES.md` + `GRID-SYSTEM.md`
+- 读取 `globals.css` Token + `设计令牌.md`
+- 读取 `动效原则.md` + `网格系统.md`
 - 读取用户指定的定稿文案
 - 技术上下文：Next.js 16 + Tailwind CSS 4、项目字体、Lucide Icons
 - 硬约束：可读、可信、结构清楚、不要空洞装饰
 - 禁止：AI slop（渐变滥用、通用插图、空洞标题）、过度 SaaS 模板感
 
-**输出**: `docs/design/impeccable/{page}/prototype/v{N}/index.html`
+**输出**: `docs/superpowers/plans/workflows/dwf/{page}/prototype/v{N}/index.html`
 
 ---
 
@@ -70,7 +70,7 @@ dwf = 设计编排器
 
 对 Phase 1 原型进行五维检查（Accessibility / Performance / Theming / Responsive / Anti-patterns）。
 
-**输出**: `docs/design/impeccable/{page}/prototype/v{N}/audit-report.md`
+**输出**: `docs/superpowers/plans/workflows/dwf/{page}/prototype/v{N}/audit-report.md`
 
 Critical/High 问题自动修复后重新审计，不进入用户评审。
 
@@ -108,14 +108,14 @@ Critical/High 问题自动修复后重新审计，不进入用户评审。
 1. `polish` → 像素级细节打磨
 2. `optimize` → 性能优化
 
-**输出**: `docs/design/impeccable/{page}/prototype/v{N+1}/index.html`（加固版本）
+**输出**: `docs/superpowers/plans/workflows/dwf/{page}/prototype/v{N+1}/index.html`（加固版本）
 
 ---
 
 ## Phase 5: 定稿 + 交接
 
 ```
-1. 复制最终版本 → docs/design/impeccable/{page}/prototype/final/
+1. 复制最终版本 → docs/superpowers/plans/workflows/dwf/{page}/prototype/final/
 2. 可选: token-lifecycle skill — 如设计系统需更新，提取新 Token
 3. 生成 HANDOFF.md（开发交接文档）
 ```
@@ -128,11 +128,11 @@ Critical/High 问题自动修复后重新审计，不进入用户评审。
 设计定稿完成
 
 产物:
-- HTML 原型: docs/design/impeccable/{page}/prototype/final/index.html
-- 审计报告: docs/design/impeccable/{page}/prototype/final/audit-report.md
-- 交接文档: docs/design/impeccable/{page}/HANDOFF.md
+- HTML 原型: docs/superpowers/plans/workflows/dwf/{page}/prototype/final/index.html
+- 审计报告: docs/superpowers/plans/workflows/dwf/{page}/prototype/final/audit-report.md
+- 交接文档: docs/superpowers/plans/workflows/dwf/{page}/HANDOFF.md
 ```
 
 ## 会话恢复
 
-检测到 `docs/design/impeccable/{page}/` 存在 → 显示当前状态 → 询问：继续 / 新版本 / 新项目。
+检测到 `docs/superpowers/plans/workflows/dwf/{page}/` 存在 → 显示当前状态 → 询问：继续 / 新版本 / 新项目。

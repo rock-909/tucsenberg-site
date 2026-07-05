@@ -8,7 +8,7 @@ import {
 /**
  * User Journey E2E Tests
  *
- * Aligned to Behavioral Contracts (docs/ref/contracts.md).
+ * Aligned to Behavioral Contracts (docs/项目基础/行为合约.md).
  * Each test covers a real user journey, not individual component checks.
  *
  * BC-002: Navigate to all main pages from header

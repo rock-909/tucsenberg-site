@@ -12,8 +12,8 @@ import {
 const SOURCE_ROOT = "src";
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
-const UI_COMPONENT_PLAYBOOK_PATH = "docs/ref/ui-components.md";
-const UI_COMPONENT_INDEX_PATH = "docs/ref/ui-component-index.md";
+const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
+const UI_COMPONENT_INDEX_PATH = "docs/design/组件索引.md";
 const AGENTS_MD_PATH = "AGENTS.md";
 const CLAUDE_MD_PATH = "CLAUDE.md";
 const REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE =
@@ -650,7 +650,7 @@ describe("component governance", () => {
     expect(playbook).toContain("Project-level");
     expect(playbook).toContain(".claude/rules/ui.md");
     expect(playbook).toContain("full maintained wrapper inventory");
-    expect(playbook).toContain("ui-component-index.md");
+    expect(playbook).toContain("组件索引.md");
     expect(playbook).toContain("Registry and Playbook are retained");
     expect(playbook).toContain(
       "AI discoverability and machine governance will not get weaker",

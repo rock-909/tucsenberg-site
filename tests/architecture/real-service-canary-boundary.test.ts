@@ -50,8 +50,8 @@ describe("real service canary boundary", () => {
   });
 
   it("documents that owner notification confirmation is not automatic in the Playwright canary", () => {
-    const runbook = readFileSync("docs/proof/release.md", "utf8");
-    const qualityProof = readFileSync("docs/proof/launch.md", "utf8");
+    const runbook = readFileSync("docs/项目基础/发布验证.md", "utf8");
+    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
 
     for (const source of [runbook, qualityProof]) {
       expect(source).toContain("recordCreated");

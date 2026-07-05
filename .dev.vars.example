@@ -4,7 +4,7 @@
 # .dev.vars 已在 .gitignore 中，不会被提交
 #
 # This file is only the local Workers preview surface. Use .env.example and
-# docs/use/deploy.md as the full env contract, then copy only the
+# docs/项目基础/部署.md as the full env contract, then copy only the
 # server-only values needed for the preview you are actually testing.
 
 NODE_ENV=development

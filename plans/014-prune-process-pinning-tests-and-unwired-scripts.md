@@ -44,7 +44,7 @@ cases; every file gets a re-verify gate in Step 1 anyway.
 Representative evidence (each pattern was read directly):
 
 - `tests/architecture/lead-pipeline-policy-contract.test.ts` (13 lines,
-  whole test): reads `docs/ref/contracts.md` and asserts it `toContain`
+  whole test): reads `docs/项目基础/行为合约.md` and asserts it `toContain`
   the words "storage-before-email", "Airtable", "Resend", "derived project".
   A doc-wording pin; the actual delivery policy is enforced in
   `process-lead.ts` and its tests.
@@ -80,7 +80,7 @@ Representative evidence (each pattern was read directly):
 | tests/architecture/root-instructions-contract.test.ts | 197 | AGENTS.md/CLAUDE.md wording + structure map |
 | tests/architecture/adopter-docs-company-site-contract.test.ts | 190 | README/launch/dry-run/profiles doc prose |
 | tests/architecture/starter-checks-module-boundary.test.ts | 176 | source substrings of scripts file layout |
-| tests/architecture/replacement-surface-index.test.ts | 152 | docs/ref/surfaces.md table content wholesale |
+| tests/architecture/replacement-surface-index.test.ts | 152 | docs/项目基础/替换边界.md table content wholesale |
 | tests/architecture/design-calibration-docs.test.ts | 75 | DESIGN.md/truth.md/COLOR-SYSTEM prose |
 | tests/architecture/messages-split-feasibility-boundary.test.ts | 71 | one-time closeout doc (see Step 2 caveat) |
 | tests/architecture/derived-project-visual-template.test.ts | 64 | truth.md/replace.md/profiles.md prose |

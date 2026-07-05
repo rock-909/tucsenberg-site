@@ -32,13 +32,13 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 ## 主要维护入口
 
 1. `docs/README.md`
-2. `docs/ref/project.md`
-3. `docs/use/content.md`
-4. `docs/use/deploy.md`
-5. `docs/use/ai.md`
+2. `docs/项目基础/项目基础.md`
+3. `docs/项目基础/内容.md`
+4. `docs/项目基础/部署.md`
+5. `docs/项目基础/AI协作边界.md`
 6. `plans/handoff-report.md`
 
-历史 starter 派生说明仍保留在 `docs/use/start.md`、`docs/use/replace.md` 和 profile 相关文档中。它们用于解释继承工具和历史边界，不是 Tucsenberg 当前站的业务入口。
+历史 starter 派生说明仍保留在 `docs/项目基础/派生起步.md`、`docs/项目基础/替换顺序.md` 和 profile 相关文档中。它们用于解释继承工具和历史边界，不是 Tucsenberg 当前站的业务入口。
 
 ## 技术基础
 
@@ -53,7 +53,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - Vitest / Playwright
 - Cloudflare / OpenNext 1.19.11 / Wrangler 4.100.0
 
-完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/ref/tech.md`。
+完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/项目基础/技术栈.md`。
 
 ## 当前内容和配置真相
 
