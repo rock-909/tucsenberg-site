@@ -27,7 +27,12 @@ import {
   requireEnvVar,
 } from "../env";
 
+const cloudflareContextSymbol = Symbol.for("__cloudflare-context__");
+
 afterEach(() => {
+  delete (globalThis as typeof globalThis & Record<symbol, unknown>)[
+    cloudflareContextSymbol
+  ];
   vi.stubEnv("NODE_ENV", "test");
   vi.stubEnv("APP_ENV", "local");
   vi.stubEnv("CI", "false");
@@ -164,12 +169,8 @@ describe("env type safety", () => {
     expect("ALLOW_MEMORY_RATE_LIMIT" in env).toBe(true);
   });
 
-  it("exposes Cloudflare analytics and ops dashboard vars through the central env object", () => {
-    expect("CLOUDFLARE_ZONE_ID" in env).toBe(true);
+  it("exposes Cloudflare deployment account vars through the central env object", () => {
     expect("CLOUDFLARE_ACCOUNT_ID" in env).toBe(true);
-    expect("CLOUDFLARE_ANALYTICS_API_TOKEN" in env).toBe(true);
-    expect("CLOUDFLARE_ANALYTICS_HOSTNAME" in env).toBe(true);
-    expect("OPS_DASHBOARD_ACCESS_KEY" in env).toBe(true);
   });
 
   it("should have correct client env vars defined", () => {
@@ -187,6 +188,21 @@ describe("runtime env helpers", () => {
     expect(isRuntimeDevelopment()).toBe(true);
     expect(isRuntimeProduction()).toBe(false);
     expect(isRuntimeTest()).toBe(false);
+  });
+
+  it("prefers Cloudflare request context bindings over process.env", () => {
+    vi.stubEnv("RESEND_API_KEY", "process-env-key");
+    (globalThis as typeof globalThis & Record<symbol, unknown>)[
+      cloudflareContextSymbol
+    ] = {
+      env: {
+        RESEND_API_KEY: "cloudflare-binding-key",
+      },
+    };
+
+    expect(getRuntimeEnvString("RESEND_API_KEY")).toBe(
+      "cloudflare-binding-key",
+    );
   });
 
   it("parses booleans and detects CI / Playwright flags", () => {

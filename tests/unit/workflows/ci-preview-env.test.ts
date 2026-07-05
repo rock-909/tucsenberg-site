@@ -24,12 +24,45 @@ function readCiWorkflow(): Workflow {
   ) as Workflow;
 }
 
+function expectPreviewStepEnv(
+  step: WorkflowStep | undefined,
+  stepName: string,
+): void {
+  const previewSiteUrl =
+    "${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}";
+  const gaMeasurementId =
+    "${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}";
+  const googleSiteVerification =
+    "${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}";
+  const turnstileSiteKey =
+    "${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}";
+
+  expect(step?.env?.APP_ENV, stepName).toBe("preview");
+  expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).toBe(previewSiteUrl);
+  expect(step?.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID, stepName).toBe(
+    gaMeasurementId,
+  );
+  expect(step?.env?.GOOGLE_SITE_VERIFICATION, stepName).toBe(
+    googleSiteVerification,
+  );
+  expect(step?.env?.NEXT_PUBLIC_TURNSTILE_SITE_KEY, stepName).toBe(
+    turnstileSiteKey,
+  );
+  expect(step?.env?.NEXT_PUBLIC_TURNSTILE_ACTION, stepName).toBe(
+    "contact_form",
+  );
+  expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
+    "example.com",
+  );
+  expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
+    "tucsenberg.com",
+  );
+}
+
 describe("CI preview environment contract", () => {
   it("runs Cloudflare build proof against a public preview URL, not the launch domain", () => {
     const workflow = readCiWorkflow();
     const cloudflareBuildSteps = workflow.jobs?.["cloudflare-build"]?.steps;
-    const previewSiteUrl =
-      "${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}";
 
     for (const stepName of [
       "构建检查",
@@ -40,14 +73,7 @@ describe("CI preview environment contract", () => {
         (candidate) => candidate.name === stepName,
       );
 
-      expect(step?.env?.APP_ENV, stepName).toBe("preview");
-      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).toBe(previewSiteUrl);
-      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
-        "example.com",
-      );
-      expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
-        "tucsenberg.com",
-      );
+      expectPreviewStepEnv(step, stepName);
     }
   });
 });

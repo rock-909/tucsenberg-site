@@ -31,12 +31,8 @@ export const serverEnvSchema = {
   // Cloudflare split-worker Server Action compatibility
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: z.string().min(1).optional(),
 
-  // Cloudflare analytics and owner dashboard
-  CLOUDFLARE_ZONE_ID: z.string().min(1).optional(),
+  // Cloudflare deployment account metadata
   CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
-  CLOUDFLARE_ANALYTICS_API_TOKEN: z.string().min(1).optional(),
-  CLOUDFLARE_ANALYTICS_HOSTNAME: z.string().min(1).optional(),
-  OPS_DASHBOARD_ACCESS_KEY: z.string().min(16).optional(),
 
   // Runtime and platform configuration
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),
@@ -179,11 +175,7 @@ export const runtimeEnv = {
   TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
     process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
-  CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
-  CLOUDFLARE_ANALYTICS_API_TOKEN: process.env.CLOUDFLARE_ANALYTICS_API_TOKEN,
-  CLOUDFLARE_ANALYTICS_HOSTNAME: process.env.CLOUDFLARE_ANALYTICS_HOSTNAME,
-  OPS_DASHBOARD_ACCESS_KEY: process.env.OPS_DASHBOARD_ACCESS_KEY,
   LOG_LEVEL: process.env.LOG_LEVEL,
   CONTENT_ENABLE_DRAFTS: process.env.CONTENT_ENABLE_DRAFTS,
   DEPLOYMENT_PLATFORM: process.env.DEPLOYMENT_PLATFORM,
@@ -249,6 +241,22 @@ function readRawEnvValue(key: string): string | undefined {
   return process.env[key];
 }
 
+interface CloudflareContextStore {
+  env?: Record<string, unknown>;
+}
+
+const cloudflareContextSymbol = Symbol.for("__cloudflare-context__");
+
+function readCloudflareContextEnvValue(key: string): string | undefined {
+  const context = (
+    globalThis as typeof globalThis &
+      Record<symbol, CloudflareContextStore | undefined>
+  )[cloudflareContextSymbol];
+  const value = context?.env?.[key];
+
+  return typeof value === "string" ? value : undefined;
+}
+
 function shouldSkipEnvValidation(): boolean {
   return readRawEnvValue("SKIP_ENV_VALIDATION") === "true";
 }
@@ -284,7 +292,7 @@ export function getEnvVar(
 }
 
 function readProcessEnvValue(key: keyof typeof env): string | undefined {
-  return readRawEnvValue(key);
+  return readCloudflareContextEnvValue(key) ?? readRawEnvValue(key);
 }
 
 function readValidatedEnvValue(key: keyof typeof env) {

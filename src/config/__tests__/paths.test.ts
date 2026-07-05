@@ -25,6 +25,7 @@ const isOptionalUrl = (value: string) => value === "" || isHttpUrl(value);
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isPhone = (value: string) =>
   /^\+\d{1,3}[-\s]?\(?[\d]{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,9}$/.test(value);
+const isOptionalPhone = (value: string) => value === "" || isPhone(value);
 const isOwnerTodo = (value: string) => value === "TODO-OWNER";
 
 const CURRENT_PRODUCTION_LOCALE_CONTRACT = {
@@ -226,7 +227,7 @@ describe("paths configuration", () => {
       expect(
         isPlaceholder(contact.phone) ||
           isOwnerTodo(contact.phone) ||
-          isPhone(contact.phone),
+          isOptionalPhone(contact.phone),
       ).toBe(true);
       expect(isPlaceholder(contact.email) || isEmail(contact.email)).toBe(true);
     });
@@ -491,7 +492,7 @@ describe("paths configuration", () => {
       expect(
         isPlaceholder(SITE_CONFIG.contact.phone) ||
           isOwnerTodo(SITE_CONFIG.contact.phone) ||
-          isPhone(SITE_CONFIG.contact.phone),
+          isOptionalPhone(SITE_CONFIG.contact.phone),
       ).toBe(true);
     });
   });

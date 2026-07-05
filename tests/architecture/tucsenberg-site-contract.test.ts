@@ -243,10 +243,12 @@ describe("Tucsenberg Phase 1 site contract", () => {
     );
     expect(codeowners).not.toContain("/messages/zh/");
     expect(wranglerConfig).toContain('"name": "tucsenberg-site"');
-    expect(wranglerConfig).toContain("tucsenberg-site-preview.workers.dev");
+    expect(wranglerConfig).toContain(
+      "tucsenberg-site-preview.faints-pudgier-9r.workers.dev",
+    );
     expect(wranglerConfig).not.toContain("preview.example.com");
     expect(singleSiteConfig).toContain(
-      '"https://tucsenberg-site-preview.workers.dev"',
+      '"https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev"',
     );
     expect(singleSiteConfig).not.toContain(
       'resolveSingleSiteBaseUrl("https://tucsenberg.com")',

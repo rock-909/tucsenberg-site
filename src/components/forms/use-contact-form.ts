@@ -1,5 +1,7 @@
 import { useRef, useState, useTransition } from "react";
 import { logger } from "@/lib/logger";
+import { pickAttributionFieldsFromFormData } from "@/lib/marketing/attribution-fields";
+import { trackGenerateLead } from "@/lib/marketing/lead-event";
 import { appendAttributionToFormData } from "@/lib/marketing/utm";
 import { useRateLimit } from "@/components/forms/use-rate-limit";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
@@ -35,6 +37,13 @@ export interface UseContactFormResult {
   turnstileStatus: TurnstileStatus;
   setTurnstileStatus: (status: TurnstileStatus) => void;
   isRateLimited: boolean;
+}
+
+function handleSuccessfulContactSubmission(
+  setLastSubmissionTime: (submittedAt: Date) => void,
+): void {
+  setLastSubmissionTime(new Date());
+  trackGenerateLead("contact");
 }
 
 /**
@@ -87,7 +96,7 @@ export function useContactForm(): UseContactFormResult {
       const nextState = createContactStateFromResponse(payload);
 
       if (nextState.success) {
-        setLastSubmissionTime(new Date());
+        handleSuccessfulContactSubmission(setLastSubmissionTime);
       }
 
       startTransition(() => {
@@ -165,6 +174,7 @@ function createContactRequestBody(formData: FormData) {
     website: getOptionalString(formData, "website") ?? "",
     turnstileToken: getRequiredString(formData, "turnstileToken"),
     submittedAt: getRequiredString(formData, "submittedAt"),
+    ...pickAttributionFieldsFromFormData(formData),
   };
 }
 

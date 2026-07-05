@@ -18,7 +18,7 @@ export function resolveAirtableModule(mod: unknown): AirtableLike | null {
 
   if (
     candidate &&
-    typeof candidate === "object" &&
+    (typeof candidate === "object" || typeof candidate === "function") &&
     "base" in candidate &&
     "configure" in candidate &&
     typeof (candidate as AirtableLike).base === "function" &&

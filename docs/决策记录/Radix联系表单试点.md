@@ -131,8 +131,7 @@ pilot evidence only, not a current route promise.
   - JS files for `[project]/src/app/[locale]/contact/page`: 104,920 bytes
   - CSS files for `[project]/src/app/[locale]/contact/page`: 786,348 bytes
 - Global CSS scope note:
-  - `src/app/[locale]/layout.tsx` and `src/app/ops/layout.tsx` import
-    `src/app/globals.css`.
+  - `src/app/[locale]/layout.tsx` imports `src/app/globals.css`.
   - The built locale homepage, about page, and contact page all reference the
     shared CSS chunk that contains Radix Themes styles.
   - `.next/static/chunks/0ikjb5g-ck431.css`: 785,868 bytes.

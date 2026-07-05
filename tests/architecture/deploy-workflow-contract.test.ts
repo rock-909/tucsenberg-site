@@ -34,4 +34,18 @@ describe("Cloudflare deploy workflow contract", () => {
       /if:\s*\$\{\{\s*inputs\.environment == 'production'\s*\}\}/u,
     );
   });
+
+  it("passes public marketing verification config into production builds", () => {
+    const workflow = readFileSync(
+      ".github/workflows/cloudflare-deploy.yml",
+      "utf8",
+    );
+
+    expect(workflow).toContain(
+      "NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}",
+    );
+    expect(workflow).toContain(
+      "GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}",
+    );
+  });
 });

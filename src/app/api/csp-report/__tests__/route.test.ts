@@ -301,17 +301,23 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该在开发环境中忽略报告（当CSP_REPORT_URI未设置时）", async () => {
-      vi.doMock("@/lib/env", () => ({
-        env: {
+      vi.doMock("@/lib/env", () => {
+        const env = {
           NODE_ENV: "development",
           CSP_REPORT_URI: undefined,
-        },
-        getRuntimeEnvString: (key: string) => {
-          if (key === "NODE_ENV") return "development";
-          if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
-          return undefined;
-        },
-      }));
+        };
+
+        return {
+          env,
+          runtimeEnv: env,
+          isRuntimeProduction: () => false,
+          getRuntimeEnvString: (key: string) => {
+            if (key === "NODE_ENV") return "development";
+            if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
+            return undefined;
+          },
+        };
+      });
       vi.resetModules();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
@@ -357,18 +363,25 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该处理生产环境的特殊日志记录", async () => {
-      vi.doMock("@/lib/env", () => ({
-        env: {
+      vi.doMock("@/lib/env", () => {
+        const env = {
           NODE_ENV: "production",
           CSP_REPORT_URI: "https://example.com/csp-report",
-        },
-        getRuntimeEnvString: (key: string) => {
-          if (key === "NODE_ENV") return "production";
-          if (key === "CSP_REPORT_URI") return "https://example.com/csp-report";
-          if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
-          return undefined;
-        },
-      }));
+        };
+
+        return {
+          env,
+          runtimeEnv: env,
+          isRuntimeProduction: () => true,
+          getRuntimeEnvString: (key: string) => {
+            if (key === "NODE_ENV") return "production";
+            if (key === "CSP_REPORT_URI")
+              return "https://example.com/csp-report";
+            if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
+            return undefined;
+          },
+        };
+      });
       vi.resetModules();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {

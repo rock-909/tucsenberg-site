@@ -197,14 +197,22 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_TURNSTILE_ACTION: contact_form
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
       - name: Cloudflare/OpenNext 构建
         run: pnpm website:build:cf
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_TURNSTILE_ACTION: contact_form
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
       - name: Cloudflare/Wrangler dry-run
         if: ${{ github.event_name != 'pull_request' }}
@@ -212,7 +220,11 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
-          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.workers.dev' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_TURNSTILE_ACTION: contact_form
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 

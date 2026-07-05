@@ -30,11 +30,15 @@ function createRuntimeEnvMock({
   productionBuild?: boolean;
   cloudflare?: boolean;
 }) {
+  const env = {};
+
   return {
-    env: {},
+    env,
+    runtimeEnv: env,
     isRuntimeCi: () => ci,
     isRuntimeDevelopment: () => development,
     isRuntimePlaywright: () => playwright,
+    isRuntimeProduction: () => false,
     isRuntimeProductionBuildPhase: () => productionBuild,
     isRuntimeCloudflare: () => cloudflare,
   };

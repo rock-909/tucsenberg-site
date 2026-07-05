@@ -11,9 +11,27 @@ import type {
 import { sanitizeAirtableTextField } from "@/lib/airtable/service-internal/field-sanitization";
 import { LEAD_TYPES, type LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
+import {
+  ATTRIBUTION_FIELD_NAMES,
+  type AttributionFieldName,
+  type MarketingAttributionFields,
+} from "@/lib/marketing/attribution-fields";
 
 type AirtableFieldValue = string | number | boolean;
 type AirtableFields = Record<string, AirtableFieldValue>;
+
+const AIRTABLE_ATTRIBUTION_FIELD_NAMES = {
+  utmSource: "UTM Source",
+  utmMedium: "UTM Medium",
+  utmCampaign: "UTM Campaign",
+  utmTerm: "UTM Term",
+  utmContent: "UTM Content",
+  gclid: "GCLID",
+  fbclid: "FBCLID",
+  msclkid: "MSCLKID",
+  landingPage: "Landing Page",
+  capturedAt: "Captured At",
+} satisfies Record<AttributionFieldName, string>;
 
 function getLeadSource(type: LeadType): LeadSource {
   switch (type) {
@@ -85,6 +103,19 @@ function addNewsletterFields(fields: AirtableFields): void {
   fields["Message"] = "Newsletter subscription";
 }
 
+function addAttributionFields(
+  fields: AirtableFields,
+  data: MarketingAttributionFields,
+): void {
+  for (const fieldName of ATTRIBUTION_FIELD_NAMES) {
+    const value = data[fieldName];
+    if (value) {
+      fields[AIRTABLE_ATTRIBUTION_FIELD_NAMES[fieldName]] =
+        sanitizeAirtableTextField(value);
+    }
+  }
+}
+
 function addTypeSpecificFields(
   fields: AirtableFields,
   type: LeadType,
@@ -114,6 +145,7 @@ function buildLeadFields(params: {
   const fields = buildBaseFields(params.source, params.data.email, params.now);
   addReferenceId(fields, params.data.referenceId);
   addTypeSpecificFields(fields, params.type, params.data);
+  addAttributionFields(fields, params.data);
   return fields;
 }
 

@@ -37,10 +37,11 @@ describe("middleware responsibility boundary", () => {
     expect(securitySource).not.toContain("export function isValidNonce");
   });
 
-  it("keeps retired custom locale patch routing out of middleware", () => {
+  it("keeps retired custom locale patch routing narrow", () => {
     const middlewareSource = read("src/middleware.ts");
     const headerClientSource = read("src/components/layout/header-client.tsx");
 
+    expect(middlewareSource).toContain("isRetiredLocalePath");
     expect(middlewareSource).not.toContain("fromLocaleFallback");
     expect(middlewareSource).not.toContain("getRoutingPathPatterns");
     expect(middlewareSource).not.toContain("matchesRoutePattern");
@@ -60,7 +61,7 @@ describe("middleware responsibility boundary", () => {
     expect(middlewareSource).not.toContain("extractLocaleFromLocationHeader");
   });
 
-  it("keeps middleware as a thin next-intl routing delegate", () => {
+  it("keeps middleware as a thin next-intl routing delegate with retired-locale fast 404", () => {
     const middlewareSource = read("src/middleware.ts");
 
     expect(middlewareSource).toContain(
@@ -69,7 +70,7 @@ describe("middleware responsibility boundary", () => {
     expect(middlewareSource).toContain(
       "const intlMiddleware = createMiddleware(routing);",
     );
+    expect(middlewareSource).toContain("return createRetiredLocaleNotFound();");
     expect(middlewareSource).toContain("return intlMiddleware(request);");
-    expect(middlewareSource).not.toContain("NextResponse");
   });
 });

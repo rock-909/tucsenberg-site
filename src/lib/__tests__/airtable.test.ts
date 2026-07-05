@@ -41,6 +41,20 @@ const mockConfigure = vi.fn();
 const _setServiceReady = (service: unknown) =>
   configureServiceForTesting(service, createMockBase(tableFactory));
 
+interface MockAirtableEnv {
+  AIRTABLE_API_KEY?: string;
+  AIRTABLE_BASE_ID?: string;
+  AIRTABLE_TABLE_NAME?: string;
+}
+
+function createEnvMock(envValues: MockAirtableEnv) {
+  return {
+    env: envValues,
+    getRuntimeEnvString: (key: string) =>
+      envValues[key as keyof MockAirtableEnv],
+  };
+}
+
 vi.mock("airtable", () => ({
   default: {
     configure: mockConfigure,
@@ -92,13 +106,13 @@ describe("Airtable Tests - Index", () => {
 
   describe("Basic Configuration", () => {
     it("should configure Airtable with valid environment variables", async () => {
-      vi.doMock("@/lib/env", () => ({
-        env: {
+      vi.doMock("@/lib/env", () =>
+        createEnvMock({
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
           AIRTABLE_TABLE_NAME: "test-table",
-        },
-      }));
+        }),
+      );
 
       const { AirtableService: ServiceClass } =
         await import("../airtable/service");
@@ -108,13 +122,13 @@ describe("Airtable Tests - Index", () => {
     });
 
     it("should use default table name when not provided", async () => {
-      vi.doMock("@/lib/env", () => ({
-        env: {
+      vi.doMock("@/lib/env", () =>
+        createEnvMock({
           AIRTABLE_API_KEY: "test-api-key",
           AIRTABLE_BASE_ID: "test-base-id",
           // Missing AIRTABLE_TABLE_NAME
-        },
-      }));
+        }),
+      );
 
       const { AirtableService: ServiceClass } =
         await import("../airtable/service");
@@ -183,6 +197,52 @@ describe("Airtable Tests - Index", () => {
             Source: "Website Contact Form",
           }),
         }),
+      ]);
+    });
+
+    it("should write sanitized attribution fields to Airtable", async () => {
+      const service = new AirtableServiceClass();
+
+      configureServiceForTesting(
+        service,
+        createMockBase(
+          () =>
+            ({ create: mockCreate }) as unknown as ReturnType<
+              AirtableBaseLike["table"]
+            >,
+        ),
+      );
+
+      mockCreate.mockClear();
+      mockCreate.mockResolvedValue([
+        {
+          id: "rec-attribution",
+          fields: {},
+          get: vi.fn().mockReturnValue("2023-01-01T00:00:00Z"),
+        },
+      ]);
+
+      await service.createLead("contact", {
+        ...validLeadData,
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: '=IMPORTXML("https://example.test")',
+        gclid: "gclid-123",
+        landingPage: "/en/contact",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            "UTM Source": "google",
+            "UTM Medium": "cpc",
+            "UTM Campaign": '\'=IMPORTXML("https://example.test")',
+            GCLID: "gclid-123",
+            "Landing Page": "/en/contact",
+            "Captured At": "2026-07-04T00:00:00.000Z",
+          }),
+        },
       ]);
     });
 

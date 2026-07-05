@@ -13,6 +13,7 @@ import {
   appendAttributionToFormData,
   captureClickIds,
   captureUtmParams,
+  flushPendingAttribution,
   getAttributionAsObject,
   getAttributionSnapshot,
   storeAttributionData,
@@ -64,6 +65,8 @@ function createStoredConsent(marketing: boolean) {
 
 describe("UTM Parameter Tracking", () => {
   beforeEach(() => {
+    mockLoadConsent.mockReturnValue(createStoredConsent(true));
+    flushPendingAttribution();
     mockSessionStorage.clear();
     mockSessionStorage.getItem.mockClear();
     mockSessionStorage.setItem.mockClear();
@@ -316,6 +319,26 @@ describe("UTM Parameter Tracking", () => {
       expect(snapshot.fbclid).toBe("fb123");
     });
 
+    it("should return pending attribution before consent without writing storage", () => {
+      mockLoadConsent.mockReturnValue(createStoredConsent(false));
+      window.location.search = "?utm_source=google&utm_medium=cpc";
+      window.location.pathname = "/en/contact";
+
+      storeAttributionData();
+      window.location.search = "";
+      window.location.pathname = "/en/request-quote";
+
+      const snapshot = getAttributionSnapshot();
+
+      expect(mockSessionStorage.setItem).not.toHaveBeenCalled();
+      expect(snapshot).toMatchObject({
+        utmSource: "google",
+        utmMedium: "cpc",
+        landingPage: "/en/contact",
+      });
+      expect(snapshot.capturedAt).toEqual(expect.any(String));
+    });
+
     it("should return empty object if no data available", () => {
       window.location.search = "";
 
@@ -349,10 +372,9 @@ describe("UTM Parameter Tracking", () => {
       expect(obj).toEqual({
         utmSource: "google",
         utmMedium: "cpc",
+        landingPage: "/test",
+        capturedAt: "2024-01-01",
       });
-      // Should not include non-attribution fields
-      expect(obj).not.toHaveProperty("landingPage");
-      expect(obj).not.toHaveProperty("capturedAt");
     });
   });
 
@@ -394,6 +416,8 @@ describe("UTM Parameter Tracking", () => {
         gclid: "g123",
         fbclid: "f456",
         msclkid: "m789",
+        landingPage: "/test",
+        capturedAt: "2024-01-01",
       });
 
       const formData = new FormData();
@@ -407,6 +431,8 @@ describe("UTM Parameter Tracking", () => {
       expect(formData.get("gclid")).toBe("g123");
       expect(formData.get("fbclid")).toBe("f456");
       expect(formData.get("msclkid")).toBe("m789");
+      expect(formData.get("landingPage")).toBe("/test");
+      expect(formData.get("capturedAt")).toBe("2024-01-01");
     });
   });
 
@@ -436,10 +462,9 @@ describe("UTM Parameter Tracking", () => {
         gclid: "g123",
         fbclid: "f456",
         msclkid: "m789",
+        landingPage: "/test",
+        capturedAt: "2024-01-01",
       });
-      // Should not include non-attribution fields
-      expect(obj).not.toHaveProperty("landingPage");
-      expect(obj).not.toHaveProperty("capturedAt");
     });
 
     it("should return empty object when no attribution data", () => {

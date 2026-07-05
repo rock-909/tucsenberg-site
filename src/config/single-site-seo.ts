@@ -160,7 +160,6 @@ export const SINGLE_SITE_STATIC_PAGE_LASTMOD =
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
   "/api/",
   "/_next/",
-  "/ops/",
   "/error-test/",
 ] as const;
 

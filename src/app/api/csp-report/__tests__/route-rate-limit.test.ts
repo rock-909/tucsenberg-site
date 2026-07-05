@@ -58,19 +58,25 @@ vi.mock("@/lib/logger", () => ({
   sanitizeLogContext: vi.fn((context: Record<string, unknown>) => context),
 }));
 
-vi.mock("@/lib/env", () => ({
-  env: {
+vi.mock("@/lib/env", () => {
+  const env = {
     NODE_ENV: "production",
     CSP_REPORT_URI: "https://example.com/csp-report",
-  },
-  getRuntimeEnvString: (key: string) => {
-    if (key === "NODE_ENV") return "production";
-    if (key === "CSP_REPORT_URI") return "https://example.com/csp-report";
-    if (key === "RATE_LIMIT_PEPPER")
-      return "test-rate-limit-pepper-0123456789abcdef";
-    return process.env[key];
-  },
-}));
+  };
+
+  return {
+    env,
+    runtimeEnv: env,
+    isRuntimeProduction: () => true,
+    getRuntimeEnvString: (key: string) => {
+      if (key === "NODE_ENV") return "production";
+      if (key === "CSP_REPORT_URI") return "https://example.com/csp-report";
+      if (key === "RATE_LIMIT_PEPPER")
+        return "test-rate-limit-pepper-0123456789abcdef";
+      return process.env[key];
+    },
+  };
+});
 
 describe("CSP Report API Route - Rate Limiting", () => {
   beforeEach(() => {

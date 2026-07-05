@@ -25,6 +25,7 @@ import {
 } from "@/lib/api/with-rate-limit";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
+import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import {
   LEAD_TYPES,
   productLeadSchema,
@@ -112,6 +113,7 @@ function validateLeadData(
     email: data.email,
     company: data.company,
     marketingConsent: data.marketingConsent,
+    ...pickAttributionFields(data),
   });
 
   if (parsed.success) {

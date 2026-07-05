@@ -13,7 +13,7 @@ vi.mock("next-intl/middleware", () => ({
 vi.mock("@/i18n/routing-config", () => ({
   routing: {
     defaultLocale: "en",
-    locales: ["en", "zh"],
+    locales: ["en"],
     pathnames: {
       "/": "/",
       "/about": "/about",
@@ -21,6 +21,12 @@ vi.mock("@/i18n/routing-config", () => ({
       "/products/[market]": "/products/[market]",
     },
     localeCookie: { maxAge: 60 * 60 * 24 * 365 },
+  },
+}));
+
+vi.mock("@/config/paths/locales-config", () => ({
+  LOCALES_CONFIG: {
+    retiredLocales: ["zh"],
   },
 }));
 
@@ -45,7 +51,7 @@ describe("middleware next-intl boundary", () => {
     expect(createMiddlewareMock).toHaveBeenCalledWith(
       expect.objectContaining({
         defaultLocale: "en",
-        locales: ["en", "zh"],
+        locales: ["en"],
       }),
     );
     expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
@@ -54,7 +60,7 @@ describe("middleware next-intl boundary", () => {
 
   it("does not manually set NEXT_LOCALE for localized requests", async () => {
     const { default: middleware } = await import("@/middleware");
-    const request = new NextRequest("http://localhost:3000/zh/about", {
+    const request = new NextRequest("http://localhost:3000/en/about", {
       headers: {
         cookie: "NEXT_LOCALE=en",
       },
@@ -64,6 +70,21 @@ describe("middleware next-intl boundary", () => {
 
     expect(response.headers.get("set-cookie")).toBeNull();
     expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("short-circuits retired Chinese locale paths with a lightweight 404", async () => {
+    const { default: middleware } = await import("@/middleware");
+    const request = new NextRequest("http://localhost:3000/zh/contact");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("content-type")).toBe(
+      "text/plain; charset=utf-8",
+    );
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    await expect(response.text()).resolves.toBe("Not Found");
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
   });
 
   it("does not parse unsupported locale-like paths before next-intl", async () => {
@@ -110,13 +131,12 @@ describe("middleware next-intl boundary", () => {
     expect(response.headers.get("x-health-status")).toBeNull();
   });
 
-  it("keeps matcher out of api, admin, ops, and static files", async () => {
+  it("keeps matcher out of api, _next, and static files only", async () => {
     const { config } = await import("@/middleware");
 
-    expect(config.matcher).toEqual([
-      "/",
-      "/((?!api|_next|admin|ops|.*\\..*).*)",
-    ]);
+    expect(config.matcher).toEqual(["/", "/((?!api|_next|.*\\..*).*)"]);
+    expect(config.matcher.join(" ")).not.toContain("admin");
+    expect(config.matcher.join(" ")).not.toContain("ops");
   });
 
   it("keeps middleware as the Cloudflare runtime entrypoint until proxy support is proven", async () => {

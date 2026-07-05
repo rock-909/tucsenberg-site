@@ -9,6 +9,12 @@ vi.mock("next-intl/middleware", () => ({
   default: () => intlMiddlewareMock,
 }));
 
+vi.mock("@/config/paths/locales-config", () => ({
+  LOCALES_CONFIG: {
+    retiredLocales: ["zh"],
+  },
+}));
+
 import middleware from "../middleware";
 
 beforeEach(() => {
@@ -51,6 +57,22 @@ describe("middleware locale cookie", () => {
     expect(response.headers.get("location")).toBeNull();
     expect(response.headers.get("set-cookie")).toBeNull();
     expect(intlMiddlewareMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("short-circuits retired Chinese locale paths without setting cookies", async () => {
+    const request = new NextRequest("http://localhost/zh/about", {
+      headers: {
+        cookie: "NEXT_LOCALE=en",
+      },
+    });
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    await expect(response.text()).resolves.toBe("Not Found");
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
   });
 
   it("lets unsupported locale-like product routes fall through to next-intl", () => {

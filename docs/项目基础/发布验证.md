@@ -21,6 +21,10 @@ Wrangler dry-run needs Cloudflare credentials and is skipped for
 `workflow_dispatch` CI run or a local `pnpm release:verify` run against the
 exact head SHA.
 
+Lighthouse remains manual performance proof. It is not part of default CI, git
+hooks, or `pnpm release:verify`; run `pnpm build && pnpm website:lighthouse`
+only when a change makes a page-performance claim.
+
 ## Current sequence
 
 ```bash

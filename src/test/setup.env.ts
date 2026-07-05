@@ -37,11 +37,7 @@ vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
 vi.stubEnv("ADMIN_API_TOKEN", "test-admin-token");
 vi.stubEnv("TURNSTILE_ALLOWED_ACTIONS", "contact_form");
 vi.stubEnv("TURNSTILE_BYPASS", "false");
-vi.stubEnv("CLOUDFLARE_ZONE_ID", "test-zone-id");
 vi.stubEnv("CLOUDFLARE_ACCOUNT_ID", "test-account-id");
-vi.stubEnv("CLOUDFLARE_ANALYTICS_API_TOKEN", "test-analytics-api-token");
-vi.stubEnv("CLOUDFLARE_ANALYTICS_HOSTNAME", "example.com");
-vi.stubEnv("OPS_DASHBOARD_ACCESS_KEY", "test-ops-access-key");
 
 // Mock @t3-oss/env-nextjs to prevent server-side environment variable access errors
 vi.mock("@t3-oss/env-nextjs", () => ({
@@ -59,11 +55,7 @@ vi.mock("@t3-oss/env-nextjs", () => ({
     ADMIN_API_TOKEN: "test-admin-token",
     TURNSTILE_ALLOWED_ACTIONS: "contact_form",
     TURNSTILE_BYPASS: false,
-    CLOUDFLARE_ZONE_ID: "test-zone-id",
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",
-    CLOUDFLARE_ANALYTICS_API_TOKEN: "test-analytics-api-token",
-    CLOUDFLARE_ANALYTICS_HOSTNAME: "example.com",
-    OPS_DASHBOARD_ACCESS_KEY: "test-ops-access-key",
     NEXT_PUBLIC_BASE_URL: "https://example.com",
   })),
 }));
@@ -84,19 +76,25 @@ vi.mock("@/lib/env", () => {
     ADMIN_API_TOKEN: "test-admin-token",
     NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "test-server-actions-key",
     ALLOW_MEMORY_RATE_LIMIT: false,
-    CLOUDFLARE_ZONE_ID: "test-zone-id",
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",
-    CLOUDFLARE_ANALYTICS_API_TOKEN: "test-analytics-api-token",
-    CLOUDFLARE_ANALYTICS_HOSTNAME: "example.com",
-    OPS_DASHBOARD_ACCESS_KEY: "test-ops-access-key",
     NEXT_PUBLIC_BASE_URL: "https://example.com",
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: "test-site-key-12345",
     NEXT_PUBLIC_DEPLOYMENT_PLATFORM: "development",
     NEXT_PUBLIC_TEST_MODE: false,
   } as Record<string, string | boolean | number | undefined>;
 
+  const cloudflareContextSymbol = Symbol.for("__cloudflare-context__");
+  const readCloudflareContextEnvValue = (key: string): string | undefined => {
+    const context = (
+      globalThis as typeof globalThis &
+        Record<symbol, { env?: Record<string, unknown> } | undefined>
+    )[cloudflareContextSymbol];
+    const value = context?.env?.[key];
+
+    return typeof value === "string" ? value : undefined;
+  };
   const readProcessEnvValue = (key: string): string | undefined =>
-    process.env[key];
+    readCloudflareContextEnvValue(key) ?? process.env[key];
 
   return {
     env: mockEnv,

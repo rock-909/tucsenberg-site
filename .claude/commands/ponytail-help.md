@@ -12,6 +12,7 @@ Available project skills:
 - `ponytail-review`: diff review for over-engineering
 - `ponytail-audit`: repo-wide over-engineering audit
 - `ponytail-debt`: collect `ponytail:` simplification markers
+- `ponytail-gain`: benchmark impact scoreboard
 - `ponytail-help`: this help card
 
 Use Ponytail as a project-local simplification tool. It does not override this

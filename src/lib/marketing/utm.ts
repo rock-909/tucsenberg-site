@@ -1,6 +1,7 @@
 "use client";
 
 import { loadConsent } from "@/lib/cookie-consent/storage";
+import { ATTRIBUTION_FIELD_NAMES } from "@/lib/marketing/attribution-fields";
 
 const UTM_STORAGE_KEY = "marketing_attribution";
 
@@ -138,6 +139,8 @@ export function getAttributionSnapshot(): AttributionData {
     // Ignore parse errors
   }
 
+  if (pendingAttribution) return pendingAttribution;
+
   // Fallback to current URL params if no stored data
   // nosemgrep: object-injection-sink-spread-operator
   // Safe: captureUtmParams/captureClickIds return sanitized objects with printable ASCII values minus dangerous HTML delimiters.
@@ -151,14 +154,12 @@ export function getAttributionAsObject(): Record<string, string> {
   const attribution = getAttributionSnapshot();
   const result: Record<string, string> = {};
 
-  if (attribution.utmSource) result.utmSource = attribution.utmSource;
-  if (attribution.utmMedium) result.utmMedium = attribution.utmMedium;
-  if (attribution.utmCampaign) result.utmCampaign = attribution.utmCampaign;
-  if (attribution.utmTerm) result.utmTerm = attribution.utmTerm;
-  if (attribution.utmContent) result.utmContent = attribution.utmContent;
-  if (attribution.gclid) result.gclid = attribution.gclid;
-  if (attribution.fbclid) result.fbclid = attribution.fbclid;
-  if (attribution.msclkid) result.msclkid = attribution.msclkid;
+  for (const fieldName of ATTRIBUTION_FIELD_NAMES) {
+    const value = attribution[fieldName];
+    if (value) {
+      result[fieldName] = value;
+    }
+  }
 
   return result;
 }

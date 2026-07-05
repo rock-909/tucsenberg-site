@@ -149,6 +149,34 @@ describe("processLead", () => {
     );
   });
 
+  it("passes contact attribution fields to Airtable", async () => {
+    mockCreateLead.mockResolvedValue({ id: "record-contact-attribution" });
+    mockSendContactFormEmail.mockResolvedValue("email-contact-attribution");
+
+    const result = await processLead({
+      ...validContactLead,
+      utmSource: "google",
+      utmMedium: "cpc",
+      utmCampaign: "flood-barriers",
+      gclid: "gclid-contact-123",
+      landingPage: "/en/contact",
+      capturedAt: "2026-07-04T00:00:00.000Z",
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      LEAD_TYPES.CONTACT,
+      expect.objectContaining({
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "flood-barriers",
+        gclid: "gclid-contact-123",
+        landingPage: "/en/contact",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      }),
+    );
+  });
+
   it("omits blank contact subject from Airtable and owner email", async () => {
     mockCreateLead.mockResolvedValue({ id: "record-no-subject" });
     mockSendContactFormEmail.mockResolvedValue("email-no-subject");
@@ -172,8 +200,31 @@ describe("processLead", () => {
     );
   });
 
-  it("fails contact lead and does not send email when Airtable fails", async () => {
+  it("returns user success when contact owner email is sent and Airtable fails", async () => {
     mockCreateLead.mockRejectedValue(new Error("Airtable failed"));
+    mockSendContactFormEmail.mockResolvedValue("email-id-123");
+
+    const result = await processLead(validContactLead);
+
+    expect(result).toEqual({
+      success: true,
+      emailSent: true,
+      ownerNotified: true,
+      recordCreated: false,
+      referenceId: expect.stringMatching(/^CON-/),
+    });
+    expect(result).not.toHaveProperty("partialSuccess");
+    expect(result.error).toBeUndefined();
+    expect(mockSendContactFormEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: validContactLead.email,
+      }),
+    );
+  });
+
+  it("fails contact lead when both owner email and Airtable fail", async () => {
+    mockCreateLead.mockRejectedValue(new Error("Airtable failed"));
+    mockSendContactFormEmail.mockRejectedValue(new Error("Email failed"));
 
     const result = await processLead(validContactLead);
 
@@ -186,7 +237,7 @@ describe("processLead", () => {
       error: "PROCESSING_FAILED",
     });
     expect(result).not.toHaveProperty("partialSuccess");
-    expect(mockSendContactFormEmail).not.toHaveBeenCalled();
+    expect(mockSendContactFormEmail).toHaveBeenCalled();
     expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
   });
 
@@ -240,8 +291,59 @@ describe("processLead", () => {
     expect(result.error).toBeUndefined();
   });
 
-  it("fails product lead and does not send email when Airtable fails", async () => {
+  it("passes product attribution fields to Airtable", async () => {
+    mockCreateLead.mockResolvedValue({ id: "record-product-attribution" });
+    mockSendProductInquiryEmail.mockResolvedValue("email-product-attribution");
+
+    const result = await processLead({
+      ...validProductLead,
+      utmSource: "google",
+      utmMedium: "cpc",
+      utmCampaign: "flood-barriers",
+      gclid: "gclid-rfq-123",
+      landingPage: "/en/request-quote",
+      capturedAt: "2026-07-04T00:00:00.000Z",
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      LEAD_TYPES.PRODUCT,
+      expect.objectContaining({
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "flood-barriers",
+        gclid: "gclid-rfq-123",
+        landingPage: "/en/request-quote",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      }),
+    );
+  });
+
+  it("returns user success when product owner email is sent and Airtable fails", async () => {
     mockCreateLead.mockRejectedValue(new Error("Airtable failed"));
+    mockSendProductInquiryEmail.mockResolvedValue("product-email-id");
+
+    const result = await processLead(validProductLead);
+
+    expect(result).toEqual({
+      success: true,
+      emailSent: true,
+      ownerNotified: true,
+      recordCreated: false,
+      referenceId: expect.stringMatching(/^PRO-/),
+    });
+    expect(result).not.toHaveProperty("partialSuccess");
+    expect(result.error).toBeUndefined();
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: validProductLead.email,
+      }),
+    );
+  });
+
+  it("fails product lead when both owner email and Airtable fail", async () => {
+    mockCreateLead.mockRejectedValue(new Error("Airtable failed"));
+    mockSendProductInquiryEmail.mockRejectedValue(new Error("Email failed"));
 
     const result = await processLead(validProductLead);
 
@@ -254,7 +356,7 @@ describe("processLead", () => {
       error: "PROCESSING_FAILED",
     });
     expect(result).not.toHaveProperty("partialSuccess");
-    expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
+    expect(mockSendProductInquiryEmail).toHaveBeenCalled();
   });
 
   it("writes newsletter lead without sending any email", async () => {

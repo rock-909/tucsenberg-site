@@ -7,22 +7,27 @@ vi.mock("@/lib/security/turnstile-config", () => ({
   getAllowedTurnstileHosts: mockGetAllowedTurnstileHosts,
 }));
 
-vi.mock("@/lib/env", () => ({
-  env: {
+vi.mock("@/lib/env", () => {
+  const env = {
     NEXT_PUBLIC_BASE_URL: "https://example.com",
-  },
-  getRuntimeEnvString: (key: string) => {
-    if (key === "CORS_ALLOWED_ORIGINS") {
-      return process.env.CORS_ALLOWED_ORIGINS;
-    }
+  };
 
-    if (key === "NEXT_PUBLIC_BASE_URL") {
-      return process.env.NEXT_PUBLIC_BASE_URL ?? "https://example.com";
-    }
+  return {
+    env,
+    runtimeEnv: env,
+    getRuntimeEnvString: (key: string) => {
+      if (key === "CORS_ALLOWED_ORIGINS") {
+        return process.env.CORS_ALLOWED_ORIGINS;
+      }
 
-    return process.env[key];
-  },
-}));
+      if (key === "NEXT_PUBLIC_BASE_URL") {
+        return process.env.NEXT_PUBLIC_BASE_URL ?? "https://example.com";
+      }
+
+      return process.env[key];
+    },
+  };
+});
 
 describe("CORS Configuration", () => {
   const originalEnv = process.env;
