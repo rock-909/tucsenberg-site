@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "maxClientBoundaries": 43,
+  "maxClientBoundaries": 45,
   "allowedClientBoundaries": [
     "src/app/[locale]/contact/error.tsx",
     "src/app/[locale]/products/error.tsx",
+    "src/app/[locale]/request-quote/request-quote-form.tsx",
     "src/app/global-error.tsx",
     "src/components/attribution-bootstrap.tsx",
     "src/components/contact/contact-form-island.tsx",
@@ -44,6 +45,7 @@
     "src/components/ui/theme-switcher.tsx",
     "src/components/ui/tooltip.tsx",
     "src/lib/cookie-consent/context.tsx",
+    "src/lib/marketing/lead-event.ts",
     "src/lib/marketing/utm.ts"
   ]
 }
