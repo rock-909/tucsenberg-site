@@ -4,13 +4,18 @@ import * as route from "@/app/api/verify-turnstile/route";
 
 const mockVerifyTurnstileDetailed = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/env", () => ({
-  env: {
+vi.mock("@/lib/env", () => {
+  const env = {
     TURNSTILE_SECRET_KEY: "secret-key",
-  },
-  getRuntimeEnvString: (key: string) => process.env[key],
-  getRuntimeEnvBoolean: (key: string) => process.env[key] === "true",
-}));
+  };
+
+  return {
+    env,
+    runtimeEnv: env,
+    getRuntimeEnvString: (key: string) => process.env[key],
+    getRuntimeEnvBoolean: (key: string) => process.env[key] === "true",
+  };
+});
 
 vi.mock("@/lib/api/with-rate-limit", () => ({
   withRateLimit:

@@ -67,9 +67,9 @@ describe("RequestQuotePage", () => {
     expect(screen.getByLabelText("Quantity")).toBeInTheDocument();
     expect(screen.getByLabelText("Market & delivery port")).toBeInTheDocument();
     expect(screen.getByLabelText("Timeline")).toBeInTheDocument();
-    expect(screen.getByLabelText("Photos / drawings upload")).toHaveAttribute(
+    expect(screen.getByLabelText("Photos / drawings links")).toHaveAttribute(
       "type",
-      "file",
+      "text",
     );
     expect(screen.getByLabelText("Name")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");

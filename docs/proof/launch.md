@@ -31,14 +31,17 @@ When the change touches Cloudflare/OpenNext output, add the Cloudflare build
 proof with the current public preview URL:
 
 ```bash
-NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm build
-NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm website:build:cf
-NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.workers.dev pnpm exec wrangler deploy --dry-run --env preview
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAADvC8KDbJ54402pb NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm build
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAADvC8KDbJ54402pb NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm website:build:cf
+NODE_ENV=production APP_ENV=preview NEXT_PUBLIC_SITE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_BASE_URL=https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAADvC8KDbJ54402pb NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm exec wrangler deploy --dry-run --env preview
 ```
 
 The Wrangler dry-run is a local/non-publishing proof. Do not use
 `https://tucsenberg.com` as `NEXT_PUBLIC_SITE_URL` until the production domain
 has a separate launch signoff.
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is public by design, but it is still required
+at build time because Next.js inlines `NEXT_PUBLIC_*` values into browser
+bundles.
 
 React Doctor is an error gate: error blocks CI, and the full report target is
 zero diagnostics. Baseline notes live under `baselines/`. It is not a separate

@@ -369,25 +369,6 @@ function validatePublicLaunchTrustContent(env) {
     "content/pages/{locale}/{about,contact,privacy,terms}.mdx",
     "confirm legal/contact page truth before client launch",
   );
-  validateRequiredEnv(
-    target,
-    env,
-    "CLOUDFLARE_ANALYTICS_HOSTNAME",
-    "the owner traffic dashboard must point at the public hostname before client launch",
-  );
-  validateRequiredEnv(
-    target,
-    env,
-    "CLOUDFLARE_ZONE_ID",
-    "the owner traffic dashboard needs the real Cloudflare zone before client launch",
-  );
-  validateRequiredEnv(
-    target,
-    env,
-    "OPS_DASHBOARD_ACCESS_KEY",
-    "the owner traffic dashboard must be protected before client launch",
-  );
-
   if (!getPublicContactPhone(SINGLE_SITE_FACTS.contact.phone)) {
     target.push(
       "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",

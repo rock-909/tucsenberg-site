@@ -5,7 +5,7 @@
 
 import "server-only";
 
-import { env } from "@/lib/env";
+import { env, getRuntimeEnvString } from "@/lib/env";
 import type {
   EmailTemplateData,
   ProductInquiryEmailData,
@@ -34,13 +34,22 @@ export class ResendService {
   };
 
   constructor() {
-    this.emailConfig = {
-      from: env.EMAIL_FROM || EMAIL_CONFIG.from,
-      replyTo: env.EMAIL_REPLY_TO || EMAIL_CONFIG.replyTo,
-      supportEmail: env.EMAIL_REPLY_TO || EMAIL_CONFIG.supportEmail,
-    };
+    this.emailConfig = this.readEmailConfig();
+  }
 
-    this.initializeResend();
+  private readEmailEnv(
+    key: "EMAIL_FROM" | "EMAIL_REPLY_TO",
+  ): string | undefined {
+    return getRuntimeEnvString(key) ?? env[key];
+  }
+
+  private readEmailConfig(): typeof this.emailConfig {
+    const replyTo = this.readEmailEnv("EMAIL_REPLY_TO");
+    return {
+      from: this.readEmailEnv("EMAIL_FROM") || EMAIL_CONFIG.from,
+      replyTo: replyTo || EMAIL_CONFIG.replyTo,
+      supportEmail: replyTo || EMAIL_CONFIG.supportEmail,
+    };
   }
 
   /**
@@ -49,12 +58,20 @@ export class ResendService {
    */
   private initializeResend(): void {
     try {
-      if (!env.RESEND_API_KEY) {
+      if (this.isConfigured && this.resend !== null) {
+        return;
+      }
+
+      const apiKey =
+        getRuntimeEnvString("RESEND_API_KEY") ?? env.RESEND_API_KEY;
+      this.emailConfig = this.readEmailConfig();
+
+      if (!apiKey) {
         logger.warn("Resend API key missing - email service will be disabled");
         return;
       }
 
-      this.resend = new ResendHttpEmailClient(env.RESEND_API_KEY);
+      this.resend = new ResendHttpEmailClient(apiKey);
       this.isConfigured = true;
 
       logger.info("Resend email service initialized successfully", {
@@ -73,6 +90,9 @@ export class ResendService {
    * Check if service is configured
    */
   public isReady(): boolean {
+    if (!this.isConfigured || this.resend === null) {
+      this.initializeResend();
+    }
     return this.isConfigured && this.resend !== null;
   }
 

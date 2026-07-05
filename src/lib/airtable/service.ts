@@ -15,7 +15,7 @@ import type {
   NewsletterLeadData,
   ProductLeadData,
 } from "@/lib/airtable/types";
-import { env } from "@/lib/env";
+import { env, getRuntimeEnvString } from "@/lib/env";
 import type { LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { logger } from "@/lib/logger";
 import {
@@ -27,6 +27,15 @@ import {
 import { resolveAirtableModule } from "@/lib/airtable/service-internal/client";
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
 import { getContactStatistics } from "@/lib/airtable/service-internal/stats";
+
+type AirtableEnvKey =
+  | "AIRTABLE_API_KEY"
+  | "AIRTABLE_BASE_ID"
+  | "AIRTABLE_TABLE_NAME";
+
+function readAirtableEnv(key: AirtableEnvKey): string | undefined {
+  return getRuntimeEnvString(key) ?? env[key];
+}
 
 /**
  * Airtable配置和初始化
@@ -40,7 +49,7 @@ export class AirtableService {
   private initializationError: Error | null = null;
 
   constructor() {
-    this.tableName = env.AIRTABLE_TABLE_NAME || "Contacts";
+    this.tableName = readAirtableEnv("AIRTABLE_TABLE_NAME") || "Contacts";
     // 不在构造函数中执行初始化，延迟到首次调用方法时
   }
 
@@ -50,12 +59,16 @@ export class AirtableService {
    */
   private async initializeAirtable(): Promise<void> {
     try {
-      if (!env.AIRTABLE_API_KEY || !env.AIRTABLE_BASE_ID) {
+      const apiKey = readAirtableEnv("AIRTABLE_API_KEY");
+      const baseId = readAirtableEnv("AIRTABLE_BASE_ID");
+      this.tableName = readAirtableEnv("AIRTABLE_TABLE_NAME") || this.tableName;
+
+      if (!apiKey || !baseId) {
         logger.warn(
           "Airtable configuration missing - service will be disabled",
           {
-            hasApiKey: Boolean(env.AIRTABLE_API_KEY),
-            hasBaseId: Boolean(env.AIRTABLE_BASE_ID),
+            hasApiKey: Boolean(apiKey),
+            hasBaseId: Boolean(baseId),
           },
         );
         return;
@@ -73,10 +86,10 @@ export class AirtableService {
 
       Airtable.configure({
         endpointUrl: "https://api.airtable.com",
-        apiKey: env.AIRTABLE_API_KEY,
+        apiKey,
       });
 
-      this.base = Airtable.base(env.AIRTABLE_BASE_ID);
+      this.base = Airtable.base(baseId);
       this.isConfigured = true;
 
       logger.info("Airtable service initialized successfully", {

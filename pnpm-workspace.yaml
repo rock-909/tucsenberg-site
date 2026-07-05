@@ -65,13 +65,17 @@ overrides:
   next-intl@<4.11.0: '>=4.11.0'
   postcss@<8.5.10: '>=8.5.10'
   tmp@<0.2.6: '>=0.2.6'
+  undici@>=7.0.0 <7.28.0: 7.28.0
   uuid: '>=14.0.0'
 packageManager: pnpm@11.1.0
 peerDependencyRules:
   allowedVersions:
+    '@tailwindcss/typography>tailwindcss': '4'
     eslint-plugin-import>eslint: '10'
     eslint-plugin-jsx-a11y>eslint: '10'
     eslint-plugin-react>eslint: '10'
+    tailwindcss-animate>tailwindcss: '4'
+    tsconfck>typescript: '6'
 sharedWorkspaceLockfile: true
 trustPolicy: no-downgrade
 # chokidar@4.0.3 is currently pulled only through react-email. pnpm 11 flags

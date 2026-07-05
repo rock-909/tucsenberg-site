@@ -8,10 +8,11 @@
 
 1. `content.md`：页面正文、SEO、messages 和内容检查。
 2. `deploy.md`：Cloudflare、env、表单和上线前配置。
-3. `brand.md`：公司身份、域名、联系方式、品牌资产。
-4. `ai.md`：Codex / Claude 协作边界。
-5. `replace.md`：继承的 starter 替换面说明；只在追溯时看。
-6. `start.md`：继承的 materialize/profile 说明；不是当前站日常入口。
+3. `monitoring.md`：Cookie、GA4、Search Console、Airtable 和流量监控阶段动作。
+4. `brand.md`：公司身份、域名、联系方式、品牌资产。
+5. `ai.md`：Codex / Claude 协作边界。
+6. `replace.md`：继承的 starter 替换面说明；只在追溯时看。
+7. `start.md`：继承的 materialize/profile 说明；不是当前站日常入口。
 
 ## Do not start by deleting inherited files
 

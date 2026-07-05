@@ -306,20 +306,4 @@ describe("public launch trust content guard", () => {
       ]),
     );
   });
-
-  it("requires owner dashboard readiness in strict public launch mode", () => {
-    const result = validateProductionConfig({
-      APP_ENV: "preview",
-      NODE_ENV: "production",
-      PUBLIC_LAUNCH_STRICT: "true",
-      PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: "true",
-    });
-
-    expect(result.errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("CLOUDFLARE_ANALYTICS_HOSTNAME"),
-        expect.stringContaining("OPS_DASHBOARD_ACCESS_KEY"),
-      ]),
-    );
-  });
 });

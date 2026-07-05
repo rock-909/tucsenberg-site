@@ -111,40 +111,39 @@ describe("processLead observability contracts", () => {
       expect.objectContaining({
         type: LEAD_TYPES.CONTACT,
         email: "[REDACTED_EMAIL]",
-        leadDeliveryPolicy: "storage-before-email",
+        leadDeliveryPolicy: "email-first-storage-optional",
         referenceId: expect.stringMatching(/^CON-/),
         requestId: "req-success",
       }),
     );
   });
 
-  it("logs contact Airtable failures without sending owner or confirmation emails", async () => {
+  it("logs contact Airtable failures as non-blocking after owner email succeeds", async () => {
     mockCreateLead.mockRejectedValue(new Error("CRM failed"));
+    mockSendContactFormEmail.mockResolvedValue("email-123");
 
     const result = await processLead(VALID_CONTACT_LEAD, {
       requestId: "req-crm-failed",
     });
 
     expect(result).toEqual({
-      success: false,
-      emailSent: false,
-      ownerNotified: false,
+      success: true,
+      emailSent: true,
+      ownerNotified: true,
       recordCreated: false,
       referenceId: expect.stringMatching(/^CON-/),
-      error: "PROCESSING_FAILED",
     });
     expect(mockLoggerError).toHaveBeenCalledWith(
-      "Contact Airtable createLead failed",
+      "Contact Airtable createLead failed (non-blocking)",
       expect.objectContaining({
         error: "CRM failed",
         email: "[REDACTED_EMAIL]",
-        leadDeliveryPolicy: "storage-before-email",
+        leadDeliveryPolicy: "email-first-storage-optional",
         referenceId: expect.stringMatching(/^CON-/),
         requestId: "req-crm-failed",
       }),
     );
-    expect(mockSendContactFormEmail).not.toHaveBeenCalled();
-    expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
+    expect(mockSendContactFormEmail).toHaveBeenCalled();
   });
 
   it("logs contact owner email failure while keeping the user-facing submission successful", async () => {

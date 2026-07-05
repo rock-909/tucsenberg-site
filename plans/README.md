@@ -212,7 +212,7 @@ as a stale lead until current code and tests prove it still applies.
 
 - `docs/**` prose quality itself (only its enforcement machinery).
 - `src/lib/security/{crypto,ip-parsing,ip-range,turnstile-config}.ts`,
-  `src/lib/ops/**`, `src/lib/cloudflare/analytics-*`, `src/hooks/**`,
+  `src/hooks/**`,
   `src/lib/airtable/service-internal/**` internals beyond the sampled files.
 - E2E spec quality/flakiness (24 Playwright specs) beyond confirming coverage
   exists; no wall-clock/flake measurements were taken (read-only audit).

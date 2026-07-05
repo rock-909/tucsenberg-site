@@ -11,6 +11,16 @@ Use exact labels. Do not inflate the claim.
 | `ci-proof` | GitHub Actions CI with type, lint, tests, checks, E2E smoke, builds | release-specific deployment health or human signoff |
 | `release-proof` | local-full + ci-proof + affected runtime/platform checks + owner review | real public launch unless deployed canary/signoff also happen |
 
+## Gate boundaries
+
+| Gate | Owner | Blocks on | Does not prove |
+| --- | --- | --- | --- |
+| Git hooks | local machine | staged formatting, type/lint, related tests, pre-push build/security checks | clean CI, deployment, Lighthouse, owner signoff |
+| `pnpm website:check` | local machine | type-check, lint, tests, production build | GitHub runner truth, Cloudflare deploy health, public launch |
+| GitHub CI | pull request / push | quality, tests, E2E smoke, Semgrep `ERROR` rules over `src`, Cloudflare/OpenNext build | PR Cloudflare Free gzip budget, manual Lighthouse, owner signoff |
+| `pnpm release:verify` | release operator | release manifest sequence, Cloudflare Free dry-run when credentials exist | real public launch without deployed canary/signoff |
+| `pnpm build && pnpm website:lighthouse` | manual performance proof | current built page performance lab checks | default CI, git hook, or release approval |
+
 ## Lifecycle scope
 
 Every proof claim should say which lifecycle it belongs to:
@@ -60,7 +70,9 @@ Docs truth:
 node scripts/starter-checks.js truth-docs
 ```
 
-Semgrep: A missing local `semgrep` binary is `Blocked`, not `Passed`.
+Semgrep: A missing local `semgrep` binary is `Blocked`, not `Passed`. CI blocks
+only `severity: ERROR` rules and scans `src`; lower severities are review
+signals unless a separate change deliberately promotes a rule.
 
 ## Dirty worktree rule
 

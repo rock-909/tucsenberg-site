@@ -126,16 +126,6 @@ pre-push:
         fi
       fail_text: '架构检查失败 - 发现循环依赖或架构违规'
 
-    # 性能测试 (仅 CI 环境运行,避免本地 headless Chrome 卡住)
-    performance-test:
-      run: |
-        if [ -n "$CI" ]; then
-          echo "Lighthouse is not run from git hooks. Optional manual check: pnpm build && pnpm website:lighthouse"
-        else
-          echo "⏭️  跳过性能测试 (不接入 git hook；需要时手动运行 pnpm build && pnpm website:lighthouse)"
-        fi
-      fail_text: '性能测试失败 - 包大小或性能指标超出限制'
-
     # 安全检查（A+：本地执行；可用 RUN_FAST_PUSH=1 跳过应急推送）
     security-check:
       run: |

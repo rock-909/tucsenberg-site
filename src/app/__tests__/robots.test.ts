@@ -67,7 +67,6 @@ describe("robots.ts", () => {
 
       expect(disallowed).toContain("/api/");
       expect(disallowed).toContain("/_next/");
-      expect(disallowed).toContain("/ops/");
     });
 
     it("should disallow test paths", () => {

@@ -239,6 +239,29 @@ describe("validations - API and Data Schemas", () => {
       const result = airtableRecordSchema.safeParse(recordWithStatus);
       expect(result.success).toBe(true);
     });
+
+    it("should preserve attribution fields on Airtable records", () => {
+      const recordWithAttribution = {
+        ...validRecord,
+        fields: {
+          ...validRecord.fields,
+          "UTM Source": "google",
+          "UTM Medium": "cpc",
+          "UTM Campaign": "flood-barriers",
+          GCLID: "gclid-123",
+          "Landing Page": "/en/contact",
+          "Captured At": "2026-07-04T00:00:00.000Z",
+        },
+      };
+
+      const result = airtableRecordSchema.safeParse(recordWithAttribution);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.fields["UTM Source"]).toBe("google");
+        expect(result.data.fields.GCLID).toBe("gclid-123");
+      }
+    });
   });
 
   describe("emailTemplateDataSchema", () => {

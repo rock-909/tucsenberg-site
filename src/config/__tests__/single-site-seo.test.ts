@@ -110,7 +110,6 @@ describe("single-site-seo", () => {
     expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
       "/api/",
       "/_next/",
-      "/ops/",
       "/error-test/",
     ]);
   });

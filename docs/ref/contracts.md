@@ -24,6 +24,7 @@ User-visible behavior contracts. If one changes, update tests and proof in the s
 | BC-011 | Contact, inquiry, and subscribe enforce rate limiting. | contact route tests, `tests/integration/api/lead-family-protection.test.ts` |
 | BC-012 | Contact, inquiry, and subscribe reject invalid Turnstile tokens. | contact route tests, lead-family protection tests |
 | BC-012A | Lead sink handling remains Airtable-first; email failure after record creation is non-blocking. | lead pipeline and Airtable tests |
+| BC-013 | Buyer can submit the RFQ page through the existing product inquiry lead path. RFQ fields are packaged into the inquiry requirements payload and sent to `/api/inquiry`; the page does not pretend to upload files. | `src/app/[locale]/request-quote/__tests__/request-quote-form.test.tsx`, `/api/inquiry` route tests, real-service canary after deploy |
 | BC-024 | Public lead routes do not require a replay key. Duplicated leads are acceptable starter behavior; dropped leads are not. Contact Server Action compatibility now follows the same no-key behavior. | Status | Covered |
 
 Profile boundary: `/products/[market]` contracts apply to `catalog` / `showcase-full`, not default `company-site` output. Default `company-site` does not run `tests/e2e/product-family-contact-handoff.spec.ts`.

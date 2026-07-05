@@ -9,7 +9,6 @@
 - Resend 或邮件服务配置。
 - Airtable / CRM / 表单接收配置。
 - rate limit pepper 和生产限流后端。
-- owner dashboard hostname、zone、access key。
 - preview / production secrets。
 
 真实 secret 不入库。只提交 `.env.example`、`.dev.vars.example`、`.mcp.example.json` 这类占位示例。
@@ -17,7 +16,7 @@
 ## Env rules
 
 - `NEXT_PUBLIC_*` 会进浏览器，不能放 secret。
-- API token、邮件密钥、Airtable token、Turnstile secret、Cloudflare analytics token、rate-limit pepper 必须 server-only。
+- API token、邮件密钥、Airtable token、Turnstile secret、rate-limit pepper 必须 server-only。
 - 本地开发/测试没有配置 Upstash 时会自动使用内存限流；`ALLOW_MEMORY_RATE_LIMIT=true` 是 release/proof blocker，不是启用 fallback 的开关。
 - production strict gate 当前要求 Upstash Redis；不要把 KV-only 当作生产替代方案。
 - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` 在 preview/production 要配置稳定值。
@@ -31,8 +30,8 @@
 | Turnstile | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` |
 | email | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` |
 | Airtable | `AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`, `AIRTABLE_TABLE_NAME` |
-| Cloudflare deploy | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_ANALYTICS_HOSTNAME`, `CLOUDFLARE_ANALYTICS_API_TOKEN` |
-| security / rate limit | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, `RATE_LIMIT_PEPPER`, `RATE_LIMIT_PEPPER_PREVIOUS`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `KV_REST_API_TOKEN`, `OPS_DASHBOARD_ACCESS_KEY` |
+| Cloudflare deploy | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` |
+| security / rate limit | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, `RATE_LIMIT_PEPPER`, `RATE_LIMIT_PEPPER_PREVIOUS`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `KV_REST_API_TOKEN` |
 | CI / GitHub | `GITHUB_TOKEN` |
 | compatibility | `DEPLOY_TARGET` legacy alias; canonical is `DEPLOYMENT_PLATFORM` |
 | proof-only | `DEPLOY_SMOKE_BASE_URL`, `PLAYWRIGHT_BASE_URL`, `STAGING_URL` |
@@ -40,12 +39,14 @@
 ## Build proof
 
 ```bash
-pnpm build
-pnpm website:build:cf
-pnpm exec wrangler deploy --dry-run --env preview
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<public-site-key> NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm build
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<public-site-key> NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm website:build:cf
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<public-site-key> NEXT_PUBLIC_TURNSTILE_ACTION=contact_form pnpm exec wrangler deploy --dry-run --env preview
 ```
 
 These do not prove public launch readiness. For launch proof, continue with `../proof/launch.md`.
+`NEXT_PUBLIC_*` values are browser-visible and build-time inlined, so Worker
+runtime vars alone do not make the deployed form interactive.
 
 During the current development phase, Cloudflare build proof must use a public
 Cloudflare preview URL. Do not use `https://tucsenberg.com` as

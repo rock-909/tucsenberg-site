@@ -132,6 +132,34 @@ describe("/api/inquiry route", () => {
       expect(response.headers.get("x-observability-surface")).toBeNull();
     });
 
+    it("passes attribution fields to processLead", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...validInquiryData,
+          utmSource: "google",
+          utmMedium: "cpc",
+          utmCampaign: "flood-barriers",
+          gclid: "gclid-rfq-123",
+          landingPage: "/en/request-quote",
+          capturedAt: "2026-07-04T00:00:00.000Z",
+        }),
+      );
+
+      await POST(request);
+
+      expect(processLead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "product",
+          utmSource: "google",
+          utmMedium: "cpc",
+          utmCampaign: "flood-barriers",
+          gclid: "gclid-rfq-123",
+          landingPage: "/en/request-quote",
+          capturedAt: "2026-07-04T00:00:00.000Z",
+        }),
+      );
+    });
+
     it("binds Turnstile verification to the product_inquiry action", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 

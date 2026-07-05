@@ -40,34 +40,39 @@ vi.mock("@/lib/api/with-rate-limit", () => ({
 }));
 
 // Mock environment variables
-vi.mock("@/lib/env", () => ({
-  env: {
+vi.mock("@/lib/env", () => {
+  const env = {
     TURNSTILE_SECRET_KEY: "test-secret-key",
     TURNSTILE_SITE_KEY: "test-site-key",
     TURNSTILE_ALLOWED_HOSTS: "localhost",
     TURNSTILE_EXPECTED_ACTION: "contact_form",
     NEXT_PUBLIC_BASE_URL: "http://localhost:3000",
     NEXT_PUBLIC_TURNSTILE_ACTION: "contact_form",
-  },
-  getRuntimeEnvString: (key: string) => {
-    const runtimeValue = process.env[key];
-    if (runtimeValue !== undefined) {
-      return runtimeValue;
-    }
+  };
 
-    if (key === "TURNSTILE_ALLOWED_ACTIONS") {
-      return "contact_form";
-    }
+  return {
+    env,
+    runtimeEnv: env,
+    getRuntimeEnvString: (key: string) => {
+      const runtimeValue = process.env[key];
+      if (runtimeValue !== undefined) {
+        return runtimeValue;
+      }
 
-    if (key === "TURNSTILE_EXPECTED_ACTION") {
-      return "contact_form";
-    }
+      if (key === "TURNSTILE_ALLOWED_ACTIONS") {
+        return "contact_form";
+      }
 
-    return undefined;
-  },
-  getRuntimeEnvBoolean: () => false,
-  isRuntimeDevelopment: () => process.env.NODE_ENV === "development",
-}));
+      if (key === "TURNSTILE_EXPECTED_ACTION") {
+        return "contact_form";
+      }
+
+      return undefined;
+    },
+    getRuntimeEnvBoolean: () => false,
+    isRuntimeDevelopment: () => process.env.NODE_ENV === "development",
+  };
+});
 
 describe("Verify Turnstile API Route", () => {
   const validRequestBody = {

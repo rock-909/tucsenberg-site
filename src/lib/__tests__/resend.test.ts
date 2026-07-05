@@ -24,13 +24,16 @@ vi.mock("@/lib/email/resend-http-client", () => ({
 }));
 
 vi.mock("@/lib/env", () => {
+  const env = {
+    RESEND_API_KEY: "test-resend-key",
+    EMAIL_FROM: "test@example.com",
+    EMAIL_REPLY_TO: "reply@example.com",
+    NODE_ENV: "test",
+  };
+
   return {
-    env: {
-      RESEND_API_KEY: "test-resend-key",
-      EMAIL_FROM: "test@example.com",
-      EMAIL_REPLY_TO: "reply@example.com",
-      NODE_ENV: "test",
-    },
+    env,
+    runtimeEnv: env,
     getRuntimeEnvString: (key: string) => {
       const runtimeEnv = {
         RESEND_API_KEY: "test-resend-key",
@@ -42,6 +45,7 @@ vi.mock("@/lib/env", () => {
     },
     getRuntimeEnvBoolean: () => false,
     getRuntimeNodeEnv: () => "test",
+    isRuntimeProduction: () => false,
     isRuntimePlaywright: () => false,
   };
 });

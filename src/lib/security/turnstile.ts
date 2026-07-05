@@ -171,7 +171,8 @@ export async function verifyTurnstileDetailed(
       return { success: true };
     }
 
-    const secretKey = env.TURNSTILE_SECRET_KEY;
+    const secretKey =
+      getRuntimeEnvString("TURNSTILE_SECRET_KEY") ?? env.TURNSTILE_SECRET_KEY;
 
     if (!secretKey) {
       logger.warn("Turnstile secret key not configured");

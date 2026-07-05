@@ -71,6 +71,41 @@ describe("canonical contact submission", () => {
     );
   });
 
+  it("passes attribution fields to the lead pipeline", async () => {
+    mockProcessLead.mockResolvedValueOnce({
+      success: true,
+      emailSent: true,
+      ownerNotified: true,
+      recordCreated: true,
+      referenceId: "ref-attribution",
+    });
+
+    await submitCanonicalContactSubmission(
+      {
+        ...createContactFormData("Product inquiry"),
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "flood-barriers",
+        gclid: "gclid-contact-123",
+        landingPage: "/en/contact",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      },
+      { clientIP: "203.0.113.10" },
+    );
+
+    expect(mockProcessLead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "flood-barriers",
+        gclid: "gclid-contact-123",
+        landingPage: "/en/contact",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      }),
+      {},
+    );
+  });
+
   it("omits blank subject text before sending contact data to the lead pipeline", async () => {
     mockProcessLead.mockResolvedValueOnce({
       success: true,

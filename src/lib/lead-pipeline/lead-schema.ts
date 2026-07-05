@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
 import { sanitizePlainText } from "@/lib/security/validation";
+import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
   MAX_LEAD_EMAIL_LENGTH,
@@ -41,6 +42,20 @@ export const CONTACT_SUBJECTS = {
  * Uses Zod v4 .overwrite() to sanitize while preserving ZodString type for chaining
  */
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
+const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
+
+export const leadAttributionFields = {
+  utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  utmMedium: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  utmCampaign: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  utmTerm: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  utmContent: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  gclid: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  fbclid: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  msclkid: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  landingPage: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+  capturedAt: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
+} satisfies Record<AttributionFieldName, z.ZodOptional<z.ZodString>>;
 
 function isPositiveQuantityString(value: string): boolean {
   const parsedQuantity = Number(value);
@@ -69,6 +84,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
 const baseLeadFields = {
   email: z.string().trim().min(ONE).email().max(MAX_LEAD_EMAIL_LENGTH),
   marketingConsent: z.boolean().optional().default(false),
+  ...leadAttributionFields,
 };
 
 const productQuantitySchema: z.ZodType<string | number> = z

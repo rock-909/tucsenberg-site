@@ -11,9 +11,16 @@ import {
 } from "@/constants/api-error-codes";
 import { MINUTE_MS, TEN_MINUTES_MS } from "@/constants/time";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
-import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
+import {
+  LEAD_TYPES,
+  leadAttributionFields,
+} from "@/lib/lead-pipeline/lead-schema";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { logger, sanitizeEmail } from "@/lib/logger";
+import {
+  pickAttributionFields,
+  type MarketingAttributionFields,
+} from "@/lib/marketing/attribution-fields";
 import { verifyLeadTurnstile } from "@/lib/security/lead-turnstile";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
@@ -41,12 +48,13 @@ const contactSubmissionSchema = contactFormSchema.extend({
     .string()
     .optional()
     .transform((value) => value ?? ""),
+  ...leadAttributionFields,
 });
 
 export type ContactFormWithToken = ContactFormFieldValues & {
   turnstileToken: string;
   submittedAt: string;
-};
+} & MarketingAttributionFields;
 
 interface ContactValidationFailure {
   success: false;
@@ -341,6 +349,7 @@ async function processValidatedContactSubmission(
     turnstileToken: formData.turnstileToken,
     submittedAt: formData.submittedAt,
     marketingConsent: formData.marketingConsent ?? false,
+    ...pickAttributionFields(formData),
   };
 
   const result = await processLead(leadInput, {

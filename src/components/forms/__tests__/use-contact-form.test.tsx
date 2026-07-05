@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useContactForm } from "@/components/forms/use-contact-form";
 
 const mockSetLastSubmissionTime = vi.hoisted(() => vi.fn());
@@ -37,6 +37,8 @@ function createValidFormData(): FormData {
 describe("useContactForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear();
+    delete (window as unknown as Record<string, unknown>).gtag;
     global.fetch = vi.fn(async () =>
       Response.json({
         success: true,
@@ -47,7 +49,23 @@ describe("useContactForm", () => {
     );
   });
 
+  afterEach(() => {
+    window.sessionStorage.clear();
+    delete (window as unknown as Record<string, unknown>).gtag;
+  });
+
   it("submits the browser contact form to /api/contact as JSON", async () => {
+    window.sessionStorage.setItem(
+      "marketing_attribution",
+      JSON.stringify({
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "flood-barriers",
+        gclid: "gclid-123",
+        landingPage: "/en/contact",
+        capturedAt: "2026-07-04T00:00:00.000Z",
+      }),
+    );
     const { result } = renderHook(() => useContactForm());
 
     act(() => {
@@ -83,8 +101,38 @@ describe("useContactForm", () => {
       acceptPrivacy: true,
       marketingConsent: true,
       turnstileToken: "valid-token",
+      utmSource: "google",
+      utmMedium: "cpc",
+      utmCampaign: "flood-barriers",
+      gclid: "gclid-123",
+      landingPage: "/en/contact",
+      capturedAt: "2026-07-04T00:00:00.000Z",
     });
     expect(body).not.toHaveProperty("replayKey");
+  });
+
+  it("emits a GA4 generate_lead event after contact submission succeeds", async () => {
+    window.gtag = vi.fn();
+    const { result } = renderHook(() => useContactForm());
+
+    act(() => {
+      result.current.setTurnstileToken("valid-token");
+    });
+
+    await act(async () => {
+      await result.current.formAction(createValidFormData());
+    });
+
+    await waitFor(() => {
+      expect(window.gtag).toHaveBeenCalledWith(
+        "event",
+        "generate_lead",
+        expect.objectContaining({
+          event_category: "lead",
+          method: "contact",
+        }),
+      );
+    });
   });
 
   it("keeps public contact success state limited to the public reference id", async () => {

@@ -122,7 +122,7 @@ Public runtime module must:
 **Forbidden keys** must never enter client bundle:
 
 `RESEND_API_KEY`, `AIRTABLE_API_KEY`, `TURNSTILE_SECRET_KEY`,
-`CLOUDFLARE_ANALYTICS_API_TOKEN`, `OPS_DASHBOARD_ACCESS_KEY`,
+server-only deployment and dashboard environment keys,
 `RATE_LIMIT_PEPPER`, `UPSTASH_REDIS_REST_TOKEN`, `KV_REST_API_TOKEN`,
 `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`.
 

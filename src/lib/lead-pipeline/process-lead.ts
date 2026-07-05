@@ -23,6 +23,7 @@ import {
   splitName,
 } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
+import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import { resendService } from "@/lib/resend-instance";
 
 interface ProcessLeadOptions {
@@ -43,7 +44,7 @@ export interface LeadResult {
   error?: "VALIDATION_ERROR" | "PROCESSING_FAILED";
 }
 
-const LEAD_DELIVERY_POLICY = "storage-before-email" as const;
+const LEAD_DELIVERY_POLICY = "email-first-storage-optional" as const;
 
 function withRequestId(
   requestId?: string,
@@ -119,6 +120,38 @@ async function sendContactOwnerEmail(
   }
 }
 
+async function createContactLeadRecord(
+  lead: ContactLeadInput,
+  context: LeadProcessingContext,
+): Promise<boolean> {
+  const { firstName, lastName } = splitName(lead.fullName);
+  const { referenceId } = context;
+
+  try {
+    await airtableService.createLead(LEAD_TYPES.CONTACT, {
+      firstName,
+      lastName,
+      email: lead.email,
+      company: lead.company,
+      ...createOptionalSubject(lead.subject),
+      message: lead.message,
+      marketingConsent: lead.marketingConsent,
+      referenceId,
+      ...pickAttributionFields(lead),
+    });
+    return true;
+  } catch (error) {
+    logger.error("Contact Airtable createLead failed (non-blocking)", {
+      error: normalizeErrorMessage(error),
+      email: sanitizeEmail(lead.email),
+      leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
+      referenceId,
+      ...withRequestId(context.requestId),
+    });
+    return false;
+  }
+}
+
 function scheduleContactConfirmationEmail(
   lead: ContactLeadInput,
   context: LeadProcessingContext,
@@ -154,42 +187,22 @@ async function processContact(
   lead: ContactLeadInput,
   context: LeadProcessingContext,
 ): Promise<LeadResult> {
-  const { firstName, lastName } = splitName(lead.fullName);
   const { referenceId } = context;
 
-  // Starter default: storage-before-email. Airtable persistence must succeed
-  // before owner email delivery so downstream teams do not act on leads that
-  // were not recorded. Derived projects may change this policy deliberately.
-  try {
-    await airtableService.createLead(LEAD_TYPES.CONTACT, {
-      firstName,
-      lastName,
-      email: lead.email,
-      company: lead.company,
-      ...createOptionalSubject(lead.subject),
-      message: lead.message,
-      marketingConsent: lead.marketingConsent,
-      referenceId,
-    });
-  } catch (error) {
-    logger.error("Contact Airtable createLead failed", {
-      error: normalizeErrorMessage(error),
-      email: sanitizeEmail(lead.email),
-      leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
-      referenceId,
-      ...withRequestId(context.requestId),
-    });
+  const emailSent = await sendContactOwnerEmail(lead, context);
+  const recordCreated = await createContactLeadRecord(lead, context);
+
+  if (!emailSent && !recordCreated) {
     return createProcessingFailureResult(referenceId);
   }
 
-  const emailSent = await sendContactOwnerEmail(lead, context);
   scheduleContactConfirmationEmail(lead, context);
 
   return {
     success: true,
     emailSent,
     ownerNotified: emailSent,
-    recordCreated: true,
+    recordCreated,
     referenceId,
   };
 }
@@ -230,10 +243,10 @@ async function sendProductOwnerEmail(
   }
 }
 
-async function processProduct(
+async function createProductLeadRecord(
   lead: ProductLeadInput,
   context: LeadProcessingContext,
-): Promise<LeadResult> {
+): Promise<boolean> {
   const { firstName, lastName } = splitName(lead.fullName);
   const { referenceId } = context;
   const message = generateProductInquiryMessage(
@@ -242,9 +255,6 @@ async function processProduct(
     lead.requirements,
   );
 
-  // Starter default: storage-before-email. Airtable persistence must succeed
-  // before owner email delivery so downstream teams do not act on leads that
-  // were not recorded. Derived projects may change this policy deliberately.
   try {
     await airtableService.createLead(LEAD_TYPES.PRODUCT, {
       firstName,
@@ -258,25 +268,38 @@ async function processProduct(
       requirements: lead.requirements,
       marketingConsent: lead.marketingConsent,
       referenceId,
+      ...pickAttributionFields(lead),
     });
+    return true;
   } catch (error) {
-    logger.error("Product Airtable createLead failed", {
+    logger.error("Product Airtable createLead failed (non-blocking)", {
       error: normalizeErrorMessage(error),
       email: sanitizeEmail(lead.email),
       leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
       referenceId,
       ...withRequestId(context.requestId),
     });
+    return false;
+  }
+}
+
+async function processProduct(
+  lead: ProductLeadInput,
+  context: LeadProcessingContext,
+): Promise<LeadResult> {
+  const { referenceId } = context;
+  const emailSent = await sendProductOwnerEmail(lead, context);
+  const recordCreated = await createProductLeadRecord(lead, context);
+
+  if (!emailSent && !recordCreated) {
     return createProcessingFailureResult(referenceId);
   }
-
-  const emailSent = await sendProductOwnerEmail(lead, context);
 
   return {
     success: true,
     emailSent,
     ownerNotified: emailSent,
-    recordCreated: true,
+    recordCreated,
     referenceId,
   };
 }

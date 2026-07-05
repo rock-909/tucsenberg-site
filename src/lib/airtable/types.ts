@@ -2,6 +2,8 @@
  * Airtable 相关类型定义
  */
 
+import type { MarketingAttributionFields } from "@/lib/marketing/attribution-fields";
+
 // 重新导出生产链路仍在使用的 Airtable 类型
 export type { AirtableRecord } from "@/lib/airtable/record-schema";
 
@@ -25,7 +27,7 @@ export type LeadSource =
   | "Newsletter Subscription";
 
 // Base lead data for CRM
-interface BaseLeadData {
+interface BaseLeadData extends MarketingAttributionFields {
   email: string;
   referenceId?: string;
 }

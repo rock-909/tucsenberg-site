@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env, isRuntimeProduction, runtimeEnv } from "@/lib/env";
 import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
 import { defineSiteDefinition } from "@/config/site-definition-builder";
 import type { PageType } from "@/config/paths/types";
@@ -35,17 +35,24 @@ export type {
 } from "@/config/site-types";
 
 function resolveSingleSiteBaseUrl(fallback: string): string {
-  const explicitSiteUrl = env.NEXT_PUBLIC_SITE_URL?.trim();
+  const explicitSiteUrl =
+    runtimeEnv.NEXT_PUBLIC_SITE_URL?.trim() ?? env.NEXT_PUBLIC_SITE_URL?.trim();
   if (explicitSiteUrl) return explicitSiteUrl;
 
+  const runtimeSharedBaseUrl = runtimeEnv.NEXT_PUBLIC_BASE_URL?.trim();
+  if (runtimeSharedBaseUrl) return runtimeSharedBaseUrl;
+
   const sharedBaseUrl = env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (isRuntimeProduction() && sharedBaseUrl === "http://localhost:3000") {
+    return fallback;
+  }
   if (sharedBaseUrl) return sharedBaseUrl;
 
   return fallback;
 }
 
 const baseUrl = resolveSingleSiteBaseUrl(
-  "https://tucsenberg-site-preview.workers.dev",
+  "https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev",
 );
 
 const social = {
@@ -165,7 +172,7 @@ export const TUCSENBERG_REGISTERED_ADDRESS =
   "No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China";
 
 const contact = {
-  phone: "TODO-OWNER",
+  phone: "",
   email: "sales@tucsenberg.com",
 } as const;
 

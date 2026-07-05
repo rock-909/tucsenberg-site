@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env, getRuntimeEnvString } from "@/lib/env";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { logger } from "@/lib/logger";
 
@@ -6,7 +6,9 @@ import { logger } from "@/lib/logger";
  * Parse the configured Turnstile allowed hostnames.
  */
 function parseConfiguredHosts(): string[] {
-  const hosts = env.TURNSTILE_ALLOWED_HOSTS;
+  const hosts =
+    getRuntimeEnvString("TURNSTILE_ALLOWED_HOSTS") ??
+    env.TURNSTILE_ALLOWED_HOSTS;
   if (!hosts) return [];
 
   return hosts.split(",").flatMap((value: string) => {
@@ -79,7 +81,9 @@ const DEFAULT_ALLOWED_ACTIONS = [
 const DEFAULT_ALLOWED_ACTIONS_SET = new Set<string>(DEFAULT_ALLOWED_ACTIONS);
 
 function parseConfiguredActions(): string[] {
-  const configuredActions = env.TURNSTILE_ALLOWED_ACTIONS;
+  const configuredActions =
+    getRuntimeEnvString("TURNSTILE_ALLOWED_ACTIONS") ??
+    env.TURNSTILE_ALLOWED_ACTIONS;
   if (!configuredActions) {
     return [];
   }
@@ -106,7 +110,11 @@ function getAllowedTurnstileActionsSet(): Set<string> {
  * Return the expected Turnstile action identifier (primary action).
  */
 export function getExpectedTurnstileAction(): string {
-  const configured = env.TURNSTILE_EXPECTED_ACTION?.trim() ?? "";
+  const configured =
+    (
+      getRuntimeEnvString("TURNSTILE_EXPECTED_ACTION") ??
+      env.TURNSTILE_EXPECTED_ACTION
+    )?.trim() ?? "";
   return configured === "" ? "contact_form" : configured;
 }
 

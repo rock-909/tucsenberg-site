@@ -317,7 +317,9 @@ Impeccable 决定：
 - lint：`pnpm lint:check`
 - broad runtime：`pnpm build`
 - Cloudflare artifact：先 `pnpm build`，再 `pnpm website:build:cf`
-- release-facing：`pnpm website:check`
+- local full gate：`pnpm website:check`
+- release-facing：`pnpm release:verify`
+- manual performance proof：`pnpm build && pnpm website:lighthouse`
 
 本地验证只证明项目实现可交付。上线前仍以 `docs/proof/launch.md` 为准；涉及表单、邮件、CRM、Turnstile、Cloudflare 的项目，
 还需要 deployed smoke 和 real-service canary。

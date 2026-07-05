@@ -155,12 +155,11 @@ Do not delete, archive, or shrink Registry / Playbook until a later approved ret
 
 ## Ponytail Skills
 
-Project-local Ponytail skills are installed for both Claude and Codex:
-
 - `ponytail`
 - `ponytail-review`
 - `ponytail-audit`
 - `ponytail-debt`
+- `ponytail-gain`
 - `ponytail-help`
 
 Ponytail is default-on in this project as the simplification and
