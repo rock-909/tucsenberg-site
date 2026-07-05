@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/test/render-async-page";
@@ -95,6 +95,10 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
 }));
 
 describe("ContactPage MDX migration", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetContactCopyFromMessages.mockReturnValue(contactCopy);
@@ -368,6 +372,8 @@ describe("ContactPage MDX migration", () => {
   });
 
   it("generates runtime SEO metadata for the actual localized contact route", async () => {
+    vi.stubEnv("APP_ENV", "production");
+
     const metadata = await generateMetadata({
       params: Promise.resolve({ locale: "en" }),
     });

@@ -1,7 +1,28 @@
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/config/paths";
 import { ONE } from "@/constants";
-import { getRuntimeEnvString } from "@/lib/env";
+import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
+
+const INDEXABLE_ROBOTS = {
+  index: true,
+  follow: true,
+  googleBot: {
+    index: true,
+    follow: true,
+    "max-video-preview": -ONE,
+    "max-image-preview": "large",
+    "max-snippet": -ONE,
+  },
+} as const satisfies Metadata["robots"];
+
+const NOINDEX_ROBOTS = {
+  index: false,
+  follow: false,
+  googleBot: {
+    index: false,
+    follow: false,
+  },
+} as const satisfies Metadata["robots"];
 
 /**
  * Locale layout metadata (base only).
@@ -29,17 +50,8 @@ export async function generateLocaleMetadata({
       template: SITE_CONFIG.seo.titleTemplate,
     },
     description: SITE_CONFIG.seo.defaultDescription,
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -ONE,
-        "max-image-preview": "large",
-        "max-snippet": -ONE,
-      },
-    },
+    robots:
+      getRuntimeAppEnv() === "production" ? INDEXABLE_ROBOTS : NOINDEX_ROBOTS,
     verification: {
       google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
       yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),

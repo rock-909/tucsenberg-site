@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
+import { createPageSEOConfig } from "@/lib/seo-metadata";
 
 const PREVIEW_BASE_URL =
   "https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev";
+const TUCSENBERG_OG_IMAGE = "/images/tucsenberg-og.png";
 
 describe("single-site", () => {
   afterEach(() => {
@@ -27,5 +30,10 @@ describe("single-site", () => {
     const { SINGLE_SITE_CONFIG } = await import("@/config/single-site");
 
     expect(SINGLE_SITE_CONFIG.baseUrl).toBe(PREVIEW_BASE_URL);
+  });
+
+  it("keeps the approved Tucsenberg OG image as the live default", () => {
+    expect(SINGLE_SITE_FACTS.brandAssets.ogImage).toBe(TUCSENBERG_OG_IMAGE);
+    expect(createPageSEOConfig("home").image).toBe(TUCSENBERG_OG_IMAGE);
   });
 });

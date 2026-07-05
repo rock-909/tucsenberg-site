@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { siteFacts } from "@/config/site-facts";
 import type { ProductFamilyDefinition } from "@/constants/product-catalog";
 import type { FamilySpecs } from "@/constants/product-specs/types";
 import { Link } from "@/i18n/routing";
@@ -6,6 +7,23 @@ import type { LinkHref } from "@/lib/i18n/route-parsing";
 import { cn } from "@/lib/utils";
 import { SpecTable } from "@/components/products/spec-table";
 import { Button } from "@/components/ui/button";
+
+const FALLBACK_PRODUCT_IMAGE =
+  "/profile-fixtures/catalog/products/sample-product-a.svg";
+
+function resolveProductImage(images: readonly string[]) {
+  const firstImage = images[0];
+
+  if (
+    siteFacts.brandAssets.productPhotos.status !== "ready" ||
+    !firstImage ||
+    firstImage.includes("placeholder")
+  ) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  return firstImage;
+}
 
 export interface FamilySectionProps {
   family: ProductFamilyDefinition;
@@ -30,16 +48,14 @@ export function FamilySection({
   priorityImage = false,
   className,
 }: FamilySectionProps) {
-  const firstImage =
-    specs.images[0] ??
-    "/profile-fixtures/catalog/products/sample-product-a.svg";
+  const firstImage = resolveProductImage(specs.images);
 
   return (
     <section id={family.slug} className={cn("py-12", className)}>
       {/* Desktop: two-column split; Mobile: vertical stack */}
       <div className="mb-8 flex flex-col gap-8 md:flex-row md:items-start">
         {/* Image area — left column on desktop */}
-        <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg border border-border bg-muted md:w-1/2">
+        <div className="border-border bg-muted relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg border md:w-1/2">
           <Image
             src={firstImage}
             alt={familyLabel}
@@ -52,7 +68,7 @@ export function FamilySection({
 
         {/* Overview — right column on desktop */}
         <div className="flex flex-col gap-4 md:w-1/2">
-          <h2 className="text-2xl font-semibold text-foreground">
+          <h2 className="text-foreground text-2xl font-semibold">
             {familyLabel}
           </h2>
           <p className="text-muted-foreground">{familyDescription}</p>
@@ -62,7 +78,7 @@ export function FamilySection({
             {specs.highlights.map((highlight) => (
               <li key={highlight} className="flex items-center gap-2 text-sm">
                 <span
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs text-foreground"
+                  className="border-border bg-muted text-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs"
                   aria-hidden="true"
                 >
                   ✓

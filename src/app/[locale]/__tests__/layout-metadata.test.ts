@@ -34,9 +34,11 @@ describe("Locale layout metadata", () => {
   afterEach(() => {
     delete process.env.GOOGLE_SITE_VERIFICATION;
     delete process.env.YANDEX_VERIFICATION;
+    delete process.env.APP_ENV;
   });
 
   it("returns base metadata without alternates", async () => {
+    process.env.APP_ENV = "production";
     const params = Promise.resolve({ locale: "en" });
     const metadata = await generateLocaleMetadata({ params });
 
@@ -64,5 +66,20 @@ describe("Locale layout metadata", () => {
     const metadata = await generateLocaleMetadata({ params });
 
     expect(metadata.openGraph).toBeUndefined();
+  });
+
+  it("noindexes non-production layout metadata", async () => {
+    process.env.APP_ENV = "preview";
+    const params = Promise.resolve({ locale: "en" });
+    const metadata = await generateLocaleMetadata({ params });
+
+    expect(metadata.robots).toMatchObject({
+      index: false,
+      follow: false,
+      googleBot: {
+        index: false,
+        follow: false,
+      },
+    });
   });
 });

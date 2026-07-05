@@ -20,6 +20,7 @@ describe("Tucsenberg product page copy contract", () => {
       expect(pagePayload, slug).not.toMatch(/offers"\s*:\s*\{/iu);
       expect(pagePayload, slug).not.toMatch(/price"\s*:/iu);
       expect(pagePayload, slug).not.toMatch(/[$€£]\s*\d/u);
+      expect(pagePayload, slug).not.toContain("TODO-OWNER");
     }
   });
 

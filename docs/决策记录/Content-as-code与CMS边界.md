@@ -229,7 +229,7 @@ If maintainers decide to test CMS editing, run a narrow proof:
 ```bash
 pnpm content:check
 node scripts/starter-checks.js translations
-node scripts/starter-checks.js content-readiness --profile company-site
+node scripts/starter-checks.js content-readiness --profile catalog
 ```
 
 6. Prove preview deployment behavior before recommending the tool for derived

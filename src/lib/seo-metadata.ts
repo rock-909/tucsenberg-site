@@ -8,7 +8,7 @@ import {
 import { siteFacts } from "@/config/site-facts";
 import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
-import { getRuntimeEnvString } from "@/lib/env";
+import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -47,6 +47,7 @@ interface StaticPageMetadataConfigOptions {
 }
 
 const FALLBACK_LOCALE: Locale = "en";
+const DEFAULT_OG_IMAGE = siteFacts.brandAssets.ogImage;
 
 function resolveLocale(locale: Locale): Locale {
   return locale === FALLBACK_LOCALE ? locale : FALLBACK_LOCALE;
@@ -159,7 +160,7 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
     return {
       type: "website",
       keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-      image: "/images/og-image.jpg",
+      image: DEFAULT_OG_IMAGE,
     };
   }
 
@@ -168,7 +169,7 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
       return {
         type: "website",
         keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-        image: "/images/og-image.jpg",
+        image: DEFAULT_OG_IMAGE,
       };
     case "content.pages.about":
       return {
@@ -224,7 +225,7 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
       return {
         type: "website",
         keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-        image: "/images/og-image.jpg",
+        image: DEFAULT_OG_IMAGE,
       };
   }
 }
@@ -325,6 +326,10 @@ const INACTIVE_PROFILE_ROBOTS = {
   },
 } as const satisfies Metadata["robots"];
 
+function shouldIndexRuntimeEnvironment(): boolean {
+  return getRuntimeAppEnv() === "production";
+}
+
 export function generateMetadataForPath(
   params: GenerateMetadataForPathParams,
 ): Metadata {
@@ -352,6 +357,7 @@ export function generateMetadataForPath(
   }
 
   if (
+    !shouldIndexRuntimeEnvironment() ||
     !shouldIndexPublicPageForProfile(
       pageType,
       path,

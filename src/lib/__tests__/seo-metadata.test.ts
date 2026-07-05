@@ -29,6 +29,21 @@ vi.mock("@/config/paths", () => ({
   },
 }));
 
+vi.mock("@/config/site-facts", () => ({
+  siteFacts: {
+    company: {
+      established: 2021,
+      employees: 0,
+    },
+    brandAssets: {
+      ogImage: "/images/facts-og.png",
+    },
+    stats: {
+      exportCountries: 0,
+    },
+  },
+}));
+
 vi.mock("@/lib/seo/url-generator", () => ({
   generateCanonicalURL: mockGenerateCanonicalURL,
   generateLanguageAlternates: mockGenerateLanguageAlternates,
@@ -53,6 +68,7 @@ describe("SEO Metadata", () => {
     vi.restoreAllMocks();
     delete process.env.GOOGLE_SITE_VERIFICATION;
     delete process.env.YANDEX_VERIFICATION;
+    delete process.env.APP_ENV;
   });
 
   describe("generateLocalizedMetadata", () => {
@@ -200,7 +216,42 @@ describe("SEO Metadata", () => {
   });
 
   describe("generateMetadataForPath", () => {
+    it("noindexes active catalog pages outside production", () => {
+      process.env.APP_ENV = "preview";
+
+      const metadata = generateMetadataForPath({
+        locale: "en",
+        pageType: "products",
+        path: "/products",
+      });
+
+      expect(metadata.robots).toMatchObject({
+        index: false,
+        follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
+      });
+    });
+
+    it("keeps active catalog pages indexable in production", () => {
+      process.env.APP_ENV = "production";
+
+      const metadata = generateMetadataForPath({
+        locale: "en",
+        pageType: "products",
+        path: "/products",
+      });
+
+      expect(metadata.robots).toMatchObject({
+        index: true,
+        follow: true,
+      });
+    });
+
     it("should keep default Tucsenberg catalog pages indexable", () => {
+      process.env.APP_ENV = "production";
       const productsMetadata = generateMetadataForPath({
         locale: "en",
         pageType: "products",
@@ -227,6 +278,7 @@ describe("SEO Metadata", () => {
     });
 
     it("should index product market pages in the default public SEO profile", () => {
+      process.env.APP_ENV = "production";
       const metadata = generateMetadataForPath({
         locale: "en",
         pageType: "products",
@@ -257,6 +309,7 @@ describe("SEO Metadata", () => {
     });
 
     it("should keep active b2b-lead pages indexable", () => {
+      process.env.APP_ENV = "production";
       const aboutMetadata = generateMetadataForPath({
         locale: "en",
         pageType: "about",
@@ -387,7 +440,7 @@ describe("SEO Metadata", () => {
       expect(config).toEqual({
         type: "website",
         keywords: ["test", "site", "B2B Solution"],
-        image: "/images/og-image.jpg",
+        image: "/images/facts-og.png",
       });
     });
 
@@ -404,12 +457,12 @@ describe("SEO Metadata", () => {
       expect(createPageSEOConfig("capabilities")).toEqual({
         type: "website",
         keywords: ["test", "site", "B2B Solution"],
-        image: "/images/og-image.jpg",
+        image: "/images/facts-og.png",
       });
       expect(createPageSEOConfig("howItWorks")).toEqual({
         type: "website",
         keywords: ["test", "site", "B2B Solution"],
-        image: "/images/og-image.jpg",
+        image: "/images/facts-og.png",
       });
     });
 
@@ -582,7 +635,7 @@ describe("SEO Metadata", () => {
       // Test applyBaseFields with image defined (line 119-120)
       const config = createPageSEOConfig("home");
 
-      expect(config.image).toBe("/images/og-image.jpg");
+      expect(config.image).toBe("/images/facts-og.png");
     });
   });
 

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import robots from "../robots";
 
 // Mock config before import
@@ -25,6 +25,10 @@ function normalizeRules(
 }
 
 describe("robots.ts", () => {
+  afterEach(() => {
+    delete process.env.APP_ENV;
+  });
+
   describe("robots()", () => {
     it("should return robots configuration object", () => {
       const result = robots();
@@ -51,31 +55,36 @@ describe("robots.ts", () => {
       expect(wildcardRule).toBeDefined();
     });
 
-    it("should allow root path", () => {
+    it("should disallow all crawling outside production", () => {
+      process.env.APP_ENV = "preview";
       const result = robots();
       const rulesArray = normalizeRules(result.rules);
       const wildcardRule = rulesArray[0];
 
-      expect(wildcardRule?.allow).toBe("/");
+      expect(wildcardRule?.allow).toBeUndefined();
+      expect(wildcardRule?.disallow).toBe("/");
     });
 
-    it("should disallow sensitive paths", () => {
+    it("should allow root and disallow sensitive paths in production", () => {
+      process.env.APP_ENV = "production";
       const result = robots();
       const rulesArray = normalizeRules(result.rules);
       const wildcardRule = rulesArray[0];
       const disallowed = wildcardRule?.disallow;
 
+      expect(wildcardRule?.allow).toBe("/");
       expect(disallowed).toContain("/api/");
       expect(disallowed).toContain("/_next/");
     });
 
-    it("should disallow test paths", () => {
+    it("should not reference removed test paths", () => {
+      process.env.APP_ENV = "production";
       const result = robots();
       const rulesArray = normalizeRules(result.rules);
       const wildcardRule = rulesArray[0];
       const disallowed = wildcardRule?.disallow;
 
-      expect(disallowed).toContain("/error-test/");
+      expect(disallowed).not.toContain("/error-test/");
     });
 
     it("should include sitemap URL", () => {

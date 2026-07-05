@@ -48,4 +48,18 @@ describe("Cloudflare deploy workflow contract", () => {
       "GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}",
     );
   });
+
+  it("runs the strict public-launch config gate before production deploy", () => {
+    const workflow = readFileSync(
+      ".github/workflows/cloudflare-deploy.yml",
+      "utf8",
+    );
+
+    expect(workflow).toContain(
+      "PUBLIC_LAUNCH_STRICT=true APP_ENV=production node scripts/starter-checks.js validate-production-config",
+    );
+    expect(workflow.indexOf("validate-production-config")).toBeLessThan(
+      workflow.indexOf("部署到 Cloudflare Workers（production）"),
+    );
+  });
 });

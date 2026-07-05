@@ -6,11 +6,9 @@ describe("Contact page MDX rendering contract", () => {
     const page = await getPageBySlug("contact", "en");
 
     expect(page.content).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote/)",
+      "**Fastest route**: the [RFQ form](/request-quote)",
     );
     expect(page.content).toContain("**Email**: sales@tucsenberg.com");
-    expect(page.content).toContain(
-      "**WhatsApp**: @Tucsenberg (business account)",
-    );
+    expect(page.content).not.toContain("**WhatsApp**:");
   });
 });

@@ -4,7 +4,7 @@ import {
   type StarterProfileId,
 } from "@/config/starter-profiles";
 
-const STATIC_PAGE_LASTMOD_ISO = "2026-04-26T00:00:00Z";
+const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
 export type PublicStaticPageChangeFrequency =
   | "always"

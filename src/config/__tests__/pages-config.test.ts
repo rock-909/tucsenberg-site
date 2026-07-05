@@ -130,9 +130,9 @@ describe("pages.config static public page registry", () => {
 
   it("keeps static sidecar lastmod only for non-MDX static public pages", () => {
     expect(getStaticPageLastmodByPath()).toEqual({
-      "": "2026-04-26T00:00:00Z",
-      "/products": "2026-04-26T00:00:00Z",
-      "/request-quote": "2026-04-26T00:00:00Z",
+      "": "2026-07-05T00:00:00Z",
+      "/products": "2026-07-05T00:00:00Z",
+      "/request-quote": "2026-07-05T00:00:00Z",
     });
   });
 
@@ -226,9 +226,9 @@ describe("pages.config static public page registry", () => {
       priority: 0.9,
     });
     expect(getActiveStaticPageLastmodByPath()).toEqual({
-      "": "2026-04-26T00:00:00Z",
-      "/products": "2026-04-26T00:00:00Z",
-      "/request-quote": "2026-04-26T00:00:00Z",
+      "": "2026-07-05T00:00:00Z",
+      "/products": "2026-07-05T00:00:00Z",
+      "/request-quote": "2026-07-05T00:00:00Z",
     });
     expect(getActiveMdxPageSlugByStaticPath()).toEqual({
       "/about": "about",
@@ -270,9 +270,9 @@ describe("pages.config static public page registry", () => {
       "/terms",
     ]);
     expect(getActiveStaticPageLastmodByPath("catalog")).toEqual({
-      "": "2026-04-26T00:00:00Z",
-      "/products": "2026-04-26T00:00:00Z",
-      "/request-quote": "2026-04-26T00:00:00Z",
+      "": "2026-07-05T00:00:00Z",
+      "/products": "2026-07-05T00:00:00Z",
+      "/request-quote": "2026-07-05T00:00:00Z",
     });
   });
 });

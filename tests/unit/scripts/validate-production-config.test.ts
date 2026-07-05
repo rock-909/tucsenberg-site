@@ -306,4 +306,56 @@ describe("public launch trust content guard", () => {
       ]),
     );
   });
+
+  it("treats workers.dev and example.invalid as non-launch public URLs", () => {
+    const workersDev = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_SITE_URL:
+        "https://tucsenberg-site-preview.example.workers.dev",
+      ...createValidProductionEnv(),
+    });
+    const exampleInvalid = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_SITE_URL:
+        "https://tucsenberg-site-production.example.invalid",
+      ...createValidProductionEnv(),
+    });
+
+    expect(workersDev.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_SITE_URL")]),
+    );
+    expect(exampleInvalid.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_SITE_URL")]),
+    );
+  });
+
+  it("treats workers.dev and example.invalid base URLs as non-launch public URLs", () => {
+    const workersDev = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_BASE_URL:
+        "https://tucsenberg-site-preview.example.workers.dev",
+      ...createValidProductionEnv(),
+    });
+    const exampleInvalid = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_BASE_URL:
+        "https://tucsenberg-site-production.example.invalid",
+      ...createValidProductionEnv(),
+    });
+
+    expect(workersDev.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_BASE_URL")]),
+    );
+    expect(exampleInvalid.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_BASE_URL")]),
+    );
+  });
 });

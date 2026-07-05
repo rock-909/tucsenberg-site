@@ -140,7 +140,7 @@ function isTrue(env, key) {
 function containsStarterMarker(value) {
   if (!value) return true;
 
-  return /Example Showcase Company|Showcase Website Starter|example\.(?:com|org|net)|[\w.-]+\.example|localhost|127\.0\.0\.1|sales@example\.com|starter-contact@example\.com|showcase website example|showcase website starter|public demo starter|replaceable showcase website example|Public Demo Starter Site|Example Business Park|Example City|Replace before launch|x\.com\/example|linkedin\.com\/company\/example/iu.test(
+  return /Example Showcase Company|Showcase Website Starter|example\.(?:com|org|net|invalid)|[\w.-]+\.example|\.workers\.dev|localhost|127\.0\.0\.1|sales@example\.com|starter-contact@example\.com|showcase website example|showcase website starter|public demo starter|replaceable showcase website example|Public Demo Starter Site|Example Business Park|Example City|Replace before launch|x\.com\/example|linkedin\.com\/company\/example/iu.test(
     value,
   );
 }
@@ -292,6 +292,15 @@ function validatePublicLaunchTrustContent(env) {
 
   if (!shouldCheck) {
     return { warnings, errors };
+  }
+
+  for (const key of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_URL"]) {
+    const value = readEnv(env, key);
+    if (value && containsStarterMarker(value)) {
+      target.push(
+        `${key} is not public-launch ready (configure the real public domain before client launch).`,
+      );
+    }
   }
 
   validateNoStarterMarker(

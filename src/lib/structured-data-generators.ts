@@ -64,6 +64,19 @@ interface LocalBusinessSchemaInput {
   priceRange?: string;
 }
 
+function getSocialProfileUrls(
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): string[] {
+  return [
+    t("organization.social.twitter", {
+      defaultValue: SITE_CONFIG.social.twitter,
+    }),
+    t("organization.social.linkedin", {
+      defaultValue: SITE_CONFIG.social.linkedin,
+    }),
+  ].filter((url) => /^https?:\/\//iu.test(url));
+}
+
 export function buildSchemaFallback(type: string): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -82,6 +95,7 @@ export function generateOrganizationData(
   const telephone = getPublicContactPhone(
     data.phone ?? SITE_CONFIG.contact.phone,
   );
+  const sameAs = getSocialProfileUrls(t);
 
   return {
     "@context": "https://schema.org",
@@ -106,14 +120,7 @@ export function generateOrganizationData(
       contactType: "customer service",
       availableLanguage: routing.locales,
     },
-    sameAs: [
-      t("organization.social.twitter", {
-        defaultValue: SITE_CONFIG.social.twitter,
-      }),
-      t("organization.social.linkedin", {
-        defaultValue: SITE_CONFIG.social.linkedin,
-      }),
-    ],
+    ...(sameAs.length > 0 ? { sameAs } : {}),
     // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }

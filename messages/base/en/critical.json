@@ -100,98 +100,6 @@
     "turnstileTestMode": "Bot protection disabled in test mode",
     "turnstileLoadFailed": "Security verification failed to load."
   },
-  "underConstruction": {
-    "title": "Under Construction",
-    "subtitle": "We're working hard to bring you something amazing",
-    "description": "This page is currently under development. We're building something great and will have it ready soon.",
-    "backToHome": "Back to Home",
-    "comingSoon": "Coming Soon",
-    "expectedCompletion": "Expected completion: {date}",
-    "expectedLaunch": "Expected launch: {date}",
-    "dates": {
-      "q2_2024": "Q2 2024",
-      "q3_2024": "Q3 2024"
-    },
-    "stayTuned": "Stay tuned for updates",
-    "contactUs": "Contact us for more information",
-    "progress": {
-      "title": "Development Progress"
-    },
-    "pages": {
-      "products": {
-        "title": "Products - Under Construction",
-        "description": "Our product showcase is being crafted with care. Discover innovative solutions that will transform your business.",
-        "features": "Product features and specifications coming soon"
-      },
-      "about": {
-        "title": "About Us - Under Construction",
-        "description": "Learn more about our story, mission, and the team behind our innovative solutions.",
-        "features": "Company story, team profiles, and mission statement coming soon"
-      },
-      "contact": {
-        "title": "Contact",
-        "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
-        "features": "Email, WhatsApp and RFQ routing for Tucsenberg buyers",
-        "panel": {
-          "contactTitle": "Email & WhatsApp",
-          "email": "Email",
-          "emailUnavailable": "Use the RFQ form if email is unavailable.",
-          "phone": "Phone",
-          "hoursTitle": "Time zone",
-          "weekdays": "China",
-          "saturday": "Follow-up",
-          "sunday": "US/EU hours",
-          "closed": "Closed",
-          "responseTitle": "Quote response",
-          "responseTimeLabel": "Standard items",
-          "responseTimeValue": "12 hours",
-          "bestForLabel": "Custom configurations",
-          "bestForValue": "48 hours",
-          "prepareLabel": "Fastest route",
-          "prepareValue": "Use the RFQ form; it asks the questions we'd ask anyway."
-        }
-      }
-    },
-    "animation": {
-      "loading": "Loading animation",
-      "construction": "Construction in progress"
-    },
-    "status": {
-      "inProgress": "In Progress"
-    },
-    "features": {
-      "title": "Feature Preview",
-      "performance": "High Performance",
-      "performanceDesc": "Optimized performance and fast loading experience",
-      "collaboration": "Team Collaboration",
-      "collaborationDesc": "Powerful team collaboration and project management features",
-      "quality": "Quality Assurance",
-      "qualityDesc": "Strict quality control and testing processes"
-    },
-    "social": {
-      "followUs": "Follow us for the latest updates"
-    },
-    "subscription": {
-      "title": "Get Launch Notifications",
-      "description": "Be the first to know about our latest updates",
-      "placeholder": "Enter your email address",
-      "submit": "Subscribe",
-      "submitting": "Submitting...",
-      "success": "Successfully subscribed! We'll notify you soon"
-    },
-    "emailSubscription": {
-      "title": "Stay in the Loop",
-      "description": "Subscribe to receive updates about our launch timeline and new features.",
-      "success": "You're subscribed! We'll keep you posted.",
-      "placeholder": "Enter your email address",
-      "button": "Notify Me"
-    },
-    "contact": {
-      "title": "Need Assistance?",
-      "description": "Reach out to our team for tailored support and partnership opportunities.",
-      "button": "Contact Support"
-    }
-  },
   "cookie": {
     "title": "Cookie Preferences",
     "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
@@ -221,8 +129,8 @@
       "description": "Factory-direct flood barrier supply from China",
       "phone": "Contact sales by email",
       "social": {
-        "twitter": "https://x.com/example",
-        "linkedin": "https://www.linkedin.com/company/example"
+        "twitter": "",
+        "linkedin": ""
       }
     },
     "website": {

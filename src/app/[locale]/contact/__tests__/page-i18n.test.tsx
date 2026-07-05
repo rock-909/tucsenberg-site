@@ -9,7 +9,7 @@ describe("Contact page MDX i18n", () => {
       "Contact Tucsenberg — Flood Barrier Supplier, China",
     );
     expect(en.content).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote/)",
+      "**Fastest route**: the [RFQ form](/request-quote)",
     );
   });
 });

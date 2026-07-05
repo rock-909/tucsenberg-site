@@ -65,6 +65,11 @@ vi.mock("@/config/paths", () => ({
   SITE_CONFIG: {
     name: "Example Showcase Company",
     baseUrl: "https://www.example.com",
+    brandAssets: {
+      productPhotos: {
+        status: "pending",
+      },
+    },
     seo: {
       defaultTitle: "Example Showcase Company",
       defaultDescription: "Replaceable showcase catalog example",
@@ -297,6 +302,9 @@ describe("Market Landing Page", () => {
         expect.objectContaining({ "@type": "BreadcrumbList" }),
         expect.objectContaining({ "@type": "FAQPage" }),
       ]);
+      expect(JSON.stringify(graphCall?.data)).not.toContain(
+        "/images/products/",
+      );
     });
   });
 

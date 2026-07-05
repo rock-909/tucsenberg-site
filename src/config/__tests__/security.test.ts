@@ -62,6 +62,24 @@ describe("Security Configuration", () => {
       expect(csp).toContain("https://www.google-analytics.com");
     });
 
+    it("does not allow starter image hosts or server-only email APIs in browser CSP", () => {
+      const csp = generateCSP();
+
+      expect(csp).not.toContain("https://images.unsplash.com");
+      expect(csp).not.toContain("https://via.placeholder.com");
+      expect(csp).not.toContain("https://api.resend.com");
+    });
+
+    it("does not broadly allow remote images in browser CSP", () => {
+      const csp = generateCSP();
+      const imgSrc = csp
+        .split(";")
+        .find((directive) => directive.trim().startsWith("img-src"));
+
+      expect(imgSrc).toBeDefined();
+      expect(imgSrc).not.toMatch(/(^|\s)https:(\s|$)/u);
+    });
+
     it("should set frame-ancestors to none", () => {
       const csp = generateCSP();
       expect(csp).toContain("frame-ancestors 'none'");
