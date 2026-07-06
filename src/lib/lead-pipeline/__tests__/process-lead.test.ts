@@ -9,6 +9,17 @@ const mockSendContactFormEmail = vi.hoisted(() => vi.fn());
 const mockSendConfirmationEmail = vi.hoisted(() => vi.fn());
 const mockSendProductInquiryEmail = vi.hoisted(() => vi.fn());
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return { promise, reject, resolve };
+}
+
 vi.mock("next/server", () => ({
   after: mockAfter,
 }));
@@ -123,6 +134,40 @@ describe("processLead", () => {
     expect(result).not.toHaveProperty("partialSuccess");
     expect(result.referenceId?.startsWith("CON-")).toBe(true);
     expect(result.error).toBeUndefined();
+  });
+
+  it("starts contact owner email and Airtable delivery before either settles", async () => {
+    const emailDelivery = createDeferred<string>();
+    const recordDelivery = createDeferred<{ id: string }>();
+    const events: string[] = [];
+
+    mockSendContactFormEmail.mockImplementation(() => {
+      events.push("owner-email-started");
+      return emailDelivery.promise;
+    });
+    mockCreateLead.mockImplementation(() => {
+      events.push("airtable-record-started");
+      return recordDelivery.promise;
+    });
+
+    const resultPromise = processLead(validContactLead);
+    await Promise.resolve();
+
+    expect(mockSendContactFormEmail).toHaveBeenCalledTimes(1);
+    expect(mockCreateLead).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(["owner-email-started", "airtable-record-started"]);
+
+    emailDelivery.resolve("email-id-123");
+    recordDelivery.resolve({ id: "record-123" });
+
+    await expect(resultPromise).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        emailSent: true,
+        ownerNotified: true,
+        recordCreated: true,
+      }),
+    );
   });
 
   it("passes buyer-entered contact subject to Airtable and owner email", async () => {
@@ -289,6 +334,40 @@ describe("processLead", () => {
     expect(result).not.toHaveProperty("partialSuccess");
     expect(result.referenceId?.startsWith("PRO-")).toBe(true);
     expect(result.error).toBeUndefined();
+  });
+
+  it("starts product owner email and Airtable delivery before either settles", async () => {
+    const emailDelivery = createDeferred<string>();
+    const recordDelivery = createDeferred<{ id: string }>();
+    const events: string[] = [];
+
+    mockSendProductInquiryEmail.mockImplementation(() => {
+      events.push("owner-email-started");
+      return emailDelivery.promise;
+    });
+    mockCreateLead.mockImplementation(() => {
+      events.push("airtable-record-started");
+      return recordDelivery.promise;
+    });
+
+    const resultPromise = processLead(validProductLead);
+    await Promise.resolve();
+
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledTimes(1);
+    expect(mockCreateLead).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(["owner-email-started", "airtable-record-started"]);
+
+    emailDelivery.resolve("product-email-id");
+    recordDelivery.resolve({ id: "record-456" });
+
+    await expect(resultPromise).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        emailSent: true,
+        ownerNotified: true,
+        recordCreated: true,
+      }),
+    );
   });
 
   it("passes product attribution fields to Airtable", async () => {

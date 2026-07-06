@@ -189,8 +189,10 @@ async function processContact(
 ): Promise<LeadResult> {
   const { referenceId } = context;
 
-  const emailSent = await sendContactOwnerEmail(lead, context);
-  const recordCreated = await createContactLeadRecord(lead, context);
+  const [emailSent, recordCreated] = await Promise.all([
+    sendContactOwnerEmail(lead, context),
+    createContactLeadRecord(lead, context),
+  ]);
 
   if (!emailSent && !recordCreated) {
     return createProcessingFailureResult(referenceId);
@@ -288,8 +290,10 @@ async function processProduct(
   context: LeadProcessingContext,
 ): Promise<LeadResult> {
   const { referenceId } = context;
-  const emailSent = await sendProductOwnerEmail(lead, context);
-  const recordCreated = await createProductLeadRecord(lead, context);
+  const [emailSent, recordCreated] = await Promise.all([
+    sendProductOwnerEmail(lead, context),
+    createProductLeadRecord(lead, context),
+  ]);
 
   if (!emailSent && !recordCreated) {
     return createProcessingFailureResult(referenceId);
