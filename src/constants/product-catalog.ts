@@ -1,9 +1,10 @@
 /**
  * Product catalog query facade.
  *
- * Authoring truth stays in src/config/single-site-product-catalog.ts and
- * src/constants/product-specs/**; this module gives routes, sitemap generation,
- * and pages a stable way to query the current catalog.
+ * Catalog route/list truth stays in src/config/single-site-product-catalog.ts.
+ * Current Tucsenberg product page specs/copy live in
+ * src/constants/tucsenberg-product-pages.ts; src/constants/product-specs/**
+ * remains a legacy starter/adopter fixture.
  */
 
 import {

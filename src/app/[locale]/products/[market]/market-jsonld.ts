@@ -1,59 +1,66 @@
 import { buildCatalogBreadcrumbJsonLd } from "@/components/products/catalog-breadcrumb-jsonld";
 import { SITE_CONFIG } from "@/config/paths";
-import { siteFacts } from "@/config/site-facts";
+import type { MarketDefinition } from "@/constants/product-catalog";
+import type {
+  TucsenbergProductPage,
+  TucsenbergProductSection,
+} from "@/constants/tucsenberg-product-pages";
 import { generateProductGroupData } from "@/lib/structured-data-generators";
-import type { MarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
 
-export interface MarketPageJsonLdLabels {
-  marketDescription: string;
-  marketLabel: string;
-}
-
-function getJsonLdProductImage(image: string | undefined) {
-  if (
-    siteFacts.brandAssets.productPhotos.status !== "ready" ||
-    !image ||
-    image.includes("placeholder")
-  ) {
+function getJsonLdProductImage(productPage: TucsenbergProductPage) {
+  if (productPage.image.status !== "real") {
     return undefined;
   }
 
-  return `${SITE_CONFIG.baseUrl}${image}`;
+  return new URL(productPage.image.src, SITE_CONFIG.baseUrl).toString();
+}
+
+function getSectionTableSummary(section: TucsenbergProductSection) {
+  if (!section.table) {
+    return undefined;
+  }
+
+  const rows = section.table.rows.map((row) => row.join(" | ")).join("; ");
+  return `${section.title}: ${rows}`;
+}
+
+function getProductJsonLdDescription(productPage: TucsenbergProductPage) {
+  return [
+    productPage.subtitle,
+    productPage.lead,
+    ...productPage.sections
+      .map((section) => getSectionTableSummary(section))
+      .filter((summary): summary is string => Boolean(summary)),
+  ].join(" ");
 }
 
 export async function buildMarketPageJsonLdData({
-  data,
-  labels,
+  market,
   marketUrl,
-  t,
+  productPage,
 }: {
-  data: Pick<MarketPageData, "families" | "familySpecsMap" | "market">;
-  labels: MarketPageJsonLdLabels;
+  market: MarketDefinition;
   marketUrl: string;
-  t: (key: string) => string;
+  productPage: TucsenbergProductPage;
 }): Promise<unknown[]> {
-  const { families, familySpecsMap, market } = data;
+  const image = getJsonLdProductImage(productPage);
   const productGroupSchema = generateProductGroupData({
-    name: labels.marketLabel,
-    description: labels.marketDescription,
+    name: productPage.title,
+    description: productPage.lead,
     url: marketUrl,
     brand: SITE_CONFIG.name,
-    products: families.map((family) => {
-      const image = getJsonLdProductImage(
-        familySpecsMap.get(family.slug)?.images[0],
-      );
-
-      return {
-        name: t(`families.${market.slug}.${family.slug}.label`),
-        description: t(`families.${market.slug}.${family.slug}.description`),
+    products: [
+      {
+        name: productPage.title,
+        description: getProductJsonLdDescription(productPage),
         ...(image ? { image } : {}),
-        url: `${marketUrl}#${family.slug}`,
-      };
-    }),
+        url: marketUrl,
+      },
+    ],
   });
   const breadcrumbSchema = await buildCatalogBreadcrumbJsonLd({
     market,
-    marketLabel: labels.marketLabel,
+    marketLabel: productPage.title,
   });
 
   return [productGroupSchema, breadcrumbSchema];

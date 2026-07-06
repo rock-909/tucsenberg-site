@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
@@ -21,6 +23,24 @@ describe("Tucsenberg product page copy contract", () => {
       expect(pagePayload, slug).not.toMatch(/price"\s*:/iu);
       expect(pagePayload, slug).not.toMatch(/[$€£]\s*\d/u);
       expect(pagePayload, slug).not.toContain("TODO-OWNER");
+    }
+  });
+
+  it("uses explicit product image state instead of placeholder paths", () => {
+    for (const [slug, page] of Object.entries(TUCSENBERG_PRODUCT_PAGES)) {
+      const image = page.image;
+
+      expect(["real", "pending", "omitted"], slug).toContain(image.status);
+      expect(JSON.stringify(page), slug).not.toMatch(
+        /\/images\/products\/.*placeholder/iu,
+      );
+
+      if (image.status === "real") {
+        expect(image.src, slug).toMatch(/^\//u);
+        expect(image.src, slug).not.toContain("placeholder");
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- product image paths are fixed owner-authored constants validated against public/
+        expect(existsSync(join(process.cwd(), "public", image.src))).toBe(true);
+      }
     }
   });
 

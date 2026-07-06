@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
+import { SITE_CONFIG } from "@/config/paths";
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);
 const RUNTIME_SOURCE_ROOTS = [
@@ -13,6 +14,7 @@ const RUNTIME_SOURCE_ROOTS = [
 const WEBSITE_CONFIG_PREFIX = "@/config/website";
 const IMPORT_SPECIFIER_PATTERN =
   /(?:from\s+["']|import\s*[(]?\s*["']|require\s*[(]\s*["'])([^"']+)["']/gu;
+const SITE_CONFIG_BRAND_ASSETS_PATTERN = /\bSITE_CONFIG\s*\.\s*brandAssets\b/u;
 
 function read(repoPath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads repo-local files from fixed scan roots
@@ -145,6 +147,28 @@ describe("website config runtime boundary", () => {
 
         for (const specifier of imports) {
           offenders.push(`${repoPath} -> ${specifier}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps brand asset facts out of the SITE_CONFIG runtime facade", () => {
+    const runtimeConfig = SITE_CONFIG as Record<string, unknown>;
+
+    expect(Object.hasOwn(runtimeConfig, "brandAssets")).toBe(false);
+  });
+
+  it("keeps runtime source from reading brand assets through SITE_CONFIG", () => {
+    const offenders: string[] = [];
+
+    for (const root of RUNTIME_SOURCE_ROOTS) {
+      for (const repoPath of walkSourceFiles(root)) {
+        const source = read(repoPath);
+
+        if (SITE_CONFIG_BRAND_ASSETS_PATTERN.test(source)) {
+          offenders.push(repoPath);
         }
       }
     }

@@ -302,8 +302,26 @@ describe("Market Landing Page", () => {
         expect.objectContaining({ "@type": "BreadcrumbList" }),
         expect.objectContaining({ "@type": "FAQPage" }),
       ]);
-      expect(JSON.stringify(graphCall?.data)).not.toContain(
-        "/images/products/",
+      const productGroup = graphCall?.data.find(
+        (item) =>
+          item !== null &&
+          typeof item === "object" &&
+          (item as { "@type"?: unknown })["@type"] === "ProductGroup",
+      );
+      const jsonLdPayload = JSON.stringify(graphCall?.data);
+
+      expect(productGroup).toMatchObject({
+        name: "ABS Interlocking Boxwall Flood Barriers",
+        description: expect.stringContaining(
+          "A freestanding flood barrier that needs no bolts",
+        ),
+      });
+      expect(jsonLdPayload).toContain("TB-BW50");
+      expect(jsonLdPayload).toContain("4 mm");
+      expect(jsonLdPayload).not.toContain("/images/products/");
+      expect(jsonLdPayload).not.toContain("brandAssets");
+      expect(jsonLdPayload).not.toContain(
+        "Straight, curved and gable-end ABS units for freestanding runs.",
       );
     });
   });

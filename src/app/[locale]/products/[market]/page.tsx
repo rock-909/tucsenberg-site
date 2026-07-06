@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import {
   getAllMarketSlugs,
   getMarketBySlug,
@@ -38,15 +38,10 @@ interface MarketPageProps {
   params: Promise<{ locale: string; market: string }>;
 }
 
-type CatalogTranslator = (
-  key: string,
-  values?: Record<string, string>,
-) => string;
-
 function ProductContentTable({ table }: { table: TucsenbergProductTable }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border">
-      <table className="min-w-full divide-y divide-border text-left text-sm">
+    <div className="border-border overflow-x-auto rounded-2xl border">
+      <table className="divide-border min-w-full divide-y text-left text-sm">
         <thead className="bg-muted/60 text-foreground">
           <tr>
             {table.columns.map((column) => (
@@ -56,13 +51,13 @@ function ProductContentTable({ table }: { table: TucsenbergProductTable }) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-border divide-y">
           {table.rows.map((row) => (
             <tr key={row.join("|")}>
               {row.map((cell, index) => (
                 <td
                   key={`${cell}-${index}`}
-                  className="px-4 py-3 align-top text-muted-foreground"
+                  className="text-muted-foreground px-4 py-3 align-top"
                 >
                   {cell}
                 </td>
@@ -86,18 +81,18 @@ function ProductContentSection({
       {section.paragraphs?.map((paragraph) => (
         <p
           key={paragraph}
-          className="mb-4 text-base leading-7 text-muted-foreground last:mb-0"
+          className="text-muted-foreground mb-4 text-base leading-7 last:mb-0"
         >
           {paragraph}
         </p>
       ))}
       {section.bullets ? (
-        <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
+        <ul className="text-muted-foreground space-y-3 text-sm leading-6">
           {section.bullets.map((bullet) => (
             <li key={bullet} className="flex gap-3">
               <span
                 aria-hidden
-                className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
+                className="bg-primary mt-2 size-1.5 shrink-0 rounded-full"
               />
               <span>{bullet}</span>
             </li>
@@ -117,7 +112,7 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
         {page.faqs.map((faq) => (
           <article key={faq.question}>
             <h3 className="text-lg font-semibold">{faq.question}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm leading-6">
               {faq.answer}
             </p>
           </article>
@@ -131,7 +126,7 @@ function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
   return (
     <section className="surface-card p-6 md:p-8">
       <h2 className="text-2xl font-semibold">Request a quote</h2>
-      <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+      <p className="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
         Tell us the opening or perimeter, ground type, quantity, market and
         timeline. Photos and drawings help us give a cleaner answer.
       </p>
@@ -185,28 +180,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
     notFound();
   }
 
-  const t = await getTranslations({ locale, namespace: "catalog" });
-  const translateCatalog = t as unknown as CatalogTranslator;
-  const marketLabel = translateCatalog(`markets.${marketSlug}.label`);
-  const marketDescription = translateCatalog(
-    `markets.${marketSlug}.description`,
-  );
   const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(
     pageData.market.slug,
   )}`;
   const faqSchema = buildTucsenbergProductFaqSchema(productPage, locale);
   const jsonLdData = await buildMarketPageJsonLdData({
-    data: {
-      families: pageData.families,
-      familySpecsMap: pageData.familySpecsMap,
-      market: pageData.market,
-    },
-    labels: {
-      marketLabel,
-      marketDescription,
-    },
+    market: pageData.market,
     marketUrl,
-    t: translateCatalog,
+    productPage,
   });
 
   return (
@@ -228,14 +209,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
       />
 
       <header className="mb-10">
-        <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+        <span className="bg-muted text-muted-foreground mb-2 inline-block rounded px-2 py-0.5 font-mono text-xs">
           {productPage.eyebrow}
         </span>
         <h1 className="text-heading mb-4">{productPage.title}</h1>
-        <p className="text-body max-w-3xl font-medium text-foreground">
+        <p className="text-body text-foreground max-w-3xl font-medium">
           {productPage.subtitle}
         </p>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">
+        <p className="text-muted-foreground mt-4 max-w-3xl text-base leading-7">
           {productPage.lead}
         </p>
         <div className="mt-6">

@@ -1,3 +1,12 @@
+/**
+ * Legacy/starter catalog fixture.
+ *
+ * This file is not the current Tucsenberg product-page runtime truth. The
+ * live product detail pages and JSON-LD use src/constants/tucsenberg-product-pages.ts.
+ * Keep this fixture only for starter/profile compatibility until an approved
+ * retirement proof removes or replaces the legacy catalog path.
+ */
+
 import type { MarketSpecs } from "@/constants/product-specs/types";
 
 const updatedAt = "2026-07-02T00:00:00Z";
