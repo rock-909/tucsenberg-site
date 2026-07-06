@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import RequestQuotePage, { generateMetadata } from "../page";
 
@@ -79,36 +79,15 @@ describe("RequestQuotePage", () => {
     expect(
       screen.getByRole("form", { name: "Request a quote" }),
     ).toHaveAttribute("data-analytics-event", "rfq_submit");
-    expect(
-      screen.getByLabelText("What are you protecting?"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Opening width × height / run length"),
-    ).toBeInTheDocument();
-    const mountingSurface = screen.getByRole("combobox", {
-      name: "Mounting surface / ground type",
-    });
-    expect(mountingSurface).toBeInTheDocument();
-    expect(
-      within(mountingSurface).getByRole("option", { name: "Other" }),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText("Material preference")).toBeInTheDocument();
-    expect(screen.getByLabelText("Quantity")).toBeInTheDocument();
-    expect(screen.getByLabelText("Market & delivery port")).toBeInTheDocument();
-    expect(screen.getByLabelText("Timeline")).toBeInTheDocument();
-    expect(screen.getByLabelText("Photos / drawings links")).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText("Name")).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
-    expect(screen.getByLabelText("Company")).toBeInTheDocument();
-    expect(screen.getByLabelText("WhatsApp")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(
-        "This is a wholesale / OEM / private label enquiry",
-      ),
-    ).toHaveAttribute("type", "checkbox");
+    const nameField = screen.getByLabelText("Your name");
+    expect(nameField).toBeRequired();
+    const emailField = screen.getByLabelText("Work email");
+    expect(emailField).toHaveAttribute("type", "email");
+    expect(emailField).toBeRequired();
+    const messageField = screen.getByLabelText("What do you need?");
+    expect(messageField.tagName).toBe("TEXTAREA");
+    expect(messageField).not.toBeRequired();
+    expect(screen.getByText(/product line, opening sizes/)).toBeInTheDocument();
     expect(
       screen.getByText(
         "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",

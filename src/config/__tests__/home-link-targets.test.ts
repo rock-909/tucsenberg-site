@@ -77,11 +77,11 @@ describe("single-site home link targets", () => {
 
   it("derives final CTA targets from semantic route availability", () => {
     expect(getSingleSiteHomeFinalCtaTargets("catalog")).toEqual([
-      { href: "/products", labelKey: "primary" },
-      { href: "/request-quote", labelKey: "secondary" },
+      { href: "/request-quote", labelKey: "primary" },
+      { href: "/oem-wholesale", labelKey: "secondary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("b2b-lead")).toEqual([
-      { href: "/contact", labelKey: "secondary" },
+      { href: "/contact", labelKey: "primary" },
     ]);
     expect(getSingleSiteHomeFinalCtaTargets("minimal")).toEqual([]);
   });

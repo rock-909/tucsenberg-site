@@ -22,8 +22,10 @@ describe("single-site-page-expression", () => {
     expect(SINGLE_SITE_HOME_SECTION_ORDER).toEqual([
       "hero",
       "problems",
-      "answer",
+      "howToChoose",
       "startPath",
+      "answer",
+      "faq",
       "finalCta",
     ]);
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual({

@@ -1,0 +1,159 @@
+import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
+
+export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
+  slug: "abs-flood-barriers",
+  meta: TUCSENBERG_PRODUCT_META["abs-flood-barriers"],
+  image: { status: "pending" },
+  eyebrow: "TB-BW series",
+  title: "ABS Interlocking Boxwall Flood Barriers",
+  subtitle:
+    "Freestanding flood barriers for driveways, doorways and paved perimeters — no drilling, no fixing to the building.",
+  lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
+  cta: {
+    href: "/request-quote",
+    label: "Request a Quote — standard items quoted within 12 hours",
+  },
+  downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
+  sections: [
+    {
+      title: "How it works",
+      kind: "bullets",
+      bullets: [
+        "Freestanding L-profile. The barrier stands on its own foot. As floodwater rises, its weight pushes the foot down — the water itself makes the seal tighter. No anchors, no drilling, no damage to the surface.",
+        "Mechanical interlock. Units connect by hand with a locking-and-coupling joint — no tools, no loose pins.",
+        "Corners, curves and gable ends. Inward-curve, outward-curve and gable-end units are available at every height, so the wall follows driveways, entrances and property lines — the same configuration family our factory pool has shipped to US flood brands for years.",
+        "Ground sealing. The base seal takes up small surface irregularities; on rough ground a ground sheet under the run improves sealing. On heavily broken or sloped ground — deep grooves, divots, recessed paving lines — boxwall may be the wrong tool. Send site photos with your RFQ and we'll say so, and point you to [tube dams](/products/flood-tube-dams) if that's the honest answer.",
+      ],
+    },
+    {
+      title: "Not the disposable kit you saw on Amazon",
+      kind: "table",
+      paragraphs: [
+        "Cheap ABS flood kits exist. They are thinner, degrade in sunlight, and are sold as disposable. Professional boxwall systems differ in ways you can measure:",
+      ],
+      table: {
+        columns: ["What to check", "Disposable kits", "TB-BW series"],
+        rows: [
+          ["Wall thickness", "typically unstated", "4–5 mm (±0.5)"],
+          [
+            "UV performance",
+            "no / unstated",
+            "UV-tested to ASTM G154-2016 (0.76 W/m² @340 nm, BPT 60 °C, 8 h)",
+          ],
+          ["Temperature range", "unstated", "−40 °C to +95 °C working range"],
+          [
+            "Interlock",
+            "loose pins or none",
+            "full mechanical locking-and-coupling joint",
+          ],
+          [
+            "Configurations",
+            "straight only",
+            "straight, inward/outward curve, gable end",
+          ],
+          ["Spares", "none", "joints, seals and single units sold separately"],
+        ],
+      },
+      footer:
+        "Full comparison across all five materials: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
+    },
+    {
+      title: "Specifications",
+      kind: "table",
+      table: {
+        columns: [
+          "Height",
+          "Model",
+          "Straight unit",
+          "Curve units (in/out)",
+          "Wall thickness",
+        ],
+        rows: [
+          ["50 cm", "TB-BW50", "3.8 kg", "2.8 / 2.7 kg", "4 mm"],
+          ["60 cm", "TB-BW60", "7.4 kg", "3.3 / 3.3 kg", "4–5 mm"],
+          ["75 cm", "TB-BW75", "9.8 kg", "3.2 / 3.2 kg", "4–5 mm"],
+          [
+            "85 cm (with handle)",
+            "TB-BW85",
+            "9.8 kg",
+            "5 / 5 kg",
+            "5 mm — effective stop height 75 cm",
+          ],
+        ],
+      },
+    },
+    {
+      title: "What determines your price",
+      kind: "bullets",
+      paragraphs: [
+        "We don't publish list prices — quantities, height mix and configuration move the number too much for a static price to be honest. What you can expect:",
+      ],
+      bullets: [
+        "Quantity ladder. Carton < pallet < container: unit cost drops at each step, freight per unit drops faster.",
+        "Height mix. An 85 cm unit uses far more material than a 50 cm unit; mixed orders are normal.",
+        "Configuration mix. Corners and gable ends cost more than straights — but they're what makes a wall actually close.",
+        "Branding. Moulded-in logo has a mould cost; printed labels and custom packaging are cheap at pallet volume.",
+      ],
+      footer: "[Get exact pricing in 12 hours](/request-quote)",
+    },
+    {
+      title: "Small orders, samples, first-time buyers",
+      kind: "bullets",
+      bullets: [
+        "Minimum order: one carton / small pallet lot. We don't ship single retail units — international freight on one unit costs more than the unit.",
+        "Paid sample kit: 2 straight units + 1 corner + documentation, at sample price plus freight. The sample fee is credited against your first order.",
+        "First time importing from China? We'll walk you through terms, documents and freight in plain language — ask anything in the RFQ form.",
+      ],
+    },
+    {
+      title: "OEM & private label",
+      kind: "bullets",
+      paragraphs: [
+        "Boxwall is the easiest line in our range to brand as your own:",
+      ],
+      bullets: [
+        "Moulded-in logo on the unit face (mould contribution applies, quoted per project)",
+        "Printed labels, custom carton and pallet presentation",
+        "Your manual / datasheet layout with your branding",
+        "Custom colours from moulded-batch quantities — confirmed at quotation",
+      ],
+      footer:
+        "See [OEM & Wholesale](/oem-wholesale) for how our factory pool handles private label across all five product lines.",
+    },
+  ],
+  faqs: [
+    {
+      question: "Can one person deploy it?",
+      answer:
+        "Yes — units connect by hand at ground level. For long runs two people are faster: one places, one locks.",
+    },
+    {
+      question: "How does it seal on uneven ground?",
+      answer:
+        "The base seal handles small irregularities, and rising water presses the foot down harder. For gravel, deep joints or slopes, use a ground sheet — or send photos with your RFQ and we'll advise, including when boxwall is the wrong tool.",
+    },
+    {
+      question: "How many times can it be reused?",
+      answer:
+        "The units are solid ABS with mechanical locks — designed for repeated seasonal deployment. Rinse, dry, stack. Spare joints and seals are available separately, so one damaged part never retires a wall.",
+    },
+    {
+      question: "Can this replace sandbags?",
+      answer:
+        "For repeated seasonal use on paved ground, yes — no filling, no disposal, and one person can wall off a driveway. But we won't oversell it: sandbags still win for salt water, odd gaps, moving water and lowest possible cost. If your flooding is storm surge, read the honest limits above before you spend money.",
+    },
+    {
+      question: "What's the warranty?",
+      answer:
+        "3 years on materials and workmanship — a year longer than the 2-year norm most suppliers offer. Custom-cut and custom-branded items are final sale. Full terms: [Warranty policy](/warranty).",
+    },
+    {
+      question: "What's the lead time?",
+      answer:
+        "In-stock configurations ship in 2–7 days. Production orders (custom colours, moulded logos) are confirmed at quotation.",
+    },
+  ],
+  rfqNote:
+    "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. Standard items quoted within 12 hours; custom configurations within 48.",
+} as const satisfies TucsenbergProductPage;

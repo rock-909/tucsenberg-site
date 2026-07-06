@@ -10,12 +10,19 @@ import { BreathingReveal } from "@/components/motion/breathing-reveal";
 import { HeroSection } from "@/components/sections/hero-section";
 import { getLocalizedPath } from "@/config/paths";
 import {
+  SINGLE_SITE_HOME_FAQ_ITEM_KEYS,
+  SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS,
+  SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS,
+  SINGLE_SITE_HOME_PRODUCT_CARD_LINKS,
   SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS,
   SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS,
   SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS,
   SINGLE_SITE_HOME_SECTION_ORDER,
   type SingleSiteHomeSectionKey,
 } from "@/config/single-site-page-expression";
+import { FaqSectionView } from "@/components/sections/faq-section-view";
+import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
+import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import {
   getSingleSiteHomeFinalCtaTargetsFromLinks,
   getSingleSiteHomeLinkTargets,
@@ -23,13 +30,22 @@ import {
 } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
-import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
+import {
+  JsonLdGraphScript,
+  JsonLdScript,
+} from "@/components/seo/json-ld-script";
 
 type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
 
 interface HomeCardItem {
   title: string;
   description: string;
+}
+
+interface HomeProductCardItem extends HomeCardItem {
+  href: string;
+  linkLabel: string;
+  badge?: string;
 }
 
 interface HomeStepItem extends HomeCardItem {
@@ -55,12 +71,23 @@ export async function generateMetadata({
   });
 }
 
+const HOME_PRODUCT_CARD_BADGE_KEY_SET = new Set<string>(
+  SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS,
+);
+
 function getHomePageContent(t: HomeTranslator) {
   return {
-    problems: SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS.map((key) => ({
-      title: t(`problems.items.${key}.title`),
-      description: t(`problems.items.${key}.description`),
-    })),
+    problems: SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS.map(
+      (key): HomeProductCardItem => ({
+        title: t(`problems.items.${key}.title`),
+        description: t(`problems.items.${key}.description`),
+        href: SINGLE_SITE_HOME_PRODUCT_CARD_LINKS[key],
+        linkLabel: t(`problems.items.${key}.linkLabel`),
+        ...(HOME_PRODUCT_CARD_BADGE_KEY_SET.has(key)
+          ? { badge: t(`problems.items.${key}.badge`) }
+          : {}),
+      }),
+    ),
     answers: SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS.map((key) => ({
       title: t(`answer.items.${key}.title`),
       description: t(`answer.items.${key}.description`),
@@ -82,7 +109,7 @@ function HomeProblemSection({
 }: {
   title: string;
   description: string;
-  items: readonly HomeCardItem[];
+  items: readonly HomeProductCardItem[];
 }) {
   return (
     <section
@@ -91,23 +118,99 @@ function HomeProblemSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-balance text-[32px] font-semibold leading-tight">
+          <h2 className="text-[32px] leading-tight font-semibold text-balance">
             {title}
           </h2>
-          <p className="mt-3 text-pretty text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-pretty">
             {description}
           </p>
         </div>
         <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <article key={item.title} className="surface-card min-w-0 p-5">
-              <h3 className="text-balance font-semibold">{item.title}</h3>
-              <p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">
+            <article
+              key={item.title}
+              className="surface-card group hover:border-ring relative flex min-w-0 flex-col p-5 transition-colors"
+            >
+              {item.badge ? (
+                <span className="border-border bg-muted text-muted-foreground mb-3 inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                  {item.badge}
+                </span>
+              ) : null}
+              <h3 className="font-semibold text-balance">
+                <Link
+                  href={item.href}
+                  className="after:absolute after:inset-0 focus-visible:outline-none"
+                >
+                  {item.title}
+                </Link>
+              </h3>
+              <p className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
                 {item.description}
               </p>
+              <span
+                aria-hidden
+                className="text-primary mt-4 inline-flex items-center gap-1 text-sm font-medium"
+              >
+                {item.linkLabel}
+                <span className="transition-transform group-hover:translate-x-0.5">
+                  →
+                </span>
+              </span>
             </article>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
+  return (
+    <section
+      data-testid="home-how-to-choose-section"
+      className="section-divider px-6 py-14 md:py-[72px]"
+    >
+      <div className="mx-auto max-w-[1080px]">
+        <div className="max-w-2xl">
+          <h2 className="text-[32px] leading-tight font-semibold text-balance">
+            {t("howToChoose.title")}
+          </h2>
+          <p className="text-muted-foreground mt-3 text-pretty">
+            {t("howToChoose.description")}
+          </p>
+        </div>
+        <div className="border-border mt-8 overflow-x-auto rounded-2xl border">
+          <table className="divide-border min-w-full divide-y text-left text-sm">
+            <thead className="bg-muted/60 text-foreground">
+              <tr>
+                <th className="px-4 py-3 font-semibold">
+                  {t("howToChoose.columns.situation")}
+                </th>
+                <th className="px-4 py-3 font-semibold">
+                  {t("howToChoose.columns.startWith")}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-border divide-y">
+              {SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS.map((key) => (
+                <tr key={key}>
+                  <td className="text-muted-foreground px-4 py-3 align-top">
+                    {t(`howToChoose.rows.${key}.situation`)}
+                  </td>
+                  <td className="text-foreground px-4 py-3 align-top font-medium">
+                    {t(`howToChoose.rows.${key}.startWith`)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-muted-foreground mt-6 max-w-3xl text-sm leading-6">
+          {t("howToChoose.honestNote")}
+        </p>
+        <p className="mt-4 text-sm font-medium">
+          <InlineMarkdown text={t("howToChoose.guideLink")} />
+        </p>
       </div>
     </section>
   );
@@ -129,28 +232,28 @@ function HomeCapabilitiesSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-balance text-[32px] font-semibold leading-tight">
+          <h2 className="text-[32px] leading-tight font-semibold text-balance">
             {title}
           </h2>
-          <p className="mt-3 text-pretty text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-pretty">
             {description}
           </p>
         </div>
         <div
           data-testid="home-answer-proof-panel"
-          className="mt-8 surface-card rounded-2xl bg-muted/30 p-3 md:p-4"
+          className="surface-card bg-muted/30 mt-8 rounded-2xl p-3 md:p-4"
         >
           <dl className="grid gap-2 md:grid-cols-2">
             {items.map((item) => (
               <div
                 key={item.title}
                 data-testid="home-answer-proof-item"
-                className="min-w-0 rounded-xl border border-border bg-background px-4 py-4"
+                className="border-border bg-background min-w-0 rounded-xl border px-4 py-4"
               >
-                <dt className="text-balance text-sm font-semibold text-foreground">
+                <dt className="text-foreground text-sm font-semibold text-balance">
                   {item.title}
                 </dt>
-                <dd className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">
+                <dd className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
                   {item.description}
                 </dd>
               </div>
@@ -176,10 +279,10 @@ function HomeStartPathSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-balance text-[32px] font-semibold leading-tight">
+          <h2 className="text-[32px] leading-tight font-semibold text-balance">
             {t("startPath.title")}
           </h2>
-          <p className="mt-3 text-pretty text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-pretty">
             {t("startPath.description")}
           </p>
         </div>
@@ -191,13 +294,13 @@ function HomeStartPathSection({
             >
               <span
                 data-testid="home-start-path-step-badge"
-                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted font-mono text-[12px] font-semibold text-foreground"
+                className="border-border bg-muted text-foreground flex size-9 shrink-0 items-center justify-center rounded-full border font-mono text-[12px] font-semibold"
               >
                 {item.number}
               </span>
               <div className="min-w-0">
-                <h3 className="text-balance font-semibold">{item.title}</h3>
-                <p className="mt-1 text-pretty text-sm leading-6 text-muted-foreground">
+                <h3 className="font-semibold text-balance">{item.title}</h3>
+                <p className="text-muted-foreground mt-1 text-sm leading-6 text-pretty">
                   {item.description}
                 </p>
               </div>
@@ -223,27 +326,28 @@ function HomeFinalAction({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="surface-card px-6 py-10 text-center md:px-10 md:py-12">
-          <h2 className="text-balance text-[32px] font-semibold leading-tight md:text-[36px]">
+          <h2 className="text-[32px] leading-tight font-semibold text-balance md:text-[36px]">
             {t("finalCta.title")}
           </h2>
-          <p className="mx-auto mt-4 max-w-[620px] text-pretty text-muted-foreground">
+          <p className="text-muted-foreground mx-auto mt-4 max-w-[620px] text-pretty">
             {t("finalCta.description")}
           </p>
           {ctaTargets.length > 0 && (
-            <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               {ctaTargets.map((target) =>
-                target.labelKey === "secondary" ? (
+                target.labelKey === "primary" ? (
                   <Button key={target.labelKey} size="lg" asChild>
-                    <Link href={target.href}>{t("finalCta.secondary")}</Link>
+                    <Link href={target.href}>{t("finalCta.primary")}</Link>
                   </Button>
                 ) : (
-                  <Link
+                  <Button
                     key={target.labelKey}
-                    href={target.href}
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    size="lg"
+                    variant="outline"
+                    asChild
                   >
-                    {t("finalCta.primary")}
-                  </Link>
+                    <Link href={target.href}>{t("finalCta.secondary")}</Link>
+                  </Button>
                 ),
               )}
             </div>
@@ -261,6 +365,11 @@ export default async function Home({ params }: HomePageProps) {
   const content = getHomePageContent(t);
   const homeLinks = getSingleSiteHomeLinkTargets();
   const finalCtaTargets = getSingleSiteHomeFinalCtaTargetsFromLinks(homeLinks);
+  const homeFaqItems = SINGLE_SITE_HOME_FAQ_ITEM_KEYS.map((key) => ({
+    id: `home-faq-${key}`,
+    question: t(`faq.items.${key}.question`),
+    answer: t(`faq.items.${key}.answer`),
+  }));
   const homeSections = {
     hero: <HeroSection />,
     problems: (
@@ -272,6 +381,11 @@ export default async function Home({ params }: HomePageProps) {
         />
       </BreathingReveal>
     ),
+    howToChoose: (
+      <BreathingReveal>
+        <HomeHowToChooseSection t={t} />
+      </BreathingReveal>
+    ),
     answer: (
       <BreathingReveal>
         <HomeCapabilitiesSection
@@ -279,6 +393,21 @@ export default async function Home({ params }: HomePageProps) {
           description={t("answer.description")}
           items={content.answers}
         />
+      </BreathingReveal>
+    ),
+    faq: (
+      <BreathingReveal>
+        <JsonLdScript data={generateFaqSchemaFromItems(homeFaqItems, locale)} />
+        <div data-testid="home-faq-section">
+          <FaqSectionView
+            title={t("faq.title")}
+            items={homeFaqItems.map((item) => ({
+              key: item.id,
+              question: item.question,
+              answer: item.answer,
+            }))}
+          />
+        </div>
       </BreathingReveal>
     ),
     startPath: (
@@ -294,7 +423,7 @@ export default async function Home({ params }: HomePageProps) {
   } satisfies Record<SingleSiteHomeSectionKey, ReactNode>;
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-dvh">
       <JsonLdGraphScript locale={locale as Locale} />
       <div>
         {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (

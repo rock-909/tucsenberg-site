@@ -7,8 +7,7 @@ import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-
 import { createRequestQuotePayload } from "@/app/[locale]/request-quote/request-quote-payload";
 import {
   RequestQuoteContactFields,
-  RequestQuoteProjectFields,
-  RequestQuoteTradeMarkerField,
+  RequestQuoteMessageField,
 } from "@/app/[locale]/request-quote/request-quote-form-fields";
 import {
   RequestQuoteSubmitControls,
@@ -49,6 +48,12 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
     }
 
     const formData = new FormData(event.currentTarget);
+    const interest = new URLSearchParams(window.location.search).get(
+      "interest",
+    );
+    if (interest) {
+      formData.set("interest", interest);
+    }
     appendAttributionToFormData(formData);
     setState({ status: "submitting" });
 
@@ -95,9 +100,8 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
         data-lead-path="api-inquiry"
         onSubmit={handleSubmit}
       >
-        <RequestQuoteProjectFields copy={copy} />
         <RequestQuoteContactFields copy={copy} />
-        <RequestQuoteTradeMarkerField copy={copy} />
+        <RequestQuoteMessageField copy={copy} />
         <RequestQuoteSubmitControls
           copy={copy}
           isSubmitting={isSubmitting}

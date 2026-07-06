@@ -105,8 +105,8 @@ function readMaterializedRuntimeSurface(
 
       const homeLinks = getSingleSiteHomeLinkTargets();
       const finalCtaLabels = {
-        primary: "View product capabilities",
-        secondary: "Contact",
+        primary: "Request a Quote",
+        secondary: "Wholesale & OEM",
       };
       const finalCtaLinks = getSingleSiteHomeFinalCtaTargets().map((target) => ({
         href: target.href,
@@ -115,7 +115,7 @@ function readMaterializedRuntimeSurface(
       const renderedFinalCtaLinks = finalCtaLinks.map((link) => {
         const html = renderToStaticMarkup(createElement("a", { href: link.href }, link.label));
         const href = html.match(/href="([^"]+)"/)?.[1] ?? "";
-        const label = html.replace(/<[^>]+>/g, "");
+        const label = html.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&");
         return { href, label };
       });
 
@@ -197,7 +197,7 @@ describe("profile materialization runtime output", () => {
           secondaryCta: "/about",
         },
         expectedAboutCta: "/contact",
-        expectedFinalCtaLinks: [{ href: "/contact", label: "Contact" }],
+        expectedFinalCtaLinks: [{ href: "/contact", label: "Request a Quote" }],
         forbiddenHrefs: [
           "/products",
           "/blog",
@@ -219,8 +219,8 @@ describe("profile materialization runtime output", () => {
         },
         expectedAboutCta: "/products",
         expectedFinalCtaLinks: [
-          { href: "/products", label: "View product capabilities" },
-          { href: "/request-quote", label: "Contact" },
+          { href: "/request-quote", label: "Request a Quote" },
+          { href: "/oem-wholesale", label: "Wholesale & OEM" },
         ],
         forbiddenHrefs: [
           "/blog",

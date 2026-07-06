@@ -27,8 +27,10 @@ export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 export const SINGLE_SITE_HOME_SECTION_ORDER = [
   "hero",
   "problems",
-  "answer",
+  "howToChoose",
   "startPath",
+  "answer",
+  "faq",
   "finalCta",
 ] as const;
 
@@ -55,6 +57,44 @@ export const SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS = [
   "content",
   "forms",
   "deploy",
+  "ship",
+] as const;
+
+/** Deep-link targets for the five home product cards, keyed by problem item. */
+export const SINGLE_SITE_HOME_PRODUCT_CARD_LINKS = {
+  structure: "/products/abs-flood-barriers",
+  content: "/products/aluminum-flood-gates",
+  deployment: "/products/absorbent-flood-bags",
+  inquiry: "/products/flood-tube-dams",
+  multilingual: "/products/frp-flood-barriers",
+} as const satisfies Record<
+  (typeof SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS)[number],
+  string
+>;
+
+/** Home product cards that carry a status badge (message key `badge`). */
+export const SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS = [
+  "multilingual",
+] as const;
+
+export const SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS = [
+  "openings",
+  "perimeters",
+  "emergency",
+  "longRuns",
+  "coastal",
+] as const;
+
+export const SINGLE_SITE_HOME_FAQ_ITEM_KEYS = [
+  "minimumOrder",
+  "quoteSpeed",
+  "paymentTerms",
+  "samples",
+  "oem",
+  "warranty",
+  "leadTime",
+  "madeInChina",
+  "audit",
 ] as const;
 
 export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [

@@ -9,7 +9,8 @@
   "legal": {
     "effectiveDate": "Effective Date",
     "lastUpdated": "Last Updated",
-    "tableOfContents": "Table of Contents"
+    "tableOfContents": "Table of Contents",
+    "articleAuthorLine": "Written by the Tucsenberg team — factory-direct supplier of the flood barrier systems covered in this guide."
   },
   "instructions": {
     "getStarted": "Get started by editing",
@@ -320,7 +321,7 @@
     },
     "page": {
       "heading": "Get real numbers, fast",
-      "intro": "Send what you know — photos and rough dimensions are enough to start. Standard items quoted within {standardHours} hours, custom configurations within {customHours}.",
+      "intro": "Two required fields, one optional message — send what you know and a person replies. Standard items quoted within {standardHours} hours, custom configurations within {customHours}.",
       "afterSubmitTitle": "After you submit",
       "confidenceTitle": "Quote confidence",
       "confidenceWarranty": "3-year warranty",
@@ -330,7 +331,6 @@
     "form": {
       "title": "Request a quote",
       "ariaLabel": "Request a quote",
-      "selectOne": "Select one",
       "submit": "Send RFQ",
       "submitting": "Sending RFQ...",
       "success": "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
@@ -338,78 +338,16 @@
       "networkError": "Network error. Please try again or email sales@tucsenberg.com.",
       "turnstilePending": "Security verification is still loading. Please try again.",
       "referenceLabel": "Reference",
-      "tradeEnquiry": "This is a wholesale / OEM / private label enquiry",
-      "assetHint": "Optional. Paste Drive, Dropbox, OneDrive or PDF links here; do not upload files on this page.",
+      "messageHint": "Optional, but anything helps: product line, opening sizes (width × height), quantity, delivery country or port. The more you tell us, the more accurate the first quote — and you can always just say hello and ask.",
       "fields": {
-        "protection": "What are you protecting?",
-        "dimensions": "Opening width × height / run length",
-        "mounting": "Mounting surface / ground type",
-        "material": "Material preference",
-        "quantity": "Quantity",
-        "delivery": "Market & delivery port",
-        "timeline": "Timeline",
-        "assetLinks": "Photos / drawings links",
-        "fullName": "Name",
-        "email": "Email",
-        "company": "Company",
-        "whatsApp": "WhatsApp"
+        "fullName": "Your name",
+        "email": "Work email",
+        "message": "What do you need?"
       },
-      "requirements": {
-        "source": "RFQ source: /request-quote",
-        "notSpecified": "Not specified",
-        "yes": "Yes",
-        "no": "No",
-        "productNamePrefix": "RFQ",
-        "protection": "What are you protecting",
-        "dimensions": "Opening width x height / run length",
-        "mounting": "Mounting surface / ground type",
-        "material": "Material preference",
-        "quantity": "Quantity",
-        "delivery": "Market & delivery port",
-        "timeline": "Timeline",
-        "assetLinks": "Photos / drawings links",
-        "whatsApp": "WhatsApp",
-        "tradeEnquiry": "Wholesale / OEM / private label"
-      },
-      "options": {
-        "protection": {
-          "door": "Door",
-          "garage": "Garage",
-          "driveway": "Driveway",
-          "loadingDock": "Loading dock",
-          "perimeter": "Perimeter",
-          "stockResaleOrder": "Stock / resale order",
-          "other": "Other"
-        },
-        "mounting": {
-          "concrete": "Concrete",
-          "masonry": "Masonry",
-          "steel": "Steel",
-          "timber": "Timber",
-          "groundSoil": "Ground / soil",
-          "other": "Other"
-        },
-        "material": {
-          "adviseMe": "Advise me",
-          "absFloodBarriers": "ABS flood barriers",
-          "aluminumFloodGates": "Aluminum flood gates",
-          "absorbentFloodBags": "Absorbent flood bags",
-          "floodTubeDams": "Flood tube dams",
-          "frpFloodBarriers": "FRP flood barriers"
-        },
-        "quantity": {
-          "sampleCarton": "Sample carton",
-          "cartons": "Cartons",
-          "pallet": "Pallet",
-          "lcl": "LCL",
-          "container": "Container",
-          "projectSchedule": "Project schedule"
-        },
-        "timeline": {
-          "urgent": "Urgent",
-          "thisSeason": "This season",
-          "planning": "Planning"
-        }
+      "payload": {
+        "source": "Submitted via the request-quote form.",
+        "productName": "General RFQ — product line to be advised",
+        "quantityFallback": "Not specified — see message"
       }
     }
   },

@@ -88,16 +88,18 @@ const homeMessages: Record<string, string> = {
     "Start from a real website foundation, then replace what must become yours.",
   "finalCta.description":
     "Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
-  "finalCta.primary": "View product capabilities",
-  "finalCta.secondary": "Contact",
+  "finalCta.primary": "Request a Quote",
+  "finalCta.secondary": "Wholesale & OEM",
 };
 
 const mockGetSingleSiteHomeLinkTargets = vi.hoisted(() =>
   vi.fn(() => ({
     contact: "/contact",
     products: "/products",
-    primaryCta: "/products",
-    secondaryCta: "/contact",
+    requestQuote: "/request-quote",
+    oemWholesale: "/oem-wholesale",
+    primaryCta: "/request-quote",
+    secondaryCta: "/oem-wholesale",
   })),
 );
 
@@ -148,8 +150,10 @@ describe("Home Page", () => {
     mockGetSingleSiteHomeLinkTargets.mockReturnValue({
       contact: "/contact",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      oemWholesale: "/oem-wholesale",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
   });
 
@@ -227,8 +231,10 @@ describe("Home Page", () => {
       const sectionTestIds = {
         hero: "hero-section",
         problems: "home-problem-section",
+        howToChoose: "home-how-to-choose-section",
         answer: "home-answer-section",
         startPath: "home-start-path-section",
+        faq: "home-faq-section",
         finalCta: "home-final-action",
       } as const;
       const expectedOrder = SINGLE_SITE_HOME_SECTION_ORDER.map(
@@ -253,13 +259,11 @@ describe("Home Page", () => {
 
       const finalAction = within(screen.getByTestId("home-final-action"));
       expect(
-        finalAction.getByRole("link", { name: "Contact" }),
-      ).toHaveAttribute("href", "/contact");
+        finalAction.getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", "/request-quote");
       expect(
-        finalAction.getByRole("link", {
-          name: "View product capabilities",
-        }),
-      ).toHaveAttribute("href", "/products");
+        finalAction.getByRole("link", { name: "Wholesale & OEM" }),
+      ).toHaveAttribute("href", "/oem-wholesale");
     });
 
     it("does not reuse product or about labels when a thin profile only has contact", async () => {
@@ -277,12 +281,10 @@ describe("Home Page", () => {
 
       const finalAction = within(screen.getByTestId("home-final-action"));
       expect(
-        finalAction.getByRole("link", { name: "Contact" }),
+        finalAction.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/contact");
       expect(
-        finalAction.queryByRole("link", {
-          name: "View product capabilities",
-        }),
+        finalAction.queryByRole("link", { name: "Wholesale & OEM" }),
       ).not.toBeInTheDocument();
       expect(
         finalAction.queryByRole("link", { name: "About" }),

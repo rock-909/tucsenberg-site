@@ -13,6 +13,8 @@ import {
 export interface StaticMdxPageConfig {
   pageType: PageType;
   slug: string;
+  /** Structured-data type for the page body; defaults to WebPage. */
+  schemaType?: "WebPage" | "Article";
 }
 
 export interface StaticMdxPageProps {
@@ -56,7 +58,8 @@ export async function StaticMdxPage({
       content={content}
       headings={headings}
       locale={locale}
-      schemaType="WebPage"
+      schemaType={config.schemaType ?? "WebPage"}
+      pagePath={getLocalizedPath(config.pageType, locale as Locale)}
     />
   );
 }

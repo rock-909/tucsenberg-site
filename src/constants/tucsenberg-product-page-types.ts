@@ -3,7 +3,7 @@ import type { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-met
 export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
 
 export interface TucsenbergProductCta {
-  href: "/request-quote";
+  href: `/request-quote${string}`;
   label: string;
 }
 
@@ -18,6 +18,8 @@ export interface TucsenbergProductSection {
   paragraphs?: readonly string[];
   bullets?: readonly string[];
   table?: TucsenbergProductTable;
+  /** Closing line rendered after bullets/table; supports inline markdown links. */
+  footer?: string;
 }
 
 export interface TucsenbergProductFaq {
@@ -37,8 +39,12 @@ export interface TucsenbergProductPage {
   title: string;
   subtitle: string;
   lead: string;
+  /** Honest-boundary note rendered after the lead; supports inline markdown links. */
+  leadNote?: string;
   cta: TucsenbergProductCta;
   downloadHref: string;
+  /** Page-specific request-a-quote guidance shown in the final CTA section. */
+  rfqNote?: string;
   sections: readonly TucsenbergProductSection[];
   faqs: readonly TucsenbergProductFaq[];
 }

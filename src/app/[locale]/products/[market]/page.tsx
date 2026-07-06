@@ -26,6 +26,7 @@ import {
   type TucsenbergProductTable,
 } from "@/constants/tucsenberg-product-pages";
 import { buildTucsenbergProductFaqSchema } from "@/constants/tucsenberg-product-faq-schema";
+import { InlineMarkdown } from "@/lib/content/inline-markdown";
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
@@ -83,7 +84,7 @@ function ProductContentSection({
           key={paragraph}
           className="text-muted-foreground mb-4 text-base leading-7 last:mb-0"
         >
-          {paragraph}
+          <InlineMarkdown text={paragraph} />
         </p>
       ))}
       {section.bullets ? (
@@ -94,12 +95,19 @@ function ProductContentSection({
                 aria-hidden
                 className="bg-primary mt-2 size-1.5 shrink-0 rounded-full"
               />
-              <span>{bullet}</span>
+              <span>
+                <InlineMarkdown text={bullet} />
+              </span>
             </li>
           ))}
         </ul>
       ) : null}
       {section.table ? <ProductContentTable table={section.table} /> : null}
+      {section.footer ? (
+        <p className="text-muted-foreground mt-4 text-sm leading-6">
+          <InlineMarkdown text={section.footer} />
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -113,7 +121,7 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
           <article key={faq.question}>
             <h3 className="text-lg font-semibold">{faq.question}</h3>
             <p className="text-muted-foreground mt-2 text-sm leading-6">
-              {faq.answer}
+              <InlineMarkdown text={faq.answer} />
             </p>
           </article>
         ))}
@@ -127,8 +135,8 @@ function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
     <section className="surface-card p-6 md:p-8">
       <h2 className="text-2xl font-semibold">Request a quote</h2>
       <p className="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
-        Tell us the opening or perimeter, ground type, quantity, market and
-        timeline. Photos and drawings help us give a cleaner answer.
+        {page.rfqNote ??
+          "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer."}
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Button asChild size="lg">
@@ -219,6 +227,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
         <p className="text-muted-foreground mt-4 max-w-3xl text-base leading-7">
           {productPage.lead}
         </p>
+        {productPage.leadNote ? (
+          <p className="border-border text-foreground bg-muted/40 mt-4 max-w-3xl rounded-lg border p-4 text-sm leading-6">
+            <InlineMarkdown text={productPage.leadNote} />
+          </p>
+        ) : null}
         <div className="mt-6">
           <Button asChild>
             <Link href={productPage.cta.href}>{productPage.cta.label}</Link>

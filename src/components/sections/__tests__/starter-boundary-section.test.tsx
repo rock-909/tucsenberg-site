@@ -26,7 +26,7 @@ describe("StarterBoundarySection", () => {
     const list = screen.getByRole("list", {
       name: "startPath.title",
     });
-    expect(within(list).getAllByRole("listitem")).toHaveLength(4);
+    expect(within(list).getAllByRole("listitem")).toHaveLength(5);
     expect(
       screen.getByRole("link", { name: "finalCta.primary" }),
     ).toHaveAttribute("href", SINGLE_SITE_ROUTE_HREFS.products);
@@ -41,7 +41,7 @@ describe("StarterBoundarySection", () => {
 
     expect(copy.title.trim().length).toBeGreaterThan(0);
     expect(copy.description.trim().length).toBeGreaterThan(0);
-    expect(Object.keys(copy.items)).toHaveLength(4);
+    expect(Object.keys(copy.items)).toHaveLength(5);
     expect(finalCtaCopy.primary.trim().length).toBeGreaterThan(0);
     expect(finalCtaCopy.secondary.trim().length).toBeGreaterThan(0);
 
