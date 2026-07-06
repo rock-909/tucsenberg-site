@@ -13,6 +13,9 @@ type MockHref =
       pathname: string;
       query?: Record<string, string>;
     };
+type TestProductImage =
+  | { status: "real"; src: string }
+  | { status: "pending" | "omitted" };
 
 function stringifyMockHref(href: MockHref) {
   if (typeof href === "string") {
@@ -21,6 +24,22 @@ function stringifyMockHref(href: MockHref) {
 
   const query = href.query ? `?${new URLSearchParams(href.query)}` : "";
   return `${href.pathname}${query}`;
+}
+
+function findProductGroupVariant(data: readonly unknown[]) {
+  const productGroup = data.find(
+    (item) =>
+      item !== null &&
+      typeof item === "object" &&
+      (item as { "@type"?: unknown })["@type"] === "ProductGroup",
+  ) as { hasVariant?: readonly unknown[] } | undefined;
+  const variant = productGroup?.hasVariant?.[0];
+
+  if (variant === null || typeof variant !== "object") {
+    throw new Error("ProductGroup variant missing from JSON-LD test payload");
+  }
+
+  return variant as Record<string, unknown>;
 }
 
 vi.mock("next/navigation", () => ({
@@ -249,6 +268,29 @@ describe("Market Landing Page", () => {
     });
   }
 
+  async function buildAbsProductVariantForImage(image: TestProductImage) {
+    const { buildMarketPageJsonLdData } = await import("../market-jsonld");
+    const { getMarketBySlug } = await import("@/constants/product-catalog");
+    const { TUCSENBERG_PRODUCT_PAGES } =
+      await import("@/constants/tucsenberg-product-pages");
+    const market = getMarketBySlug("abs-flood-barriers");
+
+    if (!market) {
+      throw new Error("ABS flood barriers market fixture missing");
+    }
+
+    const data = await buildMarketPageJsonLdData({
+      market,
+      marketUrl: "https://www.example.com/products/abs-flood-barriers",
+      productPage: {
+        ...TUCSENBERG_PRODUCT_PAGES["abs-flood-barriers"],
+        image,
+      },
+    });
+
+    return findProductGroupVariant(data);
+  }
+
   describe("Scenario 1.1: Page renders with title and standard label", () => {
     it("renders the market title as h1 and standard label badge", async () => {
       await renderPage("abs-flood-barriers");
@@ -302,9 +344,56 @@ describe("Market Landing Page", () => {
         expect.objectContaining({ "@type": "BreadcrumbList" }),
         expect.objectContaining({ "@type": "FAQPage" }),
       ]);
-      expect(JSON.stringify(graphCall?.data)).not.toContain(
-        "/images/products/",
+      const productGroup = graphCall?.data.find(
+        (item) =>
+          item !== null &&
+          typeof item === "object" &&
+          (item as { "@type"?: unknown })["@type"] === "ProductGroup",
       );
+      const jsonLdPayload = JSON.stringify(graphCall?.data);
+      const variant = productGroup
+        ? findProductGroupVariant([productGroup])
+        : undefined;
+
+      expect(productGroup).toMatchObject({
+        name: "ABS Interlocking Boxwall Flood Barriers",
+        description: expect.stringContaining(
+          "A freestanding flood barrier that needs no bolts",
+        ),
+      });
+      expect(jsonLdPayload).toContain("TB-BW50");
+      expect(jsonLdPayload).toContain("4 mm");
+      expect(variant).not.toHaveProperty("image");
+      expect(jsonLdPayload).not.toMatch(/placeholder/iu);
+      expect(jsonLdPayload).not.toContain("brandAssets");
+      expect(jsonLdPayload).not.toContain(
+        "Straight, curved and gable-end ABS units for freestanding runs.",
+      );
+    });
+
+    it("emits JSON-LD image only for safe root-relative real product images", async () => {
+      await expect(
+        buildAbsProductVariantForImage({
+          status: "real",
+          src: "/images/tucsenberg-logo.png",
+        }),
+      ).resolves.toMatchObject({
+        image: "https://www.example.com/images/tucsenberg-logo.png",
+      });
+
+      await expect(
+        buildAbsProductVariantForImage({
+          status: "real",
+          src: "//evil.example/product.png",
+        }),
+      ).resolves.not.toHaveProperty("image");
+
+      await expect(
+        buildAbsProductVariantForImage({
+          status: "real",
+          src: "/../package.json",
+        }),
+      ).resolves.not.toHaveProperty("image");
     });
   });
 

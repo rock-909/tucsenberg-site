@@ -10,7 +10,7 @@ export interface SpecGroup {
 export interface FamilySpecs {
   /** Must match a slug in product-catalog.ts families */
   slug: string;
-  /** Product image paths (placeholder or real) */
+  /** Legacy fixture product image paths */
   images: string[];
   /** Key selling points (raw English strings) */
   highlights: string[];

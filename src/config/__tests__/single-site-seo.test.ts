@@ -15,8 +15,7 @@ import {
   SINGLE_SITE_SITEMAP_PAGE_CONFIG,
   SINGLE_SITE_STATIC_PAGE_LASTMOD,
 } from "@/config/single-site-seo";
-import { getAllMarketSlugs } from "@/constants/product-catalog";
-import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-registry";
+import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 describe("single-site-seo", () => {
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
@@ -91,9 +90,9 @@ describe("single-site-seo", () => {
 
   it("keeps default sidecar lastmod scoped to catalog static and product pages", () => {
     const expectedProductLastmod = Object.fromEntries(
-      getAllMarketSlugs().map((marketSlug) => [
-        getProductMarketPath(marketSlug),
-        getMarketSpecsBySlug(marketSlug)?.updatedAt,
+      Object.values(TUCSENBERG_PRODUCT_PAGES).map((productPage) => [
+        getProductMarketPath(productPage.slug),
+        productPage.meta.updatedAt,
       ]),
     );
 
@@ -125,12 +124,9 @@ describe("single-site-seo", () => {
     });
 
     const catalogLastmod = getSingleSiteStaticPageLastmod("catalog");
-    for (const marketSlug of getAllMarketSlugs()) {
-      const specs = getMarketSpecsBySlug(marketSlug);
-
-      expect(specs, `${marketSlug} should have market specs`).toBeDefined();
-      expect(catalogLastmod[getProductMarketPath(marketSlug)]).toBe(
-        specs?.updatedAt,
+    for (const productPage of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
+      expect(catalogLastmod[getProductMarketPath(productPage.slug)]).toBe(
+        productPage.meta.updatedAt,
       );
     }
   });

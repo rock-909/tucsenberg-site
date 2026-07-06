@@ -1,47 +1,21 @@
 import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 
-export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
-
-export interface TucsenbergProductCta {
-  href: "/request-quote";
-  label: string;
-}
-
-export interface TucsenbergProductTable {
-  columns: readonly string[];
-  rows: readonly (readonly string[])[];
-}
-
-export interface TucsenbergProductSection {
-  title: string;
-  kind: TucsenbergProductContentKind;
-  paragraphs?: readonly string[];
-  bullets?: readonly string[];
-  table?: TucsenbergProductTable;
-}
-
-export interface TucsenbergProductFaq {
-  question: string;
-  answer: string;
-}
-
-export interface TucsenbergProductPage {
-  slug: string;
-  meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  lead: string;
-  cta: TucsenbergProductCta;
-  downloadHref: string;
-  sections: readonly TucsenbergProductSection[];
-  faqs: readonly TucsenbergProductFaq[];
-}
+export type {
+  TucsenbergProductContentKind,
+  TucsenbergProductCta,
+  TucsenbergProductFaq,
+  TucsenbergProductImage,
+  TucsenbergProductPage,
+  TucsenbergProductSection,
+  TucsenbergProductTable,
+} from "@/constants/tucsenberg-product-page-types";
 
 export const TUCSENBERG_PRODUCT_PAGES = {
   "abs-flood-barriers": {
     slug: "abs-flood-barriers",
     meta: TUCSENBERG_PRODUCT_META["abs-flood-barriers"],
+    image: { status: "pending" },
     eyebrow: "TB-BW series",
     title: "ABS Interlocking Boxwall Flood Barriers",
     subtitle:
@@ -168,6 +142,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   "aluminum-flood-gates": {
     slug: "aluminum-flood-gates",
     meta: TUCSENBERG_PRODUCT_META["aluminum-flood-gates"],
+    image: { status: "pending" },
     eyebrow: "TB-AG series",
     title: "Aluminum Flood Gates & Demountable Barrier Systems",
     subtitle:
@@ -258,6 +233,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   "absorbent-flood-bags": {
     slug: "absorbent-flood-bags",
     meta: TUCSENBERG_PRODUCT_META["absorbent-flood-bags"],
+    image: { status: "pending" },
     eyebrow: "TB-FB series",
     title: "Absorbent Flood Bags (Sandless Sandbags) — Bulk & Private Label",
     subtitle:
@@ -344,6 +320,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   "flood-tube-dams": {
     slug: "flood-tube-dams",
     meta: TUCSENBERG_PRODUCT_META["flood-tube-dams"],
+    image: { status: "pending" },
     eyebrow: "TB-TD series",
     title: "Water & Air-Filled Flood Tube Dams",
     subtitle:
@@ -425,6 +402,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
   "frp-flood-barriers": {
     slug: "frp-flood-barriers",
     meta: TUCSENBERG_PRODUCT_META["frp-flood-barriers"],
+    image: { status: "pending" },
     eyebrow: "TB-CP series",
     title: "FRP Composite Flood Barrier Planks",
     subtitle:
@@ -497,5 +475,7 @@ export type TucsenbergProductPageSlug = keyof typeof TUCSENBERG_PRODUCT_PAGES;
 export function getTucsenbergProductPage(
   slug: string,
 ): TucsenbergProductPage | undefined {
-  return TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug];
+  return Object.hasOwn(TUCSENBERG_PRODUCT_PAGES, slug)
+    ? TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug]
+    : undefined;
 }
