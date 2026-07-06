@@ -60,6 +60,7 @@ const B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS = [
   "website",
   "trust",
   "faq",
+  "requestQuote",
 ];
 
 const PROFILE_MESSAGE_NAMESPACE_OWNERSHIP = {

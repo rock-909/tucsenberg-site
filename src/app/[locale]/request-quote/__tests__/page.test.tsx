@@ -9,9 +9,38 @@ const { mockGenerateMetadataForPath } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock("next-intl/server", () => ({
-  setRequestLocale: vi.fn(),
-}));
+vi.mock("next-intl/server", async () => {
+  const {
+    getRequestQuoteFormMessage,
+    getRequestQuoteMetadataMessage,
+    getRequestQuotePageMessage,
+  } = await import("@/test/request-quote-test-messages");
+
+  return {
+    setRequestLocale: vi.fn(),
+    getTranslations: vi.fn(
+      async ({
+        namespace,
+      }: {
+        locale?: string;
+        namespace:
+          | "requestQuote.form"
+          | "requestQuote.metadata"
+          | "requestQuote.page";
+      }) => {
+        if (namespace === "requestQuote.form") {
+          return (key: string) => getRequestQuoteFormMessage(key);
+        }
+        if (namespace === "requestQuote.metadata") {
+          return (key: string) => getRequestQuoteMetadataMessage(key);
+        }
+
+        return (key: string, values?: Record<string, string | number>) =>
+          getRequestQuotePageMessage(key, values);
+      },
+    ),
+  };
+});
 
 vi.mock("@/lib/seo-metadata", () => ({
   generateMetadataForPath: mockGenerateMetadataForPath,

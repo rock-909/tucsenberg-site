@@ -67,6 +67,7 @@ const B2B_LEAD_REQUIRED_MESSAGE_NAMESPACES = [
   "footer",
   "home",
   "contact",
+  "requestQuote",
   "privacy",
   "terms",
   "legal",

@@ -89,7 +89,13 @@ describe("starter profile registry", () => {
     ]);
     expect(profile.dynamicSurfaces).toEqual([]);
     expect(profile.messageNamespaces).toEqual(
-      expect.arrayContaining(["navigation", "footer", "home", "contact"]),
+      expect.arrayContaining([
+        "navigation",
+        "footer",
+        "home",
+        "contact",
+        "requestQuote",
+      ]),
     );
     expect(profile.proofLanes).toEqual(["core-starter", "b2b-lead"]);
     expect(profile.examplePacks).toEqual([]);
@@ -137,6 +143,9 @@ describe("starter profile registry", () => {
       proofLanes: ["core-starter", "catalog"],
       examplePacks: ["catalog-examples"],
     });
+    expect(getStarterProfile("catalog").messageNamespaces).toEqual(
+      expect.arrayContaining(["requestQuote", "catalog", "products"]),
+    );
 
     expect(getStarterProfile("content-marketing")).toMatchObject({
       staticPages: ["home", "blog", "about", "contact", "privacy", "terms"],
