@@ -52,6 +52,9 @@
 
 ### Task 3: Buyer-visible content and product image fallback
 
+Historical note: the `src/components/products/family-section.tsx` path listed
+below was retired by S2 on 2026-07-06 and is no longer a current runtime target.
+
 **Files:**
 - Modify: `content/pages/en/contact.mdx`
 - Modify: `content/pages/en/flood-barrier-materials-guide.mdx`

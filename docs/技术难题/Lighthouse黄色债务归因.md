@@ -70,7 +70,7 @@ Lighthouse transfer metrics after repair.
 | `@/lib/form-schema/contact-form-schema.ts` → zod validators | Server | Used by server actions | **No leakage** to product/blog pages |
 | `@/lib/lead-pipeline/*` → `zod` | Server | API routes (`/api/inquiry`, `/api/subscribe`) | **No leakage** |
 | `@/components/forms/contact-form-container.tsx` → `use-contact-form` | Client | Contact page only (`contact-form-island`) | **No leakage** — not imported by product detail |
-| `market-page-sections.tsx` → product components only | Server | Product detail | **No contact/form/zod imports** — verified by `rg` (zero matches) |
+| Historical `market-page-sections.tsx` path → product components only | Server | Product detail | **Retired by S2**; historical finding only. No contact/form/zod imports were found when this attribution was recorded. |
 
 ### Product detail script treemap (top contributors)
 
@@ -96,9 +96,10 @@ the zod chunk, see Lighthouse `network-requests`: `0u50s2q5tiahi.js`
 
 1. Fix only issues with direct evidence. Do not loosen Lighthouse thresholds.
 2. Do not alter UI foundation (Radix static-surface swap, fonts, contrast) unless attribution proves it blocks Wave 1 — defer those to Wave 2.
-3. **Original Task 3** (product-detail form boundary in `market-page-sections.tsx`)
-   is **superseded** — attribution shows that path is already clean. Do **not**
-   create `tests/architecture/product-detail-client-boundary.test.ts`.
+3. **Original Task 3** (product-detail form boundary in the historical
+   `market-page-sections.tsx` path) is **superseded** — S2 retired that path
+   after S1 moved current product detail rendering to `TUCSENBERG_PRODUCT_PAGES`.
+   Do **not** recreate `tests/architecture/product-detail-client-boundary.test.ts`.
 
 ## Task 3 addendum: zod-free public runtime env split (blocked — Codex approval required)
 
