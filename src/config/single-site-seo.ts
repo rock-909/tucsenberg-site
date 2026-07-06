@@ -22,7 +22,7 @@ export interface SingleSiteSitemapPageConfig {
   priority: number;
 }
 
-const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-04-26T00:00:00Z";
+const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
 const SINGLE_SITE_PRODUCT_MARKET_CONFIG = {
   changeFrequency: "weekly",
@@ -157,11 +157,7 @@ export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
 export const SINGLE_SITE_STATIC_PAGE_LASTMOD =
   getSingleSiteStaticPageLastmod() satisfies Record<string, string>;
 
-export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = [
-  "/api/",
-  "/_next/",
-  "/error-test/",
-] as const;
+export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = ["/api/", "/_next/"] as const;
 
 export function getSingleSiteSitemapPageConfig(
   path: string,

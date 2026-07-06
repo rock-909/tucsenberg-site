@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { getCanonicalPath } from "@/config/paths/utils";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
@@ -157,6 +158,16 @@ function readRepoJson(repoPath: string): unknown {
   return JSON.parse(readRepoFile(repoPath)) as unknown;
 }
 
+function readRepoJsonc(repoPath: string): unknown {
+  const parsed = ts.parseConfigFileTextToJson(repoPath, readRepoFile(repoPath));
+  if (parsed.error) {
+    throw new Error(
+      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
+    );
+  }
+  return parsed.config as unknown;
+}
+
 function getObject(value: unknown, label: string): Record<string, unknown> {
   expect(value, label).toBeTruthy();
   expect(typeof value, label).toBe("object");
@@ -222,6 +233,21 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(nextConfig).toContain('value: "noindex"');
   });
 
+  it("sets ordinary non-production pages to noindex at the response-header layer", () => {
+    const nextConfig = readRepoFile("next.config.ts");
+
+    expect(nextConfig).toContain('process.env.APP_ENV !== "production"');
+    expect(nextConfig).toContain('source: "/:path*"');
+    expect(nextConfig).toContain('value: "noindex, nofollow"');
+  });
+
+  it("does not keep starter image hosts in Next image allowlist", () => {
+    const nextConfig = readRepoFile("next.config.ts");
+
+    expect(nextConfig).not.toContain("images.unsplash.com");
+    expect(nextConfig).not.toContain("via.placeholder.com");
+  });
+
   it("does not keep Chinese public content directories", () => {
     expect(() => statSync("content/pages/zh")).toThrow();
     expect(() => statSync("messages/base/zh")).toThrow();
@@ -253,6 +279,19 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(singleSiteConfig).not.toContain(
       'resolveSingleSiteBaseUrl("https://tucsenberg.com")',
     );
+  });
+
+  it("keeps formal domain cutover out of the no-cutover production config", () => {
+    const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
+    const env = getObject(wrangler.env, "wrangler.env");
+    const production = getObject(env.production, "wrangler.env.production");
+    const vars = getObject(production.vars, "wrangler.env.production.vars");
+
+    expect(production).not.toHaveProperty("routes");
+    expect(production).not.toHaveProperty("custom_domain");
+    expect(production).not.toHaveProperty("workers_dev");
+    expect(vars.NEXT_PUBLIC_SITE_URL).not.toBe("https://tucsenberg.com");
+    expect(vars.NEXT_PUBLIC_BASE_URL).not.toBe("https://tucsenberg.com");
   });
 
   it("keeps forbidden claims out of public-rendered source surfaces", () => {
@@ -323,14 +362,12 @@ describe("Tucsenberg Phase 1 site contract", () => {
     );
     expect(contactPage).toContain("title: 'Contact'");
     expect(contactPage).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote/) — it asks the questions we'd ask anyway, so your quote comes back faster.",
+      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so your quote comes back faster.",
     );
     expect(contactPage).toContain(
       "**Email**: sales@tucsenberg.com — standard items quoted within 12 hours, custom within 48. You'll hear from a person, not a sequence.",
     );
-    expect(contactPage).toContain(
-      "**WhatsApp**: @Tucsenberg (business account) — same quote commitment as email: standard items 12 hours, custom 48.",
-    );
+    expect(contactPage).not.toContain("**WhatsApp**:");
     expect(contactPage).toContain(
       "No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China",
     );

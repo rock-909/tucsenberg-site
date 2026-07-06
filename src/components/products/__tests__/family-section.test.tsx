@@ -131,7 +131,7 @@ describe("Feature: Market Family Page — Product Family Section", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders an image area with the first product image", async () => {
+    it("renders the neutral fallback while product photos are pending", async () => {
       const FamilySection = await importComponent();
       render(
         <FamilySection
@@ -145,7 +145,27 @@ describe("Feature: Market Family Page — Product Family Section", () => {
       const img = screen.getByRole("img");
       expect(img).toHaveAttribute(
         "src",
-        "/profile-fixtures/catalog/products/placeholder-shape.svg",
+        "/profile-fixtures/catalog/products/sample-product-a.svg",
+      );
+    });
+
+    it("falls back when pending product photos point to a missing non-placeholder file", async () => {
+      const FamilySection = await importComponent();
+      render(
+        <FamilySection
+          family={mockFamily}
+          specs={{
+            ...mockSpecs,
+            images: ["/images/products/missing-real-photo.jpg"],
+          }}
+          familyLabel="Sample Product Shapes"
+          familyDescription="Replaceable item examples for versions, shapes, packages, or service variants."
+        />,
+      );
+
+      expect(screen.getByRole("img")).toHaveAttribute(
+        "src",
+        "/profile-fixtures/catalog/products/sample-product-a.svg",
       );
     });
 

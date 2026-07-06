@@ -48,4 +48,39 @@ describe("Cloudflare deploy workflow contract", () => {
       "GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}",
     );
   });
+
+  it("runs the strict public-launch config gate before production deploy", () => {
+    const workflow = readFileSync(
+      ".github/workflows/cloudflare-deploy.yml",
+      "utf8",
+    );
+
+    expect(workflow).toContain(
+      "PUBLIC_LAUNCH_STRICT=true APP_ENV=production node scripts/starter-checks.js validate-production-config",
+    );
+    expect(workflow.indexOf("validate-production-config")).toBeLessThan(
+      workflow.indexOf("部署到 Cloudflare Workers（production）"),
+    );
+  });
+
+  it("uses wrangler production public vars before strict proof and build", () => {
+    const workflow = readFileSync(
+      ".github/workflows/cloudflare-deploy.yml",
+      "utf8",
+    );
+
+    expect(workflow).toContain("导出 production public vars（wrangler）");
+    expect(workflow).toContain("ts.parseConfigFileTextToJson");
+    expect(workflow).toContain("NEXT_PUBLIC_SITE_URL");
+    expect(workflow).toContain("NEXT_PUBLIC_BASE_URL");
+    expect(
+      workflow.indexOf("导出 production public vars（wrangler）"),
+    ).toBeLessThan(workflow.indexOf("validate-production-config"));
+    expect(workflow.indexOf("validate-production-config")).toBeLessThan(
+      workflow.indexOf("pnpm release:verify"),
+    );
+    expect(workflow.indexOf("validate-production-config")).toBeLessThan(
+      workflow.indexOf("pnpm website:build:cf"),
+    );
+  });
 });

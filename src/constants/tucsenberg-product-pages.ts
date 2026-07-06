@@ -376,7 +376,7 @@ export const TUCSENBERG_PRODUCT_PAGES = {
             ["Tube wall", "0.9 mm PVC tarpaulin, thermally moulded", "same"],
             ["Ground mat", "0.6 mm PVC", "0.6 mm PVC, 10.8 m × 2 m"],
             ["Fabric weight", "1,120 g/m²", "same"],
-            ["Section weight", "TODO-OWNER", "52 kg ±5%"],
+            ["Section weight", "Available on request", "52 kg ±5%"],
             ["Inflation", "~450 s to 6 PSI (pump included)", "same"],
           ],
         },

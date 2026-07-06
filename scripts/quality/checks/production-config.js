@@ -1,3 +1,13 @@
+const fs = require("node:fs");
+const path = require("node:path");
+const ts = require("typescript");
+
+const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
+const WRANGLER_PRODUCTION_PUBLIC_URL_KEYS = [
+  "NEXT_PUBLIC_SITE_URL",
+  "NEXT_PUBLIC_BASE_URL",
+];
+
 function ensureTypeScriptRequireRuntime() {
   if (require.extensions[".ts"]) return;
   if (process.env.VITEST === "true" || process.env.VITEST_WORKER_ID) return;
@@ -137,10 +147,56 @@ function isTrue(env, key) {
   return readEnv(env, key) === "true";
 }
 
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseJsoncText(filePath, content) {
+  const parsed = ts.parseConfigFileTextToJson(filePath, content);
+  if (parsed.error) {
+    throw new Error(
+      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
+    );
+  }
+  return parsed.config;
+}
+
+function readWranglerProductionVars(rootDir = process.cwd()) {
+  const filePath = path.join(rootDir, WRANGLER_CONFIG_PATH);
+
+  if (!fs.existsSync(filePath)) {
+    return undefined;
+  }
+
+  const config = parseJsoncText(filePath, fs.readFileSync(filePath, "utf8"));
+  const vars = config?.env?.production?.vars;
+  return isRecord(vars) ? vars : undefined;
+}
+
+function validateWranglerProductionPublicUrls(target) {
+  const productionVars = readWranglerProductionVars();
+
+  if (!productionVars) {
+    target.push(
+      "wrangler.jsonc env.production.vars is missing; production deploy config cannot be public-launch validated.",
+    );
+    return;
+  }
+
+  for (const key of WRANGLER_PRODUCTION_PUBLIC_URL_KEYS) {
+    const value = readEnv(productionVars, key);
+    if (containsStarterMarker(value)) {
+      target.push(
+        `wrangler.jsonc env.production.vars.${key} is not public-launch ready (configure the real public domain before production deploy).`,
+      );
+    }
+  }
+}
+
 function containsStarterMarker(value) {
   if (!value) return true;
 
-  return /Example Showcase Company|Showcase Website Starter|example\.(?:com|org|net)|[\w.-]+\.example|localhost|127\.0\.0\.1|sales@example\.com|starter-contact@example\.com|showcase website example|showcase website starter|public demo starter|replaceable showcase website example|Public Demo Starter Site|Example Business Park|Example City|Replace before launch|x\.com\/example|linkedin\.com\/company\/example/iu.test(
+  return /Example Showcase Company|Showcase Website Starter|example\.(?:com|org|net|invalid)|[\w.-]+\.example|\.workers\.dev|localhost|127\.0\.0\.1|sales@example\.com|starter-contact@example\.com|showcase website example|showcase website starter|public demo starter|replaceable showcase website example|Public Demo Starter Site|Example Business Park|Example City|Replace before launch|x\.com\/example|linkedin\.com\/company\/example/iu.test(
     value,
   );
 }
@@ -293,6 +349,16 @@ function validatePublicLaunchTrustContent(env) {
   if (!shouldCheck) {
     return { warnings, errors };
   }
+
+  for (const key of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_URL"]) {
+    const value = readEnv(env, key);
+    if (value && containsStarterMarker(value)) {
+      target.push(
+        `${key} is not public-launch ready (configure the real public domain before client launch).`,
+      );
+    }
+  }
+  validateWranglerProductionPublicUrls(target);
 
   validateNoStarterMarker(
     target,

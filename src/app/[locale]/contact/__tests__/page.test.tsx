@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/test/render-async-page";
@@ -95,6 +95,10 @@ vi.mock("@/lib/contact/getContactCopy", () => ({
 }));
 
 describe("ContactPage MDX migration", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetContactCopyFromMessages.mockReturnValue(contactCopy);
@@ -164,8 +168,9 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(
-      screen.getByRole("heading", { name: "Email & WhatsApp" }),
+      screen.getByRole("heading", { name: "Email & RFQ" }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Email & WhatsApp/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Quote response" }),
     ).toBeInTheDocument();
@@ -179,7 +184,7 @@ describe("ContactPage MDX migration", () => {
     render(
       <ContactMethodsCard
         copy={{
-          title: "Email & WhatsApp",
+          title: "Email & RFQ",
           emailLabel: "Email",
           emailUnavailable: "Use the RFQ form if email is unavailable.",
           phoneLabel: "Phone",
@@ -191,6 +196,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
     expect(screen.queryByText("TODO-OWNER")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
+    expect(screen.queryByText(/WhatsApp/i)).not.toBeInTheDocument();
   });
 
   it("does not render starter FAQ from MDX frontmatter", async () => {
@@ -368,6 +374,8 @@ describe("ContactPage MDX migration", () => {
   });
 
   it("generates runtime SEO metadata for the actual localized contact route", async () => {
+    vi.stubEnv("APP_ENV", "production");
+
     const metadata = await generateMetadata({
       params: Promise.resolve({ locale: "en" }),
     });

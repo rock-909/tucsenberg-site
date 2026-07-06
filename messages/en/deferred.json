@@ -181,7 +181,7 @@
     },
     "title": "Contact",
     "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
-    "features": "Email, WhatsApp and RFQ routing for Tucsenberg buyers",
+    "features": "Email and RFQ routing for Tucsenberg buyers",
     "inquiryHandoff": {
       "title": "Fastest route",
       "description": "The RFQ form asks the questions we would ask anyway, so your quote comes back faster.",
@@ -201,7 +201,7 @@
       }
     },
     "panel": {
-      "contactTitle": "Email & WhatsApp",
+      "contactTitle": "Email & RFQ",
       "email": "Email",
       "emailUnavailable": "Use the RFQ form if email is unavailable.",
       "phone": "Phone",

@@ -98,20 +98,16 @@ describe("single-site-seo", () => {
     );
 
     expect(SINGLE_SITE_STATIC_PAGE_LASTMOD).toEqual({
-      "": "2026-04-26T00:00:00Z",
-      "/products": "2026-04-26T00:00:00Z",
-      "/request-quote": "2026-04-26T00:00:00Z",
+      "": "2026-07-05T00:00:00Z",
+      "/products": "2026-07-05T00:00:00Z",
+      "/request-quote": "2026-07-05T00:00:00Z",
       ...expectedProductLastmod,
     });
     expect(SINGLE_SITE_STATIC_PAGE_LASTMOD[getCanonicalPath("products")]).toBe(
-      "2026-04-26T00:00:00Z",
+      "2026-07-05T00:00:00Z",
     );
     expect(SINGLE_SITE_STATIC_PAGE_LASTMOD["/capabilities"]).toBeUndefined();
-    expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual([
-      "/api/",
-      "/_next/",
-      "/error-test/",
-    ]);
+    expect(SINGLE_SITE_ROBOTS_DISALLOW_PATHS).toEqual(["/api/", "/_next/"]);
   });
 
   it("can derive explicit catalog static pages and product market sidecar lastmod", () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { getProductMarketPath } from "@/config/paths/utils";
 import {
@@ -7,6 +7,10 @@ import {
 } from "@/config/single-site-seo";
 
 describe("market metadata live integration", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   const expectedProductMetadata = [
     [
       "abs-flood-barriers",
@@ -36,6 +40,8 @@ describe("market metadata live integration", () => {
   ] as const;
 
   it("indexes current catalog product markets in the public SEO profile", async () => {
+    vi.stubEnv("APP_ENV", "production");
+
     const path = getProductMarketPath("abs-flood-barriers");
     const profileId = getSingleSitePublicSeoProfileId();
 
@@ -57,6 +63,8 @@ describe("market metadata live integration", () => {
   });
 
   it("page generateMetadata matches path-aware helper", async () => {
+    vi.stubEnv("APP_ENV", "production");
+
     const { generateMetadata } = await import("../page");
     const metadata = await generateMetadata({
       params: Promise.resolve({ locale: "en", market: "abs-flood-barriers" }),

@@ -81,10 +81,6 @@ export function generateCSP(): string {
     "img-src": [
       "'self'",
       "data:",
-      "https:",
-      // External image sources
-      "https://images.unsplash.com",
-      "https://via.placeholder.com",
       // Google Analytics
       "https://www.google-analytics.com",
       "https://www.googletagmanager.com",
@@ -94,8 +90,6 @@ export function generateCSP(): string {
       "'self'",
       // API endpoints
       ...(isDevelopment ? ["http://localhost:*", "ws://localhost:*"] : []),
-      // External APIs
-      "https://api.resend.com",
       // Google Analytics
       "https://www.google-analytics.com",
       "https://analytics.google.com",

@@ -224,6 +224,29 @@ describe("validateProductionConfig CI vs deploy gate", () => {
 });
 
 describe("public launch trust content guard", () => {
+  it("checks the actual wrangler production public URLs in strict mode", () => {
+    const result = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: "true",
+      NEXT_PUBLIC_SITE_URL: "https://launch.tucsenberg.test",
+      NEXT_PUBLIC_BASE_URL: "https://launch.tucsenberg.test",
+      ...createValidProductionEnv(),
+    });
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL",
+        ),
+        expect.stringContaining(
+          "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL",
+        ),
+      ]),
+    );
+  });
+
   it("reports owner-dependent public trust items as warnings by default", () => {
     const env: NodeJS.ProcessEnv = {
       APP_ENV: "preview",
@@ -304,6 +327,58 @@ describe("public launch trust content guard", () => {
       expect.arrayContaining([
         expect.stringContaining("PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED"),
       ]),
+    );
+  });
+
+  it("treats workers.dev and example.invalid as non-launch public URLs", () => {
+    const workersDev = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_SITE_URL:
+        "https://tucsenberg-site-preview.example.workers.dev",
+      ...createValidProductionEnv(),
+    });
+    const exampleInvalid = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_SITE_URL:
+        "https://tucsenberg-site-production.example.invalid",
+      ...createValidProductionEnv(),
+    });
+
+    expect(workersDev.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_SITE_URL")]),
+    );
+    expect(exampleInvalid.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_SITE_URL")]),
+    );
+  });
+
+  it("treats workers.dev and example.invalid base URLs as non-launch public URLs", () => {
+    const workersDev = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_BASE_URL:
+        "https://tucsenberg-site-preview.example.workers.dev",
+      ...createValidProductionEnv(),
+    });
+    const exampleInvalid = validateProductionConfig({
+      APP_ENV: "production",
+      NODE_ENV: "production",
+      PUBLIC_LAUNCH_STRICT: "true",
+      NEXT_PUBLIC_BASE_URL:
+        "https://tucsenberg-site-production.example.invalid",
+      ...createValidProductionEnv(),
+    });
+
+    expect(workersDev.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_BASE_URL")]),
+    );
+    expect(exampleInvalid.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("NEXT_PUBLIC_BASE_URL")]),
     );
   });
 });

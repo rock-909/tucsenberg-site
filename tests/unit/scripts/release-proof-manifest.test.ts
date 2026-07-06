@@ -70,7 +70,7 @@ describe("release proof manifest", () => {
     );
   });
 
-  it("keeps default release proof local and company-site scoped", () => {
+  it("keeps default release proof local and catalog scoped", () => {
     const manifest = loadReleaseProofManifest();
     const releaseProofFlow = manifest.getReleaseProofSequence().join("\n");
     const lanes = new Set(
@@ -79,6 +79,9 @@ describe("release proof manifest", () => {
 
     expect([...lanes]).toEqual(["local/test-mode"]);
     expect(releaseProofFlow).toContain(
+      "node scripts/starter-checks.js content-readiness --profile catalog",
+    );
+    expect(releaseProofFlow).not.toContain(
       "node scripts/starter-checks.js content-readiness --profile company-site",
     );
     expect(releaseProofFlow).not.toContain(

@@ -1,11 +1,24 @@
 import { buildCatalogBreadcrumbJsonLd } from "@/components/products/catalog-breadcrumb-jsonld";
 import { SITE_CONFIG } from "@/config/paths";
+import { siteFacts } from "@/config/site-facts";
 import { generateProductGroupData } from "@/lib/structured-data-generators";
 import type { MarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
 
 export interface MarketPageJsonLdLabels {
   marketDescription: string;
   marketLabel: string;
+}
+
+function getJsonLdProductImage(image: string | undefined) {
+  if (
+    siteFacts.brandAssets.productPhotos.status !== "ready" ||
+    !image ||
+    image.includes("placeholder")
+  ) {
+    return undefined;
+  }
+
+  return `${SITE_CONFIG.baseUrl}${image}`;
 }
 
 export async function buildMarketPageJsonLdData({
@@ -26,12 +39,14 @@ export async function buildMarketPageJsonLdData({
     url: marketUrl,
     brand: SITE_CONFIG.name,
     products: families.map((family) => {
-      const image = familySpecsMap.get(family.slug)?.images[0];
+      const image = getJsonLdProductImage(
+        familySpecsMap.get(family.slug)?.images[0],
+      );
 
       return {
         name: t(`families.${market.slug}.${family.slug}.label`),
         description: t(`families.${market.slug}.${family.slug}.description`),
-        ...(image ? { image: `${SITE_CONFIG.baseUrl}${image}` } : {}),
+        ...(image ? { image } : {}),
         url: `${marketUrl}#${family.slug}`,
       };
     }),

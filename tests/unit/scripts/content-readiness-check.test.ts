@@ -975,6 +975,26 @@ describe("content-readiness-check", () => {
     );
   });
 
+  it("reports TODO markers in catalog product specs for catalog readiness", () => {
+    const rootDir = createFixture({
+      "src/constants/product-specs/tucsenberg-product-lines.ts":
+        "export const row = ['Section weight', 'TODO-OWNER', '52 kg'];",
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = runContentReadinessCheck(rootDir, {
+      profileId: "catalog",
+      strictClientLaunch: true,
+    });
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "todo-marker",
+      "src/constants/product-specs/tucsenberg-product-lines.ts",
+    );
+  });
+
   it("reports showcase-full residue across optional demo surfaces", () => {
     const rootDir = createFixture({
       "content/pages/en/custom-project-support.mdx": "lorem ipsum",

@@ -50,6 +50,10 @@ describe("market spec registry", () => {
   it("keeps live market spec families off the sample product illustration", () => {
     for (const [marketSlug, specs] of getMarketSpecEntries()) {
       for (const family of specs.families) {
+        expect(
+          JSON.stringify(family),
+          `${marketSlug}/${family.slug}`,
+        ).not.toContain("TODO-OWNER");
         expect(family.images, `${marketSlug}/${family.slug}`).not.toContain(
           "/profile-fixtures/catalog/products/sample-product.svg",
         );

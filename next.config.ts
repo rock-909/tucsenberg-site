@@ -81,24 +81,6 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: !isCloudflare,
 
   images: {
-    // Remote image patterns allow Next.js Image component to optimize external images.
-    // Management process:
-    // 1. Only add trusted domains with explicit business justification
-    // 2. Use specific hostnames (avoid wildcards unless necessary)
-    // 3. Review patterns periodically and remove unused ones
-    // 4. Document each pattern's purpose for maintainability
-    remotePatterns: [
-      {
-        // Unsplash: High-quality stock photos for blog/marketing content
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        // Placeholder.com: Development/testing placeholder images
-        protocol: "https",
-        hostname: "via.placeholder.com",
-      },
-    ],
     // Starter baseline: Cloudflare builds must not require Images,
     // Transformations, Polish, Mirage, R2, or a custom image loader. Derived
     // customer projects can opt into those lanes only with separate deployed
@@ -178,6 +160,13 @@ const nextConfig: NextConfig = {
         value: "noindex",
       },
     ];
+    const nonProductionNoindexHeaders = [
+      {
+        key: "X-Robots-Tag",
+        value: "noindex, nofollow",
+      },
+    ];
+    const shouldNoindexPublicPages = process.env.APP_ENV !== "production";
 
     const headerConfigs = [
       // 安全头部应用到所有路径
@@ -186,6 +175,14 @@ const nextConfig: NextConfig = {
             {
               source: "/:path*",
               headers: securityHeaders,
+            },
+          ]
+        : []),
+      ...(shouldNoindexPublicPages
+        ? [
+            {
+              source: "/:path*",
+              headers: nonProductionNoindexHeaders,
             },
           ]
         : []),

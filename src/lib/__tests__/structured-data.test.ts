@@ -94,8 +94,8 @@ vi.mock("@/config/paths/site-config", () => ({
       keywords: [],
     },
     social: {
-      twitter: "https://x.com/example",
-      linkedin: "https://www.linkedin.com/company/example",
+      twitter: "",
+      linkedin: "",
     },
     contact: {
       phone: "+86-518-0000-0000",
@@ -192,12 +192,7 @@ describe("Structured Data Generation", () => {
         "https://example.com/images/tucsenberg-logo.png",
       );
 
-      const sameAs = schema["sameAs"] as string[];
-      expect(sameAs).toEqual([
-        "https://x.com/example",
-        "https://www.linkedin.com/company/example",
-      ]);
-      expect(sameAs).toHaveLength(2);
+      expect(schema).not.toHaveProperty("sameAs");
     });
 
     it("should handle different locales", async () => {
@@ -257,6 +252,11 @@ describe("Structured Data Generation", () => {
       expect(JSON.stringify([organization, website])).not.toMatch(
         factualPlaceholderPattern,
       );
+      expect(JSON.stringify(organization)).not.toContain("x.com/example");
+      expect(JSON.stringify(organization)).not.toContain(
+        "linkedin.com/company/example",
+      );
+      expect(organization).not.toHaveProperty("sameAs");
     });
   });
 

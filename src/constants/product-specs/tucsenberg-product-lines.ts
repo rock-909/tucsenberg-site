@@ -170,7 +170,7 @@ export const FLOOD_TUBE_DAM_SPECS = {
             ["Tube wall", "0.9 mm PVC tarpaulin, thermally moulded", "same"],
             ["Ground mat", "0.6 mm PVC", "0.6 mm PVC, 10.8 m x 2 m"],
             ["Fabric weight", "1,120 g/m²", "same"],
-            ["Section weight", "TODO-OWNER", "52 kg +/-5%"],
+            ["Section weight", "Available on request", "52 kg +/-5%"],
             ["Tear strength", "warp 280 N / weft 320 N", "same"],
             ["Tensile strength", "2,800 / 2,500 N/5 cm", "same"],
             ["Flex durability", "100,000 cycles", "same"],
