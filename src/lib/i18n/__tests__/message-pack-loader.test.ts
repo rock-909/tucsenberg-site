@@ -75,6 +75,7 @@ describe("message pack loader", () => {
       "catalog",
       "products",
       "contact",
+      "requestQuote",
       "privacy",
       "terms",
     ]);
@@ -105,6 +106,7 @@ describe("message pack loader", () => {
       "footer",
       "home",
       "contact",
+      "requestQuote",
       "privacy",
       "terms",
       "legal",

@@ -6,14 +6,19 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestRequestQuoteFormCopy } from "@/test/request-quote-test-messages";
 import { RequestQuoteForm } from "../request-quote-form";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({
     action,
+    onError,
+    onExpire,
     onSuccess,
   }: {
     action?: string;
+    onError?: () => void;
+    onExpire?: () => void;
     onSuccess?: (token: string) => void;
   }) => (
     <div data-action={action} data-testid="rfq-turnstile">
@@ -23,6 +28,20 @@ vi.mock("@/components/forms/lazy-turnstile", () => ({
         type="button"
       >
         Complete verification
+      </button>
+      <button
+        data-testid="rfq-turnstile-expire"
+        onClick={() => onExpire?.()}
+        type="button"
+      >
+        Expire verification
+      </button>
+      <button
+        data-testid="rfq-turnstile-error"
+        onClick={() => onError?.()}
+        type="button"
+      >
+        Fail verification
       </button>
     </div>
   ),
@@ -35,6 +54,8 @@ function getFetchBody(): Record<string, unknown> {
 }
 
 describe("RequestQuoteForm", () => {
+  const copy = createTestRequestQuoteFormCopy();
+
   beforeEach(() => {
     vi.clearAllMocks();
     window.sessionStorage.clear();
@@ -55,6 +76,34 @@ describe("RequestQuoteForm", () => {
     delete (window as unknown as Record<string, unknown>).gtag;
   });
 
+  it("keeps submit disabled until Turnstile succeeds", async () => {
+    render(<RequestQuoteForm copy={copy} />);
+
+    const submitButton = screen.getByRole("button", { name: "Send RFQ" });
+
+    expect(submitButton).toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
+    });
+
+    expect(submitButton).not.toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("rfq-turnstile-expire"));
+    });
+
+    expect(submitButton).toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
+      fireEvent.click(screen.getByTestId("rfq-turnstile-error"));
+    });
+
+    expect(submitButton).toBeDisabled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("submits RFQ fields through /api/inquiry with product inquiry Turnstile", async () => {
     window.sessionStorage.setItem(
       "marketing_attribution",
@@ -68,7 +117,7 @@ describe("RequestQuoteForm", () => {
     );
     window.gtag = vi.fn();
 
-    render(<RequestQuoteForm />);
+    render(<RequestQuoteForm copy={copy} />);
 
     expect(screen.getByTestId("rfq-turnstile")).toHaveAttribute(
       "data-action",
@@ -169,5 +218,75 @@ describe("RequestQuoteForm", () => {
         method: "rfq",
       }),
     );
+  });
+
+  it("shows a buyer-safe error when the inquiry API rejects the RFQ", async () => {
+    global.fetch = vi.fn(async () =>
+      Response.json(
+        {
+          success: false,
+          errorCode: "INQUIRY_VALIDATION_FAILED",
+        },
+        { status: 400 },
+      ),
+    );
+    window.gtag = vi.fn();
+
+    render(<RequestQuoteForm copy={copy} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
+    });
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Alice Buyer" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "alice@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Quantity"), {
+      target: { value: "container" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Send RFQ" }));
+    });
+
+    expect(
+      await screen.findByText(
+        "We could not send your RFQ. Please review the fields.",
+      ),
+    ).toBeInTheDocument();
+    expect(window.gtag).not.toHaveBeenCalled();
+  });
+
+  it("shows the network fallback when the inquiry request fails before a response", async () => {
+    global.fetch = vi.fn(async () => {
+      throw new Error("offline");
+    });
+
+    render(<RequestQuoteForm copy={copy} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
+    });
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Alice Buyer" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "alice@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Quantity"), {
+      target: { value: "container" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Send RFQ" }));
+    });
+
+    expect(
+      await screen.findByText(
+        "Network error. Please try again or email sales@tucsenberg.com.",
+      ),
+    ).toBeInTheDocument();
   });
 });

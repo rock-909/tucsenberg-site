@@ -55,6 +55,7 @@ export type StarterMessageNamespace =
   | "privacy"
   | "products"
   | "progress"
+  | "requestQuote"
   | "resources"
   | "stats"
   | "structured-data"
@@ -132,6 +133,7 @@ const B2B_LEAD_MESSAGE_NAMESPACES = [
   "website",
   "trust",
   "faq",
+  "requestQuote",
 ] as const satisfies readonly StarterMessageNamespace[];
 
 const CATALOG_MESSAGE_NAMESPACES = [
