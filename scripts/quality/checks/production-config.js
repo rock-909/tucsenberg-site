@@ -207,6 +207,17 @@ function validateNoStarterMarker(target, markerPath, value, reason) {
   }
 }
 
+function validateOptionalSocialProfile(target, markerPath, value) {
+  if (!value) return;
+
+  validateNoStarterMarker(
+    target,
+    markerPath,
+    value,
+    "remove starter social profiles or replace them with owner-confirmed profiles before client launch",
+  );
+}
+
 function validateLaunchSignoff(target, env, key, surface, reason) {
   if (!isTrue(env, key)) {
     target.push(
@@ -392,17 +403,15 @@ function validatePublicLaunchTrustContent(env) {
     SINGLE_SITE_DEFINITION.config.seo.defaultDescription,
     "replace starter SEO description defaults before client launch",
   );
-  validateNoStarterMarker(
+  validateOptionalSocialProfile(
     target,
     "SITE_CONFIG.social.twitter",
     SINGLE_SITE_DEFINITION.config.social.twitter,
-    "replace the starter social profile before client launch",
   );
-  validateNoStarterMarker(
+  validateOptionalSocialProfile(
     target,
     "SITE_CONFIG.social.linkedin",
     SINGLE_SITE_DEFINITION.config.social.linkedin,
-    "replace the starter social profile before client launch",
   );
   validateNoStarterMarker(
     target,
