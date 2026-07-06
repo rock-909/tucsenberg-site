@@ -1,12 +1,19 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const PRODUCT_MARKET_ROUTE_FILES = [
   "src/app/[locale]/products/[market]/page.tsx",
   "src/app/[locale]/products/[market]/market-page-data.ts",
   "src/app/[locale]/products/[market]/market-jsonld.ts",
+] as const;
+const RETIRED_PRODUCT_ROUTE_FILES = [
   "src/app/[locale]/products/[market]/market-page-sections.tsx",
   "src/app/[locale]/products/[market]/market-spec-presenter.ts",
+  "src/app/[locale]/products/[market]/cta-section.tsx",
+  "src/app/[locale]/products/[market]/trust-signals-section.tsx",
+  "src/components/products/family-section.tsx",
+  "src/components/products/family-section.stories.tsx",
+  "src/components/products/__tests__/family-section.test.tsx",
 ] as const;
 const PRODUCT_PUBLIC_SEO_FILES = ["src/config/single-site-seo.ts"] as const;
 
@@ -60,6 +67,13 @@ describe("product market route boundary", () => {
 
       expect(source, filePath).toMatch(TUCSENBERG_PRODUCT_PAGE_IMPORT_PATTERN);
       expect(source, filePath).not.toMatch(MARKET_SPEC_REGISTRY_IMPORT_PATTERN);
+    }
+  });
+
+  it("keeps the retired FamilySection product-detail path out of active source", () => {
+    for (const filePath of RETIRED_PRODUCT_ROUTE_FILES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks a fixed repo-local retired-path allowlist
+      expect(existsSync(filePath), filePath).toBe(false);
     }
   });
 });

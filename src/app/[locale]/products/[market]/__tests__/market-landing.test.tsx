@@ -140,34 +140,6 @@ vi.mock("@/components/seo/json-ld-script", () => ({
   },
 }));
 
-vi.mock("@/components/products/family-section", () => ({
-  FamilySection: ({
-    family,
-    familyLabel,
-    inquiry,
-  }: {
-    family: { slug: string; label: string };
-    familyLabel: string;
-    inquiry?: { href: MockHref; label: string; prefetch?: boolean };
-  }) => (
-    <section data-testid={`family-${family.slug}`}>
-      <h2>{familyLabel}</h2>
-      {inquiry ? (
-        <a
-          href={stringifyMockHref(inquiry.href)}
-          data-prefetch={
-            inquiry.prefetch === undefined
-              ? "default"
-              : String(inquiry.prefetch)
-          }
-        >
-          {inquiry.label}
-        </a>
-      ) : null}
-    </section>
-  ),
-}));
-
 vi.mock("@/components/products/sticky-family-nav", () => ({
   StickyFamilyNav: () => <nav data-testid="sticky-nav">nav</nav>,
 }));
@@ -547,7 +519,7 @@ describe("Market Landing Page", () => {
   });
 
   describe("Scenario: Another product line renders with product copy", () => {
-    it("renders family sections for flood tube dams", async () => {
+    it("renders current product page copy for flood tube dams", async () => {
       await renderPage("flood-tube-dams");
 
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(

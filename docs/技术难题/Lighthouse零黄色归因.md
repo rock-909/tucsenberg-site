@@ -225,12 +225,13 @@ Source evidence:
 
 - `src/app/[locale]/products/[market]/page.tsx:70-151` renders JSON-LD,
   breadcrumb, hero, family sections, trust signals, and CTA.
-- `src/app/[locale]/products/[market]/market-page-sections.tsx:74-99` and
-  `src/components/products/family-section.tsx:74-77` add inquiry/contact links,
-  which match the `/contact` RSC prefetches observed in network requests.
-- `src/components/products/family-section.tsx:60-71` renders the visible check
-  mark glyph. Wave 2 found the product-detail font delta is a symbol-subset
-  issue, not a separate removable font weight.
+- Historical `src/app/[locale]/products/[market]/market-page-sections.tsx` and
+  `src/components/products/family-section.tsx` paths added inquiry/contact
+  links when this attribution was recorded. S2 retired those paths after S1
+  moved current product detail rendering to `TUCSENBERG_PRODUCT_PAGES`.
+- Historical `src/components/products/family-section.tsx` rendered the visible
+  check mark glyph. Wave 2 found the product-detail font delta was a
+  symbol-subset issue, not a separate removable font weight.
 - `src/components/products/spec-table.tsx:22-61` and
   `src/components/products/product-specs.tsx:25-55,137-194` render dense spec
   tables with `DataCard`.

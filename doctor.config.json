@@ -126,7 +126,6 @@
           "src/components/layout/header-language-menu.tsx",
           "src/components/layout/header.tsx",
           "src/components/layout/mobile-navigation-interactive.tsx",
-          "src/components/products/family-section.tsx",
           "src/components/sections/chain-section-view.tsx",
           "src/components/sections/products-section-view.tsx",
           "src/components/sections/resources-section-view.tsx",
@@ -206,7 +205,6 @@
         "files": [
           "src/app/[locale]/products/__tests__/products-page.test.tsx",
           "src/components/layout/logo.tsx",
-          "src/components/products/__tests__/family-section.test.tsx",
           "src/components/products/__tests__/market-series-card.test.tsx"
         ],
         "rules": ["react-doctor/nextjs-no-img-element"]

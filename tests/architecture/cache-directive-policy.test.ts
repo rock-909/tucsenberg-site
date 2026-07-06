@@ -29,8 +29,6 @@ const PRODUCT_MARKET_SOURCE_FILES = [
   "src/app/[locale]/products/[market]/page.tsx",
   "src/app/[locale]/products/[market]/market-jsonld.ts",
   "src/app/[locale]/products/[market]/market-page-data.ts",
-  "src/app/[locale]/products/[market]/market-page-sections.tsx",
-  "src/app/[locale]/products/[market]/market-spec-presenter.ts",
 ] as const;
 const USE_CACHE_DIRECTIVE_PATTERN = /["'`]\s*use\s+cache\s*["'`]/i;
 const NEXT_CACHE_IMPORT_PATTERN = /from\s+["'`]\s*next\/cache\s*["'`]/i;
