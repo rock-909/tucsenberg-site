@@ -1,9 +1,22 @@
+import { spawnSync } from "node:child_process";
+
 import { describe, expect, it } from "vitest";
 import {
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
   validateProductionRuntimeContract,
 } from "../../../scripts/starter-checks.js";
+
+function createChildEnv(overrides: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([key]) => !key.startsWith("VITEST")),
+  );
+
+  return {
+    ...env,
+    ...overrides,
+  };
+}
 
 function createValidProductionEnv(): NodeJS.ProcessEnv {
   return {
@@ -310,6 +323,26 @@ describe("public launch trust content guard", () => {
         ),
       ]),
     );
+  });
+
+  it("allows intentionally empty optional social links in the real strict public-launch CLI", () => {
+    const result = spawnSync(
+      process.execPath,
+      ["scripts/starter-checks.js", "validate-production-config"],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: createChildEnv({
+          APP_ENV: "preview",
+          NODE_ENV: "production",
+          PUBLIC_LAUNCH_STRICT: "true",
+        }),
+      },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).not.toContain("SITE_CONFIG.social.twitter");
+    expect(result.stderr).not.toContain("SITE_CONFIG.social.linkedin");
   });
 
   it("does not make legal/contact owner review a permanent client-launch failure", () => {
