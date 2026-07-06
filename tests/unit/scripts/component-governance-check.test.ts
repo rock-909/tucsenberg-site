@@ -2,7 +2,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { collectComponentGovernanceFindings } from "../../../scripts/starter-checks.js";
+
+const focusedComponentGovernance = require("../../../scripts/quality/checks/component-governance.js");
+const starterChecksFacade = require("../../../scripts/starter-checks.js");
+const { collectComponentGovernanceFindings } = starterChecksFacade;
 
 interface ComponentGovernanceFinding {
   file: string;
@@ -96,6 +99,15 @@ describe("component-governance-check", () => {
     for (const rootDir of fixtureRoots.splice(0)) {
       moveFixtureToTrash(rootDir);
     }
+  });
+
+  it("keeps starter-checks component governance exports wired to the focused module", () => {
+    expect(starterChecksFacade.collectComponentGovernanceFindings).toBe(
+      focusedComponentGovernance.collectComponentGovernanceFindings,
+    );
+    expect(starterChecksFacade.runComponentGovernanceCli).toBe(
+      focusedComponentGovernance.runComponentGovernanceCli,
+    );
   });
 
   it("passes valid primitive registry without warning on business components that lack stories", () => {

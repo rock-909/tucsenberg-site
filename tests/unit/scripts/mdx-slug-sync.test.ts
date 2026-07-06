@@ -36,6 +36,7 @@ const {
   runContentManifestGenerator,
   writeFileAtomic,
 } = starterChecksFacade;
+const contentManifestModule = require("../../../scripts/quality/checks/content-manifest.js");
 
 describe("content-slug-sync legacy facade", () => {
   it("keeps starter-checks exports wired to the focused module", () => {
@@ -59,6 +60,21 @@ describe("content-slug-sync legacy facade", () => {
     );
     expect(starterChecksFacade.generateContentManifest).toBeTypeOf("function");
     expect(starterChecksFacade.writeFileAtomic).toBeTypeOf("function");
+  });
+
+  it("keeps content manifest helpers wired to the focused module", () => {
+    expect(starterChecksFacade.createContentManifestContext).toBe(
+      contentManifestModule.createContentManifestContext,
+    );
+    expect(starterChecksFacade.generateContentManifest).toBe(
+      contentManifestModule.generateContentManifest,
+    );
+    expect(starterChecksFacade.runContentManifestGenerator).toBe(
+      contentManifestModule.runContentManifestGenerator,
+    );
+    expect(starterChecksFacade.writeFileAtomic).toBe(
+      contentManifestModule.writeFileAtomic,
+    );
   });
 
   it("keeps report output out of the default freshness contract", () => {

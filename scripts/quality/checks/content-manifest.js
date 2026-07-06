@@ -1,0 +1,397 @@
+const fs = require("node:fs");
+const path = require("node:path");
+const matter = require("gray-matter");
+const yaml = require("js-yaml");
+const i18nLocalesConfig = require("../../../i18n-locales.config.js");
+const { validateContentFrontmatterContract } = require("./content-slugs");
+
+const ROOT = process.cwd();
+const CONTENT_TYPES = ["posts", "pages", "products"];
+const CONTENT_MANIFEST_LOCALES = i18nLocalesConfig.locales;
+const CONTENT_MANIFEST_SOURCES = [
+  {
+    source: "active-content",
+    root: "content",
+  },
+  {
+    source: "profile-fixture",
+    root: "profile-fixtures/showcase-full/content",
+    profileId: "showcase-full",
+  },
+];
+const VALID_CONTENT_EXTENSIONS = new Set([".mdx", ".md"]);
+
+function createContentManifestContext(rootDir = ROOT) {
+  return {
+    rootDir,
+    contentDir: path.join(rootDir, "content"),
+    importersOutput: path.join(
+      rootDir,
+      "src",
+      "lib",
+      "mdx-importers.generated.ts",
+    ),
+    manifestTsOutput: path.join(
+      rootDir,
+      "src",
+      "lib",
+      "content-manifest.generated.ts",
+    ),
+  };
+}
+
+function scanContentManifestDirectory(
+  context,
+  sourceConfig,
+  contentType,
+  locale,
+) {
+  const dirPath = path.join(
+    context.rootDir,
+    sourceConfig.root,
+    contentType,
+    locale,
+  );
+  const entries = [];
+
+  if (!fs.existsSync(dirPath)) {
+    return entries;
+  }
+
+  const files = fs.readdirSync(dirPath).sort();
+
+  for (const file of files) {
+    const ext = path.extname(file);
+    if (!VALID_CONTENT_EXTENSIONS.has(ext)) {
+      continue;
+    }
+
+    const slug = path.basename(file, ext);
+    const filePath = path.join(dirPath, file);
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    const { data: metadata, content } = matter(fileContent, {
+      engines: {
+        yaml: (source) => yaml.load(source),
+      },
+    });
+    const relativePath = path
+      .relative(context.rootDir, filePath)
+      .split(path.sep)
+      .join("/");
+    const stableFilePath = `/${relativePath}`;
+
+    entries.push({
+      type: contentType,
+      locale,
+      slug,
+      extension: ext,
+      filePath: stableFilePath,
+      relativePath,
+      source: sourceConfig.source,
+      ...(sourceConfig.profileId ? { profileId: sourceConfig.profileId } : {}),
+      metadata,
+      content,
+    });
+  }
+
+  return entries;
+}
+
+function buildContentManifestKey(type, locale, slug) {
+  return `${type}/${locale}/${slug}`;
+}
+
+function assertContentManifestFrontmatterValid(context) {
+  const result = validateContentFrontmatterContract({
+    rootDir: context.rootDir,
+    collections: CONTENT_TYPES,
+    locales: CONTENT_MANIFEST_LOCALES,
+    strictFrontmatter: false,
+    contentRoots: CONTENT_MANIFEST_SOURCES.map(
+      (sourceConfig) => sourceConfig.root,
+    ),
+  });
+
+  if (result.ok) {
+    return;
+  }
+
+  const detail = result.issues
+    .slice(0, 10)
+    .map((issue) => `- ${issue.filePath}: ${issue.message}`)
+    .join("\n");
+
+  throw new Error(`Content manifest frontmatter validation failed:\n${detail}`);
+}
+
+function generateContentManifest(context = createContentManifestContext()) {
+  assertContentManifestFrontmatterValid(context);
+
+  const entries = [];
+
+  for (const sourceConfig of CONTENT_MANIFEST_SOURCES) {
+    for (const contentType of CONTENT_TYPES) {
+      for (const locale of CONTENT_MANIFEST_LOCALES) {
+        entries.push(
+          ...scanContentManifestDirectory(
+            context,
+            sourceConfig,
+            contentType,
+            locale,
+          ),
+        );
+      }
+    }
+  }
+
+  const byKey = {};
+  for (const entry of entries) {
+    const key = buildContentManifestKey(entry.type, entry.locale, entry.slug);
+    if (byKey[key]) {
+      throw new Error(
+        `Duplicate slug "${key}": found in both "${byKey[key].filePath}" and "${entry.filePath}"`,
+      );
+    }
+    byKey[key] = entry;
+  }
+
+  return {
+    entries,
+    byKey,
+  };
+}
+
+function ensureOutputDir(outputPath) {
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+}
+
+let atomicWriteCounter = 0;
+
+function writeFileAtomic(outputPath, content) {
+  ensureOutputDir(outputPath);
+  atomicWriteCounter += 1;
+  const tempPath = `${outputPath}.tmp-${process.pid}-${Date.now()}-${atomicWriteCounter}`;
+  fs.writeFileSync(tempPath, content);
+  fs.renameSync(tempPath, outputPath);
+}
+
+function generateImportersCode(context, entries) {
+  const entriesByType = new Map();
+
+  for (const entry of entries) {
+    let typeMap = entriesByType.get(entry.type);
+    if (typeMap === undefined) {
+      typeMap = new Map();
+      entriesByType.set(entry.type, typeMap);
+    }
+    let localeEntries = typeMap.get(entry.locale);
+    if (localeEntries === undefined) {
+      localeEntries = [];
+      typeMap.set(entry.locale, localeEntries);
+    }
+    localeEntries.push(entry);
+  }
+
+  const lines = [
+    "/**",
+    " * AUTO-GENERATED FILE - DO NOT EDIT",
+    " *",
+    " * Generated by: node scripts/starter-checks.js content-manifest",
+    " *",
+    " * This file provides static import maps for MDX content.",
+    " * To update, add/remove/rename content files and re-run the generator.",
+    " */",
+    "",
+    "import type { ComponentType } from 'react';",
+    "",
+    "export interface MDXContentModule {",
+    "  default: ComponentType;",
+    "  frontmatter?: Record<string, unknown>;",
+    "}",
+    "",
+    "type ContentImporter = () => Promise<MDXContentModule>;",
+    "",
+  ];
+
+  const typeToExportName = {
+    posts: "postImporters",
+    pages: "pageImporters",
+    products: "productImporters",
+  };
+
+  for (const contentType of CONTENT_TYPES) {
+    const typeMap = entriesByType.get(contentType);
+    const exportName = typeToExportName[contentType];
+
+    lines.push(
+      `export const ${exportName}: Record<string, Record<string, ContentImporter>> = {`,
+    );
+
+    for (const locale of CONTENT_MANIFEST_LOCALES) {
+      const localeEntries = typeMap?.get(locale) ?? [];
+      lines.push(`  ${locale}: {`);
+
+      for (const entry of localeEntries) {
+        const generatedDir = path.join(context.rootDir, "src", "lib");
+        const relativeImporterPath = path
+          .relative(
+            generatedDir,
+            path.join(context.rootDir, entry.relativePath),
+          )
+          .split(path.sep)
+          .join("/");
+        const importerPath = relativeImporterPath.startsWith(".")
+          ? relativeImporterPath
+          : `./${relativeImporterPath}`;
+        lines.push(`    '${entry.slug}': () => import('${importerPath}'),`);
+      }
+
+      lines.push("  },");
+    }
+
+    lines.push("};");
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+function generateManifestTsCode(manifest) {
+  const entriesJson = JSON.stringify(manifest.entries, null, 2);
+  const entryIndexes = new Map(
+    manifest.entries.map((entry, index) => [entry, index]),
+  );
+  const byKeyIndex = {};
+
+  for (const [key, entry] of Object.entries(manifest.byKey)) {
+    byKeyIndex[key] = entryIndexes.get(entry);
+  }
+
+  const byKeyIndexJson = JSON.stringify(byKeyIndex, null, 2);
+
+  return `/**
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ *
+ * Generated by: node scripts/starter-checks.js content-manifest
+ *
+ * This file provides statically bundled content manifest data.
+ * No runtime fs dependency - works in dev and production builds.
+ */
+
+import type { ContentType, Locale } from '@/types/content.types';
+
+export interface ContentEntry {
+  type: ContentType;
+  locale: Locale;
+  slug: string;
+  extension: string;
+  filePath: string;
+  relativePath: string;
+  source: "active-content" | "profile-fixture";
+  profileId?: "showcase-full";
+  metadata: Record<string, unknown>;
+  content: string;
+}
+
+export interface ContentManifest {
+  entries: ContentEntry[];
+  byKey: Record<string, ContentEntry>;
+}
+
+const _entries: ContentEntry[] = ${entriesJson};
+
+const _byKeyIndex: Record<string, number> = ${byKeyIndexJson};
+
+const _byKey: Record<string, ContentEntry> = Object.fromEntries(
+  Object.entries(_byKeyIndex).map(([key, idx]) => [key, _entries[idx]!]),
+);
+
+export const CONTENT_MANIFEST: ContentManifest = {
+  entries: _entries,
+  byKey: _byKey,
+} as const;
+`;
+}
+
+function readTextIfExists(filePath) {
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : null;
+}
+
+function runContentManifestGenerator(
+  context = createContentManifestContext(),
+  options = {},
+) {
+  const checkOnly = options.check === true;
+  console.log(
+    checkOnly
+      ? "Checking content manifest and import map..."
+      : "Generating content manifest and import map...",
+  );
+
+  const manifest = generateContentManifest(context);
+  const importersCode = generateImportersCode(context, manifest.entries);
+  const manifestTsCode = generateManifestTsCode(manifest);
+
+  if (checkOnly) {
+    const staleOutputs = [
+      [context.importersOutput, importersCode],
+      [context.manifestTsOutput, manifestTsCode],
+    ].flatMap(([filePath, expected]) =>
+      readTextIfExists(filePath) === expected ? [] : [filePath],
+    );
+
+    if (staleOutputs.length === 0) {
+      console.log("Content manifest artifacts are fresh.");
+      return true;
+    }
+
+    console.error("Content manifest artifacts are stale:");
+    for (const filePath of staleOutputs) {
+      console.error(`  - ${filePath}`);
+    }
+    console.error(
+      "Run `node scripts/starter-checks.js content-manifest` to refresh them.",
+    );
+    return false;
+  }
+
+  if (context.reportOutput !== undefined) {
+    writeFileAtomic(context.reportOutput, JSON.stringify(manifest, null, 2));
+  }
+  writeFileAtomic(context.importersOutput, importersCode);
+  writeFileAtomic(context.manifestTsOutput, manifestTsCode);
+
+  console.log(`Generated manifest with ${manifest.entries.length} entries`);
+  let outputIndex = 1;
+  if (context.reportOutput !== undefined) {
+    console.log(`Output ${outputIndex}: ${context.reportOutput}`);
+    outputIndex += 1;
+  }
+  console.log(`Output ${outputIndex}: ${context.importersOutput}`);
+  outputIndex += 1;
+  console.log(`Output ${outputIndex}: ${context.manifestTsOutput}`);
+
+  const summary = {};
+  for (const entry of manifest.entries) {
+    const key = `${entry.type}/${entry.locale}`;
+    summary[key] = (summary[key] ?? 0) + 1;
+  }
+
+  console.log("\nSummary:");
+  for (const [key, count] of Object.entries(summary)) {
+    console.log(`  ${key}: ${count} files`);
+  }
+
+  return true;
+}
+
+module.exports = {
+  assertContentManifestFrontmatterValid,
+  createContentManifestContext,
+  generateContentManifest,
+  runContentManifestGenerator,
+  writeFileAtomic,
+};
