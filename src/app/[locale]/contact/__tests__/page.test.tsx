@@ -168,8 +168,9 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     expect(
-      screen.getByRole("heading", { name: "Email & WhatsApp" }),
+      screen.getByRole("heading", { name: "Email & RFQ" }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Email & WhatsApp/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Quote response" }),
     ).toBeInTheDocument();
@@ -183,7 +184,7 @@ describe("ContactPage MDX migration", () => {
     render(
       <ContactMethodsCard
         copy={{
-          title: "Email & WhatsApp",
+          title: "Email & RFQ",
           emailLabel: "Email",
           emailUnavailable: "Use the RFQ form if email is unavailable.",
           phoneLabel: "Phone",
@@ -195,6 +196,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.queryByText("+86-518-0000-0000")).not.toBeInTheDocument();
     expect(screen.queryByText("TODO-OWNER")).not.toBeInTheDocument();
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
+    expect(screen.queryByText(/WhatsApp/i)).not.toBeInTheDocument();
   });
 
   it("does not render starter FAQ from MDX frontmatter", async () => {

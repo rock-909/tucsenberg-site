@@ -25,7 +25,7 @@ describe("getContactCopy", () => {
     title: "Contact",
     description:
       "Fastest route: the RFQ form asks the questions we would ask anyway.",
-    "panel.contactTitle": "Email & WhatsApp",
+    "panel.contactTitle": "Email & RFQ",
     "panel.email": "Email",
     "panel.emailUnavailable": "Use the RFQ form if email is unavailable.",
     "panel.phone": "Phone",
@@ -85,7 +85,7 @@ describe("getContactCopy", () => {
     expect(copy.header.description).toBe(
       "Fastest route: the RFQ form asks the questions we would ask anyway.",
     );
-    expect(copy.panel.contact.title).toBe("Email & WhatsApp");
+    expect(copy.panel.contact.title).toBe("Email & RFQ");
     expect(copy.panel.response.prepareValue).toBe(
       "Use the RFQ form; it asks the questions we'd ask anyway.",
     );
@@ -185,7 +185,7 @@ describe("getContactCopy", () => {
       "Fastest route: the RFQ form asks the questions we would ask anyway.",
     );
 
-    expect(copy.panel.contact.title).toBe("Email & WhatsApp");
+    expect(copy.panel.contact.title).toBe("Email & RFQ");
     expect(copy.panel.contact.emailLabel).toBe("Email");
     expect(copy.panel.contact.phoneLabel).toBe("Phone");
 

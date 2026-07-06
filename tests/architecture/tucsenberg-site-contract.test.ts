@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { getCanonicalPath } from "@/config/paths/utils";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
@@ -157,6 +158,16 @@ function readRepoJson(repoPath: string): unknown {
   return JSON.parse(readRepoFile(repoPath)) as unknown;
 }
 
+function readRepoJsonc(repoPath: string): unknown {
+  const parsed = ts.parseConfigFileTextToJson(repoPath, readRepoFile(repoPath));
+  if (parsed.error) {
+    throw new Error(
+      ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n"),
+    );
+  }
+  return parsed.config as unknown;
+}
+
 function getObject(value: unknown, label: string): Record<string, unknown> {
   expect(value, label).toBeTruthy();
   expect(typeof value, label).toBe("object");
@@ -268,6 +279,19 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(singleSiteConfig).not.toContain(
       'resolveSingleSiteBaseUrl("https://tucsenberg.com")',
     );
+  });
+
+  it("keeps formal domain cutover out of the no-cutover production config", () => {
+    const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
+    const env = getObject(wrangler.env, "wrangler.env");
+    const production = getObject(env.production, "wrangler.env.production");
+    const vars = getObject(production.vars, "wrangler.env.production.vars");
+
+    expect(production).not.toHaveProperty("routes");
+    expect(production).not.toHaveProperty("custom_domain");
+    expect(production).not.toHaveProperty("workers_dev");
+    expect(vars.NEXT_PUBLIC_SITE_URL).not.toBe("https://tucsenberg.com");
+    expect(vars.NEXT_PUBLIC_BASE_URL).not.toBe("https://tucsenberg.com");
   });
 
   it("keeps forbidden claims out of public-rendered source surfaces", () => {

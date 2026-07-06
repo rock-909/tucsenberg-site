@@ -46,7 +46,7 @@ const CONTACT_COPY_FALLBACKS = {
   title: "Contact",
   description:
     "Fastest route: the RFQ form asks the questions we would ask anyway.",
-  "panel.contactTitle": "Email & WhatsApp",
+  "panel.contactTitle": "Email & RFQ",
   "panel.email": "Email",
   "panel.emailUnavailable": "Use the RFQ form if email is unavailable.",
   "panel.phone": "Phone",
