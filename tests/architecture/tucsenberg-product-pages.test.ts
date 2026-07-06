@@ -1,12 +1,40 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { resolve, sep } from "node:path";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
-import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
+import {
+  getTucsenbergProductPage,
+  type TucsenbergProductPage,
+  TUCSENBERG_PRODUCT_PAGES,
+} from "@/constants/tucsenberg-product-pages";
+
+function resolvePublicImagePath(src: string): string {
+  const publicRoot = resolve(process.cwd(), "public");
+  const resolvedPath = resolve(publicRoot, src.slice(1));
+
+  expect(src).toMatch(/^\/(?!\/)/u);
+  expect(src.split(/[?#]/u)[0]?.split("/"), src).not.toContain("..");
+  expect(
+    resolvedPath === publicRoot ||
+      resolvedPath.startsWith(`${publicRoot}${sep}`),
+    src,
+  ).toBe(true);
+
+  return resolvedPath;
+}
 
 describe("Tucsenberg product page copy contract", () => {
   it("covers every live product route with owner-approved product page data", () => {
     expect(Object.keys(TUCSENBERG_PRODUCT_PAGES)).toEqual(getAllMarketSlugs());
+  });
+
+  it("treats unknown product slugs as missing at runtime and type level", () => {
+    const missingProductPage = getTucsenbergProductPage("__missing__");
+
+    expect(missingProductPage).toBeUndefined();
+    expectTypeOf(missingProductPage).toEqualTypeOf<
+      TucsenbergProductPage | undefined
+    >();
   });
 
   it("keeps each product page RFQ-ready without public price or price offers", () => {
@@ -36,12 +64,20 @@ describe("Tucsenberg product page copy contract", () => {
       );
 
       if (image.status === "real") {
-        expect(image.src, slug).toMatch(/^\//u);
+        const resolvedPath = resolvePublicImagePath(image.src);
+
         expect(image.src, slug).not.toContain("placeholder");
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- product image paths are fixed owner-authored constants validated against public/
-        expect(existsSync(join(process.cwd(), "public", image.src))).toBe(true);
+        expect(existsSync(resolvedPath)).toBe(true);
       }
     }
+  });
+
+  it("rejects external-like and escaping real product image paths", () => {
+    expect(() =>
+      resolvePublicImagePath("//evil.example/product.png"),
+    ).toThrow();
+    expect(() => resolvePublicImagePath("/../package.json")).toThrow();
   });
 
   it("uses FAQ questions as display headings and schema source", () => {

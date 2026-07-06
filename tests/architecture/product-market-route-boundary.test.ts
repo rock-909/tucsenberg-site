@@ -8,6 +8,7 @@ const PRODUCT_MARKET_ROUTE_FILES = [
   "src/app/[locale]/products/[market]/market-page-sections.tsx",
   "src/app/[locale]/products/[market]/market-spec-presenter.ts",
 ] as const;
+const PRODUCT_PUBLIC_SEO_FILES = ["src/config/single-site-seo.ts"] as const;
 
 const MARKET_SPEC_DIRECT_IMPORT_PATTERN =
   /@\/constants\/product-specs\/(north-america|australia-new-zealand|mexico|europe|specialty-product-systems)/;
@@ -50,6 +51,15 @@ describe("product market route boundary", () => {
       expect(source, filePath).not.toContain("familySpecsMap");
       expect(source, filePath).not.toContain(ROUTE_LOCAL_SPEC_MAP_NAME);
       expect(source, filePath).not.toContain("SITE_CONFIG.brandAssets");
+    }
+  });
+
+  it("keeps public product SEO and sitemap lastmod on Tucsenberg product pages", () => {
+    for (const filePath of PRODUCT_PUBLIC_SEO_FILES) {
+      const source = readSource(filePath);
+
+      expect(source, filePath).toMatch(TUCSENBERG_PRODUCT_PAGE_IMPORT_PATTERN);
+      expect(source, filePath).not.toMatch(MARKET_SPEC_REGISTRY_IMPORT_PATTERN);
     }
   });
 });

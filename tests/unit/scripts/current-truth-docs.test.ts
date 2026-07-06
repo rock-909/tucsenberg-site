@@ -125,6 +125,25 @@ describe("current-truth docs guard", () => {
     );
   });
 
+  it("guards stable docs from naming legacy specs as current product truth", () => {
+    expect(CHECKS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: "docs/项目基础/配置.md",
+          required: expect.arrayContaining([
+            "src/constants/tucsenberg-product-pages.ts",
+          ]),
+        }),
+        expect.objectContaining({
+          file: "docs/项目基础/替换边界.md",
+          forbidden: expect.arrayContaining([
+            "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
+          ]),
+        }),
+      ]),
+    );
+  });
+
   it("flags missing required path markers and forbidden stale path markers", () => {
     const files = createValidFiles();
     files["docs/项目基础/维护规则.md"] = [

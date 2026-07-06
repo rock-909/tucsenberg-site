@@ -113,6 +113,7 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-seo.ts",
       "src/config/single-site-product-catalog.ts",
       "src/constants/product-standards.ts",
+      "src/constants/tucsenberg-product-pages.ts",
       "src/constants/product-specs/**",
       "messages/base/**",
       "messages/profiles/**",
@@ -130,6 +131,7 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-seo.ts",
       "src/config/single-site-product-catalog.ts",
       "src/constants/product-standards.ts",
+      "src/constants/tucsenberg-product-pages.ts",
       "src/constants/product-specs/**",
       "content/config/content.json",
       "docs/项目基础/替换顺序.md",
@@ -143,10 +145,16 @@ const TRUTH_DOC_CHECKS = [
   {
     file: "docs/项目基础/替换边界.md",
     required: ["content/config/content.json", "`content/pages/{locale}/*.mdx`"],
+    forbidden: [
+      "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
+    ],
   },
   {
     file: "docs/项目基础/配置.md",
-    required: ["content/config/content.json"],
+    required: [
+      "content/config/content.json",
+      "src/constants/tucsenberg-product-pages.ts",
+    ],
   },
   {
     file: "docs/项目基础/维护规则.md",

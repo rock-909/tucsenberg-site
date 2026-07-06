@@ -12,8 +12,7 @@ import {
   getStarterProfile,
   type StarterProfileId,
 } from "@/config/starter-profiles";
-import { getAllMarketSlugs } from "@/constants/product-catalog";
-import { getMarketSpecsBySlug } from "@/constants/product-specs/market-spec-registry";
+import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 export type SingleSiteSitemapChangeFrequency = PublicStaticPageChangeFrequency;
 
@@ -43,10 +42,9 @@ export function getSingleSitePublicSeoProfileId(): StarterProfileId {
 
 function buildSingleSiteProductMarketLastmod(): Record<string, string> {
   return Object.fromEntries(
-    getAllMarketSlugs().map((marketSlug) => [
-      getProductMarketPath(marketSlug),
-      getMarketSpecsBySlug(marketSlug)?.updatedAt ??
-        SINGLE_SITE_STATIC_LASTMOD_ISO,
+    Object.values(TUCSENBERG_PRODUCT_PAGES).map((productPage) => [
+      getProductMarketPath(productPage.slug),
+      productPage.meta.updatedAt ?? SINGLE_SITE_STATIC_LASTMOD_ISO,
     ]),
   );
 }

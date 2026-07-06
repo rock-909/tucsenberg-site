@@ -1,47 +1,15 @@
 import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 
-export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
-
-export interface TucsenbergProductCta {
-  href: "/request-quote";
-  label: string;
-}
-
-export interface TucsenbergProductTable {
-  columns: readonly string[];
-  rows: readonly (readonly string[])[];
-}
-
-export interface TucsenbergProductSection {
-  title: string;
-  kind: TucsenbergProductContentKind;
-  paragraphs?: readonly string[];
-  bullets?: readonly string[];
-  table?: TucsenbergProductTable;
-}
-
-export interface TucsenbergProductFaq {
-  question: string;
-  answer: string;
-}
-
-export type TucsenbergProductImage =
-  | { status: "real"; src: string }
-  | { status: "pending" | "omitted" };
-
-export interface TucsenbergProductPage {
-  slug: string;
-  meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
-  image: TucsenbergProductImage;
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  lead: string;
-  cta: TucsenbergProductCta;
-  downloadHref: string;
-  sections: readonly TucsenbergProductSection[];
-  faqs: readonly TucsenbergProductFaq[];
-}
+export type {
+  TucsenbergProductContentKind,
+  TucsenbergProductCta,
+  TucsenbergProductFaq,
+  TucsenbergProductImage,
+  TucsenbergProductPage,
+  TucsenbergProductSection,
+  TucsenbergProductTable,
+} from "@/constants/tucsenberg-product-page-types";
 
 export const TUCSENBERG_PRODUCT_PAGES = {
   "abs-flood-barriers": {
@@ -504,6 +472,10 @@ export const TUCSENBERG_PRODUCT_PAGES = {
 
 export type TucsenbergProductPageSlug = keyof typeof TUCSENBERG_PRODUCT_PAGES;
 
-export function getTucsenbergProductPage(slug: string) {
-  return TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug];
+export function getTucsenbergProductPage(
+  slug: string,
+): TucsenbergProductPage | undefined {
+  return Object.hasOwn(TUCSENBERG_PRODUCT_PAGES, slug)
+    ? TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug]
+    : undefined;
 }

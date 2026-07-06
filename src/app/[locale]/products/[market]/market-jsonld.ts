@@ -12,7 +12,17 @@ function getJsonLdProductImage(productPage: TucsenbergProductPage) {
     return undefined;
   }
 
+  if (!isSafeRootRelativeImageSrc(productPage.image.src)) {
+    return undefined;
+  }
+
   return new URL(productPage.image.src, SITE_CONFIG.baseUrl).toString();
+}
+
+function isSafeRootRelativeImageSrc(src: string): boolean {
+  const pathname = src.split(/[?#]/u)[0] ?? "";
+
+  return /^\/(?!\/)/u.test(src) && !pathname.split("/").includes("..");
 }
 
 function getSectionTableSummary(section: TucsenbergProductSection) {
