@@ -15,6 +15,24 @@ import eslintComments from "@eslint-community/eslint-plugin-eslint-comments/conf
 
 const security = securityPlugin.default ?? securityPlugin;
 const promise = promisePlugin.default ?? promisePlugin;
+const MAGIC_NUMBER_IGNORE_LIST = [
+  // 基础数字
+  0, 1, -1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+  // 常见小数字
+  12, 14, 15, 16, 17, 18, 20, 22, 23, 24, 25, 30, 32, 35, 36, 40, 42, 45, 49,
+  50,
+  // 百分比相关
+  60, 64, 65, 70, 75, 80, 85, 90, 95, 99, 100,
+  // 尺寸和像素
+  120, 128, 150, 160, 190, 250, 256, 300, 360, 365,
+  // 数据大小
+  512, 640, 700, 750, 768, 800, 900, 999,
+  // 大数字和时间
+  1000, 1024, 1200, 1234, 1280, 1500, 1536, 1600, 1800, 1920, 2000, 2048, 2500,
+  3000, 4000, 4096, 5000, 6000, 7000, 8000, 8192, 8888, 8900, 9000, 10000,
+  12000, 12345, 15000, 30000, 45000, 50000, 60000, 65536, 100000, 120000,
+  125000, 170000, 200000, 300000, 500000,
+];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -373,25 +391,7 @@ export default [
       "no-magic-numbers": [
         "error",
         {
-          // CODEX分层治理：大幅扩展ignore列表，减少91%的噪音
-          ignore: [
-            // 基础数字
-            0, 1, -1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            // 常见小数字 (扩展剩余数字豁免)
-            12, 14, 15, 16, 17, 18, 20, 22, 23, 24, 25, 30, 32, 35, 36, 40, 42,
-            45, 49, 50,
-            // 百分比相关
-            60, 64, 65, 70, 75, 80, 85, 90, 95, 99, 100,
-            // 尺寸和像素
-            120, 128, 150, 160, 190, 250, 256, 300, 360, 365,
-            // 数据大小
-            512, 640, 700, 750, 768, 800, 900, 999,
-            // 大数字和时间
-            1000, 1024, 1200, 1234, 1280, 1500, 1536, 1600, 1800, 1920, 2000,
-            2048, 2500, 3000, 4000, 4096, 5000, 6000, 7000, 8000, 8192, 8888,
-            8900, 9000, 10000, 12000, 12345, 15000, 30000, 45000, 50000, 60000,
-            65536, 100000, 120000, 125000, 170000, 200000, 300000, 500000,
-          ],
+          ignore: MAGIC_NUMBER_IGNORE_LIST,
           ignoreArrayIndexes: true, // 数组索引豁免
           ignoreDefaultValues: true, // 默认值豁免
           ignoreNumericLiteralTypes: true, // 类型域字面量豁免
@@ -456,38 +456,6 @@ export default [
       "no-labels": "error",
       "no-lone-blocks": "error",
       "no-loop-func": "error",
-      "no-magic-numbers": [
-        "error", // 升级为error - 魔法数字必须定义为常量
-        {
-          // CODEX分层治理：统一大幅扩展的ignore列表
-          ignore: [
-            // 基础数字
-            0, 1, -1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            // 常见小数字 (扩展剩余数字豁免)
-            12, 14, 15, 16, 17, 18, 20, 22, 23, 24, 25, 30, 32, 35, 36, 40, 42,
-            45, 49, 50,
-            // 百分比相关
-            60, 64, 65, 70, 75, 80, 85, 90, 95, 99, 100,
-            // 尺寸和像素
-            120, 128, 150, 160, 190, 250, 256, 300, 360, 365,
-            // 数据大小
-            512, 640, 700, 750, 768, 800, 900, 999,
-            // 大数字和时间
-            1000, 1024, 1200, 1234, 1280, 1500, 1536, 1600, 1800, 1920, 2000,
-            2048, 2500, 3000, 4000, 4096, 5000, 6000, 7000, 8000, 8192, 8888,
-            8900, 9000, 10000, 12000, 12345, 15000, 30000, 45000, 50000, 60000,
-            65536, 100000, 120000, 125000, 170000, 200000, 300000, 500000,
-          ],
-          ignoreArrayIndexes: true,
-          ignoreDefaultValues: true, // Allow magic numbers in default parameters
-          ignoreNumericLiteralTypes: true, // 类型域字面量豁免
-          ignoreEnums: true, // 枚举值豁免
-          ignoreReadonlyClassProperties: true, // 只读类属性豁免
-          ignoreTypeIndexes: true, // 类型索引豁免
-          enforceConst: true, // Encourage constant definitions for business logic
-          detectObjects: false, // 关闭对象检测，减少噪音
-        },
-      ],
       "no-multi-assign": "error",
       "no-new": "error",
       "no-new-object": "error",
@@ -706,6 +674,7 @@ export default [
         "warn",
         { max: 800, skipBlankLines: true, skipComments: true },
       ], // 调整到800行并跳过空行与注释，适应开发工具复杂性
+      "max-params": ["warn", 5], // scripts允许少量CLI参数，但仍保留治理信号
 
       // 构建脚本必要豁免（保持不变）
       "no-console": "off", // 构建脚本需要console输出
@@ -733,7 +702,6 @@ export default [
       "prefer-destructuring": "warn", // 开发工具属性访问
       "require-await": "warn",
       "no-console": "off", // 开发工具中完全允许console输出
-      "max-statements": ["warn", 40],
 
       // 保持严格的基本语法检查
       "no-undef": ["error", { typeof: true }], // 未定义变量检查
@@ -754,6 +722,27 @@ export default [
       "require-await": "warn", // async函数无await降级为警告
       "default-case": "warn", // switch缺少default降级为警告
       "no-else-return": "warn", // else return降级为警告
+    },
+  },
+
+  // Legacy script structural baselines - keep guardrails on, but avoid turning
+  // existing script debt into anonymous lint noise under --max-warnings 0.
+  {
+    name: "legacy-script-structural-baselines",
+    files: [
+      "scripts/quality/checks/content-readiness.js",
+      "scripts/quality/checks/content-slugs.js",
+      "scripts/quality/checks/current-truth-docs.js",
+      "scripts/quality/checks/eslint-disable.js",
+      "scripts/quality/checks/release-verify.js",
+    ],
+    rules: {
+      complexity: ["warn", 30],
+      "max-lines": [
+        "warn",
+        { max: 1000, skipBlankLines: true, skipComments: true },
+      ],
+      "max-statements": ["warn", 45],
     },
   },
 
@@ -1013,22 +1002,10 @@ export default [
       "default-case": "off",
       // Allow missing radix parameter
       radix: "off",
-      // Allow deep nesting
-      "max-depth": "off",
       // Allow inconsistent returns
       "consistent-return": "off",
       // Allow useless escapes
       "no-useless-escape": "off",
-      // Allow high complexity
-      complexity: "off",
-      // Allow many statements
-      "max-statements": "off",
-      // Allow long functions
-      "max-lines-per-function": "off",
-      // Allow large files
-      "max-lines": "off",
-      // Allow many parameters
-      "max-params": "off",
       // Allow parameter reassignment
       "no-param-reassign": "off",
       // Allow direct property access
