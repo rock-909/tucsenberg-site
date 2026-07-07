@@ -176,6 +176,11 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
         "No. SAP doesn't activate properly in salt or brackish water — see the honest limits above. This matters for coastal buyers: pair bags with hard barriers.",
     },
     {
+      question: "Do they work in cold weather?",
+      answer:
+        "Activation speed depends on water temperature: the 3–4 minute figure assumes moderate conditions, warmer water activates faster, and near-freezing water takes noticeably longer. If your market is cold-climate, tell us in the RFQ and we'll advise on realistic activation planning rather than quote you the brochure number.",
+    },
+    {
       question: "Are they a full sandbag replacement?",
       answer:
         "For weight, storage, stacking and speed, yes — one person carries a carton of 50 where two sandbags would be the limit. But sandbags still win in three cases: salt water, fast-moving water, and lowest possible cost. For high water or long immersion, hard barriers outperform any bag.",

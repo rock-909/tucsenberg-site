@@ -138,6 +138,12 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
   ],
   faqs: [
     {
+      question:
+        "Flood gate, flood barrier, flood panels — what's the difference?",
+      answer:
+        "Mostly market vocabulary. A flood gate (or flood boards, flood panels, demountable barrier) protects a defined opening — this system. Flood barrier is the umbrella term, and often means freestanding perimeter products like our [ABS boxwall](/products/abs-flood-barriers). Same physics, different mounting: gates fix to the opening once and then deploy in minutes each season; freestanding barriers fix to nothing at all. Unsure which your site needs? [The materials guide compares all five classes](/guides/flood-barrier-materials-guide).",
+    },
+    {
       question: "How high can it protect?",
       answer:
         "Planks stack to 1.8 m as standard. Above that, engineering review applies — we'll say honestly when an opening needs more than a demountable system.",
