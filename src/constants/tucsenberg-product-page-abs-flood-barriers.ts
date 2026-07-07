@@ -25,6 +25,46 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     note: "Standard items quoted within 12 hours; custom within 48.",
   },
   downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
+  proofStrip: [
+    "Freestanding — no fixing",
+    "50–85 cm heights",
+    "−40 °C to +95 °C",
+    "UV-tested · ASTM G154-2016",
+    "3-year warranty",
+    "MOQ one carton",
+  ],
+  scenes: {
+    title: "Where it works",
+    intro:
+      "Freestanding on paved and firm ground — the same configuration family closes very different sites. Site photography is being prepared; schematics hold each position until it lands.",
+    afterSection: "Specifications",
+    items: [
+      {
+        title: "Driveways",
+        note: "Walls off a sloped approach with curved units — no rails, no drilling.",
+      },
+      {
+        title: "Doorways & shopfronts",
+        note: "A single carton covers a standard opening; gable ends close the run.",
+      },
+      {
+        title: "Paved perimeters",
+        note: "Straight, curved and gable-end units follow property lines.",
+      },
+      {
+        title: "Warehouses & loading yards",
+        note: "Deploys by hand ahead of forecast flooding; rinses and stacks flat after.",
+      },
+      {
+        title: "Ramp & garage entrances",
+        note: "Holds back sheet flow before it reaches the down-ramp.",
+      },
+      {
+        title: "Municipal & emergency stock",
+        note: "One SKU, tool-free, deployable on any sound paved surface.",
+      },
+    ],
+  },
   sections: [
     {
       title: "How it works",

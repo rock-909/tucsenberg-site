@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import {
@@ -25,8 +27,15 @@ import {
   type TucsenbergProductSection,
   type TucsenbergProductTable,
 } from "@/constants/tucsenberg-product-pages";
+import type {
+  TucsenbergProductDiagramKind,
+  TucsenbergProductScenes,
+} from "@/constants/tucsenberg-product-page-types";
 import { buildTucsenbergProductFaqSchema } from "@/constants/tucsenberg-product-faq-schema";
-import { ProductDiagramPanel } from "@/components/products/product-diagrams";
+import {
+  ProductDiagramPanel,
+  ProductLineGlyph,
+} from "@/components/products/product-diagrams";
 import { ProductRunCalculator } from "@/components/products/product-run-calculator";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 
@@ -188,6 +197,75 @@ function ProductContentSection({
   );
 }
 
+/** Scannable verifiable facts under the hero — never invented numbers. */
+function ProductProofStrip({ items }: { items: readonly string[] }) {
+  return (
+    <ul className="border-border text-muted-foreground mb-12 flex flex-wrap items-center gap-x-8 gap-y-2 border-y py-3 font-mono text-[11.5px] md:mb-16">
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * "Can I use it on my site?" answered by showing: real photos when delivered,
+ * honest schematic bases until then (spec: docs/design/视觉翻译-旗舰页样板.md).
+ */
+function ProductSceneWall({
+  scenes,
+  glyphKind,
+}: {
+  scenes: TucsenbergProductScenes;
+  glyphKind: TucsenbergProductDiagramKind | undefined;
+}) {
+  return (
+    <section>
+      <h2 className="text-section mb-3">{scenes.title}</h2>
+      {scenes.intro ? (
+        <p className="text-muted-foreground mb-6 max-w-[75ch] text-sm leading-6">
+          {scenes.intro}
+        </p>
+      ) : null}
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {scenes.items.map((scene) => (
+          <li
+            key={scene.title}
+            className="border-border overflow-hidden rounded-xl border"
+          >
+            <div className="bg-muted/40 relative aspect-[4/3]">
+              {scene.image ? (
+                <Image
+                  src={scene.image.src}
+                  alt={scene.image.alt}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="text-muted-foreground/50 flex h-full items-center justify-center"
+                >
+                  {glyphKind ? (
+                    <ProductLineGlyph kind={glyphKind} className="size-14" />
+                  ) : null}
+                </div>
+              )}
+            </div>
+            <div className="p-4">
+              <h3 className="text-sm font-semibold">{scene.title}</h3>
+              <p className="text-muted-foreground mt-1 text-sm leading-6">
+                {scene.note}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
   return (
     <section className="md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
@@ -330,9 +408,21 @@ export default async function MarketPage({ params }: MarketPageProps) {
         ) : null}
       </header>
 
+      {productPage.proofStrip ? (
+        <ProductProofStrip items={productPage.proofStrip} />
+      ) : null}
+
       <div className="space-y-12 md:space-y-16">
         {productPage.sections.map((section) => (
-          <ProductContentSection key={section.title} section={section} />
+          <Fragment key={section.title}>
+            <ProductContentSection section={section} />
+            {productPage.scenes?.afterSection === section.title ? (
+              <ProductSceneWall
+                scenes={productPage.scenes}
+                glyphKind={productPage.diagram?.kind}
+              />
+            ) : null}
+          </Fragment>
         ))}
         {productPage.calculator ? (
           <ProductRunCalculator calculator={productPage.calculator} />

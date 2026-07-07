@@ -76,6 +76,22 @@ export interface TucsenbergProductCalculator {
   rfqMessageTemplate: string;
 }
 
+/** One scene tile: real photo when delivered, honest line-drawing base until then. */
+export interface TucsenbergProductScene {
+  title: string;
+  note: string;
+  image?: { src: string; alt: string };
+}
+
+/** "Can I use it on my site?" wall — answers by showing, not telling. */
+export interface TucsenbergProductScenes {
+  title: string;
+  intro?: string;
+  /** Section title after which the wall renders (visual-translation order). */
+  afterSection: string;
+  items: readonly TucsenbergProductScene[];
+}
+
 export interface TucsenbergProductPage {
   slug: string;
   meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
@@ -91,6 +107,10 @@ export interface TucsenbergProductPage {
   downloadHref: string;
   /** Page-specific request-a-quote guidance shown in the final CTA section. */
   rfqNote?: string;
+  /** Scannable proof strip under the hero; verifiable facts only, never invented. */
+  proofStrip?: readonly string[];
+  /** Scene wall rendered after `scenes.afterSection`. */
+  scenes?: TucsenbergProductScenes;
   /** Optional straight-run estimator rendered after the content sections. */
   calculator?: TucsenbergProductCalculator;
   sections: readonly TucsenbergProductSection[];
