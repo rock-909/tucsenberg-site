@@ -42,11 +42,11 @@ const _entries: ContentEntry[] = [
       "description": "Tucsenberg is the trading name of Jiangsu Tucson Borg Technology Co., Ltd., a factory-direct flood barrier supply brand from Lianyungang, Jiangsu.",
       "slug": "about",
       "publishedAt": "2026-07-02",
-      "updatedAt": "2026-07-02",
+      "updatedAt": "2026-07-07",
       "author": "Tucsenberg",
       "layout": "default",
       "showToc": true,
-      "lastReviewed": "2026-07-02",
+      "lastReviewed": "2026-07-07",
       "draft": false,
       "seo": {
         "title": "About Tucsenberg — Factory-Direct Flood Barrier Supply from China",
@@ -58,7 +58,7 @@ const _entries: ContentEntry[] = [
         ]
       }
     },
-    "content": "\nTucsenberg is the trading name of **Jiangsu Tucson Borg Technology Co., Ltd.**, founded in 2021 and based in **Lianyungang, Jiangsu — one of China's major coastal port cities**, within reach of the Yangtze Delta manufacturing cluster where our factory pool operates: ABS injection moulding, aluminum extrusion, PVC welding and technical textiles. One spec system, one QC standard, one contact. This page is the due-diligence shortcut: who we are, how the pool works, and how to verify both.\n\n### Why a young company, on purpose\n\nWe won't pretend to decades of history — the factories in our pool carry the manufacturing years. What's ours: the product designs and specifications, the QC standard every factory ships against, and a front end that answers in your time zone and treats a one-carton buyer like a future container buyer. Ask why any number on our spec sheets is what it is — why the 85 cm barrier stops 75 cm of water, why the bag cores are rated fresh-water only — and you'll get the engineering reason, not a brochure. That's what the design work buys you, and it's the part of China sourcing that most often goes missing.\n\n### The person behind it\n\nTucsenberg is run as an export coordination brand for a specialised factory pool. For buyer due diligence, we prioritise verifiable company details, product samples, factory audit access and written quotation records over a personality-led sales page. Owner profile material can be added later when the public photo and English name are approved.\n\n### How the factory pool works\n\nSpecialised factories, coordinated under one spec sheet per product — your reorder next year matches your order this year. Mixed containers across lines. Spare parts stay orderable for years.\n\n### Quality control, concretely\n\n- Pre-production sample confirmation against the spec sheet\n- In-production checks at the factory\n- Pre-shipment inspection with photo/video report to your inbox before anything sails\n- Third-party inspection (SGS/BV) welcome at buyer's option — we'll coordinate it\n\n### Verify us\n\n- **Factory audits welcome** — in person or live video, any factory in the pool\n- **References on request**\n- **Paid samples before volume** — judge the product, not the website\n- Company registration details available on request for your compliance file\n\nWe don't ask buyers to trust a badge. We expect samples, photos and inspections to do the work — that's what they're for.\n"
+    "content": "\nTucsenberg is the trading name of **Jiangsu Tucson Borg Technology Co., Ltd.**, founded in 2021 and based in **Lianyungang, Jiangsu — one of China's major coastal port cities**, within reach of the Yangtze Delta manufacturing cluster where our factory pool operates: ABS injection moulding, aluminum extrusion, PVC welding and technical textiles. One spec system, one QC standard, one contact. This page is the due-diligence shortcut: who we are, how the pool works, and how to verify both.\n\n## Why a young company, on purpose\n\nWe won't pretend to decades of history — the factories in our pool carry the manufacturing years. What's ours: the product designs and specifications, the QC standard every factory ships against, and a front end that answers in your time zone and treats a one-carton buyer like a future container buyer. Ask why any number on our spec sheets is what it is — why the 85 cm barrier stops 75 cm of water, why the bag cores are rated fresh-water only — and you'll get the engineering reason, not a brochure. That's what the design work buys you, and it's the part of China sourcing that most often goes missing.\n\n## The person behind it\n\nTucsenberg is run as an export coordination brand for a specialised factory pool. For buyer due diligence, we prioritise verifiable company details, product samples, factory audit access and written quotation records over a personality-led sales page. Owner profile material can be added later when the public photo and English name are approved.\n\n## How the factory pool works\n\nSpecialised factories, coordinated under one spec sheet per product — your reorder next year matches your order this year. Mixed containers across lines. Spare parts stay orderable for years. The full picture, including private label: [OEM & Wholesale](/oem-wholesale).\n\n## Quality control, concretely\n\n- Pre-production sample confirmation against the spec sheet\n- In-production checks at the factory\n- Pre-shipment inspection with photo/video report to your inbox before anything sails\n- Third-party inspection (SGS/BV) welcome at buyer's option — we'll coordinate it\n\n## Verify us\n\n- **Factory audits welcome** — in person or live video, any factory in the pool\n- **References on request**\n- **Paid samples before volume** — judge the product, not the website\n- Company registration details available on request for your compliance file\n\nWe don't ask buyers to trust a badge. We expect samples, photos and inspections to do the work — that's what they're for.\n\n**[Request a Quote](/request-quote)** — standard items quoted within 12 hours, custom configurations within 48.\n"
   },
   {
     "type": "pages",
@@ -71,14 +71,14 @@ const _entries: ContentEntry[] = [
     "metadata": {
       "locale": "en",
       "title": "Contact",
-      "description": "Fastest route: the RFQ form — it asks the questions we'd ask anyway, so your quote comes back faster.",
+      "description": "Email, RFQ form and company details for Tucsenberg — Jiangsu Tucson Borg Technology Co., Ltd., Lianyungang, Jiangsu, China (UTC+8).",
       "slug": "contact",
       "publishedAt": "2026-07-02",
-      "updatedAt": "2026-07-05",
+      "updatedAt": "2026-07-07",
       "author": "Tucsenberg",
       "layout": "default",
       "showToc": false,
-      "lastReviewed": "2026-07-05",
+      "lastReviewed": "2026-07-07",
       "draft": false,
       "seo": {
         "title": "Contact Tucsenberg — Flood Barrier Supplier, China",

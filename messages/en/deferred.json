@@ -348,7 +348,9 @@
         "source": "Submitted via the request-quote form.",
         "productName": "General RFQ — product line to be advised",
         "quantityFallback": "Not specified — see message"
-      }
+      },
+      "successReading": "While you wait, this is how we match products to sites:",
+      "successReadingLinkLabel": "ABS vs Aluminum vs FRP vs Water-Filled — How to Choose"
     }
   },
   "formTemplate": {

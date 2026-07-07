@@ -157,7 +157,13 @@ export async function LegalPageShell({
           )}
         </section>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,1.2fr)]">
+        <div
+          className={
+            hasToc
+              ? "grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,1.2fr)]"
+              : undefined
+          }
+        >
           <article className="min-w-0">
             <LegalContentRenderer content={content} />
             {schemaType === "Article" ? (

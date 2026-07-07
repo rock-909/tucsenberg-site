@@ -11,6 +11,8 @@ export interface RequestQuoteFormCopy {
   readonly submit: string;
   readonly submitting: string;
   readonly success: string;
+  readonly successReading: string;
+  readonly successReadingLinkLabel: string;
   readonly genericError: string;
   readonly networkError: string;
   readonly turnstilePending: string;
@@ -33,6 +35,8 @@ export function createRequestQuoteFormCopy(
     submit: t("submit"),
     submitting: t("submitting"),
     success: t("success"),
+    successReading: t("successReading"),
+    successReadingLinkLabel: t("successReadingLinkLabel"),
     genericError: t("genericError"),
     networkError: t("networkError"),
     turnstilePending: t("turnstilePending"),
