@@ -562,5 +562,9 @@
         }
       }
     }
+  },
+  "oemLanding": {
+    "primaryCta": "Request a trade quote",
+    "secondaryCta": "See the five product lines"
   }
 }

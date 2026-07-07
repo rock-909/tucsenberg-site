@@ -80,6 +80,7 @@ export async function HeroSection() {
         t("hero.preview.deliveryProof"),
         t("hero.preview.inquiryPath"),
       ],
+      itemGlyphs: ["boxwall", "gate", "bag", "tube"],
     },
   } satisfies HeroSectionContent;
 

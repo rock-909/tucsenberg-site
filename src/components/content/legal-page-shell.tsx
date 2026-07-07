@@ -26,7 +26,7 @@ interface LegalPageShellProps {
   pagePath?: string;
 }
 
-interface ShellSchemaInput {
+export interface ShellSchemaInput {
   metadata: LegalPageMetadata;
   locale: string;
   schemaType: LegalPageShellProps["schemaType"];
@@ -54,7 +54,7 @@ async function buildShellArticleSchema(
   }) as Record<string, unknown>;
 }
 
-function buildShellPageSchema(
+export function buildShellPageSchema(
   input: ShellSchemaInput,
 ): Promise<Record<string, unknown>> | Record<string, unknown> {
   const { metadata, locale, schemaType, schemaAdditionalType, pageUrl } = input;

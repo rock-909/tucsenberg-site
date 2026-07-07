@@ -1,7 +1,9 @@
 import type { ComponentProps } from "react";
 
 import { HeroGuideOverlay } from "@/components/grid/hero-guide-overlay";
+import { ProductLineGlyph } from "@/components/products/product-diagrams";
 import { Button } from "@/components/ui/button";
+import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
 import { Link } from "@/i18n/routing";
 
 type HeroSectionHref = ComponentProps<typeof Link>["href"];
@@ -21,6 +23,8 @@ interface HeroSectionPreview {
   title: string;
   description: string;
   items: string[];
+  /** Optional decorative line glyph per item, aligned by index. */
+  itemGlyphs?: TucsenbergProductDiagramKind[];
 }
 
 export interface HeroSectionContent {
@@ -44,8 +48,8 @@ const DEFAULT_PREVIEW_TITLE_ID = "hero-preview-title";
 function HeroEyebrow({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
-      <span className="text-[13px] font-medium uppercase tracking-[0.04em] text-muted-foreground">
+      <span className="bg-primary size-2 rounded-full" aria-hidden="true" />
+      <span className="text-muted-foreground text-[13px] font-medium tracking-[0.04em] uppercase">
         {text}
       </span>
     </div>
@@ -67,11 +71,11 @@ function HeroVisual({
         className="surface-card p-5 shadow-none md:p-6"
       >
         <div className="flex items-center justify-between gap-4">
-          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs font-medium">
             {preview.label}
           </span>
           <span
-            className="size-2.5 rounded-full bg-foreground/40"
+            className="bg-foreground/40 size-2.5 rounded-full"
             aria-hidden
           />
         </div>
@@ -79,24 +83,33 @@ function HeroVisual({
         <div className="mt-5 min-w-0">
           <h2
             id={previewTitleId}
-            className="text-balance text-2xl font-semibold text-foreground"
+            className="text-foreground text-2xl font-semibold text-balance"
           >
             {preview.title}
           </h2>
-          <p className="mt-3 text-pretty text-sm leading-6 text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-sm leading-6 text-pretty">
             {preview.description}
           </p>
         </div>
 
         <ul className="mt-6 grid grid-cols-2 gap-2 md:gap-3">
-          {preview.items.map((item) => (
-            <li
-              key={item}
-              className="min-w-0 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium break-words text-foreground"
-            >
-              {item}
-            </li>
-          ))}
+          {preview.items.map((item, index) => {
+            const glyph = preview.itemGlyphs?.[index];
+            return (
+              <li
+                key={item}
+                className="border-border bg-background text-foreground flex min-w-0 items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium break-words"
+              >
+                {glyph ? (
+                  <ProductLineGlyph
+                    kind={glyph}
+                    className="text-muted-foreground size-8 shrink-0"
+                  />
+                ) : null}
+                <span className="min-w-0">{item}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
@@ -117,18 +130,18 @@ function HeroProofPanel({
   return (
     <ul
       aria-label={ariaLabel}
-      className="mt-6 grid grid-cols-2 gap-2 rounded-xl border border-border bg-muted/40 p-2 font-mono text-[13px] md:grid-cols-4"
+      className="border-border bg-muted/40 mt-6 grid grid-cols-2 gap-2 rounded-xl border p-2 font-mono text-[13px] md:grid-cols-4"
     >
       {items.map((item, index) => (
         <li
           key={`${item.value}-${index}`}
-          className="min-w-0 rounded-lg bg-background/70 px-3 py-2"
+          className="bg-background/70 min-w-0 rounded-lg px-3 py-2"
         >
-          <span className="block break-words font-semibold text-foreground">
+          <span className="text-foreground block font-semibold break-words">
             {item.value}
           </span>
           {item.label !== undefined ? (
-            <span className="mt-0.5 block break-words text-muted-foreground">
+            <span className="text-muted-foreground mt-0.5 block break-words">
               {item.label}
             </span>
           ) : null}
@@ -153,13 +166,13 @@ export function HeroSectionView({
           <HeroEyebrow text={content.eyebrow} />
 
           <div>
-            <h1 className="mt-4 text-balance text-[36px] font-semibold leading-[1.12] md:text-[46px] md:leading-[1.06]">
+            <h1 className="mt-4 text-[36px] leading-[1.12] font-semibold text-balance md:text-[46px] md:leading-[1.06]">
               {content.title}
             </h1>
           </div>
 
           <div>
-            <p className="mt-4 max-w-[480px] text-pretty text-lg text-muted-foreground">
+            <p className="text-muted-foreground mt-4 max-w-[480px] text-lg text-pretty">
               {content.subtitle}
             </p>
           </div>

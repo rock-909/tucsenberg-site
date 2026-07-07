@@ -5,6 +5,13 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
   slug: "absorbent-flood-bags",
   meta: TUCSENBERG_PRODUCT_META["absorbent-flood-bags"],
   image: { status: "pending" },
+  diagram: {
+    kind: "bag",
+    ariaLabel:
+      "TB-FB absorbent flood bag — flat bag activating with water and stacked deployment",
+    caption:
+      "Activation and deployment: a flat 0.23 kg bag swells to 20 kg in 3–4 minutes, then stacks like sandbags. Schematic, not to scale. Product photography in preparation.",
+  },
   eyebrow: "TB-FB series",
   title: "Absorbent Flood Bags (Sandless Sandbags) — Bulk & Private Label",
   subtitle:

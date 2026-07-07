@@ -21,6 +21,8 @@ import {
   type SingleSiteHomeSectionKey,
 } from "@/config/single-site-page-expression";
 import { FaqSectionView } from "@/components/sections/faq-section-view";
+import { ProductLineGlyph } from "@/components/products/product-diagrams";
+import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
 import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import {
@@ -45,8 +47,20 @@ interface HomeCardItem {
 interface HomeProductCardItem extends HomeCardItem {
   href: string;
   linkLabel: string;
+  glyph: TucsenbergProductDiagramKind;
   badge?: string;
 }
+
+const HOME_PRODUCT_CARD_GLYPHS: Record<
+  (typeof SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS)[number],
+  TucsenbergProductDiagramKind
+> = {
+  structure: "boxwall",
+  content: "gate",
+  deployment: "bag",
+  inquiry: "tube",
+  multilingual: "frp",
+};
 
 interface HomeStepItem extends HomeCardItem {
   number: string;
@@ -83,6 +97,7 @@ function getHomePageContent(t: HomeTranslator) {
         description: t(`problems.items.${key}.description`),
         href: SINGLE_SITE_HOME_PRODUCT_CARD_LINKS[key],
         linkLabel: t(`problems.items.${key}.linkLabel`),
+        glyph: HOME_PRODUCT_CARD_GLYPHS[key],
         ...(HOME_PRODUCT_CARD_BADGE_KEY_SET.has(key)
           ? { badge: t(`problems.items.${key}.badge`) }
           : {}),
@@ -131,11 +146,17 @@ function HomeProblemSection({
               key={item.title}
               className="surface-card group hover:border-ring relative flex min-w-0 flex-col p-5 transition-colors"
             >
-              {item.badge ? (
-                <span className="border-border bg-muted text-muted-foreground mb-3 inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
-                  {item.badge}
-                </span>
-              ) : null}
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <ProductLineGlyph
+                  kind={item.glyph}
+                  className="text-muted-foreground size-8 shrink-0"
+                />
+                {item.badge ? (
+                  <span className="border-border bg-muted text-muted-foreground inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                    {item.badge}
+                  </span>
+                ) : null}
+              </div>
               <h3 className="font-semibold text-balance">
                 <Link
                   href={item.href}

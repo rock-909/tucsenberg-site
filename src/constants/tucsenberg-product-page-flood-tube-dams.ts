@@ -5,6 +5,13 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
   slug: "flood-tube-dams",
   meta: TUCSENBERG_PRODUCT_META["flood-tube-dams"],
   image: { status: "pending" },
+  diagram: {
+    kind: "tube",
+    ariaLabel:
+      "TB-TD flood tube dam — cross-section on ground mat with pinned skirt and water side",
+    caption:
+      "Cross-section: the tube sits on its ground mat with the skirt pinned toward the water side. Schematic, not to scale — section lengths confirmed at quotation. Product photography in preparation.",
+  },
   eyebrow: "TB-TD series",
   title: "Water & Air-Filled Flood Tube Dams",
   subtitle:

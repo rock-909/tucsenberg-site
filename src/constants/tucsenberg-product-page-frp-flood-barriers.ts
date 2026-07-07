@@ -5,6 +5,13 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "frp-flood-barriers",
   meta: TUCSENBERG_PRODUCT_META["frp-flood-barriers"],
   image: { status: "pending" },
+  diagram: {
+    kind: "frp",
+    ariaLabel:
+      "TB-CP FRP composite flood plank — multi-cell pultruded profile cross-section",
+    caption:
+      "Profile cross-section: multi-cell pultruded FRP in the 180 mm plank class. Indicative geometry — final profile is confirmed with tooling. Product photography follows first production run.",
+  },
   eyebrow: "TB-CP series",
   title: "FRP Composite Flood Barrier Planks",
   subtitle:

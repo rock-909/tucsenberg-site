@@ -5,6 +5,13 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "abs-flood-barriers",
   meta: TUCSENBERG_PRODUCT_META["abs-flood-barriers"],
   image: { status: "pending" },
+  diagram: {
+    kind: "boxwall",
+    ariaLabel:
+      "TB-BW ABS boxwall flood barrier — freestanding L-profile side view with water load sealing the base",
+    caption:
+      "Working principle, side view: rising water presses the L-shaped base down and seals it. Schematic, not to scale — dimensions confirmed at quotation. Product photography in preparation.",
+  },
   eyebrow: "TB-BW series",
   title: "ABS Interlocking Boxwall Flood Barriers",
   subtitle:

@@ -26,6 +26,7 @@ import {
   type TucsenbergProductTable,
 } from "@/constants/tucsenberg-product-pages";
 import { buildTucsenbergProductFaqSchema } from "@/constants/tucsenberg-product-faq-schema";
+import { ProductDiagramPanel } from "@/components/products/product-diagrams";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 
 export function generateStaticParams() {
@@ -58,7 +59,7 @@ function ProductContentTable({ table }: { table: TucsenbergProductTable }) {
               {row.map((cell, index) => (
                 <td
                   key={`${cell}-${index}`}
-                  className="text-muted-foreground px-4 py-3 align-top"
+                  className="text-muted-foreground px-4 py-3 align-top tabular-nums"
                 >
                   {cell}
                 </td>
@@ -216,27 +217,32 @@ export default async function MarketPage({ params }: MarketPageProps) {
         data={[...jsonLdData, faqSchema]}
       />
 
-      <header className="mb-10">
-        <span className="bg-muted text-muted-foreground mb-2 inline-block rounded px-2 py-0.5 font-mono text-xs">
-          {productPage.eyebrow}
-        </span>
-        <h1 className="text-heading mb-4">{productPage.title}</h1>
-        <p className="text-body text-foreground max-w-3xl font-medium">
-          {productPage.subtitle}
-        </p>
-        <p className="text-muted-foreground mt-4 max-w-3xl text-base leading-7">
-          {productPage.lead}
-        </p>
-        {productPage.leadNote ? (
-          <p className="border-border text-foreground bg-muted/40 mt-4 max-w-3xl rounded-lg border p-4 text-sm leading-6">
-            <InlineMarkdown text={productPage.leadNote} />
+      <header className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
+        <div className="min-w-0">
+          <span className="bg-muted text-muted-foreground mb-2 inline-block rounded px-2 py-0.5 font-mono text-xs">
+            {productPage.eyebrow}
+          </span>
+          <h1 className="text-heading mb-4">{productPage.title}</h1>
+          <p className="text-body text-foreground max-w-3xl font-medium">
+            {productPage.subtitle}
           </p>
-        ) : null}
-        <div className="mt-6">
-          <Button asChild>
-            <Link href={productPage.cta.href}>{productPage.cta.label}</Link>
-          </Button>
+          <p className="text-muted-foreground mt-4 max-w-3xl text-base leading-7">
+            {productPage.lead}
+          </p>
+          {productPage.leadNote ? (
+            <p className="border-border text-foreground bg-muted/40 mt-4 max-w-3xl rounded-lg border p-4 text-sm leading-6">
+              <InlineMarkdown text={productPage.leadNote} />
+            </p>
+          ) : null}
+          <div className="mt-6">
+            <Button asChild>
+              <Link href={productPage.cta.href}>{productPage.cta.label}</Link>
+            </Button>
+          </div>
         </div>
+        {productPage.diagram ? (
+          <ProductDiagramPanel diagram={productPage.diagram} />
+        ) : null}
       </header>
 
       <div className="space-y-8">

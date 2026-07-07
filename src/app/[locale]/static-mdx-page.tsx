@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
 import { LegalPageShell } from "@/components/content/legal-page-shell";
+import { TradeLandingShell } from "@/components/content/trade-landing-shell";
 import { getLocalizedPath, type PageType } from "@/config/paths";
 import { loadLegalPage } from "@/lib/content/legal-page";
 import {
@@ -15,6 +16,8 @@ export interface StaticMdxPageConfig {
   slug: string;
   /** Structured-data type for the page body; defaults to WebPage. */
   schemaType?: "WebPage" | "Article";
+  /** Rendering register: legal-document chrome (default) or wide trade landing. */
+  shell?: "legal" | "landing";
 }
 
 export interface StaticMdxPageProps {
@@ -51,6 +54,18 @@ export async function StaticMdxPage({
     config.slug,
     locale,
   );
+  const pagePath = getLocalizedPath(config.pageType, locale as Locale);
+
+  if (config.shell === "landing") {
+    return (
+      <TradeLandingShell
+        metadata={metadata}
+        content={content}
+        locale={locale}
+        pagePath={pagePath}
+      />
+    );
+  }
 
   return (
     <LegalPageShell
@@ -59,7 +74,7 @@ export async function StaticMdxPage({
       headings={headings}
       locale={locale}
       schemaType={config.schemaType ?? "WebPage"}
-      pagePath={getLocalizedPath(config.pageType, locale as Locale)}
+      pagePath={pagePath}
     />
   );
 }

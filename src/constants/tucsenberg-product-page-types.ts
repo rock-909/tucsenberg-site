@@ -31,10 +31,28 @@ export type TucsenbergProductImage =
   | { status: "real"; src: string }
   | { status: "pending" | "omitted" };
 
+export type TucsenbergProductDiagramKind =
+  | "boxwall"
+  | "gate"
+  | "bag"
+  | "tube"
+  | "frp";
+
+/**
+ * Honest technical line drawing shown until owner photos land
+ * (copy strategy: 截面图/线图 over stock imagery).
+ */
+export interface TucsenbergProductDiagram {
+  kind: TucsenbergProductDiagramKind;
+  ariaLabel: string;
+  caption: string;
+}
+
 export interface TucsenbergProductPage {
   slug: string;
   meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
   image: TucsenbergProductImage;
+  diagram?: TucsenbergProductDiagram;
   eyebrow: string;
   title: string;
   subtitle: string;

@@ -5,6 +5,13 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
   slug: "aluminum-flood-gates",
   meta: TUCSENBERG_PRODUCT_META["aluminum-flood-gates"],
   image: { status: "pending" },
+  diagram: {
+    kind: "gate",
+    ariaLabel:
+      "TB-AG aluminum flood gate — stacked planks between channel posts with EPDM seals, front view",
+    caption:
+      "System front view: 180 mm planks stack between posts; EPDM seals compress on every joint. Schematic, not to scale — cut to your opening schedule at order. Product photography in preparation.",
+  },
   eyebrow: "TB-AG series",
   title: "Aluminum Flood Gates & Demountable Barrier Systems",
   subtitle:
