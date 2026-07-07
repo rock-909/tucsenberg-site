@@ -23,6 +23,46 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     note: "We'll share span/deflection test data as it completes.",
   },
   downloadHref: "/downloads/product-catalog.pdf",
+  proofStrip: [
+    "Pultruded fiberglass",
+    "180 mm plank class",
+    "Never corrodes",
+    "Non-conductive",
+    "EPDM sealing",
+    "Order-driven production",
+  ],
+  scenes: {
+    title: "Where FRP earns its premium",
+    intro:
+      "Three environments punish aluminum over a service life — that's the honest scope of this line.",
+    afterSection: "Why FRP, and why now",
+    items: [
+      {
+        title: "Coastal & salt-air sites",
+        note: "Corrosion is aluminum's one real weakness over decades; FRP doesn't participate.",
+      },
+      {
+        title: "Chemical & industrial plants",
+        note: "Process exposure that eats metal service life.",
+      },
+      {
+        title: "Wastewater sites",
+        note: "Continuous chemical and moisture exposure.",
+      },
+      {
+        title: "Substations & switchyards",
+        note: "A non-conductive barrier isn't a preference here — it's a spec.",
+      },
+      {
+        title: "De-icing salt zones",
+        note: "Roadside and ramp openings with seasonal salt loading.",
+      },
+      {
+        title: "Utility & dealer fleets",
+        note: "Volume cases where tooling math works — early buyers shape the range.",
+      },
+    ],
+  },
   sections: [
     {
       title: "Why FRP, and why now",

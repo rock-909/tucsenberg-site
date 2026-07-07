@@ -23,6 +23,46 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     note: "Standard cartons quoted within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-fb.pdf",
+  proofStrip: [
+    "0.23 kg flat → 20 kg wet",
+    "Activates in 3–4 min",
+    "Fresh water only",
+    "3-year shelf life, vacuum-packed",
+    "50 per carton · under 15 kg",
+    "MOQ 300 bags",
+  ],
+  scenes: {
+    title: "Where it works",
+    intro:
+      "Low-level fresh water is the honest scope: gaps, thresholds and last-minute response. Site photography is being prepared; schematics hold each position until it lands.",
+    afterSection: "Specifications",
+    items: [
+      {
+        title: "Door gaps",
+        note: "Two layers across a standard doorway — five to six bags.",
+      },
+      {
+        title: "Garage thresholds",
+        note: "Brick-laid rows follow the threshold line; no filling, no shoveling.",
+      },
+      {
+        title: "Low points & drains",
+        note: "Rows around floor drains and low spots before the rain arrives.",
+      },
+      {
+        title: "Leak response",
+        note: "Activated on the spot around appliance and pipe leaks.",
+      },
+      {
+        title: "Last-minute rain prep",
+        note: "A carton on a shelf covers what a sand pile can't — deployed in minutes.",
+      },
+      {
+        title: "Reseller shelf stock",
+        note: "Single-event consumable — storm seasons empty shelves and reorder.",
+      },
+    ],
+  },
   sections: [
     {
       title: "How they work",

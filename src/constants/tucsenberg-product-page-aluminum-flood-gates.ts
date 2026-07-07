@@ -25,6 +25,46 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     note: "Standard items quoted within 12 hours; custom cut lists within 48.",
   },
   downloadHref: "/downloads/spec-sheet-tb-ag.pdf",
+  proofStrip: [
+    "6063-T6 · ≥2.0 mm wall",
+    "180 mm plank profile",
+    "Up to 1.8 m stacked",
+    "EPDM seals, replaceable",
+    "Custom-cut to your openings",
+    "3-year warranty",
+  ],
+  scenes: {
+    title: "Where it works",
+    intro:
+      "A defined opening with sound reveals is this system's home ground. Site photography is being prepared; schematics hold each position until it lands.",
+    afterSection: "Specifications",
+    items: [
+      {
+        title: "Doorways",
+        note: "Two wall channels and a short stack — the bread-and-butter configuration.",
+      },
+      {
+        title: "Garage doors",
+        note: "Wide openings take a removable mid post in a flush ground socket.",
+      },
+      {
+        title: "Loading docks",
+        note: "Higher stacks with ground-socket posts; nothing above ground off-season.",
+      },
+      {
+        title: "Shopfronts",
+        note: "Low-profile wall channels stay in the reveal, paintable.",
+      },
+      {
+        title: "Wide spans",
+        note: "Beyond ~3 m, intermediate posts split the span — post count quoted from width × height.",
+      },
+      {
+        title: "Perimeter runs",
+        note: "Corner posts take the system around building lines.",
+      },
+    ],
+  },
   sections: [
     {
       title: "The system, part by part",

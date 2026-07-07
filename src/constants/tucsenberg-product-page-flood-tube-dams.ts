@@ -23,6 +23,46 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     note: "Quoted within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-td.pdf",
+  proofStrip: [
+    "1 m protection height",
+    "5 m / 10 m sections",
+    "~7–8 min inflation per 10 m",
+    "EN 13501 B1 fire rating",
+    "−30 °C to +70 °C",
+    "Accessory kit included",
+  ],
+  scenes: {
+    title: "Where it works",
+    intro:
+      "Built for the ground rigid barriers can't seal. Site photography is being prepared; schematics hold each position until it lands.",
+    afterSection: "Specifications",
+    items: [
+      {
+        title: "Grass & mud runs",
+        note: "The reason this product exists — seals where boxwall and gates can't.",
+      },
+      {
+        title: "Gravel & broken ground",
+        note: "The ground mat and pinned skirt take up what rigid bases can't.",
+      },
+      {
+        title: "Long perimeters",
+        note: "Hundreds of metres deploy from a pallet and a pump.",
+      },
+      {
+        title: "Municipal & emergency stock",
+        note: "Stores compact, deploys anywhere; reflective marking for night work.",
+      },
+      {
+        title: "Planned seasonal defence",
+        note: "Set the line first, then fill — a dry run before the season is worth an hour.",
+      },
+      {
+        title: "Spill & runoff containment",
+        note: "The same tubes bund spills and contain runoff.",
+      },
+    ],
+  },
   sections: [
     {
       title: "How it works",
