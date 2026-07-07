@@ -311,7 +311,7 @@ function HomeStartPathSection({
           {items.map((item) => (
             <li
               key={item.number}
-              className="surface-card flex gap-4 p-5 md:gap-5"
+              className="surface-card flex gap-4 p-5 md:gap-5 md:last:odd:col-span-2"
             >
               <span
                 data-testid="home-start-path-step-badge"

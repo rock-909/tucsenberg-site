@@ -126,7 +126,13 @@ export async function LegalPageShell({
     <>
       <JsonLdGraphScript locale={locale as Locale} data={schemas} />
 
-      <div className="mx-auto max-w-[720px] px-6 py-8 md:py-12">
+      <div
+        className={
+          schemaType === "Article"
+            ? "mx-auto max-w-[1080px] px-6 py-8 md:py-12"
+            : "mx-auto max-w-[720px] px-6 py-8 md:py-12"
+        }
+      >
         <header className="mb-6 md:mb-8">
           <h1 className="text-heading mb-4">{metadata.title}</h1>
           {metadata.description && (

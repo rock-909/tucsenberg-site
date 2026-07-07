@@ -59,7 +59,8 @@ interface RenderState {
 function createListElement(state: RenderState): ReactNode | null {
   if (state.listItems.length === 0) return null;
 
-  const className = "mt-3 list-inside space-y-1 text-sm text-muted-foreground";
+  const className =
+    "mt-3 list-inside space-y-1 text-base leading-7 text-muted-foreground";
   if (state.listType === "ordered") {
     return (
       <ol key={`ol-${state.index}`} className={`${className} list-decimal`}>
@@ -156,7 +157,7 @@ function createInlineBoldParagraph(text: string, key: string): ReactNode {
   return (
     <p
       key={key}
-      className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
+      className="mt-3 whitespace-pre-line text-base leading-7 text-muted-foreground"
     >
       <InlineMarkdown text={text} />
     </p>
@@ -251,7 +252,7 @@ function renderBoldParagraph(state: RenderState, trimmed: string): void {
   state.elements.push(
     <p
       key={`em-${state.index}`}
-      className="mt-3 text-sm font-medium text-foreground"
+      className="mt-3 text-base leading-7 font-medium text-foreground"
     >
       <InlineMarkdown text={text} />
     </p>,
