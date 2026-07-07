@@ -253,7 +253,7 @@ function renderBoldParagraph(state: RenderState, trimmed: string): void {
       key={`em-${state.index}`}
       className="mt-3 text-sm font-medium text-foreground"
     >
-      {text}
+      <InlineMarkdown text={text} />
     </p>,
   );
   state.index += 1;

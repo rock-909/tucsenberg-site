@@ -38,6 +38,20 @@ describe("InlineMarkdown", () => {
     );
   });
 
+  it("renders links nested inside bold segments", () => {
+    render(
+      <p>
+        <InlineMarkdown text="**[Start your trade quote →](/request-quote)**" />
+      </p>,
+    );
+    const link = screen.getByRole("link", {
+      name: "Start your trade quote →",
+    });
+    expect(link).toHaveAttribute("href", "/request-quote");
+    expect(link.closest("strong")).not.toBeNull();
+    expect(screen.queryByText(/\*\*/)).not.toBeInTheDocument();
+  });
+
   it("does not link external urls", () => {
     render(
       <p>

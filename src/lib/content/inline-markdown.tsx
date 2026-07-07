@@ -8,34 +8,8 @@ interface InlineMarkdownProps {
   readonly text: string;
 }
 
-function InlineMarkdownPart({ part }: { readonly part: string }): ReactNode {
-  if (part.startsWith("**") && part.endsWith("**")) {
-    return (
-      <strong className="font-medium text-foreground">
-        {part.slice(BOLD_WRAPPER_LENGTH, -BOLD_WRAPPER_LENGTH)}
-      </strong>
-    );
-  }
-
-  return part;
-}
-
-function BoldText({ text }: InlineMarkdownProps): ReactNode {
-  let cursor = 0;
-
-  return text.split(/(\*\*[^*]+\*\*)/g).flatMap((part) => {
-    const key = `${cursor}-${part}`;
-    cursor += part.length;
-
-    if (part.length === 0) {
-      return [];
-    }
-
-    return <InlineMarkdownPart key={key} part={part} />;
-  });
-}
-
-export function InlineMarkdown({ text }: InlineMarkdownProps): ReactNode {
+/** Renders internal `[label](/path)` links inside otherwise-plain text. */
+function LinkifiedText({ text }: InlineMarkdownProps): ReactNode {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
 
@@ -44,8 +18,7 @@ export function InlineMarkdown({ text }: InlineMarkdownProps): ReactNode {
     const { index } = match;
 
     if (index > lastIndex) {
-      const plain = text.slice(lastIndex, index);
-      nodes.push(<BoldText key={`text-${lastIndex}`} text={plain} />);
+      nodes.push(text.slice(lastIndex, index));
     }
 
     nodes.push(
@@ -62,12 +35,40 @@ export function InlineMarkdown({ text }: InlineMarkdownProps): ReactNode {
   }
 
   if (lastIndex === 0) {
-    return <BoldText text={text} />;
+    return text;
   }
 
   if (lastIndex < text.length) {
-    nodes.push(<BoldText key={`text-${lastIndex}`} text={text.slice(lastIndex)} />);
+    nodes.push(text.slice(lastIndex));
   }
 
   return nodes;
+}
+
+/**
+ * Bold splits first so `**[label](/path)**` nests cleanly; links are then
+ * parsed inside each bold or plain segment.
+ */
+export function InlineMarkdown({ text }: InlineMarkdownProps): ReactNode {
+  let cursor = 0;
+
+  return text.split(/(\*\*[^*]+\*\*)/g).flatMap((part) => {
+    const key = `${cursor}-${part}`;
+    cursor += part.length;
+
+    if (part.length === 0) {
+      return [];
+    }
+
+    if (part.startsWith("**") && part.endsWith("**")) {
+      const inner = part.slice(BOLD_WRAPPER_LENGTH, -BOLD_WRAPPER_LENGTH);
+      return (
+        <strong key={key} className="font-medium text-foreground">
+          <LinkifiedText text={inner} />
+        </strong>
+      );
+    }
+
+    return <LinkifiedText key={key} text={part} />;
+  });
 }
