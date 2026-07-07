@@ -141,6 +141,11 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
         "0.9 mm tarpaulin resists tears (280–320 N), and every section ships with repair patches. Field repair is a patch-and-reinflate job.",
     },
     {
+      question: "Does water get past it?",
+      answer:
+        "A little, and that's normal for every barrier of this class: minor seepage under the skirt on rough interfaces is expected, which is why the ground mat matters and why any protected area should have a pump or drainage plan for what seeps through and what rains in behind the line.",
+    },
+    {
       question: "How does it handle overtopping or debris?",
       answer:
         "Like every barrier: overtopping ends protection — height planning matters (1 m tubes, stack/parallel configurations on request). Debris impact is where the 100,000-cycle flex fabric earns its spec.",
@@ -172,5 +177,5 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
       "TB-TD flood tube dams: protect approx. {length}, estimated {units} sections of 10 m (TB-TD1000 basis; 5 m sections available for the remainder). Please confirm layout and exact configuration.",
   },
   rfqNote:
-    "Tell us run length, ground type, whether you need air or water fill, and what pump or water source the site will have. Quoted within 12 hours.",
+    "Tell us run length, ground type, whether you need air or water fill, and what pump or water source the site will have. Quoted within 12 hours. In-stock sections ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

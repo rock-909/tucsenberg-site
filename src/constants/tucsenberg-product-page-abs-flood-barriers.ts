@@ -183,6 +183,16 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "The base seal handles small irregularities, and rising water presses the foot down harder. For gravel, deep joints or slopes, use a ground sheet — or send photos with your RFQ and we'll advise, including when boxwall is the wrong tool.",
     },
     {
+      question: "Will water seep through?",
+      answer:
+        "Some — and any supplier who says otherwise is overselling. Every freestanding barrier lets a small amount of water past joints and the base seal; the wall keeps the flood out, a pump keeps the protected side dry. Plan barrier plus pump as one system, and rain falling behind the wall needs the same pump anyway.",
+    },
+    {
+      question: "What kinds of floodwater does it handle?",
+      answer:
+        "Rising or standing water is the design case — the load presses the foot down and the wall gets tighter. Salt water doesn't harm the ABS shell (rinse after use), but storm surge and fast-moving water add wave and impact loads no freestanding wall should be asked to hold alone. Tell us your water type in the RFQ and we'll say honestly which case you're in.",
+    },
+    {
       question: "How many times can it be reused?",
       answer:
         "The units are solid ABS with mechanical locks — designed for repeated seasonal deployment. Rinse, dry, stack. Spare joints and seals are available separately, so one damaged part never retires a wall.",
@@ -219,5 +229,5 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
       "TB-BW ABS boxwall: protect approx. {length}, estimated {units} straight units (100 cm unit footprint basis). Please confirm corners, gable ends and exact configuration.",
   },
   rfqNote:
-    "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. Standard items quoted within 12 hours; custom configurations within 48.",
+    "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. Standard items quoted within 12 hours; custom configurations within 48. In-stock configurations ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

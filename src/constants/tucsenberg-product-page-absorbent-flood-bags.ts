@@ -122,6 +122,20 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
         "Dealers: this table is yours to reuse in your own sales material once you stock the line.",
     },
     {
+      title: "After the flood",
+      kind: "bullets",
+      paragraphs: [
+        "The question nobody's product page answers: what happens to the bags once the water recedes. Here's the honest version:",
+      ],
+      bullets: [
+        "They stay swollen. Once activated, a bag doesn't shrink back — it's a single-event product by design. That's also why dealers treat this line as consumable stock: storm seasons empty shelves.",
+        "Disposal is simple. Shells and cores are non-toxic — dispose as regular waste. If the floodwater was contaminated (sewage, fuel), treat the bags as you'd treat anything else that water touched and follow local guidance.",
+        "Unused stock keeps for 3 years in the original vacuum packaging, stored cool and dry. Keep cartons off concrete floors and they're ready for the next season.",
+      ],
+      footer:
+        "No drying racks, no washing, no sand to shovel out and landfill — the cleanup cost is part of what you're buying.",
+    },
+    {
       title: "Built for resale",
       kind: "bullets",
       bullets: [
@@ -178,5 +192,5 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
   ],
   rfqNote:
-    "Tell us your market, quantity band and whether you need private label. Standard cartons quoted within 12 hours.",
+    "Tell us your market, quantity band and whether you need private label. Standard cartons quoted within 12 hours. In-stock cartons ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

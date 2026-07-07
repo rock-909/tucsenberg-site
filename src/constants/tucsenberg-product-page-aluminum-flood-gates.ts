@@ -174,5 +174,5 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
   ],
   rfqNote:
-    "Send your opening schedule — width × height per opening, mounting surface, photos if you have them. Standard items quoted within 12 hours; custom cut lists within 48.",
+    "Send your opening schedule — width × height per opening, mounting surface, photos if you have them. Standard items quoted within 12 hours; custom cut lists within 48. In-stock standard planks ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;
