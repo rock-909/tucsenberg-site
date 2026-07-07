@@ -413,6 +413,13 @@ export default async function MarketPage({ params }: MarketPageProps) {
       ) : null}
 
       <div className="space-y-12 md:space-y-16">
+        {/* Q2 before Q3: "does it fit my site?" precedes "how does it work". */}
+        {productPage.scenes && !productPage.scenes.afterSection ? (
+          <ProductSceneWall
+            scenes={productPage.scenes}
+            glyphKind={productPage.diagram?.kind}
+          />
+        ) : null}
         {productPage.sections.map((section) => (
           <Fragment key={section.title}>
             <ProductContentSection section={section} />

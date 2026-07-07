@@ -37,7 +37,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "A defined opening with sound reveals is this system's home ground. Site photography is being prepared; schematics hold each position until it lands.",
-    afterSection: "Specifications",
     items: [
       {
         title: "Doorways",

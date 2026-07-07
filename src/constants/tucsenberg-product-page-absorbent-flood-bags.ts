@@ -35,7 +35,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "Low-level fresh water is the honest scope: gaps, thresholds and last-minute response. Site photography is being prepared; schematics hold each position until it lands.",
-    afterSection: "Specifications",
     items: [
       {
         title: "Door gaps",

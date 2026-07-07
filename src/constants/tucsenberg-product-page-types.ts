@@ -87,8 +87,12 @@ export interface TucsenbergProductScene {
 export interface TucsenbergProductScenes {
   title: string;
   intro?: string;
-  /** Section title after which the wall renders (visual-translation order). */
-  afterSection: string;
+  /**
+   * Optional anchor: render after this section title. Unset = the Q2 default
+   * slot, before all content sections ("does it fit my site?" comes before
+   * "how does it work" — buyer question order, 视觉翻译-自顶向下设计.md).
+   */
+  afterSection?: string;
   items: readonly TucsenbergProductScene[];
 }
 

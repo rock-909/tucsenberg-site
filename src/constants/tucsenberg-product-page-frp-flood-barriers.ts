@@ -35,7 +35,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     title: "Where FRP earns its premium",
     intro:
       "Three environments punish aluminum over a service life — that's the honest scope of this line.",
-    afterSection: "Why FRP, and why now",
     items: [
       {
         title: "Coastal & salt-air sites",

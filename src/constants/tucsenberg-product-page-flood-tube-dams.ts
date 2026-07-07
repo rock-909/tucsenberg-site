@@ -35,7 +35,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "Built for the ground rigid barriers can't seal. Site photography is being prepared; schematics hold each position until it lands.",
-    afterSection: "Specifications",
     items: [
       {
         title: "Grass & mud runs",

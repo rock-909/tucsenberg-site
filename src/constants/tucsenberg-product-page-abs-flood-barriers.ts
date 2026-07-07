@@ -37,7 +37,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "Freestanding on paved and firm ground — the same configuration family closes very different sites. Site photography is being prepared; schematics hold each position until it lands.",
-    afterSection: "Specifications",
     items: [
       {
         title: "Driveways",
