@@ -41,46 +41,62 @@ interface MarketPageProps {
   params: Promise<{ locale: string; market: string }>;
 }
 
-function ProductContentTable({ table }: { table: TucsenbergProductTable }) {
+function ProductContentTable({
+  table,
+  fade,
+}: {
+  table: TucsenbergProductTable;
+  fade: "background" | "card";
+}) {
   return (
-    <div className="border-border overflow-x-auto rounded-2xl border">
-      <table className="divide-border min-w-full divide-y text-left text-sm">
-        <thead className="bg-muted/60 text-foreground">
-          <tr>
-            {table.columns.map((column) => (
-              <th key={column} className="px-4 py-3 font-semibold">
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-border divide-y">
-          {table.rows.map((row) => (
-            <tr key={row.join("|")}>
-              {row.map((cell, index) => (
-                <td
-                  key={`${cell}-${index}`}
-                  className="text-muted-foreground px-4 py-3 align-top tabular-nums"
-                >
-                  {cell}
-                </td>
+    <div className="relative">
+      <div className="border-border [scrollbar-width:thin] overflow-x-auto rounded-2xl border">
+        <table className="divide-border min-w-full divide-y text-left text-sm">
+          <thead className="bg-muted/60 text-foreground">
+            <tr>
+              {table.columns.map((column) => (
+                <th key={column} className="px-4 py-3 font-semibold">
+                  {column}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-border divide-y">
+            {table.rows.map((row) => (
+              <tr key={row.join("|")}>
+                {row.map((cell, index) => (
+                  <td
+                    key={`${cell}-${index}`}
+                    className="text-muted-foreground px-4 py-3 align-top tabular-nums"
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Mobile cue that the table scrolls; wide tables clip silently otherwise. */}
+      <div
+        aria-hidden
+        className={
+          fade === "card"
+            ? "from-card pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l to-transparent md:hidden"
+            : "from-background pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l to-transparent md:hidden"
+        }
+      />
     </div>
   );
 }
 
-function ProductContentSection({
+function ProductSectionBody({
   section,
 }: {
   section: TucsenbergProductSection;
 }) {
   return (
-    <section className="surface-card p-6 md:p-8">
-      <h2 className="mb-4 text-2xl font-semibold">{section.title}</h2>
+    <>
       {section.paragraphs?.map((paragraph) => (
         <p
           key={paragraph}
@@ -90,12 +106,12 @@ function ProductContentSection({
         </p>
       ))}
       {section.bullets ? (
-        <ul className="text-muted-foreground space-y-3 text-sm leading-6">
+        <ul className="text-muted-foreground space-y-3 text-base leading-7">
           {section.bullets.map((bullet) => (
             <li key={bullet} className="flex gap-3">
               <span
                 aria-hidden
-                className="bg-primary mt-2 size-1.5 shrink-0 rounded-full"
+                className="bg-primary mt-2.5 size-1.5 shrink-0 rounded-full"
               />
               <span>
                 <InlineMarkdown text={bullet} />
@@ -104,23 +120,81 @@ function ProductContentSection({
           ))}
         </ul>
       ) : null}
-      {section.table ? <ProductContentTable table={section.table} /> : null}
       {section.footer ? (
-        <p className="text-muted-foreground mt-4 text-sm leading-6">
+        <p className="text-muted-foreground mt-5 text-sm leading-6">
           <InlineMarkdown text={section.footer} />
         </p>
       ) : null}
+    </>
+  );
+}
+
+/**
+ * Rhythm over uniformity: data tables run open and full-width, argument
+ * tables (table + framing paragraphs) keep a card, narrative sections run as
+ * open two-column text capped at a readable measure. Only the final CTA gets
+ * the accent band — one visual focus per page.
+ */
+function ProductContentSection({
+  section,
+}: {
+  section: TucsenbergProductSection;
+}) {
+  const { table } = section;
+
+  if (table && !section.paragraphs) {
+    return (
+      <section>
+        <h2 className="text-section mb-5">{section.title}</h2>
+        <ProductContentTable table={table} fade="background" />
+        {section.footer ? (
+          <p className="text-muted-foreground mt-4 text-sm leading-6">
+            <InlineMarkdown text={section.footer} />
+          </p>
+        ) : null}
+      </section>
+    );
+  }
+
+  if (table) {
+    return (
+      <section className="surface-card p-6 md:p-8">
+        <h2 className="text-section mb-4">{section.title}</h2>
+        {section.paragraphs?.map((paragraph) => (
+          <p
+            key={paragraph}
+            className="text-muted-foreground mb-5 max-w-[75ch] text-base leading-7"
+          >
+            <InlineMarkdown text={paragraph} />
+          </p>
+        ))}
+        <ProductContentTable table={table} fade="card" />
+        {section.footer ? (
+          <p className="text-muted-foreground mt-4 text-sm leading-6">
+            <InlineMarkdown text={section.footer} />
+          </p>
+        ) : null}
+      </section>
+    );
+  }
+
+  return (
+    <section className="md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
+      <h2 className="text-section mb-4 md:mb-0">{section.title}</h2>
+      <div className="max-w-[75ch] min-w-0">
+        <ProductSectionBody section={section} />
+      </div>
     </section>
   );
 }
 
 function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
   return (
-    <section className="surface-card p-6 md:p-8">
-      <h2 className="mb-6 text-2xl font-semibold">FAQ</h2>
-      <div className="space-y-6">
+    <section className="md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
+      <h2 className="text-section mb-4 md:mb-0">FAQ</h2>
+      <div className="divide-border max-w-[75ch] min-w-0 divide-y">
         {page.faqs.map((faq) => (
-          <article key={faq.question}>
+          <article key={faq.question} className="py-5 first:pt-0 last:pb-0">
             <h3 className="text-lg font-semibold">{faq.question}</h3>
             <p className="text-muted-foreground mt-2 text-sm leading-6">
               <InlineMarkdown text={faq.answer} />
@@ -134,13 +208,13 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
 
 function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
   return (
-    <section className="surface-card p-6 md:p-8">
-      <h2 className="text-2xl font-semibold">Request a quote</h2>
+    <section className="bg-accent rounded-2xl px-6 py-10 md:px-10 md:py-12">
+      <h2 className="text-section">Request a quote</h2>
       <p className="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
         {page.rfqNote ??
           "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer."}
       </p>
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button asChild size="lg">
           <Link href={page.cta.href}>{page.cta.label}</Link>
         </Button>
@@ -148,6 +222,11 @@ function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
           <a href={page.downloadHref}>Download spec sheet</a>
         </Button>
       </div>
+      {page.cta.note ? (
+        <p className="text-muted-foreground mt-3 text-sm leading-6">
+          {page.cta.note}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -239,6 +318,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
             <Button asChild>
               <Link href={productPage.cta.href}>{productPage.cta.label}</Link>
             </Button>
+            {productPage.cta.note ? (
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                {productPage.cta.note}
+              </p>
+            ) : null}
           </div>
         </div>
         {productPage.diagram ? (
@@ -246,7 +330,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
         ) : null}
       </header>
 
-      <div className="space-y-8">
+      <div className="space-y-12 md:space-y-16">
         {productPage.sections.map((section) => (
           <ProductContentSection key={section.title} section={section} />
         ))}

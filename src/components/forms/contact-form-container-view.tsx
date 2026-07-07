@@ -93,8 +93,13 @@ export function ContactFormContainerView({
   onTurnstileLoad,
   errorContainerRef,
 }: ContactFormContainerViewProps) {
+  // On "error" the widget already renders its own unavailable message with a
+  // rescue channel; stacking a second "please try again" line contradicts it.
   const shouldShowTurnstilePendingMessage = Boolean(
-    !turnstileToken && !isPending && !isRateLimited,
+    !turnstileToken &&
+    !isPending &&
+    !isRateLimited &&
+    turnstileStatus !== "error",
   );
   const turnstileStatusMessageKey =
     TURNSTILE_STATUS_MESSAGE_KEYS[turnstileStatus];

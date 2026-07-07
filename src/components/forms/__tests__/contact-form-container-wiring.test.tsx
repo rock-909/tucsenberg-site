@@ -213,7 +213,9 @@ describe("ContactFormContainer real form wiring", () => {
       fireEvent.click(screen.getByTestId("turnstile-error"));
     });
 
-    expect(screen.getByText(failedCopy)).toBeInTheDocument();
+    // The widget owns the error state (unavailable + email rescue); the form
+    // must not stack its own contradictory "please try again" line on top.
+    expect(screen.queryByText(failedCopy)).not.toBeInTheDocument();
     expect(screen.queryByText(pendingCopy)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
 

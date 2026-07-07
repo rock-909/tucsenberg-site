@@ -309,19 +309,20 @@ describe("Home Page", () => {
       const problemArticles = within(problemSection).getAllByRole("article");
       expect(problemArticles[0]).toHaveClass("surface-card");
 
+      // Rhythm over uniformity: proof items are an open bordered grid (no
+      // nested panel card), and the step list runs as an open divided list.
       const answerProofPanel = within(answerSection).getByTestId(
         "home-answer-proof-panel",
       );
-      expect(answerProofPanel).toHaveClass("surface-card");
-      expect(answerProofPanel).toHaveClass("rounded-2xl");
-      expect(answerProofPanel).toHaveClass("bg-muted/30");
+      expect(answerProofPanel).not.toHaveClass("surface-card");
+      expect(answerProofPanel).toHaveClass("grid");
       expect(
         within(answerProofPanel).getAllByTestId("home-answer-proof-item")[0],
       ).toHaveClass("rounded-xl");
 
       const startPathList = within(startPathSection).getByRole("list");
-      expect(startPathList).toHaveClass("grid");
-      expect(startPathList).not.toHaveClass("divide-y");
+      expect(startPathList).toHaveClass("divide-y");
+      expect(startPathList).not.toHaveClass("grid");
       expect(
         within(startPathList).getAllByTestId("home-start-path-step-badge")[0],
       ).toHaveClass("rounded-full");

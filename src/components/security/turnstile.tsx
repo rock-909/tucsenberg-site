@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { logger } from "@/lib/logger";
+import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
 import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,
@@ -65,7 +66,7 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
       className={`turnstile-mock ${className ?? ""}`}
       data-testid="turnstile-mock"
     >
-      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-muted-foreground text-sm">{label}</div>
     </div>
   );
 }
@@ -79,7 +80,8 @@ function TurnstileUnavailableStatus({
       className={`turnstile-fallback ${className ?? ""}`}
       aria-live="polite"
     >
-      <div className="text-sm text-destructive">{label}</div>
+      <div className="text-destructive text-sm">{label}</div>
+      <TurnstileRescueLine />
     </output>
   );
 }

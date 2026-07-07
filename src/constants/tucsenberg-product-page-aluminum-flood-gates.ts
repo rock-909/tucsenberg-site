@@ -21,7 +21,8 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     "One boundary before anything else: a flood gate protects a defined opening. It earns its money when the door or garage really is where the water comes in — not when water rises through the slab, the soil or the drains, and not when the wall around the opening is itself porous. And rain can still fall or blow in behind any barrier, so plan for a pump or a drain on the protected side. Unsure which case is yours? Send site photos with your RFQ and we'll tell you which.",
   cta: {
     href: "/request-quote",
-    label: "Request a Quote — standard items quoted within 12 hours",
+    label: "Request a Quote",
+    note: "Standard items quoted within 12 hours; custom cut lists within 48.",
   },
   downloadHref: "/downloads/spec-sheet-tb-ag.pdf",
   sections: [

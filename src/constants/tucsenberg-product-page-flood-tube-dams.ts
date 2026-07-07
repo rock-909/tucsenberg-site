@@ -19,7 +19,8 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
   lead: "Roll it out, inflate it with the included pump (about 7–8 minutes per 10 m section), pin the skirt, and you have a metre-high wall. Sections connect for runs of any length. We supply them factory-direct with the full accessory kit in the bag.",
   cta: {
     href: "/request-quote",
-    label: "Request a Quote — quoted within 12 hours",
+    label: "Request a Quote",
+    note: "Quoted within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-td.pdf",
   sections: [

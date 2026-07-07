@@ -133,9 +133,7 @@ function HomeProblemSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-[32px] leading-tight font-semibold text-balance">
-            {title}
-          </h2>
+          <h2 className="text-section text-balance">{title}</h2>
           <p className="text-muted-foreground mt-3 text-pretty">
             {description}
           </p>
@@ -193,7 +191,7 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-[32px] leading-tight font-semibold text-balance">
+          <h2 className="text-section text-balance">
             {t("howToChoose.title")}
           </h2>
           <p className="text-muted-foreground mt-3 text-pretty">
@@ -253,34 +251,30 @@ function HomeCapabilitiesSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-[32px] leading-tight font-semibold text-balance">
-            {title}
-          </h2>
+          <h2 className="text-section text-balance">{title}</h2>
           <p className="text-muted-foreground mt-3 text-pretty">
             {description}
           </p>
         </div>
-        <div
+        <dl
           data-testid="home-answer-proof-panel"
-          className="surface-card bg-muted/30 mt-8 rounded-2xl p-3 md:p-4"
+          className="mt-8 grid gap-3 md:grid-cols-2"
         >
-          <dl className="grid gap-2 md:grid-cols-2">
-            {items.map((item) => (
-              <div
-                key={item.title}
-                data-testid="home-answer-proof-item"
-                className="border-border bg-background min-w-0 rounded-xl border px-4 py-4"
-              >
-                <dt className="text-foreground text-sm font-semibold text-balance">
-                  {item.title}
-                </dt>
-                <dd className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
-                  {item.description}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+          {items.map((item) => (
+            <div
+              key={item.title}
+              data-testid="home-answer-proof-item"
+              className="border-border bg-background min-w-0 rounded-xl border px-5 py-5"
+            >
+              <dt className="text-foreground text-sm font-semibold text-balance">
+                {item.title}
+              </dt>
+              <dd className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
+                {item.description}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
@@ -300,19 +294,14 @@ function HomeStartPathSection({
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-[32px] leading-tight font-semibold text-balance">
-            {t("startPath.title")}
-          </h2>
+          <h2 className="text-section text-balance">{t("startPath.title")}</h2>
           <p className="text-muted-foreground mt-3 text-pretty">
             {t("startPath.description")}
           </p>
         </div>
-        <ol className="mt-8 grid gap-3 md:grid-cols-2">
+        <ol className="divide-border mt-6 max-w-3xl divide-y">
           {items.map((item) => (
-            <li
-              key={item.number}
-              className="surface-card flex gap-4 p-5 md:gap-5 md:last:odd:col-span-2"
-            >
+            <li key={item.number} className="flex gap-4 py-5 md:gap-6">
               <span
                 data-testid="home-start-path-step-badge"
                 className="border-border bg-muted text-foreground flex size-9 shrink-0 items-center justify-center rounded-full border font-mono text-[12px] font-semibold"
@@ -321,7 +310,7 @@ function HomeStartPathSection({
               </span>
               <div className="min-w-0">
                 <h3 className="font-semibold text-balance">{item.title}</h3>
-                <p className="text-muted-foreground mt-1 text-sm leading-6 text-pretty">
+                <p className="text-muted-foreground mt-1 max-w-[70ch] text-sm leading-6 text-pretty">
                   {item.description}
                 </p>
               </div>
@@ -346,10 +335,8 @@ function HomeFinalAction({
       className="section-divider px-6 py-14 md:py-[72px]"
     >
       <div className="mx-auto max-w-[1080px]">
-        <div className="surface-card px-6 py-10 text-center md:px-10 md:py-12">
-          <h2 className="text-[32px] leading-tight font-semibold text-balance md:text-[36px]">
-            {t("finalCta.title")}
-          </h2>
+        <div className="bg-accent rounded-2xl px-6 py-10 text-center md:px-10 md:py-12">
+          <h2 className="text-section text-balance">{t("finalCta.title")}</h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-[620px] text-pretty">
             {t("finalCta.description")}
           </p>

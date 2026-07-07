@@ -21,7 +21,8 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
   cta: {
     href: "/request-quote",
-    label: "Request a Quote — standard items quoted within 12 hours",
+    label: "Request a Quote",
+    note: "Standard items quoted within 12 hours; custom within 48.",
   },
   downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
   sections: [

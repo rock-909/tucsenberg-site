@@ -5,6 +5,8 @@ export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
 export interface TucsenbergProductCta {
   href: `/request-quote${string}`;
   label: string;
+  /** Quote-SLA promise rendered as a muted line under the button, never inside it (mobile overflow). */
+  note?: string;
 }
 
 export interface TucsenbergProductTable {
