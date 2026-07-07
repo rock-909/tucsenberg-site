@@ -564,6 +564,9 @@
   },
   "oemLanding": {
     "primaryCta": "Request a trade quote",
-    "secondaryCta": "See the five product lines"
+    "secondaryCta": "See the five product lines",
+    "diagramLabel": "FACTORY POOL · ONE SPEC SYSTEM",
+    "diagramAriaLabel": "Factory pool process — four specialised factories produce against one spec sheet and QC standard, shipping as one mixed container",
+    "diagramCaption": "Four specialised factories, one spec sheet, one QC standard — consolidated into one mixed container. Schematic."
   }
 }

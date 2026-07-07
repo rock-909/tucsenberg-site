@@ -2,31 +2,6 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-// Mock next/image — renders as plain <img> in test environment
-vi.mock("next/image", () => ({
-  default: ({
-    src,
-    alt,
-    fill,
-    sizes,
-    className,
-  }: {
-    src: string;
-    alt: string;
-    fill?: boolean;
-    sizes?: string;
-    className?: string;
-  }) => (
-    <img
-      src={src}
-      alt={alt}
-      data-fill={fill ? "true" : undefined}
-      data-sizes={sizes}
-      className={className}
-    />
-  ),
-}));
-
 vi.mock("@/i18n/routing", () => ({
   Link: ({
     href,
@@ -118,10 +93,18 @@ describe("MarketSeriesCard", () => {
     expect(screen.getByText("3 个产品系列")).toBeInTheDocument();
   });
 
-  it("renders a placeholder image with label as alt text", async () => {
+  it("renders the engineering line drawing for a real product line", async () => {
     const MarketSeriesCard = await importComponent();
-    render(<MarketSeriesCard {...defaultProps} />);
-    const img = screen.getByRole("img");
-    expect(img).toHaveAttribute("alt", "Primary Offer Example");
+    const { container } = render(
+      <MarketSeriesCard {...defaultProps} slug="abs-flood-barriers" />,
+    );
+    // Decorative drawing: present for real lines, hidden from the a11y tree.
+    expect(container.querySelector("[aria-hidden] svg")).not.toBeNull();
+  });
+
+  it("renders no drawing area for slugs without a product page", async () => {
+    const MarketSeriesCard = await importComponent();
+    const { container } = render(<MarketSeriesCard {...defaultProps} />);
+    expect(container.querySelector("svg")).toBeNull();
   });
 });

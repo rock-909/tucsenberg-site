@@ -21,7 +21,7 @@ import {
   type SingleSiteHomeSectionKey,
 } from "@/config/single-site-page-expression";
 import { FaqSectionView } from "@/components/sections/faq-section-view";
-import { ProductLineGlyph } from "@/components/products/product-diagrams";
+import { ProductLineDiagram } from "@/components/products/product-diagrams";
 import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
 import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
@@ -144,13 +144,13 @@ function HomeProblemSection({
               key={item.title}
               className="surface-card group hover:border-ring relative flex min-w-0 flex-col p-5 transition-colors"
             >
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <ProductLineGlyph
-                  kind={item.glyph}
-                  className="text-muted-foreground size-8 shrink-0"
-                />
+              <div
+                aria-hidden
+                className="border-border bg-background relative mb-4 overflow-hidden rounded-md border p-2"
+              >
+                <ProductLineDiagram kind={item.glyph} ariaLabel="" />
                 {item.badge ? (
-                  <span className="border-border bg-muted text-muted-foreground inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                  <span className="border-border bg-muted text-muted-foreground absolute top-2 right-2 inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
                     {item.badge}
                   </span>
                 ) : null}

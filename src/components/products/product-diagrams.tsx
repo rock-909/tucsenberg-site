@@ -472,6 +472,22 @@ const DIAGRAMS: Record<
   frp: FrpDiagram,
 };
 
+/**
+ * Full line drawing for card-scale use (products index, home cards) — the
+ * engineering-drawing identity carries the visual weight until owner
+ * photography lands.
+ */
+export function ProductLineDiagram({
+  kind,
+  ariaLabel,
+}: {
+  kind: TucsenbergProductDiagramKind;
+  ariaLabel: string;
+}) {
+  const Diagram = DIAGRAMS[kind];
+  return <Diagram ariaLabel={ariaLabel} />;
+}
+
 export function ProductDiagramPanel({
   diagram,
 }: {
