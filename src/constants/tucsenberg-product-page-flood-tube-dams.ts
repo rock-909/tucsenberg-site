@@ -116,6 +116,21 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
         "3 years on materials and workmanship (consumable accessories excluded). In-stock: ships in 2–7 days; custom lengths confirmed at quotation.",
     },
   ],
+  calculator: {
+    heading: "How many sections do I need?",
+    intro:
+      "Enter the run you want to protect and we'll estimate the number of 10 m sections (TB-TD1000). 5 m sections (TB-TD500) are available to fine-tune the remainder.",
+    inputLabel: "Run length to protect",
+    unitSelectLabel: "Unit of length",
+    unitWidthCm: 1000,
+    resultUnitLabel: "sections of 10 m",
+    disclaimer:
+      "Straight-run estimate, quantities only — no prices here by design. Sections join with the included splicing sleeves; corners, terrain and how the run terminates change the final count, and height planning matters — overtopping ends protection. Send this estimate with your ground type and we'll confirm the exact configuration at quotation.",
+    ctaLabel: "Get a quote for this configuration",
+    interest: "flood-tube-dams",
+    rfqMessageTemplate:
+      "TB-TD flood tube dams: protect approx. {length}, estimated {units} sections of 10 m (TB-TD1000 basis; 5 m sections available for the remainder). Please confirm layout and exact configuration.",
+  },
   rfqNote:
     "Tell us run length, ground type, whether you need air or water fill, and what pump or water source the site will have. Quoted within 12 hours.",
 } as const satisfies TucsenbergProductPage;

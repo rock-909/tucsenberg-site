@@ -26,30 +26,40 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     {
       title: "Why FRP, and why now",
       kind: "bullets",
+      paragraphs: [
+        "Aluminum demountable systems are the trade standard — and inland, they should be. But three environments punish aluminum over a service life:",
+      ],
       bullets: [
         "Coastal and salt-air sites — corrosion is aluminum's one real weakness over decades; FRP simply doesn't participate.",
         "Chemical and industrial exposure — process plants, wastewater sites, de-icing salt zones.",
         "Electrical infrastructure — substations and switchyards, where a non-conductive barrier isn't a preference, it's a spec.",
       ],
+      footer:
+        "If your openings live in one of those, FRP earns its premium across the service life — that's the honest scope. For everything else, [aluminum](/products/aluminum-flood-gates) remains the value answer, and we'll tell you so in the quote.",
     },
     {
       title: "Same logic as aluminum, different material",
       kind: "bullets",
       bullets: [
-        "180 mm plank profile class — designed to the same stacked-plank, post-and-seal system as our aluminum gates.",
-        "Pultruded fiberglass — continuous glass fibre in a resin matrix.",
+        "180 mm plank profile class — designed to the same stacked-plank, post-and-seal system as our aluminum gates, so posts, seals and deployment practice carry over.",
+        "Pultruded fiberglass — continuous glass fibre in a resin matrix, the process behind FRP ladders, grating and utility poles: proven material science, newly applied to flood planks built to international specifications.",
         "EPDM sealing — unchanged; sealing is a geometry problem, not a material one.",
       ],
     },
     {
-      title: "How order-driven production works",
+      title: "How order-driven production works (the part nobody publishes)",
       kind: "bullets",
+      paragraphs: [
+        "FRP profiles are made on pultrusion dies. Opening a new profile means tooling — and we'd rather show you the economics than hide them:",
+      ],
       bullets: [
         "Tooling: a one-time die cost, quoted per profile, amortised across your first production run.",
-        "First run: minimum volumes apply (hundreds of metres, not thousands).",
-        "Testing: span and deflection verification on the produced profile.",
+        "First run: minimum volumes apply (hundreds of metres, not thousands) — an opening schedule for a real project usually clears it.",
+        "Testing: span and deflection verification on the produced profile — data you receive with the delivery, and the dataset we're building publicly as this line matures.",
         "Reorders: the die is cut; subsequent runs price like a standard product.",
       ],
+      footer:
+        "Transparency is the filter here: if your requirement is one doorway, FRP tooling math won't work and we'll say so — [aluminum](/products/aluminum-flood-gates) will. If it's a coastal project, a utility fleet or a dealer range, the numbers get interesting.",
     },
     {
       title: "Span & deflection data",
@@ -57,18 +67,20 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
       paragraphs: [
         "Testing data for the first profiles is being compiled with our pultrusion partners. Register interest below and we'll send span/deflection tables as they complete — no marketing sheet, the actual numbers.",
       ],
+      footer:
+        "Where FRP sits among the five materials: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
     },
   ],
   faqs: [
     {
       question: "Is FRP stronger than aluminum?",
       answer:
-        "Different, not simply stronger: excellent stiffness-to-weight and zero corrosion, but design data is profile-specific.",
+        "Different, not simply stronger: excellent stiffness-to-weight and zero corrosion, but design data (span limits at height) is profile-specific — which is exactly why we publish test data instead of adjectives.",
     },
     {
       question: "Why doesn't anyone else sell FRP flood planks?",
       answer:
-        "Pultrusion and flood barriers live in different industries; crossing them takes tooling risk nobody has taken at full specification.",
+        "Pultrusion and flood barriers live in different industries; crossing them takes tooling risk nobody has taken at full specification. That's the gap this line exists to fill — early buyers shape the profile range.",
     },
     {
       question: "What does it cost?",
@@ -76,4 +88,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "More than aluminum per metre at first run (tooling amortisation), competitive at reorder. Real numbers come with your opening schedule — quoted within 48 hours as a custom line.",
     },
   ],
+  rfqNote:
+    'Tell us your site type and rough volumes. You\'ll get: tooling economics for your case, the test dataset as it lands, and first-run scheduling before this page gets an "in stock" badge.',
 } as const satisfies TucsenbergProductPage;
