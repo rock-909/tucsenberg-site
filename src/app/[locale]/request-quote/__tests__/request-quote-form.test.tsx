@@ -186,6 +186,31 @@ describe("RequestQuoteForm", () => {
     );
   });
 
+  it("prefills the message field from a product estimator ?config= param", () => {
+    // setup.next.ts replaces window.location with a static snapshot, so set
+    // the search string directly instead of going through history APIs.
+    const originalLocation = window.location;
+    const config =
+      "TB-BW ABS boxwall: protect approx. 12 m, estimated 12 straight units (100 cm unit footprint basis).";
+    Object.defineProperty(window, "location", {
+      value: {
+        ...originalLocation,
+        search: `?config=${encodeURIComponent(config)}`,
+      },
+      configurable: true,
+    });
+
+    try {
+      render(<RequestQuoteForm copy={copy} />);
+      expect(screen.getByLabelText("What do you need?")).toHaveValue(config);
+    } finally {
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        configurable: true,
+      });
+    }
+  });
+
   it("shows a buyer-safe error when the inquiry API rejects the RFQ", async () => {
     global.fetch = vi.fn(async () =>
       Response.json(

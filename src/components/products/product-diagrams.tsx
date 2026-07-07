@@ -4,6 +4,7 @@ import type {
   TucsenbergProductDiagram,
   TucsenbergProductDiagramKind,
 } from "@/constants/tucsenberg-product-page-types";
+import { BoxwallCrossSection } from "@/components/products/boxwall-cross-section";
 
 /**
  * Honest engineering line drawings (copy strategy: 截面图/线图 over stock
@@ -477,12 +478,25 @@ export function ProductDiagramPanel({
   diagram: TucsenbergProductDiagram;
 }) {
   const Diagram = DIAGRAMS[diagram.kind];
+  const staticDrawing = <Diagram ariaLabel={diagram.ariaLabel} />;
   return (
     <figure
       className="border-border bg-card min-w-0 rounded-2xl border p-4 md:p-5"
       data-testid="product-diagram"
     >
-      <Diagram ariaLabel={diagram.ariaLabel} />
+      {diagram.panelLabel ? (
+        <div className="border-border mb-3 flex items-center justify-between gap-3 border-b pb-3">
+          <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.1em] uppercase">
+            {diagram.panelLabel}
+          </span>
+          <span aria-hidden className="bg-primary size-1.5 rounded-full" />
+        </div>
+      ) : null}
+      {diagram.animated && diagram.kind === "boxwall" ? (
+        <BoxwallCrossSection fallback={staticDrawing} />
+      ) : (
+        staticDrawing
+      )}
       <figcaption className="text-muted-foreground border-border mt-3 border-t pt-3 text-xs leading-5">
         {diagram.caption}
       </figcaption>

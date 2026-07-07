@@ -27,6 +27,7 @@ import {
 } from "@/constants/tucsenberg-product-pages";
 import { buildTucsenbergProductFaqSchema } from "@/constants/tucsenberg-product-faq-schema";
 import { ProductDiagramPanel } from "@/components/products/product-diagrams";
+import { ProductRunCalculator } from "@/components/products/product-run-calculator";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 
 export function generateStaticParams() {
@@ -249,6 +250,9 @@ export default async function MarketPage({ params }: MarketPageProps) {
         {productPage.sections.map((section) => (
           <ProductContentSection key={section.title} section={section} />
         ))}
+        {productPage.calculator ? (
+          <ProductRunCalculator calculator={productPage.calculator} />
+        ) : null}
         <ProductFaqSection page={productPage} />
         <ProductFinalCta page={productPage} />
       </div>

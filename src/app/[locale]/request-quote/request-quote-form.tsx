@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { trackGenerateLead } from "@/lib/marketing/lead-event";
 import { appendAttributionToFormData } from "@/lib/marketing/utm";
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
@@ -29,12 +29,28 @@ interface InquiryApiErrorResponse {
 
 type InquiryApiResponse = InquiryApiSuccessResponse | InquiryApiErrorResponse;
 
+// Cap for the `?config=` prefill coming from product estimators; the message
+// field itself allows more, but a URL-borne prefill should stay short.
+const CONFIG_PREFILL_MAX_LENGTH = 500;
+
 export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [state, setState] = useState<RequestQuoteSubmitState>({
     status: "idle",
   });
   const isSubmitting = state.status === "submitting";
+
+  // Product estimators (e.g. the boxwall unit calculator) hand their result
+  // over via `?config=`; surface it in the message field so the buyer sees
+  // and can edit what they're sending.
+  useEffect(() => {
+    const config = new URLSearchParams(window.location.search).get("config");
+    if (!config) return;
+    const field = document.getElementById("rfq-message");
+    if (field instanceof HTMLTextAreaElement && field.value === "") {
+      field.value = config.slice(0, CONFIG_PREFILL_MAX_LENGTH);
+    }
+  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

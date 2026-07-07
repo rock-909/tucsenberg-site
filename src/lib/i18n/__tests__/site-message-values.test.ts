@@ -18,7 +18,7 @@ describe("site message values", () => {
     const values = getSiteMessageValues();
 
     expect(values.currentYear).toBe(CHECKED_IN_SITE_YEAR);
-    expect(values.copyright.en).toContain(`(c) ${CHECKED_IN_SITE_YEAR}`);
-    expect(values.copyright.zh).toContain(`(c) ${CHECKED_IN_SITE_YEAR}`);
+    expect(values.copyright.en).toContain(`© ${CHECKED_IN_SITE_YEAR}`);
+    expect(values.copyright.zh).toContain(`© ${CHECKED_IN_SITE_YEAR}`);
   });
 });

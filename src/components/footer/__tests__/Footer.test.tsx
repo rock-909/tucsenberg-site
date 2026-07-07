@@ -1,49 +1,19 @@
 /**
  * Footer Component Tests
  *
- * Tests for the new Footer component (src/components/footer/Footer.tsx)
+ * Covers the hairline three-column footer with legal identity bar
+ * (spec: docs/design/可迁移设计资产-剖面动画与页脚.md, asset 2).
  */
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { Footer } from "../Footer";
-
-// Mock next-intl
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
-
-// Mock next/link
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
-}));
+import { describe, expect, it } from "vitest";
+import { Footer } from "@/components/footer/Footer";
+import { FOOTER_COLUMNS } from "@/config/footer-links";
+import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 
 describe("Footer Component", () => {
   it("renders without crashing", () => {
     render(<Footer />);
-    const footer = screen.getByRole("contentinfo");
-    expect(footer).toBeInTheDocument();
-  });
-
-  it("renders all footer sections", () => {
-    render(<Footer />);
-
-    // Check for section headings (using translation keys as mock returns them)
-    const sections = ["Resources", "Company", "Legal"];
-    sections.forEach((section) => {
-      // Look for headings or elements with these keys
-      const elements = screen.queryAllByText(
-        (content, element) =>
-          element?.tagName === "H2" && content.includes(section.toLowerCase()),
-      );
-      // At least some footer structure should exist
-      expect(elements.length >= 0).toBe(true);
-    });
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
 
   it("keeps footer navigation aligned with the Tucsenberg catalog IA", () => {
@@ -95,50 +65,35 @@ describe("Footer Component", () => {
     });
   });
 
-  it("renders social links section", () => {
+  it("renders the brand wordmark with an accessible site name", () => {
     render(<Footer />);
 
-    // Social section should exist
-    const socialHeading = screen.queryByRole("heading", {
-      name: /social/i,
-      level: 2,
-    });
-
-    // If social heading exists, verify structure
-    if (socialHeading) {
-      expect(socialHeading).toBeInTheDocument();
-    }
+    expect(screen.getByText(SINGLE_SITE_CONFIG.name)).toHaveClass("sr-only");
+    expect(screen.getByText("=")).toHaveClass("text-primary");
   });
 
-  it("renders theme toggle slot when provided", () => {
-    const ThemeToggle = () => <button>Toggle Theme</button>;
-    render(<Footer themeToggleSlot={<ThemeToggle />} />);
+  it("renders the legal identity bar from single-site config", () => {
+    render(<Footer />);
 
-    const themeButton = screen.getByText("Toggle Theme");
-    expect(themeButton).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `${SINGLE_SITE_FACTS.company.name} · ${SINGLE_SITE_CONFIG.contact.email}`,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (content) =>
+          content.startsWith("© ") && content.includes("All rights reserved"),
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("renders status slot when provided", () => {
-    const StatusContent = () => <div>© 2025 Company</div>;
-    render(<Footer statusSlot={<StatusContent />} />);
-
-    const status = screen.getByText(/© 2025 Company/);
-    expect(status).toBeInTheDocument();
-  });
-
-  it("applies custom className", () => {
-    const { container } = render(<Footer className="custom-footer" />);
-    const footer = container.querySelector(".custom-footer");
-    expect(footer).toBeInTheDocument();
-  });
-
-  it("uses footer-specific color tokens for the dark footer surface", () => {
+  it("uses footer-specific color tokens for the flat footer surface", () => {
     render(<Footer />);
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveClass(
       "bg-[var(--footer-bg)]",
-      "text-[var(--footer-text)]",
       "border-[var(--footer-divider)]",
     );
 
@@ -148,67 +103,71 @@ describe("Footer Component", () => {
     const firstLink = screen.getAllByRole("link")[0];
     expect(firstLink).toHaveClass(
       "text-[var(--footer-text)]",
-      "hover:text-[var(--footer-link)]",
+      "hover:text-primary",
     );
   });
 
-  it("centers footer content inside a max-width container without viewport-expanding margins", () => {
-    render(<Footer />);
-
-    const footerNav = screen.getByRole("navigation", {
-      name: /footer navigation/i,
-    });
-    const container = footerNav.parentElement;
-
-    expect(container).toHaveStyle({
-      maxWidth: "1080px",
-      marginInline: "auto",
-    });
-    expect(container).not.toHaveStyle({
-      marginInline: "clamp(24px, 12vw, 184px)",
-    });
-  });
-
-  it("keeps footer links large enough for mobile touch input", () => {
+  it("keeps links block-level with padded touch targets", () => {
     render(<Footer />);
 
     const firstLink = screen.getAllByRole("link")[0];
-    expect(firstLink).toHaveClass("min-h-11", "py-2");
+    expect(firstLink).toHaveClass("block", "py-1.5");
   });
 
-  it("renders with default FOOTER_COLUMNS config", () => {
-    render(<Footer />);
+  it("renders theme toggle slot in the legal bar when provided", () => {
+    render(<Footer themeToggleSlot={<button>Toggle Theme</button>} />);
+    expect(screen.getByText("Toggle Theme")).toBeInTheDocument();
+  });
 
-    // Should have footer element
-    const footer = screen.getByRole("contentinfo");
+  it("applies custom className and data-theme", () => {
+    const { container } = render(
+      <Footer className="custom-footer" dataTheme="dark" />,
+    );
+    const footer = container.querySelector(".custom-footer");
     expect(footer).toBeInTheDocument();
-
-    // Should have some list structure
-    const lists = footer.querySelectorAll("ul");
-    expect(lists.length).toBeGreaterThan(0);
+    expect(footer).toHaveAttribute("data-theme", "dark");
   });
 
-  it("accepts custom columns configuration", () => {
-    const customColumns = [
-      {
-        key: "test",
-        title: "Test Section",
-        translationKey: "footer.custom.test",
-        links: [
+  it("accepts custom columns and marks external links", () => {
+    render(
+      <Footer
+        columns={[
           {
-            key: "test-link",
-            label: "Test Link",
-            href: "/test",
-            translationKey: "test.link",
+            key: "custom",
+            title: "Custom Section",
+            translationKey: "footer.custom.title",
+            links: [
+              {
+                key: "internal",
+                label: "Internal Link",
+                href: "/products",
+                translationKey: "footer.custom.internal",
+              },
+              {
+                key: "external",
+                label: "External Link",
+                href: "https://example.com",
+                external: true,
+                translationKey: "footer.custom.external",
+              },
+            ],
           },
-        ],
-      },
-    ];
+        ]}
+      />,
+    );
 
-    render(<Footer columns={customColumns} />);
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Custom Section" }),
+    ).toBeInTheDocument();
+    const internal = screen.getByRole("link", { name: "Internal Link" });
+    expect(internal).not.toHaveAttribute("target");
+    const external = screen.getByRole("link", { name: "External Link" });
+    expect(external).toHaveAttribute("target", "_blank");
+    expect(external).toHaveAttribute("rel", "noreferrer noopener");
 
-    // Should render custom section
-    const testSections = screen.getAllByText(/test/i);
-    expect(testSections.length).toBeGreaterThan(0);
+    expect(FOOTER_COLUMNS.map((column) => column.key)).toEqual([
+      "navigation",
+      "support",
+    ]);
   });
 });

@@ -21,9 +21,11 @@ export function getSiteMessageValues(): SiteMessageValues {
     siteName: SINGLE_SITE_CONFIG.name,
     companyName,
     currentYear,
+    // Short brand mark: the footer legal bar already carries the full legal
+    // company name, so the copyright line stays brand-short by design.
     copyright: {
-      en: `(c) ${currentYear} ${companyName}. All rights reserved.`,
-      zh: `(c) ${currentYear} ${companyName}。保留所有权利。`,
+      en: `© ${currentYear} ${SINGLE_SITE_CONFIG.name}. All rights reserved.`,
+      zh: `© ${currentYear} ${SINGLE_SITE_CONFIG.name}。保留所有权利。`,
     },
   };
 }

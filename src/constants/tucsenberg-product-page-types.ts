@@ -46,6 +46,32 @@ export interface TucsenbergProductDiagram {
   kind: TucsenbergProductDiagramKind;
   ariaLabel: string;
   caption: string;
+  /** Instrument-panel header label (mono microcopy) above the drawing. */
+  panelLabel?: string;
+  /** Upgrade the static drawing to the animated canvas cross-section. */
+  animated?: boolean;
+}
+
+/**
+ * Straight-run unit estimator (quote funnel: quantities only, never prices).
+ * `unitWidthCm` must come from a real owner spec — never invented.
+ */
+export interface TucsenbergProductCalculator {
+  heading: string;
+  intro: string;
+  inputLabel: string;
+  unitSelectLabel: string;
+  /** Width of one straight unit in cm (real spec basis for the estimate). */
+  unitWidthCm: number;
+  /** e.g. "straight units" */
+  resultUnitLabel: string;
+  /** Honest limits: what the estimate does not cover. */
+  disclaimer: string;
+  ctaLabel: string;
+  /** interest slug forwarded to the RFQ page. */
+  interest: string;
+  /** RFQ prefill message; placeholders: {length}, {units}. */
+  rfqMessageTemplate: string;
 }
 
 export interface TucsenbergProductPage {
@@ -63,6 +89,8 @@ export interface TucsenbergProductPage {
   downloadHref: string;
   /** Page-specific request-a-quote guidance shown in the final CTA section. */
   rfqNote?: string;
+  /** Optional straight-run estimator rendered after the content sections. */
+  calculator?: TucsenbergProductCalculator;
   sections: readonly TucsenbergProductSection[];
   faqs: readonly TucsenbergProductFaq[];
 }

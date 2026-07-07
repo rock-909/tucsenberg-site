@@ -319,7 +319,7 @@ describe("load-messages runtime gating", () => {
       SINGLE_SITE_FACTS.company.established +
         SINGLE_SITE_FACTS.company.yearsInBusiness,
     );
-    const expectedEnCopyright = `(c) ${currentYear} ${SINGLE_SITE_FACTS.company.name}. All rights reserved.`;
+    const expectedEnCopyright = `© ${currentYear} ${SINGLE_SITE_CONFIG.name}. All rights reserved.`;
     const enMessages = await loadCriticalMessages("en");
     assertFactualCriticalMessages(enMessages);
 

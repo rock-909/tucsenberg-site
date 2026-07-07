@@ -7,10 +7,12 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   image: { status: "pending" },
   diagram: {
     kind: "boxwall",
+    animated: true,
+    panelLabel: "TB-BW BOXWALL · SELF-ANCHORING PRINCIPLE",
     ariaLabel:
       "TB-BW ABS boxwall flood barrier — freestanding L-profile side view with water load sealing the base",
     caption:
-      "Working principle, side view: rising water presses the L-shaped base down and seals it. Schematic, not to scale — dimensions confirmed at quotation. Product photography in preparation.",
+      "Principle — the flood's own weight presses the apron down; no fixing to the building. Schematic, not to scale — dimensions confirmed at quotation. Product photography in preparation.",
   },
   eyebrow: "TB-BW series",
   title: "ABS Interlocking Boxwall Flood Barriers",
@@ -161,6 +163,21 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "In-stock configurations ship in 2–7 days. Production orders (custom colours, moulded logos) are confirmed at quotation.",
     },
   ],
+  calculator: {
+    heading: "How many units do I need?",
+    intro:
+      "Enter the length you want to protect and we'll estimate the number of straight units, based on the 100 cm footprint width of one TB-BW straight unit.",
+    inputLabel: "Length to protect",
+    unitSelectLabel: "Unit of length",
+    unitWidthCm: 100,
+    resultUnitLabel: "straight units",
+    disclaimer:
+      "Straight-run estimate, quantities only — no prices here by design. Corners, gable ends, joint overlap, uneven ground and how the run terminates all change the final count, and a barrier holds water back — it doesn't drain it. Send this estimate with your site details and we'll confirm the exact configuration at quotation.",
+    ctaLabel: "Get a quote for this configuration",
+    interest: "abs-flood-barriers",
+    rfqMessageTemplate:
+      "TB-BW ABS boxwall: protect approx. {length}, estimated {units} straight units (100 cm unit footprint basis). Please confirm corners, gable ends and exact configuration.",
+  },
   rfqNote:
     "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. Standard items quoted within 12 hours; custom configurations within 48.",
 } as const satisfies TucsenbergProductPage;
