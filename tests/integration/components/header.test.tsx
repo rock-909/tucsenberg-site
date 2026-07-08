@@ -66,9 +66,6 @@ vi.mock("@/components/layout/header-client", () => ({
   MobileNavigationIsland: () => (
     <nav data-testid="mobile-navigation">Mobile Navigation</nav>
   ),
-  LanguageToggleIsland: () => (
-    <div data-testid="language-toggle">Language Toggle</div>
-  ),
 }));
 
 vi.mock("@/components/ui/button", () => ({
@@ -115,7 +112,6 @@ describe("Header Integration Tests", () => {
       expect(screen.getByTestId("logo")).toBeInTheDocument();
       expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
-      expect(screen.getByTestId("language-toggle")).toBeInTheDocument();
     });
 
     it("should protect desktop navigation and CTA labels without broad wrappers", async () => {
@@ -275,7 +271,6 @@ describe("Header Integration Tests", () => {
 
       // Child components should handle their own keyboard navigation
       expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
-      expect(screen.getByTestId("language-toggle")).toBeInTheDocument();
     });
   });
 
@@ -298,12 +293,10 @@ describe("Header Integration Tests", () => {
       const logo = screen.getByTestId("logo");
       const navSwitcher = screen.getByTestId("header-desktop-nav");
       const mobileNav = screen.getByTestId("mobile-navigation");
-      const langToggle = screen.getByTestId("language-toggle");
 
       expect(container).toContainElement(logo);
       expect(container).toContainElement(navSwitcher);
       expect(container).toContainElement(mobileNav);
-      expect(container).toContainElement(langToggle);
     });
   });
 

@@ -17,7 +17,6 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { usePathname } from "@/i18n/routing";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
-import { MobileLanguageSwitcher } from "@/components/layout/mobile-language-switcher";
 import {
   MobileNavigationLinks,
   type MobileNavigationLinksProps,
@@ -38,7 +37,6 @@ interface MobileNavigationInteractiveProps {
   className?: string;
   closeMenuLabel?: string | undefined;
   initialOpen?: boolean;
-  languageLabel?: string | undefined;
   openMenuLabel?: string | undefined;
   siteDescription?: string | undefined;
   siteName?: string | undefined;
@@ -52,7 +50,6 @@ interface MobileMenuButtonProps extends ComponentProps<"button"> {
 }
 
 interface MobileMenuState {
-  isLanguageExpanded: boolean;
   isOpen: boolean;
   pathname: string;
 }
@@ -105,7 +102,7 @@ function MobileNavigationHeader({
       <div className="text-lg font-semibold" aria-hidden="true">
         {siteName}
       </div>
-      <SheetDescription className="text-sm text-muted-foreground">
+      <SheetDescription className="text-muted-foreground text-sm">
         {siteDescription}
       </SheetDescription>
     </SheetHeader>
@@ -129,19 +126,16 @@ export function MobileNavigationInteractive({
   initialOpen = false,
   openMenuLabel,
   closeMenuLabel,
-  languageLabel = "Language",
   siteName,
   siteDescription,
 }: MobileNavigationInteractiveProps) {
   const tNavigation = useTranslations("navigation");
   const pathname = usePathname();
   const [menuState, setMenuState] = useState<MobileMenuState>(() => ({
-    isLanguageExpanded: false,
     isOpen: initialOpen,
     pathname,
   }));
   const isOpen = menuState.pathname === pathname && menuState.isOpen;
-  const isLanguageExpanded = isOpen && menuState.isLanguageExpanded;
   const resolvedSiteName = siteName ?? tNavigation("siteName");
   const resolvedSiteDescription =
     siteDescription ?? tNavigation("siteDescription");
@@ -149,19 +143,8 @@ export function MobileNavigationInteractive({
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setMenuState((currentState) => ({
-        isLanguageExpanded: open ? currentState.isLanguageExpanded : false,
-        isOpen: open,
-        pathname,
-      }));
-    },
-    [pathname],
-  );
-
-  const handleLanguageExpandedChange = useCallback(
-    (expanded: boolean) => {
-      setMenuState((currentState) => ({
         ...currentState,
-        isLanguageExpanded: expanded,
+        isOpen: open,
         pathname,
       }));
     },
@@ -206,14 +189,6 @@ export function MobileNavigationInteractive({
           />
           <Separator className="my-4" />
           {navigationContent}
-          <Separator className="my-4" />
-          <MobileLanguageSwitcher
-            isExpanded={isLanguageExpanded}
-            languageLabel={languageLabel}
-            onExpandedChange={handleLanguageExpandedChange}
-            pathname={pathname}
-            onNavigate={() => handleOpenChange(false)}
-          />
         </SheetContent>
       </Sheet>
     </div>

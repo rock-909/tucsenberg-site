@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -145,31 +145,6 @@ function TestNavigationComponent() {
   );
 }
 
-// 测试组件：语言切换组件
-function TestLanguageSwitcher() {
-  const locale = mockUseLocale();
-  const t = mockUseTranslations("language");
-
-  const handleLanguageSwitch = (newLocale: string) => {
-    mockUseLocale.mockReturnValue(newLocale);
-  };
-
-  return (
-    <div data-testid="language-switcher">
-      <button
-        data-testid="language-toggle"
-        onClick={() => handleLanguageSwitch(locale === "en" ? "zh" : "en")}
-      >
-        {t("toggle")}
-      </button>
-      <div data-testid="current-locale">{locale}</div>
-      <div data-testid="select-language-text">{t("selectLanguage")}</div>
-      <div data-testid="english-text">{t("english")}</div>
-      <div data-testid="chinese-text">{t("chinese")}</div>
-    </div>
-  );
-}
-
 // 辅助函数：渲染带有i18n上下文的组件
 function renderWithI18n(component: React.ReactElement, locale: string = "en") {
   const messages = locale === "en" ? mockEnMessages : mockZhMessages;
@@ -268,37 +243,6 @@ describe("i18n 组件集成测试", () => {
       expect(screen.getByTestId("home-link")).toHaveTextContent("首页");
       expect(screen.getByTestId("about-link")).toHaveTextContent("关于");
       expect(screen.getByTestId("contact-link")).toHaveTextContent("联系");
-    });
-  });
-
-  describe("语言切换功能", () => {
-    it("应该显示当前语言", () => {
-      renderWithI18n(<TestLanguageSwitcher />, "en");
-
-      expect(screen.getByTestId("current-locale")).toHaveTextContent("en");
-      expect(screen.getByTestId("language-toggle")).toHaveTextContent(
-        "Toggle language",
-      );
-    });
-
-    it("应该支持语言切换按钮点击", async () => {
-      renderWithI18n(<TestLanguageSwitcher />, "en");
-
-      const toggleButton = screen.getByTestId("language-toggle");
-      fireEvent.click(toggleButton);
-
-      // 验证Mock函数被调用
-      expect(mockUseLocale).toHaveBeenCalled();
-    });
-
-    it("应该显示语言选择相关文本", () => {
-      renderWithI18n(<TestLanguageSwitcher />, "en");
-
-      expect(screen.getByTestId("select-language-text")).toHaveTextContent(
-        "Select Language",
-      );
-      expect(screen.getByTestId("english-text")).toHaveTextContent("English");
-      expect(screen.getByTestId("chinese-text")).toHaveTextContent("Chinese");
     });
   });
 });

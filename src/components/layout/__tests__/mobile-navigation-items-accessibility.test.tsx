@@ -102,17 +102,9 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
 
       expect(screen.getByRole("navigation")).toBeInTheDocument();
 
-      const languageButton = screen.getByRole("button", {
-        name: "Language English",
-      });
-      languageButton.focus();
-      expect(languageButton).toHaveFocus();
-
-      await user.keyboard("{Enter}");
-      expect(languageButton).toHaveAttribute("aria-expanded", "true");
-      expect(
-        screen.getByTestId("mobile-language-option-label-en"),
-      ).toBeInTheDocument();
+      const firstLink = screen.getByRole("link", { name: "Home" });
+      firstLink.focus();
+      expect(firstLink).toHaveFocus();
 
       // Escape should close menu
       await user.keyboard("{Escape}");
@@ -215,7 +207,7 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       const links = screen.getAllByRole("link");
       const linkTexts = links.map((link) => link.textContent?.trim());
 
-      // Navigation items + CTA. Language links are collapsed by default.
+      // Navigation items + CTA. The single-locale language row is not rendered.
       expect(linkTexts).toEqual([
         "Home",
         "Products",
@@ -224,14 +216,6 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
         "About",
         "Request a Quote",
       ]);
-
-      fireEvent.click(screen.getByRole("button", { name: "Language English" }));
-      expect(
-        screen.getByTestId("mobile-language-option-label-en"),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("mobile-language-option-label-zh"),
-      ).not.toBeInTheDocument();
     });
 
     it("applies consistent styling to navigation items", async () => {
@@ -346,8 +330,8 @@ describe("Mobile Navigation - Advanced Integration Tests", () => {
       fireEvent.click(trigger);
       expect(screen.getByRole("navigation")).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "Language English" }),
-      ).toHaveAttribute("aria-expanded", "false");
+        screen.queryByRole("button", { name: "Language English" }),
+      ).not.toBeInTheDocument();
     });
 
     it("supports keyboard navigation", async () => {

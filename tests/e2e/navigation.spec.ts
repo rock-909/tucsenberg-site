@@ -25,7 +25,6 @@ const BASE_ORIGIN = new URL(rawBaseUrl).origin;
 test.describe("Navigation System", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    await page.waitForURL("**/en");
     await waitForLoadWithFallback(page, {
       context: "navigation beforeEach",
       loadTimeout: 5_000,
@@ -35,43 +34,16 @@ test.describe("Navigation System", () => {
     await waitForStablePage(page);
   });
 
-  test("should redirect root path to default locale", async ({
-    page,
-    request,
-    browserName,
-  }) => {
-    // On Firefox, validate redirect via API to avoid page navigation flakiness
-    if (browserName === "firefox") {
-      const resp = await request.get(`${BASE_ORIGIN}/`, {
-        maxRedirects: 0,
-      });
-      expect([301, 302, 307, 308]).toContain(resp.status());
-      const location =
-        resp.headers()["location"] || resp.headers()["Location"] || "";
-      expect(location).toMatch(/\/en(\/|$)/);
-      await page.goto(`${BASE_ORIGIN}/en`);
-
-      await waitForLoadWithFallback(page, {
-        context: "navigation firefox redirect",
-        loadTimeout: 5_000,
-        fallbackDelay: 500,
-      });
-      await waitForStablePage(page);
-      await expect(page.locator("html")).toHaveAttribute("lang", "en");
-      return;
-    }
-
-    // For other browsers: navigate to root and assert client-side end state
+  test("should serve root as the default English locale", async ({ page }) => {
     await page.goto(`${BASE_ORIGIN}/`);
-    await page.waitForURL("**/en");
 
     await waitForLoadWithFallback(page, {
-      context: "navigation client redirect",
+      context: "navigation root locale",
       loadTimeout: 5_000,
       fallbackDelay: 500,
     });
     await waitForStablePage(page);
-    await expect(page).toHaveURL(/\/en\/?$/);
+    expect(new URL(page.url()).pathname).toBe("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 
@@ -89,8 +61,10 @@ test.describe("Navigation System", () => {
 
       await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
       await expect(nav.getByRole("link", { name: /Products/i })).toBeVisible();
-      await expect(nav.getByRole("link", { name: /Blog/i })).toBeVisible();
-      await expect(nav.getByRole("link", { name: /Resources/i })).toBeVisible();
+      await expect(
+        nav.getByRole("link", { name: "OEM & Wholesale" }),
+      ).toBeVisible();
+      await expect(nav.getByRole("link", { name: "Guides" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "About" })).toBeVisible();
       await expect(nav.getByRole("link", { name: "Capabilities" })).toHaveCount(
         0,
@@ -126,8 +100,8 @@ test.describe("Navigation System", () => {
 
       const routeChecks = [
         {
-          href: "/en/about",
-          pattern: /\/en\/about$/,
+          href: "/about",
+          pattern: /\/about$/,
         },
       ] as const;
 
@@ -140,7 +114,7 @@ test.describe("Navigation System", () => {
         await page.waitForURL(route.pattern, { waitUntil: "domcontentloaded" });
         await waitForStablePage(page);
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-        await page.goto("/en");
+        await page.goto("/");
         await waitForStablePage(page);
       }
 
@@ -155,7 +129,7 @@ test.describe("Navigation System", () => {
 
       // The loop above returns to home after each route; history behavior is
       // covered by the dedicated back/forward navigation test below.
-      await expect(page).toHaveURL(/\/en\/?$/);
+      await expect(page).toHaveURL(/\/$/);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
         timeout: 30_000,
       });
@@ -205,130 +179,7 @@ test.describe("Navigation System", () => {
       });
 
       // Should stay on home page or navigate properly
-      expect(page.url()).toContain("/en");
-    });
-
-    test("should reset desktop language menu state after navigation", async ({
-      page,
-    }) => {
-      if (await isHeaderInMobileMode(page)) {
-        test.skip(true, "desktop language menu is not visible in mobile mode");
-      }
-
-      const languageToggleButton = page.getByTestId("language-toggle-button");
-      await expect(languageToggleButton).toBeVisible();
-
-      await languageToggleButton.click();
-      await expect(languageToggleButton).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      );
-
-      const openDropdown = page.locator(
-        '[data-testid="language-dropdown-content"][data-state="open"]',
-      );
-      await expect(openDropdown).toBeVisible();
-
-      const aboutLink = getNav(page).getByRole("link", { name: "About" });
-      await aboutLink.click();
-      await page.waitForURL(/\/en\/about$/, { waitUntil: "domcontentloaded" });
-      await waitForStablePage(page);
-
-      const currentLanguageToggleButton = page.getByTestId(
-        "language-toggle-button",
-      );
-      await expect(currentLanguageToggleButton).toBeVisible();
-      await expect(currentLanguageToggleButton).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-      await expect(
-        page.locator(
-          '[data-testid="language-dropdown-content"][data-state="open"]',
-        ),
-      ).toHaveCount(0);
-    });
-
-    test("should keep desktop language menu closed across back and forward", async ({
-      page,
-    }) => {
-      if (await isHeaderInMobileMode(page)) {
-        test.skip(true, "desktop language menu is not visible in mobile mode");
-      }
-
-      const languageToggleButton = page.getByTestId("language-toggle-button");
-      await expect(languageToggleButton).toBeVisible();
-      await languageToggleButton.click();
-      await expect(languageToggleButton).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      );
-
-      await getNav(page).getByRole("link", { name: "About" }).click();
-      await page.waitForURL(/\/en\/about$/, { waitUntil: "domcontentloaded" });
-      await waitForStablePage(page);
-      await expect(page.getByTestId("language-toggle-button")).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-
-      await page.goBack({ waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(/\/en\/?$/);
-      await waitForStablePage(page);
-      await expect(page.getByTestId("language-toggle-button")).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-
-      await page.goForward({ waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(/\/en\/about$/);
-      await waitForStablePage(page);
-      await expect(page.getByTestId("language-toggle-button")).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-    });
-
-    test("should keep language switcher closed after locale switch and browser back", async ({
-      page,
-    }) => {
-      if (await isHeaderInMobileMode(page)) {
-        test.skip(true, "desktop language menu is not visible in mobile mode");
-      }
-
-      const languageToggleButton = page.getByTestId("language-toggle-button");
-      await expect(languageToggleButton).toBeVisible();
-      await languageToggleButton.click();
-      await expect(languageToggleButton).toHaveAttribute(
-        "aria-expanded",
-        "true",
-      );
-
-      await page
-        .locator('[data-testid="language-dropdown-content"][data-state="open"]')
-        .getByTestId("language-link-zh")
-        .click();
-      await page.waitForURL(/\/zh\/?$/, { waitUntil: "domcontentloaded" });
-      await waitForStablePage(page);
-      await expect(page.locator("html")).toHaveAttribute("lang", "zh");
-      await expect(page.getByTestId("language-toggle-button")).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-
-      await page.goBack({ waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(/\/en\/?$/);
-      await waitForStablePage(page);
-      await expect(page.locator("html")).toHaveAttribute("lang", "en");
-      await expect(page.getByTestId("language-toggle-button")).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-      await expect(
-        page.locator(
-          '[data-testid="language-dropdown-content"][data-state="open"]',
-        ),
-      ).toHaveCount(0);
+      expect(new URL(page.url()).pathname).toBe("/");
     });
 
     test("should handle external links correctly", async ({ page }) => {
@@ -392,7 +243,13 @@ test.describe("Navigation System", () => {
       await expect(mobileNavSheet.getByRole("heading").first()).toBeVisible();
 
       // Verify navigation links in mobile menu (match actual config)
-      const expectedLinks = ["Home", "Products", "Blog", "Resources", "About"];
+      const expectedLinks = [
+        "Home",
+        "Products",
+        "OEM & Wholesale",
+        "Guides",
+        "About",
+      ];
       for (const linkText of expectedLinks) {
         const link = mobileNavSheet.getByRole("link", {
           exact: true,
@@ -412,11 +269,9 @@ test.describe("Navigation System", () => {
       await expect(
         mobileNavSheet.getByRole("link", {
           exact: true,
-          name: "Contact",
+          name: "Request a Quote",
         }),
       ).toBeVisible();
-      await expect(mobileNavSheet.getByText("Select Language")).toBeVisible();
-
       // Close menu by clicking close button
       const closeButton = mobileNavSheet.getByRole("button", {
         name: /close/i,
@@ -481,57 +336,7 @@ test.describe("Navigation System", () => {
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       };
 
-      await clickMobileMenuRoute("/en/about", /\/en\/about$/);
-    });
-
-    test("should reset mobile menu language expander after navigation", async ({
-      page,
-    }) => {
-      const mobileMenuButton = getHeaderMobileMenuButton(page);
-      await expect(mobileMenuButton).toBeVisible();
-      await mobileMenuButton.click();
-
-      const mobileNavSheet = page.getByRole("dialog", {
-        name: /mobile navigation/i,
-      });
-      await expect(mobileNavSheet).toBeVisible();
-
-      const languageRowButton = mobileNavSheet.getByTestId(
-        "mobile-language-switcher-label",
-      );
-      await expect(languageRowButton).toHaveAttribute("aria-expanded", "false");
-
-      await languageRowButton.click();
-      await expect(languageRowButton).toHaveAttribute("aria-expanded", "true");
-      await expect(
-        mobileNavSheet.getByTestId("mobile-language-option-label-zh"),
-      ).toBeVisible();
-
-      await mobileNavSheet
-        .getByRole("link", { exact: true, name: "About" })
-        .click();
-      await page.waitForURL(/\/en\/about$/, { waitUntil: "domcontentloaded" });
-      await waitForStablePage(page);
-
-      await expect(mobileMenuButton).toBeVisible();
-      await expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
-
-      await mobileMenuButton.click();
-      const reopenedMobileNavSheet = page.getByRole("dialog", {
-        name: /mobile navigation/i,
-      });
-      await expect(reopenedMobileNavSheet).toBeVisible();
-
-      const reopenedLanguageRowButton = reopenedMobileNavSheet.getByTestId(
-        "mobile-language-switcher-label",
-      );
-      await expect(reopenedLanguageRowButton).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-      await expect(
-        reopenedMobileNavSheet.getByTestId("mobile-language-option-label-zh"),
-      ).toHaveCount(0);
+      await clickMobileMenuRoute("/about", /\/about$/);
     });
 
     test("should keep mobile menu closed across browser back and forward", async ({
@@ -549,17 +354,17 @@ test.describe("Navigation System", () => {
       await mobileNavSheet
         .getByRole("link", { exact: true, name: "About" })
         .click();
-      await page.waitForURL(/\/en\/about$/, { waitUntil: "domcontentloaded" });
+      await page.waitForURL(/\/about$/, { waitUntil: "domcontentloaded" });
       await waitForStablePage(page);
       await expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
 
       await page.goBack({ waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(/\/en\/?$/);
+      await expect(page).toHaveURL(/\/$/);
       await waitForStablePage(page);
       await expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
 
       await page.goForward({ waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(/\/en\/about$/);
+      await expect(page).toHaveURL(/\/about$/);
       await waitForStablePage(page);
       await expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
     });
@@ -595,7 +400,7 @@ test.describe("Navigation System", () => {
     test("should handle non-existent routes with 404 page", async ({
       page,
     }) => {
-      await page.goto("/en/this-page-does-not-exist");
+      await page.goto("/this-page-does-not-exist");
 
       // Should show 404 page
       const notFoundHeading = page.getByRole("heading", {
@@ -604,14 +409,14 @@ test.describe("Navigation System", () => {
       await expect(notFoundHeading).toBeVisible();
 
       // Should have proper status code
-      const response = await page.goto("/en/this-page-does-not-exist");
+      const response = await page.goto("/this-page-does-not-exist");
       expect(response?.status()).toBe(404);
     });
 
     test("should preserve query parameters during navigation", async ({
       page,
     }) => {
-      await page.goto("/en?utm_source=test&utm_medium=e2e");
+      await page.goto("/?utm_source=test&utm_medium=e2e");
 
       if (await isHeaderInMobileMode(page)) {
         const mobileMenuButton = getHeaderMobileMenuButton(page);
@@ -629,24 +434,24 @@ test.describe("Navigation System", () => {
         const aboutLink = nav.getByRole("link", { name: "About" });
         await aboutLink.click();
       }
-      await page.waitForURL("**/en/about");
+      await page.waitForURL("**/about");
 
       // Query parameters might be preserved depending on implementation
       // This test documents the expected behavior
-      expect(page.url()).toContain("/en/about");
+      expect(page.url()).toContain("/about");
     });
 
     test("should not show navigation progress for same-page hash links", async ({
       page,
     }) => {
-      await page.goto("/en#main-content", { waitUntil: "domcontentloaded" });
+      await page.goto("/#main-content", { waitUntil: "domcontentloaded" });
       await waitForStablePage(page);
 
       await page
         .locator('a[href="#main-content"]')
         .first()
         .dispatchEvent("click");
-      await expect(page).toHaveURL(/\/en#main-content$/);
+      await expect(page).toHaveURL(/\/#main-content$/);
       await expect(page.getByTestId("navigation-progress-bar")).toHaveCount(0);
     });
 
@@ -682,22 +487,22 @@ test.describe("Navigation System", () => {
         const aboutLink = nav.getByRole("link", { name: "About" });
         await aboutLink.click();
       }
-      await page.waitForURL("**/en/about");
+      await page.waitForURL("**/about");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       // Navigate back to Home using direct navigation for reliability
       // This creates proper browser history for back/forward testing
-      await page.goto("/en", { waitUntil: "domcontentloaded" });
-      await page.waitForURL("**/en");
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      await page.waitForURL("**/");
 
       // Back to About
       await page.goBack();
-      await page.waitForURL("**/en/about");
+      await page.waitForURL("**/about");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
       // Forward to Home
       await page.goForward();
-      await page.waitForURL("**/en");
+      await page.waitForURL("**/");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
   });
@@ -867,7 +672,7 @@ test.describe("Navigation System", () => {
 
       const aboutLink = nav.getByRole("link", { name: "About" });
       await aboutLink.click({ noWaitAfter: true });
-      await page.waitForURL("**/en/about");
+      await page.waitForURL("**/about");
 
       const navigationTime = Date.now() - startTime;
 
