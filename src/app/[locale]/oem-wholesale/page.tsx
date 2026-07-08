@@ -10,6 +10,7 @@ import {
 const pageConfig = {
   pageType: "oemWholesale",
   slug: "oem-wholesale",
+  shell: "landing",
 } as const;
 
 interface OemWholesalePageProps {

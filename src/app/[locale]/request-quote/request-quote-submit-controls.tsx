@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { Link } from "@/i18n/routing";
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
 
 export interface RequestQuoteSubmitState {
@@ -55,7 +56,18 @@ function RequestQuoteStatusMessage({
   if (state.status === "success") {
     return (
       <RequestQuoteStatusCallout tone="success">
-        {copy.success} {copy.referenceLabel}: {state.referenceId}
+        <p>
+          {copy.success} {copy.referenceLabel}: {state.referenceId}
+        </p>
+        <p className="mt-2">
+          {copy.successReading}{" "}
+          <Link
+            className="font-medium underline underline-offset-4 hover:no-underline"
+            href="/guides/flood-barrier-materials-guide"
+          >
+            {copy.successReadingLinkLabel}
+          </Link>
+        </p>
       </RequestQuoteStatusCallout>
     );
   }

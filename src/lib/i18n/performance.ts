@@ -1,14 +1,8 @@
 import {
   ANIMATION_DURATION_SLOW,
-  COUNT_FIVE,
-  COUNT_TWO,
-  COUNT_TEN,
-  COUNT_THREE,
   HTTP_OK,
-  ONE,
   PERCENTAGE_FULL,
   PERCENTAGE_HALF,
-  ZERO,
 } from "@/constants";
 import {
   CACHE_LIMITS,
@@ -19,9 +13,9 @@ import {
 export class I18nPerformanceMonitor {
   private static metrics = {
     loadTime: [] as number[],
-    cacheHits: ZERO,
-    cacheMisses: ZERO,
-    errors: ZERO,
+    cacheHits: 0,
+    cacheMisses: 0,
+    errors: 0,
   };
 
   static recordLoadTime(time: number): void {
@@ -33,31 +27,31 @@ export class I18nPerformanceMonitor {
   }
 
   static recordCacheHit(): void {
-    this.metrics.cacheHits += ONE;
+    this.metrics.cacheHits += 1;
   }
 
   static recordCacheMiss(): void {
-    this.metrics.cacheMisses += ONE;
+    this.metrics.cacheMisses += 1;
   }
 
   static recordError(): void {
-    this.metrics.errors += ONE;
+    this.metrics.errors += 1;
   }
 
   static getMetrics() {
     const loadTimes = this.metrics.loadTime;
     const avgLoadTime =
-      loadTimes.length > ZERO
-        ? loadTimes.reduce((a, b) => a + b, ZERO) / loadTimes.length
-        : ZERO;
+      loadTimes.length > 0
+        ? loadTimes.reduce((a, b) => a + b, 0) / loadTimes.length
+        : 0;
 
     const totalRequests = this.metrics.cacheHits + this.metrics.cacheMisses;
     const cacheHitRate =
-      totalRequests > ZERO
+      totalRequests > 0
         ? ((this.metrics.cacheHits / totalRequests) *
             PERFORMANCE_THRESHOLDS.MAX_RESPONSE_TIME) /
-          COUNT_TEN
-        : ZERO;
+          10
+        : 0;
 
     return {
       averageLoadTime: avgLoadTime,
@@ -70,9 +64,9 @@ export class I18nPerformanceMonitor {
   static reset(): void {
     this.metrics = {
       loadTime: [],
-      cacheHits: ZERO,
-      cacheMisses: ZERO,
-      errors: ZERO,
+      cacheHits: 0,
+      cacheMisses: 0,
+      errors: 0,
     };
   }
 }
@@ -87,9 +81,9 @@ const PERFORMANCE_TARGETS = {
   },
 
   CACHE_HIT_RATE: {
-    excellent: PERFORMANCE_THRESHOLDS.EXCELLENT + COUNT_THREE, // > 98%
+    excellent: PERFORMANCE_THRESHOLDS.EXCELLENT + 3, // > 98%
     good: PERFORMANCE_THRESHOLDS.EXCELLENT, // > 95%
-    acceptable: PERFORMANCE_THRESHOLDS.GOOD + COUNT_TEN, // > 90%
+    acceptable: PERFORMANCE_THRESHOLDS.GOOD + 10, // > 90%
     poor: PERFORMANCE_THRESHOLDS.GOOD, // < 80%
   },
 };
@@ -118,7 +112,7 @@ export function evaluatePerformance(
   // 错误率惩罚：每1%错误率减少2分
   const errorPenalty = Math.min(errorRate * 2, 50); // 最大惩罚50分
 
-  let overallScore = (loadTimeScore + cacheScore) / COUNT_TWO;
+  let overallScore = (loadTimeScore + cacheScore) / 2;
   overallScore = Math.max(0, overallScore - errorPenalty); // 应用错误率惩罚
 
   return {
@@ -158,9 +152,9 @@ function getPerformanceScore(
 }
 
 function getGrade(score: number): string {
-  if (score >= PERFORMANCE_THRESHOLDS.EXCELLENT - COUNT_FIVE) return "A";
+  if (score >= PERFORMANCE_THRESHOLDS.EXCELLENT - 5) return "A";
   if (score >= PERFORMANCE_THRESHOLDS.GOOD) return "B";
-  if (score >= PERFORMANCE_THRESHOLDS.GOOD - COUNT_TEN) return "C";
+  if (score >= PERFORMANCE_THRESHOLDS.GOOD - 10) return "C";
   if (score >= PERFORMANCE_THRESHOLDS.FAIR) return "D";
   return "F";
 }

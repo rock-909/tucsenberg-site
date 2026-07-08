@@ -245,4 +245,45 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(airtableCreateMock).not.toHaveBeenCalled();
     expect(getResendCalls()).toHaveLength(0);
   });
+
+  it("airtable failure: still succeeds and delivers the owner email", async () => {
+    airtableCreateMock.mockRejectedValue(new Error("airtable down"));
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(VALID_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.data.referenceId).toMatch(/^PRO-/);
+    expect(getResendCalls()).toHaveLength(1);
+  });
+
+  it("both channels fail: rejects with an inquiry processing error", async () => {
+    airtableCreateMock.mockRejectedValue(new Error("airtable down"));
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(VALID_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
+    expect(getResendCalls()).toHaveLength(1);
+  });
 });

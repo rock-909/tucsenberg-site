@@ -375,7 +375,7 @@ new animation dependencies without separate proof.
 - **Don't** 文案里用 **em-dash 或 `--`**。用逗号、冒号、分号、句号、括号。
 - **Don't** Modal 当第一直觉。先尝试 inline 展开 / 渐进式 / 抽屉。Sheet 适合移动端导航；Dialog 留给真的"阻塞性决策"。
 - **Don't** 把业务文案（公司名、产品规格）写进 `src/components/ui/*` 低层原语。这些内容属于 config 或 MDX。
-- **Don't** 滥用 `--ease-spring`（带 1.56 overshoot 的弹簧曲线）。它存在是为了少数刻意的"出现"动画（`animate-scale-in`），不要用在 hover / 状态切换上——shared design law 明确禁止弹跳/橡皮筋。如果一定要用，单点用、不要叠加。
+- **Don't** 使用弹跳/橡皮筋缓动。原 `--ease-spring`（1.56 overshoot）已于 2026-07-07 重调为 `--ease-out-quint`（平滑指数缓出）——全站从未有组件使用该弹簧值，而 shared design law 明确禁止弹跳，休眠例外已移除。
 
 ## 7. Current Truth Sources
 

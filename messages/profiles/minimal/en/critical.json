@@ -8,7 +8,6 @@
     "siteDescription": "Reusable showcase website starter for product or service presentation."
   },
   "footer": {
-    "systemStatus": "All systems normal.",
     "sections": {
       "product": {
         "title": "Product",
@@ -73,15 +72,10 @@
         "est": "Product",
         "estLabel": "systems"
       },
-      "preview": {
-        "label": "Buyer evaluation map",
-        "title": "A clearer path from product fit to inquiry",
-        "description": "The first screens help buyers understand what is offered, where it fits, what supports delivery, and how to prepare the next request.",
-        "productSystem": "Product system",
-        "applicationFit": "Application fit",
-        "deliveryProof": "Delivery proof",
-        "inquiryPath": "Inquiry path",
-        "note": "Replace example content before launch"
+      "diagram": {
+        "panelLabel": "PRODUCT PRINCIPLE",
+        "ariaLabel": "Product working-principle line drawing placeholder",
+        "caption": "Replace with your product's working-principle drawing before launch."
       },
       "proofAriaLabel": "Homepage proof categories"
     },
@@ -546,6 +540,25 @@
     "internationalization": "Internationalization",
     "internationalizationDesc": "Multi-language support with next-intl",
     "testingReady": "Testing Ready",
-    "testingReadyDesc": "Comprehensive E2E testing setup"
+    "testingReadyDesc": "Comprehensive E2E testing setup",
+    "verify": {
+      "title": "Verify this supplier",
+      "description": "Replace with the three cheapest ways a buyer can verify your company before ordering.",
+      "items": {
+        "audits": {
+          "title": "Audits welcome",
+          "description": "Replace with your audit policy."
+        },
+        "samples": {
+          "title": "Samples before volume",
+          "description": "Replace with your sample policy."
+        },
+        "inspection": {
+          "title": "Third-party inspection",
+          "description": "Replace with your inspection policy."
+        }
+      },
+      "aboutLink": "[About this company →](/about)"
+    }
   }
 }

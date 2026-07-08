@@ -10,15 +10,7 @@
  */
 
 import { logger } from "@/lib/logger";
-import {
-  COUNT_FIVE,
-  COUNT_TWO,
-  COUNT_TEN,
-  COUNT_THREE,
-  MINUTE_MS,
-  ONE,
-  ZERO,
-} from "@/constants";
+import { MINUTE_MS } from "@/constants";
 import {
   type RateLimitStore,
   MemoryRateLimitStore,
@@ -30,7 +22,7 @@ import {
 // failureMode: "open" = allow on storage failure; "closed" = deny on storage failure
 export const RATE_LIMIT_PRESETS = {
   contact: {
-    maxRequests: COUNT_FIVE,
+    maxRequests: 5,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
@@ -40,34 +32,34 @@ export const RATE_LIMIT_PRESETS = {
     failureMode: "open" as const,
   },
   inquiry: {
-    maxRequests: COUNT_TEN,
+    maxRequests: 10,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
   subscribe: {
-    maxRequests: COUNT_THREE,
+    maxRequests: 3,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
   csp: { maxRequests: 100, windowMs: MINUTE_MS, failureMode: "open" as const },
   // Security-sensitive: deny on storage failure to prevent brute-force bypass
   turnstile: {
-    maxRequests: COUNT_TEN,
+    maxRequests: 10,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
   cacheInvalidate: {
-    maxRequests: COUNT_TEN,
+    maxRequests: 10,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
   cacheInvalidatePreAuth: {
-    maxRequests: COUNT_TEN * COUNT_TWO,
+    maxRequests: 10 * 2,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
   opsAccess: {
-    maxRequests: COUNT_FIVE,
+    maxRequests: 5,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
@@ -150,7 +142,7 @@ async function executeRateLimitCheck(
     const { count } = entry;
     const resetTime = entry.expiresAt;
     const now = Date.now();
-    const remaining = Math.max(ZERO, config.maxRequests - count);
+    const remaining = Math.max(0, config.maxRequests - count);
     const allowed = count <= config.maxRequests;
 
     return {
@@ -170,7 +162,7 @@ async function executeRateLimitCheck(
     logger.error("[Rate Limit] Storage backend error details", { error });
     return {
       allowed: !failClosed,
-      remaining: failClosed ? ZERO : config.maxRequests - ONE,
+      remaining: failClosed ? 0 : config.maxRequests - 1,
       resetTime: Date.now() + config.windowMs,
       retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
       degraded: true,
@@ -239,7 +231,7 @@ export async function getRateLimitStatus(
       };
     }
 
-    const remaining = Math.max(ZERO, config.maxRequests - entry.count);
+    const remaining = Math.max(0, config.maxRequests - entry.count);
     const allowed = entry.count < config.maxRequests;
 
     return {
@@ -258,7 +250,7 @@ export async function getRateLimitStatus(
     );
     return {
       allowed: !failClosed,
-      remaining: failClosed ? ZERO : config.maxRequests,
+      remaining: failClosed ? 0 : config.maxRequests,
       resetTime: Date.now() + config.windowMs,
       retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
       degraded: true,

@@ -113,11 +113,11 @@ describe("Homepage section cluster contract", () => {
     expect(within(finalTrustList).getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByText("primary").closest("a")).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.products,
+      HOMEPAGE_SECTION_LINKS.requestQuote,
     );
     expect(screen.getByText("secondary").closest("a")).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.requestQuote,
+      "/oem-wholesale",
     );
   });
 

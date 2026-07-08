@@ -1,4 +1,3 @@
-import { ZERO } from "../constants/core";
 import {
   getRuntimeEnvBoolean,
   getRuntimeEnvString,
@@ -30,7 +29,7 @@ export function generateCSP(): string {
   const isProduction = isRuntimeProduction();
   const configuredReportUri = getRuntimeEnvString("CSP_REPORT_URI")?.trim();
   const reportUri =
-    configuredReportUri && configuredReportUri.length > ZERO
+    configuredReportUri && configuredReportUri.length > 0
       ? configuredReportUri
       : "/api/csp-report";
 
@@ -114,7 +113,7 @@ export function generateCSP(): string {
         return [];
       }
 
-      if (Array.isArray(value) && value.length > ZERO) {
+      if (Array.isArray(value) && value.length > 0) {
         return [`${key} ${value.join(" ")}`];
       }
 

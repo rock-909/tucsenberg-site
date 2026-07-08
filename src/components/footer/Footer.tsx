@@ -1,26 +1,20 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import {
-  ExternalLinkIcon,
-  SocialIconMapper,
-} from "@/components/ui/social-icons";
-import {
-  FOOTER_COLUMNS,
-  FOOTER_STYLE_TOKENS,
-  type FooterColumnConfig,
-  type FooterStyleTokens,
-} from "@/config/footer-links";
+import { FOOTER_COLUMNS, type FooterColumnConfig } from "@/config/footer-links";
+import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 import { Link } from "@/i18n/routing";
 
+/**
+ * Hairline B2B footer: wide brand column + two link columns over a legal
+ * identity bar. Flat surface, no colour blocks — the only accent is the
+ * wordmark's "=" mark. Spec: docs/design/可迁移设计资产-剖面动画与页脚.md.
+ */
+
 export interface FooterProps {
-  /** 页脚列配置，默认使用 starter 四列数据 */
+  /** 页脚链接列配置，默认使用 single-site 的 Navigation / Support 两列 */
   columns?: FooterColumnConfig[];
-  /** 自定义样式 token，默认使用 FOOTER_STYLE_TOKENS */
-  tokens?: FooterStyleTokens;
-  /** 状态插槽（如版权、运行状态） */
-  statusSlot?: ReactNode;
-  /** 主题切换插槽（如 ThemeSwitcher） */
+  /** 主题切换插槽（如 ThemeSwitcher），渲染在法务条右侧 */
   themeToggleSlot?: ReactNode;
   /** 额外类名 */
   className?: string;
@@ -28,71 +22,54 @@ export interface FooterProps {
   dataTheme?: string;
 }
 
-interface FooterSectionProps {
-  section: FooterColumnConfig;
-  translate: (key: string | undefined, fallback: string) => string;
-  linkClassName: string;
-  linkStyle: CSSProperties;
-  titleStyle: CSSProperties;
-}
+type TranslateWithFallback = (
+  key: string | undefined,
+  fallback: string,
+  values?: Record<string, string | number>,
+) => string;
+
+const MICRO_LABEL_CLASS =
+  "font-mono text-[11px] font-semibold tracking-[0.1em] uppercase text-[var(--footer-heading)]";
+const LEGAL_TEXT_CLASS =
+  "font-mono text-[11.5px] leading-5 text-[var(--footer-text)]";
+const LINK_CLASS =
+  "block py-1.5 text-sm leading-6 text-[var(--footer-text)] transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 function FooterSection({
   section,
   translate,
-  linkClassName,
-  linkStyle,
-  titleStyle,
-}: FooterSectionProps) {
-  const isSocial = section.key === "social";
-
+}: {
+  section: FooterColumnConfig;
+  translate: TranslateWithFallback;
+}) {
   return (
-    <section aria-labelledby={`${section.key}-heading`} className="space-y-4">
-      <h2
-        id={`${section.key}-heading`}
-        className="text-[var(--footer-heading)]"
-        style={titleStyle}
-      >
+    <section aria-labelledby={`${section.key}-heading`}>
+      <h2 id={`${section.key}-heading`} className={MICRO_LABEL_CLASS}>
         {translate(section.translationKey, section.title)}
       </h2>
-      <ul className="space-y-2">
-        {section.links.map((link) => {
-          const content = (
-            <>
-              {isSocial ? (
-                <SocialIconMapper platform={link.key} size={16} />
-              ) : null}
-              <span>{translate(link.translationKey, link.label)}</span>
-              {link.showExternalIcon && !isSocial ? (
-                <ExternalLinkIcon size={12} />
-              ) : null}
-            </>
-          );
-
-          return (
-            <li key={link.key}>
-              {link.external ? (
-                <a
-                  className={linkClassName}
-                  href={link.href}
-                  rel="noreferrer noopener"
-                  style={linkStyle}
-                  target="_blank"
-                >
-                  {content}
-                </a>
-              ) : (
-                <Link
-                  className={linkClassName}
-                  href={link.href as "/privacy" | "/terms"}
-                  prefetch={false}
-                  style={linkStyle}
-                >
-                  {content}
-                </Link>
-              )}
-            </li>
-          );
-        })}
+      <ul className="mt-3">
+        {section.links.map((link) => (
+          <li key={link.key}>
+            {link.external ? (
+              <a
+                className={LINK_CLASS}
+                href={link.href}
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                {translate(link.translationKey, link.label)}
+              </a>
+            ) : (
+              <Link
+                className={LINK_CLASS}
+                href={link.href as "/privacy" | "/terms"}
+                prefetch={false}
+              >
+                {translate(link.translationKey, link.label)}
+              </Link>
+            )}
+          </li>
+        ))}
       </ul>
     </section>
   );
@@ -100,8 +77,6 @@ function FooterSection({
 
 export function Footer({
   columns = FOOTER_COLUMNS,
-  tokens = FOOTER_STYLE_TOKENS,
-  statusSlot,
   themeToggleSlot,
   className,
   dataTheme,
@@ -109,95 +84,88 @@ export function Footer({
   const t = useTranslations();
   const translateDynamicKey = t as unknown as (
     key: string,
-    values?: Record<string, string>,
+    values?: Record<string, string | number>,
   ) => string;
 
-  const translateWithFallback = (key: string | undefined, fallback: string) => {
+  const translateWithFallback: TranslateWithFallback = (
+    key,
+    fallback,
+    values,
+  ) => {
     if (!key) return fallback;
     try {
-      const translated = translateDynamicKey(key, { fallback });
+      const translated = translateDynamicKey(key, { fallback, ...values });
       return translated === key ? fallback : translated;
     } catch {
       return fallback;
     }
   };
 
-  const { layout, typography, colors, hover } = tokens;
-
-  const containerStyle: CSSProperties = {
-    maxWidth: `${layout.maxWidthPx}px`,
-    marginInline: layout.containerMarginInline,
-  };
-
-  const gridStyle: CSSProperties = {
-    gridTemplateColumns: `repeat(auto-fit, minmax(${layout.minColumnWidthPx}px, 1fr))`,
-    columnGap: `${layout.gapPx.column}px`,
-    rowGap: `${layout.gapPx.row}px`,
-  };
-
-  const titleStyle: CSSProperties = {
-    fontSize: `${typography.title.fontSizePx}px`,
-    lineHeight: `${typography.title.lineHeightPx}px`,
-    fontWeight: typography.title.fontWeight,
-    letterSpacing: typography.title.letterSpacing,
-    fontFamily: typography.fontFamily,
-  };
-
-  const linkStyle: CSSProperties = {
-    fontSize: `${typography.link.fontSizePx}px`,
-    lineHeight: `${typography.link.lineHeightPx}px`,
-    fontWeight: typography.link.fontWeight,
-    fontFamily: typography.fontFamily,
-  };
-
-  const linkClassName = cn(
-    "inline-flex min-h-11 items-center gap-2 px-0 py-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
-    hover.transition,
-    colors.light.text,
-    colors.dark.text,
-    colors.light.hoverText,
-    colors.dark.hoverText,
-    hover.light.underline || hover.dark.underline ? "hover:underline" : null,
+  const { name: siteName } = SINGLE_SITE_CONFIG;
+  const { name: companyName } = SINGLE_SITE_FACTS.company;
+  const { email } = SINGLE_SITE_CONFIG.contact;
+  // Pure facts, no translatable words — composed from config, not messages.
+  const legalLine = `${companyName} · ${email}`;
+  // "{copyright}" placeholder is interpolated from single-site config by the
+  // message loader at runtime; the fallback mirrors that composed value.
+  // Config snapshot year, not new Date(): Cache Components forbid current-time
+  // reads during prerender.
+  const snapshotYear =
+    SINGLE_SITE_FACTS.company.established +
+    SINGLE_SITE_FACTS.company.yearsInBusiness;
+  const copyright = translateWithFallback(
+    "footer.copyright",
+    `© ${snapshotYear} ${siteName}. All rights reserved.`,
   );
 
   return (
     <footer
       className={cn(
-        "border-t border-[var(--footer-divider)] bg-[var(--footer-bg)] text-[var(--footer-text)]",
+        "border-t border-[var(--footer-divider)] bg-[var(--footer-bg)]",
         className,
       )}
       data-theme={dataTheme}
     >
-      <div
-        className={cn(
-          // 内边距跟随 token，且与布局 px-4/6/8 对齐
-          "px-4 md:px-6 lg:px-8",
-          "py-12 md:py-14 lg:py-16",
-        )}
-        style={containerStyle}
-      >
-        <nav aria-label="Footer navigation" className="grid" style={gridStyle}>
-          {columns.map((section) => (
-            <FooterSection
-              key={section.key}
-              linkClassName={linkClassName}
-              linkStyle={linkStyle}
-              section={section}
-              titleStyle={titleStyle}
-              translate={translateWithFallback}
-            />
-          ))}
-        </nav>
-        {(statusSlot || themeToggleSlot) && (
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-[var(--footer-text)]">
-              {statusSlot}
-            </div>
-            <div className="flex items-center justify-start gap-4 sm:justify-end">
-              {themeToggleSlot}
-            </div>
+      <div className="mx-auto max-w-[1080px] px-6 py-12 md:py-14">
+        <div className="grid gap-x-8 gap-y-10 md:grid-cols-[1.4fr_2fr]">
+          <div>
+            <p className="text-lg font-semibold tracking-tight text-[var(--footer-heading)]">
+              <span className="sr-only">{siteName}</span>
+              <span aria-hidden="true">
+                TUCS
+                <span className="text-primary">=</span>
+                NBERG
+              </span>
+            </p>
+            <p className="mt-3 max-w-[34ch] text-[13px] leading-6 text-[var(--footer-text)]">
+              {translateWithFallback(
+                "footer.description",
+                SINGLE_SITE_CONFIG.description,
+              )}
+            </p>
           </div>
-        )}
+
+          <nav
+            aria-label="Footer navigation"
+            className="grid grid-cols-2 gap-x-8 gap-y-10"
+          >
+            {columns.map((section) => (
+              <FooterSection
+                key={section.key}
+                section={section}
+                translate={translateWithFallback}
+              />
+            ))}
+          </nav>
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-[var(--footer-divider)] pt-6">
+          <p className={LEGAL_TEXT_CLASS}>{legalLine}</p>
+          <div className="flex items-center gap-4">
+            <p className={LEGAL_TEXT_CLASS}>{copyright}</p>
+            {themeToggleSlot}
+          </div>
+        </div>
       </div>
     </footer>
   );

@@ -16,13 +16,14 @@ const LIGHT_BREATHING_EASE = [
   LIGHT_BREATHING_EASE_Y2,
 ] as const;
 
+// Transform-only on purpose: content must remain visible even when the
+// reveal never fires (no-JS, headless render, print). Motion governance
+// forbids gating content visibility on animation.
 export const lightBreathingItemVariants = {
   hidden: {
-    opacity: 0,
     y: 12,
   },
   visible: {
-    opacity: 1,
     y: 0,
   },
 } as const;

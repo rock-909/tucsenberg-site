@@ -29,14 +29,13 @@ export const TUCSENBERG_PRODUCT_META = {
     title:
       "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs | Tucsenberg",
     description:
-      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Full accessory kit. 12-hour quotes.",
-    updatedAt: "2026-07-05T00:00:00Z",
+      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. 12-hour quotes.",
+    updatedAt: "2026-07-06T00:00:00Z",
   },
   "frp-flood-barriers": {
-    title:
-      "FRP Composite Flood Barrier Planks — Corrosion-Free Alternative to Aluminum | Tucsenberg",
+    title: "FRP Composite Flood Barrier Planks — Corrosion-Free | Tucsenberg",
     description:
-      "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production with transparent tooling economics. Register interest for span and deflection data.",
-    updatedAt: "2026-07-05T00:00:00Z",
+      "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production — register interest.",
+    updatedAt: "2026-07-06T00:00:00Z",
   },
 } as const satisfies Record<string, TucsenbergProductMeta>;

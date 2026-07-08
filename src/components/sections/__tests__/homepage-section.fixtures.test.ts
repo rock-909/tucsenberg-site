@@ -54,26 +54,13 @@ describe("homepage Storybook fixtures", () => {
   it("keeps hero fixtures aligned with the B2B proof slice", () => {
     expect(homepageStoryHero.title).toContain("products");
     expect(homepageStoryHero.title).toContain("applications");
-    expect(homepageStoryHero.preview.items).toEqual([
-      "Product system",
-      "Application fit",
-      "Delivery proof",
-      "Inquiry path",
-    ]);
     expect(homepageStoryHero.proofItems).toHaveLength(4);
-    expect(homepageStoryHero.preview.items).not.toContain("Pages");
-    expect(homepageStoryHero.preview.items).not.toContain("AI workflow");
+    expect(homepageStoryHero.diagram.kind).toBe("boxwall");
+    expect(homepageStoryHero.diagram.caption.trim().length).toBeGreaterThan(0);
 
     expect(homepageStoryHeroZh.title).toContain("产品");
-    expect(homepageStoryHeroZh.preview.items).toEqual([
-      "产品体系",
-      "应用适配",
-      "交付证据",
-      "询盘路径",
-    ]);
     expect(homepageStoryHeroZh.proofItems).toHaveLength(4);
-    expect(homepageStoryHeroZh.preview.items).not.toContain("页面");
-    expect(homepageStoryHeroZh.preview.items).not.toContain("AI 工作流");
+    expect(homepageStoryHeroZh.diagram.kind).toBe("boxwall");
   });
 
   it("keeps the long-copy fixture in the same B2B proof domain", () => {
@@ -84,11 +71,12 @@ describe("homepage Storybook fixtures", () => {
     expect(homepageStoryHeroLongCopy.title).toContain("inquiry content");
   });
 
-  it("keeps hero/preview shape and CTA paths aligned across EN and ZH", () => {
-    expect(homepageStoryHero.preview.items).toHaveLength(4);
-    expect(homepageStoryHeroZh.preview.items).toHaveLength(4);
+  it("keeps hero shape and CTA paths aligned across EN and ZH", () => {
     expect(homepageStoryHero.proofItems).toHaveLength(
       homepageStoryHeroZh.proofItems.length,
+    );
+    expect(homepageStoryHero.diagram.kind).toBe(
+      homepageStoryHeroZh.diagram.kind,
     );
     expect(homepageStoryHero.primaryCta.href).toBe("/products");
     expect(homepageStoryHero.secondaryCta.href).toBe("/contact");

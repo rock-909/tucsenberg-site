@@ -252,7 +252,9 @@ describe("design token contract", () => {
     expect(footerComponentSource).toContain("text-[var(--footer-heading)]");
     expect(footerComponentSource).not.toContain("bg-background");
     expect(footerComponentSource).not.toContain("text-foreground");
-    expect(footerLayoutSource).toContain("text-[var(--footer-text)]");
+    // The legal identity bar is rendered inside Footer itself; layout must not
+    // reintroduce footer-styled text outside the footer token contract.
+    expect(footerLayoutSource).not.toContain("text-[var(--footer-");
   });
 
   it("keeps runtime font truth aligned across design docs and footer tokens", () => {

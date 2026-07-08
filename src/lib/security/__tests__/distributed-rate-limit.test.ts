@@ -8,14 +8,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  COUNT_FIVE,
-  COUNT_TEN,
-  COUNT_THREE,
-  COUNT_TWO,
-  MINUTE_MS,
-  ONE,
-} from "@/constants";
+import { MINUTE_MS } from "@/constants";
 
 import {
   checkDistributedRateLimit,
@@ -72,7 +65,7 @@ async function flushMicrotasks(turns = 6): Promise<void> {
 
 async function expectPromiseToSettleSoon<T>(
   promise: Promise<T>,
-  timeoutMs = ONE,
+  timeoutMs = 1,
 ): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
@@ -116,7 +109,7 @@ describe("distributed-rate-limit", () => {
 
       expect(result.allowed).toBe(true);
       // First request: count=1, remaining=maxRequests-1=5-1=4
-      expect(result.remaining).toBe(COUNT_FIVE - ONE);
+      expect(result.remaining).toBe(5 - 1);
     });
 
     it("should increment count on subsequent requests", async () => {
@@ -127,12 +120,12 @@ describe("distributed-rate-limit", () => {
 
       expect(result.allowed).toBe(true);
       // Second request: count=2, remaining=5-2=3
-      expect(result.remaining).toBe(COUNT_FIVE - ONE - ONE);
+      expect(result.remaining).toBe(5 - 1 - 1);
     });
 
     it("should reset count after window expires", async () => {
       // Make requests to reach limit
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit("test-user-3", "contact");
       }
 
@@ -141,7 +134,7 @@ describe("distributed-rate-limit", () => {
       expect(atLimit.allowed).toBe(false);
 
       // Advance time past the window
-      vi.advanceTimersByTime(MINUTE_MS + ONE);
+      vi.advanceTimersByTime(MINUTE_MS + 1);
 
       // Should be allowed again
       const afterReset = await checkDistributedRateLimit(
@@ -149,7 +142,7 @@ describe("distributed-rate-limit", () => {
         "contact",
       );
       expect(afterReset.allowed).toBe(true);
-      expect(afterReset.remaining).toBe(COUNT_FIVE - ONE);
+      expect(afterReset.remaining).toBe(5 - 1);
     });
 
     it("should warn about in-memory store on first use", async () => {
@@ -169,7 +162,7 @@ describe("distributed-rate-limit", () => {
       const warnCalls = mockLoggerWarn.mock.calls.filter((call) =>
         String(call[0]).includes("Using in-memory store"),
       );
-      expect(warnCalls).toHaveLength(ONE);
+      expect(warnCalls).toHaveLength(1);
     });
   });
 
@@ -197,7 +190,7 @@ describe("distributed-rate-limit", () => {
       );
 
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(maxRequests - ONE);
+      expect(result.remaining).toBe(maxRequests - 1);
     });
 
     it("falls back safely when the store throws", async () => {
@@ -209,7 +202,7 @@ describe("distributed-rate-limit", () => {
       const result = await checkDistributedRateLimit("fallback-user", "csp");
 
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - ONE);
+      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - 1);
       expect(mockLoggerError).toHaveBeenCalled();
     });
 
@@ -249,7 +242,7 @@ describe("distributed-rate-limit", () => {
 
       expect(result).toMatchObject({
         allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - ONE,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
         degraded: true,
       });
       expect(result.retryAfter).toBeNull();
@@ -281,14 +274,14 @@ describe("distributed-rate-limit", () => {
       const result = await checkDistributedRateLimit(identifier, "contact");
 
       // After 3 requests: remaining = 5 - 3 = 2
-      expect(result.remaining).toBe(COUNT_FIVE - COUNT_THREE);
+      expect(result.remaining).toBe(5 - 3);
     });
 
     it("should block requests at limit", async () => {
       const identifier = "at-limit-user";
 
       // Make exactly maxRequests (5) requests
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
 
@@ -303,7 +296,7 @@ describe("distributed-rate-limit", () => {
       const identifier = "retry-after-user";
 
       // Exhaust the limit
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
 
@@ -319,7 +312,7 @@ describe("distributed-rate-limit", () => {
       vi.setSystemTime(1_700_000_000_000);
       const identifier = "blocked-metadata-user";
 
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
 
@@ -338,7 +331,7 @@ describe("distributed-rate-limit", () => {
       const identifier = "window-reset-user";
 
       // Exhaust limit
-      for (let i = 0; i <= COUNT_FIVE; i++) {
+      for (let i = 0; i <= 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
 
@@ -347,7 +340,7 @@ describe("distributed-rate-limit", () => {
       expect(blocked.allowed).toBe(false);
 
       // Advance time past the window
-      vi.advanceTimersByTime(MINUTE_MS + ONE);
+      vi.advanceTimersByTime(MINUTE_MS + 1);
 
       // Should be allowed again
       const afterWindow = await checkDistributedRateLimit(
@@ -367,7 +360,7 @@ describe("distributed-rate-limit", () => {
 
     it("should track different identifiers separately", async () => {
       // Exhaust limit for user-a
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit("user-a", "contact");
       }
       const blockedUserA = await checkDistributedRateLimit("user-a", "contact");
@@ -383,7 +376,7 @@ describe("distributed-rate-limit", () => {
       const identifier = "multi-preset-user";
 
       // Exhaust contact limit (5 requests)
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
       const blockedContact = await checkDistributedRateLimit(
@@ -412,7 +405,7 @@ describe("distributed-rate-limit", () => {
       const result = await getRateLimitStatus("new-user", "contact");
 
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(COUNT_FIVE);
+      expect(result.remaining).toBe(5);
       expect(result.resetTime).toBe(1_700_000_000_000 + MINUTE_MS);
       expect(result.retryAfter).toBeNull();
     });
@@ -428,7 +421,7 @@ describe("distributed-rate-limit", () => {
       const status = await getRateLimitStatus(identifier, "contact");
 
       // After 2 requests: remaining = 5 - 2 = 3
-      expect(status.remaining).toBe(COUNT_FIVE - ONE - ONE);
+      expect(status.remaining).toBe(5 - 1 - 1);
       expect(status.allowed).toBe(true);
     });
 
@@ -439,12 +432,12 @@ describe("distributed-rate-limit", () => {
       await checkDistributedRateLimit(identifier, "contact");
 
       // Advance time past window
-      vi.advanceTimersByTime(MINUTE_MS + ONE);
+      vi.advanceTimersByTime(MINUTE_MS + 1);
 
       // Status should show full limit (entry expired)
       const status = await getRateLimitStatus(identifier, "contact");
 
-      expect(status.remaining).toBe(COUNT_FIVE);
+      expect(status.remaining).toBe(5);
       expect(status.allowed).toBe(true);
     });
 
@@ -454,8 +447,8 @@ describe("distributed-rate-limit", () => {
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
         increment: vi.fn(),
         get: vi.fn().mockResolvedValue({
-          count: COUNT_FIVE,
-          expiresAt: 1_700_000_000_000 - ONE,
+          count: 5,
+          expiresAt: 1_700_000_000_000 - 1,
         }),
         delete: vi.fn(),
       } as unknown as ReturnType<typeof mod.createRateLimitStore>);
@@ -464,7 +457,7 @@ describe("distributed-rate-limit", () => {
 
       expect(status).toEqual({
         allowed: true,
-        remaining: COUNT_FIVE,
+        remaining: 5,
         resetTime: 1_700_000_000_000 + MINUTE_MS,
         retryAfter: null,
       });
@@ -476,7 +469,7 @@ describe("distributed-rate-limit", () => {
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
         increment: vi.fn(),
         get: vi.fn().mockResolvedValue({
-          count: COUNT_FIVE,
+          count: 5,
           expiresAt: 1_700_000_000_000,
         }),
         delete: vi.fn(),
@@ -486,7 +479,7 @@ describe("distributed-rate-limit", () => {
 
       expect(status).toEqual({
         allowed: true,
-        remaining: COUNT_FIVE,
+        remaining: 5,
         resetTime: 1_700_000_000_000 + MINUTE_MS,
         retryAfter: null,
       });
@@ -508,7 +501,7 @@ describe("distributed-rate-limit", () => {
 
       // Should be count=2 (only the two checkDistributedRateLimit calls)
       // remaining = 5 - 2 = 3
-      expect(result.remaining).toBe(COUNT_FIVE - ONE - ONE);
+      expect(result.remaining).toBe(5 - 1 - 1);
     });
 
     it("should show blocked status when at limit", async () => {
@@ -516,7 +509,7 @@ describe("distributed-rate-limit", () => {
       vi.setSystemTime(1_700_000_000_000);
 
       // Exhaust limit
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         await checkDistributedRateLimit(identifier, "contact");
       }
 
@@ -640,21 +633,21 @@ describe("distributed-rate-limit", () => {
     it("should set X-RateLimit-Remaining header", () => {
       const result = {
         allowed: true,
-        remaining: COUNT_THREE,
+        remaining: 3,
         resetTime: Date.now() + MINUTE_MS,
         retryAfter: null,
       };
 
       const headers = createRateLimitHeaders(result);
 
-      expect(headers.get("X-RateLimit-Remaining")).toBe(String(COUNT_THREE));
+      expect(headers.get("X-RateLimit-Remaining")).toBe(String(3));
     });
 
     it("should set X-RateLimit-Reset header", () => {
       const resetTime = Date.now() + MINUTE_MS;
       const result = {
         allowed: true,
-        remaining: COUNT_FIVE,
+        remaining: 5,
         resetTime,
         retryAfter: null,
       };
@@ -681,7 +674,7 @@ describe("distributed-rate-limit", () => {
     it("should not set Retry-After header when null", () => {
       const result = {
         allowed: true,
-        remaining: COUNT_FIVE,
+        remaining: 5,
         resetTime: Date.now() + MINUTE_MS,
         retryAfter: null,
       };
@@ -725,19 +718,19 @@ describe("distributed-rate-limit", () => {
     });
 
     it("should have expected values for contact preset", () => {
-      expect(RATE_LIMIT_PRESETS.contact.maxRequests).toBe(COUNT_FIVE);
+      expect(RATE_LIMIT_PRESETS.contact.maxRequests).toBe(5);
       expect(RATE_LIMIT_PRESETS.contact.windowMs).toBe(MINUTE_MS);
       expect(RATE_LIMIT_PRESETS.contact.failureMode).toBe("closed");
     });
 
     it("should have expected values for inquiry preset", () => {
-      expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(COUNT_TEN);
+      expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(10);
       expect(RATE_LIMIT_PRESETS.inquiry.windowMs).toBe(MINUTE_MS);
       expect(RATE_LIMIT_PRESETS.inquiry.failureMode).toBe("closed");
     });
 
     it("should have expected values for subscribe preset", () => {
-      expect(RATE_LIMIT_PRESETS.subscribe.maxRequests).toBe(COUNT_THREE);
+      expect(RATE_LIMIT_PRESETS.subscribe.maxRequests).toBe(3);
       expect(RATE_LIMIT_PRESETS.subscribe.windowMs).toBe(MINUTE_MS);
       expect(RATE_LIMIT_PRESETS.subscribe.failureMode).toBe("closed");
     });
@@ -749,7 +742,7 @@ describe("distributed-rate-limit", () => {
     });
 
     it("should have expected values for opsAccess preset", () => {
-      expect(RATE_LIMIT_PRESETS.opsAccess.maxRequests).toBe(COUNT_FIVE);
+      expect(RATE_LIMIT_PRESETS.opsAccess.maxRequests).toBe(5);
       expect(RATE_LIMIT_PRESETS.opsAccess.windowMs).toBe(MINUTE_MS);
       expect(RATE_LIMIT_PRESETS.opsAccess.failureMode).toBe("closed");
     });
@@ -798,14 +791,14 @@ describe("distributed-rate-limit", () => {
       await checkDistributedRateLimit("cleanup-user-2", "contact");
 
       // Advance time past the window to expire entries
-      vi.advanceTimersByTime(MINUTE_MS + ONE);
+      vi.advanceTimersByTime(MINUTE_MS + 1);
 
       // Cleanup should not throw
       expect(() => cleanupRateLimitStore()).not.toThrow();
 
       // After cleanup, new requests should get full limit
       const result = await getRateLimitStatus("cleanup-user-1", "contact");
-      expect(result.remaining).toBe(COUNT_FIVE);
+      expect(result.remaining).toBe(5);
     });
 
     it("should not affect non-expired entries", async () => {
@@ -822,7 +815,7 @@ describe("distributed-rate-limit", () => {
       // Entry should still exist with same count
       const status = await getRateLimitStatus("active-user", "contact");
       // count=2, remaining = 5-2 = 3
-      expect(status.remaining).toBe(COUNT_FIVE - ONE - ONE);
+      expect(status.remaining).toBe(5 - 1 - 1);
     });
   });
 
@@ -840,7 +833,7 @@ describe("distributed-rate-limit", () => {
 
       // New requests should get full limit (store recreated)
       const result = await getRateLimitStatus("reset-user-1", "contact");
-      expect(result.remaining).toBe(COUNT_FIVE);
+      expect(result.remaining).toBe(5);
     });
 
     it("should cause warning to be logged again after reset", async () => {
@@ -859,7 +852,7 @@ describe("distributed-rate-limit", () => {
         String(call[0]).includes("Using in-memory store"),
       ).length;
 
-      expect(afterResetWarnCount).toBe(initialWarnCount + ONE);
+      expect(afterResetWarnCount).toBe(initialWarnCount + 1);
     });
   });
 
@@ -871,7 +864,7 @@ describe("distributed-rate-limit", () => {
       const identifier = "boundary-user";
 
       // Make exactly maxRequests requests (5 for contact)
-      for (let i = 0; i < COUNT_FIVE; i++) {
+      for (let i = 0; i < 5; i++) {
         const result = await checkDistributedRateLimit(identifier, "contact");
         expect(result.allowed).toBe(true);
       }
@@ -886,7 +879,7 @@ describe("distributed-rate-limit", () => {
       const identifier = "negative-remaining-user";
 
       // Make more requests than the limit
-      for (let i = 0; i < COUNT_TEN; i++) {
+      for (let i = 0; i < 10; i++) {
         const result = await checkDistributedRateLimit(identifier, "contact");
         // Remaining should never be negative
         expect(result.remaining).toBeGreaterThanOrEqual(0);
@@ -915,7 +908,7 @@ describe("distributed-rate-limit", () => {
 
       expect(result.resetTime).toBeGreaterThanOrEqual(beforeRequest);
       expect(result.resetTime).toBeLessThanOrEqual(
-        beforeRequest + MINUTE_MS + ONE,
+        beforeRequest + MINUTE_MS + 1,
       );
     });
   });
@@ -935,7 +928,7 @@ describe("distributed-rate-limit", () => {
         .mockImplementationOnce(() => first.promise)
         .mockImplementationOnce(() => second.promise)
         .mockResolvedValueOnce({
-          count: COUNT_THREE,
+          count: 3,
           expiresAt,
         });
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
@@ -952,12 +945,12 @@ describe("distributed-rate-limit", () => {
       expect(increment).toHaveBeenCalledTimes(1);
       expect(getRateLimitQueueSizeForTesting()).toBe(1);
 
-      first.resolve({ count: ONE, expiresAt });
+      first.resolve({ count: 1, expiresAt });
       await expect(
         expectPromiseToSettleSoon(firstRequest),
       ).resolves.toMatchObject({
         allowed: true,
-        remaining: COUNT_FIVE - ONE,
+        remaining: 5 - 1,
         retryAfter: null,
       });
       await flushMicrotasks();
@@ -970,20 +963,20 @@ describe("distributed-rate-limit", () => {
 
       expect(increment).toHaveBeenCalledTimes(2);
 
-      second.resolve({ count: COUNT_TWO, expiresAt });
+      second.resolve({ count: 2, expiresAt });
 
       await expect(
         expectPromiseToSettleSoon(secondRequest),
       ).resolves.toMatchObject({
         allowed: true,
-        remaining: COUNT_FIVE - COUNT_TWO,
+        remaining: 5 - 2,
         retryAfter: null,
       });
       await expect(
         expectPromiseToSettleSoon(thirdRequest),
       ).resolves.toMatchObject({
         allowed: true,
-        remaining: COUNT_FIVE - COUNT_THREE,
+        remaining: 5 - 3,
         retryAfter: null,
       });
 
@@ -1000,7 +993,7 @@ describe("distributed-rate-limit", () => {
         .fn()
         .mockImplementationOnce(() => first.promise)
         .mockResolvedValue({
-          count: ONE,
+          count: 1,
           expiresAt,
         });
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
@@ -1040,7 +1033,7 @@ describe("distributed-rate-limit", () => {
         expectPromiseToSettleSoon(secondRequest),
       ).resolves.toMatchObject({
         allowed: true,
-        remaining: COUNT_FIVE - ONE,
+        remaining: 5 - 1,
         retryAfter: null,
       });
       expect(getRateLimitQueueSizeForTesting()).toBe(0);
@@ -1077,7 +1070,7 @@ describe("distributed-rate-limit", () => {
           // Async delay opens the race window: all concurrent reads
           // see the same snapshot before any write lands
           await new Promise<void>((resolve) => {
-            setTimeout(resolve, ONE);
+            setTimeout(resolve, 1);
           });
           return new Response(JSON.stringify({ result: snapshot }), {
             status: 200,
@@ -1095,7 +1088,7 @@ describe("distributed-rate-limit", () => {
       });
 
       const identifier = "concurrent-redis-user";
-      const concurrentRequests = COUNT_FIVE + ONE;
+      const concurrentRequests = 5 + 1;
 
       // Fire 10 concurrent requests against a window of 5 (contact preset)
       const results = await Promise.all(
@@ -1111,7 +1104,7 @@ describe("distributed-rate-limit", () => {
       // With atomic INCR, at most 5 should be allowed.
       // With non-atomic GET+SET, ALL 10 see count=null (no entry yet),
       // each creates count=1, and all 10 are allowed.
-      expect(allowedCount).toBeLessThanOrEqual(COUNT_FIVE);
+      expect(allowedCount).toBeLessThanOrEqual(5);
     });
   });
 
@@ -1233,7 +1226,7 @@ describe("distributed-rate-limit", () => {
 
       expect(result).toMatchObject({
         allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - ONE,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
         degraded: true,
       });
       expect(result.retryAfter).toBeNull();
@@ -1253,7 +1246,7 @@ describe("distributed-rate-limit", () => {
               // intentionally never settles
             }),
         )
-        .mockResolvedValueOnce({ count: ONE, expiresAt });
+        .mockResolvedValueOnce({ count: 1, expiresAt });
       vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
         increment,
         get: vi.fn(),
@@ -1287,10 +1280,10 @@ describe("distributed-rate-limit", () => {
         expectPromiseToSettleSoon(secondRequest),
       ).resolves.toMatchObject({
         allowed: true,
-        remaining: RATE_LIMIT_PRESETS.contact.maxRequests - ONE,
+        remaining: RATE_LIMIT_PRESETS.contact.maxRequests - 1,
         retryAfter: null,
       });
-      expect(increment).toHaveBeenCalledTimes(COUNT_TWO);
+      expect(increment).toHaveBeenCalledTimes(2);
       expect(getRateLimitQueueSizeForTesting()).toBe(0);
     });
   });

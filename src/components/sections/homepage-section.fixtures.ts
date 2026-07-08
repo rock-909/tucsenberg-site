@@ -35,17 +35,11 @@ export const homepageStoryHero = {
     { value: "Delivery", label: "proof" },
     { value: "Inquiry", label: "ready" },
   ],
-  preview: {
-    label: "Buyer evaluation map",
-    title: "A clearer path from product fit to inquiry",
-    description:
-      "The first screens help buyers understand what is offered, where it fits, what supports delivery, and how to prepare the next request.",
-    items: [
-      "Product system",
-      "Application fit",
-      "Delivery proof",
-      "Inquiry path",
-    ],
+  diagram: {
+    kind: "boxwall",
+    panelLabel: "PRODUCT PRINCIPLE",
+    ariaLabel: "Product working-principle line drawing placeholder",
+    caption: "Replace with your product's working-principle drawing.",
   },
 } satisfies HomepageStoryHeroContent;
 
@@ -64,12 +58,11 @@ export const homepageStoryHeroZh = {
     { value: "交付", label: "证据" },
     { value: "询盘", label: "就绪" },
   ],
-  preview: {
-    label: "买方评估路径",
-    title: "从产品适配到询盘的清晰路径",
-    description:
-      "首页前几屏帮助买方理解提供什么、适合哪些场景、有什么交付依据，以及如何准备下一步需求。",
-    items: ["产品体系", "应用适配", "交付证据", "询盘路径"],
+  diagram: {
+    kind: "boxwall",
+    panelLabel: "产品原理",
+    ariaLabel: "产品工作原理线描占位图",
+    caption: "上线前替换为你产品的工作原理图。",
   },
 } satisfies HomepageStoryHeroContent;
 

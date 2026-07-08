@@ -2,13 +2,6 @@ import enCriticalMessages from "../../messages/en/critical.json";
 import enDeferredMessages from "../../messages/en/deferred.json";
 import b2bLeadDeferredMessages from "../../messages/profiles/b2b-lead/en/deferred.json";
 import catalogDeferredMessages from "../../messages/profiles/catalog/en/deferred.json";
-import {
-  REQUEST_QUOTE_MATERIAL_OPTIONS,
-  REQUEST_QUOTE_MOUNTING_SURFACE_OPTIONS,
-  REQUEST_QUOTE_PROTECTION_OPTIONS,
-  REQUEST_QUOTE_QUANTITY_OPTIONS,
-  REQUEST_QUOTE_TIMELINE_OPTIONS,
-} from "@/config/request-quote-form-config";
 import { describe, expect, it } from "vitest";
 
 type JsonObject = Record<string, unknown>;
@@ -62,17 +55,14 @@ const REQUEST_QUOTE_RUNTIME_KEYS = [
   "requestQuote.form.genericError",
   "requestQuote.form.networkError",
   "requestQuote.form.turnstilePending",
-  "requestQuote.form.fields.material",
-  "requestQuote.form.requirements.productNamePrefix",
+  "requestQuote.form.messageHint",
+  "requestQuote.form.fields.fullName",
+  "requestQuote.form.fields.email",
+  "requestQuote.form.fields.message",
+  "requestQuote.form.payload.source",
+  "requestQuote.form.payload.productName",
+  "requestQuote.form.payload.quantityFallback",
 ] as const;
-
-const REQUEST_QUOTE_OPTION_LABEL_KEYS = [
-  ...REQUEST_QUOTE_PROTECTION_OPTIONS,
-  ...REQUEST_QUOTE_MOUNTING_SURFACE_OPTIONS,
-  ...REQUEST_QUOTE_MATERIAL_OPTIONS,
-  ...REQUEST_QUOTE_QUANTITY_OPTIONS,
-  ...REQUEST_QUOTE_TIMELINE_OPTIONS,
-].map((option) => `requestQuote.form.${option.labelKey}`);
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -145,10 +135,7 @@ describe("real i18n runtime message contract", () => {
   it.each(runtimeMessageCases)(
     "keeps RFQ page and option keys in the real %s split message bundle",
     (_locale, messages) => {
-      for (const keyPath of [
-        ...REQUEST_QUOTE_RUNTIME_KEYS,
-        ...REQUEST_QUOTE_OPTION_LABEL_KEYS,
-      ]) {
+      for (const keyPath of REQUEST_QUOTE_RUNTIME_KEYS) {
         const value = getMessageValue(messages, keyPath);
 
         expect(typeof value, keyPath).toBe("string");

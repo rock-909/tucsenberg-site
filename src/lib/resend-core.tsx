@@ -18,7 +18,6 @@ import {
 } from "@/lib/email/runtime-email-content";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
-import { ZERO } from "@/constants";
 
 /**
  * Resend邮件服务配置
@@ -251,10 +250,10 @@ export class ResendService {
     complained: number;
   } {
     return {
-      sent: ZERO,
-      delivered: ZERO,
-      bounced: ZERO,
-      complained: ZERO,
+      sent: 0,
+      delivered: 0,
+      bounced: 0,
+      complained: 0,
     };
   }
 

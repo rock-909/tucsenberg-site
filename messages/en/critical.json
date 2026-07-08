@@ -253,7 +253,6 @@
     "siteDescription": "Factory-direct flood barrier supply from China."
   },
   "footer": {
-    "systemStatus": "Tucsenberg · Jiangsu Tucson Borg Technology Co., Ltd. · sales@tucsenberg.com",
     "sections": {
       "navigation": {
         "title": "Navigation",
@@ -294,14 +293,10 @@
         "production": "OEM",
         "productionLabel": "private label ready"
       },
-      "preview": {
-        "label": "Product line map",
-        "title": "ABS, aluminum, flood bags, tube dams and FRP",
-        "description": "Start with the opening, the ground and the order size. The same RFQ can route to standard stock, custom-cut openings, private label packaging or mixed-line consolidation.",
-        "productSystem": "ABS boxwall",
-        "applicationFit": "Aluminum gates",
-        "deliveryProof": "Flood bags",
-        "inquiryPath": "Tube dams & FRP"
+      "diagram": {
+        "panelLabel": "TB-BW BOXWALL · WORKING PRINCIPLE",
+        "ariaLabel": "Freestanding L-profile flood barrier side view — rising floodwater presses the base down and seals it against the ground",
+        "caption": "The principle behind the range: the flood's own weight makes the seal tighter — no drilling, no fixing to the building. The five product lines follow below."
       },
       "proofAriaLabel": "Tucsenberg quote, warranty and factory-pool facts"
     },
@@ -311,23 +306,29 @@
       "items": {
         "structure": {
           "title": "ABS Interlocking Boxwall — TB-BW series",
-          "description": "Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own."
+          "description": "Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own.",
+          "linkLabel": "Explore ABS barriers"
         },
         "content": {
           "title": "Aluminum Flood Gates — TB-AG series",
-          "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule."
+          "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule.",
+          "linkLabel": "Explore flood gates"
         },
         "deployment": {
           "title": "Absorbent Flood Bags — TB-FB series",
-          "description": "Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order in our range."
+          "description": "Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order in our range.",
+          "linkLabel": "Explore flood bags"
         },
         "inquiry": {
           "title": "Water & Air-Filled Tube Dams — TB-TD series",
-          "description": "Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock."
+          "description": "Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock.",
+          "linkLabel": "Explore tube dams"
         },
         "multilingual": {
           "title": "FRP Composite Planks — TB-CP series",
-          "description": "Pultruded composite planks: corrosion-free, non-conductive, built for coastal and industrial sites. In development with our pultrusion partners."
+          "description": "Pultruded composite planks: corrosion-free, non-conductive, built for coastal and industrial sites. In development with our pultrusion partners.",
+          "linkLabel": "Register interest",
+          "badge": "New — register interest"
         }
       }
     },
@@ -372,16 +373,112 @@
         "deploy": {
           "title": "Production & QC",
           "description": "One QC standard across the factory pool; inspection report before shipment."
+        },
+        "ship": {
+          "title": "Ship carton to container",
+          "description": "Mixed-line consolidation in one container: gates + boxwall + bags + spares."
         }
       }
     },
     "finalCta": {
       "title": "Protecting openings or building a product line — either way, start with the numbers.",
       "description": "Send your requirement; standard items quoted in 12 hours.",
-      "primary": "View product lines",
-      "secondary": "Request a Quote",
+      "primary": "Request a Quote",
+      "secondary": "Wholesale & OEM",
       "trustAriaLabel": "Homepage trust facts",
       "trust": "Standard items quoted in 12 hours · 3-year warranty on all standard lines · Factory pool supplies established brands"
+    },
+    "howToChoose": {
+      "title": "How to choose",
+      "description": "Not sure which material fits? Three questions settle most cases:",
+      "columns": {
+        "situation": "Your situation",
+        "startWith": "Start with"
+      },
+      "rows": {
+        "openings": {
+          "situation": "Garage doors, French doors, shopfronts — defined openings, repeat use",
+          "startWith": "Aluminum flood gates (TB-AG)"
+        },
+        "perimeters": {
+          "situation": "Perimeters, driveways, no fixing allowed",
+          "startWith": "ABS boxwall (TB-BW)"
+        },
+        "emergency": {
+          "situation": "Emergency stock, leak response, low budget per point",
+          "startWith": "Flood bags (TB-FB)"
+        },
+        "longRuns": {
+          "situation": "Long runs on rough ground, fast response teams",
+          "startWith": "Tube dams (TB-TD)"
+        },
+        "coastal": {
+          "situation": "Coastal/corrosive sites, long-life spec",
+          "startWith": "FRP planks (TB-CP)"
+        }
+      },
+      "honestNote": "One honest note before you buy anything: a barrier seals an opening — it is not a drainage plan. If water rises through the slab, the soil or the drains, you need drainage, pumps or site work first, and we would rather tell you that now than after you've paid for freight.",
+      "guideLink": "Full comparison: [ABS vs Aluminum vs FRP vs Water-Filled: How to Choose](/guides/flood-barrier-materials-guide)"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": {
+        "minimumOrder": {
+          "question": "What is your minimum order?",
+          "answer": "It depends on the line: boxwall from one carton, flood bags from 300 bags (six cartons), tube dams from a single section; gates are quoted per opening schedule. We don't ship single retail units — freight economics punish everyone. Smaller need? Ask about joining our next consolidated shipment."
+        },
+        "quoteSpeed": {
+          "question": "How fast will I get a price?",
+          "answer": "Standard items: within 12 hours. Custom configurations (cut-to-size, moulded branding): within 48 hours."
+        },
+        "paymentTerms": {
+          "question": "What are your payment terms?",
+          "answer": "30% deposit, 70% before shipment, by T/T. For custom orders, terms are agreed per order and confirmed with your quotation."
+        },
+        "samples": {
+          "question": "Can I get samples?",
+          "answer": "Yes — paid samples plus freight, and the sample fee is credited against your first order."
+        },
+        "oem": {
+          "question": "Do you offer OEM / private label?",
+          "answer": "On every line: printed labels, custom packaging, moulded-in logos (mould contribution applies), your manuals and datasheets."
+        },
+        "warranty": {
+          "question": "What warranty do you give?",
+          "answer": "3 years on materials and workmanship for standard lines. Custom-cut and custom-branded items are final sale. [Full terms](/warranty)."
+        },
+        "leadTime": {
+          "question": "What's the lead time?",
+          "answer": "In-stock configurations ship in 2–7 days. Production orders are confirmed at quotation."
+        },
+        "madeInChina": {
+          "question": "You're made in China — how do I know the quality is real?",
+          "answer": "The stereotype exists for a reason: this market is full of unbranded bargain kits with no stated wall thickness, no test standard and no spares. But the reverse is also true — established international flood brands have their products made in China, and our factory pool has supplied that tier for years. Geography doesn't decide quality; spec discipline does. Ours is checkable: published numbers on every product page, your spec written into the quotation and invoice so it's enforceable, third-party inspection welcome (SGS, TÜV, QIMA), and a paid sample — credited against your first order — before any volume. Judge us by the sample and the spec sheet, not the country line on the box."
+        },
+        "audit": {
+          "question": "Can we audit the factories?",
+          "answer": "Yes — factory audits are welcome, in person or by video. References available on request."
+        }
+      }
+    },
+    "verify": {
+      "title": "Check us before you trust us",
+      "description": "You're buying from a Chinese supplier you found online — verify, don't hope. Three ways to check us that cost you little:",
+      "items": {
+        "audits": {
+          "title": "Factory audits welcome",
+          "description": "In person or live video walk-through of any factory in the pool — unscripted."
+        },
+        "samples": {
+          "title": "Paid samples before volume",
+          "description": "Judge the product, not the website. Sample fees are credited against your first order."
+        },
+        "inspection": {
+          "title": "Third-party inspection accepted",
+          "description": "Appoint SGS, TÜV, QIMA or your own agent — we schedule around them, not against them."
+        }
+      },
+      "aboutLink": "[Who you're actually buying from →](/about)"
     }
   },
   "catalog": {
@@ -721,5 +818,12 @@
         }
       }
     }
+  },
+  "oemLanding": {
+    "primaryCta": "Request a trade quote",
+    "secondaryCta": "See the five product lines",
+    "diagramLabel": "FACTORY POOL · ONE SPEC SYSTEM",
+    "diagramAriaLabel": "Factory pool process — four specialised factories produce against one spec sheet and QC standard, shipping as one mixed container",
+    "diagramCaption": "Four specialised factories, one spec sheet, one QC standard — consolidated into one mixed container. Schematic."
   }
 }

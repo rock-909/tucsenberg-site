@@ -22,7 +22,6 @@ const {
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({ namespace }: { namespace: string }) => {
     const translations: Record<string, string> = {
-      systemStatus: "System online",
       contactSales: "Contact sales",
       skipToContent:
         namespace === "accessibility"
@@ -99,8 +98,8 @@ vi.mock("@/components/cookie/lazy-cookie-consent-island", () => ({
 }));
 
 vi.mock("@/components/footer/Footer", () => ({
-  Footer: ({ statusSlot }: { statusSlot?: React.ReactNode }) => (
-    <footer data-testid="footer">{statusSlot}</footer>
+  Footer: ({ themeToggleSlot }: { themeToggleSlot?: React.ReactNode }) => (
+    <footer data-testid="footer">{themeToggleSlot}</footer>
   ),
 }));
 

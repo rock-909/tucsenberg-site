@@ -8,29 +8,20 @@ type RequestQuoteTranslate = (key: string) => string;
 export interface RequestQuoteFormCopy {
   readonly title: string;
   readonly ariaLabel: string;
-  readonly selectOne: string;
   readonly submit: string;
   readonly submitting: string;
   readonly success: string;
+  readonly successReading: string;
+  readonly successReadingLinkLabel: string;
   readonly genericError: string;
   readonly networkError: string;
   readonly turnstilePending: string;
   readonly referenceLabel: string;
-  readonly tradeEnquiry: string;
-  readonly assetHint: string;
+  readonly messageHint: string;
   readonly fields: {
-    readonly protection: string;
-    readonly dimensions: string;
-    readonly mounting: string;
-    readonly material: string;
-    readonly quantity: string;
-    readonly delivery: string;
-    readonly timeline: string;
-    readonly assetLinks: string;
     readonly fullName: string;
     readonly email: string;
-    readonly company: string;
-    readonly whatsApp: string;
+    readonly message: string;
   };
   readonly payload: RequestQuotePayloadCopy;
 }
@@ -41,29 +32,20 @@ export function createRequestQuoteFormCopy(
   return {
     title: t("title"),
     ariaLabel: t("ariaLabel"),
-    selectOne: t("selectOne"),
     submit: t("submit"),
     submitting: t("submitting"),
     success: t("success"),
+    successReading: t("successReading"),
+    successReadingLinkLabel: t("successReadingLinkLabel"),
     genericError: t("genericError"),
     networkError: t("networkError"),
     turnstilePending: t("turnstilePending"),
     referenceLabel: t("referenceLabel"),
-    tradeEnquiry: t("tradeEnquiry"),
-    assetHint: t("assetHint"),
+    messageHint: t("messageHint"),
     fields: {
-      protection: t("fields.protection"),
-      dimensions: t("fields.dimensions"),
-      mounting: t("fields.mounting"),
-      material: t("fields.material"),
-      quantity: t("fields.quantity"),
-      delivery: t("fields.delivery"),
-      timeline: t("fields.timeline"),
-      assetLinks: t("fields.assetLinks"),
       fullName: t("fields.fullName"),
       email: t("fields.email"),
-      company: t("fields.company"),
-      whatsApp: t("fields.whatsApp"),
+      message: t("fields.message"),
     },
     payload: createRequestQuotePayloadCopy(t),
   };

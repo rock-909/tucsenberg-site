@@ -1,6 +1,3 @@
-export const ZERO = 0;
-export const ONE = 1;
-
 export const HTTP_OK = 200;
 export const HTTP_BAD_REQUEST = 400;
 export const HTTP_UNAUTHORIZED = 401;

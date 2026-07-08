@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/config/paths";
-import { ONE } from "@/constants";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 
 const INDEXABLE_ROBOTS = {
@@ -9,9 +8,9 @@ const INDEXABLE_ROBOTS = {
   googleBot: {
     index: true,
     follow: true,
-    "max-video-preview": -ONE,
+    "max-video-preview": -1,
     "max-image-preview": "large",
-    "max-snippet": -ONE,
+    "max-snippet": -1,
   },
 } as const satisfies Metadata["robots"];
 

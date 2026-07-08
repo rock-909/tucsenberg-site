@@ -14,7 +14,7 @@ import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { PageTransition } from "@/components/motion/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
-import { FOOTER_COLUMNS, FOOTER_STYLE_TOKENS } from "@/config/footer-links";
+import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 import { loadClientMessages } from "@/lib/i18n/client-messages";
 import { mainNavigation } from "@/lib/navigation";
@@ -41,24 +41,18 @@ async function AsyncLocaleLayoutContent({
   // Do not read runtime headers here; Cache Components need this layout to stay
   // prerenderable. Static CSP is emitted from next.config.ts.
 
-  const [tFooter, tNavigation, tAccessibility, clientMessages] =
-    await Promise.all([
-      getTranslations({
-        locale,
-        namespace: "footer",
-      }),
-      getTranslations({
-        locale,
-        namespace: "navigation",
-      }),
-      getTranslations({
-        locale,
-        namespace: "accessibility",
-      }),
-      loadClientMessages(locale),
-    ]);
+  const [tNavigation, tAccessibility, clientMessages] = await Promise.all([
+    getTranslations({
+      locale,
+      namespace: "navigation",
+    }),
+    getTranslations({
+      locale,
+      namespace: "accessibility",
+    }),
+    loadClientMessages(locale),
+  ]);
 
-  const footerSystemStatus = tFooter("systemStatus");
   const contactSalesLabel = tNavigation("contactSales");
   const openMenuLabel = tAccessibility("openMenu");
   const closeMenuLabel = tAccessibility("closeMenu");
@@ -101,15 +95,9 @@ async function AsyncLocaleLayoutContent({
               </Suspense>
             </main>
 
-            {/* 页脚：使用新 Footer 组件与配置数据，附加主题切换与状态插槽 */}
+            {/* 页脚：发丝线三列 + 法务条，法务信息在 Footer 内部取自 single-site 配置 */}
             <Footer
               columns={FOOTER_COLUMNS}
-              tokens={FOOTER_STYLE_TOKENS}
-              statusSlot={
-                <span className="text-xs font-medium text-[var(--footer-text)] sm:text-sm">
-                  {footerSystemStatus}
-                </span>
-              }
               themeToggleSlot={
                 <LazyThemeSwitcher data-testid="footer-theme-toggle" />
               }

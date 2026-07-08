@@ -1,6 +1,7 @@
-import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { getProductMarketPath } from "@/config/paths";
+import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
+import { ProductLineDiagram } from "@/components/products/product-diagrams";
 
 interface MarketSeriesCardProps {
   slug: string;
@@ -10,16 +11,6 @@ interface MarketSeriesCardProps {
   familyCountLabel: string;
 }
 
-const MARKET_CARD_IMAGES: Record<string, string> = {
-  "north-america": "/profile-fixtures/catalog/products/sample-product-a.svg",
-  "australia-new-zealand":
-    "/profile-fixtures/catalog/products/sample-product-a.svg",
-  mexico: "/profile-fixtures/catalog/products/sample-product-a.svg",
-  europe: "/profile-fixtures/catalog/products/sample-product-a.svg",
-  "specialty-product-systems":
-    "/profile-fixtures/catalog/products/sample-product-b.svg",
-};
-
 export function MarketSeriesCard({
   slug,
   label,
@@ -27,32 +18,31 @@ export function MarketSeriesCard({
   standardLabel,
   familyCountLabel,
 }: MarketSeriesCardProps) {
-  const imageSrc =
-    MARKET_CARD_IMAGES[slug] ??
-    "/profile-fixtures/catalog/products/sample-product-a.svg";
+  // Engineering line drawing from the product page config — the honest
+  // stand-in for photography (copy strategy: 截面图/线图 over stock imagery).
+  const diagram = getTucsenbergProductPage(slug)?.diagram;
 
   return (
     <Link
       href={getProductMarketPath(slug)}
-      className="group block surface-card p-6 transition-[border-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group surface-card focus-visible:ring-ring block p-6 transition-[border-color] duration-150 focus-visible:ring-2 focus-visible:outline-none"
     >
-      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-md bg-muted">
-        <Image
-          src={imageSrc}
-          alt={label}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-contain p-4 transition-transform duration-200 group-hover:scale-[1.02]"
-        />
-      </div>
-      <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+      {diagram ? (
+        <div
+          aria-hidden
+          className="border-border bg-background mb-4 w-full overflow-hidden rounded-md border p-3"
+        >
+          <ProductLineDiagram kind={diagram.kind} ariaLabel="" />
+        </div>
+      ) : null}
+      <span className="bg-muted text-muted-foreground mb-2 inline-block rounded px-2 py-0.5 font-mono text-xs">
         {standardLabel}
       </span>
-      <h2 className="mb-2 text-lg font-semibold text-foreground group-hover:text-primary">
+      <h2 className="text-foreground group-hover:text-primary mb-2 text-lg font-semibold">
         {label}
       </h2>
-      <p className="mb-4 text-sm text-muted-foreground">{description}</p>
-      <span className="text-sm text-muted-foreground">{familyCountLabel}</span>
+      <p className="text-muted-foreground mb-4 text-sm">{description}</p>
+      <span className="text-muted-foreground text-sm">{familyCountLabel}</span>
     </Link>
   );
 }

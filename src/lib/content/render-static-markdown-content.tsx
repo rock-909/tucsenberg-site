@@ -59,7 +59,8 @@ interface RenderState {
 function createListElement(state: RenderState): ReactNode | null {
   if (state.listItems.length === 0) return null;
 
-  const className = "mt-3 list-inside space-y-1 text-sm text-muted-foreground";
+  const className =
+    "mt-3 max-w-[72ch] list-inside space-y-1 text-base leading-7 text-muted-foreground";
   if (state.listType === "ordered") {
     return (
       <ol key={`ol-${state.index}`} className={`${className} list-decimal`}>
@@ -85,8 +86,14 @@ function createTableElement(state: RenderState): ReactNode | null {
   }
 
   return (
-    <div key={`table-${state.index}`} className="mt-4 overflow-x-auto">
-      <table className="w-full text-sm">
+    <div key={`table-${state.index}`} className="relative mt-4">
+      {/* Mobile cue that wide tables scroll instead of silently clipping. */}
+      <div
+        aria-hidden
+        className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l to-transparent md:hidden"
+      />
+      <div className="overflow-x-auto [scrollbar-width:thin]">
+        <table className="w-full text-sm">
         <thead>
           <tr className="border-b">
             {state.tableHeaders.map((header, headerIndex) => (
@@ -109,14 +116,15 @@ function createTableElement(state: RenderState): ReactNode | null {
                     key={`cell-${rowIndex}-${cellIndex}`}
                     className="px-3 py-2 text-muted-foreground"
                   >
-                    {cell}
+                    <InlineMarkdown text={cell} />
                   </td>
                 );
               })}
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }
@@ -156,7 +164,7 @@ function createInlineBoldParagraph(text: string, key: string): ReactNode {
   return (
     <p
       key={key}
-      className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
+      className="mt-3 max-w-[72ch] whitespace-pre-line text-base leading-7 text-muted-foreground"
     >
       <InlineMarkdown text={text} />
     </p>
@@ -223,7 +231,7 @@ function renderH2(state: RenderState, trimmed: string): void {
     <h2
       key={`h2-${id || state.index}`}
       id={id || undefined}
-      className="mt-8 scroll-mt-24 text-xl font-semibold tracking-tight text-foreground first:mt-0"
+      className="text-section mt-10 scroll-mt-24 text-foreground first:mt-0"
     >
       {displayText}
     </h2>,
@@ -238,7 +246,7 @@ function renderH3(state: RenderState, trimmed: string): void {
     <h3
       key={`h3-${id || state.index}`}
       id={id || undefined}
-      className="mt-6 scroll-mt-24 text-base font-semibold text-foreground"
+      className="mt-6 scroll-mt-24 text-lg font-semibold text-foreground"
     >
       {displayText}
     </h3>,
@@ -251,9 +259,9 @@ function renderBoldParagraph(state: RenderState, trimmed: string): void {
   state.elements.push(
     <p
       key={`em-${state.index}`}
-      className="mt-3 text-sm font-medium text-foreground"
+      className="mt-3 max-w-[72ch] text-base leading-7 font-medium text-foreground"
     >
-      {text}
+      <InlineMarkdown text={text} />
     </p>,
   );
   state.index += 1;
