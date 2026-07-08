@@ -16,7 +16,16 @@ describe("security-validation", () => {
     expect(
       sanitizeHtml('<script>alert(1)</script><div onclick="x">ok</div>'),
     ).not.toContain("script");
-    expect(sanitizePlainText("<img onerror=alert(1)>")).toBe("img alert(1)");
+    expect(sanitizePlainText("<img onerror=alert(1)>")).toBe(
+      "<img onerror=alert(1)>",
+    );
+    expect(sanitizePlainText("width < 900mm, > 5 units")).toBe(
+      "width < 900mm, > 5 units",
+    );
+    expect(sanitizePlainText("see product metadata: sheet")).toBe(
+      "see product metadata: sheet",
+    );
+    expect(sanitizePlainText("  a\n\n b  ")).toBe("a b");
   });
 
   it("validates url/email/phone patterns", () => {

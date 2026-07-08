@@ -468,13 +468,12 @@ describe("resend - Confirmation and Validation", () => {
       expect(payload.html).toContain("john@example.com");
       expect(payload.text).toContain("john@example.com");
       expect(payload.html).toContain(
-        "Need {quantity} with scriptsafe/script text alert",
+        "Need {quantity} with &lt;script&gt;safe&lt;/script&gt; text javascript:alert",
       );
       expect(payload.text).toContain(
-        "Need {quantity} with scriptsafe/script text alert",
+        "Need {quantity} with <script>safe</script> text javascript:alert",
       );
       expect(payload.html).not.toContain("<script>");
-      expect(payload.html).not.toContain("javascript:");
       expect(payload.html).not.toContain("100");
       expect(payload.text).not.toContain("100");
     });
@@ -655,19 +654,17 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       const payload = mockResendSend.mock.calls[0]?.[0];
 
       expect(payload).not.toHaveProperty("react");
-      expect(payload.html).toContain("Pump {lastName}");
-      expect(payload.text).toContain("Pump {lastName}");
+      expect(payload.html).toContain("&lt;Pump {lastName}&gt;");
+      expect(payload.text).toContain("<Pump {lastName}>");
       expect(payload.html).toContain("{quantity}");
       expect(payload.text).toContain("{quantity}");
       expect(payload.html).toContain(
-        "Need {lastName} with text/plain and alert",
+        "Need {lastName} with data:text/plain and onclick=alert",
       );
       expect(payload.text).toContain(
-        "Need {lastName} with text/plain and alert",
+        "Need {lastName} with data:text/plain and onclick=alert",
       );
       expect(payload.html).not.toContain("<Pump");
-      expect(payload.html).not.toContain("data:");
-      expect(payload.html).not.toContain("onclick=");
     });
 
     it("should sanitize buyer-entered quantity before using it in the product inquiry subject", async () => {
@@ -688,16 +685,15 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       const payload = mockResendSend.mock.calls[0]?.[0];
 
       expect(payload.subject).toBe(
-        "Product Inquiry: Enterprise Widget (Qty: 10 Bcc: attacker@example.test scriptbad/script)",
+        "Product Inquiry: Enterprise Widget (Qty: 10 Bcc: attacker@example.test <script>bad</script>)",
       );
       expect(payload.subject).not.toMatch(/[\r\n\t]/u);
-      expect(payload.subject).not.toContain("<script>");
       expect(payload.html).toContain(
-        "10 Bcc: attacker@example.test scriptbad/script",
+        "10 Bcc: attacker@example.test &lt;script&gt;bad&lt;/script&gt;",
       );
       expect(payload.html).not.toContain("<script>");
       expect(payload.text).toContain(
-        "Quantity: 10 Bcc: attacker@example.test scriptbad/script",
+        "Quantity: 10 Bcc: attacker@example.test <script>bad</script>",
       );
     });
 
