@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "maxClientBoundaries": 47,
+  "maxClientBoundaries": 45,
   "allowedClientBoundaries": [
     "src/app/[locale]/contact/error.tsx",
     "src/app/[locale]/products/error.tsx",
@@ -18,8 +18,6 @@
     "src/components/forms/lazy-turnstile.tsx",
     "src/components/forms/use-rate-limit.ts",
     "src/components/layout/header-client.tsx",
-    "src/components/layout/header-language-menu.tsx",
-    "src/components/layout/mobile-language-switcher.tsx",
     "src/components/layout/mobile-navigation-interactive.tsx",
     "src/components/motion/breathing-reveal.tsx",
     "src/components/motion/breathing-stagger.tsx",

@@ -5,8 +5,6 @@ const site = {
   skipLabel: "Skip to main content",
   homeHeading: /Factory-Direct Flood Barriers from China/i,
   contactHeading: /Contact/i,
-  languageLabel: "Select Language",
-  currentLanguage: "English",
   fullNameLabel: "Full name",
   optionalLabel: "optional",
 } as const;
@@ -66,62 +64,12 @@ test.describe("No-JS HTML contract (English-only)", () => {
       page.getByRole("navigation", { name: /mobile navigation menu/i }),
     ).toBeVisible();
     await expect(
-      page.getByText(site.languageLabel, { exact: true }),
-    ).toBeVisible();
-
-    const languageFallback = page.getByTestId("mobile-language-fallback");
-    await expect(languageFallback).toContainText(site.currentLanguage);
-
-    const englishLanguageLink = fallbackPanel.locator(
-      'a[hreflang="en"][href="/en"]',
-    );
-    await expect(englishLanguageLink).toBeHidden();
+      fallbackPanel.getByTestId("mobile-language-fallback"),
+    ).toHaveCount(0);
     await expect(fallbackPanel.locator('a[hreflang="zh"]')).toHaveCount(0);
     await expect(fallbackPanel.locator('a[href="/zh"]')).toHaveCount(0);
     await expect(fallbackPanel.getByText("简体中文")).toHaveCount(0);
     await expect(fallbackPanel.getByText("中文")).toHaveCount(0);
-
-    await languageFallback.click();
-
-    await expect(englishLanguageLink).toBeVisible();
-    await expect(fallbackPanel.locator('a[hreflang="zh"]')).toHaveCount(0);
-    await expect(fallbackPanel.locator('a[href="/zh"]')).toHaveCount(0);
-  });
-
-  test("mobile language fallback keeps the current English root without JavaScript", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("http://localhost:3000/contact", {
-      waitUntil: "domcontentloaded",
-    });
-
-    const trigger = getHeaderMobileMenuButton(page);
-    await trigger.click();
-
-    const fallbackPanel = page.getByTestId(
-      "header-mobile-navigation-fallback-panel",
-    );
-    const languageFallback = page.getByTestId("mobile-language-fallback");
-    await languageFallback.click();
-
-    const englishLanguageLink = fallbackPanel.locator(
-      'a[hreflang="en"][href="/en"]',
-    );
-    await expect(englishLanguageLink).toBeVisible();
-    await expect(fallbackPanel.locator('a[hreflang="zh"]')).toHaveCount(0);
-    await expect(fallbackPanel.locator('a[href="/zh"]')).toHaveCount(0);
-
-    await englishLanguageLink.click();
-
-    await expect.poll(() => new URL(page.url()).pathname).toBe("/");
-    expect(new URL(page.url()).search).toBe("");
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: site.homeHeading,
-      }),
-    ).toBeVisible();
   });
 
   test("retired /zh route stays unavailable without JavaScript", async ({

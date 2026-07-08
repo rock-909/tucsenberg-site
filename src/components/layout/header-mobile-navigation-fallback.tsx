@@ -1,66 +1,13 @@
 import type { ReactNode } from "react";
-import {
-  LANGUAGE_OPTION_LABELS,
-  type SiteLanguage,
-} from "@/config/language-display";
-import {
-  LOCALES_CONFIG,
-  type ConfiguredLocale,
-} from "@/config/paths/locales-config";
-import { Link } from "@/i18n/routing";
 
 interface MobileNavigationFallbackProps {
   children?: ReactNode;
-  languageLabel: string;
-  locale: SiteLanguage;
   onActivate: () => void;
   openMenuLabel: string;
 }
 
-function MobileLanguageFallback({
-  languageLabel,
-  locale,
-}: {
-  languageLabel: string;
-  locale: SiteLanguage;
-}) {
-  const configuredLocales = LOCALES_CONFIG.locales as readonly string[];
-  const currentLocale = configuredLocales.includes(locale)
-    ? (locale as ConfiguredLocale)
-    : LOCALES_CONFIG.defaultLocale;
-  const currentLanguageName = LOCALES_CONFIG.displayNames[currentLocale];
-
-  return (
-    <details className="mt-3 border-t border-border pt-3">
-      <summary
-        className="flex cursor-pointer list-none items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground [&::-webkit-details-marker]:hidden"
-        data-testid="mobile-language-fallback"
-      >
-        <span translate="no">{languageLabel}</span>
-        <span translate="no">{currentLanguageName}</span>
-      </summary>
-      <div className="mt-1 space-y-1">
-        {LOCALES_CONFIG.locales.map((optionLocale) => (
-          <Link
-            key={optionLocale}
-            href="/"
-            className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-            hrefLang={optionLocale}
-            locale={optionLocale}
-            prefetch={false}
-          >
-            <span translate="no">{LANGUAGE_OPTION_LABELS[optionLocale]}</span>
-          </Link>
-        ))}
-      </div>
-    </details>
-  );
-}
-
 export function MobileNavigationFallback({
   children,
-  languageLabel,
-  locale,
   onActivate,
   openMenuLabel,
 }: MobileNavigationFallbackProps) {
@@ -70,7 +17,7 @@ export function MobileNavigationFallback({
       data-testid="header-mobile-navigation-fallback"
     >
       <summary
-        className="relative inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-foreground transition-colors duration-150 hover:bg-accent [&::-webkit-details-marker]:hidden"
+        className="text-foreground hover:bg-accent relative inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-md transition-colors duration-150 [&::-webkit-details-marker]:hidden"
         aria-label={openMenuLabel}
         aria-controls="mobile-navigation"
         aria-haspopup="dialog"
@@ -102,14 +49,10 @@ export function MobileNavigationFallback({
       {children ? (
         <div
           id="mobile-navigation"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+          className="border-border bg-popover text-popover-foreground absolute top-full right-0 z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-xl border p-3 shadow-lg"
           data-testid="header-mobile-navigation-fallback-panel"
         >
           {children}
-          <MobileLanguageFallback
-            languageLabel={languageLabel}
-            locale={locale}
-          />
         </div>
       ) : null}
     </details>

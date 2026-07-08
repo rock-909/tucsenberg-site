@@ -41,28 +41,22 @@ async function AsyncLocaleLayoutContent({
   // Do not read runtime headers here; Cache Components need this layout to stay
   // prerenderable. Static CSP is emitted from next.config.ts.
 
-  const [tNavigation, tAccessibility, tLanguage, clientMessages] =
-    await Promise.all([
-      getTranslations({
-        locale,
-        namespace: "navigation",
-      }),
-      getTranslations({
-        locale,
-        namespace: "accessibility",
-      }),
-      getTranslations({
-        locale,
-        namespace: "language",
-      }),
-      loadClientMessages(locale),
-    ]);
+  const [tNavigation, tAccessibility, clientMessages] = await Promise.all([
+    getTranslations({
+      locale,
+      namespace: "navigation",
+    }),
+    getTranslations({
+      locale,
+      namespace: "accessibility",
+    }),
+    loadClientMessages(locale),
+  ]);
 
   const contactSalesLabel = tNavigation("contactSales");
   const openMenuLabel = tAccessibility("openMenu");
   const closeMenuLabel = tAccessibility("closeMenu");
   const skipToContentLabel = tAccessibility("skipToContent");
-  const mobileLanguageLabel = tLanguage("selectLanguage");
   const mainNavItems = mainNavigation.map((item) => ({
     key: item.key,
     href: item.href,
@@ -91,7 +85,6 @@ async function AsyncLocaleLayoutContent({
               contactSalesLabel={contactSalesLabel}
               openMenuLabel={openMenuLabel}
               closeMenuLabel={closeMenuLabel}
-              mobileLanguageLabel={mobileLanguageLabel}
               mainNavItems={mainNavItems}
             />
 

@@ -9,10 +9,7 @@ import type { Locale } from "@/i18n/routing-config";
 import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import {
-  LanguageToggleIsland,
-  MobileNavigationIsland,
-} from "@/components/layout/header-client";
+import { MobileNavigationIsland } from "@/components/layout/header-client";
 import { HEADER_CTA_CLASS } from "@/components/layout/header-utility-control";
 import { Logo } from "@/components/layout/logo";
 import { MobileNavigationLinks } from "@/components/layout/mobile-navigation";
@@ -39,7 +36,6 @@ interface HeaderProps {
   contactSalesLabel?: string;
   openMenuLabel?: string;
   closeMenuLabel?: string;
-  mobileLanguageLabel?: string;
   mainNavItems?: HeaderNavItem[];
 }
 
@@ -67,7 +63,6 @@ export function Header({
   contactSalesLabel = "Contact",
   openMenuLabel = "Open navigation menu",
   closeMenuLabel = "Close navigation menu",
-  mobileLanguageLabel = "Language",
   mainNavItems = EMPTY_MAIN_NAV_ITEMS,
 }: HeaderProps) {
   const { isSticky, isMinimal, isTransparent, isModernNav, showTestIds } =
@@ -76,12 +71,12 @@ export function Header({
   return (
     <header
       className={cn(
-        "w-full bg-background/80 backdrop-blur-md",
+        "bg-background/80 w-full backdrop-blur-md",
         isSticky && "sticky top-0 z-50 pt-[env(safe-area-inset-top,0px)]",
         isTransparent && "border-transparent bg-transparent backdrop-blur-none",
         isModernNav
-          ? "border-b border-border/10 transition-[background-color,border-color] duration-200"
-          : !isTransparent && "border-b border-border/10",
+          ? "border-border/10 border-b transition-[background-color,border-color] duration-200"
+          : !isTransparent && "border-border/10 border-b",
         className,
       )}
     >
@@ -107,7 +102,6 @@ export function Header({
             locale={locale}
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
-            mobileLanguageLabel={mobileLanguageLabel}
           />
         </div>
       </div>
@@ -165,23 +159,16 @@ function HeaderUtilityControls({
   locale,
   openMenuLabel,
   closeMenuLabel,
-  mobileLanguageLabel,
 }: {
   contactSalesLabel: string;
   locale: Locale | undefined;
   openMenuLabel: string;
   closeMenuLabel: string;
-  mobileLanguageLabel: string;
 }) {
   const contactHref = SINGLE_SITE_HOME_LINK_TARGETS.contact;
 
   return (
-    <div
-      className="header-nav-right"
-      data-testid={
-        locale ? "header-utility-controls" : "language-toggle-button"
-      }
-    >
+    <div className="header-nav-right" data-testid="header-utility-controls">
       {locale ? (
         <>
           {contactHref ? (
@@ -213,15 +200,10 @@ function HeaderUtilityControls({
               </Link>
             </div>
           ) : null}
-          <div className="header-full-desktop-only flex h-10 shrink-0 items-center">
-            <LanguageToggleIsland locale={locale} />
-          </div>
           <div className="header-mobile-only h-10 w-10">
             <MobileNavigationIsland
               openMenuLabel={openMenuLabel}
               closeMenuLabel={closeMenuLabel}
-              languageLabel={mobileLanguageLabel}
-              locale={locale}
             >
               <MobileNavigationLinks
                 contactSalesLabel={contactSalesLabel}
