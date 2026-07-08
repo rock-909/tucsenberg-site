@@ -18,6 +18,7 @@ import {
   SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS,
   SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS,
   SINGLE_SITE_HOME_SECTION_ORDER,
+  SINGLE_SITE_HOME_VERIFY_ITEM_KEYS,
   type SingleSiteHomeSectionKey,
 } from "@/config/single-site-page-expression";
 import { FaqSectionView } from "@/components/sections/faq-section-view";
@@ -322,6 +323,46 @@ function HomeStartPathSection({
   );
 }
 
+/**
+ * Q5 summary — "can this company be verified?" answered on the page flow,
+ * before the buyer has to hunt for About (视觉翻译-自顶向下设计.md, home §5).
+ */
+function HomeVerifySection({ t }: { t: HomeTranslator }) {
+  return (
+    <section
+      data-testid="home-verify-section"
+      className="section-divider px-6 py-14 md:py-[72px]"
+    >
+      <div className="mx-auto max-w-[1080px]">
+        <div className="max-w-2xl">
+          <h2 className="text-section text-balance">{t("verify.title")}</h2>
+          <p className="text-muted-foreground mt-3 text-pretty">
+            {t("verify.description")}
+          </p>
+        </div>
+        <ul className="mt-8 grid gap-3 md:grid-cols-3">
+          {SINGLE_SITE_HOME_VERIFY_ITEM_KEYS.map((key) => (
+            <li
+              key={key}
+              className="border-border bg-background min-w-0 rounded-xl border px-5 py-5"
+            >
+              <h3 className="text-foreground text-sm font-semibold text-balance">
+                {t(`verify.items.${key}.title`)}
+              </h3>
+              <p className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
+                {t(`verify.items.${key}.description`)}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 text-sm font-medium">
+          <InlineMarkdown text={t("verify.aboutLink")} />
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function HomeFinalAction({
   t,
   ctaTargets,
@@ -421,6 +462,11 @@ export default async function Home({ params }: HomePageProps) {
     startPath: (
       <BreathingReveal>
         <HomeStartPathSection t={t} items={content.startPath} />
+      </BreathingReveal>
+    ),
+    verify: (
+      <BreathingReveal>
+        <HomeVerifySection t={t} />
       </BreathingReveal>
     ),
     finalCta: (

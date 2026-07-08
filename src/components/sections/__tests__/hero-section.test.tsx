@@ -6,13 +6,6 @@ import enCriticalMessages from "../../../../messages/en/critical.json";
 import { HeroSection } from "@/components/sections/hero-section";
 import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
 
-const obsoleteHeroPreviewKeys = [
-  "items",
-  "pages",
-  "components",
-  "storybook",
-  "workflow",
-] as const;
 const heroMessageCases = [
   {
     locale: "en",
@@ -26,12 +19,6 @@ const heroMessageCases = [
       rangeLabel: "supplies established brands",
       production: "OEM",
       productionLabel: "private label ready",
-    },
-    preview: {
-      productSystem: "ABS boxwall",
-      applicationFit: "Aluminum gates",
-      deliveryProof: "Flood bags",
-      inquiryPath: "Tube dams & FRP",
     },
   },
 ] as const;
@@ -65,63 +52,31 @@ describe("HeroSection", () => {
     expect(screen.getByText("hero.subtitle")).toBeInTheDocument();
   });
 
-  it("renders starter preview as a B2B evaluation map", async () => {
+  it("renders the working-principle diagram instead of a product-line index", async () => {
     await renderAsyncComponent(HeroSection());
 
-    const preview = screen.getByTestId("hero-preview-card");
-    const previewList = within(preview).getByRole("list");
-    const previewItems = within(previewList).getAllByRole("listitem");
+    const heroDiagram = screen.getByTestId("hero-diagram");
+    const panel = within(heroDiagram).getByTestId("product-diagram");
 
-    expect(preview).toBeInTheDocument();
-    expect(preview).toHaveAttribute("aria-labelledby", "hero-preview-title");
-    expect(
-      within(preview).getByRole("heading", {
-        level: 2,
-        name: "hero.preview.title",
-      }),
-    ).toBeInTheDocument();
-    expect(previewItems).toHaveLength(4);
-    expect(
-      within(preview).getByText("hero.preview.productSystem"),
-    ).toBeInTheDocument();
-    expect(
-      within(preview).getByText("hero.preview.applicationFit"),
-    ).toBeInTheDocument();
-    expect(
-      within(preview).getByText("hero.preview.deliveryProof"),
-    ).toBeInTheDocument();
-    expect(
-      within(preview).getByText("hero.preview.inquiryPath"),
-    ).toBeInTheDocument();
-    expect(
-      within(preview).queryByText("hero.preview.note"),
-    ).not.toBeInTheDocument();
+    expect(within(panel).getByText("hero.diagram.panelLabel")).toBeVisible();
+    expect(within(panel).getByText("hero.diagram.caption")).toBeVisible();
+    // The five product cards below the hero own the line index; the hero
+    // must not duplicate it (视觉翻译-自顶向下设计.md, home §1).
+    expect(screen.queryByTestId("hero-preview-card")).not.toBeInTheDocument();
   });
 
-  it("keeps starter preview translation keys wired to real copy", () => {
-    for (const { hero, preview: expectedPreview } of heroMessageCases) {
-      const preview = hero.preview;
+  it("keeps hero diagram translation keys wired to real copy", () => {
+    for (const { hero } of heroMessageCases) {
+      expect("preview" in hero).toBe(false);
 
+      const diagram = hero.diagram;
       for (const copy of [
-        preview.label,
-        preview.title,
-        preview.description,
-        preview.productSystem,
-        preview.applicationFit,
-        preview.deliveryProof,
-        preview.inquiryPath,
+        diagram.panelLabel,
+        diagram.ariaLabel,
+        diagram.caption,
       ]) {
         expect(copy.trim().length).toBeGreaterThan(0);
-        expect(copy).not.toMatch(/^hero\.preview\./);
-      }
-
-      expect(preview.productSystem).toBe(expectedPreview.productSystem);
-      expect(preview.applicationFit).toBe(expectedPreview.applicationFit);
-      expect(preview.deliveryProof).toBe(expectedPreview.deliveryProof);
-      expect(preview.inquiryPath).toBe(expectedPreview.inquiryPath);
-
-      for (const obsoleteKey of obsoleteHeroPreviewKeys) {
-        expect(obsoleteKey in preview).toBe(false);
+        expect(copy).not.toMatch(/^hero\.diagram\./);
       }
     }
   });
@@ -187,8 +142,6 @@ describe("HeroSection", () => {
   it("uses a compact proof panel near the hero claims", async () => {
     await renderAsyncComponent(HeroSection());
 
-    const preview = screen.getByTestId("hero-preview-card");
-    const previewList = within(preview).getByRole("list");
     const proofList = screen.getByRole("list", {
       name: "hero.proofAriaLabel",
     });
@@ -198,8 +151,6 @@ describe("HeroSection", () => {
       "hero.proof.estLabel",
     );
 
-    expect(preview).toHaveClass("surface-card", "md:p-6", "shadow-none");
-    expect(previewList).toHaveClass("gap-2");
     expect(proofList).toHaveClass(
       "rounded-xl",
       "border",

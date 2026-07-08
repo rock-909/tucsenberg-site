@@ -262,6 +262,14 @@ function ProductSceneWall({
           </li>
         ))}
       </ul>
+      {scenes.boundary ? (
+        <p
+          data-testid="scene-wall-boundary"
+          className="border-border text-foreground bg-muted/40 mt-6 max-w-3xl rounded-lg border p-4 text-sm leading-6"
+        >
+          <InlineMarkdown text={scenes.boundary} />
+        </p>
+      ) : null}
     </section>
   );
 }

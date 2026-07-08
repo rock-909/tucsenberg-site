@@ -30,6 +30,7 @@ export const SINGLE_SITE_HOME_SECTION_ORDER = [
   "howToChoose",
   "startPath",
   "answer",
+  "verify",
   "faq",
   "finalCta",
 ] as const;
@@ -75,6 +76,13 @@ export const SINGLE_SITE_HOME_PRODUCT_CARD_LINKS = {
 /** Home product cards that carry a status badge (message key `badge`). */
 export const SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS = [
   "multilingual",
+] as const;
+
+/** Q5 summary on home: how a buyer verifies us without leaving the page flow. */
+export const SINGLE_SITE_HOME_VERIFY_ITEM_KEYS = [
+  "audits",
+  "samples",
+  "inspection",
 ] as const;
 
 export const SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS = [

@@ -70,17 +70,11 @@ export async function HeroSection() {
     },
     proofAriaLabel: t("hero.proofAriaLabel"),
     proofItems,
-    preview: {
-      label: t("hero.preview.label"),
-      title: t("hero.preview.title"),
-      description: t("hero.preview.description"),
-      items: [
-        t("hero.preview.productSystem"),
-        t("hero.preview.applicationFit"),
-        t("hero.preview.deliveryProof"),
-        t("hero.preview.inquiryPath"),
-      ],
-      itemGlyphs: ["boxwall", "gate", "bag", "tube"],
+    diagram: {
+      kind: "boxwall",
+      panelLabel: t("hero.diagram.panelLabel"),
+      ariaLabel: t("hero.diagram.ariaLabel"),
+      caption: t("hero.diagram.caption"),
     },
   } satisfies HeroSectionContent;
 

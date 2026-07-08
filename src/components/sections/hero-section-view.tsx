@@ -1,9 +1,9 @@
 import type { ComponentProps } from "react";
 
 import { HeroGuideOverlay } from "@/components/grid/hero-guide-overlay";
-import { ProductLineGlyph } from "@/components/products/product-diagrams";
+import { ProductDiagramPanel } from "@/components/products/product-diagrams";
 import { Button } from "@/components/ui/button";
-import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
+import type { TucsenbergProductDiagram } from "@/constants/tucsenberg-product-page-types";
 import { Link } from "@/i18n/routing";
 
 type HeroSectionHref = ComponentProps<typeof Link>["href"];
@@ -18,15 +18,6 @@ interface HeroSectionCta {
   href: HeroSectionHref;
 }
 
-interface HeroSectionPreview {
-  label: string;
-  title: string;
-  description: string;
-  items: string[];
-  /** Optional decorative line glyph per item, aligned by index. */
-  itemGlyphs?: TucsenbergProductDiagramKind[];
-}
-
 export interface HeroSectionContent {
   eyebrow: string;
   title: string;
@@ -35,15 +26,17 @@ export interface HeroSectionContent {
   secondaryCta: HeroSectionCta;
   proofAriaLabel: string;
   proofItems: HeroSectionProofItem[];
-  preview: HeroSectionPreview;
+  /**
+   * Working-principle drawing (Q1.5 "does this actually work?" —
+   * 视觉翻译-自顶向下设计.md). The product-line index lives in the five cards
+   * below the hero; the hero must not pre-answer it.
+   */
+  diagram: TucsenbergProductDiagram;
 }
 
 export interface HeroSectionViewProps {
   content: HeroSectionContent;
-  previewTitleId?: string;
 }
-
-const DEFAULT_PREVIEW_TITLE_ID = "hero-preview-title";
 
 function HeroEyebrow({ text }: { text: string }) {
   return (
@@ -56,62 +49,10 @@ function HeroEyebrow({ text }: { text: string }) {
   );
 }
 
-function HeroVisual({
-  preview,
-  previewTitleId,
-}: {
-  preview: HeroSectionPreview;
-  previewTitleId: string;
-}) {
+function HeroVisual({ diagram }: { diagram: TucsenbergProductDiagram }) {
   return (
-    <div className="min-w-0">
-      <div
-        data-testid="hero-preview-card"
-        aria-labelledby={previewTitleId}
-        className="surface-card p-5 shadow-none md:p-6"
-      >
-        <div className="flex items-center justify-between gap-4">
-          <span className="bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs font-medium">
-            {preview.label}
-          </span>
-          <span
-            className="bg-foreground/40 size-2.5 rounded-full"
-            aria-hidden
-          />
-        </div>
-
-        <div className="mt-5 min-w-0">
-          <h2
-            id={previewTitleId}
-            className="text-foreground text-2xl font-semibold text-balance"
-          >
-            {preview.title}
-          </h2>
-          <p className="text-muted-foreground mt-3 text-sm leading-6 text-pretty">
-            {preview.description}
-          </p>
-        </div>
-
-        <ul className="mt-6 grid grid-cols-2 gap-2 md:gap-3">
-          {preview.items.map((item, index) => {
-            const glyph = preview.itemGlyphs?.[index];
-            return (
-              <li
-                key={item}
-                className="border-border bg-background text-foreground flex min-w-0 items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium break-words"
-              >
-                {glyph ? (
-                  <ProductLineGlyph
-                    kind={glyph}
-                    className="text-muted-foreground size-8 shrink-0"
-                  />
-                ) : null}
-                <span className="min-w-0">{item}</span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+    <div data-testid="hero-diagram" className="min-w-0">
+      <ProductDiagramPanel diagram={diagram} />
     </div>
   );
 }
@@ -151,10 +92,7 @@ function HeroProofPanel({
   );
 }
 
-export function HeroSectionView({
-  content,
-  previewTitleId = DEFAULT_PREVIEW_TITLE_ID,
-}: HeroSectionViewProps) {
+export function HeroSectionView({ content }: HeroSectionViewProps) {
   return (
     <section
       data-testid="hero-section"
@@ -200,7 +138,7 @@ export function HeroSectionView({
           </div>
         </div>
 
-        <HeroVisual preview={content.preview} previewTitleId={previewTitleId} />
+        <HeroVisual diagram={content.diagram} />
       </div>
     </section>
   );

@@ -78,19 +78,7 @@ interface FactualCompleteMessages
 
 const factualPlaceholderPattern =
   /\{(?:siteName|companyName|currentYear|copyright)\}/u;
-const heroPreviewKeys = [
-  "productSystem",
-  "applicationFit",
-  "deliveryProof",
-  "inquiryPath",
-] as const;
-const obsoleteHeroPreviewKeys = [
-  "items",
-  "pages",
-  "components",
-  "storybook",
-  "workflow",
-] as const;
+const heroDiagramKeys = ["panelLabel", "ariaLabel", "caption"] as const;
 const homeB2BSectionPaths = [
   ["home", "problems", "title"],
   ["home", "problems", "description"],
@@ -105,6 +93,11 @@ const homeB2BSectionPaths = [
   ["home", "answer", "items", "replacementSurface", "title"],
   ["home", "answer", "items", "inquiryPath", "title"],
   ["home", "answer", "items", "cloudflareFoundation", "title"],
+  ["home", "verify", "title"],
+  ["home", "verify", "items", "audits", "title"],
+  ["home", "verify", "items", "samples", "title"],
+  ["home", "verify", "items", "inspection", "title"],
+  ["home", "verify", "aboutLink"],
 ] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -352,19 +345,18 @@ describe("load-messages runtime gating", () => {
       "Tucsenberg quote, warranty and factory-pool facts",
     );
 
-    const enPreview = expectRecordPath(enMessages, ["home", "hero", "preview"]);
+    const enHero = expectRecordPath(enMessages, ["home", "hero"]);
+    // The hero visual is the working-principle diagram; the retired
+    // product-line preview card must not resurface in runtime messages.
+    expect("preview" in enHero).toBe(false);
 
-    for (const previewKey of heroPreviewKeys) {
+    for (const diagramKey of heroDiagramKeys) {
       expectNonEmptyStringPath(enMessages, [
         "home",
         "hero",
-        "preview",
-        previewKey,
+        "diagram",
+        diagramKey,
       ]);
-    }
-
-    for (const obsoleteKey of obsoleteHeroPreviewKeys) {
-      expect(obsoleteKey in enPreview).toBe(false);
     }
 
     for (const path of homeB2BSectionPaths) {

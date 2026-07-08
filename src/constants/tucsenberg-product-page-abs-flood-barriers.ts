@@ -37,6 +37,8 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "Freestanding on paved and firm ground — the same configuration family closes very different sites. Site photography is being prepared; schematics hold each position until it lands.",
+    boundary:
+      "Where it doesn't: on heavily broken or sloped ground — deep grooves, divots, recessed paving lines — boxwall may be the wrong tool. Send site photos with your RFQ and we'll say so, and point you to [tube dams](/products/flood-tube-dams) if that's the honest answer.",
     items: [
       {
         title: "Driveways",
@@ -72,7 +74,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Freestanding L-profile. The barrier stands on its own foot. As floodwater rises, its weight pushes the foot down — the water itself makes the seal tighter. No anchors, no drilling, no damage to the surface.",
         "Mechanical interlock. Units connect by hand with a locking-and-coupling joint — no tools, no loose pins.",
         "Corners, curves and gable ends. Inward-curve, outward-curve and gable-end units are available at every height, so the wall follows driveways, entrances and property lines — the same configuration family our factory pool has shipped to US flood brands for years.",
-        "Ground sealing. The base seal takes up small surface irregularities; on rough ground a ground sheet under the run improves sealing. On heavily broken or sloped ground — deep grooves, divots, recessed paving lines — boxwall may be the wrong tool. Send site photos with your RFQ and we'll say so, and point you to [tube dams](/products/flood-tube-dams) if that's the honest answer.",
+        "Ground sealing. The base seal takes up small surface irregularities; on rough ground a ground sheet under the run improves sealing. The honest limits of what it can seal are stated above, next to the scenes.",
       ],
     },
     {

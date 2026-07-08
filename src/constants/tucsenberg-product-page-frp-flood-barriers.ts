@@ -35,6 +35,8 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     title: "Where FRP earns its premium",
     intro:
       "Three environments punish aluminum over a service life — that's the honest scope of this line.",
+    boundary:
+      "Where it doesn't: if your openings don't live in one of these environments, [aluminum](/products/aluminum-flood-gates) remains the value answer — and we'll tell you so in the quote. One doorway won't clear FRP tooling math either; that honesty is the filter this line runs on.",
     items: [
       {
         title: "Coastal & salt-air sites",
@@ -75,7 +77,7 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Electrical infrastructure — substations and switchyards, where a non-conductive barrier isn't a preference, it's a spec.",
       ],
       footer:
-        "If your openings live in one of those, FRP earns its premium across the service life — that's the honest scope. For everything else, [aluminum](/products/aluminum-flood-gates) remains the value answer, and we'll tell you so in the quote.",
+        "If your openings live in one of those, FRP earns its premium across the service life — the honest scope stated next to the scenes above.",
     },
     {
       title: "Same logic as aluminum, different material",

@@ -35,6 +35,8 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     title: "Where it works",
     intro:
       "Built for the ground rigid barriers can't seal. Site photography is being prepared; schematics hold each position until it lands.",
+    boundary:
+      "Where it doesn't: a tube dam is a planned-response product, not a last-minute one — it needs a pump or water source, fill time, a crew, and space to set the line, because a filled tube is heavy and hard to reposition. On hard paving with narrow recessed joints (tile lines, expansion gaps) water can track under the skirt — use the ground mat and consider [ABS boxwall](/products/abs-flood-barriers) there. For defined openings that must seal in minutes, use [aluminum flood gates](/products/aluminum-flood-gates) instead.",
     items: [
       {
         title: "Grass & mud runs",
@@ -73,7 +75,7 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
         "Connect sections with the splicing sleeve for longer perimeters.",
       ],
       footer:
-        "A tube dam needs four things a doorway product doesn't: a pump or water source, fill time, a crew, and space to set the line — because once a water-filled tube is full it is heavy and hard to reposition. Set your line first, then fill; a dry run before the season is worth an hour. It's a planned-response product, not a last-minute one. Two more honest notes: on hard paving with narrow recessed joints (tile lines, expansion gaps) water can track under the skirt — use the ground mat and consider [ABS boxwall](/products/abs-flood-barriers) there; and for defined openings that must seal in minutes, use [aluminum flood gates](/products/aluminum-flood-gates) instead.",
+        "Set your line first, then fill — once a section is full it stays where you set it. A dry run before the season is worth an hour.",
     },
     {
       title: "Specifications",

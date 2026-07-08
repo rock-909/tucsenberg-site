@@ -180,7 +180,7 @@ function BoxwallDiagram({ ariaLabel }: { ariaLabel: string }) {
       <Annotation x={196} y={232}>
         load seals the base
       </Annotation>
-      <Annotation x={306} y={76}>
+      <Annotation x={470} y={76} anchor="end">
         interlocking ABS unit — freestanding L-profile
       </Annotation>
     </DiagramSvg>

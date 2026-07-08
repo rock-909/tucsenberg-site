@@ -81,22 +81,14 @@ test.describe("Homepage Core Functionality", () => {
       await expect(proofItems.first()).toBeVisible();
     }
 
-    const previewCard = heroSection.getByTestId("hero-preview-card");
-    await expect(previewCard).toBeVisible();
-    await expect(previewCard).toHaveAttribute(
-      "aria-labelledby",
-      "hero-preview-title",
-    );
-    const previewTitle = previewCard.locator("#hero-preview-title");
-    await expect(previewTitle).toBeVisible();
-    await expect(previewTitle).not.toHaveText(/^\s*$/);
-    const previewDescription = previewCard.locator("p").first();
-    await expect(previewDescription).toBeVisible();
-    await expect(previewDescription).not.toHaveText(/^\s*$/);
-    await expect(previewCard.getByRole("listitem")).toHaveCount(4);
-    const previewNote = previewCard.locator("p").last();
-    await expect(previewNote).toBeVisible();
-    await expect(previewNote).not.toHaveText(/^\s*$/);
+    // Hero visual is the working-principle diagram, not a product-line index
+    // (the five cards below own the index — 视觉翻译-自顶向下设计.md).
+    const heroDiagram = heroSection.getByTestId("hero-diagram");
+    await expect(heroDiagram).toBeVisible();
+    const diagramCaption = heroDiagram.locator("figcaption");
+    await expect(diagramCaption).toBeVisible();
+    await expect(diagramCaption).not.toHaveText(/^\s*$/);
+    await expect(heroSection.getByTestId("hero-preview-card")).toHaveCount(0);
   });
 
   test("should handle CTA button interactions correctly", async ({ page }) => {
@@ -146,7 +138,7 @@ test.describe("Homepage Core Functionality", () => {
       const proofList = heroSection.getByRole("list", {
         name: "首页证明分类",
       });
-      const previewCard = heroSection.getByTestId("hero-preview-card");
+      const heroDiagram = heroSection.getByTestId("hero-diagram");
       const answerSection = page.getByTestId("home-answer-section");
       const startPathSection = page.getByTestId("home-start-path-section");
 
@@ -154,7 +146,7 @@ test.describe("Homepage Core Functionality", () => {
         heroSection.getByRole("heading", { level: 1 }),
       ).toContainText("产品体系");
       await expect(proofList.getByRole("listitem")).toHaveCount(4);
-      await expect(previewCard).toBeVisible();
+      await expect(heroDiagram).toBeVisible();
       await expect(answerSection).toBeVisible();
       await expect(startPathSection).toBeVisible();
       await expect(

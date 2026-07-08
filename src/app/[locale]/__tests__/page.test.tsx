@@ -18,15 +18,9 @@ const homeMessages: Record<string, string> = {
     "Use this starter to organize product families, application fit, proof points, and inquiry paths before a real company replaces the example content.",
   "hero.cta.primary": "View product systems",
   "hero.cta.secondary": "Plan an inquiry",
-  "hero.preview.label": "Buyer evaluation map",
-  "hero.preview.title": "A clearer path from product fit to inquiry",
-  "hero.preview.description":
-    "The first screens help buyers understand what is offered, where it fits, what supports delivery, and how to prepare the next request.",
-  "hero.preview.productSystem": "Product system",
-  "hero.preview.applicationFit": "Application fit",
-  "hero.preview.deliveryProof": "Delivery proof",
-  "hero.preview.inquiryPath": "Inquiry path",
-  "hero.preview.note": "Replace example content before launch",
+  "hero.diagram.panelLabel": "Product principle",
+  "hero.diagram.ariaLabel": "Working-principle line drawing",
+  "hero.diagram.caption": "How the product works, in one drawing.",
   "hero.proof.est": "Product",
   "hero.proof.estLabel": "systems",
   "hero.proof.countries": "Application",
@@ -69,6 +63,15 @@ const homeMessages: Record<string, string> = {
   "answer.items.cloudflareFoundation.title": "Inquiry path",
   "answer.items.cloudflareFoundation.description":
     "Keep contact and product routes connected so evaluation can turn into a prepared inquiry.",
+  "verify.title": "Check us before you trust us",
+  "verify.description": "Three ways to verify this supplier before ordering.",
+  "verify.items.audits.title": "Factory audits welcome",
+  "verify.items.audits.description": "In person or live video walk-through.",
+  "verify.items.samples.title": "Paid samples before volume",
+  "verify.items.samples.description": "Judge the product, not the website.",
+  "verify.items.inspection.title": "Third-party inspection accepted",
+  "verify.items.inspection.description": "Appoint your own inspection agent.",
+  "verify.aboutLink": "[Who you're actually buying from →](/about)",
   "startPath.title": "A practical path from starter to public launch.",
   "startPath.description":
     "Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
@@ -137,10 +140,9 @@ vi.mock("@/components/sections/hero-section", () => ({
         Present products, applications, and delivery proof in one clear B2B
         website.
       </h1>
-      <span>Product system</span>
-      <span>Application fit</span>
-      <span>Delivery proof</span>
-      <span>Inquiry path</span>
+      <figure data-testid="hero-diagram">
+        <figcaption>How the product works, in one drawing.</figcaption>
+      </figure>
     </section>
   ),
 }));
@@ -215,10 +217,17 @@ describe("Home Page", () => {
         answerSection.getByText("Delivery and quality proof"),
       ).toBeInTheDocument();
       const heroSection = within(screen.getByTestId("hero-section"));
-      expect(heroSection.getByText("Product system")).toBeInTheDocument();
-      expect(heroSection.getByText("Application fit")).toBeInTheDocument();
-      expect(heroSection.getByText("Delivery proof")).toBeInTheDocument();
-      expect(heroSection.getByText("Inquiry path")).toBeInTheDocument();
+      expect(heroSection.getByTestId("hero-diagram")).toBeInTheDocument();
+      expect(
+        heroSection.getByText("How the product works, in one drawing."),
+      ).toBeInTheDocument();
+      expect(
+        heroSection.queryByTestId("hero-preview-card"),
+      ).not.toBeInTheDocument();
+      const verifySection = within(screen.getByTestId("home-verify-section"));
+      expect(
+        verifySection.getByText("Factory audits welcome"),
+      ).toBeInTheDocument();
     });
 
     it("renders homepage sections in the configured page-expression order", async () => {
@@ -233,6 +242,7 @@ describe("Home Page", () => {
         problems: "home-problem-section",
         howToChoose: "home-how-to-choose-section",
         answer: "home-answer-section",
+        verify: "home-verify-section",
         startPath: "home-start-path-section",
         faq: "home-faq-section",
         finalCta: "home-final-action",

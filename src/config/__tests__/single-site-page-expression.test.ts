@@ -25,6 +25,7 @@ describe("single-site-page-expression", () => {
       "howToChoose",
       "startPath",
       "answer",
+      "verify",
       "faq",
       "finalCta",
     ]);

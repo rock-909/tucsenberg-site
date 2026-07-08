@@ -293,14 +293,10 @@
         "production": "OEM",
         "productionLabel": "private label ready"
       },
-      "preview": {
-        "label": "Product line map",
-        "title": "ABS, aluminum, flood bags, tube dams and FRP",
-        "description": "Start with the opening, the ground and the order size. The same RFQ can route to standard stock, custom-cut openings, private label packaging or mixed-line consolidation.",
-        "productSystem": "ABS boxwall",
-        "applicationFit": "Aluminum gates",
-        "deliveryProof": "Flood bags",
-        "inquiryPath": "Tube dams & FRP"
+      "diagram": {
+        "panelLabel": "TB-BW BOXWALL · WORKING PRINCIPLE",
+        "ariaLabel": "Freestanding L-profile flood barrier side view — rising floodwater presses the base down and seals it against the ground",
+        "caption": "The principle behind the range: the flood's own weight makes the seal tighter — no drilling, no fixing to the building. The five product lines follow below."
       },
       "proofAriaLabel": "Tucsenberg quote, warranty and factory-pool facts"
     },
@@ -464,6 +460,25 @@
           "answer": "Yes — factory audits are welcome, in person or by video. References available on request."
         }
       }
+    },
+    "verify": {
+      "title": "Check us before you trust us",
+      "description": "You're buying from a Chinese supplier you found online — verify, don't hope. Three ways to check us that cost you little:",
+      "items": {
+        "audits": {
+          "title": "Factory audits welcome",
+          "description": "In person or live video walk-through of any factory in the pool — unscripted."
+        },
+        "samples": {
+          "title": "Paid samples before volume",
+          "description": "Judge the product, not the website. Sample fees are credited against your first order."
+        },
+        "inspection": {
+          "title": "Third-party inspection accepted",
+          "description": "Appoint SGS, TÜV, QIMA or your own agent — we schedule around them, not against them."
+        }
+      },
+      "aboutLink": "[Who you're actually buying from →](/about)"
     }
   },
   "catalog": {

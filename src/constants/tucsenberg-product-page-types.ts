@@ -93,6 +93,11 @@ export interface TucsenbergProductScenes {
    * "how does it work" — buyer question order, 视觉翻译-自顶向下设计.md).
    */
   afterSection?: string;
+  /**
+   * Honest-boundary block rendered after the scene grid (Q2's full answer is
+   * "fits X, wrong for Y"); supports inline markdown links.
+   */
+  boundary?: string;
   items: readonly TucsenbergProductScene[];
 }
 
