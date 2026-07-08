@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "maxClientBoundaries": 45,
+  "maxClientBoundaries": 47,
   "allowedClientBoundaries": [
     "src/app/[locale]/contact/error.tsx",
     "src/app/[locale]/products/error.tsx",
@@ -27,6 +27,8 @@
     "src/components/motion/page-transition.tsx",
     "src/components/monitoring/enterprise-analytics-island.tsx",
     "src/components/navigation/navigation-progress-bar.tsx",
+    "src/components/products/boxwall-cross-section.tsx",
+    "src/components/products/product-run-calculator.tsx",
     "src/components/security/turnstile.tsx",
     "src/components/theme-provider.tsx",
     "src/components/ui/checkbox.tsx",
