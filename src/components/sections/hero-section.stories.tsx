@@ -16,7 +16,6 @@ const meta = {
   tags: ["autodocs"],
   args: {
     content: homepageStoryHero,
-    previewTitleId: "hero-preview-title-default-story",
   },
 } satisfies Meta<typeof HeroSectionView>;
 
@@ -29,14 +28,12 @@ export const Default: Story = {};
 export const LongCopy: Story = {
   args: {
     content: homepageStoryHeroLongCopy,
-    previewTitleId: "hero-preview-title-long-copy-story",
   },
 };
 
 export const ChineseCopy: Story = {
   args: {
     content: homepageStoryHeroZh,
-    previewTitleId: "hero-preview-title-chinese-copy-story",
   },
   globals: {
     locale: "en",
@@ -46,7 +43,6 @@ export const ChineseCopy: Story = {
 export const NarrowCanvas: Story = {
   args: {
     content: homepageStoryHeroLongCopy,
-    previewTitleId: "hero-preview-title-narrow-canvas",
   },
   globals: {
     viewport: { value: "mobile1", isRotated: false },

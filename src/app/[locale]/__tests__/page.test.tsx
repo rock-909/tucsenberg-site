@@ -18,15 +18,9 @@ const homeMessages: Record<string, string> = {
     "Use this starter to organize product families, application fit, proof points, and inquiry paths before a real company replaces the example content.",
   "hero.cta.primary": "View product systems",
   "hero.cta.secondary": "Plan an inquiry",
-  "hero.preview.label": "Buyer evaluation map",
-  "hero.preview.title": "A clearer path from product fit to inquiry",
-  "hero.preview.description":
-    "The first screens help buyers understand what is offered, where it fits, what supports delivery, and how to prepare the next request.",
-  "hero.preview.productSystem": "Product system",
-  "hero.preview.applicationFit": "Application fit",
-  "hero.preview.deliveryProof": "Delivery proof",
-  "hero.preview.inquiryPath": "Inquiry path",
-  "hero.preview.note": "Replace example content before launch",
+  "hero.diagram.panelLabel": "Product principle",
+  "hero.diagram.ariaLabel": "Working-principle line drawing",
+  "hero.diagram.caption": "How the product works, in one drawing.",
   "hero.proof.est": "Product",
   "hero.proof.estLabel": "systems",
   "hero.proof.countries": "Application",
@@ -69,6 +63,15 @@ const homeMessages: Record<string, string> = {
   "answer.items.cloudflareFoundation.title": "Inquiry path",
   "answer.items.cloudflareFoundation.description":
     "Keep contact and product routes connected so evaluation can turn into a prepared inquiry.",
+  "verify.title": "Check us before you trust us",
+  "verify.description": "Three ways to verify this supplier before ordering.",
+  "verify.items.audits.title": "Factory audits welcome",
+  "verify.items.audits.description": "In person or live video walk-through.",
+  "verify.items.samples.title": "Paid samples before volume",
+  "verify.items.samples.description": "Judge the product, not the website.",
+  "verify.items.inspection.title": "Third-party inspection accepted",
+  "verify.items.inspection.description": "Appoint your own inspection agent.",
+  "verify.aboutLink": "[Who you're actually buying from →](/about)",
   "startPath.title": "A practical path from starter to public launch.",
   "startPath.description":
     "Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
@@ -88,16 +91,18 @@ const homeMessages: Record<string, string> = {
     "Start from a real website foundation, then replace what must become yours.",
   "finalCta.description":
     "Review what the starter includes, or use the contact route as the quick path for the next real setup conversation.",
-  "finalCta.primary": "View product capabilities",
-  "finalCta.secondary": "Contact",
+  "finalCta.primary": "Request a Quote",
+  "finalCta.secondary": "Wholesale & OEM",
 };
 
 const mockGetSingleSiteHomeLinkTargets = vi.hoisted(() =>
   vi.fn(() => ({
     contact: "/contact",
     products: "/products",
-    primaryCta: "/products",
-    secondaryCta: "/contact",
+    requestQuote: "/request-quote",
+    oemWholesale: "/oem-wholesale",
+    primaryCta: "/request-quote",
+    secondaryCta: "/oem-wholesale",
   })),
 );
 
@@ -135,10 +140,9 @@ vi.mock("@/components/sections/hero-section", () => ({
         Present products, applications, and delivery proof in one clear B2B
         website.
       </h1>
-      <span>Product system</span>
-      <span>Application fit</span>
-      <span>Delivery proof</span>
-      <span>Inquiry path</span>
+      <figure data-testid="hero-diagram">
+        <figcaption>How the product works, in one drawing.</figcaption>
+      </figure>
     </section>
   ),
 }));
@@ -148,8 +152,10 @@ describe("Home Page", () => {
     mockGetSingleSiteHomeLinkTargets.mockReturnValue({
       contact: "/contact",
       products: "/products",
-      primaryCta: "/products",
-      secondaryCta: "/contact",
+      requestQuote: "/request-quote",
+      oemWholesale: "/oem-wholesale",
+      primaryCta: "/request-quote",
+      secondaryCta: "/oem-wholesale",
     });
   });
 
@@ -211,10 +217,17 @@ describe("Home Page", () => {
         answerSection.getByText("Delivery and quality proof"),
       ).toBeInTheDocument();
       const heroSection = within(screen.getByTestId("hero-section"));
-      expect(heroSection.getByText("Product system")).toBeInTheDocument();
-      expect(heroSection.getByText("Application fit")).toBeInTheDocument();
-      expect(heroSection.getByText("Delivery proof")).toBeInTheDocument();
-      expect(heroSection.getByText("Inquiry path")).toBeInTheDocument();
+      expect(heroSection.getByTestId("hero-diagram")).toBeInTheDocument();
+      expect(
+        heroSection.getByText("How the product works, in one drawing."),
+      ).toBeInTheDocument();
+      expect(
+        heroSection.queryByTestId("hero-preview-card"),
+      ).not.toBeInTheDocument();
+      const verifySection = within(screen.getByTestId("home-verify-section"));
+      expect(
+        verifySection.getByText("Factory audits welcome"),
+      ).toBeInTheDocument();
     });
 
     it("renders homepage sections in the configured page-expression order", async () => {
@@ -227,8 +240,11 @@ describe("Home Page", () => {
       const sectionTestIds = {
         hero: "hero-section",
         problems: "home-problem-section",
+        howToChoose: "home-how-to-choose-section",
         answer: "home-answer-section",
+        verify: "home-verify-section",
         startPath: "home-start-path-section",
+        faq: "home-faq-section",
         finalCta: "home-final-action",
       } as const;
       const expectedOrder = SINGLE_SITE_HOME_SECTION_ORDER.map(
@@ -253,13 +269,11 @@ describe("Home Page", () => {
 
       const finalAction = within(screen.getByTestId("home-final-action"));
       expect(
-        finalAction.getByRole("link", { name: "Contact" }),
-      ).toHaveAttribute("href", "/contact");
+        finalAction.getByRole("link", { name: "Request a Quote" }),
+      ).toHaveAttribute("href", "/request-quote");
       expect(
-        finalAction.getByRole("link", {
-          name: "View product capabilities",
-        }),
-      ).toHaveAttribute("href", "/products");
+        finalAction.getByRole("link", { name: "Wholesale & OEM" }),
+      ).toHaveAttribute("href", "/oem-wholesale");
     });
 
     it("does not reuse product or about labels when a thin profile only has contact", async () => {
@@ -277,12 +291,10 @@ describe("Home Page", () => {
 
       const finalAction = within(screen.getByTestId("home-final-action"));
       expect(
-        finalAction.getByRole("link", { name: "Contact" }),
+        finalAction.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/contact");
       expect(
-        finalAction.queryByRole("link", {
-          name: "View product capabilities",
-        }),
+        finalAction.queryByRole("link", { name: "Wholesale & OEM" }),
       ).not.toBeInTheDocument();
       expect(
         finalAction.queryByRole("link", { name: "About" }),
@@ -307,19 +319,20 @@ describe("Home Page", () => {
       const problemArticles = within(problemSection).getAllByRole("article");
       expect(problemArticles[0]).toHaveClass("surface-card");
 
+      // Rhythm over uniformity: proof items are an open bordered grid (no
+      // nested panel card), and the step list runs as an open divided list.
       const answerProofPanel = within(answerSection).getByTestId(
         "home-answer-proof-panel",
       );
-      expect(answerProofPanel).toHaveClass("surface-card");
-      expect(answerProofPanel).toHaveClass("rounded-2xl");
-      expect(answerProofPanel).toHaveClass("bg-muted/30");
+      expect(answerProofPanel).not.toHaveClass("surface-card");
+      expect(answerProofPanel).toHaveClass("grid");
       expect(
         within(answerProofPanel).getAllByTestId("home-answer-proof-item")[0],
       ).toHaveClass("rounded-xl");
 
       const startPathList = within(startPathSection).getByRole("list");
-      expect(startPathList).toHaveClass("grid");
-      expect(startPathList).not.toHaveClass("divide-y");
+      expect(startPathList).toHaveClass("divide-y");
+      expect(startPathList).not.toHaveClass("grid");
       expect(
         within(startPathList).getAllByTestId("home-start-path-step-badge")[0],
       ).toHaveClass("rounded-full");

@@ -10,6 +10,7 @@ import {
 const pageConfig = {
   pageType: "materialsGuide",
   slug: "flood-barrier-materials-guide",
+  schemaType: "Article",
 } as const;
 
 interface MaterialsGuidePageProps {

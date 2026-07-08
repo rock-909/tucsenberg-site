@@ -1,4 +1,5 @@
 import { siteFacts } from "@/config/site-facts";
+import { stripInlineMarkdown } from "@/lib/content/inline-markdown-text";
 import type { FaqItem } from "@/types/content.types";
 
 export const LAYER1_FACTS: Record<string, string | number> = {
@@ -63,7 +64,7 @@ export function generateFaqSchemaFromItems(
       name: item.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: item.answer,
+        text: stripInlineMarkdown(item.answer),
       },
     })),
   };

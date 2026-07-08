@@ -1,5 +1,4 @@
 import { execFileSync } from "node:child_process";
-import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -21,9 +20,9 @@ function listTrackedFiles(rootRelativePath: string): string[] {
 
 describe("Impeccable project-local skill contract", () => {
   it("does not ship retired project-local Impeccable skill bundles", () => {
+    // Local (gitignored) skill installs are the owner's tooling choice; the
+    // repo contract is only that these bundles are never tracked/shipped.
     for (const root of RETIRED_IMPECCABLE_SKILL_ROOTS) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test iterates over a fixed allowlist of retired repo-local skill roots
-      expect(fs.existsSync(path.join(REPO_ROOT, root)), root).toBe(false);
       expect(listTrackedFiles(root), root).toEqual([]);
     }
   });

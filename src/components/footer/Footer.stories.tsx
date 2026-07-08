@@ -94,17 +94,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const WithStatusSlot: Story = {
-  args: {
-    statusSlot: <span>Starter status: review-ready</span>,
-  },
-};
-
 export const WithThemeToggleSlot: Story = {
   args: {
     themeToggleSlot: (
       <button
-        className="rounded-md border border-border px-3 py-1 text-sm"
+        className="border-border rounded-md border px-3 py-1 text-sm"
         type="button"
       >
         Theme control slot

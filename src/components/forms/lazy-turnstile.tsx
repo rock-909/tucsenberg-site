@@ -12,6 +12,7 @@ import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
 import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { requestIdleCallback } from "@/lib/idle-callback";
 import { LazyIslandErrorBoundary } from "@/components/ui/lazy-island-error-boundary";
+import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
 
 const TURNSTILE_PLACEHOLDER_CLASS_NAME =
   "h-[var(--turnstile-placeholder-height)] w-full animate-pulse rounded-md bg-muted";
@@ -149,7 +150,8 @@ export function LazyTurnstile({
       className={`turnstile-fallback ${className ?? "w-full"}`}
       aria-live="polite"
     >
-      <div className="text-sm text-destructive">{labelText.unavailable}</div>
+      <div className="text-destructive text-sm">{labelText.unavailable}</div>
+      <TurnstileRescueLine />
     </output>
   );
   const handleLazyError = () => {

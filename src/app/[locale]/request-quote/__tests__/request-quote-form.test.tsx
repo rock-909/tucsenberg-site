@@ -128,50 +128,17 @@ describe("RequestQuoteForm", () => {
       fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
     });
 
-    fireEvent.change(screen.getByLabelText("What are you protecting?"), {
-      target: { value: "door" },
-    });
-    fireEvent.change(
-      screen.getByLabelText("Opening width × height / run length"),
-      {
-        target: { value: "2.4m × 1.2m" },
-      },
-    );
-    fireEvent.change(screen.getByLabelText("Mounting surface / ground type"), {
-      target: { value: "concrete" },
-    });
-    fireEvent.change(screen.getByLabelText("Material preference"), {
-      target: { value: "aluminum-flood-gates" },
-    });
-    fireEvent.change(screen.getByLabelText("Quantity"), {
-      target: { value: "container" },
-    });
-    fireEvent.change(screen.getByLabelText("Market & delivery port"), {
-      target: { value: "USA / Los Angeles" },
-    });
-    fireEvent.change(screen.getByLabelText("Timeline"), {
-      target: { value: "urgent" },
-    });
-    fireEvent.change(screen.getByLabelText("Photos / drawings links"), {
-      target: { value: "https://example.com/drawings.pdf" },
-    });
-    fireEvent.change(screen.getByLabelText("Name"), {
+    fireEvent.change(screen.getByLabelText("Your name"), {
       target: { value: "Alice Buyer" },
     });
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText("Work email"), {
       target: { value: "alice@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Company"), {
-      target: { value: "Flood Buyer Co." },
+    fireEvent.change(screen.getByLabelText("What do you need?"), {
+      target: {
+        value: "Aluminum gates for 3 garage doors, 2.4m × 1.2m, to USA.",
+      },
     });
-    fireEvent.change(screen.getByLabelText("WhatsApp"), {
-      target: { value: "+1 555 0100" },
-    });
-    fireEvent.click(
-      screen.getByLabelText(
-        "This is a wholesale / OEM / private label enquiry",
-      ),
-    );
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Send RFQ" }));
@@ -192,10 +159,9 @@ describe("RequestQuoteForm", () => {
     expect(getFetchBody()).toMatchObject({
       fullName: "Alice Buyer",
       email: "alice@example.com",
-      company: "Flood Buyer Co.",
-      productSlug: "aluminum-flood-gates",
-      productName: "RFQ: Aluminum flood gates",
-      quantity: "Container",
+      productSlug: "request-quote",
+      productName: "General RFQ — product line to be advised",
+      quantity: "Not specified — see message",
       turnstileToken: "mock-rfq-turnstile-token",
       marketingConsent: false,
       utmSource: "google",
@@ -205,10 +171,10 @@ describe("RequestQuoteForm", () => {
       capturedAt: "2026-07-04T00:00:00.000Z",
     });
     expect(String(getFetchBody().requirements)).toContain(
-      "Photos / drawings links: https://example.com/drawings.pdf",
+      "Submitted via the request-quote form.",
     );
     expect(String(getFetchBody().requirements)).toContain(
-      "Wholesale / OEM / private label: Yes",
+      "Aluminum gates for 3 garage doors, 2.4m × 1.2m, to USA.",
     );
     expect(window.gtag).toHaveBeenCalledWith(
       "event",
@@ -218,6 +184,31 @@ describe("RequestQuoteForm", () => {
         method: "rfq",
       }),
     );
+  });
+
+  it("prefills the message field from a product estimator ?config= param", () => {
+    // setup.next.ts replaces window.location with a static snapshot, so set
+    // the search string directly instead of going through history APIs.
+    const originalLocation = window.location;
+    const config =
+      "TB-BW ABS boxwall: protect approx. 12 m, estimated 12 straight units (100 cm unit footprint basis).";
+    Object.defineProperty(window, "location", {
+      value: {
+        ...originalLocation,
+        search: `?config=${encodeURIComponent(config)}`,
+      },
+      configurable: true,
+    });
+
+    try {
+      render(<RequestQuoteForm copy={copy} />);
+      expect(screen.getByLabelText("What do you need?")).toHaveValue(config);
+    } finally {
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        configurable: true,
+      });
+    }
   });
 
   it("shows a buyer-safe error when the inquiry API rejects the RFQ", async () => {
@@ -237,14 +228,11 @@ describe("RequestQuoteForm", () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
     });
-    fireEvent.change(screen.getByLabelText("Name"), {
+    fireEvent.change(screen.getByLabelText("Your name"), {
       target: { value: "Alice Buyer" },
     });
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText("Work email"), {
       target: { value: "alice@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText("Quantity"), {
-      target: { value: "container" },
     });
 
     await act(async () => {
@@ -269,14 +257,11 @@ describe("RequestQuoteForm", () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId("rfq-turnstile-success"));
     });
-    fireEvent.change(screen.getByLabelText("Name"), {
+    fireEvent.change(screen.getByLabelText("Your name"), {
       target: { value: "Alice Buyer" },
     });
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText("Work email"), {
       target: { value: "alice@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText("Quantity"), {
-      target: { value: "container" },
     });
 
     await act(async () => {

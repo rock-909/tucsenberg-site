@@ -30,12 +30,12 @@ describe("market metadata live integration", () => {
     [
       "flood-tube-dams",
       "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs | Tucsenberg",
-      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Full accessory kit. 12-hour quotes.",
+      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. 12-hour quotes.",
     ],
     [
       "frp-flood-barriers",
-      "FRP Composite Flood Barrier Planks — Corrosion-Free Alternative to Aluminum | Tucsenberg",
-      "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production with transparent tooling economics. Register interest for span and deflection data.",
+      "FRP Composite Flood Barrier Planks — Corrosion-Free | Tucsenberg",
+      "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production — register interest.",
     ],
   ] as const;
 

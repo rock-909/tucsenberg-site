@@ -129,15 +129,16 @@ function getProductHomeLinkTargets(
 export function getSingleSiteHomeFinalCtaTargetsFromLinks(
   targets: SingleSiteHomeLinkTargets,
 ): SingleSiteHomeFinalCtaTarget[] {
+  const primaryHref = targets.requestQuote ?? targets.contact;
+  const secondaryHref = targets.oemWholesale ?? targets.products;
+
   return [
-    ...(targets.products !== undefined
-      ? [{ href: targets.products, labelKey: "primary" as const }]
+    ...(primaryHref !== undefined
+      ? [{ href: primaryHref, labelKey: "primary" as const }]
       : []),
-    ...(targets.requestQuote !== undefined
-      ? [{ href: targets.requestQuote, labelKey: "secondary" as const }]
-      : targets.contact !== undefined
-        ? [{ href: targets.contact, labelKey: "secondary" as const }]
-        : []),
+    ...(secondaryHref !== undefined
+      ? [{ href: secondaryHref, labelKey: "secondary" as const }]
+      : []),
   ];
 }
 
