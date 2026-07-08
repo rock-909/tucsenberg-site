@@ -116,9 +116,6 @@ export default defineConfig({
         "reports/**",
         "docs/**",
         "test-results/**",
-        // 排除静态数据/配置组件，避免拉低覆盖率
-        "src/components/i18n/locale-switcher/config.ts",
-        "src/components/shared/animations/showcase-config.tsx",
         // 排除纯类型定义文件（无运行时代码）
         "src/types/**/*.d.ts",
         "src/types/i18n.ts",
@@ -126,8 +123,7 @@ export default defineConfig({
         "src/types/content.ts",
         // 注意：src/types/index.ts, test-types.ts, react19.ts 包含运行时函数，不排除
       ],
-      // 覆盖率阈值由 scripts/quality-gate.js 统一管理
-      // Vitest 仅生成报告数据，不执行阈值检查
+      // 覆盖率为报告用途，不设阈值门禁；质量门禁是 type-check / lint / test / 架构测试
     },
 
     // 测试超时设置 - 适应 CI 环境
