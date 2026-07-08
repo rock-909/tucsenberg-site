@@ -8,7 +8,6 @@ import type { Locale } from "@/types/i18n";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { BREAKPOINT_MD, BREAKPOINT_XL } from "@/constants/breakpoints";
 import { BYTES_PER_KB } from "@/constants/core";
-import { COUNT_250 } from "@/constants/count";
 import { PERCENTAGE_FULL } from "@/constants/decimal";
 import {
   SINGLE_SITE_NAVIGATION,
@@ -16,6 +15,8 @@ import {
 } from "@/config/single-site-navigation";
 
 export type NavigationItem = SiteNavigationItem;
+
+const NAV_PREFETCH_DELAY_MS = 250;
 
 // Main navigation is authored in `src/config/single-site.ts`; this wrapper keeps
 // existing consumers pinned to the active single-site source.
@@ -89,7 +90,7 @@ export const NAVIGATION_BREAKPOINTS = Object.freeze({
 
 // Animation durations
 export const NAVIGATION_ANIMATIONS = Object.freeze({
-  mobileMenuToggle: COUNT_250,
+  mobileMenuToggle: NAV_PREFETCH_DELAY_MS,
   dropdownFade: PERCENTAGE_FULL,
   hoverTransition: PERCENTAGE_FULL,
 } as const);

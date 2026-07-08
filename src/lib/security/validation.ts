@@ -1,4 +1,3 @@
-import { ZERO } from "@/constants";
 import { INPUT_VALIDATION_CONSTANTS } from "@/constants/security-constants";
 
 /**
@@ -89,7 +88,7 @@ function scanUnsafeTagStep(
   const { input, lower, tag } = scan;
   const { current, depth, quote } = state;
   const character = input[current];
-  const previousCharacter = current > ZERO ? input[current - 1] : undefined;
+  const previousCharacter = current > 0 ? input[current - 1] : undefined;
   const nextQuote = updateQuoteState(quote, character, previousCharacter);
 
   if (nextQuote !== quote) {
@@ -125,7 +124,7 @@ function findUnsafeTagEnd(scan: UnsafeTagScan, start: number): number {
 
   while (state.current < input.length) {
     state = scanUnsafeTagStep(scan, state);
-    if (state.depth === ZERO) return state.current;
+    if (state.depth === 0) return state.current;
   }
 
   return input.length;
@@ -135,7 +134,7 @@ function stripUnsafeTag(input: string, tag: "script" | "iframe"): string {
   const lower = input.toLowerCase();
   const scan = { input, lower, tag };
   const out: string[] = [];
-  let current = ZERO;
+  let current = 0;
 
   while (current < input.length) {
     if (isOpeningTagAt(lower, current, tag)) {
@@ -262,7 +261,7 @@ export function sanitizeFilePath(filePath: string): string {
  */
 export function validateInputLength(
   input: string,
-  minLength: number = ZERO,
+  minLength: number = 0,
   maxLength: number = INPUT_VALIDATION_CONSTANTS.TEXT_MAX_LENGTH,
 ): { valid: boolean; error?: string } {
   if (typeof input !== "string") {

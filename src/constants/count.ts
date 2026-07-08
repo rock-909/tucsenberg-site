@@ -8,22 +8,6 @@
  */
 
 // ============================================================================
-// 基础计数常量
-// ============================================================================
-
-export const COUNT_ZERO = 0 as const;
-export const COUNT_ONE = 1 as const;
-export const COUNT_TWO = 2 as const;
-export const COUNT_THREE = 3 as const;
-export const COUNT_4 = 4 as const;
-export const COUNT_FIVE = 5 as const;
-export const COUNT_SIX = 6 as const;
-export const COUNT_SEVEN = 7 as const;
-export const COUNT_EIGHT = 8 as const;
-export const COUNT_NINE = 9 as const;
-export const COUNT_TEN = 10 as const;
-
-// ============================================================================
 // 常用数值常量 (按使用场景分组)
 // ============================================================================
 
@@ -74,22 +58,6 @@ export const HTTP_SERVER_ERROR_UPPER = 600 as const;
 export const RESPONSE_TIME_DEGRADED_MS = 2000 as const;
 /** LCP "Good" 阈值 (2500ms) */
 export const LCP_GOOD_THRESHOLD_MS = 2500 as const;
-
-// -- 尺寸和数量限制 --
-/** Logo 尺寸相关 */
-export const COUNT_120 = 120 as const;
-/** 内容截断长度 */
-export const COUNT_160 = 160 as const;
-/** 导航预加载延迟 */
-export const COUNT_250 = 250 as const;
-/** 组件模板尺寸 */
-export const COUNT_700 = 700 as const;
-/** Top Loader 尺寸 */
-export const COUNT_1600 = 1600 as const;
-/** 秒每小时 */
-export const COUNT_3600 = 3600 as const;
-/** 5分钟 (毫秒) */
-export const COUNT_300000 = 300000 as const;
 
 // ============================================================================
 // 大容量数值 (文件大小和时间相关)

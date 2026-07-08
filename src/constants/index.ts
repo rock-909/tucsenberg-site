@@ -93,18 +93,6 @@ export {
 // 计数与数值常量
 // ============================================================================
 export {
-  // 基础计数
-  COUNT_ZERO,
-  COUNT_ONE,
-  COUNT_TWO,
-  COUNT_THREE,
-  COUNT_4,
-  COUNT_FIVE,
-  COUNT_SIX,
-  COUNT_SEVEN,
-  COUNT_EIGHT,
-  COUNT_NINE,
-  COUNT_TEN,
   // 进制和编码
   HEX_RADIX,
   BASE36_RADIX,
@@ -129,14 +117,6 @@ export {
   // 时间相关
   RESPONSE_TIME_DEGRADED_MS,
   LCP_GOOD_THRESHOLD_MS,
-  // 尺寸和数量
-  COUNT_120,
-  COUNT_160,
-  COUNT_250,
-  COUNT_700,
-  COUNT_1600,
-  COUNT_3600,
-  COUNT_300000,
   // 大容量数值
   BYTES_PER_MB,
   MS_PER_HOUR,
@@ -192,14 +172,7 @@ export {
 } from "./breakpoints";
 export type { BreakpointKey } from "./breakpoints";
 
-// ============================================================================
-// Legacy compatibility facade.
-// Prefer local literals or domain-named constants instead of generic ZERO/ONE
-// in new production code.
-// ============================================================================
 export {
-  ZERO,
-  ONE,
   HTTP_OK,
   HTTP_BAD_REQUEST,
   HTTP_UNAUTHORIZED,

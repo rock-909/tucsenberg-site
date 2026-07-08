@@ -7,7 +7,7 @@ import type {
   ContactStatus,
 } from "@/lib/airtable/types";
 import { logger } from "@/lib/logger";
-import { ONE, PERCENTAGE_FULL, ZERO } from "@/constants";
+import { PERCENTAGE_FULL } from "@/constants";
 
 function escapeAirtableFormulaValue(value: string): string {
   return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
@@ -121,11 +121,11 @@ export async function isDuplicateEmailAddress(params: {
       .table(tableName)
       .select({
         filterByFormula: `{Email} = "${normalizedEmail}"`,
-        maxRecords: ONE,
+        maxRecords: 1,
       })
       .all();
 
-    return records.length > ZERO;
+    return records.length > 0;
   } catch (error) {
     logger.error("Failed to check duplicate email", {
       error: error instanceof Error ? error.message : "Unknown error",

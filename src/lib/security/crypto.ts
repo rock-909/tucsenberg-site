@@ -1,10 +1,8 @@
 import {
   AES_KEY_LENGTH_BITS,
-  COUNT_TWO,
   AES_GCM_IV_BYTES,
   HEX_RADIX,
   PBKDF2_ITERATIONS,
-  ZERO,
 } from "@/constants";
 
 /**
@@ -17,9 +15,9 @@ import {
  */
 const CRYPTO_CONSTANTS = {
   SALT_BYTE_LENGTH: HEX_RADIX,
-  HEX_CHARS_PER_BYTE: COUNT_TWO,
+  HEX_CHARS_PER_BYTE: 2,
   HEX_BASE: HEX_RADIX,
-  HEX_PAD_LENGTH: COUNT_TWO,
+  HEX_PAD_LENGTH: 2,
 } as const;
 
 /**
@@ -75,9 +73,9 @@ export async function verifyPassword(
 
     const salt = (() => {
       const pairs: string[] = [];
-      for (let i = 0; i < saltHex.length; i += COUNT_TWO) {
-        const seg = saltHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) pairs.push(seg);
+      for (let i = 0; i < saltHex.length; i += 2) {
+        const seg = saltHex.slice(i, i + 2);
+        if (seg.length === 2) pairs.push(seg);
       }
       return pairs.map((byte) => parseInt(byte, HEX_RADIX));
     })();
@@ -244,13 +242,13 @@ export async function encryptData(
 
   return {
     encrypted: Array.from(new Uint8Array(encrypted))
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(2, "0"))
       .join(""),
     iv: Array.from(iv)
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(2, "0"))
       .join(""),
     salt: Array.from(salt)
-      .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
+      .map((b) => b.toString(HEX_RADIX).padStart(2, "0"))
       .join(""),
   };
 }
@@ -271,9 +269,9 @@ export async function decryptData(params: {
   const encrypted = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < encryptedHex.length; i += COUNT_TWO) {
-        const seg = encryptedHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < encryptedHex.length; i += 2) {
+        const seg = encryptedHex.slice(i, i + 2);
+        if (seg.length === 2) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -281,9 +279,9 @@ export async function decryptData(params: {
   const iv = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < ivHex.length; i += COUNT_TWO) {
-        const seg = ivHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < ivHex.length; i += 2) {
+        const seg = ivHex.slice(i, i + 2);
+        if (seg.length === 2) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -291,9 +289,9 @@ export async function decryptData(params: {
   const salt = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < saltHex.length; i += COUNT_TWO) {
-        const seg = saltHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < saltHex.length; i += 2) {
+        const seg = saltHex.slice(i, i + 2);
+        if (seg.length === 2) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -348,7 +346,7 @@ export function generateEncryptionKey(): Promise<CryptoKey> {
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await crypto.subtle.exportKey("raw", key);
   return Array.from(new Uint8Array(exported))
-    .map((b) => b.toString(HEX_RADIX).padStart(COUNT_TWO, "0"))
+    .map((b) => b.toString(HEX_RADIX).padStart(2, "0"))
     .join("");
 }
 
@@ -359,9 +357,9 @@ export function importKey(keyHex: string): Promise<CryptoKey> {
   const keyBytes = new Uint8Array(
     (() => {
       const out: number[] = [];
-      for (let i = 0; i < keyHex.length; i += COUNT_TWO) {
-        const seg = keyHex.slice(i, i + COUNT_TWO);
-        if (seg.length === COUNT_TWO) out.push(parseInt(seg, HEX_RADIX));
+      for (let i = 0; i < keyHex.length; i += 2) {
+        const seg = keyHex.slice(i, i + 2);
+        if (seg.length === 2) out.push(parseInt(seg, HEX_RADIX));
       }
       return out;
     })(),
@@ -384,12 +382,12 @@ export function constantTimeCompare(a: string, b: string): boolean {
   // Track both XOR result and length mismatch
   let result = a.length ^ b.length;
 
-  for (let i = ZERO; i < maxLength; i++) {
+  for (let i = 0; i < maxLength; i++) {
     // Use 0 as fallback for out-of-bounds access to maintain constant time
-    const charA = i < a.length ? a.charCodeAt(i) : ZERO;
-    const charB = i < b.length ? b.charCodeAt(i) : ZERO;
+    const charA = i < a.length ? a.charCodeAt(i) : 0;
+    const charB = i < b.length ? b.charCodeAt(i) : 0;
     result |= charA ^ charB;
   }
 
-  return result === ZERO;
+  return result === 0;
 }

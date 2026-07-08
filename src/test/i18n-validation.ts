@@ -2,7 +2,7 @@
  * 企业级国际化验证工具
  * 提供翻译完整性检查、质量验证和同步机制
  */
-import { PERCENTAGE_FULL, ZERO } from "@/constants";
+import { PERCENTAGE_FULL } from "@/constants";
 import { routing } from "@/i18n/routing";
 
 // 测试环境检测
@@ -169,11 +169,11 @@ function calculateCoverage(
   const totalKeys = allKeys.size * routing.locales.length;
   const missingCount = missingKeys.length;
 
-  if (allKeys.size === ZERO) {
+  if (allKeys.size === 0) {
     return PERCENTAGE_FULL;
   }
 
-  if (totalKeys > ZERO) {
+  if (totalKeys > 0) {
     return ((totalKeys - missingCount) / totalKeys) * PERCENTAGE_FULL;
   }
 
@@ -188,9 +188,9 @@ function validateEmptyTranslations(
   translations: Record<string, unknown>,
   errors: TranslationError[],
 ): void {
-  if (allKeys.size === ZERO && Object.keys(translations).length > ZERO) {
+  if (allKeys.size === 0 && Object.keys(translations).length > 0) {
     const allEmpty = Object.values(translations).every(
-      (trans) => trans && Object.keys(trans).length === ZERO,
+      (trans) => trans && Object.keys(trans).length === 0,
     );
 
     if (allEmpty) {
@@ -248,7 +248,7 @@ export async function validateTranslations(): Promise<TranslationValidationResul
     const criticalErrors = errors.filter(
       (e) => e.severity === "critical" || e.severity === "high",
     );
-    const isValid = criticalErrors.length === ZERO;
+    const isValid = criticalErrors.length === 0;
 
     return {
       isValid,
@@ -271,7 +271,7 @@ export async function validateTranslations(): Promise<TranslationValidationResul
         },
       ],
       warnings: [],
-      coverage: ZERO,
+      coverage: 0,
       missingKeys: [],
       inconsistentKeys: [],
     };
