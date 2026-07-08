@@ -47,19 +47,20 @@ classification logic unless the route has a documented business reason.
 
 ## Lead-family behavior
 
-Target behavior for contact, inquiry, and subscribe:
+Canonical behavior for contact and inquiry (owner decision, 2026-07-07):
 
 ```text
-browser form -> route handler -> Zod -> Turnstile -> process lead -> Airtable first -> optional email
+browser form -> route handler -> Zod -> Turnstile -> process lead -> parallel owner email + Airtable record
 ```
 
-- Airtable record creation is the business success condition.
-- Email failure after record creation returns user success and logs internally.
-- Airtable failure returns failure and must not send email.
+- Owner email and Airtable record creation start in parallel; either channel
+  succeeding is the user-facing success condition (email-best-effort policy:
+  a lead must never be rejected while at least one delivery channel works).
+- When Airtable fails but email succeeds, the route returns success and the
+  failure is logged as an error for manual CRM backfill.
+- Both channels failing returns failure with a stable error code.
+- Newsletter subscribe remains Airtable-only: record failure returns failure.
 - User-facing `partialSuccess` is not part of the target contract.
-
-Until Phase 2/3 finishes, existing routes may still carry old wrappers. Do not
-copy those wrappers into new code.
 
 Buyer-controlled fields sent to Airtable or another spreadsheet-like sink must
 be neutralized for formula injection before record creation.
