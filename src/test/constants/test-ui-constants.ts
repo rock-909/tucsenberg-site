@@ -121,9 +121,6 @@ export const TEST_SPECIAL_CONSTANTS = {
   /** 负数测试值 - -100 */
   NEGATIVE_VALUE: -100,
 
-  /** 零值 */
-  ZERO: 0,
-
   /** 单位值 */
   UNIT: 1,
 

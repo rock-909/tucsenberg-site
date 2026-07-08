@@ -6,7 +6,6 @@ import {
   shouldIndexPublicPageForProfile,
 } from "@/config/single-site-seo";
 import { siteFacts } from "@/config/site-facts";
-import { ONE } from "@/constants";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 import {
@@ -286,9 +285,9 @@ export function generateLocalizedMetadata(
       googleBot: {
         index: true,
         follow: true,
-        "max-video-preview": -ONE,
+        "max-video-preview": -1,
         "max-image-preview": "large",
-        "max-snippet": -ONE,
+        "max-snippet": -1,
       },
     },
 

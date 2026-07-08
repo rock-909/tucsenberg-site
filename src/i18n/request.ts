@@ -10,7 +10,6 @@ import {
 } from "@/config/paths/locales-config";
 import { coerceLocale } from "@/i18n/locale-utils";
 import type { Locale } from "@/i18n/routing-config";
-import { COUNT_FIVE } from "@/constants";
 
 // 辅助函数：获取格式配置
 function getFormats(locale: Locale) {
@@ -30,7 +29,7 @@ function getFormats(locale: Locale) {
     },
     number: {
       precise: {
-        maximumFractionDigits: COUNT_FIVE,
+        maximumFractionDigits: 5,
       },
       currency: {
         style: "currency" as const,

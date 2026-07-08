@@ -9,7 +9,6 @@ import {
 } from "@/lib/structured-data-helpers";
 import type { Locale } from "@/lib/structured-data-types";
 import { type PageType } from "@/config/paths";
-import { COUNT_TWO } from "@/constants";
 
 export type { Locale } from "@/lib/structured-data-types";
 
@@ -21,8 +20,7 @@ export { generateLocalizedStructuredData };
  * @see https://nextjs.org/docs/app/guides/json-ld
  */
 export function generateJSONLD(structuredData: unknown): string {
-  const JSON_INDENT = COUNT_TWO;
-  const jsonString = JSON.stringify(structuredData, null, JSON_INDENT);
+  const jsonString = JSON.stringify(structuredData, null, 2);
   // Escape HTML-sensitive characters and JS line separators before embedding
   // JSON-LD in a script tag so every call site shares the same hardening.
   return jsonString

@@ -13,7 +13,6 @@ import {
   MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
-  ONE,
 } from "@/constants";
 
 /**
@@ -82,7 +81,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: z.string().trim().min(ONE).email().max(MAX_LEAD_EMAIL_LENGTH),
+  email: z.string().trim().min(1).email().max(MAX_LEAD_EMAIL_LENGTH),
   marketingConsent: z.boolean().optional().default(false),
   ...leadAttributionFields,
 };
@@ -96,7 +95,7 @@ const productQuantitySchema: z.ZodType<string | number> = z
     ) {
       context.addIssue({
         code: "too_small",
-        minimum: ONE,
+        minimum: 1,
         inclusive: true,
         origin: "string",
         message: "Quantity is required",
@@ -132,7 +131,7 @@ export const contactLeadSchema = z.object({
   message: sanitizedString()
     .min(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MIN_LENGTH)
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MAX_LENGTH),
-  turnstileToken: z.string().min(ONE),
+  turnstileToken: z.string().min(1),
   submittedAt: z.string().optional(),
   company: sanitizedString()
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.COMPANY_MAX_LENGTH)
@@ -146,9 +145,9 @@ export const contactLeadSchema = z.object({
  */
 export const productLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.PRODUCT),
-  fullName: sanitizedString().min(ONE).max(MAX_LEAD_NAME_LENGTH),
-  productSlug: z.string().trim().min(ONE),
-  productName: sanitizedString().min(ONE).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
+  fullName: sanitizedString().min(1).max(MAX_LEAD_NAME_LENGTH),
+  productSlug: z.string().trim().min(1),
+  productName: sanitizedString().min(1).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
   quantity: productQuantitySchema,
   company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
   requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
