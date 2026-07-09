@@ -81,26 +81,6 @@ function getPepper(): string {
   return currentPepper;
 }
 
-export function extractBearerToken(authHeader: string): string | null {
-  const bearerPrefixLength = "Bearer".length;
-  const scheme = authHeader.slice(0, bearerPrefixLength);
-  if (scheme.toLowerCase() !== "bearer") {
-    return null;
-  }
-
-  const separator = authHeader[bearerPrefixLength];
-  if (!separator || !/\s/.test(separator)) {
-    return null;
-  }
-
-  const token = authHeader.slice(bearerPrefixLength + 1).trim();
-  if (token.length === 0) {
-    return null;
-  }
-
-  return token;
-}
-
 /**
  * Generate HMAC key from input using server-side pepper
  *
@@ -111,32 +91,6 @@ export async function hmacKey(input: string): Promise<string> {
   const pepper = getPepper();
   const digest = await generateHMAC(input, pepper, "SHA-256");
   return digest.slice(0, HMAC_OUTPUT_LENGTH);
-}
-
-/**
- * Generate HMAC key with pepper rotation support
- * During rotation grace period, checks both current and previous pepper
- *
- * TODO: Not currently used. Implement pepper rotation workflow:
- * 1. Set RATE_LIMIT_PEPPER_PREVIOUS to current pepper
- * 2. Set RATE_LIMIT_PEPPER to new pepper
- * 3. Use this function to check rate limits against both keys during grace period
- * 4. After grace period (e.g., 2x window duration), remove RATE_LIMIT_PEPPER_PREVIOUS
- *
- * @param input - The value to hash
- * @returns Array of possible keys (usually 1, up to 2 during rotation)
- */
-export async function hmacKeyWithRotation(input: string): Promise<string[]> {
-  const keys = [await hmacKey(input)];
-
-  const previousPepper = getRuntimeEnvString("RATE_LIMIT_PEPPER_PREVIOUS");
-  if (previousPepper) {
-    const previousDigest = await generateHMAC(input, previousPepper, "SHA-256");
-    const previousKey = previousDigest.slice(0, HMAC_OUTPUT_LENGTH);
-    keys.push(previousKey);
-  }
-
-  return keys;
 }
 
 /**
@@ -151,99 +105,6 @@ export async function hmacKeyWithRotation(input: string): Promise<string[]> {
 export async function getIPKey(request: NextRequest): Promise<string> {
   const clientIP = getClientIP(request);
   return `ip:${await hmacKey(clientIP)}`;
-}
-
-/**
- * Strategy 2: Session Priority (for authenticated users)
- *
- * Uses server-issued session ID when available, falls back to IP.
- *
- * SECURITY WARNING: This strategy trusts the session-id cookie value for rate
- * limiting. If the cookie is not cryptographically signed (e.g., with iron-session
- * or similar), an attacker can bypass rate limits by changing the cookie value
- * on each request. Only use this strategy when:
- * - Session cookie is server-signed and tamper-proof, OR
- * - The protected endpoint has low abuse impact (e.g., analytics)
- *
- * For high-security endpoints, use getIPKey() or implement session signature
- * verification before rate limiting.
- *
- * @param request - Next.js request object
- * @returns Rate limit key in format `session:{hmacHash}` or `ip:{hmacHash}`
- */
-export async function getSessionPriorityKey(
-  request: NextRequest,
-): Promise<string> {
-  // Check for session cookie (should be server-issued and signed)
-  const sessionCookie = request.cookies.get("session-id");
-  const sessionValue = sessionCookie?.value;
-
-  if (sessionValue && isValidSessionFormat(sessionValue)) {
-    return `session:${await hmacKey(sessionValue)}`;
-  }
-
-  // Fallback to IP
-  return getIPKey(request);
-}
-
-/**
- * Strategy 3: API Key Priority (for server-to-server APIs)
- *
- * Uses API key from Authorization header when available, falls back to IP.
- *
- * SECURITY WARNING: This strategy uses the raw Bearer token value BEFORE
- * authentication. If rate limiting runs before auth validation, an attacker
- * can bypass rate limits by sending random Bearer tokens on each request.
- *
- * RECOMMENDED PATTERN for high-security endpoints:
- * 1. Use getIPKey() for pre-auth rate limiting (coarse protection)
- * 2. Validate authentication
- * 3. Apply per-API-key rate limits after auth passes (fine-grained protection)
- *
- * Only use this strategy when:
- * - Rate limiting happens AFTER authentication, OR
- * - You accept the risk of pre-auth resource consumption
- *
- * @param request - Next.js request object
- * @returns Rate limit key in format `apikey:{hmacHash}` or `ip:{hmacHash}`
- */
-export async function getApiKeyPriorityKey(
-  request: NextRequest,
-): Promise<string> {
-  const authHeader = request.headers.get("Authorization");
-  const apiKey = authHeader ? extractBearerToken(authHeader) : null;
-
-  if (typeof apiKey === "string") {
-    return `apikey:${await hmacKey(apiKey)}`;
-  }
-
-  // Fallback to IP
-  return getIPKey(request);
-}
-
-/**
- * Validate session ID format
- *
- * Session IDs must be server-issued (typically UUID or similar format).
- * This is a basic format check - actual session validation should happen
- * in the application's auth layer before using session-based rate limiting.
- *
- * @param sessionId - Session ID string to validate
- * @returns true if format appears valid (not empty, reasonable length)
- */
-function isValidSessionFormat(sessionId: string): boolean {
-  // Basic sanity checks - session must be non-empty and reasonable length
-  // Actual validation (signature, expiry) should happen in auth middleware
-  if (!sessionId || sessionId.length < 8 || sessionId.length > 256) {
-    return false;
-  }
-
-  // Reject obviously invalid values
-  if (sessionId === "undefined" || sessionId === "[object Object]") {
-    return false;
-  }
-
-  return true;
 }
 
 /**

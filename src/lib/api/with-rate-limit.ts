@@ -16,7 +16,7 @@
  * export const POST = withRateLimit(
  *   'csp',
  *   async (req, { clientIP }) => { ... },
- *   getApiKeyPriorityKey
+ *   getIPKey
  * );
  * ```
  */
