@@ -1,24 +1,8 @@
 import React from "react";
 import { vi } from "vitest";
 
-// Mock app constants - 使用importOriginal保留所有原始常量
-vi.mock("@/constants/app-constants", async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
-  return {
-    ...actual,
-  };
-});
-
 // Mock unified constants entry point - 使用importOriginal保留所有原始常量
 vi.mock("@/constants", async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
-  return {
-    ...actual,
-  };
-});
-
-// Mock i18n constants - 使用importOriginal保留所有原始常量
-vi.mock("@/constants/i18n-constants", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
