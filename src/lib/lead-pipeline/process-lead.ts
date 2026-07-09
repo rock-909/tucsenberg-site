@@ -18,6 +18,7 @@ import {
   type ProductLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
 import {
+  createOptionalSubject,
   generateLeadReferenceId,
   generateProductInquiryMessage,
   splitName,
@@ -75,13 +76,6 @@ function createProcessingFailureResult(referenceId?: string): LeadResult {
     ...(referenceId ? { referenceId } : {}),
     error: "PROCESSING_FAILED",
   };
-}
-
-function createOptionalSubject(
-  subject: string | undefined,
-): { subject: string } | Record<string, never> {
-  const trimmedSubject = subject?.trim();
-  return trimmedSubject ? { subject: trimmedSubject } : {};
 }
 
 function createContactEmailData(lead: ContactLeadInput): EmailTemplateData {

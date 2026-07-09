@@ -10,6 +10,7 @@ import type {
 } from "@/lib/airtable/types";
 import { sanitizeAirtableTextField } from "@/lib/airtable/service-internal/field-sanitization";
 import { LEAD_TYPES, type LeadType } from "@/lib/lead-pipeline/lead-schema";
+import { formatQuantity } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import {
   ATTRIBUTION_FIELD_NAMES,
@@ -86,10 +87,7 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
   fields["Message"] = sanitizeAirtableTextField(data.message);
   fields["Product Name"] = sanitizeAirtableTextField(data.productName);
   fields["Product Slug"] = sanitizeAirtableTextField(data.productSlug);
-  fields["Quantity"] =
-    typeof data.quantity === "number"
-      ? data.quantity.toString()
-      : sanitizeAirtableTextField(data.quantity);
+  fields["Quantity"] = sanitizeAirtableTextField(formatQuantity(data.quantity));
   if (data.requirements) {
     fields["Requirements"] = sanitizeAirtableTextField(data.requirements);
   }

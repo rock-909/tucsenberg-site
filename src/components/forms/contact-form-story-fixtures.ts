@@ -1,4 +1,7 @@
-import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  API_ERROR_CODES,
+  FORM_NETWORK_ERROR,
+} from "@/constants/api-error-codes";
 import type { ServerActionResult } from "@/lib/actions/server-action-utils";
 import type { ContactFormResult } from "@/components/forms/use-contact-form";
 
@@ -112,7 +115,7 @@ export const contactFormProcessingErrorState = {
 
 export const contactFormNetworkErrorState = {
   success: false,
-  errorCode: "FORM_NETWORK_ERROR",
+  errorCode: FORM_NETWORK_ERROR,
   timestamp: STORY_TIMESTAMP,
 } satisfies ServerActionResult<ContactFormResult>;
 

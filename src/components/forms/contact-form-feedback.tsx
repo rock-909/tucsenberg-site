@@ -1,5 +1,8 @@
 import { memo } from "react";
-import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  API_ERROR_CODES,
+  FORM_NETWORK_ERROR,
+} from "@/constants/api-error-codes";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { translateApiError } from "@/lib/api/translate-error-code";
 import { type ServerActionResult } from "@/lib/actions/server-action-utils";
@@ -8,8 +11,6 @@ import {
   StatusCallout,
   type StatusCalloutTone,
 } from "@/components/ui/status-callout";
-
-const FORM_NETWORK_ERROR_CODE = "FORM_NETWORK_ERROR";
 
 /**
  * 获取状态消息配置
@@ -49,7 +50,7 @@ function ContactSuccessCheckIcon() {
   return (
     <span
       aria-hidden="true"
-      className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-[var(--success-foreground)] duration-300 animate-in fade-in-0 zoom-in-95"
+      className="animate-in fade-in-0 zoom-in-95 mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-[var(--success-foreground)] duration-300"
       data-slot="contact-success-check"
     >
       <svg
@@ -129,7 +130,7 @@ function getErrorDisplayState(
   const isValidationError =
     state.errorCode === API_ERROR_CODES.CONTACT_VALIDATION_FAILED;
   const translatedError =
-    state.errorCode === FORM_NETWORK_ERROR_CODE
+    state.errorCode === FORM_NETWORK_ERROR
       ? translateForm("networkError")
       : state.errorCode
         ? translateApiError(translateApi, state.errorCode)

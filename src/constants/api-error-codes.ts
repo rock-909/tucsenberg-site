@@ -118,3 +118,12 @@ export const API_ERROR_CODES = {
 
 export type ApiErrorCode =
   (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];
+
+/**
+ * Client-synthesized error code for a failed contact-form network request.
+ *
+ * Not part of {@link API_ERROR_CODES}: the server never emits it. The browser
+ * sets it when the fetch itself rejects, and the form feedback UI maps it to a
+ * localized network-error message.
+ */
+export const FORM_NETWORK_ERROR = "FORM_NETWORK_ERROR";

@@ -16,6 +16,7 @@ import {
   leadAttributionFields,
 } from "@/lib/lead-pipeline/lead-schema";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
+import { createOptionalSubject } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import {
   pickAttributionFields,
@@ -122,13 +123,6 @@ function isCanonicalContactFailure(
   result: ProcessedContactSubmissionResult | CanonicalContactSubmissionFailure,
 ): result is CanonicalContactSubmissionFailure {
   return result.success === false;
-}
-
-function createSubjectInput(
-  subject: string | undefined,
-): { subject: string } | Record<string, never> {
-  const trimmedSubject = subject?.trim();
-  return trimmedSubject ? { subject: trimmedSubject } : {};
 }
 
 function getBaseErrorKey(issue: ZodIssue): string {
@@ -331,7 +325,7 @@ async function processValidatedContactSubmission(
     fullName: formData.fullName || "Unknown",
     email: formData.email,
     company: formData.company,
-    ...createSubjectInput(formData.subject),
+    ...createOptionalSubject(formData.subject),
     message: formData.message,
     turnstileToken: formData.turnstileToken,
     submittedAt: formData.submittedAt,

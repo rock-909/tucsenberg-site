@@ -11,6 +11,7 @@ import type {
   EmailTemplateData,
   ProductInquiryEmailData,
 } from "@/lib/email/email-data-schema";
+import { formatQuantity } from "@/lib/lead-pipeline/utils";
 import { ResendUtils } from "@/lib/resend-utils";
 
 export interface RuntimeEmailContent {
@@ -220,10 +221,7 @@ export function buildConfirmationEmailContent(
 export function buildProductInquiryEmailContent(
   data: ProductInquiryEmailData,
 ): RuntimeEmailContent {
-  const quantity =
-    typeof data.quantity === "number"
-      ? data.quantity.toString()
-      : data.quantity;
+  const quantity = formatQuantity(data.quantity);
   const fields = compactFields([
     { label: EMAIL_COPY.common.fields.product, value: data.productName },
     { label: EMAIL_COPY.common.fields.quantity, value: quantity },
