@@ -5,7 +5,10 @@
 
 import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
-import { sanitizePlainText } from "@/lib/security/validation";
+import {
+  sanitizeMultilineText,
+  sanitizePlainText,
+} from "@/lib/security/validation";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
@@ -41,6 +44,14 @@ export const CONTACT_SUBJECTS = {
  * Uses Zod v4 .overwrite() to sanitize while preserving ZodString type for chaining
  */
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
+
+/**
+ * Multiline sanitized string field.
+ * Preserves buyer line breaks for free-text fields rendered as multiple lines
+ * downstream (email/Airtable). Single-line fields keep {@link sanitizedString}.
+ */
+const multilineSanitizedString = () =>
+  z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
 
 export const leadAttributionFields = {
@@ -128,7 +139,7 @@ export const contactLeadSchema = z.object({
       `Subject must be between ${CONTACT_FORM_VALIDATION_CONSTANTS.SUBJECT_MIN_LENGTH} and ${CONTACT_FORM_VALIDATION_CONSTANTS.SUBJECT_MAX_LENGTH} characters`,
     )
     .optional(),
-  message: sanitizedString()
+  message: multilineSanitizedString()
     .min(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MIN_LENGTH)
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MAX_LENGTH),
   turnstileToken: z.string().min(1),
@@ -150,7 +161,9 @@ export const productLeadSchema = z.object({
   productName: sanitizedString().min(1).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
   quantity: productQuantitySchema,
   company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
-  requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
+  requirements: multilineSanitizedString()
+    .max(MAX_LEAD_REQUIREMENTS_LENGTH)
+    .optional(),
   ...baseLeadFields,
 });
 
