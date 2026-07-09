@@ -49,7 +49,9 @@ function deriveOriginsFromTurnstileHosts(): string[] {
  * Get base URL origin from environment.
  */
 function getBaseUrlOrigin(): string | null {
-  const baseUrl = getRuntimeEnvString("NEXT_PUBLIC_BASE_URL");
+  const baseUrl =
+    getRuntimeEnvString("NEXT_PUBLIC_SITE_URL") ??
+    getRuntimeEnvString("NEXT_PUBLIC_BASE_URL");
   if (!baseUrl) return null;
 
   try {
