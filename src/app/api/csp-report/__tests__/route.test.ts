@@ -214,7 +214,7 @@ describe("CSP Report API Route", () => {
       const response = await callPOST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(415);
       expect(data.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });
 
@@ -227,7 +227,7 @@ describe("CSP Report API Route", () => {
       const response = await callPOST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(415);
       expect(data.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });
 
