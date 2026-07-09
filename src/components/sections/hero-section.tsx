@@ -6,7 +6,7 @@ import {
 } from "@/components/sections/hero-section-view";
 import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
-import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 type HeroProofItemKey = (typeof SINGLE_SITE_HOME_HERO_PROOF_ITEMS)[number];
 
@@ -62,11 +62,11 @@ export async function HeroSection() {
     subtitle: t("hero.subtitle"),
     primaryCta: {
       label: t("hero.cta.primary"),
-      href: HOMEPAGE_SECTION_LINKS.primaryCta,
+      href: SINGLE_SITE_HOME_LINK_TARGETS.primaryCta,
     },
     secondaryCta: {
       label: t("hero.cta.secondary"),
-      href: HOMEPAGE_SECTION_LINKS.secondaryCta,
+      href: SINGLE_SITE_HOME_LINK_TARGETS.secondaryCta,
     },
     proofAriaLabel: t("hero.proofAriaLabel"),
     proofItems,
