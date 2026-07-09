@@ -5,15 +5,9 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
-import {
-  applyCorsHeaders,
-  createCorsPreflightResponse,
-} from "@/lib/api/cors-utils";
+import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
-import {
-  withRateLimit,
-  type RateLimitContext,
-} from "@/lib/api/with-rate-limit";
+import { type RateLimitContext } from "@/lib/api/with-rate-limit";
 import {
   submitCanonicalContactSubmission,
   validateContactSubmissionPayload,
@@ -81,13 +75,7 @@ async function handleContactPost(
   }
 }
 
-const POST_RATE_LIMITED = withRateLimit("contact", handleContactPost);
-
-export async function POST(request: NextRequest) {
-  const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
-}
-
-export function OPTIONS(request: NextRequest) {
-  return createCorsPreflightResponse(request);
-}
+export const { POST, OPTIONS } = createCorsRateLimitedRoute(
+  "contact",
+  handleContactPost,
+);

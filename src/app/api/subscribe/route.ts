@@ -5,16 +5,10 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
-import {
-  applyCorsHeaders,
-  createCorsPreflightResponse,
-} from "@/lib/api/cors-utils";
+import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { isRuntimeProduction } from "@/lib/env";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
-import {
-  withRateLimit,
-  type RateLimitContext,
-} from "@/lib/api/with-rate-limit";
+import { type RateLimitContext } from "@/lib/api/with-rate-limit";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
 import {
@@ -23,13 +17,12 @@ import {
   newsletterLeadSchema,
 } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeEmail } from "@/lib/logger";
-import {
-  HTTP_BAD_REQUEST,
-  HTTP_INTERNAL_ERROR,
-  HTTP_SERVICE_UNAVAILABLE,
-} from "@/constants";
+import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { verifyLeadTurnstile } from "@/lib/security/lead-turnstile";
+import {
+  mapLeadTurnstileResultToResponse,
+  verifyLeadTurnstile,
+} from "@/lib/security/lead-turnstile";
 const SUBSCRIBE_EMAIL_REQUIRED_DETAILS = ["errors.email.required"];
 const SUBSCRIBE_EMAIL_INVALID_DETAILS = ["errors.email.invalid"];
 
@@ -51,29 +44,11 @@ async function validateNewsletterTurnstile(
     expectedAction: "newsletter_subscribe",
   });
 
-  switch (verificationResult.status) {
-    case "verified":
-      return null;
-    case "missing":
-      return createApiErrorResponse(
-        API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
-        HTTP_BAD_REQUEST,
-      );
-    case "service-unavailable":
-      return createApiErrorResponse(
-        API_ERROR_CODES.SERVICE_UNAVAILABLE,
-        HTTP_SERVICE_UNAVAILABLE,
-      );
-    case "failed":
-      return createApiErrorResponse(
-        API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
-        HTTP_BAD_REQUEST,
-      );
-    default: {
-      const exhaustiveStatus: never = verificationResult;
-      return exhaustiveStatus;
-    }
-  }
+  const error = mapLeadTurnstileResultToResponse(verificationResult, {
+    requiredCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+    failedCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
+  });
+  return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 
 async function createNewsletterLeadResponse(
@@ -174,14 +149,7 @@ function handlePost(
   })();
 }
 
-const POST_RATE_LIMITED = withRateLimit("subscribe", handlePost);
-
-export async function POST(request: NextRequest) {
-  const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
-}
-
-// 处理 OPTIONS 请求 (CORS)
-export function OPTIONS(request: NextRequest) {
-  return createCorsPreflightResponse(request);
-}
+export const { POST, OPTIONS } = createCorsRateLimitedRoute(
+  "subscribe",
+  handlePost,
+);
