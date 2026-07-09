@@ -19,18 +19,6 @@ describe("Constants Index Module", () => {
   });
 
   describe("Re-exported Constants", () => {
-    it("should re-export APP_CONSTANTS", async () => {
-      const { APP_CONSTANTS } = await import("../index");
-      expect(APP_CONSTANTS).toBeDefined();
-      expect(typeof APP_CONSTANTS).toBe("object");
-    });
-
-    it("should re-export SECURITY_CONSTANTS", async () => {
-      const { SECURITY_CONSTANTS } = await import("../index");
-      expect(SECURITY_CONSTANTS).toBeDefined();
-      expect(typeof SECURITY_CONSTANTS).toBe("object");
-    });
-
     it("should re-export SEO_CONSTANTS", async () => {
       const { SEO_CONSTANTS } = await import("../index");
       expect(SEO_CONSTANTS).toBeDefined();
@@ -46,9 +34,7 @@ describe("Constants Index Module", () => {
       const content = fs.readFileSync(indexPath, "utf8");
 
       // 验证包含所有必要的导出 (使用命名导出而不是通配符导出)
-      expect(content).toContain('} from "./i18n-constants"');
-      expect(content).toContain('} from "./app-constants"');
-      expect(content).toContain('} from "./security-constants"');
+      expect(content).toContain('} from "./core"');
       expect(content).toContain('} from "./seo-constants"');
     });
 
@@ -58,8 +44,6 @@ describe("Constants Index Module", () => {
       const indexPath = path.join(__dirname, "../index.ts");
       const content = fs.readFileSync(indexPath, "utf8");
 
-      expect(content).toContain("export { APP_CONSTANTS }");
-      expect(content).toContain("export { SECURITY_CONSTANTS }");
       expect(content).toContain("export { SEO_CONSTANTS }");
     });
   });
@@ -73,12 +57,7 @@ describe("Constants Index Module", () => {
 
     it("should import all modules successfully", async () => {
       // 测试所有模块都可以被成功导入
-      const modules = [
-        "../i18n-constants",
-        "../app-constants",
-        "../security-constants",
-        "../seo-constants",
-      ];
+      const modules = ["../core", "../count", "../time", "../seo-constants"];
 
       for (const modulePath of modules) {
         try {
