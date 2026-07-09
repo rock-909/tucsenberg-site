@@ -4,10 +4,26 @@ import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useCookieConsentOptional } from "@/lib/cookie-consent";
+import type { CookieConsentContextValue } from "@/lib/cookie-consent/types";
 import {
   getPublicRuntimeEnvString,
   isPublicRuntimeProduction,
 } from "@/lib/public-runtime-env";
+
+/**
+ * Decide whether analytics may run for the current consent state.
+ *
+ * When the consent context is absent (null) or not yet ready, analytics is
+ * denied: GDPR treats an unknown consent decision as "no". Only an explicit,
+ * ready, granted decision unlocks analytics.
+ */
+export function resolveAnalyticsAllowed(
+  consent: Pick<CookieConsentContextValue, "ready" | "consent"> | null,
+): boolean {
+  if (!consent) return false;
+  if (!consent.ready) return false;
+  return consent.consent.analytics;
+}
 
 function ensureGa4QueueInitialized(measurementId: string): void {
   if (!Array.isArray(window.dataLayer)) {
@@ -34,11 +50,7 @@ export function EnterpriseAnalyticsIsland() {
   );
   const cookieConsent = useCookieConsentOptional();
 
-  const analyticsAllowed = cookieConsent
-    ? cookieConsent.ready
-      ? cookieConsent.consent.analytics
-      : false
-    : true;
+  const analyticsAllowed = resolveAnalyticsAllowed(cookieConsent);
 
   const gaEnabled = Boolean(gaMeasurementId) && analyticsAllowed && isProd;
   const gaInitRef = useRef(false);
