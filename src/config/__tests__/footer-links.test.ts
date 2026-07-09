@@ -94,18 +94,4 @@ describe("footer-links", () => {
       ...EXPECTED_TUCSENBERG_NAVIGATION_LINKS,
     ]);
   });
-
-  it("can derive minimal footer links without omitted routes", () => {
-    const columns = getSingleSiteFooterColumns("minimal");
-    const navigationColumn = columns.find(
-      (column) => column.key === "navigation",
-    );
-    const supportColumn = columns.find((column) => column.key === "support");
-
-    expect(navigationColumn?.links.map((link) => link.key)).toEqual(["home"]);
-    expect(supportColumn?.links.map((link) => link.key)).toEqual([
-      "privacy",
-      "terms",
-    ]);
-  });
 });

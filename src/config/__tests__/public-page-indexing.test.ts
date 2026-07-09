@@ -55,16 +55,4 @@ describe("public page indexing by starter profile", () => {
       shouldIndexPublicPageForProfile("capabilities", "/capabilities"),
     ).toBe(false);
   });
-
-  it("keeps product markets disabled for non-catalog profiles", () => {
-    const [marketSlug] = getAllMarketSlugs();
-    expect(marketSlug).toBeDefined();
-    expect(
-      shouldIndexPublicPageForProfile(
-        "products",
-        getProductMarketPath(marketSlug ?? ""),
-        "minimal",
-      ),
-    ).toBe(false);
-  });
 });

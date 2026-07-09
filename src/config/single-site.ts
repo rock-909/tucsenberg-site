@@ -1,12 +1,10 @@
 import { env, isRuntimeProduction, runtimeEnv } from "@/lib/env";
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
 import { defineSiteDefinition } from "@/config/site-definition-builder";
 import type { PageType } from "@/config/paths/types";
 import { getActiveStaticPageTypes } from "@/config/pages.config";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
-import type { StarterProfileId } from "@/config/starter-profiles";
 import type {
   ProductCatalog,
   SiteConfig,
@@ -139,10 +137,8 @@ function filterActiveFooterPages<T extends FooterLinkPageType>(
   return orderedPageTypes.filter((pageType) => active.has(pageType));
 }
 
-export function getSingleSiteFooterColumns(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): SiteFooterColumnConfig[] {
-  const activePageTypes = getActiveStaticPageTypes(profileId);
+export function getSingleSiteFooterColumns(): SiteFooterColumnConfig[] {
+  const activePageTypes = getActiveStaticPageTypes();
   const navigationLinks = filterActiveFooterPages(
     FOOTER_NAVIGATION_PAGE_TYPES,
     activePageTypes,

@@ -1,8 +1,5 @@
 import type { LocalizedPath, PageType } from "@/config/paths/types";
-import {
-  getStarterProfile,
-  type StarterProfileId,
-} from "@/config/starter-profiles";
+import { getStarterProfile } from "@/config/starter-profiles";
 
 const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
@@ -214,17 +211,15 @@ export function getPublicStaticPageDefinition(
   return getStaticPageDefinitionsByType()[pageType];
 }
 
-export function getActiveStaticPageDefinitions(
-  profileId?: StarterProfileId,
-): PublicStaticPageDefinition[] {
+export function getActiveStaticPageDefinitions(): PublicStaticPageDefinition[] {
   const definitionsByType = getStaticPageDefinitionsByType();
 
-  return getStarterProfile(profileId).staticPages.map((pageType) => {
+  return getStarterProfile().staticPages.map((pageType) => {
     const definition = definitionsByType[pageType];
 
     if (definition === undefined) {
       throw new Error(
-        `Starter profile ${profileId ?? "default"} references unknown static page: ${pageType}`,
+        `Catalog profile references unknown static page: ${pageType}`,
       );
     }
 
@@ -232,27 +227,21 @@ export function getActiveStaticPageDefinitions(
   });
 }
 
-export function getActiveStaticPageTypes(
-  profileId?: StarterProfileId,
-): PageType[] {
-  return getActiveStaticPageDefinitions(profileId).map(
+export function getActiveStaticPageTypes(): PageType[] {
+  return getActiveStaticPageDefinitions().map(
     (definition) => definition.pageType,
   );
 }
 
-export function getActiveStaticSitemapPages(
-  profileId?: StarterProfileId,
-): string[] {
-  return getActiveStaticPageDefinitions(profileId).flatMap((definition) =>
+export function getActiveStaticSitemapPages(): string[] {
+  return getActiveStaticPageDefinitions().flatMap((definition) =>
     definition.sitemap.include
       ? [toSitemapStaticPath(definition.localizedPaths.en)]
       : [],
   );
 }
 
-export function getActiveStaticSitemapPageConfigByPath(
-  profileId?: StarterProfileId,
-): Record<
+export function getActiveStaticSitemapPageConfigByPath(): Record<
   string,
   {
     changeFrequency: PublicStaticPageChangeFrequency;
@@ -260,7 +249,7 @@ export function getActiveStaticSitemapPageConfigByPath(
   }
 > {
   return Object.fromEntries(
-    getActiveStaticPageDefinitions(profileId).flatMap((definition) =>
+    getActiveStaticPageDefinitions().flatMap((definition) =>
       definition.sitemap.include
         ? [
             [
@@ -276,44 +265,36 @@ export function getActiveStaticSitemapPageConfigByPath(
   );
 }
 
-export function getActiveStaticPageLastmodByPath(
-  profileId?: StarterProfileId,
-): Record<string, string> {
-  const entries = getActiveStaticPageDefinitions(profileId).flatMap(
-    (definition) => {
-      if (definition.lastmod.source !== "static") {
-        return [];
-      }
+export function getActiveStaticPageLastmodByPath(): Record<string, string> {
+  const entries = getActiveStaticPageDefinitions().flatMap((definition) => {
+    if (definition.lastmod.source !== "static") {
+      return [];
+    }
 
-      return [
-        [
-          toSitemapStaticPath(definition.localizedPaths.en),
-          definition.lastmod.iso,
-        ] as const,
-      ];
-    },
-  );
+    return [
+      [
+        toSitemapStaticPath(definition.localizedPaths.en),
+        definition.lastmod.iso,
+      ] as const,
+    ];
+  });
 
   return Object.fromEntries(entries);
 }
 
-export function getActiveMdxPageSlugByStaticPath(
-  profileId?: StarterProfileId,
-): Record<string, string> {
-  const entries = getActiveStaticPageDefinitions(profileId).flatMap(
-    (definition) => {
-      if (definition.mdxCollection === null) {
-        return [];
-      }
+export function getActiveMdxPageSlugByStaticPath(): Record<string, string> {
+  const entries = getActiveStaticPageDefinitions().flatMap((definition) => {
+    if (definition.mdxCollection === null) {
+      return [];
+    }
 
-      return [
-        [
-          toSitemapStaticPath(definition.localizedPaths.en),
-          definition.mdxCollection.slug,
-        ] as const,
-      ];
-    },
-  );
+    return [
+      [
+        toSitemapStaticPath(definition.localizedPaths.en),
+        definition.mdxCollection.slug,
+      ] as const,
+    ];
+  });
 
   return Object.fromEntries(entries);
 }

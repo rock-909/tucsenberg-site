@@ -13,14 +13,12 @@ import {
   SITE_CONFIG,
 } from "@/config/paths";
 import {
-  getSingleSitePublicSeoProfileId,
   getSingleSitePublicStaticPages,
   getSingleSiteSitemapPageConfig,
   getSingleSiteStaticPageLastmod,
   hasSingleSiteDynamicSurface,
   type SingleSiteSitemapPageConfig,
 } from "@/config/single-site-seo";
-import type { StarterProfileId } from "@/config/starter-profiles";
 import { routing } from "@/i18n/routing";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
@@ -29,19 +27,18 @@ const BASE_URL = SITE_CONFIG.baseUrl;
 
 type PageConfig = SingleSiteSitemapPageConfig;
 
-function createStaticPageLastmod(
-  profileId?: StarterProfileId,
-): StaticPageLastModConfig {
+function createStaticPageLastmod(): StaticPageLastModConfig {
   return new Map(
-    Object.entries(getSingleSiteStaticPageLastmod(profileId)).map(
-      ([route, isoDate]) => [route, new Date(isoDate)],
-    ),
+    Object.entries(getSingleSiteStaticPageLastmod()).map(([route, isoDate]) => [
+      route,
+      new Date(isoDate),
+    ]),
   );
 }
 
 // Helper to get page config
-function getPageConfig(path: string, profileId?: StarterProfileId): PageConfig {
-  return getSingleSiteSitemapPageConfig(path, profileId);
+function getPageConfig(path: string): PageConfig {
+  return getSingleSiteSitemapPageConfig(path);
 }
 
 function buildLocalePath(locale: string, path: string): string {
@@ -92,11 +89,9 @@ function createSitemapEntry(
 }
 
 // Generate static page entries for all locales
-async function generateStaticPageEntries(
-  profileId?: StarterProfileId,
-): Promise<MetadataRoute.Sitemap> {
-  const publicStaticPages = getSingleSitePublicStaticPages(profileId);
-  const staticPageLastmod = createStaticPageLastmod(profileId);
+async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
+  const publicStaticPages = getSingleSitePublicStaticPages();
+  const staticPageLastmod = createStaticPageLastmod();
   const mdxPages = publicStaticPages.filter(isMdxDrivenPage);
   const mdxDates = new Map<string, Date>();
   await Promise.all(
@@ -109,7 +104,7 @@ async function generateStaticPageEntries(
 
   for (const locale of routing.locales) {
     for (const page of publicStaticPages) {
-      const config = getPageConfig(page, profileId);
+      const config = getPageConfig(page);
       const url = buildAbsoluteUrl(locale, page);
       const alternates = buildAlternateLanguages(page);
       const lastModified =
@@ -126,17 +121,15 @@ async function generateStaticPageEntries(
 }
 
 // Generate product catalog entries (market + family pages) for all locales
-function generateCatalogEntries(
-  profileId?: StarterProfileId,
-): MetadataRoute.Sitemap {
-  if (!hasSingleSiteDynamicSurface("productMarket", profileId)) {
+function generateCatalogEntries(): MetadataRoute.Sitemap {
+  if (!hasSingleSiteDynamicSurface("productMarket")) {
     return [];
   }
 
   const entries: MetadataRoute.Sitemap = [];
-  const staticPageLastmod = createStaticPageLastmod(profileId);
+  const staticPageLastmod = createStaticPageLastmod();
 
-  const marketConfig = getPageConfig("productMarket", profileId);
+  const marketConfig = getPageConfig("productMarket");
   for (const market of PRODUCT_CATALOG.markets) {
     const path = getProductMarketPath(market.slug);
     const lastModified = getStaticPageLastModified(path, staticPageLastmod);
@@ -156,19 +149,17 @@ function generateCatalogEntries(
   return entries;
 }
 
-export async function generateSitemapForProfile(
-  profileId?: StarterProfileId,
-): Promise<MetadataRoute.Sitemap> {
-  const staticEntries = await generateStaticPageEntries(profileId);
-  const catalogEntries = generateCatalogEntries(profileId);
+export async function generateSitemapForProfile(): Promise<MetadataRoute.Sitemap> {
+  const staticEntries = await generateStaticPageEntries();
+  const catalogEntries = generateCatalogEntries();
 
   return [...staticEntries, ...catalogEntries];
 }
 
 /**
  * Dynamic sitemap generation for Next.js.
- * Includes the selected starter profile's static pages and owned dynamic surfaces.
+ * Includes the catalog site's static pages and its product-market surface.
  */
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {
-  return generateSitemapForProfile(getSingleSitePublicSeoProfileId());
+  return generateSitemapForProfile();
 }

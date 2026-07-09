@@ -134,12 +134,6 @@ describe("navigation", () => {
       ]);
     });
 
-    it("can derive minimal navigation without omitted routes", () => {
-      expect(getSingleSiteNavigation("minimal")).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
-      ]);
-    });
-
     it("should have valid structure for all items", () => {
       mainNavigation.forEach((item) => {
         expect(item.key).toBeTruthy();
