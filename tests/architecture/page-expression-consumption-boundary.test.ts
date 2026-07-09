@@ -39,7 +39,6 @@ describe("page-expression consumption boundary", () => {
   it("keeps page-expression consumers discoverable instead of allowlisted", () => {
     expect(pageExpressionImporters()).toEqual([
       "src/app/[locale]/page.tsx",
-      "src/components/content/about-page-shell.tsx",
       "src/components/sections/hero-section.tsx",
     ]);
   });

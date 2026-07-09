@@ -70,20 +70,6 @@ vi.mock("@/components/contact/contact-form-island", () => ({
   ),
 }));
 
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: ({
-    faqItems,
-  }: {
-    faqItems: Array<{ id: string; question: string }>;
-  }) => (
-    <section data-testid="faq-section">
-      {faqItems.map((item) => (
-        <div key={item.id}>{item.question}</div>
-      ))}
-    </section>
-  ),
-}));
-
 vi.mock("@/lib/content/render-static-markdown-content", () => ({
   createStaticMarkdownContent: (content: string) => (
     <div data-testid="mdx-body">{content}</div>
