@@ -12,9 +12,6 @@ const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/forms/contact-form-feedback.tsx",
   "src/components/forms/contact-form-container.tsx",
   "src/components/security/turnstile.tsx",
-  "src/components/sections/quality-section.tsx",
-  "src/components/sections/chain-section.tsx",
-  "src/components/sections/scenarios-section.tsx",
   FOOTER_COMPONENT_SOURCE,
 ] as const;
 

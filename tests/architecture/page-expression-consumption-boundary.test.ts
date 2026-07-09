@@ -40,11 +40,7 @@ describe("page-expression consumption boundary", () => {
     expect(pageExpressionImporters()).toEqual([
       "src/app/[locale]/page.tsx",
       "src/components/content/about-page-shell.tsx",
-      "src/components/sections/final-cta.tsx",
       "src/components/sections/hero-section.tsx",
-      "src/components/sections/quality-section.tsx",
-      "src/components/sections/scenarios-section.tsx",
-      "src/components/sections/starter-boundary-section.tsx",
     ]);
   });
 
