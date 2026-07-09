@@ -6,7 +6,7 @@
 
 **Goal**: Maintain the current Tucsenberg flood barrier website: English-only product discovery, OEM / wholesale inquiry conversion, specification evaluation, PDF download, and Cloudflare/OpenNext deployment.
 
-It is not a generic starter anymore. The inherited starter/profile machinery remains only where it supports checks, compatibility, or history.
+It is not a generic starter anymore. The former multi-profile / starter-factory machinery (runtime profile selection, `product-specs`/profile fixtures, blog data source, and the `scripts/starter-profile` materialize tooling) has been retired; the site is permanently the single English `catalog` site. Inherited starter naming survives only where it still backs checks, compatibility, or history.
 
 ## Communication
 
@@ -47,7 +47,7 @@ src/
 tests/
 - architecture/       # Repo contracts and architecture tests
 - unit/               # Unit tests for scripts and isolated logic
-- integration/        # Integration tests for APIs, components, and profile output
+- integration/        # Integration tests for APIs and components
 - e2e/                # Browser and user-flow smoke tests
 
 content/
