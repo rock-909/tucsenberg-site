@@ -1,20 +1,6 @@
-import { getTranslations } from "next-intl/server";
-import {
-  generateOrganizationData,
-  generateWebSiteData,
-} from "@/lib/structured-data-generators";
-import {
-  generateLocalizedStructuredData,
-  generateProductSchema,
-} from "@/lib/structured-data-helpers";
-import type { Locale } from "@/i18n/routing";
-import { type PageType } from "@/config/paths";
-
-export { generateLocalizedStructuredData };
-
 /**
  * 生成JSON-LD脚本标签
- * 包含 XSS 转义处理，防止 </script> 注入攻击
+ * 包含 </script> 注入防护（XSS 转义）
  * @see https://nextjs.org/docs/app/guides/json-ld
  */
 export function generateJSONLD(structuredData: unknown): string {
@@ -27,65 +13,4 @@ export function generateJSONLD(structuredData: unknown): string {
     .replace(/&/g, "\\u0026")
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
-}
-
-// 重新导出便捷函数
-export {
-  createArticleStructuredData,
-  createBreadcrumbStructuredData,
-  generateLocalBusinessSchema,
-  generateProductSchema,
-} from "@/lib/structured-data-helpers";
-
-// 函数重载：根据页面类型返回不同长度的元组，便于测试中按索引访问
-export function generateStructuredData(
-  _page: "home",
-  _locale: Locale,
-): Promise<[Record<string, unknown>, Record<string, unknown>]>;
-export function generateStructuredData(
-  _page: "products",
-  _locale: Locale,
-  _extras: {
-    product: {
-      name: string;
-      description: string;
-      image?: string;
-      price?: string | number;
-      currency?: string;
-      availability?: string;
-      brand?: string;
-      sku?: string;
-    };
-  },
-): Promise<
-  [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>]
->;
-export async function generateStructuredData(
-  page: PageType,
-  locale: Locale,
-  extras?: {
-    product?: {
-      name: string;
-      description: string;
-      image?: string;
-      price?: string | number;
-      currency?: string;
-      availability?: string;
-      brand?: string;
-      sku?: string;
-    };
-  },
-): Promise<Array<Record<string, unknown>>> {
-  const t = await getTranslations({ locale, namespace: "structured-data" });
-  const organization = generateOrganizationData(t, {});
-  const website = generateWebSiteData(t, {});
-
-  const base = [organization, website] as Array<Record<string, unknown>>;
-
-  if (page === "products" && extras?.product) {
-    const product = await generateProductSchema(extras.product, locale);
-    return [...base, product];
-  }
-
-  return base;
 }
