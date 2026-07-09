@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 import type {
   ArticleData,
   BreadcrumbData,
-  Locale,
   OrganizationData,
   ProductData,
   WebSiteData,
@@ -12,7 +11,7 @@ import {
   getPublicLogoPath,
 } from "@/config/public-trust";
 import { SITE_CONFIG } from "@/config/paths/site-config";
-import { routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
 

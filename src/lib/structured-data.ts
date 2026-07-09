@@ -7,10 +7,8 @@ import {
   generateLocalizedStructuredData,
   generateProductSchema,
 } from "@/lib/structured-data-helpers";
-import type { Locale } from "@/lib/structured-data-types";
+import type { Locale } from "@/i18n/routing";
 import { type PageType } from "@/config/paths";
-
-export type { Locale } from "@/lib/structured-data-types";
 
 export { generateLocalizedStructuredData };
 

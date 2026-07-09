@@ -1,4 +1,4 @@
-import type { Locale } from "@/types/i18n";
+import type { Locale } from "@/i18n/routing";
 import { logger } from "@/lib/logger";
 import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 import type { MessageRecord } from "@/lib/i18n/read-message-path";

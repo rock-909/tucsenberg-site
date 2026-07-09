@@ -3,7 +3,7 @@ import {
   generateOrganizationData,
   generateWebSiteData,
 } from "@/lib/structured-data-generators";
-import type { Locale } from "@/lib/structured-data";
+import type { Locale } from "@/i18n/routing";
 
 export interface PageStructuredData {
   organizationData: Record<string, unknown>;
