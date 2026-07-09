@@ -1,5 +1,10 @@
 import "server-only";
 
+import { HTTP_BAD_REQUEST, HTTP_SERVICE_UNAVAILABLE } from "@/constants";
+import {
+  API_ERROR_CODES,
+  type ApiErrorCode,
+} from "@/constants/api-error-codes";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { hasTurnstileServiceFailure } from "@/lib/security/turnstile-errors";
@@ -77,4 +82,54 @@ export async function verifyLeadTurnstile({
     errorCodes,
   });
   return { status: "failed", errorCodes };
+}
+
+/**
+ * Per-route error codes for the shared Turnstile-result classification.
+ *
+ * Each Lead-family caller keeps its own client-facing codes for the
+ * "missing" and "failed" states; the "service-unavailable" state always maps
+ * to the shared `SERVICE_UNAVAILABLE` code (503).
+ */
+export interface LeadTurnstileErrorConfig {
+  /** Code returned when the browser token is missing ("verification required"). */
+  requiredCode: ApiErrorCode;
+  /** Code returned when the token is present but rejected (anti-abuse failure). */
+  failedCode: ApiErrorCode;
+}
+
+export interface LeadTurnstileErrorOutcome {
+  errorCode: ApiErrorCode;
+  status: number;
+}
+
+/**
+ * Map a Lead-family Turnstile verification result to its HTTP error outcome.
+ *
+ * Centralizes the status/branch decision that inquiry, subscribe, and the
+ * canonical contact path previously duplicated. Returns `null` when the
+ * request verified and should proceed. Callers own the response envelope
+ * (route `NextResponse` vs. canonical validation object).
+ */
+export function mapLeadTurnstileResultToResponse(
+  result: LeadTurnstileVerificationResult,
+  { requiredCode, failedCode }: LeadTurnstileErrorConfig,
+): LeadTurnstileErrorOutcome | null {
+  switch (result.status) {
+    case "verified":
+      return null;
+    case "missing":
+      return { errorCode: requiredCode, status: HTTP_BAD_REQUEST };
+    case "service-unavailable":
+      return {
+        errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
+        status: HTTP_SERVICE_UNAVAILABLE,
+      };
+    case "failed":
+      return { errorCode: failedCode, status: HTTP_BAD_REQUEST };
+    default: {
+      const exhaustiveStatus: never = result;
+      return exhaustiveStatus;
+    }
+  }
 }
