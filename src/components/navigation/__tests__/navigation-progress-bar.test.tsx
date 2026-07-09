@@ -1,7 +1,25 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
-import { NavigationProgressBar } from "@/components/navigation/navigation-progress-bar";
+import {
+  NavigationProgressBar,
+  shouldStartNavigationProgress,
+} from "@/components/navigation/navigation-progress-bar";
+
+function createAnchor(href: string): HTMLAnchorElement {
+  const anchor = document.createElement("a");
+  anchor.setAttribute("href", href);
+  return anchor;
+}
+
+const plainLeftClick = {
+  defaultPrevented: false,
+  button: 0,
+  metaKey: false,
+  ctrlKey: false,
+  shiftKey: false,
+  altKey: false,
+};
 
 const mockUsePathname = vi.fn(() => "/en");
 const mockUseReducedMotion = vi.fn(() => false);
@@ -87,6 +105,64 @@ describe("NavigationProgressBar", () => {
     expect(
       screen.queryByTestId("navigation-progress-bar"),
     ).not.toBeInTheDocument();
+  });
+
+  describe("shouldStartNavigationProgress", () => {
+    it("starts for a plain left-click on an internal link", () => {
+      expect(
+        shouldStartNavigationProgress(
+          plainLeftClick,
+          createAnchor("/en/products"),
+        ),
+      ).toBe(true);
+    });
+
+    it("skips when the click default was already prevented", () => {
+      expect(
+        shouldStartNavigationProgress(
+          { ...plainLeftClick, defaultPrevented: true },
+          createAnchor("/en/products"),
+        ),
+      ).toBe(false);
+    });
+
+    it("skips auxiliary (non-primary) button clicks", () => {
+      expect(
+        shouldStartNavigationProgress(
+          { ...plainLeftClick, button: 1 },
+          createAnchor("/en/products"),
+        ),
+      ).toBe(false);
+    });
+
+    it("skips modifier clicks that open a new tab or window", () => {
+      for (const modifier of [
+        "metaKey",
+        "ctrlKey",
+        "shiftKey",
+        "altKey",
+      ] as const) {
+        expect(
+          shouldStartNavigationProgress(
+            { ...plainLeftClick, [modifier]: true },
+            createAnchor("/en/products"),
+          ),
+        ).toBe(false);
+      }
+    });
+
+    it("skips download links", () => {
+      const anchor = createAnchor("/en/spec.pdf");
+      anchor.setAttribute("download", "");
+
+      expect(shouldStartNavigationProgress(plainLeftClick, anchor)).toBe(false);
+    });
+
+    it("skips non-internal links", () => {
+      expect(
+        shouldStartNavigationProgress(plainLeftClick, createAnchor("#section")),
+      ).toBe(false);
+    });
   });
 
   it("renders nothing when reduced motion is enabled", () => {

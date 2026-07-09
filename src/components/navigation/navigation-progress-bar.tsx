@@ -50,6 +50,38 @@ function isInternalNavigationLink(anchor: HTMLAnchorElement): boolean {
   }
 }
 
+/** Modifier/button state a click must satisfy to trigger route progress. */
+interface NavigationClickState {
+  defaultPrevented: boolean;
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}
+
+/**
+ * Decide whether a link click should start the route progress bar.
+ *
+ * Modifier clicks (Cmd/Ctrl/Shift/Alt), auxiliary buttons, already-handled
+ * clicks, and downloads open a new tab or trigger no navigation, so the current
+ * pathname never changes and `finish()` would never fire — leaving the bar
+ * stuck. Only a plain primary-button click on an internal link starts it.
+ */
+export function shouldStartNavigationProgress(
+  event: NavigationClickState,
+  anchor: HTMLAnchorElement,
+): boolean {
+  if (event.defaultPrevented) return false;
+  if (event.button !== 0) return false;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return false;
+  }
+  if (anchor.hasAttribute("download")) return false;
+
+  return isInternalNavigationLink(anchor);
+}
+
 function getCurrentRouteKey(): string {
   return `${window.location.pathname}${window.location.search}`;
 }
@@ -148,7 +180,7 @@ export function NavigationProgressBar() {
         return;
       }
 
-      if (!isInternalNavigationLink(anchor)) {
+      if (!shouldStartNavigationProgress(event, anchor)) {
         return;
       }
 
@@ -187,7 +219,7 @@ export function NavigationProgressBar() {
     >
       <div
         className={cn(
-          "h-full w-full origin-left bg-primary shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
+          "bg-primary h-full w-full origin-left shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
           progress >= 100 ? "transition-none" : "transition-transform ease-out",
         )}
         data-testid="navigation-progress-bar-fill"
