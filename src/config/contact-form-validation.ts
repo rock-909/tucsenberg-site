@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   CONTACT_FORM_FIELD_KEYS,
+  shouldRenderField,
   type ContactFormConfig,
   type ContactFormFieldConfig,
   type ContactFormFieldKey,
@@ -68,22 +69,6 @@ export type ContactFormFieldValidators = Record<
 type ContactFormFieldValuesShape = {
   [K in keyof ContactFormFieldValues]-?: z.ZodType<ContactFormFieldValues[K]>;
 };
-
-function shouldRenderField(
-  field: ContactFormFieldConfig,
-  features: ContactFormConfig["features"],
-): boolean {
-  if (field.key === "acceptPrivacy" && !features.showPrivacyCheckbox) {
-    return false;
-  }
-  if (field.key === "marketingConsent" && !features.showMarketingConsent) {
-    return false;
-  }
-  if (field.key === "website" && !features.useWebsiteHoneypot) {
-    return false;
-  }
-  return field.enabled;
-}
 
 export function createContactFormSchemaFromConfig(
   config: ContactFormConfig,

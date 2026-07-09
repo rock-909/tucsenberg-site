@@ -223,7 +223,7 @@ const PLACEHOLDER_KEYS: Partial<Record<ContactFormFieldKey, string>> = {
   message: "messagePlaceholder",
 };
 
-function shouldRenderField(
+export function shouldRenderField(
   field: ContactFormFieldConfig,
   features: ContactFormFeatures,
 ): boolean {
