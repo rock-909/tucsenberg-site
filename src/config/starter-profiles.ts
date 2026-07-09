@@ -84,14 +84,9 @@ const SHOWCASE_FULL_STATIC_PAGES = [
   "home",
   "about",
   "products",
-  "blog",
-  "resources",
   "contact",
   "privacy",
   "terms",
-  "capabilities",
-  "howItWorks",
-  "customProject",
 ] as const satisfies readonly PageType[];
 
 const CORE_MESSAGE_NAMESPACES = [
@@ -173,17 +168,8 @@ export const STARTER_PROFILES = {
   },
   "company-site": {
     id: "company-site",
-    staticPages: [
-      "home",
-      "about",
-      "products",
-      "blog",
-      "resources",
-      "contact",
-      "privacy",
-      "terms",
-    ],
-    dynamicSurfaces: ["blogArticle"],
+    staticPages: ["home", "about", "products", "contact", "privacy", "terms"],
+    dynamicSurfaces: [],
     messageNamespaces: [
       ...CORE_MESSAGE_NAMESPACES,
       ...B2B_LEAD_MESSAGE_NAMESPACES,
@@ -229,8 +215,8 @@ export const STARTER_PROFILES = {
   },
   "content-marketing": {
     id: "content-marketing",
-    staticPages: ["home", "blog", "about", "contact", "privacy", "terms"],
-    dynamicSurfaces: ["blogArticle"],
+    staticPages: ["home", "about", "contact", "privacy", "terms"],
+    dynamicSurfaces: [],
     messageNamespaces: [
       ...CORE_MESSAGE_NAMESPACES,
       ...B2B_LEAD_MESSAGE_NAMESPACES,
@@ -242,7 +228,7 @@ export const STARTER_PROFILES = {
   "showcase-full": {
     id: "showcase-full",
     staticPages: SHOWCASE_FULL_STATIC_PAGES,
-    dynamicSurfaces: ["productMarket", "blogArticle"],
+    dynamicSurfaces: ["productMarket"],
     messageNamespaces: [
       ...CORE_MESSAGE_NAMESPACES,
       ...B2B_LEAD_MESSAGE_NAMESPACES,

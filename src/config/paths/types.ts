@@ -11,27 +11,22 @@ export type LocalizedPath = {
   [locale in Locale]: string;
 };
 
-// 页面类型定义 (静态路由)
+// 页面类型定义 (静态路由) - 与 PUBLIC_STATIC_PAGE_DEFINITIONS 中的真实页面一一对应
 export type PageType =
   | "home"
-  | "capabilities"
-  | "howItWorks"
   | "about"
-  | "contact"
+  | "products"
   | "oemWholesale"
   | "materialsGuide"
   | "specificationsGuide"
   | "requestQuote"
+  | "contact"
   | "warranty"
-  | "products"
-  | "blog"
-  | "resources"
   | "privacy"
-  | "terms"
-  | "customProject";
+  | "terms";
 
 // 动态路由类型定义
-export type DynamicPageType = "productMarket" | "blogArticle";
+export type DynamicPageType = "productMarket";
 
 // 动态路由路径模式
 export interface DynamicRoutePattern {

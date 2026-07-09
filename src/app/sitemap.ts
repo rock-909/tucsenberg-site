@@ -8,7 +8,6 @@ import {
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
 import {
-  getBlogArticlePath,
   LOCALES_CONFIG,
   getProductMarketPath,
   SITE_CONFIG,
@@ -24,11 +23,6 @@ import {
 import type { StarterProfileId } from "@/config/starter-profiles";
 import { routing } from "@/i18n/routing";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
-import {
-  getStarterBlogArticle,
-  getStarterBlogArticleModifiedAt,
-  getStarterBlogArticleSlugs,
-} from "@/lib/blog/starter-blog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
 const BASE_URL = SITE_CONFIG.baseUrl;
@@ -162,44 +156,13 @@ function generateCatalogEntries(
   return entries;
 }
 
-function generateBlogArticleEntries(
-  profileId?: StarterProfileId,
-): MetadataRoute.Sitemap {
-  if (!hasSingleSiteDynamicSurface("blogArticle", profileId)) {
-    return [];
-  }
-
-  const entries: MetadataRoute.Sitemap = [];
-  const articleConfig = getPageConfig("blogArticle", profileId);
-
-  for (const slug of getStarterBlogArticleSlugs()) {
-    const path = getBlogArticlePath(slug);
-
-    for (const locale of routing.locales) {
-      const article = getStarterBlogArticle(locale, slug);
-
-      entries.push(
-        createSitemapEntry({
-          url: buildAbsoluteUrl(locale, path),
-          lastModified: new Date(getStarterBlogArticleModifiedAt(article)),
-          config: articleConfig,
-          alternates: buildAlternateLanguages(path),
-        }),
-      );
-    }
-  }
-
-  return entries;
-}
-
 export async function generateSitemapForProfile(
   profileId?: StarterProfileId,
 ): Promise<MetadataRoute.Sitemap> {
   const staticEntries = await generateStaticPageEntries(profileId);
   const catalogEntries = generateCatalogEntries(profileId);
-  const blogArticleEntries = generateBlogArticleEntries(profileId);
 
-  return [...staticEntries, ...catalogEntries, ...blogArticleEntries];
+  return [...staticEntries, ...catalogEntries];
 }
 
 /**

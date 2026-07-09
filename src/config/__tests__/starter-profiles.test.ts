@@ -44,13 +44,11 @@ describe("starter profile registry", () => {
       "home",
       "about",
       "products",
-      "blog",
-      "resources",
       "contact",
       "privacy",
       "terms",
     ]);
-    expect(profile.dynamicSurfaces).toEqual(["blogArticle"]);
+    expect(profile.dynamicSurfaces).toEqual([]);
     expect(profile.messageNamespaces).toEqual(
       expect.arrayContaining([
         "navigation",
@@ -148,8 +146,8 @@ describe("starter profile registry", () => {
     );
 
     expect(getStarterProfile("content-marketing")).toMatchObject({
-      staticPages: ["home", "blog", "about", "contact", "privacy", "terms"],
-      dynamicSurfaces: ["blogArticle"],
+      staticPages: ["home", "about", "contact", "privacy", "terms"],
+      dynamicSurfaces: [],
       proofLanes: ["core-starter", "content-marketing"],
       examplePacks: ["content-marketing-examples"],
     });
@@ -175,17 +173,12 @@ describe("starter profile registry", () => {
       "home",
       "about",
       "products",
-      "blog",
-      "resources",
       "contact",
       "privacy",
       "terms",
-      "capabilities",
-      "howItWorks",
-      "customProject",
     ]);
     expect(PUBLIC_STATIC_PAGE_TYPES).not.toContain("resources");
-    expect(profile.dynamicSurfaces).toEqual(["productMarket", "blogArticle"]);
+    expect(profile.dynamicSurfaces).toEqual(["productMarket"]);
     expect(profile.messageNamespaces).toEqual(
       expect.arrayContaining([
         "catalog",

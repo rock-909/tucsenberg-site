@@ -291,18 +291,18 @@ describe("profile materialization dry-run plan", () => {
       false,
     );
 
-    for (const profileId of ["minimal", "b2b-lead", "catalog"] as const) {
+    for (const profileId of [
+      "minimal",
+      "b2b-lead",
+      "catalog",
+      "content-marketing",
+    ] as const) {
       expectProfileIncludesPath(
         profileId,
         "src/components/content/blog-article-view.tsx",
         false,
       );
     }
-    expectProfileIncludesPath(
-      "content-marketing",
-      "src/components/content/blog-article-view.tsx",
-      true,
-    );
 
     for (const profileId of [
       "minimal",

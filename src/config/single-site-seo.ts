@@ -28,11 +28,6 @@ const SINGLE_SITE_PRODUCT_MARKET_CONFIG = {
   priority: 0.8,
 } as const satisfies SingleSiteSitemapPageConfig;
 
-const SINGLE_SITE_BLOG_ARTICLE_CONFIG = {
-  changeFrequency: "weekly",
-  priority: 0.7,
-} as const satisfies SingleSiteSitemapPageConfig;
-
 export const SINGLE_SITE_PUBLIC_SEO_PROFILE_ID =
   DEFAULT_STARTER_PROFILE_ID satisfies StarterProfileId;
 
@@ -107,10 +102,6 @@ export function shouldIndexPublicPageForProfile(
     return false;
   }
 
-  if (pageType === "blog") {
-    return false;
-  }
-
   return activeTypes.has(pageType);
 }
 
@@ -121,9 +112,6 @@ export function getSingleSiteSitemapPageConfigByPath(
     ...getActiveStaticSitemapPageConfigByPath(profileId),
     ...(hasSingleSiteDynamicSurface("productMarket", profileId)
       ? { productMarket: SINGLE_SITE_PRODUCT_MARKET_CONFIG }
-      : {}),
-    ...(hasSingleSiteDynamicSurface("blogArticle", profileId)
-      ? { blogArticle: SINGLE_SITE_BLOG_ARTICLE_CONFIG }
       : {}),
   };
 }
