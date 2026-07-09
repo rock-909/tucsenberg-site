@@ -1,10 +1,12 @@
 /**
- * Rate Limiting with Per-Key Serialization
+ * Distributed Rate Limiting
  *
- * Provides single-instance rate limiting with per-key promise queue
- * to prevent TOCTOU races within one process. Cross-instance consistency
- * requires a distributed store backend (Upstash Redis / KV); without one,
- * limits are best-effort per-instance only.
+ * Provides single-instance rate limiting backed by a pluggable store. Store
+ * increments are atomic (Redis INCR is server-atomic; the in-memory store is
+ * synchronous), so a single `increment` call per check is race-free without any
+ * process-local serialization. Cross-instance consistency requires a
+ * distributed store backend (Upstash Redis / KV); without one, limits are
+ * best-effort per-instance only.
  *
  * Store implementations are in ./stores/rate-limit-store.ts.
  */
@@ -59,10 +61,6 @@ interface RateLimitResult {
 
 let rateLimitStore: RateLimitStore | null = null;
 
-/** Per-key promise queue for single-process atomicity (prevents TOCTOU races) */
-const rateLimitQueue = new Map<string, Promise<unknown>>();
-const RATE_LIMIT_INCREMENT_TIMEOUT_MS = 5_000;
-
 function getRateLimitStore(): RateLimitStore {
   if (!rateLimitStore) {
     rateLimitStore = createRateLimitStore();
@@ -81,43 +79,17 @@ function getRateLimitConfig(preset: RateLimitPreset): {
   return RATE_LIMIT_PRESETS[preset];
 }
 
-function createRateLimitTimeoutError(timeoutMs: number): Error {
-  return new Error(
-    `[Rate Limit] Store increment timed out after ${timeoutMs}ms`,
-  );
-}
-
-async function withRateLimitIncrementTimeout<T>(
-  operation: Promise<T>,
-  timeoutMs: number = RATE_LIMIT_INCREMENT_TIMEOUT_MS,
-): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(createRateLimitTimeoutError(timeoutMs));
-    }, timeoutMs);
-  });
-
-  try {
-    return await Promise.race([operation, timeoutPromise]);
-  } finally {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
-
 async function executeRateLimitCheck(
   key: string,
   config: ReturnType<typeof getRateLimitConfig>,
 ): Promise<RateLimitResult> {
   try {
     // getRateLimitStore inside try so any constructor/factory failure
-    // is caught and handled by the failureMode logic below.
+    // is caught and handled by the failureMode logic below. The store owns its
+    // own network timeout (Redis fetch AbortController), so no extra timeout
+    // wrapper is needed here.
     const store = getRateLimitStore();
-    const entry = await withRateLimitIncrementTimeout(
-      store.increment(key, config.windowMs),
-    );
+    const entry = await store.increment(key, config.windowMs);
     const { count } = entry;
     const resetTime = entry.expiresAt;
     const now = Date.now();
@@ -153,8 +125,8 @@ async function executeRateLimitCheck(
 /**
  * Check rate limit for a given identifier and preset.
  *
- * Serializes concurrent requests for the same key via a promise queue to
- * prevent TOCTOU races within a single process instance.
+ * Performs exactly one atomic store increment per call, so no process-local
+ * serialization is required.
  */
 export function checkDistributedRateLimit(
   identifier: string,
@@ -162,28 +134,7 @@ export function checkDistributedRateLimit(
 ): Promise<RateLimitResult> {
   const config = getRateLimitConfig(preset);
   const key = `ratelimit:${preset}:${identifier}`;
-
-  // Chain onto the previous pending request for this key (if any) to serialize
-  // increments within the same process and prevent read-modify-write races.
-  const previous = (rateLimitQueue.get(key) ?? Promise.resolve()).catch(() => {
-    /* swallow queue errors to prevent cascade failures */
-  });
-  const current = previous.then(() => executeRateLimitCheck(key, config));
-
-  // Register as the latest pending operation for this key.
-  // Clean up after settlement to prevent unbounded Map growth.
-  const tracked = current
-    .catch(() => {
-      /* swallow queue errors to prevent cascade failures */
-    })
-    .finally(() => {
-      if (rateLimitQueue.get(key) === tracked) {
-        rateLimitQueue.delete(key);
-      }
-    });
-  rateLimitQueue.set(key, tracked);
-
-  return current;
+  return executeRateLimitCheck(key, config);
 }
 
 /**
@@ -201,15 +152,10 @@ export function createRateLimitHeaders(result: RateLimitResult): Headers {
   return headers;
 }
 
-export function getRateLimitQueueSizeForTesting(): number {
-  return rateLimitQueue.size;
-}
-
 /**
  * Reset store instance (for testing)
  */
 export function resetRateLimitStore(): void {
   rateLimitStore = null;
-  rateLimitQueue.clear();
   resetRateLimitStoreWarnings();
 }

@@ -12,7 +12,6 @@ import { MINUTE_MS } from "@/constants";
 import {
   checkDistributedRateLimit,
   createRateLimitHeaders,
-  getRateLimitQueueSizeForTesting,
   RATE_LIMIT_PRESETS,
   resetRateLimitStore,
 } from "../distributed-rate-limit";
@@ -21,7 +20,6 @@ import {
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
-const RATE_LIMIT_INCREMENT_TIMEOUT_MS = 5_000;
 
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -42,38 +40,6 @@ function setEnv(key: string, value: string | undefined): void {
   } else {
     env[key] = value;
   }
-}
-
-function createDeferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
-
-async function flushMicrotasks(turns = 6): Promise<void> {
-  for (let index = 0; index < turns; index += 1) {
-    await Promise.resolve();
-  }
-}
-
-async function expectPromiseToSettleSoon<T>(
-  promise: Promise<T>,
-  timeoutMs = 1,
-): Promise<T> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
-      reject(new Error(`Promise did not settle within ${timeoutMs}ms`));
-    }, timeoutMs);
-  });
-
-  const racedPromise = Promise.race([promise, timeoutPromise]);
-  await flushMicrotasks();
-  await vi.advanceTimersByTimeAsync(timeoutMs);
-  return racedPromise;
 }
 
 describe("distributed-rate-limit", () => {
@@ -599,128 +565,6 @@ describe("distributed-rate-limit", () => {
   // 9. Atomicity & Concurrency Tests (Red — non-atomic read-modify-write)
   // =========================================================================
   describe("atomicity and concurrency", () => {
-    it("keeps same-key requests serialized until the latest queued request settles", async () => {
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      const first = createDeferred<{ count: number; expiresAt: number }>();
-      const second = createDeferred<{ count: number; expiresAt: number }>();
-      const expiresAt = Date.now() + MINUTE_MS;
-      const increment = vi
-        .fn()
-        .mockImplementationOnce(() => first.promise)
-        .mockImplementationOnce(() => second.promise)
-        .mockResolvedValueOnce({
-          count: 3,
-          expiresAt,
-        });
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment,
-        get: vi.fn().mockResolvedValue(null),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const firstRequest = checkDistributedRateLimit("queued-user", "contact");
-      const secondRequest = checkDistributedRateLimit("queued-user", "contact");
-
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(1);
-      expect(getRateLimitQueueSizeForTesting()).toBe(1);
-
-      first.resolve({ count: 1, expiresAt });
-      await expect(
-        expectPromiseToSettleSoon(firstRequest),
-      ).resolves.toMatchObject({
-        allowed: true,
-        remaining: 5 - 1,
-        retryAfter: null,
-      });
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(2);
-      expect(getRateLimitQueueSizeForTesting()).toBe(1);
-
-      const thirdRequest = checkDistributedRateLimit("queued-user", "contact");
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(2);
-
-      second.resolve({ count: 2, expiresAt });
-
-      await expect(
-        expectPromiseToSettleSoon(secondRequest),
-      ).resolves.toMatchObject({
-        allowed: true,
-        remaining: 5 - 2,
-        retryAfter: null,
-      });
-      await expect(
-        expectPromiseToSettleSoon(thirdRequest),
-      ).resolves.toMatchObject({
-        allowed: true,
-        remaining: 5 - 3,
-        retryAfter: null,
-      });
-
-      expect(increment).toHaveBeenCalledTimes(3);
-      expect(getRateLimitQueueSizeForTesting()).toBe(0);
-    });
-
-    it("releases queued requests after the leading request degrades on storage failure", async () => {
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      const first = createDeferred<{ count: number; expiresAt: number }>();
-      const expiresAt = Date.now() + MINUTE_MS;
-      const increment = vi
-        .fn()
-        .mockImplementationOnce(() => first.promise)
-        .mockResolvedValue({
-          count: 1,
-          expiresAt,
-        });
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment,
-        get: vi.fn().mockResolvedValue(null),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const firstRequest = checkDistributedRateLimit(
-        "queued-failure-user",
-        "contact",
-      );
-      const secondRequest = checkDistributedRateLimit(
-        "queued-failure-user",
-        "contact",
-      );
-
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(1);
-      expect(getRateLimitQueueSizeForTesting()).toBe(1);
-
-      first.reject(new Error("boom"));
-
-      await expect(
-        expectPromiseToSettleSoon(firstRequest),
-      ).resolves.toMatchObject({
-        allowed: false,
-        degraded: true,
-        deniedReason: "storage_failure",
-        retryAfter: Math.ceil(MINUTE_MS / 1000),
-      });
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(2);
-      await expect(
-        expectPromiseToSettleSoon(secondRequest),
-      ).resolves.toMatchObject({
-        allowed: true,
-        remaining: 5 - 1,
-        retryAfter: null,
-      });
-      expect(getRateLimitQueueSizeForTesting()).toBe(0);
-    });
-
     it("should use atomic increment to prevent over-admission under concurrent access", async () => {
       // The Redis/KV store implementations use non-atomic read-modify-write:
       //   1. GET key -> count=N
@@ -819,154 +663,6 @@ describe("distributed-rate-limit", () => {
         "[Rate Limit] Storage backend error details",
         expect.objectContaining({ error: expect.any(Error) }),
       );
-    });
-
-    it.each([
-      ["contact", RATE_LIMIT_PRESETS.contact.maxRequests],
-      ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
-      ["subscribe", RATE_LIMIT_PRESETS.subscribe.maxRequests],
-      ["turnstile", RATE_LIMIT_PRESETS.turnstile.maxRequests],
-    ] as const)(
-      "fails closed when %s increment operation times out",
-      async (preset) => {
-        vi.setSystemTime(1_700_000_000_000);
-        resetRateLimitStore();
-        const mod = await import("@/lib/security/stores/rate-limit-store");
-        vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-          increment: vi.fn(
-            () =>
-              new Promise(() => {
-                // intentionally never settles
-              }),
-          ),
-          get: vi.fn(),
-          delete: vi.fn(),
-        } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-        const resultPromise = checkDistributedRateLimit(
-          `timeout-fail-closed-${preset}`,
-          preset,
-        );
-
-        await flushMicrotasks();
-        await expect(
-          Promise.race([
-            resultPromise.then(() => "settled"),
-            Promise.resolve("pending"),
-          ]),
-        ).resolves.toBe("pending");
-
-        await vi.advanceTimersByTimeAsync(RATE_LIMIT_INCREMENT_TIMEOUT_MS);
-        const result = await expectPromiseToSettleSoon(resultPromise);
-
-        expect(result).toMatchObject({
-          allowed: false,
-          remaining: 0,
-          degraded: true,
-          deniedReason: "storage_failure",
-        });
-        expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
-        expect(mockLoggerError).toHaveBeenCalledWith(
-          "[Rate Limit] Storage backend error details",
-          expect.objectContaining({
-            error: expect.any(Error),
-          }),
-        );
-      },
-    );
-
-    it("fails open when an open preset increment operation times out", async () => {
-      vi.setSystemTime(1_700_000_000_000);
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn(
-          () =>
-            new Promise(() => {
-              // intentionally never settles
-            }),
-        ),
-        get: vi.fn(),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const resultPromise = checkDistributedRateLimit(
-        "timeout-fail-open",
-        "csp",
-      );
-
-      await flushMicrotasks();
-      await expect(
-        Promise.race([
-          resultPromise.then(() => "settled"),
-          Promise.resolve("pending"),
-        ]),
-      ).resolves.toBe("pending");
-
-      await vi.advanceTimersByTimeAsync(RATE_LIMIT_INCREMENT_TIMEOUT_MS);
-      const result = await expectPromiseToSettleSoon(resultPromise);
-
-      expect(result).toMatchObject({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
-        degraded: true,
-      });
-      expect(result.retryAfter).toBeNull();
-      expect("deniedReason" in result).toBe(false);
-    });
-
-    it("releases the same-key queue after an increment operation times out", async () => {
-      vi.setSystemTime(1_700_000_000_000);
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      const expiresAt = 1_700_000_000_000 + MINUTE_MS;
-      const increment = vi
-        .fn()
-        .mockImplementationOnce(
-          () =>
-            new Promise(() => {
-              // intentionally never settles
-            }),
-        )
-        .mockResolvedValueOnce({ count: 1, expiresAt });
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment,
-        get: vi.fn(),
-        delete: vi.fn(),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const firstRequest = checkDistributedRateLimit(
-        "timeout-queue-release",
-        "contact",
-      );
-      const secondRequest = checkDistributedRateLimit(
-        "timeout-queue-release",
-        "contact",
-      );
-
-      await flushMicrotasks();
-
-      expect(increment).toHaveBeenCalledTimes(1);
-      expect(getRateLimitQueueSizeForTesting()).toBe(1);
-
-      await vi.advanceTimersByTimeAsync(RATE_LIMIT_INCREMENT_TIMEOUT_MS);
-
-      await expect(
-        expectPromiseToSettleSoon(firstRequest),
-      ).resolves.toMatchObject({
-        allowed: false,
-        degraded: true,
-        deniedReason: "storage_failure",
-      });
-      await expect(
-        expectPromiseToSettleSoon(secondRequest),
-      ).resolves.toMatchObject({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.contact.maxRequests - 1,
-        retryAfter: null,
-      });
-      expect(increment).toHaveBeenCalledTimes(2);
-      expect(getRateLimitQueueSizeForTesting()).toBe(0);
     });
   });
 
