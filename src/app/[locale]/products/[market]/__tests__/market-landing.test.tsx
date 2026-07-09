@@ -140,14 +140,6 @@ vi.mock("@/components/seo/json-ld-script", () => ({
   },
 }));
 
-vi.mock("@/components/products/sticky-family-nav", () => ({
-  StickyFamilyNav: () => <nav data-testid="sticky-nav">nav</nav>,
-}));
-
-vi.mock("@/components/sections/faq-section", () => ({
-  FaqSection: () => <section data-testid="faq-section">FAQ</section>,
-}));
-
 vi.mock("@/lib/content-query/queries", () => ({
   getPageBySlug: vi.fn(async () => ({
     metadata: {
@@ -160,18 +152,6 @@ vi.mock("@/lib/content-query/queries", () => ({
       ],
     },
   })),
-}));
-
-vi.mock("@/components/products/product-specs", () => ({
-  ProductSpecs: ({ title }: { title?: string }) => (
-    <div data-testid="product-specs">{title}</div>
-  ),
-  ProductCertifications: ({ title }: { title?: string }) => (
-    <div data-testid="product-certifications">{title}</div>
-  ),
-  ProductTradeInfo: ({ title }: { title?: string }) => (
-    <div data-testid="product-trade-info">{title}</div>
-  ),
 }));
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
