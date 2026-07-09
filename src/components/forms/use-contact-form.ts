@@ -1,4 +1,5 @@
 import { useRef, useState, useTransition } from "react";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
 import { pickAttributionFieldsFromFormData } from "@/lib/marketing/attribution-fields";
 import { trackGenerateLead } from "@/lib/marketing/lead-event";
@@ -92,8 +93,12 @@ export function useContactForm(): UseContactFormResult {
         },
         body: JSON.stringify(createContactRequestBody(formData)),
       });
-      const payload = (await response.json()) as ContactApiResponse;
-      const nextState = createContactStateFromResponse(payload);
+      const payload: unknown = await response.json();
+      const nextState = deriveContactResultState(
+        response.ok,
+        payload,
+        new Date().toISOString(),
+      );
 
       if (nextState.success) {
         handleSuccessfulContactSubmission(setLastSubmissionTime);
@@ -178,12 +183,28 @@ function createContactRequestBody(formData: FormData) {
   };
 }
 
-function createContactStateFromResponse(
-  payload: ContactApiResponse,
-): ServerActionResult<ContactFormResult> {
-  const timestamp = new Date().toISOString();
+function isContactApiResponse(payload: unknown): payload is ContactApiResponse {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    typeof (payload as { success?: unknown }).success === "boolean"
+  );
+}
 
-  if (payload.success) {
+/**
+ * Turn a contact API response into form state.
+ *
+ * A non-ok HTTP status or a malformed body (missing a boolean `success`) is
+ * treated as a failure with a concrete error code, so the UI always shows an
+ * error instead of silently returning to idle. A well-shaped failure keeps its
+ * own error code and validation details.
+ */
+export function deriveContactResultState(
+  ok: boolean,
+  payload: unknown,
+  timestamp: string,
+): ServerActionResult<ContactFormResult> {
+  if (isContactApiResponse(payload) && ok && payload.success) {
     return {
       success: true,
       data: {
@@ -193,7 +214,20 @@ function createContactStateFromResponse(
     };
   }
 
-  return createContactErrorState(payload, timestamp);
+  const errorPayload: ContactApiErrorResponse =
+    isContactApiResponse(payload) && !payload.success
+      ? payload
+      : {
+          success: false,
+          errorCode: API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+        };
+
+  const errorState = createContactErrorState(errorPayload, timestamp);
+  if (!errorState.errorCode) {
+    errorState.errorCode = API_ERROR_CODES.CONTACT_PROCESSING_ERROR;
+  }
+
+  return errorState;
 }
 
 function createContactErrorState(
