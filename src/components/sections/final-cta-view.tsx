@@ -1,4 +1,4 @@
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import { Button } from "@/components/ui/button";
 import { HomepageTrustStrip } from "@/components/sections/homepage-trust-strip";
 import { Link } from "@/i18n/routing";
@@ -32,11 +32,11 @@ export function FinalCTAView({ content }: FinalCTAViewProps) {
     <section className="section-divider px-6 py-14 md:py-[72px]">
       <div className="mx-auto max-w-[1080px]">
         <div className="surface-card px-6 py-10 text-center md:px-10 md:py-12">
-          <h2 className="text-[32px] font-semibold leading-tight md:text-[36px]">
+          <h2 className="text-[32px] leading-tight font-semibold md:text-[36px]">
             {content.title}
           </h2>
 
-          <p className="mx-auto mt-4 max-w-[620px] text-muted-foreground">
+          <p className="text-muted-foreground mx-auto mt-4 max-w-[620px]">
             {content.description}
           </p>
 

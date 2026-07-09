@@ -3,7 +3,7 @@ import {
   isValidMarketFamilyCombo,
   isValidMarketSlug,
 } from "@/constants/product-catalog";
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import { readMessagePath } from "@/lib/i18n/read-message-path";
 
 export const PRODUCT_FAMILY_CONTACT_INTENT = "product-family" as const;

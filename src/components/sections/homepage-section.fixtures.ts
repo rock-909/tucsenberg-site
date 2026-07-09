@@ -1,4 +1,4 @@
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import type { FinalCtaContent } from "@/components/sections/final-cta-view";
 import type { HeroSectionContent } from "@/components/sections/hero-section-view";
 import type { QualitySectionContent } from "@/components/sections/quality-section-view";
