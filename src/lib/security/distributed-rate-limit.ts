@@ -13,7 +13,6 @@ import { logger } from "@/lib/logger";
 import { MINUTE_MS } from "@/constants";
 import {
   type RateLimitStore,
-  MemoryRateLimitStore,
   createRateLimitStore,
   resetRateLimitStoreWarnings,
 } from "@/lib/security/stores/rate-limit-store";
@@ -25,11 +24,6 @@ export const RATE_LIMIT_PRESETS = {
     maxRequests: 5,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
-  },
-  contactAdminStats: {
-    maxRequests: 30,
-    windowMs: MINUTE_MS,
-    failureMode: "open" as const,
   },
   inquiry: {
     maxRequests: 10,
@@ -45,21 +39,6 @@ export const RATE_LIMIT_PRESETS = {
   // Security-sensitive: deny on storage failure to prevent brute-force bypass
   turnstile: {
     maxRequests: 10,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
-  cacheInvalidate: {
-    maxRequests: 10,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
-  cacheInvalidatePreAuth: {
-    maxRequests: 10 * 2,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
-  opsAccess: {
-    maxRequests: 5,
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
@@ -208,58 +187,6 @@ export function checkDistributedRateLimit(
 }
 
 /**
- * Get current rate limit status without incrementing
- */
-export async function getRateLimitStatus(
-  identifier: string,
-  preset: RateLimitPreset,
-): Promise<RateLimitResult> {
-  const config = getRateLimitConfig(preset);
-  const key = `ratelimit:${preset}:${identifier}`;
-
-  try {
-    const store = getRateLimitStore();
-    const entry = await store.get(key);
-    const now = Date.now();
-
-    if (!entry || now >= entry.expiresAt) {
-      return {
-        allowed: true,
-        remaining: config.maxRequests,
-        resetTime: now + config.windowMs,
-        retryAfter: null,
-      };
-    }
-
-    const remaining = Math.max(0, config.maxRequests - entry.count);
-    const allowed = entry.count < config.maxRequests;
-
-    return {
-      allowed,
-      remaining,
-      resetTime: entry.expiresAt,
-      retryAfter: allowed ? null : Math.ceil((entry.expiresAt - now) / 1000),
-    };
-  } catch (error) {
-    const failClosed = config.failureMode === "closed";
-    logger.error(
-      failClosed
-        ? "[Rate Limit] Status check storage failure — fail-closed"
-        : "[Rate Limit] Status check storage failure — fail-open",
-      { error },
-    );
-    return {
-      allowed: !failClosed,
-      remaining: failClosed ? 0 : config.maxRequests,
-      resetTime: Date.now() + config.windowMs,
-      retryAfter: failClosed ? Math.ceil(config.windowMs / 1000) : null,
-      degraded: true,
-      ...(failClosed ? { deniedReason: "storage_failure" as const } : {}),
-    };
-  }
-}
-
-/**
  * Create rate limit headers for response
  */
 export function createRateLimitHeaders(result: RateLimitResult): Headers {
@@ -272,18 +199,6 @@ export function createRateLimitHeaders(result: RateLimitResult): Headers {
   }
 
   return headers;
-}
-
-/**
- * Cleanup expired entries (for memory store only)
- */
-export function cleanupRateLimitStore(): boolean {
-  const store = getRateLimitStore();
-  if ("cleanup" in store && typeof store.cleanup === "function") {
-    store.cleanup();
-    return true;
-  }
-  return store instanceof MemoryRateLimitStore;
 }
 
 export function getRateLimitQueueSizeForTesting(): number {

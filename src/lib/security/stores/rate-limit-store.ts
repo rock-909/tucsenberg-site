@@ -291,25 +291,11 @@ export function createRateLimitStore(): RateLimitStore {
     return new RedisRateLimitStore(upstashUrl, upstashToken);
   }
 
-  const kvUrl = getRuntimeEnvString("KV_REST_API_URL");
-  const kvToken = getRuntimeEnvString("KV_REST_API_TOKEN");
   const isProduction = getRuntimeEnvString("NODE_ENV") === "production";
 
   if (isProduction) {
-    if (kvUrl && kvToken) {
-      throw new Error(
-        "[Rate Limit] KV-only rate limiting is not allowed in production. Configure Upstash Redis for distributed rate limiting.",
-      );
-    }
-
     throw new Error(
       "[Rate Limit] Production requires Upstash Redis. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
-    );
-  }
-
-  if (kvUrl && kvToken) {
-    logger.warn(
-      "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
     );
   }
 

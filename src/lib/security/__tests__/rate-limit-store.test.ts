@@ -36,8 +36,6 @@ describe("rate-limit-store", () => {
     process.env = { ...originalEnv };
     setEnv("UPSTASH_REDIS_REST_URL", undefined);
     setEnv("UPSTASH_REDIS_REST_TOKEN", undefined);
-    setEnv("KV_REST_API_URL", undefined);
-    setEnv("KV_REST_API_TOKEN", undefined);
     setEnv("NODE_ENV", undefined);
     resetRateLimitStoreWarnings();
   });
@@ -55,16 +53,6 @@ describe("rate-limit-store", () => {
       );
     });
 
-    it("throws when production is configured with KV only", () => {
-      setEnv("NODE_ENV", "production");
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-      setEnv("KV_REST_API_TOKEN", "token");
-
-      expect(() => createRateLimitStore()).toThrow(
-        "KV-only rate limiting is not allowed in production",
-      );
-    });
-
     it("throws when production has no distributed store configured", () => {
       setEnv("NODE_ENV", "production");
 
@@ -74,17 +62,11 @@ describe("rate-limit-store", () => {
     });
 
     it("falls back to memory in development and logs the warning once", () => {
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-      setEnv("KV_REST_API_TOKEN", "token");
-
       const first = createRateLimitStore();
       const second = createRateLimitStore();
 
       expect(first).toBeInstanceOf(MemoryRateLimitStore);
       expect(second).toBeInstanceOf(MemoryRateLimitStore);
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
-      );
       expect(mockLoggerWarn).toHaveBeenCalledWith(
         "[Rate Limit] Using in-memory store (development only)",
       );
@@ -126,26 +108,6 @@ describe("rate-limit-store", () => {
       expect(store).toBeInstanceOf(MemoryRateLimitStore);
       expect(mockLoggerInfo).not.toHaveBeenCalledWith(
         "[Rate Limit] Using Upstash Redis store",
-      );
-    });
-
-    it("treats partial KV configuration as missing in production", () => {
-      setEnv("NODE_ENV", "production");
-      setEnv("KV_REST_API_URL", "https://example.kv.io");
-
-      expect(() => createRateLimitStore()).toThrow(
-        "Production requires Upstash Redis",
-      );
-    });
-
-    it("does not emit the KV-only warning when KV configuration is incomplete", () => {
-      setEnv("KV_REST_API_TOKEN", "token");
-
-      const store = createRateLimitStore();
-
-      expect(store).toBeInstanceOf(MemoryRateLimitStore);
-      expect(mockLoggerWarn).not.toHaveBeenCalledWith(
-        "[Rate Limit] KV store detected but Upstash Redis is preferred. Using in-memory fallback for development.",
       );
     });
 
