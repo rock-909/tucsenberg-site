@@ -24,9 +24,7 @@
     "content:check": "node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs && node scripts/starter-checks.js translations",
     "component:governance:test": "pnpm exec vitest run tests/architecture/component-governance.test.ts tests/architecture/ui-component-index.test.ts tests/unit/scripts/component-governance-check.test.ts",
     "component:governance": "node scripts/starter-checks.js component-governance",
-    "component:check": "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build",
-    "profile:dry-run": "tsx scripts/starter-profile/cli.ts --dry-run",
-    "profile:materialize": "tsx scripts/starter-profile/cli.ts"
+    "component:check": "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.3",

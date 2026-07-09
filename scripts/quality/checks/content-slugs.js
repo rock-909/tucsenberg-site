@@ -8,10 +8,7 @@ const DEFAULT_COLLECTIONS = ["posts", "pages", "products"];
 const FALLBACK_LOCALES = ["en"];
 const DEFAULT_CONTENT_EXTENSIONS = ["md", "mdx"];
 const DEFAULT_CONTENT_ROOTS = ["content"];
-const CONTENT_SLUG_SYNC_ROOTS = [
-  "content",
-  "profile-fixtures/showcase-full/content",
-];
+const CONTENT_SLUG_SYNC_ROOTS = ["content"];
 const REPORT_DIR = "reports";
 const CONTENT_SLUG_REPORT_FILENAME = "content-slug-sync-report.json";
 const REQUIRED_FRONTMATTER_STRING_FIELDS = [

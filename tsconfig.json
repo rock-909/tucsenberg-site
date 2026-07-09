@@ -50,8 +50,6 @@
     "src/**/*.tsx",
     "messages/**/*.json",
     "content/**/*.mdx",
-    "profile-fixtures/**/*.ts",
-    "profile-fixtures/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

@@ -13,11 +13,6 @@ const CONTENT_MANIFEST_SOURCES = [
     source: "active-content",
     root: "content",
   },
-  {
-    source: "profile-fixture",
-    root: "profile-fixtures/showcase-full/content",
-    profileId: "showcase-full",
-  },
 ];
 const VALID_CONTENT_EXTENSIONS = new Set([".mdx", ".md"]);
 
