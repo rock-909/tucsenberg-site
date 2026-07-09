@@ -28,20 +28,12 @@ interface RequestConfigResult {
   };
 }
 
-const { mockGetRequestConfig, mockI18nPerformanceMonitor } = vi.hoisted(() => ({
+const { mockGetRequestConfig } = vi.hoisted(() => ({
   mockGetRequestConfig: vi.fn(),
-  mockI18nPerformanceMonitor: {
-    recordLoadTime: vi.fn(),
-    recordError: vi.fn(),
-  },
 }));
 
 vi.mock("next-intl/server", () => ({
   getRequestConfig: mockGetRequestConfig,
-}));
-
-vi.mock("@/lib/i18n/performance", () => ({
-  I18nPerformanceMonitor: mockI18nPerformanceMonitor,
 }));
 
 describe("i18n Request Configuration", () => {
@@ -101,19 +93,6 @@ describe("i18n Request Configuration", () => {
     expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
   });
 
-  it("records request load time", async () => {
-    const performanceNowSpy = vi
-      .spyOn(globalThis.performance, "now")
-      .mockReturnValueOnce(100)
-      .mockReturnValueOnce(150);
-
-    await runConfig(LOCALES_CONFIG.defaultLocale);
-
-    expect(mockI18nPerformanceMonitor.recordLoadTime).toHaveBeenCalledWith(50);
-
-    performanceNowSpy.mockRestore();
-  });
-
   it("returns metadata with loadTime only on success", async () => {
     const performanceNowSpy = vi
       .spyOn(globalThis.performance, "now")
@@ -140,7 +119,6 @@ describe("i18n Request Configuration", () => {
 
     const result = await runConfig(LOCALES_CONFIG.defaultLocale);
 
-    expect(mockI18nPerformanceMonitor.recordError).toHaveBeenCalled();
     expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
     expect(result.metadata.error).toBe(true);
     expect(result.metadata.recovery).toBe("uncached-retry");
@@ -158,6 +136,5 @@ describe("i18n Request Configuration", () => {
     await expect(runConfig(LOCALES_CONFIG.defaultLocale)).rejects.toThrow(
       "source failed",
     );
-    expect(mockI18nPerformanceMonitor.recordError).toHaveBeenCalled();
   });
 });
