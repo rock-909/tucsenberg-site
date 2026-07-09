@@ -29,6 +29,45 @@ interface InquiryApiErrorResponse {
 
 type InquiryApiResponse = InquiryApiSuccessResponse | InquiryApiErrorResponse;
 
+type InquiryParseResult =
+  | { success: true; referenceId: string }
+  | { failed: true };
+
+/**
+ * Parse a raw inquiry API body without throwing.
+ *
+ * A server fault often returns non-JSON (a gateway HTML 500). Parsing that with
+ * `response.json()` throws and gets misread as a network error, telling the
+ * buyer to retry a server-side problem. Reading the raw text and guarding the
+ * `JSON.parse` lets a genuine server fault surface as a generic error while the
+ * caller's outer `catch` stays reserved for real network failures.
+ */
+export function parseInquiryResponse(
+  ok: boolean,
+  rawText: string,
+): InquiryParseResult {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(rawText);
+  } catch {
+    return { failed: true };
+  }
+
+  if (
+    ok &&
+    typeof payload === "object" &&
+    payload !== null &&
+    (payload as InquiryApiResponse).success === true
+  ) {
+    const { data } = payload as InquiryApiSuccessResponse;
+    if (typeof data?.referenceId === "string") {
+      return { success: true, referenceId: data.referenceId };
+    }
+  }
+
+  return { failed: true };
+}
+
 // Cap for the `?config=` prefill coming from product estimators; the message
 // field itself allows more, but a URL-borne prefill should stay short.
 const CONFIG_PREFILL_MAX_LENGTH = 500;
@@ -83,12 +122,13 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
           createRequestQuotePayload(formData, turnstileToken, copy.payload),
         ),
       });
-      const payload = (await response.json()) as InquiryApiResponse;
+      const rawText = await response.text();
+      const result = parseInquiryResponse(response.ok, rawText);
 
-      if (response.ok && payload.success) {
+      if ("success" in result) {
         setState({
           status: "success",
-          referenceId: payload.data.referenceId,
+          referenceId: result.referenceId,
         });
         trackGenerateLead("rfq");
         return;
