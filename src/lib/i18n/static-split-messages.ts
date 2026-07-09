@@ -1,7 +1,9 @@
 import "server-only";
 
-import type { StarterProfileId } from "@/config/starter-profiles";
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
+import {
+  DEFAULT_STARTER_PROFILE_ID,
+  type StarterProfileId,
+} from "@/config/starter-profiles";
 import type { Locale } from "@/types/content.types";
 import { mergeObjects } from "@/lib/merge-objects";
 import {
@@ -60,7 +62,7 @@ function composeStaticSplitMessages(
 
 export function getStaticSplitMessages(
   locale: Locale,
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
+  profileId: StarterProfileId = DEFAULT_STARTER_PROFILE_ID,
 ): StaticMessages {
   return composeStaticSplitMessages(locale, profileId);
 }

@@ -9,19 +9,12 @@ import {
   mockCatalogTranslationsEn,
 } from "./mocks/products-test-fixtures";
 
-const {
-  mockBuildCatalogBreadcrumbJsonLd,
-  mockGetTranslations,
-  mockGetRuntimeMessageProfileId,
-} = vi.hoisted(() => ({
-  mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
-  mockGetTranslations: vi.fn(),
-  mockGetRuntimeMessageProfileId: vi.fn(() => "catalog"),
-}));
-
-vi.mock("@/config/active-starter-profile", () => ({
-  getRuntimeMessageProfileId: mockGetRuntimeMessageProfileId,
-}));
+const { mockBuildCatalogBreadcrumbJsonLd, mockGetTranslations } = vi.hoisted(
+  () => ({
+    mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
+    mockGetTranslations: vi.fn(),
+  }),
+);
 
 vi.mock("@/config/single-site-seo", () => ({
   hasSingleSiteDynamicSurface: vi.fn(() => false),
@@ -127,7 +120,6 @@ describe("Feature: Product Overview Page", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRuntimeMessageProfileId.mockReturnValue("catalog");
     mockGetTranslations.mockImplementation(
       async ({ locale }: { locale: string }) => createCatalogTranslator(locale),
     );
@@ -372,8 +364,6 @@ describe("Feature: Product Overview Page", () => {
     });
 
     it("keeps the same guide and RFQ CTAs across active profiles", async () => {
-      mockGetRuntimeMessageProfileId.mockReturnValueOnce("catalog");
-
       await renderAsyncComponent(
         ProductsPage({ params: Promise.resolve(mockParams) }),
       );

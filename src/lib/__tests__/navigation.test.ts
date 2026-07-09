@@ -11,7 +11,6 @@ import {
   getSingleSiteNavigation,
   SINGLE_SITE_NAVIGATION,
 } from "@/config/single-site-navigation";
-import { SOURCE_RUNTIME_MESSAGE_PROFILE_ID } from "@/config/active-starter-profile";
 import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
 // Use vi.hoisted to ensure proper mock setup
@@ -54,11 +53,9 @@ describe("navigation", () => {
       expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
     });
 
-    it("should use the source runtime profile for singleton navigation", () => {
-      expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
-      expect(SINGLE_SITE_NAVIGATION).toEqual(
-        getSingleSiteNavigation(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
-      );
+    it("should use the catalog site navigation as the singleton source", () => {
+      expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
+      expect(SINGLE_SITE_NAVIGATION).toEqual(getSingleSiteNavigation());
       expect(mainNavigation).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
@@ -81,8 +78,7 @@ describe("navigation", () => {
     });
 
     it("can derive the default materialized catalog navigation explicitly", () => {
-      expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
-      expect(getSingleSiteNavigation(DEFAULT_STARTER_PROFILE_ID)).toEqual([
+      expect(getSingleSiteNavigation()).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
           key: "products",

@@ -8,8 +8,10 @@
  */
 
 import { unstable_cache } from "next/cache";
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
-import type { StarterProfileId } from "@/config/starter-profiles";
+import {
+  DEFAULT_STARTER_PROFILE_ID,
+  type StarterProfileId,
+} from "@/config/starter-profiles";
 import { i18nTags } from "@/lib/i18n/cache-tags";
 import {
   isRuntimeCi,
@@ -174,11 +176,11 @@ async function loadCompleteMessagesFromSourceForProfile(
 }
 
 export function loadCriticalMessages(locale: Locale): Promise<Messages> {
-  return loadCriticalMessagesForProfile(locale, getRuntimeMessageProfileId());
+  return loadCriticalMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
 }
 
 export function loadDeferredMessages(locale: Locale): Promise<Messages> {
-  return loadDeferredMessagesForProfile(locale, getRuntimeMessageProfileId());
+  return loadDeferredMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
 }
 
 export function loadCompleteMessagesFromSource(
@@ -187,10 +189,10 @@ export function loadCompleteMessagesFromSource(
   const safeLocale = coerceLocale(locale);
   return loadCompleteMessagesFromSourceForProfile(
     safeLocale,
-    getRuntimeMessageProfileId(),
+    DEFAULT_STARTER_PROFILE_ID,
   );
 }
 
 export function loadCompleteMessages(locale: Locale): Promise<Messages> {
-  return loadCompleteMessagesForProfile(locale, getRuntimeMessageProfileId());
+  return loadCompleteMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
 }

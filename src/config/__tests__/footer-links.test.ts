@@ -3,7 +3,6 @@ import {
   getSingleSiteFooterColumns,
   SINGLE_SITE_FOOTER_COLUMNS,
 } from "@/config/single-site";
-import { SOURCE_RUNTIME_MESSAGE_PROFILE_ID } from "@/config/active-starter-profile";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
@@ -47,11 +46,9 @@ describe("footer-links", () => {
     }
   });
 
-  it("uses the source runtime profile for singleton footer links", () => {
-    expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
-    expect(SINGLE_SITE_FOOTER_COLUMNS).toEqual(
-      getSingleSiteFooterColumns(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
-    );
+  it("uses the catalog site footer columns as the singleton source", () => {
+    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
+    expect(SINGLE_SITE_FOOTER_COLUMNS).toEqual(getSingleSiteFooterColumns());
 
     const navigationColumn = FOOTER_COLUMNS.find(
       (column) => column.key === "navigation",
@@ -69,8 +66,7 @@ describe("footer-links", () => {
   });
 
   it("can derive the default materialized catalog footer links explicitly", () => {
-    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
-    const columns = getSingleSiteFooterColumns(DEFAULT_STARTER_PROFILE_ID);
+    const columns = getSingleSiteFooterColumns();
     const navigationColumn = columns.find(
       (column) => column.key === "navigation",
     );
