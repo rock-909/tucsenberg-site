@@ -9,11 +9,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   env,
-  envUtils,
-  getEnvVar,
   getRuntimeAppEnv,
   getRuntimeEnvBoolean,
-  getRuntimeEnvNumber,
   getRuntimeEnvString,
   getRuntimeNodeEnv,
   isRuntimeCi,
@@ -23,7 +20,6 @@ import {
   isRuntimeProduction,
   isRuntimeProductionBuildPhase,
   isRuntimeTest,
-  isSecureAppEnv,
   requireEnvVar,
 } from "../env";
 
@@ -56,18 +52,6 @@ describe("env utilities", () => {
     });
   });
 
-  describe("getEnvVar", () => {
-    it("should return NODE_ENV value", () => {
-      const result = getEnvVar("NODE_ENV");
-      expect(result).toBe("test");
-    });
-
-    it("should return string values", () => {
-      const result = getEnvVar("TURNSTILE_SECRET_KEY");
-      expect(typeof result === "string" || result === undefined).toBe(true);
-    });
-  });
-
   describe("requireEnvVar", () => {
     it("should return TURNSTILE_SECRET_KEY when available", () => {
       // The test setup provides this value
@@ -83,75 +67,6 @@ describe("env utilities", () => {
     it("should return AIRTABLE_API_KEY when available", () => {
       const result = requireEnvVar("AIRTABLE_API_KEY");
       expect(result).toBe("test-airtable-key");
-    });
-  });
-
-  describe("envUtils", () => {
-    describe("environment detection", () => {
-      it("should have isDevelopment function", () => {
-        expect(typeof envUtils.isDevelopment).toBe("function");
-      });
-
-      it("should have isProduction function", () => {
-        expect(typeof envUtils.isProduction).toBe("function");
-      });
-
-      it("should have isTest function", () => {
-        expect(typeof envUtils.isTest).toBe("function");
-      });
-
-      it("isTest should return true in test environment", () => {
-        expect(envUtils.isTest()).toBe(true);
-      });
-
-      it("isDevelopment should return false in test environment", () => {
-        expect(envUtils.isDevelopment()).toBe(false);
-      });
-
-      it("isProduction should return false in test environment", () => {
-        expect(envUtils.isProduction()).toBe(false);
-      });
-    });
-    describe("Turnstile utilities", () => {
-      it("should have getTurnstileSecret function", () => {
-        expect(typeof envUtils.getTurnstileSecret).toBe("function");
-      });
-
-      it("should have getTurnstileSiteKey function", () => {
-        expect(typeof envUtils.getTurnstileSiteKey).toBe("function");
-      });
-
-      it("getTurnstileSecret should return test value", () => {
-        expect(envUtils.getTurnstileSecret()).toBe("test-secret-key");
-      });
-    });
-
-    describe("Resend utilities", () => {
-      it("should have getResendApiKey function", () => {
-        expect(typeof envUtils.getResendApiKey).toBe("function");
-      });
-
-      it("getResendApiKey should return test value", () => {
-        expect(envUtils.getResendApiKey()).toBe("test-resend-key");
-      });
-    });
-
-    describe("Airtable utilities", () => {
-      it("should have getAirtableToken function", () => {
-        expect(typeof envUtils.getAirtableToken).toBe("function");
-      });
-
-      it("should have getAirtableBaseId function", () => {
-        expect(typeof envUtils.getAirtableBaseId).toBe("function");
-      });
-
-      it("getAirtableToken should return test value", () => {
-        expect(envUtils.getAirtableToken()).toBe("test-airtable-key");
-      });
-
-      it("getAirtableBaseId should return test value", () => {
-        expect(envUtils.getAirtableBaseId()).toBe("test-base-id");
-      });
     });
   });
 });
@@ -215,24 +130,11 @@ describe("runtime env helpers", () => {
     expect(isRuntimePlaywright()).toBe(true);
   });
 
-  it("parses numeric runtime env values and ignores invalid numbers", () => {
-    vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS", "3001");
-    expect(getRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS")).toBe(
-      3001,
-    );
-
-    vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS", "not-a-number");
-    expect(
-      getRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS"),
-    ).toBeUndefined();
-  });
-
-  it("recognizes secure app envs and production build phase", () => {
+  it("recognizes the app env and production build phase", () => {
     vi.stubEnv("APP_ENV", "preview");
     vi.stubEnv("NEXT_PHASE", "phase-production-build");
 
     expect(getRuntimeAppEnv()).toBe("preview");
-    expect(isSecureAppEnv()).toBe(true);
     expect(isRuntimeProductionBuildPhase()).toBe(true);
   });
 

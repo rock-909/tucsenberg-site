@@ -284,13 +284,6 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 });
 
-// 提供类型安全的环境变量访问函数
-export function getEnvVar(
-  key: keyof typeof env,
-): string | boolean | number | undefined {
-  return env[key];
-}
-
 function readProcessEnvValue(key: keyof typeof env): string | undefined {
   return readCloudflareContextEnvValue(key) ?? readRawEnvValue(key);
 }
@@ -357,17 +350,6 @@ export function getRuntimeEnvBoolean(
   return typeof value === "boolean" ? value : undefined;
 }
 
-export function getRuntimeEnvNumber(key: keyof typeof env): number | undefined {
-  const runtimeValue = readProcessEnvValue(key);
-  if (runtimeValue !== undefined) {
-    const parsed = Number(runtimeValue);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-
-  const value = readValidatedEnvValue(key);
-  return typeof value === "number" ? value : undefined;
-}
-
 export {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvNumber,
@@ -416,11 +398,6 @@ export function isRuntimeCloudflare(): boolean {
   );
 }
 
-export function isSecureAppEnv(): boolean {
-  const appEnv = getRuntimeAppEnv();
-  return appEnv === "production" || appEnv === "preview";
-}
-
 // 提供必需环境变量检查（仅用于字符串类型的环境变量）
 export function requireEnvVar(key: keyof typeof env): string {
   const value = env[key];
@@ -431,20 +408,3 @@ export function requireEnvVar(key: keyof typeof env): string {
   }
   return value;
 }
-
-// 常用环境变量的便捷访问器
-export const envUtils = {
-  isDevelopment: () => env.NODE_ENV === "development",
-  isProduction: () => env.NODE_ENV === "production",
-  isTest: () => env.NODE_ENV === "test",
-  // Turnstile相关
-  getTurnstileSecret: () => requireEnvVar("TURNSTILE_SECRET_KEY"),
-  getTurnstileSiteKey: () => requireEnvVar("NEXT_PUBLIC_TURNSTILE_SITE_KEY"),
-
-  // Resend相关
-  getResendApiKey: () => requireEnvVar("RESEND_API_KEY"),
-
-  // Airtable相关
-  getAirtableToken: () => requireEnvVar("AIRTABLE_API_KEY"),
-  getAirtableBaseId: () => requireEnvVar("AIRTABLE_BASE_ID"),
-} as const;

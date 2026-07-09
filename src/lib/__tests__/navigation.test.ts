@@ -1,17 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import { TEST_COUNT_CONSTANTS } from "@/test/constants/test-constants";
 import {
-  TEST_COUNT_CONSTANTS,
-  TEST_SCREEN_CONSTANTS,
-  TEST_TIMEOUT_CONSTANTS,
-} from "@/test/constants/test-constants";
-import {
-  getLocalizedHref,
   isActivePath,
   mainNavigation,
   mobileNavigation,
-  NAVIGATION_ANIMATIONS,
   NAVIGATION_ARIA,
-  NAVIGATION_BREAKPOINTS,
   type NavigationItem,
 } from "../navigation";
 import {
@@ -237,102 +230,6 @@ describe("navigation", () => {
     });
   });
 
-  describe("getLocalizedHref", () => {
-    it("should return external URLs unchanged", () => {
-      expect(getLocalizedHref("https://example.com", "en")).toBe(
-        "https://example.com",
-      );
-      expect(getLocalizedHref("http://example.com", "en")).toBe(
-        "http://example.com",
-      );
-    });
-
-    it("should return mailto links unchanged", () => {
-      expect(getLocalizedHref("mailto:test@example.com", "en")).toBe(
-        "mailto:test@example.com",
-      );
-    });
-
-    it("should return tel links unchanged", () => {
-      expect(getLocalizedHref("tel:+1234567890", "en")).toBe("tel:+1234567890");
-    });
-
-    it("should keep root path unprefixed for the current locale strategy", () => {
-      expect(getLocalizedHref("/", "en")).toBe("/");
-    });
-
-    it("should keep internal paths unprefixed for the current locale strategy", () => {
-      expect(getLocalizedHref("/about", "en")).toBe("/about");
-      expect(getLocalizedHref("/products/enterprise", "en")).toBe(
-        "/products/enterprise",
-      );
-    });
-
-    it("should handle paths with query parameters", () => {
-      expect(getLocalizedHref("/search?q=test", "en")).toBe("/search?q=test");
-    });
-
-    it("should handle paths with hash fragments", () => {
-      expect(getLocalizedHref("/about#team", "en")).toBe("/about#team");
-    });
-  });
-
-  describe("NAVIGATION_BREAKPOINTS", () => {
-    it("should have all required breakpoints", () => {
-      expect(NAVIGATION_BREAKPOINTS.mobile).toBe(
-        TEST_SCREEN_CONSTANTS.MOBILE_WIDTH,
-      );
-      expect(NAVIGATION_BREAKPOINTS.tablet).toBe(
-        TEST_SCREEN_CONSTANTS.TABLET_WIDTH,
-      );
-      expect(NAVIGATION_BREAKPOINTS.desktop).toBe(
-        TEST_SCREEN_CONSTANTS.DESKTOP_WIDTH,
-      );
-    });
-
-    it("should have ascending breakpoint values", () => {
-      expect(NAVIGATION_BREAKPOINTS.mobile).toBeLessThan(
-        NAVIGATION_BREAKPOINTS.tablet,
-      );
-      expect(NAVIGATION_BREAKPOINTS.tablet).toBeLessThan(
-        NAVIGATION_BREAKPOINTS.desktop,
-      );
-    });
-
-    it("should be readonly", () => {
-      expect(() => {
-        // @ts-expect-error - Testing readonly property
-        NAVIGATION_BREAKPOINTS.mobile = 500;
-      }).toThrow();
-    });
-  });
-
-  describe("NAVIGATION_ANIMATIONS", () => {
-    it("should have all required animation durations", () => {
-      expect(NAVIGATION_ANIMATIONS.mobileMenuToggle).toBe(
-        TEST_TIMEOUT_CONSTANTS.MEDIUM_DELAY,
-      );
-      expect(NAVIGATION_ANIMATIONS.dropdownFade).toBe(
-        TEST_TIMEOUT_CONSTANTS.SHORT_DELAY,
-      );
-      expect(NAVIGATION_ANIMATIONS.hoverTransition).toBe(100);
-    });
-
-    it("should have reasonable duration values", () => {
-      Object.values(NAVIGATION_ANIMATIONS).forEach((duration) => {
-        expect(duration).toBeGreaterThan(0);
-        expect(duration).toBeLessThan(1000); // Should be under 1 second
-      });
-    });
-
-    it("should be readonly", () => {
-      expect(() => {
-        // @ts-expect-error - Testing readonly property
-        NAVIGATION_ANIMATIONS.mobileMenuToggle = 500;
-      }).toThrow();
-    });
-  });
-
   describe("NAVIGATION_ARIA", () => {
     it("should have all required ARIA labels", () => {
       expect(NAVIGATION_ARIA.mainNav).toBe("Main navigation");
@@ -363,22 +260,14 @@ describe("navigation", () => {
       const aboutItem = mainNavigation.find((item) => item.key === "about");
       expect(aboutItem).toBeDefined();
 
-      const localizedHref = getLocalizedHref(aboutItem!.href, "en");
-      expect(localizedHref).toBe("/about");
-
       const isActive = isActivePath("/about", aboutItem!.href);
       expect(isActive).toBe(true);
     });
 
     it("should handle all navigation items correctly", () => {
       mainNavigation.forEach((item) => {
-        // Test locale-aware href generation
-        const enHref = getLocalizedHref(item.href, "en");
-
-        expect(enHref).toBe(item.href);
-
-        // Test active path detection
-        const isActive = isActivePath(enHref, item.href);
+        // Test active path detection for each navigation target.
+        const isActive = isActivePath(item.href, item.href);
         expect(isActive).toBe(true);
       });
     });

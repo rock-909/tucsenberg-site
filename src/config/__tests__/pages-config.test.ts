@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PATHS_CONFIG, type PageType } from "@/config/paths";
-import { getContentEntry } from "@/lib/content-manifest";
+import { resolveOptionalContentEntry } from "@/lib/content-manifest";
 import {
   PUBLIC_STATIC_PAGE_DEFINITIONS,
   PUBLIC_STATIC_PAGE_TYPES,
@@ -164,7 +164,7 @@ describe("pages.config static public page registry", () => {
 
       const slug = definition.mdxCollection.slug;
       expect(mdxSlugsByPath[staticPath]).toBe(slug);
-      const enEntry = getContentEntry("pages", "en", slug);
+      const enEntry = resolveOptionalContentEntry("pages", "en", slug);
 
       expect(enEntry, `missing en manifest entry for ${slug}`).toBeDefined();
       expect(enEntry?.relativePath).toBe(`content/pages/en/${slug}.mdx`);
