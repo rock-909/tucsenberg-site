@@ -1,7 +1,4 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import { fixupConfigRules } from "@eslint/compat";
-import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 // Next.js ESLint configs - 使用官方推荐的直接导入方式
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -10,7 +7,6 @@ import prettierConfig from "eslint-config-prettier";
 import promisePlugin from "eslint-plugin-promise";
 import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import securityPlugin from "eslint-plugin-security";
-import securityNode from "eslint-plugin-security-node";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 
 const security = securityPlugin.default ?? securityPlugin;
@@ -33,15 +29,6 @@ const MAGIC_NUMBER_IGNORE_LIST = [
   12000, 12345, 15000, 30000, 45000, 50000, 60000, 65536, 100000, 120000,
   125000, 170000, 200000, 300000, 500000,
 ];
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
 
 export default [
   {
@@ -294,56 +281,6 @@ export default [
           ],
         },
       ],
-    },
-  },
-
-  // Node.js Security configuration (补充规则 - 仅保留 eslint-plugin-security 未覆盖的功能)
-  {
-    name: "security-node-supplementary-config",
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    plugins: {
-      "security-node": securityNode,
-    },
-    rules: {
-      // === security-node 核心规则（无 Semgrep 替代方案） ===
-
-      // NoSQL注入防护
-      "security-node/detect-nosql-injection": "error",
-      // 不当异常处理
-      "security-node/detect-improper-exception-handling": "error",
-      // 未处理的事件错误
-      "security-node/detect-unhandled-event-errors": "error",
-      // Cookie安全配置错误
-      "security-node/detect-security-missconfiguration-cookie": "error",
-      // SSL禁用检测
-      "security-node/disable-ssl-across-node-server": "error",
-
-      // === 已迁移到 eslint-plugin-security 的规则（禁用避免重复） ===
-
-      // 已迁移：security/detect-non-literal-regexp
-      "security-node/non-literal-reg-expr": "off",
-      // 已迁移：security/detect-pseudoRandomBytes
-      "security-node/detect-insecure-randomness": "off",
-      // 已迁移：security/detect-eval-with-expression
-      "security-node/detect-eval-with-expr": "off",
-      // 已迁移：security/detect-non-literal-require
-      "security-node/detect-non-literal-require-calls": "off",
-      // 已迁移：security/detect-possible-timing-attacks
-      "security-node/detect-possible-timing-attacks": "off",
-
-      // === 已迁移到 Semgrep 的规则（禁用避免重复） ===
-
-      // 已迁移：semgrep sql-injection-risk 规则覆盖
-      "security-node/detect-sql-injection": "off",
-      // 已迁移：semgrep nextjs-unsafe-html-injection 规则覆盖
-      "security-node/detect-html-injection": "off",
-      // 已迁移：semgrep nextjs-unsafe-redirect 规则覆盖
-      "security-node/detect-dangerous-redirects": "off",
-
-      // === 有bug的规则（禁用） ===
-
-      // 插件bug：TypeError: Cannot read properties of undefined (reading 'start')
-      "security-node/detect-unhandled-async-errors": "off",
     },
   },
 
