@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # 可维护性审查：components/layout + navigation + footer + grid
 
 **统计：高 3 条 / 中 14 条 / 低 18 条（共 35 条）**

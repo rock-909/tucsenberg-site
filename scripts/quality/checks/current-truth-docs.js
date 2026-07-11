@@ -128,25 +128,10 @@ const TRUTH_DOC_CHECKS = [
       "审查2026-07/交接文档.md",
     ],
   },
-  {
-    file: "docs/技术难题/审查2026-07/交接文档.md",
-    required: [
-      "PR 不是一条从 #40 开始的完整线性栈",
-      "#40",
-      "#41",
-      "#42",
-      "#50",
-      "retarget",
-      "squash merge",
-      "restack",
-      "42aaabe",
-      "8c6dc3a",
-      "base -> b2b-lead -> catalog",
-      "pnpm messages:sync",
-      "0 error / 3 warning",
-      "尚未 push",
-    ],
-  },
+  // 交接文档已整篇转为 historical（docs/技术难题/审查2026-07/ 目录豁免），
+  // 原 required 锁的是时点快照（commit 哈希 42aaabe/8c6dc3a、"0 error / 3 warning"
+  // 输出、"尚未 push" 状态），会强制文档保留过时陈述。required 只锁活的真相，
+  // 禁止锁时点快照——整条移除。
   {
     file: "docs/技术难题/性能记录.md",
     required: [
@@ -155,6 +140,8 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
+    // 维护规则.md 原在 TRUTH_DOC_CHECKS 里出现 4 次，forbidden 列表互相重叠。
+    // 合并为单一条目：required 保留唯一一份，forbidden 取 4 条的去重并集。
     file: "docs/项目基础/维护规则.md",
     required: [
       "src/config/single-site-page-expression.ts",
@@ -170,6 +157,19 @@ const TRUTH_DOC_CHECKS = [
       "src/sites/message-overrides.ts",
       "src/sites/**/messages/**",
       "review-needed",
+      "src/lib/lead-pipeline/**",
+      "messages/en.json",
+      "messages/zh.json",
+      "scripts/cloudflare/**",
+      "pnpm review:tier-a:staged",
+      "pnpm review:lead-family",
+      "pnpm review:homepage-sections",
+      "pnpm review:locale-runtime",
+      "pnpm review:clusters",
+      "pnpm review:cluster",
+      "pnpm quality:gate",
+      "src/lib/lead-pipeline/metrics.ts",
+      "src/lib/lead-pipeline/pipeline-observability.ts",
     ],
   },
   {
@@ -206,17 +206,6 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/项目基础/维护规则.md",
-    forbidden: [
-      "src/sites/message-overrides.ts",
-      "src/sites/**/messages/**",
-      "src/lib/lead-pipeline/**",
-      "messages/en.json",
-      "messages/zh.json",
-      "scripts/cloudflare/**",
-    ],
-  },
-  {
     file: "docs/项目基础/发布验证.md",
     required: [
       "src/config/single-site-page-expression.ts",
@@ -242,29 +231,6 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-seo.ts",
     ],
     forbidden: ["src/sites/**", "pnpm ci:local", "pnpm quality:gate"],
-  },
-  {
-    file: "docs/项目基础/维护规则.md",
-    forbidden: [
-      "src/sites/message-overrides.ts",
-      "src/sites/**/messages/**",
-      "messages/en.json",
-      "messages/zh.json",
-      "pnpm review:tier-a:staged",
-      "pnpm review:lead-family",
-      "pnpm review:homepage-sections",
-      "pnpm review:locale-runtime",
-      "pnpm review:clusters",
-      "pnpm review:cluster",
-    ],
-  },
-  {
-    file: "docs/项目基础/维护规则.md",
-    forbidden: [
-      "pnpm quality:gate",
-      "src/lib/lead-pipeline/metrics.ts",
-      "src/lib/lead-pipeline/pipeline-observability.ts",
-    ],
   },
   {
     file: "docs/项目基础/架构图.svg",
@@ -421,7 +387,11 @@ function isApprovedHistoricalDoc(relativePath) {
   return (
     HISTORICAL_DERIVATION_DOCS.has(relativePath) ||
     relativePath.startsWith("docs/superpowers/") ||
-    relativePath.startsWith("docs/audits/")
+    relativePath.startsWith("docs/audits/") ||
+    // 2026-07 全库审查的发现记录与交接是历史证据，不是当前 runtime truth。
+    // 它们如实记载了已退役路由/API 名，不应被 forbidden pattern 追溯定罪——
+    // 整目录纳入 historical 豁免（加横幅 + 文档清单登记），而不是改写 findings 内容。
+    relativePath.startsWith("docs/技术难题/审查2026-07/")
   );
 }
 

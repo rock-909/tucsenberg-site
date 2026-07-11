@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # 询盘/线索域审查（lead-pipeline / contact / email / form-schema / forms / airtable）
 
 统计：高 3 条 / 中 14 条 / 低 20 条，共 37 条。审查文件 24 个（23 源文件 + 1 个错放在源码目录的测试文件）。

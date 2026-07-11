@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/config/ 可维护性审查问题清单
 
 **统计：高 6 条 / 中 19 条 / 低 12 条（共 37 条）**

@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/app/ 页面批次审查清单（排除 api 与 __tests__）
 
 **统计：高 3 条 / 中 15 条 / 低 17 条（共 35 条，审查 36 个文件）**

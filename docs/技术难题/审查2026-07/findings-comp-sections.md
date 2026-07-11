@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/components/sections/ 可维护性审查
 
 统计：高 3 条 / 中 6 条 / 低 10 条（共 19 条）。实际审查文件数：25。
