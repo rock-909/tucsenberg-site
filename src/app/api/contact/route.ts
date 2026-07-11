@@ -8,10 +8,7 @@ import {
 import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { type RateLimitContext } from "@/lib/api/with-rate-limit";
-import {
-  submitCanonicalContactSubmission,
-  validateContactSubmissionPayload,
-} from "@/lib/contact/submit-canonical-contact";
+import { submitCanonicalContactSubmission } from "@/lib/contact/submit-canonical-contact";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
@@ -32,15 +29,6 @@ async function handleContactPost(
 
   if (!parsedBody.ok) {
     return createApiErrorResponse(parsedBody.errorCode, parsedBody.statusCode);
-  }
-
-  const payloadValidation = validateContactSubmissionPayload(parsedBody.data);
-  if (!payloadValidation.success) {
-    return createApiErrorResponse(
-      payloadValidation.errorCode,
-      payloadValidation.statusCode ?? HTTP_BAD_REQUEST,
-      createValidationDetailOptions(payloadValidation.details),
-    );
   }
 
   try {

@@ -239,7 +239,7 @@ export function validateContactSubmissionPayload(
   ) {
     return {
       success: false,
-      errorCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+      errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
       error: "Security verification required",
       details: null,
       data: null,
@@ -290,10 +290,7 @@ export async function validateContactSubmission(
     expectedAction: "contact_form",
   });
 
-  const turnstileError = mapLeadTurnstileResultToResponse(verificationResult, {
-    requiredCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
-    failedCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
-  });
+  const turnstileError = mapLeadTurnstileResultToResponse(verificationResult);
 
   if (!turnstileError) {
     return {

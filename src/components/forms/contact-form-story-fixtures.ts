@@ -73,7 +73,7 @@ const apiMessages = {
   CONTACT_PROCESSING_ERROR:
     "The contact request could not be processed. Please try again.",
   RATE_LIMIT_EXCEEDED: "Too many attempts. Please wait before trying again.",
-  TURNSTILE_MISSING_TOKEN: "Security verification is required.",
+  TURNSTILE_REQUIRED: "Security verification is required.",
 } as const;
 
 function translateFrom(

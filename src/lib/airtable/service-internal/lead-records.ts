@@ -53,6 +53,7 @@ function buildBaseFields(
   now: string,
 ): AirtableFields {
   return {
+    // Email is validated by the lead schema and must remain a valid typed value.
     Email: email.toLowerCase().trim(),
     "Submitted At": now,
     Status: "New",

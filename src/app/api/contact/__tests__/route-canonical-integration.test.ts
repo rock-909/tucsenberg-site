@@ -131,7 +131,7 @@ describe("/api/contact canonical integration", () => {
 
     expect(response.status).toBe(503);
     expect(data.success).toBe(false);
-    expect(data.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+    expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
     expect(processLead).not.toHaveBeenCalled();
   });
 
@@ -147,7 +147,7 @@ describe("/api/contact canonical integration", () => {
     expect(response.status).toBe(400);
     expect(data).toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+      errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
     });
     expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
     expect(processLead).not.toHaveBeenCalled();

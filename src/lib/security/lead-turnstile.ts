@@ -84,20 +84,6 @@ export async function verifyLeadTurnstile({
   return { status: "failed", errorCodes };
 }
 
-/**
- * Per-route error codes for the shared Turnstile-result classification.
- *
- * Each Lead-family caller keeps its own client-facing codes for the
- * "missing" and "failed" states; the "service-unavailable" state always maps
- * to the shared `SERVICE_UNAVAILABLE` code (503).
- */
-export interface LeadTurnstileErrorConfig {
-  /** Code returned when the browser token is missing ("verification required"). */
-  requiredCode: ApiErrorCode;
-  /** Code returned when the token is present but rejected (anti-abuse failure). */
-  failedCode: ApiErrorCode;
-}
-
 export interface LeadTurnstileErrorOutcome {
   errorCode: ApiErrorCode;
   status: number;
@@ -113,20 +99,25 @@ export interface LeadTurnstileErrorOutcome {
  */
 export function mapLeadTurnstileResultToResponse(
   result: LeadTurnstileVerificationResult,
-  { requiredCode, failedCode }: LeadTurnstileErrorConfig,
 ): LeadTurnstileErrorOutcome | null {
   switch (result.status) {
     case "verified":
       return null;
     case "missing":
-      return { errorCode: requiredCode, status: HTTP_BAD_REQUEST };
+      return {
+        errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
+        status: HTTP_BAD_REQUEST,
+      };
     case "service-unavailable":
       return {
-        errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
+        errorCode: API_ERROR_CODES.TURNSTILE_UNAVAILABLE,
         status: HTTP_SERVICE_UNAVAILABLE,
       };
     case "failed":
-      return { errorCode: failedCode, status: HTTP_BAD_REQUEST };
+      return {
+        errorCode: API_ERROR_CODES.TURNSTILE_REJECTED,
+        status: HTTP_BAD_REQUEST,
+      };
     default: {
       const exhaustiveStatus: never = result;
       return exhaustiveStatus;
