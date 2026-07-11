@@ -509,8 +509,6 @@ export default [
       "src/lib/translation-*.ts",
       "src/lib/locale-*.ts",
       "src/components/i18n/*.tsx",
-      "src/types/i18n.ts",
-      "src/components/language-toggle.tsx",
     ],
     plugins: {
       security,

@@ -154,27 +154,6 @@ export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
   },
 ] as const;
 
-export const SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS = [
-  "commitment1",
-  "commitment2",
-  "commitment3",
-  "commitment4",
-  "commitment5",
-] as const;
-
-export const SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS = [
-  "exampleA",
-  "exampleB",
-  "exampleC",
-  "exampleD",
-] as const;
-
-export const SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS = [
-  "iso9001",
-  "standards",
-  "countries",
-] as const;
-
 export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
   ctaHref: getSingleSiteAboutPageCtaHref(),
 } as const;
@@ -200,23 +179,6 @@ export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   marketLanding: {
     ctaHref: singleSiteContactFallbackHref,
   },
-} as const;
-
-export const SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION = {
-  supportedStandards: [
-    "Example Standard A",
-    "Example Standard B",
-    "Example Standard C",
-    "Example Standard D",
-  ],
-  scopeKeys: [
-    "customSizes",
-    "privateLabel",
-    "implementationSupport",
-    "qualityAssurance",
-  ],
-  processStepKeys: ["step1", "step2", "step3", "step4", "step5"],
-  ctaHref: singleSiteContactFallbackHref,
 } as const;
 
 const SINGLE_SITE_RESOURCES_CARD_KEYS = [

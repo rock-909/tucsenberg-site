@@ -232,7 +232,7 @@ describe("content-readiness-check", () => {
     const rootDir = createFixture({
       "src/constants/tucsenberg-product-page-test.ts": [
         "export const PRODUCT_PAGE = {",
-        '  technical: { material: "Replaceable core material" },',
+        '  technical: { material: "Replaceable catalog example" },',
         '  certifications: ["Example Standard A"],',
         "};",
       ].join("\n"),
@@ -261,6 +261,22 @@ describe("content-readiness-check", () => {
       result.warnings,
       "example-offer",
       "src/config/single-site-product-catalog.ts",
+    );
+  });
+
+  it("allows legitimate replaceable product features", () => {
+    const rootDir = createFixture({
+      "src/constants/tucsenberg-product-page-test.ts":
+        'export const seals = "EPDM seals, replaceable";',
+    });
+    fixtureRoots.push(rootDir);
+
+    const findings = collectContentReadinessFindings(rootDir);
+
+    expect(findings).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ ruleId: "replaceable-content" }),
+      ]),
     );
   });
 

@@ -8,7 +8,6 @@
 /src/middleware.ts @Alx-707 developer@flood-control.com
 /src/i18n/ @Alx-707 developer@flood-control.com
 /src/app/[locale]/layout.tsx @Alx-707 developer@flood-control.com
-/src/app/[locale]/head.tsx @Alx-707 developer@flood-control.com
 
 # Tier A: lead/contact pipeline
 /src/app/api/contact/ @Alx-707 developer@flood-control.com
@@ -37,6 +36,5 @@
 /messages/en/deferred.json @Alx-707 developer@flood-control.com
 /scripts/starter-checks.js @Alx-707 developer@flood-control.com
 
-# Tier A: cache utilities + health
-/src/lib/cache/ @Alx-707 developer@flood-control.com
+# Tier A: health
 /src/app/api/health/ @Alx-707 developer@flood-control.com

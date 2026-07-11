@@ -52,7 +52,6 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
-        - "**/src/app/page.tsx"
     metadata:
       category: security
       technology: [nextjs]
@@ -70,8 +69,6 @@ rules:
         - "**/scripts/**"
         - "**/tests/**"
         - "**/content/**"
-        # Mock client - only used for dev/test, not security-sensitive
-        - "**/src/lib/whatsapp/mock-client.ts"
     message: '避免使用不安全的随机数生成方法，使用crypto.randomBytes()或crypto.getRandomValues()'
     languages: [typescript, javascript]
     severity: WARNING
@@ -291,16 +288,11 @@ rules:
         - "**/src/components/ui/**"
         - "**/components/ui/**"
         - "**/src/lib/security/object-guards.ts"
-        - "**/src/lib/security-headers.ts"
-        - "**/src/lib/dev-tools-positioning.ts"
         - "**/src/config/paths/utils.ts"
         - "**/src/config/contact-form-config.ts"
         - "**/src/services/**"
-        - "**/src/shared/utils.ts"
         - "**/src/types/whatsapp-*/**"
-        - "**/src/lib/validations.ts"
         - "**/src/lib/env.ts"
-        - "**/src/lib/locale-detection-hooks.ts"
     message: '检测到动态属性访问：这是启发式风险提示；只有请求/查询/body 键写入才由 object-injection-untrusted-key-write 阻断'
     languages: [typescript, javascript]
     severity: WARNING
@@ -325,16 +317,8 @@ rules:
         - "**/scripts/**"
         - "**/src/components/ui/**"
         - "**/components/ui/**"
-        - "**/src/lib/performance-monitoring-core-config.ts"
-        - "**/src/lib/i18n-cache-types-advanced.ts"
-        - "**/src/lib/locale-storage-types-config/factory.ts"
-        - "**/src/lib/theme-analytics-core.ts"
-        - "**/src/lib/theme-analytics.ts"
         - "**/src/lib/web-vitals/**"
         - "**/src/config/contact-form-config.ts"
-        - "**/src/types/whatsapp-api-config/utils.ts"
-        - "**/src/lib/performance-monitoring-config-history.ts"
-        - "**/src/lib/performance-monitoring-config-modules.ts"
         # UI-only spread patterns that have been manually reviewed and
         # documented as safe (see .augment/rules/security-implementation.md
         # "Semgrep 规则治理记录" section). These components only spread
@@ -342,13 +326,10 @@ rules:
         # handle raw user input.
         - "**/src/app/*/about/page.tsx"
         - "**/src/app/*/products/*/page.tsx"
-        - "**/src/components/products/product-card.tsx"
         # Lead pipeline files - spread operators used with Zod-validated data only:
         # - inquiry/route.ts: leadData spread after Zod schema validation (productLeadSchema)
-        # - product-inquiry-form.tsx: client-side form with hardcoded field names
         # - lead-schema.ts: Zod schema definitions using baseLeadFields spread (compile-time safe)
         - "**/src/app/api/inquiry/route.ts"
-        - "**/src/components/products/product-inquiry-form.tsx"
         - "**/src/lib/lead-pipeline/lead-schema.ts"
         # Cookie consent - client-side state management with localStorage + hardcoded defaults
         - "**/src/lib/cookie-consent/context.tsx"
@@ -356,15 +337,8 @@ rules:
         - "**/src/lib/lead-pipeline/process-lead.ts"
         # Rate limiting - fetch config object construction (body from internal data)
         - "**/src/lib/security/distributed-rate-limit.ts"
-        # UTM tracking - spread operators used with sanitizeParam() validated alphanumeric values
-        - "**/src/lib/utm.ts"
         # Logger - spread operator used with internal application logging context, not user input
         - "**/src/lib/logger.ts"
-        # Email templates - spread operators used with static CSSProperties style objects
-        - "**/src/components/emails/EmailLayout.tsx"
-        - "**/src/components/emails/ContactFormEmail.tsx"
-        - "**/src/components/emails/ProductInquiryEmail.tsx"
-        - "**/src/components/emails/ConfirmationEmail.tsx"
     message: '检测到潜在的对象注入：使用扩展运算符或Object.assign时需验证输入对象的安全性'
     languages: [typescript, javascript]
     severity: INFO
@@ -422,8 +396,6 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
-        # Tech tabs - category comes from Object.keys() of hardcoded categories object, not user input
-        - "**/src/components/blocks/tech/tech-tabs-block.tsx"
         # mergeObjects: internal utility; also blocks prototype keys (__proto__/constructor/prototype)
         - "**/src/lib/merge-objects.ts"
     metadata:

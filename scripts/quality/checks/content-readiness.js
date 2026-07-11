@@ -105,7 +105,7 @@ const TEXT_RULES = [
   {
     ruleId: "replaceable-content",
     severity: "warning",
-    pattern: /\breplaceable\b|\breplace with real\b/giu,
+    pattern: /\breplaceable catalog example\b|\breplace with real\b/giu,
     message:
       "Replaceable starter catalog content is still present. Replace it before client launch.",
   },
