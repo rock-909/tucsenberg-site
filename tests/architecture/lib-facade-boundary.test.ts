@@ -178,13 +178,13 @@ describe("legacy lib facade boundaries", () => {
     }
   });
 
-  it("keeps contact route error responses on typed canonical error codes", () => {
+  it("keeps contact route validation and errors on the canonical submission path", () => {
     const source = read("src/app/api/contact/route.ts");
 
     expect(source).not.toContain("createSubmissionErrorResponse");
     expect(source).not.toContain("as (typeof API_ERROR_CODES)");
+    expect(source).not.toContain("validateContactSubmissionPayload");
     expect(source).toContain("createApiErrorResponse(");
-    expect(source).toContain("payloadValidation.errorCode");
     expect(source).toContain("submission.errorCode");
   });
 

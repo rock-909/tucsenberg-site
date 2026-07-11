@@ -157,7 +157,7 @@ describe("/api/subscribe route", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+      errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
     });
     expect(processLead).not.toHaveBeenCalled();
   });
@@ -173,7 +173,7 @@ describe("/api/subscribe route", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+      errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
     });
     expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
     expect(processLead).not.toHaveBeenCalled();

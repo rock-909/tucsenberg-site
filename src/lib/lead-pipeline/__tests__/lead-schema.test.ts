@@ -20,6 +20,60 @@ import {
 } from "../lead-schema";
 
 describe("Lead Schema", () => {
+  it.each([
+    [
+      contactLeadSchema,
+      {
+        type: LEAD_TYPES.CONTACT,
+        fullName: "Buyer Name",
+        email: "buyer+rfq@example.com",
+        subject: "Product inquiry",
+        message: "This is a test message with enough characters.",
+        turnstileToken: "valid-token",
+      },
+    ],
+    [
+      productLeadSchema,
+      {
+        type: LEAD_TYPES.PRODUCT,
+        fullName: "Buyer Name",
+        email: "buyer+rfq@example.com",
+        productSlug: "flood-barrier",
+        productName: "Flood Barrier",
+        quantity: 10,
+      },
+    ],
+    [
+      newsletterLeadSchema,
+      {
+        type: LEAD_TYPES.NEWSLETTER,
+        email: "buyer+rfq@example.com",
+      },
+    ],
+  ])(
+    "preserves plus-addressing accepted by Airtable's Email field",
+    (schema, lead) => {
+      const result = schema.safeParse(lead);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.email).toBe("buyer+rfq@example.com");
+      }
+    },
+  );
+
+  it.each(["=cmd@example.com", "+cmd@example.com", "-cmd@example.com"])(
+    "rejects formula-capable email %s before the Airtable boundary",
+    (email) => {
+      expect(
+        newsletterLeadSchema.safeParse({
+          type: LEAD_TYPES.NEWSLETTER,
+          email,
+        }).success,
+      ).toBe(false);
+    },
+  );
+
   describe("contactLeadSchema", () => {
     const validContactLead = {
       type: LEAD_TYPES.CONTACT,

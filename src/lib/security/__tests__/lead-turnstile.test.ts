@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  mapLeadTurnstileResultToResponse,
   type LeadTurnstileVerificationInput,
   verifyLeadTurnstile,
 } from "../lead-turnstile";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
 
 const mockLoggerWarn = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
@@ -135,5 +137,28 @@ describe("verifyLeadTurnstile", () => {
     expect(loggedText).not.toContain("secret-token");
     expect(loggedText).not.toContain("203.0.113.10");
     expect(loggedText).toContain("[REDACTED_IP]");
+  });
+});
+
+describe("mapLeadTurnstileResultToResponse", () => {
+  it.each([
+    [
+      { status: "missing" } as const,
+      { errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED, status: 400 },
+    ],
+    [
+      { status: "failed", errorCodes: ["invalid-input-response"] } as const,
+      { errorCode: API_ERROR_CODES.TURNSTILE_REJECTED, status: 400 },
+    ],
+    [
+      { status: "service-unavailable", errorCodes: ["timeout"] } as const,
+      { errorCode: API_ERROR_CODES.TURNSTILE_UNAVAILABLE, status: 503 },
+    ],
+  ])("maps %o to the shared lead-family error contract", (result, expected) => {
+    expect(mapLeadTurnstileResultToResponse(result)).toEqual(expected);
+  });
+
+  it("returns null after successful verification", () => {
+    expect(mapLeadTurnstileResultToResponse({ status: "verified" })).toBeNull();
   });
 });

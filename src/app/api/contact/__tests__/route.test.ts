@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { submitCanonicalContactSubmission } from "@/lib/contact/submit-canonical-contact";
+import {
+  submitCanonicalContactSubmission,
+  validateContactSubmissionPayload,
+} from "@/lib/contact/submit-canonical-contact";
 import { OPTIONS, POST } from "../route";
 
 vi.mock("@/lib/logger", () => ({
@@ -47,6 +50,9 @@ vi.mock("@/lib/contact/submit-canonical-contact", async (importOriginal) => {
 
   return {
     ...original,
+    validateContactSubmissionPayload: vi.fn(
+      original.validateContactSubmissionPayload,
+    ),
     submitCanonicalContactSubmission: vi.fn(async () => ({
       success: true,
       error: null,
@@ -111,7 +117,15 @@ describe("/api/contact route", () => {
     expect(submitCanonicalContactSubmission).not.toHaveBeenCalled();
   });
 
-  it("rejects invalid payload before canonical contact submission", async () => {
+  it("delegates payload validation to the canonical contact submission", async () => {
+    vi.mocked(submitCanonicalContactSubmission).mockResolvedValueOnce({
+      success: false,
+      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+      error: "Validation failed",
+      details: ["errors.email.invalid"],
+      data: null,
+    });
+
     const response = await POST(
       createContactRequest({
         ...createValidContactBody(),
@@ -126,13 +140,14 @@ describe("/api/contact route", () => {
       errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
       details: ["errors.email.invalid"],
     });
-    expect(submitCanonicalContactSubmission).not.toHaveBeenCalled();
+    expect(submitCanonicalContactSubmission).toHaveBeenCalledOnce();
+    expect(validateContactSubmissionPayload).not.toHaveBeenCalled();
   });
 
   it("returns Turnstile failure from the canonical contact path", async () => {
     vi.mocked(submitCanonicalContactSubmission).mockResolvedValueOnce({
       success: false,
-      errorCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+      errorCode: API_ERROR_CODES.TURNSTILE_REJECTED,
       error: "Security verification failed",
       details: null,
       data: null,
@@ -143,7 +158,7 @@ describe("/api/contact route", () => {
 
     expect(response.status).toBe(400);
     expect(data.success).toBe(false);
-    expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED);
+    expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
     expect(submitCanonicalContactSubmission).toHaveBeenCalledWith(
       expect.objectContaining({
         email: "alice@example.com",

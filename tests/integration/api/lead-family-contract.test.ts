@@ -161,7 +161,7 @@ describe("lead API family response contract (auxiliary)", () => {
     const body = await response.json();
     expect(body).toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+      errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
     });
   });
 
