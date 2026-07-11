@@ -8,7 +8,7 @@
  */
 
 // -- 进制和编码相关 --
-/** 十六进制基数 (用于 parseInt/toString(16)、nonce/salt 字节长度等) */
+/** 十六进制基数 (parseInt/toString(16))。仅表示进制 16，不要借用它表示字节长度。 */
 export const HEX_RADIX = 16 as const;
 
 // -- 验证相关 --
