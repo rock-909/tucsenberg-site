@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRequestQuoteFormCopy } from "@/test/request-quote-test-messages";
 import { RequestQuoteForm } from "../request-quote-form";
+import { parseInquiryResponse } from "../request-quote-response";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({
@@ -52,6 +53,40 @@ function getFetchBody(): Record<string, unknown> {
   expect(requestInit).toBeDefined();
   return JSON.parse(String(requestInit?.body)) as Record<string, unknown>;
 }
+
+describe("parseInquiryResponse", () => {
+  it("returns success with the reference id for an ok success body", () => {
+    const result = parseInquiryResponse(
+      true,
+      JSON.stringify({ success: true, data: { referenceId: "rfq-ref-100" } }),
+    );
+
+    expect(result).toEqual({ success: true, referenceId: "rfq-ref-100" });
+  });
+
+  it("returns a failed result for non-JSON bodies instead of throwing", () => {
+    expect(() =>
+      parseInquiryResponse(false, "<html>502 Bad Gateway</html>"),
+    ).not.toThrow();
+    expect(parseInquiryResponse(false, "<html>502 Bad Gateway</html>")).toEqual(
+      {
+        failed: true,
+      },
+    );
+  });
+
+  it("returns a failed result for an ok:false JSON body", () => {
+    const result = parseInquiryResponse(
+      false,
+      JSON.stringify({
+        success: false,
+        errorCode: "INQUIRY_VALIDATION_FAILED",
+      }),
+    );
+
+    expect(result).toEqual({ failed: true });
+  });
+});
 
 describe("RequestQuoteForm", () => {
   const copy = createTestRequestQuoteFormCopy();

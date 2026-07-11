@@ -1,6 +1,9 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useContactForm } from "@/components/forms/use-contact-form";
+import {
+  deriveContactResultState,
+  useContactForm,
+} from "@/components/forms/use-contact-form";
 
 const mockSetLastSubmissionTime = vi.hoisted(() => vi.fn());
 
@@ -33,6 +36,64 @@ function createValidFormData(): FormData {
   formData.set("website", "");
   return formData;
 }
+
+describe("deriveContactResultState", () => {
+  const timestamp = "2026-07-09T00:00:00.000Z";
+
+  it("returns a success state for an ok, well-formed success response", () => {
+    const state = deriveContactResultState(
+      true,
+      { success: true, data: { referenceId: "contact-ref-010" } },
+      timestamp,
+    );
+
+    expect(state).toEqual({
+      success: true,
+      data: { referenceId: "contact-ref-010" },
+      timestamp,
+    });
+  });
+
+  it("surfaces an error state with a concrete code when the response is not ok", () => {
+    const state = deriveContactResultState(
+      false,
+      { success: true, data: { referenceId: "ignored" } },
+      timestamp,
+    );
+
+    expect(state.success).toBe(false);
+    expect(state.errorCode).toBeTruthy();
+  });
+
+  it("surfaces an error state with a concrete code for a malformed payload", () => {
+    const state = deriveContactResultState(
+      true,
+      { message: "unexpected shape" },
+      timestamp,
+    );
+
+    expect(state.success).toBe(false);
+    expect(state.errorCode).toBeTruthy();
+  });
+
+  it("preserves the API error code and details when the body reports failure", () => {
+    const state = deriveContactResultState(
+      false,
+      {
+        success: false,
+        errorCode: "CONTACT_VALIDATION_FAILED",
+        details: ["errors.email.invalid"],
+      },
+      timestamp,
+    );
+
+    expect(state).toMatchObject({
+      success: false,
+      errorCode: "CONTACT_VALIDATION_FAILED",
+      details: ["errors.email.invalid"],
+    });
+  });
+});
 
 describe("useContactForm", () => {
   beforeEach(() => {

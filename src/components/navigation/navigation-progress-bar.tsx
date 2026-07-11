@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "motion/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -11,6 +11,12 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
+import {
+  getNavigationTargetRouteKey,
+  getNavigationRouteKey,
+  shouldStartHistoryNavigationProgress,
+  shouldStartNavigationProgress,
+} from "@/components/navigation/navigation-progress";
 
 const PROGRESS_START = 18;
 const PROGRESS_CAP = 92;
@@ -18,41 +24,6 @@ const PROGRESS_TRICKLE_MS = 380;
 const PROGRESS_COMPLETE_MS = 220;
 const PROGRESS_HIDE_MS = 180;
 const PROGRESS_MIN_VISIBLE_MS = 280;
-
-function isInternalNavigationLink(anchor: HTMLAnchorElement): boolean {
-  if (anchor.target === "_blank") {
-    return false;
-  }
-
-  const href = anchor.getAttribute("href");
-  if (
-    !href ||
-    href.startsWith("#") ||
-    href.startsWith("mailto:") ||
-    href.startsWith("tel:")
-  ) {
-    return false;
-  }
-
-  try {
-    const target = new URL(href, window.location.href);
-    const current = new URL(window.location.href);
-
-    if (target.origin !== current.origin) {
-      return false;
-    }
-
-    return !(
-      target.pathname === current.pathname && target.search === current.search
-    );
-  } catch {
-    return false;
-  }
-}
-
-function getCurrentRouteKey(): string {
-  return `${window.location.pathname}${window.location.search}`;
-}
 
 function getNextProgressValue(current: number): number {
   if (current >= PROGRESS_CAP) {
@@ -63,8 +34,52 @@ function getNextProgressValue(current: number): number {
   return Math.min(current + increment, PROGRESS_CAP);
 }
 
+function getCurrentBrowserRouteKey(): string {
+  return getNavigationRouteKey(
+    window.location.pathname,
+    new URLSearchParams(window.location.search),
+  );
+}
+
+function getClickedNavigationRouteKey(event: MouseEvent): string | null {
+  const { target } = event;
+  if (!(target instanceof Element)) return null;
+
+  const anchor = target.closest("a");
+  if (!(anchor instanceof HTMLAnchorElement)) return null;
+  if (!shouldStartNavigationProgress(event, anchor, window.location.href)) {
+    return null;
+  }
+
+  return getNavigationTargetRouteKey(anchor, window.location.href);
+}
+
+function NavigationProgressIndicator({ progress }: { progress: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden pt-[env(safe-area-inset-top,0px)]"
+      data-testid="navigation-progress-bar"
+    >
+      <div
+        className={cn(
+          "bg-primary h-full w-full origin-left shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
+          progress >= 100 ? "transition-none" : "transition-transform ease-out",
+        )}
+        data-testid="navigation-progress-bar-fill"
+        style={{
+          transform: `scaleX(${progress / 100})`,
+          transitionDuration: `${progress >= 100 ? 0 : PROGRESS_COMPLETE_MS}ms`,
+        }}
+      />
+    </div>
+  );
+}
+
 export function NavigationProgressBar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const routeKey = getNavigationRouteKey(pathname, searchParams);
   const reducedMotion = useReducedMotion();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -72,8 +87,13 @@ export function NavigationProgressBar() {
   const hideTimerRef = useRef<number | undefined>(undefined);
   const startedAtRef = useRef<number | null>(null);
   const isActiveRef = useRef(false);
-  const hasMountedRef = useRef(false);
-  const currentRouteKeyRef = useRef<string | null>(null);
+  const renderedRouteKeyRef = useRef(routeKey);
+  // Only click/popstate handlers own this ref. Route completion must not update
+  // it, because Next may flush route effects before our popstate listener runs.
+  const historyRef = useRef({
+    hasMounted: false,
+    routeKey: null as string | null,
+  });
 
   const clearTimers = useCallback(() => {
     if (trickleTimerRef.current !== undefined) {
@@ -126,43 +146,43 @@ export function NavigationProgressBar() {
   });
 
   useEffect(() => {
-    currentRouteKeyRef.current = getCurrentRouteKey();
-
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
+    if (!historyRef.current.hasMounted) {
+      historyRef.current = {
+        hasMounted: true,
+        routeKey: getCurrentBrowserRouteKey(),
+      };
       return;
     }
 
+    renderedRouteKeyRef.current = routeKey;
     finish();
-  }, [pathname]);
+  }, [routeKey]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
-      const { target } = event;
-      if (!(target instanceof Element)) {
-        return;
-      }
+      const nextRouteKey = getClickedNavigationRouteKey(event);
+      if (nextRouteKey === null) return;
 
-      const anchor = target.closest("a");
-      if (!(anchor instanceof HTMLAnchorElement)) {
-        return;
-      }
-
-      if (!isInternalNavigationLink(anchor)) {
-        return;
-      }
-
+      historyRef.current.routeKey = nextRouteKey;
       start();
     };
 
     const handlePopState = () => {
-      const nextRouteKey = getCurrentRouteKey();
-      if (currentRouteKeyRef.current === nextRouteKey) {
+      const nextRouteKey = getCurrentBrowserRouteKey();
+      if (
+        !shouldStartHistoryNavigationProgress(
+          historyRef.current.routeKey,
+          nextRouteKey,
+        )
+      ) {
         return;
       }
 
-      currentRouteKeyRef.current = nextRouteKey;
+      historyRef.current.routeKey = nextRouteKey;
       start();
+      queueMicrotask(() => {
+        if (renderedRouteKeyRef.current === nextRouteKey) finish();
+      });
     };
 
     document.addEventListener("click", handleClick, true);
@@ -179,23 +199,5 @@ export function NavigationProgressBar() {
     return null;
   }
 
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden pt-[env(safe-area-inset-top,0px)]"
-      data-testid="navigation-progress-bar"
-    >
-      <div
-        className={cn(
-          "h-full w-full origin-left bg-primary shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
-          progress >= 100 ? "transition-none" : "transition-transform ease-out",
-        )}
-        data-testid="navigation-progress-bar-fill"
-        style={{
-          transform: `scaleX(${progress / 100})`,
-          transitionDuration: `${progress >= 100 ? 0 : PROGRESS_COMPLETE_MS}ms`,
-        }}
-      />
-    </div>
-  );
+  return <NavigationProgressIndicator progress={progress} />;
 }

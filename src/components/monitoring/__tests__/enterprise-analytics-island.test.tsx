@@ -102,7 +102,12 @@ describe("EnterpriseAnalyticsIsland", () => {
   });
 
   it("initializes GA4 dataLayer and gtag when enabled in production", async () => {
-    mockUseCookieConsentOptional.mockReturnValue(null);
+    mockUseCookieConsentOptional.mockReturnValue(
+      createCookieConsentValue({
+        ready: true,
+        consent: { ...DEFAULT_CONSENT, analytics: true },
+      }),
+    );
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", "G-TEST123");
 
@@ -129,5 +134,43 @@ describe("EnterpriseAnalyticsIsland", () => {
     const { container } = render(<EnterpriseAnalyticsIsland />);
 
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("resolveAnalyticsAllowed", () => {
+  it("denies analytics when the consent context is absent", async () => {
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
+
+    expect(resolveAnalyticsAllowed(null)).toBe(false);
+  });
+
+  it("denies analytics while consent is not ready", async () => {
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
+
+    expect(
+      resolveAnalyticsAllowed({ ready: false, consent: DEFAULT_CONSENT }),
+    ).toBe(false);
+  });
+
+  it("allows analytics when consent is ready and granted", async () => {
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
+
+    expect(
+      resolveAnalyticsAllowed({
+        ready: true,
+        consent: { ...DEFAULT_CONSENT, analytics: true },
+      }),
+    ).toBe(true);
+  });
+
+  it("denies analytics when consent is ready but declined", async () => {
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
+
+    expect(
+      resolveAnalyticsAllowed({
+        ready: true,
+        consent: { ...DEFAULT_CONSENT, analytics: false },
+      }),
+    ).toBe(false);
   });
 });

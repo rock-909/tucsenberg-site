@@ -8,6 +8,7 @@ import {
   getPublicRuntimeEnvString,
   isPublicRuntimeProduction,
 } from "@/lib/public-runtime-env";
+import { resolveAnalyticsAllowed } from "@/components/monitoring/analytics-consent";
 
 function ensureGa4QueueInitialized(measurementId: string): void {
   if (!Array.isArray(window.dataLayer)) {
@@ -34,11 +35,7 @@ export function EnterpriseAnalyticsIsland() {
   );
   const cookieConsent = useCookieConsentOptional();
 
-  const analyticsAllowed = cookieConsent
-    ? cookieConsent.ready
-      ? cookieConsent.consent.analytics
-      : false
-    : true;
+  const analyticsAllowed = resolveAnalyticsAllowed(cookieConsent);
 
   const gaEnabled = Boolean(gaMeasurementId) && analyticsAllowed && isProd;
   const gaInitRef = useRef(false);

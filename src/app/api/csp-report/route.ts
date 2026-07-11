@@ -11,7 +11,11 @@ import {
 } from "@/lib/api/with-rate-limit";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import type { CSPReport } from "@/config/security";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
+import {
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR,
+  HTTP_UNSUPPORTED_MEDIA_TYPE,
+} from "@/constants";
 
 const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
 const MAX_SCRIPT_SAMPLE_LENGTH = 200;
@@ -197,7 +201,7 @@ async function processReport(
   if (!isContentTypeValid(contentType)) {
     return createApiErrorResponse(
       API_ERROR_CODES.UNSUPPORTED_MEDIA_TYPE,
-      HTTP_BAD_REQUEST,
+      HTTP_UNSUPPORTED_MEDIA_TYPE,
     );
   }
 

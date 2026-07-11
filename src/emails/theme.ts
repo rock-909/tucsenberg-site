@@ -40,4 +40,4 @@ export const SIZES = {
 } as const;
 
 export const FONT_FAMILY =
-  'Arial, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica';
+  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';

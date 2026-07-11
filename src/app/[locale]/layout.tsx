@@ -75,7 +75,9 @@ async function AsyncLocaleLayoutContent({
       <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LightMotionProvider>
-            <NavigationProgressBar />
+            <Suspense fallback={null}>
+              <NavigationProgressBar />
+            </Suspense>
             {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
             <AttributionBootstrap />
 

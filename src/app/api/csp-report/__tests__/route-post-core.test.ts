@@ -231,7 +231,7 @@ describe("CSP Report API Route - 核心功能测试", () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(415);
       const responseData = await response.json();
       expect(responseData.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });
@@ -244,7 +244,7 @@ describe("CSP Report API Route - 核心功能测试", () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(415);
       const responseData = await response.json();
       expect(responseData.errorCode).toBe("UNSUPPORTED_MEDIA_TYPE");
     });

@@ -5,6 +5,7 @@ import { trackGenerateLead } from "@/lib/marketing/lead-event";
 import { appendAttributionToFormData } from "@/lib/marketing/utm";
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
 import { createRequestQuotePayload } from "@/app/[locale]/request-quote/request-quote-payload";
+import { parseInquiryResponse } from "@/app/[locale]/request-quote/request-quote-response";
 import {
   RequestQuoteContactFields,
   RequestQuoteMessageField,
@@ -13,21 +14,6 @@ import {
   RequestQuoteSubmitControls,
   type RequestQuoteSubmitState,
 } from "@/app/[locale]/request-quote/request-quote-submit-controls";
-
-interface InquiryApiSuccessResponse {
-  success: true;
-  data: {
-    referenceId: string;
-  };
-}
-
-interface InquiryApiErrorResponse {
-  success: false;
-  errorCode?: string;
-  details?: string[];
-}
-
-type InquiryApiResponse = InquiryApiSuccessResponse | InquiryApiErrorResponse;
 
 // Cap for the `?config=` prefill coming from product estimators; the message
 // field itself allows more, but a URL-borne prefill should stay short.
@@ -83,12 +69,13 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
           createRequestQuotePayload(formData, turnstileToken, copy.payload),
         ),
       });
-      const payload = (await response.json()) as InquiryApiResponse;
+      const rawText = await response.text();
+      const result = parseInquiryResponse(response.ok, rawText);
 
-      if (response.ok && payload.success) {
+      if ("success" in result) {
         setState({
           status: "success",
-          referenceId: payload.data.referenceId,
+          referenceId: result.referenceId,
         });
         trackGenerateLead("rfq");
         return;

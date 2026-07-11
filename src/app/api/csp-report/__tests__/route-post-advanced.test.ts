@@ -208,7 +208,7 @@ describe("CSP Report API Route - 高级功能测试", () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(415);
     });
   });
 
