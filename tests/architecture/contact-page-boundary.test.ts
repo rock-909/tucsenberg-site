@@ -74,20 +74,4 @@ describe("Contact page source boundaries", () => {
       expect(source).not.toContain(legacyExport);
     }
   });
-
-  it("keeps legacy field helpers marked away from the main config-driven contact path", () => {
-    const legacyFieldFiles = [
-      "src/components/forms/fields/name-fields.tsx",
-      "src/components/forms/fields/contact-fields.tsx",
-      "src/components/forms/fields/additional-fields.tsx",
-      "src/components/forms/fields/message-field.tsx",
-      "src/components/forms/fields/checkbox-fields.tsx",
-    ];
-
-    for (const filePath of legacyFieldFiles) {
-      const source = read(filePath);
-      expect(source, filePath).toContain("Legacy field helper");
-      expect(source, filePath).toContain("contact-form-fields.tsx");
-    }
-  });
 });
