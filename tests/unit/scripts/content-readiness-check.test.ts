@@ -135,6 +135,26 @@ describe("content-readiness-check", () => {
     expectFinding(result.warnings, "placeholder");
   });
 
+  it("exempts form placeholder fields from generic-placeholder residue warnings", () => {
+    const rootDir = createFixture({
+      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+        form: {
+          emailPlaceholder: "your@email.com",
+          companyPlaceholder: "Your company name",
+        },
+      }),
+    });
+    fixtureRoots.push(rootDir);
+
+    // key 以 Placeholder 结尾的字段，其值本就是 UX 占位文案；
+    // your-email / your-company 规则在这里被具名放行，不产生噪音 warning。
+    const result = runContentReadinessCheck(rootDir);
+
+    expect(result.status).toBe("passed");
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
+  });
+
   it("does not treat JSON keys as buyer-visible residue", () => {
     const rootDir = createFixture({
       "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
