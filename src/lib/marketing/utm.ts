@@ -97,7 +97,6 @@ export function storeAttributionData(): void {
 
   if (!hasData) return;
 
-  // nosemgrep: object-injection-sink-spread-operator
   // Safe: utmParams and clickIds are derived from sanitizeParam(), which blocks control chars and dangerous HTML delimiters.
   const data: AttributionData = {
     ...utmParams,
@@ -142,7 +141,6 @@ export function getAttributionSnapshot(): AttributionData {
   if (pendingAttribution) return pendingAttribution;
 
   // Fallback to current URL params if no stored data
-  // nosemgrep: object-injection-sink-spread-operator
   // Safe: captureUtmParams/captureClickIds return sanitized objects with printable ASCII values minus dangerous HTML delimiters.
   return {
     ...captureUtmParams(),

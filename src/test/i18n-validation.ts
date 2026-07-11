@@ -315,7 +315,6 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
       current !== null &&
       !Array.isArray(current)
     ) {
-      // nosemgrep: object-injection-sink-reflect-api -- 路径段已通过严格字符集校验
       current = Reflect.get(current as Record<string, unknown>, seg);
     } else {
       return undefined;

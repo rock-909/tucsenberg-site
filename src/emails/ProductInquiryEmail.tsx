@@ -104,7 +104,6 @@ export function ProductInquiryEmail(data: ProductInquiryEmailData) {
       ) : null}
       {data.marketingConsent ? (
         <EmailField label={EMAIL_COPY.common.fields.marketingConsent}>
-          {/* nosemgrep: object-injection-sink-spread-operator */}
           {/* Safe: valueTextStyle is a static CSSProperties object defined in this file */}
           <Text
             style={{

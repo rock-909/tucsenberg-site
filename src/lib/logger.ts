@@ -130,7 +130,6 @@ function sanitizePhone(phone: string | undefined | null): string {
 export function sanitizeLogContext<T extends Record<string, unknown>>(
   context: T,
 ): Record<string, unknown> {
-  // nosemgrep: object-injection-sink-spread-operator
   // Safe: context is internal logging data passed by application code, not user input
   const sanitized: Record<string, unknown> = { ...context };
 

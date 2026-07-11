@@ -51,13 +51,11 @@ export function ConfirmationEmail(data: EmailTemplateData) {
           </Text>
         ))}
       </Section>
-      {/* nosemgrep: object-injection-sink-spread-operator */}
       {/* Safe: paragraphStyle is a static CSSProperties object defined in this file */}
       <Text style={{ ...paragraphStyle, marginTop: SPACING.lg }}>
         {EMAIL_COPY.confirmation.urgentHelp}
       </Text>
       <Text style={paragraphStyle}>{EMAIL_COPY.confirmation.signoff}</Text>
-      {/* nosemgrep: object-injection-sink-spread-operator */}
       {/* Safe: paragraphStyle is a static CSSProperties object defined in this file */}
       <Text style={{ ...paragraphStyle, fontWeight: "bold" }}>
         {EMAIL_COPY.confirmation.teamName(SITE_CONFIG.name)}
