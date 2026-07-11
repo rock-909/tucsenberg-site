@@ -1,4 +1,4 @@
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import { Button } from "@/components/ui/button";
 import { HomepageSectionShell } from "@/components/sections/homepage-section-shell";
 import { Link } from "@/i18n/routing";

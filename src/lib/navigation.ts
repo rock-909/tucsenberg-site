@@ -4,7 +4,7 @@
  * This module provides navigation configuration, route definitions,
  * and utility functions for the responsive navigation system.
  */
-import type { Locale } from "@/types/i18n";
+import type { Locale } from "@/i18n/routing";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { BREAKPOINT_MD, BREAKPOINT_XL } from "@/constants/breakpoints";
 import { BYTES_PER_KB } from "@/constants/core";

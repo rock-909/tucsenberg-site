@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Locale } from "@/types/i18n";
+import type { Locale } from "@/i18n/routing";
 import {
   getContactCopy,
   getContactCopyFromMessages,

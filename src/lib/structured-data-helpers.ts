@@ -12,11 +12,11 @@ import {
 import type {
   ArticleData,
   BreadcrumbData,
-  Locale,
   OrganizationData,
   ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
+import type { Locale } from "@/i18n/routing";
 
 /**
  * 创建面包屑导航结构化数据

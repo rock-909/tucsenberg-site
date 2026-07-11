@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/routing";
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import {
   Breadcrumb,
   BreadcrumbItem,

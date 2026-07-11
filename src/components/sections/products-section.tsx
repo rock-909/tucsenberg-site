@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import type { LinkHref } from "@/lib/i18n/route-parsing";
+import type { LinkHref } from "@/lib/i18n/link-href";
 import {
   ProductsSectionView,
   type ProductsSectionProductItem,
