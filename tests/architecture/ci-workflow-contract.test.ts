@@ -28,6 +28,7 @@ const ERROR_SEMGREP_RULE_IDS = [
   "no-raw-request-json-in-api",
   "env-access-bypass-in-config",
   "raw-proxy-header-read-outside-trusted-entry",
+  "api-route-free-text-error-response",
 ] as const;
 
 interface SemgrepRule {

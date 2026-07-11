@@ -549,7 +549,7 @@ rules:
           NextResponse.json({ ..., message: $VAL, ... }, ...)
     message: '公开 API route 避免返回自由文本 error/message；优先用 createApiErrorResponse()/createApiSuccessResponse() 或统一 errorCode contract'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/app/api/**/*.ts"
