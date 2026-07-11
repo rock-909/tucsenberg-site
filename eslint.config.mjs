@@ -145,33 +145,14 @@ export default [
     },
   },
 
-  // React 19 Hook Standards configuration
+  // React hooks call-ordering correctness. exhaustive-deps is upgraded to error
+  // in the progressive block; require-await / no-unused-vars / prefer-const /
+  // no-duplicate-imports are set once in the ultra-strict block below.
   {
-    name: "react-19-hook-standards-config",
+    name: "react-hooks-correctness",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // 🚀 React 19 Hook优化规则
-      // useActionState Hook最佳实践
-      "react-hooks/exhaustive-deps": "error", // 确保useActionState依赖完整
-
-      // useFormStatus Hook最佳实践 - 确保在form子组件中使用
-      // 注意：这些规则需要自定义插件，暂时使用通用规则
-      "react-hooks/rules-of-hooks": "error", // 确保Hook调用规则正确
-
-      // useOptimistic Hook最佳实践 - 确保与startTransition配合使用
-      // 通过现有规则确保正确的异步模式
-      "require-await": "error", // 确保async函数包含await
-
-      // use Hook最佳实践 - 条件调用支持
-      // React 19的use Hook支持条件调用，但仍需在组件顶层
-
-      // Form Actions最佳实践
-      // 确保Server Actions正确定义和使用
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }], // 确保action参数被使用
-
-      // React 19性能优化规则
-      "prefer-const": "error", // 优化变量声明
-      "no-duplicate-imports": "error", // 避免重复导入React 19 hooks
+      "react-hooks/rules-of-hooks": "error",
     },
   },
 
@@ -731,12 +712,8 @@ export default [
     name: "progressive-unified-enhancements",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // AI编码质量保障增强
-      "prefer-const": "error", // AI容易生成let，强制使用const
-      "no-var": "error", // 严格禁止var
-      "no-duplicate-imports": "error", // AI可能重复导入
-
-      // React特化规则（针对AI编码）
+      // React特化规则（针对AI编码）: exhaustive-deps 升级为 error（Next 默认 warn）。
+      // prefer-const / no-var / no-duplicate-imports 统一由 ultra-strict 块设置。
       "react-hooks/exhaustive-deps": "error", // AI容易遗漏依赖，升级为错误
 
       // 函数命名和结构
