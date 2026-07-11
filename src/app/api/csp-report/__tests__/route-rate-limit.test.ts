@@ -81,6 +81,18 @@ vi.mock("@/lib/env", () => {
 describe("CSP Report API Route - Rate Limiting", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // The global test setup runs vi.resetAllMocks() before each test, which
+    // wipes hoisted mock implementations. Re-establish createRateLimitHeaders
+    // so it keeps honoring its production `Headers` return-type contract.
+    mockCreateRateLimitHeaders.mockImplementation((result) => {
+      const headers = new Headers();
+      headers.set("X-RateLimit-Remaining", String(result.remaining));
+      headers.set("X-RateLimit-Reset", String(result.resetTime));
+      if (result.retryAfter !== null) {
+        headers.set("Retry-After", String(result.retryAfter));
+      }
+      return headers;
+    });
   });
 
   afterEach(() => {

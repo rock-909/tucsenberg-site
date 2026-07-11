@@ -28,6 +28,24 @@ function setEnv(key: string, value: string | undefined): void {
   }
 }
 
+function createStalledJsonResponse(signal?: AbortSignal | null): Response {
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("["));
+      signal?.addEventListener("abort", () => {
+        controller.error(
+          new DOMException("The operation was aborted", "AbortError"),
+        );
+      });
+    },
+  });
+
+  return new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 describe("rate-limit-store", () => {
   const originalEnv = process.env;
 
@@ -236,6 +254,33 @@ describe("rate-limit-store", () => {
       expect(requestInit.signal?.aborted).toBe(true);
       await abortExpectation;
       vi.useRealTimers();
+    });
+
+    it("aborts when an Upstash response body stalls during JSON parsing", async () => {
+      vi.useFakeTimers();
+      const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+        return createStalledJsonResponse(init?.signal);
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      try {
+        const store = new RedisRateLimitStore(
+          "https://example.upstash.io",
+          "t",
+        );
+        const pendingIncrement = store.increment("idem:key", 60_000);
+        await Promise.resolve();
+
+        const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+        const abortExpectation =
+          expect(pendingIncrement).rejects.toThrow("aborted");
+        await vi.advanceTimersByTimeAsync(5_000);
+
+        expect(requestInit.signal?.aborted).toBe(true);
+        await abortExpectation;
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("accepts increment responses wrapped under result arrays", async () => {

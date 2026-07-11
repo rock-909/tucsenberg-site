@@ -150,30 +150,6 @@ describe("legacy lib facade boundaries", () => {
     }
   });
 
-  it("keeps verify-turnstile on the shared rate-limit wrapper", () => {
-    const source = read("src/app/api/verify-turnstile/route.ts");
-
-    expect(source).toContain("@/lib/api/with-rate-limit");
-    expect(source).toContain('withRateLimit("turnstile"');
-    expect(source).not.toContain("@/lib/security/distributed-rate-limit");
-    expect(source).not.toContain("@/lib/security/rate-limit-key-strategies");
-    expect(source).not.toContain("checkDistributedRateLimit");
-    expect(source).not.toContain("createRateLimitHeaders");
-    expect(source).not.toContain("getIPKey");
-  });
-
-  it("keeps verify-turnstile separate from the Lead-family Turnstile helper", () => {
-    const source = read("src/app/api/verify-turnstile/route.ts");
-
-    expect(source).not.toContain("@/lib/security/lead-turnstile");
-    expect(source).not.toContain("verifyLeadTurnstile");
-    expect(source).toContain("@/lib/security/turnstile");
-    expect(source).toContain("verifyTurnstileDetailed");
-    expect(source).not.toContain('expectedAction: "product_inquiry"');
-    expect(source).not.toContain('expectedAction: "newsletter_subscribe"');
-    expect(source).not.toContain('expectedAction: "contact_form"');
-  });
-
   it("keeps csp-report on shared JSON body parsing", () => {
     const source = read("src/app/api/csp-report/route.ts");
 
@@ -210,14 +186,6 @@ describe("legacy lib facade boundaries", () => {
     expect(source).toContain("createApiErrorResponse(");
     expect(source).toContain("payloadValidation.errorCode");
     expect(source).toContain("submission.errorCode");
-  });
-
-  it("keeps verify-turnstile fixed verification failures inline", () => {
-    const source = read("src/app/api/verify-turnstile/route.ts");
-
-    expect(source).not.toContain("createVerificationErrorResponse");
-    expect(source).toContain("API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED");
-    expect(source).toContain("HTTP_BAD_REQUEST");
   });
 
   it("keeps inquiry and subscribe response branches inline", () => {

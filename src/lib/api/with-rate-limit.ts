@@ -24,6 +24,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HTTP_SERVICE_UNAVAILABLE, HTTP_TOO_MANY_REQUESTS } from "@/constants";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  createApiErrorResponse,
+  type ApiErrorResponse,
+} from "@/lib/api/api-response";
 import { logger } from "@/lib/logger";
 import { getClientIP as getTrustedClientIP } from "@/lib/security/client-ip";
 import {
@@ -81,14 +85,6 @@ export type RateLimitedHandler<T = unknown> = (
 ) => Promise<NextResponse<T>> | NextResponse<T>;
 
 /**
- * Standard rate limit error response body
- */
-interface RateLimitErrorBody {
-  success: false;
-  errorCode: string;
-}
-
-/**
  * Track storage failure and check if alert threshold exceeded
  */
 function trackStorageFailure(): boolean {
@@ -142,11 +138,11 @@ async function handleDegradedRequest<T>({
 /**
  * Create rate limit exceeded response
  */
-function createRateLimitResponse<T>(
+function createRateLimitResponse(
   result: Awaited<ReturnType<typeof checkDistributedRateLimit>>,
   keyPrefix: string,
   statusCode: number = HTTP_TOO_MANY_REQUESTS,
-): NextResponse<T> {
+): NextResponse<ApiErrorResponse> {
   const headers = createRateLimitHeaders(result);
 
   // Log only safe prefix (max 8 chars) per privacy requirements
@@ -156,16 +152,14 @@ function createRateLimitResponse<T>(
     deniedReason: result.deniedReason,
   });
 
-  return NextResponse.json(
-    {
-      success: false,
-      errorCode:
-        result.deniedReason === "storage_failure"
-          ? API_ERROR_CODES.SERVICE_UNAVAILABLE
-          : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
-    } as RateLimitErrorBody,
-    { status: statusCode, headers },
-  ) as NextResponse<T>;
+  const response = createApiErrorResponse(
+    result.deniedReason === "storage_failure"
+      ? API_ERROR_CODES.SERVICE_UNAVAILABLE
+      : API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+    statusCode,
+  );
+  headers.forEach((value, key) => response.headers.set(key, value));
+  return response;
 }
 
 /**
@@ -198,8 +192,10 @@ export function withRateLimit<T = unknown>(
   preset: RateLimitPreset,
   handler: RateLimitedHandler<T>,
   keyStrategy: KeyStrategy = getIPKey,
-): (request: NextRequest) => Promise<NextResponse<T>> {
-  return async (request: NextRequest): Promise<NextResponse<T>> => {
+): (request: NextRequest) => Promise<NextResponse<T | ApiErrorResponse>> {
+  return async (
+    request: NextRequest,
+  ): Promise<NextResponse<T | ApiErrorResponse>> => {
     let clientIP = FALLBACK_CLIENT_IP;
     let rateLimitKey = "";
 
@@ -217,13 +213,10 @@ export function withRateLimit<T = unknown>(
       });
       const failClosed = RATE_LIMIT_PRESETS[preset].failureMode === "closed";
       if (failClosed) {
-        return NextResponse.json(
-          {
-            success: false,
-            errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
-          } as RateLimitErrorBody,
-          { status: HTTP_SERVICE_UNAVAILABLE },
-        ) as NextResponse<T>;
+        return createApiErrorResponse(
+          API_ERROR_CODES.SERVICE_UNAVAILABLE,
+          HTTP_SERVICE_UNAVAILABLE,
+        );
       }
       result = {
         allowed: true,
@@ -240,7 +233,7 @@ export function withRateLimit<T = unknown>(
         result.deniedReason === "storage_failure"
           ? HTTP_SERVICE_UNAVAILABLE
           : HTTP_TOO_MANY_REQUESTS;
-      return createRateLimitResponse<T>(result, rateLimitKey, statusCode);
+      return createRateLimitResponse(result, rateLimitKey, statusCode);
     }
 
     // Storage failure triggered fail-open - track, alert, and add degraded header

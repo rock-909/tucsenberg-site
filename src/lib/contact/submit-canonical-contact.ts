@@ -4,7 +4,7 @@ import {
   type ContactFormFieldValues,
 } from "@/config/contact-form-config";
 import { createContactFormSchemaFromConfig } from "@/config/contact-form-validation";
-import { HTTP_INTERNAL_ERROR, HTTP_SERVICE_UNAVAILABLE } from "@/constants";
+import { HTTP_INTERNAL_ERROR } from "@/constants";
 import {
   API_ERROR_CODES,
   type ApiErrorCode,
@@ -21,7 +21,10 @@ import {
   pickAttributionFields,
   type MarketingAttributionFields,
 } from "@/lib/marketing/attribution-fields";
-import { verifyLeadTurnstile } from "@/lib/security/lead-turnstile";
+import {
+  mapLeadTurnstileResultToResponse,
+  verifyLeadTurnstile,
+} from "@/lib/security/lead-turnstile";
 
 const contactFormSchema = createContactFormSchemaFromConfig(
   CONTACT_FORM_CONFIG,
@@ -293,44 +296,28 @@ export async function validateContactSubmission(
     expectedAction: "contact_form",
   });
 
-  switch (verificationResult.status) {
-    case "verified":
-      return {
-        success: true,
-        error: null,
-        details: null,
-        data: formData,
-      };
-    case "missing":
-      return {
-        success: false,
-        errorCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
-        error: "Security verification required",
-        details: null,
-        data: null,
-      };
-    case "service-unavailable":
-      return {
-        success: false,
-        errorCode: API_ERROR_CODES.SERVICE_UNAVAILABLE,
-        error: "Security verification unavailable",
-        details: null,
-        data: null,
-        statusCode: HTTP_SERVICE_UNAVAILABLE,
-      };
-    case "failed":
-      return {
-        success: false,
-        errorCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
-        error: "Security verification failed",
-        details: null,
-        data: null,
-      };
-    default: {
-      const exhaustiveStatus: never = verificationResult;
-      return exhaustiveStatus;
-    }
+  const turnstileError = mapLeadTurnstileResultToResponse(verificationResult, {
+    requiredCode: API_ERROR_CODES.TURNSTILE_MISSING_TOKEN,
+    failedCode: API_ERROR_CODES.TURNSTILE_VERIFICATION_FAILED,
+  });
+
+  if (!turnstileError) {
+    return {
+      success: true,
+      error: null,
+      details: null,
+      data: formData,
+    };
   }
+
+  return {
+    success: false,
+    errorCode: turnstileError.errorCode,
+    error: "Security verification failed",
+    details: null,
+    data: null,
+    statusCode: turnstileError.status,
+  };
 }
 
 async function processValidatedContactSubmission(

@@ -13,16 +13,10 @@ import {
   mapZodIssuesToValidationDetails,
   type ValidationFieldErrorKeys,
 } from "@/lib/api/validation-error-details";
-import {
-  applyCorsHeaders,
-  createCorsPreflightResponse,
-} from "@/lib/api/cors-utils";
+import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { isRuntimeProduction } from "@/lib/env";
-import {
-  withRateLimit,
-  type RateLimitContext,
-} from "@/lib/api/with-rate-limit";
+import { type RateLimitContext } from "@/lib/api/with-rate-limit";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
@@ -33,12 +27,11 @@ import {
 } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import {
-  HTTP_BAD_REQUEST,
-  HTTP_INTERNAL_ERROR,
-  HTTP_SERVICE_UNAVAILABLE,
-} from "@/constants";
-import { verifyLeadTurnstile } from "@/lib/security/lead-turnstile";
+  mapLeadTurnstileResultToResponse,
+  verifyLeadTurnstile,
+} from "@/lib/security/lead-turnstile";
 
 interface ProductLeadValidationSuccess {
   success: true;
@@ -75,29 +68,11 @@ async function validateProductInquiryTurnstile(
     expectedAction: "product_inquiry",
   });
 
-  switch (verificationResult.status) {
-    case "verified":
-      return null;
-    case "missing":
-      return createApiErrorResponse(
-        API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
-        HTTP_BAD_REQUEST,
-      );
-    case "service-unavailable":
-      return createApiErrorResponse(
-        API_ERROR_CODES.SERVICE_UNAVAILABLE,
-        HTTP_SERVICE_UNAVAILABLE,
-      );
-    case "failed":
-      return createApiErrorResponse(
-        API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
-        HTTP_BAD_REQUEST,
-      );
-    default: {
-      const exhaustiveStatus: never = verificationResult;
-      return exhaustiveStatus;
-    }
-  }
+  const error = mapLeadTurnstileResultToResponse(verificationResult, {
+    requiredCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+    failedCode: API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
+  });
+  return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 
 function validateLeadData(
@@ -180,74 +155,63 @@ function createProductInquiryFailureResponse(
  * POST /api/inquiry
  * Handle product inquiry form submission
  */
-const POST_RATE_LIMITED = withRateLimit(
+async function handleInquiryPost(
+  request: NextRequest,
+  { clientIP }: RateLimitContext,
+) {
+  const parsedBody = await safeParseJson<{
+    turnstileToken?: string;
+    [key: string]: unknown;
+  }>(request, { route: "/api/inquiry" });
+
+  if (!parsedBody.ok) {
+    return createApiErrorResponse(parsedBody.errorCode, parsedBody.statusCode);
+  }
+
+  const startTime = Date.now();
+
+  try {
+    const data = parsedBody.data ?? {};
+    const leadValidation = validateLeadData(data);
+    if (!leadValidation.success) {
+      return createApiErrorResponse(
+        API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+        HTTP_BAD_REQUEST,
+        { details: leadValidation.details },
+      );
+    }
+
+    const turnstileError = await validateProductInquiryTurnstile(
+      data.turnstileToken,
+      clientIP,
+    );
+    if (turnstileError) return turnstileError;
+
+    const result = await processLead({
+      ...leadValidation.data,
+    });
+
+    if (result.success) {
+      return createProductInquirySuccessResponse(result, clientIP, startTime);
+    }
+
+    return createProductInquiryFailureResponse(result, clientIP, startTime);
+  } catch (error) {
+    logger.error("Product inquiry submission failed unexpectedly", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      ip: sanitizeIP(clientIP),
+      processingTime: Date.now() - startTime,
+    });
+
+    return createApiErrorResponse(
+      API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+      HTTP_INTERNAL_ERROR,
+    );
+  }
+}
+
+export const { POST, OPTIONS } = createCorsRateLimitedRoute(
   "inquiry",
-  async (request: NextRequest, { clientIP }: RateLimitContext) => {
-    const parsedBody = await safeParseJson<{
-      turnstileToken?: string;
-      [key: string]: unknown;
-    }>(request, { route: "/api/inquiry" });
-
-    if (!parsedBody.ok) {
-      return createApiErrorResponse(
-        parsedBody.errorCode,
-        parsedBody.statusCode,
-      );
-    }
-
-    const startTime = Date.now();
-
-    try {
-      const data = parsedBody.data ?? {};
-      const leadValidation = validateLeadData(data);
-      if (!leadValidation.success) {
-        return createApiErrorResponse(
-          API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-          HTTP_BAD_REQUEST,
-          { details: leadValidation.details },
-        );
-      }
-
-      const turnstileError = await validateProductInquiryTurnstile(
-        data.turnstileToken,
-        clientIP,
-      );
-      if (turnstileError) return turnstileError;
-
-      const result = await processLead({
-        ...leadValidation.data,
-      });
-
-      if (result.success) {
-        return createProductInquirySuccessResponse(result, clientIP, startTime);
-      }
-
-      return createProductInquiryFailureResponse(result, clientIP, startTime);
-    } catch (error) {
-      logger.error("Product inquiry submission failed unexpectedly", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        ip: sanitizeIP(clientIP),
-        processingTime: Date.now() - startTime,
-      });
-
-      return createApiErrorResponse(
-        API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-        HTTP_INTERNAL_ERROR,
-      );
-    }
-  },
+  handleInquiryPost,
 );
-
-export async function POST(request: NextRequest) {
-  const response = await POST_RATE_LIMITED(request);
-  return applyCorsHeaders({ request, response });
-}
-
-/**
- * OPTIONS /api/inquiry
- * Handle CORS preflight requests
- */
-export function OPTIONS(request: NextRequest) {
-  return createCorsPreflightResponse(request);
-}
