@@ -12,7 +12,9 @@ import {
 
 import { cn } from "@/lib/utils";
 import {
+  getNavigationTargetRouteKey,
   getNavigationRouteKey,
+  shouldStartHistoryNavigationProgress,
   shouldStartNavigationProgress,
 } from "@/components/navigation/navigation-progress";
 
@@ -39,6 +41,41 @@ function getCurrentBrowserRouteKey(): string {
   );
 }
 
+function getClickedNavigationRouteKey(event: MouseEvent): string | null {
+  const { target } = event;
+  if (!(target instanceof Element)) return null;
+
+  const anchor = target.closest("a");
+  if (!(anchor instanceof HTMLAnchorElement)) return null;
+  if (!shouldStartNavigationProgress(event, anchor, window.location.href)) {
+    return null;
+  }
+
+  return getNavigationTargetRouteKey(anchor, window.location.href);
+}
+
+function NavigationProgressIndicator({ progress }: { progress: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden pt-[env(safe-area-inset-top,0px)]"
+      data-testid="navigation-progress-bar"
+    >
+      <div
+        className={cn(
+          "bg-primary h-full w-full origin-left shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
+          progress >= 100 ? "transition-none" : "transition-transform ease-out",
+        )}
+        data-testid="navigation-progress-bar-fill"
+        style={{
+          transform: `scaleX(${progress / 100})`,
+          transitionDuration: `${progress >= 100 ? 0 : PROGRESS_COMPLETE_MS}ms`,
+        }}
+      />
+    </div>
+  );
+}
+
 export function NavigationProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -50,8 +87,12 @@ export function NavigationProgressBar() {
   const hideTimerRef = useRef<number | undefined>(undefined);
   const startedAtRef = useRef<number | null>(null);
   const isActiveRef = useRef(false);
-  const hasMountedRef = useRef(false);
-  const currentRouteKeyRef = useRef<string | null>(null);
+  // Only click/popstate handlers own this ref. Route completion must not update
+  // it, because Next may flush route effects before our popstate listener runs.
+  const historyRef = useRef({
+    hasMounted: false,
+    routeKey: null as string | null,
+  });
 
   const clearTimers = useCallback(() => {
     if (trickleTimerRef.current !== undefined) {
@@ -103,44 +144,55 @@ export function NavigationProgressBar() {
     }, PROGRESS_TRICKLE_MS);
   });
 
+  const completeHistory = useEffectEvent(() => {
+    if (reducedMotion) return;
+
+    clearTimers();
+    isActiveRef.current = false;
+    startedAtRef.current = Date.now();
+    setVisible(true);
+    setProgress(100);
+    hideTimerRef.current = window.setTimeout(() => {
+      setVisible(false);
+      setProgress(0);
+      startedAtRef.current = null;
+    }, PROGRESS_MIN_VISIBLE_MS + PROGRESS_HIDE_MS);
+  });
+
   useEffect(() => {
-    if (!hasMountedRef.current) {
-      currentRouteKeyRef.current = getCurrentBrowserRouteKey();
-      hasMountedRef.current = true;
+    if (!historyRef.current.hasMounted) {
+      historyRef.current = {
+        hasMounted: true,
+        routeKey: getCurrentBrowserRouteKey(),
+      };
       return;
     }
 
-    currentRouteKeyRef.current = routeKey;
     finish();
   }, [routeKey]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
-      const { target } = event;
-      if (!(target instanceof Element)) {
-        return;
-      }
+      const nextRouteKey = getClickedNavigationRouteKey(event);
+      if (nextRouteKey === null) return;
 
-      const anchor = target.closest("a");
-      if (!(anchor instanceof HTMLAnchorElement)) {
-        return;
-      }
-
-      if (!shouldStartNavigationProgress(event, anchor, window.location.href)) {
-        return;
-      }
-
+      historyRef.current.routeKey = nextRouteKey;
       start();
     };
 
     const handlePopState = () => {
       const nextRouteKey = getCurrentBrowserRouteKey();
-      if (currentRouteKeyRef.current === nextRouteKey) {
+      if (
+        !shouldStartHistoryNavigationProgress(
+          historyRef.current.routeKey,
+          nextRouteKey,
+        )
+      ) {
         return;
       }
 
-      currentRouteKeyRef.current = nextRouteKey;
-      start();
+      historyRef.current.routeKey = nextRouteKey;
+      completeHistory();
     };
 
     document.addEventListener("click", handleClick, true);
@@ -157,23 +209,5 @@ export function NavigationProgressBar() {
     return null;
   }
 
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden pt-[env(safe-area-inset-top,0px)]"
-      data-testid="navigation-progress-bar"
-    >
-      <div
-        className={cn(
-          "bg-primary h-full w-full origin-left shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
-          progress >= 100 ? "transition-none" : "transition-transform ease-out",
-        )}
-        data-testid="navigation-progress-bar-fill"
-        style={{
-          transform: `scaleX(${progress / 100})`,
-          transitionDuration: `${progress >= 100 ? 0 : PROGRESS_COMPLETE_MS}ms`,
-        }}
-      />
-    </div>
-  );
+  return <NavigationProgressIndicator progress={progress} />;
 }

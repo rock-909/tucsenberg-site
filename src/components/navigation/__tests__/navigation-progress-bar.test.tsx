@@ -2,7 +2,10 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
 import { NavigationProgressBar } from "@/components/navigation/navigation-progress-bar";
-import { shouldStartNavigationProgress } from "@/components/navigation/navigation-progress";
+import {
+  shouldStartHistoryNavigationProgress,
+  shouldStartNavigationProgress,
+} from "@/components/navigation/navigation-progress";
 
 function createAnchor(href: string): HTMLAnchorElement {
   const anchor = document.createElement("a");
@@ -147,6 +150,37 @@ describe("NavigationProgressBar", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("starts and completes route-changing history when route hooks update first", async () => {
+    mockUsePathname.mockReturnValue("/products");
+    Object.defineProperties(window.location, {
+      pathname: { configurable: true, value: "/products" },
+      search: { configurable: true, value: "" },
+    });
+    const { rerender } = render(<NavigationProgressBar />);
+
+    Object.defineProperty(window.location, "pathname", {
+      configurable: true,
+      value: "/request-quote",
+    });
+    mockUsePathname.mockReturnValue("/request-quote");
+    rerender(<NavigationProgressBar />);
+
+    act(() => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(screen.getByTestId("navigation-progress-bar-fill")).toHaveStyle({
+      transform: "scaleX(1)",
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(280 + 180);
+    });
+    expect(
+      screen.queryByTestId("navigation-progress-bar"),
+    ).not.toBeInTheDocument();
+  });
+
   describe("shouldStartNavigationProgress", () => {
     it("starts for a plain left-click on an internal link", () => {
       expect(
@@ -214,6 +248,26 @@ describe("NavigationProgressBar", () => {
           plainLeftClick,
           createAnchor("#section"),
           window.location.href,
+        ),
+      ).toBe(false);
+    });
+  });
+
+  describe("shouldStartHistoryNavigationProgress", () => {
+    it("starts for pathname and query changes but not the same route key", () => {
+      expect(
+        shouldStartHistoryNavigationProgress("/products", "/request-quote"),
+      ).toBe(true);
+      expect(
+        shouldStartHistoryNavigationProgress(
+          "/request-quote",
+          "/request-quote?source=mobile_nav_cta",
+        ),
+      ).toBe(true);
+      expect(
+        shouldStartHistoryNavigationProgress(
+          "/request-quote",
+          "/request-quote",
         ),
       ).toBe(false);
     });

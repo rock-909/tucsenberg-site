@@ -7,12 +7,12 @@ interface NavigationClickState {
   altKey: boolean;
 }
 
-function isInternalNavigationLink(
+export function getNavigationTargetRouteKey(
   anchor: HTMLAnchorElement,
   currentHref: string,
-): boolean {
+): string | null {
   if (anchor.target === "_blank") {
-    return false;
+    return null;
   }
 
   const href = anchor.getAttribute("href");
@@ -22,7 +22,7 @@ function isInternalNavigationLink(
     href.startsWith("mailto:") ||
     href.startsWith("tel:")
   ) {
-    return false;
+    return null;
   }
 
   try {
@@ -30,14 +30,19 @@ function isInternalNavigationLink(
     const current = new URL(currentHref);
 
     if (target.origin !== current.origin) {
-      return false;
+      return null;
     }
 
-    return !(
-      target.pathname === current.pathname && target.search === current.search
-    );
+    if (
+      target.pathname === current.pathname &&
+      target.search === current.search
+    ) {
+      return null;
+    }
+
+    return `${target.pathname}${target.search}`;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -53,7 +58,7 @@ export function shouldStartNavigationProgress(
   }
   if (anchor.hasAttribute("download")) return false;
 
-  return isInternalNavigationLink(anchor, currentHref);
+  return getNavigationTargetRouteKey(anchor, currentHref) !== null;
 }
 
 export function getNavigationRouteKey(
@@ -62,4 +67,11 @@ export function getNavigationRouteKey(
 ): string {
   const search = searchParams.toString();
   return `${pathname}${search ? `?${search}` : ""}`;
+}
+
+export function shouldStartHistoryNavigationProgress(
+  previousRouteKey: string | null,
+  nextRouteKey: string,
+): boolean {
+  return previousRouteKey !== null && previousRouteKey !== nextRouteKey;
 }
