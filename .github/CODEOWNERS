@@ -20,7 +20,6 @@
 # Tier A: security + abuse protection
 /src/config/security.ts @Alx-707 developer@flood-control.com
 /src/lib/security/ @Alx-707 developer@flood-control.com
-/src/app/api/verify-turnstile/ @Alx-707 developer@flood-control.com
 /src/app/api/csp-report/ @Alx-707 developer@flood-control.com
 
 # Tier A: platform build + deployment chain

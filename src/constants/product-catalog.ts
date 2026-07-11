@@ -3,8 +3,8 @@
  *
  * Catalog route/list truth stays in src/config/single-site-product-catalog.ts.
  * Current Tucsenberg product page specs/copy live in
- * src/constants/tucsenberg-product-pages.ts; src/constants/product-specs/**
- * remains a legacy starter/adopter fixture.
+ * src/constants/tucsenberg-product-page-*.ts and
+ * src/constants/tucsenberg-product-pages.ts.
  */
 
 import {

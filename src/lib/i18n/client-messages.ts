@@ -1,10 +1,7 @@
-import type { StarterProfileId } from "@/config/starter-profiles";
-import { type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing-config";
 import {
   loadCriticalMessages,
-  loadCriticalMessagesForProfile,
   loadDeferredMessages,
-  loadDeferredMessagesForProfile,
 } from "@/lib/i18n/load-messages";
 import { mergeObjects } from "@/lib/merge-objects";
 
@@ -40,19 +37,6 @@ export function pickMessages(
 
 export function pickClientMessages(messages: Messages): Messages {
   return pickMessages(messages, CLIENT_MESSAGE_NAMESPACES);
-}
-
-export async function loadClientMessagesForProfile(
-  locale: Locale,
-  profileId: StarterProfileId,
-): Promise<Messages> {
-  const [critical, deferred] = await Promise.all([
-    loadCriticalMessagesForProfile(locale, profileId),
-    loadDeferredMessagesForProfile(locale, profileId),
-  ]);
-  const messages = mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
-
-  return pickClientMessages(messages);
 }
 
 export async function loadClientMessages(locale: Locale): Promise<Messages> {

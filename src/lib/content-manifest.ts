@@ -25,24 +25,10 @@ function lookupContentEntry(
   return CONTENT_MANIFEST.byKey[buildKey(type, locale, slug)];
 }
 
-/**
- * Resolves active source-checkout content first, then the optional
- * showcase-full profile fixtures used by direct routes.
- */
 export function resolveOptionalContentEntry(
   type: ContentType,
   locale: Locale,
   slug: string,
 ): ContentEntry | undefined {
-  const entry = lookupContentEntry(type, locale, slug);
-  if (entry === undefined) {
-    return undefined;
-  }
-
-  if (entry.source !== "profile-fixture") {
-    return entry;
-  }
-
-  // Only the showcase-full fixture set is exposed on direct routes.
-  return entry.profileId === "showcase-full" ? entry : undefined;
+  return lookupContentEntry(type, locale, slug);
 }

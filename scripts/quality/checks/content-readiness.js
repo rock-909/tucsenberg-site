@@ -12,184 +12,15 @@ function getLineNumber(content, index) {
   return content.slice(0, index).split("\n").length;
 }
 
-const CONTENT_READINESS_PROFILE_IDS = new Set([
-  "minimal",
-  "company-site",
-  "b2b-lead",
-  "catalog",
-  "content-marketing",
-  "showcase-full",
-]);
-
-const CORE_MESSAGE_NAMESPACES_FOR_READINESS = [
-  "common",
-  "theme",
-  "language",
-  "monitoring",
-  "accessibility",
-  "underConstruction",
-  "cookie",
-  "structured-data",
-  "apiErrors",
-  "errors",
-  "error",
-  "turnstileRequired",
-  "errorBoundary",
-  "legal",
-  "instructions",
-  "actions",
-  "formatting",
-  "progress",
-  "themes",
-  "title",
-  "privacy",
-  "terms",
-];
-
-const B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS = [
-  "navigation",
-  "footer",
-  "home",
-  "contact",
-  "formTemplate",
-  "stats",
-  "email",
-  "emailPlaceholder",
-  "phone",
-  "organization",
-  "website",
-  "trust",
-  "faq",
-  "requestQuote",
-];
-
-const PROFILE_MESSAGE_NAMESPACE_OWNERSHIP = {
-  minimal: new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    "navigation",
-    "footer",
-    "home",
-  ]),
-  "b2b-lead": new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    ...B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS,
-  ]),
-  "company-site": new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    ...B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS,
-    "catalog",
-    "products",
-    "blog",
-    "article",
-    "resources",
-  ]),
-  catalog: new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    ...B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS,
-    "catalog",
-    "products",
-  ]),
-  "content-marketing": new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    ...B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS,
-    "blog",
-    "article",
-  ]),
-  "showcase-full": new Set([
-    ...CORE_MESSAGE_NAMESPACES_FOR_READINESS,
-    ...B2B_LEAD_MESSAGE_NAMESPACES_FOR_READINESS,
-    "catalog",
-    "products",
-    "blog",
-    "article",
-    "resources",
-    "customProject",
-  ]),
-};
-
-const PROFILE_MESSAGE_PACK_READINESS = {
-  minimal: ["base", "minimal"],
-  "company-site": ["base", "minimal", "b2b-lead", "company-site"],
-  "b2b-lead": ["base", "minimal", "b2b-lead"],
-  catalog: ["base", "minimal", "b2b-lead", "catalog"],
-  "content-marketing": ["base", "minimal", "b2b-lead", "content-marketing"],
-  "showcase-full": [
-    "base",
-    "minimal",
-    "b2b-lead",
-    "catalog",
-    "content-marketing",
-    "company-site",
-    "showcase-full",
-  ],
-};
-
-const MESSAGE_PACK_READINESS_PATTERNS = {
-  base: /^messages\/base\/[^/]+\/(?:critical|deferred)\.json$/u,
-  minimal: /^messages\/profiles\/minimal\/[^/]+\/(?:critical|deferred)\.json$/u,
-  "b2b-lead":
-    /^messages\/profiles\/b2b-lead\/[^/]+\/(?:critical|deferred)\.json$/u,
-  "company-site":
-    /^messages\/profiles\/company-site\/[^/]+\/(?:critical|deferred)\.json$/u,
-  catalog: /^messages\/profiles\/catalog\/[^/]+\/(?:critical|deferred)\.json$/u,
-  "content-marketing":
-    /^messages\/profiles\/content-marketing\/[^/]+\/(?:critical|deferred)\.json$/u,
-  "showcase-full":
-    /^messages\/profiles\/showcase-full\/[^/]+\/(?:critical|deferred)\.json$/u,
-};
-
-function isProfileOwnedMessagePackPath(repoPath, profileId) {
-  const packIds = PROFILE_MESSAGE_PACK_READINESS[profileId];
-  if (!packIds) return false;
-
-  return packIds.some((packId) =>
-    MESSAGE_PACK_READINESS_PATTERNS[packId].test(repoPath),
-  );
-}
-
-const PROFILE_MESSAGE_POINTER_EXCLUSIONS = {
-  minimal: [
-    /^\.home\.products(?:\.|$)/u,
-    /^\.home\.resources(?:\.|$)/u,
-    /^\.home\.quality\.standards(?:\.|$)/u,
-    /^\.footer\.sections\.navigation\.(?:products|blog)(?:\.|$)/u,
-    /^\.footer\.platform(?:\.|$)/u,
-    /^\.navigation\.(?:products|blog|resources|capabilities|howItWorks|customProject|services|solutions|enterprise)(?:\.|$)/u,
-  ],
-  "b2b-lead": [
-    /^\.home\.products(?:\.|$)/u,
-    /^\.home\.resources(?:\.|$)/u,
-    /^\.home\.quality\.standards(?:\.|$)/u,
-    /^\.footer\.sections\.navigation\.(?:products|blog)(?:\.|$)/u,
-    /^\.footer\.platform(?:\.|$)/u,
-    /^\.navigation\.(?:products|blog|resources|capabilities|howItWorks|customProject|services|solutions|enterprise)(?:\.|$)/u,
-  ],
-  "company-site": [
-    /^\.home\.quality\.standards(?:\.|$)/u,
-    /^\.navigation\.(?:capabilities|howItWorks|customProject|services|solutions|enterprise)(?:\.|$)/u,
-  ],
-  catalog: [
-    /^\.home\.resources(?:\.|$)/u,
-    /^\.footer\.sections\.navigation\.blog(?:\.|$)/u,
-    /^\.footer\.platform\.resources(?:\.|$)/u,
-    /^\.navigation\.(?:blog|resources)(?:\.|$)/u,
-  ],
-  "content-marketing": [
-    /^\.home\.products(?:\.|$)/u,
-    /^\.home\.quality\.standards(?:\.|$)/u,
-    /^\.footer\.sections\.navigation\.products(?:\.|$)/u,
-    /^\.footer\.platform\.products(?:\.|$)/u,
-    /^\.navigation\.(?:products|capabilities|howItWorks|customProject)(?:\.|$)/u,
-  ],
-  "showcase-full": [],
-};
-
 const LOGO_REFERENCE = "/images/logo.svg";
 const LOGO_ASSET_PATH = "public/images/logo.svg";
 const MARKDOWN_LOGO_REFERENCE_PATTERN =
   /!?\[[^\]]*\]\(\s*<?\/images\/logo\.svg>?(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)/iu;
 const ATTRIBUTE_LOGO_REFERENCE_PATTERN =
   /\b(?:href|src)\s*=\s*(?:"\/images\/logo\.svg"|'\/images\/logo\.svg'|\{\s*(?:"\/images\/logo\.svg"|'\/images\/logo\.svg'|`\/images\/logo\.svg`)\s*\})/iu;
+const TUCSENBERG_PRODUCT_PAGE_PREFIX = "src/constants/tucsenberg-product-page-";
+const TUCSENBERG_PRODUCT_PAGES_PATH =
+  "src/constants/tucsenberg-product-pages.ts";
 const READINESS_SCAN_TARGETS = [
   {
     root: "content/pages",
@@ -200,7 +31,7 @@ const READINESS_SCAN_TARGETS = [
     root: "messages",
     extensions: new Set([".json"]),
     allowedPathPattern:
-      /^messages\/(?:base\/[^/]+|profiles\/(?:minimal|company-site|b2b-lead|catalog|content-marketing|showcase-full)\/[^/]+|examples\/ui-demo\/[^/]+)\/(?:critical|deferred)\.json$/u,
+      /^messages\/(?:base\/[^/]+|profiles\/(?:b2b-lead|catalog)\/[^/]+)\/(?:critical|deferred)\.json$/u,
     scanTextRules: true,
   },
   {
@@ -218,14 +49,12 @@ const READINESS_SCAN_TARGETS = [
     scanPathRules: true,
   },
   {
-    root: "src/constants/product-specs",
+    root: "src/constants",
     extensions: new Set([".js", ".json", ".mjs", ".ts", ".tsx"]),
-    scanTextRules: true,
-  },
-  {
-    root: "src/lib/blog",
-    extensions: new Set([".js", ".json", ".mjs", ".ts", ".tsx"]),
-    allowedPathPattern: /^src\/lib\/blog\/starter-blog\.ts$/u,
+    allowedPath: (repoPath) =>
+      (repoPath.startsWith(TUCSENBERG_PRODUCT_PAGE_PREFIX) ||
+        repoPath === TUCSENBERG_PRODUCT_PAGES_PATH) &&
+      repoPath.endsWith(".ts"),
     scanTextRules: true,
   },
   {
@@ -234,26 +63,6 @@ const READINESS_SCAN_TARGETS = [
     allowedPathPattern:
       /^src\/config\/(?:single-site|single-site-seo|single-site-navigation|single-site-links|single-site-page-expression|single-site-product-catalog)\.ts$/u,
     scanTextRules: true,
-  },
-  {
-    root: "profile-fixtures",
-    extensions: new Set([".md", ".mdx", ".ts", ".tsx", ".json"]),
-    allowedPathPattern:
-      /^profile-fixtures\/(?:catalog|content-marketing|showcase-full)\//u,
-    scanTextRules: true,
-  },
-  {
-    root: "public/profile-fixtures",
-    extensions: new Set([
-      ".avif",
-      ".gif",
-      ".jpg",
-      ".jpeg",
-      ".png",
-      ".svg",
-      ".webp",
-    ]),
-    scanPathRules: true,
   },
 ];
 const GENERATED_DIR_NAMES = new Set([
@@ -433,141 +242,13 @@ function isReadinessExcludedPath(repoPath) {
 
 function isReadinessSourceFile(repoPath, filePath, target) {
   if (!target.extensions.has(path.extname(filePath))) return false;
+  if (target.allowedPath) return target.allowedPath(repoPath);
   return target.allowedPathPattern
     ? target.allowedPathPattern.test(repoPath)
     : true;
 }
 
-function normalizeContentReadinessProfile(profileId) {
-  if (profileId === undefined || profileId === null || profileId === "") {
-    return undefined;
-  }
-
-  if (!CONTENT_READINESS_PROFILE_IDS.has(profileId)) {
-    throw new Error(`Unknown content readiness profile: ${profileId}`);
-  }
-
-  return profileId;
-}
-
-function isCompanySiteReadinessPath(repoPath) {
-  return (
-    isB2bLeadReadinessPath(repoPath) ||
-    isProfileOwnedMessagePackPath(repoPath, "company-site") ||
-    isProfileOwnedMessagePackPath(repoPath, "catalog") ||
-    isProfileOwnedMessagePackPath(repoPath, "content-marketing") ||
-    isContentMarketingFixtureReadinessPath(repoPath) ||
-    repoPath.startsWith("src/lib/blog/") ||
-    repoPath.startsWith("public/images/blog/") ||
-    repoPath === "src/app/[locale]/resources/page.tsx" ||
-    /^src\/app\/\[locale\]\/products\/page\.tsx$/u.test(repoPath)
-  );
-}
-
-function isB2bLeadReadinessPath(repoPath) {
-  return (
-    /^content\/pages\/[^/]+\/(?:about|contact|privacy|terms)\.mdx$/u.test(
-      repoPath,
-    ) ||
-    isProfileOwnedMessagePackPath(repoPath, "b2b-lead") ||
-    /^messages\/[^/]+\/(?:critical|deferred)\.json$/u.test(repoPath) ||
-    /^public\/images\/(?:(?:og-image|about-og)\.(?:jpe?g|png|svg|webp)|hero\/)/u.test(
-      repoPath,
-    ) ||
-    /^src\/config\/(?:single-site|single-site-seo|single-site-navigation|single-site-links)\.ts$/u.test(
-      repoPath,
-    )
-  );
-}
-
-function isMinimalReadinessPath(repoPath) {
-  return (
-    /^content\/pages\/[^/]+\/(?:privacy|terms)\.mdx$/u.test(repoPath) ||
-    isProfileOwnedMessagePackPath(repoPath, "minimal") ||
-    /^messages\/[^/]+\/(?:critical|deferred)\.json$/u.test(repoPath) ||
-    /^public\/images\/(?:(?:og-image)\.(?:jpe?g|png|svg|webp)|hero\/)/u.test(
-      repoPath,
-    ) ||
-    /^src\/config\/(?:single-site|single-site-seo|single-site-navigation|single-site-links)\.ts$/u.test(
-      repoPath,
-    )
-  );
-}
-
-function isCatalogFixtureReadinessPath(repoPath) {
-  return (
-    repoPath.startsWith("profile-fixtures/catalog/") ||
-    repoPath.startsWith("public/profile-fixtures/catalog/")
-  );
-}
-
-function isContentMarketingFixtureReadinessPath(repoPath) {
-  return (
-    repoPath.startsWith("profile-fixtures/content-marketing/") ||
-    repoPath.startsWith("public/profile-fixtures/content-marketing/")
-  );
-}
-
-function isShowcaseFullFixtureReadinessPath(repoPath) {
-  return repoPath.startsWith("profile-fixtures/showcase-full/");
-}
-
-function isCatalogReadinessPath(repoPath) {
-  return (
-    isB2bLeadReadinessPath(repoPath) ||
-    isProfileOwnedMessagePackPath(repoPath, "catalog") ||
-    isCatalogFixtureReadinessPath(repoPath) ||
-    repoPath === "src/config/single-site-page-expression.ts" ||
-    repoPath === "src/config/single-site-product-catalog.ts" ||
-    repoPath.startsWith("src/constants/product-specs/") ||
-    repoPath.startsWith("public/images/products/")
-  );
-}
-
-function isContentMarketingReadinessPath(repoPath) {
-  return (
-    isB2bLeadReadinessPath(repoPath) ||
-    isProfileOwnedMessagePackPath(repoPath, "content-marketing") ||
-    isContentMarketingFixtureReadinessPath(repoPath) ||
-    repoPath.startsWith("src/lib/blog/") ||
-    repoPath.startsWith("public/images/blog/")
-  );
-}
-
-function isShowcaseFullReadinessPath(repoPath) {
-  return (
-    isCatalogReadinessPath(repoPath) ||
-    isContentMarketingReadinessPath(repoPath) ||
-    isProfileOwnedMessagePackPath(repoPath, "showcase-full") ||
-    isShowcaseFullFixtureReadinessPath(repoPath) ||
-    /^content\/pages\/[^/]+\/(?:capabilities|how-it-works|custom-project-support)\.mdx$/u.test(
-      repoPath,
-    )
-  );
-}
-
-function isProfileOwnedReadinessPath(repoPath, profileId) {
-  switch (profileId) {
-    case undefined:
-      return true;
-    case "minimal":
-      return isMinimalReadinessPath(repoPath);
-    case "company-site":
-      return isCompanySiteReadinessPath(repoPath);
-    case "b2b-lead":
-      return isB2bLeadReadinessPath(repoPath);
-    case "catalog":
-      return isCatalogReadinessPath(repoPath);
-    case "content-marketing":
-      return isContentMarketingReadinessPath(repoPath);
-    case "showcase-full":
-      return isShowcaseFullReadinessPath(repoPath);
-    default:
-      return false;
-  }
-}
-
-function collectReadinessFiles(rootDir, target, profileId) {
+function collectReadinessFiles(rootDir, target) {
   const results = [];
   const startPath = path.join(rootDir, target.root);
   if (!fs.existsSync(startPath)) return results;
@@ -589,8 +270,7 @@ function collectReadinessFiles(rootDir, target, profileId) {
 
     if (
       stats.isFile() &&
-      isReadinessSourceFile(repoPath, currentPath, target) &&
-      isProfileOwnedReadinessPath(repoPath, profileId)
+      isReadinessSourceFile(repoPath, currentPath, target)
     ) {
       results.push({
         absolutePath: currentPath,
@@ -842,39 +522,6 @@ function findRuntimeLogoReferenceUnit(file, scanUnits) {
   return scanUnits.find((unit) => isContentRuntimeLogoReference(file, unit));
 }
 
-function getMessageNamespaceFromPointer(pointer) {
-  if (typeof pointer !== "string") return undefined;
-  return pointer.split(".").filter(Boolean)[0];
-}
-
-function isProfileOwnedMessageUnit(file, unit, profileId) {
-  if (profileId === undefined) return true;
-  if (!file.repoPath.startsWith("messages/")) return true;
-
-  const isPackFile =
-    /^messages\/(?:base\/|profiles\/|examples\/)/u.test(file.repoPath) &&
-    !/^messages\/[^/]+\/(?:critical|deferred)\.json$/u.test(file.repoPath);
-
-  if (isPackFile && !isProfileOwnedMessagePackPath(file.repoPath, profileId)) {
-    return false;
-  }
-
-  const pointer = typeof unit.context === "string" ? unit.context : "";
-  const namespace = getMessageNamespaceFromPointer(pointer);
-  if (namespace === undefined) return true;
-
-  if (!PROFILE_MESSAGE_NAMESPACE_OWNERSHIP[profileId]?.has(namespace)) {
-    return false;
-  }
-
-  const exclusions = PROFILE_MESSAGE_POINTER_EXCLUSIONS[profileId] ?? [];
-  for (const pattern of exclusions) {
-    if (pattern.test(pointer)) return false;
-  }
-
-  return true;
-}
-
 function scanReadinessFile(rootDir, file, options = {}) {
   const content = fs.readFileSync(file.absolutePath, "utf8");
   const scanUnits = file.scanPathRules
@@ -884,7 +531,6 @@ function scanReadinessFile(rootDir, file, options = {}) {
 
   for (const unit of scanUnits) {
     if (unit.skipTextRules) continue;
-    if (!isProfileOwnedMessageUnit(file, unit, options.profileId)) continue;
 
     for (const rule of TEXT_RULES) {
       rule.pattern.lastIndex = 0;
@@ -922,13 +568,12 @@ function scanReadinessFile(rootDir, file, options = {}) {
 }
 
 function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
-  const profileId = normalizeContentReadinessProfile(options.profileId);
   const files = READINESS_SCAN_TARGETS.flatMap((target) =>
-    collectReadinessFiles(rootDir, target, profileId),
+    collectReadinessFiles(rootDir, target),
   );
   return files.flatMap((file) =>
     file.scanTextRules || file.scanPathRules
-      ? scanReadinessFile(rootDir, file, { ...options, profileId })
+      ? scanReadinessFile(rootDir, file, options)
       : [],
   );
 }
@@ -953,33 +598,17 @@ function printReadinessFinding(finding) {
   );
 }
 
-function getCliOptionValue(args, optionName) {
-  const equalsPrefix = `${optionName}=`;
-  const equalsMatch = args.find((arg) => arg.startsWith(equalsPrefix));
-  if (equalsMatch) return equalsMatch.slice(equalsPrefix.length);
-
-  const optionIndex = args.indexOf(optionName);
-  if (optionIndex === -1) return undefined;
-  return args[optionIndex + 1];
-}
-
 function runContentReadinessCli(args = []) {
-  const profileId = getCliOptionValue(args, "--profile");
   const result = runContentReadinessCheck(ROOT, {
-    profileId,
     strictClientLaunch: args.includes("--strict-client-launch"),
   });
 
-  const profileLabel = profileId ? ` for profile ${profileId}` : "";
-
   if (result.findings.length === 0) {
-    console.log(
-      `content readiness passed${profileLabel}: no buyer-visible residue found`,
-    );
+    console.log("content readiness passed: no buyer-visible residue found");
     return true;
   }
 
-  const summary = `content readiness ${result.status}${profileLabel}: ${result.errors.length} error(s), ${result.warnings.length} warning(s)`;
+  const summary = `content readiness ${result.status}: ${result.errors.length} error(s), ${result.warnings.length} warning(s)`;
   const log = result.status === "failed" ? console.error : console.log;
   log(summary);
   for (const finding of result.findings) printReadinessFinding(finding);
@@ -988,7 +617,6 @@ function runContentReadinessCli(args = []) {
 }
 
 module.exports = {
-  CONTENT_READINESS_PROFILE_IDS,
   collectContentReadinessFindings,
   runContentReadinessCheck,
   runContentReadinessCli,

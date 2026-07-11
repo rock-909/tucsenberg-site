@@ -54,6 +54,18 @@ describe("MDX manifest-only runtime contract", () => {
     );
   });
 
+  it("keeps the generated manifest catalog-only", () => {
+    for (const file of [
+      "src/lib/content-manifest.ts",
+      "src/lib/content-manifest.generated.ts",
+      "scripts/quality/checks/content-manifest.js",
+    ]) {
+      const source = readSource(file);
+      expect(source).not.toContain("profile-fixture");
+      expect(source).not.toContain("showcase-full");
+    }
+  });
+
   it("does not ship retired showcase-full fixture MDX imports in the materialized site", () => {
     const source = readSource("src/lib/mdx-importers.generated.ts");
     expect(source).not.toContain(

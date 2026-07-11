@@ -4,7 +4,6 @@ import {
   SINGLE_SITE_FOOTER_COLUMNS,
 } from "@/config/single-site";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
-import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
 const EXPECTED_TUCSENBERG_NAVIGATION_LINKS = [
   "home",
@@ -47,7 +46,6 @@ describe("footer-links", () => {
   });
 
   it("uses the catalog site footer columns as the singleton source", () => {
-    expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
     expect(SINGLE_SITE_FOOTER_COLUMNS).toEqual(getSingleSiteFooterColumns());
 
     const navigationColumn = FOOTER_COLUMNS.find(
@@ -77,17 +75,6 @@ describe("footer-links", () => {
     ]);
     expect(supportColumn?.links.map((link) => link.key)).toEqual([
       ...EXPECTED_TUCSENBERG_SUPPORT_LINKS,
-    ]);
-  });
-
-  it("can derive the catalog footer navigation links", () => {
-    const columns = getSingleSiteFooterColumns("catalog");
-    const navigationColumn = columns.find(
-      (column) => column.key === "navigation",
-    );
-
-    expect(navigationColumn?.links.map((link) => link.key)).toEqual([
-      ...EXPECTED_TUCSENBERG_NAVIGATION_LINKS,
     ]);
   });
 });

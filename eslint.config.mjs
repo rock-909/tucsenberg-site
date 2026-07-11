@@ -864,19 +864,12 @@ export default [
     },
   },
 
-  // Phase 5 profile fixture boundaries use intentional repo-relative imports
+  // Catalog replacement surfaces use intentional repo-relative imports
   {
-    name: "profile-fixture-boundary-imports",
+    name: "catalog-replacement-boundary-imports",
     files: [
-      "profile-fixtures/**/*.{ts,tsx}",
       "src/config/single-site-product-catalog.ts",
       "src/constants/product-standards.ts",
-      "src/constants/product-specs/australia-new-zealand.ts",
-      "src/constants/product-specs/europe.ts",
-      "src/constants/product-specs/mexico.ts",
-      "src/constants/product-specs/north-america.ts",
-      "src/constants/product-specs/specialty-product-systems.ts",
-      "src/lib/blog/starter-blog.ts",
     ],
     rules: {
       "no-restricted-imports": "off",

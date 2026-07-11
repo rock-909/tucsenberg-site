@@ -243,7 +243,7 @@ describe("pages.config static public page registry", () => {
   });
 
   it("derives the explicit catalog static pages from the same registry", () => {
-    expect(getActiveStaticPageTypes("catalog")).toEqual([
+    expect(getActiveStaticPageTypes()).toEqual([
       "home",
       "products",
       "oemWholesale",
@@ -256,7 +256,7 @@ describe("pages.config static public page registry", () => {
       "privacy",
       "terms",
     ]);
-    expect(getActiveStaticSitemapPages("catalog")).toEqual([
+    expect(getActiveStaticSitemapPages()).toEqual([
       "",
       "/products",
       "/oem-wholesale",
@@ -269,7 +269,7 @@ describe("pages.config static public page registry", () => {
       "/privacy",
       "/terms",
     ]);
-    expect(getActiveStaticPageLastmodByPath("catalog")).toEqual({
+    expect(getActiveStaticPageLastmodByPath()).toEqual({
       "": "2026-07-05T00:00:00Z",
       "/products": "2026-07-05T00:00:00Z",
       "/request-quote": "2026-07-05T00:00:00Z",

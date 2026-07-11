@@ -16,7 +16,7 @@ function assertNever(value: never): never {
 
 function buildHeroProofItem(
   item: HeroProofItemKey,
-  t: Awaited<ReturnType<typeof getTranslations>>,
+  t: Awaited<ReturnType<typeof getTranslations<"home">>>,
 ): HeroSectionContent["proofItems"][number] {
   switch (item) {
     case "est":

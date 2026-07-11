@@ -50,7 +50,7 @@ describe("single-site-seo", () => {
     );
   });
 
-  it("keeps default sitemap configs scoped to company-site pages", () => {
+  it("keeps catalog sitemap config scoped to current public pages", () => {
     expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("terms")]).toEqual({
       changeFrequency: "monthly",
       priority: 0.7,
@@ -103,20 +103,18 @@ describe("single-site-seo", () => {
   });
 
   it("can derive explicit catalog static pages and product market sidecar lastmod", () => {
-    expect(getSingleSitePublicStaticPageRoutes("catalog")).toEqual([
+    expect(getSingleSitePublicStaticPageRoutes()).toEqual([
       ...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
     ]);
-    expect(getSingleSitePublicStaticPages("catalog")).toContain(
+    expect(getSingleSitePublicStaticPages()).toContain(
       getCanonicalPath("products"),
     );
-    expect(
-      getSingleSiteSitemapPageConfigByPath("catalog").productMarket,
-    ).toEqual({
+    expect(getSingleSiteSitemapPageConfigByPath().productMarket).toEqual({
       changeFrequency: "weekly",
       priority: 0.8,
     });
 
-    const catalogLastmod = getSingleSiteStaticPageLastmod("catalog");
+    const catalogLastmod = getSingleSiteStaticPageLastmod();
     for (const productPage of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
       expect(catalogLastmod[getProductMarketPath(productPage.slug)]).toBe(
         productPage.meta.updatedAt,

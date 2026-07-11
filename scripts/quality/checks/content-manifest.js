@@ -83,7 +83,6 @@ function scanContentManifestDirectory(
       filePath: stableFilePath,
       relativePath,
       source: sourceConfig.source,
-      ...(sourceConfig.profileId ? { profileId: sourceConfig.profileId } : {}),
       metadata,
       content,
     });
@@ -285,8 +284,7 @@ export interface ContentEntry {
   extension: string;
   filePath: string;
   relativePath: string;
-  source: "active-content" | "profile-fixture";
-  profileId?: "showcase-full";
+  source: "active-content";
   metadata: Record<string, unknown>;
   content: string;
 }

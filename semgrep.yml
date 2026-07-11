@@ -343,7 +343,6 @@ rules:
         - "**/src/app/*/about/page.tsx"
         - "**/src/app/*/products/*/page.tsx"
         - "**/src/components/products/product-card.tsx"
-        - "**/src/components/products/product-specs.tsx"
         # Lead pipeline files - spread operators used with Zod-validated data only:
         # - inquiry/route.ts: leadData spread after Zod schema validation (productLeadSchema)
         # - product-inquiry-form.tsx: client-side form with hardcoded field names
@@ -351,14 +350,9 @@ rules:
         - "**/src/app/api/inquiry/route.ts"
         - "**/src/components/products/product-inquiry-form.tsx"
         - "**/src/lib/lead-pipeline/lead-schema.ts"
-        # API routes - spread operators used with internal result objects only:
-        # - verify-turnstile: conditional errorCodes from Cloudflare API response
-        - "**/src/app/api/verify-turnstile/route.ts"
         # Cookie consent - client-side state management with localStorage + hardcoded defaults
         - "**/src/lib/cookie-consent/context.tsx"
         - "**/src/lib/cookie-consent/storage.ts"
-        # Lead pipeline internal metrics/logging - data from Zod-validated inputs
-        - "**/src/lib/lead-pipeline/metrics.ts"
         - "**/src/lib/lead-pipeline/process-lead.ts"
         # Rate limiting - fetch config object construction (body from internal data)
         - "**/src/lib/security/distributed-rate-limit.ts"
@@ -371,8 +365,6 @@ rules:
         - "**/src/components/emails/ContactFormEmail.tsx"
         - "**/src/components/emails/ProductInquiryEmail.tsx"
         - "**/src/components/emails/ConfirmationEmail.tsx"
-        # Blog newsletter - spread operator used with getAttributionAsObject() sanitized values
-        - "**/src/components/blog/blog-newsletter.tsx"
     message: '检测到潜在的对象注入：使用扩展运算符或Object.assign时需验证输入对象的安全性'
     languages: [typescript, javascript]
     severity: INFO

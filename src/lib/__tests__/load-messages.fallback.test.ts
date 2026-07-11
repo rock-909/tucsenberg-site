@@ -62,24 +62,4 @@ describe("load-messages canonical runtime source", () => {
     expect(messages.footer?.description).toBeTruthy();
     expect(messages.home?.hero?.title).toBeTruthy();
   });
-
-  it("keeps explicit b2b-lead and catalog profile loading separate", async () => {
-    const [{ loadCompleteMessagesForProfile }] = await Promise.all([
-      import("@/lib/i18n/load-messages"),
-    ]);
-
-    const b2bLead = (await loadCompleteMessagesForProfile(
-      "en",
-      "b2b-lead",
-    )) as Record<string, unknown>;
-    const catalog = (await loadCompleteMessagesForProfile(
-      "en",
-      "catalog",
-    )) as Record<string, unknown>;
-
-    expect(b2bLead).not.toHaveProperty("catalog");
-    expect(b2bLead).not.toHaveProperty("blog");
-    expect(catalog).toHaveProperty("catalog");
-    expect(catalog).not.toHaveProperty("blog");
-  });
 });

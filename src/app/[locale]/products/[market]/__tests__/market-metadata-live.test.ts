@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { getProductMarketPath } from "@/config/paths/utils";
-import { shouldIndexPublicPageForProfile } from "@/config/single-site-seo";
+import { shouldIndexPublicPage } from "@/config/single-site-seo";
 
 describe("market metadata live integration", () => {
   afterEach(() => {
@@ -41,7 +41,7 @@ describe("market metadata live integration", () => {
 
     const path = getProductMarketPath("abs-flood-barriers");
 
-    expect(shouldIndexPublicPageForProfile("products", path)).toBe(true);
+    expect(shouldIndexPublicPage("products", path)).toBe(true);
 
     const metadata = generateMetadataForPath({
       locale: "en",

@@ -8,10 +8,6 @@
  */
 
 import { unstable_cache } from "next/cache";
-import {
-  DEFAULT_STARTER_PROFILE_ID,
-  type StarterProfileId,
-} from "@/config/starter-profiles";
 import { i18nTags } from "@/lib/i18n/cache-tags";
 import {
   isRuntimeCi,
@@ -22,12 +18,9 @@ import {
 } from "@/lib/env";
 import { mergeObjects } from "@/lib/merge-objects";
 import { MONITORING_INTERVALS } from "@/constants/performance-constants";
-import { type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing-config";
 import { coerceLocale } from "@/i18n/locale-utils";
-import {
-  getMessagePackIdsForProfile,
-  type MessageType,
-} from "@/lib/i18n/message-pack-config";
+import { type MessageType } from "@/lib/i18n/message-pack-config";
 import { loadComposedRawMessages } from "@/lib/i18n/message-pack-loader";
 import {
   getSiteMessageValues,
@@ -35,8 +28,6 @@ import {
 } from "@/lib/i18n/site-message-values";
 
 type Messages = Record<string, unknown>;
-
-export { getMessagePackIdsForProfile };
 
 const isCiEnv = isRuntimeCi() || isRuntimePlaywright();
 const isProductionBuild = () => isRuntimeProductionBuildPhase();
@@ -89,17 +80,12 @@ function interpolateSiteMessageValues(
   return value;
 }
 
-async function loadMessageSourceForProfile(
+async function loadMessageSource(
   locale: Locale,
   type: MessageType,
-  profileId: StarterProfileId,
 ): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
-  const loadedMessages = await loadComposedRawMessages(
-    safeLocale,
-    type,
-    profileId,
-  );
+  const loadedMessages = await loadComposedRawMessages(safeLocale, type);
 
   return interpolateSiteMessageValues(
     loadedMessages,
@@ -108,14 +94,10 @@ async function loadMessageSourceForProfile(
   ) as Messages;
 }
 
-function createCachedForProfile(
-  locale: Locale,
-  type: MessageType,
-  profileId: StarterProfileId,
-) {
+function createCached(locale: Locale, type: MessageType) {
   return unstable_cache(
-    () => loadMessageSourceForProfile(locale, type, profileId),
-    [`i18n-${type}`, locale, profileId],
+    () => loadMessageSource(locale, type),
+    [`i18n-${type}`, locale],
     {
       revalidate: revalidate(),
       tags: [
@@ -126,73 +108,44 @@ function createCachedForProfile(
   );
 }
 
-function loadForProfile(
-  locale: Locale,
-  type: MessageType,
-  profileId: StarterProfileId,
-): Promise<Messages> {
+function load(locale: Locale, type: MessageType): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
   return isCiEnv || isProductionBuild() || isCloudflareRuntime()
-    ? loadMessageSourceForProfile(safeLocale, type, profileId)
-    : createCachedForProfile(safeLocale, type, profileId)();
+    ? loadMessageSource(safeLocale, type)
+    : createCached(safeLocale, type)();
 }
 
-export function loadCriticalMessagesForProfile(
+async function loadCompleteMessagesFromSourceInternal(
   locale: Locale,
-  profileId: StarterProfileId,
-): Promise<Messages> {
-  return loadForProfile(locale, "critical", profileId);
-}
-
-export function loadDeferredMessagesForProfile(
-  locale: Locale,
-  profileId: StarterProfileId,
-): Promise<Messages> {
-  return loadForProfile(locale, "deferred", profileId);
-}
-
-export async function loadCompleteMessagesForProfile(
-  locale: Locale,
-  profileId: StarterProfileId,
 ): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
   const [critical, deferred] = await Promise.all([
-    loadCriticalMessagesForProfile(safeLocale, profileId),
-    loadDeferredMessagesForProfile(safeLocale, profileId),
-  ]);
-  return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
-}
-
-async function loadCompleteMessagesFromSourceForProfile(
-  locale: Locale,
-  profileId: StarterProfileId,
-): Promise<Messages> {
-  const safeLocale = coerceLocale(locale);
-  const [critical, deferred] = await Promise.all([
-    loadMessageSourceForProfile(safeLocale, "critical", profileId),
-    loadMessageSourceForProfile(safeLocale, "deferred", profileId),
+    loadMessageSource(safeLocale, "critical"),
+    loadMessageSource(safeLocale, "deferred"),
   ]);
   return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
 }
 
 export function loadCriticalMessages(locale: Locale): Promise<Messages> {
-  return loadCriticalMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
+  return load(locale, "critical");
 }
 
 export function loadDeferredMessages(locale: Locale): Promise<Messages> {
-  return loadDeferredMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
+  return load(locale, "deferred");
 }
 
 export function loadCompleteMessagesFromSource(
   locale: string,
 ): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
-  return loadCompleteMessagesFromSourceForProfile(
-    safeLocale,
-    DEFAULT_STARTER_PROFILE_ID,
-  );
+  return loadCompleteMessagesFromSourceInternal(safeLocale);
 }
 
-export function loadCompleteMessages(locale: Locale): Promise<Messages> {
-  return loadCompleteMessagesForProfile(locale, DEFAULT_STARTER_PROFILE_ID);
+export async function loadCompleteMessages(locale: Locale): Promise<Messages> {
+  const safeLocale = coerceLocale(locale);
+  const [critical, deferred] = await Promise.all([
+    loadCriticalMessages(safeLocale),
+    loadDeferredMessages(safeLocale),
+  ]);
+  return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
 }

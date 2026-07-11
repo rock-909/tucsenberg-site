@@ -2,9 +2,9 @@
  * 路径配置相关类型定义
  */
 
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import type { ConfiguredLocale as Locale } from "@/config/paths/locales-config";
 
-export type Locale = (typeof LOCALES_CONFIG.locales)[number];
+export type { Locale };
 
 // 路径映射接口定义
 export type LocalizedPath = {

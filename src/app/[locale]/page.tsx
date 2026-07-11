@@ -38,7 +38,7 @@ import {
   JsonLdScript,
 } from "@/components/seo/json-ld-script";
 
-type HomeTranslator = Awaited<ReturnType<typeof getTranslations>>;
+type HomeTranslator = Awaited<ReturnType<typeof getTranslations<"home">>>;
 
 interface HomeCardItem {
   title: string;
@@ -86,10 +86,6 @@ export async function generateMetadata({
   });
 }
 
-const HOME_PRODUCT_CARD_BADGE_KEY_SET = new Set<string>(
-  SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS,
-);
-
 function getHomePageContent(t: HomeTranslator) {
   return {
     problems: SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS.map(
@@ -99,8 +95,8 @@ function getHomePageContent(t: HomeTranslator) {
         href: SINGLE_SITE_HOME_PRODUCT_CARD_LINKS[key],
         linkLabel: t(`problems.items.${key}.linkLabel`),
         glyph: HOME_PRODUCT_CARD_GLYPHS[key],
-        ...(HOME_PRODUCT_CARD_BADGE_KEY_SET.has(key)
-          ? { badge: t(`problems.items.${key}.badge`) }
+        ...(key === SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS[0]
+          ? { badge: t("problems.items.multilingual.badge") }
           : {}),
       }),
     ),

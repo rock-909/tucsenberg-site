@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getPublicStaticPageDefinition } from "@/config/pages.config";
 import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
-import { shouldIndexPublicPageForProfile } from "@/config/single-site-seo";
+import { shouldIndexPublicPage } from "@/config/single-site-seo";
 import { siteFacts } from "@/config/site-facts";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
@@ -352,7 +352,7 @@ export function generateMetadataForPath(
 
   if (
     !shouldIndexRuntimeEnvironment() ||
-    !shouldIndexPublicPageForProfile(pageType, path)
+    !shouldIndexPublicPage(pageType, path)
   ) {
     metadata.robots = INACTIVE_PROFILE_ROBOTS;
   }

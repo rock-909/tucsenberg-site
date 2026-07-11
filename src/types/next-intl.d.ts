@@ -7,14 +7,8 @@
  * @see https://next-intl.dev/docs/workflows/typescript
  */
 
-import type enBaseCritical from "@messages/base/en/critical.json";
-import type enBaseDeferred from "@messages/base/en/deferred.json";
-import type enMinimalCritical from "@messages/profiles/minimal/en/critical.json";
-import type enMinimalDeferred from "@messages/profiles/minimal/en/deferred.json";
-import type enB2bLeadCritical from "@messages/profiles/b2b-lead/en/critical.json";
-import type enB2bLeadDeferred from "@messages/profiles/b2b-lead/en/deferred.json";
-import type enCatalogCritical from "@messages/profiles/catalog/en/critical.json";
-import type enCatalogDeferred from "@messages/profiles/catalog/en/deferred.json";
+import type enCritical from "@messages/en/critical.json";
+import type enDeferred from "@messages/en/deferred.json";
 
 /**
  * Deep merge two types, giving priority to values from B when conflicts occur.
@@ -35,10 +29,10 @@ type DeepMerge<A, B> = {
 };
 
 /**
- * Combined messages type from profile packs in pack order.
+ * Combined messages type from generated catalog compatibility files.
  * This type represents the complete translation structure.
  */
-type Messages = DeepMerge<DeepMerge<DeepMerge<DeepMerge<DeepMerge<DeepMerge<DeepMerge<typeof enBaseCritical, typeof enBaseDeferred>, typeof enMinimalCritical>, typeof enMinimalDeferred>, typeof enB2bLeadCritical>, typeof enB2bLeadDeferred>, typeof enCatalogCritical>, typeof enCatalogDeferred>;
+type Messages = DeepMerge<typeof enCritical, typeof enDeferred>;
 
 declare module "next-intl" {
   /**

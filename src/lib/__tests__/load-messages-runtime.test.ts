@@ -225,11 +225,7 @@ describe("load-messages runtime gating", () => {
     await loadCriticalMessages("en");
 
     expect(unstableCache).toHaveBeenCalledTimes(1);
-    expect(unstableCache.mock.calls[0]?.[1]).toEqual([
-      "i18n-critical",
-      "en",
-      "catalog",
-    ]);
+    expect(unstableCache.mock.calls[0]?.[1]).toEqual(["i18n-critical", "en"]);
     expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
       tags: ["i18n:critical:en", "i18n:all"],
     });
@@ -268,11 +264,7 @@ describe("load-messages runtime gating", () => {
     await loadDeferredMessages("zh");
 
     expect(unstableCache).toHaveBeenCalledTimes(1);
-    expect(unstableCache.mock.calls[0]?.[1]).toEqual([
-      "i18n-deferred",
-      "en",
-      "catalog",
-    ]);
+    expect(unstableCache.mock.calls[0]?.[1]).toEqual(["i18n-deferred", "en"]);
     expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
       tags: ["i18n:deferred:en", "i18n:all"],
     });

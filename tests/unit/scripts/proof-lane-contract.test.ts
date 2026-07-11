@@ -72,7 +72,7 @@ describe("release proof manifest contract", () => {
       "pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts tests/integration/api/subscribe.test.ts",
       "pnpm exec vitest run tests/integration/api/health.test.ts src/__tests__/middleware-locale-cookie.test.ts",
       "node scripts/starter-checks.js translations",
-      "node scripts/starter-checks.js content-readiness --profile catalog",
+      "node scripts/starter-checks.js content-readiness",
       "pnpm build",
       "pnpm website:build:cf",
       "node scripts/starter-checks.js cf-static-asset-headers",

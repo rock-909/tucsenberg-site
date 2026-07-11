@@ -1,5 +1,3 @@
-/* eslint-disable max-lines, max-lines-per-function, max-statements -- profile readiness contract matrix stays in one file */
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -75,6 +73,19 @@ describe("content-readiness-check", () => {
     for (const rootDir of fixtureRoots.splice(0)) {
       moveFixtureToTrash(rootDir);
     }
+  });
+
+  it("scans current Tucsenberg product-page truth instead of retired specs", () => {
+    const source = fs.readFileSync(
+      "scripts/quality/checks/content-readiness.js",
+      "utf8",
+    );
+
+    expect(source).toContain("src/constants/tucsenberg-product-page-");
+    expect(source).toContain("src/constants/tucsenberg-product-pages.ts");
+    expect(source).not.toContain("src/constants/product-specs");
+    expect(source).not.toContain("profile-fixtures");
+    expect(source).not.toContain("--profile");
   });
 
   it("fails on hard fake buyer-visible content", () => {
@@ -217,10 +228,10 @@ describe("content-readiness-check", () => {
     );
   });
 
-  it("scans catalog specs and product catalog config as buyer-visible truth", () => {
+  it("scans current product-page and catalog config as buyer-visible truth", () => {
     const rootDir = createFixture({
-      "src/constants/product-specs/north-america.ts": [
-        "export const NORTH_AMERICA_SPECS = {",
+      "src/constants/tucsenberg-product-page-test.ts": [
+        "export const PRODUCT_PAGE = {",
         '  technical: { material: "Replaceable core material" },',
         '  certifications: ["Example Standard A"],',
         "};",
@@ -239,12 +250,12 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.warnings,
       "replaceable-content",
-      "src/constants/product-specs/north-america.ts",
+      "src/constants/tucsenberg-product-page-test.ts",
     );
     expectFinding(
       result.warnings,
       "example-standard",
-      "src/constants/product-specs/north-america.ts",
+      "src/constants/tucsenberg-product-page-test.ts",
     );
     expectFinding(
       result.warnings,
@@ -372,7 +383,7 @@ describe("content-readiness-check", () => {
 
   it("warns on buyer-visible starter identity residue without failing the default starter check", () => {
     const rootDir = createFixture({
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
         title: "Showcase Website Starter",
       }),
       "content/pages/en/about.mdx": "Welcome to Public Demo Starter Site.",
@@ -390,7 +401,7 @@ describe("content-readiness-check", () => {
 
   it("promotes client-launch residue warnings to errors only in strict client launch mode", () => {
     const rootDir = createFixture({
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
         title: "Showcase Website Starter",
         product: "Sample Product",
         standard: "Example Standard A",
@@ -654,7 +665,7 @@ describe("content-readiness-check", () => {
         "This page mentions `/images/logo.svg` as an example path.",
         "Real content.",
       ].join("\n"),
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
         note: "Mention /images/logo.svg only as a replacement note.",
       }),
     });
@@ -781,474 +792,6 @@ describe("content-readiness-check", () => {
       findings,
       "replace-this-image",
       "content/pages/en/contact.mdx",
-    );
-  });
-
-  it("skips optional profile message packs for b2b-lead readiness", () => {
-    const rootDir = createFixture({
-      "messages/base/en/critical.json": JSON.stringify({
-        common: { loading: "Loading" },
-      }),
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
-        home: { hero: { title: "Real client title" } },
-      }),
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
-        contact: { heading: "Talk to the team" },
-      }),
-      "messages/profiles/catalog/en/critical.json": JSON.stringify({
-        catalog: { heading: "Primary Offer Example" },
-      }),
-      "messages/profiles/content-marketing/en/critical.json": JSON.stringify({
-        blog: { heading: "Showcase Website Starter" },
-      }),
-      "messages/profiles/showcase-full/en/deferred.json": JSON.stringify({
-        customProject: { heading: "Primary Offer Example" },
-      }),
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("passed");
-    expect(result.findings).toEqual([]);
-  });
-
-  it("skips optional catalog and showcase-full residue for b2b-lead profile readiness", () => {
-    const rootDir = createFixture({
-      "content/pages/en/about.mdx": "Real about page content.",
-      "content/pages/en/contact.mdx": "Real contact page content.",
-      "content/pages/en/privacy.mdx": "Real privacy page content.",
-      "content/pages/en/terms.mdx": "Real terms page content.",
-      "content/pages/en/capabilities.mdx": "Sample Product",
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
-        home: { title: "Real homepage" },
-        contact: { title: "Real contact" },
-      }),
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
-        contact: { title: "Real contact form" },
-      }),
-      "messages/profiles/catalog/en/critical.json": JSON.stringify({
-        catalog: { title: "Sample Product" },
-      }),
-      "messages/profiles/content-marketing/en/critical.json": JSON.stringify({
-        blog: { title: "Visit example.com" },
-      }),
-      "messages/profiles/showcase-full/en/deferred.json": JSON.stringify({
-        customProject: { title: "Primary Offer Example" },
-      }),
-      "src/config/single-site-product-catalog.ts":
-        "export const catalog = { title: 'Primary Offer Example' };",
-      "src/constants/product-specs/north-america.ts":
-        "export const spec = { standard: 'Example Standard A' };",
-      "public/images/products/sample-product.svg": "<svg />",
-      "public/images/blog/welcome-cover.jpg": "fake image",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("passed");
-    expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual([]);
-  });
-
-  it("keeps minimal readiness to core starter pages and messages", () => {
-    const rootDir = createFixture({
-      "content/pages/en/privacy.mdx": "Real privacy page content.",
-      "content/pages/en/terms.mdx": "Real terms page content.",
-      "content/pages/en/about.mdx": "Sample Product",
-      "messages/base/en/critical.json": JSON.stringify({
-        common: { cta: "Continue" },
-        privacy: { title: "Real privacy" },
-      }),
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
-        home: { title: "Real homepage" },
-        contact: { title: "Sample Product" },
-      }),
-      "messages/profiles/catalog/en/deferred.json": JSON.stringify({
-        products: { title: "Example Standard A" },
-      }),
-      "src/config/single-site.ts":
-        "export const site = { name: 'Real Company' };",
-      "src/config/single-site-product-catalog.ts":
-        "export const catalog = { title: 'Sample Product' };",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "minimal",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("passed");
-    expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual([]);
-  });
-
-  it("reports b2b-lead owned asset placeholders by path", () => {
-    const rootDir = createFixture({
-      "public/images/hero/showcase-placeholder.svg": "<svg />",
-      "public/images/products/sample-product.svg": "<svg />",
-      "public/images/blog/welcome-cover.jpg": "fake image",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "placeholder",
-      "public/images/hero/showcase-placeholder.svg",
-    );
-    expect(result.findings).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          file: "public/images/products/sample-product.svg",
-        }),
-      ]),
-    );
-    expect(result.findings).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          file: "public/images/blog/welcome-cover.jpg",
-        }),
-      ]),
-    );
-  });
-
-  it("reports catalog residue when catalog profile owns the catalog surface", () => {
-    const rootDir = createFixture({
-      "messages/profiles/catalog/en/critical.json": JSON.stringify({
-        catalog: { title: "Sample Product" },
-      }),
-      "messages/profiles/catalog/en/deferred.json": JSON.stringify({
-        products: { title: "Example Standard A" },
-      }),
-      "src/config/single-site-product-catalog.ts":
-        "export const catalog = { title: 'Primary Offer Example' };",
-      "src/constants/product-specs/north-america.ts":
-        "export const spec = { standard: 'Example Standard A' };",
-      "public/images/products/sample-product.svg": "<svg />",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "catalog",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "sample-product",
-      "messages/profiles/catalog/en/critical.json",
-    );
-    expectFinding(
-      result.errors,
-      "example-standard",
-      "messages/profiles/catalog/en/deferred.json",
-    );
-    expectFinding(
-      result.errors,
-      "example-offer",
-      "src/config/single-site-product-catalog.ts",
-    );
-    expectFinding(
-      result.errors,
-      "example-standard",
-      "src/constants/product-specs/north-america.ts",
-    );
-    expectFinding(
-      result.errors,
-      "sample-product",
-      "public/images/products/sample-product.svg",
-    );
-  });
-
-  it("reports TODO markers in catalog product specs for catalog readiness", () => {
-    const rootDir = createFixture({
-      "src/constants/product-specs/tucsenberg-product-lines.ts":
-        "export const row = ['Section weight', 'TODO-OWNER', '52 kg'];",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "catalog",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "todo-marker",
-      "src/constants/product-specs/tucsenberg-product-lines.ts",
-    );
-  });
-
-  it("reports showcase-full residue across optional demo surfaces", () => {
-    const rootDir = createFixture({
-      "content/pages/en/custom-project-support.mdx": "lorem ipsum",
-      "messages/profiles/showcase-full/en/deferred.json": JSON.stringify({
-        customProject: { title: "Primary Offer Example" },
-      }),
-      "src/lib/blog/starter-blog.ts":
-        "export const post = { title: 'Visit example.com' };",
-      "public/images/blog/example-domain-cover.svg": "<svg />",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "showcase-full",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "lorem-ipsum",
-      "content/pages/en/custom-project-support.mdx",
-    );
-    expectFinding(
-      result.errors,
-      "example-offer",
-      "messages/profiles/showcase-full/en/deferred.json",
-    );
-    expectFinding(
-      result.errors,
-      "example-domain",
-      "src/lib/blog/starter-blog.ts",
-    );
-    expectFinding(
-      result.errors,
-      "example-domain",
-      "public/images/blog/example-domain-cover.svg",
-    );
-  });
-
-  it("rejects unknown content readiness profile ids", () => {
-    const rootDir = createFixture({
-      "content/pages/en/about.mdx": "Real about page content.",
-    });
-    fixtureRoots.push(rootDir);
-
-    expect(() =>
-      runContentReadinessCheck(rootDir, {
-        profileId: "unknown-profile",
-      }),
-    ).toThrow(/Unknown content readiness profile: unknown-profile/u);
-  });
-
-  it("ignores optional page-expression config for b2b-lead strict readiness", () => {
-    const rootDir = createFixture({
-      "content/pages/en/about.mdx": "Real about page content.",
-      "content/pages/en/contact.mdx": "Real contact page content.",
-      "content/pages/en/privacy.mdx": "Real privacy page content.",
-      "content/pages/en/terms.mdx": "Real terms page content.",
-      "src/config/single-site-page-expression.ts": `
-        export const SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION = {
-          supportedStandards: [
-            "Example Standard A",
-            "Example Standard B",
-          ],
-        };
-      `,
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("passed");
-    expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual([]);
-  });
-
-  it("skips optional home.products and navigation.products subtrees for b2b-lead", () => {
-    const rootDir = createFixture({
-      "content/pages/en/about.mdx": "Real about page content.",
-      "content/pages/en/contact.mdx": "Real contact page content.",
-      "content/pages/en/privacy.mdx": "Real privacy page content.",
-      "content/pages/en/terms.mdx": "Real terms page content.",
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
-        home: {
-          title: "Real homepage",
-          products: {
-            title: "Replaceable",
-            item1: { spec3: "Replace with real product data" },
-          },
-          quality: {
-            standards: {
-              exampleA: "Example Standard A",
-            },
-          },
-        },
-        navigation: {
-          home: "Home",
-          products: "Products",
-          blog: "Blog",
-        },
-        footer: {
-          sections: {
-            navigation: {
-              products: "Products",
-              blog: "Blog",
-            },
-          },
-        },
-      }),
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("passed");
-    expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual([]);
-  });
-
-  it("reports optional home.products residue for catalog profile readiness", () => {
-    const rootDir = createFixture({
-      "messages/profiles/minimal/en/critical.json": JSON.stringify({
-        home: {
-          products: {
-            title: "Replaceable",
-          },
-        },
-      }),
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = runContentReadinessCheck(rootDir, {
-      profileId: "catalog",
-      strictClientLaunch: true,
-    });
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "replaceable-content",
-      "messages/profiles/minimal/en/critical.json",
-    );
-  });
-
-  it("rejects unknown content readiness profile ids through the CLI", () => {
-    const scriptPath = path.join(
-      __dirname,
-      "../../../scripts/starter-checks.js",
-    );
-    const rootDir = createFixture({});
-    fixtureRoots.push(rootDir);
-    const result = spawnSync(
-      process.execPath,
-      [scriptPath, "content-readiness", "--profile", "unknown-profile"],
-      {
-        cwd: rootDir,
-        encoding: "utf8",
-      },
-    );
-
-    expect(result.status).not.toBe(0);
-    expect(`${result.stdout}\n${result.stderr}`).toContain(
-      "Unknown content readiness profile: unknown-profile",
-    );
-  });
-});
-
-describe("content-readiness-check profile fixtures", () => {
-  const fixtureRoots: string[] = [];
-
-  afterEach(() => {
-    for (const rootDir of fixtureRoots.splice(0)) {
-      moveFixtureToTrash(rootDir);
-    }
-  });
-
-  it("keeps profile fixture residue out of b2b-lead readiness and inside optional lanes", () => {
-    const rootDir = createFixture({
-      "content/pages/en/about.mdx": "Real about page content.",
-      "profile-fixtures/catalog/product-catalog.ts":
-        "export const catalog = { label: 'Primary Offer Example' };",
-      "profile-fixtures/catalog/product-specs/north-america.ts":
-        "export const specs = { standard: 'Example Standard A' };",
-      "profile-fixtures/content-marketing/starter-blog.ts":
-        "export const post = { title: 'Visit example.com' };",
-      "profile-fixtures/showcase-full/content/pages/en/capabilities.mdx":
-        "lorem ipsum",
-      "public/profile-fixtures/catalog/products/sample-product.svg": "<svg />",
-      "public/profile-fixtures/content-marketing/blog/example-domain-welcome-cover.jpg":
-        "fake image",
-    });
-    fixtureRoots.push(rootDir);
-
-    const b2bLeadResult = runContentReadinessCheck(rootDir, {
-      profileId: "b2b-lead",
-      strictClientLaunch: true,
-    });
-    expect(b2bLeadResult.status).toBe("passed");
-    expect(b2bLeadResult.errors).toEqual([]);
-    expect(b2bLeadResult.warnings).toEqual([]);
-
-    const catalogResult = runContentReadinessCheck(rootDir, {
-      profileId: "catalog",
-      strictClientLaunch: true,
-    });
-    expect(catalogResult.status).toBe("failed");
-    expectFinding(
-      catalogResult.errors,
-      "example-offer",
-      "profile-fixtures/catalog/product-catalog.ts",
-    );
-    expectFinding(
-      catalogResult.errors,
-      "example-standard",
-      "profile-fixtures/catalog/product-specs/north-america.ts",
-    );
-    expectFinding(
-      catalogResult.errors,
-      "sample-product",
-      "public/profile-fixtures/catalog/products/sample-product.svg",
-    );
-
-    const contentMarketingResult = runContentReadinessCheck(rootDir, {
-      profileId: "content-marketing",
-      strictClientLaunch: true,
-    });
-    expect(contentMarketingResult.status).toBe("failed");
-    expectFinding(
-      contentMarketingResult.errors,
-      "example-domain",
-      "profile-fixtures/content-marketing/starter-blog.ts",
-    );
-    expectFinding(
-      contentMarketingResult.errors,
-      "example-domain",
-      "public/profile-fixtures/content-marketing/blog/example-domain-welcome-cover.jpg",
-    );
-
-    const showcaseFullResult = runContentReadinessCheck(rootDir, {
-      profileId: "showcase-full",
-      strictClientLaunch: true,
-    });
-    expect(showcaseFullResult.status).toBe("failed");
-    expectFinding(
-      showcaseFullResult.errors,
-      "lorem-ipsum",
-      "profile-fixtures/showcase-full/content/pages/en/capabilities.mdx",
     );
   });
 });

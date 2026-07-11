@@ -70,7 +70,7 @@ describe("release proof manifest", () => {
     );
   });
 
-  it("keeps default release proof local and catalog scoped", () => {
+  it("keeps release proof local and catalog-only", () => {
     const manifest = loadReleaseProofManifest();
     const releaseProofFlow = manifest.getReleaseProofSequence().join("\n");
     const lanes = new Set(
@@ -79,14 +79,9 @@ describe("release proof manifest", () => {
 
     expect([...lanes]).toEqual(["local/test-mode"]);
     expect(releaseProofFlow).toContain(
-      "node scripts/starter-checks.js content-readiness --profile catalog",
+      "node scripts/starter-checks.js content-readiness",
     );
-    expect(releaseProofFlow).not.toContain(
-      "node scripts/starter-checks.js content-readiness --profile company-site",
-    );
-    expect(releaseProofFlow).not.toContain(
-      "node scripts/starter-checks.js content-readiness --profile b2b-lead",
-    );
+    expect(releaseProofFlow).not.toContain("--profile");
     expect(releaseProofFlow).not.toContain("cf-preview-deployed");
     expect(releaseProofFlow).not.toContain("deployed-smoke");
     expect(releaseProofFlow).not.toContain("POST_DEPLOY_TEST=1");

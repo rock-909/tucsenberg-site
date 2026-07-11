@@ -1,5 +1,4 @@
 import type { LocalizedPath, PageType } from "@/config/paths/types";
-import { getStarterProfile } from "@/config/starter-profiles";
 
 const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
@@ -192,6 +191,20 @@ export const PUBLIC_STATIC_PAGE_TYPES = PUBLIC_STATIC_PAGE_DEFINITIONS.map(
   (definition) => definition.pageType,
 ) as readonly PageType[];
 
+const CATALOG_STATIC_PAGE_TYPES = [
+  "home",
+  "products",
+  "oemWholesale",
+  "materialsGuide",
+  "specificationsGuide",
+  "about",
+  "requestQuote",
+  "contact",
+  "warranty",
+  "privacy",
+  "terms",
+] as const satisfies readonly PageType[];
+
 export function getStaticPageDefinitionsByType(): Readonly<
   Partial<Record<PageType, PublicStaticPageDefinition>>
 > {
@@ -213,16 +226,11 @@ export function getPublicStaticPageDefinition(
 
 export function getActiveStaticPageDefinitions(): PublicStaticPageDefinition[] {
   const definitionsByType = getStaticPageDefinitionsByType();
-
-  return getStarterProfile().staticPages.map((pageType) => {
+  return CATALOG_STATIC_PAGE_TYPES.map((pageType) => {
     const definition = definitionsByType[pageType];
-
     if (definition === undefined) {
-      throw new Error(
-        `Catalog profile references unknown static page: ${pageType}`,
-      );
+      throw new Error(`Missing catalog static page definition: ${pageType}`);
     }
-
     return definition;
   });
 }

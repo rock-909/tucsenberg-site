@@ -149,7 +149,7 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
-export async function generateSitemapForProfile(): Promise<MetadataRoute.Sitemap> {
+export async function generateSitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = await generateStaticPageEntries();
   const catalogEntries = generateCatalogEntries();
 
@@ -161,5 +161,5 @@ export async function generateSitemapForProfile(): Promise<MetadataRoute.Sitemap
  * Includes the catalog site's static pages and its product-market surface.
  */
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {
-  return generateSitemapForProfile();
+  return generateSitemap();
 }

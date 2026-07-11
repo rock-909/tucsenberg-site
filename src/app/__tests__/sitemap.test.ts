@@ -10,7 +10,7 @@ import {
 } from "@/config/single-site-seo";
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
 import { getStaticPageLastModified } from "@/lib/sitemap-utils";
-import sitemap, { generateSitemapForProfile } from "../sitemap";
+import sitemap, { generateSitemap } from "../sitemap";
 
 // Mock dependencies before imports
 vi.mock("@/config/paths", async (importOriginal) => {
@@ -348,7 +348,7 @@ describe("sitemap.ts", () => {
     });
 
     it("can generate catalog sitemap entries with product markets but without blog", async () => {
-      const result = await generateSitemapForProfile("catalog");
+      const result = await generateSitemap();
       const urls = result.map((entry) => entry.url);
 
       expect(urls).toContain(localizedUrl(defaultLocale, "/products"));

@@ -7,7 +7,6 @@ import {
 } from "@/config/pages.config";
 import type { DynamicPageType, PageType } from "@/config/paths/types";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
-import { getStarterProfile } from "@/config/starter-profiles";
 import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 export type SingleSiteSitemapChangeFrequency = PublicStaticPageChangeFrequency;
@@ -53,7 +52,7 @@ export function getSingleSitePublicStaticPages(): string[] {
 export function hasSingleSiteDynamicSurface(
   dynamicSurface: DynamicPageType,
 ): boolean {
-  return getStarterProfile().dynamicSurfaces.includes(dynamicSurface);
+  return dynamicSurface === "productMarket";
 }
 
 function normalizePublicPagePath(path: string): string {
@@ -65,7 +64,7 @@ function normalizePublicPagePath(path: string): string {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
-export function shouldIndexPublicPageForProfile(
+export function shouldIndexPublicPage(
   pageType: PageType,
   path: string,
 ): boolean {
