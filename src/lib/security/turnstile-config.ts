@@ -94,11 +94,6 @@ function parseConfiguredActions(): string[] {
   });
 }
 
-function getAllowedTurnstileActionsFromConfig(): string[] {
-  const configured = parseConfiguredActions();
-  return configured.length > 0 ? configured : [...DEFAULT_ALLOWED_ACTIONS];
-}
-
 function getAllowedTurnstileActionsSet(): Set<string> {
   const configured = parseConfiguredActions();
   return configured.length > 0
@@ -116,13 +111,6 @@ export function getExpectedTurnstileAction(): string {
       env.TURNSTILE_EXPECTED_ACTION
     )?.trim() ?? "";
   return configured === "" ? "contact_form" : configured;
-}
-
-/**
- * Return all allowed Turnstile action identifiers.
- */
-export function getAllowedTurnstileActions(): string[] {
-  return getAllowedTurnstileActionsFromConfig();
 }
 
 /**

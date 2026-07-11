@@ -112,13 +112,10 @@ describe("turnstile-config", () => {
       expectedAction: " product_inquiry ",
     });
 
-    expect(mod.getAllowedTurnstileActions()).toEqual([
-      "contact_form",
-      "product_inquiry",
-      "custom_action",
-    ]);
     expect(mod.getExpectedTurnstileAction()).toBe("product_inquiry");
+    expect(mod.isAllowedTurnstileAction("contact_form")).toBe(true);
     expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
+    expect(mod.isAllowedTurnstileAction("custom_action")).toBe(true);
     expect(mod.isAllowedTurnstileAction(" product_inquiry ")).toBe(true);
     expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(false);
     expect(mod.isAllowedTurnstileAction(null)).toBe(false);
@@ -130,12 +127,10 @@ describe("turnstile-config", () => {
       expectedAction: "   ",
     });
 
-    expect(mod.getAllowedTurnstileActions()).toEqual([
-      "contact_form",
-      "newsletter_subscribe",
-      "product_inquiry",
-    ]);
     expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
+    expect(mod.isAllowedTurnstileAction("contact_form")).toBe(true);
+    expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(true);
+    expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
     expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
     expect(mod.isAllowedTurnstileAction("   ")).toBe(false);
   });
