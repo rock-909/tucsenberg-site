@@ -99,8 +99,8 @@ middleware-provided trusted IP headers.
 
 ## Cache and runtime bindings
 
-- Do not add `cacheTag()`, `revalidateTag()`, or `revalidatePath()` to
-  production code without a new Cloudflare proof plan.
+- Do not add `cacheTag()`, `revalidateTag()`, `revalidatePath()`, or
+  `updateTag()` to production code without a new Cloudflare proof plan.
 - Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
   cache storage as a starter default.
 - New `"use cache"` boundaries must stay narrow and explain why rebuild/redeploy
