@@ -277,7 +277,7 @@ describe("SEO Metadata", () => {
       });
     });
 
-    it("should index product market pages in the default public SEO profile", () => {
+    it("should index product market pages in the catalog-only public SEO surface", () => {
       process.env.APP_ENV = "production";
       const metadata = generateMetadataForPath({
         locale: "en",
@@ -291,7 +291,7 @@ describe("SEO Metadata", () => {
       });
     });
 
-    it("should noindex showcase-full demo pages outside the default public SEO profile", () => {
+    it("should noindex showcase-full demo pages outside the catalog-only public SEO surface", () => {
       const capabilitiesMetadata = generateMetadataForPath({
         locale: "en",
         pageType: "capabilities",
@@ -308,7 +308,7 @@ describe("SEO Metadata", () => {
       });
     });
 
-    it("should keep active b2b-lead pages indexable", () => {
+    it("should keep current lead pages indexable", () => {
       process.env.APP_ENV = "production";
       const aboutMetadata = generateMetadataForPath({
         locale: "en",

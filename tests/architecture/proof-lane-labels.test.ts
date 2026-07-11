@@ -8,15 +8,6 @@ const REQUIRED_PROOF_LANES = [
   "real-service-canary",
 ] as const;
 
-const RETAINED_STARTER_PROFILES = [
-  "company-site",
-  "b2b-lead",
-  "minimal",
-  "catalog",
-  "content-marketing",
-  "showcase-full",
-] as const;
-
 const CURRENT_PLAYWRIGHT_DEFAULT_MATCHES = [
   "**/tucsenberg-site-smoke.spec.ts",
   "**/contact-form-smoke.spec.ts",
@@ -39,59 +30,28 @@ const RETIRED_PLAYWRIGHT_DEFAULT_FILES = [
 ] as const;
 
 describe("proof lane labels", () => {
-  it("documents the shared proof lane vocabulary", () => {
-    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
-
-    for (const lane of REQUIRED_PROOF_LANES) {
-      expect(qualityProof).toContain(lane);
-    }
-  });
-
-  it("documents profile-scoped proof lanes", () => {
-    const starterProof = [
-      readFileSync("docs/项目基础/派生干跑验证.md", "utf8"),
-      readFileSync("docs/项目基础/生命周期.md", "utf8"),
-      readFileSync("docs/项目基础/派生配置.md", "utf8"),
-    ].join("\n");
-
-    for (const profile of RETAINED_STARTER_PROFILES) {
-      expect(starterProof).toContain(profile);
-    }
-
-    expect(starterProof).toContain("Lifecycle: `starter-only`.");
-  });
-
-  it("separates current Tucsenberg proof from starter profile proof", () => {
-    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
-
-    expect(qualityProof).toContain("## Tucsenberg local proof");
-    expect(qualityProof).toContain(
-      "Inherited starter/profile proof lanes are not Tucsenberg launch proof.",
-    );
-    expect(qualityProof).not.toContain("Default `company-site` first-pass");
-    expect(qualityProof).not.toContain("Profile proof lanes:");
-  });
-
-  it("keeps profile-scoped content-readiness commands out of launch proof", () => {
-    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
-
-    for (const lane of RETAINED_STARTER_PROFILES) {
-      expect(qualityProof).not.toContain(
-        `node scripts/starter-checks.js content-readiness --profile ${lane}`,
-      );
-    }
-    expect(qualityProof).toContain("pnpm content:check");
-  });
-
-  it("labels release proof output with the shared proof lane vocabulary", () => {
+  it("keeps the shared proof lane vocabulary in docs and release output", () => {
+    const launchProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
     const releaseProofOutput = getManualProofLaneSummaryLines().join("\n");
 
     for (const lane of REQUIRED_PROOF_LANES) {
+      expect(launchProof).toContain(lane);
       expect(releaseProofOutput).toContain(`[${lane}]`);
     }
   });
 
-  it("labels local and post-deploy Playwright proof boundaries", () => {
+  it("separates current Tucsenberg proof from inherited proof", () => {
+    const launchProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
+
+    expect(launchProof).toContain("## Tucsenberg local proof");
+    expect(launchProof).toContain(
+      "Historical starter/profile proof records are not Tucsenberg launch proof.",
+    );
+    expect(launchProof).not.toContain("Default `company-site` first-pass");
+    expect(launchProof).not.toContain("Profile proof lanes:");
+  });
+
+  it("labels local and post-deploy E2E proof boundaries", () => {
     const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
     const localContactSmoke = readFileSync(
       "tests/e2e/contact-form-smoke.spec.ts",
@@ -107,7 +67,7 @@ describe("proof lane labels", () => {
     expect(postDeploySmoke).toContain("Proof lane: real-service-canary");
   });
 
-  it("limits default Playwright discovery to current Tucsenberg proof", () => {
+  it("limits default Playwright discovery to current Tucsenberg smoke proof", () => {
     const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
     const proofLevels = readFileSync("docs/项目基础/验证等级.md", "utf8");
 
@@ -116,45 +76,45 @@ describe("proof lane labels", () => {
     for (const match of CURRENT_PLAYWRIGHT_DEFAULT_MATCHES) {
       expect(playwrightConfig).toContain(match);
     }
-
     for (const file of RETIRED_PLAYWRIGHT_DEFAULT_FILES) {
       expect(playwrightConfig).not.toContain(file);
     }
-
     expect(proofLevels).toContain(
       "Default Playwright discovery is intentionally limited",
     );
   });
 
-  it("marks retired navigation E2E proof docs as historical", () => {
+  it("marks retired navigation proof docs as historical", () => {
     const proofReadme = readFileSync("docs/技术难题/验证入口.md", "utf8");
     const performanceReadme = readFileSync("docs/技术难题/性能记录.md", "utf8");
 
     expect(proofReadme).toContain("性能记录.md");
     expect(performanceReadme).toContain("不是当前 Tucsenberg 上线证明");
 
-    const historicalDocs = [
-      readFileSync("docs/技术难题/Lighthouse共享负载.md", "utf8"),
-      readFileSync("docs/技术难题/Lighthouse产品详情负载.md", "utf8"),
-      readFileSync("docs/技术难题/Lighthouse预取策略.md", "utf8"),
-      readFileSync("docs/技术难题/Next16行为审计.md", "utf8"),
-    ];
-
-    for (const doc of historicalDocs) {
+    for (const docPath of [
+      "docs/技术难题/Lighthouse共享负载.md",
+      "docs/技术难题/Lighthouse产品详情负载.md",
+      "docs/技术难题/Lighthouse预取策略.md",
+      "docs/技术难题/Next16行为审计.md",
+    ]) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths come from the fixed historical proof allowlist above
+      const doc = readFileSync(docPath, "utf8");
       expect(doc).toContain("Historical starter proof");
       expect(doc).toContain("not current Tucsenberg launch proof");
       expect(doc).toContain("tests/e2e/navigation.spec.ts");
     }
   });
 
-  it("keeps inherited workflow docs out of current docs truth", () => {
+  it("keeps inherited workflow records outside current docs truth", () => {
     const docsReadme = readFileSync("docs/README.md", "utf8");
-    const useReadme = readFileSync("docs/项目基础/维护入口.md", "utf8");
+    const maintenanceEntry = readFileSync("docs/项目基础/维护入口.md", "utf8");
 
     expect(docsReadme).toContain("docs/superpowers/specs/**");
     expect(docsReadme).toContain("docs/superpowers/plans/**");
-    expect(useReadme).toContain("旧 starter workflow 说明已经移出 `docs/`");
-    expect(useReadme).not.toContain("project-workflow.md");
-    expect(useReadme).not.toContain("website-production-workflow.md");
+    expect(maintenanceEntry).toContain(
+      "旧 starter workflow 说明已经移出 `docs/`",
+    );
+    expect(maintenanceEntry).not.toContain("project-workflow.md");
+    expect(maintenanceEntry).not.toContain("website-production-workflow.md");
   });
 });

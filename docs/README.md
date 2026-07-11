@@ -16,6 +16,7 @@ Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `d
 | 看 CI 和质量门 | `项目基础/发布验证.md` -> `项目基础/验证等级.md` -> `项目基础/ReactDoctor政策.md` |
 | 做 UI / 设计调整 | `design/设计真相.md` -> `design/组件治理.md` -> `design/组件使用手册.md` |
 | 查性能、路由、Cloudflare 等难题 | `技术难题/性能记录.md` -> `技术难题/性能实验优化方法论.md` |
+| 查 2026-07 全库审查修复和合并交接 | `技术难题/审查2026-07/交接文档.md` |
 | 查已经确认的取舍 | `决策记录/UI基础方案.md` -> `决策记录/Content-as-code与CMS边界.md` |
 | 查 docs 为什么保留 | `项目基础/文档清单.md` |
 
@@ -24,6 +25,7 @@ Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `d
 - `项目基础/`：项目怎么维护、怎么部署、技术栈、配置、内容、品牌、CI/验证和继承边界。
 - `design/`：设计真相、设计系统、组件治理、Storybook 和视觉规则。
 - `技术难题/`：性能、Cloudflare、Next.js 16、路由模式、客户端边界预算等问题记录。
+- `audits/`：修复前审查和计划快照，全部是历史记录。
 - `决策记录/`：已经确认过的架构或产品技术决策。
 - `superpowers/`：Superpowers 上游当前默认输出根目录；只放 `specs/**` 和 `plans/**`，不是当前产品真相。
 

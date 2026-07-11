@@ -3,11 +3,11 @@
 Status: accepted
 Date: 2026-06-04
 Owner: project maintainers
-Applies to: multilingual showcase websites built from this starter
+Applies to: current Tucsenberg English catalog site
 
 ## Decision
 
-The default content operating model for this starter is content-as-code.
+The default content operating model for Tucsenberg is content-as-code.
 
 Page content, locale-specific copy, SEO inputs, and replacement surfaces should
 stay in the repository unless a derived project explicitly chooses a heavier CMS
@@ -27,20 +27,19 @@ judged by the exact content surface it will own.
 
 ## Context
 
-This starter is a reusable company/product/service website starter, not a
-general publishing platform. Its value comes from clear replacement surfaces,
-multilingual routing, inquiry conversion, component governance, security basics,
-and Cloudflare deployment proof.
+Tucsenberg is a product and inquiry website, not a general publishing platform.
+Its content model must keep product facts, page prose, UI messages, routing, and
+lead behavior reviewable in the repository.
 
 The project already separates content into several different ownership layers:
 
 - locale routing in `src/config/paths/locales-config.ts`;
 - page prose and page SEO in `content/pages/{locale}/*.mdx`;
-- UI messages in `messages/base/**` and `messages/profiles/**`;
+- UI messages in the fixed `base -> b2b-lead -> catalog` graph;
 - page expression in `src/config/single-site-page-expression.ts`;
 - brand, SEO, links, and navigation in `src/config/single-site*.ts`;
-- the default blog source in `src/lib/blog/starter-blog.ts`;
-- optional catalog/product truth in typed config and fixture surfaces.
+- product truth in `src/constants/tucsenberg-product-page-*.ts`, assembled by
+  `src/constants/tucsenberg-product-pages.ts`.
 
 A single CMS cannot safely own all of these without weakening the boundaries
 that make the starter maintainable.
@@ -48,7 +47,7 @@ that make the starter maintainable.
 ## Why this decision
 
 The useful lesson from the Cursor CMS migration is not "never use a CMS." It is
-that a marketing site can lose a lot of engineering and agentic-editing leverage
+that a marketing site can lose useful engineering and agent-editing capability
 when content moves behind a remote CMS abstraction.
 
 For this starter, repository-owned content has practical benefits:
@@ -68,7 +67,7 @@ inventing hidden CMS state.
 
 ## Approved default model
 
-Default derived projects should keep this model:
+The current site uses this model:
 
 ```mermaid
 flowchart LR
@@ -78,21 +77,18 @@ flowchart LR
   D --> E["Production deployment"]
 ```
 
-For multilingual content, the default expectation is parallel locale files:
+The current site has one locale:
 
 ```text
 content/pages/en/about.mdx
-content/pages/zh/about.mdx
 ```
 
-The default workflow for a new or changed page should be:
+The workflow for a new or changed page is:
 
 1. edit the default-locale content;
-2. create or update the matching non-default-locale file;
-3. use AI to draft translation when useful;
-4. review terminology, facts, and SEO manually;
-5. run content and translation checks;
-6. publish through preview and deployment proof.
+2. review terminology, product facts, claims, and SEO manually;
+3. run content and message checks;
+4. publish through preview and deployment proof.
 
 AI translation belongs in the authoring workflow. It must not become runtime
 machine translation for public pages.
@@ -110,7 +106,7 @@ The safest first CMS proof is:
 - Contact page MDX;
 - Privacy page MDX;
 - Terms page MDX;
-- optional MDX pages only when the selected profile includes them.
+- other approved MDX pages when their current route exists.
 
 These files already match the content-as-code model.
 
@@ -118,12 +114,13 @@ These files already match the content-as-code model.
 
 Do not let an early CMS proof manage:
 
-- `messages/base/**` or `messages/profiles/**`;
+- `messages/base/**`, `messages/profiles/b2b-lead/**`, or
+  `messages/profiles/catalog/**`;
 - `src/config/single-site-page-expression.ts`;
 - `src/config/single-site-navigation.ts`;
 - `src/config/single-site-product-catalog.ts`;
-- `src/constants/product-specs/**`;
-- `src/lib/blog/starter-blog.ts`;
+- `src/constants/tucsenberg-product-page-*.ts`;
+- `src/constants/tucsenberg-product-pages.ts`;
 - contact form behavior;
 - email runtime behavior;
 - security, rate limiting, or Turnstile policy;
@@ -167,15 +164,14 @@ D1 does not solve these authoring needs:
 Using D1 for public content means building a custom CMS. That is not the default
 path for this starter.
 
-## Multilingual operating rules
+## Locale operating rules
 
 Any CMS or authoring workflow must preserve these rules:
 
 - `LOCALES_CONFIG` remains the runtime locale truth.
-- Public page content stays paired by locale.
-- Missing locale files should block release or be clearly flagged.
-- Slugs should stay stable across locales unless a separate localized-routing
-  decision is approved.
+- Public page content is English-only.
+- Adding another locale requires a separate routing, message, MDX, SEO, and
+  release-proof decision.
 - `seo.title`, `seo.description`, `updatedAt`, and `lastReviewed` remain
   operator-visible fields for MDX pages.
 - Translated content must be reviewed for business facts, legal statements,
@@ -184,8 +180,7 @@ Any CMS or authoring workflow must preserve these rules:
 
 ## Blog and resources boundary
 
-The default `company-site` blog is an explicit TypeScript data-source exception
-in `src/lib/blog/starter-blog.ts`. Do not migrate it to MDX as an ad hoc CMS
+The current route set has no blog. Do not add a CMS-backed blog as an ad hoc
 follow-up.
 
 If a derived project needs operator-managed blog articles, first design a
@@ -219,7 +214,7 @@ entire asset pipeline by default.
 If maintainers decide to test CMS editing, run a narrow proof:
 
 1. Choose Decap CMS or Keystatic.
-2. Expose only `content/pages/{locale}/*.mdx` for About, Contact, Privacy, and
+2. Expose only `content/pages/en/*.mdx` for About, Contact, Privacy, and
    Terms.
 3. Keep page structure, messages, blog, products, forms, email, and security out
    of scope.
@@ -229,7 +224,7 @@ If maintainers decide to test CMS editing, run a narrow proof:
 ```bash
 pnpm content:check
 node scripts/starter-checks.js translations
-node scripts/starter-checks.js content-readiness --profile catalog
+node scripts/starter-checks.js content-readiness
 ```
 
 6. Prove preview deployment behavior before recommending the tool for derived

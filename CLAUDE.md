@@ -6,7 +6,7 @@
 
 **Goal**: Maintain the current Tucsenberg flood barrier website: English-only product discovery, OEM / wholesale inquiry conversion, specification evaluation, PDF download, and Cloudflare/OpenNext deployment.
 
-It is not a generic starter anymore. The inherited starter/profile machinery remains only where it supports checks, compatibility, or history.
+It is not a generic starter anymore. Runtime profile selection, profile fixtures, the old blog source, and materialization tooling have been retired. The site is permanently the single English catalog site. Inherited starter naming survives only in checks, compatibility filenames, or clearly marked history.
 
 ## Communication
 
@@ -47,7 +47,7 @@ src/
 tests/
 - architecture/       # Repo contracts and architecture tests
 - unit/               # Unit tests for scripts and isolated logic
-- integration/        # Integration tests for APIs, components, and profile output
+- integration/        # Integration tests for APIs and components
 - e2e/                # Browser and user-flow smoke tests
 
 content/
@@ -56,7 +56,8 @@ content/
 
 messages/
 - base/                       # Base physical message packs
-- profiles/                   # Profile-specific physical message packs
+- profiles/b2b-lead/          # Fixed lead-form message ownership layer
+- profiles/catalog/           # Fixed catalog message ownership layer
 - en/                         # Generated compatibility message JSON
 ```
 
@@ -80,6 +81,7 @@ Verify dependency APIs from current docs before editing.
 pnpm dev
 pnpm brand:check
 pnpm content:check
+pnpm messages:sync
 pnpm component:check
 pnpm website:check
 pnpm website:build:cf

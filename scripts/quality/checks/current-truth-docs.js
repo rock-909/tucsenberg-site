@@ -23,6 +23,22 @@ const PERFORMANCE_ARCHIVE_DOCS = [
   "docs/技术难题/性能治理候选审计.md",
   "docs/技术难题/SEO公开页面性能余量.md",
 ];
+const RETIRED_CURRENT_TRUTH_PATTERNS = [
+  "src/constants/product-specs/**",
+  "src/lib/blog/starter-blog.ts",
+  "scripts/starter-profile/**",
+  "messages/profiles/company-site/**",
+  "/api/verify-turnstile",
+  "pnpm profile:dry-run",
+  "pnpm profile:materialize",
+];
+const HISTORICAL_BANNER = "> Historical.";
+const HISTORICAL_DERIVATION_DOCS = new Set([
+  "docs/项目基础/替换顺序.md",
+  "docs/项目基础/派生起步.md",
+  "docs/项目基础/派生配置.md",
+  "docs/项目基础/派生干跑验证.md",
+]);
 
 const TRUTH_DOC_CHECKS = [
   {
@@ -31,7 +47,6 @@ const TRUTH_DOC_CHECKS = [
       "current-entry",
       "current-reference",
       "current-proof",
-      "inherited-starter-reference",
       "historical-proof",
       "method-workflow",
       "candidate-backlog",
@@ -43,6 +58,8 @@ const TRUTH_DOC_CHECKS = [
       "specs/**",
       "plans/**",
       "docs/技术难题/性能实验优化方法论.md",
+      "docs/技术难题/审查2026-07/交接文档.md",
+      "docs/audits/上线就绪问题清单-2026-07-05.md",
     ],
     forbidden: ["review-needed", "Follow-up buckets"],
   },
@@ -53,6 +70,17 @@ const TRUTH_DOC_CHECKS = [
       "Superpowers 上游当前默认输出路径",
       "docs/superpowers/specs/**",
       "docs/superpowers/plans/**",
+      "技术难题/审查2026-07/交接文档.md",
+    ],
+  },
+  {
+    file: "README.md",
+    required: [
+      "src/constants/tucsenberg-product-page-*.ts",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
+      "base -> b2b-lead -> catalog",
+      "pnpm messages:sync",
     ],
   },
   {
@@ -97,6 +125,26 @@ const TRUTH_DOC_CHECKS = [
       "路由模式基线.md",
       "Storybook警告基线.md",
       "旧 mock 方法笔记已经移出 `docs/`",
+      "审查2026-07/交接文档.md",
+    ],
+  },
+  {
+    file: "docs/技术难题/审查2026-07/交接文档.md",
+    required: [
+      "PR 不是一条从 #40 开始的完整线性栈",
+      "#40",
+      "#41",
+      "#42",
+      "#50",
+      "retarget",
+      "squash merge",
+      "restack",
+      "42aaabe",
+      "8c6dc3a",
+      "base -> b2b-lead -> catalog",
+      "pnpm messages:sync",
+      "0 error / 3 warning",
+      "尚未 push",
     ],
   },
   {
@@ -114,9 +162,9 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-product-catalog.ts",
       "src/constants/product-standards.ts",
       "src/constants/tucsenberg-product-pages.ts",
-      "src/constants/product-specs/**",
       "messages/base/**",
-      "messages/profiles/**",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
     ],
     forbidden: [
       "src/sites/message-overrides.ts",
@@ -125,22 +173,23 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
-    file: "docs/项目基础/替换顺序.md",
+    file: "docs/项目基础/内容.md",
     required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-      "src/config/single-site-product-catalog.ts",
-      "src/constants/product-standards.ts",
-      "src/constants/tucsenberg-product-pages.ts",
-      "src/constants/product-specs/**",
       "content/config/content.json",
-      "docs/项目基础/替换顺序.md",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
+      "pnpm messages:sync",
+      "node scripts/starter-checks.js content-readiness",
     ],
-    forbidden: ["pnpm ci:local", "pnpm review:translation-quartet"],
   },
   {
-    file: "docs/项目基础/内容.md",
-    required: ["content/config/content.json"],
+    file: "docs/项目基础/项目基础.md",
+    required: [
+      "src/constants/tucsenberg-product-page-*.ts",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
+      "pnpm messages:sync",
+    ],
   },
   {
     file: "docs/项目基础/替换边界.md",
@@ -307,6 +356,12 @@ const TRUTH_DOC_CHECKS = [
     file: ".claude/rules/i18n.md",
     required: [
       "messages/base/{locale}/{critical,deferred}.json",
+      "messages/profiles/b2b-lead/{locale}/{critical,deferred}.json",
+      "messages/profiles/catalog/{locale}/{critical,deferred}.json",
+      "base -> b2b-lead -> catalog",
+      "pnpm messages:sync",
+    ],
+    forbidden: [
       "messages/profiles/{profile}/{locale}/{critical,deferred}.json",
       "src/sites/**/messages/**",
     ],
@@ -319,11 +374,9 @@ const TRUTH_DOC_CHECKS = [
 
 const CURRENT_TRUTH_COMMAND_DOCS = [
   "docs/项目基础/维护规则.md",
-  "docs/项目基础/替换顺序.md",
   "docs/项目基础/发布验证.md",
   "docs/项目基础/验证等级.md",
   "docs/项目基础/上线验证.md",
-  "docs/项目基础/替换顺序.md",
   "docs/项目基础/部署.md",
   "docs/项目基础/技术栈.md",
   "docs/design/区块重设检查清单.md",
@@ -346,6 +399,88 @@ const ROOT_INSTRUCTION_COMMAND_DOCS = [
 
 function readTruthFile(rootDir, relativePath) {
   return fs.readFileSync(path.join(rootDir, relativePath), "utf8");
+}
+
+function collectMarkdownFiles(rootDir, relativeDir) {
+  const startPath = path.join(rootDir, relativeDir);
+  if (!fs.existsSync(startPath)) return [];
+
+  const results = [];
+  for (const entry of fs.readdirSync(startPath, { withFileTypes: true })) {
+    const relativePath = path.posix.join(relativeDir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...collectMarkdownFiles(rootDir, relativePath));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      results.push(relativePath);
+    }
+  }
+  return results;
+}
+
+function isApprovedHistoricalDoc(relativePath) {
+  return (
+    HISTORICAL_DERIVATION_DOCS.has(relativePath) ||
+    relativePath.startsWith("docs/superpowers/") ||
+    relativePath.startsWith("docs/audits/")
+  );
+}
+
+function inventoryMarksHistorical(inventory, relativePath) {
+  return inventory
+    .split("\n")
+    .some(
+      (line) =>
+        line.includes(`\`${relativePath}\``) &&
+        line.includes("historical-proof"),
+    );
+}
+
+function collectMarkdownTruthFindings(rootDir) {
+  const inventoryPath = path.join(rootDir, "docs/项目基础/文档清单.md");
+  const inventory = fs.existsSync(inventoryPath)
+    ? readTruthFile(rootDir, "docs/项目基础/文档清单.md")
+    : "";
+  const files = [
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ...collectMarkdownFiles(rootDir, ".claude/rules"),
+    ...collectMarkdownFiles(rootDir, "docs"),
+  ]
+    .filter((file, index, candidates) => candidates.indexOf(file) === index)
+    .filter((file) => fs.existsSync(path.join(rootDir, file)));
+  const failures = [];
+
+  for (const file of files) {
+    const content = readTruthFile(rootDir, file);
+    if (isApprovedHistoricalDoc(file)) {
+      if (!content.startsWith(HISTORICAL_BANNER)) {
+        failures.push({
+          file,
+          error: `historical document must start with "${HISTORICAL_BANNER}"`,
+        });
+      }
+      if (!inventoryMarksHistorical(inventory, file)) {
+        failures.push({
+          file,
+          error:
+            "historical document is not classified as historical-proof in docs/项目基础/文档清单.md",
+        });
+      }
+      continue;
+    }
+
+    for (const pattern of RETIRED_CURRENT_TRUTH_PATTERNS) {
+      if (content.includes(pattern)) {
+        failures.push({
+          file,
+          error: `forbidden retired current-truth pattern "${pattern}"`,
+        });
+      }
+    }
+  }
+
+  return failures;
 }
 
 function findOutOfOrderCommand(sequence, content) {
@@ -446,6 +581,8 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
     }
   }
 
+  failures.push(...collectMarkdownTruthFindings(rootDir));
+
   const packageJsonPath = path.join(rootDir, "package.json");
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = JSON.parse(readTruthFile(rootDir, "package.json"));
@@ -539,6 +676,9 @@ function runTruthDocsCheck() {
 module.exports = {
   CHECKS: TRUTH_DOC_CHECKS,
   CURRENT_TRUTH_COMMAND_DOCS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,

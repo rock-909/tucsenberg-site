@@ -4,6 +4,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   CHECKS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS,
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   findOutOfOrderCommand,
   getReleaseProofDocsCommandBlock,
@@ -57,6 +60,13 @@ function createValidFiles(): Record<string, string> {
     ]
       .filter(Boolean)
       .join("\n");
+  }
+
+  for (const historicalPath of HISTORICAL_DERIVATION_DOCS) {
+    if (!(historicalPath in files)) continue;
+    files[historicalPath] = `${HISTORICAL_BANNER}\n${files[historicalPath]}`;
+    files["docs/项目基础/文档清单.md"] +=
+      `\n| \`${historicalPath}\` | \`historical-proof\` | Historical record. |`;
   }
 
   files["docs/项目基础/发布验证.md"] = [
@@ -128,6 +138,24 @@ describe("current-truth docs guard", () => {
     );
   });
 
+  it("locks the corrected PR stack and catalog closeout handoff markers", () => {
+    expect(CHECKS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: "docs/技术难题/审查2026-07/交接文档.md",
+          required: expect.arrayContaining([
+            "PR 不是一条从 #40 开始的完整线性栈",
+            "retarget",
+            "restack",
+            "42aaabe",
+            "8c6dc3a",
+            "pnpm messages:sync",
+          ]),
+        }),
+      ]),
+    );
+  });
+
   it("indexes the maintainability audit as historical evidence, not runtime truth", () => {
     for (const file of [
       "docs/项目基础/文档清单.md",
@@ -156,6 +184,61 @@ describe("current-truth docs guard", () => {
             "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
           ]),
         }),
+      ]),
+    );
+  });
+
+  it("rejects retired paths and commands from current docs", () => {
+    const files = createValidFiles();
+    files["README.md"] = RETIRED_CURRENT_TRUTH_PATTERNS.join("\n");
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    const findings = collectCurrentTruthDocFindings(repoDir);
+
+    for (const pattern of RETIRED_CURRENT_TRUTH_PATTERNS) {
+      expect(findings).toContainEqual({
+        file: "README.md",
+        error: `forbidden retired current-truth pattern "${pattern}"`,
+      });
+    }
+  });
+
+  it("allows retired references only in bannered and inventoried historical docs", () => {
+    const files = createValidFiles();
+    const historicalPath = "docs/superpowers/plans/retired-profile-example.md";
+    files[historicalPath] =
+      `${HISTORICAL_BANNER}\n# Old plan\n${RETIRED_CURRENT_TRUTH_PATTERNS.join("\n")}`;
+    files["docs/项目基础/文档清单.md"] +=
+      `\n| \`${historicalPath}\` | \`historical-proof\` | Old plan. |`;
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
+  });
+
+  it("requires both the approved banner and historical inventory classification", () => {
+    const files = createValidFiles();
+    const missingBanner = "docs/superpowers/plans/missing-banner.md";
+    const missingInventory = "docs/audits/missing-inventory.md";
+    files[missingBanner] = "# Old plan";
+    files[missingInventory] = `${HISTORICAL_BANNER}\n# Old audit`;
+    files["docs/项目基础/文档清单.md"] +=
+      `\n| \`${missingBanner}\` | \`historical-proof\` | Old plan. |`;
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(collectCurrentTruthDocFindings(repoDir)).toEqual(
+      expect.arrayContaining([
+        {
+          file: missingBanner,
+          error: `historical document must start with "${HISTORICAL_BANNER}"`,
+        },
+        {
+          file: missingInventory,
+          error:
+            "historical document is not classified as historical-proof in docs/项目基础/文档清单.md",
+        },
       ]),
     );
   });

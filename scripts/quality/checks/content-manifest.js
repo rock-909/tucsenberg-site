@@ -13,11 +13,6 @@ const CONTENT_MANIFEST_SOURCES = [
     source: "active-content",
     root: "content",
   },
-  {
-    source: "profile-fixture",
-    root: "profile-fixtures/showcase-full/content",
-    profileId: "showcase-full",
-  },
 ];
 const VALID_CONTENT_EXTENSIONS = new Set([".mdx", ".md"]);
 
@@ -88,7 +83,6 @@ function scanContentManifestDirectory(
       filePath: stableFilePath,
       relativePath,
       source: sourceConfig.source,
-      ...(sourceConfig.profileId ? { profileId: sourceConfig.profileId } : {}),
       metadata,
       content,
     });
@@ -290,8 +284,7 @@ export interface ContentEntry {
   extension: string;
   filePath: string;
   relativePath: string;
-  source: "active-content" | "profile-fixture";
-  profileId?: "showcase-full";
+  source: "active-content";
   metadata: Record<string, unknown>;
   content: string;
 }

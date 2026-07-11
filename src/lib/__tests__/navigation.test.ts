@@ -11,8 +11,6 @@ import {
   getSingleSiteNavigation,
   SINGLE_SITE_NAVIGATION,
 } from "@/config/single-site-navigation";
-import { SOURCE_RUNTIME_MESSAGE_PROFILE_ID } from "@/config/active-starter-profile";
-import { DEFAULT_STARTER_PROFILE_ID } from "@/config/starter-profiles";
 
 // Use vi.hoisted to ensure proper mock setup
 const { mockLocalesConfig } = vi.hoisted(() => ({
@@ -54,11 +52,8 @@ describe("navigation", () => {
       expect(mainNavigation).toBe(SINGLE_SITE_NAVIGATION);
     });
 
-    it("should use the source runtime profile for singleton navigation", () => {
-      expect(SOURCE_RUNTIME_MESSAGE_PROFILE_ID).toBe("catalog");
-      expect(SINGLE_SITE_NAVIGATION).toEqual(
-        getSingleSiteNavigation(SOURCE_RUNTIME_MESSAGE_PROFILE_ID),
-      );
+    it("should use the catalog site navigation as the singleton source", () => {
+      expect(SINGLE_SITE_NAVIGATION).toEqual(getSingleSiteNavigation());
       expect(mainNavigation).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
@@ -81,8 +76,7 @@ describe("navigation", () => {
     });
 
     it("can derive the default materialized catalog navigation explicitly", () => {
-      expect(DEFAULT_STARTER_PROFILE_ID).toBe("catalog");
-      expect(getSingleSiteNavigation(DEFAULT_STARTER_PROFILE_ID)).toEqual([
+      expect(getSingleSiteNavigation()).toEqual([
         { key: "home", href: "/", translationKey: "navigation.home" },
         {
           key: "products",
@@ -110,34 +104,6 @@ describe("navigation", () => {
       expect(actualKeys).not.toContain("customProject");
       expect(actualKeys).not.toContain("contact");
       expect(actualKeys).not.toContain("privacy");
-    });
-
-    it("can derive the catalog navigation", () => {
-      expect(getSingleSiteNavigation("catalog")).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
-        {
-          key: "products",
-          href: "/products",
-          translationKey: "navigation.products",
-        },
-        {
-          key: "oemWholesale",
-          href: "/oem-wholesale",
-          translationKey: "navigation.oemWholesale",
-        },
-        {
-          key: "materialsGuide",
-          href: "/guides/flood-barrier-materials-guide",
-          translationKey: "navigation.guides",
-        },
-        { key: "about", href: "/about", translationKey: "navigation.about" },
-      ]);
-    });
-
-    it("can derive minimal navigation without omitted routes", () => {
-      expect(getSingleSiteNavigation("minimal")).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
-      ]);
     });
 
     it("should have valid structure for all items", () => {

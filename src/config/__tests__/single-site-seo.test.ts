@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import {
-  getSingleSitePublicSeoProfileId,
   getSingleSitePublicStaticPageRoutes,
   getSingleSitePublicStaticPages,
   getSingleSiteSitemapPageConfigByPath,
   getSingleSiteStaticPageLastmod,
   hasSingleSiteDynamicSurface,
-  SINGLE_SITE_PUBLIC_SEO_PROFILE_ID,
   SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
   SINGLE_SITE_ROBOTS_DISALLOW_PATHS,
@@ -19,11 +17,6 @@ import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 describe("single-site-seo", () => {
   const RETIRED_BENDING_MACHINES_PATH = "/capabilities/bending-machines";
-
-  it("makes catalog the explicit default public SEO profile", () => {
-    expect(SINGLE_SITE_PUBLIC_SEO_PROFILE_ID).toBe("catalog");
-    expect(getSingleSitePublicSeoProfileId()).toBe("catalog");
-  });
 
   it("uses Tucsenberg catalog public static sitemap pages by default", () => {
     expect(SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES).toEqual([
@@ -57,7 +50,7 @@ describe("single-site-seo", () => {
     );
   });
 
-  it("keeps default sitemap configs scoped to company-site pages", () => {
+  it("keeps catalog sitemap config scoped to current public pages", () => {
     expect(SINGLE_SITE_SITEMAP_PAGE_CONFIG[getCanonicalPath("terms")]).toEqual({
       changeFrequency: "monthly",
       priority: 0.7,
@@ -110,20 +103,18 @@ describe("single-site-seo", () => {
   });
 
   it("can derive explicit catalog static pages and product market sidecar lastmod", () => {
-    expect(getSingleSitePublicStaticPageRoutes("catalog")).toEqual([
+    expect(getSingleSitePublicStaticPageRoutes()).toEqual([
       ...SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES,
     ]);
-    expect(getSingleSitePublicStaticPages("catalog")).toContain(
+    expect(getSingleSitePublicStaticPages()).toContain(
       getCanonicalPath("products"),
     );
-    expect(
-      getSingleSiteSitemapPageConfigByPath("catalog").productMarket,
-    ).toEqual({
+    expect(getSingleSiteSitemapPageConfigByPath().productMarket).toEqual({
       changeFrequency: "weekly",
       priority: 0.8,
     });
 
-    const catalogLastmod = getSingleSiteStaticPageLastmod("catalog");
+    const catalogLastmod = getSingleSiteStaticPageLastmod();
     for (const productPage of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
       expect(catalogLastmod[getProductMarketPath(productPage.slug)]).toBe(
         productPage.meta.updatedAt,
@@ -131,35 +122,12 @@ describe("single-site-seo", () => {
     }
   });
 
-  it("derives minimal static sitemap pages without product markets", () => {
-    expect(getSingleSitePublicStaticPageRoutes("minimal")).toEqual([
-      "home",
-      "privacy",
-      "terms",
-    ]);
-    expect(getSingleSitePublicStaticPages("minimal")).toEqual([
-      "",
-      "/privacy",
-      "/terms",
-    ]);
-    expect(getSingleSitePublicStaticPages("minimal")).not.toContain(
-      "/products",
-    );
-    expect(
-      getSingleSiteSitemapPageConfigByPath("minimal").productMarket,
-    ).toBeUndefined();
-    expect(
-      getSingleSiteStaticPageLastmod("minimal")[getCanonicalPath("products")],
-    ).toBeUndefined();
-  });
-
-  it("derives dynamic surface ownership by profile", () => {
+  it("owns the product-market dynamic surface and no blog surface", () => {
     expect(hasSingleSiteDynamicSurface("productMarket")).toBe(true);
-    expect(hasSingleSiteDynamicSurface("productMarket", "catalog")).toBe(true);
-    expect(hasSingleSiteDynamicSurface("productMarket", "minimal")).toBe(false);
-    expect(hasSingleSiteDynamicSurface("blogArticle", "catalog")).toBe(false);
-    expect(
-      getSingleSiteSitemapPageConfigByPath("catalog").blogArticle,
-    ).toBeUndefined();
+    expect(getSingleSiteSitemapPageConfigByPath().productMarket).toEqual({
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+    expect(getSingleSiteSitemapPageConfigByPath().blogArticle).toBeUndefined();
   });
 });

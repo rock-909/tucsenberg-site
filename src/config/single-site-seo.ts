@@ -7,11 +7,6 @@ import {
 } from "@/config/pages.config";
 import type { DynamicPageType, PageType } from "@/config/paths/types";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
-import {
-  DEFAULT_STARTER_PROFILE_ID,
-  getStarterProfile,
-  type StarterProfileId,
-} from "@/config/starter-profiles";
 import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 export type SingleSiteSitemapChangeFrequency = PublicStaticPageChangeFrequency;
@@ -27,18 +22,6 @@ const SINGLE_SITE_PRODUCT_MARKET_CONFIG = {
   changeFrequency: "weekly",
   priority: 0.8,
 } as const satisfies SingleSiteSitemapPageConfig;
-
-const SINGLE_SITE_BLOG_ARTICLE_CONFIG = {
-  changeFrequency: "weekly",
-  priority: 0.7,
-} as const satisfies SingleSiteSitemapPageConfig;
-
-export const SINGLE_SITE_PUBLIC_SEO_PROFILE_ID =
-  DEFAULT_STARTER_PROFILE_ID satisfies StarterProfileId;
-
-export function getSingleSitePublicSeoProfileId(): StarterProfileId {
-  return SINGLE_SITE_PUBLIC_SEO_PROFILE_ID;
-}
 
 function buildSingleSiteProductMarketLastmod(): Record<string, string> {
   return Object.fromEntries(
@@ -58,23 +41,18 @@ function buildSingleSiteProductMarketLastmod(): Record<string, string> {
  * - `single-site-seo.ts`: sitemap / robots / public static page SEO defaults
  */
 
-export function getSingleSitePublicStaticPageRoutes(
-  profileId?: StarterProfileId,
-) {
-  return getActiveStaticPageTypes(profileId);
+export function getSingleSitePublicStaticPageRoutes() {
+  return getActiveStaticPageTypes();
 }
 
-export function getSingleSitePublicStaticPages(
-  profileId?: StarterProfileId,
-): string[] {
-  return getActiveStaticSitemapPages(profileId);
+export function getSingleSitePublicStaticPages(): string[] {
+  return getActiveStaticSitemapPages();
 }
 
 export function hasSingleSiteDynamicSurface(
   dynamicSurface: DynamicPageType,
-  profileId?: StarterProfileId,
 ): boolean {
-  return getStarterProfile(profileId).dynamicSurfaces.includes(dynamicSurface);
+  return dynamicSurface === "productMarket";
 }
 
 function normalizePublicPagePath(path: string): string {
@@ -86,14 +64,13 @@ function normalizePublicPagePath(path: string): string {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
-export function shouldIndexPublicPageForProfile(
+export function shouldIndexPublicPage(
   pageType: PageType,
   path: string,
-  profileId?: StarterProfileId,
 ): boolean {
   const normalizedPath = normalizePublicPagePath(path);
   const productsPath = getCanonicalPath("products");
-  const activeTypes = new Set(getActiveStaticPageTypes(profileId));
+  const activeTypes = new Set(getActiveStaticPageTypes());
 
   if (pageType === "products") {
     if (normalizedPath === productsPath) {
@@ -101,39 +78,30 @@ export function shouldIndexPublicPageForProfile(
     }
 
     if (normalizedPath.startsWith(`${productsPath}/`)) {
-      return hasSingleSiteDynamicSurface("productMarket", profileId);
+      return hasSingleSiteDynamicSurface("productMarket");
     }
 
-    return false;
-  }
-
-  if (pageType === "blog") {
     return false;
   }
 
   return activeTypes.has(pageType);
 }
 
-export function getSingleSiteSitemapPageConfigByPath(
-  profileId?: StarterProfileId,
-): Readonly<Record<string, SingleSiteSitemapPageConfig>> {
+export function getSingleSiteSitemapPageConfigByPath(): Readonly<
+  Record<string, SingleSiteSitemapPageConfig>
+> {
   return {
-    ...getActiveStaticSitemapPageConfigByPath(profileId),
-    ...(hasSingleSiteDynamicSurface("productMarket", profileId)
+    ...getActiveStaticSitemapPageConfigByPath(),
+    ...(hasSingleSiteDynamicSurface("productMarket")
       ? { productMarket: SINGLE_SITE_PRODUCT_MARKET_CONFIG }
-      : {}),
-    ...(hasSingleSiteDynamicSurface("blogArticle", profileId)
-      ? { blogArticle: SINGLE_SITE_BLOG_ARTICLE_CONFIG }
       : {}),
   };
 }
 
-export function getSingleSiteStaticPageLastmod(
-  profileId?: StarterProfileId,
-): Record<string, string> {
+export function getSingleSiteStaticPageLastmod(): Record<string, string> {
   return {
-    ...getActiveStaticPageLastmodByPath(profileId),
-    ...(hasSingleSiteDynamicSurface("productMarket", profileId)
+    ...getActiveStaticPageLastmodByPath(),
+    ...(hasSingleSiteDynamicSurface("productMarket")
       ? buildSingleSiteProductMarketLastmod()
       : {}),
   };
@@ -159,10 +127,9 @@ export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = ["/api/", "/_next/"] as const;
 
 export function getSingleSiteSitemapPageConfig(
   path: string,
-  profileId?: StarterProfileId,
 ): SingleSiteSitemapPageConfig {
   return (
-    getSingleSiteSitemapPageConfigByPath(profileId)[path] ??
+    getSingleSiteSitemapPageConfigByPath()[path] ??
     SINGLE_SITE_SITEMAP_DEFAULT_CONFIG
   );
 }

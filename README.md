@@ -2,7 +2,7 @@
 
 Tucsenberg 英文官网项目，面向海外防洪屏障采购、OEM/批发询盘和资料下载转化。
 
-这个仓库已经从 `showcase-website-starter` 派生成具体站点。当前业务真相以 Tucsenberg 页面、内容、配置和上线证明为准；保留下来的 starter/profile 工具只作为维护和历史兼容面，不再是默认产品目标。
+这个仓库已经从 `showcase-website-starter` 派生成具体站点。当前业务真相以 Tucsenberg 页面、内容、配置和上线证明为准。多 profile runtime 和 materialize 工具已经退役；旧说明只作为标明日期的历史记录保留。
 
 ## 当前站点范围
 
@@ -49,7 +49,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 3. `docs/项目基础/内容.md`
 4. `docs/项目基础/部署.md`
 5. `docs/项目基础/AI协作边界.md`
-6. `plans/handoff-report.md`
+6. `docs/技术难题/审查2026-07/交接文档.md`
 
 历史 starter 派生说明仍保留在 `docs/项目基础/派生起步.md`、`docs/项目基础/替换顺序.md` 和 profile 相关文档中。它们用于解释继承工具和历史边界，不是 Tucsenberg 当前站的业务入口。
 
@@ -75,12 +75,11 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - 页面表达：`src/config/single-site-page-expression.ts`
 - 导航和链接：`src/config/single-site-navigation.ts`、`src/config/single-site-links.ts`
 - 页面正文：`content/pages/en/*.mdx`
-- 产品数据：`src/config/single-site-product-catalog.ts`、`src/constants/product-specs/**`、`src/constants/tucsenberg-product-pages.ts`
-- UI 文案 authoring truth：`messages/base/**`、`messages/profiles/catalog/**`
-- 仍保留的 inherited starter pack：`messages/profiles/company-site/**`
+- 产品数据：`src/constants/tucsenberg-product-page-*.ts`、`src/constants/tucsenberg-product-pages.ts`、`src/config/single-site-product-catalog.ts`、`src/constants/product-standards.ts`
+- UI 文案 authoring truth：`messages/base/**`、`messages/profiles/b2b-lead/**`、`messages/profiles/catalog/**`
 - generated compat 输出：`messages/en/critical.json`、`messages/en/deferred.json`
 
-不要先手改 generated compat 文件；需要同步时用现有 message/profile 工具。
+message graph 固定为 `base -> b2b-lead -> catalog`。不要先手改 generated compat 文件；修改 physical packs 后运行 `pnpm messages:sync`，再运行 `pnpm content:check`。
 
 ## AI 协作入口
 

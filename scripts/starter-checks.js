@@ -56,6 +56,9 @@ const {
 } = require("./quality/checks/release-verify");
 const {
   CHECKS: TRUTH_DOC_CHECKS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS,
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,
@@ -118,7 +121,7 @@ Commands:
   validate-production-config Validate production and public-launch config gates
   eslint-disable      Check eslint-disable exception hygiene
   component-governance Check component registry, Storybook, and UI wrapper drift
-  content-readiness   Check buyer-visible starter residue (--profile <id>, --strict-client-launch promotes launch blockers to errors)
+  content-readiness   Check buyer-visible catalog residue (--strict-client-launch promotes launch blockers to errors)
   client-boundary     Check top-level use client budget
   cf-preview-smoke    Probe local Cloudflare preview behavior
   public-preview-smoke Probe public preview page route health
@@ -188,9 +191,12 @@ if (require.main === module) {
 module.exports = {
   CONTENT_READINESS_PROFILE_IDS,
   CHECKS: TRUTH_DOC_CHECKS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS,
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   formatReleaseCommand,
   analyzeFile,
   analyzeSource,

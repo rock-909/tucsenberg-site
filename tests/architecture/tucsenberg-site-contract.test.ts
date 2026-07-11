@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import ts from "typescript";
@@ -176,6 +176,24 @@ function getObject(value: unknown, label: string): Record<string, unknown> {
 }
 
 describe("Tucsenberg Phase 1 site contract", () => {
+  it("removes retired profile runtime and public fixture surfaces", () => {
+    expect(existsSync("src/config/starter-profiles.ts")).toBe(false);
+    expect(existsSync("messages/profiles/minimal")).toBe(false);
+    expect(existsSync("public/profile-fixtures")).toBe(false);
+
+    for (const file of [
+      "src/config/pages.config.ts",
+      "src/config/single-site-seo.ts",
+      "src/lib/i18n/message-pack-config.ts",
+      "src/lib/i18n/message-pack-loader.ts",
+      "src/lib/i18n/load-messages.ts",
+    ]) {
+      const source = readRepoFile(file);
+      expect(source).not.toContain("StarterProfileId");
+      expect(source).not.toContain('"company-site"');
+    }
+  });
+
   it("runs as an English-only site", () => {
     expect(LOCALES_CONFIG.locales).toEqual(["en"]);
     expect(LOCALES_CONFIG.defaultLocale).toBe("en");

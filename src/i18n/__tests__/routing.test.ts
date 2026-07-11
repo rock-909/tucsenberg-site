@@ -197,7 +197,7 @@ describe("i18n Routing Configuration", () => {
       const config = await getRoutingDefinition();
       const pathnames = config.pathnames;
 
-      const dynamicRoutes = ["/blog/[slug]", "/products/[market]"];
+      const dynamicRoutes = ["/products/[market]"];
       dynamicRoutes.forEach((route) => {
         expect(pathnames).toHaveProperty(route);
       });

@@ -13,6 +13,9 @@ import { SITE_CONFIG } from "@/config/paths/site-config";
 import { routing, type Locale } from "@/i18n/routing";
 
 const FALLBACK_BASE_URL = SITE_CONFIG.baseUrl;
+type StructuredDataTranslator = Awaited<
+  ReturnType<typeof getTranslations<"structured-data">>
+>;
 
 interface ProductGroupInput {
   name: string;
@@ -37,9 +40,7 @@ interface LegalPageSchemaInput {
   modifiedAt?: string;
 }
 
-function getSocialProfileUrls(
-  t: Awaited<ReturnType<typeof getTranslations>>,
-): string[] {
+function getSocialProfileUrls(t: StructuredDataTranslator): string[] {
   return [
     t("organization.social.twitter", {
       defaultValue: SITE_CONFIG.social.twitter,
@@ -54,7 +55,7 @@ function getSocialProfileUrls(
  * 生成组织结构化数据
  */
 export function generateOrganizationData(
-  t: Awaited<ReturnType<typeof getTranslations>>,
+  t: StructuredDataTranslator,
   data: OrganizationData = {},
 ) {
   const logoPath = data.logo ?? getPublicLogoPath();
@@ -95,7 +96,7 @@ export function generateOrganizationData(
  * 生成网站结构化数据
  */
 export function generateWebSiteData(
-  t: Awaited<ReturnType<typeof getTranslations>>,
+  t: StructuredDataTranslator,
   data: WebSiteData = {},
 ) {
   return {
@@ -121,7 +122,7 @@ export function generateWebSiteData(
  * 生成文章结构化数据
  */
 export function generateArticleData(
-  t: Awaited<ReturnType<typeof getTranslations>>,
+  t: StructuredDataTranslator,
   locale: Locale,
   data: ArticleData,
 ) {

@@ -1,18 +1,14 @@
 import "server-only";
 
-import type { StarterProfileId } from "@/config/starter-profiles";
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
-import type { Locale } from "@/types/content.types";
+import type { Locale } from "@/i18n/routing-config";
 import { mergeObjects } from "@/lib/merge-objects";
 import {
-  getMessagePackIdsForProfile,
+  CATALOG_MESSAGE_PACK_IDS,
   type MessagePackId,
 } from "@/lib/i18n/message-pack-config";
 
 import enBaseCritical from "@messages/base/en/critical.json";
 import enBaseDeferred from "@messages/base/en/deferred.json";
-import enMinimalCritical from "@messages/profiles/minimal/en/critical.json";
-import enMinimalDeferred from "@messages/profiles/minimal/en/deferred.json";
 import enB2bLeadCritical from "@messages/profiles/b2b-lead/en/critical.json";
 import enB2bLeadDeferred from "@messages/profiles/b2b-lead/en/deferred.json";
 import enCatalogCritical from "@messages/profiles/catalog/en/critical.json";
@@ -27,10 +23,6 @@ const STATIC_PACKS: Record<Locale, Record<MessagePackId, StaticPack>> = {
       critical: enBaseCritical,
       deferred: enBaseDeferred,
     },
-    minimal: {
-      critical: enMinimalCritical,
-      deferred: enMinimalDeferred,
-    },
     "b2b-lead": {
       critical: enB2bLeadCritical,
       deferred: enB2bLeadDeferred,
@@ -42,25 +34,16 @@ const STATIC_PACKS: Record<Locale, Record<MessagePackId, StaticPack>> = {
   },
 };
 
-function composeStaticSplitMessages(
-  locale: Locale,
-  profileId: StarterProfileId,
-): StaticMessages {
-  return getMessagePackIdsForProfile(profileId).reduce<StaticMessages>(
-    (acc, packId) => {
-      const pack = STATIC_PACKS[locale][packId];
-      return mergeObjects(
-        mergeObjects(acc, pack.critical) as StaticMessages,
-        pack.deferred,
-      ) as StaticMessages;
-    },
-    {},
-  );
+function composeStaticSplitMessages(locale: Locale): StaticMessages {
+  return CATALOG_MESSAGE_PACK_IDS.reduce<StaticMessages>((acc, packId) => {
+    const pack = STATIC_PACKS[locale][packId];
+    return mergeObjects(
+      mergeObjects(acc, pack.critical) as StaticMessages,
+      pack.deferred,
+    ) as StaticMessages;
+  }, {});
 }
 
-export function getStaticSplitMessages(
-  locale: Locale,
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): StaticMessages {
-  return composeStaticSplitMessages(locale, profileId);
+export function getStaticSplitMessages(locale: Locale): StaticMessages {
+  return composeStaticSplitMessages(locale);
 }

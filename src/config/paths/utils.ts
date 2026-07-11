@@ -70,10 +70,6 @@ export function getProductMarketPath(marketSlug: string): string {
   return `${getCanonicalPath("products")}/${marketSlug}`;
 }
 
-export function getBlogArticlePath(articleSlug: string): string {
-  return `${getCanonicalPath("blog")}/${articleSlug}`;
-}
-
 /**
  * 获取所有页面的路径映射（用于next-intl routing）
  *

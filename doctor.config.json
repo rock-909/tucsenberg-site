@@ -50,8 +50,7 @@
           "src/lib/cookie-consent/types.ts",
           "src/lib/cookie-consent/index.ts",
           "src/test/test-types.ts",
-          "src/types/content.types.ts",
-          "src/types/i18n.ts"
+          "src/types/content.types.ts"
         ],
         "rules": ["knip/types"]
       },
@@ -98,16 +97,10 @@
       {
         "files": [
           "mdx-components.tsx",
-          "src/app/[locale]/capabilities/page.tsx",
-          "src/app/[locale]/custom-project-support/page.tsx",
-          "src/app/[locale]/how-it-works/page.tsx",
           "src/app/[locale]/page.tsx",
           "src/app/[locale]/products/page.tsx",
           "src/app/global-error.tsx",
-          "src/components/sections/final-cta-view.tsx",
           "src/components/sections/hero-section-view.tsx",
-          "src/components/sections/sample-cta-view.tsx",
-          "src/components/sections/scenarios-section-view.tsx",
           "src/components/ui/section-head.tsx",
           "src/stories/color-directions.stories.tsx"
         ],
@@ -121,15 +114,8 @@
         "files": [
           "src/app/[locale]/contact/contact-form-static-fallback.tsx",
           "src/app/[locale]/contact/contact-page-sections.tsx",
-          "src/app/[locale]/custom-project-support/page.tsx",
-          "src/components/forms/fields/checkbox-fields.tsx",
-          "src/components/layout/header-language-menu.tsx",
           "src/components/layout/header.tsx",
           "src/components/layout/mobile-navigation-interactive.tsx",
-          "src/components/sections/chain-section-view.tsx",
-          "src/components/sections/products-section-view.tsx",
-          "src/components/sections/resources-section-view.tsx",
-          "src/components/sections/sample-cta-view.tsx",
           "src/components/ui/theme-switcher-highlight.stories.tsx",
           "src/components/ui/theme-switcher.tsx",
           "src/stories/color-directions.stories.tsx"
@@ -140,8 +126,7 @@
         "files": [
           "src/app/[locale]/contact/contact-form-static-fallback.tsx",
           "src/app/[locale]/contact/contact-page-sections.tsx",
-          "src/components/forms/contact-form-fields.tsx",
-          "src/components/forms/fields/checkbox-fields.tsx"
+          "src/components/forms/contact-form-fields.tsx"
         ],
         "rules": ["react-doctor/design-no-space-on-flex-children"]
       },
@@ -155,12 +140,10 @@
           "src/config/__tests__/site-facts.test.ts",
           "src/config/__tests__/standards-consistency.test.ts",
           "tests/architecture/component-governance.test.ts",
-          "tests/architecture/generic-numeric-constants.test.ts",
           "tests/architecture/lib-facade-boundary.test.ts",
           "tests/unit/content-page-placeholders.test.ts",
           "tests/unit/scripts/current-truth-docs.test.ts",
-          "tests/unit/scripts/proof-lane-contract.test.ts",
-          "tests/unit/scripts/route-mode-snapshot.test.ts"
+          "tests/unit/scripts/proof-lane-contract.test.ts"
         ],
         "rules": ["react-doctor/js-combine-iterations"]
       },
@@ -188,7 +171,6 @@
       {
         "files": [
           "src/config/__tests__/single-site-seo.test.ts",
-          "src/constants/product-specs/__tests__/market-spec-registry.test.ts",
           "src/lib/i18n/__tests__/client-messages.test.ts"
         ],
         "rules": ["react-doctor/js-tosorted-immutable"]
@@ -204,8 +186,7 @@
       {
         "files": [
           "src/app/[locale]/products/__tests__/products-page.test.tsx",
-          "src/components/layout/logo.tsx",
-          "src/components/products/__tests__/market-series-card.test.tsx"
+          "src/components/layout/logo.tsx"
         ],
         "rules": ["react-doctor/nextjs-no-img-element"]
       },
@@ -220,13 +201,8 @@
       {
         "files": [
           "src/app/[locale]/about/page.tsx",
-          "src/app/[locale]/capabilities/page.tsx",
-          "src/app/[locale]/custom-project-support/page.tsx",
-          "src/app/[locale]/how-it-works/page.tsx",
           "src/app/[locale]/privacy/page.tsx",
           "src/app/[locale]/terms/page.tsx",
-          "src/components/grid/grid-frame.tsx",
-          "src/components/grid/grid-system.tsx",
           "src/components/layout/__tests__/mobile-navigation-edge-cases-advanced.test.tsx"
         ],
         "rules": ["react-doctor/no-array-index-as-key"]
@@ -245,13 +221,6 @@
       {
         "files": ["src/components/cookie/cookie-banner.tsx"],
         "rules": ["react-doctor/prefer-tag-over-role"]
-      },
-      {
-        "files": [
-          "profile-fixtures/content-marketing/starter-blog.ts",
-          "profile-fixtures/catalog/product-standards.ts"
-        ],
-        "rules": ["deslop/unused-file", "deslop/unused-export"]
       },
       {
         "files": [
@@ -278,11 +247,7 @@
         "rules": ["react-doctor/no-react19-deprecated-apis"]
       },
       {
-        "files": [
-          "src/app/[locale]/capabilities/page.tsx",
-          "src/app/[locale]/contact/page.tsx",
-          "src/app/[locale]/how-it-works/page.tsx"
-        ],
+        "files": ["src/app/[locale]/contact/page.tsx"],
         "rules": ["react-doctor/no-render-in-render"]
       },
       {
@@ -306,8 +271,6 @@
           "scripts/starter-checks.js",
           "src/app/[locale]/contact/__tests__/page-i18n-basic.test.tsx",
           "src/app/[locale]/contact/__tests__/page.test.tsx",
-          "src/app/__tests__/actions.test.ts",
-          "src/app/__tests__/contact-integration.test.ts",
           "src/app/api/csp-report/__tests__/route-get-options.test.ts",
           "src/app/api/inquiry/__tests__/route.test.ts",
           "src/lib/__tests__/load-messages-runtime.test.ts",
@@ -324,10 +287,7 @@
         "rules": ["react-doctor/server-sequential-independent-await"]
       },
       {
-        "files": [
-          "src/components/sections/__tests__/faq-section.test.tsx",
-          "src/components/seo/json-ld-script.tsx"
-        ],
+        "files": ["src/components/seo/json-ld-script.tsx"],
         "rules": ["react/no-danger", "react-doctor/no-danger"]
       }
     ]

@@ -114,7 +114,8 @@ describe("website config runtime boundary", () => {
       "config/             # Runtime config and starter replacement surfaces",
       "test/               # Source-level test helpers",
       "- base/                       # Base physical message packs",
-      "- profiles/                   # Profile-specific physical message packs",
+      "- profiles/b2b-lead/          # Fixed lead-form message ownership layer",
+      "- profiles/catalog/           # Fixed catalog message ownership layer",
       "- en/                         # Generated compatibility message JSON",
     ] as const;
 

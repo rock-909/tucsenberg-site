@@ -5,14 +5,8 @@ const ROOT = process.cwd();
 const I18N_LOCALES = require("../../../i18n-locales.config").locales;
 const MESSAGES_DIR = path.join(ROOT, "messages");
 const MESSAGE_TYPES = ["critical", "deferred"];
-const PROFILE_MESSAGE_PACKS = require("../../../messages/message-packs.json");
-
-const MESSAGE_PACK_IDS = [
-  ...new Set(Object.values(PROFILE_MESSAGE_PACKS).flat()),
-];
-const COMPATIBILITY_PROFILE_ID = PROFILE_MESSAGE_PACKS.catalog
-  ? "catalog"
-  : Object.keys(PROFILE_MESSAGE_PACKS)[0];
+const CATALOG_MESSAGE_PACK_IDS = require("../../../messages/message-packs.json");
+const MESSAGE_PACK_IDS = [...new Set(CATALOG_MESSAGE_PACK_IDS)];
 
 const REQUIRED_PACK_FILES = MESSAGE_PACK_IDS.flatMap((packId) =>
   I18N_LOCALES.flatMap((locale) =>
@@ -82,11 +76,10 @@ function mergeObjects(target, source) {
   return result;
 }
 
-function composeProfileMessages(profileId, locale) {
-  const packs = PROFILE_MESSAGE_PACKS[profileId] ?? [];
+function composeCatalogMessages(locale) {
   const composed = { critical: {}, deferred: {} };
 
-  for (const packId of packs) {
+  for (const packId of CATALOG_MESSAGE_PACK_IDS) {
     for (const type of MESSAGE_TYPES) {
       const packPath = getPackAbsolutePath(packId, locale, type);
       const packMessages = readJson(packPath);
@@ -199,35 +192,33 @@ function validatePackLocaleParity() {
   return allMatch;
 }
 
-function validateComposedProfileParity() {
-  console.log("\nValidating composed profile locale parity...");
+function validateComposedCatalogParity() {
+  console.log("\nValidating composed catalog locale parity...");
   let allMatch = true;
 
-  for (const profileId of Object.keys(PROFILE_MESSAGE_PACKS)) {
-    const [firstLocale, ...otherLocales] = I18N_LOCALES;
-    const firstComposed = composeProfileMessages(profileId, firstLocale);
-    const firstAllPaths = new Set([
-      ...collectLeafPaths(firstComposed.critical),
-      ...collectLeafPaths(firstComposed.deferred),
+  const [firstLocale, ...otherLocales] = I18N_LOCALES;
+  const firstComposed = composeCatalogMessages(firstLocale);
+  const firstAllPaths = new Set([
+    ...collectLeafPaths(firstComposed.critical),
+    ...collectLeafPaths(firstComposed.deferred),
+  ]);
+
+  for (const locale of otherLocales) {
+    const composed = composeCatalogMessages(locale);
+    const allPaths = new Set([
+      ...collectLeafPaths(composed.critical),
+      ...collectLeafPaths(composed.deferred),
     ]);
 
-    for (const locale of otherLocales) {
-      const composed = composeProfileMessages(profileId, locale);
-      const allPaths = new Set([
-        ...collectLeafPaths(composed.critical),
-        ...collectLeafPaths(composed.deferred),
-      ]);
-
-      if (
-        !compareLeafPathSets(
-          `${profileId}/${firstLocale}`,
-          firstAllPaths,
-          `${profileId}/${locale}`,
-          allPaths,
-        )
-      ) {
-        allMatch = false;
-      }
+    if (
+      !compareLeafPathSets(
+        `catalog/${firstLocale}`,
+        firstAllPaths,
+        `catalog/${locale}`,
+        allPaths,
+      )
+    ) {
+      allMatch = false;
     }
   }
 
@@ -235,13 +226,11 @@ function validateComposedProfileParity() {
 }
 
 function validateCompatibilityFiles() {
-  console.log(
-    `\nValidating compatibility files against ${COMPATIBILITY_PROFILE_ID} packs...`,
-  );
+  console.log("\nValidating compatibility files against catalog packs...");
   let allMatch = true;
 
   for (const locale of I18N_LOCALES) {
-    const composed = composeProfileMessages(COMPATIBILITY_PROFILE_ID, locale);
+    const composed = composeCatalogMessages(locale);
     const { critical: criticalPath, deferred: deferredPath } =
       getLocaleSplitPaths(locale);
 
@@ -267,15 +256,13 @@ function validateCompatibilityFiles() {
 
       if (expectedText !== actualText) {
         console.error(
-          `   Error: ${relativePath} does not match composed ${COMPATIBILITY_PROFILE_ID} ${type} packs`,
+          `   Error: ${relativePath} does not match composed catalog ${type} packs`,
         );
         allMatch = false;
         continue;
       }
 
-      console.log(
-        `   ${relativePath} matches composed ${COMPATIBILITY_PROFILE_ID} ${type}`,
-      );
+      console.log(`   ${relativePath} matches composed catalog ${type}`);
     }
   }
 
@@ -413,7 +400,7 @@ function compareLocales(localeData) {
 }
 
 function runTranslationCheck() {
-  console.log("Translation Validation (profile message packs)");
+  console.log("Translation Validation (catalog message packs)");
   console.log("===============================================");
 
   let allValid = true;
@@ -437,7 +424,7 @@ function runTranslationCheck() {
     allValid = false;
   }
 
-  if (!validateComposedProfileParity()) {
+  if (!validateComposedCatalogParity()) {
     allValid = false;
   }
 

@@ -114,12 +114,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       label: "Catalog content readiness",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
-      args: [
-        "scripts/starter-checks.js",
-        "content-readiness",
-        "--profile",
-        "catalog",
-      ],
+      args: ["scripts/starter-checks.js", "content-readiness"],
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {

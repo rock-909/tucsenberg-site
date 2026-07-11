@@ -1,8 +1,7 @@
-import type { StarterProfileId } from "@/config/starter-profiles";
-import type { Locale } from "@/i18n/routing";
+import type { Locale } from "@/i18n/routing-config";
 import { mergeObjects } from "@/lib/merge-objects";
 import {
-  getMessagePackIdsForProfile,
+  CATALOG_MESSAGE_PACK_IDS,
   type MessagePackId,
   type MessageType,
 } from "@/lib/i18n/message-pack-config";
@@ -19,10 +18,6 @@ const MESSAGE_PACK_LOADERS: Record<
     base: {
       critical: () => import("@messages/base/en/critical.json"),
       deferred: () => import("@messages/base/en/deferred.json"),
-    },
-    minimal: {
-      critical: () => import("@messages/profiles/minimal/en/critical.json"),
-      deferred: () => import("@messages/profiles/minimal/en/deferred.json"),
     },
     "b2b-lead": {
       critical: () => import("@messages/profiles/b2b-lead/en/critical.json"),
@@ -47,10 +42,9 @@ export async function loadRawMessagePack(
 export async function loadComposedRawMessages(
   locale: Locale,
   type: MessageType,
-  profileId: StarterProfileId,
 ): Promise<Messages> {
   const packs = await Promise.all(
-    getMessagePackIdsForProfile(profileId).map((packId) =>
+    CATALOG_MESSAGE_PACK_IDS.map((packId) =>
       loadRawMessagePack(locale, packId, type),
     ),
   );

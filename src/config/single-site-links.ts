@@ -1,7 +1,5 @@
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
 import { getActiveStaticPageTypes } from "@/config/pages.config";
 import { getCanonicalPath } from "@/config/paths/utils";
-import type { StarterProfileId } from "@/config/starter-profiles";
 
 export const SINGLE_SITE_ROUTE_HREFS = {
   home: getCanonicalPath("home"),
@@ -47,10 +45,8 @@ function activeHref(
   return active.has(pageType) ? SINGLE_SITE_ROUTE_HREFS[pageType] : undefined;
 }
 
-export function getSingleSiteActiveRouteTargets(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): SingleSiteActiveRouteTargets {
-  const active = new Set(getActiveStaticPageTypes(profileId));
+export function getSingleSiteActiveRouteTargets(): SingleSiteActiveRouteTargets {
+  const active = new Set(getActiveStaticPageTypes());
   const about = activeHref(active, "about");
   const contact = activeHref(active, "contact");
   const oemWholesale = activeHref(active, "oemWholesale");
@@ -66,50 +62,18 @@ export function getSingleSiteActiveRouteTargets(
   };
 }
 
-export function getSingleSiteHomeLinkTargets(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): SingleSiteHomeLinkTargets {
-  const activeTargets = getSingleSiteActiveRouteTargets(profileId);
-  const { about, contact, products } = activeTargets;
+export function getSingleSiteHomeLinkTargets(): SingleSiteHomeLinkTargets {
+  const activeTargets = getSingleSiteActiveRouteTargets();
 
-  if (products !== undefined) {
-    return getProductHomeLinkTargets({ ...activeTargets, products });
-  }
-
-  if (contact !== undefined && about !== undefined) {
-    return {
-      contact,
-      about,
-      primaryCta: contact,
-      secondaryCta: about,
-    };
-  }
-
-  if (contact !== undefined) {
-    return {
-      contact,
-      primaryCta: contact,
-      secondaryCta: SINGLE_SITE_ROUTE_HREFS.home,
-    };
-  }
-
-  if (about !== undefined) {
-    return {
-      about,
-      primaryCta: about,
-      secondaryCta: SINGLE_SITE_ROUTE_HREFS.home,
-    };
-  }
-
-  return {
-    primaryCta: SINGLE_SITE_ROUTE_HREFS.home,
-    secondaryCta: SINGLE_SITE_ROUTE_HREFS.home,
-  };
+  // The catalog site always exposes the products route, so home links always
+  // resolve through the product-oriented targets.
+  return getProductHomeLinkTargets({
+    ...activeTargets,
+    products: activeTargets.products ?? SINGLE_SITE_ROUTE_HREFS.products,
+  });
 }
 
-export const SINGLE_SITE_HOME_LINK_TARGETS = getSingleSiteHomeLinkTargets(
-  getRuntimeMessageProfileId(),
-);
+export const SINGLE_SITE_HOME_LINK_TARGETS = getSingleSiteHomeLinkTargets();
 
 function getProductHomeLinkTargets(
   targets: SingleSiteActiveRouteTargets & { products: string },
@@ -142,26 +106,20 @@ export function getSingleSiteHomeFinalCtaTargetsFromLinks(
   ];
 }
 
-export function getSingleSiteHomeFinalCtaTargets(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): SingleSiteHomeFinalCtaTarget[] {
+export function getSingleSiteHomeFinalCtaTargets(): SingleSiteHomeFinalCtaTarget[] {
   return getSingleSiteHomeFinalCtaTargetsFromLinks(
-    getSingleSiteHomeLinkTargets(profileId),
+    getSingleSiteHomeLinkTargets(),
   );
 }
 
-export function getSingleSiteContactFallbackHref(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): string {
-  const targets = getSingleSiteHomeLinkTargets(profileId);
+export function getSingleSiteContactFallbackHref(): string {
+  const targets = getSingleSiteHomeLinkTargets();
 
   return targets.contact ?? targets.primaryCta;
 }
 
-export function getSingleSiteAboutPageCtaHref(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): string {
-  const targets = getSingleSiteHomeLinkTargets(profileId);
+export function getSingleSiteAboutPageCtaHref(): string {
+  const targets = getSingleSiteHomeLinkTargets();
 
   if (targets.products !== undefined) {
     return targets.products;

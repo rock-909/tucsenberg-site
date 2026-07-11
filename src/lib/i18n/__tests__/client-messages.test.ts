@@ -90,20 +90,4 @@ describe("client message scoping", () => {
     expect(source).not.toContain("loadCompleteMessages");
     expect(source).not.toContain("pickClientMessages(messages)");
   });
-
-  it("can load client messages for a materialized b2b-lead profile without optional namespaces", async () => {
-    const { loadClientMessagesForProfile } =
-      await import("@/lib/i18n/client-messages");
-
-    const scoped = await loadClientMessagesForProfile("en", "b2b-lead");
-
-    expect(Object.keys(scoped).sort()).toEqual(
-      [...getClientMessageNamespaces()].sort(),
-    );
-    expect(scoped).not.toHaveProperty("catalog");
-    expect(scoped).not.toHaveProperty("products");
-    expect(scoped).not.toHaveProperty("blog");
-    expect(scoped).not.toHaveProperty("article");
-    expect(scoped).not.toHaveProperty("customProject");
-  });
 });

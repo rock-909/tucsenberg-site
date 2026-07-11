@@ -7,12 +7,8 @@ import {
   SINGLE_SITE_HOME_FINAL_TRUST_ITEMS,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
   SINGLE_SITE_HOME_LINK_TARGETS,
-  SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS,
-  SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS,
-  SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS,
   SINGLE_SITE_HOME_SCENARIO_ITEMS,
   SINGLE_SITE_HOME_SECTION_ORDER,
-  SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
   SINGLE_SITE_RESOURCES_PAGE_EXPRESSION,
 } from "@/config/single-site-page-expression";
@@ -84,24 +80,6 @@ describe("single-site-page-expression", () => {
       "item2",
       "item3",
     ]);
-    expect(SINGLE_SITE_HOME_QUALITY_COMMITMENT_ITEMS).toEqual([
-      "commitment1",
-      "commitment2",
-      "commitment3",
-      "commitment4",
-      "commitment5",
-    ]);
-    expect(SINGLE_SITE_HOME_QUALITY_STANDARD_ITEMS).toEqual([
-      "exampleA",
-      "exampleB",
-      "exampleC",
-      "exampleD",
-    ]);
-    expect(SINGLE_SITE_HOME_QUALITY_PROOF_STRIP_ITEMS).toEqual([
-      "iso9001",
-      "standards",
-      "countries",
-    ]);
   });
 
   it("keeps product page grouping aligned with the catalog", () => {
@@ -116,13 +94,6 @@ describe("single-site-page-expression", () => {
       "/contact",
     );
     expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/products");
-    expect(SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.ctaHref).toBe("/contact");
-    expect(SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION).not.toHaveProperty(
-      "processStepCount",
-    );
-    expect(
-      SINGLE_SITE_CUSTOM_PROJECT_PAGE_EXPRESSION.processStepKeys,
-    ).toHaveLength(5);
   });
 
   it("keeps resources page display order and CTA targets centralized", () => {

@@ -1,11 +1,9 @@
-import { getRuntimeMessageProfileId } from "@/config/active-starter-profile";
 import {
   getActiveStaticPageDefinitions,
   getPublicStaticPageDefinition,
 } from "@/config/pages.config";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import type { SiteNavigationItem } from "@/config/site-types";
-import type { StarterProfileId } from "@/config/starter-profiles";
 
 export type { SiteNavigationItem } from "@/config/site-types";
 
@@ -45,13 +43,9 @@ function requireRouteHref(pageType: SingleSiteRoutePageType): string {
   return href;
 }
 
-export function getSingleSiteNavigation(
-  profileId: StarterProfileId = getRuntimeMessageProfileId(),
-): SiteNavigationItem[] {
+export function getSingleSiteNavigation(): SiteNavigationItem[] {
   const activePageTypes = new Set(
-    getActiveStaticPageDefinitions(profileId).map(
-      (definition) => definition.pageType,
-    ),
+    getActiveStaticPageDefinitions().map((definition) => definition.pageType),
   );
 
   return MAIN_NAVIGATION_PAGE_TYPES.flatMap((pageType) =>
