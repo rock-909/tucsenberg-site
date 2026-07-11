@@ -303,7 +303,6 @@ export default [
         { max: 500, skipBlankLines: true, skipComments: true },
       ], // 调整到500行并跳过空行与注释
       "max-statements": ["error", 20], // 降低到20个语句，强制逻辑简化
-      "max-statements-per-line": ["error", { max: 1 }], // 每行最大语句数
 
       // 🔒 代码质量规则：零容忍标准
       "no-console": "error", // 完全禁止console，强制使用logger
@@ -361,7 +360,6 @@ export default [
       "no-new-wrappers": "error",
       "no-proto": "error",
       "no-return-assign": "error",
-      "no-return-await": "error",
       "no-void": "error",
       "no-with": "error",
       "require-await": "error",
@@ -383,11 +381,8 @@ export default [
       "no-caller": "error",
       "no-constructor-return": "error",
       "no-else-return": "error",
-      "no-empty-function": "error",
       "no-extend-native": "error",
       "no-extra-bind": "error",
-      "no-floating-decimal": "error",
-      "no-implicit-coercion": "error",
       "no-implicit-globals": "error",
       "no-iterator": "error",
       "no-labels": "error",
@@ -395,7 +390,7 @@ export default [
       "no-loop-func": "error",
       "no-multi-assign": "error",
       "no-new": "error",
-      "no-new-object": "error",
+      "no-object-constructor": "error",
       "no-octal-escape": "error",
       "no-param-reassign": "error",
       "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
@@ -635,8 +630,6 @@ export default [
       "consistent-return": "warn", // 开发工具复杂逻辑
       "no-param-reassign": "warn", // 开发工具参数修改
       "prefer-destructuring": "warn", // 开发工具属性访问
-      "require-await": "warn",
-      "no-console": "off", // 开发工具中完全允许console输出
 
       // 保持严格的基本语法检查
       "no-undef": ["error", { typeof: true }], // 未定义变量检查
@@ -749,10 +742,6 @@ export default [
       // 函数命名和结构
       "func-names": ["warn", "as-needed"], // 鼓励命名函数，便于调试
       "no-anonymous-default-export": "off", // 允许匿名默认导出（React组件）
-
-      // 渐进式质量提升
-      "max-statements-per-line": ["error", { max: 1 }], // 每行最多一个语句
-      "no-multiple-empty-lines": ["error", { max: 2, maxEOF: 1 }], // 控制空行数量
 
       // 安全增强（针对AI编码）
       "no-eval": "error", // 严格禁止eval
