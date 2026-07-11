@@ -1,10 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  NavigationProgressBar,
-  shouldStartNavigationProgress,
-} from "@/components/navigation/navigation-progress-bar";
+import { NavigationProgressBar } from "@/components/navigation/navigation-progress-bar";
+import { shouldStartNavigationProgress } from "@/components/navigation/navigation-progress";
 
 function createAnchor(href: string): HTMLAnchorElement {
   const anchor = document.createElement("a");
@@ -22,10 +20,12 @@ const plainLeftClick = {
 };
 
 const mockUsePathname = vi.fn(() => "/en");
+const mockUseSearchParams = vi.fn(() => new URLSearchParams());
 const mockUseReducedMotion = vi.fn(() => false);
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
+  useSearchParams: () => mockUseSearchParams(),
 }));
 
 vi.mock("motion/react", () => ({
@@ -36,6 +36,7 @@ describe("NavigationProgressBar", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockUsePathname.mockReturnValue("/en");
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockUseReducedMotion.mockReturnValue(false);
     window.history.replaceState({}, "", "/en");
   });
@@ -64,6 +65,45 @@ describe("NavigationProgressBar", () => {
       <>
         <NavigationProgressBar />
         <a href="/en/products">Products</a>
+      </>,
+    );
+
+    expect(screen.getByTestId("navigation-progress-bar-fill")).toHaveStyle({
+      transform: "scaleX(1)",
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(280 + 180);
+    });
+    expect(
+      screen.queryByTestId("navigation-progress-bar"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("completes when only the search params change", async () => {
+    mockUsePathname.mockReturnValue("/request-quote");
+    window.history.replaceState({}, "", "/request-quote");
+
+    const { rerender } = render(
+      <>
+        <NavigationProgressBar />
+        <a href="/request-quote?source=mobile_nav_cta">Request quote</a>
+      </>,
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: "Request quote" }));
+
+    expect(screen.getByTestId("navigation-progress-bar-fill")).toHaveStyle({
+      transform: "scaleX(0.18)",
+    });
+
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams("source=mobile_nav_cta"),
+    );
+    rerender(
+      <>
+        <NavigationProgressBar />
+        <a href="/request-quote?source=mobile_nav_cta">Request quote</a>
       </>,
     );
 
@@ -113,6 +153,7 @@ describe("NavigationProgressBar", () => {
         shouldStartNavigationProgress(
           plainLeftClick,
           createAnchor("/en/products"),
+          window.location.href,
         ),
       ).toBe(true);
     });
@@ -122,6 +163,7 @@ describe("NavigationProgressBar", () => {
         shouldStartNavigationProgress(
           { ...plainLeftClick, defaultPrevented: true },
           createAnchor("/en/products"),
+          window.location.href,
         ),
       ).toBe(false);
     });
@@ -131,6 +173,7 @@ describe("NavigationProgressBar", () => {
         shouldStartNavigationProgress(
           { ...plainLeftClick, button: 1 },
           createAnchor("/en/products"),
+          window.location.href,
         ),
       ).toBe(false);
     });
@@ -146,6 +189,7 @@ describe("NavigationProgressBar", () => {
           shouldStartNavigationProgress(
             { ...plainLeftClick, [modifier]: true },
             createAnchor("/en/products"),
+            window.location.href,
           ),
         ).toBe(false);
       }
@@ -155,12 +199,22 @@ describe("NavigationProgressBar", () => {
       const anchor = createAnchor("/en/spec.pdf");
       anchor.setAttribute("download", "");
 
-      expect(shouldStartNavigationProgress(plainLeftClick, anchor)).toBe(false);
+      expect(
+        shouldStartNavigationProgress(
+          plainLeftClick,
+          anchor,
+          window.location.href,
+        ),
+      ).toBe(false);
     });
 
     it("skips non-internal links", () => {
       expect(
-        shouldStartNavigationProgress(plainLeftClick, createAnchor("#section")),
+        shouldStartNavigationProgress(
+          plainLeftClick,
+          createAnchor("#section"),
+          window.location.href,
+        ),
       ).toBe(false);
     });
   });

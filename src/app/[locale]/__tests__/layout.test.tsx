@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type React from "react";
 import { cleanup, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -186,6 +187,14 @@ describe("LocaleLayout", () => {
   });
 
   describe("layout shell", () => {
+    it("keeps search-param navigation tracking inside a local Suspense boundary", () => {
+      const source = readFileSync("src/app/[locale]/layout.tsx", "utf8");
+
+      expect(source).toMatch(
+        /<Suspense fallback=\{null\}>\s*<NavigationProgressBar \/>\s*<\/Suspense>/,
+      );
+    });
+
     it("keeps the core layout shell stable without development-tool scripts", async () => {
       const page = await LocaleLayout({
         children: <div>Child</div>,
