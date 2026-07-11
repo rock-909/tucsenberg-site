@@ -68,11 +68,19 @@ async function parseJsonResponse(response: Response): Promise<unknown> {
 }
 
 export class ResendHttpEmailClient {
+  private readonly apiKey: string;
+  private readonly fetchFn: typeof fetch;
+  private readonly options: ResendHttpEmailClientOptions;
+
   constructor(
-    private readonly apiKey: string,
-    private readonly fetchFn: typeof fetch = fetch,
-    private readonly options: ResendHttpEmailClientOptions = {},
-  ) {}
+    apiKey: string,
+    fetchFn: typeof fetch = fetch,
+    options: ResendHttpEmailClientOptions = {},
+  ) {
+    this.apiKey = apiKey;
+    this.fetchFn = fetchFn;
+    this.options = options;
+  }
 
   async send(payload: ResendEmailPayload): Promise<ResendEmailSendResult> {
     const controller = new AbortController();
