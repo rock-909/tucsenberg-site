@@ -4,19 +4,13 @@
  * This module provides navigation configuration, route definitions,
  * and utility functions for the responsive navigation system.
  */
-import type { Locale } from "@/i18n/routing";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
-import { BREAKPOINT_MD, BREAKPOINT_XL } from "@/constants/breakpoints";
-import { BYTES_PER_KB } from "@/constants/core";
-import { PERCENTAGE_FULL } from "@/constants/decimal";
 import {
   SINGLE_SITE_NAVIGATION,
   type SiteNavigationItem,
 } from "@/config/single-site-navigation";
 
 export type NavigationItem = SiteNavigationItem;
-
-const NAV_PREFETCH_DELAY_MS = 250;
 
 // Main navigation is authored in `src/config/single-site.ts`; this wrapper keeps
 // existing consumers pinned to the active single-site source.
@@ -57,43 +51,6 @@ export function isActivePath(currentPath: string, itemPath: string): boolean {
 
   return normalizedCurrentPath.startsWith(normalizedItemPath);
 }
-
-// Utility function to get localized href
-export function getLocalizedHref(href: string, locale: Locale): string {
-  if (
-    href.startsWith("http") ||
-    href.startsWith("mailto:") ||
-    href.startsWith("tel:")
-  ) {
-    return href;
-  }
-
-  if (LOCALES_CONFIG.localePrefix === "never") {
-    return href;
-  }
-
-  // For root path, return just the locale
-  if (href === "/") {
-    return `/${locale}`;
-  }
-
-  // For other paths, prepend locale
-  return `/${locale}${href}`;
-}
-
-// Navigation breakpoints
-export const NAVIGATION_BREAKPOINTS = Object.freeze({
-  mobile: BREAKPOINT_MD,
-  tablet: BYTES_PER_KB,
-  desktop: BREAKPOINT_XL,
-} as const);
-
-// Animation durations
-export const NAVIGATION_ANIMATIONS = Object.freeze({
-  mobileMenuToggle: NAV_PREFETCH_DELAY_MS,
-  dropdownFade: PERCENTAGE_FULL,
-  hoverTransition: PERCENTAGE_FULL,
-} as const);
 
 // ARIA labels and accessibility
 export const NAVIGATION_ARIA = Object.freeze({

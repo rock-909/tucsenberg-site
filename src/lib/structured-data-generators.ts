@@ -3,7 +3,6 @@ import type {
   ArticleData,
   BreadcrumbData,
   OrganizationData,
-  ProductData,
   WebSiteData,
 } from "@/lib/structured-data-types";
 import {
@@ -28,22 +27,6 @@ interface ProductGroupInput {
   }>;
 }
 
-interface CustomProjectPageSchemaInput {
-  name: string;
-  description?: string;
-  locale: string;
-  specialty: string;
-}
-
-interface AboutPageSchemaInput {
-  title: string;
-  description?: string;
-  locale: string;
-  companyName: string;
-  established: string | number;
-  employees: number;
-}
-
 interface LegalPageSchemaInput {
   schemaType: "PrivacyPolicy" | "WebPage";
   additionalType?: string;
@@ -52,15 +35,6 @@ interface LegalPageSchemaInput {
   description?: string;
   publishedAt?: string;
   modifiedAt?: string;
-}
-
-interface LocalBusinessSchemaInput {
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  openingHours?: string[];
-  priceRange?: string;
 }
 
 function getSocialProfileUrls(
@@ -74,13 +48,6 @@ function getSocialProfileUrls(
       defaultValue: SITE_CONFIG.social.linkedin,
     }),
   ].filter((url) => /^https?:\/\//iu.test(url));
-}
-
-export function buildSchemaFallback(type: string): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": type,
-  };
 }
 
 /**
@@ -205,48 +172,6 @@ export function generateArticleData(
   };
 }
 
-/**
- * 生成产品结构化数据
- */
-export function generateProductData(
-  t: Awaited<ReturnType<typeof getTranslations>>,
-  data: ProductData,
-) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: data.name,
-    description: data.description,
-    brand: {
-      "@type": "Brand",
-      name:
-        data.brand ||
-        t("organization.name", {
-          defaultValue: SITE_CONFIG.name,
-        }),
-    },
-    manufacturer: {
-      "@type": "Organization",
-      name:
-        data.manufacturer ||
-        t("organization.name", {
-          defaultValue: SITE_CONFIG.name,
-        }),
-    },
-    image: data.image ? [data.image] : undefined,
-    offers: data.price
-      ? {
-          "@type": "Offer",
-          price: data.price,
-          priceCurrency: data.currency || "USD",
-          availability: data.availability || "https://schema.org/InStock",
-        }
-      : undefined,
-    sku: data.sku,
-    // 移除 ...data 扩展运算符，只使用已验证的属性
-  };
-}
-
 export function generateProductGroupData(
   data: ProductGroupInput,
 ): Record<string, unknown> {
@@ -267,40 +192,6 @@ export function generateProductGroupData(
       ...(product.image ? { image: product.image } : {}),
       ...(product.url ? { url: product.url } : {}),
     })),
-  };
-}
-
-export function buildCustomProjectPageSchema(
-  data: CustomProjectPageSchemaInput,
-): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: data.name,
-    ...(data.description ? { description: data.description } : {}),
-    inLanguage: data.locale,
-    specialty: data.specialty,
-  };
-}
-
-export function buildAboutPageSchema(
-  data: AboutPageSchemaInput,
-): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    name: data.title,
-    ...(data.description ? { description: data.description } : {}),
-    inLanguage: data.locale,
-    mainEntity: {
-      "@type": "Organization",
-      name: data.companyName,
-      foundingDate: String(data.established),
-      numberOfEmployees: {
-        "@type": "QuantitativeValue",
-        value: data.employees,
-      },
-    },
   };
 }
 
@@ -328,36 +219,6 @@ export function buildBreadcrumbListSchema(
       position: index + 1,
     })),
   });
-}
-
-export function buildLocalBusinessSchema(
-  business: LocalBusinessSchemaInput,
-): Record<string, unknown> {
-  const schema: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: business.name,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: business.address,
-    },
-    url: SITE_CONFIG.baseUrl,
-  };
-
-  if (business.phone) {
-    schema.telephone = business.phone;
-  }
-  if (business.email) {
-    schema.email = business.email;
-  }
-  if (business.openingHours) {
-    schema.openingHours = business.openingHours;
-  }
-  if (business.priceRange) {
-    schema.priceRange = business.priceRange;
-  }
-
-  return schema;
 }
 
 /**

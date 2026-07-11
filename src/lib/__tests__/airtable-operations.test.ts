@@ -163,64 +163,6 @@ describe("Airtable Service - Main Operations Tests", () => {
       expect(mockCreate).toHaveBeenCalled();
     });
 
-    it("should handle basic contact retrieval", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const mockRecords = [
-        createMockRecord({
-          id: "rec123456",
-          fields: { "First Name": "John", "Last Name": "Doe" },
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ];
-
-      mockSelectAll.mockResolvedValue(mockRecords);
-
-      const result = await service.getContacts();
-
-      expect(result).toEqual([
-        {
-          id: "rec123456",
-          fields: { "First Name": "John", "Last Name": "Doe" },
-          createdTime: "2023-01-01T00:00:00Z",
-        },
-      ]);
-      expect(mockSelect).toHaveBeenCalled();
-    });
-
-    it("should handle contact status updates", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const mockUpdateRecord = createMockRecord({
-        id: "rec123456",
-        fields: { Status: "Completed" },
-        createdTime: "2023-01-01T00:00:00Z",
-      });
-      mockUpdate.mockResolvedValue([mockUpdateRecord]);
-
-      await service.updateContactStatus("rec123456", "Completed");
-
-      // updateContactStatus returns void, so just check that it was called
-      expect(mockUpdate).toHaveBeenCalled();
-    });
-
-    it("should handle contact deletion", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      mockDestroy.mockResolvedValue([{ id: "rec123456", deleted: true }]);
-
-      await service.deleteContact("rec123456");
-
-      // deleteContact returns void, so just check that it was called
-      expect(mockDestroy).toHaveBeenCalledWith(["rec123456"]);
-    });
-
     it("should check service readiness correctly", () => {
       const service = new AirtableServiceClass();
 
@@ -262,42 +204,6 @@ describe("Airtable Service - Main Operations Tests", () => {
       await expect(
         service.createLead("contact", validLeadData),
       ).rejects.toThrow("Failed to create lead record");
-    });
-
-    it("should handle retrieval errors gracefully", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      mockSelectAll.mockRejectedValue(new Error("Retrieval failed"));
-
-      await expect(service.getContacts()).rejects.toThrow(
-        "Failed to fetch contact records",
-      );
-    });
-
-    it("should handle update errors gracefully", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      mockUpdate.mockRejectedValue(new Error("Update failed"));
-
-      await expect(
-        service.updateContactStatus("rec123456", "Completed"),
-      ).rejects.toThrow("Failed to update contact status");
-    });
-
-    it("should handle deletion errors gracefully", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      mockDestroy.mockRejectedValue(new Error("Deletion failed"));
-
-      await expect(service.deleteContact("rec123456")).rejects.toThrow(
-        "Failed to delete contact record",
-      );
     });
   });
 

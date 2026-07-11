@@ -98,7 +98,6 @@ vi.mock("@/lib/env", () => {
 
   return {
     env: mockEnv,
-    getEnvVar: (key: string) => mockEnv[key],
     serverEnvSchema: {},
     clientEnvSchema: {},
     runtimeEnv: mockEnv,
@@ -119,16 +118,6 @@ vi.mock("@/lib/env", () => {
 
       const value = mockEnv[key];
       return typeof value === "boolean" ? value : undefined;
-    },
-    getRuntimeEnvNumber: (key: string) => {
-      const runtimeValue = readProcessEnvValue(key);
-      if (runtimeValue !== undefined) {
-        const parsed = Number(runtimeValue);
-        return Number.isFinite(parsed) ? parsed : undefined;
-      }
-
-      const value = mockEnv[key];
-      return typeof value === "number" ? value : undefined;
     },
     getPublicRuntimeEnvString: (key: string) => readProcessEnvValue(key),
     getPublicRuntimeEnvBoolean: (key: string) => {
@@ -182,10 +171,6 @@ vi.mock("@/lib/env", () => {
       readProcessEnvValue("DEPLOYMENT_PLATFORM") === "cloudflare" ||
       readProcessEnvValue("DEPLOY_TARGET") === "cloudflare" ||
       readProcessEnvValue("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare",
-    isSecureAppEnv: () => {
-      const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
-      return value === "production" || value === "preview";
-    },
     requireEnvVar: (key: string) => {
       const value = mockEnv[key];
       if (!value || typeof value === "boolean" || typeof value === "number") {
@@ -194,16 +179,6 @@ vi.mock("@/lib/env", () => {
         );
       }
       return value;
-    },
-    envUtils: {
-      isDevelopment: () => false,
-      isProduction: () => false,
-      isTest: () => true,
-      getTurnstileSecret: () => "test-secret-key",
-      getTurnstileSiteKey: () => "test-site-key",
-      getResendApiKey: () => "test-resend-key",
-      getAirtableToken: () => "test-airtable-key",
-      getAirtableBaseId: () => "test-base-id",
     },
   };
 });

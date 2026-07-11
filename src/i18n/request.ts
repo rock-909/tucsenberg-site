@@ -1,5 +1,4 @@
 import { getRequestConfig } from "next-intl/server";
-import { I18nPerformanceMonitor } from "@/lib/i18n/performance";
 import {
   loadCompleteMessages,
   loadCompleteMessagesFromSource,
@@ -49,11 +48,6 @@ function getFormats(locale: Locale) {
   };
 }
 
-// 辅助函数：记录请求级消息加载指标
-function recordRequestMetrics(loadTime: number) {
-  I18nPerformanceMonitor.recordLoadTime(loadTime);
-}
-
 // 辅助函数：创建成功响应
 interface SuccessResponseArgs {
   locale: Locale;
@@ -101,7 +95,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
   try {
     const messages = await loadCompleteMessages(locale);
     const loadTime = performance.now() - startTime;
-    recordRequestMetrics(loadTime);
 
     return createSuccessResponse({
       locale,
@@ -109,7 +102,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
       loadTime,
     });
   } catch {
-    I18nPerformanceMonitor.recordError();
     return createUncachedRetryResponse(locale, startTime);
   }
 });

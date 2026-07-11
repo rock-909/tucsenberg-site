@@ -8,25 +8,16 @@ import "server-only";
 // import type 仅用于类型提示，实际模块在运行时按需加载
 import type AirtableNS from "airtable";
 import type {
-  AirtableQueryOptions,
   AirtableRecord,
   ContactLeadData,
-  ContactStatus,
   NewsletterLeadData,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { env, getRuntimeEnvString } from "@/lib/env";
 import type { LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { logger } from "@/lib/logger";
-import {
-  deleteContactRecord,
-  getContactRecords,
-  isDuplicateEmailAddress,
-  updateContactRecordStatus,
-} from "@/lib/airtable/service-internal/contact-records";
 import { resolveAirtableModule } from "@/lib/airtable/service-internal/client";
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
-import { getContactStatistics } from "@/lib/airtable/service-internal/stats";
 
 type AirtableEnvKey =
   | "AIRTABLE_API_KEY"
@@ -136,11 +127,6 @@ export class AirtableService {
     return this.base as AirtableNS.Base;
   }
 
-  private async getBaseIfReady(): Promise<AirtableNS.Base | null> {
-    await this.ensureReady();
-    return this.isReady() ? (this.base as AirtableNS.Base) : null;
-  }
-
   /**
    * Create a unified lead record in Airtable
    * Supports contact, product inquiry, and newsletter leads
@@ -151,89 +137,5 @@ export class AirtableService {
   ): Promise<AirtableRecord> {
     const base = await this.requireBase();
     return createLeadRecord({ base, tableName: this.tableName, type, data });
-  }
-
-  /**
-   * 获取联系人记录
-   * Get contact records from Airtable
-   */
-  public async getContacts(
-    options: AirtableQueryOptions = {},
-  ): Promise<AirtableRecord[]> {
-    const base = await this.requireBase();
-    return getContactRecords({ base, tableName: this.tableName, options });
-  }
-
-  /**
-   * 更新联系人记录状态
-   * Update contact record status
-   */
-  public async updateContactStatus(
-    recordId: string,
-    status: ContactStatus,
-  ): Promise<void> {
-    const base = await this.requireBase();
-    await updateContactRecordStatus({
-      base,
-      tableName: this.tableName,
-      recordId,
-      status,
-    });
-  }
-
-  /**
-   * 删除联系人记录
-   * Delete contact record
-   */
-  public async deleteContact(recordId: string): Promise<void> {
-    const base = await this.requireBase();
-    await deleteContactRecord({
-      base,
-      tableName: this.tableName,
-      recordId,
-    });
-  }
-
-  /**
-   * 检查重复邮箱
-   * Check for duplicate email addresses
-   *
-   * Returns false if service is not configured (graceful degradation).
-   * Logs warning and returns false if the check fails (e.g., API error),
-   * allowing form submission to proceed rather than blocking users.
-   */
-  public async isDuplicateEmail(email: string): Promise<boolean> {
-    const base = await this.getBaseIfReady();
-    if (!base) return false;
-
-    try {
-      return await isDuplicateEmailAddress({
-        base,
-        tableName: this.tableName,
-        email,
-      });
-    } catch (error) {
-      // Log warning but allow submission to proceed - duplicate check is
-      // a nice-to-have, not a hard requirement. Better to accept potential
-      // duplicates than block legitimate submissions due to transient errors.
-      logger.warn("Duplicate email check failed, proceeding with submission", {
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-      return false;
-    }
-  }
-
-  /**
-   * 获取统计信息
-   * Get statistics
-   */
-  public async getStatistics(): Promise<{
-    totalContacts: number;
-    newContacts: number;
-    completedContacts: number;
-    recentContacts: number;
-  }> {
-    const base = await this.requireBase();
-    return getContactStatistics({ base, tableName: this.tableName });
   }
 }

@@ -164,7 +164,6 @@ describe("Airtable Advanced Tests", () => {
       (service as unknown as AirtableServicePrivate).base = {
         table: vi.fn().mockReturnValue({
           create: mockCreate,
-          select: mockSelect,
         }),
       };
 
@@ -174,14 +173,8 @@ describe("Airtable Advanced Tests", () => {
         get: vi.fn().mockReturnValue("2023-01-01T00:00:00Z"),
       };
 
-      const mockSelectChain = {
-        all: vi.fn().mockResolvedValue([mockRecord]),
-      };
-
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
-      mockSelect.mockClear();
-      mockSelect.mockReturnValue(mockSelectChain);
 
       const leadData = {
         firstName: "John",
@@ -191,18 +184,16 @@ describe("Airtable Advanced Tests", () => {
         message: "Test message",
       };
 
-      // Run concurrent operations
+      // Run concurrent lead creations
       const promises = [
         service.createLead("contact", leadData),
-        service.getContacts(),
         service.createLead("contact", { ...leadData, firstName: "Jane" }),
       ];
 
       const results = await Promise.all(promises);
 
-      expect(results).toHaveLength(3);
+      expect(results).toHaveLength(2);
       expect(mockCreate).toHaveBeenCalledTimes(2);
-      expect(mockSelect).toHaveBeenCalledTimes(1);
     });
   });
 });
