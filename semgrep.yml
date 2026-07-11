@@ -79,7 +79,7 @@ rules:
         - "**/content/**"
     message: '避免使用不安全的随机数生成方法，使用crypto.randomBytes()或crypto.getRandomValues()'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     metadata:
       category: security
       technology: [nodejs]
