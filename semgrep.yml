@@ -28,9 +28,9 @@ rules:
 
   - id: unsafe-eval-usage
     pattern-either:
-      - pattern: eval($ARG)
-      - pattern: Function($ARG)
-      - pattern: new Function($ARG)
+      - pattern: eval(...)
+      - pattern: Function(...)
+      - pattern: new Function(...)
     message: '避免使用eval()或Function构造器，存在代码注入风险'
     languages: [typescript, javascript]
     severity: ERROR
