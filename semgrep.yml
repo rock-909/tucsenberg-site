@@ -503,7 +503,7 @@ rules:
       - pattern-not: process.env['NODE_ENV']
     message: 'src/config 下避免直接读 process.env，优先通过 env.ts 统一访问'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/config/**/*.ts"
