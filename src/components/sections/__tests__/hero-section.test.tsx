@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import enCriticalMessages from "../../../../messages/en/critical.json";
 import { HeroSection } from "@/components/sections/hero-section";
-import { HOMEPAGE_SECTION_LINKS } from "@/components/sections/homepage-section-links";
+import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 const heroMessageCases = [
   {
@@ -98,12 +98,12 @@ describe("HeroSection", () => {
     const secondaryLink = screen.getByText("hero.cta.secondary").closest("a");
     expect(primaryLink).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.primaryCta,
+      SINGLE_SITE_HOME_LINK_TARGETS.primaryCta,
     );
     expect(primaryLink).toHaveAttribute("href", "/request-quote");
     expect(secondaryLink).toHaveAttribute(
       "href",
-      HOMEPAGE_SECTION_LINKS.secondaryCta,
+      SINGLE_SITE_HOME_LINK_TARGETS.secondaryCta,
     );
     expect(secondaryLink).toHaveAttribute("href", "/oem-wholesale");
   });

@@ -4,7 +4,7 @@ import {
   homepageStoryHero,
   homepageStoryHeroLongCopy,
   homepageStoryHeroZh,
-} from "@/components/sections/homepage-section.fixtures";
+} from "@/components/sections/hero-section-view.fixtures";
 import { HeroSectionView } from "@/components/sections/hero-section-view";
 
 const meta = {

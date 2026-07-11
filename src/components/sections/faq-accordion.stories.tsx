@@ -5,7 +5,7 @@ import {
   sectionStoryFaqChineseItems,
   sectionStoryFaqItems,
   sectionStoryFaqLongItems,
-} from "@/components/sections/section-story-fixtures";
+} from "@/components/sections/faq-section-view.fixtures";
 
 const manyItems = [
   ...sectionStoryFaqItems,
