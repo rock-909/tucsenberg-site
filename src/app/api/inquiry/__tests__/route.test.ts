@@ -271,7 +271,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED);
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REQUIRED);
     });
 
     it("treats a whitespace-only turnstile token as missing without verification or lead processing", async () => {
@@ -285,7 +285,7 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(400);
       expect(data).toEqual({
         success: false,
-        errorCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+        errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
       });
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
       expect(processLead).not.toHaveBeenCalled();
@@ -487,7 +487,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_FAILED);
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
     });
 
     it("should return 503 when turnstile verification is unavailable", async () => {
@@ -503,7 +503,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(503);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
       expect(processLead).not.toHaveBeenCalled();
     });
 

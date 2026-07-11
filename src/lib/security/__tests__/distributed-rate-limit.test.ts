@@ -162,6 +162,59 @@ describe("distributed-rate-limit", () => {
       expect(mockLoggerError).toHaveBeenCalled();
     });
 
+    it.each(["contact", "inquiry", "subscribe", "turnstile"] as const)(
+      "fails closed for the %s preset when the store operation times out",
+      async (preset) => {
+        const mod = await import("@/lib/security/stores/rate-limit-store");
+        vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+          increment: vi
+            .fn()
+            .mockRejectedValue(
+              new DOMException("The operation was aborted", "AbortError"),
+            ),
+        } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+        const result = await checkDistributedRateLimit(
+          `timeout-fail-closed-${preset}`,
+          preset,
+        );
+
+        expect(result).toMatchObject({
+          allowed: false,
+          remaining: 0,
+          degraded: true,
+          deniedReason: "storage_failure",
+        });
+        expect(result.retryAfter).toBe(
+          Math.ceil(RATE_LIMIT_PRESETS[preset].windowMs / 1000),
+        );
+      },
+    );
+
+    it("fails open for the csp preset when the store operation times out", async () => {
+      const mod = await import("@/lib/security/stores/rate-limit-store");
+      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+        increment: vi
+          .fn()
+          .mockRejectedValue(
+            new DOMException("The operation was aborted", "AbortError"),
+          ),
+      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+
+      const result = await checkDistributedRateLimit(
+        "timeout-fail-open-csp",
+        "csp",
+      );
+
+      expect(result).toMatchObject({
+        allowed: true,
+        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
+        degraded: true,
+      });
+      expect(result.retryAfter).toBeNull();
+      expect("deniedReason" in result).toBe(false);
+    });
+
     it("fails closed when the store factory throws for a closed preset", async () => {
       const mod = await import("@/lib/security/stores/rate-limit-store");
       vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {

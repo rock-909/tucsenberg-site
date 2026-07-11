@@ -62,8 +62,11 @@ browser form -> route handler -> Zod -> Turnstile -> process lead -> parallel ow
 - Newsletter subscribe remains Airtable-only: record failure returns failure.
 - User-facing `partialSuccess` is not part of the target contract.
 
-Buyer-controlled fields sent to Airtable or another spreadsheet-like sink must
-be neutralized for formula injection before record creation.
+Buyer-controlled free-text fields sent to Airtable or another spreadsheet-like
+sink must use `sanitizeAirtableTextField()` before record creation. Airtable's
+typed Email field is the narrow exception: the lead schema rejects
+formula-capable prefixes, and the valid address is stored unchanged so ordinary
+plus-addressing keeps working.
 
 When changing contact, inquiry, subscribe, or Airtable field mapping behavior,
 update focused lead-family tests for the changed contract. Do not rely on email

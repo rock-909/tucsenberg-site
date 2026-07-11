@@ -6,6 +6,7 @@ import {
   validateContactSubmissionPayload,
 } from "@/lib/contact/submit-canonical-contact";
 import { contactLeadSchema, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
+import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 
 const mockProcessLead = vi.hoisted(() => vi.fn());
 
@@ -140,6 +141,40 @@ describe("canonical contact submission", () => {
         success: false,
         errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
         details: ["errors.message.required", "errors.acceptPrivacy.required"],
+      }),
+    );
+  });
+
+  it.each(["+cmd@example.com", "-cmd@example.com"])(
+    "rejects formula-capable email %s before Turnstile and lead processing",
+    async (email) => {
+      const result = await submitCanonicalContactSubmission(
+        { ...createContactFormData("Product inquiry"), email },
+        { clientIP: "203.0.113.10" },
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: false,
+          errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+          details: ["errors.email.invalid"],
+        }),
+      );
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+      expect(mockProcessLead).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps plus-addressing valid at the canonical contact boundary", () => {
+    const result = validateContactSubmissionPayload({
+      ...createContactFormData("Product inquiry"),
+      email: "buyer+rfq@example.com",
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({ email: "buyer+rfq@example.com" }),
       }),
     );
   });

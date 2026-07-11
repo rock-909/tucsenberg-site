@@ -7,6 +7,7 @@ import {
   type ContactFormFieldValidatorContext,
   type ContactFormFieldValidators,
 } from "@/config/contact-form-validation";
+import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 
 const applyOptionality = (
   schema: z.ZodTypeAny,
@@ -42,6 +43,10 @@ export function email({ field, config }: ContactFormFieldValidatorContext) {
     .max(
       CONTACT_FORM_VALIDATION_CONSTANTS.EMAIL_MAX_LENGTH,
       `Email must be less than ${CONTACT_FORM_VALIDATION_CONSTANTS.EMAIL_MAX_LENGTH} characters`,
+    )
+    .refine(
+      (value) => !hasSpreadsheetFormulaPrefix(value),
+      "Please enter a valid email address",
     )
     .transform((val) => val.toLowerCase());
 

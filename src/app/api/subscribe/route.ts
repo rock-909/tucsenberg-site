@@ -44,10 +44,7 @@ async function validateNewsletterTurnstile(
     expectedAction: "newsletter_subscribe",
   });
 
-  const error = mapLeadTurnstileResultToResponse(verificationResult, {
-    requiredCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
-    failedCode: API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED,
-  });
+  const error = mapLeadTurnstileResultToResponse(verificationResult);
   return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 

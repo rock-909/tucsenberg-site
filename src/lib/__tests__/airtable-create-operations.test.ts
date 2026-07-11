@@ -169,6 +169,31 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
+    it("writes a validated plus-addressed email without text-field escaping", async () => {
+      const service = new AirtableServiceClass();
+      setServiceReady(service);
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec-plus-address",
+          fields: {},
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await service.createLead("contact", {
+        ...validLeadData,
+        email: "buyer+rfq@example.com",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            Email: "buyer+rfq@example.com",
+          }),
+        },
+      ]);
+    });
+
     it("maps split full names and optional company into the canonical Airtable fields", async () => {
       const service = new AirtableServiceClass();
 

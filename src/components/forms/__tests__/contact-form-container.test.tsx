@@ -65,8 +65,7 @@ const mockT = vi.fn((key: string) => {
     rateLimitMessage: "Please wait before submitting again.",
     CONTACT_SUBMISSION_EXPIRED:
       "This form expired. Please refresh the page and try again.",
-    TURNSTILE_VERIFICATION_FAILED:
-      "Security verification failed. Please try again.",
+    TURNSTILE_REJECTED: "Security verification failed. Please try again.",
 
     // Checkboxes
     acceptPrivacy: "I accept the privacy policy",

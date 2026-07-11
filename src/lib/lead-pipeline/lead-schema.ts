@@ -9,6 +9,7 @@ import {
   sanitizeMultilineText,
   sanitizePlainText,
 } from "@/lib/security/validation";
+import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
@@ -54,6 +55,16 @@ const multilineSanitizedString = () =>
   z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
 
+// Airtable's Email field stays a real email value; reject formula-capable
+// prefixes here instead of corrupting valid addresses with text escaping.
+const leadEmailSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .email()
+  .max(MAX_LEAD_EMAIL_LENGTH)
+  .refine((email) => !hasSpreadsheetFormulaPrefix(email));
+
 export const leadAttributionFields = {
   utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
   utmMedium: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
@@ -92,7 +103,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: z.string().trim().min(1).email().max(MAX_LEAD_EMAIL_LENGTH),
+  email: leadEmailSchema,
   marketingConsent: z.boolean().optional().default(false),
   ...leadAttributionFields,
 };
@@ -173,7 +184,7 @@ export const productLeadSchema = z.object({
  */
 export const newsletterLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.NEWSLETTER),
-  email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
+  email: leadEmailSchema,
 });
 
 /**

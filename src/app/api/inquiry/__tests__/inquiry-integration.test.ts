@@ -188,7 +188,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(processLead).not.toHaveBeenCalled();
     });
 
-    it("missing turnstile token returns 400 with INQUIRY_SECURITY_REQUIRED", async () => {
+    it("missing turnstile token returns 400 with TURNSTILE_REQUIRED", async () => {
       const body = validInquiryData();
       delete (body as Record<string, unknown>).turnstileToken;
       const request = createRequest(body);
@@ -198,11 +198,11 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED);
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REQUIRED);
       expect(processLead).not.toHaveBeenCalled();
     });
 
-    it("turnstile verification failure returns 400 with INQUIRY_SECURITY_FAILED", async () => {
+    it("turnstile verification failure returns 400 with TURNSTILE_REJECTED", async () => {
       vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
       vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
         success: false,
@@ -214,7 +214,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_FAILED);
+      expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
       // processLead should NOT be called
       expect(processLead).not.toHaveBeenCalled();
     });
