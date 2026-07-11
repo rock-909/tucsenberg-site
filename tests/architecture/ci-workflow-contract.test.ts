@@ -23,6 +23,7 @@ const ERROR_SEMGREP_RULE_IDS = [
   "weak-crypto-algorithm",
   "sql-injection-risk",
   "nextjs-unsafe-server-action",
+  "environment-variable-exposure",
   "object-injection-untrusted-key-write",
 ] as const;
 

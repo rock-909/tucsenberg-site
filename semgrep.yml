@@ -160,7 +160,7 @@ rules:
     pattern-regex: "console\\.(log|info|debug|warn|error)\\(.*process\\.env\\..*\\)"
     message: '避免在日志中暴露环境变量，可能包含敏感信息'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     metadata:
       category: security
       technology: [nodejs]
