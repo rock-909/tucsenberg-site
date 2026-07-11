@@ -139,15 +139,13 @@ describe("EnterpriseAnalyticsIsland", () => {
 
 describe("resolveAnalyticsAllowed", () => {
   it("denies analytics when the consent context is absent", async () => {
-    const { resolveAnalyticsAllowed } =
-      await import("../enterprise-analytics-island");
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
 
     expect(resolveAnalyticsAllowed(null)).toBe(false);
   });
 
   it("denies analytics while consent is not ready", async () => {
-    const { resolveAnalyticsAllowed } =
-      await import("../enterprise-analytics-island");
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
 
     expect(
       resolveAnalyticsAllowed({ ready: false, consent: DEFAULT_CONSENT }),
@@ -155,8 +153,7 @@ describe("resolveAnalyticsAllowed", () => {
   });
 
   it("allows analytics when consent is ready and granted", async () => {
-    const { resolveAnalyticsAllowed } =
-      await import("../enterprise-analytics-island");
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
 
     expect(
       resolveAnalyticsAllowed({
@@ -167,8 +164,7 @@ describe("resolveAnalyticsAllowed", () => {
   });
 
   it("denies analytics when consent is ready but declined", async () => {
-    const { resolveAnalyticsAllowed } =
-      await import("../enterprise-analytics-island");
+    const { resolveAnalyticsAllowed } = await import("../analytics-consent");
 
     expect(
       resolveAnalyticsAllowed({
