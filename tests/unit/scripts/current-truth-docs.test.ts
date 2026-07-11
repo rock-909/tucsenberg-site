@@ -28,6 +28,9 @@ const TEMP_TRASH_ROOT = path.join(
   "showcase-current-truth-docs-test-trash",
 );
 
+const AUDIT_EVIDENCE_INDEX = "docs/技术难题/审查2026-07/README.md";
+const HISTORICAL_AUDIT_BOUNDARY = "历史审查证据，不是当前 runtime truth";
+
 function moveTempRepoToTrash(dir: string): void {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks the test-owned temporary fixture directory
   if (!fs.existsSync(dir)) return;
@@ -123,6 +126,19 @@ describe("current-truth docs guard", () => {
         }),
       ]),
     );
+  });
+
+  it("indexes the maintainability audit as historical evidence, not runtime truth", () => {
+    for (const file of [
+      "docs/项目基础/文档清单.md",
+      "docs/技术难题/验证入口.md",
+    ]) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths are fixed test-owned documentation fixtures
+      const content = fs.readFileSync(path.resolve(file), "utf8");
+
+      expect(content).toContain(AUDIT_EVIDENCE_INDEX);
+      expect(content).toContain(HISTORICAL_AUDIT_BOUNDARY);
+    }
   });
 
   it("guards stable docs from naming legacy specs as current product truth", () => {
