@@ -16,7 +16,7 @@ rules:
       owasp: 'A03:2021 - Injection'
 
   - id: hardcoded-api-keys
-    pattern-regex: "(api[_-]?key|secret[_-]?key|access[_-]?token)\\s*[=:]\\s*['\"][a-zA-Z0-9]{20,}['\"]"
+    pattern-regex: "(api[_-]?key|secret[_-]?key|access[_-]?token)\\s*[=:]\\s*['\"][a-zA-Z0-9_-]{20,}['\"]"
     message: '检测到硬编码的API密钥或访问令牌'
     languages: [typescript, javascript]
     severity: ERROR
