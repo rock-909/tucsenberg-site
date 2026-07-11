@@ -13,6 +13,17 @@ function createAnchor(href: string): HTMLAnchorElement {
   return anchor;
 }
 
+function setTestLocation(pathname: string, search = "") {
+  Object.defineProperties(window.location, {
+    href: {
+      configurable: true,
+      value: `http://localhost${pathname}${search}`,
+    },
+    pathname: { configurable: true, value: pathname },
+    search: { configurable: true, value: search },
+  });
+}
+
 const plainLeftClick = {
   defaultPrevented: false,
   button: 0,
@@ -41,10 +52,11 @@ describe("NavigationProgressBar", () => {
     mockUsePathname.mockReturnValue("/en");
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockUseReducedMotion.mockReturnValue(false);
-    window.history.replaceState({}, "", "/en");
+    setTestLocation("/en");
   });
 
   afterEach(() => {
+    setTestLocation("/en");
     vi.useRealTimers();
   });
 
@@ -85,7 +97,7 @@ describe("NavigationProgressBar", () => {
 
   it("completes when only the search params change", async () => {
     mockUsePathname.mockReturnValue("/request-quote");
-    window.history.replaceState({}, "", "/request-quote");
+    setTestLocation("/request-quote");
 
     const { rerender } = render(
       <>
@@ -152,20 +164,14 @@ describe("NavigationProgressBar", () => {
 
   it("starts and completes route-changing history when route hooks update first", async () => {
     mockUsePathname.mockReturnValue("/products");
-    Object.defineProperties(window.location, {
-      pathname: { configurable: true, value: "/products" },
-      search: { configurable: true, value: "" },
-    });
+    setTestLocation("/products");
     const { rerender } = render(<NavigationProgressBar />);
 
-    Object.defineProperty(window.location, "pathname", {
-      configurable: true,
-      value: "/request-quote",
-    });
+    setTestLocation("/request-quote");
     mockUsePathname.mockReturnValue("/request-quote");
     rerender(<NavigationProgressBar />);
 
-    act(() => {
+    await act(async () => {
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
 
@@ -179,6 +185,32 @@ describe("NavigationProgressBar", () => {
     expect(
       screen.queryByTestId("navigation-progress-bar"),
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps route-changing history pending until route hooks finish", async () => {
+    mockUsePathname.mockReturnValue("/products");
+    setTestLocation("/products");
+    const { rerender } = render(<NavigationProgressBar />);
+
+    setTestLocation("/request-quote");
+    await act(async () => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(screen.getByTestId("navigation-progress-bar-fill")).toHaveStyle({
+      transform: "scaleX(0.18)",
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(280 + 180);
+    });
+    expect(screen.getByTestId("navigation-progress-bar")).toBeInTheDocument();
+
+    mockUsePathname.mockReturnValue("/request-quote");
+    rerender(<NavigationProgressBar />);
+    expect(screen.getByTestId("navigation-progress-bar-fill")).toHaveStyle({
+      transform: "scaleX(1)",
+    });
   });
 
   describe("shouldStartNavigationProgress", () => {
@@ -248,6 +280,16 @@ describe("NavigationProgressBar", () => {
           plainLeftClick,
           createAnchor("#section"),
           window.location.href,
+        ),
+      ).toBe(false);
+    });
+
+    it("skips hash-only targets with equivalent encoded query values", () => {
+      expect(
+        shouldStartNavigationProgress(
+          plainLeftClick,
+          createAnchor("/request-quote?config=two%20units#details"),
+          "http://localhost/request-quote?config=two+units",
         ),
       ).toBe(false);
     });

@@ -33,14 +33,19 @@ export function getNavigationTargetRouteKey(
       return null;
     }
 
-    if (
-      target.pathname === current.pathname &&
-      target.search === current.search
-    ) {
+    const targetRouteKey = getNavigationRouteKey(
+      target.pathname,
+      target.searchParams,
+    );
+    const currentRouteKey = getNavigationRouteKey(
+      current.pathname,
+      current.searchParams,
+    );
+    if (targetRouteKey === currentRouteKey) {
       return null;
     }
 
-    return `${target.pathname}${target.search}`;
+    return targetRouteKey;
   } catch {
     return null;
   }

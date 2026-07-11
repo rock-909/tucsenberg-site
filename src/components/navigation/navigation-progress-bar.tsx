@@ -87,6 +87,7 @@ export function NavigationProgressBar() {
   const hideTimerRef = useRef<number | undefined>(undefined);
   const startedAtRef = useRef<number | null>(null);
   const isActiveRef = useRef(false);
+  const renderedRouteKeyRef = useRef(routeKey);
   // Only click/popstate handlers own this ref. Route completion must not update
   // it, because Next may flush route effects before our popstate listener runs.
   const historyRef = useRef({
@@ -144,21 +145,6 @@ export function NavigationProgressBar() {
     }, PROGRESS_TRICKLE_MS);
   });
 
-  const completeHistory = useEffectEvent(() => {
-    if (reducedMotion) return;
-
-    clearTimers();
-    isActiveRef.current = false;
-    startedAtRef.current = Date.now();
-    setVisible(true);
-    setProgress(100);
-    hideTimerRef.current = window.setTimeout(() => {
-      setVisible(false);
-      setProgress(0);
-      startedAtRef.current = null;
-    }, PROGRESS_MIN_VISIBLE_MS + PROGRESS_HIDE_MS);
-  });
-
   useEffect(() => {
     if (!historyRef.current.hasMounted) {
       historyRef.current = {
@@ -168,6 +154,7 @@ export function NavigationProgressBar() {
       return;
     }
 
+    renderedRouteKeyRef.current = routeKey;
     finish();
   }, [routeKey]);
 
@@ -192,7 +179,10 @@ export function NavigationProgressBar() {
       }
 
       historyRef.current.routeKey = nextRouteKey;
-      completeHistory();
+      start();
+      queueMicrotask(() => {
+        if (renderedRouteKeyRef.current === nextRouteKey) finish();
+      });
     };
 
     document.addEventListener("click", handleClick, true);
