@@ -9,6 +9,7 @@ import {
   sanitizeMultilineText,
   sanitizePlainText,
 } from "@/lib/security/validation";
+import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
@@ -53,7 +54,6 @@ const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 const multilineSanitizedString = () =>
   z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
-const AIRTABLE_FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
 
 // Airtable's Email field stays a real email value; reject formula-capable
 // prefixes here instead of corrupting valid addresses with text escaping.
@@ -63,7 +63,7 @@ const leadEmailSchema = z
   .min(1)
   .email()
   .max(MAX_LEAD_EMAIL_LENGTH)
-  .refine((email) => !AIRTABLE_FORMULA_PREFIX_PATTERN.test(email));
+  .refine((email) => !hasSpreadsheetFormulaPrefix(email));
 
 export const leadAttributionFields = {
   utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),

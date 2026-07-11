@@ -1,4 +1,4 @@
-const FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
+import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 
 /**
  * Neutralize spreadsheet formula injection before writing to Airtable.
@@ -11,7 +11,7 @@ const FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
  */
 export function sanitizeAirtableTextField(value: string): string {
   const trimmed = value.trim();
-  if (FORMULA_PREFIX_PATTERN.test(trimmed)) {
+  if (hasSpreadsheetFormulaPrefix(trimmed)) {
     return `'${trimmed}`;
   }
   return trimmed;
