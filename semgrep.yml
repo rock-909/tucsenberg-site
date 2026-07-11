@@ -1,6 +1,11 @@
 rules:
   - id: nextjs-unsafe-dangerouslySetInnerHTML
-    pattern-regex: 'dangerouslySetInnerHTML=\{\{__html:\s*\$[A-Za-z_][A-Za-z0-9_]*\}\}'
+    # 匹配任意 JSX 元素上的 dangerouslySetInnerHTML（含带空格/模板串/obj.prop 形态）。
+    # 旧的 pattern-regex 把 Semgrep 元变量语法 $VAR 误写进正则，\$ 只匹配字面美元符号，
+    # 真实代码永不命中。改为真 Semgrep JSX pattern，强制"单一可审计位置"约束：
+    # 任何新的 dangerouslySetInnerHTML 都必须显式 nosemgrep 注明理由。
+    pattern: |
+      <$EL dangerouslySetInnerHTML=... />
     message: '避免使用dangerouslySetInnerHTML，存在XSS风险'
     languages: [typescript, javascript]
     severity: ERROR
