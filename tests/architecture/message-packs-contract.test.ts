@@ -150,7 +150,8 @@ describe("physical message packs", () => {
     );
 
     expect(readme).toContain("messages/base/**");
-    expect(readme).toContain("messages/profiles/company-site/**");
+    expect(readme).toContain("messages/profiles/b2b-lead/**");
+    expect(readme).toContain("messages/profiles/catalog/**");
     expect(readme).toContain("generated compat");
     expect(readme).not.toContain(
       "UI 文案放在 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json`",
@@ -162,7 +163,8 @@ describe("physical message packs", () => {
       "Physical message packs are the authoring truth",
     );
     expect(currentTruthDocs).toContain("messages/base/**");
-    expect(currentTruthDocs).toContain("messages/profiles/**");
+    expect(currentTruthDocs).toContain("messages/profiles/b2b-lead/**");
+    expect(currentTruthDocs).toContain("messages/profiles/catalog/**");
   });
 
   it("keeps generated compatibility messages synced from the active catalog physical packs", () => {

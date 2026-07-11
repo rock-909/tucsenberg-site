@@ -56,6 +56,9 @@ const {
 } = require("./quality/checks/release-verify");
 const {
   CHECKS: TRUTH_DOC_CHECKS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS,
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,
@@ -188,9 +191,12 @@ if (require.main === module) {
 module.exports = {
   CONTENT_READINESS_PROFILE_IDS,
   CHECKS: TRUTH_DOC_CHECKS,
+  HISTORICAL_BANNER,
+  HISTORICAL_DERIVATION_DOCS,
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
+  RETIRED_CURRENT_TRUTH_PATTERNS,
   formatReleaseCommand,
   analyzeFile,
   analyzeSource,

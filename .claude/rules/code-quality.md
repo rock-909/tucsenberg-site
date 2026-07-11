@@ -79,13 +79,12 @@ domain meaning.
 
 - Treat unused dependency and unused export reports as leads, not deletion
   proof.
-- For starter surfaces, classify findings before removal: active runtime entry,
-  generated/tooling entry, starter reserve, false positive, or removable.
-- Do not remove profile fixtures, UI wrapper exports, governance scripts, or
-  generated-surface helpers only because static analysis cannot see their
-  entrypoint.
-- Dependency removals must include the smallest proof that the starter, selected
-  profile, and related tooling still work.
+- Classify findings before removal: active runtime entry, generated/tooling
+  entry, documented governance surface, false positive, or removable.
+- Do not remove UI wrapper exports, governance scripts, or generated-surface
+  helpers only because static analysis cannot see their entrypoint.
+- Dependency removals must include the smallest proof that the current catalog
+  site and related tooling still work.
 
 ## Hard gates
 

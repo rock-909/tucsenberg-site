@@ -45,7 +45,7 @@ describe("proof lane labels", () => {
 
     expect(launchProof).toContain("## Tucsenberg local proof");
     expect(launchProof).toContain(
-      "Inherited starter/profile proof lanes are not Tucsenberg launch proof.",
+      "Historical starter/profile proof records are not Tucsenberg launch proof.",
     );
     expect(launchProof).not.toContain("Default `company-site` first-pass");
     expect(launchProof).not.toContain("Profile proof lanes:");

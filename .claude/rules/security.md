@@ -89,8 +89,11 @@ happy-path proof to prove CRM persistence.
 | `/api/subscribe` | Turnstile + validation + body size gate + rate limit while wired |
 | `/api/contact` | same public route model as inquiry/subscribe |
 | `/api/csp-report` | body size gate + rate limit; never trust payload content |
-| `/api/verify-turnstile` | body size gate; no secrets in response |
 | `/api/health` | public health only; no credentials, config dumps, or env details |
+
+Turnstile verification is internal to the protected write routes. Do not add a
+public token preflight endpoint: Turnstile tokens are single-use, so a preflight
+would consume the token before the real submission.
 
 ### Owner ops access
 

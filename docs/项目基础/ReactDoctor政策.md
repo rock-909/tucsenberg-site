@@ -37,9 +37,8 @@ a regression in this baseline.
 - Turnstile effect callbacks are allowed only in
   `src/components/security/turnstile.tsx` for external-widget availability
   states: development bypass success and missing-site-key failure.
-- Profile fixture warnings are scoped to optional starter/profile source files
-  that are materialized through `scripts/starter-profile/**`, not active app
-  runtime code.
+- Every exact file override in `doctor.config.json` must point to a live path.
+  `tests/architecture/config-exact-paths-exist.test.ts` enforces this boundary.
 - Dependency warnings are resolved by removing unused direct dependencies unless
   a package is a real script/bin entry such as `@lhci/cli` for
   `pnpm website:lighthouse`.
@@ -52,7 +51,6 @@ a regression in this baseline.
 | `confirmed-real` | Real production risk or quality debt; fix it. |
 | `generated-or-tooling` | Generated output or tool-owned bundle; exclude narrowly. |
 | `project-exception` | Documented repo-specific exception with file/rule scope. |
-| `starter-profile-surface` | Optional starter/profile source retained for materialization. |
 | `removable` | No active entry or proof; remove the direct dependency/export. |
 
 ## Do not
