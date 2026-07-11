@@ -7,7 +7,8 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRequestQuoteFormCopy } from "@/test/request-quote-test-messages";
-import { parseInquiryResponse, RequestQuoteForm } from "../request-quote-form";
+import { RequestQuoteForm } from "../request-quote-form";
+import { parseInquiryResponse } from "../request-quote-response";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({

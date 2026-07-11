@@ -1,7 +1,7 @@
 import { getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
-const UPSTASH_FETCH_TIMEOUT_MS = 5_000;
+const UPSTASH_OPERATION_TIMEOUT_MS = 5_000;
 
 /**
  * Key-value pair interface representing rate limit data
@@ -35,6 +35,11 @@ export interface RateLimitStore {
 }
 
 type UpstashResultEnvelope = { result: unknown };
+
+interface UpstashFetchOperation {
+  response: Response;
+  clearTimeout: () => void;
+}
 
 function hasUpstashResultProperty(
   value: unknown,
@@ -102,25 +107,30 @@ class RedisRateLimitStore implements RateLimitStore {
   private async fetchUpstash(
     input: string,
     init: RequestInit,
-  ): Promise<Response> {
+  ): Promise<UpstashFetchOperation> {
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
-      UPSTASH_FETCH_TIMEOUT_MS,
+      UPSTASH_OPERATION_TIMEOUT_MS,
     );
 
     try {
-      return await fetch(input, {
+      const response = await fetch(input, {
         ...init,
         signal: controller.signal,
       });
-    } finally {
+      return {
+        response,
+        clearTimeout: () => clearTimeout(timeout),
+      };
+    } catch (error) {
       clearTimeout(timeout);
+      throw error;
     }
   }
 
   async increment(key: string, windowMs: number): Promise<RateLimitEntry> {
-    const response = await this.fetchUpstash(`${this.url}/multi-exec`, {
+    const operation = await this.fetchUpstash(`${this.url}/multi-exec`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -132,38 +142,43 @@ class RedisRateLimitStore implements RateLimitStore {
         ["PTTL", key],
       ]),
     });
+    const { response } = operation;
 
-    if (!response.ok) {
-      logger.error(
-        `[Rate Limit] Upstash pipeline failed: ${response.statusText}`,
-      );
-      throw new Error(
-        `Upstash rate limit operation failed: ${response.status}`,
-      );
+    try {
+      if (!response.ok) {
+        logger.error(
+          `[Rate Limit] Upstash pipeline failed: ${response.statusText}`,
+        );
+        throw new Error(
+          `Upstash rate limit operation failed: ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+      const results = getStrictUpstashPipelineResults(data);
+      if (results.length < 3) {
+        throw new Error(
+          "[Rate Limit] Invalid Upstash response: expected multi-exec results",
+        );
+      }
+      const [countResult, _expireResult, ttlResult] = results;
+      const count = parseStrictNumber(countResult, "count");
+      const ttlMs = Number(unwrapUpstashResult(ttlResult));
+
+      if (!Number.isFinite(ttlMs) || ttlMs < 0) {
+        logger.error("[Rate Limit] Upstash transaction returned invalid TTL");
+        throw new Error("Upstash rate limit operation returned invalid TTL");
+      }
+
+      const expiresAt = Date.now() + ttlMs;
+      return { count, expiresAt };
+    } finally {
+      operation.clearTimeout();
     }
-
-    const data = await response.json();
-    const results = getStrictUpstashPipelineResults(data);
-    if (results.length < 3) {
-      throw new Error(
-        "[Rate Limit] Invalid Upstash response: expected multi-exec results",
-      );
-    }
-    const [countResult, _expireResult, ttlResult] = results;
-    const count = parseStrictNumber(countResult, "count");
-    const ttlMs = Number(unwrapUpstashResult(ttlResult));
-
-    if (!Number.isFinite(ttlMs) || ttlMs < 0) {
-      logger.error("[Rate Limit] Upstash transaction returned invalid TTL");
-      throw new Error("Upstash rate limit operation returned invalid TTL");
-    }
-
-    const expiresAt = Date.now() + ttlMs;
-    return { count, expiresAt };
   }
 
   async get(key: string): Promise<RateLimitEntry | null> {
-    const response = await this.fetchUpstash(`${this.url}/pipeline`, {
+    const operation = await this.fetchUpstash(`${this.url}/pipeline`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -174,36 +189,41 @@ class RedisRateLimitStore implements RateLimitStore {
         ["PTTL", key],
       ]),
     });
+    const { response } = operation;
 
-    if (!response.ok) {
-      throw new Error(
-        `[Rate Limit] Upstash get failed: ${response.statusText}`,
-      );
-    }
+    try {
+      if (!response.ok) {
+        throw new Error(
+          `[Rate Limit] Upstash get failed: ${response.statusText}`,
+        );
+      }
 
-    const data = await response.json();
-    const results = getUpstashPipelineResults(data);
-    if (results.length < 2) {
-      return null;
+      const data = await response.json();
+      const results = getUpstashPipelineResults(data);
+      if (results.length < 2) {
+        return null;
+      }
+      const [countResult, ttlResult] = results;
+      const rawCount = unwrapUpstashResult(countResult);
+      if (rawCount === null || rawCount === undefined) {
+        return null;
+      }
+      const count = parseInt(String(rawCount), 10);
+      if (Number.isNaN(count)) {
+        throw new Error(
+          "[Rate Limit] Invalid Upstash response: expected numeric count",
+        );
+      }
+      const ttlMs = parseLenientTTL(ttlResult);
+      const expiresAt = Date.now() + ttlMs;
+      return { count, expiresAt };
+    } finally {
+      operation.clearTimeout();
     }
-    const [countResult, ttlResult] = results;
-    const rawCount = unwrapUpstashResult(countResult);
-    if (rawCount === null || rawCount === undefined) {
-      return null;
-    }
-    const count = parseInt(String(rawCount), 10);
-    if (Number.isNaN(count)) {
-      throw new Error(
-        "[Rate Limit] Invalid Upstash response: expected numeric count",
-      );
-    }
-    const ttlMs = parseLenientTTL(ttlResult);
-    const expiresAt = Date.now() + ttlMs;
-    return { count, expiresAt };
   }
 
   async delete(key: string): Promise<void> {
-    const response = await this.fetchUpstash(this.url, {
+    const operation = await this.fetchUpstash(this.url, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -211,11 +231,16 @@ class RedisRateLimitStore implements RateLimitStore {
       },
       body: JSON.stringify(["DEL", key]),
     });
+    const { response } = operation;
 
-    if (!response.ok) {
-      logger.error(
-        `[Rate Limit] Failed to delete rate limit key: ${response.statusText}`,
-      );
+    try {
+      if (!response.ok) {
+        logger.error(
+          `[Rate Limit] Failed to delete rate limit key: ${response.statusText}`,
+        );
+      }
+    } finally {
+      operation.clearTimeout();
     }
   }
 }
