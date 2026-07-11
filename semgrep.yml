@@ -529,7 +529,7 @@ rules:
       - pattern: $HEADERS.get("x-forwarded-for")
     message: '不要在业务代码直接信任原始代理头；Cloudflare/header-only 上下文请走 getClientIP()/getClientIPFromHeaders() 或 x-internal-client-ip'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       exclude:
         - "**/__tests__/**"

@@ -27,6 +27,7 @@ const ERROR_SEMGREP_RULE_IDS = [
   "object-injection-untrusted-key-write",
   "no-raw-request-json-in-api",
   "env-access-bypass-in-config",
+  "raw-proxy-header-read-outside-trusted-entry",
 ] as const;
 
 interface SemgrepRule {
