@@ -1,8 +1,13 @@
 import enCriticalMessages from "../../messages/en/critical.json";
 import enDeferredMessages from "../../messages/en/deferred.json";
+import baseEnCriticalMessages from "../../messages/base/en/critical.json";
 import b2bLeadDeferredMessages from "../../messages/profiles/b2b-lead/en/deferred.json";
 import catalogDeferredMessages from "../../messages/profiles/catalog/en/deferred.json";
 import { describe, expect, it } from "vitest";
+import {
+  API_ERROR_CODES,
+  FORM_NETWORK_ERROR,
+} from "@/constants/api-error-codes";
 
 type JsonObject = Record<string, unknown>;
 
@@ -155,5 +160,29 @@ describe("real i18n runtime message contract", () => {
     );
 
     expect(catalogRuntimeMessages).toHaveProperty("requestQuote");
+  });
+
+  it("keeps API error messages aligned with live error codes", () => {
+    const liveErrorCodes = Object.values(API_ERROR_CODES).sort();
+    const authoringErrorKeys = Object.keys(
+      baseEnCriticalMessages.apiErrors,
+    ).sort();
+
+    expect(authoringErrorKeys).toEqual(liveErrorCodes);
+    expect(Object.keys(enCriticalMessages.apiErrors).sort()).toEqual(
+      liveErrorCodes,
+    );
+  });
+
+  it("keeps the client-only network fallback on its dedicated form message", () => {
+    expect(baseEnCriticalMessages.apiErrors).not.toHaveProperty(
+      FORM_NETWORK_ERROR,
+    );
+    expect(
+      getMessageValue(
+        mergeMessages(enCriticalMessages, enDeferredMessages),
+        "contact.form.networkError",
+      ),
+    ).toEqual(expect.any(String));
   });
 });
