@@ -22,7 +22,13 @@ const CLOUDFLARE_SOURCE_CHECKS = [
   {
     file: "wrangler.jsonc",
     label: "Wrangler config keeps the static-generation Cloudflare baseline",
-    requiredSnippets: ['".open-next/worker.js"', '"ASSETS"'],
+    requiredSnippets: [
+      '".open-next/worker.js"',
+      '"ASSETS"',
+      // OpenNext Cloudflare hard minimum: removing these breaks the whole site.
+      '"nodejs_compat"',
+      '"global_fetch_strictly_public"',
+    ],
     forbiddenSnippets: [
       '"WORKER_SELF_REFERENCE"',
       '"NEXT_INC_CACHE_R2_BUCKET"',
