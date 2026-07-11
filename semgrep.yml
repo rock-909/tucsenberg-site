@@ -479,7 +479,7 @@ rules:
       await $REQ.json()
     message: 'API 路由中避免直接使用 request.json()，请走 safeParseJson'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/app/api/**/*.ts"

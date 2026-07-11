@@ -25,6 +25,7 @@ const ERROR_SEMGREP_RULE_IDS = [
   "nextjs-unsafe-server-action",
   "environment-variable-exposure",
   "object-injection-untrusted-key-write",
+  "no-raw-request-json-in-api",
 ] as const;
 
 interface SemgrepRule {
