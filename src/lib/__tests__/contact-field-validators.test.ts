@@ -98,6 +98,16 @@ describe("contact-field-validators", () => {
     expect(emailSchema.parse("USER@ALLOWED.COM")).toBe("user@allowed.com");
   });
 
+  it("rejects spreadsheet formula prefixes without breaking plus-addressing", () => {
+    const emailSchema = email(createEmailContext());
+
+    expect(emailSchema.parse("buyer+rfq@example.com")).toBe(
+      "buyer+rfq@example.com",
+    );
+    expect(emailSchema.safeParse("+cmd@example.com").success).toBe(false);
+    expect(emailSchema.safeParse("-cmd@example.com").success).toBe(false);
+  });
+
   it("trims company values, enforces inclusive length boundaries, and rejects invalid edge characters", () => {
     const schema = company(createContext("company"));
     const minCompany = "A".repeat(

@@ -240,7 +240,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
 
     expect(response.status).toBe(400);
     expect(body.success).toBe(false);
-    expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_SECURITY_FAILED);
+    expect(body.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
 
     expect(airtableCreateMock).not.toHaveBeenCalled();
     expect(getResendCalls()).toHaveLength(0);

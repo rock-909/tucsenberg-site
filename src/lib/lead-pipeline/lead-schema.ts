@@ -5,7 +5,11 @@
 
 import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
-import { sanitizePlainText } from "@/lib/security/validation";
+import {
+  sanitizeMultilineText,
+  sanitizePlainText,
+} from "@/lib/security/validation";
+import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
@@ -41,7 +45,25 @@ export const CONTACT_SUBJECTS = {
  * Uses Zod v4 .overwrite() to sanitize while preserving ZodString type for chaining
  */
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
+
+/**
+ * Multiline sanitized string field.
+ * Preserves buyer line breaks for free-text fields rendered as multiple lines
+ * downstream (email/Airtable). Single-line fields keep {@link sanitizedString}.
+ */
+const multilineSanitizedString = () =>
+  z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
+
+// Airtable's Email field stays a real email value; reject formula-capable
+// prefixes here instead of corrupting valid addresses with text escaping.
+const leadEmailSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .email()
+  .max(MAX_LEAD_EMAIL_LENGTH)
+  .refine((email) => !hasSpreadsheetFormulaPrefix(email));
 
 export const leadAttributionFields = {
   utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
@@ -81,7 +103,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: z.string().trim().min(1).email().max(MAX_LEAD_EMAIL_LENGTH),
+  email: leadEmailSchema,
   marketingConsent: z.boolean().optional().default(false),
   ...leadAttributionFields,
 };
@@ -128,7 +150,7 @@ export const contactLeadSchema = z.object({
       `Subject must be between ${CONTACT_FORM_VALIDATION_CONSTANTS.SUBJECT_MIN_LENGTH} and ${CONTACT_FORM_VALIDATION_CONSTANTS.SUBJECT_MAX_LENGTH} characters`,
     )
     .optional(),
-  message: sanitizedString()
+  message: multilineSanitizedString()
     .min(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MIN_LENGTH)
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MAX_LENGTH),
   turnstileToken: z.string().min(1),
@@ -150,7 +172,9 @@ export const productLeadSchema = z.object({
   productName: sanitizedString().min(1).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
   quantity: productQuantitySchema,
   company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
-  requirements: sanitizedString().max(MAX_LEAD_REQUIREMENTS_LENGTH).optional(),
+  requirements: multilineSanitizedString()
+    .max(MAX_LEAD_REQUIREMENTS_LENGTH)
+    .optional(),
   ...baseLeadFields,
 });
 
@@ -160,7 +184,7 @@ export const productLeadSchema = z.object({
  */
 export const newsletterLeadSchema = z.object({
   type: z.literal(LEAD_TYPES.NEWSLETTER),
-  email: z.string().email().max(MAX_LEAD_EMAIL_LENGTH),
+  email: leadEmailSchema,
 });
 
 /**

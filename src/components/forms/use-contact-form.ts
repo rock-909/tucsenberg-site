@@ -1,5 +1,8 @@
 import { useRef, useState, useTransition } from "react";
-import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import {
+  API_ERROR_CODES,
+  FORM_NETWORK_ERROR,
+} from "@/constants/api-error-codes";
 import { logger } from "@/lib/logger";
 import { pickAttributionFieldsFromFormData } from "@/lib/marketing/attribution-fields";
 import { trackGenerateLead } from "@/lib/marketing/lead-event";
@@ -111,7 +114,7 @@ export function useContactForm(): UseContactFormResult {
       startTransition(() => {
         setState({
           success: false,
-          errorCode: "FORM_NETWORK_ERROR",
+          errorCode: FORM_NETWORK_ERROR,
           timestamp: new Date().toISOString(),
         });
       });

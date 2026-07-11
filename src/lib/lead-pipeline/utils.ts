@@ -41,6 +41,19 @@ export function splitName(fullName: string): SplitNameResult {
 }
 
 /**
+ * Build an optional `subject` property from possibly-empty input.
+ *
+ * Returns `{ subject }` with a trimmed value when non-empty, otherwise an empty
+ * object so callers can spread it without emitting an `undefined` subject.
+ */
+export function createOptionalSubject(
+  subject: string | undefined,
+): { subject: string } | Record<string, never> {
+  const trimmedSubject = subject?.trim();
+  return trimmedSubject ? { subject: trimmedSubject } : {};
+}
+
+/**
  * Format quantity for display and storage
  * Handles both numeric and string quantities
  *

@@ -68,10 +68,7 @@ async function validateProductInquiryTurnstile(
     expectedAction: "product_inquiry",
   });
 
-  const error = mapLeadTurnstileResultToResponse(verificationResult, {
-    requiredCode: API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
-    failedCode: API_ERROR_CODES.INQUIRY_SECURITY_FAILED,
-  });
+  const error = mapLeadTurnstileResultToResponse(verificationResult);
   return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 

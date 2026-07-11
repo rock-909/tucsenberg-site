@@ -156,10 +156,10 @@ describe("lead API family protection contract", () => {
     );
 
     expect((await inquiry.json()).errorCode).toBe(
-      API_ERROR_CODES.INQUIRY_SECURITY_REQUIRED,
+      API_ERROR_CODES.TURNSTILE_REQUIRED,
     );
     expect((await subscribe.json()).errorCode).toBe(
-      API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED,
+      API_ERROR_CODES.TURNSTILE_REQUIRED,
     );
     expect(vi.mocked(processLead)).not.toHaveBeenCalled();
   });

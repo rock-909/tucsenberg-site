@@ -1,5 +1,6 @@
 import { siteFacts } from "@/config/site-facts";
 import { stripInlineMarkdown } from "@/lib/content/inline-markdown-text";
+import { interpolate } from "@/lib/interpolate";
 import type { FaqItem } from "@/types/content.types";
 
 export const LAYER1_FACTS: Record<string, string | number> = {
@@ -29,10 +30,7 @@ export function interpolateFaqAnswer(
   answer: string,
   facts: Record<string, string | number>,
 ): string {
-  return answer.replace(/\{(\w+)\}/g, (match, key: string) => {
-    const value = facts[key];
-    return value !== undefined ? String(value) : match;
-  });
+  return interpolate(answer, facts);
 }
 
 interface FaqSchemaQuestion {

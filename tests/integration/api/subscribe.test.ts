@@ -138,7 +138,7 @@ describe("api/subscribe", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.success).toBe(false);
-    expect(json.errorCode).toBe(API_ERROR_CODES.SUBSCRIBE_SECURITY_REQUIRED);
+    expect(json.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REQUIRED);
   });
 
   it("returns 400 when turnstile verification fails", async () => {
@@ -156,7 +156,7 @@ describe("api/subscribe", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.success).toBe(false);
-    expect(json.errorCode).toBe(API_ERROR_CODES.SUBSCRIBE_SECURITY_FAILED);
+    expect(json.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
   });
 
   it("returns 503 when turnstile verification is unavailable", async () => {
@@ -174,7 +174,7 @@ describe("api/subscribe", () => {
     expect(res.status).toBe(503);
     const json = await res.json();
     expect(json.success).toBe(false);
-    expect(json.errorCode).toBe(API_ERROR_CODES.SERVICE_UNAVAILABLE);
+    expect(json.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
   });
 
   it("returns success when the newsletter record is created", async () => {

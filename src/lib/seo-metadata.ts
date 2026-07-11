@@ -8,6 +8,7 @@ import {
 import { siteFacts } from "@/config/site-facts";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
+import { interpolate } from "@/lib/interpolate";
 import {
   generateCanonicalURL,
   generateLanguageAlternates,
@@ -60,10 +61,7 @@ const SEO_INTERPOLATION_MAP: Record<string, string | number> = {
 };
 
 function interpolateSeoString(text: string): string {
-  return text.replace(/\{(\w+)\}/g, (match, key: string) => {
-    const value = SEO_INTERPOLATION_MAP[key];
-    return value !== undefined ? String(value) : match;
-  });
+  return interpolate(text, SEO_INTERPOLATION_MAP);
 }
 
 function normalizePath(path: string): string {
