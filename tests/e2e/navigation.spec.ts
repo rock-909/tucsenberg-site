@@ -505,6 +505,68 @@ test.describe("Navigation System", () => {
       await page.waitForURL("**/");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
+
+    test("should show progress for pathname and query history but not hash-only history", async ({
+      page,
+    }) => {
+      const progress = page.getByTestId("navigation-progress-bar");
+
+      const nav = getNav(page);
+      await nav.getByRole("link", { name: "About" }).click();
+      await page.waitForURL(/\/about$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await Promise.all([
+        progress.waitFor({ state: "visible" }),
+        page.goBack({ waitUntil: "domcontentloaded" }),
+      ]);
+      await expect(page).toHaveURL(/\/$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await Promise.all([
+        progress.waitFor({ state: "visible" }),
+        page.goForward({ waitUntil: "domcontentloaded" }),
+      ]);
+      await expect(page).toHaveURL(/\/about$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto("/request-quote", { waitUntil: "domcontentloaded" });
+      await waitForStablePage(page);
+
+      const mobileMenuButton = getHeaderMobileMenuButton(page);
+      await mobileMenuButton.click();
+      const mobileNavSheet = page.getByRole("dialog", {
+        name: /mobile navigation/i,
+      });
+      await mobileNavSheet
+        .getByRole("link", { name: /contact sales|request a quote/i })
+        .click();
+      await page.waitForURL(/\/request-quote\?source=mobile_nav_cta$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await Promise.all([
+        progress.waitFor({ state: "visible" }),
+        page.goBack({ waitUntil: "domcontentloaded" }),
+      ]);
+      await expect(page).toHaveURL(/\/request-quote$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await Promise.all([
+        progress.waitFor({ state: "visible" }),
+        page.goForward({ waitUntil: "domcontentloaded" }),
+      ]);
+      await expect(page).toHaveURL(/\/request-quote\?source=mobile_nav_cta$/);
+      await expect(progress).toHaveCount(0, { timeout: 2_000 });
+
+      await page.evaluate(() => {
+        window.history.pushState({}, "", `${window.location.href}#details`);
+      });
+      await page.goBack();
+      await expect(progress).toHaveCount(0);
+      await page.waitForTimeout(500);
+      await expect(progress).toHaveCount(0);
+    });
   });
 
   test.describe("Accessibility Tests", () => {

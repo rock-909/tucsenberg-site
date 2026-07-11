@@ -5,6 +5,7 @@ import { trackGenerateLead } from "@/lib/marketing/lead-event";
 import { appendAttributionToFormData } from "@/lib/marketing/utm";
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
 import { createRequestQuotePayload } from "@/app/[locale]/request-quote/request-quote-payload";
+import { parseInquiryResponse } from "@/app/[locale]/request-quote/request-quote-response";
 import {
   RequestQuoteContactFields,
   RequestQuoteMessageField,
@@ -13,60 +14,6 @@ import {
   RequestQuoteSubmitControls,
   type RequestQuoteSubmitState,
 } from "@/app/[locale]/request-quote/request-quote-submit-controls";
-
-interface InquiryApiSuccessResponse {
-  success: true;
-  data: {
-    referenceId: string;
-  };
-}
-
-interface InquiryApiErrorResponse {
-  success: false;
-  errorCode?: string;
-  details?: string[];
-}
-
-type InquiryApiResponse = InquiryApiSuccessResponse | InquiryApiErrorResponse;
-
-type InquiryParseResult =
-  | { success: true; referenceId: string }
-  | { failed: true };
-
-/**
- * Parse a raw inquiry API body without throwing.
- *
- * A server fault often returns non-JSON (a gateway HTML 500). Parsing that with
- * `response.json()` throws and gets misread as a network error, telling the
- * buyer to retry a server-side problem. Reading the raw text and guarding the
- * `JSON.parse` lets a genuine server fault surface as a generic error while the
- * caller's outer `catch` stays reserved for real network failures.
- */
-export function parseInquiryResponse(
-  ok: boolean,
-  rawText: string,
-): InquiryParseResult {
-  let payload: unknown;
-  try {
-    payload = JSON.parse(rawText);
-  } catch {
-    return { failed: true };
-  }
-
-  if (
-    ok &&
-    typeof payload === "object" &&
-    payload !== null &&
-    (payload as InquiryApiResponse).success === true
-  ) {
-    const { data } = payload as InquiryApiSuccessResponse;
-    if (typeof data?.referenceId === "string") {
-      return { success: true, referenceId: data.referenceId };
-    }
-  }
-
-  return { failed: true };
-}
 
 // Cap for the `?config=` prefill coming from product estimators; the message
 // field itself allows more, but a URL-borne prefill should stay short.
