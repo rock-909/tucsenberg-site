@@ -53,14 +53,14 @@ export function ProductRunCalculator({
   return (
     <section className="surface-card p-6 md:p-8">
       <h2 className="mb-4 text-2xl font-semibold">{calculator.heading}</h2>
-      <p className="text-muted-foreground mb-6 max-w-2xl text-base leading-7">
+      <p className="mb-6 max-w-2xl text-base leading-7 text-muted-foreground">
         {calculator.intro}
       </p>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-2">
           <label
-            className="text-foreground block text-sm leading-none font-medium"
+            className="block text-sm leading-none font-medium text-foreground"
             htmlFor={inputId}
           >
             {calculator.inputLabel}
@@ -89,12 +89,12 @@ export function ProductRunCalculator({
 
       <p
         aria-live="polite"
-        className="text-foreground mt-4 min-h-7 font-mono text-lg font-semibold tabular-nums"
+        className="mt-4 min-h-7 font-mono text-lg font-semibold text-foreground tabular-nums"
       >
         {units > 0 ? `≈ ${units} ${calculator.resultUnitLabel}` : ""}
       </p>
 
-      <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-6">
+      <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
         {calculator.disclaimer}
       </p>
 

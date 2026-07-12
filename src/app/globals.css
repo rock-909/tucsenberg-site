@@ -18,7 +18,7 @@
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ==================== PRIMITIVE TOKENS ==================== */
 /* Design System: Showcase Website Starter-owned Radix-style roles.
@@ -899,11 +899,11 @@
   }
 
   .column-divider {
-    @apply divide-border/30 divide-x;
+    @apply divide-x divide-border/30;
   }
 
   .card-border {
-    @apply border-border border;
+    @apply border border-border;
     border-radius: var(--radius);
   }
 

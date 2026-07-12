@@ -235,7 +235,7 @@ function PaletteRow({
 }) {
   return (
     <div>
-      <p className="mb-2 text-[13px] font-semibold uppercase tracking-[0.04em] text-muted-foreground">
+      <p className="mb-2 text-[13px] font-semibold tracking-[0.04em] text-muted-foreground uppercase">
         {label}
       </p>
       <div className="flex gap-1">
@@ -272,10 +272,10 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
             </div>
             <PaletteRow label="Brand" prefix="brand" />
             <div className="rounded-lg border border-border p-5">
-              <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-primary">
+              <span className="text-[12px] font-semibold tracking-[0.04em] text-primary uppercase">
                 Showcase Website - Custom Project - Starter
               </span>
-              <h2 className="mt-2 text-xl font-extrabold leading-tight tracking-tight">
+              <h2 className="mt-2 text-xl leading-tight font-extrabold tracking-tight">
                 Clear presentation for a replaceable offer
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">

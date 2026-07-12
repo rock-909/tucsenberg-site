@@ -98,7 +98,7 @@ export const WithThemeToggleSlot: Story = {
   args: {
     themeToggleSlot: (
       <button
-        className="border-border rounded-md border px-3 py-1 text-sm"
+        className="rounded-md border border-border px-3 py-1 text-sm"
         type="button"
       >
         Theme control slot

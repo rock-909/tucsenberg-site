@@ -148,6 +148,12 @@ jobs:
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
+      - name: 阻断：production 严格内容就绪（launch 门禁）
+        if: ${{ inputs.environment == 'production' }}
+        run: |
+          set -euo pipefail
+          node scripts/starter-checks.js content-readiness --strict-client-launch
+
       - name: 运行环境对应的证明链
         id: proof
         run: |

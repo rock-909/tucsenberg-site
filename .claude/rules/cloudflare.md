@@ -77,6 +77,12 @@ Current decision record:
 `docs/项目基础/技术栈.md` (`official-doc-only check`).
 No runtime migration test was run for that decision.
 
+For reference only (the migration itself stays shelved): next-intl 4.x official
+docs already use `proxy.ts` with the same API surface, and Next.js ships a
+codemod `npx @next/codemod@canary middleware-to-proxy .` for the rename. The
+natural trigger to revisit this proof lane is the next `@opennextjs/cloudflare`
+upgrade — evaluate the migration then, not as ad-hoc cleanup.
+
 The matcher must remain static string literals.
 
 If a future branch revisits the migration, it must be a dedicated proof lane
@@ -109,12 +115,24 @@ middleware-provided trusted IP headers.
   `updateTag()` to production code without a new Cloudflare proof plan.
 - Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
   cache storage as a starter default.
+- `unstable_cache` on the Cloudflare/OpenNext runtime behaves as no-cache: the
+  runtime's dummy cache throws an `IgnorableError`, so nothing is stored. Any
+  new `unstable_cache` use must either carry an explicit bypass rationale or
+  come with Cloudflare proof that it actually caches. Prefer `"use cache"`.
 - New `"use cache"` boundaries must stay narrow and explain why rebuild/redeploy
   is not enough.
 - Content updates flow through rebuild/redeploy unless a future CMS integration
   proves a different path.
-- `wrangler.jsonc` must not add `r2_buckets`, `d1_databases`, or
-  `durable_objects` for this starter by default.
+- On incremental cache choice: OpenNext's official SSG recommendation is
+  `staticAssetsIncrementalCache` (served from Workers Static Assets, zero extra
+  cost on the free tier). This site deliberately uses the `dummy` incremental
+  cache instead, accepting rebuild-to-update as the content-refresh path so that
+  no KV/R2/D1 binding is required. Revisit only if content must update without a
+  redeploy. Also note: OpenNext's `enableCacheInterception` is incompatible with
+  PPR, so do not enable it while Cache Components / PPR is in use.
+- `wrangler.jsonc` must not add `kv_namespaces`, `r2_buckets`, `d1_databases`,
+  or `durable_objects` for this starter by default. Older OpenNext setups wired
+  KV as the incremental cache store; this repo intentionally omits it.
 - `open-next.config.ts` must not add custom incremental cache, tag cache, or
   queue overrides by default.
 

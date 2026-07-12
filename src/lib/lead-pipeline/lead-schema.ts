@@ -58,10 +58,9 @@ const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
 // Airtable's Email field stays a real email value; reject formula-capable
 // prefixes here instead of corrupting valid addresses with text escaping.
 const leadEmailSchema = z
-  .string()
+  .email()
   .trim()
   .min(1)
-  .email()
   .max(MAX_LEAD_EMAIL_LENGTH)
   .refine((email) => !hasSpreadsheetFormulaPrefix(email));
 
@@ -128,7 +127,7 @@ const productQuantitySchema: z.ZodType<string | number> = z
     return typeof value === "string" ? value.trim() : value;
   })
   .refine(isValidProductQuantity, {
-    message: "Quantity must be positive when using a numeric string",
+    error: "Quantity must be positive when using a numeric string",
   });
 
 /**

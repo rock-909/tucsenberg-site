@@ -150,7 +150,7 @@ export function LazyTurnstile({
       className={`turnstile-fallback ${className ?? "w-full"}`}
       aria-live="polite"
     >
-      <div className="text-destructive text-sm">{labelText.unavailable}</div>
+      <div className="text-sm text-destructive">{labelText.unavailable}</div>
       <TurnstileRescueLine />
     </output>
   );

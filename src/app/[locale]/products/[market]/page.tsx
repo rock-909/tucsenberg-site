@@ -59,8 +59,8 @@ function ProductContentTable({
 }) {
   return (
     <div className="relative">
-      <div className="border-border [scrollbar-width:thin] overflow-x-auto rounded-2xl border">
-        <table className="divide-border min-w-full divide-y text-left text-sm">
+      <div className="[scrollbar-width:thin] overflow-x-auto rounded-2xl border border-border">
+        <table className="min-w-full divide-y divide-border text-left text-sm">
           <thead className="bg-muted/60 text-foreground">
             <tr>
               {table.columns.map((column) => (
@@ -70,13 +70,13 @@ function ProductContentTable({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-border divide-y">
+          <tbody className="divide-y divide-border">
             {table.rows.map((row) => (
               <tr key={row.join("|")}>
                 {row.map((cell, index) => (
                   <td
                     key={`${cell}-${index}`}
-                    className="text-muted-foreground px-4 py-3 align-top tabular-nums"
+                    className="px-4 py-3 align-top text-muted-foreground tabular-nums"
                   >
                     {cell}
                   </td>
@@ -91,8 +91,8 @@ function ProductContentTable({
         aria-hidden
         className={
           fade === "card"
-            ? "from-card pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l to-transparent md:hidden"
-            : "from-background pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l to-transparent md:hidden"
+            ? "pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l from-card to-transparent md:hidden"
+            : "pointer-events-none absolute inset-y-px right-px w-8 rounded-r-2xl bg-gradient-to-l from-background to-transparent md:hidden"
         }
       />
     </div>
@@ -109,18 +109,18 @@ function ProductSectionBody({
       {section.paragraphs?.map((paragraph) => (
         <p
           key={paragraph}
-          className="text-muted-foreground mb-4 text-base leading-7 last:mb-0"
+          className="mb-4 text-base leading-7 text-muted-foreground last:mb-0"
         >
           <InlineMarkdown text={paragraph} />
         </p>
       ))}
       {section.bullets ? (
-        <ul className="text-muted-foreground space-y-3 text-base leading-7">
+        <ul className="space-y-3 text-base leading-7 text-muted-foreground">
           {section.bullets.map((bullet) => (
             <li key={bullet} className="flex gap-3">
               <span
                 aria-hidden
-                className="bg-primary mt-2.5 size-1.5 shrink-0 rounded-full"
+                className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary"
               />
               <span>
                 <InlineMarkdown text={bullet} />
@@ -130,7 +130,7 @@ function ProductSectionBody({
         </ul>
       ) : null}
       {section.footer ? (
-        <p className="text-muted-foreground mt-5 text-sm leading-6">
+        <p className="mt-5 text-sm leading-6 text-muted-foreground">
           <InlineMarkdown text={section.footer} />
         </p>
       ) : null}
@@ -157,7 +157,7 @@ function ProductContentSection({
         <h2 className="text-section mb-5">{section.title}</h2>
         <ProductContentTable table={table} fade="background" />
         {section.footer ? (
-          <p className="text-muted-foreground mt-4 text-sm leading-6">
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
             <InlineMarkdown text={section.footer} />
           </p>
         ) : null}
@@ -172,14 +172,14 @@ function ProductContentSection({
         {section.paragraphs?.map((paragraph) => (
           <p
             key={paragraph}
-            className="text-muted-foreground mb-5 max-w-[75ch] text-base leading-7"
+            className="mb-5 max-w-[75ch] text-base leading-7 text-muted-foreground"
           >
             <InlineMarkdown text={paragraph} />
           </p>
         ))}
         <ProductContentTable table={table} fade="card" />
         {section.footer ? (
-          <p className="text-muted-foreground mt-4 text-sm leading-6">
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
             <InlineMarkdown text={section.footer} />
           </p>
         ) : null}
@@ -200,7 +200,7 @@ function ProductContentSection({
 /** Scannable verifiable facts under the hero — never invented numbers. */
 function ProductProofStrip({ items }: { items: readonly string[] }) {
   return (
-    <ul className="border-border text-muted-foreground mb-12 flex flex-wrap items-center gap-x-8 gap-y-2 border-y py-3 font-mono text-[11.5px] md:mb-16">
+    <ul className="mb-12 flex flex-wrap items-center gap-x-8 gap-y-2 border-y border-border py-3 font-mono text-[11.5px] text-muted-foreground md:mb-16">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}
@@ -223,7 +223,7 @@ function ProductSceneWall({
     <section>
       <h2 className="text-section mb-3">{scenes.title}</h2>
       {scenes.intro ? (
-        <p className="text-muted-foreground mb-6 max-w-[75ch] text-sm leading-6">
+        <p className="mb-6 max-w-[75ch] text-sm leading-6 text-muted-foreground">
           {scenes.intro}
         </p>
       ) : null}
@@ -231,9 +231,9 @@ function ProductSceneWall({
         {scenes.items.map((scene) => (
           <li
             key={scene.title}
-            className="border-border overflow-hidden rounded-xl border"
+            className="overflow-hidden rounded-xl border border-border"
           >
-            <div className="bg-muted/40 relative aspect-[4/3]">
+            <div className="relative aspect-[4/3] bg-muted/40">
               {scene.image ? (
                 <Image
                   src={scene.image.src}
@@ -245,7 +245,7 @@ function ProductSceneWall({
               ) : (
                 <div
                   aria-hidden
-                  className="text-muted-foreground/50 flex h-full items-center justify-center"
+                  className="flex h-full items-center justify-center text-muted-foreground/50"
                 >
                   {glyphKind ? (
                     <ProductLineGlyph kind={glyphKind} className="size-14" />
@@ -255,7 +255,7 @@ function ProductSceneWall({
             </div>
             <div className="p-4">
               <h3 className="text-sm font-semibold">{scene.title}</h3>
-              <p className="text-muted-foreground mt-1 text-sm leading-6">
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 {scene.note}
               </p>
             </div>
@@ -265,7 +265,7 @@ function ProductSceneWall({
       {scenes.boundary ? (
         <p
           data-testid="scene-wall-boundary"
-          className="border-border text-foreground bg-muted/40 mt-6 max-w-3xl rounded-lg border p-4 text-sm leading-6"
+          className="mt-6 max-w-3xl rounded-lg border border-border bg-muted/40 p-4 text-sm leading-6 text-foreground"
         >
           <InlineMarkdown text={scenes.boundary} />
         </p>
@@ -278,11 +278,11 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
   return (
     <section className="md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
       <h2 className="text-section mb-4 md:mb-0">FAQ</h2>
-      <div className="divide-border max-w-[75ch] min-w-0 divide-y">
+      <div className="max-w-[75ch] min-w-0 divide-y divide-border">
         {page.faqs.map((faq) => (
           <article key={faq.question} className="py-5 first:pt-0 last:pb-0">
             <h3 className="text-lg font-semibold">{faq.question}</h3>
-            <p className="text-muted-foreground mt-2 text-sm leading-6">
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               <InlineMarkdown text={faq.answer} />
             </p>
           </article>
@@ -294,9 +294,9 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
 
 function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
   return (
-    <section className="bg-accent rounded-2xl px-6 py-10 md:px-10 md:py-12">
+    <section className="rounded-2xl bg-accent px-6 py-10 md:px-10 md:py-12">
       <h2 className="text-section">Request a quote</h2>
-      <p className="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
+      <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
         {page.rfqNote ??
           "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer."}
       </p>
@@ -309,7 +309,7 @@ function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
         </Button>
       </div>
       {page.cta.note ? (
-        <p className="text-muted-foreground mt-3 text-sm leading-6">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {page.cta.note}
         </p>
       ) : null}
@@ -385,18 +385,18 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       <header className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
         <div className="min-w-0">
-          <span className="bg-muted text-muted-foreground mb-2 inline-block rounded px-2 py-0.5 font-mono text-xs">
+          <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
             {productPage.eyebrow}
           </span>
           <h1 className="text-heading mb-4">{productPage.title}</h1>
-          <p className="text-body text-foreground max-w-3xl font-medium">
+          <p className="text-body max-w-3xl font-medium text-foreground">
             {productPage.subtitle}
           </p>
-          <p className="text-muted-foreground mt-4 max-w-3xl text-base leading-7">
+          <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">
             {productPage.lead}
           </p>
           {productPage.leadNote ? (
-            <p className="border-border text-foreground bg-muted/40 mt-4 max-w-3xl rounded-lg border p-4 text-sm leading-6">
+            <p className="mt-4 max-w-3xl rounded-lg border border-border bg-muted/40 p-4 text-sm leading-6 text-foreground">
               <InlineMarkdown text={productPage.leadNote} />
             </p>
           ) : null}
@@ -405,7 +405,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
               <Link href={productPage.cta.href}>{productPage.cta.label}</Link>
             </Button>
             {productPage.cta.note ? (
-              <p className="text-muted-foreground mt-2 text-sm leading-6">
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {productPage.cta.note}
               </p>
             ) : null}
