@@ -1,6 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "./tsconfig.typecheck-source.tsbuildinfo"
-  }
-}
