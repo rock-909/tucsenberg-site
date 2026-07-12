@@ -165,7 +165,7 @@ function HomeProblemSection({
               </p>
               <span
                 aria-hidden
-                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--primary-text)]"
               >
                 {item.linkLabel}
                 <span className="transition-transform group-hover:translate-x-0.5">
