@@ -250,12 +250,10 @@ export function buildFormFieldsFromConfig(
   return fields
     .sort((a, b) => a.order - b.order)
     .map((field) => ({
-      // nosemgrep: object-injection-sink-spread-operator
       // Safe spread: field is a strongly typed ContactFormFieldConfig from
       // static form configuration, not user-provided input.
       ...field,
       labelKey: field.i18nKey,
-      // nosemgrep: object-injection-sink-dynamic-property
       // Safe lookup: PLACEHOLDER_KEYS is keyed by ContactFormFieldKey union type,
       // and field.key is a trusted enum-like key from config, not user input.
       placeholderKey: PLACEHOLDER_KEYS[field.key],

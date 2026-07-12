@@ -17,7 +17,6 @@ import {
   isRuntimeProductionBuildPhase,
 } from "@/lib/env";
 import { mergeObjects } from "@/lib/merge-objects";
-import { MONITORING_INTERVALS } from "@/constants/performance-constants";
 import { type Locale } from "@/i18n/routing-config";
 import { coerceLocale } from "@/i18n/locale-utils";
 import { type MessageType } from "@/lib/i18n/message-pack-config";
@@ -33,7 +32,15 @@ const isCiEnv = isRuntimeCi() || isRuntimePlaywright();
 const isProductionBuild = () => isRuntimeProductionBuildPhase();
 const isDev = () => isRuntimeDevelopment();
 const isCloudflareRuntime = () => isRuntimeCloudflare();
-const revalidate = () => (isDev() ? 1 : MONITORING_INTERVALS.CACHE_CLEANUP);
+/**
+ * next/cache `unstable_cache` expects `revalidate` in SECONDS. 30 minutes = 1800s.
+ * Do not borrow a millisecond interval here: the retired bug used
+ * `MONITORING_INTERVALS.CACHE_CLEANUP` (30 minutes in MILLISECONDS = 1,800,000),
+ * which as seconds is ~20.8 days.
+ */
+export const I18N_MESSAGE_REVALIDATE_SECONDS = 30 * 60;
+
+const revalidate = () => (isDev() ? 1 : I18N_MESSAGE_REVALIDATE_SECONDS);
 
 function interpolateSiteMessageString(
   value: string,

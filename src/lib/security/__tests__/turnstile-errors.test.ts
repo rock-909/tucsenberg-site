@@ -5,7 +5,7 @@ import {
 } from "@/lib/security/turnstile-errors";
 
 describe("turnstile service-failure classification", () => {
-  it.each(["not-configured", "network-error", "timeout"])(
+  it.each(["not-configured", "network-error", "timeout", "internal-error"])(
     "treats %s as a Turnstile service failure",
     (code) => {
       expect(isTurnstileServiceFailureCode(code)).toBe(true);

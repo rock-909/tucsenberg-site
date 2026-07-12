@@ -12,6 +12,14 @@ const BANNED_NEXT_CACHE_IMPORTS = new Set<string>([
   "unstable_cache",
   "cacheLife",
   "cacheTag",
+  // Next 16 on-demand invalidation family, all exported from next/cache
+  // (see node_modules/next/dist/docs/01-app/03-api-reference/04-functions/).
+  // Runtime tag/path invalidation is banned on this Cloudflare/OpenNext
+  // deployment; content flows through rebuild/redeploy.
+  "revalidateTag",
+  "revalidatePath",
+  "updateTag",
+  "refresh",
 ]);
 
 const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
