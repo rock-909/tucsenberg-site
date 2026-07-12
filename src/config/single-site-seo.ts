@@ -1,9 +1,9 @@
 import {
+  PUBLIC_STATIC_PAGE_TYPES,
   type PublicStaticPageChangeFrequency,
-  getActiveStaticPageLastmodByPath,
-  getActiveStaticPageTypes,
-  getActiveStaticSitemapPageConfigByPath,
-  getActiveStaticSitemapPages,
+  getStaticPageLastmodByPath,
+  getStaticSitemapPageConfigByPath,
+  getStaticSitemapPages,
 } from "@/config/pages.config";
 import type { DynamicPageType, PageType } from "@/config/paths/types";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
@@ -42,11 +42,11 @@ function buildSingleSiteProductMarketLastmod(): Record<string, string> {
  */
 
 export function getSingleSitePublicStaticPageRoutes() {
-  return getActiveStaticPageTypes();
+  return [...PUBLIC_STATIC_PAGE_TYPES];
 }
 
 export function getSingleSitePublicStaticPages(): string[] {
-  return getActiveStaticSitemapPages();
+  return getStaticSitemapPages();
 }
 
 export function hasSingleSiteDynamicSurface(
@@ -70,7 +70,7 @@ export function shouldIndexPublicPage(
 ): boolean {
   const normalizedPath = normalizePublicPagePath(path);
   const productsPath = getCanonicalPath("products");
-  const activeTypes = new Set(getActiveStaticPageTypes());
+  const activeTypes = new Set(PUBLIC_STATIC_PAGE_TYPES);
 
   if (pageType === "products") {
     if (normalizedPath === productsPath) {
@@ -91,7 +91,7 @@ export function getSingleSiteSitemapPageConfigByPath(): Readonly<
   Record<string, SingleSiteSitemapPageConfig>
 > {
   return {
-    ...getActiveStaticSitemapPageConfigByPath(),
+    ...getStaticSitemapPageConfigByPath(),
     ...(hasSingleSiteDynamicSurface("productMarket")
       ? { productMarket: SINGLE_SITE_PRODUCT_MARKET_CONFIG }
       : {}),
@@ -100,7 +100,7 @@ export function getSingleSiteSitemapPageConfigByPath(): Readonly<
 
 export function getSingleSiteStaticPageLastmod(): Record<string, string> {
   return {
-    ...getActiveStaticPageLastmodByPath(),
+    ...getStaticPageLastmodByPath(),
     ...(hasSingleSiteDynamicSurface("productMarket")
       ? buildSingleSiteProductMarketLastmod()
       : {}),

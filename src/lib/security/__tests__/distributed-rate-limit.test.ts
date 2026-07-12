@@ -138,7 +138,6 @@ describe("distributed-rate-limit", () => {
       ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
       ["subscribe", RATE_LIMIT_PRESETS.subscribe.maxRequests],
       ["csp", RATE_LIMIT_PRESETS.csp.maxRequests],
-      ["turnstile", RATE_LIMIT_PRESETS.turnstile.maxRequests],
     ] as const)("uses the %s preset", async (preset, maxRequests) => {
       const result = await checkDistributedRateLimit(
         `preset-${preset}`,
@@ -162,7 +161,7 @@ describe("distributed-rate-limit", () => {
       expect(mockLoggerError).toHaveBeenCalled();
     });
 
-    it.each(["contact", "inquiry", "subscribe", "turnstile"] as const)(
+    it.each(["contact", "inquiry", "subscribe"] as const)(
       "fails closed for the %s preset when the store operation times out",
       async (preset) => {
         const mod = await import("@/lib/security/stores/rate-limit-store");

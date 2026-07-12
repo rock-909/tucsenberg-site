@@ -67,7 +67,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
   sections: [
     {
       title: "The system, part by part",
-      kind: "bullets",
       bullets: [
         "Planks. Extruded aluminum profiles, 180 mm per plank, stacked to your protection height. Alloy and temper are the numbers to ask any supplier for — ours: 6063-T6, wall thickness ≥2.0 mm. A supplier who won't name alloy and wall thickness is telling you something.",
         "Seals. EPDM rubber on every horizontal joint and at the base — compression sealing, the same principle the category has used for decades. Replacement seals sold separately, forever.",
@@ -77,7 +76,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
     {
       title: "Configurations",
-      kind: "bullets",
       bullets: [
         "Single opening — doorways, garage doors: two channels + planks. The bread-and-butter configuration.",
         "Wide spans — beyond roughly 3 m, intermediate ground-socket posts split the span. We quote post count from your opening width and protection height — water load grows with the square of depth, so the same span doesn't hold at every height.",
@@ -87,7 +85,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
     {
       title: "Specifications",
-      kind: "table",
       table: {
         columns: ["Parameter", "Value"],
         rows: [
@@ -114,7 +111,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
     {
       title: "What determines your price",
-      kind: "bullets",
       bullets: [
         "Total plank metres — width × stacked height across all openings; the single biggest driver.",
         "Post count and type — ground sockets cost more than wall channels; wide spans add posts.",
@@ -126,7 +122,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
     {
       title: "For dealers and installers",
-      kind: "bullets",
       bullets: [
         "Your measurements, our cutting. You survey the opening; we cut, label and pack per opening. Your installer unpacks kit #3 for door #3.",
         "Spare-parts continuity — seals, clamps, single planks stay orderable for years. Your installed base stays serviceable through you.",

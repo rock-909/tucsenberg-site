@@ -78,16 +78,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       routeOwner: "src/app/[locale]/page.tsx",
     },
     {
-      pageType: "about",
-      localizedPaths: localizedPath("/about"),
-      navigationKey: "navigation.about",
-      seoKey: "content.pages.about",
-      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
-      mdxCollection: { collection: "pages", slug: "about" },
-      routeOwner: "src/app/[locale]/about/page.tsx",
-    },
-    {
       pageType: "products",
       localizedPaths: localizedPath("/products"),
       navigationKey: "navigation.products",
@@ -134,6 +124,16 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       },
       routeOwner:
         "src/app/[locale]/guides/flood-barrier-specifications/page.tsx",
+    },
+    {
+      pageType: "about",
+      localizedPaths: localizedPath("/about"),
+      navigationKey: "navigation.about",
+      seoKey: "content.pages.about",
+      sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
+      lastmod: { source: "mdx" },
+      mdxCollection: { collection: "pages", slug: "about" },
+      routeOwner: "src/app/[locale]/about/page.tsx",
     },
     {
       pageType: "requestQuote",
@@ -191,20 +191,6 @@ export const PUBLIC_STATIC_PAGE_TYPES = PUBLIC_STATIC_PAGE_DEFINITIONS.map(
   (definition) => definition.pageType,
 ) as readonly PageType[];
 
-const CATALOG_STATIC_PAGE_TYPES = [
-  "home",
-  "products",
-  "oemWholesale",
-  "materialsGuide",
-  "specificationsGuide",
-  "about",
-  "requestQuote",
-  "contact",
-  "warranty",
-  "privacy",
-  "terms",
-] as const satisfies readonly PageType[];
-
 export function getStaticPageDefinitionsByType(): Readonly<
   Partial<Record<PageType, PublicStaticPageDefinition>>
 > {
@@ -222,89 +208,6 @@ export function getPublicStaticPageDefinition(
   pageType: PageType,
 ): PublicStaticPageDefinition | undefined {
   return getStaticPageDefinitionsByType()[pageType];
-}
-
-export function getActiveStaticPageDefinitions(): PublicStaticPageDefinition[] {
-  const definitionsByType = getStaticPageDefinitionsByType();
-  return CATALOG_STATIC_PAGE_TYPES.map((pageType) => {
-    const definition = definitionsByType[pageType];
-    if (definition === undefined) {
-      throw new Error(`Missing catalog static page definition: ${pageType}`);
-    }
-    return definition;
-  });
-}
-
-export function getActiveStaticPageTypes(): PageType[] {
-  return getActiveStaticPageDefinitions().map(
-    (definition) => definition.pageType,
-  );
-}
-
-export function getActiveStaticSitemapPages(): string[] {
-  return getActiveStaticPageDefinitions().flatMap((definition) =>
-    definition.sitemap.include
-      ? [toSitemapStaticPath(definition.localizedPaths.en)]
-      : [],
-  );
-}
-
-export function getActiveStaticSitemapPageConfigByPath(): Record<
-  string,
-  {
-    changeFrequency: PublicStaticPageChangeFrequency;
-    priority: number;
-  }
-> {
-  return Object.fromEntries(
-    getActiveStaticPageDefinitions().flatMap((definition) =>
-      definition.sitemap.include
-        ? [
-            [
-              toSitemapStaticPath(definition.localizedPaths.en),
-              {
-                changeFrequency: definition.sitemap.changeFrequency,
-                priority: definition.sitemap.priority,
-              },
-            ] as const,
-          ]
-        : [],
-    ),
-  );
-}
-
-export function getActiveStaticPageLastmodByPath(): Record<string, string> {
-  const entries = getActiveStaticPageDefinitions().flatMap((definition) => {
-    if (definition.lastmod.source !== "static") {
-      return [];
-    }
-
-    return [
-      [
-        toSitemapStaticPath(definition.localizedPaths.en),
-        definition.lastmod.iso,
-      ] as const,
-    ];
-  });
-
-  return Object.fromEntries(entries);
-}
-
-export function getActiveMdxPageSlugByStaticPath(): Record<string, string> {
-  const entries = getActiveStaticPageDefinitions().flatMap((definition) => {
-    if (definition.mdxCollection === null) {
-      return [];
-    }
-
-    return [
-      [
-        toSitemapStaticPath(definition.localizedPaths.en),
-        definition.mdxCollection.slug,
-      ] as const,
-    ];
-  });
-
-  return Object.fromEntries(entries);
 }
 
 export function getStaticSitemapPages(): string[] {

@@ -6,7 +6,6 @@
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing-config";
-import { getRuntimeEnvString } from "@/lib/env";
 import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { MobileNavigationIsland } from "@/components/layout/header-client";
@@ -50,7 +49,6 @@ function getHeaderState(
     isSticky: variant === "transparent" ? false : sticky,
     isMinimal: variant === "minimal",
     isTransparent: variant === "transparent",
-    isModernNav: getRuntimeEnvString("NEXT_PUBLIC_NAV_VARIANT") !== "legacy",
     showTestIds: !locale,
   };
 }
@@ -65,8 +63,11 @@ export function Header({
   closeMenuLabel = "Close navigation menu",
   mainNavItems = EMPTY_MAIN_NAV_ITEMS,
 }: HeaderProps) {
-  const { isSticky, isMinimal, isTransparent, isModernNav, showTestIds } =
-    getHeaderState(variant, sticky, locale);
+  const { isSticky, isMinimal, isTransparent, showTestIds } = getHeaderState(
+    variant,
+    sticky,
+    locale,
+  );
 
   return (
     <header
@@ -74,9 +75,7 @@ export function Header({
         "w-full bg-background/80 backdrop-blur-md",
         isSticky && "sticky top-0 z-50 pt-[env(safe-area-inset-top,0px)]",
         isTransparent && "border-transparent bg-transparent backdrop-blur-none",
-        isModernNav
-          ? "border-b border-border/10 transition-[background-color,border-color] duration-200"
-          : !isTransparent && "border-b border-border/10",
+        "border-b border-border/10 transition-[background-color,border-color] duration-200",
         className,
       )}
     >

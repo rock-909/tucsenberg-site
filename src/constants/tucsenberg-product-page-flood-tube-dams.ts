@@ -67,7 +67,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
   sections: [
     {
       title: "How it works",
-      kind: "bullets",
       bullets: [
         "Roll out the tube along your line — over grass, soil or broken ground.",
         "Inflate with the supplied AC pump: ~450 seconds to 6 PSI per 10 m section. (Water-fill deployment is also supported where compressors aren't practical.)",
@@ -79,7 +78,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     },
     {
       title: "Specifications",
-      kind: "table",
       table: {
         columns: ["", "TB-TD500", "TB-TD1000"],
         rows: [
@@ -103,7 +101,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     },
     {
       title: "Where tube dams win",
-      kind: "bullets",
       bullets: [
         "Unpaved and uneven ground — the reason this product exists: grass, mud, gravel where boxwall and gates can't seal.",
         "Long perimeters, fast — hundreds of metres deploy from a pallet and a pump; no fixing, no surveys.",
@@ -115,7 +112,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     },
     {
       title: "For trade buyers",
-      kind: "bullets",
       bullets: [
         "MOQ from 10 metres — a single section qualifies the product.",
         "OEM: printed sleeve marking, custom section lengths, your carton and manual.",

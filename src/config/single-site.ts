@@ -1,13 +1,13 @@
 import { env, isRuntimeProduction, runtimeEnv } from "@/lib/env";
-import { defineSiteDefinition } from "@/config/site-definition-builder";
 import type { PageType } from "@/config/paths/types";
-import { getActiveStaticPageTypes } from "@/config/pages.config";
+import { PUBLIC_STATIC_PAGE_TYPES } from "@/config/pages.config";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import type {
   ProductCatalog,
   SiteConfig,
+  SiteDefinition,
   SiteFacts,
   SiteFooterColumnConfig,
 } from "@/config/site-types";
@@ -138,7 +138,7 @@ function filterActiveFooterPages<T extends FooterLinkPageType>(
 }
 
 export function getSingleSiteFooterColumns(): SiteFooterColumnConfig[] {
-  const activePageTypes = getActiveStaticPageTypes();
+  const activePageTypes = PUBLIC_STATIC_PAGE_TYPES;
   const navigationLinks = filterActiveFooterPages(
     FOOTER_NAVIGATION_PAGE_TYPES,
     activePageTypes,
@@ -178,8 +178,8 @@ const siteFactSnapshotYear = 2026;
 /**
  * Single-site canonical source for the current cutover phase.
  */
-export const SINGLE_SITE_KEY = "showcase" as const;
-export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
+export const SINGLE_SITE_KEY = "tucsenberg" as const;
+export const SINGLE_SITE_DEFINITION = {
   key: SINGLE_SITE_KEY,
   config: {
     baseUrl,
@@ -255,7 +255,7 @@ export const SINGLE_SITE_DEFINITION = defineSiteDefinition({
     main: SINGLE_SITE_NAVIGATION,
   },
   footerColumns: getSingleSiteFooterColumns(),
-});
+} as const satisfies SiteDefinition;
 
 export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
 export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;

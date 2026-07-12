@@ -65,7 +65,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
   sections: [
     {
       title: "How they work",
-      kind: "bullets",
       bullets: [
         "Store flat. Vacuum-packed 5 to a bag, 50 to a carton (TB-FB400). A carton is 50 × 36 × 42 cm and under 15 kg — one shelf holds what a sand pile can't.",
         "Activate with water. Submerge or hose down; the SAP core absorbs to 20 kg (±5%) in 3–4 minutes. Warmer water activates faster.",
@@ -74,7 +73,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "Honest limits — read before you order",
-      kind: "paragraphs",
       paragraphs: [
         "Fresh water only. SAP cores do not activate properly in salt or brackish water. For coastal storm surge, use hard barriers — [ABS boxwall](/products/abs-flood-barriers) or [aluminum flood gates](/products/aluminum-flood-gates) — and keep bags for rain and freshwater flooding inland.",
         "Absorbent bags are for low-level water: door gaps, garage thresholds, low points, leak response and last-minute rain prep. For knee-high water or structural protection they're the wrong tool, and in fast-moving water a swollen bag is close to neutral buoyancy — current can shift what a sandbag would hold. We'd rather tell you that here than after you've ordered.",
@@ -82,7 +80,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "Specifications",
-      kind: "table",
       table: {
         columns: ["", "TB-FB400 (no handle)", "TB-FB436 (with handle)"],
         rows: [
@@ -105,7 +102,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "How many bags does a job take?",
-      kind: "table",
       paragraphs: [
         "Based on TB-FB400 (600 mm laid along the run, two layers, ~15% overlap):",
       ],
@@ -123,7 +119,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "After the flood",
-      kind: "bullets",
       paragraphs: [
         "The question nobody's product page answers: what happens to the bags once the water recedes. Here's the honest version:",
       ],
@@ -137,7 +132,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "Built for resale",
-      kind: "bullets",
       bullets: [
         "Carton quantities from MOQ 300 bags — pallet (~1,600) and container tiers above.",
         "Consumable demand. Bags are single-event products; storm seasons empty shelves. Repeat orders are the norm, not the hope.",
@@ -149,7 +143,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
     {
       title: "Works as a system",
-      kind: "bullets",
       bullets: [
         "Perimeter — [tube dams](/products/flood-tube-dams) or [boxwall](/products/abs-flood-barriers)",
         "Openings — [aluminum flood gates](/products/aluminum-flood-gates)",
