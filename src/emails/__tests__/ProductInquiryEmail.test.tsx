@@ -13,7 +13,6 @@ const baseData: ProductInquiryEmailData = {
   lastName: "Doe",
   email: "john.doe@example.com",
   productName: "Hydraulic Pump Station",
-  productSlug: "hydraulic-pump-station",
   quantity: 10,
 };
 
@@ -45,9 +44,9 @@ describe("ProductInquiryEmail", () => {
       expect(html).toContain("john.doe@example.com");
     });
 
-    it("should include product slug in footer", async () => {
+    it("should include the neutral footer that claims no product page", async () => {
       const html = await render(<ProductInquiryEmail {...baseData} />);
-      expect(html).toContain("hydraulic-pump-station");
+      expect(html).toContain(EMAIL_COPY.productInquiry.footer());
     });
   });
 
@@ -60,9 +59,15 @@ describe("ProductInquiryEmail", () => {
     });
 
     it("should handle string quantity", async () => {
-      const data = { ...baseData, quantity: "50" as unknown as number };
+      const data = { ...baseData, quantity: "50" };
       const html = await render(<ProductInquiryEmail {...data} />);
       expect(html).toContain("50");
+    });
+
+    it("should omit the quantity block for a general RFQ with no quantity", async () => {
+      const { quantity: _omitted, ...noQuantity } = baseData;
+      const html = await render(<ProductInquiryEmail {...noQuantity} />);
+      expect(html).not.toContain(EMAIL_COPY.common.fields.quantity);
     });
   });
 
@@ -152,7 +157,6 @@ describe("ProductInquiryEmail", () => {
         lastName: "Smith",
         email: "jane.smith@company.com",
         productName: "Industrial Valve",
-        productSlug: "industrial-valve",
         quantity: 100,
         company: "Smith Industries",
         requirements: "Custom specifications needed\nUrgent delivery required",

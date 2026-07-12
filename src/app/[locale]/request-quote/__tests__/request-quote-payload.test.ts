@@ -18,8 +18,6 @@ function createFormData(entries: Array<[string, string]>): FormData {
 
 const MESSAGES = {
   "payload.source": "Submitted via the request-quote form.",
-  "payload.productName": "General RFQ — product line to be advised",
-  "payload.quantityFallback": "Not specified — see message",
 } as const;
 
 function t(key: string): string {
@@ -45,7 +43,7 @@ describe("request quote payload", () => {
     );
   });
 
-  it("falls back to the source line when the optional message is blank", () => {
+  it("produces an explicit general RFQ with no product identity", () => {
     const formData = createFormData([
       ["fullName", "Alice Buyer"],
       ["email", "alice@example.com"],
@@ -61,13 +59,33 @@ describe("request quote payload", () => {
     expect(payload).toMatchObject({
       fullName: "Alice Buyer",
       email: "alice@example.com",
-      productSlug: "request-quote",
-      productName: "General RFQ — product line to be advised",
-      quantity: "Not specified — see message",
+      productInquiryKind: "general-rfq",
       requirements: "Submitted via the request-quote form.",
       marketingConsent: false,
       turnstileToken: "turnstile-token",
     });
+    // A general RFQ never claims a per-product identity.
+    expect(payload).not.toHaveProperty("catalogProductId");
+    // No product-line hint was supplied, so buyerInterest is omitted.
+    expect(payload).not.toHaveProperty("buyerInterest");
+  });
+
+  it("carries a product-line hint as buyerInterest, not as identity", () => {
+    const formData = createFormData([
+      ["fullName", "Alice Buyer"],
+      ["email", "alice@example.com"],
+      ["interest", "aluminum flood gates"],
+    ]);
+
+    const payload = createRequestQuotePayload(
+      formData,
+      "turnstile-token",
+      createRequestQuotePayloadCopy(t),
+    );
+
+    expect(payload.buyerInterest).toBe("aluminum flood gates");
+    expect(payload.productInquiryKind).toBe("general-rfq");
+    expect(payload).not.toHaveProperty("catalogProductId");
   });
 
   it("preserves marketing attribution fields", () => {
@@ -96,11 +114,12 @@ describe("request quote payload", () => {
     });
   });
 
-  it("creates a product lead payload accepted by the real inquiry schema", () => {
+  it("creates a general RFQ payload accepted by the real inquiry schema", () => {
     const formData = createFormData([
       ["fullName", "Alice Buyer"],
       ["email", "alice@example.com"],
       ["message", "FRP planks, 12m run length, Australia / Brisbane."],
+      ["interest", "frp planks"],
       ["utmSource", "google"],
     ]);
 
@@ -111,12 +130,11 @@ describe("request quote payload", () => {
     );
 
     expect(Object.keys(payload).sort()).toEqual([
+      "buyerInterest",
       "email",
       "fullName",
       "marketingConsent",
-      "productName",
-      "productSlug",
-      "quantity",
+      "productInquiryKind",
       "requirements",
       "turnstileToken",
       "utmSource",
@@ -124,10 +142,9 @@ describe("request quote payload", () => {
 
     const parsed = productLeadSchema.safeParse({
       type: LEAD_TYPES.PRODUCT,
+      productInquiryKind: payload.productInquiryKind,
       fullName: payload.fullName,
-      productSlug: payload.productSlug,
-      productName: payload.productName,
-      quantity: payload.quantity,
+      buyerInterest: payload.buyerInterest,
       requirements: payload.requirements,
       email: payload.email,
       marketingConsent: payload.marketingConsent,

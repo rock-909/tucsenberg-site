@@ -379,7 +379,7 @@ describe("Airtable Service - Create Operations Tests", () => {
         company: "@Buyer Co",
         message: "=message",
         productName: "+Product",
-        productSlug: "-product-slug",
+        catalogProductId: "-product-slug",
         quantity: "@100",
         requirements: "=requirements",
         referenceId: "PROD-formula-123",

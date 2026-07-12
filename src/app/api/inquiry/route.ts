@@ -51,8 +51,9 @@ const PRODUCT_INQUIRY_FIELD_ERROR_KEYS: ValidationFieldErrorKeys = {
   fullName: "errors.fullName",
   email: "errors.email",
   company: "errors.company",
-  productSlug: "errors.productSlug",
-  productName: "errors.productName",
+  productInquiryKind: "errors.productInquiryKind",
+  catalogProductId: "errors.catalogProductId",
+  buyerInterest: "errors.buyerInterest",
   quantity: "errors.quantity",
   requirements: "errors.requirements",
 };
@@ -77,9 +78,10 @@ function validateLeadData(
 ): ProductLeadValidationResult {
   const parsed = productLeadSchema.safeParse({
     type: LEAD_TYPES.PRODUCT,
+    productInquiryKind: data.productInquiryKind,
     fullName: data.fullName,
-    productSlug: data.productSlug,
-    productName: data.productName,
+    catalogProductId: data.catalogProductId,
+    buyerInterest: data.buyerInterest,
     quantity: data.quantity,
     requirements: data.requirements,
     email: data.email,

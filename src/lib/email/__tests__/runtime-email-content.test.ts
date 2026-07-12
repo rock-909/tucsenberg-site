@@ -96,7 +96,6 @@ describe("runtime email content", () => {
       email: "pat@example.com",
       company: "Buyer LLC",
       productName: "Enterprise Widget",
-      productSlug: "enterprise-widget",
       quantity: "500 units\nper month",
       requirements: "Line one\nLine two",
       marketingConsent: true,

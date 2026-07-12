@@ -30,12 +30,12 @@ const INQUIRY_API_VALIDATION_DETAIL_KEYS = [
   "errors.company.tooShort",
   "errors.company.tooLong",
   "errors.company.invalid",
-  "errors.productSlug.required",
-  "errors.productSlug.invalid",
-  "errors.productName.required",
-  "errors.productName.invalid",
-  "errors.productName.tooLong",
-  "errors.productName.tooShort",
+  "errors.productInquiryKind.required",
+  "errors.productInquiryKind.invalid",
+  "errors.catalogProductId.required",
+  "errors.catalogProductId.invalid",
+  "errors.buyerInterest.tooLong",
+  "errors.buyerInterest.invalid",
   "errors.quantity.required",
   "errors.quantity.invalid",
   "errors.requirements.invalid",
@@ -65,8 +65,6 @@ const REQUEST_QUOTE_RUNTIME_KEYS = [
   "requestQuote.form.fields.email",
   "requestQuote.form.fields.message",
   "requestQuote.form.payload.source",
-  "requestQuote.form.payload.productName",
-  "requestQuote.form.payload.quantityFallback",
 ] as const;
 
 function isJsonObject(value: unknown): value is JsonObject {

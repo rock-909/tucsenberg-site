@@ -194,9 +194,7 @@ describe("RequestQuoteForm", () => {
     expect(getFetchBody()).toMatchObject({
       fullName: "Alice Buyer",
       email: "alice@example.com",
-      productSlug: "request-quote",
-      productName: "General RFQ — product line to be advised",
-      quantity: "Not specified — see message",
+      productInquiryKind: "general-rfq",
       turnstileToken: "mock-rfq-turnstile-token",
       marketingConsent: false,
       utmSource: "google",
@@ -205,6 +203,9 @@ describe("RequestQuoteForm", () => {
       landingPage: "/en/request-quote",
       capturedAt: "2026-07-04T00:00:00.000Z",
     });
+    // The RFQ never claims a per-product identity.
+    expect(getFetchBody()).not.toHaveProperty("catalogProductId");
+    expect(getFetchBody()).not.toHaveProperty("productSlug");
     expect(String(getFetchBody().requirements)).toContain(
       "Submitted via the request-quote form.",
     );

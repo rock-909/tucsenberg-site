@@ -221,10 +221,13 @@ export function buildConfirmationEmailContent(
 export function buildProductInquiryEmailContent(
   data: ProductInquiryEmailData,
 ): RuntimeEmailContent {
-  const quantity = formatQuantity(data.quantity);
+  const quantity =
+    data.quantity !== undefined ? formatQuantity(data.quantity) : undefined;
   const fields = compactFields([
     { label: EMAIL_COPY.common.fields.product, value: data.productName },
-    { label: EMAIL_COPY.common.fields.quantity, value: quantity },
+    quantity
+      ? { label: EMAIL_COPY.common.fields.quantity, value: quantity }
+      : null,
     {
       label: EMAIL_COPY.common.fields.contactName,
       value: `${data.firstName} ${data.lastName}`,
@@ -255,12 +258,16 @@ export function buildProductInquiryEmailContent(
     `<p style="margin:0 0 10px 0;font-size:${FONT_SIZES.lg};font-weight:bold;">${escapeHtml(
       data.productName,
     )}</p>`,
-    `<p style="margin:0 0 6px 0;font-weight:bold;color:${COLORS.textLight};font-size:${FONT_SIZES.sm};">${escapeHtml(
-      EMAIL_COPY.common.fields.quantity,
-    )}</p>`,
-    `<p style="margin:0;font-size:${FONT_SIZES.md};font-weight:bold;color:${COLORS.success};">${escapeHtml(
-      quantity,
-    )}</p>`,
+    ...(quantity
+      ? [
+          `<p style="margin:0 0 6px 0;font-weight:bold;color:${COLORS.textLight};font-size:${FONT_SIZES.sm};">${escapeHtml(
+            EMAIL_COPY.common.fields.quantity,
+          )}</p>`,
+          `<p style="margin:0;font-size:${FONT_SIZES.md};font-weight:bold;color:${COLORS.success};">${escapeHtml(
+            quantity,
+          )}</p>`,
+        ]
+      : []),
     "</section>",
   ].join("");
   const bodyFields = fields.filter(
@@ -273,7 +280,7 @@ export function buildProductInquiryEmailContent(
     title: EMAIL_COPY.productInquiry.title,
     preview: EMAIL_COPY.productInquiry.preview,
     accentColor: COLORS.success,
-    footerText: EMAIL_COPY.productInquiry.footer(data.productSlug),
+    footerText: EMAIL_COPY.productInquiry.footer(),
     contentBackgroundColor: COLORS.contentBackground,
     bodyHtml: `${highlightHtml}${renderFields(bodyFields)}`,
     bodyText: renderPlainFields(fields),

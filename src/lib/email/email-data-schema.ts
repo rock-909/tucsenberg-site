@@ -39,7 +39,12 @@ export const emailTemplateDataSchema = z.object({
 export type EmailTemplateData = z.infer<typeof emailTemplateDataSchema>;
 
 /**
- * Product inquiry email data validation schema
+ * Product inquiry email data validation schema.
+ *
+ * `productName` is the server-resolved display name (catalog label or the
+ * general-RFQ label), never a client-supplied slug. `quantity` is optional
+ * because a general RFQ carries no quantity. Buyer free-text interest is folded
+ * into `requirements` as description upstream.
  */
 export const productInquiryEmailDataSchema = z.object({
   firstName: z.string(),
@@ -47,8 +52,7 @@ export const productInquiryEmailDataSchema = z.object({
   email: z.email(),
   company: z.string().optional(),
   productName: z.string(),
-  productSlug: z.string(),
-  quantity: z.union([z.string(), z.number()]),
+  quantity: z.union([z.string(), z.number()]).optional(),
   requirements: z.string().optional(),
   marketingConsent: z.boolean().optional(),
 });

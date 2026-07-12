@@ -172,8 +172,8 @@
     "productInquiry": {
       "title": "New Product Inquiry",
       "preview": "New product inquiry received.",
-      "footer": "This inquiry was submitted from the product page: {productSlug}",
-      "subject": "Product Inquiry: {productName} (Qty: {quantity})"
+      "footer": "This inquiry was submitted through the Tucsenberg website.",
+      "subject": "Product Inquiry: {productName}"
     }
   },
   "contact": {
@@ -268,15 +268,17 @@
           "tooLong": "Company name must be less than 100 characters",
           "invalid": "Company name contains invalid characters"
         },
-        "productSlug": {
+        "productInquiryKind": {
+          "required": "Please choose an inquiry type before sending",
+          "invalid": "The inquiry type is not recognized"
+        },
+        "catalogProductId": {
           "required": "Please choose a product before sending your inquiry",
           "invalid": "The selected product is not recognized"
         },
-        "productName": {
-          "required": "Product name is required",
-          "tooShort": "Product name must be at least 2 characters",
-          "tooLong": "Product name must be less than 100 characters",
-          "invalid": "Product name contains invalid characters"
+        "buyerInterest": {
+          "tooLong": "Product interest is too long",
+          "invalid": "Product interest contains invalid characters"
         },
         "quantity": {
           "required": "Quantity is required",
@@ -345,9 +347,7 @@
         "message": "What do you need?"
       },
       "payload": {
-        "source": "Submitted via the request-quote form.",
-        "productName": "General RFQ — product line to be advised",
-        "quantityFallback": "Not specified — see message"
+        "source": "Submitted via the request-quote form."
       },
       "successReading": "While you wait, this is how we match products to sites:",
       "successReadingLinkLabel": "ABS vs Aluminum vs FRP vs Water-Filled — How to Choose"

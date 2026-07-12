@@ -82,10 +82,10 @@ describe("processLead", () => {
 
   const validProductLead = {
     type: LEAD_TYPES.PRODUCT,
+    productInquiryKind: "catalog-product",
     fullName: "Jane Smith",
     email: "jane@example.com",
-    productSlug: "showcase-plan-basic",
-    productName: "Showcase Plan Basic",
+    catalogProductId: "abs-flood-barriers",
     quantity: "500 units",
     company: "Example Company",
     requirements: "Brand adaptation needed",

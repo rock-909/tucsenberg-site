@@ -87,8 +87,15 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
     : "";
   fields["Message"] = sanitizeAirtableTextField(data.message);
   fields["Product Name"] = sanitizeAirtableTextField(data.productName);
-  fields["Product Slug"] = sanitizeAirtableTextField(data.productSlug);
-  fields["Quantity"] = sanitizeAirtableTextField(formatQuantity(data.quantity));
+  // Product Slug holds the registry-validated catalog product id, and is empty
+  // for a general RFQ, which honestly carries no per-product identity.
+  fields["Product Slug"] = data.catalogProductId
+    ? sanitizeAirtableTextField(data.catalogProductId)
+    : "";
+  fields["Quantity"] =
+    data.quantity !== undefined && String(data.quantity).trim().length > 0
+      ? sanitizeAirtableTextField(formatQuantity(data.quantity))
+      : "";
   if (data.requirements) {
     fields["Requirements"] = sanitizeAirtableTextField(data.requirements);
   }
