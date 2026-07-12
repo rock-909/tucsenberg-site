@@ -196,7 +196,6 @@ describe("RequestQuoteForm", () => {
       email: "alice@example.com",
       productInquiryKind: "general-rfq",
       turnstileToken: "mock-rfq-turnstile-token",
-      marketingConsent: false,
       utmSource: "google",
       utmCampaign: "flood-barriers",
       gclid: "gclid-rfq-123",

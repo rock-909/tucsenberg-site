@@ -76,7 +76,6 @@ function addContactFields(fields: AirtableFields, data: ContactLeadData): void {
     fields["Subject"] = sanitizeAirtableTextField(data.subject);
   }
   fields["Message"] = sanitizeAirtableTextField(data.message);
-  fields["Marketing Consent"] = data.marketingConsent || false;
 }
 
 function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
@@ -99,7 +98,6 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
   if (data.requirements) {
     fields["Requirements"] = sanitizeAirtableTextField(data.requirements);
   }
-  fields["Marketing Consent"] = data.marketingConsent || false;
 }
 
 function addNewsletterFields(fields: AirtableFields): void {

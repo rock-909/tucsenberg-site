@@ -66,10 +66,6 @@ const mockT = vi.fn((key: string) => {
     CONTACT_SUBMISSION_EXPIRED:
       "This form expired. Please refresh the page and try again.",
     TURNSTILE_REJECTED: "Security verification failed. Please try again.",
-
-    // Checkboxes
-    acceptPrivacy: "I accept the privacy policy",
-    marketingConsent: "I agree to receive marketing communications",
   };
 
   const normalizedKey = key.split(".").pop() ?? key;
@@ -171,10 +167,6 @@ const _fillValidForm = async () => {
     fireEvent.change(screen.getByLabelText(/message/i), {
       target: { value: validFormData.message },
     });
-
-    // 勾选隐私政策
-    const privacyCheckbox = screen.getByLabelText(/accept.*privacy/i);
-    fireEvent.click(privacyCheckbox);
 
     // 启用 Turnstile
     fireEvent.click(screen.getByTestId("turnstile-success"));

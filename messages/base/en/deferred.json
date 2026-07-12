@@ -127,7 +127,6 @@
     "runtimeDefaultLocale": "en",
     "common": {
       "unknownSubmissionTime": "Unknown submission time",
-      "marketingConsentAccepted": "Yes, agreed to receive marketing communications",
       "fields": {
         "name": "Name",
         "contactName": "Contact Name",
@@ -137,7 +136,6 @@
         "subject": "Subject",
         "message": "Message",
         "submittedAt": "Submitted At",
-        "marketingConsent": "Marketing Consent",
         "product": "Product",
         "quantity": "Quantity",
         "requirements": "Requirements"

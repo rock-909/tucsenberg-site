@@ -12,6 +12,7 @@ import {
   StatusMessage,
 } from "@/components/forms/contact-form-feedback";
 import { FormFields } from "@/components/forms/contact-form-fields";
+import { FormPrivacyNotice } from "@/components/forms/form-privacy-notice";
 import { FORM_STATUS_CLASS_NAMES } from "@/components/forms/form-status-styles";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 
@@ -144,6 +145,8 @@ export function ContactFormContainerView({
             {translateForm(turnstileStatusMessageKey)}
           </p>
         ) : null}
+
+        <FormPrivacyNotice text={translateForm("privacyNotice")} />
 
         <SubmitButton
           disabled={submitDisabledReason}

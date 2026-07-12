@@ -110,7 +110,6 @@ function isValidProductQuantity(value: unknown): value is string | number {
  */
 const baseLeadFields = {
   email: leadEmailSchema,
-  marketingConsent: z.boolean().optional().default(false),
   ...leadAttributionFields,
 };
 

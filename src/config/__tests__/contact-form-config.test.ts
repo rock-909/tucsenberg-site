@@ -26,15 +26,14 @@ describe("contact form configuration builder", () => {
 
   it("返回字段顺序并响应特性开关", () => {
     const fields = buildFormFieldsFromConfig(CONTACT_FORM_CONFIG);
-    // phone field is disabled per Lead Pipeline requirements
+    // phone field is disabled per Lead Pipeline requirements; website is a
+    // hidden honeypot that still serializes.
     expect(fields.map((field) => field.key)).toEqual([
       "fullName",
       "email",
       "company",
       "subject",
       "message",
-      "acceptPrivacy",
-      "marketingConsent",
       "website",
     ]);
 
@@ -42,13 +41,11 @@ describe("contact form configuration builder", () => {
       ...CONTACT_FORM_CONFIG,
       features: {
         ...CONTACT_FORM_CONFIG.features,
-        showPrivacyCheckbox: false,
+        useWebsiteHoneypot: false,
       },
     };
     const filteredFields = buildFormFieldsFromConfig(toggledConfig);
-    expect(filteredFields.some((field) => field.key === "acceptPrivacy")).toBe(
-      false,
-    );
+    expect(filteredFields.some((field) => field.key === "website")).toBe(false);
   });
 
   it("支持邮箱域白名单", () => {
@@ -68,9 +65,7 @@ describe("contact form configuration builder", () => {
       email: "john.doe@allowed.com",
       company: "",
       message: "Hello there, this is a valid message.",
-      acceptPrivacy: true,
       website: "",
-      marketingConsent: false,
     };
 
     expect(schema.safeParse(basePayload).success).toBe(true);

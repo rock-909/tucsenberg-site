@@ -117,11 +117,6 @@ function getRequiredString(formData: FormData, key: string): string {
   return getOptionalString(formData, key) ?? "";
 }
 
-function getBoolean(formData: FormData, key: string): boolean {
-  const value = formData.get(key);
-  return value === "true" || value === "on" || value === "1";
-}
-
 function createContactRequestBody(
   formData: FormData,
   turnstileToken: string,
@@ -134,8 +129,6 @@ function createContactRequestBody(
     phone: getOptionalString(formData, "phone"),
     subject: getOptionalString(formData, "subject"),
     message: getRequiredString(formData, "message"),
-    acceptPrivacy: getBoolean(formData, "acceptPrivacy"),
-    marketingConsent: getBoolean(formData, "marketingConsent"),
     website: getOptionalString(formData, "website") ?? "",
     turnstileToken,
     submittedAt,

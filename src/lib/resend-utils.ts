@@ -50,7 +50,6 @@ export class ResendUtils {
       phone: data.phone ? sanitizePlainText(data.phone) : undefined,
       subject: data.subject ? sanitizePlainText(data.subject) : undefined,
       submittedAt: data.submittedAt,
-      marketingConsent: data.marketingConsent,
     };
   }
 
@@ -141,7 +140,6 @@ export class ResendUtils {
       requirements: data.requirements
         ? sanitizePlainText(data.requirements)
         : undefined,
-      marketingConsent: data.marketingConsent,
     };
   }
 

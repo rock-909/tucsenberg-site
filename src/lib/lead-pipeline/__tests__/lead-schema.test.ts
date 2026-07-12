@@ -88,7 +88,6 @@ describe("Lead Schema", () => {
       message: "This is a test message with enough characters.",
       turnstileToken: "valid-token",
       company: "Test Company",
-      marketingConsent: true,
     };
 
     it("should validate a complete contact lead", () => {
@@ -107,9 +106,6 @@ describe("Lead Schema", () => {
       };
       const result = contactLeadSchema.safeParse(minimalLead);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.marketingConsent).toBe(false);
-      }
     });
 
     it("should reject contact lead with invalid email", () => {
@@ -191,7 +187,6 @@ describe("Lead Schema", () => {
       quantity: "500 units",
       company: "Example Company",
       requirements: "Need brand adaptation",
-      marketingConsent: false,
     };
 
     const validGeneralRfqLead = {
@@ -200,7 +195,6 @@ describe("Lead Schema", () => {
       fullName: "Rita Buyer",
       email: "rita@example.com",
       requirements: "Submitted via the request-quote form.",
-      marketingConsent: false,
     };
 
     it("validates a complete catalog product lead", () => {
@@ -284,7 +278,6 @@ describe("Lead Schema", () => {
       if (result.success) {
         expect(result.data.catalogProductId).toBe(CATALOG_PRODUCT_ID);
         expect(result.data.quantity).toBe("500 units");
-        expect(result.data.marketingConsent).toBe(false);
       }
     });
 
@@ -468,7 +461,6 @@ describe("Lead Schema", () => {
         subject: "General question",
         message: "Test message.",
         turnstileToken: "token",
-        marketingConsent: false,
       };
       expect(isContactLead(contactLead)).toBe(true);
       expect(isProductLead(contactLead)).toBe(false);
@@ -483,7 +475,6 @@ describe("Lead Schema", () => {
         email: "test@example.com",
         catalogProductId: CATALOG_PRODUCT_ID,
         quantity: 1,
-        marketingConsent: false,
       };
       expect(isProductLead(productLead)).toBe(true);
       expect(isContactLead(productLead)).toBe(false);

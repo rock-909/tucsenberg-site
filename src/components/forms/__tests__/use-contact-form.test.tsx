@@ -31,8 +31,6 @@ function createValidFormData(): FormData {
     "message",
     "We need help scoping a replacement website project.",
   );
-  formData.set("acceptPrivacy", "on");
-  formData.set("marketingConsent", "on");
   formData.set("website", "");
   return formData;
 }
@@ -159,8 +157,6 @@ describe("useContactForm", () => {
     expect(body).toMatchObject({
       fullName: "Alice Example",
       email: "alice@example.com",
-      acceptPrivacy: true,
-      marketingConsent: true,
       turnstileToken: "valid-token",
       utmSource: "google",
       utmMedium: "cpc",

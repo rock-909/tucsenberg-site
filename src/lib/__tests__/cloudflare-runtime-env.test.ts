@@ -110,7 +110,6 @@ describe("Cloudflare runtime env timing", () => {
       lastName: "Tester",
       email: "runtime@example.com",
       message: "Runtime env should be available when Airtable initializes.",
-      marketingConsent: false,
     });
 
     expect(configure).toHaveBeenCalledWith(

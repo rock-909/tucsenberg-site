@@ -18,6 +18,7 @@ export interface RequestQuoteFormCopy {
   readonly turnstilePending: string;
   readonly referenceLabel: string;
   readonly messageHint: string;
+  readonly privacyNotice: string;
   readonly fields: {
     readonly fullName: string;
     readonly email: string;
@@ -42,6 +43,7 @@ export function createRequestQuoteFormCopy(
     turnstilePending: t("turnstilePending"),
     referenceLabel: t("referenceLabel"),
     messageHint: t("messageHint"),
+    privacyNotice: t("privacyNotice"),
     fields: {
       fullName: t("fields.fullName"),
       email: t("fields.email"),

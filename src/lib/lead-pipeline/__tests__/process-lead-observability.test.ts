@@ -65,7 +65,6 @@ const VALID_CONTACT_LEAD = {
   message: "This is a test message with enough characters.",
   turnstileToken: "valid-token",
   company: "Test Company",
-  marketingConsent: true,
 };
 
 const VALID_NEWSLETTER_LEAD = {

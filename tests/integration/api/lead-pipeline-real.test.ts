@@ -197,7 +197,6 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "Product Name": CATALOG_PRODUCT_LABEL,
       "Product Slug": "abs-flood-barriers",
       Quantity: "100",
-      "Marketing Consent": false,
     });
     expect(typeof fields["Reference ID"]).toBe("string");
     expect(fields["Reference ID"]).toBe(body.data.referenceId);

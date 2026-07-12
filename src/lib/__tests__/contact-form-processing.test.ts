@@ -36,8 +36,6 @@ function createContactFormData(
     company: "Example Co.",
     subject,
     message: "We need help scoping a replacement website project.",
-    acceptPrivacy: true,
-    marketingConsent: false,
     turnstileToken: "valid-token",
     submittedAt: new Date().toISOString(),
   };
@@ -132,7 +130,6 @@ describe("canonical contact submission", () => {
     const payload: Partial<ContactFormWithToken> =
       createContactFormData("Product inquiry");
     delete payload.message;
-    delete payload.acceptPrivacy;
 
     const result = validateContactSubmissionPayload(payload);
 
@@ -140,7 +137,7 @@ describe("canonical contact submission", () => {
       expect.objectContaining({
         success: false,
         errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-        details: ["errors.message.required", "errors.acceptPrivacy.required"],
+        details: ["errors.message.required"],
       }),
     );
   });
@@ -275,7 +272,6 @@ describe("canonical contact submission", () => {
   it("passes validated contact form data that the lead schema accepts at the handoff boundary", async () => {
     const formData = createContactFormData("Custom project setup");
     formData.company = "";
-    formData.marketingConsent = undefined;
     mockProcessLead.mockResolvedValueOnce({
       success: true,
       emailSent: true,
@@ -303,7 +299,6 @@ describe("canonical contact submission", () => {
         message: "We need help scoping a replacement website project.",
         turnstileToken: "valid-token",
         submittedAt: expect.any(String),
-        marketingConsent: false,
       }),
     );
   });

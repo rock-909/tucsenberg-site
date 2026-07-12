@@ -27,7 +27,6 @@ export const emailTemplateDataSchema = z.object({
   phone: z.string().optional(),
   subject: z.string().optional(),
   submittedAt: z.string(),
-  marketingConsent: z.boolean().optional(),
 
   // Honeypot field - should remain empty
   website: z
@@ -54,7 +53,6 @@ export const productInquiryEmailDataSchema = z.object({
   productName: z.string(),
   quantity: z.union([z.string(), z.number()]).optional(),
   requirements: z.string().optional(),
-  marketingConsent: z.boolean().optional(),
 });
 
 export type ProductInquiryEmailData = z.infer<

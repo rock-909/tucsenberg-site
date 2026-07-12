@@ -39,7 +39,6 @@ const FIELD_ERROR_KEY_PREFIX = new Map<string, string>([
   ["message", "errors.message"],
   ["phone", "errors.phone"],
   ["subject", "errors.subject"],
-  ["acceptPrivacy", "errors.acceptPrivacy"],
   ["website", "errors.website"],
 ]);
 
@@ -152,10 +151,6 @@ function isMissingRequiredInvalidType(issue: ZodIssue): boolean {
 
 function handleCustomIssue(baseKey: string, issue: ZodIssue): string {
   const message = issue.message?.toLowerCase?.() ?? "";
-
-  if (baseKey === "errors.acceptPrivacy") {
-    return `${baseKey}.required`;
-  }
 
   if (baseKey === "errors.subject") {
     return `${baseKey}.length`;
@@ -326,7 +321,6 @@ async function processValidatedContactSubmission(
     message: formData.message,
     turnstileToken: formData.turnstileToken,
     submittedAt: formData.submittedAt,
-    marketingConsent: formData.marketingConsent ?? false,
     ...pickAttributionFields(formData),
   };
 
