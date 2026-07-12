@@ -27,9 +27,8 @@ vi.mock("@/app/[locale]/generate-static-params", () => ({
   generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
 }));
 
-vi.mock("next-intl/server", () => ({
-  setRequestLocale: vi.fn(),
-}));
+// next-intl/server (incl. setRequestLocale) is mocked globally in
+// src/test/setup.constants-and-i18n.ts; no local override needed here.
 
 describe("PrivacyContent async invocation", () => {
   beforeEach(() => {

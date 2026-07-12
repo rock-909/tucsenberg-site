@@ -150,47 +150,10 @@
 
 import React from "react";
 import { render, type RenderOptions } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
 import { vi } from "vitest";
 import { combinedMessages } from "@/test/constants/mock-messages";
 
 // import { ThemeProvider } from 'next-themes';
-
-/**
- * 深度合并两个对象,右侧优先
- * 用于合并默认 mock 消息和测试特定的覆写消息
- */
-function deepMerge<T extends Record<string, unknown>>(
-  target: T,
-  source: Partial<T>,
-): T {
-  const output = { ...target };
-
-  for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = source[key];
-      const targetValue = output[key];
-
-      if (
-        sourceValue &&
-        typeof sourceValue === "object" &&
-        !Array.isArray(sourceValue) &&
-        targetValue &&
-        typeof targetValue === "object" &&
-        !Array.isArray(targetValue)
-      ) {
-        output[key] = deepMerge(
-          targetValue as Record<string, unknown>,
-          sourceValue as Record<string, unknown>,
-        ) as T[Extract<keyof T, string>];
-      } else {
-        output[key] = sourceValue as T[Extract<keyof T, string>];
-      }
-    }
-  }
-
-  return output;
-}
 
 // 国际化Provider Mock
 const MockIntlProvider = ({
@@ -347,56 +310,6 @@ export const createMockUseTranslations = (
 
   return vi.fn((namespace?: string) =>
     vi.fn((key: string) => translate(namespace ? `${namespace}.${key}` : key)),
-  );
-};
-
-/**
- * 国际化渲染工具 - 用于解决 NextIntlClientProvider 上下文缺失问题
- *
- * 现在默认使用集中的 mock 消息 (src/test/constants/mock-messages.ts),
- * 支持通过 partialMessages 参数进行局部覆写。
- *
- * @param ui - 要渲染的 React 元素
- * @param locale - 语言代码,默认 'en'
- * @param partialMessages - 可选的局部消息覆写,会与默认集中 mock 深度合并
- * @returns render 结果
- *
- * @example
- * ```typescript
- * // 使用默认集中 mock
- * renderWithIntl(<Component />);
- *
- * // 指定语言
- * renderWithIntl(<Component />, 'zh');
- *
- * // 覆写特定命名空间
- * renderWithIntl(<Component />, 'en', {
- *   navigation: { home: 'Custom Home' }
- * });
- *
- * // 深度合并覆写
- * renderWithIntl(<Component />, 'en', {
- *   common: {
- *     loading: 'Custom Loading...',
- *     // 其他 common key 保持默认
- *   }
- * });
- * ```
- */
-export const renderWithIntl = (
-  ui: React.ReactElement,
-  locale: string = "en",
-  partialMessages?: Record<string, unknown>,
-) => {
-  // 使用集中的 mock 消息作为默认
-  const messages = partialMessages
-    ? deepMerge(combinedMessages as Record<string, unknown>, partialMessages)
-    : combinedMessages;
-
-  return render(
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {ui}
-    </NextIntlClientProvider>,
   );
 };
 
