@@ -19,6 +19,23 @@ import { logger } from "@/lib/logger";
 import { resolveAirtableModule } from "@/lib/airtable/service-internal/client";
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
 
+/**
+ * Airtable 单次请求预算（毫秒）。
+ *
+ * Airtable SDK 默认 requestTimeout 为 300000ms（5 分钟）。对 B2B 买家提交表单
+ * 而言，这意味着 CRM 挂起时响应可能被拖到几分钟，属于不可接受的等待。
+ *
+ * 取值 8000ms 的依据：
+ * - Airtable 单条记录写入 p50 约 150-300ms、p99 一般在 2s 以内；
+ * - SDK 对 HTTP 429 会做指数退避重试（含 jitter），一轮退避约 1-2s；
+ * - 8s 可从容覆盖 p99 + 一次限流重试并留出余量；
+ * - 8s 约为默认 300s 的 1/37，远低于“分钟级”，买家绝不会等到几分钟。
+ *
+ * 由于 contact/inquiry 的用户成功以“业主邮件”为准（email-first），该预算只是
+ * 尽力而为的 CRM 写入的最坏情况上限；正常响应时延仍由邮件时延决定。
+ */
+export const AIRTABLE_REQUEST_TIMEOUT_MS = 8000;
+
 type AirtableEnvKey =
   | "AIRTABLE_API_KEY"
   | "AIRTABLE_BASE_ID"
@@ -78,6 +95,8 @@ export class AirtableService {
       Airtable.configure({
         endpointUrl: "https://api.airtable.com",
         apiKey,
+        // 覆盖 SDK 默认的 300000ms，避免挂起请求把 Cloudflare 调用拖住数分钟
+        requestTimeout: AIRTABLE_REQUEST_TIMEOUT_MS,
       });
 
       this.base = Airtable.base(baseId);

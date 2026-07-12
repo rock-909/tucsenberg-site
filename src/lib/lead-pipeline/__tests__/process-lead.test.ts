@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
 import { LEAD_TYPES } from "../lead-schema";
 import { processLead } from "../process-lead";
 
@@ -482,5 +483,83 @@ describe("processLead", () => {
     expect(mockSendContactFormEmail).not.toHaveBeenCalled();
     expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
     expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
+  });
+
+  describe("Airtable request budget (never-resolving Airtable must not hang)", () => {
+    // Never-resolving CRM mock: proves the response is bounded by the request
+    // budget, not by the Airtable SDK's 5-minute default.
+    const neverResolves = () => new Promise<never>(() => {});
+
+    it("resolves contact success within the budget when Airtable never settles", async () => {
+      vi.useFakeTimers();
+      try {
+        mockSendContactFormEmail.mockResolvedValue("email-id-123");
+        mockCreateLead.mockImplementation(neverResolves);
+
+        const resultPromise = processLead(validContactLead);
+        await vi.advanceTimersByTimeAsync(AIRTABLE_REQUEST_TIMEOUT_MS);
+        const result = await resultPromise;
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            success: true,
+            emailSent: true,
+            ownerNotified: true,
+            recordCreated: false,
+          }),
+        );
+        expect(result.referenceId?.startsWith("CON-")).toBe(true);
+        expect(result.error).toBeUndefined();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("resolves product success within the budget when Airtable never settles", async () => {
+      vi.useFakeTimers();
+      try {
+        mockSendProductInquiryEmail.mockResolvedValue("product-email-id");
+        mockCreateLead.mockImplementation(neverResolves);
+
+        const resultPromise = processLead(validProductLead);
+        await vi.advanceTimersByTimeAsync(AIRTABLE_REQUEST_TIMEOUT_MS);
+        const result = await resultPromise;
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            success: true,
+            emailSent: true,
+            ownerNotified: true,
+            recordCreated: false,
+          }),
+        );
+        expect(result.referenceId?.startsWith("PRO-")).toBe(true);
+        expect(result.error).toBeUndefined();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("fails subscribe within the budget when Airtable never settles (no fake success)", async () => {
+      vi.useFakeTimers();
+      try {
+        mockCreateLead.mockImplementation(neverResolves);
+
+        const resultPromise = processLead(validNewsletterLead);
+        await vi.advanceTimersByTimeAsync(AIRTABLE_REQUEST_TIMEOUT_MS);
+        const result = await resultPromise;
+
+        expect(result).toEqual({
+          success: false,
+          emailSent: false,
+          ownerNotified: false,
+          recordCreated: false,
+          referenceId: expect.stringMatching(/^NEW-/),
+          error: "PROCESSING_FAILED",
+        });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });
