@@ -44,7 +44,7 @@ const CLOUDFLARE_SOURCE_CHECKS = [
 const CLOUDFLARE_SCRIPT_SURFACE_CHECKS = [
   {
     name: "website:build:cf",
-    expected: "pnpm exec opennextjs-cloudflare build --noMinify",
+    expected: "pnpm exec opennextjs-cloudflare build",
   },
 ];
 const DESTRUCTIVE_DEPLOY_SCRIPT_SNIPPETS = [

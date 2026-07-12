@@ -7,15 +7,6 @@
  * not depend on them.
  */
 
-import { unstable_cache } from "next/cache";
-import { i18nTags } from "@/lib/i18n/cache-tags";
-import {
-  isRuntimeCi,
-  isRuntimeCloudflare,
-  isRuntimeDevelopment,
-  isRuntimePlaywright,
-  isRuntimeProductionBuildPhase,
-} from "@/lib/env";
 import { mergeObjects } from "@/lib/merge-objects";
 import { type Locale } from "@/i18n/routing-config";
 import { coerceLocale } from "@/i18n/locale-utils";
@@ -27,20 +18,6 @@ import {
 } from "@/lib/i18n/site-message-values";
 
 type Messages = Record<string, unknown>;
-
-const isCiEnv = isRuntimeCi() || isRuntimePlaywright();
-const isProductionBuild = () => isRuntimeProductionBuildPhase();
-const isDev = () => isRuntimeDevelopment();
-const isCloudflareRuntime = () => isRuntimeCloudflare();
-/**
- * next/cache `unstable_cache` expects `revalidate` in SECONDS. 30 minutes = 1800s.
- * Do not borrow a millisecond interval here: the retired bug used
- * `MONITORING_INTERVALS.CACHE_CLEANUP` (30 minutes in MILLISECONDS = 1,800,000),
- * which as seconds is ~20.8 days.
- */
-export const I18N_MESSAGE_REVALIDATE_SECONDS = 30 * 60;
-
-const revalidate = () => (isDev() ? 1 : I18N_MESSAGE_REVALIDATE_SECONDS);
 
 function interpolateSiteMessageString(
   value: string,
@@ -101,25 +78,9 @@ async function loadMessageSource(
   ) as Messages;
 }
 
-function createCached(locale: Locale, type: MessageType) {
-  return unstable_cache(
-    () => loadMessageSource(locale, type),
-    [`i18n-${type}`, locale],
-    {
-      revalidate: revalidate(),
-      tags: [
-        (type === "critical" ? i18nTags.critical : i18nTags.deferred)(locale),
-        i18nTags.all(),
-      ],
-    },
-  );
-}
-
 function load(locale: Locale, type: MessageType): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
-  return isCiEnv || isProductionBuild() || isCloudflareRuntime()
-    ? loadMessageSource(safeLocale, type)
-    : createCached(safeLocale, type)();
+  return loadMessageSource(safeLocale, type);
 }
 
 async function loadCompleteMessagesFromSourceInternal(

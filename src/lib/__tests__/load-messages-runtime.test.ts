@@ -2,21 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-interface CacheOptions {
-  revalidate?: number | false;
-  tags?: string[];
-}
-
-type UnstableCacheMock = (
-  loader: () => Promise<unknown>,
-  keyParts?: string[],
-  options?: CacheOptions,
-) => () => Promise<unknown>;
-
-function createUnstableCacheMock() {
-  return vi.fn<UnstableCacheMock>((loader) => loader);
-}
-
 function createRuntimeEnvMock({
   ci = false,
   development = false,
@@ -174,123 +159,10 @@ afterEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
   vi.doUnmock("@/lib/env");
-  vi.doUnmock("next/cache");
 });
 
-describe("load-messages runtime gating", () => {
-  it("bypasses cache in CI mode", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => createRuntimeEnvMock({ ci: true }));
-
-    const { loadCriticalMessages } = await import("@/lib/i18n/load-messages");
-
-    await loadCriticalMessages("en");
-
-    expect(unstableCache).not.toHaveBeenCalled();
-  });
-
-  it("bypasses cache during production build phase", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => ({
-      ...createRuntimeEnvMock({ productionBuild: true }),
-    }));
-
-    const { loadDeferredMessages } = await import("@/lib/i18n/load-messages");
-
-    await loadDeferredMessages("zh");
-
-    expect(unstableCache).not.toHaveBeenCalled();
-  });
-
-  it("uses cache outside CI and production build", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => ({
-      ...createRuntimeEnvMock({ development: true }),
-    }));
-
-    const { loadCriticalMessages } = await import("@/lib/i18n/load-messages");
-
-    await loadCriticalMessages("en");
-
-    expect(unstableCache).toHaveBeenCalledTimes(1);
-    expect(unstableCache.mock.calls[0]?.[1]).toEqual(["i18n-critical", "en"]);
-    expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
-      tags: ["i18n:critical:en", "i18n:all"],
-    });
-  });
-
-  it("loads complete source messages without unstable_cache outside CI and Cloudflare", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => ({
-      ...createRuntimeEnvMock({ development: true }),
-    }));
-
-    const { loadCompleteMessagesFromSource } =
-      await import("@/lib/i18n/load-messages");
-
-    await loadCompleteMessagesFromSource("en");
-
-    expect(unstableCache).not.toHaveBeenCalled();
-  });
-
-  it("passes deferred locale cache tags to unstable_cache", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => ({
-      ...createRuntimeEnvMock({ development: true }),
-    }));
-
-    const { loadDeferredMessages } = await import("@/lib/i18n/load-messages");
-
-    await loadDeferredMessages("zh");
-
-    expect(unstableCache).toHaveBeenCalledTimes(1);
-    expect(unstableCache.mock.calls[0]?.[1]).toEqual(["i18n-deferred", "en"]);
-    expect(unstableCache.mock.calls[0]?.[2]).toMatchObject({
-      tags: ["i18n:deferred:en", "i18n:all"],
-    });
-  });
-
-  it("bypasses unstable_cache on Cloudflare runtime", async () => {
-    const unstableCache = createUnstableCacheMock();
-
-    vi.doMock("next/cache", () => ({
-      unstable_cache: unstableCache,
-    }));
-    vi.doMock("@/lib/env", () => ({
-      ...createRuntimeEnvMock({ development: true, cloudflare: true }),
-    }));
-
-    const { loadCriticalMessages } = await import("@/lib/i18n/load-messages");
-
-    await loadCriticalMessages("en");
-
-    expect(unstableCache).not.toHaveBeenCalled();
-  });
-
+describe("load-messages runtime loading", () => {
   it("returns concrete factual brand values from critical message loading", async () => {
-    vi.doMock("next/cache", () => ({
-      unstable_cache: createUnstableCacheMock(),
-    }));
     vi.doMock("@/lib/env", () => createRuntimeEnvMock({ ci: true }));
 
     const [
@@ -324,9 +196,6 @@ describe("load-messages runtime gating", () => {
   });
 
   it("keeps homepage B2B proof copy in complete runtime messages", async () => {
-    vi.doMock("next/cache", () => ({
-      unstable_cache: createUnstableCacheMock(),
-    }));
     vi.doMock("@/lib/env", () => createRuntimeEnvMock({ ci: true }));
 
     const { loadCompleteMessages } = await import("@/lib/i18n/load-messages");
@@ -357,9 +226,6 @@ describe("load-messages runtime gating", () => {
   });
 
   it("returns concrete structured-data names from complete source loading", async () => {
-    vi.doMock("next/cache", () => ({
-      unstable_cache: createUnstableCacheMock(),
-    }));
     vi.doMock("@/lib/env", () => createRuntimeEnvMock({ ci: true }));
 
     const [

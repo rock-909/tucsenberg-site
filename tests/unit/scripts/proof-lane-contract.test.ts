@@ -100,7 +100,7 @@ describe("package proof command surface", () => {
       "pnpm type-check && pnpm lint:check && pnpm test && pnpm build",
     );
     expect(scripts["website:build:cf"]).toBe(
-      "pnpm exec opennextjs-cloudflare build --noMinify",
+      "pnpm exec opennextjs-cloudflare build",
     );
   });
 
