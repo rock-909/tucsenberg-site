@@ -152,7 +152,8 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         limitKiB: 3000,
         preferredKiB: 2700,
         measuredArtifact: "source-checkout",
-        source: "Cloudflare Workers Free gzip upload limit",
+        source:
+          "Project self-budget (3000 KiB), ~72 KiB margin below the Cloudflare Workers Free gzip upload limit of 3072 KiB (3 MiB)",
       },
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },

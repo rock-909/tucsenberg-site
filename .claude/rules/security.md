@@ -29,9 +29,16 @@ Browser-exposed write endpoints need:
 - small route-local or shared rate limit when currently wired;
 - stable machine-readable error codes.
 
-Do not add body hashing, distributed rate limiting, or duplicate-submission
-replay as starter defaults. Add them later only when a real incident justifies
-the extra complexity.
+The existing distributed rate limiter (`src/lib/security/distributed-rate-limit.ts`,
+Upstash-backed with an in-memory fallback) is already wired to the public write
+routes and is the allowed established state — do not tear it out. What is
+forbidden is adding new abuse-control complexity on top of it (body hashing,
+duplicate-submission replay detection, per-field fingerprinting, etc.) as a
+starter default; add those later only when a real incident justifies them.
+
+If Upstash becomes a problem, the official Workers-native alternative is the
+`ratelimits` binding (wrangler >= 4.36, free, per-colo). Treat it as the
+established migration direction rather than inventing a new custom store.
 
 ## Turnstile failure classification
 
