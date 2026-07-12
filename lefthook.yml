@@ -135,3 +135,15 @@ pre-push:
           pnpm audit --prod --audit-level moderate --ignore-registry-errors
         fi
       fail_text: '安全检查失败 - 发现安全漏洞，请修复后推送'
+
+    # 死导出防复发门：全仓 knip 扫描，阻止零引用导出（尤其常量货架）无成本增长。
+    # react-doctor 的 knip 规则只覆盖改动文件；此门补上全仓基线。忽略清单见 knip.json，
+    # 治理面用 @public JSDoc 具名放行（参照 eslint-disable GSE 登记制）。
+    dead-export-check:
+      run: |
+        if [ -n "$RUN_FAST_PUSH" ]; then
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过死导出扫描（CI 会兜底）";
+        else
+          pnpm knip:check
+        fi
+      fail_text: '死导出检查失败 - 发现零引用导出。删除它，或（若是有意的治理/公共面）用 @public JSDoc 具名放行'
