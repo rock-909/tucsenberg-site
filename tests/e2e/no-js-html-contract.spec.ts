@@ -38,7 +38,15 @@ test.describe("No-JS HTML contract (English-only)", () => {
 
     const html = await page.content();
     expectExactlyOneMain(html);
-    expect(html).not.toContain("BAILOUT_TO_CLIENT_SIDE_RENDERING");
+    // The static shell must be server-rendered (prerendered), proven by the
+    // hero H1 living in the raw HTML string — not injected by client boot.
+    // NavigationProgressBar reads useSearchParams under an explicit
+    // <Suspense fallback={null}> in [locale]/layout.tsx, so Next.js emits a
+    // BAILOUT_TO_CLIENT_SIDE_RENDERING marker for that bounded subtree only.
+    // That marker is the officially-sanctioned prerender pattern (installed
+    // next docs: use-search-params.md, "Prerendering") — a contained subtree
+    // bailout, NOT a whole-page bailout — so we do not assert its absence.
+    expect(html).toMatch(site.homeHeading);
     expect(html).toContain('id="main-content"');
   });
 

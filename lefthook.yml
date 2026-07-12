@@ -121,7 +121,7 @@ pre-push:
     security-check:
       run: |
         if [ -n "$RUN_FAST_PUSH" ]; then
-          echo "⏭️  RUN_FAST_PUSH=1: 跳过安全审计（仅用于紧急推送，CI 会兜底）";
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过依赖安全审计 pnpm audit（仅用于紧急推送）。注意：CI 不跑 pnpm audit，只有 Semgrep 源码扫描，不覆盖依赖 CVE——请尽快本地补跑";
         else
           pnpm audit --prod --audit-level moderate --ignore-registry-errors
         fi
@@ -133,7 +133,7 @@ pre-push:
     dead-export-check:
       run: |
         if [ -n "$RUN_FAST_PUSH" ]; then
-          echo "⏭️  RUN_FAST_PUSH=1: 跳过死导出扫描（CI 会兜底）";
+          echo "⏭️  RUN_FAST_PUSH=1: 跳过死导出扫描（CI quality 作业会跑 pnpm knip:check 兜底）";
         else
           pnpm knip:check
         fi
