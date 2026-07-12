@@ -109,5 +109,6 @@ reviews/
 # Superpowers local state only; committed records use docs/superpowers/specs/ or docs/superpowers/plans/.
 .superpowers/
 .omx/
+.grok/
 .eslintcache-audit
 .worktrees/
