@@ -220,6 +220,74 @@ describe("CSP Report API Route - 核心功能测试", () => {
       expect(response.status).toBe(200);
     });
 
+    it("应该接受并解析 Reporting API 的 application/reports+json 数组报文", async () => {
+      // The modern report-to / Reporting-Endpoints channel POSTs an array of
+      // reports with camelCase body fields (blockedURL, documentURL, ...) under
+      // application/reports+json. It must parse to a 2xx, not 400.
+      const reportingApiBody = [
+        {
+          type: "csp-violation",
+          age: 10,
+          url: "https://example.com/page",
+          user_agent: "Mozilla/5.0",
+          body: {
+            documentURL: "https://example.com/page",
+            referrer: "https://example.com",
+            blockedURL: "https://malicious.com/script.js",
+            effectiveDirective: "script-src",
+            violatedDirective: "script-src",
+            originalPolicy: "default-src 'self'; script-src 'self'",
+            disposition: "enforce",
+            statusCode: 200,
+            sourceFile: "https://example.com/page",
+            lineNumber: 42,
+            columnNumber: 10,
+            sample: 'eval("malicious code")',
+          },
+        },
+      ];
+
+      const request = new NextRequest("http://localhost:3000/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify(reportingApiBody),
+        headers: {
+          "content-type": "application/reports+json",
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(console.warn).toHaveBeenCalledWith(
+        "CSP Violation Report",
+        expect.any(Object),
+      );
+    });
+
+    it("应该宽容处理 Reporting API 中的非 csp-violation 报告类型", async () => {
+      // Best-effort telemetry: unknown report types must be ignored, never 4xx-errored.
+      const reportingApiBody = [
+        {
+          type: "deprecation",
+          url: "https://example.com/page",
+          body: { id: "SomeDeprecation", message: "deprecated" },
+        },
+      ];
+
+      const request = new NextRequest("http://localhost:3000/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify(reportingApiBody),
+        headers: {
+          "content-type": "application/reports+json",
+        },
+      });
+
+      const response = await POST(request);
+
+      // Accepted-and-ignored: no csp-violation entries → 204 No Content.
+      expect(response.status).toBe(204);
+    });
+
     it("应该拒绝不支持的content type", async () => {
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",

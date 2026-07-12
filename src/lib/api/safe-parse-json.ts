@@ -49,6 +49,16 @@ function createJsonFailure(
   };
 }
 
+function isAcceptableJsonRoot(
+  raw: unknown,
+  allowTopLevelArray: boolean,
+): boolean {
+  if (raw === null || typeof raw !== "object") {
+    return false;
+  }
+  return Array.isArray(raw) ? allowTopLevelArray : true;
+}
+
 function resolveMaxBytes(options?: { maxBytes?: number }): number {
   return typeof options?.maxBytes === "number" && options.maxBytes > 0
     ? options.maxBytes
@@ -98,7 +108,9 @@ async function readBodyWithinLimit(
 /**
  * 安全解析 JSON 请求体，统一处理解析错误和非法结构。
  *
- * - 仅当解析结果为非 null 对象且不是数组时视为成功；
+ * - 默认仅当解析结果为非 null 对象且不是数组时视为成功；
+ * - 顶层数组默认拒绝（普通写接口应提交对象）；仅当调用方显式传入
+ *   `allowTopLevelArray: true` 时才接受数组，用于 Reporting API 批量报文；
  * - 解析失败或结果不是对象时，返回 { ok: false, errorCode: API_ERROR_CODES.INVALID_JSON_BODY }；
  * - 不直接决定 HTTP 状态码，由调用方根据结果返回 400 等响应；
  * - 使用统一日志格式记录解析失败，便于观察和告警。
@@ -112,6 +124,8 @@ export async function safeParseJson<T>(
     maxBytes?: number;
     /** 空请求体错误码；默认保持 INVALID_JSON_BODY */
     emptyBodyErrorCode?: EmptyBodyErrorCode;
+    /** 允许顶层 JSON 数组（Reporting API report-to 批量报文）；默认拒绝 */
+    allowTopLevelArray?: boolean;
   },
 ): Promise<SafeJsonParseResult<T>> {
   const maxBytes = resolveMaxBytes(options);
@@ -144,7 +158,7 @@ export async function safeParseJson<T>(
 
     const raw = JSON.parse(rawText) as unknown;
 
-    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    if (!isAcceptableJsonRoot(raw, options?.allowTopLevelArray ?? false)) {
       logger.warn("Invalid JSON structure - expected object", {
         route,
         receivedType: Array.isArray(raw) ? "array" : typeof raw,
