@@ -58,6 +58,7 @@ function collectLeafPaths(obj, prefix = "") {
   return paths;
 }
 
+// Local copy to avoid importing runtime src/ into a build script; keep in sync with src/lib/merge-objects.ts
 function mergeObjects(target, source) {
   const result = { ...target };
 
@@ -155,6 +156,7 @@ function compareLeafPathSets(leftLabel, leftPaths, rightLabel, rightPaths) {
   return false;
 }
 
+// Dormant under single-locale (en). Auto-activates when LOCALES_CONFIG gains locales — owner 2026-07-11 decision to keep.
 function validatePackLocaleParity() {
   console.log("\nValidating pack locale parity...");
   let allMatch = true;
@@ -192,6 +194,7 @@ function validatePackLocaleParity() {
   return allMatch;
 }
 
+// Dormant under single-locale (en). Auto-activates when LOCALES_CONFIG gains locales — owner 2026-07-11 decision to keep.
 function validateComposedCatalogParity() {
   console.log("\nValidating composed catalog locale parity...");
   let allMatch = true;
@@ -338,6 +341,7 @@ function validateLocale(locale) {
   };
 }
 
+// Dormant under single-locale (en). Auto-activates when LOCALES_CONFIG gains locales — owner 2026-07-11 decision to keep.
 function compareLocales(localeData) {
   console.log("\nComparing locales...");
   const locales = Object.keys(localeData);

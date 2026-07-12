@@ -75,8 +75,7 @@ export default defineConfig({
       include: ["src/**/*.{js,jsx,ts,tsx}"],
       // 将覆盖率输出目录统一至 reports/coverage，便于与其它报告汇总
       reportsDirectory: "./reports/coverage",
-      // json: 提供逐行命中数据，供 CI diff-line coverage 使用
-      reporter: ["text", "html", "json-summary", "json"],
+      reporter: ["text", "html", "json-summary"],
       exclude: [
         "node_modules/",
         ".next/",
@@ -134,10 +133,7 @@ export default defineConfig({
     // retry: 2, // 已移除全局 retry，遇到 flaky 测试应修复根因或局部声明
 
     // 报告器配置
-    reporters: debugTestOutput ? ["verbose", "json"] : ["default", "json"],
-    outputFile: {
-      json: "./reports/test-results.json",
-    },
+    reporters: debugTestOutput ? ["verbose"] : ["default"],
 
     // 环境变量
     env: {

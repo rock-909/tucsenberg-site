@@ -93,13 +93,12 @@ function formatCloudflareCompareForbiddenSnippet(snippet) {
   return check.type === "regex" ? check.match.toString() : check.match;
 }
 
-function collectCloudflareOfficialCompareFailures(options = {}) {
-  const { sourceOnly = false, generatedOnly = false } = options;
+function collectCloudflareOfficialCompareFailures() {
   const failures = [];
   const packageJson = JSON.parse(readCloudflareCompareFile("package.json"));
   const scripts = packageJson.scripts ?? {};
 
-  if (!generatedOnly) {
+  {
     for (const check of CLOUDFLARE_SOURCE_CHECKS) {
       const content = readCloudflareCompareFile(check.file);
       const missing = check.requiredSnippets.filter(
@@ -191,24 +190,18 @@ function collectCloudflareOfficialCompareFailures(options = {}) {
     }
   }
 
-  if (generatedOnly) {
-    console.warn(
-      "cf-official-compare: --generated-only is retired; native Cloudflare deploy-artifact proof is `pnpm exec wrangler deploy --dry-run --env preview` after `pnpm website:build:cf`.",
-    );
-  }
-
   return failures;
 }
 
 function runCloudflareOfficialCompareCli(args = []) {
   const sourceOnly = args.includes("--source-only");
-  const generatedOnly = args.includes("--generated-only");
-  const requireGenerated =
-    generatedOnly || args.includes("--require-generated") || !sourceOnly;
 
-  if (sourceOnly && generatedOnly) {
+  if (args.includes("--generated-only")) {
     console.error(
-      "cf-official-compare: --generated-only is retired; use --source-only plus wrangler deploy --dry-run.",
+      "cf-official-compare: --generated-only is retired and runs no checks. " +
+        "Use `--source-only` for the source baseline, and " +
+        "`pnpm exec wrangler deploy --dry-run --env preview` (after `pnpm website:build:cf`) " +
+        "for native deploy-artifact proof.",
     );
     return false;
   }
@@ -220,11 +213,7 @@ function runCloudflareOfficialCompareCli(args = []) {
     return false;
   }
 
-  const failures = collectCloudflareOfficialCompareFailures({
-    sourceOnly,
-    generatedOnly,
-    requireGenerated,
-  });
+  const failures = collectCloudflareOfficialCompareFailures();
 
   if (failures.length > 0) {
     console.error("cf-official-compare: failed");
@@ -243,11 +232,7 @@ function runCloudflareOfficialCompareCli(args = []) {
   }
 
   console.log("cf-official-compare: passed");
-  if (generatedOnly) {
-    console.log(
-      "Generated phase config checks are retired. Run `pnpm exec wrangler deploy --dry-run --env preview` for native deploy-artifact proof.",
-    );
-  } else if (sourceOnly) {
+  if (sourceOnly) {
     console.log(
       "Verified static-generation Cloudflare source baseline against open-next.config.ts, wrangler.jsonc, and package deploy aliases.",
     );

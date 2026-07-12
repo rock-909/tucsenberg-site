@@ -79,7 +79,6 @@ const {
   validatePublicLaunchTrustContent,
 } = require("./quality/checks/production-config");
 const {
-  CONTENT_READINESS_PROFILE_IDS,
   collectContentReadinessFindings,
   runContentReadinessCheck,
   runContentReadinessCli,
@@ -189,7 +188,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-  CONTENT_READINESS_PROFILE_IDS,
   CHECKS: TRUTH_DOC_CHECKS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
