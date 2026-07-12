@@ -1,15 +1,22 @@
 /**
  * Product Inquiry API — Integration Tests
  *
- * Tests the full POST /api/inquiry chain with only external services mocked:
+ * Drives the real POST /api/inquiry route orchestration with the external
+ * services mocked at their boundaries:
+ * - Rate-limit store (`checkDistributedRateLimit`, Upstash-backed) — mocked to
+ *   allow-by-default
  * - Turnstile verification (Cloudflare API)
  * - Lead pipeline (Resend email + Airtable CRM)
  *
- * Internal protection chain runs as real code:
- * - Rate limiting (via withRateLimit HOF)
+ * The route's own protection wiring runs as real code:
+ * - Rate-limit gate ordering via the withRateLimit HOF (only the distributed
+ *   store decision above is mocked; the HOF's short-circuit / 429 path is real)
  * - JSON parsing + validation
  * - Turnstile token presence check
  * - No starter-default replay-key requirement
+ *
+ * This is an integration-layer guard for the route contract, not deployed
+ * lead-chain proof; the deployed limiter and lead pipeline own that boundary.
  */
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";

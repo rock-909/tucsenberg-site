@@ -111,51 +111,22 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
   });
 
   test.describe("1. Turnstile 验证流程", () => {
-    test("应该加载 Turnstile widget（英文页面）", async ({ page }) => {
+    test("联系表单内存在 Turnstile 挂载区域", async ({ page }) => {
       await gotoContactPage(page, test.info());
 
       // 检查表单存在
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
 
-      // 等待 LazyTurnstile 懒加载完成（IntersectionObserver + requestIdleCallback）
-      // 最长等待时间：1500ms timeout + 额外缓冲
-      await page.waitForTimeout(3000);
-
-      // 检查 Turnstile widget 容器或 iframe
-      // 注意：test-mode smoke 仍可能因为懒加载时机等原因暂时看不到 Turnstile 元素
-      // 这是非阻塞性检查，只记录警告
-      const hasTurnstileIframe =
-        (await page
-          .locator('iframe[src*="challenges.cloudflare.com"]')
-          .count()) > 0;
-      const hasTurnstileContainer =
-        (await page.locator('[class*="turnstile"]').count()) > 0;
-      const hasMock =
-        (await page.locator('[data-testid="turnstile-mock"]').count()) > 0;
-      const hasPlaceholder = (await page.locator(".animate-pulse").count()) > 0;
-
-      const hasTurnstileElement =
-        hasTurnstileIframe ||
-        hasTurnstileContainer ||
-        hasMock ||
-        hasPlaceholder;
-
-      // 记录 Turnstile 状态（非阻塞性检查）
-      if (!hasTurnstileElement) {
-        console.warn("⚠️  Turnstile widget not detected in test-mode smoke");
-        console.warn(
-          "    This may be due to lazy loading timing or local test harness configuration",
-        );
-        console.warn(
-          "    Real submission behavior must still be verified by post-deploy smoke",
-        );
-      } else {
-        console.log("✅ Turnstile element detected");
-      }
-
-      // 验证表单基本功能（不依赖 Turnstile）
-      await expect(form).toBeVisible();
+      // LazyTurnstile 始终在表单内渲染一个挂载区域，只是形态会变化：
+      // 懒加载占位骨架（.animate-pulse）→ 真实 widget（Cloudflare iframe）
+      // 或加载失败回退（.turnstile-fallback）。这里断言该区域确实存在，
+      // 而不是像旧写法那样谎称 widget 一定加载成功后再用 console.warn 掩盖失败。
+      // test-mode 懒加载时机下 widget 未必及时出现，但挂载区域一定在。
+      const turnstileRegion = form.locator(
+        'iframe[src*="challenges.cloudflare.com"], .turnstile-fallback, .animate-pulse',
+      );
+      await expect(turnstileRegion.first()).toBeVisible();
     });
 
     test("提交按钮初始状态应该被禁用", async ({ page }) => {

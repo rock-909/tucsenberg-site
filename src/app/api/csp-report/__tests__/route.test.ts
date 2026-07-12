@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { suppressExpectedCspConsole } from "./test-utils";
 
 async function importRouteModule() {
   return import("../route");
@@ -43,9 +44,7 @@ function getAllowMethods(response: Response): string[] {
 describe("CSP Report API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset console mocks
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    suppressExpectedCspConsole();
   });
 
   afterEach(() => {
@@ -441,8 +440,7 @@ describe("CSP Report API Route", () => {
 
         // Clear mocks for next iteration
         vi.clearAllMocks();
-        vi.spyOn(console, "warn").mockImplementation(() => {});
-        vi.spyOn(console, "error").mockImplementation(() => {});
+        suppressExpectedCspConsole();
       }
     });
   });

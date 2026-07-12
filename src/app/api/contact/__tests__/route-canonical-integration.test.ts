@@ -5,6 +5,17 @@ import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { POST } from "../route";
 
+/**
+ * Canonical /api/contact route wiring checks.
+ *
+ * This suite drives the real contact route orchestration — validation,
+ * Turnstile gating, canonical lead assembly, and response shape — but mocks the
+ * deeper pipeline around it: the rate-limit store, Turnstile verification, and
+ * `processLead` (Resend email + Airtable record). Treat it as an
+ * integration-layer guard for the route's canonical ordering and public
+ * response contract, not deployed lead-chain proof. Route/action protection
+ * suites and deployed canaries own that proof boundary.
+ */
 vi.mock("@/lib/logger", () => ({
   logger: {
     info: vi.fn(),

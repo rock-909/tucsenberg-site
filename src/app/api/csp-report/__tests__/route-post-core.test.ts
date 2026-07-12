@@ -8,15 +8,14 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
+import { suppressExpectedCspConsole } from "./test-utils";
 
 // Unmock zod to use real validation in this test file
 
 describe("CSP Report API Route - 核心功能测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset console mocks
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    suppressExpectedCspConsole();
   });
 
   afterEach(() => {

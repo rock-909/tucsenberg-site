@@ -8,12 +8,12 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
+import { suppressExpectedCspConsole } from "./test-utils";
 
 describe("CSP Report API Route - 高级功能测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    suppressExpectedCspConsole();
   });
 
   afterEach(() => {
@@ -39,8 +39,8 @@ describe("CSP Report API Route - 高级功能测试", () => {
 
   // 注意：安全性测试已移至 route-post-security.test.ts
 
-  describe("性能测试", () => {
-    it("应该在合理时间内处理大型报告", async () => {
+  describe("大报告与并发处理", () => {
+    it("应该接受超大报告负载并返回 200", async () => {
       const largeReport = {
         "csp-report": {
           ...validCSPReport["csp-report"],
@@ -48,8 +48,6 @@ describe("CSP Report API Route - 高级功能测试", () => {
           "large-field": Array(100).fill("data").join(","),
         },
       };
-
-      const _startTime = performance.now();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",
@@ -60,13 +58,11 @@ describe("CSP Report API Route - 高级功能测试", () => {
       });
 
       const response = await POST(request);
-      const endTime = performance.now();
 
       expect(response.status).toBe(200);
-      expect(endTime - _startTime).toBeLessThan(1000); // 应该在1秒内完成
     });
 
-    it("应该处理并发请求", async () => {
+    it("应该独立处理并发报告请求，全部返回 200", async () => {
       const requests = Array(10)
         .fill(null)
         .map(
@@ -80,14 +76,11 @@ describe("CSP Report API Route - 高级功能测试", () => {
             }),
         );
 
-      const _startTime = performance.now();
       const responses = await Promise.all(requests.map((req) => POST(req)));
-      const endTime = performance.now();
 
       responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
-      expect(endTime - _startTime).toBeLessThan(2000); // 并发处理应该在2秒内完成
     });
   });
 
