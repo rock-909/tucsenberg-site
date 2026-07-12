@@ -52,5 +52,5 @@ Do not treat starter examples as client-ready facts.
 - Home is a structured campaign landing exception: current section order and
   reusable section copy can stay in config/i18n as an implementation detail
   until a conversion-copy rewrite moves it.
-- Generated workflow context under `docs/superpowers/plans/workflows/cwf/**` can explain work,
+- Generated workflow/plan context under `docs/superpowers/plans/**` can explain work,
   but it is not a content authoring source.

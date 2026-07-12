@@ -315,7 +315,7 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
       "content/config/content.json",
-      "docs/superpowers/plans/workflows/cwf/**",
+      "docs/superpowers/plans/**",
     ],
   },
   {
@@ -453,6 +453,46 @@ function collectMarkdownTruthFindings(rootDir) {
   return failures;
 }
 
+function extractFrontmatterPathGlobs(content) {
+  const frontmatter = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!frontmatter) return [];
+  return [...frontmatter[1].matchAll(/^\s*-\s*"([^"]+)"/gm)].map(
+    (match) => match[1],
+  );
+}
+
+function ruleGlobMatchesRealFile(glob, rootDir) {
+  // A literal path (plain file like `next.config.ts`, or a Next.js route-group
+  // directory like `src/app/[locale]/layout.tsx` where `[ ]` are glob character
+  // classes rather than literal brackets) is alive when it exists on disk.
+  if (fs.existsSync(path.join(rootDir, glob))) return true;
+  try {
+    return fs.globSync(glob, { cwd: rootDir }).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+// 护活真相：每个 .claude/rules/*.md 的 frontmatter `paths:` glob 都必须命中至少
+// 一个真实文件。命中 0 个说明规则文件在为已删除/不存在的代码路径立规矩——
+// 属于死 glob，必须失败，逼规则跟随真实代码路径。
+function collectRuleFrontmatterGlobFindings(rootDir) {
+  const rulesDir = ".claude/rules";
+  const failures = [];
+  for (const file of collectMarkdownFiles(rootDir, rulesDir)) {
+    const content = readTruthFile(rootDir, file);
+    for (const glob of extractFrontmatterPathGlobs(content)) {
+      if (!ruleGlobMatchesRealFile(glob, rootDir)) {
+        failures.push({
+          file,
+          error: `frontmatter paths glob matches no real file "${glob}"`,
+        });
+      }
+    }
+  }
+  return failures;
+}
+
 function findOutOfOrderCommand(sequence, content) {
   let previousIndex = -1;
 
@@ -552,6 +592,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
   }
 
   failures.push(...collectMarkdownTruthFindings(rootDir));
+  failures.push(...collectRuleFrontmatterGlobFindings(rootDir));
 
   const packageJsonPath = path.join(rootDir, "package.json");
   if (fs.existsSync(packageJsonPath)) {
@@ -650,6 +691,7 @@ module.exports = {
   HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],
   RETIRED_CURRENT_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
+  collectRuleFrontmatterGlobFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,
   runTruthDocsCheck,
