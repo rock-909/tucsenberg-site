@@ -6,7 +6,11 @@ import type AirtableNS from "airtable";
 
 export interface AirtableLike {
   base: (id: string) => AirtableNS.Base;
-  configure: (opts: { endpointUrl: string; apiKey: string }) => void;
+  configure: (opts: {
+    endpointUrl: string;
+    apiKey: string;
+    requestTimeout?: number;
+  }) => void;
 }
 
 export function resolveAirtableModule(mod: unknown): AirtableLike | null {
