@@ -11,6 +11,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, OPTIONS, POST } from "@/app/api/csp-report/route";
+import { suppressExpectedCspConsole } from "./test-utils";
 
 function createOptionsRequest(origin = "http://localhost:3000") {
   return new NextRequest("http://localhost:3000/api/csp-report", {
@@ -35,9 +36,7 @@ function getAllowMethods(response: Response): string[] {
 describe("CSP Report API Route - GET & OPTIONS Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset console mocks
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    suppressExpectedCspConsole();
   });
 
   afterEach(() => {

@@ -11,6 +11,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
+import { suppressExpectedCspConsole } from "./test-utils";
 
 // 注意：基础测试已移至 route-post-core.test.ts
 // 注意：高级功能测试已移至 route-post-advanced.test.ts
@@ -18,9 +19,7 @@ import { POST } from "@/app/api/csp-report/route";
 describe("CSP Report API Route - 集成测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset console mocks
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    suppressExpectedCspConsole();
   });
 
   afterEach(() => {

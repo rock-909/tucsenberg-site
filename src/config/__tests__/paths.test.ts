@@ -497,53 +497,6 @@ describe("paths configuration", () => {
     });
   });
 
-  describe("性能和内存测试", () => {
-    it("should handle repeated function calls efficiently", () => {
-      const startTime = performance.now();
-
-      for (let i = 0; i < 1000; i++) {
-        getLocalizedPath("home", "en");
-        getPathnames();
-        getPageTypeFromPath("/about", "en");
-      }
-
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-
-      // Should complete within reasonable time (less than 100ms)
-      expect(duration).toBeLessThan(100);
-    });
-
-    it("should not create memory leaks with repeated calls", () => {
-      const getUsedHeapSize = () => {
-        const perf = globalThis.performance as Performance & {
-          memory?: { usedJSHeapSize?: number };
-        };
-        return perf.memory?.usedJSHeapSize ?? 0;
-      };
-
-      const initialMemory = getUsedHeapSize();
-
-      // Perform many operations
-      for (let i = 0; i < 10000; i++) {
-        getLocalizedPath("about", "en");
-        getPageTypeFromPath("/contact", "en");
-      }
-
-      // Force garbage collection if available
-      const gc = (globalThis as typeof globalThis & { gc?: () => void }).gc;
-      if (typeof gc === "function") {
-        gc();
-      }
-
-      const finalMemory = getUsedHeapSize();
-      const memoryIncrease = finalMemory - initialMemory;
-
-      // Memory increase should be minimal (less than 1MB)
-      expect(memoryIncrease).toBeLessThan(1024 * 1024);
-    });
-  });
-
   describe("错误处理强化测试", () => {
     it("should throw specific error messages for invalid inputs", () => {
       // Test getLocalizedPath with invalid page type

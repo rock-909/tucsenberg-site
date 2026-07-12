@@ -6,15 +6,13 @@ import {
   waitForStablePage,
 } from "./test-environment-setup";
 
-const corePages = [
-  "about",
-  "products",
-  "resources",
-  "blog",
-  "contact",
-] as const;
+// English-only site: `resources` and `blog` are retired routes (they 404), and
+// `/zh/*` 404s as well. A 404 page still renders main#main-content + an h1 with
+// no overflow, so keeping those entries produced false-green assertions. Scope
+// the calibration to the real English core pages instead.
+const corePages = ["about", "products", "contact"] as const;
 
-const locales = ["en", "zh"] as const;
+const locales = ["en"] as const;
 
 async function preparePage(page: Page, path: string) {
   await page.goto(path, { waitUntil: "domcontentloaded" });
