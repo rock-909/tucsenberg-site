@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { routing } from "@/i18n/routing-config";
+import { HTTP_NOT_FOUND } from "@/constants";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -18,7 +19,7 @@ function isRetiredLocalePath(pathname: string): boolean {
 
 function createRetiredLocaleNotFound() {
   return new NextResponse("Not Found", {
-    status: 404,
+    status: HTTP_NOT_FOUND,
     headers: RETIRED_LOCALE_NOT_FOUND_HEADERS,
   });
 }

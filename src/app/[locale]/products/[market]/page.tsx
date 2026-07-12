@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fragment } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   getAllMarketSlugs,
   getMarketBySlug,
@@ -274,10 +274,23 @@ function ProductSceneWall({
   );
 }
 
-function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
+interface ProductLandingLabels {
+  faqTitle: string;
+  finalCtaTitle: string;
+  rfqNoteFallback: string;
+  downloadSpec: string;
+}
+
+function ProductFaqSection({
+  page,
+  labels,
+}: {
+  page: TucsenbergProductPage;
+  labels: ProductLandingLabels;
+}) {
   return (
     <section className="md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
-      <h2 className="text-section mb-4 md:mb-0">FAQ</h2>
+      <h2 className="text-section mb-4 md:mb-0">{labels.faqTitle}</h2>
       <div className="max-w-[75ch] min-w-0 divide-y divide-border">
         {page.faqs.map((faq) => (
           <article key={faq.question} className="py-5 first:pt-0 last:pb-0">
@@ -292,20 +305,25 @@ function ProductFaqSection({ page }: { page: TucsenbergProductPage }) {
   );
 }
 
-function ProductFinalCta({ page }: { page: TucsenbergProductPage }) {
+function ProductFinalCta({
+  page,
+  labels,
+}: {
+  page: TucsenbergProductPage;
+  labels: ProductLandingLabels;
+}) {
   return (
     <section className="rounded-2xl bg-accent px-6 py-10 md:px-10 md:py-12">
-      <h2 className="text-section">Request a quote</h2>
+      <h2 className="text-section">{labels.finalCtaTitle}</h2>
       <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-        {page.rfqNote ??
-          "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer."}
+        {page.rfqNote ?? labels.rfqNoteFallback}
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button asChild size="lg">
           <Link href={page.cta.href}>{page.cta.label}</Link>
         </Button>
         <Button asChild size="lg" variant="outline">
-          <a href={page.downloadHref}>Download spec sheet</a>
+          <a href={page.downloadHref}>{labels.downloadSpec}</a>
         </Button>
       </div>
       {page.cta.note ? (
@@ -354,6 +372,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
   if (!productPage) {
     notFound();
   }
+
+  const tLanding = await getTranslations("catalog.market.landing");
+  const landingLabels: ProductLandingLabels = {
+    faqTitle: tLanding("faqTitle"),
+    finalCtaTitle: tLanding("finalCtaTitle"),
+    rfqNoteFallback: tLanding("rfqNoteFallback"),
+    downloadSpec: tLanding("downloadSpec"),
+  };
 
   const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(
     pageData.market.slug,
@@ -442,8 +468,8 @@ export default async function MarketPage({ params }: MarketPageProps) {
         {productPage.calculator ? (
           <ProductRunCalculator calculator={productPage.calculator} />
         ) : null}
-        <ProductFaqSection page={productPage} />
-        <ProductFinalCta page={productPage} />
+        <ProductFaqSection page={productPage} labels={landingLabels} />
+        <ProductFinalCta page={productPage} labels={landingLabels} />
       </div>
     </div>
   );

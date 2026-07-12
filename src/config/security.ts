@@ -6,10 +6,10 @@ import {
   isRuntimeTest,
 } from "../lib/env";
 
-export type SecurityHeader = {
+export interface SecurityHeader {
   key: string;
   value: string;
-};
+}
 
 /**
  * Named endpoint for the modern Reporting API (`Reporting-Endpoints` header +
