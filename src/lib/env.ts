@@ -10,8 +10,8 @@ import { z } from "zod";
 export const serverEnvSchema = {
   // Email Service (Resend)
   RESEND_API_KEY: z.string().min(1).optional(),
-  EMAIL_FROM: z.string().email().optional(),
-  EMAIL_REPLY_TO: z.string().email().optional(),
+  EMAIL_FROM: z.email().optional(),
+  EMAIL_REPLY_TO: z.email().optional(),
 
   // Data Storage (Airtable)
   AIRTABLE_API_KEY: z.string().min(1).optional(),

@@ -48,7 +48,7 @@ export function ProductLineCards({ translate }: { translate: ProductsText }) {
     <section data-section="product-line-cards" className="mb-16">
       <div className="max-w-2xl">
         <h2 className="text-section">{translate("overview.cardsTitle")}</h2>
-        <p className="text-muted-foreground mt-3">
+        <p className="mt-3 text-muted-foreground">
           {translate("overview.cardsDescription")}
         </p>
       </div>
@@ -65,12 +65,12 @@ export function ProductLineCards({ translate }: { translate: ProductsText }) {
               {diagram ? (
                 <div
                   aria-hidden
-                  className="border-border bg-background mb-4 overflow-hidden rounded-md border p-3"
+                  className="mb-4 overflow-hidden rounded-md border border-border bg-background p-3"
                 >
                   <ProductLineDiagram kind={diagram.kind} ariaLabel="" />
                 </div>
               ) : null}
-              <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+              <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 <span>P{index + 1}</span>
                 <span aria-hidden="true">/</span>
                 <span>{market.standardLabel}</span>
@@ -80,7 +80,7 @@ export function ProductLineCards({ translate }: { translate: ProductsText }) {
                   {translate(`markets.${market.slug}.label`)}
                 </Link>
               </h3>
-              <p className="text-muted-foreground mt-3 text-sm leading-6">
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 {translate(`markets.${market.slug}.description`)}
               </p>
             </article>
@@ -105,19 +105,19 @@ export function ProductOverviewPath({
         <h2 className="text-2xl font-semibold">
           {translate("overview.pathTitle")}
         </h2>
-        <p className="text-muted-foreground mt-3 text-base leading-7">
+        <p className="mt-3 text-base leading-7 text-muted-foreground">
           {translate("overview.pathDescription")}
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {PRODUCT_OVERVIEW_PATH_KEYS.map((key, index) => (
-            <div key={key} className="border-border rounded-2xl border p-4">
+            <div key={key} className="rounded-2xl border border-border p-4">
               <span className="text-xs font-semibold text-[var(--primary-text)]">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <h3 className="mt-3 text-base font-semibold">
                 {translate(`path.items.${key}.title`)}
               </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-6">
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {translate(`path.items.${key}.description`)}
               </p>
             </div>
@@ -125,18 +125,18 @@ export function ProductOverviewPath({
         </div>
       </div>
 
-      <aside className="border-border bg-muted/30 rounded-3xl border p-6 md:p-8">
+      <aside className="rounded-3xl border border-border bg-muted/30 p-6 md:p-8">
         <h2 className="text-2xl font-semibold">
           {translate("overview.detailTitle")}
         </h2>
-        <p className="text-muted-foreground mt-3 text-sm leading-6">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {translate("overview.detailDescription")}
         </p>
-        <ul className="text-muted-foreground mt-6 space-y-3 text-sm leading-6">
+        <ul className="mt-6 space-y-3 text-sm leading-6 text-muted-foreground">
           {PRODUCT_DETAIL_UPGRADE_KEYS.map((key) => (
             <li key={key} className="flex gap-3">
               <span
-                className="bg-primary mt-2 size-1.5 shrink-0 rounded-full"
+                className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
                 aria-hidden="true"
               />
               <span>{translate(`detail.items.${key}`)}</span>
@@ -161,14 +161,14 @@ export function ProductLaunchBoundary({
       <h2 className="text-2xl font-semibold">
         {translate("overview.boundaryTitle")}
       </h2>
-      <p className="text-muted-foreground mt-3 max-w-3xl">
+      <p className="mt-3 max-w-3xl text-muted-foreground">
         {translate("overview.boundaryDescription")}
       </p>
       <ul className="mt-6 grid gap-3 md:grid-cols-3">
         {PRODUCT_BOUNDARY_KEYS.map((key) => (
           <li
             key={key}
-            className="border-border bg-muted rounded-md border px-4 py-3 text-sm font-medium"
+            className="rounded-md border border-border bg-muted px-4 py-3 text-sm font-medium"
           >
             {translate(`boundary.items.${key}`)}
           </li>
@@ -193,7 +193,7 @@ export function ProductsPageCta({
     <section className="surface-card px-6 py-10 md:px-10 md:py-12">
       <div className="max-w-2xl">
         <h2 className="text-section">{title}</h2>
-        <p className="text-muted-foreground mt-3">{description}</p>
+        <p className="mt-3 text-muted-foreground">{description}</p>
       </div>
       <div className="mt-8 flex flex-wrap gap-3">
         <Button size="lg" asChild>

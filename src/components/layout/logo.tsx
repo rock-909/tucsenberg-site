@@ -62,7 +62,7 @@ export function Logo({
       href="/"
       prefetch={false}
       className={cn(
-        "flex min-w-0 max-w-full items-center gap-2 transition-opacity hover:opacity-80",
+        "flex max-w-full min-w-0 items-center gap-2 transition-opacity hover:opacity-80",
         className,
       )}
       aria-label={ariaLabel}

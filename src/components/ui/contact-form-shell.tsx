@@ -15,7 +15,7 @@ export function ContactFormShell({
   return (
     <RadixThemePilot className="mx-auto w-full max-w-2xl">
       <RadixCard
-        className={cn("min-w-0 w-full", className)}
+        className={cn("w-full min-w-0", className)}
         data-testid="contact-form-shell"
         size="3"
         variant="surface"

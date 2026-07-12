@@ -102,7 +102,7 @@ function MobileNavigationHeader({
       <div className="text-lg font-semibold" aria-hidden="true">
         {siteName}
       </div>
-      <SheetDescription className="text-muted-foreground text-sm">
+      <SheetDescription className="text-sm text-muted-foreground">
         {siteDescription}
       </SheetDescription>
     </SheetHeader>
