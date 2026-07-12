@@ -7,6 +7,7 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { Button } from "@/components/ui/button";
 import { BreathingReveal } from "@/components/motion/breathing-reveal";
+import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { HeroSection } from "@/components/sections/hero-section";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -472,14 +473,19 @@ export default async function Home({ params }: HomePageProps) {
     ),
   } satisfies Record<SingleSiteHomeSectionKey, ReactNode>;
 
+  // The homepage is the only route that animates content (BreathingReveal
+  // viewport reveals). The LazyMotion runtime therefore lives here instead of in
+  // the root layout, so non-home routes no longer ship the motion runtime.
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <JsonLdGraphScript locale={locale as Locale} />
-      <div>
-        {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (
-          <Fragment key={sectionKey}>{homeSections[sectionKey]}</Fragment>
-        ))}
+    <LightMotionProvider>
+      <div className="min-h-dvh bg-background text-foreground">
+        <JsonLdGraphScript locale={locale as Locale} />
+        <div>
+          {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (
+            <Fragment key={sectionKey}>{homeSections[sectionKey]}</Fragment>
+          ))}
+        </div>
       </div>
-    </div>
+    </LightMotionProvider>
   );
 }

@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { PageTransition } from "@/components/motion/page-transition";
 
 vi.mock("next/navigation", () => ({
@@ -9,15 +8,17 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("PageTransition", () => {
-  it("renders children", () => {
+  it("renders children without the enter animation on first paint", () => {
     render(
-      <LightMotionProvider>
-        <PageTransition>
-          <p>Page body</p>
-        </PageTransition>
-      </LightMotionProvider>,
+      <PageTransition>
+        <p>Page body</p>
+      </PageTransition>,
     );
 
-    expect(screen.getByText("Page body")).toBeInTheDocument();
+    const body = screen.getByText("Page body");
+    expect(body).toBeInTheDocument();
+    // First paint (no client navigation yet) must stay static so the initial /
+    // LCP render is not animated.
+    expect(body.parentElement).not.toHaveClass("animate-page-enter");
   });
 });

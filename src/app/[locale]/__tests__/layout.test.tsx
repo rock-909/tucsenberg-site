@@ -49,12 +49,6 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/en",
 }));
 
-vi.mock("@/components/motion/light-motion-provider", () => ({
-  LightMotionProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
-
 vi.mock("@/components/motion/page-transition", () => ({
   PageTransition: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>

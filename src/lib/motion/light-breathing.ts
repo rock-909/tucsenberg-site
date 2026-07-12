@@ -35,24 +35,10 @@ export const lightBreathingRevealTransition = {
   ease: LIGHT_BREATHING_EASE,
 } as const;
 
-export const lightBreathingPageEnterTransition = {
-  duration: 0.32,
-  ease: LIGHT_BREATHING_EASE,
-  exit: {
-    duration: 0.24,
-    ease: LIGHT_BREATHING_EASE,
-  },
-} as const;
-
-export const lightBreathingPageEnter = {
-  opacity: 0,
-  y: 14,
-} as const;
-
-export const lightBreathingPageActive = {
-  opacity: 1,
-  y: 0,
-} as const;
+// The route-change (page enter) animation is now a pure-CSS keyframe
+// (`.animate-page-enter` / `@keyframes pageEnter` in globals.css: 0.32s,
+// cubic-bezier(0.25, 1, 0.5, 1), translateY(14px) -> 0). It no longer needs a
+// motion/react token here, which keeps the motion runtime off non-home routes.
 
 /**
  * Scroll reveal — first-pass timing (light, not delayed into the reading band).

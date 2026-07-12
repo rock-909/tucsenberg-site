@@ -10,7 +10,6 @@ import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/layout/header";
 import { NavigationProgressBar } from "@/components/navigation/navigation-progress-bar";
-import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { PageTransition } from "@/components/motion/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
@@ -74,40 +73,38 @@ async function AsyncLocaleLayoutContent({
       </a>
       <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <LightMotionProvider>
-            <Suspense fallback={null}>
-              <NavigationProgressBar />
+          <Suspense fallback={null}>
+            <NavigationProgressBar />
+          </Suspense>
+          {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
+          <AttributionBootstrap />
+
+          {/* 导航栏 */}
+          <Header
+            locale={locale}
+            contactSalesLabel={contactSalesLabel}
+            openMenuLabel={openMenuLabel}
+            closeMenuLabel={closeMenuLabel}
+            mainNavItems={mainNavItems}
+          />
+
+          {/* 主要内容 */}
+          <main id="main-content" className="flex-1">
+            <Suspense fallback={children}>
+              <PageTransition>{children}</PageTransition>
             </Suspense>
-            {/* P1-1 Fix: Single attribution initialization for UTM tracking */}
-            <AttributionBootstrap />
+          </main>
 
-            {/* 导航栏 */}
-            <Header
-              locale={locale}
-              contactSalesLabel={contactSalesLabel}
-              openMenuLabel={openMenuLabel}
-              closeMenuLabel={closeMenuLabel}
-              mainNavItems={mainNavItems}
-            />
+          {/* 页脚：发丝线三列 + 法务条，法务信息在 Footer 内部取自 single-site 配置 */}
+          <Footer
+            columns={FOOTER_COLUMNS}
+            themeToggleSlot={
+              <LazyThemeSwitcher data-testid="footer-theme-toggle" />
+            }
+          />
 
-            {/* 主要内容 */}
-            <main id="main-content" className="flex-1">
-              <Suspense fallback={children}>
-                <PageTransition>{children}</PageTransition>
-              </Suspense>
-            </main>
-
-            {/* 页脚：发丝线三列 + 法务条，法务信息在 Footer 内部取自 single-site 配置 */}
-            <Footer
-              columns={FOOTER_COLUMNS}
-              themeToggleSlot={
-                <LazyThemeSwitcher data-testid="footer-theme-toggle" />
-              }
-            />
-
-            {/* Consent UI and analytics are deferred until the main thread is idle. */}
-            <LazyCookieConsentIsland />
-          </LightMotionProvider>
+          {/* Consent UI and analytics are deferred until the main thread is idle. */}
+          <LazyCookieConsentIsland />
         </ThemeProvider>
       </NextIntlClientProvider>
     </>
