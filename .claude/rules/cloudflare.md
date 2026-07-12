@@ -4,8 +4,6 @@ paths:
   - "open-next.config.ts"
   - "wrangler.jsonc"
   - "scripts/starter-checks.js"
-  - "src/app/actions.ts"
-  - "src/app/**/actions.ts"
   - "src/lib/actions/**"
   - "src/lib/security/**"
 ---
@@ -102,12 +100,14 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 
 ## Public submission identity
 
-Browser contact submissions go through `/api/contact`. Middleware must not
-inject internal client-IP headers for public form flows.
+Browser contact submissions go through the `/api/contact` route handler.
+Middleware must not inject internal client-IP headers for public form flows.
 
-Server Action contact code is compatibility-only. It must validate internally
-and fail closed when request identity is unavailable rather than relying on
-middleware-provided trusted IP headers.
+There is no live `'use server'` Server Action contact path; the shared helpers in
+`src/lib/actions/` are ordinary utilities with no `'use server'` directive. Any
+server-side submission code must validate internally and fail closed when request
+identity is unavailable rather than relying on middleware-provided trusted IP
+headers.
 
 ## Cache and runtime bindings
 

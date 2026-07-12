@@ -17,13 +17,21 @@ Before creating a component, check existing folders:
 
 ```text
 src/components/ui
-src/components/blocks
 src/components/sections
 src/components/forms
 src/components/products
 src/components/layout
+src/components/navigation
+src/components/footer
 src/components/contact
-src/components/trust
+src/components/content
+src/components/grid
+src/components/motion
+src/components/errors
+src/components/cookie
+src/components/security
+src/components/seo
+src/components/monitoring
 ```
 
 Decision order:

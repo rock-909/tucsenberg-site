@@ -7,7 +7,6 @@ paths:
   - "package.json"
   - "pnpm-lock.yaml"
   - "eslint.config.mjs"
-  - "stryker.config.json"
 ---
 
 # Code Quality Rules

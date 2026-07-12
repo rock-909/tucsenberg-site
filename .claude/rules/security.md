@@ -1,13 +1,10 @@
 ---
 paths:
   - "src/app/api/**/*"
-  - "src/app/actions.ts"
-  - "src/app/**/actions.ts"
   - "src/lib/security/**/*"
   - "src/lib/api/**"
   - "src/lib/actions/**"
   - "src/lib/lead-pipeline/lead-schema.ts"
-  - "src/lib/security-validation.ts"
   - "src/config/security.ts"
   - "next.config.ts"
 ---
@@ -30,11 +27,16 @@ Browser-exposed write endpoints need:
 - stable machine-readable error codes.
 
 The existing distributed rate limiter (`src/lib/security/distributed-rate-limit.ts`,
-Upstash-backed with an in-memory fallback) is already wired to the public write
-routes and is the allowed established state — do not tear it out. What is
-forbidden is adding new abuse-control complexity on top of it (body hashing,
-duplicate-submission replay detection, per-field fingerprinting, etc.) as a
-starter default; add those later only when a real incident justifies them.
+Upstash-backed) is already wired to the public write routes and is the allowed
+established state — do not tear it out. The in-memory store is a
+development-only fallback: in production, a missing Upstash configuration makes
+store construction throw (fail-closed at startup) rather than silently degrading
+to per-instance memory. Once the store is live, a per-limit `failureMode`
+(`"open"` or `"closed"`) decides whether a runtime storage failure allows or
+denies the request. What is forbidden is adding new abuse-control complexity on
+top of this (body hashing, duplicate-submission replay detection, per-field
+fingerprinting, etc.) as a starter default; add those later only when a real
+incident justifies them.
 
 If Upstash becomes a problem, the official Workers-native alternative is the
 `ratelimits` binding (wrangler >= 4.36, free, per-colo). Treat it as the
@@ -102,14 +104,56 @@ Turnstile verification is internal to the protected write routes. Do not add a
 public token preflight endpoint: Turnstile tokens are single-use, so a preflight
 would consume the token before the real submission.
 
-### Owner ops access
+### CSP report endpoint
 
-`/ops/traffic/access` is a route-local rate-limit exception. It must use the
-shared `opsAccess` preset and trusted client-IP keying, but only failed owner
-access attempts consume the bucket. A valid access key must not be locked out by
-previous failed attempts. Do not copy this pattern to public write endpoints;
-they should keep the shared `withRateLimit` wrapper unless their auth flow
-requires route-local ordering.
+`/api/csp-report` is intentionally minimal and never trusts payload content, but
+it already carries more than a bare body-size gate:
+
+- Body is capped at 16 KB (`MAX_CSP_REPORT_BODY_BYTES`) — CSP reports are tiny,
+  so a small cap blocks body-based DoS.
+- A content-type allowlist accepts only `application/csp-report`,
+  `application/reports+json`, and `application/json`; anything else is rejected
+  before parsing.
+- Both the legacy single-report shape and the modern Reporting API top-level
+  array (batched reports) are accepted. Array batching is only allowed here
+  because the parser is called with `allowTopLevelArray: true`; an empty batch
+  returns `204 No Content`.
+- `GET /api/csp-report` is a lightweight health probe that returns
+  `{ status: "CSP report endpoint active" }`; it never accepts report data.
+
+### JSON body parsing contract
+
+Public write routes parse request bodies through `safeParseJson`
+(`src/lib/api/safe-parse-json.ts`). It takes an options contract:
+
+- `maxBytes` — hard body-size ceiling; oversize bodies are rejected without
+  parsing.
+- `emptyBodyErrorCode` — the stable error code returned for an empty body.
+- `allowTopLevelArray` — defaults to `false`, so a top-level JSON array is
+  rejected. Only endpoints that genuinely accept batched arrays (the CSP report
+  route) opt in by passing `true`.
+
+Keep new routes on this shared parser instead of hand-rolling body reads, so the
+size ceiling, empty-body handling, and array policy stay consistent.
+
+### Contact anti-abuse (existing, not new)
+
+`/api/contact` already carries two lightweight anti-abuse checks that predate any
+future hardening and must not be mistaken for the forbidden new replay/hashing
+complexity called out in the rate-limiter section above:
+
+- A `website` honeypot field (`contact-form-config.ts`): real browsers leave it
+  empty; a filled value marks the submission as bot traffic.
+- A `submittedAt` freshness window (`submit-canonical-contact.ts`): submissions
+  whose page-render timestamp is older than ten minutes are rejected as
+  stale-page submissions. This is a staleness guard, not replay protection — it
+  does not detect or block duplicate/replayed payloads, and must not be described
+  as if it did.
+
+Both are already-wired mechanisms. They do not count as the "duplicate-submission
+replay detection" that the rate-limiter section forbids adding as a new starter
+default; leave them in place and do not extend them into fingerprinting or
+body-hashing without a real incident.
 
 ## CSP and headers
 
