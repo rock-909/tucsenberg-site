@@ -5,25 +5,22 @@ pre-commit:
   parallel: true
   commands:
     # 代码格式检查 (Prettier)
+    # 用 lefthook 官方 {staged_files} 模板 + glob 过滤，替代手写 git diff 管道
+    # （$FILES 未加引号会在含空格文件名时碎裂）。纯 --check 不写文件，无 stage_fixed。
     format-check:
-      run: |
-        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|md|mdx|yml|yaml|css|scss|html)$' || true)
-        if [ -z "$FILES" ]; then echo "✅ 格式检查通过 (无可格式化变更)"; exit 0; fi
-        pnpm exec prettier --check $FILES
+      glob: "*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss,html}"
+      run: pnpm exec prettier --check {staged_files}
       fail_text: '代码格式检查失败 - 请运行 pnpm exec prettier --write <files> 修复格式问题'
-      stage_fixed: true
 
-    # TypeScript类型检查
+    # TypeScript类型检查（纯检查，不写文件——不挂 stage_fixed）
     type-check:
       run: pnpm type-check
       fail_text: 'TypeScript类型检查失败 - 请修复类型错误后重新提交'
-      stage_fixed: true
 
-    # 代码质量检查 (ESLint)
+    # 代码质量检查 (ESLint，纯检查不写文件——不挂 stage_fixed)
     quality-check:
       run: pnpm lint:check
       fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
-      stage_fixed: true
 
     # 架构守卫 - 仅检查已暂存的 JS/TS 变更（排除测试文件和脚本目录）
     architecture-guard:
