@@ -55,14 +55,6 @@
         "rules": ["knip/types"]
       },
       {
-        "files": ["src/components/layout/__tests__/mobile-navigation.test.tsx"],
-        "rules": ["jsx-a11y/click-events-have-key-events"]
-      },
-      {
-        "files": ["src/components/layout/__tests__/mobile-navigation.test.tsx"],
-        "rules": ["jsx-a11y/no-static-element-interactions"]
-      },
-      {
         "files": [
           "scripts/starter-checks.js",
           "src/app/api/csp-report/__tests__/route-post.test.ts",
@@ -200,8 +192,7 @@
         "files": [
           "src/app/[locale]/about/page.tsx",
           "src/app/[locale]/privacy/page.tsx",
-          "src/app/[locale]/terms/page.tsx",
-          "src/components/layout/__tests__/mobile-navigation-edge-cases-advanced.test.tsx"
+          "src/app/[locale]/terms/page.tsx"
         ],
         "rules": ["react-doctor/no-array-index-as-key"]
       },
@@ -215,10 +206,6 @@
       },
       {
         "files": [
-          "src/components/layout/__tests__/mobile-navigation-basic.test.tsx",
-          "src/components/layout/__tests__/mobile-navigation-items-accessibility-core.test.tsx",
-          "src/components/layout/__tests__/mobile-navigation-responsive-basic.test.tsx",
-          "src/components/layout/__tests__/mobile-navigation-responsive-edge-cases.test.tsx",
           "src/components/ui/__tests__/input.test.tsx",
           "src/components/ui/__tests__/label-integration.test.tsx",
           "src/components/ui/__tests__/label.test.tsx"
