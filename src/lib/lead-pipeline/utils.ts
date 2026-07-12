@@ -68,28 +68,71 @@ export function formatQuantity(quantity: string | number): string {
 }
 
 /**
- * Generate a structured message from product inquiry data
+ * Parts of a product inquiry, as resolved server-side, used to compose the
+ * CRM/email message. `productName` is the server-resolved display name (catalog
+ * label or general-RFQ label), never a client-supplied string.
+ */
+export interface ProductInquiryMessageParts {
+  productName: string;
+  quantity?: string | number | undefined;
+  buyerInterest?: string | undefined;
+  requirements?: string | undefined;
+}
+
+function hasQuantity(quantity: string | number | undefined): boolean {
+  if (quantity === undefined) return false;
+  return String(quantity).trim().length > 0;
+}
+
+/**
+ * Generate a structured message from product inquiry data for CRM/email.
  *
- * @param productName - Name of the product
- * @param quantity - Requested quantity
- * @param requirements - Optional requirements text
- * @returns Formatted message string for CRM/email
+ * Every line is server-composed. `buyerInterest` is included only as descriptive
+ * free text; it is never used as product attribution.
  */
 export function generateProductInquiryMessage(
-  productName: string,
-  quantity: string | number,
-  requirements?: string,
+  parts: ProductInquiryMessageParts,
 ): string {
-  const lines = [
-    `Product: ${productName}`,
-    `Quantity: ${formatQuantity(quantity)}`,
-  ];
+  const lines = [`Product: ${parts.productName}`];
 
-  if (requirements?.trim()) {
-    lines.push(`Requirements: ${requirements.trim()}`);
+  if (hasQuantity(parts.quantity)) {
+    lines.push(
+      `Quantity: ${formatQuantity(parts.quantity as string | number)}`,
+    );
+  }
+
+  if (parts.buyerInterest?.trim()) {
+    lines.push(`Interest: ${parts.buyerInterest.trim()}`);
+  }
+
+  if (parts.requirements?.trim()) {
+    lines.push(`Requirements: ${parts.requirements.trim()}`);
   }
 
   return lines.join("\n");
+}
+
+/**
+ * Compose the buyer's free-text description for the owner email's requirements
+ * block: the stated interest (labelled) followed by any requirements text.
+ * Product name and quantity are rendered separately, so they are excluded here.
+ * Returns undefined when the buyer supplied neither.
+ */
+export function composeInquiryDescription(parts: {
+  buyerInterest?: string | undefined;
+  requirements?: string | undefined;
+}): string | undefined {
+  const lines: string[] = [];
+
+  if (parts.buyerInterest?.trim()) {
+    lines.push(`Interest: ${parts.buyerInterest.trim()}`);
+  }
+
+  if (parts.requirements?.trim()) {
+    lines.push(parts.requirements.trim());
+  }
+
+  return lines.length > 0 ? lines.join("\n") : undefined;
 }
 
 /**

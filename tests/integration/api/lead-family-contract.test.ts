@@ -110,8 +110,8 @@ describe("lead API family response contract (auxiliary)", () => {
         email: "buyer@example.com",
         fullName: "Buyer",
         company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
       }),
     );
 
@@ -151,8 +151,8 @@ describe("lead API family response contract (auxiliary)", () => {
         email: "buyer@example.com",
         fullName: "Buyer",
         company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
       }),
     );
 
@@ -220,8 +220,8 @@ describe("lead API family response contract (auxiliary)", () => {
           email: "buyer@example.com",
           fullName: "Buyer",
           company: "Buyer Co",
-          productSlug: "north-america",
-          productName: "North America",
+          productInquiryKind: "catalog-product",
+          catalogProductId: "abs-flood-barriers",
         }),
       ),
       400,
@@ -256,8 +256,8 @@ describe("lead API family response contract (auxiliary)", () => {
           email: "buyer@example.com",
           fullName: "Buyer",
           company: "Buyer Co",
-          productSlug: "north-america",
-          productName: "North America",
+          productInquiryKind: "catalog-product",
+          catalogProductId: "abs-flood-barriers",
         }),
       ),
       500,

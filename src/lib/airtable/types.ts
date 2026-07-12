@@ -42,15 +42,20 @@ export interface ContactLeadData extends BaseLeadData {
   marketingConsent?: boolean;
 }
 
-// Product inquiry lead data
+// Product inquiry lead data.
+//
+// `productName` is the server-resolved display name (catalog label or the
+// general-RFQ label), never a client-supplied slug. `catalogProductId` is
+// present only for a catalog product inquiry; a general RFQ carries no product
+// identity. `quantity` is optional because a general RFQ has none.
 export interface ProductLeadData extends BaseLeadData {
   firstName: string;
   lastName: string;
   company?: string;
   message: string;
-  productSlug: string;
   productName: string;
-  quantity: string | number;
+  catalogProductId?: string;
+  quantity?: string | number;
   requirements?: string;
   marketingConsent?: boolean;
 }

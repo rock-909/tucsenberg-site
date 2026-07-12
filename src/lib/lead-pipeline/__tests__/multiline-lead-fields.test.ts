@@ -51,10 +51,10 @@ describe("multiline lead fields", () => {
   it("keeps newlines in product requirements at the schema boundary", () => {
     const parsed = productLeadSchema.parse({
       type: LEAD_TYPES.PRODUCT,
+      productInquiryKind: "catalog-product",
       fullName: "Pat Lee",
       email: "pat@example.com",
-      productSlug: "flood-barrier",
-      productName: "Flood Barrier",
+      catalogProductId: "abs-flood-barriers",
       quantity: "500 units",
       requirements: "Need custom height\nStainless finish",
     });

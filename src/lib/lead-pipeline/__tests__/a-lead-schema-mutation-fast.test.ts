@@ -4,10 +4,10 @@ import { LEAD_TYPES, productLeadSchema } from "../lead-schema";
 
 const validProductLead = {
   type: LEAD_TYPES.PRODUCT,
+  productInquiryKind: "catalog-product",
   fullName: "Fast Mutation Test",
   email: "fast@example.com",
-  productSlug: "fast-product",
-  productName: "Fast Product",
+  catalogProductId: "abs-flood-barriers",
   quantity: "12",
 };
 

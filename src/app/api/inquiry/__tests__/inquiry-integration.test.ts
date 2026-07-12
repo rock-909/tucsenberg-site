@@ -88,11 +88,11 @@ function validInquiryData() {
   return {
     turnstileToken: "valid-turnstile-token",
     type: "product",
+    productInquiryKind: "catalog-product",
     fullName: "Bob Wang",
     email: "bob@example.com",
     company: "BuildCo Ltd.",
-    productSlug: "sample-product-25mm",
-    productName: "Example Offer 25",
+    catalogProductId: "abs-flood-barriers",
     quantity: "1000",
     requirements:
       "Interested in example offer configuration for warehouse project.",

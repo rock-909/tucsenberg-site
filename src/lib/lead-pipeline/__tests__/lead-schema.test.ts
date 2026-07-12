@@ -7,17 +7,22 @@ import { describe, expect, it } from "vitest";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
 import {
   contactLeadSchema,
+  isCatalogProductInquiry,
   isContactLead,
   isNewsletterLead,
   isProductLead,
   LEAD_TYPES,
   leadSchema,
   newsletterLeadSchema,
+  PRODUCT_INQUIRY_KINDS,
   productLeadSchema,
   type ContactLeadInput,
   type NewsletterLeadInput,
   type ProductLeadInput,
 } from "../lead-schema";
+
+// A real catalog product slug, validated server-side against the registry.
+const CATALOG_PRODUCT_ID = "abs-flood-barriers";
 
 describe("Lead Schema", () => {
   it.each([
@@ -36,10 +41,10 @@ describe("Lead Schema", () => {
       productLeadSchema,
       {
         type: LEAD_TYPES.PRODUCT,
+        productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
         fullName: "Buyer Name",
         email: "buyer+rfq@example.com",
-        productSlug: "flood-barrier",
-        productName: "Flood Barrier",
+        catalogProductId: CATALOG_PRODUCT_ID,
         quantity: 10,
       },
     ],
@@ -177,193 +182,195 @@ describe("Lead Schema", () => {
   });
 
   describe("productLeadSchema", () => {
-    const validProductLead = {
+    const validCatalogProductLead = {
       type: LEAD_TYPES.PRODUCT,
+      productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
       fullName: "Jane Smith",
       email: "jane@example.com",
-      productSlug: "showcase-plan-basic",
-      productName: "Showcase Plan Basic",
+      catalogProductId: CATALOG_PRODUCT_ID,
       quantity: "500 units",
       company: "Example Company",
       requirements: "Need brand adaptation",
       marketingConsent: false,
     };
 
-    it("should validate a complete product lead", () => {
-      const result = productLeadSchema.safeParse(validProductLead);
-      expect(result.success).toBe(true);
+    const validGeneralRfqLead = {
+      type: LEAD_TYPES.PRODUCT,
+      productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
+      fullName: "Rita Buyer",
+      email: "rita@example.com",
+      requirements: "Submitted via the request-quote form.",
+      marketingConsent: false,
+    };
+
+    it("validates a complete catalog product lead", () => {
+      expect(productLeadSchema.safeParse(validCatalogProductLead).success).toBe(
+        true,
+      );
     });
 
-    it("should validate product lead with numeric quantity", () => {
-      const leadWithNumericQty = { ...validProductLead, quantity: 100 };
-      const result = productLeadSchema.safeParse(leadWithNumericQty);
+    it("validates a general RFQ with no product identity and no quantity", () => {
+      const result = productLeadSchema.safeParse(validGeneralRfqLead);
       expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.catalogProductId).toBeUndefined();
+        expect(result.data.quantity).toBeUndefined();
+      }
     });
 
-    it("should reject non-positive or non-finite numeric quantities", () => {
-      expect(
-        productLeadSchema.safeParse({ ...validProductLead, quantity: 0 })
-          .success,
-      ).toBe(false);
-      expect(
-        productLeadSchema.safeParse({ ...validProductLead, quantity: -1 })
-          .success,
-      ).toBe(false);
+    it("keeps buyerInterest as description-only free text, never identity", () => {
+      const result = productLeadSchema.safeParse({
+        ...validGeneralRfqLead,
+        buyerInterest: "Aluminum flood gates for a garage",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.buyerInterest).toBe(
+          "Aluminum flood gates for a garage",
+        );
+        expect(result.data.catalogProductId).toBeUndefined();
+      }
+    });
+
+    it("validates a catalog product lead with numeric quantity", () => {
       expect(
         productLeadSchema.safeParse({
-          ...validProductLead,
-          quantity: Number.POSITIVE_INFINITY,
+          ...validCatalogProductLead,
+          quantity: 100,
+        }).success,
+      ).toBe(true);
+    });
+
+    it("rejects a catalog product id that is not in the registry", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          catalogProductId: "not-a-real-product",
         }).success,
       ).toBe(false);
     });
 
-    it("should trim product slug and quantity strings", () => {
-      const leadWithSpacing = {
-        ...validProductLead,
-        productSlug: "  showcase-plan-basic  ",
+    it("rejects a catalog product lead with no catalogProductId", () => {
+      const { catalogProductId: _omitted, ...invalidLead } =
+        validCatalogProductLead;
+      expect(productLeadSchema.safeParse(invalidLead).success).toBe(false);
+    });
+
+    it("rejects a catalog product lead with a whitespace-only catalogProductId", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          catalogProductId: "   ",
+        }).success,
+      ).toBe(false);
+    });
+
+    it("rejects a general RFQ that smuggles a catalog product identity", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validGeneralRfqLead,
+          catalogProductId: CATALOG_PRODUCT_ID,
+        }).success,
+      ).toBe(false);
+    });
+
+    it("trims catalogProductId and quantity strings", () => {
+      const result = productLeadSchema.safeParse({
+        ...validCatalogProductLead,
+        catalogProductId: `  ${CATALOG_PRODUCT_ID}  `,
         quantity: "  500 units  ",
-      };
-      const result = productLeadSchema.safeParse(leadWithSpacing);
+      });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.productSlug).toBe("showcase-plan-basic");
+        expect(result.data.catalogProductId).toBe(CATALOG_PRODUCT_ID);
         expect(result.data.quantity).toBe("500 units");
         expect(result.data.marketingConsent).toBe(false);
       }
     });
 
-    it("should reject product lead without productSlug", () => {
-      const { productSlug: _, ...invalidLead } = validProductLead;
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject non-string, non-number quantity values", () => {
+    it("rejects non-string, non-number quantity values", () => {
       expect(
         productLeadSchema.safeParse({
-          ...validProductLead,
+          ...validCatalogProductLead,
           quantity: true,
         }).success,
       ).toBe(false);
       expect(
         productLeadSchema.safeParse({
-          ...validProductLead,
+          ...validCatalogProductLead,
           quantity: { value: 10 },
         }).success,
       ).toBe(false);
     });
 
-    it("should reject product lead with a whitespace-only productSlug", () => {
-      const invalidLead = { ...validProductLead, productSlug: "   " };
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
+    it("rejects non-positive or non-finite numeric quantities", () => {
+      expect(
+        productLeadSchema.safeParse({ ...validCatalogProductLead, quantity: 0 })
+          .success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          quantity: -1,
+        }).success,
+      ).toBe(false);
+      expect(
+        productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          quantity: Number.POSITIVE_INFINITY,
+        }).success,
+      ).toBe(false);
     });
 
-    it("should reject product lead without productName", () => {
-      const { productName: _, ...invalidLead } = validProductLead;
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
+    it("accepts a catalog product lead without optional requirements", () => {
+      const { requirements: _omitted, ...minimalLead } =
+        validCatalogProductLead;
+      expect(productLeadSchema.safeParse(minimalLead).success).toBe(true);
     });
 
-    it("should accept product lead without optional requirements", () => {
-      const { requirements: _, ...minimalLead } = validProductLead;
-      const result = productLeadSchema.safeParse(minimalLead);
-      expect(result.success).toBe(true);
+    it("rejects a blank quantity string when quantity is supplied", () => {
+      expect(
+        productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          quantity: "   ",
+        }).success,
+      ).toBe(false);
     });
 
-    it("should reject product lead with a whitespace-only quantity string", () => {
-      const invalidLead = { ...validProductLead, quantity: "   " };
-      const result = productLeadSchema.safeParse(invalidLead);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject numeric quantity strings that are zero or negative", () => {
-      const zeroQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "0",
-      });
-      const paddedZeroQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "00",
-      });
-      const decimalZeroQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "0.00",
-      });
-      const negativeQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "-1",
-      });
-      const negativeDecimalQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "-0.5",
-      });
-
-      expect(zeroQuantity.success).toBe(false);
-      expect(paddedZeroQuantity.success).toBe(false);
-      expect(decimalZeroQuantity.success).toBe(false);
-      expect(negativeQuantity.success).toBe(false);
-      expect(negativeDecimalQuantity.success).toBe(false);
-      if (
-        !zeroQuantity.success &&
-        !paddedZeroQuantity.success &&
-        !decimalZeroQuantity.success &&
-        !negativeQuantity.success &&
-        !negativeDecimalQuantity.success
-      ) {
-        expect(zeroQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-        expect(paddedZeroQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-        expect(decimalZeroQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-        expect(negativeQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
-        expect(negativeDecimalQuantity.error.issues[0]?.message).toBe(
-          "Quantity must be positive when using a numeric string",
-        );
+    it("rejects numeric quantity strings that are zero or negative", () => {
+      for (const quantity of ["0", "00", "0.00", "-1", "-0.5"]) {
+        const result = productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          quantity,
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues[0]?.message).toBe(
+            "Quantity must be positive when using a numeric string",
+          );
+        }
       }
     });
 
-    it("should still accept descriptive quantity strings and positive numeric strings", () => {
-      const singleDigitQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "1",
-      });
-      const numericStringQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "12",
-      });
-      const descriptiveQuantity = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "500 units per month",
-      });
-      const trailingNumericDescription = productLeadSchema.safeParse({
-        ...validProductLead,
-        quantity: "approx 500",
-      });
-
-      expect(singleDigitQuantity.success).toBe(true);
-      expect(numericStringQuantity.success).toBe(true);
-      expect(descriptiveQuantity.success).toBe(true);
-      expect(trailingNumericDescription.success).toBe(true);
-      if (
-        singleDigitQuantity.success &&
-        numericStringQuantity.success &&
-        descriptiveQuantity.success &&
-        trailingNumericDescription.success
-      ) {
-        expect(singleDigitQuantity.data.quantity).toBe("1");
-        expect(typeof singleDigitQuantity.data.quantity).toBe("string");
-        expect(numericStringQuantity.data.quantity).toBe("12");
-        expect(typeof numericStringQuantity.data.quantity).toBe("string");
-        expect(descriptiveQuantity.data.quantity).toBe("500 units per month");
-        expect(trailingNumericDescription.data.quantity).toBe("approx 500");
+    it("still accepts descriptive quantity strings and positive numeric strings", () => {
+      for (const quantity of ["1", "12", "500 units per month", "approx 500"]) {
+        const result = productLeadSchema.safeParse({
+          ...validCatalogProductLead,
+          quantity,
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.quantity).toBe(quantity);
+          expect(typeof result.data.quantity).toBe("string");
+        }
       }
+    });
+
+    it("classifies the two inquiry states via isCatalogProductInquiry", () => {
+      const catalog = productLeadSchema.parse(validCatalogProductLead);
+      const general = productLeadSchema.parse(validGeneralRfqLead);
+      expect(isCatalogProductInquiry(catalog)).toBe(true);
+      expect(isCatalogProductInquiry(general)).toBe(false);
     });
   });
 
@@ -413,10 +420,10 @@ describe("Lead Schema", () => {
     it("should correctly discriminate product lead", () => {
       const productLead = {
         type: LEAD_TYPES.PRODUCT,
+        productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
         fullName: "Test User",
         email: "test@example.com",
-        productSlug: "test-product",
-        productName: "Test Product",
+        catalogProductId: CATALOG_PRODUCT_ID,
         quantity: 10,
       };
       const result = leadSchema.safeParse(productLead);
@@ -471,10 +478,10 @@ describe("Lead Schema", () => {
     it("isProductLead should correctly identify product leads", () => {
       const productLead: ProductLeadInput = {
         type: LEAD_TYPES.PRODUCT,
+        productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
         fullName: "Test",
         email: "test@example.com",
-        productSlug: "test",
-        productName: "Test",
+        catalogProductId: CATALOG_PRODUCT_ID,
         quantity: 1,
         marketingConsent: false,
       };

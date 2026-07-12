@@ -19,11 +19,13 @@ import {
   type ProductLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
 import {
+  composeInquiryDescription,
   createOptionalSubject,
   generateLeadReferenceId,
   generateProductInquiryMessage,
   splitName,
 } from "@/lib/lead-pipeline/utils";
+import { resolveProductIdentity } from "@/lib/lead-pipeline/product-identity";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import { resendService } from "@/lib/resend-instance";
@@ -230,16 +232,20 @@ function createProductEmailData(
   lead: ProductLeadInput,
 ): ProductInquiryEmailData {
   const { firstName, lastName } = splitName(lead.fullName);
+  const { productName } = resolveProductIdentity(lead);
+  const description = composeInquiryDescription({
+    buyerInterest: lead.buyerInterest,
+    requirements: lead.requirements,
+  });
 
   return {
     firstName,
     lastName,
     email: lead.email,
     company: lead.company,
-    productName: lead.productName,
-    productSlug: lead.productSlug,
+    productName,
     quantity: lead.quantity,
-    requirements: lead.requirements,
+    requirements: description,
     marketingConsent: lead.marketingConsent,
   };
 }
@@ -268,11 +274,13 @@ async function createProductLeadRecord(
 ): Promise<boolean> {
   const { firstName, lastName } = splitName(lead.fullName);
   const { referenceId } = context;
-  const message = generateProductInquiryMessage(
-    lead.productName,
-    lead.quantity,
-    lead.requirements,
-  );
+  const identity = resolveProductIdentity(lead);
+  const message = generateProductInquiryMessage({
+    productName: identity.productName,
+    quantity: lead.quantity,
+    buyerInterest: lead.buyerInterest,
+    requirements: lead.requirements,
+  });
 
   try {
     await withAirtableBudget(
@@ -282,8 +290,8 @@ async function createProductLeadRecord(
         email: lead.email,
         company: lead.company,
         message,
-        productSlug: lead.productSlug,
-        productName: lead.productName,
+        productName: identity.productName,
+        catalogProductId: identity.catalogProductId,
         quantity: lead.quantity,
         requirements: lead.requirements,
         marketingConsent: lead.marketingConsent,

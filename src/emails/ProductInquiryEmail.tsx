@@ -51,13 +51,15 @@ function getRequirementLineKey(line: string, index: number): string {
 
 export function ProductInquiryEmail(data: ProductInquiryEmailData) {
   const quantity =
-    typeof data.quantity === "number"
-      ? data.quantity.toString()
-      : data.quantity;
+    data.quantity === undefined
+      ? undefined
+      : typeof data.quantity === "number"
+        ? data.quantity.toString()
+        : data.quantity;
   const requirementLines = data.requirements
     ? data.requirements.split("\n")
     : [];
-  const footerText = EMAIL_COPY.productInquiry.footer(data.productSlug);
+  const footerText = EMAIL_COPY.productInquiry.footer();
 
   return (
     <EmailLayout
@@ -72,10 +74,14 @@ export function ProductInquiryEmail(data: ProductInquiryEmailData) {
           {EMAIL_COPY.common.fields.product}
         </Text>
         <Text style={productNameStyle}>{data.productName}</Text>
-        <Text style={highlightLabelStyle}>
-          {EMAIL_COPY.common.fields.quantity}
-        </Text>
-        <Text style={quantityStyle}>{quantity}</Text>
+        {quantity ? (
+          <>
+            <Text style={highlightLabelStyle}>
+              {EMAIL_COPY.common.fields.quantity}
+            </Text>
+            <Text style={quantityStyle}>{quantity}</Text>
+          </>
+        ) : null}
       </Section>
       <EmailField label={EMAIL_COPY.common.fields.contactName}>
         <Text

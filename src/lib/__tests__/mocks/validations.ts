@@ -34,8 +34,7 @@ export type ProductInquiryEmailData = {
   lastName: string;
   email: string;
   productName: string;
-  productSlug: string;
-  quantity: number;
+  quantity?: string | number;
   company?: string;
   requirements?: string;
   marketingConsent?: boolean;

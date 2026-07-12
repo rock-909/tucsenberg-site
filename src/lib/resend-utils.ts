@@ -137,7 +137,6 @@ export class ResendUtils {
       email: data.email.toLowerCase().trim(),
       company: data.company ? sanitizePlainText(data.company) : undefined,
       productName: sanitizePlainText(data.productName),
-      productSlug: data.productSlug.trim(),
       quantity,
       requirements: data.requirements
         ? sanitizePlainText(data.requirements)
@@ -150,11 +149,7 @@ export class ResendUtils {
    * Generate product inquiry email subject
    */
   static generateProductInquirySubject(data: ProductInquiryEmailData): string {
-    const quantity =
-      typeof data.quantity === "number"
-        ? data.quantity.toString()
-        : data.quantity;
-    return EMAIL_COPY.productInquiry.subject(data, quantity);
+    return EMAIL_COPY.productInquiry.subject(data);
   }
 
   /**

@@ -124,14 +124,17 @@ function makeInquiryRequest(body: unknown): NextRequest {
 
 const VALID_INQUIRY_BODY = {
   turnstileToken: "valid-turnstile-token",
+  productInquiryKind: "catalog-product",
   fullName: "Jane Buyer",
   email: "buyer@example.com",
   company: "Buyer Co",
-  productSlug: "widget-pro",
-  productName: "Widget Pro",
+  catalogProductId: "abs-flood-barriers",
   quantity: 100,
   requirements: "Custom packaging",
 };
+
+// Display name is resolved server-side from the catalog registry, not the client.
+const CATALOG_PRODUCT_LABEL = "ABS Interlocking Boxwall";
 
 describe("lead pipeline (real end-to-end proof)", () => {
   beforeEach(() => {
@@ -191,15 +194,15 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "First Name": "Jane",
       "Last Name": "Buyer",
       Company: "Buyer Co",
-      "Product Name": "Widget Pro",
-      "Product Slug": "widget-pro",
+      "Product Name": CATALOG_PRODUCT_LABEL,
+      "Product Slug": "abs-flood-barriers",
       Quantity: "100",
       "Marketing Consent": false,
     });
     expect(typeof fields["Reference ID"]).toBe("string");
     expect(fields["Reference ID"]).toBe(body.data.referenceId);
     expect(typeof fields["Message"]).toBe("string");
-    expect(fields["Message"]).toContain("Widget Pro");
+    expect(fields["Message"]).toContain(CATALOG_PRODUCT_LABEL);
 
     // Resend wire: assert the outbound email payload for the submitted lead.
     const resendCalls = getResendCalls();

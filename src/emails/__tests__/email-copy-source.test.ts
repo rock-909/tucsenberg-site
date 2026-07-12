@@ -75,7 +75,6 @@ const productInquiryEmailData: ProductInquiryEmailData = {
   email: "john.doe@example.com",
   company: "Example Industries",
   productName: "Hydraulic Pump Station",
-  productSlug: "hydraulic-pump-station",
   quantity: 10,
   requirements: "Need urgent delivery.",
   marketingConsent: true,
@@ -99,7 +98,6 @@ const productInquiryEmailDataWithPlaceholderLikeInput: ProductInquiryEmailData =
     lastName: "Doe",
     email: "john.doe@example.com",
     productName: "{quantity}",
-    productSlug: "placeholder-like-product",
     quantity: 10,
   };
 
@@ -228,7 +226,6 @@ describe("email copy source", () => {
   it("uses default English message-pack copy for owner notification copy", () => {
     const emailTemplates = getEmailTemplates();
     const siteName = "Example Pumps";
-    const quantity = "25";
 
     expect(EMAIL_COPY.contact.title).toBe(emailTemplates.contact.title);
     expect(EMAIL_COPY.contact.preview(contactEmailData)).toBe(
@@ -257,19 +254,12 @@ describe("email copy source", () => {
     expect(EMAIL_COPY.productInquiry.preview).toBe(
       emailTemplates.productInquiry.preview,
     );
-    expect(
-      EMAIL_COPY.productInquiry.footer(productInquiryEmailData.productSlug),
-    ).toBe(
-      formatTemplate(emailTemplates.productInquiry.footer, {
-        productSlug: productInquiryEmailData.productSlug,
-      }),
+    expect(EMAIL_COPY.productInquiry.footer()).toBe(
+      emailTemplates.productInquiry.footer,
     );
-    expect(
-      EMAIL_COPY.productInquiry.subject(productInquiryEmailData, quantity),
-    ).toBe(
+    expect(EMAIL_COPY.productInquiry.subject(productInquiryEmailData)).toBe(
       formatTemplate(emailTemplates.productInquiry.subject, {
         productName: productInquiryEmailData.productName,
-        quantity,
       }),
     );
   });
@@ -278,7 +268,6 @@ describe("email copy source", () => {
     const submittedAt = "2026-04-29 12:00 UTC";
     const siteName = "Example Pumps";
     const year = 2026;
-    const quantity = "25";
 
     expectNoUnresolvedPlaceholders([
       EMAIL_COPY.confirmation.greeting(contactEmailData.firstName),
@@ -290,8 +279,8 @@ describe("email copy source", () => {
       EMAIL_COPY.contact.footer(siteName),
       EMAIL_COPY.contact.subject(contactEmailData),
       EMAIL_COPY.contact.subject(contactEmailDataWithoutSubject),
-      EMAIL_COPY.productInquiry.footer(productInquiryEmailData.productSlug),
-      EMAIL_COPY.productInquiry.subject(productInquiryEmailData, quantity),
+      EMAIL_COPY.productInquiry.footer(),
+      EMAIL_COPY.productInquiry.subject(productInquiryEmailData),
     ]);
   });
 
@@ -312,9 +301,8 @@ describe("email copy source", () => {
     expect(
       EMAIL_COPY.productInquiry.subject(
         productInquiryEmailDataWithPlaceholderLikeInput,
-        "10",
       ),
-    ).toBe("Product Inquiry: {quantity} (Qty: 10)");
+    ).toBe("Product Inquiry: {quantity}");
   });
 
   it("omits optional company and subject summary lines when values are absent", () => {

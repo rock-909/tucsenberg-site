@@ -92,8 +92,8 @@ describe("lead API family protection contract", () => {
         email: "buyer@example.com",
         fullName: "Buyer",
         company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
         turnstileToken: "valid-token",
       }),
     );
@@ -124,8 +124,8 @@ describe("lead API family protection contract", () => {
         email: "buyer@example.com",
         fullName: "Buyer",
         company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
       }),
     );
     const subscribe = await subscribeRoute.POST(
@@ -145,8 +145,8 @@ describe("lead API family protection contract", () => {
         email: "buyer@example.com",
         fullName: "Buyer",
         company: "Buyer Co",
-        productSlug: "north-america",
-        productName: "North America",
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
       }),
     );
     const subscribe = await subscribeRoute.POST(

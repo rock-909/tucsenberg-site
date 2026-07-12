@@ -95,12 +95,12 @@ export const EMAIL_COPY = {
   productInquiry: {
     title: emailTemplateCopy.productInquiry.title,
     preview: emailTemplateCopy.productInquiry.preview,
-    footer: (productSlug: string) =>
-      formatTemplate(emailTemplateCopy.productInquiry.footer, { productSlug }),
-    subject: (data: ProductInquiryEmailData, quantity: string) =>
+    // Neutral footer: an inquiry may be a catalog-product enquiry or a general
+    // RFQ, so it must not claim a specific product page or slug.
+    footer: () => emailTemplateCopy.productInquiry.footer,
+    subject: (data: ProductInquiryEmailData) =>
       formatTemplate(emailTemplateCopy.productInquiry.subject, {
         productName: data.productName,
-        quantity,
       }),
   },
 } as const;

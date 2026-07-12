@@ -55,10 +55,10 @@ const contactLeadArb = fc
 const productLeadArb = fc
   .record({
     type: fc.constant(LEAD_TYPES.PRODUCT),
+    productInquiryKind: fc.constantFrom("catalog-product", "general-rfq"),
     fullName: fc.string({ minLength: 1, maxLength: 24 }),
     email: fc.emailAddress(),
-    productSlug: fc.stringMatching(/^[a-z0-9-]{1,24}$/),
-    productName: fc.string({ minLength: 1, maxLength: 32 }),
+    catalogProductId: fc.constant("abs-flood-barriers"),
     quantity: fc.oneof(
       fc.integer({ min: 1, max: 10000 }),
       fc.string({ minLength: 1, maxLength: 24 }),
@@ -71,13 +71,17 @@ const productLeadArb = fc
         company: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
           nil: undefined,
         }),
+        buyerInterest: fc.option(fc.string({ minLength: 1, maxLength: 32 }), {
+          nil: undefined,
+        }),
         requirements: fc.option(fc.string({ minLength: 1, maxLength: 80 }), {
           nil: undefined,
         }),
       })
-      .map(({ company, requirements }) => ({
+      .map(({ company, buyerInterest, requirements }) => ({
         ...base,
         ...(company !== undefined ? { company } : {}),
+        ...(buyerInterest !== undefined ? { buyerInterest } : {}),
         ...(requirements !== undefined ? { requirements } : {}),
       })),
   );

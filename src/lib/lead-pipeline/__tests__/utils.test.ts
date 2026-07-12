@@ -5,6 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  composeInquiryDescription,
   formatQuantity,
   generateLeadReferenceId,
   generateProductInquiryMessage,
@@ -93,38 +94,84 @@ describe("Lead Pipeline Utils", () => {
 
   describe("generateProductInquiryMessage", () => {
     it("should generate message with product and quantity", () => {
-      const message = generateProductInquiryMessage("Widget X", 100);
+      const message = generateProductInquiryMessage({
+        productName: "Widget X",
+        quantity: 100,
+      });
       expect(message).toBe("Product: Widget X\nQuantity: 100");
     });
 
-    it("should include requirements when provided", () => {
-      const message = generateProductInquiryMessage(
-        "Widget X",
-        "500 units",
-        "Brand adaptation needed",
+    it("should omit quantity when absent (general RFQ)", () => {
+      const message = generateProductInquiryMessage({
+        productName: "General RFQ (no catalog product)",
+      });
+      expect(message).toBe("Product: General RFQ (no catalog product)");
+    });
+
+    it("should include buyer interest as description, after quantity", () => {
+      const message = generateProductInquiryMessage({
+        productName: "Widget X",
+        quantity: "500 units",
+        buyerInterest: "Aluminum flood gates",
+      });
+      expect(message).toBe(
+        "Product: Widget X\nQuantity: 500 units\nInterest: Aluminum flood gates",
       );
+    });
+
+    it("should include requirements when provided", () => {
+      const message = generateProductInquiryMessage({
+        productName: "Widget X",
+        quantity: "500 units",
+        requirements: "Brand adaptation needed",
+      });
       expect(message).toBe(
         "Product: Widget X\nQuantity: 500 units\nRequirements: Brand adaptation needed",
       );
     });
 
-    it("should exclude requirements when empty", () => {
-      const message = generateProductInquiryMessage("Widget X", 100, "");
-      expect(message).toBe("Product: Widget X\nQuantity: 100");
-    });
-
-    it("should exclude requirements when whitespace only", () => {
-      const message = generateProductInquiryMessage("Widget X", 100, "   ");
-      expect(message).toBe("Product: Widget X\nQuantity: 100");
+    it("should exclude requirements when empty or whitespace only", () => {
+      expect(
+        generateProductInquiryMessage({
+          productName: "Widget X",
+          quantity: 100,
+          requirements: "",
+        }),
+      ).toBe("Product: Widget X\nQuantity: 100");
+      expect(
+        generateProductInquiryMessage({
+          productName: "Widget X",
+          quantity: 100,
+          requirements: "   ",
+        }),
+      ).toBe("Product: Widget X\nQuantity: 100");
     });
 
     it("should trim requirements", () => {
-      const message = generateProductInquiryMessage(
-        "Widget X",
-        100,
-        "  Brand adaptation  ",
-      );
+      const message = generateProductInquiryMessage({
+        productName: "Widget X",
+        quantity: 100,
+        requirements: "  Brand adaptation  ",
+      });
       expect(message).toContain("Requirements: Brand adaptation");
+    });
+  });
+
+  describe("composeInquiryDescription", () => {
+    it("labels buyer interest and appends requirements", () => {
+      expect(
+        composeInquiryDescription({
+          buyerInterest: "Aluminum flood gates",
+          requirements: "Need custom height",
+        }),
+      ).toBe("Interest: Aluminum flood gates\nNeed custom height");
+    });
+
+    it("returns undefined when neither is provided", () => {
+      expect(composeInquiryDescription({})).toBeUndefined();
+      expect(
+        composeInquiryDescription({ buyerInterest: "  ", requirements: "  " }),
+      ).toBeUndefined();
     });
   });
 

@@ -99,19 +99,31 @@ describe("/api/inquiry route", () => {
   });
 
   describe("POST", () => {
+    // Default happy-path payload: a real catalog product, identified by a
+    // registry-validated slug (never a client-invented product name).
     const validInquiryData = {
       turnstileToken: "valid-token",
       type: "product",
+      productInquiryKind: "catalog-product",
       fullName: "John Doe",
       email: "john@example.com",
       company: "Acme Inc",
-      productSlug: "example-product",
-      productName: "Example Product",
+      catalogProductId: "abs-flood-barriers",
       quantity: "100",
       requirements: "I am interested in your products.",
     };
 
-    it("should process valid inquiry successfully", async () => {
+    // A general RFQ from the Request-a-Quote page: no per-product identity.
+    const generalRfqData = {
+      turnstileToken: "valid-token",
+      type: "product",
+      productInquiryKind: "general-rfq",
+      fullName: "Rita Buyer",
+      email: "rita@example.com",
+      requirements: "Submitted via the request-quote form.",
+    };
+
+    it("accepts a catalog product inquiry and forwards the validated identity", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
@@ -124,12 +136,90 @@ describe("/api/inquiry route", () => {
         expect.objectContaining({
           type: "product",
           email: "john@example.com",
-          productSlug: "example-product",
-          productName: "Example Product",
+          productInquiryKind: "catalog-product",
+          catalogProductId: "abs-flood-barriers",
         }),
       );
       expect(response.headers.get("x-request-id")).toBeNull();
       expect(response.headers.get("x-observability-surface")).toBeNull();
+    });
+
+    it("accepts a general RFQ with no per-product identity", async () => {
+      const request = createInquiryRequest(JSON.stringify(generalRfqData));
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      const callArgs = vi.mocked(processLead).mock.calls[0]![0] as Record<
+        string,
+        unknown
+      >;
+      expect(callArgs.productInquiryKind).toBe("general-rfq");
+      expect(callArgs.catalogProductId).toBeUndefined();
+    });
+
+    it("accepts a buyer-interest-only general RFQ and keeps interest as description, not identity", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...generalRfqData,
+          buyerInterest: "Aluminum flood gates for a garage",
+        }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      const callArgs = vi.mocked(processLead).mock.calls[0]![0] as Record<
+        string,
+        unknown
+      >;
+      expect(callArgs.productInquiryKind).toBe("general-rfq");
+      expect(callArgs.buyerInterest).toBe("Aluminum flood gates for a garage");
+      expect(callArgs.catalogProductId).toBeUndefined();
+    });
+
+    it("rejects an unknown catalog product id before lead processing", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...validInquiryData,
+          catalogProductId: "not-a-real-product",
+        }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toEqual({
+        success: false,
+        errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+        details: ["errors.catalogProductId.invalid"],
+      });
+      expect(processLead).not.toHaveBeenCalled();
+    });
+
+    it("rejects a general RFQ that smuggles a catalog product identity", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...generalRfqData,
+          catalogProductId: "abs-flood-barriers",
+        }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toEqual({
+        success: false,
+        errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+        details: ["errors.catalogProductId.invalid"],
+      });
+      expect(processLead).not.toHaveBeenCalled();
     });
 
     it("passes attribution fields to processLead", async () => {
@@ -369,18 +459,6 @@ describe("/api/inquiry route", () => {
           field: "email",
           expectedDetails: ["errors.email.required"],
         },
-        {
-          field: "productSlug",
-          expectedDetails: ["errors.productSlug.required"],
-        },
-        {
-          field: "productName",
-          expectedDetails: ["errors.productName.required"],
-        },
-        {
-          field: "quantity",
-          expectedDetails: ["errors.quantity.required"],
-        },
       ] as const;
 
       const results = [];
@@ -415,12 +493,11 @@ describe("/api/inquiry route", () => {
       expect(processLead).not.toHaveBeenCalled();
     });
 
-    it("should reject a missing product identity before lead processing", async () => {
+    it("should reject a catalog product inquiry with a missing product identity", async () => {
       const request = createInquiryRequest(
         JSON.stringify({
           ...validInquiryData,
-          productSlug: "",
-          productName: "",
+          catalogProductId: "",
         }),
       );
 
@@ -431,12 +508,12 @@ describe("/api/inquiry route", () => {
       expect(data).toEqual({
         success: false,
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.productSlug.required", "errors.productName.required"],
+        details: ["errors.catalogProductId.required"],
       });
       expect(processLead).not.toHaveBeenCalled();
     });
 
-    it("should reject missing quantity before turnstile and lead processing", async () => {
+    it("accepts a catalog product inquiry without a quantity (quantity is optional)", async () => {
       const dataWithoutQuantity: Record<string, unknown> = {
         ...validInquiryData,
       };
@@ -447,14 +524,15 @@ describe("/api/inquiry route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data).toEqual({
-        success: false,
-        errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.quantity.required"],
-      });
-      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(processLead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "product",
+          productInquiryKind: "catalog-product",
+          catalogProductId: "abs-flood-barriers",
+        }),
+      );
     });
 
     it("should reject a non-positive numeric quantity", async () => {

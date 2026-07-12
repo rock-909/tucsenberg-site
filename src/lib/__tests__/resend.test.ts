@@ -586,7 +586,6 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       lastName: "Smith",
       email: "jane.smith@example.com",
       productName: "Enterprise Widget",
-      productSlug: "enterprise-widget",
       quantity: 100,
       company: "Acme Corp",
       requirements: "Need bulk pricing",
@@ -637,7 +636,6 @@ describe("resend - Product Inquiry and Utility Methods", () => {
         ...validProductInquiryData,
         email: "JANE@EXAMPLE.COM",
         productName: "<Pump {lastName}>",
-        productSlug: " enterprise-widget ",
         quantity: "{quantity}",
         requirements:
           "Need {lastName}\n\nwith data:text/plain and onclick=alert",
@@ -667,7 +665,7 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       expect(payload.html).not.toContain("<Pump");
     });
 
-    it("should sanitize buyer-entered quantity before using it in the product inquiry subject", async () => {
+    it("sanitizes buyer-entered quantity in the body and keeps it out of the subject", async () => {
       const service = new ResendServiceClass();
       const emailData = {
         ...validProductInquiryData,
@@ -684,9 +682,9 @@ describe("resend - Product Inquiry and Utility Methods", () => {
 
       const payload = mockResendSend.mock.calls[0]?.[0];
 
-      expect(payload.subject).toBe(
-        "Product Inquiry: Enterprise Widget (Qty: 10 Bcc: attacker@example.test <script>bad</script>)",
-      );
+      // The subject carries only the server-resolved product name — buyer
+      // quantity cannot inject headers into it.
+      expect(payload.subject).toBe("Product Inquiry: Enterprise Widget");
       expect(payload.subject).not.toMatch(/[\r\n\t]/u);
       expect(payload.html).toContain(
         "10 Bcc: attacker@example.test &lt;script&gt;bad&lt;/script&gt;",

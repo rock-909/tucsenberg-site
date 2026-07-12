@@ -5,6 +5,11 @@
 
 import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
+import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
+import {
+  PRODUCT_INQUIRY_KINDS,
+  type ProductInquiryKind,
+} from "@/lib/lead-pipeline/product-inquiry-kinds";
 import {
   sanitizeMultilineText,
   sanitizePlainText,
@@ -29,6 +34,8 @@ export const LEAD_TYPES = {
 } as const;
 
 export type LeadType = (typeof LEAD_TYPES)[keyof typeof LEAD_TYPES];
+
+export { PRODUCT_INQUIRY_KINDS, type ProductInquiryKind };
 
 /**
  * Subject options for contact form
@@ -161,21 +168,88 @@ export const contactLeadSchema = z.object({
 });
 
 /**
- * Product inquiry lead schema
- * Used for product-specific inquiries via product page drawer
+ * The set of real catalog product ids (market slugs). Sourced from the catalog
+ * literal (not the aggregated site config) so lead validation stays free of the
+ * runtime/site-URL environment coupling.
  */
-export const productLeadSchema = z.object({
-  type: z.literal(LEAD_TYPES.PRODUCT),
-  fullName: sanitizedString().min(1).max(MAX_LEAD_NAME_LENGTH),
-  productSlug: z.string().trim().min(1),
-  productName: sanitizedString().min(1).max(MAX_LEAD_PRODUCT_NAME_LENGTH),
-  quantity: productQuantitySchema,
-  company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
-  requirements: multilineSanitizedString()
-    .max(MAX_LEAD_REQUIREMENTS_LENGTH)
-    .optional(),
-  ...baseLeadFields,
-});
+const CATALOG_PRODUCT_IDS: ReadonlySet<string> = new Set(
+  singleSiteProductCatalog.markets.map((market) => market.slug),
+);
+
+function isCatalogProductId(id: string): boolean {
+  return CATALOG_PRODUCT_IDS.has(id);
+}
+
+/**
+ * Catalog-product identity field.
+ *
+ * The identity is the catalog product id (a market slug). It is validated
+ * server-side against the product registry, so a client cannot invent a product
+ * identity by sending an arbitrary slug — the registry is the source of truth.
+ */
+const catalogProductIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .refine(isCatalogProductId, {
+    error: "catalogProductId must match a real catalog product",
+  });
+
+/**
+ * Product inquiry lead schema.
+ *
+ * Models three explicit, server-defined states instead of trusting a client
+ * product slug/name as identity:
+ * - catalog product: `productInquiryKind === "catalog-product"` with a
+ *   registry-validated `catalogProductId`;
+ * - general RFQ: `productInquiryKind === "general-rfq"` with no product
+ *   identity;
+ * - buyer interest: `buyerInterest` free text, kept for description only and
+ *   never used as product attribution.
+ *
+ * The display product name is resolved server-side from the registry (catalog
+ * product) or a fixed general-RFQ label — it is never taken from the client.
+ */
+export const productLeadSchema = z
+  .object({
+    type: z.literal(LEAD_TYPES.PRODUCT),
+    productInquiryKind: z.enum([
+      PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+      PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
+    ]),
+    fullName: sanitizedString().min(1).max(MAX_LEAD_NAME_LENGTH),
+    catalogProductId: catalogProductIdSchema.optional(),
+    buyerInterest: sanitizedString()
+      .max(MAX_LEAD_PRODUCT_NAME_LENGTH)
+      .optional(),
+    quantity: productQuantitySchema.optional(),
+    company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
+    requirements: multilineSanitizedString()
+      .max(MAX_LEAD_REQUIREMENTS_LENGTH)
+      .optional(),
+    ...baseLeadFields,
+  })
+  .superRefine((data, ctx) => {
+    if (data.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT) {
+      if (!data.catalogProductId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["catalogProductId"],
+          message: "catalogProductId is required for a catalog product inquiry",
+        });
+      }
+      return;
+    }
+
+    // A general RFQ carries no per-product identity; reject a smuggled slug.
+    if (data.catalogProductId !== undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["catalogProductId"],
+        message: "general RFQ must not carry a catalog product identity",
+      });
+    }
+  });
 
 /**
  * Newsletter subscription lead schema
@@ -226,4 +300,9 @@ export function isProductLead(lead: LeadInput): lead is ProductLeadInput {
 
 export function isNewsletterLead(lead: LeadInput): lead is NewsletterLeadInput {
   return lead.type === LEAD_TYPES.NEWSLETTER;
+}
+
+/** A product inquiry that targets a real, registry-validated catalog product. */
+export function isCatalogProductInquiry(lead: ProductLeadInput): boolean {
+  return lead.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT;
 }
