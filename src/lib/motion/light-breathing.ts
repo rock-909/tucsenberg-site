@@ -28,11 +28,6 @@ export const lightBreathingItemVariants = {
   },
 } as const;
 
-export const lightBreathingStaggerTransition = {
-  duration: 0.45,
-  ease: LIGHT_BREATHING_EASE,
-} as const;
-
 export const lightBreathingStaggerChildren = 0.08;
 
 export const lightBreathingRevealTransition = {

@@ -21,7 +21,8 @@ function DropdownMenuTrigger({
   );
 }
 
-function DropdownMenuGroup({
+/** @public shadcn wrapper API surface — kept for complete DropdownMenu primitive set */
+export function DropdownMenuGroup({
   ...props
 }: ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Group>) {
   return (
@@ -29,7 +30,8 @@ function DropdownMenuGroup({
   );
 }
 
-function DropdownMenuPortal({
+/** @public shadcn wrapper API surface — kept for complete DropdownMenu primitive set */
+export function DropdownMenuPortal({
   ...props
 }: ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Portal>) {
   return (
@@ -116,8 +118,6 @@ export {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuPortal,
   DropdownMenuItem,
   DropdownMenuSeparator,
 };

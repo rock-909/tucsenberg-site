@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "maxClientBoundaries": 45,
+  "maxClientBoundaries": 44,
   "allowedClientBoundaries": [
     "src/app/[locale]/contact/error.tsx",
     "src/app/[locale]/products/error.tsx",
@@ -20,7 +20,6 @@
     "src/components/layout/header-client.tsx",
     "src/components/layout/mobile-navigation-interactive.tsx",
     "src/components/motion/breathing-reveal.tsx",
-    "src/components/motion/breathing-stagger.tsx",
     "src/components/motion/light-motion-provider.tsx",
     "src/components/motion/page-transition.tsx",
     "src/components/monitoring/enterprise-analytics-island.tsx",

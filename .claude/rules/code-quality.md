@@ -88,7 +88,11 @@ domain meaning.
 
 ## Hard gates
 
-- TypeScript: zero errors
+- TypeScript: zero errors. This gate covers production code only. `tsconfig.json`
+  excludes `tests/**`, `**/*.test.*`, and `src/test/**`; test code is transpiled
+  and executed by Vitest and is not independently type-checked. This is an
+  owner-decided quality exemption (production code is the strict standard), not
+  an oversight — do not wire test code into `tsc`.
 - ESLint: zero warnings
 - Build: no errors
 
