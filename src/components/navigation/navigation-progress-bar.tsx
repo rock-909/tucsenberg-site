@@ -64,7 +64,7 @@ function NavigationProgressIndicator({ progress }: { progress: number }) {
     >
       <div
         className={cn(
-          "bg-primary h-full w-full origin-left shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
+          "h-full w-full origin-left bg-primary shadow-[0_0_8px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
           progress >= 100 ? "transition-none" : "transition-transform ease-out",
         )}
         data-testid="navigation-progress-bar-fill"

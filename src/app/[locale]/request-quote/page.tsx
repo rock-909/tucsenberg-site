@@ -51,13 +51,13 @@ function RequestQuoteAside({
     <aside className="space-y-4">
       <section className="surface-card p-6">
         <h2 className="text-lg font-semibold">{t("afterSubmitTitle")}</h2>
-        <p className="text-muted-foreground mt-3 text-sm leading-6">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {successCopy}
         </p>
       </section>
       <section className="surface-card p-6">
         <h2 className="text-lg font-semibold">{t("confidenceTitle")}</h2>
-        <ul className="text-muted-foreground mt-3 space-y-2 text-sm leading-6">
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
           <li>{t("confidenceWarranty")}</li>
           <li>{t("confidenceSamples")}</li>
           <li>{t("confidencePricing")}</li>

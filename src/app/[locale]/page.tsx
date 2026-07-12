@@ -131,7 +131,7 @@ function HomeProblemSection({
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
           <h2 className="text-section text-balance">{title}</h2>
-          <p className="text-muted-foreground mt-3 text-pretty">
+          <p className="mt-3 text-pretty text-muted-foreground">
             {description}
           </p>
         </div>
@@ -139,15 +139,15 @@ function HomeProblemSection({
           {items.map((item) => (
             <article
               key={item.title}
-              className="surface-card group hover:border-ring relative flex min-w-0 flex-col p-5 transition-colors"
+              className="surface-card group relative flex min-w-0 flex-col p-5 transition-colors hover:border-ring"
             >
               <div
                 aria-hidden
-                className="border-border bg-background relative mb-4 overflow-hidden rounded-md border p-2"
+                className="relative mb-4 overflow-hidden rounded-md border border-border bg-background p-2"
               >
                 <ProductLineDiagram kind={item.glyph} ariaLabel="" />
                 {item.badge ? (
-                  <span className="border-border bg-muted text-muted-foreground absolute top-2 right-2 inline-flex w-fit rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                  <span className="absolute top-2 right-2 inline-flex w-fit rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                     {item.badge}
                   </span>
                 ) : null}
@@ -160,12 +160,12 @@ function HomeProblemSection({
                   {item.title}
                 </Link>
               </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
+              <p className="mt-2 text-sm leading-6 text-pretty text-muted-foreground">
                 {item.description}
               </p>
               <span
                 aria-hidden
-                className="text-primary mt-4 inline-flex items-center gap-1 text-sm font-medium"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary"
               >
                 {item.linkLabel}
                 <span className="transition-transform group-hover:translate-x-0.5">
@@ -191,12 +191,12 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
           <h2 className="text-section text-balance">
             {t("howToChoose.title")}
           </h2>
-          <p className="text-muted-foreground mt-3 text-pretty">
+          <p className="mt-3 text-pretty text-muted-foreground">
             {t("howToChoose.description")}
           </p>
         </div>
-        <div className="border-border mt-8 overflow-x-auto rounded-2xl border">
-          <table className="divide-border min-w-full divide-y text-left text-sm">
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-border">
+          <table className="min-w-full divide-y divide-border text-left text-sm">
             <thead className="bg-muted/60 text-foreground">
               <tr>
                 <th className="px-4 py-3 font-semibold">
@@ -207,13 +207,13 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-border divide-y">
+            <tbody className="divide-y divide-border">
               {SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS.map((key) => (
                 <tr key={key}>
-                  <td className="text-muted-foreground px-4 py-3 align-top">
+                  <td className="px-4 py-3 align-top text-muted-foreground">
                     {t(`howToChoose.rows.${key}.situation`)}
                   </td>
-                  <td className="text-foreground px-4 py-3 align-top font-medium">
+                  <td className="px-4 py-3 align-top font-medium text-foreground">
                     {t(`howToChoose.rows.${key}.startWith`)}
                   </td>
                 </tr>
@@ -221,7 +221,7 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
             </tbody>
           </table>
         </div>
-        <p className="text-muted-foreground mt-6 max-w-3xl text-sm leading-6">
+        <p className="mt-6 max-w-3xl text-sm leading-6 text-muted-foreground">
           {t("howToChoose.honestNote")}
         </p>
         <p className="mt-4 text-sm font-medium">
@@ -249,7 +249,7 @@ function HomeCapabilitiesSection({
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
           <h2 className="text-section text-balance">{title}</h2>
-          <p className="text-muted-foreground mt-3 text-pretty">
+          <p className="mt-3 text-pretty text-muted-foreground">
             {description}
           </p>
         </div>
@@ -261,12 +261,12 @@ function HomeCapabilitiesSection({
             <div
               key={item.title}
               data-testid="home-answer-proof-item"
-              className="border-border bg-background min-w-0 rounded-xl border px-5 py-5"
+              className="min-w-0 rounded-xl border border-border bg-background px-5 py-5"
             >
-              <dt className="text-foreground text-sm font-semibold text-balance">
+              <dt className="text-sm font-semibold text-balance text-foreground">
                 {item.title}
               </dt>
-              <dd className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
+              <dd className="mt-2 text-sm leading-6 text-pretty text-muted-foreground">
                 {item.description}
               </dd>
             </div>
@@ -292,22 +292,22 @@ function HomeStartPathSection({
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
           <h2 className="text-section text-balance">{t("startPath.title")}</h2>
-          <p className="text-muted-foreground mt-3 text-pretty">
+          <p className="mt-3 text-pretty text-muted-foreground">
             {t("startPath.description")}
           </p>
         </div>
-        <ol className="divide-border mt-6 max-w-3xl divide-y">
+        <ol className="mt-6 max-w-3xl divide-y divide-border">
           {items.map((item) => (
             <li key={item.number} className="flex gap-4 py-5 md:gap-6">
               <span
                 data-testid="home-start-path-step-badge"
-                className="border-border bg-muted text-foreground flex size-9 shrink-0 items-center justify-center rounded-full border font-mono text-[12px] font-semibold"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted font-mono text-[12px] font-semibold text-foreground"
               >
                 {item.number}
               </span>
               <div className="min-w-0">
                 <h3 className="font-semibold text-balance">{item.title}</h3>
-                <p className="text-muted-foreground mt-1 max-w-[70ch] text-sm leading-6 text-pretty">
+                <p className="mt-1 max-w-[70ch] text-sm leading-6 text-pretty text-muted-foreground">
                   {item.description}
                 </p>
               </div>
@@ -332,7 +332,7 @@ function HomeVerifySection({ t }: { t: HomeTranslator }) {
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
           <h2 className="text-section text-balance">{t("verify.title")}</h2>
-          <p className="text-muted-foreground mt-3 text-pretty">
+          <p className="mt-3 text-pretty text-muted-foreground">
             {t("verify.description")}
           </p>
         </div>
@@ -340,12 +340,12 @@ function HomeVerifySection({ t }: { t: HomeTranslator }) {
           {SINGLE_SITE_HOME_VERIFY_ITEM_KEYS.map((key) => (
             <li
               key={key}
-              className="border-border bg-background min-w-0 rounded-xl border px-5 py-5"
+              className="min-w-0 rounded-xl border border-border bg-background px-5 py-5"
             >
-              <h3 className="text-foreground text-sm font-semibold text-balance">
+              <h3 className="text-sm font-semibold text-balance text-foreground">
                 {t(`verify.items.${key}.title`)}
               </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-6 text-pretty">
+              <p className="mt-2 text-sm leading-6 text-pretty text-muted-foreground">
                 {t(`verify.items.${key}.description`)}
               </p>
             </li>
@@ -372,9 +372,9 @@ function HomeFinalAction({
       className="section-divider px-6 py-14 md:py-[72px]"
     >
       <div className="mx-auto max-w-[1080px]">
-        <div className="bg-accent rounded-2xl px-6 py-10 text-center md:px-10 md:py-12">
+        <div className="rounded-2xl bg-accent px-6 py-10 text-center md:px-10 md:py-12">
           <h2 className="text-section text-balance">{t("finalCta.title")}</h2>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-[620px] text-pretty">
+          <p className="mx-auto mt-4 max-w-[620px] text-pretty text-muted-foreground">
             {t("finalCta.description")}
           </p>
           {ctaTargets.length > 0 && (
@@ -473,7 +473,7 @@ export default async function Home({ params }: HomePageProps) {
   } satisfies Record<SingleSiteHomeSectionKey, ReactNode>;
 
   return (
-    <div className="bg-background text-foreground min-h-dvh">
+    <div className="min-h-dvh bg-background text-foreground">
       <JsonLdGraphScript locale={locale as Locale} />
       <div>
         {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (

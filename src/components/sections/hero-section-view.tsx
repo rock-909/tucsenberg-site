@@ -41,8 +41,8 @@ export interface HeroSectionViewProps {
 function HeroEyebrow({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="bg-primary size-2 rounded-full" aria-hidden="true" />
-      <span className="text-muted-foreground text-[13px] font-medium tracking-[0.04em] uppercase">
+      <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
+      <span className="text-[13px] font-medium tracking-[0.04em] text-muted-foreground uppercase">
         {text}
       </span>
     </div>
@@ -71,18 +71,18 @@ function HeroProofPanel({
   return (
     <ul
       aria-label={ariaLabel}
-      className="border-border bg-muted/40 mt-6 grid grid-cols-2 gap-2 rounded-xl border p-2 font-mono text-[13px] md:grid-cols-4"
+      className="mt-6 grid grid-cols-2 gap-2 rounded-xl border border-border bg-muted/40 p-2 font-mono text-[13px] md:grid-cols-4"
     >
       {items.map((item, index) => (
         <li
           key={`${item.value}-${index}`}
-          className="bg-background/70 min-w-0 rounded-lg px-3 py-2"
+          className="min-w-0 rounded-lg bg-background/70 px-3 py-2"
         >
-          <span className="text-foreground block font-semibold break-words">
+          <span className="block font-semibold break-words text-foreground">
             {item.value}
           </span>
           {item.label !== undefined ? (
-            <span className="text-muted-foreground mt-0.5 block break-words">
+            <span className="mt-0.5 block break-words text-muted-foreground">
               {item.label}
             </span>
           ) : null}
@@ -110,7 +110,7 @@ export function HeroSectionView({ content }: HeroSectionViewProps) {
           </div>
 
           <div>
-            <p className="text-muted-foreground mt-4 max-w-[480px] text-lg text-pretty">
+            <p className="mt-4 max-w-[480px] text-lg text-pretty text-muted-foreground">
               {content.subtitle}
             </p>
           </div>

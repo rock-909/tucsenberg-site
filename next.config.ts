@@ -109,8 +109,6 @@ const nextConfig: NextConfig = {
     // 内联关键CSS（experimental.inlineCss）在当前构建链路下会引入 FOUC，导致首屏 CLS/Performance 显著劣化
     // 先禁用以稳定 CI 的 Lighthouse 质量门禁（后续可在 Next.js/Turbopack 修复后再评估开启）
     inlineCss: false,
-    // PPR 需要 Next.js canary 版本，暂时禁用
-    // ppr: 'incremental',
   },
 
   // 解决 Turbopack + OpenTelemetry 依赖问题

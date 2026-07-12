@@ -38,8 +38,7 @@ export function fullName({ field }: ContactFormFieldValidatorContext) {
 
 export function email({ field, config }: ContactFormFieldValidatorContext) {
   let schema = z
-    .string()
-    .email("Please enter a valid email address")
+    .email({ error: "Please enter a valid email address" })
     .max(
       CONTACT_FORM_VALIDATION_CONSTANTS.EMAIL_MAX_LENGTH,
       `Email must be less than ${CONTACT_FORM_VALIDATION_CONSTANTS.EMAIL_MAX_LENGTH} characters`,
@@ -76,14 +75,14 @@ export function company({ field }: ContactFormFieldValidatorContext) {
         val === undefined ||
         (val.length >= COMPANY_MIN_LENGTH && val.length <= COMPANY_MAX_LENGTH),
       {
-        message: `Company name must be between ${COMPANY_MIN_LENGTH} and ${COMPANY_MAX_LENGTH} characters`,
+        error: `Company name must be between ${COMPANY_MIN_LENGTH} and ${COMPANY_MAX_LENGTH} characters`,
       },
     )
     .refine(
       (val) =>
         val === undefined || /^[a-zA-Z0-9\s\u4e00-\u9fff&.,'-]+$/.test(val),
       {
-        message: "Company name contains invalid characters",
+        error: "Company name contains invalid characters",
       },
     );
 

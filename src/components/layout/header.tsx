@@ -71,12 +71,12 @@ export function Header({
   return (
     <header
       className={cn(
-        "bg-background/80 w-full backdrop-blur-md",
+        "w-full bg-background/80 backdrop-blur-md",
         isSticky && "sticky top-0 z-50 pt-[env(safe-area-inset-top,0px)]",
         isTransparent && "border-transparent bg-transparent backdrop-blur-none",
         isModernNav
-          ? "border-border/10 border-b transition-[background-color,border-color] duration-200"
-          : !isTransparent && "border-border/10 border-b",
+          ? "border-b border-border/10 transition-[background-color,border-color] duration-200"
+          : !isTransparent && "border-b border-border/10",
         className,
       )}
     >

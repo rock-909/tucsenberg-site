@@ -77,6 +77,11 @@ If behavior changes, update the contract and proving tests in the same branch.
 ## Reliability
 
 - Avoid wall-clock thresholds in normal unit/integration tests.
+- Existing E2E wall-clock waits are a tolerated test-exemption zone (owner
+  decision); this is not a hard ban. But new E2E should prefer Playwright
+  web-first assertions (`expect(locator).toBeVisible()` and friends, which
+  auto-retry) and must avoid new `waitForTimeout` unless there is a documented
+  reason no assertion can express the wait.
 - UI tests must create the state they assert against.
 - Critical smoke/E2E tests must fail on runtime errors.
 - Tests named integration, contract, or protection must not mock away the core

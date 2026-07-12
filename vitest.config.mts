@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import { resolve } from "path";
 import { defineConfig } from "vitest/config";
 
@@ -76,45 +75,20 @@ export default defineConfig({
       // 将覆盖率输出目录统一至 reports/coverage，便于与其它报告汇总
       reportsDirectory: "./reports/coverage",
       reporter: ["text", "html", "json-summary"],
+      // Vitest v4: coverage.exclude only filters files already matched by
+      // `include` (src/**); coverage.all was removed, so non-src globs never
+      // match. Keep only src-relevant excludes.
       exclude: [
-        "node_modules/",
-        ".next/",
-        "dist/",
-        "build/",
-        "coverage/",
         "**/*.d.ts",
         "**/*.stories.{js,jsx,ts,tsx}",
         "**/*.test.{js,jsx,ts,tsx}",
         "**/*.spec.{js,jsx,ts,tsx}",
         "src/test/**",
-        "scripts/**",
         "**/__mocks__/**",
         "**/test-utils/**",
-        // 排除配置文件，避免污染覆盖率
-        "next.config.ts",
-        "tailwind.config.js",
-        "postcss.config.mjs",
-        "eslint.config.mjs",
-        "playwright.config.ts",
-        "commitlint.config.js",
-        "translation.config.js",
-        "tsconfig.json",
-        "vitest.config.mts",
-        "lefthook.yml",
-        "semgrep.yml",
-        "mdx-components.tsx",
         "src/middleware.ts",
-        "instrumentation.ts",
-        "instrumentation-client.ts",
-        "sentry.*.config.ts",
         // 排除自动生成的文件
         "**/*.generated.*",
-        "content/config/**",
-        "**/*.tsbuildinfo",
-        // 排除报告和文档目录
-        "reports/**",
-        "docs/**",
-        "test-results/**",
         // 排除纯类型定义文件（无运行时代码）
         "src/types/**/*.d.ts",
         // 注意：src/types/index.ts, test-types.ts, react19.ts 包含运行时函数，不排除

@@ -497,15 +497,15 @@ export function ProductDiagramPanel({
   const staticDrawing = <Diagram ariaLabel={diagram.ariaLabel} />;
   return (
     <figure
-      className="border-border bg-card min-w-0 rounded-2xl border p-4 md:p-5"
+      className="min-w-0 rounded-2xl border border-border bg-card p-4 md:p-5"
       data-testid="product-diagram"
     >
       {diagram.panelLabel ? (
-        <div className="border-border mb-3 flex items-center justify-between gap-3 border-b pb-3">
-          <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.1em] uppercase">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-border pb-3">
+          <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             {diagram.panelLabel}
           </span>
-          <span aria-hidden className="bg-primary size-1.5 rounded-full" />
+          <span aria-hidden className="size-1.5 rounded-full bg-primary" />
         </div>
       ) : null}
       {diagram.animated && diagram.kind === "boxwall" ? (
@@ -513,7 +513,7 @@ export function ProductDiagramPanel({
       ) : (
         staticDrawing
       )}
-      <figcaption className="text-muted-foreground border-border mt-3 border-t pt-3 text-xs leading-5">
+      <figcaption className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
         {diagram.caption}
       </figcaption>
     </figure>
