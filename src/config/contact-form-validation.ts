@@ -19,8 +19,6 @@ const FIELD_CONFIG_SCHEMA = z.object({
 
 const FEATURES_SCHEMA = z.object({
   enableTurnstile: z.boolean(),
-  showPrivacyCheckbox: z.boolean(),
-  showMarketingConsent: z.boolean(),
   useWebsiteHoneypot: z.boolean(),
   sendConfirmationEmail: z.boolean(),
 });

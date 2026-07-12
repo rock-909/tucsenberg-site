@@ -14,7 +14,6 @@ const contactEmailData: EmailTemplateData = {
   subject: "showcase offer example quote",
   message: "Need a distributor quote.\nPlease include MOQ and lead time.",
   submittedAt: "2026-04-29T12:00:00.000Z",
-  marketingConsent: true,
 };
 
 describe("contact email templates", () => {

@@ -8,7 +8,6 @@ import type { ContactFormResult } from "@/components/forms/use-contact-form";
 const STORY_TIMESTAMP = "2026-05-06T00:00:00.000Z";
 
 const defaultFormMessages = {
-  acceptPrivacy: "I accept the privacy policy",
   company: "Company",
   companyPlaceholder: "Your company name",
   email: "Email",
@@ -16,7 +15,6 @@ const defaultFormMessages = {
   error: "Please check the highlighted fields.",
   fullName: "Full name",
   fullNamePlaceholder: "Jane Smith",
-  marketingConsent: "Send me occasional product and resource updates",
   message: "Message",
   messagePlaceholder: "Tell us what you need, target market, and timeline.",
   optional: "optional",
@@ -42,7 +40,6 @@ const longEnglishFormMessages = {
 } as const;
 
 const longChineseFormMessages = {
-  acceptPrivacy: "我同意隐私政策",
   company: "公司名称",
   companyPlaceholder: "示例采购与运营团队",
   email: "邮箱",
@@ -50,7 +47,6 @@ const longChineseFormMessages = {
   error: "请检查表单里的提示。",
   fullName: "姓名",
   fullNamePlaceholder: "张三",
-  marketingConsent: "我愿意接收后续产品和资源更新",
   message: "询盘说明",
   messagePlaceholder:
     "请说明项目范围、需要替换的内容、证明材料、交付时间和团队回复前需要了解的限制。",

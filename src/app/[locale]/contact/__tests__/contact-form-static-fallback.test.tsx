@@ -15,8 +15,8 @@ const messages = {
       subject: "Subject",
       optional: "optional",
       message: "Message",
-      acceptPrivacy: "I agree to the privacy policy",
-      marketingConsent: "I would like to receive marketing communications",
+      privacyNotice:
+        "By submitting, you agree to our privacy policy. We use your details only to respond to your enquiry.",
       submit: "Submit",
       turnstilePending:
         "Security verification is loading. You can send the form once it is ready.",
@@ -62,9 +62,9 @@ describe("ContactFormStaticFallback", () => {
       document.querySelector('[data-contact-form-field-optional="company"]'),
     ).toHaveTextContent("optional");
     expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
-    expect(
-      screen.getByRole("checkbox", { name: /privacy policy/i }),
-    ).toBeRequired();
+    expect(screen.getByTestId("form-privacy-notice")).toHaveTextContent(
+      messages.contact.form.privacyNotice,
+    );
   });
 
   it("keeps the static honeypot hidden and serialized while explaining the disabled security gate", () => {
@@ -95,31 +95,6 @@ describe("ContactFormStaticFallback", () => {
         "Security verification is loading. You can send the form once it is ready.",
       ),
     ).toBeInTheDocument();
-  });
-
-  it("renders fallback consent checkboxes with mobile-friendly touch targets", () => {
-    render(<ContactFormStaticFallback messages={messages} />);
-
-    for (const name of ["acceptPrivacy", "marketingConsent"]) {
-      const checkbox = document.querySelector<HTMLInputElement>(
-        `input[name="${name}"]`,
-      );
-
-      if (!checkbox) {
-        throw new Error(`Expected ${name} fallback checkbox to render.`);
-      }
-
-      const row = checkbox.parentElement;
-
-      expect(checkbox).toBeDisabled();
-      expect(checkbox).toHaveAttribute("type", "checkbox");
-      expect(checkbox).toHaveClass("size-6");
-      expect(checkbox).not.toHaveClass("size-4");
-      expect(row).toHaveClass("min-h-11", "gap-3");
-      expect(
-        document.querySelector(`label[for="${checkbox.id}"]`),
-      ).toBeInTheDocument();
-    }
   });
 
   it("protects fallback labels at the leaf level", () => {

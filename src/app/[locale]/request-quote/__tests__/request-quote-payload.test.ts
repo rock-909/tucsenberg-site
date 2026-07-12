@@ -61,7 +61,6 @@ describe("request quote payload", () => {
       email: "alice@example.com",
       productInquiryKind: "general-rfq",
       requirements: "Submitted via the request-quote form.",
-      marketingConsent: false,
       turnstileToken: "turnstile-token",
     });
     // A general RFQ never claims a per-product identity.
@@ -133,7 +132,6 @@ describe("request quote payload", () => {
       "buyerInterest",
       "email",
       "fullName",
-      "marketingConsent",
       "productInquiryKind",
       "requirements",
       "turnstileToken",
@@ -147,7 +145,6 @@ describe("request quote payload", () => {
       buyerInterest: payload.buyerInterest,
       requirements: payload.requirements,
       email: payload.email,
-      marketingConsent: payload.marketingConsent,
       utmSource: payload.utmSource,
     });
 

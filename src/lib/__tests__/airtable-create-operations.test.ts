@@ -160,7 +160,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Email: "john.doe@example.com",
             Company: "Test Company",
             Message: "This is a test message",
-            "Marketing Consent": false,
             Status: "New",
             Source: "Website Contact Form",
             "Submitted At": expect.any(String),
@@ -293,7 +292,6 @@ describe("Airtable Service - Create Operations Tests", () => {
       const leadDataWithOptionals = {
         ...validLeadData,
         subject: "Product Inquiry",
-        marketingConsent: true,
       };
 
       const mockRecordDataWithOptionals = {
@@ -315,7 +313,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Email: "john.doe@example.com",
             Company: "Test Company",
             Message: "This is a test message",
-            "Marketing Consent": true,
             Subject: "Product Inquiry",
             Status: "New",
             Source: "Website Contact Form",
@@ -518,7 +515,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Email: "jose.garcia@example.com",
             Company: "Test & Co.",
             Message: 'Message with "quotes" and special chars: @#$%',
-            "Marketing Consent": false,
             Status: "New",
             Source: "Website Contact Form",
             "Submitted At": expect.any(String),
@@ -560,7 +556,6 @@ describe("Airtable Service - Create Operations Tests", () => {
             Email: "john.doe@example.com",
             Company: "Test Company",
             Message: longMessage,
-            "Marketing Consent": false,
             Status: "New",
             Source: "Website Contact Form",
             "Submitted At": expect.any(String),

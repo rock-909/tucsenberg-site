@@ -94,12 +94,12 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
     const fullNameInput = page.locator('input[name="fullName"]').first();
     const messageInput = page.locator('textarea[name="message"]').first();
-    const privacyCheckbox = page.locator('input[name="acceptPrivacy"]').first();
+    const privacyNotice = page.getByTestId("form-privacy-notice").first();
 
     await expect(fullNameInput).toBeVisible();
     await expect(fullNameInput).toBeEditable();
     await expect(messageInput).toBeEditable();
-    await expect(privacyCheckbox).toBeEnabled();
+    await expect(privacyNotice).toBeVisible();
   };
 
   test.beforeEach(async ({ page }) => {
@@ -152,7 +152,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const count = await requiredInputs.count();
       expect(count).toBeGreaterThan(0);
 
-      // 验证核心必填字段（fullName, email, message, acceptPrivacy）
+      // 验证核心必填字段（fullName, email, message）。隐私已改为提交按钮旁的
+      // 声明式文案，不再是必填复选框，因此不在必填字段断言之列。
       // 注意：Production 环境的 company 字段可能不是 required（与本地代码不同步）
       await expect(page.locator('input[name="fullName"]')).toHaveAttribute(
         "required",
@@ -161,9 +162,6 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         "required",
       );
       await expect(page.locator('textarea[name="message"]')).toHaveAttribute(
-        "required",
-      );
-      await expect(page.locator('input[name="acceptPrivacy"]')).toHaveAttribute(
         "required",
       );
     });
@@ -186,8 +184,9 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await expect(page.locator('input[name="company"]')).toBeVisible();
       await expect(page.locator('textarea[name="message"]')).toBeVisible();
 
-      // 检查隐私政策复选框
-      await expect(page.locator('input[name="acceptPrivacy"]')).toBeVisible();
+      // 检查提交按钮旁的隐私声明（替代旧的隐私复选框）
+      await expect(page.getByTestId("form-privacy-notice")).toBeVisible();
+      await expect(page.locator('input[name="acceptPrivacy"]')).toHaveCount(0);
     });
   });
 
@@ -261,17 +260,12 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const messageInput = page.getByLabel(/message/i);
       await expect(messageInput).toHaveAttribute("name", "message");
 
-      const privacyCheckbox = page.getByLabel(/privacy policy/i);
-      await expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
-      await expect(privacyCheckbox).toHaveAttribute("type", "checkbox");
-
-      const privacyCheckboxByRole = page.getByRole("checkbox", {
-        name: /privacy|accept/i,
-      });
-      await expect(privacyCheckboxByRole).toHaveAttribute(
-        "name",
-        "acceptPrivacy",
-      );
+      // 隐私改为提交按钮旁的声明式文案（非复选框）：声明可见、指向隐私政策，
+      // 且表单内不再有任何 checkbox。
+      const privacyNotice = page.getByTestId("form-privacy-notice");
+      await expect(privacyNotice).toBeVisible();
+      await expect(privacyNotice).toContainText(/privacy policy/i);
+      await expect(page.getByRole("checkbox")).toHaveCount(0);
     });
   });
 

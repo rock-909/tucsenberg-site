@@ -26,7 +26,6 @@ export type EmailTemplateData = {
   phone?: string;
   subject?: string;
   submittedAt: string;
-  marketingConsent?: boolean;
 };
 
 export type ProductInquiryEmailData = {
@@ -37,5 +36,4 @@ export type ProductInquiryEmailData = {
   quantity?: string | number;
   company?: string;
   requirements?: string;
-  marketingConsent?: boolean;
 };

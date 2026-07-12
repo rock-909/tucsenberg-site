@@ -73,8 +73,6 @@ const mockT = vi.fn((key: string) => {
     subjectPlaceholder: "Project subject",
     message: "Message",
     messagePlaceholder: "Tell us what you need",
-    acceptPrivacy: "I accept the privacy policy",
-    marketingConsent: "I agree to receive marketing communications",
     optional: "Optional",
     submit: "Submit",
     submitting: "Submitting...",
@@ -159,7 +157,6 @@ describe("ContactFormContainer real form wiring", () => {
     fireEvent.change(screen.getByLabelText(/message/i), {
       target: { value: "We need help scoping a replacement website project." },
     });
-    fireEvent.click(screen.getByLabelText(/privacy policy/i));
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Submit" }));
@@ -183,8 +180,6 @@ describe("ContactFormContainer real form wiring", () => {
       company: "Example Co.",
       subject: "Custom project",
       message: "We need help scoping a replacement website project.",
-      acceptPrivacy: true,
-      marketingConsent: false,
       website: "",
       turnstileToken: "mock-turnstile-token",
       submittedAt: expect.any(String),

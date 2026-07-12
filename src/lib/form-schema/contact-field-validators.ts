@@ -138,19 +138,6 @@ export function subject({ field }: ContactFormFieldValidatorContext) {
   return applyOptionality(schema, field);
 }
 
-function acceptPrivacy({ field }: ContactFormFieldValidatorContext) {
-  const schema = z
-    .boolean()
-    .refine((value) => value === true, "You must accept the privacy policy");
-
-  return applyOptionality(schema, field);
-}
-
-function marketingConsent({ field }: ContactFormFieldValidatorContext) {
-  const schema = z.boolean();
-  return applyOptionality(schema, field);
-}
-
 function website({ field }: ContactFormFieldValidatorContext) {
   const schema = z
     .string()
@@ -169,7 +156,5 @@ export const contactFieldValidators: ContactFormFieldValidators = {
   message,
   phone,
   subject,
-  acceptPrivacy,
-  marketingConsent,
   website,
 };

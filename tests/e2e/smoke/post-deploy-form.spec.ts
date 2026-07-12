@@ -80,11 +80,8 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
       "Automated post-deploy verification — please ignore",
     );
 
-    // Check privacy checkbox
-    const privacyCheckbox = page.locator('input[name="acceptPrivacy"]');
-    if (await privacyCheckbox.isVisible()) {
-      await privacyCheckbox.check();
-    }
+    // Privacy is a submit-adjacent statement now, not a checkbox — nothing to
+    // tick before submitting.
 
     // 3. Wait for Turnstile to initialize on the deployed page
     await page.waitForTimeout(3000);

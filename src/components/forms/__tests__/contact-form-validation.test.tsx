@@ -70,7 +70,6 @@ const mockT = vi.fn((key: string) => {
     message: "Message",
     submit: "Submit",
     submitting: "Submitting...",
-    acceptPrivacy: "I accept the privacy policy",
   };
   return translations[key] || key; // key 来自测试数据，安全
 });
@@ -146,12 +145,6 @@ const _fillValidFormExcept = async (excludeFields: string[]) => {
       fireEvent.change(screen.getByLabelText(/message/i), {
         target: { value: "Test message content" },
       });
-    }
-
-    // 总是勾选隐私政策（除非明确排除）
-    if (!excludeFields.includes("acceptPrivacy")) {
-      const privacyCheckbox = screen.getByLabelText(/accept.*privacy/i);
-      fireEvent.click(privacyCheckbox);
     }
 
     // 启用 Turnstile

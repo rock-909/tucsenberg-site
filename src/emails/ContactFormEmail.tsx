@@ -5,7 +5,7 @@ import { ResendUtils } from "@/lib/resend-utils";
 import { EmailField } from "@/emails/EmailField";
 import { EmailLayout } from "@/emails/EmailLayout";
 import { EMAIL_COPY } from "@/emails/email-copy";
-import { COLORS, FONT_SIZES } from "@/emails/theme";
+import { COLORS } from "@/emails/theme";
 import { SITE_CONFIG } from "@/config/paths/site-config";
 
 const ACCENT_COLOR = COLORS.primary;
@@ -69,20 +69,6 @@ export function ContactFormEmail(data: EmailTemplateData) {
       <EmailField label={EMAIL_COPY.common.fields.submittedAt}>
         <Text style={valueTextStyle}>{submittedAt}</Text>
       </EmailField>
-      {data.marketingConsent ? (
-        <EmailField label={EMAIL_COPY.common.fields.marketingConsent}>
-          {/* Safe: valueTextStyle is a static CSSProperties object defined in this file */}
-          <Text
-            style={{
-              ...valueTextStyle,
-              color: COLORS.success,
-              fontSize: FONT_SIZES.sm,
-            }}
-          >
-            {EMAIL_COPY.common.marketingConsentAccepted}
-          </Text>
-        </EmailField>
-      ) : null}
     </EmailLayout>
   );
 }

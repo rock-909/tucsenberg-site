@@ -11,8 +11,6 @@ export const CONTACT_FORM_FIELD_KEYS = [
   "phone",
   "subject",
   "message",
-  "acceptPrivacy",
-  "marketingConsent",
   "website",
 ] as const;
 
@@ -43,8 +41,6 @@ export interface ContactFormFieldConfig {
  */
 interface ContactFormFeatures {
   enableTurnstile: boolean;
-  showPrivacyCheckbox: boolean;
-  showMarketingConsent: boolean;
   useWebsiteHoneypot: boolean;
   sendConfirmationEmail: boolean;
 }
@@ -75,8 +71,6 @@ export interface ContactFormFieldValues {
   message: string;
   phone?: string | undefined;
   subject?: string | undefined;
-  acceptPrivacy: boolean;
-  marketingConsent?: boolean | undefined;
   website?: string | undefined;
 }
 
@@ -164,22 +158,6 @@ const DEFAULT_FIELD_CONFIGS: Record<
     order: 6,
     i18nKey: "message",
   },
-  acceptPrivacy: {
-    key: "acceptPrivacy",
-    enabled: true,
-    required: true,
-    type: "checkbox",
-    order: 7,
-    i18nKey: "acceptPrivacy",
-  },
-  marketingConsent: {
-    key: "marketingConsent",
-    enabled: true,
-    required: false,
-    type: "checkbox",
-    order: 8,
-    i18nKey: "marketingConsent",
-  },
   website: {
     key: "website",
     enabled: true,
@@ -195,8 +173,6 @@ export const CONTACT_FORM_CONFIG: ContactFormConfig = {
   fields: DEFAULT_FIELD_CONFIGS,
   features: {
     enableTurnstile: true,
-    showPrivacyCheckbox: true,
-    showMarketingConsent: true,
     useWebsiteHoneypot: true,
     sendConfirmationEmail: false,
   },
@@ -227,12 +203,6 @@ export function shouldRenderField(
   field: ContactFormFieldConfig,
   features: ContactFormFeatures,
 ): boolean {
-  if (field.key === "acceptPrivacy" && !features.showPrivacyCheckbox) {
-    return false;
-  }
-  if (field.key === "marketingConsent" && !features.showMarketingConsent) {
-    return false;
-  }
   if (field.key === "website" && !features.useWebsiteHoneypot) {
     return false;
   }

@@ -74,8 +74,6 @@ function createValidContactBody() {
     company: "Example Co.",
     subject: "Custom project",
     message: "We need help scoping a replacement website project.",
-    acceptPrivacy: true,
-    marketingConsent: false,
     website: "",
     turnstileToken: "valid-token",
     submittedAt: new Date().toISOString(),
@@ -125,7 +123,6 @@ describe("/api/contact canonical integration", () => {
         message: "We need help scoping a replacement website project.",
         turnstileToken: "valid-token",
         submittedAt: expect.any(String),
-        marketingConsent: false,
       }),
       {},
     );

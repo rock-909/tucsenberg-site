@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -97,49 +96,6 @@ describe("Contact Form Fields - React 19 Native Form Tests", () => {
         "spellcheck",
         "true",
       );
-    });
-
-    it("keeps configured checkboxes native and accessible during the text-control pilot", async () => {
-      const user = userEvent.setup();
-      render(<FormFields {...defaultProps} />);
-
-      const privacyCheckbox = screen.getByRole("checkbox", {
-        name: /acceptPrivacy/i,
-      });
-      const marketingCheckbox = screen.getByRole("checkbox", {
-        name: /marketingConsent/i,
-      });
-
-      expect(privacyCheckbox).toHaveAttribute("type", "checkbox");
-      expect(privacyCheckbox).toHaveAttribute("name", "acceptPrivacy");
-      expect(privacyCheckbox).toBeRequired();
-      expect(marketingCheckbox).toHaveAttribute("type", "checkbox");
-      expect(marketingCheckbox).toHaveAttribute("name", "marketingConsent");
-      expect(marketingCheckbox).not.toBeRequired();
-
-      await user.click(privacyCheckbox);
-      await user.click(marketingCheckbox);
-
-      expect(privacyCheckbox).toBeChecked();
-      expect(marketingCheckbox).toBeChecked();
-    });
-
-    it("keeps checkbox labels clickable during the text-control pilot", async () => {
-      const user = userEvent.setup();
-      render(<FormFields {...defaultProps} />);
-
-      const privacyCheckbox = screen.getByRole("checkbox", {
-        name: /acceptPrivacy/i,
-      });
-      const marketingCheckbox = screen.getByRole("checkbox", {
-        name: /marketingConsent/i,
-      });
-
-      await user.click(screen.getByText("acceptPrivacy"));
-      await user.click(screen.getByText("marketingConsent"));
-
-      expect(privacyCheckbox).toBeChecked();
-      expect(marketingCheckbox).toBeChecked();
     });
   });
 });

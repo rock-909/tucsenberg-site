@@ -17,6 +17,7 @@ const REQUIRED_RUNTIME_KEYS = [
   "accessibility.turnstileTestMode",
   "accessibility.turnstileLoadFailed",
   "contact.form.networkError",
+  "contact.form.privacyNotice",
 ] as const;
 
 const INQUIRY_API_VALIDATION_DETAIL_KEYS = [
@@ -47,7 +48,6 @@ const CONTACT_API_VALIDATION_DETAIL_KEYS = [
   "errors.message.tooShort",
   "errors.message.tooLong",
   "errors.subject.length",
-  "errors.acceptPrivacy.required",
 ] as const;
 
 const REQUEST_QUOTE_RUNTIME_KEYS = [
@@ -61,6 +61,7 @@ const REQUEST_QUOTE_RUNTIME_KEYS = [
   "requestQuote.form.networkError",
   "requestQuote.form.turnstilePending",
   "requestQuote.form.messageHint",
+  "requestQuote.form.privacyNotice",
   "requestQuote.form.fields.fullName",
   "requestQuote.form.fields.email",
   "requestQuote.form.fields.message",

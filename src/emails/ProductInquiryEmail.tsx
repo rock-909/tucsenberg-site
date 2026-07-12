@@ -108,20 +108,6 @@ export function ProductInquiryEmail(data: ProductInquiryEmailData) {
           ))}
         </EmailField>
       ) : null}
-      {data.marketingConsent ? (
-        <EmailField label={EMAIL_COPY.common.fields.marketingConsent}>
-          {/* Safe: valueTextStyle is a static CSSProperties object defined in this file */}
-          <Text
-            style={{
-              ...valueTextStyle,
-              color: COLORS.success,
-              fontSize: FONT_SIZES.sm,
-            }}
-          >
-            {EMAIL_COPY.common.marketingConsentAccepted}
-          </Text>
-        </EmailField>
-      ) : null}
     </EmailLayout>
   );
 }

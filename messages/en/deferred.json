@@ -127,7 +127,6 @@
     "runtimeDefaultLocale": "en",
     "common": {
       "unknownSubmissionTime": "Unknown submission time",
-      "marketingConsentAccepted": "Yes, agreed to receive marketing communications",
       "fields": {
         "name": "Name",
         "contactName": "Contact Name",
@@ -137,7 +136,6 @@
         "subject": "Subject",
         "message": "Message",
         "submittedAt": "Submitted At",
-        "marketingConsent": "Marketing Consent",
         "product": "Product",
         "quantity": "Quantity",
         "requirements": "Requirements"
@@ -235,8 +233,7 @@
       "phonePlaceholder": "WhatsApp or phone number",
       "subjectPlaceholder": "Product line, quantity, or site question",
       "messagePlaceholder": "Share product interest, quantity, market, delivery port, timeline, dimensions, or photos/drawings you can provide.",
-      "acceptPrivacy": "I agree to the privacy policy and terms of service",
-      "marketingConsent": "I would like to receive marketing communications",
+      "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
       "submit": "Send Enquiry",
       "submitting": "Sending...",
       "submitSuccess": "Received. You'll hear from a person, not a sequence.",
@@ -299,9 +296,6 @@
         "subject": {
           "length": "Subject must be between 5 and 100 characters"
         },
-        "acceptPrivacy": {
-          "required": "You must accept the privacy policy"
-        },
         "website": {
           "shouldBeEmpty": "This field should be empty"
         }
@@ -341,6 +335,7 @@
       "turnstilePending": "Security verification is still loading. Please try again.",
       "referenceLabel": "Reference",
       "messageHint": "Optional, but anything helps: product line, opening sizes (width × height), quantity, delivery country or port. The more you tell us, the more accurate the first quote — and you can always just say hello and ask.",
+      "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
       "fields": {
         "fullName": "Your name",
         "email": "Work email",

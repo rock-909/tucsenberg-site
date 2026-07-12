@@ -29,7 +29,6 @@ interface RequestQuotePayload extends MarketingAttributionFields {
   readonly productInquiryKind: ProductInquiryKind;
   readonly buyerInterest?: string;
   readonly requirements: string;
-  readonly marketingConsent: false;
   readonly turnstileToken: string;
 }
 
@@ -68,7 +67,6 @@ export function createRequestQuotePayload(
     productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
     ...(buyerInterest ? { buyerInterest } : {}),
     requirements: createRequestQuoteRequirements(formData, copy),
-    marketingConsent: false,
     turnstileToken,
     ...pickAttributionFieldsFromFormData(formData),
   };

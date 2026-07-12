@@ -25,7 +25,6 @@ function formatTemplate(
 export const EMAIL_COPY = {
   common: {
     unknownSubmissionTime: emailTemplateCopy.common.unknownSubmissionTime,
-    marketingConsentAccepted: emailTemplateCopy.common.marketingConsentAccepted,
     fields: emailTemplateCopy.common.fields,
   },
   confirmation: {

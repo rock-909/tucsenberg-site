@@ -26,8 +26,6 @@ vi.mock("next-intl", () => ({
       company: "Company",
       subject: "Subject",
       message: "Message",
-      acceptPrivacy: "I accept the privacy policy",
-      marketingConsent: "I agree to receive marketing communications",
       submit: "Submit",
       submitting: "Submitting...",
       turnstilePending:
@@ -220,30 +218,6 @@ describe("ContactFormContainer accessibility", () => {
 
     honeypot.value = "bot-filled";
     expect(new FormData(form).get("website")).toBe("bot-filled");
-  });
-
-  it("renders contact consent checkboxes with mobile-friendly touch targets", () => {
-    render(<FormFields t={(key) => key} isPending={false} />);
-
-    for (const name of ["acceptPrivacy", "marketingConsent"]) {
-      const checkbox = document.querySelector<HTMLInputElement>(
-        `input[name="${name}"]`,
-      );
-
-      if (!checkbox) {
-        throw new Error(`Expected ${name} checkbox to render.`);
-      }
-
-      const row = checkbox.parentElement;
-
-      expect(checkbox).toHaveAttribute("type", "checkbox");
-      expect(checkbox).toHaveClass("size-6");
-      expect(checkbox).not.toHaveClass("size-4");
-      expect(row).toHaveClass("min-h-11", "gap-3");
-      expect(
-        document.querySelector(`label[for="${checkbox.id}"]`),
-      ).toBeInTheDocument();
-    }
   });
 
   it("explains why submit is disabled while security verification is pending", async () => {

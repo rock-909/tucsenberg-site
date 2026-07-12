@@ -77,7 +77,6 @@ describe("processLead", () => {
     message: "This is a test message with enough characters.",
     turnstileToken: "valid-token",
     company: "Test Company",
-    marketingConsent: true,
   };
 
   const validProductLead = {
@@ -89,7 +88,6 @@ describe("processLead", () => {
     quantity: "500 units",
     company: "Example Company",
     requirements: "Brand adaptation needed",
-    marketingConsent: true,
   };
 
   const validNewsletterLead = {

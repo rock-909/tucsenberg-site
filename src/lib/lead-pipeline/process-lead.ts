@@ -113,7 +113,6 @@ function createContactEmailData(lead: ContactLeadInput): EmailTemplateData {
     ...createOptionalSubject(lead.subject),
     message: lead.message,
     submittedAt: lead.submittedAt || new Date().toISOString(),
-    marketingConsent: lead.marketingConsent,
   };
 }
 
@@ -153,7 +152,6 @@ async function createContactLeadRecord(
         company: lead.company,
         ...createOptionalSubject(lead.subject),
         message: lead.message,
-        marketingConsent: lead.marketingConsent,
         referenceId,
         ...pickAttributionFields(lead),
       }),
@@ -246,7 +244,6 @@ function createProductEmailData(
     productName,
     quantity: lead.quantity,
     requirements: description,
-    marketingConsent: lead.marketingConsent,
   };
 }
 
@@ -294,7 +291,6 @@ async function createProductLeadRecord(
         catalogProductId: identity.catalogProductId,
         quantity: lead.quantity,
         requirements: lead.requirements,
-        marketingConsent: lead.marketingConsent,
         referenceId,
         ...pickAttributionFields(lead),
       }),

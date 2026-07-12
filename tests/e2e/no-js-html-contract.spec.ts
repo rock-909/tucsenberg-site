@@ -133,22 +133,20 @@ test.describe("No-JS HTML contract (English-only)", () => {
     ).toBeVisible();
     await expect(submitButton).toBeDisabled();
 
-    for (const fieldName of [
-      "fullName",
-      "email",
-      "company",
-      "message",
-      "acceptPrivacy",
-    ]) {
+    for (const fieldName of ["fullName", "email", "company", "message"]) {
       expect(html).toContain(`name="${fieldName}"`);
     }
 
     const contactForm = page.locator("form").first();
-    const acceptPrivacyCheckbox = contactForm.locator(
-      'input[name="acceptPrivacy"][type="checkbox"]',
-    );
-    await expect(acceptPrivacyCheckbox).toHaveCount(1);
-    await expect(acceptPrivacyCheckbox).toHaveAttribute("required", "");
+    // Privacy is now a submit-adjacent statement, not a consent checkbox: the
+    // old required `acceptPrivacy` checkbox must be gone and the statement
+    // present. Submit stays disabled without JavaScript because the Turnstile
+    // token never arrives — it is not, and never was, gated by a privacy
+    // checkbox.
+    await expect(
+      contactForm.locator('input[name="acceptPrivacy"]'),
+    ).toHaveCount(0);
+    await expect(contactForm.getByTestId("form-privacy-notice")).toHaveCount(1);
   });
 
   test("key public pages expose one composed main landmark", async ({

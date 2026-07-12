@@ -1,4 +1,5 @@
 import { DataCard } from "@/components/ui/data-card";
+import { FormPrivacyNotice } from "@/components/forms/form-privacy-notice";
 import {
   buildFormFieldsFromConfig,
   CONTACT_FORM_CONFIG,
@@ -216,6 +217,8 @@ export function ContactFormStaticFallback({
         >
           {turnstilePendingMessage}
         </p>
+
+        <FormPrivacyNotice text={pick("privacyNotice")} />
 
         <button
           type="submit"

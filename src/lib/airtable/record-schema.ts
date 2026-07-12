@@ -19,7 +19,6 @@ export const airtableRecordSchema = z.object({
       .enum(["New", "In Progress", "Completed", "Archived"])
       .default("New"),
     Source: z.string().default("Website Contact Form"),
-    "Marketing Consent": z.boolean().optional(),
     "UTM Source": z.string().optional(),
     "UTM Medium": z.string().optional(),
     "UTM Campaign": z.string().optional(),

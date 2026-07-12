@@ -21,7 +21,6 @@ describe("validations - Schema Validation", () => {
       email: "john.doe@example.com",
       company: "Test Company",
       message: "This is a test message with sufficient length.",
-      acceptPrivacy: true,
       website: "", // honeypot field
     };
 
@@ -167,23 +166,6 @@ describe("validations - Schema Validation", () => {
       }
     });
 
-    it("should require privacy acceptance", () => {
-      const invalidData = { ...validFormData, acceptPrivacy: false };
-      const result = contactFormSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain(
-          "accept the privacy policy",
-        );
-      }
-    });
-
-    it("should validate optional marketing consent", () => {
-      const dataWithConsent = { ...validFormData, marketingConsent: true };
-      const result = contactFormSchema.safeParse(dataWithConsent);
-      expect(result.success).toBe(true);
-    });
-
     it("should reject honeypot field with content", () => {
       const invalidData = { ...validFormData, website: "spam content" };
       const result = contactFormSchema.safeParse(invalidData);
@@ -284,7 +266,6 @@ describe("validations - API and Data Schemas", () => {
         ...validTemplateData,
         phone: "+1234567890",
         subject: "Test Subject",
-        marketingConsent: true,
       };
       const result = emailTemplateDataSchema.safeParse(dataWithOptionals);
       expect(result.success).toBe(true);
@@ -318,7 +299,6 @@ describe("validations - Types", () => {
         email: "john@example.com",
         company: undefined,
         message: "Test message",
-        acceptPrivacy: true,
         website: "",
       };
       expect(formData).toBeDefined();

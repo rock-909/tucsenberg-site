@@ -147,7 +147,6 @@ describe("resend - Email Operations", () => {
       company: "Test Company",
       message: "This is a test message",
       submittedAt: "2023-01-01T00:00:00Z",
-      marketingConsent: true,
     };
 
     it("should send contact form email successfully", async () => {
@@ -177,12 +176,6 @@ describe("resend - Email Operations", () => {
             { name: "source", value: "website" },
           ]),
         }),
-      );
-      expect(payload.html).toContain(
-        EMAIL_COPY.common.marketingConsentAccepted,
-      );
-      expect(payload.text).toContain(
-        EMAIL_COPY.common.marketingConsentAccepted,
       );
       expect(payload).not.toHaveProperty("react");
     });
@@ -589,7 +582,6 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       quantity: 100,
       company: "Acme Corp",
       requirements: "Need bulk pricing",
-      marketingConsent: true,
     };
 
     it("should send product inquiry email successfully", async () => {
@@ -620,12 +612,6 @@ describe("resend - Product Inquiry and Utility Methods", () => {
             { name: "type", value: "product-inquiry" },
           ]),
         }),
-      );
-      expect(payload.html).toContain(
-        EMAIL_COPY.common.marketingConsentAccepted,
-      );
-      expect(payload.text).toContain(
-        EMAIL_COPY.common.marketingConsentAccepted,
       );
       expect(payload).not.toHaveProperty("react");
     });

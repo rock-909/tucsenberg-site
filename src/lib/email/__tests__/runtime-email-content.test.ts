@@ -19,7 +19,6 @@ describe("runtime email content", () => {
     subject: "Need a quote",
     message: "Line one\nLine two",
     submittedAt: "2026-05-30T08:30:00.000Z",
-    marketingConsent: true,
   };
 
   it("renders contact fields in both HTML and plain text", () => {
@@ -33,7 +32,6 @@ describe("runtime email content", () => {
     expect(content.html).toContain("Line one");
     expect(content.html).toContain("Line two");
     expect(content.html).toContain("2026-05-30 08:30 UTC");
-    expect(content.html).toContain(EMAIL_COPY.common.marketingConsentAccepted);
 
     expect(content.text).toContain("Name: Jane Buyer");
     expect(content.text).toContain("Email: jane@example.com");
@@ -42,9 +40,6 @@ describe("runtime email content", () => {
     expect(content.text).toContain("Subject: Need a quote");
     expect(content.text).toContain("Message: Line one\nLine two");
     expect(content.text).toContain("Submitted At: 2026-05-30 08:30 UTC");
-    expect(content.text).toContain(
-      `Marketing Consent: ${EMAIL_COPY.common.marketingConsentAccepted}`,
-    );
   });
 
   it("omits optional contact labels when the fields are not provided", () => {
@@ -59,13 +54,9 @@ describe("runtime email content", () => {
     expect(content.text).not.toContain("Company:");
     expect(content.text).not.toContain("Phone:");
     expect(content.text).not.toContain("Subject:");
-    expect(content.text).not.toContain("Marketing Consent:");
     expect(content.html).not.toContain(EMAIL_COPY.common.fields.company);
     expect(content.html).not.toContain(EMAIL_COPY.common.fields.phone);
     expect(content.html).not.toContain(EMAIL_COPY.common.fields.subject);
-    expect(content.html).not.toContain(
-      EMAIL_COPY.common.fields.marketingConsent,
-    );
   });
 
   it("escapes special characters in HTML while keeping readable text content", () => {
@@ -98,7 +89,6 @@ describe("runtime email content", () => {
       productName: "Enterprise Widget",
       quantity: "500 units\nper month",
       requirements: "Line one\nLine two",
-      marketingConsent: true,
     };
 
     const content = buildProductInquiryEmailContent(inquiryData);
@@ -111,7 +101,6 @@ describe("runtime email content", () => {
     expect(content.html).toContain("Buyer LLC");
     expect(content.html).toContain("Line one");
     expect(content.html).toContain("Line two");
-    expect(content.html).toContain(EMAIL_COPY.common.marketingConsentAccepted);
 
     expect(content.text).toContain("Product: Enterprise Widget");
     expect(content.text).toContain("Quantity: 500 units\nper month");

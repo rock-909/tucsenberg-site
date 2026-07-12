@@ -19,11 +19,9 @@ export type ContactFormData = {
   email: string;
   company: string;
   message: string;
-  acceptPrivacy: boolean;
   website?: string;
   phone?: string;
   subject?: string;
-  marketingConsent?: boolean;
 };
 
 export type AirtableRecord = {

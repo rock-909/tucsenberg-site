@@ -151,12 +151,6 @@ export function buildContactFormEmailContent(
       multiline: true,
     },
     { label: EMAIL_COPY.common.fields.submittedAt, value: submittedAt },
-    data.marketingConsent
-      ? {
-          label: EMAIL_COPY.common.fields.marketingConsent,
-          value: EMAIL_COPY.common.marketingConsentAccepted,
-        }
-      : null,
   ]);
 
   return renderEmailDocument({
@@ -241,12 +235,6 @@ export function buildProductInquiryEmailContent(
           label: EMAIL_COPY.common.fields.requirements,
           value: data.requirements,
           multiline: true,
-        }
-      : null,
-    data.marketingConsent
-      ? {
-          label: EMAIL_COPY.common.fields.marketingConsent,
-          value: EMAIL_COPY.common.marketingConsentAccepted,
         }
       : null,
   ]);

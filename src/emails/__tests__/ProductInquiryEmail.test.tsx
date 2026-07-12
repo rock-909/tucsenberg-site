@@ -130,24 +130,6 @@ describe("ProductInquiryEmail", () => {
       const html = await render(<ProductInquiryEmail {...baseData} />);
       expect(html).not.toContain(">Requirements<");
     });
-
-    it("should render marketing consent when true", async () => {
-      const data = { ...baseData, marketingConsent: true };
-      const html = await render(<ProductInquiryEmail {...data} />);
-      expect(html).toContain(EMAIL_COPY.common.fields.marketingConsent);
-      expect(html).toContain(EMAIL_COPY.common.marketingConsentAccepted);
-    });
-
-    it("should not render marketing consent when false", async () => {
-      const data = { ...baseData, marketingConsent: false };
-      const html = await render(<ProductInquiryEmail {...data} />);
-      expect(html).not.toContain("Marketing Consent");
-    });
-
-    it("should not render marketing consent when undefined", async () => {
-      const html = await render(<ProductInquiryEmail {...baseData} />);
-      expect(html).not.toContain("Marketing Consent");
-    });
   });
 
   describe("Full Data Rendering", () => {
@@ -160,7 +142,6 @@ describe("ProductInquiryEmail", () => {
         quantity: 100,
         company: "Smith Industries",
         requirements: "Custom specifications needed\nUrgent delivery required",
-        marketingConsent: true,
       };
 
       const html = await render(<ProductInquiryEmail {...fullData} />);
@@ -172,7 +153,6 @@ describe("ProductInquiryEmail", () => {
       expect(html).toContain("Smith Industries");
       expect(html).toContain("Custom specifications needed");
       expect(html).toContain("Urgent delivery required");
-      expect(html).toContain("Marketing Consent");
     });
   });
 

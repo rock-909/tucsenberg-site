@@ -81,7 +81,6 @@ const mockT = vi.fn((key: string) => {
     message: "Message",
     submit: "Submit",
     submitting: "Submitting...",
-    acceptPrivacy: "I accept the privacy policy",
     submitSuccess: "Message sent successfully",
     submitError: "Failed to submit form. Please try again.",
     rateLimitMessage: "Please wait before submitting again.",
@@ -177,10 +176,6 @@ const _fillValidForm = async () => {
     fireEvent.change(screen.getByLabelText(/message/i), {
       target: { value: "Test message content" },
     });
-
-    // 勾选隐私政策
-    const privacyCheckbox = screen.getByLabelText(/accept.*privacy/i);
-    fireEvent.click(privacyCheckbox);
 
     // 启用 Turnstile
     const successButton = await screen.findByTestId("turnstile-success");
@@ -301,10 +296,6 @@ describe("ContactFormContainer - 提交和错误处理", () => {
         fireEvent.change(screen.getByLabelText(/message/i), {
           target: { value: "Test message content" },
         });
-
-        // 勾选隐私政策
-        const privacyCheckbox = screen.getByLabelText(/accept.*privacy/i);
-        fireEvent.click(privacyCheckbox);
       });
 
       const submitButton = screen.getByRole("button", { name: /submit/i });

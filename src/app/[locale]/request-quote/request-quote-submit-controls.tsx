@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { FormPrivacyNotice } from "@/components/forms/form-privacy-notice";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Link } from "@/i18n/routing";
@@ -112,6 +113,8 @@ export function RequestQuoteSubmitControls({
       />
 
       <RequestQuoteStatusMessage copy={copy} state={state} />
+
+      <FormPrivacyNotice text={copy.privacyNotice} />
 
       <button
         className={buttonVariants({ className: "w-full" })}

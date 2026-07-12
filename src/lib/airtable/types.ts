@@ -39,7 +39,6 @@ export interface ContactLeadData extends BaseLeadData {
   company?: string;
   subject?: string;
   message: string;
-  marketingConsent?: boolean;
 }
 
 // Product inquiry lead data.
@@ -57,7 +56,6 @@ export interface ProductLeadData extends BaseLeadData {
   catalogProductId?: string;
   quantity?: string | number;
   requirements?: string;
-  marketingConsent?: boolean;
 }
 
 // Newsletter subscription lead data

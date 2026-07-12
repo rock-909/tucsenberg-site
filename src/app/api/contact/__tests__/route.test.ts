@@ -76,8 +76,6 @@ function createValidContactBody() {
     company: "Example Co.",
     subject: "Custom project",
     message: "We need help scoping a replacement website project.",
-    acceptPrivacy: true,
-    marketingConsent: false,
     website: "",
     turnstileToken: "valid-token",
     submittedAt: new Date().toISOString(),
@@ -195,7 +193,7 @@ describe("/api/contact route", () => {
       success: false,
       errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
       error: "Validation failed",
-      details: ["errors.message.required", "errors.acceptPrivacy.required"],
+      details: ["errors.message.required"],
       data: null,
     });
 
@@ -206,7 +204,7 @@ describe("/api/contact route", () => {
     expect(data).toEqual({
       success: false,
       errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
-      details: ["errors.message.required", "errors.acceptPrivacy.required"],
+      details: ["errors.message.required"],
     });
   });
 

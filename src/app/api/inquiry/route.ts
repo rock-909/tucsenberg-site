@@ -86,7 +86,6 @@ function validateLeadData(
     requirements: data.requirements,
     email: data.email,
     company: data.company,
-    marketingConsent: data.marketingConsent,
     ...pickAttributionFields(data),
   });
 

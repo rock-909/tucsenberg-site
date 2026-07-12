@@ -9,7 +9,6 @@ import type {
 interface EmailTemplates {
   common: {
     unknownSubmissionTime: string;
-    marketingConsentAccepted: string;
     fields: typeof EMAIL_COPY.common.fields;
   };
   confirmation: {
@@ -55,7 +54,6 @@ const contactEmailData: EmailTemplateData = {
   subject: "showcase offer example quote",
   message: "Need a distributor quote.",
   submittedAt: "2026-04-29T12:00:00.000Z",
-  marketingConsent: true,
 };
 
 const contactEmailDataWithoutSubject: EmailTemplateData = {
@@ -66,7 +64,6 @@ const contactEmailDataWithoutSubject: EmailTemplateData = {
   phone: "+1 555 0100",
   message: "Need a distributor quote.",
   submittedAt: "2026-04-29T12:00:00.000Z",
-  marketingConsent: true,
 };
 
 const productInquiryEmailData: ProductInquiryEmailData = {
@@ -77,7 +74,6 @@ const productInquiryEmailData: ProductInquiryEmailData = {
   productName: "Hydraulic Pump Station",
   quantity: 10,
   requirements: "Need urgent delivery.",
-  marketingConsent: true,
 };
 
 const contactEmailDataWithPlaceholderLikeInput: EmailTemplateData = {
@@ -89,7 +85,6 @@ const contactEmailDataWithPlaceholderLikeInput: EmailTemplateData = {
   subject: "{submittedAt}",
   message: "Need a distributor quote.",
   submittedAt: "2026-04-29T12:00:00.000Z",
-  marketingConsent: true,
 };
 
 const productInquiryEmailDataWithPlaceholderLikeInput: ProductInquiryEmailData =
@@ -108,7 +103,6 @@ const contactEmailDataWithoutCompanyOrSubject: EmailTemplateData = {
   phone: "+1 555 0100",
   message: "Need a distributor quote.",
   submittedAt: "2026-04-29T12:00:00.000Z",
-  marketingConsent: true,
 };
 
 const UNRESOLVED_PLACEHOLDER_PATTERN = /\{[^}]+\}/;
@@ -156,9 +150,6 @@ describe("email copy source", () => {
 
     expect(EMAIL_COPY.common.unknownSubmissionTime).toBe(
       emailTemplates.common.unknownSubmissionTime,
-    );
-    expect(EMAIL_COPY.common.marketingConsentAccepted).toBe(
-      emailTemplates.common.marketingConsentAccepted,
     );
     expect(EMAIL_COPY.common.fields).toEqual(emailTemplates.common.fields);
   });

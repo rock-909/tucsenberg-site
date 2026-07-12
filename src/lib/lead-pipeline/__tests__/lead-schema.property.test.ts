@@ -24,7 +24,6 @@ const contactLeadArb = fc
     subject: contactSubjectArb,
     message: fc.string({ minLength: 20, maxLength: 120 }),
     turnstileToken: fc.string({ minLength: 1, maxLength: 48 }),
-    marketingConsent: fc.boolean(),
   })
   .chain((base) =>
     fc
@@ -63,7 +62,6 @@ const productLeadArb = fc
       fc.integer({ min: 1, max: 10000 }),
       fc.string({ minLength: 1, maxLength: 24 }),
     ),
-    marketingConsent: fc.boolean(),
   })
   .chain((base) =>
     fc
