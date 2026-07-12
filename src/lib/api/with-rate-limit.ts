@@ -173,7 +173,7 @@ function createRateLimitResponse(
  * - Context injection with clientIP
  * - TypeScript-safe generics
  *
- * @param preset - Rate limit preset name (e.g., 'contact', 'turnstile')
+ * @param preset - Rate limit preset name (e.g., 'contact', 'inquiry')
  * @param handler - The actual request handler function
  * @param keyStrategy - Optional custom key generation strategy (defaults to IP-based)
  * @returns Wrapped handler function compatible with Next.js route exports

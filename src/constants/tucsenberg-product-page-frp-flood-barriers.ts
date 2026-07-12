@@ -67,7 +67,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
   sections: [
     {
       title: "Why FRP, and why now",
-      kind: "bullets",
       paragraphs: [
         "Aluminum demountable systems are the trade standard — and inland, they should be. But three environments punish aluminum over a service life:",
       ],
@@ -81,7 +80,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "Same logic as aluminum, different material",
-      kind: "bullets",
       bullets: [
         "180 mm plank profile class — designed to the same stacked-plank, post-and-seal system as our aluminum gates, so posts, seals and deployment practice carry over.",
         "Pultruded fiberglass — continuous glass fibre in a resin matrix, the process behind FRP ladders, grating and utility poles: proven material science, newly applied to flood planks built to international specifications.",
@@ -90,7 +88,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "How order-driven production works (the part nobody publishes)",
-      kind: "bullets",
       paragraphs: [
         "FRP profiles are made on pultrusion dies. Opening a new profile means tooling — and we'd rather show you the economics than hide them:",
       ],
@@ -105,7 +102,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "Span & deflection data",
-      kind: "paragraphs",
       paragraphs: [
         "Testing data for the first profiles is being compiled with our pultrusion partners. Register interest below and we'll send span/deflection tables as they complete — no marketing sheet, the actual numbers.",
       ],

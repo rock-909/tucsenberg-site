@@ -1,7 +1,5 @@
 import type { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 
-export type TucsenbergProductContentKind = "paragraphs" | "bullets" | "table";
-
 export interface TucsenbergProductCta {
   href: `/request-quote${string}`;
   label: string;
@@ -14,15 +12,36 @@ export interface TucsenbergProductTable {
   rows: readonly (readonly string[])[];
 }
 
-export interface TucsenbergProductSection {
+/**
+ * Narrative section: prose paragraphs and/or a bullet list, with an optional
+ * closing footer. The absence of a `table` field is what makes this a prose
+ * section — content presence is the only signal, there is no separate label.
+ */
+export interface TucsenbergProductProseSection {
   title: string;
-  kind: TucsenbergProductContentKind;
   paragraphs?: readonly string[];
   bullets?: readonly string[];
-  table?: TucsenbergProductTable;
-  /** Closing line rendered after bullets/table; supports inline markdown links. */
+  /** Closing line rendered after bullets; supports inline markdown links. */
   footer?: string;
 }
+
+/**
+ * Table section: a required data/argument table with optional framing
+ * paragraphs and an optional closing footer. The required `table` field is the
+ * discriminant that separates this variant from a prose section and makes
+ * illegal combinations (e.g. a table with bullets) unrepresentable.
+ */
+export interface TucsenbergProductTableSection {
+  title: string;
+  table: TucsenbergProductTable;
+  paragraphs?: readonly string[];
+  /** Closing line rendered after the table; supports inline markdown links. */
+  footer?: string;
+}
+
+export type TucsenbergProductSection =
+  | TucsenbergProductProseSection
+  | TucsenbergProductTableSection;
 
 export interface TucsenbergProductFaq {
   question: string;

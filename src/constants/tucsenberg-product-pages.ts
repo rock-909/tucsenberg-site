@@ -6,13 +6,14 @@ import { FLOOD_TUBE_DAMS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-pag
 import { FRP_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-frp-flood-barriers";
 
 export type {
-  TucsenbergProductContentKind,
   TucsenbergProductCta,
   TucsenbergProductFaq,
   TucsenbergProductImage,
   TucsenbergProductPage,
+  TucsenbergProductProseSection,
   TucsenbergProductSection,
   TucsenbergProductTable,
+  TucsenbergProductTableSection,
 } from "@/constants/tucsenberg-product-page-types";
 
 export const TUCSENBERG_PRODUCT_PAGES = {

@@ -19,7 +19,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
   createRateLimitHeaders: mockCreateRateLimitHeaders,
   RATE_LIMIT_PRESETS: {
     contact: { failureMode: "closed", windowMs: 60000 },
-    turnstile: { failureMode: "closed", windowMs: 60000 },
+    inquiry: { failureMode: "closed", windowMs: 60000 },
     csp: { failureMode: "open", windowMs: 60000 },
   },
 }));
@@ -254,7 +254,7 @@ describe("withRateLimit", () => {
       mockCreateRateLimitHeaders.mockReturnValue(new Headers());
 
       const mockHandler = createMockHandler({ success: true });
-      const wrappedHandler = withRateLimit("turnstile", mockHandler);
+      const wrappedHandler = withRateLimit("inquiry", mockHandler);
 
       const response = await wrappedHandler(createMockRequest());
       const body = await response.json();
@@ -279,7 +279,7 @@ describe("withRateLimit", () => {
       mockCreateRateLimitHeaders.mockReturnValue(new Headers());
 
       const mockHandler = createMockHandler({ success: true });
-      const wrappedHandler = withRateLimit("turnstile", mockHandler);
+      const wrappedHandler = withRateLimit("inquiry", mockHandler);
 
       const response = await wrappedHandler(createMockRequest());
       const body = await response.json();
@@ -295,7 +295,7 @@ describe("withRateLimit", () => {
 
     it("should return 503 when key generation fails before the rate-limit check", async () => {
       const mockHandler = createMockHandler({ success: true });
-      const wrappedHandler = withRateLimit("turnstile", mockHandler, () => {
+      const wrappedHandler = withRateLimit("inquiry", mockHandler, () => {
         throw new Error("pepper missing");
       });
 

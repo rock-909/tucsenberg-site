@@ -26,7 +26,7 @@ function isSafeRootRelativeImageSrc(src: string): boolean {
 }
 
 function getSectionTableSummary(section: TucsenbergProductSection) {
-  if (!section.table) {
+  if (!("table" in section)) {
     return undefined;
   }
 

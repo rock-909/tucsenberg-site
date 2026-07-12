@@ -38,12 +38,6 @@ export const RATE_LIMIT_PRESETS = {
     failureMode: "closed" as const,
   },
   csp: { maxRequests: 100, windowMs: MINUTE_MS, failureMode: "open" as const },
-  // Security-sensitive: deny on storage failure to prevent brute-force bypass
-  turnstile: {
-    maxRequests: 10,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
 } as const;
 
 export type RateLimitPreset = keyof typeof RATE_LIMIT_PRESETS;

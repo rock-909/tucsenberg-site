@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import {
   getTucsenbergProductPage,
   type TucsenbergProductPage,
+  type TucsenbergProductProseSection,
   type TucsenbergProductSection,
   type TucsenbergProductTable,
 } from "@/constants/tucsenberg-product-pages";
@@ -102,7 +103,7 @@ function ProductContentTable({
 function ProductSectionBody({
   section,
 }: {
-  section: TucsenbergProductSection;
+  section: TucsenbergProductProseSection;
 }) {
   return (
     <>
@@ -149,23 +150,23 @@ function ProductContentSection({
 }: {
   section: TucsenbergProductSection;
 }) {
-  const { table } = section;
+  if ("table" in section) {
+    const { table } = section;
 
-  if (table && !section.paragraphs) {
-    return (
-      <section>
-        <h2 className="text-section mb-5">{section.title}</h2>
-        <ProductContentTable table={table} fade="background" />
-        {section.footer ? (
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">
-            <InlineMarkdown text={section.footer} />
-          </p>
-        ) : null}
-      </section>
-    );
-  }
+    if (!section.paragraphs) {
+      return (
+        <section>
+          <h2 className="text-section mb-5">{section.title}</h2>
+          <ProductContentTable table={table} fade="background" />
+          {section.footer ? (
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              <InlineMarkdown text={section.footer} />
+            </p>
+          ) : null}
+        </section>
+      );
+    }
 
-  if (table) {
     return (
       <section className="surface-card p-6 md:p-8">
         <h2 className="text-section mb-4">{section.title}</h2>

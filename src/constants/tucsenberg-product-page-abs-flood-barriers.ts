@@ -69,7 +69,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   sections: [
     {
       title: "How it works",
-      kind: "bullets",
       bullets: [
         "Freestanding L-profile. The barrier stands on its own foot. As floodwater rises, its weight pushes the foot down — the water itself makes the seal tighter. No anchors, no drilling, no damage to the surface.",
         "Mechanical interlock. Units connect by hand with a locking-and-coupling joint — no tools, no loose pins.",
@@ -79,7 +78,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "Not the disposable kit you saw on Amazon",
-      kind: "table",
       paragraphs: [
         "Cheap ABS flood kits exist. They are thinner, degrade in sunlight, and are sold as disposable. Professional boxwall systems differ in ways you can measure:",
       ],
@@ -111,7 +109,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "Specifications",
-      kind: "table",
       table: {
         columns: [
           "Height",
@@ -136,7 +133,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "What determines your price",
-      kind: "bullets",
       paragraphs: [
         "We don't publish list prices — quantities, height mix and configuration move the number too much for a static price to be honest. What you can expect:",
       ],
@@ -150,7 +146,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "Small orders, samples, first-time buyers",
-      kind: "bullets",
       bullets: [
         "Minimum order: one carton / small pallet lot. We don't ship single retail units — international freight on one unit costs more than the unit.",
         "Paid sample kit: 2 straight units + 1 corner + documentation, at sample price plus freight. The sample fee is credited against your first order.",
@@ -159,7 +154,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     },
     {
       title: "OEM & private label",
-      kind: "bullets",
       paragraphs: [
         "Boxwall is the easiest line in our range to brand as your own:",
       ],

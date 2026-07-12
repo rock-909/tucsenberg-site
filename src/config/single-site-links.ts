@@ -1,4 +1,4 @@
-import { getActiveStaticPageTypes } from "@/config/pages.config";
+import { PUBLIC_STATIC_PAGE_TYPES } from "@/config/pages.config";
 import { getCanonicalPath } from "@/config/paths/utils";
 
 export const SINGLE_SITE_ROUTE_HREFS = {
@@ -46,7 +46,7 @@ function activeHref(
 }
 
 export function getSingleSiteActiveRouteTargets(): SingleSiteActiveRouteTargets {
-  const active = new Set(getActiveStaticPageTypes());
+  const active = new Set(PUBLIC_STATIC_PAGE_TYPES);
   const about = activeHref(active, "about");
   const contact = activeHref(active, "contact");
   const oemWholesale = activeHref(active, "oemWholesale");

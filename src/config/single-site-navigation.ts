@@ -1,5 +1,5 @@
 import {
-  getActiveStaticPageDefinitions,
+  PUBLIC_STATIC_PAGE_DEFINITIONS,
   getPublicStaticPageDefinition,
 } from "@/config/pages.config";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
@@ -45,7 +45,7 @@ function requireRouteHref(pageType: SingleSiteRoutePageType): string {
 
 export function getSingleSiteNavigation(): SiteNavigationItem[] {
   const activePageTypes = new Set(
-    getActiveStaticPageDefinitions().map((definition) => definition.pageType),
+    PUBLIC_STATIC_PAGE_DEFINITIONS.map((definition) => definition.pageType),
   );
 
   return MAIN_NAVIGATION_PAGE_TYPES.flatMap((pageType) =>

@@ -6,12 +6,6 @@ import { resolveOptionalContentEntry } from "@/lib/content-manifest";
 import {
   PUBLIC_STATIC_PAGE_DEFINITIONS,
   PUBLIC_STATIC_PAGE_TYPES,
-  getActiveMdxPageSlugByStaticPath,
-  getActiveStaticPageDefinitions,
-  getActiveStaticPageLastmodByPath,
-  getActiveStaticPageTypes,
-  getActiveStaticSitemapPageConfigByPath,
-  getActiveStaticSitemapPages,
   getMdxPageSlugByStaticPath,
   getPublicStaticPageDefinition,
   getStaticPageDefinitionsByType,
@@ -22,11 +16,11 @@ import {
 
 const EXPECTED_STATIC_PUBLIC_PAGE_TYPES = [
   "home",
-  "about",
   "products",
   "oemWholesale",
   "materialsGuide",
   "specificationsGuide",
+  "about",
   "requestQuote",
   "contact",
   "warranty",
@@ -100,11 +94,11 @@ describe("pages.config static public page registry", () => {
   it("derives sitemap pages and route configs from the registry", () => {
     expect(getStaticSitemapPages()).toEqual([
       "",
-      "/about",
       "/products",
       "/oem-wholesale",
       "/guides/flood-barrier-materials-guide",
       "/guides/flood-barrier-specifications",
+      "/about",
       "/request-quote",
       "/contact",
       "/warranty",
@@ -169,110 +163,5 @@ describe("pages.config static public page registry", () => {
       expect(enEntry, `missing en manifest entry for ${slug}`).toBeDefined();
       expect(enEntry?.relativePath).toBe(`content/pages/en/${slug}.mdx`);
     }
-  });
-
-  it("derives the default active static pages from the Tucsenberg catalog profile", () => {
-    expect(getActiveStaticPageTypes()).toEqual([
-      "home",
-      "products",
-      "oemWholesale",
-      "materialsGuide",
-      "specificationsGuide",
-      "about",
-      "requestQuote",
-      "contact",
-      "warranty",
-      "privacy",
-      "terms",
-    ]);
-    expect(
-      getActiveStaticPageDefinitions().map((definition) => definition.pageType),
-    ).toEqual([
-      "home",
-      "products",
-      "oemWholesale",
-      "materialsGuide",
-      "specificationsGuide",
-      "about",
-      "requestQuote",
-      "contact",
-      "warranty",
-      "privacy",
-      "terms",
-    ]);
-    expect(getActiveStaticSitemapPages()).toEqual([
-      "",
-      "/products",
-      "/oem-wholesale",
-      "/guides/flood-barrier-materials-guide",
-      "/guides/flood-barrier-specifications",
-      "/about",
-      "/request-quote",
-      "/contact",
-      "/warranty",
-      "/privacy",
-      "/terms",
-    ]);
-
-    expect(getActiveStaticSitemapPageConfigByPath()).toMatchObject({
-      "": { changeFrequency: "daily", priority: 1 },
-      "/about": { changeFrequency: "monthly", priority: 0.8 },
-      "/contact": { changeFrequency: "monthly", priority: 0.8 },
-      "/privacy": { changeFrequency: "monthly", priority: 0.7 },
-      "/terms": { changeFrequency: "monthly", priority: 0.7 },
-    });
-    expect(getActiveStaticSitemapPageConfigByPath()["/products"]).toEqual({
-      changeFrequency: "weekly",
-      priority: 0.9,
-    });
-    expect(getActiveStaticPageLastmodByPath()).toEqual({
-      "": "2026-07-05T00:00:00Z",
-      "/products": "2026-07-05T00:00:00Z",
-      "/request-quote": "2026-07-05T00:00:00Z",
-    });
-    expect(getActiveMdxPageSlugByStaticPath()).toEqual({
-      "/about": "about",
-      "/oem-wholesale": "oem-wholesale",
-      "/guides/flood-barrier-materials-guide": "flood-barrier-materials-guide",
-      "/guides/flood-barrier-specifications": "flood-barrier-specifications",
-      "/contact": "contact",
-      "/warranty": "warranty",
-      "/privacy": "privacy",
-      "/terms": "terms",
-    });
-  });
-
-  it("derives the explicit catalog static pages from the same registry", () => {
-    expect(getActiveStaticPageTypes()).toEqual([
-      "home",
-      "products",
-      "oemWholesale",
-      "materialsGuide",
-      "specificationsGuide",
-      "about",
-      "requestQuote",
-      "contact",
-      "warranty",
-      "privacy",
-      "terms",
-    ]);
-    expect(getActiveStaticSitemapPages()).toEqual([
-      "",
-      "/products",
-      "/oem-wholesale",
-      "/guides/flood-barrier-materials-guide",
-      "/guides/flood-barrier-specifications",
-      "/about",
-      "/request-quote",
-      "/contact",
-      "/warranty",
-      "/privacy",
-      "/terms",
-    ]);
-    expect(getActiveStaticPageLastmodByPath()).toEqual({
-      "": "2026-07-05T00:00:00Z",
-      "/products": "2026-07-05T00:00:00Z",
-      "/request-quote": "2026-07-05T00:00:00Z",
-    });
   });
 });
