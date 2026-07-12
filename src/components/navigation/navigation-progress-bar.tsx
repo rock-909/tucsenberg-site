@@ -30,6 +30,7 @@ function getNextProgressValue(current: number): number {
     return current;
   }
 
+  // nosemgrep: insecure-random-generation -- 进度条增量抖动是纯视觉动画，不涉及密钥/token/抽样公平性等安全语义
   const increment = 4 + Math.random() * 6;
   return Math.min(current + increment, PROGRESS_CAP);
 }

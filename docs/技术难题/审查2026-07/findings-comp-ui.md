@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/components/ui/ 审查清单
 
 **统计：高 3 条 / 中 12 条 / 低 12 条（共 27 条）**

@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # misc 批次审查清单（src/constants + src/i18n + src/emails + src/hooks + src/types + scripts）
 
 **审查文件数**：84 个（constants 37、i18n 4、emails 7、hooks 1、types 3、scripts 32）。"未使用"结论均经 grep 全仓验证（排除 `__tests__`）。

@@ -15,8 +15,10 @@ paths:
 - No `any` in production code.
 - Default to `interface` for object shapes.
 - Use `type` for unions, tuples, mapped types, and utility-heavy compositions.
-- Prefer `const` objects plus union types over `enum` unless third-party interop
-  makes `enum` clearer.
+- Prefer `const` objects plus union types over `enum`. `erasableSyntaxOnly` is
+  on in `tsconfig.json`, so the compiler rejects non-erasable syntax (`enum`,
+  `namespace`, constructor parameter properties) — this is enforced, not just a
+  preference.
 - Use `satisfies` for typed object literals.
 
 With `exactOptionalPropertyTypes`, omit optional properties instead of passing

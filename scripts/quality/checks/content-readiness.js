@@ -186,6 +186,21 @@ const STRICT_CLIENT_LAUNCH_BLOCKER_RULE_IDS = new Set([
   "your-company",
   "your-email",
 ]);
+// 表单输入框 placeholder 字段（JSON key 以 Placeholder 结尾）里出现 your@email /
+// Your company 是有意的 UX 占位文案——占位符字段的职责本就是展示示例文本，
+// "Generic placeholder text ... replace before launch" 规则在这里是自我拆台。
+// 具名放行这两条规则，避免永久的 3 条噪音 warning。零基线才有告警价值。
+const FORM_PLACEHOLDER_FIELD_KEY_PATTERN = /placeholder$/iu;
+const FORM_PLACEHOLDER_ALLOWED_RULE_IDS = new Set([
+  "your-email",
+  "your-company",
+]);
+
+function isFormPlaceholderField(scanUnit) {
+  const lastSegment = (scanUnit.context ?? "").split(".").pop() ?? "";
+  return FORM_PLACEHOLDER_FIELD_KEY_PATTERN.test(lastSegment);
+}
+
 const CONFIG_SOURCE_EXTENSIONS = new Set([".js", ".mjs", ".ts", ".tsx"]);
 const TS_TYPE_ONLY_NODE_TYPES = new Set([
   "TSArrayType",
@@ -534,6 +549,13 @@ function scanReadinessFile(rootDir, file, options = {}) {
 
     for (const rule of TEXT_RULES) {
       rule.pattern.lastIndex = 0;
+
+      if (
+        FORM_PLACEHOLDER_ALLOWED_RULE_IDS.has(rule.ruleId) &&
+        isFormPlaceholderField(unit)
+      ) {
+        continue;
+      }
 
       for (const match of unit.value.matchAll(rule.pattern)) {
         const index = match.index ?? 0;

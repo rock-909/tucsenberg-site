@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/lib/security/ 可维护性审查清单
 
 **统计：高 8 条 / 中 10 条 / 低 21 条（共 39 条）**

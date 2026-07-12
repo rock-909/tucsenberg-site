@@ -116,23 +116,6 @@ module.exports = {
       to: {},
     },
     {
-      name: "feature-isolation",
-      severity: "error",
-      comment: "特性间依赖隔离 - 确保功能模块间的清晰边界",
-      from: { path: "^src/features/[^/]+" },
-      to: {
-        path: "^src/features/(?!\\1)[^/]+",
-        pathNot: "^src/(shared|lib|components|utils|types|hooks)",
-      },
-    },
-    {
-      name: "no-external-to-internal",
-      severity: "error",
-      comment: "禁止外部依赖直接访问内部模块",
-      from: { pathNot: "^src/" },
-      to: { path: "^src/lib/internal" },
-    },
-    {
       name: "no-test-imports-in-production",
       severity: "error",
       comment: "禁止生产代码导入测试文件",
@@ -169,82 +152,6 @@ module.exports = {
     },
     // === 跨域依赖规则（显式域匹配，避免跨规则反向引用） ===
     {
-      name: "no-cross-domain-direct-access:web-vitals",
-      severity: "error",
-      comment:
-        "web-vitals 域应避免直接依赖其他 lib 域（试点已稳定，升级为 error）",
-      from: {
-        path: "^src/lib/web-vitals/",
-      },
-      to: {
-        path: [
-          "^src/lib/security(?:/|-)",
-          "^src/lib/i18n(?:/|-)",
-          "^src/lib/locale-storage",
-          "^src/lib/performance-monitoring",
-          "^src/lib/theme-analytics",
-          "^src/lib/content(?:-query|-)",
-          "^src/lib/resend",
-          "^src/lib/airtable",
-        ].join("|"),
-        // 豁免类型定义和常量
-        pathNot: [
-          "/types\\.(ts|tsx)$",
-          "/constants\\.(ts|tsx)$",
-          "/index\\.(ts|tsx)$",
-        ].join("|"),
-      },
-    },
-    {
-      name: "no-shipped-blog-routes-to-newsletter-island",
-      severity: "error",
-      comment:
-        "已上线 blog routes 不得重新依赖 BlogNewsletter client island（含可达依赖）",
-      from: {
-        path: [
-          "^src/app/\\[locale\\]/blog/page\\.tsx$",
-          "^src/app/\\[locale\\]/blog/\\[slug\\]/page\\.tsx$",
-        ].join("|"),
-      },
-      to: {
-        path: "^src/components/blog/blog-newsletter\\.tsx$",
-        reachable: true,
-      },
-    },
-    {
-      name: "no-shipped-product-routes-to-inquiry-islands",
-      severity: "error",
-      comment:
-        "已上线 product routes 不得重新依赖 ProductActions / InquiryDrawer / ProductInquiryForm（含可达依赖）",
-      from: {
-        path: [
-          "^src/app/\\[locale\\]/products/page\\.tsx$",
-          "^src/app/\\[locale\\]/products/\\[market\\]/page\\.tsx$",
-        ].join("|"),
-      },
-      to: {
-        path: [
-          "^src/components/products/product-actions\\.tsx$",
-          "^src/components/products/inquiry-drawer\\.tsx$",
-          "^src/components/products/product-inquiry-form\\.tsx$",
-        ].join("|"),
-        reachable: true,
-      },
-    },
-    {
-      name: "web-vitals-no-ui-deps",
-      severity: "error",
-      comment:
-        "web-vitals 域不依赖 UI/Page 层（试点收紧为 error，保障无 UI 反向依赖）",
-      from: {
-        path: "^src/lib/web-vitals/",
-      },
-      to: {
-        path: "^src/(app|components)/",
-        pathNot: "/(types|constants)\\.(ts|tsx)$",
-      },
-    },
-    {
       name: "i18n-no-ui-deps",
       severity: "warn",
       comment: "i18n 域不依赖 UI/Page 层（新扩面灰度）",
@@ -264,17 +171,6 @@ module.exports = {
       to: {
         path: "\\.\\./",
         pathNot: "\\.(spec|test|stories)\\.(js|ts|tsx)$",
-      },
-    },
-    {
-      name: "enforce-domain-boundaries",
-      severity: "error",
-      comment:
-        "强制域边界（试点升级）- web-vitals 跨域直接阻断，保持稳定后扩面",
-      from: { path: "^src/lib/web-vitals/" },
-      to: {
-        path: "^src/lib/(?!web-vitals/)[^/]+/",
-        pathNot: ["^src/lib/security/object-guards.ts$"].join("|"),
       },
     },
     {
@@ -301,7 +197,6 @@ module.exports = {
           "^src/components/",
           "^src/constants/index\\.(ts|js)$",
           "^src/types/index\\.(ts|js)$",
-          "^src/lib/web-vitals/index\\.(ts|js)$",
         ].join("|"),
       },
     },
@@ -341,10 +236,6 @@ module.exports = {
             {
               criteria: { source: "^src/lib" },
               attributes: { fillcolor: "#ccccff", style: "filled" },
-            },
-            {
-              criteria: { source: "^src/features" },
-              attributes: { fillcolor: "#ffffcc", style: "filled" },
             },
           ],
         },

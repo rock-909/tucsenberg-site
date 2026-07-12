@@ -31,6 +31,7 @@
     "jsx": "react-jsx",
     "incremental": true,
     "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     "paths": {
       "@/*": ["./src/*"],
       "@messages/*": ["./messages/*"],

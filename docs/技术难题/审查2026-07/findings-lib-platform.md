@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # 可维护性审查：src/lib/{api,i18n,seo,analytics}（lib-platform 批次）
 
 **统计：高 5 条 / 中 10 条 / 低 14 条（实际审查 20 个非测试 .ts 文件）**

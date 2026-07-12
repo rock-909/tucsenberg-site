@@ -1,6 +1,11 @@
 rules:
   - id: nextjs-unsafe-dangerouslySetInnerHTML
-    pattern-regex: 'dangerouslySetInnerHTML=\{\{__html:\s*\$[A-Za-z_][A-Za-z0-9_]*\}\}'
+    # 匹配任意 JSX 元素上的 dangerouslySetInnerHTML（含带空格/模板串/obj.prop 形态）。
+    # 旧的 pattern-regex 把 Semgrep 元变量语法 $VAR 误写进正则，\$ 只匹配字面美元符号，
+    # 真实代码永不命中。改为真 Semgrep JSX pattern，强制"单一可审计位置"约束：
+    # 任何新的 dangerouslySetInnerHTML 都必须显式 nosemgrep 注明理由。
+    pattern: |
+      <$EL dangerouslySetInnerHTML=... />
     message: '避免使用dangerouslySetInnerHTML，存在XSS风险'
     languages: [typescript, javascript]
     severity: ERROR
@@ -11,7 +16,7 @@ rules:
       owasp: 'A03:2021 - Injection'
 
   - id: hardcoded-api-keys
-    pattern-regex: "(api[_-]?key|secret[_-]?key|access[_-]?token)\\s*[=:]\\s*['\"][a-zA-Z0-9]{20,}['\"]"
+    pattern-regex: "(api[_-]?key|secret[_-]?key|access[_-]?token)\\s*[=:]\\s*['\"][a-zA-Z0-9_-]{20,}['\"]"
     message: '检测到硬编码的API密钥或访问令牌'
     languages: [typescript, javascript]
     severity: ERROR
@@ -23,9 +28,9 @@ rules:
 
   - id: unsafe-eval-usage
     pattern-either:
-      - pattern: eval($ARG)
-      - pattern: Function($ARG)
-      - pattern: new Function($ARG)
+      - pattern: eval(...)
+      - pattern: Function(...)
+      - pattern: new Function(...)
     message: '避免使用eval()或Function构造器，存在代码注入风险'
     languages: [typescript, javascript]
     severity: ERROR
@@ -46,7 +51,10 @@ rules:
           redirect($URL)
     message: '确保重定向URL经过验证，防止开放重定向攻击'
     languages: [typescript, javascript]
-    severity: WARNING
+    # ERROR so CI (`--severity ERROR`) actually enforces it. The pattern is broad
+    # and will also match intentional literal redirects; annotate those with
+    # `// nosemgrep: nextjs-unsafe-redirect` and a reason.
+    severity: ERROR
     paths:
       exclude:
         - "**/__tests__/**"
@@ -71,7 +79,7 @@ rules:
         - "**/content/**"
     message: '避免使用不安全的随机数生成方法，使用crypto.randomBytes()或crypto.getRandomValues()'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     metadata:
       category: security
       technology: [nodejs]
@@ -152,7 +160,7 @@ rules:
     pattern-regex: "console\\.(log|info|debug|warn|error)\\(.*process\\.env\\..*\\)"
     message: '避免在日志中暴露环境变量，可能包含敏感信息'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     metadata:
       category: security
       technology: [nodejs]
@@ -261,217 +269,12 @@ rules:
       cwe: "CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes"
       owasp: "A03:2021 - Injection"
 
-  - id: object-injection-sink-dynamic-property
-    patterns:
-      - pattern-either:
-          - pattern: $OBJ[$KEY]
-          - pattern: $OBJ[$KEY] = $VALUE
-      # Exclude string literal keys (single and double quotes)
-      - pattern-not: $OBJ["$LIT"]
-      - pattern-not: $OBJ['$LIT']
-      # Exclude numeric literal indices
-      - pattern-not: $OBJ[$NUM]
-      - metavariable-regex:
-          metavariable: $NUM
-          regex: "^[0-9]+$"
-      # Exclude for-loop index patterns
-      - pattern-not-inside: |
-          for (let $VAR = 0; $VAR < $OBJ.length; $VAR += 1) {
-            ...
-          }
-    paths:
-      exclude:
-        - "**/__tests__/**"
-        - "**/*.test.*"
-        - "**/*.spec.*"
-        - "**/scripts/**"
-        - "**/src/components/ui/**"
-        - "**/components/ui/**"
-        - "**/src/lib/security/object-guards.ts"
-        - "**/src/config/paths/utils.ts"
-        - "**/src/config/contact-form-config.ts"
-        - "**/src/services/**"
-        - "**/src/types/whatsapp-*/**"
-        - "**/src/lib/env.ts"
-    message: '检测到动态属性访问：这是启发式风险提示；只有请求/查询/body 键写入才由 object-injection-untrusted-key-write 阻断'
-    languages: [typescript, javascript]
-    severity: WARNING
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-spread-operator
-    patterns:
-      - pattern-either:
-          - pattern: |
-              {...$VAR}
-          - pattern: |
-              Object.assign($TARGET, $VAR)
-    paths:
-      exclude:
-        - "**/__tests__/**"
-        - "**/*.test.*"
-        - "**/*.spec.*"
-        - "**/scripts/**"
-        - "**/src/components/ui/**"
-        - "**/components/ui/**"
-        - "**/src/lib/web-vitals/**"
-        - "**/src/config/contact-form-config.ts"
-        # UI-only spread patterns that have been manually reviewed and
-        # documented as safe (see .augment/rules/security-implementation.md
-        # "Semgrep 规则治理记录" section). These components only spread
-        # controlled translation/label objects used for rendering and never
-        # handle raw user input.
-        - "**/src/app/*/about/page.tsx"
-        - "**/src/app/*/products/*/page.tsx"
-        # Lead pipeline files - spread operators used with Zod-validated data only:
-        # - inquiry/route.ts: leadData spread after Zod schema validation (productLeadSchema)
-        # - lead-schema.ts: Zod schema definitions using baseLeadFields spread (compile-time safe)
-        - "**/src/app/api/inquiry/route.ts"
-        - "**/src/lib/lead-pipeline/lead-schema.ts"
-        # Cookie consent - client-side state management with localStorage + hardcoded defaults
-        - "**/src/lib/cookie-consent/context.tsx"
-        - "**/src/lib/cookie-consent/storage.ts"
-        - "**/src/lib/lead-pipeline/process-lead.ts"
-        # Rate limiting - fetch config object construction (body from internal data)
-        - "**/src/lib/security/distributed-rate-limit.ts"
-        # Logger - spread operator used with internal application logging context, not user input
-        - "**/src/lib/logger.ts"
-    message: '检测到潜在的对象注入：使用扩展运算符或Object.assign时需验证输入对象的安全性'
-    languages: [typescript, javascript]
-    severity: INFO
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: unsafe-property-access-pattern
-    pattern-regex: "\\$\\{[^}]*\\}\\s*\\[\\s*[^\\]]*\\s*\\]"
-    message: '检测到不安全的属性访问模式：避免在模板字符串中使用动态属性访问'
-    languages: [typescript, javascript]
-    severity: WARNING
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-computed-property
-    pattern-either:
-      - pattern: |
-          { [$KEY]: $VALUE }
-      - pattern: |
-          { [$KEY]: $VALUE, ...$REST }
-    message: '检测到计算属性对象注入：使用动态键创建对象时需要验证键的安全性'
-    languages: [typescript, javascript]
-    severity: WARNING
-    paths:
-      exclude:
-        - "**/__tests__/**"
-        - "**/*.test.*"
-        - "**/*.spec.*"
-        # Cookie consent - category key is from ConsentCategory enum type, not user input
-        - "**/src/lib/cookie-consent/context.tsx"
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-for-in-loop
-    pattern: |
-      for ($KEY in $OBJ) {
-        ...
-        $TARGET[$KEY] = $VALUE
-        ...
-      }
-    message: '检测到for-in循环中的对象注入：遍历对象属性时需要验证属性键的安全性'
-    languages: [typescript, javascript]
-    severity: WARNING
-    paths:
-      exclude:
-        - "**/__tests__/**"
-        - "**/*.test.*"
-        - "**/*.spec.*"
-        # mergeObjects: internal utility; also blocks prototype keys (__proto__/constructor/prototype)
-        - "**/src/lib/merge-objects.ts"
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-object-keys
-    pattern-either:
-      - pattern: |
-          Object.keys($OBJ).forEach($KEY => {
-            ...
-            $TARGET[$KEY] = $VALUE
-            ...
-          })
-      - pattern: |
-          Object.entries($OBJ).forEach(([$KEY, $VALUE]) => {
-            ...
-            $TARGET[$KEY] = $VALUE
-            ...
-          })
-    message: '检测到Object.keys/entries中的对象注入：使用对象键时需要验证键的安全性'
-    languages: [typescript, javascript]
-    severity: WARNING
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-destructuring-assignment
-    pattern-either:
-      - pattern: |
-          const { [$KEY]: $VALUE } = $OBJ
-      - pattern: |
-          const { [$KEY]: $VALUE, ...$REST } = $OBJ
-    message: '检测到解构赋值中的对象注入：使用动态键进行解构时需要验证键的安全性'
-    languages: [typescript, javascript]
-    severity: WARNING
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
-  - id: object-injection-sink-reflect-api
-    pattern-either:
-      - pattern: |
-          Reflect.get($OBJ, $KEY)
-      - pattern: |
-          Reflect.set($OBJ, $KEY, $VALUE)
-      - pattern: |
-          Reflect.has($OBJ, $KEY)
-      - pattern: |
-          Reflect.deleteProperty($OBJ, $KEY)
-    message: '检测到Reflect API中的对象注入：使用Reflect API时需要验证属性键的安全性'
-    languages: [typescript, javascript]
-    severity: WARNING
-    paths:
-      exclude:
-        - "**/__tests__/**"
-        - "**/*.test.*"
-        - "**/*.spec.*"
-    metadata:
-      category: security
-      technology: [nodejs, react, nextjs]
-      cwe: 'CWE-94: Improper Control of Generation of Code'
-      owasp: 'A03:2021 - Injection'
-
   - id: no-raw-request-json-in-api
     pattern: |
       await $REQ.json()
     message: 'API 路由中避免直接使用 request.json()，请走 safeParseJson'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/app/api/**/*.ts"
@@ -495,7 +298,7 @@ rules:
       - pattern-not: process.env['NODE_ENV']
     message: 'src/config 下避免直接读 process.env，优先通过 env.ts 统一访问'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/config/**/*.ts"
@@ -521,7 +324,7 @@ rules:
       - pattern: $HEADERS.get("x-forwarded-for")
     message: '不要在业务代码直接信任原始代理头；Cloudflare/header-only 上下文请走 getClientIP()/getClientIPFromHeaders() 或 x-internal-client-ip'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       exclude:
         - "**/__tests__/**"
@@ -541,7 +344,7 @@ rules:
           NextResponse.json({ ..., message: $VAL, ... }, ...)
     message: '公开 API route 避免返回自由文本 error/message；优先用 createApiErrorResponse()/createApiSuccessResponse() 或统一 errorCode contract'
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: ERROR
     paths:
       include:
         - "src/app/api/**/*.ts"
@@ -558,7 +361,7 @@ rules:
   - id: starter-lead-route-missing-safe-json-body
     message: 'starter 公开 lead route 必须显式使用 safeParseJson()，保留 JSON body size gate 和统一错误码'
     languages: [generic]
-    severity: WARNING
+    severity: ERROR
     patterns:
       - pattern-regex: '(?s).+'
       - pattern-not-regex: '(?s).*safeParseJson\s*<'

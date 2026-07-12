@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # 跨模块横向审查报告（tucsenberg-site）
 
 **一行统计：跨模块问题共 37 条 —— 高 11 / 中 17 / 低 9；全仓生产不可达代码估算约 10,500–11,500 行，占 src 39,835 行（不含 tests/stories）的约 26–28%。**

@@ -10,7 +10,6 @@ export function mergeObjects<T extends Record<string, unknown>>(
   target: T,
   source: Partial<T>,
 ): T {
-  // nosemgrep: object-injection-sink-spread-operator -- 仅复制受控 target 对象
   const result = { ...target };
 
   // Prevent prototype pollution by dropping known dangerous keys
