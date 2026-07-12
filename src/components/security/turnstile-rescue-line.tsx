@@ -12,7 +12,7 @@ export function TurnstileRescueLine() {
     <p className="mt-1 text-sm leading-6 text-muted-foreground">
       Email us instead —{" "}
       <a
-        className="font-medium text-primary underline underline-offset-4 hover:no-underline"
+        className="font-medium text-[var(--primary-text)] underline underline-offset-4 hover:no-underline"
         href={`mailto:${TURNSTILE_RESCUE_EMAIL}?subject=Quote%20request`}
       >
         {TURNSTILE_RESCUE_EMAIL}
