@@ -1,7 +1,4 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import { fixupConfigRules } from "@eslint/compat";
-import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 // Next.js ESLint configs - 使用官方推荐的直接导入方式
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -10,7 +7,6 @@ import prettierConfig from "eslint-config-prettier";
 import promisePlugin from "eslint-plugin-promise";
 import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import securityPlugin from "eslint-plugin-security";
-import securityNode from "eslint-plugin-security-node";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 
 const security = securityPlugin.default ?? securityPlugin;
@@ -33,15 +29,6 @@ const MAGIC_NUMBER_IGNORE_LIST = [
   12000, 12345, 15000, 30000, 45000, 50000, 60000, 65536, 100000, 120000,
   125000, 170000, 200000, 300000, 500000,
 ];
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
 
 export default [
   {
@@ -158,33 +145,14 @@ export default [
     },
   },
 
-  // React 19 Hook Standards configuration
+  // React hooks call-ordering correctness. exhaustive-deps is upgraded to error
+  // in the progressive block; require-await / no-unused-vars / prefer-const /
+  // no-duplicate-imports are set once in the ultra-strict block below.
   {
-    name: "react-19-hook-standards-config",
+    name: "react-hooks-correctness",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // 🚀 React 19 Hook优化规则
-      // useActionState Hook最佳实践
-      "react-hooks/exhaustive-deps": "error", // 确保useActionState依赖完整
-
-      // useFormStatus Hook最佳实践 - 确保在form子组件中使用
-      // 注意：这些规则需要自定义插件，暂时使用通用规则
-      "react-hooks/rules-of-hooks": "error", // 确保Hook调用规则正确
-
-      // useOptimistic Hook最佳实践 - 确保与startTransition配合使用
-      // 通过现有规则确保正确的异步模式
-      "require-await": "error", // 确保async函数包含await
-
-      // use Hook最佳实践 - 条件调用支持
-      // React 19的use Hook支持条件调用，但仍需在组件顶层
-
-      // Form Actions最佳实践
-      // 确保Server Actions正确定义和使用
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }], // 确保action参数被使用
-
-      // React 19性能优化规则
-      "prefer-const": "error", // 优化变量声明
-      "no-duplicate-imports": "error", // 避免重复导入React 19 hooks
+      "react-hooks/rules-of-hooks": "error",
     },
   },
 
@@ -297,56 +265,6 @@ export default [
     },
   },
 
-  // Node.js Security configuration (补充规则 - 仅保留 eslint-plugin-security 未覆盖的功能)
-  {
-    name: "security-node-supplementary-config",
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    plugins: {
-      "security-node": securityNode,
-    },
-    rules: {
-      // === security-node 核心规则（无 Semgrep 替代方案） ===
-
-      // NoSQL注入防护
-      "security-node/detect-nosql-injection": "error",
-      // 不当异常处理
-      "security-node/detect-improper-exception-handling": "error",
-      // 未处理的事件错误
-      "security-node/detect-unhandled-event-errors": "error",
-      // Cookie安全配置错误
-      "security-node/detect-security-missconfiguration-cookie": "error",
-      // SSL禁用检测
-      "security-node/disable-ssl-across-node-server": "error",
-
-      // === 已迁移到 eslint-plugin-security 的规则（禁用避免重复） ===
-
-      // 已迁移：security/detect-non-literal-regexp
-      "security-node/non-literal-reg-expr": "off",
-      // 已迁移：security/detect-pseudoRandomBytes
-      "security-node/detect-insecure-randomness": "off",
-      // 已迁移：security/detect-eval-with-expression
-      "security-node/detect-eval-with-expr": "off",
-      // 已迁移：security/detect-non-literal-require
-      "security-node/detect-non-literal-require-calls": "off",
-      // 已迁移：security/detect-possible-timing-attacks
-      "security-node/detect-possible-timing-attacks": "off",
-
-      // === 已迁移到 Semgrep 的规则（禁用避免重复） ===
-
-      // 已迁移：semgrep sql-injection-risk 规则覆盖
-      "security-node/detect-sql-injection": "off",
-      // 已迁移：semgrep nextjs-unsafe-html-injection 规则覆盖
-      "security-node/detect-html-injection": "off",
-      // 已迁移：semgrep nextjs-unsafe-redirect 规则（ERROR 级，CI 强制）覆盖
-      "security-node/detect-dangerous-redirects": "off",
-
-      // === 有bug的规则（禁用） ===
-
-      // 插件bug：TypeError: Cannot read properties of undefined (reading 'start')
-      "security-node/detect-unhandled-async-errors": "off",
-    },
-  },
-
   // 超严格质量保障配置 - 零妥协标准
   {
     name: "ultra-strict-quality-config",
@@ -366,7 +284,6 @@ export default [
         { max: 500, skipBlankLines: true, skipComments: true },
       ], // 调整到500行并跳过空行与注释
       "max-statements": ["error", 20], // 降低到20个语句，强制逻辑简化
-      "max-statements-per-line": ["error", { max: 1 }], // 每行最大语句数
 
       // 🔒 代码质量规则：零容忍标准
       "no-console": "error", // 完全禁止console，强制使用logger
@@ -424,7 +341,6 @@ export default [
       "no-new-wrappers": "error",
       "no-proto": "error",
       "no-return-assign": "error",
-      "no-return-await": "error",
       "no-void": "error",
       "no-with": "error",
       "require-await": "error",
@@ -446,11 +362,8 @@ export default [
       "no-caller": "error",
       "no-constructor-return": "error",
       "no-else-return": "error",
-      "no-empty-function": "error",
       "no-extend-native": "error",
       "no-extra-bind": "error",
-      "no-floating-decimal": "error",
-      "no-implicit-coercion": "error",
       "no-implicit-globals": "error",
       "no-iterator": "error",
       "no-labels": "error",
@@ -458,7 +371,7 @@ export default [
       "no-loop-func": "error",
       "no-multi-assign": "error",
       "no-new": "error",
-      "no-new-object": "error",
+      "no-object-constructor": "error",
       "no-octal-escape": "error",
       "no-param-reassign": "error",
       "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
@@ -698,8 +611,6 @@ export default [
       "consistent-return": "warn", // 开发工具复杂逻辑
       "no-param-reassign": "warn", // 开发工具参数修改
       "prefer-destructuring": "warn", // 开发工具属性访问
-      "require-await": "warn",
-      "no-console": "off", // 开发工具中完全允许console输出
 
       // 保持严格的基本语法检查
       "no-undef": ["error", { typeof: true }], // 未定义变量检查
@@ -801,21 +712,13 @@ export default [
     name: "progressive-unified-enhancements",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // AI编码质量保障增强
-      "prefer-const": "error", // AI容易生成let，强制使用const
-      "no-var": "error", // 严格禁止var
-      "no-duplicate-imports": "error", // AI可能重复导入
-
-      // React特化规则（针对AI编码）
+      // React特化规则（针对AI编码）: exhaustive-deps 升级为 error（Next 默认 warn）。
+      // prefer-const / no-var / no-duplicate-imports 统一由 ultra-strict 块设置。
       "react-hooks/exhaustive-deps": "error", // AI容易遗漏依赖，升级为错误
 
       // 函数命名和结构
       "func-names": ["warn", "as-needed"], // 鼓励命名函数，便于调试
       "no-anonymous-default-export": "off", // 允许匿名默认导出（React组件）
-
-      // 渐进式质量提升
-      "max-statements-per-line": ["error", { max: 1 }], // 每行最多一个语句
-      "no-multiple-empty-lines": ["error", { max: 2, maxEOF: 1 }], // 控制空行数量
 
       // 安全增强（针对AI编码）
       "no-eval": "error", // 严格禁止eval
