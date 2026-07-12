@@ -19,15 +19,15 @@ export const routing = defineRouting({
   // 注意：仅包含已实现的页面路径，避免 404 错误
   pathnames: PATHNAMES,
 
-  // English-only site: keep self canonical / x-default behavior predictable.
-  alternateLinks: true,
+  // localePrefix 'never' disables next-intl alternate links (no-op here);
+  // canonical/hreflang is handled by the metadata layer.
 
   localeDetection: false,
 
   // 配置locale cookie - 持久化用户语言偏好
   localeCookie: {
     name: "NEXT_LOCALE",
-    // 1年过期时间 (符合GDPR要求)
+    // 自选 1 年持久化；next-intl 4 默认为会话级，加语种上线前复核 cookie 声明合规
     maxAge: 60 * 60 * 24 * 365,
   },
 });

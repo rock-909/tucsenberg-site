@@ -72,7 +72,6 @@ describe("i18n Routing Configuration", () => {
             "/request-quote": "/request-quote",
             "/warranty": "/warranty",
           }),
-          alternateLinks: true,
           localeDetection: false,
         }),
       );
@@ -113,9 +112,11 @@ describe("i18n Routing Configuration", () => {
       expect(config?.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
     });
 
-    it("应该启用alternateLinks", async () => {
+    it("不设置 alternateLinks（localePrefix:'never' 下 next-intl 禁用它，是 no-op）", async () => {
       const config = await getRoutingDefinition();
-      expect(config?.alternateLinks).toBe(true);
+      // next-intl 在 localePrefix:'never' 模式下不生成 alternate links；
+      // canonical/hreflang 由 metadata 层负责，不由路由配置提供。
+      expect(config?.alternateLinks).toBeUndefined();
     });
 
     it("应该禁用localeDetection", async () => {
@@ -234,9 +235,10 @@ describe("i18n Routing Configuration", () => {
   });
 
   describe("SEO配置", () => {
-    it("应该启用hreflang链接生成", async () => {
+    it("hreflang 不由路由配置驱动（localePrefix:'never' 下 alternateLinks 无效）", async () => {
       const config = await getRoutingDefinition();
-      expect(config.alternateLinks).toBe(true);
+      // hreflang/canonical 由 metadata 层生成；路由配置不设 alternateLinks。
+      expect(config.alternateLinks).toBeUndefined();
     });
 
     it("应该禁用智能语言检测", async () => {
@@ -274,7 +276,6 @@ describe("i18n Routing Configuration", () => {
         "defaultLocale",
         "localePrefix",
         "pathnames",
-        "alternateLinks",
         "localeDetection",
       ];
 

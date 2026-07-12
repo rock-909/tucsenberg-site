@@ -9,7 +9,7 @@ export const airtableRecordSchema = z.object({
   fields: z.object({
     "First Name": z.string(),
     "Last Name": z.string(),
-    Email: z.string().email(),
+    Email: z.email(),
     Company: z.string(),
     Message: z.string(),
     Phone: z.string().optional(),

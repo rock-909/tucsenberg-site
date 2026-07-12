@@ -8,7 +8,7 @@ import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config"
 export const emailTemplateDataSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   company: z
     .string()
     .transform((val) => val.trim())
@@ -44,7 +44,7 @@ export type EmailTemplateData = z.infer<typeof emailTemplateDataSchema>;
 export const productInquiryEmailDataSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   company: z.string().optional(),
   productName: z.string(),
   productSlug: z.string(),
