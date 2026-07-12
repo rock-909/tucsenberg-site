@@ -1,8 +1,7 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
-import { trackGenerateLead } from "@/lib/marketing/lead-event";
-import { appendAttributionToFormData } from "@/lib/marketing/utm";
+import { type FormEvent, useEffect } from "react";
+import { useLeadFormSubmission } from "@/lib/forms/use-lead-form-submission";
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
 import { createRequestQuotePayload } from "@/app/[locale]/request-quote/request-quote-payload";
 import { parseInquiryResponse } from "@/app/[locale]/request-quote/request-quote-response";
@@ -19,12 +18,36 @@ import {
 // field itself allows more, but a URL-borne prefill should stay short.
 const CONFIG_PREFILL_MAX_LENGTH = 500;
 
+async function decodeInquiryState(
+  response: Response,
+  copy: RequestQuoteFormCopy,
+): Promise<RequestQuoteSubmitState> {
+  const parsed = parseInquiryResponse(response.ok, await response.text());
+  if ("success" in parsed) {
+    return { status: "success", referenceId: parsed.referenceId };
+  }
+  return { status: "error", message: copy.genericError };
+}
+
 export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [state, setState] = useState<RequestQuoteSubmitState>({
-    status: "idle",
+  const kernel = useLeadFormSubmission<RequestQuoteSubmitState>({
+    endpoint: "/api/inquiry",
+    leadEventTag: "rfq",
+    buildBody: (formData, turnstileToken) => {
+      // Any product-line hint the buyer arrived with is carried as free text,
+      // never as product attribution (see behavior contract BC-013).
+      const interest = new URLSearchParams(window.location.search).get(
+        "interest",
+      );
+      if (interest) {
+        formData.set("interest", interest);
+      }
+      return createRequestQuotePayload(formData, turnstileToken, copy.payload);
+    },
+    decode: (response) => decodeInquiryState(response, copy),
+    isSuccess: (result) => result.status === "success",
+    toNetworkError: () => ({ status: "error", message: copy.networkError }),
   });
-  const isSubmitting = state.status === "submitting";
 
   // Product estimators (e.g. the boxwall unit calculator) hand their result
   // over via `?config=`; surface it in the message field so the buyer sees
@@ -38,60 +61,22 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
     }
   }, []);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!turnstileToken) {
-      setState({
-        status: "error",
-        message: copy.turnstilePending,
-      });
+    // The submit button is disabled without a token, but Enter can still submit
+    // the form; surface the pending-verification message instead of posting.
+    if (!kernel.turnstileToken) {
+      kernel.fail({ status: "error", message: copy.turnstilePending });
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
-    const interest = new URLSearchParams(window.location.search).get(
-      "interest",
-    );
-    if (interest) {
-      formData.set("interest", interest);
-    }
-    appendAttributionToFormData(formData);
-    setState({ status: "submitting" });
-
-    try {
-      const response = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          createRequestQuotePayload(formData, turnstileToken, copy.payload),
-        ),
-      });
-      const rawText = await response.text();
-      const result = parseInquiryResponse(response.ok, rawText);
-
-      if ("success" in result) {
-        setState({
-          status: "success",
-          referenceId: result.referenceId,
-        });
-        trackGenerateLead("rfq");
-        return;
-      }
-
-      setState({
-        status: "error",
-        message: copy.genericError,
-      });
-    } catch {
-      setState({
-        status: "error",
-        message: copy.networkError,
-      });
-    }
+    kernel.submit(new FormData(event.currentTarget)).catch(() => undefined);
   };
+
+  const displayState: RequestQuoteSubmitState = kernel.isSubmitting
+    ? { status: "submitting" }
+    : (kernel.result ?? { status: "idle" });
 
   return (
     <section className="surface-card p-6 md:p-8">
@@ -107,13 +92,11 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
         <RequestQuoteMessageField copy={copy} />
         <RequestQuoteSubmitControls
           copy={copy}
-          isSubmitting={isSubmitting}
-          onTurnstileError={() => {
-            setTurnstileToken("");
-          }}
-          onTurnstileSuccess={setTurnstileToken}
-          state={state}
-          turnstileToken={turnstileToken}
+          isSubmitting={kernel.isSubmitting}
+          onTurnstileError={kernel.resetTurnstileToken}
+          onTurnstileSuccess={kernel.acquireTurnstileToken}
+          state={displayState}
+          turnstileToken={kernel.turnstileToken}
         />
       </form>
     </section>

@@ -1,17 +1,4 @@
-interface InquiryApiSuccessResponse {
-  success: true;
-  data: {
-    referenceId: string;
-  };
-}
-
-interface InquiryApiErrorResponse {
-  success: false;
-  errorCode?: string;
-  details?: string[];
-}
-
-type InquiryApiResponse = InquiryApiSuccessResponse | InquiryApiErrorResponse;
+import { readLeadReferenceId } from "@/lib/forms/lead-response";
 
 type InquiryParseResult =
   | { success: true; referenceId: string }
@@ -28,16 +15,9 @@ export function parseInquiryResponse(
     return { failed: true };
   }
 
-  if (
-    ok &&
-    typeof payload === "object" &&
-    payload !== null &&
-    (payload as InquiryApiResponse).success === true
-  ) {
-    const { data } = payload as InquiryApiSuccessResponse;
-    if (typeof data?.referenceId === "string") {
-      return { success: true, referenceId: data.referenceId };
-    }
+  const referenceId = readLeadReferenceId(ok, payload);
+  if (referenceId !== null) {
+    return { success: true, referenceId };
   }
 
   return { failed: true };

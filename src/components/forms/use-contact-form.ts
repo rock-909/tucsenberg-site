@@ -1,14 +1,13 @@
-import { useRef, useState, useTransition } from "react";
+import { useState } from "react";
 import {
   API_ERROR_CODES,
   FORM_NETWORK_ERROR,
 } from "@/constants/api-error-codes";
-import { logger } from "@/lib/logger";
 import { pickAttributionFieldsFromFormData } from "@/lib/marketing/attribution-fields";
-import { trackGenerateLead } from "@/lib/marketing/lead-event";
-import { appendAttributionToFormData } from "@/lib/marketing/utm";
+import { readLeadReferenceId } from "@/lib/forms/lead-response";
 import { useRateLimit } from "@/components/forms/use-rate-limit";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
+import { useLeadFormSubmission } from "@/lib/forms/use-lead-form-submission";
 import { type ServerActionResult } from "@/lib/actions/server-action-utils";
 
 export interface ContactFormResult {
@@ -16,20 +15,6 @@ export interface ContactFormResult {
 }
 
 export type TurnstileStatus = "loading" | "verified" | "error" | "expired";
-
-interface SubmitStatusInput {
-  isPending: boolean;
-  stateSuccess: boolean | undefined;
-  stateError: string | undefined;
-  stateErrorCode: string | undefined;
-}
-
-function computeSubmitStatus(input: SubmitStatusInput): FormSubmissionStatus {
-  if (input.isPending) return "submitting";
-  if (input.stateSuccess) return "success";
-  if (input.stateError || input.stateErrorCode) return "error";
-  return "idle";
-}
 
 export interface UseContactFormResult {
   state: ServerActionResult<ContactFormResult> | null;
@@ -43,104 +28,74 @@ export interface UseContactFormResult {
   isRateLimited: boolean;
 }
 
-function handleSuccessfulContactSubmission(
-  setLastSubmissionTime: (submittedAt: Date) => void,
-): void {
-  setLastSubmissionTime(new Date());
-  trackGenerateLead("contact");
-}
-
 /**
  * 管理联系表单状态和提交流程。
+ *
+ * 共享的提交生命周期（提交锁、Turnstile 令牌、归因、请求解码、状态机）来自
+ * `useLeadFormSubmission`；联系表单在其之上保留自己的字段解码、错误形状
+ * (`ServerActionResult`)、速率限制与 Turnstile 状态枚举等独有关注点。
  */
 export function useContactForm(): UseContactFormResult {
-  const [state, setState] =
-    useState<ServerActionResult<ContactFormResult> | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [turnstileStatus, setTurnstileStatus] =
     useState<TurnstileStatus>("loading");
-  const [isPendingTransition, startTransition] = useTransition();
-  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const isSubmitting = isSubmittingRequest || isPendingTransition;
   const { isRateLimited, setLastSubmissionTime } = useRateLimit();
 
-  const submitStatus = computeSubmitStatus({
-    isPending: isSubmitting,
-    stateSuccess: state?.success,
-    stateError: state?.error,
-    stateErrorCode: state?.errorCode,
-  });
-
-  const enhancedFormAction = async (formData: FormData) => {
-    if (!turnstileToken) {
-      logger.warn("Form submission attempted without Turnstile token");
-      return;
-    }
-
-    if (isSubmittingRef.current || isRateLimited) {
-      return;
-    }
-
-    isSubmittingRef.current = true;
-    formData.append("turnstileToken", turnstileToken);
-    formData.append("submittedAt", new Date().toISOString());
-    appendAttributionToFormData(formData);
-
-    setIsSubmittingRequest(true);
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(createContactRequestBody(formData)),
-      });
+  const kernel = useLeadFormSubmission<ServerActionResult<ContactFormResult>>({
+    endpoint: "/api/contact",
+    leadEventTag: "contact",
+    buildBody: (formData, turnstileToken) =>
+      createContactRequestBody(
+        formData,
+        turnstileToken,
+        new Date().toISOString(),
+      ),
+    decode: async (response) => {
       const payload: unknown = await response.json();
-      const nextState = deriveContactResultState(
+      return deriveContactResultState(
         response.ok,
         payload,
         new Date().toISOString(),
       );
+    },
+    isSuccess: (result) => result.success === true,
+    toNetworkError: () => ({
+      success: false,
+      errorCode: FORM_NETWORK_ERROR,
+      timestamp: new Date().toISOString(),
+    }),
+    onSuccess: () => {
+      setLastSubmissionTime(new Date());
+    },
+  });
 
-      if (nextState.success) {
-        handleSuccessfulContactSubmission(setLastSubmissionTime);
-      }
-
-      startTransition(() => {
-        setState(nextState);
-      });
-    } catch {
-      startTransition(() => {
-        setState({
-          success: false,
-          errorCode: FORM_NETWORK_ERROR,
-          timestamp: new Date().toISOString(),
-        });
-      });
-    } finally {
-      isSubmittingRef.current = false;
-      setIsSubmittingRequest(false);
+  // The container drives success/clear through a single token setter, so map an
+  // empty token to a reset and any real token to an acquisition.
+  const setTurnstileToken = (token: string) => {
+    if (token) {
+      kernel.acquireTurnstileToken(token);
+    } else {
+      kernel.resetTurnstileToken();
     }
   };
 
+  // Rate limiting stays a contact-only concern layered on the shared submit.
+  const formAction = async (formData: FormData) => {
+    if (isRateLimited) {
+      return;
+    }
+    await kernel.submit(formData);
+  };
+
   return {
-    state,
-    formAction: enhancedFormAction,
-    isPending: isSubmitting,
-    submitStatus,
-    turnstileToken,
+    state: kernel.result,
+    formAction,
+    isPending: kernel.isSubmitting,
+    submitStatus: kernel.status,
+    turnstileToken: kernel.turnstileToken,
     setTurnstileToken,
     turnstileStatus,
     setTurnstileStatus,
     isRateLimited,
-  };
-}
-
-interface ContactApiSuccessResponse {
-  success: true;
-  data: {
-    referenceId: string;
   };
 }
 
@@ -149,8 +104,6 @@ interface ContactApiErrorResponse {
   errorCode?: string;
   details?: string[];
 }
-
-type ContactApiResponse = ContactApiSuccessResponse | ContactApiErrorResponse;
 
 function getOptionalString(
   formData: FormData,
@@ -169,7 +122,11 @@ function getBoolean(formData: FormData, key: string): boolean {
   return value === "true" || value === "on" || value === "1";
 }
 
-function createContactRequestBody(formData: FormData) {
+function createContactRequestBody(
+  formData: FormData,
+  turnstileToken: string,
+  submittedAt: string,
+) {
   return {
     fullName: getRequiredString(formData, "fullName"),
     email: getRequiredString(formData, "email"),
@@ -180,50 +137,51 @@ function createContactRequestBody(formData: FormData) {
     acceptPrivacy: getBoolean(formData, "acceptPrivacy"),
     marketingConsent: getBoolean(formData, "marketingConsent"),
     website: getOptionalString(formData, "website") ?? "",
-    turnstileToken: getRequiredString(formData, "turnstileToken"),
-    submittedAt: getRequiredString(formData, "submittedAt"),
+    turnstileToken,
+    submittedAt,
     ...pickAttributionFieldsFromFormData(formData),
   };
 }
 
-function isContactApiResponse(payload: unknown): payload is ContactApiResponse {
+function isContactErrorResponse(
+  payload: unknown,
+): payload is ContactApiErrorResponse {
   return (
     typeof payload === "object" &&
     payload !== null &&
-    typeof (payload as { success?: unknown }).success === "boolean"
+    (payload as { success?: unknown }).success === false
   );
 }
 
 /**
  * Turn a contact API response into form state.
  *
- * A non-ok HTTP status or a malformed body (missing a boolean `success`) is
- * treated as a failure with a concrete error code, so the UI always shows an
- * error instead of silently returning to idle. A well-shaped failure keeps its
- * own error code and validation details.
+ * The shared success shape (`ok` + `success` + `data.referenceId`) is read via
+ * `readLeadReferenceId`. A non-ok status or a malformed body is treated as a
+ * failure with a concrete error code, so the UI always shows an error instead
+ * of silently returning to idle. A well-shaped failure keeps its own error code
+ * and validation details.
  */
 export function deriveContactResultState(
   ok: boolean,
   payload: unknown,
   timestamp: string,
 ): ServerActionResult<ContactFormResult> {
-  if (isContactApiResponse(payload) && ok && payload.success) {
+  const referenceId = readLeadReferenceId(ok, payload);
+  if (referenceId !== null) {
     return {
       success: true,
-      data: {
-        referenceId: payload.data.referenceId,
-      },
+      data: { referenceId },
       timestamp,
     };
   }
 
-  const errorPayload: ContactApiErrorResponse =
-    isContactApiResponse(payload) && !payload.success
-      ? payload
-      : {
-          success: false,
-          errorCode: API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
-        };
+  const errorPayload: ContactApiErrorResponse = isContactErrorResponse(payload)
+    ? payload
+    : {
+        success: false,
+        errorCode: API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+      };
 
   const errorState = createContactErrorState(errorPayload, timestamp);
   if (!errorState.errorCode) {
