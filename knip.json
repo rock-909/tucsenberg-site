@@ -10,10 +10,10 @@
   ],
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{js,mjs,ts}"],
   "ignoreExportsUsedInFile": true,
-  "ignore": [],
+  "ignore": ["src/test/css-stub.ts", "src/test/mdx-stub.ts"],
   "ignoreDependencies": [],
   "rules": {
-    "files": "off",
+    "files": "error",
     "dependencies": "off",
     "devDependencies": "off",
     "unlisted": "off",
