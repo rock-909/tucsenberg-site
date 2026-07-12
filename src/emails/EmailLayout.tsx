@@ -86,7 +86,6 @@ export function EmailLayout({
       <Preview>{preview}</Preview>
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
-          {/* nosemgrep: object-injection-sink-spread-operator */}
           {/* Safe: headerStyle is a static CSSProperties object, accentColor is a validated color string */}
           <Section style={{ ...headerStyle, backgroundColor: accentColor }}>
             <Heading style={headingStyle}>{title}</Heading>
