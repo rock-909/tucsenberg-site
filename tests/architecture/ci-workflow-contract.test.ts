@@ -17,6 +17,7 @@ const ERROR_SEMGREP_RULE_IDS = [
   "nextjs-unsafe-dangerouslySetInnerHTML",
   "hardcoded-api-keys",
   "unsafe-eval-usage",
+  "nextjs-unsafe-redirect",
   "nextjs-unsafe-html-injection",
   "weak-crypto-algorithm",
   "sql-injection-risk",

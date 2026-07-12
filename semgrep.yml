@@ -46,7 +46,10 @@ rules:
           redirect($URL)
     message: '确保重定向URL经过验证，防止开放重定向攻击'
     languages: [typescript, javascript]
-    severity: WARNING
+    # ERROR so CI (`--severity ERROR`) actually enforces it. The pattern is broad
+    # and will also match intentional literal redirects; annotate those with
+    # `// nosemgrep: nextjs-unsafe-redirect` and a reason.
+    severity: ERROR
     paths:
       exclude:
         - "**/__tests__/**"

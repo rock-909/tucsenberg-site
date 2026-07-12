@@ -337,7 +337,7 @@ export default [
       "security-node/detect-sql-injection": "off",
       // 已迁移：semgrep nextjs-unsafe-html-injection 规则覆盖
       "security-node/detect-html-injection": "off",
-      // 已迁移：semgrep nextjs-unsafe-redirect 规则覆盖
+      // 已迁移：semgrep nextjs-unsafe-redirect 规则（ERROR 级，CI 强制）覆盖
       "security-node/detect-dangerous-redirects": "off",
 
       // === 有bug的规则（禁用） ===
