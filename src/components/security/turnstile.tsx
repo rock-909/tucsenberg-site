@@ -66,7 +66,7 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
       className={`turnstile-mock ${className ?? ""}`}
       data-testid="turnstile-mock"
     >
-      <div className="text-muted-foreground text-sm">{label}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -80,7 +80,7 @@ function TurnstileUnavailableStatus({
       className={`turnstile-fallback ${className ?? ""}`}
       aria-live="polite"
     >
-      <div className="text-destructive text-sm">{label}</div>
+      <div className="text-sm text-destructive">{label}</div>
       <TurnstileRescueLine />
     </output>
   );

@@ -173,7 +173,7 @@ export function ResponseExpectationsCard({
         </dl>
 
         <div className="mt-6 border-t pt-6">
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
             {hoursCopy.title}
           </h4>
           <div className="space-y-2 text-sm">

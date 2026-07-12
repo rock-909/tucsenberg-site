@@ -66,7 +66,7 @@ function ContactContentBody({
     >
       <JsonLdGraphScript locale={locale} data={faqSchema ? [faqSchema] : []} />
       <div className="mx-auto max-w-[1080px]">
-        <header className="mb-10 min-w-0 max-w-2xl">
+        <header className="mb-10 max-w-2xl min-w-0">
           <h1 className="text-heading mb-4">{page.metadata.title}</h1>
           {page.metadata.description ? (
             <p className="text-body text-muted-foreground">
@@ -75,7 +75,7 @@ function ContactContentBody({
           ) : null}
         </header>
 
-        <article className="prose prose-neutral mb-10 max-w-3xl dark:prose-invert">
+        <article className="prose mb-10 max-w-3xl prose-neutral dark:prose-invert">
           {createStaticMarkdownContent(page.content)}
         </article>
 

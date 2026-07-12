@@ -9,10 +9,10 @@ const TURNSTILE_RESCUE_EMAIL = "sales@tucsenberg.com";
  */
 export function TurnstileRescueLine() {
   return (
-    <p className="text-muted-foreground mt-1 text-sm leading-6">
+    <p className="mt-1 text-sm leading-6 text-muted-foreground">
       Email us instead —{" "}
       <a
-        className="text-primary font-medium underline underline-offset-4 hover:no-underline"
+        className="font-medium text-primary underline underline-offset-4 hover:no-underline"
         href={`mailto:${TURNSTILE_RESCUE_EMAIL}?subject=Quote%20request`}
       >
         {TURNSTILE_RESCUE_EMAIL}

@@ -190,7 +190,7 @@ export const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
                 />
                 <Label
                   htmlFor={field.key}
-                  className={`${getFieldLabelClass(field)} min-w-0 flex-1 break-words leading-6`}
+                  className={`${getFieldLabelClass(field)} min-w-0 flex-1 leading-6 break-words`}
                 >
                   {t(field.labelKey)}
                 </Label>

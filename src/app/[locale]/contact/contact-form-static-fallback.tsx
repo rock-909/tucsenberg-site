@@ -126,7 +126,7 @@ function StaticCheckboxField({
         />
         <label
           htmlFor={field.key}
-          className={`${getFieldLabelClass(field)} min-w-0 flex-1 break-words leading-6`}
+          className={`${getFieldLabelClass(field)} min-w-0 flex-1 leading-6 break-words`}
         >
           <span translate="no">{label}</span>
         </label>

@@ -50,7 +50,7 @@ function ContactSuccessCheckIcon() {
   return (
     <span
       aria-hidden="true"
-      className="animate-in fade-in-0 zoom-in-95 mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-[var(--success-foreground)] duration-300"
+      className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-[var(--success-foreground)] duration-300 animate-in fade-in-0 zoom-in-95"
       data-slot="contact-success-check"
     >
       <svg
