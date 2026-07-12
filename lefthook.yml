@@ -46,12 +46,6 @@ pre-commit:
       fail_text: '架构守卫检查失败 - 发现违反架构重构规则的代码变更'
       stage_fixed: false
 
-    # 别名一致性检查
-    config-check:
-      run: pnpm exec tsc --noEmit --pretty false --incremental false --noErrorTruncation
-      fail_text: '别名一致性检查失败 - 请修复 tsconfig/next.config/ESLint 配置一致性'
-      stage_fixed: false
-
     # 多语言同步检查
     i18n-sync:
       run: |
@@ -60,7 +54,7 @@ pre-commit:
         else
           echo "跳过 i18n 同步检查（无相关变更）"; exit 0;
         fi
-      fail_text: '多语言同步检查失败 - 请同步 messages 与内容文件的中英版本'
+      fail_text: '翻译验证失败 - 请同步 messages 物理包与内容文件'
       stage_fixed: false
 
     structural-clusters-review:

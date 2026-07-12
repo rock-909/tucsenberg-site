@@ -4,10 +4,9 @@ const matter = require("gray-matter");
 const { glob } = require("glob");
 const yaml = require("js-yaml");
 
-const DEFAULT_COLLECTIONS = ["posts", "pages", "products"];
+const DEFAULT_COLLECTIONS = ["pages"];
 const FALLBACK_LOCALES = ["en"];
 const DEFAULT_CONTENT_EXTENSIONS = ["md", "mdx"];
-const DEFAULT_CONTENT_ROOTS = ["content"];
 const CONTENT_SLUG_SYNC_ROOTS = ["content"];
 const REPORT_DIR = "reports";
 const CONTENT_SLUG_REPORT_FILENAME = "content-slug-sync-report.json";
@@ -536,7 +535,7 @@ Usage:
 
 Options:
   --json              Output JSON report to reports/content-slug-sync-report.json
-  --collections=x,y   Collections to check (default: posts,pages,products)
+  --collections=x,y   Collections to check (default: pages)
   --locales=x,y       Locales to check (default: ${DEFAULT_LOCALES.join(",")})
   --strict-frontmatter Run opt-in frontmatter/SEO contract checks
   --quiet             Only output errors

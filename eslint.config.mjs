@@ -11,23 +11,20 @@ import eslintComments from "@eslint-community/eslint-plugin-eslint-comments/conf
 
 const security = securityPlugin.default ?? securityPlugin;
 const promise = promisePlugin.default ?? promisePlugin;
+// Only values that appear as bare numeric literals in lintable production code
+// are kept. Unused ignore entries were removed so no-magic-numbers keeps its
+// teeth; re-add a value here only when a real production literal needs it.
 const MAGIC_NUMBER_IGNORE_LIST = [
   // 基础数字
   0, 1, -1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
   // 常见小数字
-  12, 14, 15, 16, 17, 18, 20, 22, 23, 24, 25, 30, 32, 35, 36, 40, 42, 45, 49,
-  50,
+  12, 14, 16, 18, 20, 22, 24, 25, 30, 32, 36, 40, 50,
   // 百分比相关
-  60, 64, 65, 70, 75, 80, 85, 90, 95, 99, 100,
+  60, 64, 90, 100,
   // 尺寸和像素
-  120, 128, 150, 160, 190, 250, 256, 300, 360, 365,
-  // 数据大小
-  512, 640, 700, 750, 768, 800, 900, 999,
-  // 大数字和时间
-  1000, 1024, 1200, 1234, 1280, 1500, 1536, 1600, 1800, 1920, 2000, 2048, 2500,
-  3000, 4000, 4096, 5000, 6000, 7000, 8000, 8192, 8888, 8900, 9000, 10000,
-  12000, 12345, 15000, 30000, 45000, 50000, 60000, 65536, 100000, 120000,
-  125000, 170000, 200000, 300000, 500000,
+  120, 128, 150, 190, 250, 256, 300, 360,
+  // 大数字和时间（含 365 = 天/年）
+  365, 1000, 1024, 4000, 5000, 60000, 300000,
 ];
 
 export default [
@@ -674,7 +671,7 @@ export default [
       "e2e/**/*.{js,jsx,ts,tsx}",
     ],
     rules: {
-      // 禁止新增export *重新导出 - 架构重构期间临时规则
+      // 禁止新增 export * 重新导出 - 命名导出边界的长期约束（非临时规则）
       "no-restricted-syntax": [
         "error",
         {
