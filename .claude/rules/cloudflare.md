@@ -52,9 +52,15 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 
 ## Build ownership
 
-- `pnpm website:build:cf` is the public Cloudflare build command.
-- OpenNext worker minification stays disabled in `open-next.config.ts` until
-  native build and preview have fresh proof.
+- `pnpm website:build:cf` is the public Cloudflare build command. It minifies
+  the production worker by default (owner 2026-07-12 decision): `--noMinify` is
+  an OpenNext CPU-profiling debug aid, not a production default, and shipping it
+  bloated the worker toward the free-tier limit.
+- `pnpm website:build:cf:debug` retains the `--noMinify` unminified variant for
+  CPU profiling only. Do not point the deploy chain at it.
+- The `open-next.config.ts` aws-layer `default.minify` flag is a separate,
+  build-and-preview-gated setting. The shipped Cloudflare worker minification is
+  driven by the build command above, not by that lower-layer flag.
 - Wrangler-level minification in `wrangler.jsonc` may stay enabled; do not
   treat it as proof that OpenNext split-function minification is safe.
 - Use `DEPLOYMENT_PLATFORM=cloudflare` as the canonical Cloudflare signal.
