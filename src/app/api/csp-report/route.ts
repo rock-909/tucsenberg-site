@@ -14,6 +14,8 @@ import type { CSPReport } from "@/config/security";
 import {
   HTTP_BAD_REQUEST,
   HTTP_INTERNAL_ERROR,
+  HTTP_NO_CONTENT,
+  HTTP_OK,
   HTTP_UNSUPPORTED_MEDIA_TYPE,
 } from "@/constants";
 
@@ -252,7 +254,7 @@ async function parseAndValidateCSPReports(
     logger.warn(
       "Empty CSP report batch (browser quirk, empty report-to batch, or ignored report type)",
     );
-    return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, { status: HTTP_NO_CONTENT });
   }
 
   return violations;
@@ -317,7 +319,7 @@ async function processReport(
 
   return NextResponse.json(
     { status: "received", timestamp: new Date().toISOString() },
-    { status: 200 },
+    { status: HTTP_OK },
   );
 }
 
@@ -338,7 +340,7 @@ const POST_RATE_LIMITED = withRateLimit(
 
 export function POST(request: NextRequest) {
   if (isDevIgnored()) {
-    return NextResponse.json({ status: "ignored" }, { status: 200 });
+    return NextResponse.json({ status: "ignored" }, { status: HTTP_OK });
   }
 
   return POST_RATE_LIMITED(request);
@@ -353,7 +355,7 @@ export function GET() {
       status: "CSP report endpoint active",
       timestamp: new Date().toISOString(),
     },
-    { status: 200 },
+    { status: HTTP_OK },
   );
 }
 

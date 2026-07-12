@@ -46,7 +46,9 @@ export { HEX_RADIX, PHONE_MAX_DIGITS, DEFAULT_ICON_SIZE } from "./count";
 // ============================================================================
 export {
   HTTP_OK,
+  HTTP_NO_CONTENT,
   HTTP_BAD_REQUEST,
+  HTTP_NOT_FOUND,
   HTTP_PAYLOAD_TOO_LARGE,
   HTTP_UNSUPPORTED_MEDIA_TYPE,
   HTTP_TOO_MANY_REQUESTS,

@@ -529,6 +529,12 @@
         "portOfLoading": "Port of Loading"
       },
       "specsComingSoon": "Specifications coming soon. Contact us for detailed product data.",
+      "landing": {
+        "faqTitle": "FAQ",
+        "finalCtaTitle": "Request a quote",
+        "rfqNoteFallback": "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer.",
+        "downloadSpec": "Download spec sheet"
+      },
       "cta": {
         "heading": "Need to review {marketLabel}?",
         "description": "Send an inquiry with dimensions, quantity, market, timeline and photos or drawings if available.",

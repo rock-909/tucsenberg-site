@@ -65,6 +65,34 @@ Direct literals are fine for language and UI idioms such as array index `0`,
 Do not introduce `ZERO`, `ONE`, or similar aliases unless the name carries real
 domain meaning.
 
+### Known hole: `no-magic-numbers` `detectObjects: false`
+
+`eslint.config.mjs` runs `no-magic-numbers` with `detectObjects: false`, so
+numeric literals in object-property position are not flagged. This is a
+deliberate, measured choice, not an oversight.
+
+Measured on 2026-07-12 by flipping the flag to `true`: 38 new violations across
+8 files. About 36 of them are exactly the literals this section already permits
+as direct — animation durations and opacity (`src/lib/motion/light-breathing.ts`),
+style tokens (`src/config/footer-style-tokens.ts`), layout dimensions
+(`src/config/pages.config.ts`), SEO/site config (`src/config/single-site*.ts`),
+and Lighthouse score/budget thresholds (`lighthouserc.js`). Turning the flag on
+would force naming that config/motion idiom class, fighting this section's own
+policy, so it stays `false`.
+
+Two literals it surfaced carried real domain meaning and were handled directly
+instead of via the noisy global flag (the narrower guard):
+
+- `src/middleware.ts` bare `404` → replaced with `HTTP_NOT_FOUND` from
+  `src/constants/core.ts` (same class as the other HTTP status constants).
+- `src/config/cors.ts` `maxAge: 3600` is a preflight-cache TTL, but the property
+  name `maxAge` plus its inline `(1 hour)` comment already name it; a separate
+  constant would add no clarity, so it is left as documented config.
+
+If a future change adds object-position numeric literals with real domain
+meaning (new HTTP codes, TTLs, rate limits), name them at the source rather than
+enabling the global flag.
+
 ## React performance patterns
 
 - Do not add `memo`, `useMemo`, or `useCallback` broadly as a default style.

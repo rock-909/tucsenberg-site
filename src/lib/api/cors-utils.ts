@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { CORS_CONFIG, isAllowedOrigin, isSameOrigin } from "@/config/cors";
+import { HTTP_NO_CONTENT, HTTP_OK } from "@/constants";
 
 interface CorsOptions {
   additionalMethods?: string[];
@@ -71,11 +72,11 @@ export function createCorsPreflightResponse(
   });
 
   if (Object.keys(corsHeaders).length === 0) {
-    return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, { status: HTTP_NO_CONTENT });
   }
 
   return new NextResponse(null, {
-    status: 200,
+    status: HTTP_OK,
     headers: corsHeaders,
   });
 }
