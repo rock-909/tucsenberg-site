@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # lib-content 批次审查清单（src/lib content/blog/marketing/image/motion/cookie-consent/actions + lib 根目录）
 
 **审了 45 个文件**（含 2 个生成文件仅核对结构），"零调用"结论均经 grep 全仓验证（排除 __tests__）。

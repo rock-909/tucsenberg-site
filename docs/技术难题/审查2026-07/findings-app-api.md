@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/app/api/ 路由审查问题清单
 
 **统计：高 3 条 / 中 11 条 / 低 17 条（共 31 条）**

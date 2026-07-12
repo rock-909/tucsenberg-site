@@ -138,22 +138,26 @@ describe("current-truth docs guard", () => {
     );
   });
 
-  it("locks the corrected PR stack and catalog closeout handoff markers", () => {
-    expect(CHECKS).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          file: "docs/技术难题/审查2026-07/交接文档.md",
-          required: expect.arrayContaining([
-            "PR 不是一条从 #40 开始的完整线性栈",
-            "retarget",
-            "restack",
-            "42aaabe",
-            "8c6dc3a",
-            "pnpm messages:sync",
-          ]),
-        }),
-      ]),
-    );
+  it("treats the 2026-07 audit handoff as historical, not snapshot-pinned truth", () => {
+    // 交接文档整篇转为 historical（docs/技术难题/审查2026-07/ 目录豁免）。
+    // required 不再钉死时点快照（commit 哈希、"尚未 push" 状态、检查输出数字）——
+    // 那正是强制文档说假话的机制。CHECKS 里不应再有它的条目。
+    for (const check of CHECKS) {
+      expect(check.file).not.toBe("docs/技术难题/审查2026-07/交接文档.md");
+    }
+  });
+
+  it("exempts bannered + inventoried 2026-07 audit findings from retired-pattern scan", () => {
+    const files = createValidFiles();
+    const auditFinding = "docs/技术难题/审查2026-07/findings-example.md";
+    files[auditFinding] =
+      `${HISTORICAL_BANNER}\n# 审查发现\n${RETIRED_CURRENT_TRUTH_PATTERNS.join("\n")}`;
+    files["docs/项目基础/文档清单.md"] +=
+      `\n| \`${auditFinding}\` | \`historical-proof\` | Audit finding. |`;
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
   });
 
   it("indexes the maintainability audit as historical evidence, not runtime truth", () => {

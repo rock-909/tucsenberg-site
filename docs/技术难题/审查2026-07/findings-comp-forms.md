@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # src/components/forms/ 可维护性审查
 
 统计：高 4 条 / 中 15 条 / 低 17 条（共 36 条）。实际范围：14 个文件、1529 行（排除 __tests__ 与 *.stories.*）。

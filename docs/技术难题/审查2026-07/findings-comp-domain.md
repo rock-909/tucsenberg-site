@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # components 业务域批次审查清单（products / content / contact / cookie / security / seo / monitoring / errors / motion / mdx / icons + 根目录）
 
 **统计：高 2 条 / 中 17 条 / 低 22 条（共 41 条；审查范围 43 个文件、约 4150 行）**

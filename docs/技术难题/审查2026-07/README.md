@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # 全库可维护性审查 · 2026-07
 
 分 13 批 + 1 轮跨模块横向扫描，覆盖 `src/` 全部业务代码与 `scripts/`（测试目录暂缓）。共 475 条问题（高 65 / 中 195 / 低 215）。审查标准按资深工程师品味判断，不引用项目规则文件。每条结论均经 grep 验证调用方。
