@@ -3,6 +3,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 import { getAllMarketSlugs } from "../../src/constants/product-catalog";
+import { routing } from "../../src/i18n/routing-config";
 
 const REPO_PATH_PATTERN = /^(?:content|messages|public|scripts|src|tests)\//u;
 const QUOTED_REPO_PATH_PATTERN =
@@ -136,8 +137,19 @@ function collectDepCruiserDeadToFiles(): string[] {
 // are validated against the live catalog. Returns true only when it lands on a
 // real page.tsx — so an audited URL can never silently point at a 404.
 function appRouteResolves(pathnameSegments: string[]): boolean {
+  // The first segment is the locale; it must be a configured public locale.
+  // A retired/unknown locale prefix (e.g. a re-introduced `/zh/...`) is a dead
+  // URL even if the rest of the path exists under [locale].
+  const [localeSegment, ...routeSegments] = pathnameSegments;
+  if (
+    localeSegment === undefined ||
+    !(routing.locales as readonly string[]).includes(localeSegment)
+  ) {
+    return false;
+  }
+
   let dir = "src/app/[locale]";
-  for (const segment of pathnameSegments) {
+  for (const segment of routeSegments) {
     const currentDir = dir;
     const staticDir = path.join(currentDir, segment);
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test walks the repo-local app router tree
@@ -154,6 +166,9 @@ function appRouteResolves(pathnameSegments: string[]): boolean {
     );
     if (dynamicDirs.length !== 1) return false;
     const dynamicDir = dynamicDirs[0] ?? "";
+    // A catch-all segment (`[...rest]`) exists only to render notFound(); a path
+    // that resolves *into* it is by definition a dead route, not a real page.
+    if (dynamicDir.startsWith("[...")) return false;
     if (dynamicDir === "[market]" && !getAllMarketSlugs().includes(segment)) {
       return false;
     }
@@ -169,11 +184,9 @@ function collectLighthouseRoutePathSegments(): string[][] {
     (match) => match[1] ?? "",
   );
   return [...new Set(urls)].map((pathname) =>
-    pathname
-      .split("/")
-      .filter((segment) => segment !== "")
-      // drop the leading locale segment (en); the rest is the route path
-      .slice(1),
+    // keep the full path incl. the locale segment; appRouteResolves validates
+    // the locale prefix against routing.locales.
+    pathname.split("/").filter((segment) => segment !== ""),
   );
 }
 
@@ -254,7 +267,7 @@ describe("exact repository paths in configuration", () => {
   it("keeps Lighthouse audit URLs mapped to real routes", () => {
     const unresolved = collectLighthouseRoutePathSegments()
       .filter((segments) => !appRouteResolves(segments))
-      .map((segments) => `/en/${segments.join("/")}`)
+      .map((segments) => `/${segments.join("/")}`)
       .sort();
 
     expect(unresolved).toEqual([]);
