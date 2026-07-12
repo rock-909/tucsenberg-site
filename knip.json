@@ -11,10 +11,10 @@
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{js,mjs,ts}"],
   "ignoreExportsUsedInFile": true,
   "ignore": ["src/test/css-stub.ts", "src/test/mdx-stub.ts"],
-  "ignoreDependencies": [],
+  "ignoreDependencies": ["@tailwindcss/typography"],
   "rules": {
     "files": "error",
-    "dependencies": "off",
+    "dependencies": "error",
     "devDependencies": "off",
     "unlisted": "off",
     "binaries": "off",
