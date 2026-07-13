@@ -1,22 +1,24 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-
-import {
-  lightBreathingPageActive,
-  lightBreathingPageEnter,
-  lightBreathingPageEnterTransition,
-} from "@/lib/motion/light-breathing";
 
 interface PageTransitionProps {
   children: ReactNode;
 }
 
+/**
+ * Route-change enter animation. Implemented with a CSS keyframe
+ * (`.animate-page-enter` in globals.css) instead of `motion/react`, so the
+ * site-wide navigation shell no longer ships the motion runtime on every page.
+ *
+ * The first paint (motionKey === 0) renders without the animation class to keep
+ * the initial/LCP render static. Each client-side navigation bumps the key so
+ * the wrapper remounts and the CSS animation replays. prefers-reduced-motion is
+ * honored by the global reduced-motion reset in globals.css.
+ */
 export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
-  const reducedMotion = useReducedMotion();
   const previousPathname = useRef<string | undefined>(undefined);
   const [motionKey, setMotionKey] = useState(0);
 
@@ -31,18 +33,12 @@ export function PageTransition({ children }: PageTransitionProps) {
     previousPathname.current = pathname;
   }, [pathname]);
 
-  if (reducedMotion) {
-    return children;
-  }
-
   return (
-    <m.div
+    <div
       key={motionKey}
-      initial={motionKey === 0 ? false : lightBreathingPageEnter}
-      animate={lightBreathingPageActive}
-      transition={lightBreathingPageEnterTransition}
+      className={motionKey === 0 ? undefined : "animate-page-enter"}
     >
       {children}
-    </m.div>
+    </div>
   );
 }

@@ -42,8 +42,8 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
-vi.mock("motion/react", () => ({
-  useReducedMotion: () => mockUseReducedMotion(),
+vi.mock("@/lib/motion/use-prefers-reduced-motion", () => ({
+  usePrefersReducedMotion: () => mockUseReducedMotion(),
 }));
 
 describe("NavigationProgressBar", () => {

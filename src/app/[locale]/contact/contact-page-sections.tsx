@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { NextIntlClientProvider } from "next-intl";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { ProductFamilyContextNotice } from "@/components/contact/product-family-context-notice";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
@@ -10,8 +11,12 @@ import {
 } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
 import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
+import {
+  CONTACT_CLIENT_MESSAGE_NAMESPACES,
+  pickMessages,
+} from "@/lib/i18n/client-messages";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import type { FaqItem } from "@/types/content.types";
+import type { FaqItem, Locale } from "@/types/content.types";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
 
@@ -229,9 +234,11 @@ export function ContactFaqSection({
 }
 
 async function ContactFormColumn({
+  locale,
   searchParams,
   messages,
 }: {
+  locale: Locale;
   searchParams: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
@@ -262,25 +269,41 @@ async function ContactFormColumn({
         context={productFamilyContext}
         label={productFamilyContextLabel}
       />
-      <ContactFormIsland
-        errorMessage={formLoadError}
-        fallback={<ContactFormStaticFallback messages={messages} />}
-        retryLabel={formRetryLabel}
-      />
+      {/* The contact form is the only client consumer of the `contact` and
+          `apiErrors` message namespaces. Provide them (plus `accessibility`,
+          which the form's Turnstile labels use) locally here instead of from
+          the site-wide root provider, so non-contact pages stop shipping the
+          contact form copy. */}
+      <NextIntlClientProvider
+        locale={locale}
+        messages={pickMessages(messages, CONTACT_CLIENT_MESSAGE_NAMESPACES)}
+      >
+        <ContactFormIsland
+          errorMessage={formLoadError}
+          fallback={<ContactFormStaticFallback messages={messages} />}
+          retryLabel={formRetryLabel}
+        />
+      </NextIntlClientProvider>
     </div>
   );
 }
 
 export function ContactFormWithFallback({
+  locale,
   searchParams,
   messages,
 }: {
+  locale: Locale;
   searchParams: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
   return (
     <Suspense fallback={<ContactFormStaticFallback messages={messages} />}>
-      <ContactFormColumn searchParams={searchParams} messages={messages} />
+      <ContactFormColumn
+        locale={locale}
+        searchParams={searchParams}
+        messages={messages}
+      />
     </Suspense>
   );
 }

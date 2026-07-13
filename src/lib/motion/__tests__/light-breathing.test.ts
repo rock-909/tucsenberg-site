@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   getInstantTransition,
-  lightBreathingPageEnterTransition,
   lightBreathingRevealTransition,
   lightBreathingStaggerChildren,
   lightBreathingViewport,
@@ -13,13 +12,13 @@ describe("light-breathing motion tokens", () => {
     expect(lightBreathingStaggerChildren).toBeLessThanOrEqual(0.1);
   });
 
-  it("keeps page transitions faster than section reveals", () => {
-    expect(lightBreathingPageEnterTransition.duration).toBeLessThan(
-      lightBreathingRevealTransition.duration,
-    );
-    expect(lightBreathingPageEnterTransition.exit.duration).toBeLessThan(
-      lightBreathingPageEnterTransition.duration,
-    );
+  it("keeps section reveals in the restrained timing band", () => {
+    // The page-enter (route change) animation moved to a CSS keyframe
+    // (globals.css, 0.32s); the section reveal token below stays the longer of
+    // the two, matching the original "page transition faster than reveal"
+    // relationship.
+    expect(lightBreathingRevealTransition.duration).toBeGreaterThan(0.32);
+    expect(lightBreathingRevealTransition.duration).toBeLessThanOrEqual(0.6);
   });
 
   it("uses the first-pass scroll reveal timing", () => {

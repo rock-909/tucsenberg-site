@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  CONTACT_CLIENT_MESSAGE_NAMESPACES,
   getClientMessageNamespaces,
   loadClientMessages,
   pickMessages,
@@ -10,10 +11,11 @@ import {
 const LAYOUT_SOURCE_PATH = "src/app/[locale]/layout.tsx";
 
 describe("client message scoping", () => {
-  it("keeps only namespaces needed by client islands", () => {
+  it("keeps only namespaces needed site-wide by client islands", () => {
     const scoped = pickClientMessages({
       home: { hero: "server-only" },
       faq: { sectionTitle: "server-only" },
+      accessibility: { skipToContent: "Skip" },
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
       cookie: { title: "Cookies" },
@@ -24,21 +26,18 @@ describe("client message scoping", () => {
     });
 
     expect(scoped).toEqual({
-      apiErrors: { UNKNOWN_ERROR: "Unknown" },
+      accessibility: { skipToContent: "Skip" },
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
-      contact: { form: { title: "Contact" } },
       cookie: { title: "Cookies" },
       errors: { contact: { title: "Unavailable" } },
       theme: { switchToDark: "Switch to dark theme" },
     });
   });
 
-  it("tracks the intended namespace allowlist", () => {
+  it("tracks the intended site-wide namespace allowlist", () => {
     expect(getClientMessageNamespaces()).toEqual([
       "accessibility",
-      "apiErrors",
-      "contact",
       "cookie",
       "errors",
       "language",
@@ -47,36 +46,50 @@ describe("client message scoping", () => {
     ]);
   });
 
-  it("can scope a page-specific subset when needed", () => {
+  it("keeps the contact form copy off the site-wide client payload", () => {
+    // Only the contact form consumes these on the client; they must be
+    // supplied by the contact route's local provider, not shipped everywhere.
+    expect(getClientMessageNamespaces()).not.toContain("contact");
+    expect(getClientMessageNamespaces()).not.toContain("apiErrors");
+    expect([...CONTACT_CLIENT_MESSAGE_NAMESPACES].sort()).toEqual([
+      "accessibility",
+      "apiErrors",
+      "contact",
+    ]);
+  });
+
+  it("can scope the contact route subset when needed", () => {
     const scoped = pickMessages(
       {
+        accessibility: { turnstileTestMode: "Test" },
         contact: { form: { title: "Contact" } },
         apiErrors: { UNKNOWN_ERROR: "Unknown" },
         home: { hero: "Server only" },
       },
-      ["contact", "apiErrors"],
+      CONTACT_CLIENT_MESSAGE_NAMESPACES,
     );
 
     expect(scoped).toEqual({
+      accessibility: { turnstileTestMode: "Test" },
       contact: { form: { title: "Contact" } },
       apiErrors: { UNKNOWN_ERROR: "Unknown" },
     });
   });
 
-  it("loads only client provider namespaces from split message bundles", async () => {
+  it("loads only site-wide client provider namespaces from split bundles", async () => {
     const scoped = await loadClientMessages("en");
 
     expect(Object.keys(scoped).sort()).toEqual(
       [...getClientMessageNamespaces()].sort(),
     );
     expect(scoped).toHaveProperty("accessibility");
-    expect(scoped).toHaveProperty("apiErrors");
-    expect(scoped).toHaveProperty("contact");
     expect(scoped).toHaveProperty("cookie");
     expect(scoped).toHaveProperty("errors");
     expect(scoped).toHaveProperty("language");
     expect(scoped).toHaveProperty("navigation");
     expect(scoped).toHaveProperty("theme");
+    expect(scoped).not.toHaveProperty("contact");
+    expect(scoped).not.toHaveProperty("apiErrors");
     expect(scoped).not.toHaveProperty("footer");
     expect(scoped).not.toHaveProperty("home");
     expect(scoped).not.toHaveProperty("faq");

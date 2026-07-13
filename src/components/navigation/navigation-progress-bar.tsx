@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   useCallback,
@@ -11,6 +10,7 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
+import { usePrefersReducedMotion } from "@/lib/motion/use-prefers-reduced-motion";
 import {
   getNavigationTargetRouteKey,
   getNavigationRouteKey,
@@ -81,7 +81,7 @@ export function NavigationProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const routeKey = getNavigationRouteKey(pathname, searchParams);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
   const trickleTimerRef = useRef<number | undefined>(undefined);

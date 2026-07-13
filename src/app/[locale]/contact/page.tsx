@@ -83,6 +83,7 @@ function ContactContentBody({
 
         <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <ContactFormWithFallback
+            locale={locale}
             searchParams={searchParams}
             messages={messages}
           />
