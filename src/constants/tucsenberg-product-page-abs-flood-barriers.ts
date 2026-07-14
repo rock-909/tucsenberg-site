@@ -85,11 +85,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         columns: ["What to check", "Disposable kits", "TB-BW series"],
         rows: [
           ["Wall thickness", "typically unstated", "4–5 mm (±0.5)"],
-          [
-            "UV performance",
-            "no / unstated",
-            "UV-stabilised ABS resin, tested in-house under accelerated weathering",
-          ],
+          ["UV performance", "no / unstated", "UV-stabilised ABS"],
           ["Temperature range", "unstated", "−40 °C to +95 °C working range"],
           [
             "Interlock",
