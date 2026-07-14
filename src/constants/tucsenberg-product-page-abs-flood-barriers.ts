@@ -29,7 +29,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     "Freestanding — no fixing",
     "50–85 cm heights",
     "−40 °C to +95 °C",
-    "UV-tested · ASTM G154-2016",
+    "UV-stabilised ABS",
     "3-year warranty",
     "MOQ one carton",
   ],
@@ -88,7 +88,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
           [
             "UV performance",
             "no / unstated",
-            "UV-tested to ASTM G154-2016 (0.76 W/m² @340 nm, BPT 60 °C, 8 h)",
+            "UV-stabilised ABS resin, tested in-house under accelerated weathering",
           ],
           ["Temperature range", "unstated", "−40 °C to +95 °C working range"],
           [
