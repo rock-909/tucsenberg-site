@@ -36,6 +36,7 @@ export interface ContactFormContainerViewProps {
   onTurnstileError: () => void;
   onTurnstileExpire: () => void;
   onTurnstileLoad: () => void;
+  onTurnstileReadyRef?: (reset: () => void) => (() => void) | void;
   errorContainerRef?: (node: HTMLDivElement | null) => void;
 }
 
@@ -92,6 +93,7 @@ export function ContactFormContainerView({
   onTurnstileError,
   onTurnstileExpire,
   onTurnstileLoad,
+  onTurnstileReadyRef,
   errorContainerRef,
 }: ContactFormContainerViewProps) {
   // On "error" the widget already renders its own unavailable message with a
@@ -133,6 +135,7 @@ export function ContactFormContainerView({
           onError={onTurnstileError}
           onExpire={onTurnstileExpire}
           onLoad={onTurnstileLoad}
+          {...(onTurnstileReadyRef ? { onReadyRef: onTurnstileReadyRef } : {})}
         />
 
         {shouldShowTurnstilePendingMessage ? (

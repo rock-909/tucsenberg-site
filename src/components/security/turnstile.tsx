@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { logger } from "@/lib/logger";
 import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
 import {
@@ -25,6 +25,11 @@ interface TurnstileProps {
   onError?: (_error: string) => void;
   onExpire?: () => void;
   onLoad?: () => void;
+  /**
+   * Receives a widget `reset()` binder. May return an unregister/cleanup
+   * function invoked when the widget unmounts or the binder changes.
+   */
+  onReadyRef?: (reset: () => void) => (() => void) | void;
   className?: string;
   theme?: "light" | "dark" | "auto";
   size?: "normal" | "compact";
@@ -94,6 +99,7 @@ export function TurnstileWidget({
   onError,
   onExpire,
   onLoad,
+  onReadyRef,
   className,
   theme = "auto",
   size = "normal",
@@ -111,7 +117,17 @@ export function TurnstileWidget({
   const isTestMode =
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const bypassTriggeredRef = useRef(false);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
   const labelText = labels ?? DEFAULT_TURNSTILE_LABELS;
+
+  useEffect(() => {
+    if (!onReadyRef) {
+      return undefined;
+    }
+    return onReadyRef(() => {
+      turnstileRef.current?.reset();
+    });
+  }, [onReadyRef]);
 
   // All hooks must be called before any conditional returns
   useEffect(() => {
@@ -190,6 +206,7 @@ export function TurnstileWidget({
   return (
     <div className={`turnstile-container ${className || ""}`}>
       <Turnstile
+        ref={turnstileRef}
         siteKey={siteKey}
         onSuccess={handleSuccess}
         onError={handleError}

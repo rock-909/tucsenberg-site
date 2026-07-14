@@ -32,6 +32,7 @@ export function ContactFormContainer() {
     setTurnstileToken,
     turnstileStatus,
     setTurnstileStatus,
+    registerTurnstileReset,
     isRateLimited,
   } = useContactForm();
 
@@ -76,6 +77,7 @@ export function ContactFormContainer() {
       onTurnstileError={handleTurnstileError}
       onTurnstileExpire={handleTurnstileExpire}
       onTurnstileLoad={handleTurnstileLoad}
+      onTurnstileReadyRef={registerTurnstileReset}
       errorContainerRef={handleErrorDisplayRef}
     />
   );

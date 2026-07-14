@@ -25,6 +25,7 @@ export interface UseContactFormResult {
   setTurnstileToken: (token: string) => void;
   turnstileStatus: TurnstileStatus;
   setTurnstileStatus: (status: TurnstileStatus) => void;
+  registerTurnstileReset: (reset: () => void) => () => void;
   isRateLimited: boolean;
 }
 
@@ -95,6 +96,7 @@ export function useContactForm(): UseContactFormResult {
     setTurnstileToken,
     turnstileStatus,
     setTurnstileStatus,
+    registerTurnstileReset: kernel.registerTurnstileReset,
     isRateLimited,
   };
 }

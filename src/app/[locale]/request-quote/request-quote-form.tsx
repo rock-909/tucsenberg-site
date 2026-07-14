@@ -95,6 +95,7 @@ export function RequestQuoteForm({ copy }: { copy: RequestQuoteFormCopy }) {
           isSubmitting={kernel.isSubmitting}
           onTurnstileError={kernel.resetTurnstileToken}
           onTurnstileSuccess={kernel.acquireTurnstileToken}
+          onTurnstileReadyRef={kernel.registerTurnstileReset}
           state={displayState}
           turnstileToken={kernel.turnstileToken}
         />

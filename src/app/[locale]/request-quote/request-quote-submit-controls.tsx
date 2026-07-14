@@ -93,6 +93,7 @@ export interface RequestQuoteSubmitControlsProps {
   readonly turnstileToken: string;
   readonly onTurnstileError: () => void;
   readonly onTurnstileSuccess: (token: string) => void;
+  readonly onTurnstileReadyRef?: (reset: () => void) => (() => void) | void;
 }
 
 export function RequestQuoteSubmitControls({
@@ -102,6 +103,7 @@ export function RequestQuoteSubmitControls({
   turnstileToken,
   onTurnstileError,
   onTurnstileSuccess,
+  onTurnstileReadyRef,
 }: RequestQuoteSubmitControlsProps) {
   return (
     <>
@@ -110,6 +112,7 @@ export function RequestQuoteSubmitControls({
         onError={onTurnstileError}
         onExpire={onTurnstileError}
         onSuccess={onTurnstileSuccess}
+        {...(onTurnstileReadyRef ? { onReadyRef: onTurnstileReadyRef } : {})}
       />
 
       <RequestQuoteStatusMessage copy={copy} state={state} />
