@@ -26,6 +26,7 @@ interface LazyTurnstileProps {
   onError?: (reason?: string) => void;
   onExpire?: () => void;
   onLoad?: () => void;
+  onReadyRef?: (reset: () => void) => (() => void) | void;
   className?: string;
   theme?: "light" | "dark" | "auto";
   size?: "normal" | "compact";
@@ -115,33 +116,57 @@ function useLazyRender(containerRef: React.RefObject<HTMLDivElement | null>) {
   return shouldRender;
 }
 
+function resolveLazyTurnstileLabels(
+  labels: LazyTurnstileProps["labels"],
+): NonNullable<LazyTurnstileProps["labels"]> {
+  return (
+    labels ?? {
+      unavailable: "Security verification is temporarily unavailable.",
+      loadFailed: "Security verification failed to load.",
+      devBypass: "Dev mode: Turnstile verification bypassed",
+      testMode: "Bot protection disabled in test mode",
+    }
+  );
+}
+
+function buildLazyTurnstileWidgetProps(args: {
+  props: LazyTurnstileProps;
+  labelText: NonNullable<LazyTurnstileProps["labels"]>;
+  theme: NonNullable<LazyTurnstileProps["theme"]>;
+  size: NonNullable<LazyTurnstileProps["size"]>;
+}) {
+  const { props, labelText, theme, size } = args;
+  return {
+    className: props.className ?? "w-full",
+    theme,
+    size,
+    labels: {
+      unavailable: labelText.unavailable,
+      devBypass: labelText.devBypass,
+      testMode: labelText.testMode,
+    },
+    ...(props.onSuccess ? { onSuccess: props.onSuccess } : {}),
+    ...(props.onError ? { onError: props.onError } : {}),
+    ...(props.onExpire ? { onExpire: props.onExpire } : {}),
+    ...(props.onLoad ? { onLoad: props.onLoad } : {}),
+    ...(props.onReadyRef ? { onReadyRef: props.onReadyRef } : {}),
+    ...(props.tabIndex !== undefined ? { tabIndex: props.tabIndex } : {}),
+    ...(props.id !== undefined ? { id: props.id } : {}),
+    ...(props.action !== undefined ? { action: props.action } : {}),
+    ...(props.cData !== undefined ? { cData: props.cData } : {}),
+  };
+}
+
 /**
  * 延迟加载 Turnstile CAPTCHA 组件
  * 优先在进入视口时加载，退化为空闲时加载
  */
-export function LazyTurnstile({
-  onSuccess,
-  onError,
-  onExpire,
-  onLoad,
-  className,
-  theme = "auto",
-  size = "normal",
-  tabIndex,
-  id,
-  action,
-  cData,
-  labels,
-}: LazyTurnstileProps) {
+export function LazyTurnstile(props: LazyTurnstileProps) {
+  const { onError, className, theme = "auto", size = "normal", labels } = props;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
   const placeholderStyle = createTurnstilePlaceholderStyle(size);
-  const labelText = labels ?? {
-    unavailable: "Security verification is temporarily unavailable.",
-    loadFailed: "Security verification failed to load.",
-    devBypass: "Dev mode: Turnstile verification bypassed",
-    testMode: "Bot protection disabled in test mode",
-  };
+  const labelText = resolveLazyTurnstileLabels(labels);
   const placeholder = (
     <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
   );
@@ -159,24 +184,12 @@ export function LazyTurnstile({
   const handleLazyError = () => {
     onError?.(labelText.loadFailed);
   };
-  const turnstileProps = {
-    className: className ?? "w-full",
+  const turnstileProps = buildLazyTurnstileWidgetProps({
+    props,
+    labelText,
     theme,
     size,
-    labels: {
-      unavailable: labelText.unavailable,
-      devBypass: labelText.devBypass,
-      testMode: labelText.testMode,
-    },
-    ...(onSuccess ? { onSuccess } : {}),
-    ...(onError ? { onError } : {}),
-    ...(onExpire ? { onExpire } : {}),
-    ...(onLoad ? { onLoad } : {}),
-    ...(tabIndex !== undefined ? { tabIndex } : {}),
-    ...(id !== undefined ? { id } : {}),
-    ...(action !== undefined ? { action } : {}),
-    ...(cData !== undefined ? { cData } : {}),
-  };
+  });
 
   return (
     <div className="space-y-2" ref={containerRef} style={placeholderStyle}>

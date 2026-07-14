@@ -102,6 +102,73 @@ describe("useLeadFormSubmission", () => {
     expect(trackGenerateLead).not.toHaveBeenCalled();
   });
 
+  it("clears the Turnstile token and calls the registered widget reset after success", async () => {
+    const widgetReset = vi.fn();
+    const { result } = renderHook(() => useLeadFormSubmission(createConfig()));
+
+    act(() => {
+      result.current.registerTurnstileReset(widgetReset);
+      result.current.acquireTurnstileToken("token-123");
+    });
+
+    await act(async () => {
+      await result.current.submit(formDataWithName("Alice"));
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("success");
+    });
+    expect(result.current.turnstileToken).toBe("");
+    expect(widgetReset).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears the Turnstile token and calls the registered widget reset after failure", async () => {
+    global.fetch = vi.fn(async () => Response.json({}, { status: 500 }));
+    const widgetReset = vi.fn();
+    const { result } = renderHook(() => useLeadFormSubmission(createConfig()));
+
+    act(() => {
+      result.current.registerTurnstileReset(widgetReset);
+      result.current.acquireTurnstileToken("token-123");
+    });
+
+    await act(async () => {
+      await result.current.submit(formDataWithName("Alice"));
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("error");
+    });
+    expect(result.current.turnstileToken).toBe("");
+    expect(widgetReset).toHaveBeenCalledTimes(1);
+  });
+
+  it("unregistering the Turnstile reset binder drops the stale callback", async () => {
+    const staleReset = vi.fn();
+    const liveReset = vi.fn();
+    const { result } = renderHook(() => useLeadFormSubmission(createConfig()));
+
+    let unregister = () => undefined;
+    act(() => {
+      unregister = result.current.registerTurnstileReset(staleReset);
+    });
+    act(() => {
+      unregister();
+      result.current.registerTurnstileReset(liveReset);
+      result.current.acquireTurnstileToken("token-123");
+    });
+
+    await act(async () => {
+      await result.current.submit(formDataWithName("Alice"));
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("success");
+    });
+    expect(staleReset).not.toHaveBeenCalled();
+    expect(liveReset).toHaveBeenCalledTimes(1);
+  });
+
   it("stores the network-error result when the request throws before decoding", async () => {
     global.fetch = vi.fn(async () => {
       throw new Error("offline");

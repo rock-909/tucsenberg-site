@@ -12,7 +12,9 @@ import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
  *
  * It owns only the lifecycle both forms genuinely duplicate:
  * - submit lock (a ref-based in-flight guard against double submit);
- * - Turnstile token lifecycle (acquire on success, reset on error/expire);
+ * - Turnstile token lifecycle (acquire on success; clear token and reset the
+ *   widget after every submit settlement — success or failure — and on
+ *   error/expire callbacks from the widget);
  * - attribution wiring (append UTM/click-id fields before the body is built);
  * - fetch + decode dispatch to the lead API;
  * - the idle -> submitting -> success/error state machine, plus the
@@ -49,6 +51,11 @@ export interface LeadFormSubmission<TResult> {
   readonly turnstileToken: string;
   readonly acquireTurnstileToken: (token: string) => void;
   readonly resetTurnstileToken: () => void;
+  /**
+   * Register the live widget reset callback. Returns an unregister function
+   * so remounts do not leave a stale widget ref in the kernel.
+   */
+  readonly registerTurnstileReset: (reset: () => void) => () => void;
   readonly submit: (formData: FormData) => Promise<void>;
   /** Seed a client-side error into the state machine without submitting. */
   readonly fail: (result: TResult) => void;
@@ -91,6 +98,21 @@ export function useLeadFormSubmission<TResult>(
   const [status, setStatus] = useState<FormSubmissionStatus>("idle");
   const [result, setResult] = useState<TResult | null>(null);
   const isSubmittingRef = useRef(false);
+  const turnstileResetRef = useRef<(() => void) | null>(null);
+
+  const registerTurnstileReset = (reset: () => void): (() => void) => {
+    turnstileResetRef.current = reset;
+    return () => {
+      if (turnstileResetRef.current === reset) {
+        turnstileResetRef.current = null;
+      }
+    };
+  };
+
+  const clearTurnstileAfterSettlement = () => {
+    setTurnstileToken("");
+    turnstileResetRef.current?.();
+  };
 
   const submit = async (formData: FormData): Promise<void> => {
     // Defensive: the submit button is disabled without a token, but a form can
@@ -124,6 +146,7 @@ export function useLeadFormSubmission<TResult>(
       }
     } finally {
       isSubmittingRef.current = false;
+      clearTurnstileAfterSettlement();
     }
   };
 
@@ -134,6 +157,7 @@ export function useLeadFormSubmission<TResult>(
     turnstileToken,
     acquireTurnstileToken: (token: string) => setTurnstileToken(token),
     resetTurnstileToken: () => setTurnstileToken(""),
+    registerTurnstileReset,
     submit,
     fail: (nextResult: TResult) => {
       setResult(nextResult);
