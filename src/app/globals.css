@@ -147,8 +147,8 @@
   /* Borders & Inputs */
   --border: var(--neutral-5);
   --border-light: var(--neutral-4);
-  --input: oklch(0.9809 0.0025 228.7836);
-  --ring: var(--brand-7);
+  --input: var(--neutral-8);
+  --ring: var(--brand-10);
 
   /* Charts */
   --chart-1: var(--brand-9);
@@ -337,7 +337,7 @@
   --muted-foreground: var(--neutral-8);
   --border: var(--neutral-5);
   --border-light: var(--neutral-4);
-  --input: oklch(0.302 0.0288 244.8244);
+  --input: var(--neutral-8);
   --primary: var(--brand-9);
   --primary-dark: var(--brand-10);
   --primary-foreground: var(--neutral-1);

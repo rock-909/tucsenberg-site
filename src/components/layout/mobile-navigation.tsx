@@ -51,7 +51,7 @@ export function MobileNavigationLinks({
                 className={cn(
                   "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
                   isActive
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-accent text-[var(--primary-text)]"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
                 aria-current={isActive ? "page" : undefined}
@@ -75,7 +75,7 @@ export function MobileNavigationLinks({
                 query: { source: "mobile_nav_cta" },
               }}
               prefetch={false}
-              className="flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
+              className="flex items-center rounded-md bg-[var(--button-primary-bg)] px-3 py-2 text-sm font-medium text-[var(--button-primary-fg)] transition-colors duration-200 hover:bg-[var(--button-primary-hover-bg)]"
               onClick={onNavigate}
             >
               {resolvedContactSalesLabel}

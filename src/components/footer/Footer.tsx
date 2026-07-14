@@ -33,7 +33,7 @@ const MICRO_LABEL_CLASS =
 const LEGAL_TEXT_CLASS =
   "font-mono text-[11.5px] leading-5 text-[var(--footer-text)]";
 const LINK_CLASS =
-  "block py-1.5 text-sm leading-6 text-[var(--footer-text)] transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "block py-1.5 text-sm leading-6 text-[var(--footer-text)] transition-colors hover:text-[var(--primary-text)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 function FooterSection({
   section,

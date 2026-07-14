@@ -80,7 +80,7 @@ function TurnstileUnavailableStatus({
       className={`turnstile-fallback ${className ?? ""}`}
       aria-live="polite"
     >
-      <div className="text-sm text-destructive">{label}</div>
+      <div className="text-sm text-[var(--error-foreground)]">{label}</div>
       <TurnstileRescueLine />
     </output>
   );
