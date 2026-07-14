@@ -359,8 +359,7 @@ describe("Market Landing Page", () => {
       const metadata = await generatePageMetadata("abs-flood-barriers");
 
       expect(metadata).toMatchObject({
-        title:
-          "ABS Interlocking Flood Barriers — Freestanding Boxwall | Tucsenberg",
+        title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
         description:
           "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Quoted within 12 hours.",
         alternates: {
