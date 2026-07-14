@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { buildCanarySelectors } from "./canary-selectors";
 import { isDeployedCanaryUrl } from "./post-deploy-canary-url";
 
 /**
@@ -68,7 +69,7 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
     );
 
     // 1. Navigate to contact page
-    await page.goto("/en/contact");
+    await page.goto("/contact");
     await page.waitForLoadState("load");
 
     // 2. Fill form
@@ -87,8 +88,9 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
     await page.waitForTimeout(3000);
 
     // 4. Submit form
+    const selectors = buildCanarySelectors();
     const submitButton = page.getByRole("button", {
-      name: /send message|submit/i,
+      name: selectors.submitLabel,
     });
 
     await expect(
@@ -99,9 +101,7 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
     await submitButton.click();
 
     // 5. Wait for success or error feedback
-    const successIndicator = page
-      .getByText(/success|thank you|sent/i)
-      .or(page.getByText(/成功|感谢|已发送/i));
+    const successIndicator = page.getByText(selectors.successPrefix);
     const errorIndicator = page
       .getByText(/error|failed|try again/i)
       .or(page.getByText(/错误|失败|重试/i));
