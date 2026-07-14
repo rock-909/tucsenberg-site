@@ -13,7 +13,7 @@ describe("createStaticMarkdownContent", () => {
     const { container } = render(
       <>
         {createStaticMarkdownContent(
-          "- **Email inquiries**: Response within 24 hours",
+          "- **Email inquiries**: Response within one business day",
         )}
       </>,
     );
