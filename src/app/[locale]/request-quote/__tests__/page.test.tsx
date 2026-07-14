@@ -59,8 +59,7 @@ describe("RequestQuotePage", () => {
     expect(mockGenerateMetadataForPath).toHaveBeenCalledWith(
       expect.objectContaining({
         config: expect.objectContaining({
-          title:
-            "Request a Quote — 12-Hour Response on Standard Items | Tucsenberg",
+          title: "Request a Quote — 12-Hour Response on Standard Items",
         }),
       }),
     );

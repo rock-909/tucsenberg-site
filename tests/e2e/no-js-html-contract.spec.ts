@@ -160,4 +160,15 @@ test.describe("No-JS HTML contract (English-only)", () => {
       expectExactlyOneMain(await page.content());
     }
   });
+
+  test("rendered <title> carries exactly one brand suffix", async ({
+    page,
+  }) => {
+    await page.goto("http://localhost:3000/products/aluminum-flood-gates", {
+      waitUntil: "domcontentloaded",
+    });
+    const title = await page.title();
+    expect(title).toMatch(/\| Tucsenberg$/u);
+    expect(title).not.toMatch(/Tucsenberg\s*\|\s*Tucsenberg/u);
+  });
 });

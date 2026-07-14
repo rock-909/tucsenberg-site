@@ -145,7 +145,7 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-07-05",
       "draft": false,
       "seo": {
-        "title": "Demountable Flood Barrier Specifications Explained | Tucsenberg",
+        "title": "Demountable Flood Barrier Specifications Explained",
         "description": "How to read a flood barrier spec sheet — profiles, alloys, EPDM seals, post types, span rules — plus the 10 questions to ask any supplier before you buy.",
         "keywords": [
           "demountable flood barrier specifications",
@@ -177,7 +177,7 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-07-07",
       "draft": false,
       "seo": {
-        "title": "OEM & Private Label Flood Barriers — Wholesale from China | Tucsenberg",
+        "title": "OEM & Private Label Flood Barriers — Wholesale from China",
         "description": "One factory pool for five flood barrier lines: private label on every line, mixed-container consolidation, one QC standard. Trade quotes in 12 hours.",
         "keywords": [
           "OEM flood barriers",
@@ -241,7 +241,7 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-07-05",
       "draft": false,
       "seo": {
-        "title": "Privacy Policy | Tucsenberg",
+        "title": "Privacy Policy",
         "description": "How Tucsenberg uses RFQ and contact information for quote processing and buyer communication.",
         "keywords": [
           "Tucsenberg privacy policy"
@@ -271,7 +271,7 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-07-02",
       "draft": false,
       "seo": {
-        "title": "Terms of Service | Tucsenberg",
+        "title": "Terms of Service",
         "description": "Terms for using the Tucsenberg website and requesting flood barrier quotations.",
         "keywords": [
           "Tucsenberg terms"
@@ -301,7 +301,7 @@ const _entries: ContentEntry[] = [
       "lastReviewed": "2026-07-02",
       "draft": false,
       "seo": {
-        "title": "Warranty Policy | Tucsenberg",
+        "title": "Warranty Policy",
         "description": "Warranty boundaries for standard Tucsenberg flood barrier lines, consumables, custom items, exclusions and supply-only responsibility.",
         "keywords": [
           "Tucsenberg warranty",

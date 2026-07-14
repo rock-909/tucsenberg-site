@@ -11,27 +11,27 @@ describe("market metadata live integration", () => {
   const expectedProductMetadata = [
     [
       "abs-flood-barriers",
-      "ABS Interlocking Flood Barriers — Freestanding Boxwall | Tucsenberg",
+      "ABS Interlocking Flood Barriers — Freestanding Boxwall",
       "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Quoted within 12 hours.",
     ],
     [
       "aluminum-flood-gates",
-      "Aluminum Flood Gates for Doors & Garages — Custom-Cut | Tucsenberg",
+      "Aluminum Flood Gates for Doors & Garages — Custom-Cut",
       "Demountable aluminum flood gates (flood boards): 6063-T6 planks, EPDM seals, custom-cut to your openings — doors, garages, loading docks. 12-hour quotes.",
     ],
     [
       "absorbent-flood-bags",
-      "Sandless Sandbags & Water-Activated Flood Bags — Wholesale | Tucsenberg",
+      "Sandless Sandbags & Water-Activated Flood Bags — Wholesale",
       "Water-activated absorbent flood bags factory-direct: 0.23 kg flat, 20 kg in 3–4 minutes, 3-year shelf life. Carton to pallet, private label. Fresh water only.",
     ],
     [
       "flood-tube-dams",
-      "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs | Tucsenberg",
+      "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs",
       "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. 12-hour quotes.",
     ],
     [
       "frp-flood-barriers",
-      "FRP Composite Flood Barrier Planks — Corrosion-Free | Tucsenberg",
+      "FRP Composite Flood Barrier Planks — Corrosion-Free",
       "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production — register interest.",
     ],
   ] as const;
