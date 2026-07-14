@@ -6,6 +6,7 @@ import {
   PRODUCT_INQUIRY_KINDS,
   type ProductInquiryKind,
 } from "@/lib/lead-pipeline/product-inquiry-kinds";
+import { MAX_LEAD_REQUIREMENTS_LENGTH } from "@/constants";
 
 type RequestQuoteTranslate = (key: string) => string;
 
@@ -43,6 +44,19 @@ export function createRequestQuotePayloadCopy(
 function getOptionalString(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+/**
+ * The buyer message becomes `requirements = copy.source + "\n" + message`
+ * (see {@link createRequestQuoteRequirements}), so the message textarea's
+ * `maxLength` must leave room for the fixed source line and its separator —
+ * otherwise a fully-typed message produces a `requirements` value the
+ * server-side lead schema rejects as too long.
+ */
+export function getRequestQuoteMessageMaxLength(
+  copy: RequestQuotePayloadCopy,
+): number {
+  return MAX_LEAD_REQUIREMENTS_LENGTH - copy.source.length - 1;
 }
 
 export function createRequestQuoteRequirements(

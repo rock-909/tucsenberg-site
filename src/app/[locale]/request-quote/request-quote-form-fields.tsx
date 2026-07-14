@@ -1,4 +1,5 @@
 import type { RequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
+import { getRequestQuoteMessageMaxLength } from "@/app/[locale]/request-quote/request-quote-payload";
 
 const RFQ_FIELD_CLASS = "min-w-0 space-y-2";
 const RFQ_LABEL_CLASS =
@@ -6,8 +7,6 @@ const RFQ_LABEL_CLASS =
 const RFQ_INPUT_CLASS =
   "min-h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-[var(--shadow-xs)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const RFQ_HINT_CLASS = "text-xs leading-5 text-muted-foreground";
-
-const RFQ_MESSAGE_MAX_LENGTH = 4000;
 
 export function RequestQuoteContactFields({
   copy,
@@ -63,7 +62,7 @@ export function RequestQuoteMessageField({
         aria-describedby={hintId}
         className={`${RFQ_INPUT_CLASS} min-h-32 resize-y leading-6`}
         id="rfq-message"
-        maxLength={RFQ_MESSAGE_MAX_LENGTH}
+        maxLength={getRequestQuoteMessageMaxLength(copy.payload)}
         name="message"
         rows={5}
       />

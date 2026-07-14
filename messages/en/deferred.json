@@ -282,7 +282,7 @@
           "invalid": "Quantity must be a valid amount"
         },
         "requirements": {
-          "tooLong": "Requirements must be less than 1000 characters",
+          "tooLong": "Requirements must be less than 2000 characters",
           "invalid": "Requirements contain invalid characters"
         },
         "message": {
