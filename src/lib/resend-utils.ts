@@ -3,7 +3,10 @@
  * Resend email service utilities
  */
 
-import { sanitizePlainText } from "@/lib/security/validation";
+import {
+  sanitizeMultilineText,
+  sanitizePlainText,
+} from "@/lib/security/validation";
 import {
   emailTemplateDataSchema,
   productInquiryEmailDataSchema,
@@ -46,7 +49,7 @@ export class ResendUtils {
       lastName: sanitizePlainText(data.lastName),
       email: data.email.toLowerCase().trim(),
       company: data.company ? sanitizePlainText(data.company) : undefined,
-      message: sanitizePlainText(data.message),
+      message: sanitizeMultilineText(data.message),
       phone: data.phone ? sanitizePlainText(data.phone) : undefined,
       subject: data.subject ? sanitizePlainText(data.subject) : undefined,
       submittedAt: data.submittedAt,
@@ -138,7 +141,7 @@ export class ResendUtils {
       productName: sanitizePlainText(data.productName),
       quantity,
       requirements: data.requirements
-        ? sanitizePlainText(data.requirements)
+        ? sanitizeMultilineText(data.requirements)
         : undefined,
     };
   }
