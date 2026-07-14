@@ -5,6 +5,7 @@
  * runtime export plus production-readiness checks in one stable import path.
  */
 
+import { createRequire } from "node:module";
 import { SINGLE_SITE_CONFIG, type SiteConfig } from "@/config/single-site";
 import {
   getRuntimeEnvBoolean,
@@ -15,6 +16,18 @@ import {
 export type { SiteConfig } from "@/config/single-site";
 
 export const SITE_CONFIG = SINGLE_SITE_CONFIG;
+
+/**
+ * Shared pure URL readiness (also used by production-config.js).
+ * Kept as scripts/quality/public-url-readiness.js so Node checks and the
+ * Next runtime share one implementation without a second copy.
+ */
+const require = createRequire(import.meta.url);
+const {
+  isPublicBaseUrlReady,
+}: {
+  isPublicBaseUrlReady: (baseUrl: string) => boolean;
+} = require("../../../scripts/quality/public-url-readiness.js");
 
 /**
  * Production placeholder pattern - matches [PLACEHOLDER_NAME] format
@@ -30,8 +43,8 @@ export function isPlaceholder(value: string): boolean {
 }
 
 /**
- * Check if the base URL is properly configured for production
- * Returns false if using example.com or localhost in production
+ * Check if the base URL is properly configured for production.
+ * Rejects .example hosts, localhost, 127.0.0.1, and workers.dev preview hosts.
  */
 export function isBaseUrlConfigured(
   baseUrl: string = SITE_CONFIG.baseUrl,
@@ -39,7 +52,7 @@ export function isBaseUrlConfigured(
   if (getRuntimeNodeEnv() !== "production") return true;
   if (isRuntimePlaywright()) return true;
   if (getRuntimeEnvBoolean("SKIP_ENV_VALIDATION")) return true;
-  return !baseUrl.includes("example.com") && !baseUrl.includes("localhost");
+  return isPublicBaseUrlReady(baseUrl);
 }
 
 /**

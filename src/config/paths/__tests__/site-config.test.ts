@@ -87,6 +87,27 @@ describe("site-config", () => {
       expect(isBaseUrlConfigured("https://example.com")).toBe(false);
     });
 
+    it("should return false for current production placeholders and workers.dev", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      const rejected = [
+        "https://tucsenberg-site-production.example.invalid",
+        "https://example.com",
+        "https://sub.example.org",
+        "http://localhost:3000",
+        "http://127.0.0.1:8787",
+        "https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev",
+      ];
+      for (const url of rejected) {
+        expect(isBaseUrlConfigured(url), url).toBe(false);
+      }
+    });
+
+    it("should return true for real public domains in production", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      expect(isBaseUrlConfigured("https://tucsenberg.com")).toBe(true);
+      expect(isBaseUrlConfigured("https://www.tucsenberg.com")).toBe(true);
+    });
+
     it("should return true in production when baseUrl is configured", () => {
       vi.stubEnv("NODE_ENV", "production");
       expect(isBaseUrlConfigured("https://showcase-website-starter.test")).toBe(
