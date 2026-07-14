@@ -1,7 +1,7 @@
 # Security Policy for Tucsenberg (tucsenberg.com)
 # https://securitytxt.org/
 
-Contact: mailto:security@tucsenberg.com
+Contact: mailto:sales@tucsenberg.com
 Expires: 2027-03-17T00:00:00.000Z
 Preferred-Languages: en, zh
 Canonical: https://tucsenberg.com/.well-known/security.txt

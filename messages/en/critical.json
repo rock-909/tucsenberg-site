@@ -415,7 +415,7 @@
         },
         "madeInChina": {
           "question": "You're made in China — how do I know the quality is real?",
-          "answer": "The stereotype exists for a reason: this market is full of unbranded bargain kits with no stated wall thickness, no test standard and no spares. But the reverse is also true — established international flood brands have their products made in China, and our factory pool has supplied that tier for years. Geography doesn't decide quality; spec discipline does. Ours is checkable: published numbers on every product page, your spec written into the quotation and invoice so it's enforceable, third-party inspection welcome (SGS, TÜV, QIMA), and a paid sample — credited against your first order — before any volume. Judge us by the sample and the spec sheet, not the country line on the box."
+          "answer": "The stereotype exists for a reason: this market is full of unbranded bargain kits with no stated wall thickness, no test standard and no spares. But the reverse is also true — established international flood brands have their products made in China, and our factory pool has supplied that tier for years. Geography doesn't decide quality; spec discipline does. Ours is checkable: published numbers on every product page, your spec written into the quotation and invoice so it's enforceable, third-party inspection welcome from any agency of your choice, and a paid sample — credited against your first order — before any volume. Judge us by the sample and the spec sheet, not the country line on the box."
         },
         "audit": {
           "question": "Can we audit the factories?",
@@ -437,7 +437,7 @@
         },
         "inspection": {
           "title": "Third-party inspection accepted",
-          "description": "Appoint SGS, TÜV, QIMA or your own agent — we schedule around them, not against them."
+          "description": "Appoint any agency of your choice — we schedule around them, not against them."
         }
       },
       "aboutLink": "[Who you're actually buying from →](/about)"
