@@ -461,11 +461,15 @@ describe("resend - Confirmation and Validation", () => {
       expect(payload).not.toHaveProperty("react");
       expect(payload.html).toContain("john@example.com");
       expect(payload.text).toContain("john@example.com");
-      expect(payload.html).toContain(
-        "Need {quantity} with &lt;script&gt;safe&lt;/script&gt; text javascript:alert",
-      );
       expect(payload.text).toContain(
-        "Need {quantity} with <script>safe</script> text javascript:alert",
+        "Need {quantity}\n\nwith <script>safe</script> text javascript:alert",
+      );
+      expect(payload.html).toContain("Need {quantity}");
+      expect(payload.html).toContain(
+        "with &lt;script&gt;safe&lt;/script&gt; text javascript:alert",
+      );
+      expect(payload.html).not.toContain(
+        "Need {quantity} with &lt;script&gt;safe&lt;/script&gt;",
       );
       expect(payload.html).not.toContain("<script>");
       expect(payload.html).not.toContain("100");
@@ -643,10 +647,12 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       expect(payload.text).toContain("<Pump {lastName}>");
       expect(payload.html).toContain("{quantity}");
       expect(payload.text).toContain("{quantity}");
-      expect(payload.html).toContain(
-        "Need {lastName} with data:text/plain and onclick=alert",
-      );
       expect(payload.text).toContain(
+        "Need {lastName}\n\nwith data:text/plain and onclick=alert",
+      );
+      expect(payload.html).toContain("Need {lastName}");
+      expect(payload.html).toContain("with data:text/plain and onclick=alert");
+      expect(payload.html).not.toContain(
         "Need {lastName} with data:text/plain and onclick=alert",
       );
       expect(payload.html).not.toContain("<Pump");
