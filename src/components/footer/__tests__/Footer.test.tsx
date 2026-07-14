@@ -103,7 +103,7 @@ describe("Footer Component", () => {
     const firstLink = screen.getAllByRole("link")[0];
     expect(firstLink).toHaveClass(
       "text-[var(--footer-text)]",
-      "hover:text-primary",
+      "hover:text-[var(--primary-text)]",
     );
   });
 

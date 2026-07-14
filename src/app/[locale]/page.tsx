@@ -154,10 +154,7 @@ function HomeProblemSection({
                 ) : null}
               </div>
               <h3 className="font-semibold text-balance">
-                <Link
-                  href={item.href}
-                  className="after:absolute after:inset-0 focus-visible:outline-none"
-                >
+                <Link href={item.href} className="after:absolute after:inset-0">
                   {item.title}
                 </Link>
               </h3>
