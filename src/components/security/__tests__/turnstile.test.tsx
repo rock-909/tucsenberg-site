@@ -233,15 +233,27 @@ describe("TurnstileWidget", () => {
       expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
     });
 
-    it("uses the provided test-mode label when the site key is missing", () => {
+    it("uses the provided test-mode label when the site key is missing", async () => {
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
       vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
+      const onSuccess = vi.fn();
+      const onLoad = vi.fn();
 
-      render(<TurnstileWidget labels={labels} />);
+      render(
+        <TurnstileWidget
+          labels={labels}
+          onSuccess={onSuccess}
+          onLoad={onLoad}
+        />,
+      );
 
       expect(screen.getByTestId("turnstile-mock")).toHaveTextContent(
         labels.testMode,
       );
+      await vi.waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+      });
+      expect(onLoad).not.toHaveBeenCalled();
     });
 
     it("uses the provided dev-bypass label", () => {

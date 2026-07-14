@@ -116,7 +116,7 @@ export function TurnstileWidget({
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
   const isTestMode =
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
-  const bypassTriggeredRef = useRef(false);
+  const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const labelText = labels ?? DEFAULT_TURNSTILE_LABELS;
 
@@ -129,16 +129,22 @@ export function TurnstileWidget({
     });
   }, [onReadyRef]);
 
-  // All hooks must be called before any conditional returns
+  // All hooks must be called before any conditional returns. Dev bypass and
+  // test mode both replace the real widget, so they share one settle-once
+  // effect instead of two near-identical ones. Bypass wins if both are on.
   useEffect(() => {
-    if (!isBypassMode || bypassTriggeredRef.current) return;
-    bypassTriggeredRef.current = true;
-    logger.warn("[DEV] Turnstile bypass mode enabled");
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Turnstile dev bypass is an external widget adapter state, not a user event.
-    if (onSuccess) {
-      onSuccess("TURNSTILE_BYPASS_TOKEN");
+    if (autoResolveTriggeredRef.current) return;
+    // Match bypass mode: only onSuccess. Calling onLoad afterward would clear the token
+    // (contact handleTurnstileLoad resets token + status to "loading").
+    if (isBypassMode) {
+      autoResolveTriggeredRef.current = true;
+      logger.warn("[DEV] Turnstile bypass mode enabled");
+      onSuccess?.("TURNSTILE_BYPASS_TOKEN");
+    } else if (isTestMode) {
+      autoResolveTriggeredRef.current = true;
+      onSuccess?.("TURNSTILE_TEST_MODE_TOKEN");
     }
-  }, [isBypassMode, onSuccess]);
+  }, [isBypassMode, isTestMode, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode && !isTestMode) {
