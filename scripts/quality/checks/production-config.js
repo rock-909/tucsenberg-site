@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
+const { isPublicBaseUrlReady } = require("../public-url-readiness");
 
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
 const WRANGLER_PRODUCTION_PUBLIC_URL_KEYS = [
@@ -185,7 +186,7 @@ function validateWranglerProductionPublicUrls(target) {
 
   for (const key of WRANGLER_PRODUCTION_PUBLIC_URL_KEYS) {
     const value = readEnv(productionVars, key);
-    if (containsStarterMarker(value)) {
+    if (!isPublicBaseUrlReady(value)) {
       target.push(
         `wrangler.jsonc env.production.vars.${key} is not public-launch ready (configure the real public domain before production deploy).`,
       );
@@ -363,7 +364,7 @@ function validatePublicLaunchTrustContent(env) {
 
   for (const key of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_URL"]) {
     const value = readEnv(env, key);
-    if (value && containsStarterMarker(value)) {
+    if (value && !isPublicBaseUrlReady(value)) {
       target.push(
         `${key} is not public-launch ready (configure the real public domain before client launch).`,
       );
@@ -377,12 +378,11 @@ function validatePublicLaunchTrustContent(env) {
     SINGLE_SITE_DEFINITION.config.name,
     "replace the starter company identity before client launch",
   );
-  validateNoStarterMarker(
-    target,
-    "SITE_CONFIG.baseUrl",
-    SINGLE_SITE_DEFINITION.config.baseUrl,
-    "configure the real public domain before client launch",
-  );
+  if (!isPublicBaseUrlReady(SINGLE_SITE_DEFINITION.config.baseUrl)) {
+    target.push(
+      "SITE_CONFIG.baseUrl is not public-launch ready (configure the real public domain before client launch).",
+    );
+  }
   if (
     containsStarterMarker(SINGLE_SITE_DEFINITION.config.contact.email) ||
     !getPublicContactEmail(SINGLE_SITE_DEFINITION.config.contact.email)
