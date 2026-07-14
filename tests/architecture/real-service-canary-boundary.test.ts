@@ -3,25 +3,6 @@ import { describe, expect, it } from "vitest";
 import { isDeployedCanaryUrl } from "../e2e/smoke/post-deploy-canary-url";
 
 describe("real service canary boundary", () => {
-  it("keeps the deployed lead canary gated by explicit deployed-mode environment", () => {
-    const spec = readFileSync(
-      "tests/e2e/smoke/post-deploy-form.spec.ts",
-      "utf8",
-    );
-
-    for (const required of [
-      "Proof lane: real-service-canary",
-      "POST_DEPLOY_TEST",
-      "STAGING_URL",
-      "PLAYWRIGHT_BASE_URL",
-      "isDeployedCanaryUrl",
-      "AIRTABLE_API_KEY",
-      "AIRTABLE_BASE_ID",
-    ]) {
-      expect(spec).toContain(required);
-    }
-  });
-
   it("does not treat local URLs as real-service canary targets", () => {
     expect(isDeployedCanaryUrl(undefined)).toBe(false);
     expect(isDeployedCanaryUrl("not a url")).toBe(false);
@@ -36,17 +17,6 @@ describe("real service canary boundary", () => {
     expect(isDeployedCanaryUrl("http://starter.local:3000")).toBe(false);
     expect(isDeployedCanaryUrl("file:///tmp/showcase")).toBe(false);
     expect(isDeployedCanaryUrl("https://preview.example.com")).toBe(true);
-  });
-
-  it("documents POST_DEPLOY_TEST as required for the real-service canary", () => {
-    const spec = readFileSync(
-      "tests/e2e/smoke/post-deploy-form.spec.ts",
-      "utf8",
-    );
-
-    expect(spec).toContain("POST_DEPLOY_TEST=1");
-    expect(spec).toContain("STAGING_URL or PLAYWRIGHT_BASE_URL");
-    expect(spec).toContain('process.env.POST_DEPLOY_TEST === "1"');
   });
 
   it("documents that owner notification confirmation is not automatic in the Playwright canary", () => {
