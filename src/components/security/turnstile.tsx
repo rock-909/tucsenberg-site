@@ -116,9 +116,8 @@ export function TurnstileWidget({
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
   const isTestMode =
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
-  const bypassTriggeredRef = useRef(false);
+  const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const testModeTriggeredRef = useRef(false);
   const labelText = labels ?? DEFAULT_TURNSTILE_LABELS;
 
   useEffect(() => {
@@ -130,27 +129,22 @@ export function TurnstileWidget({
     });
   }, [onReadyRef]);
 
-  // All hooks must be called before any conditional returns
+  // All hooks must be called before any conditional returns. Dev bypass and
+  // test mode both replace the real widget, so they share one settle-once
+  // effect instead of two near-identical ones. Bypass wins if both are on.
   useEffect(() => {
-    if (!isBypassMode || bypassTriggeredRef.current) return;
-    bypassTriggeredRef.current = true;
-    logger.warn("[DEV] Turnstile bypass mode enabled");
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Turnstile dev bypass is an external widget adapter state, not a user event.
-    if (onSuccess) {
-      onSuccess("TURNSTILE_BYPASS_TOKEN");
-    }
-  }, [isBypassMode, onSuccess]);
-
-  useEffect(() => {
-    if (!isTestMode || isBypassMode || testModeTriggeredRef.current) return;
-    testModeTriggeredRef.current = true;
+    if (autoResolveTriggeredRef.current) return;
     // Match bypass mode: only onSuccess. Calling onLoad afterward would clear the token
     // (contact handleTurnstileLoad resets token + status to "loading").
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Test-mode mock replaces the widget and must still settle the form token lifecycle.
-    if (onSuccess) {
-      onSuccess("TURNSTILE_TEST_MODE_TOKEN");
+    if (isBypassMode) {
+      autoResolveTriggeredRef.current = true;
+      logger.warn("[DEV] Turnstile bypass mode enabled");
+      onSuccess?.("TURNSTILE_BYPASS_TOKEN");
+    } else if (isTestMode) {
+      autoResolveTriggeredRef.current = true;
+      onSuccess?.("TURNSTILE_TEST_MODE_TOKEN");
     }
-  }, [isTestMode, isBypassMode, onSuccess]);
+  }, [isBypassMode, isTestMode, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode && !isTestMode) {
