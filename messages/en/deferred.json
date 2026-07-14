@@ -143,8 +143,8 @@
     },
     "confirmation": {
       "title": "Thank You for Contacting Us",
-      "preview": "We received your message and will reply within 24 hours.",
-      "receivedMessage": "Thank you for reaching out to us. We have received your message and will get back to you within 24 hours.",
+      "preview": "We received your enquiry — quote within 12 hours for standard items.",
+      "receivedMessage": "Thank you for reaching out. We have received your enquiry and will reply with a quote within 12 hours for standard items (within 48 hours for custom work).",
       "summaryIntro": "Here is a summary of your submission:",
       "urgentHelp": "If you have any urgent questions, please do not hesitate to contact us directly.",
       "signoff": "Best regards,",
@@ -462,7 +462,6 @@
       "requirementsPlaceholder": "Please describe any special requirements such as customization, packaging, or certifications...",
       "submit": "Send Inquiry",
       "submitting": "Sending...",
-      "success": "Your inquiry has been sent successfully! We will get back to you within 24 hours.",
       "error": "Failed to send inquiry. Please try again later.",
       "turnstileRequired": "Please complete the security verification."
     }
