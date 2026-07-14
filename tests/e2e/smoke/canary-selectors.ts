@@ -7,7 +7,7 @@ export interface CanarySelectors {
 
 export function buildCanarySelectors(): CanarySelectors {
   const submitLabel = deferred.contact.form.submit;
-  const successText = deferred.contact.form.success;
+  const successText = deferred.contact.form.submitSuccess;
   if (!submitLabel || !successText) {
     throw new Error("canary selectors: message truth missing");
   }

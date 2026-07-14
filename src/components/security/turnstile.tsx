@@ -118,6 +118,7 @@ export function TurnstileWidget({
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const bypassTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const testModeTriggeredRef = useRef(false);
   const labelText = labels ?? DEFAULT_TURNSTILE_LABELS;
 
   useEffect(() => {
@@ -139,6 +140,17 @@ export function TurnstileWidget({
       onSuccess("TURNSTILE_BYPASS_TOKEN");
     }
   }, [isBypassMode, onSuccess]);
+
+  useEffect(() => {
+    if (!isTestMode || isBypassMode || testModeTriggeredRef.current) return;
+    testModeTriggeredRef.current = true;
+    // Match bypass mode: only onSuccess. Calling onLoad afterward would clear the token
+    // (contact handleTurnstileLoad resets token + status to "loading").
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Test-mode mock replaces the widget and must still settle the form token lifecycle.
+    if (onSuccess) {
+      onSuccess("TURNSTILE_TEST_MODE_TOKEN");
+    }
+  }, [isTestMode, isBypassMode, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode && !isTestMode) {

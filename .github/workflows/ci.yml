@@ -149,11 +149,15 @@ jobs:
           NODE_ENV: production
           APP_ENV: preview
           PLAYWRIGHT_TEST: "true"
+          NEXT_PUBLIC_TEST_MODE: "true"
           NEXT_PUBLIC_BASE_URL: http://localhost:3000
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
+          TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
+          NEXT_PUBLIC_TURNSTILE_ACTION: "contact_form"
 
       - name: 运行 Tucsenberg E2E
-        run: pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/no-js-html-contract.spec.ts
+        run: pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/no-js-html-contract.spec.ts tests/e2e/contact-submit-journey.spec.ts
 
   semgrep:
     name: Semgrep 安全扫描
