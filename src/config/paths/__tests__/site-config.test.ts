@@ -108,11 +108,13 @@ describe("site-config", () => {
       expect(isBaseUrlConfigured("https://www.tucsenberg.com")).toBe(true);
     });
 
-    it("should return true in production when baseUrl is configured", () => {
+    it("should reject reserved .test hosts and non-origin URLs in production", () => {
       vi.stubEnv("NODE_ENV", "production");
       expect(isBaseUrlConfigured("https://showcase-website-starter.test")).toBe(
-        true,
+        false,
       );
+      expect(isBaseUrlConfigured("http://tucsenberg.com")).toBe(false);
+      expect(isBaseUrlConfigured("https://tucsenberg.com/path")).toBe(false);
     });
   });
 
@@ -268,7 +270,7 @@ describe("site-config", () => {
       vi.stubEnv("NODE_ENV", "production");
       const configuredConfig = {
         ...SITE_CONFIG,
-        baseUrl: "https://showcase-website-starter.test",
+        baseUrl: "https://tucsenberg.com",
       } satisfies SiteConfig;
       const result = validateSiteConfig(configuredConfig);
       expect(result.valid).toBe(true);
