@@ -79,6 +79,34 @@ describe("ResendHttpEmailClient", () => {
     });
   });
 
+  it("fails closed when a 2xx response is missing a message id", async () => {
+    const fetchFn: typeof fetch = async () => createJsonResponse({});
+    const client = new ResendHttpEmailClient("test-api-key", fetchFn);
+
+    const result = await client.send(SAMPLE_PAYLOAD);
+
+    expect(result).toEqual({
+      data: null,
+      error: {
+        message: "Resend success response is missing a message id",
+      },
+    });
+  });
+
+  it("fails closed when a 2xx response has an empty message id", async () => {
+    const fetchFn: typeof fetch = async () => createJsonResponse({ id: "" });
+    const client = new ResendHttpEmailClient("test-api-key", fetchFn);
+
+    const result = await client.send(SAMPLE_PAYLOAD);
+
+    expect(result).toEqual({
+      data: null,
+      error: {
+        message: "Resend success response is missing a message id",
+      },
+    });
+  });
+
   it("returns nested Resend API error messages", async () => {
     const fetchFn: typeof fetch = async () =>
       createJsonResponse({ error: { message: "Invalid recipient" } }, 422);

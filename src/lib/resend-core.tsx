@@ -121,18 +121,20 @@ export class ResendService {
         tags: ResendUtils.getContactFormTags(),
       });
 
-      if (result.error) {
-        throw new Error(`Resend API error: ${result.error.message}`);
+      if (result.error || !result.data) {
+        throw new Error(
+          `Resend API error: ${result.error?.message ?? "missing message id"}`,
+        );
       }
 
       logger.info("Contact form email sent successfully", {
-        messageId: result.data?.id,
+        messageId: result.data.id,
         to: sanitizeEmail(this.emailConfig.replyTo),
         from: sanitizeEmail(sanitizedData.email),
         subject,
       });
 
-      return result.data?.id || "unknown";
+      return result.data.id;
     } catch (error) {
       logger.error("Failed to send contact form email", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -168,17 +170,19 @@ export class ResendService {
         tags: ResendUtils.getConfirmationTags(),
       });
 
-      if (result.error) {
-        throw new Error(`Resend API error: ${result.error.message}`);
+      if (result.error || !result.data) {
+        throw new Error(
+          `Resend API error: ${result.error?.message ?? "missing message id"}`,
+        );
       }
 
       logger.info("Confirmation email sent successfully", {
-        messageId: result.data?.id,
+        messageId: result.data.id,
         to: sanitizeEmail(sanitizedData.email),
         subject,
       });
 
-      return result.data?.id || "unknown";
+      return result.data.id;
     } catch (error) {
       logger.error("Failed to send confirmation email", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -216,19 +220,21 @@ export class ResendService {
         tags: ResendUtils.getProductInquiryTags(),
       });
 
-      if (result.error) {
-        throw new Error(`Resend API error: ${result.error.message}`);
+      if (result.error || !result.data) {
+        throw new Error(
+          `Resend API error: ${result.error?.message ?? "missing message id"}`,
+        );
       }
 
       logger.info("Product inquiry email sent successfully", {
-        messageId: result.data?.id,
+        messageId: result.data.id,
         to: sanitizeEmail(this.emailConfig.replyTo),
         from: sanitizeEmail(sanitizedData.email),
         product: sanitizedData.productName,
         quantity: sanitizedData.quantity,
       });
 
-      return result.data?.id || "unknown";
+      return result.data.id;
     } catch (error) {
       logger.error("Failed to send product inquiry email", {
         error: error instanceof Error ? error.message : "Unknown error",

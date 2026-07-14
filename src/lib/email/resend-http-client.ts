@@ -118,10 +118,17 @@ export class ResendHttpEmailClient {
         };
       }
 
-      return {
-        data: getSuccessData(responsePayload),
-        error: null,
-      };
+      const data = getSuccessData(responsePayload);
+      if (!data || data.id.length === 0) {
+        return {
+          data: null,
+          error: {
+            message: "Resend success response is missing a message id",
+          },
+        };
+      }
+
+      return { data, error: null };
     } catch (error) {
       if (isAbortError(error)) {
         return {

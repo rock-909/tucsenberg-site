@@ -265,7 +265,7 @@ describe("resend - Email Operations", () => {
       ).rejects.toThrow("Failed to send email");
     });
 
-    it("should return unknown when message ID is not available", async () => {
+    it("should fail when message ID is not available", async () => {
       const service = new ResendServiceClass();
 
       mockResendSend.mockClear();
@@ -274,8 +274,9 @@ describe("resend - Email Operations", () => {
         error: null,
       });
 
-      const result = await service.sendContactFormEmail(validEmailData);
-      expect(result).toBe("unknown");
+      await expect(
+        service.sendContactFormEmail(validEmailData),
+      ).rejects.toThrow("Failed to send email");
     });
   });
 });
@@ -715,7 +716,7 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       ).rejects.toThrow("Failed to send product inquiry email");
     });
 
-    it("should return unknown when message ID is not available", async () => {
+    it("should fail when message ID is not available", async () => {
       const service = new ResendServiceClass();
 
       mockResendSend.mockClear();
@@ -724,10 +725,9 @@ describe("resend - Product Inquiry and Utility Methods", () => {
         error: null,
       });
 
-      const result = await service.sendProductInquiryEmail(
-        validProductInquiryData,
-      );
-      expect(result).toBe("unknown");
+      await expect(
+        service.sendProductInquiryEmail(validProductInquiryData),
+      ).rejects.toThrow("Failed to send product inquiry email");
     });
   });
 
