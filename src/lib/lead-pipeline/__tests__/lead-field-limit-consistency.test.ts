@@ -1,10 +1,16 @@
+import { createElement } from "react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   MAX_LEAD_COMPANY_LENGTH,
   MAX_LEAD_EMAIL_LENGTH,
   MAX_LEAD_NAME_LENGTH,
+  MAX_LEAD_REQUIREMENTS_LENGTH,
 } from "@/constants/validation-limits";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
+import { RequestQuoteMessageField } from "@/app/[locale]/request-quote/request-quote-form-fields";
+import { createRequestQuoteRequirements } from "@/app/[locale]/request-quote/request-quote-payload";
+import { createTestRequestQuoteFormCopy } from "@/test/request-quote-test-messages";
 
 /**
  * The same buyer-visible fields (name / email / company) are length-limited in
@@ -45,4 +51,34 @@ describe("lead field length limit consistency", () => {
       expect(productInquiryMax).toBeGreaterThanOrEqual(contactMax);
     },
   );
+});
+
+/**
+ * The RFQ page's `message` textarea has its own client-side `maxLength`,
+ * independent from the server-side `requirements` schema limit
+ * (`MAX_LEAD_REQUIREMENTS_LENGTH`). `request-quote-payload.ts` prefixes every
+ * buyer message with a fixed source line before it becomes `requirements`, so
+ * a buyer who fills the textarea to its rendered limit must still produce a
+ * `requirements` value the server accepts. This renders the real field and
+ * builds `requirements` through the real payload builder — it fails the
+ * moment the two limits drift, regardless of which one changes.
+ */
+describe("RFQ message field length vs server-side requirements limit", () => {
+  it("keeps a max-length RFQ message within the requirements limit", () => {
+    const copy = createTestRequestQuoteFormCopy();
+    render(createElement(RequestQuoteMessageField, { copy }));
+
+    const textarea = screen.getByLabelText(
+      copy.fields.message,
+    ) as HTMLTextAreaElement;
+
+    const formData = new FormData();
+    formData.set("message", "x".repeat(textarea.maxLength));
+
+    const requirements = createRequestQuoteRequirements(formData, copy.payload);
+
+    expect(requirements.length).toBeLessThanOrEqual(
+      MAX_LEAD_REQUIREMENTS_LENGTH,
+    );
+  });
 });
