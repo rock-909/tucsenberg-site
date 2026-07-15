@@ -183,6 +183,24 @@ function analyzeSource(filePath, content, options = {}) {
       return trimmed.slice(jsxBlockIdx + 3).trim();
     }
 
+    // Trailing comments: `stmt; // eslint-disable-line …` / `stmt; /* eslint-disable … */`
+    // ESLINT_DIRECTIVE_PATTERN already matched somewhere on the line; recover the comment body.
+    const lineCommentIdx = trimmed.indexOf("//");
+    if (
+      lineCommentIdx !== -1 &&
+      ESLINT_DIRECTIVE_PATTERN.test(trimmed.slice(lineCommentIdx))
+    ) {
+      return trimmed.slice(lineCommentIdx + 2).trim();
+    }
+
+    const blockCommentIdx = trimmed.indexOf("/*");
+    if (
+      blockCommentIdx !== -1 &&
+      ESLINT_DIRECTIVE_PATTERN.test(trimmed.slice(blockCommentIdx))
+    ) {
+      return trimmed.slice(blockCommentIdx + 2).trim();
+    }
+
     return null;
   }
 

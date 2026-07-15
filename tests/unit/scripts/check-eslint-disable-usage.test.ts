@@ -188,6 +188,29 @@ export function Example() {
     },
   );
 
+  it("detects trailing-comment eslint-disable directives", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const value = 1; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings.length).toBeGreaterThan(0);
+    expect(
+      findings.some(
+        (finding) =>
+          finding.directive === "eslint-disable-line" &&
+          finding.violations.includes("missing production-code reason"),
+      ),
+    ).toBe(true);
+  });
+
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(
       "src/lib/security/__tests__/distributed-rate-limit.test.ts",
