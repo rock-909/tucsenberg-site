@@ -12,41 +12,6 @@ async function globalSetup(config: FullConfig) {
   // 设置测试环境变量
   setupTestEnvironment();
 
-  const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
-    .split(",")
-    .map((locale) => locale.trim())
-    .filter(Boolean);
-  const defaultLocale =
-    process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() ||
-    supportedLocales[0] ||
-    "en";
-
-  const ensureLocaleInUrl = (input: string): string => {
-    try {
-      const url = new URL(input);
-      const segments = url.pathname.split("/").filter(Boolean);
-      const firstSegment = segments[0];
-      const lastSegment =
-        segments.length > 0 ? segments[segments.length - 1] : undefined;
-      const hasLocale =
-        (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
-        (lastSegment ? supportedLocales.includes(lastSegment) : false);
-
-      if (!hasLocale) {
-        url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
-      }
-
-      const normalizedPath = url.pathname.replace(/\/$/, "");
-      return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
-    } catch {
-      const trimmed = input.replace(/\/$/, "");
-      const hasLocale = supportedLocales.some((locale) =>
-        trimmed.endsWith(`/${locale}`),
-      );
-      return hasLocale ? trimmed : `${trimmed}/${defaultLocale}`;
-    }
-  };
-
   // Launch browser for setup
   const browser = await chromium.launch();
   const context = await browser.newContext();
@@ -56,12 +21,11 @@ async function globalSetup(config: FullConfig) {
   try {
     // 如果设置了 STAGING_URL，使用它；否则使用 baseURL
     const stagingURL = process.env.STAGING_URL;
-    const baseURL = ensureLocaleInUrl(
+    const baseURL =
       stagingURL ||
-        config.projects?.[0]?.use?.baseURL ||
-        process.env.PLAYWRIGHT_BASE_URL ||
-        "http://localhost:3000",
-    );
+      config.projects?.[0]?.use?.baseURL ||
+      process.env.PLAYWRIGHT_BASE_URL ||
+      "http://localhost:3000";
 
     console.log(`⏳ Waiting for server at ${baseURL}...`);
 
