@@ -494,6 +494,41 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("resets negation when a comma introduces a positive instruction", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use `src/legacy.ts`, use `src/current-missing.ts` as the runtime entry.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "src/current-missing.ts"',
+      },
+    ]);
+  });
+
+  it("keeps comma-separated paths inside one negative instruction", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": "Do not use `src/a.ts`, `src/b.ts`, or `src/c.ts`.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([]);
+  });
+
   it("inherits an explicit negative heading into Markdown list items", () => {
     const files = {
       "docs/项目基础/文档清单.md":

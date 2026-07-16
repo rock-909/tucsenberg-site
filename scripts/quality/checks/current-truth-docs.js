@@ -524,7 +524,7 @@ function isNegatedDocumentedPath(content, lineStart, matchIndex) {
 
   const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
   const clauseResetPattern =
-    /[.;!?，。；！？]|\b(?:but|however|yet)\b|(?:但是|然而|但)/giu;
+    /[.;!?，。；！？]|,(?=\s*(?:use|keep|read|run|import|reference|replace|choose|adopt|update|move|create|add)\b)|\b(?:but|however|yet)\b|(?:但是|然而|但)/giu;
   let activeClauseStart = 0;
   for (const match of normalizedClausePrefix.matchAll(clauseResetPattern)) {
     activeClauseStart = (match.index ?? 0) + match[0].length;
