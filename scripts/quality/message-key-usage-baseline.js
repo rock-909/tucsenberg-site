@@ -167,10 +167,9 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     reason: "footer links consume the configured translation key values",
   },
   {
-    kind: "property-values",
+    kind: "collection-values",
     file: "src/config/single-site.ts",
-    functionName: "getSingleSiteFooterColumns",
-    propertyName: "translationKey",
+    sourceName: "FOOTER_COLUMN_TRANSLATION_KEYS",
     prefix: "",
     suffixes: [""],
     reason: "footer column headings consume their literal translation keys",

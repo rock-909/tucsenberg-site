@@ -462,28 +462,6 @@ describe("derived message key consumers", () => {
     ).toEqual([]);
   });
 
-  it("scopes property-value consumers to one declared function", () => {
-    expect(
-      collect({
-        catalogKeys: ["example.used", "example.dead"],
-        content: [
-          'function Config() { return { label: "used" }; }',
-          'function Other() { return { label: "dead" }; }',
-        ].join("\n"),
-        derivedKeyConsumers: [
-          derivedConsumer({
-            kind: "property-values",
-            functionName: "Config",
-            propertyName: "label",
-            prefix: "example.",
-            suffixes: [""],
-          }),
-        ],
-        unusedKeyAllowlist: ["example.dead"],
-      }),
-    ).toEqual([]);
-  });
-
   it("rejects stale derived consumers when their declaration disappears", () => {
     expect(
       collect({

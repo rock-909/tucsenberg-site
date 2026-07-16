@@ -474,6 +474,41 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("resets negation at an explicit contrast clause", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use `src/legacy.ts`, but use `src/missing.ts` as current.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/missing.ts"',
+      },
+    ]);
+  });
+
+  it("inherits an explicit negative heading into Markdown list items", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not create these paths:\n- `src/legacy.ts`\n- `tests/legacy.test.ts`",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([]);
+  });
+
   it("rejects registered GSE ids without a production consumer", () => {
     const files = {
       "docs/项目基础/维护规则.md":

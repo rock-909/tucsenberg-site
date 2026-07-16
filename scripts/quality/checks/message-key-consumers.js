@@ -214,44 +214,6 @@ function collectCallArgumentKeys({
   };
 }
 
-function collectPropertyValueKeys({ sourceFile, consumer, getStaticString }) {
-  const keys = new Set();
-  const scope = getUniqueMatch(
-    findNamedFunctionDeclarations(sourceFile, consumer.functionName),
-  );
-  if (scope.status !== "matched") return { keys, status: scope.status };
-  let matchedProperty = false;
-  let unsupportedProperty = false;
-
-  function visit(node) {
-    if (node !== scope.match && ts.isFunctionLike(node)) return;
-    if (
-      ts.isPropertyAssignment(node) &&
-      getPropertyName(node.name) === consumer.propertyName
-    ) {
-      const value = getStaticString(node.initializer, new Map());
-      if (value !== undefined) {
-        matchedProperty = true;
-        for (const suffix of consumer.suffixes) {
-          keys.add(`${consumer.prefix}${value}${suffix}`);
-        }
-      } else {
-        unsupportedProperty = true;
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(scope.match);
-  return {
-    keys,
-    status: unsupportedProperty
-      ? "unsupported"
-      : matchedProperty
-        ? "matched"
-        : "missing",
-  };
-}
-
 function createConsumerCollector({ unwrapExpression, getStaticString }) {
   function getStaticPrimitive(node) {
     const current = unwrapExpression(node);
@@ -651,14 +613,6 @@ function collectDerivedKeyConsumerUsage({
       const result = collectCallArgumentKeys({
         sourceFile,
         checker: sourceProgram.checker,
-        consumer,
-        getStaticString,
-      });
-      status = result.status;
-      keys = result.keys;
-    } else if (consumer.kind === "property-values") {
-      const result = collectPropertyValueKeys({
-        sourceFile,
         consumer,
         getStaticString,
       });

@@ -492,27 +492,48 @@ function documentedRepoPathExists(rootDir, documentedPath) {
 
 function isNegatedDocumentedPath(content, lineStart, matchIndex) {
   const currentLinePrefix = content.slice(lineStart, matchIndex);
-  const previousLineEnd = Math.max(0, lineStart - 1);
-  const previousLineStart = content.lastIndexOf("\n", previousLineEnd - 1) + 1;
-  const previousLine = content.slice(previousLineStart, previousLineEnd);
   const currentLineEnd = content.indexOf("\n", matchIndex);
   const currentLineSuffix = content.slice(
     matchIndex,
     currentLineEnd === -1 ? undefined : currentLineEnd,
   );
-  const previousLineContinuesClause = /(?:\b(?:and|or)|[,，、:：])\s*$/iu.test(
-    previousLine,
-  );
-  const clausePrefix = currentLinePrefix.trim()
-    ? currentLinePrefix
-    : previousLineContinuesClause
-      ? `${previousLine.replace(/[:：]\s*$/u, "")}\n${currentLinePrefix}`
-      : currentLinePrefix;
+  const linePrefix = currentLinePrefix.trim();
+  const isListItem = /^(?:[-*+]|\d+[.)])\s*$/u.test(linePrefix);
+  let clausePrefix = currentLinePrefix;
+
+  if (!linePrefix || isListItem) {
+    let previousLineEnd = Math.max(0, lineStart - 1);
+    while (previousLineEnd > 0) {
+      const previousLineStart =
+        content.lastIndexOf("\n", previousLineEnd - 1) + 1;
+      const previousLine = content.slice(previousLineStart, previousLineEnd);
+      const previousTrimmed = previousLine.trim();
+
+      if (!previousTrimmed) break;
+      if (isListItem && /^(?:[-*+]|\d+[.)])\s+/u.test(previousTrimmed)) {
+        previousLineEnd = Math.max(0, previousLineStart - 1);
+        continue;
+      }
+
+      if (/(?:\b(?:and|or)|[:：])\s*$/iu.test(previousLine)) {
+        clausePrefix = `${previousLine.replace(/[:：]\s*$/u, "")}\n${currentLinePrefix}`;
+      }
+      break;
+    }
+  }
+
   const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
+  const clauseResetPattern =
+    /[.;!?，。；！？]|\b(?:but|however|yet)\b|(?:但是|然而|但)/giu;
+  let activeClauseStart = 0;
+  for (const match of normalizedClausePrefix.matchAll(clauseResetPattern)) {
+    activeClauseStart = (match.index ?? 0) + match[0].length;
+  }
+  const activeClausePrefix = normalizedClausePrefix.slice(activeClauseStart);
 
   return (
     /(?:\b(?:do not|does not|must not|never|not rename|not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)[^，。；：！？]{0,72})\s*$/iu.test(
-      normalizedClausePrefix,
+      activeClausePrefix,
     ) ||
     /^`[^`]+`\s+(?:is not created|does not exist|is not present)\b/iu.test(
       currentLineSuffix,

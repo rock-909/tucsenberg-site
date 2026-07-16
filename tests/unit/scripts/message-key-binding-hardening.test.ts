@@ -256,22 +256,19 @@ describe("message key binding hardening", () => {
     });
   });
 
-  it("ignores nested function data in scoped derived consumers", () => {
+  it("binds collection consumers to their unique top-level source", () => {
     expect(
       collect({
         catalogKeys: ["example.used", "example.dead"],
         content: [
-          "function Config() {",
-          '  function Nested() { return { label: "dead" }; }',
-          '  return { label: "used", nested: Nested };',
-          "}",
+          'const KEYS = { primary: "used" };',
+          'function Config() { const KEYS = { nested: "dead" }; return KEYS; }',
         ].join("\n"),
         derivedKeyConsumers: [
           {
-            kind: "property-values",
+            kind: "collection-values",
             file: "src/example.ts",
-            functionName: "Config",
-            propertyName: "label",
+            sourceName: "KEYS",
             prefix: "example.",
             suffixes: [""],
             reason: "fixture",
@@ -280,6 +277,37 @@ describe("message key binding hardening", () => {
         unusedKeyAllowlist: ["example.dead"],
       }),
     ).toEqual([]);
+  });
+
+  it("does not let an unrelated local object satisfy a property-values consumer", () => {
+    expect(
+      collect({
+        catalogKeys: ["footer.fake"],
+        content: [
+          "function record(value: unknown) { return value; }",
+          "function getFooter() {",
+          '  const audit = { translationKey: "footer.fake" };',
+          "  record(audit);",
+          "  return [];",
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          {
+            kind: "property-values",
+            file: "src/example.ts",
+            functionName: "getFooter",
+            propertyName: "translationKey",
+            prefix: "",
+            suffixes: [""],
+            reason: "fixture",
+          },
+        ],
+      }),
+    ).toContainEqual({
+      file: "messages",
+      error:
+        'message key has no detected consumer and is not baselined "footer.fake"',
+    });
   });
 
   it("rejects partial derived and object-key sources it cannot enumerate", () => {
@@ -372,31 +400,6 @@ describe("message key binding hardening", () => {
       file: "scripts/quality/message-key-usage-baseline.js",
       error:
         'derived message key consumer is unsupported "src/example.ts#call-arguments"',
-    });
-
-    expect(
-      collect({
-        content: [
-          "function Config() {",
-          '  return [{ label: "used" }, { label: getLabel() }];',
-          "}",
-        ].join("\n"),
-        derivedKeyConsumers: [
-          {
-            kind: "property-values",
-            file: "src/example.ts",
-            functionName: "Config",
-            propertyName: "label",
-            prefix: "example.",
-            suffixes: [""],
-            reason: "fixture",
-          },
-        ],
-      }),
-    ).toContainEqual({
-      file: "scripts/quality/message-key-usage-baseline.js",
-      error:
-        'derived message key consumer is unsupported "src/example.ts#property-values"',
     });
 
     expect(
