@@ -510,13 +510,13 @@ const NEGATED_TARGET_PATTERN = new RegExp(
   "iu",
 );
 const NEGATED_PASSIVE_TARGET_PATTERN = new RegExp(
-  `\`path\`\\s+(?:${NEGATIVE_MODAL_SOURCE}\\s+be|is\\s+never)\\s+(?:(?:renamed|moved)\\s+(?:to|as|into)|replaced\\s+with)\\s*$`,
+  `\`path\`\\s+(?:${NEGATIVE_MODAL_SOURCE}\\s+be|is\\s+(?:not|never))\\s+(?:(?:renamed|moved)\\s+(?:to|as|into)|replaced\\s+with)\\s*$`,
   "iu",
 );
 const CHINESE_NEGATED_ABSENCE_ACTION_PATTERN =
   /(?:不要|不得|禁止)\s*(?:创建|使用|导入|引用|添加|采用|选择|运行|读取)[^，。；：！？]{0,72}$/iu;
 const CHINESE_NEGATED_TARGET_PATTERN =
-  /(?:(?:不把|不将|(?:不要|不得|禁止)(?:把|将))\s*`path`[^，。；：！？]{0,40}(?:改成|重命名为|移动到|移到|替换为)|(?:不要|不得|禁止)\s*(?:(?:移动|移)\s*`path`\s*(?:到|至)|重命名\s*`path`\s*(?:为|成)|替换\s*`path`\s*(?:为|成)))\s*$/iu;
+  /(?:(?:不把|不将|(?:不要|不得|禁止)(?:把|将))\s*`path`[^，。；：！？]{0,40}(?:改(?:成|为)|重命名(?:为|成)|(?:移动|移)(?:到|至)|替换(?:为|成))|(?:不要|不得|禁止)\s*(?:(?:移动|移)\s*`path`\s*(?:到|至)|重命名\s*`path`\s*(?:为|成)|替换\s*`path`\s*(?:为|成)))\s*$/iu;
 const NEGATED_STATE_PREFIX_PATTERN =
   /(?:\b(?:not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不存在|未恢复|没有现役)[^，。；：！？]{0,72})\s*$/iu;
 const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(

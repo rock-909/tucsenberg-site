@@ -40,6 +40,28 @@ function missingCurrentDocPath(pathname: string): {
   };
 }
 
+const PRESERVED_ENGLISH_PATH_SOURCES = [
+  "src/delete.ts",
+  "src/remove.ts",
+  "src/must-keep.ts",
+  "src/rename-source.ts",
+  "src/move-source.ts",
+  "src/replace-source.ts",
+  "src/should-rename-source.ts",
+  "src/cannot-move-source.ts",
+  "src/may-replace-source.ts",
+  "src/can-not-rename-source.ts",
+  "src/must-never-rename-source.ts",
+  "src/passive-rename-source.ts",
+  "src/passive-move-source.ts",
+  "src/passive-replace-source.ts",
+  "src/passive-never-source.ts",
+  "src/passive-is-not-rename-source.ts",
+  "src/passive-is-not-move-source.ts",
+  "src/passive-is-not-replace-source.ts",
+  "src/passive-source-only.ts",
+];
+
 const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
   "showcase-current-truth-docs-test-trash",
@@ -690,6 +712,9 @@ describe("current-truth docs guard", () => {
         "`src/passive-move-source.ts` must not be moved to `src/passive-move-target.ts`.",
         "`src/passive-replace-source.ts` must not be replaced with `src/passive-replace-target.ts`.",
         "`src/passive-never-source.ts` must never be renamed to `src/passive-never-target.ts`.",
+        "`src/passive-is-not-rename-source.ts` is not renamed to `src/passive-is-not-rename-target.ts`.",
+        "`src/passive-is-not-move-source.ts` is not moved to `src/passive-is-not-move-target.ts`.",
+        "`src/passive-is-not-replace-source.ts` is not replaced with `src/passive-is-not-replace-target.ts`.",
         "`src/passive-source-only.ts` must not be renamed.",
       ].join("\n"),
     };
@@ -698,26 +723,7 @@ describe("current-truth docs guard", () => {
 
     expect(
       collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
-    ).toEqual(
-      [
-        "src/delete.ts",
-        "src/remove.ts",
-        "src/must-keep.ts",
-        "src/rename-source.ts",
-        "src/move-source.ts",
-        "src/replace-source.ts",
-        "src/should-rename-source.ts",
-        "src/cannot-move-source.ts",
-        "src/may-replace-source.ts",
-        "src/can-not-rename-source.ts",
-        "src/must-never-rename-source.ts",
-        "src/passive-rename-source.ts",
-        "src/passive-move-source.ts",
-        "src/passive-replace-source.ts",
-        "src/passive-never-source.ts",
-        "src/passive-source-only.ts",
-      ].map(missingCurrentDocPath),
-    );
+    ).toEqual(PRESERVED_ENGLISH_PATH_SOURCES.map(missingCurrentDocPath));
   });
 
   it("applies the same source and target roles to Chinese directives", () => {
@@ -730,6 +736,9 @@ describe("current-truth docs guard", () => {
         "当前不将 `src/not-jiang-rename-source.ts` 重命名为 `src/not-jiang-rename-target.ts`。",
         "当前不将 `src/not-jiang-move-source.ts` 移动到 `src/not-jiang-move-target.ts`。",
         "当前不将 `src/not-jiang-replace-source.ts` 替换为 `src/not-jiang-replace-target.ts`。",
+        "不要把 `src/ba-rename-source.ts` 重命名成 `src/ba-rename-target.ts`。",
+        "不得将 `src/jiang-replace-source.ts` 替换成 `src/jiang-replace-target.ts`。",
+        "禁止把 `src/ba-move-source.ts` 移动至 `src/ba-move-target.ts`。",
         "不要移动 `src/direct-move-source.ts` 到 `src/direct-move-target.ts`。",
         "不要重命名 `src/direct-rename-source.ts` 为 `src/direct-rename-target.ts`。",
         "不要替换 `src/direct-replace-source.ts` 为 `src/direct-replace-target.ts`。",
@@ -748,6 +757,9 @@ describe("current-truth docs guard", () => {
         "src/not-jiang-rename-source.ts",
         "src/not-jiang-move-source.ts",
         "src/not-jiang-replace-source.ts",
+        "src/ba-rename-source.ts",
+        "src/jiang-replace-source.ts",
+        "src/ba-move-source.ts",
         "src/direct-move-source.ts",
         "src/direct-rename-source.ts",
         "src/direct-replace-source.ts",
