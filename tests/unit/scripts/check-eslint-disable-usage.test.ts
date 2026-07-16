@@ -290,6 +290,43 @@ export const value = 1; // eslint-disable-line no-unused-vars -- retained for in
     expect(findings).toEqual([]);
   });
 
+  it("detects real trailing eslint-disable after a prior directive-looking string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = "eslint-disable"; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it("ignores eslint-disable text that only appears inside a string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = "// eslint-disable-line no-unused-vars";
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([]);
+  });
+
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(
       "src/lib/security/__tests__/distributed-rate-limit.test.ts",
