@@ -5,17 +5,33 @@ const RADIX_PACKAGE_PATTERN = /^@radix-ui\/[^/]+(?:\/.*)?$/;
 const RADIX_THEMES_PATTERN = /^@radix-ui\/themes(?:\/.*)?$/;
 const RADIX_PRIMITIVE_PATTERN = /^@radix-ui\/react-[^/]+(?:\/.*)?$/;
 
-function getStringLiteralValue(node) {
-  return ts.isStringLiteralLike(node) ? node.text : null;
+function unwrapStaticStringExpression(node) {
+  let current = node;
+
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    ts.isSatisfiesExpression(current) ||
+    ts.isNonNullExpression(current)
+  ) {
+    current = current.expression;
+  }
+
+  return current;
 }
 
-function collectModuleReferences(source) {
+function getStringLiteralValue(node) {
+  const unwrapped = unwrapStaticStringExpression(node);
+  return ts.isStringLiteralLike(unwrapped) ? unwrapped.text : null;
+}
+
+function collectModuleReferences(source, filePath) {
   const sourceFile = ts.createSourceFile(
-    "component-governance-source.tsx",
+    filePath,
     source,
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TSX,
   );
   const references = [];
 
@@ -65,8 +81,11 @@ function findModuleReference(references, packagePattern) {
   );
 }
 
-function getRadixModuleReferenceSummary(source) {
-  const references = collectModuleReferences(source);
+function getRadixModuleReferenceSummary(
+  source,
+  filePath = "component-governance-source.tsx",
+) {
+  const references = collectModuleReferences(source, filePath);
 
   return {
     packageReference: findModuleReference(references, RADIX_PACKAGE_PATTERN),
@@ -78,16 +97,124 @@ function getRadixModuleReferenceSummary(source) {
   };
 }
 
-function findRadixPackageReference(source) {
-  return getRadixModuleReferenceSummary(source).packageReference;
+function stripCssComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
+    comment.replace(/[^\n]/g, " "),
+  );
 }
 
-function findRadixThemesReference(source) {
-  return getRadixModuleReferenceSummary(source).themesReference;
+function skipCssWhitespace(source, start) {
+  let cursor = start;
+  while (/\s/.test(source[cursor] ?? "")) cursor += 1;
+  return cursor;
 }
 
-function findRadixPrimitiveReference(source) {
-  return getRadixModuleReferenceSummary(source).primitiveReference;
+function readCssQuotedValue(source, start) {
+  const quote = source[start];
+  if (quote !== '"' && quote !== "'") return null;
+
+  let cursor = start + 1;
+  while (cursor < source.length) {
+    if (source[cursor] === "\\") {
+      cursor += 2;
+      continue;
+    }
+    if (source[cursor] === quote) {
+      return {
+        value: source.slice(start + 1, cursor),
+        end: cursor + 1,
+      };
+    }
+    cursor += 1;
+  }
+
+  return null;
+}
+
+function readCssImportSpecifier(source, start) {
+  let cursor = skipCssWhitespace(source, start);
+  const functionName = source.slice(cursor, cursor + 3).toLowerCase();
+
+  if (functionName === "url") {
+    cursor = skipCssWhitespace(source, cursor + 3);
+    if (source[cursor] !== "(") return null;
+    cursor = skipCssWhitespace(source, cursor + 1);
+
+    const quoted = readCssQuotedValue(source, cursor);
+    if (quoted) return { specifier: quoted.value, end: quoted.end };
+
+    const valueStart = cursor;
+    while (
+      cursor < source.length &&
+      source[cursor] !== ")" &&
+      !/\s/.test(source[cursor])
+    ) {
+      cursor += 1;
+    }
+    if (cursor === valueStart) return null;
+    return { specifier: source.slice(valueStart, cursor), end: cursor };
+  }
+
+  const quoted = readCssQuotedValue(source, cursor);
+  return quoted ? { specifier: quoted.value, end: quoted.end } : null;
+}
+
+function collectCssImportReferences(source) {
+  const commentStrippedSource = stripCssComments(source);
+  const references = [];
+  let cursor = 0;
+
+  while (cursor < commentStrippedSource.length) {
+    const quoted = readCssQuotedValue(commentStrippedSource, cursor);
+    if (quoted) {
+      cursor = quoted.end;
+      continue;
+    }
+
+    const keyword = commentStrippedSource.slice(cursor, cursor + 7);
+    const nextCharacter = commentStrippedSource[cursor + 7] ?? "";
+    if (keyword.toLowerCase() !== "@import" || !/\s/.test(nextCharacter)) {
+      cursor += 1;
+      continue;
+    }
+
+    const reference = readCssImportSpecifier(commentStrippedSource, cursor + 7);
+    if (!reference) {
+      cursor += 7;
+      continue;
+    }
+
+    if (RADIX_PACKAGE_PATTERN.test(reference.specifier)) {
+      references.push({
+        specifier: reference.specifier,
+        line: commentStrippedSource.slice(0, cursor).split("\n").length,
+      });
+    }
+    cursor = reference.end;
+  }
+
+  return references;
+}
+
+function getCssRadixModuleReferenceSummary(source) {
+  const references = collectCssImportReferences(source);
+
+  return {
+    packageReference: references[0] ?? null,
+    themesReference: findModuleReference(references, RADIX_THEMES_PATTERN),
+  };
+}
+
+function findRadixPackageReference(source, filePath) {
+  return getRadixModuleReferenceSummary(source, filePath).packageReference;
+}
+
+function findRadixThemesReference(source, filePath) {
+  return getRadixModuleReferenceSummary(source, filePath).themesReference;
+}
+
+function findRadixPrimitiveReference(source, filePath) {
+  return getRadixModuleReferenceSummary(source, filePath).primitiveReference;
 }
 
 function getExpectedClientBoundary(source) {
@@ -104,6 +231,7 @@ function getExpectedRadixLayer(source) {
 module.exports = {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
+  getCssRadixModuleReferenceSummary,
   getRadixModuleReferenceSummary,
   findRadixPackageReference,
   findRadixPrimitiveReference,

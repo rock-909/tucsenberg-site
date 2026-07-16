@@ -496,7 +496,7 @@ describe("component governance", () => {
       .filter((filePath) => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
-        return findRadixPackageReference(source) !== null;
+        return findRadixPackageReference(source, filePath) !== null;
       });
 
     expect(violations).toEqual([]);
@@ -532,7 +532,7 @@ describe("component governance", () => {
       .filter((filePath) => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
-        return findRadixThemesReference(source) !== null;
+        return findRadixThemesReference(source, filePath) !== null;
       });
 
     expect(violations).toEqual([]);

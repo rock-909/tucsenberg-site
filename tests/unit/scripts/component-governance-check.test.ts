@@ -538,6 +538,43 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("detects statically known Radix imports behind TypeScript expression wrappers", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/parenthesized-import.ts":
+          'export async function loadTheme() { return import(("@radix-ui/themes")); }',
+        "src/lib/asserted-import.ts":
+          'export async function loadTheme() { return import("@radix-ui/themes" as string); }',
+        "src/lib/satisfies-import.ts":
+          'export async function loadTheme() { return import("@radix-ui/themes" satisfies string); }',
+        "src/lib/type-asserted-import.ts":
+          'export async function loadTheme() { return import(<string>"@radix-ui/themes"); }',
+        "src/lib/parenthesized-require.ts":
+          'const theme = require(("@radix-ui/themes"));\nexport { theme };',
+        "src/lib/asserted-require.ts":
+          'const theme = require("@radix-ui/themes" as string);\nexport { theme };',
+        "src/lib/non-null-require.ts":
+          'const theme = require(("@radix-ui/themes")!);\nexport { theme };',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    for (const file of [
+      "src/lib/parenthesized-import.ts",
+      "src/lib/asserted-import.ts",
+      "src/lib/satisfies-import.ts",
+      "src/lib/type-asserted-import.ts",
+      "src/lib/parenthesized-require.ts",
+      "src/lib/asserted-require.ts",
+      "src/lib/non-null-require.ts",
+    ]) {
+      expectFinding(result.errors, "radix-themes-import-forbidden", file);
+    }
+  });
+
   it("fails when Radix packages use side-effect, re-export, or CommonJS imports outside UI wrappers", () => {
     const rootDir = createFixture(
       baseFiles({
@@ -663,6 +700,10 @@ describe("component-governance-check", () => {
           '@import "@radix-ui/colors/blue.css";',
           '@import "@radix-ui/themes/styles.css";',
         ].join("\n"),
+        "src/components/ui/vendor-same-line.css":
+          '@import "@radix-ui/colors/blue.css"; @import "@radix-ui/themes/styles.css";',
+        "src/components/ui/vendor-uppercase.css":
+          '@IMPORT URL("@radix-ui/themes/styles.css");',
       }),
     );
     fixtureRoots.push(rootDir);
@@ -679,6 +720,16 @@ describe("component-governance-check", () => {
       result.errors,
       "radix-themes-import-forbidden",
       "src/components/ui/vendor.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-same-line.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-uppercase.css",
     );
   });
 

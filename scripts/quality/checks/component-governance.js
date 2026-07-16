@@ -3,6 +3,7 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
+  getCssRadixModuleReferenceSummary,
   getRadixModuleReferenceSummary,
 } = require("../../component-governance-registry-truth");
 
@@ -43,8 +44,6 @@ const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
   /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/|^src\/(?:test|testing)\/)/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
   /(?:^|[\s"'`.[_-])rt-[A-Za-z0-9_-]+/;
-const COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN =
-  /^[\t ]*@import\s+(?:url\(\s*)?["']?(@radix-ui\/[^\s"');]+)["']?\s*\)?/m;
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_MODULE_PATTERN =
   "(?:@/config/static-theme-colors|(?:\\.\\.?/)+config/static-theme-colors)";
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_IMPORT_PATTERN = new RegExp(
@@ -120,31 +119,10 @@ function isGovernedUiSource(file) {
   );
 }
 
-function getCssRadixModuleReferenceSummary(source) {
-  const commentStrippedSource = source.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
-    comment.replace(/[^\n]/g, " "),
-  );
-  const matches = commentStrippedSource.matchAll(
-    new RegExp(COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN.source, "gm"),
-  );
-  const references = Array.from(matches, (match) => ({
-    specifier: match[1],
-    line: commentStrippedSource.slice(0, match.index).split("\n").length,
-  }));
-
-  return {
-    packageReference: references[0] ?? null,
-    themesReference:
-      references.find(({ specifier }) =>
-        /^@radix-ui\/themes(?:\/.*)?$/.test(specifier),
-      ) ?? null,
-  };
-}
-
 function getSourceRadixModuleReferenceSummary(file, source) {
   return file.endsWith(".css")
     ? getCssRadixModuleReferenceSummary(source)
-    : getRadixModuleReferenceSummary(source);
+    : getRadixModuleReferenceSummary(source, file);
 }
 
 function getUiPrimitiveNames(rootDir) {
