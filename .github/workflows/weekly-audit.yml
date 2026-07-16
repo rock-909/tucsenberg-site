@@ -9,6 +9,10 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: weekly-production-dependency-audit
+  cancel-in-progress: false
+
 jobs:
   audit:
     name: Production dependency audit
@@ -45,13 +49,13 @@ jobs:
         with:
           script: |
             const title = "Weekly production dependency audit failed";
-            const { data: issues } = await github.rest.issues.listForRepo({
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: "open",
               per_page: 100,
             });
-            if (!issues.some((issue) => issue.title === title)) {
+            if (!issues.some((issue) => !issue.pull_request && issue.title === title)) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -60,6 +64,6 @@ jobs:
               });
             }
 
-      - name: Fail when the audit finds high-severity vulnerabilities
-        if: steps.audit.outcome == 'failure'
+      - name: Fail when the dependency audit step fails
+        if: ${{ !cancelled() && steps.audit.outcome == 'failure' }}
         run: exit 1
