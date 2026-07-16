@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   CHECKS,
@@ -321,7 +322,7 @@ describe("current-truth docs guard", () => {
   it("rejects a tracked document that is missing from the inventory", () => {
     const repoDir = createTempRepo({
       "docs/项目基础/文档清单.md":
-        "| Path | Class | Notes |\n| --- | --- | --- |",
+        "Mention `docs/new-current-doc.md` in prose only.\n\n| Path | Class | Notes |\n| --- | --- | --- |",
       "docs/new-current-doc.md": "# New current doc",
     });
     tempDirs.push(repoDir);
@@ -333,6 +334,25 @@ describe("current-truth docs guard", () => {
         file: "docs/项目基础/文档清单.md",
         error:
           'tracked document is missing from inventory "docs/new-current-doc.md"',
+      },
+    ]);
+  });
+
+  it("requires non-Markdown tracked docs to be inventoried", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md":
+        "| Path | Class | Notes |\n| --- | --- | --- |\n| `docs/项目基础/文档清单.md` | `current-reference` | Inventory. |",
+      "docs/runtime-proof.json": "{}",
+    });
+    tempDirs.push(repoDir);
+    execFileSync("git", ["init", "-q"], { cwd: repoDir });
+    execFileSync("git", ["add", "docs"], { cwd: repoDir });
+
+    expect(collectDocumentInventoryFindings(repoDir)).toEqual([
+      {
+        file: "docs/项目基础/文档清单.md",
+        error:
+          'tracked document is missing from inventory "docs/runtime-proof.json"',
       },
     ]);
   });

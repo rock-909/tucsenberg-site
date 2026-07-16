@@ -384,7 +384,7 @@ function hasGitMetadata(rootDir) {
   return fs.existsSync(path.join(rootDir, ".git"));
 }
 
-function collectTrackedMarkdownDocs(rootDir) {
+function collectTrackedDocFiles(rootDir) {
   if (!hasGitMetadata(rootDir)) return [];
 
   const output = execFileSync(
@@ -392,19 +392,28 @@ function collectTrackedMarkdownDocs(rootDir) {
     ["-c", "core.quotepath=false", "ls-files", "-z", "--", "docs"],
     { cwd: rootDir, encoding: "utf8" },
   );
-  return output
-    .split("\0")
-    .filter((file) => file.endsWith(".md"))
-    .sort();
+  return output.split("\0").filter(Boolean).sort();
+}
+
+function collectTrackedMarkdownDocs(rootDir) {
+  return collectTrackedDocFiles(rootDir).filter((file) => file.endsWith(".md"));
+}
+
+function inventoryHasFileEntry(inventory, file) {
+  const expectedCell = `\`${file}\``;
+  return inventory.split("\n").some((line) => {
+    const cells = line.split("|");
+    return cells.length > 2 && cells[1].trim() === expectedCell;
+  });
 }
 
 function collectDocumentInventoryFindings(rootDir, trackedDocs) {
   const inventoryPath = "docs/项目基础/文档清单.md";
   const inventory = readTruthFile(rootDir, inventoryPath);
-  const docs = trackedDocs ?? collectTrackedMarkdownDocs(rootDir);
+  const docs = trackedDocs ?? collectTrackedDocFiles(rootDir);
 
   return docs
-    .filter((file) => !inventory.includes(`\`${file}\``))
+    .filter((file) => !inventoryHasFileEntry(inventory, file))
     .map((file) => ({
       file: inventoryPath,
       error: `tracked document is missing from inventory "${file}"`,
