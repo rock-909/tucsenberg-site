@@ -603,6 +603,52 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("resets negation for explicit positive path predicates", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": [
+        "Do not use `src/legacy-a.ts`, `src/required.ts` is required.",
+        "Do not use `src/legacy-b.ts`, use of `src/also-required.ts` is required.",
+      ].join("\n"),
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/required.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "src/also-required.ts"',
+      },
+    ]);
+  });
+
+  it("does not exempt a positive requirement merely because it contains not", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": "`src/required.ts` should not be missing.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/required.ts"',
+      },
+    ]);
+  });
+
   it("inherits an explicit negative heading into Markdown list items", () => {
     const files = {
       "docs/项目基础/文档清单.md":

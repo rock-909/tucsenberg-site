@@ -492,6 +492,16 @@ function documentedRepoPathExists(rootDir, documentedPath) {
 
 const PATH_INSTRUCTION_VERB_SOURCE =
   "(?:use|keep|read|run|import|reference|replace|choose|adopt|update|move|create|add)";
+const PATH_STATE_SOURCE =
+  "(?:used|kept|read|run|imported|referenced|replaced|chosen|adopted|updated|moved|created|added|renamed|required|supported|present|active|current|canonical)";
+const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(
+  `^\`[^\`]+\`\\s+(?:is not created|does not exist|is not present|is (?:prohibited|forbidden)|(?:(?:must|should|may) not|cannot|can not)\\s+(?:(?:be\\s+)?${PATH_STATE_SOURCE}|exist))\\b`,
+  "iu",
+);
+const POSITIVE_PATH_PREDICATE_PATTERN = new RegExp(
+  `^\`[^\`]+\`\\s+(?:is\\s+(?:the\\s+)?${PATH_STATE_SOURCE}|(?:must|should)\\s+(?:exist|be\\s+${PATH_STATE_SOURCE})|exists)\\b`,
+  "iu",
+);
 
 function commaBelongsToNegatedActionList(normalizedClause, commaIndex) {
   const remainingClause = normalizedClause.slice(commaIndex + 1);
@@ -563,15 +573,18 @@ function isNegatedDocumentedPath(content, lineStart, matchIndex) {
     }
     activeClauseStart = (match.index ?? 0) + match[0].length;
   }
+  if (POSITIVE_PATH_PREDICATE_PATTERN.test(currentLineSuffix)) {
+    const positiveClauseCommaIndex = normalizedClausePrefix.lastIndexOf(",");
+    if (positiveClauseCommaIndex >= activeClauseStart) {
+      activeClauseStart = positiveClauseCommaIndex + 1;
+    }
+  }
   const activeClausePrefix = normalizedClausePrefix.slice(activeClauseStart);
 
   return (
     /(?:\b(?:do not|does not|must not|never|not rename|not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)[^，。；：！？]{0,72})\s*$/iu.test(
       activeClausePrefix,
-    ) ||
-    /^`[^`]+`\s+(?:is not created|does not exist|is not present|is (?:prohibited|forbidden)|(?:must|should|may) not\b|cannot\b|can not\b)/iu.test(
-      currentLineSuffix,
-    )
+    ) || NEGATIVE_PATH_PREDICATE_PATTERN.test(currentLineSuffix)
   );
 }
 
