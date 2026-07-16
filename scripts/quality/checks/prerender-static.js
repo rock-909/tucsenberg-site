@@ -58,6 +58,18 @@ function collectTemplateFindings(buildRoot, localizedPageTemplates) {
   return findings;
 }
 
+function collectTemplateRouteFindings(localizedPageTemplates, localizedRoutes) {
+  const prerenderedTemplates = new Set(
+    localizedRoutes.map(([, config]) => config.srcRoute),
+  );
+  return localizedPageTemplates
+    .filter((route) => !prerenderedTemplates.has(route))
+    .map((route) => ({
+      file: "prerender-manifest.json",
+      error: `localized route template has no default-locale prerender output "${route}"`,
+    }));
+}
+
 function collectLocalizedRouteFindings({
   buildRoot,
   localizedRoutes,
@@ -144,6 +156,7 @@ function collectPrerenderStaticFindings({
 
   return [
     ...collectTemplateFindings(buildRoot, localizedPageTemplates),
+    ...collectTemplateRouteFindings(localizedPageTemplates, localizedRoutes),
     ...routeUsage.findings,
     ...collectStaleExemptionFindings(
       postponedRouteExemptions,

@@ -295,10 +295,10 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     kind: "collection-values",
     file: "src/components/forms/contact-form-feedback.tsx",
     sourceName: "CONTACT_FORM_API_ERROR_CODES",
-    propertyAccessValue: "property-name",
     prefix: "apiErrors.",
     suffixes: [""],
-    reason: "the contact client enforces this response-code translation domain",
+    reason:
+      "the contact client enforces these literal runtime response-code values",
   },
   {
     kind: "call-arguments",

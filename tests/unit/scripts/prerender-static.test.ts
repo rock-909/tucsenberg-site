@@ -33,6 +33,7 @@ function writeJson(rootDir: string, relativePath: string, value: unknown) {
 function createBuildFixture({
   aboutPostponed = false,
   contactPostponed = true,
+  includeAboutRoute = true,
   includeAboutTemplateMeta = true,
 } = {}) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "prerender-static-"));
@@ -43,7 +44,9 @@ function createBuildFixture({
   });
   writeJson(rootDir, ".next/prerender-manifest.json", {
     routes: {
-      "/en/about": { srcRoute: "/[locale]/about" },
+      ...(includeAboutRoute
+        ? { "/en/about": { srcRoute: "/[locale]/about" } }
+        : {}),
       "/en/contact": { srcRoute: "/[locale]/contact" },
     },
   });
@@ -89,6 +92,17 @@ describe("prerender static behavior gate", () => {
       file: "server/app/[locale]/about.meta",
       error:
         'localized route template has no prerender shell "/[locale]/about"',
+    });
+  });
+
+  it("rejects a localized page template without a concrete locale route", () => {
+    const findings = collectPrerenderStaticFindings({
+      rootDir: createBuildFixture({ includeAboutRoute: false }),
+    });
+    expect(findings).toContainEqual({
+      file: "prerender-manifest.json",
+      error:
+        'localized route template has no default-locale prerender output "/[locale]/about"',
     });
   });
 

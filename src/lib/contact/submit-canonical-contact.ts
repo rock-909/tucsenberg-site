@@ -51,6 +51,7 @@ const CONTACT_FORM_VALIDATION_DETAIL_KEYS = [
   "errors.email.required",
   "errors.email.invalid",
   "errors.email.tooLong",
+  "errors.email.domainNotAllowed",
   "errors.company.tooShort",
   "errors.company.tooLong",
   "errors.company.invalid",
@@ -220,7 +221,7 @@ function buildZodIssueErrorKey(issue: ZodIssue): string {
   }
 }
 
-function mapZodIssueToErrorKey(issue: ZodIssue): string {
+export function mapContactValidationIssueToMessageKey(issue: ZodIssue): string {
   const key = buildZodIssueErrorKey(issue);
   return CONTACT_FORM_VALIDATION_DETAIL_KEY_SET.has(key)
     ? key
@@ -278,7 +279,9 @@ export function validateContactSubmissionPayload(
       success: false,
       errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
       error: "Validation failed",
-      details: validationResult.error.issues.map(mapZodIssueToErrorKey),
+      details: validationResult.error.issues.map(
+        mapContactValidationIssueToMessageKey,
+      ),
       data: null,
     };
   }

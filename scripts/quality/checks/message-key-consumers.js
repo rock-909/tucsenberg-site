@@ -100,16 +100,7 @@ function createConsumerCollector({
 
     function getCollectionValue(node) {
       const value = getStaticString(node, new Map());
-      if (value !== undefined) return value;
-      const current = unwrapExpression(node);
-      if (
-        consumer.propertyAccessValue === "property-name" &&
-        current &&
-        ts.isPropertyAccessExpression(current)
-      ) {
-        return current.name.text;
-      }
-      return undefined;
+      return value;
     }
 
     function collectValues(node) {

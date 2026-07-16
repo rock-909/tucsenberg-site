@@ -270,17 +270,16 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
-  it("derives enum-like values from property access collections", () => {
+  it("derives the runtime string values of finite error domains", () => {
     expect(
       collect({
-        catalogKeys: ["apiErrors.FAILED"],
-        content: "const CODES = [API_ERROR_CODES.FAILED] as const;",
+        catalogKeys: ["apiErrors.RENAMED_AT_RUNTIME"],
+        content: 'const CODES = ["RENAMED_AT_RUNTIME"] as const;',
         derivedKeyConsumers: [
           {
             kind: "collection-values",
             file: "src/example.ts",
             sourceName: "CODES",
-            propertyAccessValue: "property-name",
             prefix: "apiErrors.",
             suffixes: [""],
             reason: "fixture",
@@ -288,6 +287,28 @@ describe("message key usage gate", () => {
         ],
       }),
     ).toEqual([]);
+
+    expect(
+      collect({
+        catalogKeys: ["apiErrors.FAILED"],
+        content: 'const CODES = ["RENAMED_AT_RUNTIME"] as const;',
+        derivedKeyConsumers: [
+          {
+            kind: "collection-values",
+            file: "src/example.ts",
+            sourceName: "CODES",
+            prefix: "apiErrors.",
+            suffixes: [""],
+            reason: "fixture",
+          },
+        ],
+        unusedKeyAllowlist: ["apiErrors.FAILED"],
+      }),
+    ).toContainEqual({
+      file: "message usage",
+      error:
+        'used message key is missing from the catalog "apiErrors.RENAMED_AT_RUNTIME"',
+    });
   });
 
   it("rejects stale configured object consumers", () => {
