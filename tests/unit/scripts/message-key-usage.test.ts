@@ -685,10 +685,7 @@ describe("derived message key consumers", () => {
         catalogKeys: [],
         content: [
           "function Translated(t: (key: string) => string) { return t; }",
-          "function Outer() {",
-          "  const Translated = (t: (key: string) => string) => t;",
-          "  return Translated;",
-          "}",
+          "function Translated(t: (key: string) => string) { return t; }",
         ].join("\n"),
         translatorParameterOverrides: [
           {

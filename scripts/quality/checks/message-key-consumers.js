@@ -33,6 +33,13 @@ function findTopLevelVariableDeclarations(sourceFile, sourceName) {
   return declarations;
 }
 
+function isConstVariableDeclaration(node) {
+  return (
+    ts.isVariableDeclarationList(node.parent) &&
+    (node.parent.flags & ts.NodeFlags.Const) !== 0
+  );
+}
+
 function findDirectFunctionBindingIdentifiers(
   functionDeclaration,
   identifierName,
@@ -63,15 +70,11 @@ function findDirectFunctionBindingIdentifiers(
 }
 
 function findNamedFunctionDeclarations(sourceFile, functionName) {
-  const declarations = [];
-  function visit(node) {
-    if (ts.isFunctionDeclaration(node) && node.name?.text === functionName) {
-      declarations.push(node);
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  return declarations;
+  return sourceFile.statements.filter(
+    (statement) =>
+      ts.isFunctionDeclaration(statement) &&
+      statement.name?.text === functionName,
+  );
 }
 
 function getUniqueMatch(matches) {
@@ -103,11 +106,27 @@ function collectPropertyAccessKeys({
     findTopLevelVariableDeclarations(sourceFile, consumer.rootName),
   );
   if (root.status !== "matched") return { keys, status: root.status };
+  if (!isConstVariableDeclaration(root.match)) {
+    return { keys, status: "unsupported" };
+  }
   const rootSymbol = checker.getSymbolAtLocation(root.match.name);
   if (!rootSymbol) return { keys, status: "missing" };
   let matchedAccess = false;
+  let unsupportedAccess = false;
 
   function visit(node) {
+    if (ts.isElementAccessExpression(node)) {
+      let current = unwrapExpression(node.expression);
+      while (ts.isPropertyAccessExpression(current)) {
+        current = unwrapExpression(current.expression);
+      }
+      if (
+        ts.isIdentifier(current) &&
+        checker.getSymbolAtLocation(current) === rootSymbol
+      ) {
+        unsupportedAccess = true;
+      }
+    }
     if (
       ts.isPropertyAccessExpression(node) &&
       !(
@@ -138,7 +157,14 @@ function collectPropertyAccessKeys({
     ts.forEachChild(node, visit);
   }
   visit(sourceFile);
-  return { keys, status: matchedAccess ? "matched" : "missing" };
+  return {
+    keys,
+    status: unsupportedAccess
+      ? "unsupported"
+      : matchedAccess
+        ? "matched"
+        : "missing",
+  };
 }
 
 function collectCallArgumentKeys({
@@ -159,6 +185,7 @@ function collectCallArgumentKeys({
   const targetSymbol = checker.getSymbolAtLocation(target.match);
   if (!targetSymbol) return { keys, status: "missing" };
   let matchedCall = false;
+  let unsupportedCall = false;
 
   function visit(node) {
     if (
@@ -170,12 +197,21 @@ function collectCallArgumentKeys({
       if (value !== undefined) {
         matchedCall = true;
         for (const prefix of consumer.prefixes) keys.add(`${prefix}${value}`);
+      } else {
+        unsupportedCall = true;
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(owner.match);
-  return { keys, status: matchedCall ? "matched" : "missing" };
+  return {
+    keys,
+    status: unsupportedCall
+      ? "unsupported"
+      : matchedCall
+        ? "matched"
+        : "missing",
+  };
 }
 
 function collectPropertyValueKeys({ sourceFile, consumer, getStaticString }) {
@@ -185,8 +221,10 @@ function collectPropertyValueKeys({ sourceFile, consumer, getStaticString }) {
   );
   if (scope.status !== "matched") return { keys, status: scope.status };
   let matchedProperty = false;
+  let unsupportedProperty = false;
 
   function visit(node) {
+    if (node !== scope.match && ts.isFunctionLike(node)) return;
     if (
       ts.isPropertyAssignment(node) &&
       getPropertyName(node.name) === consumer.propertyName
@@ -197,12 +235,21 @@ function collectPropertyValueKeys({ sourceFile, consumer, getStaticString }) {
         for (const suffix of consumer.suffixes) {
           keys.add(`${consumer.prefix}${value}${suffix}`);
         }
+      } else {
+        unsupportedProperty = true;
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(scope.match);
-  return { keys, status: matchedProperty ? "matched" : "missing" };
+  return {
+    keys,
+    status: unsupportedProperty
+      ? "unsupported"
+      : matchedProperty
+        ? "matched"
+        : "missing",
+  };
 }
 
 function createConsumerCollector({ unwrapExpression, getStaticString }) {
@@ -221,24 +268,48 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
     return undefined;
   }
 
-  function getObjectPropertyValue(object, propertyName) {
+  function getObjectPropertyResult(object, propertyName) {
     for (const property of object.properties) {
+      if (
+        ts.isShorthandPropertyAssignment(property) &&
+        property.name.text === propertyName
+      ) {
+        return { status: "unsupported" };
+      }
       if (!ts.isPropertyAssignment(property)) continue;
       if (getPropertyName(property.name) !== propertyName) continue;
-      return getStaticPrimitive(property.initializer);
+      const value = getStaticPrimitive(property.initializer);
+      return value === undefined
+        ? { status: "unsupported" }
+        : { status: "matched", value };
     }
-    return undefined;
+    return { status: "missing" };
   }
 
   function matchesEntryFilters(object, filters = []) {
-    return filters.every((filter) => {
-      const value = getObjectPropertyValue(object, filter.property);
-      if (Object.hasOwn(filter, "equals")) return value === filter.equals;
-      if (Object.hasOwn(filter, "notEquals")) {
-        return value !== undefined && value !== filter.notEquals;
+    for (const filter of filters) {
+      const result = getObjectPropertyResult(object, filter.property);
+      if (result.status === "unsupported") {
+        return { matches: false, supported: false };
       }
-      return false;
-    });
+      if (result.status === "missing") {
+        return { matches: false, supported: true };
+      }
+      if (Object.hasOwn(filter, "equals")) {
+        if (result.value !== filter.equals) {
+          return { matches: false, supported: true };
+        }
+        continue;
+      }
+      if (Object.hasOwn(filter, "notEquals")) {
+        if (result.value === filter.notEquals) {
+          return { matches: false, supported: true };
+        }
+        continue;
+      }
+      return { matches: false, supported: false };
+    }
+    return { matches: true, supported: true };
   }
 
   function getTopLevelVariableInitializer(sourceFile, sourceName) {
@@ -246,6 +317,9 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
       findTopLevelVariableDeclarations(sourceFile, sourceName),
     );
     if (result.status !== "matched") return result;
+    if (!isConstVariableDeclaration(result.match)) {
+      return { status: "unsupported" };
+    }
     const initializer = result.match.initializer
       ? unwrapExpression(result.match.initializer)
       : undefined;
@@ -254,27 +328,78 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
       : { status: "missing" };
   }
 
+  function containsCollectionSpread(node) {
+    let found = false;
+    function visit(current) {
+      if (found || ts.isFunctionLike(current)) return;
+      if (ts.isSpreadAssignment(current) || ts.isSpreadElement(current)) {
+        found = true;
+        return;
+      }
+      ts.forEachChild(current, visit);
+    }
+    visit(node);
+    return found;
+  }
+
   function collectFilteredObjectEntryKeys(sourceFile, sourceName, filters) {
     const source = getTopLevelVariableInitializer(sourceFile, sourceName);
     const keys = new Set();
     if (source.status !== "matched") return { keys, status: source.status };
+    if (containsCollectionSpread(source.initializer)) {
+      return { keys, status: "unsupported" };
+    }
     if (!ts.isObjectLiteralExpression(source.initializer)) {
       return { keys, status: "missing" };
     }
     for (const property of source.initializer.properties) {
-      if (!ts.isPropertyAssignment(property)) continue;
+      if (!ts.isPropertyAssignment(property)) {
+        return { keys, status: "unsupported" };
+      }
       const key = getPropertyName(property.name);
       const value = unwrapExpression(property.initializer);
-      if (
-        key !== undefined &&
-        value &&
-        ts.isObjectLiteralExpression(value) &&
-        matchesEntryFilters(value, filters)
-      ) {
-        keys.add(key);
+      if (key === undefined || !value || !ts.isObjectLiteralExpression(value)) {
+        return { keys, status: "unsupported" };
       }
+      const filterResult = matchesEntryFilters(value, filters);
+      if (!filterResult.supported) return { keys, status: "unsupported" };
+      if (filterResult.matches) keys.add(key);
     }
     return { keys, status: "matched" };
+  }
+
+  function collectFilteredPropertyValues(initializer, consumer, values) {
+    if (
+      !consumer.valueProperty ||
+      !consumer.entryFilters ||
+      !ts.isObjectLiteralExpression(initializer)
+    ) {
+      return null;
+    }
+    for (const property of initializer.properties) {
+      if (!ts.isPropertyAssignment(property)) {
+        return { status: "unsupported" };
+      }
+      const entry = unwrapExpression(property.initializer);
+      if (!entry || !ts.isObjectLiteralExpression(entry)) {
+        return { status: "unsupported" };
+      }
+      const filterResult = matchesEntryFilters(entry, consumer.entryFilters);
+      if (!filterResult.supported) return { status: "unsupported" };
+      if (!filterResult.matches) continue;
+      const valueResult = getObjectPropertyResult(
+        entry,
+        consumer.valueProperty,
+      );
+      if (
+        valueResult.status !== "matched" ||
+        typeof valueResult.value !== "string"
+      ) {
+        return { status: "unsupported" };
+      }
+      values.add(valueResult.value);
+    }
+    return { status: "matched" };
   }
 
   function collectNamedCollectionValues(sourceFile, consumer) {
@@ -285,6 +410,9 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
     );
     if (source.status !== "matched") {
       return { status: source.status, values };
+    }
+    if (containsCollectionSpread(source.initializer)) {
+      return { status: "unsupported", values };
     }
     const entryKeys = consumer.entryKeySource
       ? collectFilteredObjectEntryKeys(
@@ -303,15 +431,33 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
       return value;
     }
 
+    let unsupportedValue = false;
+
+    function collectConfiguredPropertyValue(node) {
+      if (
+        ts.isShorthandPropertyAssignment(node) &&
+        node.name.text === consumer.valueProperty
+      ) {
+        unsupportedValue = true;
+        return;
+      }
+      if (!ts.isPropertyAssignment(node)) return;
+      const propertyName = getPropertyName(node.name);
+      if (propertyName !== consumer.valueProperty) return;
+      const value = getStaticString(node.initializer, new Map());
+      if (value !== undefined) {
+        values.add(value);
+      } else if (
+        unwrapExpression(node.initializer)?.kind !== ts.SyntaxKind.NullKeyword
+      ) {
+        unsupportedValue = true;
+      }
+    }
+
     function collectValues(node) {
+      if (ts.isFunctionLike(node)) return;
       if (consumer.valueProperty) {
-        if (ts.isPropertyAssignment(node)) {
-          const propertyName = getPropertyName(node.name);
-          if (propertyName === consumer.valueProperty) {
-            const value = getStaticString(node.initializer, new Map());
-            if (value !== undefined) values.add(value);
-          }
-        }
+        collectConfiguredPropertyValue(node);
         ts.forEachChild(node, collectValues);
         return;
       }
@@ -321,6 +467,7 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
         for (const element of current.elements) {
           const value = getCollectionValue(element);
           if (value !== undefined) values.add(value);
+          else unsupportedValue = true;
         }
         return;
       }
@@ -336,35 +483,110 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
           }
           const value = getCollectionValue(property.initializer);
           if (value !== undefined) values.add(value);
+          else unsupportedValue = true;
         }
+        return;
       }
+      unsupportedValue = true;
     }
 
-    if (
-      consumer.valueProperty &&
-      consumer.entryFilters &&
-      ts.isObjectLiteralExpression(source.initializer)
-    ) {
-      for (const property of source.initializer.properties) {
-        if (!ts.isPropertyAssignment(property)) continue;
-        const entry = unwrapExpression(property.initializer);
-        if (
-          !entry ||
-          !ts.isObjectLiteralExpression(entry) ||
-          !matchesEntryFilters(entry, consumer.entryFilters)
-        ) {
-          continue;
-        }
-        const value = getObjectPropertyValue(entry, consumer.valueProperty);
-        if (typeof value === "string") values.add(value);
-      }
-    } else {
+    const filteredValues = collectFilteredPropertyValues(
+      source.initializer,
+      consumer,
+      values,
+    );
+    if (filteredValues?.status === "unsupported") {
+      return { status: "unsupported", values };
+    }
+    if (!filteredValues) {
       collectValues(source.initializer);
     }
-    return { status: "matched", values };
+    return {
+      status: unsupportedValue ? "unsupported" : "matched",
+      values,
+    };
   }
 
   return { collectNamedCollectionValues };
+}
+
+function collectObjectKeyConsumerUsage({
+  sourceProgram,
+  objectKeyConsumers,
+  unwrapExpression,
+  getStaticString,
+}) {
+  const findings = [];
+  const staticKeys = new Set();
+
+  for (const consumer of objectKeyConsumers) {
+    const sourceFile = sourceProgram.sourceFiles.get(consumer.file);
+    if (!sourceFile) {
+      findings.push({
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `message object-key consumer source is missing "${consumer.file}"`,
+      });
+      continue;
+    }
+    const source = getUniqueMatch(
+      findTopLevelVariableDeclarations(sourceFile, consumer.objectName),
+    );
+    if (source.status === "ambiguous") {
+      findings.push({
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `message object-key consumer is ambiguous "${consumer.file}#${consumer.objectName}"`,
+      });
+      continue;
+    }
+    if (
+      source.status === "matched" &&
+      !isConstVariableDeclaration(source.match)
+    ) {
+      findings.push({
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `message object-key consumer is unsupported "${consumer.file}#${consumer.objectName}"`,
+      });
+      continue;
+    }
+    const initializer = unwrapExpression(source.match?.initializer);
+    if (
+      source.status !== "matched" ||
+      !ts.isObjectLiteralExpression(initializer)
+    ) {
+      findings.push({
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `message object-key consumer is stale "${consumer.file}#${consumer.objectName}"`,
+      });
+      continue;
+    }
+    const objectKeys = new Set();
+    let unsupportedProperty = false;
+    for (const property of initializer.properties) {
+      if (!ts.isPropertyAssignment(property)) {
+        unsupportedProperty = true;
+        break;
+      }
+      const propertyName = getStaticString(property.name, new Map());
+      if (propertyName !== undefined) {
+        objectKeys.add(`${consumer.prefix}${propertyName}`);
+      } else if (ts.isIdentifier(property.name)) {
+        objectKeys.add(`${consumer.prefix}${property.name.text}`);
+      } else {
+        unsupportedProperty = true;
+        break;
+      }
+    }
+    if (unsupportedProperty) {
+      findings.push({
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `message object-key consumer is unsupported "${consumer.file}#${consumer.objectName}"`,
+      });
+      continue;
+    }
+    for (const key of objectKeys) staticKeys.add(key);
+  }
+
+  return { findings, staticKeys };
 }
 
 function collectDerivedKeyConsumerUsage({
@@ -447,7 +669,7 @@ function collectDerivedKeyConsumerUsage({
     if (status !== "matched" || keys.size === 0) {
       findings.push({
         file: "scripts/quality/message-key-usage-baseline.js",
-        error: `derived message key consumer is ${status === "ambiguous" ? "ambiguous" : "stale"} "${consumer.file}#${consumer.kind}"`,
+        error: `derived message key consumer is ${status === "ambiguous" ? "ambiguous" : status === "unsupported" ? "unsupported" : "stale"} "${consumer.file}#${consumer.kind}"`,
       });
       continue;
     }
@@ -456,4 +678,7 @@ function collectDerivedKeyConsumerUsage({
   return { findings, staticKeys };
 }
 
-module.exports = { collectDerivedKeyConsumerUsage };
+module.exports = {
+  collectDerivedKeyConsumerUsage,
+  collectObjectKeyConsumerUsage,
+};

@@ -3,7 +3,10 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const ts = require("typescript");
 const { composeCatalogMessages, collectLeafPaths } = require("./translations");
-const { collectDerivedKeyConsumerUsage } = require("./message-key-consumers");
+const {
+  collectDerivedKeyConsumerUsage,
+  collectObjectKeyConsumerUsage,
+} = require("./message-key-consumers");
 const {
   DYNAMIC_MESSAGE_KEY_PREFIXES,
   MESSAGE_DERIVED_KEY_CONSUMERS,
@@ -28,6 +31,7 @@ const SELF_FILES = new Set([
   "scripts/quality/checks/message-key-consumers.js",
   "scripts/quality/message-key-usage-baseline.js",
 ]);
+const UNKNOWN_TRANSLATION_NAMESPACE = Symbol("unknown-translation-namespace");
 
 function getCatalogKeys(locale = DEFAULT_LOCALE) {
   const composed = composeCatalogMessages(locale);
@@ -81,13 +85,6 @@ function getStaticString(node, constants) {
   return undefined;
 }
 
-function getCallName(callExpression) {
-  const callee = callExpression.expression;
-  if (ts.isIdentifier(callee)) return callee.text;
-  if (ts.isPropertyAccessExpression(callee)) return callee.name.text;
-  return undefined;
-}
-
 function getTranslationNamespace(callExpression, constants) {
   const firstArgument = callExpression.arguments[0];
   const direct = getStaticString(firstArgument, constants);
@@ -113,7 +110,7 @@ function getImportDeclaration(node) {
   return current;
 }
 
-function getTranslationFactoryImport(expression, checker) {
+function getImportedBinding(expression, checker) {
   if (ts.isIdentifier(expression)) {
     const symbol = checker.getSymbolAtLocation(expression);
     const declaration = symbol?.declarations?.find(ts.isImportSpecifier);
@@ -150,7 +147,7 @@ function getTranslationFactoryImport(expression, checker) {
 }
 
 function isSupportedTranslationFactory(expression, checker) {
-  const imported = getTranslationFactoryImport(expression, checker);
+  const imported = getImportedBinding(expression, checker);
   return (
     (imported?.importedName === "useTranslations" &&
       imported.moduleName === "next-intl") ||
@@ -165,20 +162,26 @@ function getTranslatorNamespaceFromExpression(node, constants, checker) {
   if (!isSupportedTranslationFactory(expression.expression, checker)) {
     return undefined;
   }
-  return getTranslationNamespace(expression, constants);
+  return (
+    getTranslationNamespace(expression, constants) ??
+    UNKNOWN_TRANSLATION_NAMESPACE
+  );
 }
 
 function joinMessageKey(namespace, key) {
   return namespace ? `${namespace}.${key}` : key;
 }
 
-function getPromiseAllInputs(node) {
+function getPromiseAllInputs(node, checker) {
   const initializer = unwrapExpression(node);
   if (
     !initializer ||
     !ts.isCallExpression(initializer) ||
     !ts.isPropertyAccessExpression(initializer.expression) ||
-    initializer.expression.expression.getText() !== "Promise" ||
+    !ts.isIdentifier(initializer.expression.expression) ||
+    initializer.expression.expression.text !== "Promise" ||
+    checker.getSymbolAtLocation(initializer.expression.expression) !==
+      undefined ||
     initializer.expression.name.text !== "all"
   ) {
     return null;
@@ -199,12 +202,39 @@ function getBindingIdentifier(bindingName, identifierName) {
   return undefined;
 }
 
-function getFunctionName(node) {
-  if (node.name && ts.isIdentifier(node.name)) return node.name.text;
+function isConstVariableDeclaration(node) {
+  return (
+    ts.isVariableDeclarationList(node.parent) &&
+    (node.parent.flags & ts.NodeFlags.Const) !== 0
+  );
+}
+
+function isConstInitializedVariableDeclaration(node) {
+  return (
+    ts.isVariableDeclaration(node) &&
+    isConstVariableDeclaration(node) &&
+    node.initializer !== undefined
+  );
+}
+
+function getTopLevelFunctionName(node) {
+  if (
+    ts.isFunctionDeclaration(node) &&
+    ts.isSourceFile(node.parent) &&
+    node.name
+  ) {
+    return node.name.text;
+  }
   let current = node.parent;
   while (current) {
     if (ts.isVariableDeclaration(current) && ts.isIdentifier(current.name)) {
-      return current.name.text;
+      const statement = current.parent?.parent;
+      return statement &&
+        isConstVariableDeclaration(current) &&
+        ts.isVariableStatement(statement) &&
+        ts.isSourceFile(statement.parent)
+        ? current.name.text
+        : null;
     }
     if (ts.isFunctionLike(current)) return null;
     current = current.parent;
@@ -224,7 +254,7 @@ function collectTranslatorBindings({
   );
 
   function collectBindings(node) {
-    if (ts.isVariableDeclaration(node) && node.initializer) {
+    if (isConstInitializedVariableDeclaration(node)) {
       if (ts.isIdentifier(node.name)) {
         const namespace = getTranslatorNamespaceFromExpression(
           node.initializer,
@@ -236,7 +266,7 @@ function collectTranslatorBindings({
           translatorBindings.set(symbol, namespace);
         }
       } else if (ts.isArrayBindingPattern(node.name)) {
-        const inputs = getPromiseAllInputs(node.initializer);
+        const inputs = getPromiseAllInputs(node.initializer, checker);
         for (const [index, binding] of node.name.elements.entries()) {
           if (!inputs || !ts.isBindingElement(binding)) continue;
           if (!ts.isIdentifier(binding.name)) continue;
@@ -252,7 +282,7 @@ function collectTranslatorBindings({
         }
       }
     } else if (ts.isParameter(node)) {
-      const functionName = getFunctionName(node.parent);
+      const functionName = getTopLevelFunctionName(node.parent);
       for (const override of parameterOverrides) {
         if (override.functionName !== functionName) continue;
         const identifier = getBindingIdentifier(node.name, override.identifier);
@@ -299,6 +329,7 @@ function collectForwardedTranslatorCalls(
   function collectForwardedBindings(node) {
     if (
       ts.isVariableDeclaration(node) &&
+      isConstVariableDeclaration(node) &&
       ts.isIdentifier(node.name) &&
       node.initializer
     ) {
@@ -350,6 +381,10 @@ function collectTranslatorCallUsage({
   if (!symbol) return;
   const namespace = translatorBindings.get(symbol);
   if (namespace === undefined) return;
+  if (namespace === UNKNOWN_TRANSLATION_NAMESPACE) {
+    dynamicPrefixes.add("");
+    return;
+  }
   const keyArgument = unwrapExpression(node.arguments[0]);
   const key = getStaticString(keyArgument, constants);
   if (key !== undefined) {
@@ -363,13 +398,23 @@ function collectTranslatorCallUsage({
 
 function collectRequiredMessagePathUsage({
   node,
+  checker,
   constants,
   staticKeys,
   dynamicPrefixes,
 }) {
-  if (getCallName(node) !== "readRequiredMessagePath") return;
+  const imported = getImportedBinding(node.expression, checker);
+  if (
+    imported?.importedName !== "readRequiredMessagePath" ||
+    imported.moduleName !== "@/lib/i18n/read-message-path"
+  ) {
+    return;
+  }
   const pathArgument = unwrapExpression(node.arguments[1]);
-  if (!pathArgument || !ts.isArrayLiteralExpression(pathArgument)) return;
+  if (!pathArgument || !ts.isArrayLiteralExpression(pathArgument)) {
+    dynamicPrefixes.add("");
+    return;
+  }
 
   const segments = [];
   let dynamic = false;
@@ -381,7 +426,10 @@ function collectRequiredMessagePathUsage({
     }
     segments.push(segment);
   }
-  if (segments.length === 0) return;
+  if (segments.length === 0) {
+    if (dynamic || pathArgument.elements.length === 0) dynamicPrefixes.add("");
+    return;
+  }
   const key = segments.join(".");
   if (dynamic) dynamicPrefixes.add(`${key}.`);
   else staticKeys.add(key);
@@ -420,6 +468,7 @@ function collectSourceUsage({
       });
       collectRequiredMessagePathUsage({
         node,
+        checker,
         constants,
         staticKeys,
         dynamicPrefixes,
@@ -489,67 +538,6 @@ function createSourceProgram({ rootDir, sourceEntries }) {
   };
 }
 
-function collectObjectKeyConsumerUsage({ sourceEntries, objectKeyConsumers }) {
-  const sourceByFile = new Map(
-    sourceEntries.map((entry) => [entry.file, entry.content]),
-  );
-  const findings = [];
-  const staticKeys = new Set();
-
-  for (const consumer of objectKeyConsumers) {
-    const content = sourceByFile.get(consumer.file);
-    if (content === undefined) {
-      findings.push({
-        file: "scripts/quality/message-key-usage-baseline.js",
-        error: `message object-key consumer source is missing "${consumer.file}"`,
-      });
-      continue;
-    }
-
-    const sourceFile = ts.createSourceFile(
-      consumer.file,
-      content,
-      ts.ScriptTarget.Latest,
-      true,
-      consumer.file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-    );
-    let matchedObject = false;
-
-    function visit(node) {
-      if (
-        ts.isVariableDeclaration(node) &&
-        ts.isIdentifier(node.name) &&
-        node.name.text === consumer.objectName
-      ) {
-        const initializer = unwrapExpression(node.initializer);
-        if (initializer && ts.isObjectLiteralExpression(initializer)) {
-          matchedObject = true;
-          for (const property of initializer.properties) {
-            if (!ts.isPropertyAssignment(property)) continue;
-            const propertyName = getStaticString(property.name, new Map());
-            if (propertyName !== undefined) {
-              staticKeys.add(`${consumer.prefix}${propertyName}`);
-            } else if (ts.isIdentifier(property.name)) {
-              staticKeys.add(`${consumer.prefix}${property.name.text}`);
-            }
-          }
-        }
-      }
-      ts.forEachChild(node, visit);
-    }
-    visit(sourceFile);
-
-    if (!matchedObject) {
-      findings.push({
-        file: "scripts/quality/message-key-usage-baseline.js",
-        error: `message object-key consumer is stale "${consumer.file}#${consumer.objectName}"`,
-      });
-    }
-  }
-
-  return { findings, staticKeys };
-}
-
 function collectBindingIdentifiers(bindingName, identifiers) {
   if (ts.isIdentifier(bindingName)) {
     identifiers.push(bindingName.text);
@@ -588,7 +576,7 @@ function collectFileStringConstants({ file, content }) {
     if (ts.isVariableDeclaration(node)) {
       recordBinding(
         node.name,
-        node.initializer
+        isConstVariableDeclaration(node) && node.initializer
           ? getStaticString(node.initializer, new Map())
           : undefined,
       );
@@ -766,8 +754,13 @@ function collectMessageKeyUsageFindings({
   });
 
   const objectKeyUsage = collectObjectKeyConsumerUsage({
-    sourceEntries,
+    sourceProgram: {
+      checker: sourceUsage.checker,
+      sourceFiles: sourceUsage.sourceFiles,
+    },
     objectKeyConsumers,
+    unwrapExpression,
+    getStaticString,
   });
   const derivedKeyUsage = collectDerivedKeyConsumerUsage({
     sourceEntries,
@@ -779,7 +772,6 @@ function collectMessageKeyUsageFindings({
     derivedKeyConsumers,
     unwrapExpression,
     getStaticString,
-    getCallName,
   });
   const staticKeys = new Set([
     ...sourceUsage.staticKeys,
@@ -823,7 +815,6 @@ function runMessageKeyUsageCheck() {
 
 module.exports = {
   collectDerivedKeyConsumerUsage,
-  collectObjectKeyConsumerUsage,
   collectMessageKeyUsageFindings,
   collectUsageSourceFiles,
   getCatalogKeys,
