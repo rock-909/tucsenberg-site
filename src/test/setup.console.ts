@@ -8,7 +8,7 @@
  * - 需要调试时允许显式开启（VITEST_SHOW_LOGS=1）
  */
 
-import { afterEach, beforeEach } from "vitest";
+import { afterEach } from "vitest";
 
 function isTruthyEnv(value: string | undefined): boolean {
   return value === "1" || value === "true" || value === "TRUE";
@@ -43,10 +43,6 @@ export function createUnexpectedConsoleError(
 
   return new Error(`Unexpected console.error call(s):\n${details}`);
 }
-
-beforeEach(() => {
-  unexpectedConsoleErrors.length = 0;
-});
 
 afterEach(() => {
   const calls = unexpectedConsoleErrors.splice(0);

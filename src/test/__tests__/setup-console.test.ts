@@ -61,4 +61,18 @@ describe("unexpected console.error gate", () => {
 
     expect(expected.status, expectedOutput).toBe(0);
   });
+
+  it("also rejects errors raised during module loading or after an expected capture", () => {
+    for (const [fixture, sentinel] of [
+      ["top-level-unexpected.fixture.ts", "console-gate-top-level-sentinel"],
+      ["mixed.fixture.ts", "console-gate-mixed-unexpected-sentinel"],
+    ] as const) {
+      const result = runConsoleGateFixture(fixture);
+      const output = `${result.stdout}${result.stderr}`;
+
+      expect(result.status).not.toBe(0);
+      expect(output).toContain("Unexpected console.error call(s)");
+      expect(output).toContain(sentinel);
+    }
+  });
 });
