@@ -1,6 +1,7 @@
 const { execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const { parser } = require("typescript-eslint");
 
 const ROOT = process.cwd();
 
@@ -19,7 +20,6 @@ const STRUCTURAL_GUARDRAIL_RULES = new Set([
   "max-params",
   "max-statements",
 ]);
-const ESLINT_DIRECTIVE_PATTERN = /eslint-disable|eslint-enable/;
 
 function getRepoFiles() {
   try {
@@ -165,6 +165,25 @@ function parseDisableDirective(line, directive) {
   return { rules, reason };
 }
 
+function extractCommentLines(filePath, content) {
+  const result = parser.parseForESLint(content, {
+    comment: true,
+    filePath,
+    loc: true,
+    range: true,
+  });
+
+  return (result.ast.comments ?? []).map((comment) => {
+    const leadingWhitespace = comment.value.match(/^\s*/u)?.[0] ?? "";
+    const lineOffset = leadingWhitespace.match(/\n/gu)?.length ?? 0;
+
+    return {
+      line: comment.loc.start.line + lineOffset,
+      text: comment.value.slice(leadingWhitespace.length).trimEnd(),
+    };
+  });
+}
+
 function analyzeSource(filePath, content, options = {}) {
   const registeredGuardrailExceptionIds =
     options.registeredGuardrailExceptionIds ?? new Set();
@@ -173,28 +192,8 @@ function analyzeSource(filePath, content, options = {}) {
   const testFile = isTestFile(filePath);
   const productionFile = isProductionFile(filePath);
 
-  function extractDirectiveText(trimmed) {
-    if (trimmed.startsWith("//")) return trimmed.slice(2).trim();
-    if (trimmed.startsWith("/*")) return trimmed.slice(2).trim();
-    if (trimmed.startsWith("*")) return trimmed.slice(1).trim();
-
-    const jsxBlockIdx = trimmed.indexOf("{/*");
-    if (jsxBlockIdx !== -1) {
-      return trimmed.slice(jsxBlockIdx + 3).trim();
-    }
-
-    return null;
-  }
-
-  for (let i = 0; i < lines.length; i += 1) {
-    const rawLine = lines[i] ?? "";
-    const directiveMarker = ESLINT_DIRECTIVE_PATTERN.exec(rawLine)?.[0];
-    if (directiveMarker !== "eslint-disable") continue;
-
-    const trimmed = rawLine.trim();
-    const directiveText = extractDirectiveText(trimmed);
-    if (!directiveText) continue;
-
+  for (const commentLine of extractCommentLines(filePath, content)) {
+    const directiveText = commentLine.text;
     const directiveMatch = directiveText.match(
       /^eslint-disable(?:-next-line|-line)?\b/,
     );
@@ -241,9 +240,9 @@ function analyzeSource(filePath, content, options = {}) {
     if (violations.length > 0) {
       findings.push({
         filePath,
-        line: i + 1,
+        line: commentLine.line,
         directive,
-        content: trimmed,
+        content: (lines[commentLine.line - 1] ?? "").trim(),
         violations,
       });
     }

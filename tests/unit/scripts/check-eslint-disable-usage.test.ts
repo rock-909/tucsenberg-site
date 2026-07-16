@@ -188,6 +188,187 @@ export function Example() {
     },
   );
 
+  it("detects trailing-comment eslint-disable directives", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const value = 1; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings.length).toBeGreaterThan(0);
+    expect(
+      findings.some(
+        (finding) =>
+          finding.directive === "eslint-disable-line" &&
+          finding.violations.includes("missing production-code reason"),
+      ),
+    ).toBe(true);
+  });
+
+  it("detects trailing eslint-disable after a URL string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const url = "https://example.com"; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it("detects trailing block-comment eslint-disable after a URL string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const url = "https://example.com"; /* eslint-disable-line no-unused-vars */
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it("detects trailing eslint-disable after a regex literal", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const x = /https?:\\/\\//; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it("allows trailing eslint-disable with a production reason", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const value = 1; // eslint-disable-line no-unused-vars -- retained for intentional fixture escape
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([]);
+  });
+
+  it("detects real trailing eslint-disable after a prior directive-looking string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = "eslint-disable"; // eslint-disable-line no-unused-vars
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it("ignores eslint-disable text that only appears inside a string", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = "// eslint-disable-line no-unused-vars";
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([]);
+  });
+
+  it("detects eslint-disable inside a template expression", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = \`\${value /* eslint-disable-line no-unused-vars */}\`;
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
+  it.each([
+    [
+      "a starred line comment",
+      `// * eslint-disable-line no-unused-vars
+const value = 1;`,
+    ],
+    [
+      "a JSDoc block",
+      `/** eslint-disable-next-line no-unused-vars */
+const value = 1;`,
+    ],
+  ])("ignores directive-looking text in %s", (_label, source) => {
+    const findings = analyzeSource("src/lib/example.ts", source, {
+      registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+        REGISTER_WITH_CONTACT_EXCEPTION,
+      ),
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(
       "src/lib/security/__tests__/distributed-rate-limit.test.ts",
