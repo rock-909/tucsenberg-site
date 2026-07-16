@@ -161,7 +161,6 @@ vi.mock("@/lib/env", () => {
       readProcessEnvValue("NODE_ENV") === "development",
     isPublicRuntimeProduction: () =>
       readProcessEnvValue("NODE_ENV") === "production",
-    isPublicRuntimeTest: () => readProcessEnvValue("NODE_ENV") === "test",
     isRuntimeCi: () => readProcessEnvValue("CI") === "true",
     isRuntimePlaywright: () =>
       readProcessEnvValue("PLAYWRIGHT_TEST") === "true",

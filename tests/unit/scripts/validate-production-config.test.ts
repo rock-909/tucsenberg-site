@@ -177,6 +177,48 @@ describe("validate-production-config runtime contract", () => {
       ]),
     );
   });
+
+  it.each([
+    {
+      name: "Upstash",
+      remove: ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      message: "Production rate limiting requires Upstash Redis",
+    },
+    {
+      name: "rate-limit pepper",
+      remove: ["RATE_LIMIT_PEPPER"],
+      message: "RATE_LIMIT_PEPPER is required",
+    },
+    {
+      name: "Resend",
+      remove: ["RESEND_API_KEY"],
+      message: "RESEND_API_KEY is required",
+    },
+    {
+      name: "Airtable API key",
+      remove: ["AIRTABLE_API_KEY"],
+      message: "AIRTABLE_API_KEY is required",
+    },
+    {
+      name: "Airtable base",
+      remove: ["AIRTABLE_BASE_ID"],
+      message: "AIRTABLE_BASE_ID is required",
+    },
+  ])(
+    "fails closed when a complete production fixture loses $name",
+    (fixture) => {
+      const env = createValidProductionEnv();
+      for (const key of fixture.remove) {
+        delete env[key];
+      }
+
+      const result = validateProductionRuntimeContract(env);
+
+      expect(result.errors).toEqual(
+        expect.arrayContaining([expect.stringContaining(fixture.message)]),
+      );
+    },
+  );
 });
 
 describe("validateProductionConfig CI vs deploy gate", () => {
