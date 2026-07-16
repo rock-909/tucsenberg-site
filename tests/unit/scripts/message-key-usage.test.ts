@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { collectMessageKeyUsageFindings } from "../../../scripts/quality/checks/message-key-usage.js";
+import { UNUSED_MESSAGE_KEYS } from "../../../scripts/quality/message-key-usage-baseline.js";
 
 const tempDirs: string[] = [];
 const TEMP_TRASH_ROOT = path.join(
@@ -38,23 +39,18 @@ function collect({
   catalogKeys,
   content = "export {};",
   dynamicPrefixAllowlist = [],
+  derivedKeyConsumers = [],
   objectKeyConsumers = [],
-  subtreeConsumers = [],
   unusedKeyAllowlist = [],
 }: {
   catalogKeys: string[];
   content?: string;
   dynamicPrefixAllowlist?: Array<{ prefix: string; reason: string }>;
+  derivedKeyConsumers?: Array<Record<string, unknown>>;
   objectKeyConsumers?: Array<{
     file: string;
     objectName: string;
     prefix: string;
-    reason: string;
-  }>;
-  subtreeConsumers?: Array<{
-    file: string;
-    prefix: string;
-    anchor: string;
     reason: string;
   }>;
   unusedKeyAllowlist?: string[];
@@ -65,8 +61,8 @@ function collect({
     catalogKeys: new Set(catalogKeys),
     sourceFiles: [file],
     dynamicPrefixAllowlist,
+    derivedKeyConsumers,
     objectKeyConsumers,
-    subtreeConsumers,
     translatorBindingOverrides: [],
     translatorParameterOverrides: [],
     unusedKeyAllowlist,
@@ -80,6 +76,11 @@ afterEach(() => {
 });
 
 describe("message key usage gate", () => {
+  it("baselines the known runtime default locale email residue exactly", () => {
+    const key = ["emailTemplates", "runtimeDefaultLocale"].join(".");
+    expect(UNUSED_MESSAGE_KEYS).toContain(key);
+  });
+
   it("accepts a statically consumed catalog key", () => {
     expect(
       collect({
@@ -157,6 +158,21 @@ describe("message key usage gate", () => {
 
     expect(
       collect({
+        catalogKeys: ["example.items.one", "example.items.deadSibling"],
+        content,
+        dynamicPrefixAllowlist: [
+          { prefix: "example.items.", reason: "fixture" },
+        ],
+        unusedKeyAllowlist: ["example.items.one"],
+      }),
+    ).toContainEqual({
+      file: "messages",
+      error:
+        'message key has no detected consumer and is not baselined "example.items.deadSibling"',
+    });
+
+    expect(
+      collect({
         catalogKeys: ["example.other"],
         dynamicPrefixAllowlist: [
           { prefix: "example.items.", reason: "fixture" },
@@ -221,29 +237,75 @@ describe("message key usage gate", () => {
     });
   });
 
-  it("accepts anchored subtree consumers and rejects stale anchors", () => {
+  it("derives only exact collection keys and detects missing required leaves", () => {
     const consumer = {
+      kind: "collection-values",
       file: "src/example.ts",
+      sourceName: "ITEM_KEYS",
       prefix: "example.items.",
-      anchor: "consumeItems(messages)",
+      suffixes: [".title"],
       reason: "fixture",
     };
     expect(
       collect({
-        catalogKeys: ["example.items.one"],
-        content: "export const value = consumeItems(messages);",
-        subtreeConsumers: [consumer],
+        catalogKeys: ["example.items.one.title", "example.items.dead.title"],
+        content: 'const ITEM_KEYS = ["one"] as const;',
+        derivedKeyConsumers: [consumer],
+        unusedKeyAllowlist: ["example.items.dead.title"],
       }),
     ).toEqual([]);
+
     expect(
       collect({
-        catalogKeys: ["example.items.one"],
-        subtreeConsumers: [consumer],
+        catalogKeys: [],
+        content: 'const ITEM_KEYS = ["one"] as const;',
+        derivedKeyConsumers: [consumer],
+      }),
+    ).toContainEqual({
+      file: "message usage",
+      error:
+        'used message key is missing from the catalog "example.items.one.title"',
+    });
+  });
+
+  it("does not let a property-access root hide an unaccessed sibling", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used", "example.deadSibling"],
+        content:
+          "const copy = messages.example; export const value = copy.used;",
+        derivedKeyConsumers: [
+          {
+            kind: "property-accesses",
+            file: "src/example.ts",
+            rootName: "copy",
+            prefix: "example.",
+            reason: "fixture",
+          },
+        ],
+        unusedKeyAllowlist: ["example.deadSibling"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("rejects stale derived consumer anchors", () => {
+    expect(
+      collect({
+        catalogKeys: [],
+        derivedKeyConsumers: [
+          {
+            kind: "exact-keys",
+            file: "src/example.ts",
+            anchors: ["REMOVED_ANCHOR"],
+            keys: ["example.used"],
+            reason: "fixture",
+          },
+        ],
       }),
     ).toContainEqual({
       file: "scripts/quality/message-key-usage-baseline.js",
       error:
-        'message subtree consumer is stale "src/example.ts#example.items."',
+        'derived message key consumer is stale "src/example.ts#exact-keys"',
     });
   });
 
