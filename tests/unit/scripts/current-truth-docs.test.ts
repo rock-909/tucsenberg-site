@@ -342,7 +342,12 @@ describe("current-truth docs guard", () => {
       "docs/项目基础/文档清单.md":
         "| Path | Class | Notes |\n| --- | --- | --- |",
       "docs/current.md": "Use `src/missing.ts` as the runtime entry.",
-      "docs/negated.md": "Do not create `src/proxy.ts` for this project.",
+      "docs/negated.md": [
+        "Do not create `src/proxy.ts` for this project.",
+        "Do not rename `src/live.ts` to `src/renamed.ts`.",
+        "`src/not-created.ts` is not created.",
+      ].join("\n"),
+      "src/live.ts": "export const live = true;",
     };
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
@@ -352,6 +357,54 @@ describe("current-truth docs guard", () => {
         "docs/current.md",
         "docs/negated.md",
       ]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/missing.ts"',
+      },
+    ]);
+  });
+
+  it("requires wildcard paths to match files and checks directory references", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| Path | Class | Notes |\n| --- | --- | --- |",
+      "docs/current.md": [
+        "Use `src/empty/*.ts` as the runtime source.",
+        "Keep the helpers under `tests/missing-directory`.",
+      ].join("\n"),
+      "src/empty/.gitkeep": "",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/empty/*.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "tests/missing-directory"',
+      },
+    ]);
+  });
+
+  it("does not let an unrelated negation hide a positive path reference", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| Path | Class | Notes |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use the legacy entry. Use `src/missing.ts` as the runtime entry.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
     ).toEqual([
       {
         file: "docs/current.md",

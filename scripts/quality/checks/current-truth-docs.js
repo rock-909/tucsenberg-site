@@ -439,21 +439,49 @@ function normalizeDocumentedRepoPath(rawPath) {
 function documentedRepoPathExists(rootDir, documentedPath) {
   if (fs.existsSync(path.join(rootDir, documentedPath))) return true;
 
-  const firstPatternIndex = documentedPath.search(/[?*{]/u);
-  if (firstPatternIndex !== -1) {
-    const staticPrefix = documentedPath
-      .slice(0, firstPatternIndex)
-      .replace(/\/$/u, "");
-    if (staticPrefix && fs.existsSync(path.join(rootDir, staticPrefix))) {
-      return true;
-    }
-  }
-
   try {
+    const firstPatternIndex = documentedPath.search(/[?*{]/u);
+    if (firstPatternIndex !== -1) {
+      const staticPrefix = documentedPath
+        .slice(0, firstPatternIndex)
+        .replace(/\/$/u, "");
+      const staticRoot = path.join(rootDir, staticPrefix);
+      if (staticPrefix && fs.existsSync(staticRoot)) {
+        const relativePattern = documentedPath
+          .slice(staticPrefix.length)
+          .replace(/^\/+/, "");
+        return fs.globSync(relativePattern, { cwd: staticRoot }).length > 0;
+      }
+    }
     return fs.globSync(documentedPath, { cwd: rootDir }).length > 0;
   } catch {
     return false;
   }
+}
+
+function isNegatedDocumentedPath(content, lineStart, matchIndex) {
+  const currentLinePrefix = content.slice(lineStart, matchIndex);
+  const previousLineEnd = Math.max(0, lineStart - 1);
+  const previousLineStart = content.lastIndexOf("\n", previousLineEnd - 1) + 1;
+  const previousLine = content.slice(previousLineStart, previousLineEnd);
+  const currentLineEnd = content.indexOf("\n", matchIndex);
+  const currentLineSuffix = content.slice(
+    matchIndex,
+    currentLineEnd === -1 ? undefined : currentLineEnd,
+  );
+  const clausePrefix = currentLinePrefix.trim()
+    ? currentLinePrefix
+    : `${previousLine}\n${currentLinePrefix}`;
+  const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
+
+  return (
+    /(?:\b(?:do not|does not|must not|never|not rename|not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)[^，。；：！？]{0,72})\s*$/iu.test(
+      normalizedClausePrefix,
+    ) ||
+    /^`[^`]+`\s+(?:is not created|does not exist|is not present)\b/iu.test(
+      currentLineSuffix,
+    )
+  );
 }
 
 function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
@@ -481,29 +509,7 @@ function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
       if (!documentedPath) continue;
       if (documentedRepoPathExists(rootDir, documentedPath)) continue;
       const lineStart = content.lastIndexOf("\n", match.index) + 1;
-      const lineEnd = content.indexOf("\n", match.index);
-      const line = content.slice(
-        lineStart,
-        lineEnd === -1 ? undefined : lineEnd,
-      );
-      const previousLineStart = content.lastIndexOf(
-        "\n",
-        Math.max(0, lineStart - 2),
-      );
-      const context = content.slice(
-        previousLineStart + 1,
-        lineEnd === -1 ? undefined : lineEnd,
-      );
-      if (
-        /\b(?:do not|does not|must not|never|not rename|not created|no live)\b/iu.test(
-          context,
-        ) ||
-        /(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)/u.test(context)
-      ) {
-        continue;
-      }
-      const basename = path.posix.basename(documentedPath);
-      if (!basename.includes(".") && !/[?*{]/u.test(documentedPath)) {
+      if (isNegatedDocumentedPath(content, lineStart, match.index)) {
         continue;
       }
       findings.push({
