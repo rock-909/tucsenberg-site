@@ -62,7 +62,14 @@ vi.mock("next/navigation", () => ({
 const mockPathname: { current: string | undefined } = { current: "/" };
 
 vi.mock("@/i18n/routing", () => ({
-  Link: ({ children, href, className, onClick, ...props }: any) => (
+  Link: ({
+    children,
+    href,
+    className,
+    onClick,
+    prefetch: _prefetch,
+    ...props
+  }: any) => (
     <a
       href={stringifyMockHref(href)}
       className={className}

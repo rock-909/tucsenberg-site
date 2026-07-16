@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import http from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { captureExpectedConsoleErrors } from "@/test/console";
 import {
   runCloudflarePreviewSmoke,
   runDeployedSmoke,
@@ -311,6 +312,10 @@ describe("cloudflare preview smoke", () => {
   });
 
   it("fails when the removed Chinese route becomes live again", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "[cf-preview-smoke] Failures detected:",
+      "  - Expected /zh to return 404",
+    );
     const previewFetchMock = createPreviewFetchMock();
     const fetchMock = vi.fn(
       async (input: RequestInfo | URL): Promise<Response> => {
@@ -326,6 +331,7 @@ describe("cloudflare preview smoke", () => {
     await expect(
       runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
     ).resolves.toBe(false);
+    expect(consoleError).toHaveBeenCalledTimes(2);
   });
 });
 

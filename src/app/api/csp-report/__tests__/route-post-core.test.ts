@@ -8,14 +8,14 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
-import { suppressExpectedCspConsole } from "./test-utils";
+import { suppressExpectedCspWarnings } from "./test-utils";
 
 // Unmock zod to use real validation in this test file
 
 describe("CSP Report API Route - 核心功能测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    suppressExpectedCspConsole();
+    suppressExpectedCspWarnings();
   });
 
   afterEach(() => {
@@ -35,7 +35,7 @@ describe("CSP Report API Route - 核心功能测试", () => {
       "column-number": 10,
       "source-file": "https://example.com/page",
       "status-code": 200,
-      "script-sample": 'eval("malicious code")',
+      "script-sample": "console.log('policy sample')",
     },
   };
 
@@ -241,7 +241,7 @@ describe("CSP Report API Route - 核心功能测试", () => {
             sourceFile: "https://example.com/page",
             lineNumber: 42,
             columnNumber: 10,
-            sample: 'eval("malicious code")',
+            sample: "console.log('reporting sample')",
           },
         },
       ];

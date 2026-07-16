@@ -94,24 +94,18 @@ describe("CookieConsentIsland", () => {
   it("keeps the cookie banner usable when analytics island rendering fails", async () => {
     vi.stubEnv("NODE_ENV", "production");
     mockEnterpriseAnalyticsState.shouldThrow = true;
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
+    const onCaughtError = vi.fn();
+    const { CookieConsentIsland } = await import("../cookie-consent-island");
+    render(<CookieConsentIsland />, { onCaughtError });
 
-    try {
-      const { CookieConsentIsland } = await import("../cookie-consent-island");
-      render(<CookieConsentIsland />);
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
 
-      await act(async () => {
-        await vi.dynamicImportSettled();
-      });
-
-      expect(screen.getByTestId("lazy-cookie-banner")).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("enterprise-analytics-island"),
-      ).not.toBeInTheDocument();
-    } finally {
-      consoleError.mockRestore();
-    }
+    expect(screen.getByTestId("lazy-cookie-banner")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("enterprise-analytics-island"),
+    ).not.toBeInTheDocument();
+    expect(onCaughtError).toHaveBeenCalledTimes(1);
   });
 });

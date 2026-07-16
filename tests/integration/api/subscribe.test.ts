@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as route from "@/app/api/subscribe/route";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { captureExpectedConsoleErrors } from "@/test/console";
 
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
   checkDistributedRateLimit: vi.fn(async () => ({
@@ -160,6 +161,9 @@ describe("api/subscribe", () => {
   });
 
   it("returns 503 when turnstile verification is unavailable", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Lead Turnstile verification unavailable",
+    );
     const utils = await import("@/lib/security/turnstile");
     (
       utils.verifyTurnstileDetailed as ReturnType<typeof vi.fn>
@@ -175,6 +179,7 @@ describe("api/subscribe", () => {
     const json = await res.json();
     expect(json.success).toBe(false);
     expect(json.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
+    expect(consoleError).toHaveBeenCalledTimes(1);
   });
 
   it("returns success when the newsletter record is created", async () => {

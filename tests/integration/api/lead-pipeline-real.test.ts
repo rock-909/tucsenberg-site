@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { captureExpectedConsoleErrors } from "@/test/console";
 
 /**
  * Real end-to-end lead-pipeline proof.
@@ -249,6 +250,10 @@ describe("lead pipeline (real end-to-end proof)", () => {
   });
 
   it("airtable failure: still succeeds and delivers the owner email", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to create lead record",
+      "Product Airtable createLead failed",
+    );
     airtableCreateMock.mockRejectedValue(new Error("airtable down"));
 
     const response = await inquiryRoute.POST(
@@ -260,9 +265,16 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(body.success).toBe(true);
     expect(body.data.referenceId).toMatch(/^PRO-/);
     expect(getResendCalls()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalledTimes(2);
   });
 
   it("both channels fail: rejects with an inquiry processing error", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to create lead record",
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+      "Product Airtable createLead failed",
+    );
     airtableCreateMock.mockRejectedValue(new Error("airtable down"));
     fetchMock.mockImplementation(async (input: unknown) => {
       const url = resolveFetchUrl(input);
@@ -287,5 +299,6 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(body.success).toBe(false);
     expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     expect(getResendCalls()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalledTimes(4);
   });
 });

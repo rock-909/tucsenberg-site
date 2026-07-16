@@ -4,6 +4,7 @@
     "scripts/**/*.{js,mjs,ts}",
     "tests/**/*.{ts,tsx}",
     "src/**/__tests__/**/*.{ts,tsx}",
+    "src/test/fixtures/console-gate/*.fixture.ts",
     "src/**/*.stories.{ts,tsx}",
     "*.config.{js,mjs,ts,mts}",
     "open-next.config.ts"

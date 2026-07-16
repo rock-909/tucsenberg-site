@@ -6,7 +6,7 @@
  */
 
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ContactFormContainer } from "@/components/forms/contact-form-container";
 import type { UseContactFormResult } from "@/components/forms/use-contact-form";
 
@@ -67,42 +67,9 @@ vi.mock("next-intl", () => ({
   useTranslations: () => mockT,
 }));
 
-const originalRequestIdleCallback = window.requestIdleCallback;
-const originalCancelIdleCallback = window.cancelIdleCallback;
-const originalIntersectionObserver = (
-  globalThis as typeof globalThis & {
-    IntersectionObserver?: typeof IntersectionObserver;
-  }
-).IntersectionObserver;
-
-class MockIntersectionObserver implements IntersectionObserver {
-  readonly root: Element | Document | null = null;
-  readonly rootMargin = "";
-  readonly scrollMargin = "";
-  readonly thresholds = [0];
-
-  constructor(private readonly callback: IntersectionObserverCallback) {}
-
-  observe: IntersectionObserver["observe"] = vi.fn((element: Element) => {
-    this.callback(
-      [
-        {
-          isIntersecting: true,
-          target: element,
-        } as IntersectionObserverEntry,
-      ],
-      this,
-    );
-  });
-
-  unobserve: IntersectionObserver["unobserve"] = vi.fn();
-  disconnect: IntersectionObserver["disconnect"] = vi.fn();
-  takeRecords: IntersectionObserver["takeRecords"] = vi.fn(() => []);
-}
-
 // Mock Turnstile
-vi.mock("@marsidev/react-turnstile", () => ({
-  Turnstile: ({
+vi.mock("@/components/forms/lazy-turnstile", () => ({
+  LazyTurnstile: ({
     onSuccess,
     onError,
     onExpire,
@@ -113,64 +80,29 @@ vi.mock("@marsidev/react-turnstile", () => ({
   }) => (
     <div data-testid="turnstile-mock">
       <button
+        type="button"
         data-testid="turnstile-success"
         onClick={() => onSuccess?.("mock-token")}
       >
         Success
       </button>
       <button
+        type="button"
         data-testid="turnstile-error"
         onClick={() => onError?.("mock-error")}
       >
         Error
       </button>
-      <button data-testid="turnstile-expire" onClick={() => onExpire?.()}>
+      <button
+        type="button"
+        data-testid="turnstile-expire"
+        onClick={() => onExpire?.()}
+      >
         Expire
       </button>
     </div>
   ),
 }));
-
-vi.mock("next/dynamic", async () => {
-  const React = await import("react");
-  return {
-    default: (
-      importer: () => Promise<{ default?: React.ComponentType<any> }>,
-    ) => {
-      return function DynamicComponent(props: Record<string, unknown>) {
-        const [Loaded, setLoaded] =
-          React.useState<React.ComponentType<any> | null>(null);
-
-        React.useEffect(() => {
-          let mounted = true;
-          importer().then((mod) => {
-            if (!mounted) return;
-            const Component =
-              mod?.default ?? (mod as unknown as React.ComponentType<any>);
-            setLoaded(() => Component);
-          });
-          return () => {
-            mounted = false;
-          };
-        }, []);
-
-        if (!Loaded) {
-          return null;
-        }
-
-        return React.createElement(Loaded, props);
-      };
-    },
-  };
-});
-
-const renderContactForm = async () => {
-  let result: ReturnType<typeof render>;
-  await act(async () => {
-    result = render(<ContactFormContainer />);
-  });
-  return result!;
-};
 
 function createContactFormHook(
   overrides: Partial<UseContactFormResult> = {},
@@ -243,32 +175,6 @@ describe("ContactFormContainer - 核心功能", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (
-      window as typeof window & {
-        requestIdleCallback?: typeof globalThis.requestIdleCallback;
-        cancelIdleCallback?: typeof globalThis.cancelIdleCallback;
-      }
-    ).requestIdleCallback = vi.fn((callback: IdleRequestCallback) => {
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 1,
-      });
-      return 1 as unknown as number;
-    });
-
-    (
-      window as typeof window & {
-        cancelIdleCallback?: typeof globalThis.cancelIdleCallback;
-      }
-    ).cancelIdleCallback = vi.fn();
-
-    (
-      globalThis as typeof globalThis & {
-        IntersectionObserver?: typeof IntersectionObserver;
-      }
-    ).IntersectionObserver =
-      MockIntersectionObserver as unknown as typeof IntersectionObserver;
-
     // Default useActionState mock - idle state
     mockUseActionState.mockReturnValue([
       null, // state
@@ -278,33 +184,9 @@ describe("ContactFormContainer - 核心功能", () => {
     mockContactForm();
   });
 
-  afterEach(() => {
-    (
-      window as typeof window & {
-        requestIdleCallback?: typeof globalThis.requestIdleCallback;
-        cancelIdleCallback?: typeof globalThis.cancelIdleCallback;
-      }
-    ).requestIdleCallback = originalRequestIdleCallback;
-    (
-      window as typeof window & {
-        cancelIdleCallback?: typeof globalThis.cancelIdleCallback;
-      }
-    ).cancelIdleCallback = originalCancelIdleCallback;
-
-    if (originalIntersectionObserver) {
-      (
-        globalThis as typeof globalThis & {
-          IntersectionObserver?: typeof IntersectionObserver;
-        }
-      ).IntersectionObserver = originalIntersectionObserver;
-    } else {
-      Reflect.deleteProperty(globalThis, "IntersectionObserver");
-    }
-  });
-
   describe("基础渲染", () => {
     it("应该正确渲染联系表单", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 检查表单元素存在
       expect(
@@ -319,7 +201,7 @@ describe("ContactFormContainer - 核心功能", () => {
     });
 
     it("应该渲染所有必需的表单字段", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 检查所有字段是否存在
       // Note: phone field is disabled per Lead Pipeline requirements
@@ -331,7 +213,7 @@ describe("ContactFormContainer - 核心功能", () => {
     });
 
     it("提交按钮初始状态应该被禁用", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       const submitButton = screen.getByRole("button", { name: /submit/i });
       expect(submitButton).toBeDisabled();
@@ -350,7 +232,7 @@ describe("ContactFormContainer - 核心功能", () => {
         submitStatus: "error",
       });
 
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 验证错误状态消息已显示
       expect(
@@ -369,7 +251,7 @@ describe("ContactFormContainer - 核心功能", () => {
         submitStatus: "error",
       });
 
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 验证错误状态消息已显示
       expect(
@@ -380,7 +262,7 @@ describe("ContactFormContainer - 核心功能", () => {
 
   describe("Turnstile 集成", () => {
     it("Turnstile 成功后应该启用提交按钮", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       const submitButton = screen.getByRole("button", { name: /submit/i });
       expect(submitButton).toBeDisabled();
@@ -391,7 +273,7 @@ describe("ContactFormContainer - 核心功能", () => {
     });
 
     it("Turnstile 错误后应该禁用提交按钮", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 先成功，再错误
       const successButton = await screen.findByTestId("turnstile-success");
@@ -404,7 +286,7 @@ describe("ContactFormContainer - 核心功能", () => {
     });
 
     it("Turnstile 过期后应该禁用提交按钮", async () => {
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 先成功，再过期
       const successButton = await screen.findByTestId("turnstile-success");
@@ -425,7 +307,7 @@ describe("ContactFormContainer - 核心功能", () => {
         submitStatus: "success",
       });
 
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 检查成功消息 - 使用翻译文本
       expect(screen.getByText("Message sent successfully")).toBeInTheDocument();
@@ -442,7 +324,7 @@ describe("ContactFormContainer - 核心功能", () => {
         submitStatus: "error",
       });
 
-      await renderContactForm();
+      render(<ContactFormContainer />);
 
       // 检查错误消息 - 使用翻译文本
       expect(

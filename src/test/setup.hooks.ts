@@ -38,26 +38,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// Console error suppression for known issues
-const originalError = console.error;
-beforeEach(() => {
-  console.error = (...args: unknown[]) => {
-    if (
-      typeof args[0] === "string" &&
-      (args[0].includes("Warning: ReactDOM.render is deprecated") ||
-        args[0].includes("Warning: React.createFactory() is deprecated") ||
-        args[0].includes("Warning: componentWillReceiveProps has been renamed"))
-    ) {
-      return;
-    }
-    originalError.call(console, ...args);
-  };
-});
-
-afterEach(() => {
-  console.error = originalError;
-});
-
 // Ensure each test starts from a clean slate under Vitest v4
 beforeEach(() => {
   vi.resetAllMocks();

@@ -263,9 +263,7 @@ describe("LazyTurnstile", () => {
   it("shows a safe fallback and reports an error when the widget fails", async () => {
     mockTurnstileState.shouldThrow = true;
     const onError = vi.fn();
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
+    const onCaughtError = vi.fn();
     const labels = {
       unavailable: "安全验证暂时不可用。",
       loadFailed: "安全验证加载失败。",
@@ -273,20 +271,19 @@ describe("LazyTurnstile", () => {
       testMode: "测试模式下已关闭机器人防护",
     };
 
-    try {
-      render(<LazyTurnstile onError={onError} labels={labels} />);
+    render(<LazyTurnstile onError={onError} labels={labels} />, {
+      onCaughtError,
+    });
 
-      await act(async () => {
-        idleCallbacks[0]?.();
-        await vi.dynamicImportSettled();
-      });
+    await act(async () => {
+      idleCallbacks[0]?.();
+      await vi.dynamicImportSettled();
+    });
 
-      expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
-      expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
-      expect(onError).toHaveBeenCalledWith(labels.loadFailed);
-    } finally {
-      consoleError.mockRestore();
-    }
+    expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+    expect(onError).toHaveBeenCalledWith(labels.loadFailed);
+    expect(onCaughtError).toHaveBeenCalledTimes(1);
   });
 
   it("passes localized availability labels to the shared widget", async () => {

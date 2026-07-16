@@ -107,10 +107,6 @@ describe("createStaticMarkdownContent", () => {
   });
 
   it("renders repeated paragraph text without duplicate React key warnings", () => {
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-
     render(
       <>
         {createStaticMarkdownContent(
@@ -120,15 +116,6 @@ describe("createStaticMarkdownContent", () => {
     );
 
     expect(screen.getAllByText("You have the right to:")).toHaveLength(2);
-    expect(
-      consoleError.mock.calls.some((call) =>
-        call.some(
-          (entry) =>
-            typeof entry === "string" &&
-            entry.includes("Encountered two children with the same key"),
-        ),
-      ),
-    ).toBe(false);
   });
 });
 

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { suppressExpectedCspConsole } from "./test-utils";
+import { captureExpectedConsoleErrors } from "@/test/console";
+import { suppressExpectedCspWarnings } from "./test-utils";
 
 async function importRouteModule() {
   return import("../route");
@@ -44,7 +45,7 @@ function getAllowMethods(response: Response): string[] {
 describe("CSP Report API Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    suppressExpectedCspConsole();
+    suppressExpectedCspWarnings();
   });
 
   afterEach(() => {
@@ -65,7 +66,7 @@ describe("CSP Report API Route", () => {
         "column-number": 10,
         "source-file": "https://example.com/page",
         "status-code": 200,
-        "script-sample": 'eval("malicious code")',
+        "script-sample": "console.log('policy sample')",
       },
     };
 
@@ -267,6 +268,9 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该检测可疑的违规模式", async () => {
+      const consoleError = captureExpectedConsoleErrors(
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+      );
       const suspiciousReport = {
         "csp-report": {
           ...validCSPReport["csp-report"],
@@ -287,7 +291,7 @@ describe("CSP Report API Route", () => {
       const response = await callPOST(request);
 
       expect(response.status).toBe(200);
-      expect(console.error).toHaveBeenCalledWith(
+      expect(consoleError).toHaveBeenCalledWith(
         "SUSPICIOUS CSP VIOLATION DETECTED",
         expect.objectContaining({
           ip: "[REDACTED_IP]",
@@ -362,30 +366,34 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该处理生产环境的特殊日志记录", async () => {
-      vi.doMock("@/lib/env", () => {
+      const consoleError = captureExpectedConsoleErrors(
+        "Production CSP Violation",
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+      );
+      vi.doMock("@/lib/env", async (importOriginal) => {
+        const actual = await importOriginal<typeof import("@/lib/env")>();
         const env = {
+          ...actual.env,
           NODE_ENV: "production",
           CSP_REPORT_URI: "https://example.com/csp-report",
         };
 
         return {
+          ...actual,
           env,
           runtimeEnv: env,
-          isRuntimeProduction: () => true,
-          getRuntimeEnvString: (key: string) => {
-            if (key === "NODE_ENV") return "production";
-            if (key === "CSP_REPORT_URI")
-              return "https://example.com/csp-report";
-            if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
-            return undefined;
-          },
         };
       });
       vi.resetModules();
 
       const request = new NextRequest("http://localhost:3000/api/csp-report", {
         method: "POST",
-        body: JSON.stringify(validCSPReport),
+        body: JSON.stringify({
+          "csp-report": {
+            ...validCSPReport["csp-report"],
+            "script-sample": 'eval("production sample")',
+          },
+        }),
         headers: {
           "content-type": "application/csp-report",
         },
@@ -394,7 +402,7 @@ describe("CSP Report API Route", () => {
       await callPOST(request);
 
       // 在生产环境中应该记录到console.error (因为validCSPReport包含可疑内容)
-      expect(console.error).toHaveBeenCalledWith(
+      expect(consoleError).toHaveBeenCalledWith(
         "SUSPICIOUS CSP VIOLATION DETECTED",
         expect.any(Object),
       );
@@ -404,6 +412,9 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该检测多种可疑模式", async () => {
+      const consoleError = captureExpectedConsoleErrors(
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+      );
       const testCases = [
         { pattern: "eval", field: "script-sample" },
         { pattern: "vbscript:", field: "blocked-uri" },
@@ -433,14 +444,13 @@ describe("CSP Report API Route", () => {
 
         await callPOST(request);
 
-        expect(console.error).toHaveBeenCalledWith(
+        expect(consoleError).toHaveBeenCalledWith(
           "SUSPICIOUS CSP VIOLATION DETECTED",
           expect.any(Object),
         );
 
         // Clear mocks for next iteration
-        vi.clearAllMocks();
-        suppressExpectedCspConsole();
+        consoleError.mockClear();
       }
     });
   });

@@ -9,6 +9,7 @@ import {
   validateArtifactBudget,
 } from "../../../scripts/quality/checks/release-verify.js";
 import { getReleaseVerifyCommands } from "../../../scripts/quality/release-proof-manifest.js";
+import { captureExpectedConsoleErrors } from "@/test/console";
 
 const openServers: net.Server[] = [];
 
@@ -64,12 +65,10 @@ describe("release verify runner", () => {
 
   it("checks the local E2E port before launching Playwright", async () => {
     const executedCommands: string[] = [];
-    const errors: string[] = [];
-    const errorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation((message: string) => {
-        errors.push(message);
-      });
+    const errorSpy = captureExpectedConsoleErrors(
+      "release-proof cannot start local E2E",
+      "Stop the existing local server",
+    );
 
     const status = await runReleaseVerify({
       rootDir: "/repo",
@@ -89,8 +88,11 @@ describe("release verify runner", () => {
     expect(executedCommands).not.toContain(
       playwrightCommand ? formatReleaseCommand(playwrightCommand) : "",
     );
-    expect(errors).toContain(
+    expect(errorSpy).toHaveBeenCalledWith(
       "release-proof cannot start local E2E because localhost:3000 is already in use.",
+    );
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Stop the existing local server and rerun pnpm release:verify.",
     );
 
     errorSpy.mockRestore();
@@ -124,12 +126,9 @@ describe("release verify runner", () => {
   });
 
   it("fails when the Wrangler dry-run artifact exceeds the hard Free-plan budget", () => {
-    const errors: string[] = [];
-    const errorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation((message: string) => {
-        errors.push(message);
-      });
+    const errorSpy = captureExpectedConsoleErrors(
+      "Cloudflare artifact budget exceeded:",
+    );
 
     const status = validateArtifactBudget(
       {
@@ -143,7 +142,7 @@ describe("release verify runner", () => {
     );
 
     expect(status).toBe(1);
-    expect(errors).toContain(
+    expect(errorSpy).toHaveBeenCalledWith(
       "Cloudflare artifact budget exceeded: 3000.01 KiB gzip > 3000 KiB.",
     );
 

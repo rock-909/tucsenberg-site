@@ -25,7 +25,7 @@ describe("Tabs accessibility", () => {
     const overview = screen.getByRole("tab", { name: "Overview" });
     const specs = screen.getByRole("tab", { name: "Specs" });
 
-    overview.focus();
+    await user.tab();
     expect(overview).toHaveFocus();
 
     await user.keyboard("{ArrowRight}");
