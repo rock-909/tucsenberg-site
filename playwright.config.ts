@@ -41,46 +41,10 @@ const hasExplicitE2eFileSelection = process.argv.some(
     arg.includes("/tests/e2e/"),
 );
 
-const supportedLocales = (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES || "en")
-  .split(",")
-  .flatMap((locale) => {
-    const normalized = locale.trim();
-    return normalized ? [normalized] : [];
-  });
-const defaultLocale =
-  process.env.NEXT_PUBLIC_DEFAULT_LOCALE?.trim() || supportedLocales[0] || "en";
-
-const ensureLocaleInUrl = (input: string): string => {
-  try {
-    const url = new URL(input);
-    const segments = url.pathname.split("/").filter(Boolean);
-    const firstSegment = segments[0];
-    const lastSegment =
-      segments.length > 0 ? segments[segments.length - 1] : undefined;
-    const hasLocale =
-      (firstSegment ? supportedLocales.includes(firstSegment) : false) ||
-      (lastSegment ? supportedLocales.includes(lastSegment) : false);
-
-    if (!hasLocale) {
-      url.pathname = `${url.pathname.replace(/\/$/, "")}/${defaultLocale}`;
-    }
-
-    const normalizedPath = url.pathname.replace(/\/$/, "");
-    return `${url.origin}${normalizedPath}${url.search}${url.hash}`;
-  } catch {
-    const trimmed = input.replace(/\/$/, "");
-    const hasLocale = supportedLocales.some((locale) =>
-      trimmed.endsWith(`/${locale}`),
-    );
-    return hasLocale ? trimmed : `${trimmed}/${defaultLocale}`;
-  }
-};
-
-const resolvedBaseUrl = ensureLocaleInUrl(
+const resolvedBaseUrl =
   process.env.STAGING_URL ||
-    process.env.PLAYWRIGHT_BASE_URL ||
-    "http://localhost:3000",
-);
+  process.env.PLAYWRIGHT_BASE_URL ||
+  "http://localhost:3000";
 
 // HTML reporter may start a local server and wait for Ctrl+C when open is enabled.
 // In non-interactive runners (e.g. ClaudeCode/CI logs), this causes the process to hang.
@@ -145,7 +109,6 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    /* 修复：包含默认locale以确保动态路由[locale]能正确匹配 */
     baseURL: resolvedBaseUrl,
 
     // 控制动作/导航等待上限，避免无界等待导致整体卡时

@@ -115,7 +115,7 @@ jobs:
         run: pnpm test
 
       - name: Lead API family proof
-        run: pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts tests/integration/api/subscribe.test.ts
+        run: pnpm vitest run tests/integration/api/lead-pipeline-real.test.ts
 
   e2e:
     name: Tucsenberg 浏览器冒烟
