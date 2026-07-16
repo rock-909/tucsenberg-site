@@ -3,14 +3,15 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  RADIX_PACKAGE_IMPORT_PATTERN,
-  RADIX_THEMES_IMPORT_PATTERN,
+  findRadixPackageReference,
 } = require("../../component-governance-registry-truth");
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const COMPONENT_GOVERNANCE_COMPONENTS_ROOT = "src/components";
 const COMPONENT_GOVERNANCE_APP_ROOT = "src/app";
+const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
+const COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES = ["mdx-components.tsx"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
 const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
 const COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS = [
@@ -36,12 +37,14 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
   ]),
   clientBoundary: new Set(["server-safe", "client"]),
 };
-const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx|css)$/;
+const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|css)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
-  /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
+  /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/|^src\/(?:test|testing)\/)/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
   /(?:^|[\s"'`.[_-])rt-[A-Za-z0-9_-]+/;
+const COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN =
+  /^[\t ]*@import\s+(?:url\(\s*)?["']?(@radix-ui\/[^\s"');]+)["']?\s*\)?/m;
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_MODULE_PATTERN =
   "(?:@/config/static-theme-colors|(?:\\.\\.?/)+config/static-theme-colors)";
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_IMPORT_PATTERN = new RegExp(
@@ -97,20 +100,48 @@ function walkFiles(rootDir, relativeRoot) {
 }
 
 function getScannedSourceFiles(rootDir) {
-  const files = [];
+  const files = walkFiles(rootDir, COMPONENT_GOVERNANCE_SOURCE_ROOT).filter(
+    (file) =>
+      COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file) &&
+      !COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file),
+  );
 
-  for (const root of [
-    COMPONENT_GOVERNANCE_COMPONENTS_ROOT,
-    COMPONENT_GOVERNANCE_APP_ROOT,
-  ]) {
-    for (const file of walkFiles(rootDir, root)) {
-      if (!COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file)) continue;
-      if (COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file)) continue;
-      files.push(file);
-    }
+  for (const file of COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES) {
+    if (exists(rootDir, file)) files.push(file);
   }
 
-  return files;
+  return files.sort();
+}
+
+function isGovernedUiSource(file) {
+  return (
+    file.startsWith(`${COMPONENT_GOVERNANCE_COMPONENTS_ROOT}/`) ||
+    file.startsWith(`${COMPONENT_GOVERNANCE_APP_ROOT}/`)
+  );
+}
+
+function findCssRadixReference(source) {
+  const commentStrippedSource = source.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
+    comment.replace(/[^\n]/g, " "),
+  );
+  const match = COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN.exec(
+    commentStrippedSource,
+  );
+  if (!match) return null;
+
+  return {
+    specifier: match[1],
+    line: commentStrippedSource.slice(0, match.index).split("\n").length,
+  };
+}
+
+function findSourceRadixPackageReference(file, source) {
+  if (!file.endsWith(".css")) return findRadixPackageReference(source);
+
+  const reference = findCssRadixReference(source);
+  return reference && /^@radix-ui\/[^/]+(?:\/.*)?$/.test(reference.specifier)
+    ? reference
+    : null;
 }
 
 function getUiPrimitiveNames(rootDir) {
@@ -346,30 +377,34 @@ function collectTextScanFindings(rootDir, errors) {
     const isOutsideUiWrapper = !file.startsWith(
       `${COMPONENT_GOVERNANCE_UI_ROOT}/`,
     );
-    const importsRadixThemes = RADIX_THEMES_IMPORT_PATTERN.test(source);
+    const radixPackageReference = findSourceRadixPackageReference(file, source);
+    const radixThemesReference =
+      radixPackageReference &&
+      /^@radix-ui\/themes(?:\/.*)?$/.test(radixPackageReference.specifier)
+        ? radixPackageReference
+        : null;
 
-    if (importsRadixThemes) {
+    if (radixThemesReference) {
       errors.push(
         createFinding(
           file,
           "radix-themes-import-forbidden",
           "Production UI must not import the retired @radix-ui/themes package.",
-          getPatternLineNumber(source, RADIX_THEMES_IMPORT_PATTERN),
+          radixThemesReference.line,
         ),
       );
-    } else if (
-      isOutsideUiWrapper &&
-      RADIX_PACKAGE_IMPORT_PATTERN.test(source)
-    ) {
+    } else if (isOutsideUiWrapper && radixPackageReference) {
       errors.push(
         createFinding(
           file,
           "radix-import-outside-ui",
           "Production UI must import Radix through src/components/ui wrappers.",
-          getPatternLineNumber(source, RADIX_PACKAGE_IMPORT_PATTERN),
+          radixPackageReference.line,
         ),
       );
     }
+
+    if (!isGovernedUiSource(file)) continue;
 
     if (COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN.test(source)) {
       errors.push(

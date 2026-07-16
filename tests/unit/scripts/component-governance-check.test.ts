@@ -369,6 +369,112 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("detects multiline Radix imports and keeps wrapper source truth accurate", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/component-governance.registry.json": registry({
+          button: {
+            ...VALID_BUTTON_REGISTRY_ITEM,
+            radixLayer: "local",
+          },
+        }),
+        "src/components/ui/button.tsx":
+          'import {\n  Slot,\n} from "@radix-ui/react-slot";\nexport function Button() { return <Slot />; }',
+        "src/components/layout/header.tsx":
+          'export {\n  Slot as HeaderSlot,\n} from "@radix-ui/react-slot";',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(result.errors, "registry-agent-source-mismatch");
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/components/layout/header.tsx",
+    );
+  });
+
+  it("scans Radix module references across all production source directories", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/label.ts":
+          'import {\n  Root as Label,\n} from "@radix-ui/react-label";\nexport { Label };',
+        "src/lib/dialog-loader.ts":
+          'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+        "src/lib/menu-loader.ts":
+          'const menu = require("@radix-ui/react-dropdown-menu");\nexport { menu };',
+        "src/lib/slot-export.ts":
+          'export { Slot } from "@radix-ui/react-slot";',
+        "src/lib/themes-side-effect.ts":
+          'import "@radix-ui/themes/styles.css";\nexport const loaded = true;',
+        "src/config/theme-loader.ts":
+          'const themes = require("@radix-ui/themes");\nexport { themes };',
+        "src/i18n/slot-export.ts":
+          'export { Slot } from "@radix-ui/react-slot";',
+        "mdx-components.tsx":
+          'import { Slot } from "@radix-ui/react-slot";\nexport function useMDXComponents() { return { Slot }; }',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    for (const file of [
+      "src/lib/label.ts",
+      "src/lib/dialog-loader.ts",
+      "src/lib/menu-loader.ts",
+      "src/lib/slot-export.ts",
+    ]) {
+      expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/lib/themes-side-effect.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/config/theme-loader.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/i18n/slot-export.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "mdx-components.tsx",
+    );
+  });
+
+  it("does not treat comments or ordinary strings as Radix module references", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/radix-notes.ts": [
+          '// import { Slot } from "@radix-ui/react-slot";',
+          'const example = `import("@radix-ui/themes")`;',
+          "export { example };",
+        ].join("\n"),
+        "src/app/radix-notes.css": [
+          '/* @import "@radix-ui/themes/styles.css"; */',
+          '.example::before { content: "@import url(@radix-ui/themes/styles.css)"; }',
+        ].join("\n"),
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("passed");
+    expect(result.errors).toEqual([]);
+  });
+
   it("allows direct Radix imports inside src/components/ui", () => {
     const rootDir = createFixture({
       "src/components/component-governance.registry.json": registry({
@@ -468,6 +574,7 @@ describe("component-governance-check", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/app/globals.css": '@import url("@radix-ui/themes/styles.css");\n',
+        "src/app/vendor.css": "@import url(@radix-ui/themes/styles.css);\n",
       }),
     );
     fixtureRoots.push(rootDir);
@@ -479,6 +586,11 @@ describe("component-governance-check", () => {
       result.errors,
       "radix-themes-import-forbidden",
       "src/app/globals.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/app/vendor.css",
     );
   });
 

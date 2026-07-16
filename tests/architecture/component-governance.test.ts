@@ -3,12 +3,14 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import {
+  findRadixPackageReference,
+  findRadixThemesReference,
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  RADIX_THEMES_IMPORT_PATTERN,
 } from "../../scripts/component-governance-registry-truth.js";
 
 const SOURCE_ROOT = "src";
+const ROOT_PRODUCTION_SOURCE_FILES = ["mdx-components.tsx"] as const;
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
@@ -24,11 +26,10 @@ const STORYBOOK_CONFIG_PATH = ".storybook/main.ts";
 const STORY_EXPLORATION_ROOT = "src/stories";
 const UI_WRAPPER_ROOT = "src/components/ui";
 const STORY_OR_TEST_FILE_PATTERN =
-  /(?:\.stories\.(?:ts|tsx|js|jsx|mdx)|\.(?:test|spec)\.(?:ts|tsx|js|jsx)|\/__tests__\/)/;
-const SOURCE_FILE_PATTERN = /\.(?:ts|tsx)$/;
+  /(?:\.stories\.(?:ts|tsx|js|jsx|mdx)|\.(?:test|spec)\.(?:ts|tsx|js|jsx)|\/__tests__\/|^src\/(?:test|testing)\/)/;
+const SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?)$/;
 const STORY_FILE_PATTERN = /\.(?:stories)\.(?:ts|tsx|js|jsx|mdx)$/;
 const TSX_FILE_PATTERN = /\.tsx$/;
-const RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
 const UI_CHECKBOX_WRAPPER_IMPORT_PATTERN =
   /from\s+["'](?:@\/components\/ui\/checkbox|\.\.[^"']*\/ui\/checkbox)["']/;
 const PROTECTED_NATIVE_CHECKBOX_SURFACES = [
@@ -484,7 +485,10 @@ describe("component governance", () => {
   });
 
   it("keeps direct Radix imports inside the UI wrapper layer", () => {
-    const violations = walkFiles(SOURCE_ROOT)
+    const violations = [
+      ...walkFiles(SOURCE_ROOT),
+      ...ROOT_PRODUCTION_SOURCE_FILES,
+    ]
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
       .filter((filePath) => !filePath.startsWith(`${UI_WRAPPER_ROOT}/`))
@@ -492,7 +496,7 @@ describe("component governance", () => {
       .filter((filePath) => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
-        return RADIX_IMPORT_PATTERN.test(source);
+        return findRadixPackageReference(source) !== null;
       });
 
     expect(violations).toEqual([]);
@@ -518,14 +522,17 @@ describe("component governance", () => {
   });
 
   it("keeps the retired Radix Themes package out of production source", () => {
-    const violations = walkFiles(SOURCE_ROOT)
+    const violations = [
+      ...walkFiles(SOURCE_ROOT),
+      ...ROOT_PRODUCTION_SOURCE_FILES,
+    ]
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
       .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))
       .filter((filePath) => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
-        return RADIX_THEMES_IMPORT_PATTERN.test(source);
+        return findRadixThemesReference(source) !== null;
       });
 
     expect(violations).toEqual([]);
