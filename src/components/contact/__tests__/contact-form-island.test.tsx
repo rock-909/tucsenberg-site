@@ -32,8 +32,8 @@ async function triggerObservedIntersection() {
       [{ isIntersecting: true } as IntersectionObserverEntry],
       {} as IntersectionObserver,
     );
+    await vi.dynamicImportSettled();
   });
-  await vi.dynamicImportSettled();
 }
 
 function mockContactFormModule() {
@@ -182,6 +182,9 @@ describe("ContactFormIsland", () => {
     await user.click(
       screen.getByRole("button", { name: "Retry loading form" }),
     );
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
 
     expect(
       await screen.findByRole("form", { name: "Contact form" }),

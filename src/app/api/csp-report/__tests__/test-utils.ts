@@ -9,9 +9,8 @@ import { vi } from "vitest";
  * CSP log lines to keep test output clean. Any other, unexpected console output
  * still passes through to the real console so genuine problems keep surfacing.
  *
- * This mirrors the allowlist-filter pattern in `src/test/setup.hooks.ts`
- * (named reason + pass-through) instead of a blanket `mockImplementation(() => {})`
- * that would swallow all console output.
+ * This uses the same named-reason + pass-through policy as the global console
+ * gate instead of a blanket mock that would swallow all console output.
  */
 const EXPECTED_CSP_LOG_PREFIXES = [
   "CSP Violation Report",

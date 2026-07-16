@@ -79,7 +79,7 @@ vi.mock("@/i18n/routing", () => ({
       "/terms": "/terms",
     },
   },
-  Link: ({ children, href, ...props }: any) => {
+  Link: ({ children, href, prefetch: _prefetch, ...props }: any) => {
     const resolvedHref =
       typeof href === "string"
         ? href

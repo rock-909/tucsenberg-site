@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { Suspense } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
 import TermsPage, { generateMetadata, generateStaticParams } from "../page";
@@ -141,7 +142,8 @@ describe("TermsPage", () => {
         params: Promise.resolve(mockParams),
       });
 
-      const { container } = render(component);
+      expect(component.type).toBe(Suspense);
+      const { container } = render(component.props.fallback);
 
       expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
     });

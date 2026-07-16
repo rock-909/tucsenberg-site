@@ -31,7 +31,7 @@ describe("Tooltip accessibility", () => {
       </TooltipProvider>,
     );
 
-    screen.getByRole("button", { name: "More info" }).focus();
+    await user.tab();
 
     await waitFor(() => {
       expect(getTooltipContent()).toHaveTextContent("Supplemental hint");
@@ -47,6 +47,7 @@ describe("Tooltip accessibility", () => {
   });
 
   it("links the trigger to supplemental content through aria-describedby", async () => {
+    const user = userEvent.setup();
     render(
       <TooltipProvider delayDuration={0}>
         <Tooltip>
@@ -59,7 +60,7 @@ describe("Tooltip accessibility", () => {
     );
 
     const trigger = screen.getByRole("button", { name: "More info" });
-    trigger.focus();
+    await user.tab();
 
     await waitFor(() => {
       const describedBy = trigger.getAttribute("aria-describedby");
@@ -85,8 +86,7 @@ describe("Tooltip accessibility", () => {
       </TooltipProvider>,
     );
 
-    const trigger = screen.getByRole("button", { name: "More info" });
-    trigger.focus();
+    await user.tab();
 
     await waitFor(() => {
       expect(getTooltipContent()).toBeVisible();

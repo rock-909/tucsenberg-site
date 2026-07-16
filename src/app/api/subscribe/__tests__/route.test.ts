@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
+import { captureExpectedConsoleErrors } from "@/test/console";
 import { OPTIONS, POST } from "../route";
 
 vi.mock("@/lib/security/distributed-rate-limit", () => ({
@@ -251,6 +252,9 @@ describe("/api/subscribe route", () => {
   });
 
   it("maps unexpected processLead rejections to the subscribe processing error", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Newsletter subscription failed unexpectedly",
+    );
     vi.mocked(processLead).mockRejectedValueOnce(new Error("boom"));
 
     const response = await POST(
@@ -265,9 +269,13 @@ describe("/api/subscribe route", () => {
       success: false,
       errorCode: API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
     });
+    expect(consoleError).toHaveBeenCalledTimes(1);
   });
 
   it("maps successful lead results without reference ids to the subscribe processing error", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Newsletter subscription failed unexpectedly",
+    );
     vi.mocked(processLead).mockResolvedValueOnce({
       success: true,
       emailSent: false,
@@ -287,6 +295,7 @@ describe("/api/subscribe route", () => {
       success: false,
       errorCode: API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
     });
+    expect(consoleError).toHaveBeenCalledTimes(1);
   });
 
   it("applies CORS headers on POST response when Origin is present", async () => {

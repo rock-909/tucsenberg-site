@@ -1,6 +1,6 @@
 import React from "react";
-import { act, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderAsyncPage } from "@/test/render-async-page";
 
 const { mockLoadLegalPage } = vi.hoisted(() => ({
   mockLoadLegalPage: vi.fn(),
@@ -60,9 +60,7 @@ describe("PrivacyContent async invocation", () => {
       params: Promise.resolve({ locale: "en" }),
     });
 
-    await act(async () => {
-      render(pageElement);
-    });
+    await renderAsyncPage(pageElement);
 
     expect(mockLoadLegalPage).toHaveBeenCalledWith("privacy", "en");
   });

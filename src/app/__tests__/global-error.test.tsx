@@ -21,6 +21,12 @@ describe("GlobalError", () => {
 
   const originalLocation = window.location;
 
+  function renderGlobalError(error = mockError) {
+    return render(<GlobalError error={error} reset={mockReset} />, {
+      container: document,
+    });
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -42,7 +48,7 @@ describe("GlobalError", () => {
 
   describe("rendering", () => {
     it("should render error page structure", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
       expect(
@@ -53,24 +59,21 @@ describe("GlobalError", () => {
     });
 
     it("should render Try again button", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Try again")).toBeInTheDocument();
     });
 
     it("should render Go to homepage button", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Go to homepage")).toBeInTheDocument();
     });
 
     it("should render the main container", () => {
-      const { container } = render(
-        <GlobalError error={mockError} reset={mockReset} />,
-      );
+      const { container } = renderGlobalError();
 
-      // GlobalError renders html/body but React testing doesn't include them in container
-      // We verify the main content container instead
+      // Render against the document because GlobalError owns the html/body shell.
       const mainContainer = container.querySelector(".flex.min-h-dvh");
       expect(mainContainer).toBeInTheDocument();
     });
@@ -78,7 +81,7 @@ describe("GlobalError", () => {
 
   describe("error logging", () => {
     it("should log error on mount", async () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       await waitFor(() => {
         expect(mockLoggerError).toHaveBeenCalledWith(
@@ -89,7 +92,7 @@ describe("GlobalError", () => {
     });
 
     it("should log error only once on initial mount", async () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       await waitFor(() => {
         expect(mockLoggerError).toHaveBeenCalledTimes(1);
@@ -97,9 +100,7 @@ describe("GlobalError", () => {
     });
 
     it("should log new error when error prop changes", async () => {
-      const { rerender } = render(
-        <GlobalError error={mockError} reset={mockReset} />,
-      );
+      const { rerender } = renderGlobalError();
 
       await waitFor(() => {
         expect(mockLoggerError).toHaveBeenCalledWith(
@@ -123,7 +124,7 @@ describe("GlobalError", () => {
 
   describe("button interactions", () => {
     it("should call reset when Try again button is clicked", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       fireEvent.click(screen.getByTestId("try-again-button"));
 
@@ -131,7 +132,7 @@ describe("GlobalError", () => {
     });
 
     it("should navigate to homepage when Go to homepage button is clicked", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
@@ -145,7 +146,7 @@ describe("GlobalError", () => {
     });
 
     it("should show error details in development mode", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(
         screen.getByText("Error Details (Development Only)"),
@@ -153,7 +154,7 @@ describe("GlobalError", () => {
     });
 
     it("should display error message in development mode", () => {
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       // Error message is displayed inside a pre element along with stack trace
       // Use regex matcher to find text that contains the error message
@@ -166,7 +167,7 @@ describe("GlobalError", () => {
       const errorWithStack = new Error("Test error");
       errorWithStack.stack = "Error: Test error\n    at testFunction";
 
-      render(<GlobalError error={errorWithStack} reset={mockReset} />);
+      renderGlobalError(errorWithStack);
 
       expect(
         screen.getByText(/at testFunction/, { exact: false }),
@@ -178,7 +179,7 @@ describe("GlobalError", () => {
     it("should not show error details when NODE_ENV is production", () => {
       // Note: We can't easily change NODE_ENV at runtime in tests
       // This test verifies the component renders correctly
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       // The heading should always be visible
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
@@ -191,7 +192,7 @@ describe("GlobalError", () => {
         digest: "error-digest-123",
       });
 
-      render(<GlobalError error={errorWithDigest} reset={mockReset} />);
+      renderGlobalError(errorWithDigest);
 
       await waitFor(() => {
         expect(mockLoggerError).toHaveBeenCalledWith(
@@ -204,9 +205,7 @@ describe("GlobalError", () => {
 
   describe("styling", () => {
     it("should have centered layout", () => {
-      const { container } = render(
-        <GlobalError error={mockError} reset={mockReset} />,
-      );
+      const { container } = renderGlobalError();
 
       const mainContainer = container.querySelector(".flex.min-h-dvh");
       expect(mainContainer).toBeInTheDocument();
@@ -218,9 +217,7 @@ describe("GlobalError", () => {
     });
 
     it("should have max-width container for content", () => {
-      const { container } = render(
-        <GlobalError error={mockError} reset={mockReset} />,
-      );
+      const { container } = renderGlobalError();
 
       const contentContainer = container.querySelector(".max-w-md");
       expect(contentContainer).toBeInTheDocument();
@@ -243,7 +240,7 @@ describe("GlobalError", () => {
         value: { language: "zh-CN" },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
       expect(screen.getByText("Try again")).toBeInTheDocument();
@@ -256,7 +253,7 @@ describe("GlobalError", () => {
         value: { language: "zh-TW" },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
     });
@@ -267,7 +264,7 @@ describe("GlobalError", () => {
         value: { language: "zh-CN" },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
@@ -280,7 +277,7 @@ describe("GlobalError", () => {
         value: { language: "fr-FR" },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
     });
@@ -291,7 +288,7 @@ describe("GlobalError", () => {
         value: { language: "" },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       // Should default to English
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
@@ -303,7 +300,7 @@ describe("GlobalError", () => {
         value: { language: undefined },
       });
 
-      render(<GlobalError error={mockError} reset={mockReset} />);
+      renderGlobalError();
 
       // Should default to English
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();

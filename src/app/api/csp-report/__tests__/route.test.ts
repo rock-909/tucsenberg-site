@@ -362,23 +362,18 @@ describe("CSP Report API Route", () => {
     });
 
     it("应该处理生产环境的特殊日志记录", async () => {
-      vi.doMock("@/lib/env", () => {
+      vi.doMock("@/lib/env", async (importOriginal) => {
+        const actual = await importOriginal<typeof import("@/lib/env")>();
         const env = {
+          ...actual.env,
           NODE_ENV: "production",
           CSP_REPORT_URI: "https://example.com/csp-report",
         };
 
         return {
+          ...actual,
           env,
           runtimeEnv: env,
-          isRuntimeProduction: () => true,
-          getRuntimeEnvString: (key: string) => {
-            if (key === "NODE_ENV") return "production";
-            if (key === "CSP_REPORT_URI")
-              return "https://example.com/csp-report";
-            if (key === "NEXT_PUBLIC_BASE_URL") return "http://localhost:3000";
-            return undefined;
-          },
         };
       });
       vi.resetModules();

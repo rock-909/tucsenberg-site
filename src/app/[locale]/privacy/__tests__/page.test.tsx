@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { Suspense } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PrivacyPage, { generateMetadata } from "@/app/[locale]/privacy/page";
 import type { Locale } from "@/types/content.types";
@@ -141,7 +142,8 @@ describe("Privacy Page", () => {
       params: Promise.resolve(createParams("en")),
     });
 
-    const { container } = render(PrivacyPageComponent);
+    expect(PrivacyPageComponent.type).toBe(Suspense);
+    const { container } = render(PrivacyPageComponent.props.fallback);
 
     expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
   });

@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { captureExpectedConsoleErrors } from "@/test/console";
 
 /**
  * Content Slug Sync Core Logic Tests
@@ -840,6 +841,11 @@ describe("content-slug-sync core", () => {
     });
 
     it("check mode fails when generated artifacts are stale without rewriting them", () => {
+      const consoleError = captureExpectedConsoleErrors(
+        "Content manifest artifacts are stale:",
+        "  - ",
+        "Run `node scripts/starter-checks.js content-manifest`",
+      );
       createMdxFile("pages", "en", "about.mdx", {
         locale: "en",
         title: "About",
@@ -879,6 +885,13 @@ describe("content-slug-sync core", () => {
       );
       expect(fs.readFileSync(context.manifestTsOutput, "utf8")).toBe(
         "stale manifest",
+      );
+      expect(consoleError).toHaveBeenCalledTimes(4);
+      expect(consoleError).toHaveBeenCalledWith(
+        `  - ${context.importersOutput}`,
+      );
+      expect(consoleError).toHaveBeenCalledWith(
+        `  - ${context.manifestTsOutput}`,
       );
     });
 

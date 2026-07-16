@@ -62,7 +62,7 @@ vi.mock("next-intl", () => ({
 }));
 
 vi.mock("@/i18n/routing", () => ({
-  Link: ({ children, href, className, ...props }: any) => (
+  Link: ({ children, href, className, prefetch: _prefetch, ...props }: any) => (
     <a href={stringifyMockHref(href)} className={className} {...props}>
       {children}
     </a>

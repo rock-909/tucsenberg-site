@@ -137,7 +137,8 @@ describe("RadioGroup", () => {
     renderRadioGroup();
 
     const standard = screen.getByRole("radio", { name: "Standard" });
-    standard.focus();
+    await user.tab();
+    expect(standard).toHaveFocus();
 
     await user.keyboard("{ArrowDown>}{/ArrowDown}");
 

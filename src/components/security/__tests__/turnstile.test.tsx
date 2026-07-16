@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TurnstileWidget, useTurnstile } from "@/components/security/turnstile";
+import { captureExpectedConsoleErrors } from "@/test/console";
 
 // 最早时机设置环境变量 - 在任何模块导入之前
 vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key-12345");
@@ -150,6 +151,7 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该在错误时调用onError回调", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
       const onError = vi.fn();
       render(<TurnstileWidget onSuccess={vi.fn()} onError={onError} />);
 
@@ -158,6 +160,10 @@ describe("TurnstileWidget", () => {
       handleError?.("test-error");
 
       expect(onError).toHaveBeenCalledWith("test-error");
+      expect(consoleError).toHaveBeenCalledWith(
+        "Turnstile error:",
+        "test-error",
+      );
     });
 
     it("应该在过期时调用onExpire回调", () => {
@@ -183,12 +189,17 @@ describe("TurnstileWidget", () => {
     });
 
     it("应该处理没有onError回调的错误", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
       render(<TurnstileWidget onSuccess={vi.fn()} />);
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
 
       expect(() => handleError?.("test-error")).not.toThrow();
+      expect(consoleError).toHaveBeenCalledWith(
+        "Turnstile error:",
+        "test-error",
+      );
     });
 
     it("应该处理没有onExpire回调的过期", () => {

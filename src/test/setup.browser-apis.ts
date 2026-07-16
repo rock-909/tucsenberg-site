@@ -28,19 +28,18 @@ globalThis.ResizeObserver =
   MockResizeObserver as unknown as typeof ResizeObserver;
 
 // Mock PerformanceObserver for performance monitoring
-const MockPerformanceObserver = vi.fn().mockImplementation((_callback) => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-  takeRecords: vi.fn().mockReturnValue([]),
-}));
+class MockPerformanceObserver {
+  static readonly supportedEntryTypes = [
+    "navigation",
+    "resource",
+    "measure",
+    "mark",
+  ];
 
-Object.defineProperty(MockPerformanceObserver, "supportedEntryTypes", {
-  value: ["navigation", "resource", "measure", "mark"],
-  writable: false,
-  enumerable: true,
-  configurable: true,
-});
+  observe = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => [] as PerformanceEntryList);
+}
 
 globalThis.PerformanceObserver =
   MockPerformanceObserver as unknown as typeof PerformanceObserver;

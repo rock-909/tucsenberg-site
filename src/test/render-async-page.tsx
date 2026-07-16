@@ -35,5 +35,9 @@ async function resolveNode(node: React.ReactNode): Promise<React.ReactNode> {
 
 export async function renderAsyncPage(element: React.JSX.Element) {
   const resolved = await resolveNode(element);
+  if (React.isValidElement(resolved) && resolved.type === "html") {
+    return render(resolved, { container: document });
+  }
+
   return render(<>{resolved}</>);
 }
