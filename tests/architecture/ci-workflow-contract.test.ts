@@ -37,6 +37,19 @@ interface SemgrepRule {
   readonly severity?: string;
 }
 
+interface WorkflowStep {
+  readonly name?: string;
+  readonly run?: string;
+}
+
+interface CiWorkflow {
+  readonly jobs?: {
+    readonly quality?: {
+      readonly steps?: readonly WorkflowStep[];
+    };
+  };
+}
+
 interface SemgrepConfig {
   readonly rules?: readonly SemgrepRule[];
 }
@@ -52,6 +65,10 @@ function readRepoFile(relativePath: string): string {
 
 function readSemgrepConfig(): SemgrepConfig {
   return yaml.load(readRepoFile(SEMGREP_CONFIG_PATH)) as SemgrepConfig;
+}
+
+function readCiWorkflowConfig(): CiWorkflow {
+  return yaml.load(readCiWorkflow()) as CiWorkflow;
 }
 
 function getQualityJob(workflow: string): string {
@@ -78,6 +95,15 @@ describe("CI workflow contract", () => {
     }
 
     expect(qualityJob).not.toContain(FULL_COMPONENT_CHECK_COMMAND);
+  });
+
+  it("runs an honestly named preview configuration smoke in the quality job", () => {
+    const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
+
+    expect(qualitySteps).toContainEqual({
+      name: "preview config smoke",
+      run: "APP_ENV=preview node scripts/starter-checks.js validate-production-config",
+    });
   });
 
   it("keeps Semgrep blocking scope narrow in CI", () => {

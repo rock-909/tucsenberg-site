@@ -60,6 +60,9 @@ jobs:
       - name: 内容结构检查
         run: pnpm content:check
 
+      - name: preview config smoke
+        run: APP_ENV=preview node scripts/starter-checks.js validate-production-config
+
       - name: Client boundary 检查
         run: node scripts/starter-checks.js client-boundary
 
