@@ -105,11 +105,64 @@ function getTranslationNamespace(callExpression, constants) {
   return firstArgument === undefined ? "" : undefined;
 }
 
-function getTranslatorNamespaceFromExpression(node, constants) {
+function getImportDeclaration(node) {
+  let current = node;
+  while (current && !ts.isImportDeclaration(current)) {
+    current = current.parent;
+  }
+  return current;
+}
+
+function getTranslationFactoryImport(expression, checker) {
+  if (ts.isIdentifier(expression)) {
+    const symbol = checker.getSymbolAtLocation(expression);
+    const declaration = symbol?.declarations?.find(ts.isImportSpecifier);
+    if (!declaration) return undefined;
+    const importDeclaration = getImportDeclaration(declaration);
+    if (
+      !importDeclaration ||
+      !ts.isStringLiteral(importDeclaration.moduleSpecifier)
+    ) {
+      return undefined;
+    }
+    return {
+      importedName: declaration.propertyName?.text ?? declaration.name.text,
+      moduleName: importDeclaration.moduleSpecifier.text,
+    };
+  }
+  if (!ts.isPropertyAccessExpression(expression)) return undefined;
+  const namespace = unwrapExpression(expression.expression);
+  if (!namespace || !ts.isIdentifier(namespace)) return undefined;
+  const symbol = checker.getSymbolAtLocation(namespace);
+  const declaration = symbol?.declarations?.find(ts.isNamespaceImport);
+  if (!declaration) return undefined;
+  const importDeclaration = getImportDeclaration(declaration);
+  if (
+    !importDeclaration ||
+    !ts.isStringLiteral(importDeclaration.moduleSpecifier)
+  ) {
+    return undefined;
+  }
+  return {
+    importedName: expression.name.text,
+    moduleName: importDeclaration.moduleSpecifier.text,
+  };
+}
+
+function isSupportedTranslationFactory(expression, checker) {
+  const imported = getTranslationFactoryImport(expression, checker);
+  return (
+    (imported?.importedName === "useTranslations" &&
+      imported.moduleName === "next-intl") ||
+    (imported?.importedName === "getTranslations" &&
+      imported.moduleName === "next-intl/server")
+  );
+}
+
+function getTranslatorNamespaceFromExpression(node, constants, checker) {
   const expression = unwrapExpression(node);
   if (!expression || !ts.isCallExpression(expression)) return undefined;
-  const callName = getCallName(expression);
-  if (callName !== "getTranslations" && callName !== "useTranslations") {
+  if (!isSupportedTranslationFactory(expression.expression, checker)) {
     return undefined;
   }
   return getTranslationNamespace(expression, constants);
@@ -166,7 +219,9 @@ function collectTranslatorBindings({
   parameterOverrides,
 }) {
   const translatorBindings = new Map();
-  const matchedParameterOverrides = new Set();
+  const parameterOverrideCandidates = new Map(
+    parameterOverrides.map((override) => [override, []]),
+  );
 
   function collectBindings(node) {
     if (ts.isVariableDeclaration(node) && node.initializer) {
@@ -174,6 +229,7 @@ function collectTranslatorBindings({
         const namespace = getTranslatorNamespaceFromExpression(
           node.initializer,
           constants,
+          checker,
         );
         const symbol = checker.getSymbolAtLocation(node.name);
         if (namespace !== undefined && symbol) {
@@ -187,6 +243,7 @@ function collectTranslatorBindings({
           const namespace = getTranslatorNamespaceFromExpression(
             inputs[index],
             constants,
+            checker,
           );
           const symbol = checker.getSymbolAtLocation(binding.name);
           if (namespace !== undefined && symbol) {
@@ -202,8 +259,7 @@ function collectTranslatorBindings({
         if (identifier) {
           const symbol = checker.getSymbolAtLocation(identifier);
           if (symbol) {
-            translatorBindings.set(symbol, override.namespace);
-            matchedParameterOverrides.add(override);
+            parameterOverrideCandidates.get(override).push(symbol);
           }
         }
       }
@@ -211,7 +267,15 @@ function collectTranslatorBindings({
     ts.forEachChild(node, collectBindings);
   }
   collectBindings(sourceFile);
-  return { matchedParameterOverrides, translatorBindings };
+  const parameterOverrideMatchCounts = new Map();
+  for (const override of parameterOverrides) {
+    const candidates = parameterOverrideCandidates.get(override);
+    parameterOverrideMatchCounts.set(override, candidates.length);
+    if (candidates.length === 1) {
+      translatorBindings.set(candidates[0], override.namespace);
+    }
+  }
+  return { parameterOverrideMatchCounts, translatorBindings };
 }
 
 function collectForwardedTranslatorCalls(
@@ -329,7 +393,7 @@ function collectSourceUsage({
   constants,
   translatorParameterOverrides,
 }) {
-  const { matchedParameterOverrides, translatorBindings } =
+  const { parameterOverrideMatchCounts, translatorBindings } =
     collectTranslatorBindings({
       sourceFile,
       checker,
@@ -365,7 +429,7 @@ function collectSourceUsage({
   }
   collectNode(sourceFile);
 
-  return { dynamicPrefixes, matchedParameterOverrides, staticKeys };
+  return { dynamicPrefixes, parameterOverrideMatchCounts, staticKeys };
 }
 
 function createSourceProgram({ rootDir, sourceEntries }) {
@@ -564,7 +628,7 @@ function collectSourceUsageSummary({
 }) {
   const staticKeys = new Set();
   const dynamicPrefixes = new Set();
-  const matchedParameterOverrides = new Set();
+  const parameterOverrideMatchCounts = new Map();
   const program = createSourceProgram({ rootDir, sourceEntries });
   for (const entry of sourceEntries) {
     const sourceFile = program.sourceFiles.get(entry.file);
@@ -580,23 +644,34 @@ function collectSourceUsageSummary({
     });
     for (const key of usage.staticKeys) staticKeys.add(key);
     for (const prefix of usage.dynamicPrefixes) dynamicPrefixes.add(prefix);
-    for (const override of usage.matchedParameterOverrides) {
-      matchedParameterOverrides.add(override);
+    for (const [override, count] of usage.parameterOverrideMatchCounts) {
+      parameterOverrideMatchCounts.set(override, count);
     }
   }
-  return { dynamicPrefixes, matchedParameterOverrides, staticKeys };
+  return {
+    checker: program.checker,
+    dynamicPrefixes,
+    parameterOverrideMatchCounts,
+    sourceFiles: program.sourceFiles,
+    staticKeys,
+  };
 }
 
 function collectTranslatorParameterOverrideFindings(
   translatorParameterOverrides,
-  matchedParameterOverrides,
+  parameterOverrideMatchCounts,
 ) {
-  return translatorParameterOverrides
-    .filter((override) => !matchedParameterOverrides.has(override))
-    .map((override) => ({
-      file: "scripts/quality/message-key-usage-baseline.js",
-      error: `translator parameter override is stale "${override.file}#${override.functionName}:${override.identifier}"`,
-    }));
+  return translatorParameterOverrides.flatMap((override) => {
+    const matchCount = parameterOverrideMatchCounts.get(override) ?? 0;
+    if (matchCount === 1) return [];
+    const status = matchCount === 0 ? "stale" : "ambiguous";
+    return [
+      {
+        file: "scripts/quality/message-key-usage-baseline.js",
+        error: `translator parameter override is ${status} "${override.file}#${override.functionName}:${override.identifier}"`,
+      },
+    ];
+  });
 }
 
 function collectDynamicPrefixFindings({
@@ -696,6 +771,10 @@ function collectMessageKeyUsageFindings({
   });
   const derivedKeyUsage = collectDerivedKeyConsumerUsage({
     sourceEntries,
+    sourceProgram: {
+      checker: sourceUsage.checker,
+      sourceFiles: sourceUsage.sourceFiles,
+    },
     catalogKeys,
     derivedKeyConsumers,
     unwrapExpression,
@@ -712,7 +791,7 @@ function collectMessageKeyUsageFindings({
   return [
     ...collectTranslatorParameterOverrideFindings(
       translatorParameterOverrides,
-      sourceUsage.matchedParameterOverrides,
+      sourceUsage.parameterOverrideMatchCounts,
     ),
     ...objectKeyUsage.findings,
     ...derivedKeyUsage.findings,

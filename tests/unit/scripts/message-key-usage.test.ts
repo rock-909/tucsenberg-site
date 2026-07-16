@@ -10,6 +10,9 @@ const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
   "tucsenberg-message-key-usage-test-trash",
 );
+const CLIENT_TRANSLATOR_IMPORT = 'import { useTranslations } from "next-intl";';
+const SERVER_TRANSLATOR_IMPORT =
+  'import { getTranslations } from "next-intl/server";';
 
 function createSource(content: string): { rootDir: string; file: string } {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "message-key-usage-"));
@@ -93,6 +96,10 @@ function collect({
   });
 }
 
+function derivedConsumer(config: Record<string, unknown>) {
+  return { file: "src/example.ts", reason: "fixture", ...config };
+}
+
 afterEach(() => {
   for (const tempDir of tempDirs.splice(0)) {
     moveTempDirToTrash(tempDir);
@@ -109,16 +116,23 @@ describe("message key usage gate", () => {
     expect(
       collect({
         catalogKeys: ["example.used"],
-        content:
-          'const t = useTranslations("example");\nexport const value = t("used");',
+        content: [
+          CLIENT_TRANSLATOR_IMPORT,
+          'const t = useTranslations("example");',
+          'export const value = t("used");',
+        ].join("\n"),
       }),
     ).toEqual([]);
 
     expect(
       collect({
         catalogKeys: ["example.used"],
-        content:
-          'const KEY = "used";\nconst t = useTranslations("example");\nexport const value = t(KEY);',
+        content: [
+          CLIENT_TRANSLATOR_IMPORT,
+          'const KEY = "used";',
+          'const t = useTranslations("example");',
+          "export const value = t(KEY);",
+        ].join("\n"),
       }),
     ).toEqual([]);
   });
@@ -126,6 +140,7 @@ describe("message key usage gate", () => {
   it("does not resolve imported keys from unrelated same-name constants", () => {
     const { rootDir, files } = createSources({
       "src/a.ts": [
+        CLIENT_TRANSLATOR_IMPORT,
         'import { KEY } from "./runtime";',
         'const t = useTranslations("example");',
         "export const value = t(KEY);",
@@ -155,8 +170,11 @@ describe("message key usage gate", () => {
     expect(
       collect({
         catalogKeys: ["other.missing"],
-        content:
-          'const t = useTranslations("example");\nexport const value = t("missing");',
+        content: [
+          CLIENT_TRANSLATOR_IMPORT,
+          'const t = useTranslations("example");',
+          'export const value = t("missing");',
+        ].join("\n"),
       }),
     ).toContainEqual({
       file: "message usage",
@@ -208,8 +226,11 @@ describe("message key usage gate", () => {
     expect(
       collect({
         catalogKeys: ["example.used"],
-        content:
-          'const t = useTranslations("example");\nexport const value = t("used");',
+        content: [
+          CLIENT_TRANSLATOR_IMPORT,
+          'const t = useTranslations("example");',
+          'export const value = t("used");',
+        ].join("\n"),
         unusedKeyAllowlist: ["example.used"],
       }),
     ).toContainEqual({
@@ -220,8 +241,11 @@ describe("message key usage gate", () => {
   });
 
   it("requires dynamic prefixes to be registered and rejects stale entries", () => {
-    const content =
-      'const t = useTranslations("example");\nexport const value = (key: string) => t(`items.${key}`);';
+    const content = [
+      CLIENT_TRANSLATOR_IMPORT,
+      'const t = useTranslations("example");',
+      "export const value = (key: string) => t(`items.${key}`);",
+    ].join("\n");
     expect(
       collect({ catalogKeys: ["example.items.one"], content }),
     ).toContainEqual({
@@ -270,7 +294,9 @@ describe("message key usage gate", () => {
         'dynamic message key prefix is stale because no consumer emits it "example.items."',
     });
   });
+});
 
+describe("derived message key consumers", () => {
   it("derives exact keys from configured copy objects", () => {
     expect(
       collect({
@@ -302,19 +328,16 @@ describe("message key usage gate", () => {
           'const PLACEHOLDERS = { active: "activePlaceholder", disabled: "disabledPlaceholder" };',
         ].join("\n"),
         derivedKeyConsumers: [
-          {
+          derivedConsumer({
             kind: "collection-values",
-            file: "src/example.ts",
             sourceName: "FIELDS",
             valueProperty: "i18nKey",
             entryFilters: [{ property: "enabled", equals: true }],
             prefix: "form.",
             suffixes: [""],
-            reason: "fixture",
-          },
-          {
+          }),
+          derivedConsumer({
             kind: "collection-values",
-            file: "src/example.ts",
             sourceName: "PLACEHOLDERS",
             entryKeySource: {
               sourceName: "FIELDS",
@@ -322,8 +345,7 @@ describe("message key usage gate", () => {
             },
             prefix: "form.",
             suffixes: [""],
-            reason: "fixture",
-          },
+          }),
         ],
         unusedKeyAllowlist: ["form.disabled"],
       }),
@@ -336,14 +358,12 @@ describe("message key usage gate", () => {
         catalogKeys: ["apiErrors.RENAMED_AT_RUNTIME"],
         content: 'const CODES = ["RENAMED_AT_RUNTIME"] as const;',
         derivedKeyConsumers: [
-          {
+          derivedConsumer({
             kind: "collection-values",
-            file: "src/example.ts",
             sourceName: "CODES",
             prefix: "apiErrors.",
             suffixes: [""],
-            reason: "fixture",
-          },
+          }),
         ],
       }),
     ).toEqual([]);
@@ -353,14 +373,12 @@ describe("message key usage gate", () => {
         catalogKeys: ["apiErrors.FAILED"],
         content: 'const CODES = ["RENAMED_AT_RUNTIME"] as const;',
         derivedKeyConsumers: [
-          {
+          derivedConsumer({
             kind: "collection-values",
-            file: "src/example.ts",
             sourceName: "CODES",
             prefix: "apiErrors.",
             suffixes: [""],
-            reason: "fixture",
-          },
+          }),
         ],
         unusedKeyAllowlist: ["apiErrors.FAILED"],
       }),
@@ -392,14 +410,12 @@ describe("message key usage gate", () => {
   });
 
   it("derives only exact collection keys and detects missing required leaves", () => {
-    const consumer = {
+    const consumer = derivedConsumer({
       kind: "collection-values",
-      file: "src/example.ts",
       sourceName: "ITEM_KEYS",
       prefix: "example.items.",
       suffixes: [".title"],
-      reason: "fixture",
-    };
+    });
     expect(
       collect({
         catalogKeys: ["example.items.one.title", "example.items.dead.title"],
@@ -426,18 +442,44 @@ describe("message key usage gate", () => {
     expect(
       collect({
         catalogKeys: ["example.used", "example.deadSibling"],
-        content:
-          "const copy = messages.example; export const value = copy.used;",
+        content: [
+          "const copy = messages.example;",
+          "function Other() {",
+          "  const copy = messages.example;",
+          "  return copy.deadSibling;",
+          "}",
+          "export const value = copy.used;",
+        ].join("\n"),
         derivedKeyConsumers: [
-          {
+          derivedConsumer({
             kind: "property-accesses",
-            file: "src/example.ts",
             rootName: "copy",
             prefix: "example.",
-            reason: "fixture",
-          },
+          }),
         ],
         unusedKeyAllowlist: ["example.deadSibling"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("scopes property-value consumers to one declared function", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used", "example.dead"],
+        content: [
+          'function Config() { return { label: "used" }; }',
+          'function Other() { return { label: "dead" }; }',
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "property-values",
+            functionName: "Config",
+            propertyName: "label",
+            prefix: "example.",
+            suffixes: [""],
+          }),
+        ],
+        unusedKeyAllowlist: ["example.dead"],
       }),
     ).toEqual([]);
   });
@@ -447,14 +489,12 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: [],
         derivedKeyConsumers: [
-          {
+          derivedConsumer({
             kind: "collection-values",
-            file: "src/example.ts",
             sourceName: "REMOVED_KEYS",
             prefix: "example.",
             suffixes: [""],
-            reason: "fixture",
-          },
+          }),
         ],
       }),
     ).toContainEqual({
@@ -469,6 +509,7 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: ["example.used"],
         content: [
+          CLIENT_TRANSLATOR_IMPORT,
           'const t = useTranslations("example");',
           "const translate = (key: string) => t(key as never);",
           'export const value = translate("used");',
@@ -482,6 +523,7 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: ["example.used"],
         content: [
+          SERVER_TRANSLATOR_IMPORT,
           "const [t, data] = await Promise.all([",
           '  getTranslations({ namespace: "example" }),',
           "  loadData(),",
@@ -497,6 +539,7 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: ["metadata.title"],
         content: [
+          CLIENT_TRANSLATOR_IMPORT,
           'const t = useTranslations("metadata");',
           "function Aside({ t }: { t: (key: string) => string }) {",
           '  return t("heading");',
@@ -512,6 +555,7 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: ["example.used", "example.dead"],
         content: [
+          CLIENT_TRANSLATOR_IMPORT,
           'const t = useTranslations("example");',
           "function ordinaryFunction(key: string) { return key; }",
           "function Nested() {",
@@ -530,6 +574,7 @@ describe("message key usage gate", () => {
       collect({
         catalogKeys: ["example.used", "example.dead"],
         content: [
+          CLIENT_TRANSLATOR_IMPORT,
           'import { t } from "./ordinary";',
           'export const ordinary = t("dead");',
           "export function Example() {",
@@ -540,6 +585,51 @@ describe("message key usage gate", () => {
         unusedKeyAllowlist: ["example.dead"],
       }),
     ).toEqual([]);
+  });
+
+  it("accepts aliased and namespace imports from next-intl", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.first", "example.second"],
+        content: [
+          'import { useTranslations as useT } from "next-intl";',
+          'import * as intl from "next-intl";',
+          'const first = useT("example");',
+          'const second = intl.useTranslations("example");',
+          'export const value = [first("first"), second("second")];',
+        ].join("\n"),
+      }),
+    ).toEqual([]);
+  });
+
+  it("rejects fake translation factories with matching names", () => {
+    const fixtures = [
+      [
+        "function useTranslations() { return (key: string) => key; }",
+        'const t = useTranslations("example");',
+        'export const value = t("dead");',
+      ],
+      [
+        'import { useTranslations } from "./ordinary";',
+        'const t = useTranslations("example");',
+        'export const value = t("dead");',
+      ],
+      [
+        "const intl = { useTranslations: () => (key: string) => key };",
+        'const t = intl.useTranslations("example");',
+        'export const value = t("dead");',
+      ],
+    ];
+
+    for (const content of fixtures) {
+      expect(
+        collect({
+          catalogKeys: ["example.dead"],
+          content: content.join("\n"),
+          unusedKeyAllowlist: ["example.dead"],
+        }),
+      ).toEqual([]);
+    }
   });
 
   it("scopes translator parameter overrides to the declared function", () => {
@@ -586,6 +676,176 @@ describe("message key usage gate", () => {
       file: "scripts/quality/message-key-usage-baseline.js",
       error:
         'translator parameter override is stale "src/example.ts#Removed:t"',
+    });
+  });
+
+  it("rejects an ambiguous translator parameter override", () => {
+    expect(
+      collect({
+        catalogKeys: [],
+        content: [
+          "function Translated(t: (key: string) => string) { return t; }",
+          "function Outer() {",
+          "  const Translated = (t: (key: string) => string) => t;",
+          "  return Translated;",
+          "}",
+        ].join("\n"),
+        translatorParameterOverrides: [
+          {
+            file: "src/example.ts",
+            functionName: "Translated",
+            identifier: "t",
+            namespace: "example",
+            reason: "fixture",
+          },
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'translator parameter override is ambiguous "src/example.ts#Translated:t"',
+    });
+  });
+
+  it("binds derived call consumers to one declaration symbol", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used"],
+        content: [
+          "function Example() {",
+          "  const translate = (key: string) => key;",
+          '  return translate("used");',
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "call-arguments",
+            ownerFunction: "Example",
+            callee: "translate",
+            prefixes: ["example."],
+          }),
+        ],
+      }),
+    ).toEqual([]);
+
+    expect(
+      collect({
+        catalogKeys: [],
+        content: [
+          "function Example() {",
+          "  const translate = (key: string) => key;",
+          "  const translate = (key: string) => key;",
+          "  return translate;",
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "call-arguments",
+            ownerFunction: "Example",
+            callee: "translate",
+            prefixes: ["example."],
+          }),
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'derived message key consumer is ambiguous "src/example.ts#call-arguments"',
+    });
+
+    expect(
+      collect({
+        catalogKeys: [],
+        content: [
+          "function Example() { return null; }",
+          "function Other() {",
+          "  const translate = (key: string) => key;",
+          '  return translate("dead");',
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "call-arguments",
+            ownerFunction: "Example",
+            callee: "translate",
+            prefixes: ["example."],
+          }),
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'derived message key consumer is stale "src/example.ts#call-arguments"',
+    });
+  });
+
+  it("uses one unique top-level collection declaration", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used", "example.dead"],
+        content: [
+          'const KEYS = ["used"] as const;',
+          "function Other() {",
+          '  const KEYS = ["dead"] as const;',
+          "  return KEYS;",
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "collection-values",
+            sourceName: "KEYS",
+            prefix: "example.",
+            suffixes: [""],
+          }),
+        ],
+        unusedKeyAllowlist: ["example.dead"],
+      }),
+    ).toEqual([]);
+
+    expect(
+      collect({
+        catalogKeys: [],
+        content: [
+          "function Other() {",
+          '  const KEYS = ["dead"] as const;',
+          "  return KEYS;",
+          "}",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "collection-values",
+            sourceName: "KEYS",
+            prefix: "example.",
+            suffixes: [""],
+          }),
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'derived message key consumer is stale "src/example.ts#collection-values"',
+    });
+
+    expect(
+      collect({
+        catalogKeys: [],
+        content: [
+          "const KEYS = [] as const;",
+          "const KEYS = [] as const;",
+        ].join("\n"),
+        derivedKeyConsumers: [
+          derivedConsumer({
+            kind: "collection-values",
+            sourceName: "KEYS",
+            prefix: "example.",
+            suffixes: [""],
+          }),
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'derived message key consumer is ambiguous "src/example.ts#collection-values"',
     });
   });
 });

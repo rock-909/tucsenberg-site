@@ -150,9 +150,10 @@ const MESSAGE_OBJECT_KEY_CONSUMERS = [
 
 const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
-    kind: "property-values",
+    kind: "collection-values",
     file: "src/config/pages.config.ts",
-    propertyName: "navigationKey",
+    sourceName: "PUBLIC_STATIC_PAGE_DEFINITIONS",
+    valueProperty: "navigationKey",
     prefix: "",
     suffixes: [""],
     reason: "main navigation consumes the active page definition keys",
@@ -168,6 +169,7 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "property-values",
     file: "src/config/single-site.ts",
+    functionName: "getSingleSiteFooterColumns",
     propertyName: "translationKey",
     prefix: "",
     suffixes: [""],
@@ -176,6 +178,7 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "call-arguments",
     file: "src/components/footer/Footer.tsx",
+    ownerFunction: "Footer",
     callee: "translateWithFallback",
     prefixes: [""],
     reason: "footer local fallback calls consume their literal message keys",
@@ -326,6 +329,7 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "call-arguments",
     file: "src/components/errors/route-error-view.tsx",
+    ownerFunction: "RouteErrorView",
     callee: "translationFn",
     prefixes: ["errors.contact.", "errors.products."],
     reason: "both route boundaries pass their namespace into the shared view",
