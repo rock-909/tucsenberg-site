@@ -348,6 +348,27 @@ export const text = \`\${value /* eslint-disable-line no-unused-vars */}\`;
     ]);
   });
 
+  it.each([
+    [
+      "a starred line comment",
+      `// * eslint-disable-line no-unused-vars
+const value = 1;`,
+    ],
+    [
+      "a JSDoc block",
+      `/** eslint-disable-next-line no-unused-vars */
+const value = 1;`,
+    ],
+  ])("ignores directive-looking text in %s", (_label, source) => {
+    const findings = analyzeSource("src/lib/example.ts", source, {
+      registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+        REGISTER_WITH_CONTACT_EXCEPTION,
+      ),
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(
       "src/lib/security/__tests__/distributed-rate-limit.test.ts",

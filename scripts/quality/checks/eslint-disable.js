@@ -165,11 +165,6 @@ function parseDisableDirective(line, directive) {
   return { rules, reason };
 }
 
-function normalizeCommentLine(line) {
-  const trimmed = line.trim();
-  return trimmed.startsWith("*") ? trimmed.slice(1).trim() : trimmed;
-}
-
 function extractCommentLines(filePath, content) {
   const result = parser.parseForESLint(content, {
     comment: true,
@@ -178,12 +173,15 @@ function extractCommentLines(filePath, content) {
     range: true,
   });
 
-  return (result.ast.comments ?? []).flatMap((comment) =>
-    comment.value.split("\n").map((line, lineOffset) => ({
+  return (result.ast.comments ?? []).map((comment) => {
+    const leadingWhitespace = comment.value.match(/^\s*/u)?.[0] ?? "";
+    const lineOffset = leadingWhitespace.match(/\n/gu)?.length ?? 0;
+
+    return {
       line: comment.loc.start.line + lineOffset,
-      text: normalizeCommentLine(line),
-    })),
-  );
+      text: comment.value.slice(leadingWhitespace.length).trimEnd(),
+    };
+  });
 }
 
 function analyzeSource(filePath, content, options = {}) {
