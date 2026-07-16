@@ -459,37 +459,73 @@ function collectObjectKeyConsumerUsage({ sourceEntries, objectKeyConsumers }) {
   return { findings, staticKeys };
 }
 
-function collectGlobalStringConstants(sourceEntries) {
-  const constants = new Map();
-  const ambiguousNames = new Set();
-  for (const { file, content } of sourceEntries) {
-    const sourceFile = ts.createSourceFile(
-      file,
-      content,
-      ts.ScriptTarget.Latest,
-      true,
-      file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-    );
-    function visit(node) {
-      if (
-        ts.isVariableDeclaration(node) &&
-        ts.isIdentifier(node.name) &&
-        node.initializer
-      ) {
-        const value = getStaticString(node.initializer, new Map());
-        const name = node.name.text;
-        if (value !== undefined && !ambiguousNames.has(name)) {
-          if (constants.has(name) && constants.get(name) !== value) {
-            constants.delete(name);
-            ambiguousNames.add(name);
-          } else {
-            constants.set(name, value);
-          }
-        }
-      }
-      ts.forEachChild(node, visit);
+function collectBindingIdentifiers(bindingName, identifiers) {
+  if (ts.isIdentifier(bindingName)) {
+    identifiers.push(bindingName.text);
+    return;
+  }
+  for (const element of bindingName.elements) {
+    if (ts.isBindingElement(element)) {
+      collectBindingIdentifiers(element.name, identifiers);
     }
-    visit(sourceFile);
+  }
+}
+
+function collectFileStringConstants({ file, content }) {
+  const sourceFile = ts.createSourceFile(
+    file,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  const declarations = new Map();
+
+  function recordDeclaration(name, value) {
+    const values = declarations.get(name) ?? [];
+    values.push(value);
+    declarations.set(name, values);
+  }
+
+  function recordBinding(bindingName, value) {
+    const identifiers = [];
+    collectBindingIdentifiers(bindingName, identifiers);
+    for (const identifier of identifiers) recordDeclaration(identifier, value);
+  }
+
+  function visit(node) {
+    if (ts.isVariableDeclaration(node)) {
+      recordBinding(
+        node.name,
+        node.initializer
+          ? getStaticString(node.initializer, new Map())
+          : undefined,
+      );
+    } else if (ts.isParameter(node)) {
+      recordBinding(node.name, undefined);
+    } else if (ts.isImportClause(node) && node.name) {
+      recordDeclaration(node.name.text, undefined);
+    } else if (ts.isImportSpecifier(node)) {
+      recordDeclaration(node.name.text, undefined);
+    } else if (ts.isNamespaceImport(node)) {
+      recordDeclaration(node.name.text, undefined);
+    } else if (
+      (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) &&
+      node.name
+    ) {
+      recordDeclaration(node.name.text, undefined);
+    } else if (ts.isCatchClause(node) && node.variableDeclaration) {
+      recordBinding(node.variableDeclaration.name, undefined);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+
+  const constants = new Map();
+  for (const [name, values] of declarations) {
+    if (values.length === 1 && values[0] !== undefined) {
+      constants.set(name, values[0]);
+    }
   }
   return constants;
 }
@@ -497,13 +533,13 @@ function collectGlobalStringConstants(sourceEntries) {
 function collectSourceUsageSummary({
   sourceEntries,
   catalogKeys,
-  constants,
   translatorBindingOverrides,
   translatorParameterOverrides,
 }) {
   const staticKeys = new Set();
   const dynamicPrefixes = new Set();
   for (const entry of sourceEntries) {
+    const constants = collectFileStringConstants(entry);
     const usage = collectSourceUsage({
       ...entry,
       catalogKeys,
@@ -603,11 +639,9 @@ function collectMessageKeyUsageFindings({
     file,
     content: fs.readFileSync(path.join(rootDir, file), "utf8"),
   }));
-  const constants = collectGlobalStringConstants(sourceEntries);
   const sourceUsage = collectSourceUsageSummary({
     sourceEntries,
     catalogKeys,
-    constants,
     translatorBindingOverrides,
     translatorParameterOverrides,
   });

@@ -23,6 +23,23 @@ function createSource(content: string): { rootDir: string; file: string } {
   return { rootDir, file };
 }
 
+function createSources(entries: Record<string, string>): {
+  rootDir: string;
+  files: string[];
+} {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "message-key-usage-"));
+  const files = Object.keys(entries);
+  for (const [file, content] of Object.entries(entries)) {
+    const fullPath = path.join(rootDir, file);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixture path stays inside the test-owned temp directory
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixture path stays inside the test-owned temp directory
+    fs.writeFileSync(fullPath, content);
+  }
+  tempDirs.push(rootDir);
+  return { rootDir, files };
+}
+
 function moveTempDirToTrash(dir: string): void {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only inspects a test-owned temp directory
   if (!fs.existsSync(dir)) return;
@@ -89,6 +106,43 @@ describe("message key usage gate", () => {
           'const t = useTranslations("example");\nexport const value = t("used");',
       }),
     ).toEqual([]);
+
+    expect(
+      collect({
+        catalogKeys: ["example.used"],
+        content:
+          'const KEY = "used";\nconst t = useTranslations("example");\nexport const value = t(KEY);',
+      }),
+    ).toEqual([]);
+  });
+
+  it("does not resolve imported keys from unrelated same-name constants", () => {
+    const { rootDir, files } = createSources({
+      "src/a.ts": [
+        'import { KEY } from "./runtime";',
+        'const t = useTranslations("example");',
+        "export const value = t(KEY);",
+      ].join("\n"),
+      "src/runtime.ts": "export const KEY = getRuntimeKey();",
+      "src/b.ts": 'const KEY = "used";',
+    });
+
+    expect(
+      collectMessageKeyUsageFindings({
+        rootDir,
+        catalogKeys: new Set(["example.used"]),
+        sourceFiles: files,
+        dynamicPrefixAllowlist: [],
+        derivedKeyConsumers: [],
+        objectKeyConsumers: [],
+        translatorBindingOverrides: [],
+        translatorParameterOverrides: [],
+        unusedKeyAllowlist: [],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error: 'dynamic message key prefix is not allowlisted "example."',
+    });
   });
 
   it("rejects a used key that is missing from the catalog", () => {

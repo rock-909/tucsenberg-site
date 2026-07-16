@@ -36,6 +36,12 @@ const TRANSLATOR_BINDING_OVERRIDES = [
     reason: "view receives the contact form translator",
   },
   {
+    file: "src/components/forms/contact-form-container.tsx",
+    identifier: "tApi",
+    namespace: "apiErrors",
+    reason: "the API namespace constant is imported from the shared helper",
+  },
+  {
     file: "src/components/forms/contact-form-feedback.tsx",
     identifier: "translateForm",
     namespace: "contact.form",
