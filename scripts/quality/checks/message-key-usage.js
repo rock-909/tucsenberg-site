@@ -3,6 +3,7 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const ts = require("typescript");
 const { composeCatalogMessages, collectLeafPaths } = require("./translations");
+const { collectDerivedKeyConsumerUsage } = require("./message-key-consumers");
 const {
   DYNAMIC_MESSAGE_KEY_PREFIXES,
   MESSAGE_DERIVED_KEY_CONSUMERS,
@@ -25,6 +26,7 @@ const SOURCE_EXTENSIONS = new Set([
 const SOURCE_ROOTS = [".storybook", "content", "scripts", "src", "tests"];
 const SELF_FILES = new Set([
   "scripts/quality/checks/message-key-usage.js",
+  "scripts/quality/checks/message-key-consumers.js",
   "scripts/quality/message-key-usage-baseline.js",
 ]);
 
@@ -372,10 +374,6 @@ function collectSourceUsage({
   const dynamicPrefixes = new Set();
 
   function collectNode(node) {
-    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-      if (catalogKeys.has(node.text)) staticKeys.add(node.text);
-    }
-
     if (ts.isCallExpression(node) && !forwardedTranslatorCalls.has(node)) {
       collectTranslatorCallUsage({
         node,
@@ -458,191 +456,6 @@ function collectObjectKeyConsumerUsage({ sourceEntries, objectKeyConsumers }) {
     }
   }
 
-  return { findings, staticKeys };
-}
-
-function getPropertyName(node) {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node)) return node.text;
-  return undefined;
-}
-
-function collectNamedCollectionValues(sourceFile, consumer) {
-  const values = new Set();
-  let matchedCollection = false;
-
-  function collectValues(node) {
-    if (consumer.valueProperty) {
-      if (ts.isPropertyAssignment(node)) {
-        const propertyName = getPropertyName(node.name);
-        if (propertyName === consumer.valueProperty) {
-          const value = getStaticString(node.initializer, new Map());
-          if (value !== undefined) values.add(value);
-        }
-      }
-      ts.forEachChild(node, collectValues);
-      return;
-    }
-
-    const current = unwrapExpression(node);
-    if (current && ts.isArrayLiteralExpression(current)) {
-      for (const element of current.elements) {
-        const value = getStaticString(element, new Map());
-        if (value !== undefined) values.add(value);
-      }
-      return;
-    }
-    if (current && ts.isObjectLiteralExpression(current)) {
-      for (const property of current.properties) {
-        if (!ts.isPropertyAssignment(property)) continue;
-        const value = getStaticString(property.initializer, new Map());
-        if (value !== undefined) values.add(value);
-      }
-    }
-  }
-
-  function visit(node) {
-    if (
-      ts.isVariableDeclaration(node) &&
-      ts.isIdentifier(node.name) &&
-      node.name.text === consumer.sourceName &&
-      node.initializer
-    ) {
-      matchedCollection = true;
-      collectValues(node.initializer);
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  return { matchedCollection, values };
-}
-
-function getPropertyAccessPath(node, rootName) {
-  const segments = [];
-  let current = node;
-  while (ts.isPropertyAccessExpression(current)) {
-    segments.unshift(current.name.text);
-    current = unwrapExpression(current.expression);
-  }
-  return ts.isIdentifier(current) && current.text === rootName
-    ? segments
-    : null;
-}
-
-function collectPropertyAccessKeys(sourceFile, consumer, catalogKeys) {
-  const keys = new Set();
-  let matchedRoot = false;
-
-  function visit(node) {
-    if (
-      ts.isPropertyAccessExpression(node) &&
-      !(
-        ts.isPropertyAccessExpression(node.parent) &&
-        node.parent.expression === node
-      )
-    ) {
-      const pathSegments = getPropertyAccessPath(node, consumer.rootName);
-      if (pathSegments && pathSegments.length > 0) {
-        matchedRoot = true;
-        const key = `${consumer.prefix}${pathSegments.join(".")}`;
-        const childPrefix = `${key}.`;
-        const children = [...catalogKeys].filter((catalogKey) =>
-          catalogKey.startsWith(childPrefix),
-        );
-        if (children.length > 0) {
-          for (const child of children) keys.add(child);
-        } else {
-          keys.add(key);
-        }
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  return { keys, matchedRoot };
-}
-
-function collectCallArgumentKeys(sourceFile, consumer) {
-  const keys = new Set();
-  let matchedCall = false;
-
-  function visit(node) {
-    if (ts.isCallExpression(node) && getCallName(node) === consumer.callee) {
-      const value = getStaticString(node.arguments[0], new Map());
-      if (value !== undefined) {
-        matchedCall = true;
-        for (const prefix of consumer.prefixes) keys.add(`${prefix}${value}`);
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  return { keys, matchedCall };
-}
-
-function collectDerivedKeyConsumerUsage({
-  sourceEntries,
-  catalogKeys,
-  derivedKeyConsumers,
-}) {
-  const sourceByFile = new Map(
-    sourceEntries.map((entry) => [entry.file, entry.content]),
-  );
-  const findings = [];
-  const staticKeys = new Set();
-  for (const consumer of derivedKeyConsumers) {
-    const content = sourceByFile.get(consumer.file);
-    if (content === undefined) {
-      findings.push({
-        file: "scripts/quality/message-key-usage-baseline.js",
-        error: `derived message key consumer source is missing "${consumer.file}"`,
-      });
-      continue;
-    }
-    const sourceFile = ts.createSourceFile(
-      consumer.file,
-      content,
-      ts.ScriptTarget.Latest,
-      true,
-      consumer.file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-    );
-
-    let keys = new Set();
-    let matched = false;
-    if (consumer.kind === "collection-values") {
-      const result = collectNamedCollectionValues(sourceFile, consumer);
-      matched = result.matchedCollection && result.values.size > 0;
-      for (const value of result.values) {
-        if (consumer.excludeValues?.includes(value)) continue;
-        for (const suffix of consumer.suffixes) {
-          keys.add(`${consumer.prefix}${value}${suffix}`);
-        }
-      }
-    } else if (consumer.kind === "property-accesses") {
-      const result = collectPropertyAccessKeys(
-        sourceFile,
-        consumer,
-        catalogKeys,
-      );
-      matched = result.matchedRoot;
-      keys = result.keys;
-    } else if (consumer.kind === "call-arguments") {
-      const result = collectCallArgumentKeys(sourceFile, consumer);
-      matched = result.matchedCall;
-      keys = result.keys;
-    } else if (consumer.kind === "exact-keys") {
-      matched = consumer.anchors.every((anchor) => content.includes(anchor));
-      keys = new Set(consumer.keys);
-    }
-
-    if (!matched || keys.size === 0) {
-      findings.push({
-        file: "scripts/quality/message-key-usage-baseline.js",
-        error: `derived message key consumer is stale "${consumer.file}#${consumer.kind}"`,
-      });
-      continue;
-    }
-    for (const key of keys) staticKeys.add(key);
-  }
   return { findings, staticKeys };
 }
 
@@ -807,6 +620,9 @@ function collectMessageKeyUsageFindings({
     sourceEntries,
     catalogKeys,
     derivedKeyConsumers,
+    unwrapExpression,
+    getStaticString,
+    getCallName,
   });
   const staticKeys = new Set([
     ...sourceUsage.staticKeys,

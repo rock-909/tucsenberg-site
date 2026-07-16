@@ -42,6 +42,29 @@ const FIELD_ERROR_KEY_PREFIX = new Map<string, string>([
   ["website", "errors.website"],
 ]);
 
+const CONTACT_FORM_VALIDATION_DETAIL_KEYS = [
+  "errors.generic",
+  "errors.fullName.required",
+  "errors.fullName.tooShort",
+  "errors.fullName.tooLong",
+  "errors.fullName.invalid",
+  "errors.email.required",
+  "errors.email.invalid",
+  "errors.email.tooLong",
+  "errors.company.tooShort",
+  "errors.company.tooLong",
+  "errors.company.invalid",
+  "errors.message.required",
+  "errors.message.tooShort",
+  "errors.message.tooLong",
+  "errors.phone.invalid",
+  "errors.subject.length",
+  "errors.website.shouldBeEmpty",
+] as const;
+
+const CONTACT_FORM_VALIDATION_DETAIL_KEY_SET = new Set<string>(
+  CONTACT_FORM_VALIDATION_DETAIL_KEYS,
+);
 const FALLBACK_ERROR_KEY = "errors.generic";
 const CLIENT_CLOCK_SKEW_ALLOWANCE_MS = 2 * MINUTE_MS;
 
@@ -169,7 +192,7 @@ function handleCustomIssue(baseKey: string, issue: ZodIssue): string {
     : `${baseKey}.invalid`;
 }
 
-function mapZodIssueToErrorKey(issue: ZodIssue): string {
+function buildZodIssueErrorKey(issue: ZodIssue): string {
   const baseKey = getBaseErrorKey(issue);
   const message = issue.message?.toLowerCase?.() ?? "";
 
@@ -195,6 +218,13 @@ function mapZodIssueToErrorKey(issue: ZodIssue): string {
     default:
       return handleCustomIssue(baseKey, issue);
   }
+}
+
+function mapZodIssueToErrorKey(issue: ZodIssue): string {
+  const key = buildZodIssueErrorKey(issue);
+  return CONTACT_FORM_VALIDATION_DETAIL_KEY_SET.has(key)
+    ? key
+    : FALLBACK_ERROR_KEY;
 }
 
 function createExpiredSubmissionFailure(): ContactValidationFailure {

@@ -12,6 +12,30 @@ import {
   type StatusCalloutTone,
 } from "@/components/ui/status-callout";
 
+const CONTACT_FORM_API_ERROR_CODES = [
+  API_ERROR_CODES.RATE_LIMIT_EXCEEDED,
+  API_ERROR_CODES.SERVICE_UNAVAILABLE,
+  API_ERROR_CODES.INVALID_JSON_BODY,
+  API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+  API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+  API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
+  API_ERROR_CODES.CONTACT_SUBMISSION_EXPIRED,
+  API_ERROR_CODES.TURNSTILE_REQUIRED,
+  API_ERROR_CODES.TURNSTILE_REJECTED,
+  API_ERROR_CODES.TURNSTILE_UNAVAILABLE,
+  API_ERROR_CODES.UNKNOWN_ERROR,
+] as const;
+
+const CONTACT_FORM_API_ERROR_CODE_SET = new Set<string>(
+  CONTACT_FORM_API_ERROR_CODES,
+);
+
+function normalizeContactFormApiErrorCode(errorCode: string): string {
+  return CONTACT_FORM_API_ERROR_CODE_SET.has(errorCode)
+    ? errorCode
+    : API_ERROR_CODES.UNKNOWN_ERROR;
+}
+
 /**
  * 获取状态消息配置
  */
@@ -133,7 +157,10 @@ function getErrorDisplayState(
     state.errorCode === FORM_NETWORK_ERROR
       ? translateForm("networkError")
       : state.errorCode
-        ? translateApiError(translateApi, state.errorCode)
+        ? translateApiError(
+            translateApi,
+            normalizeContactFormApiErrorCode(state.errorCode),
+          )
         : undefined;
   const shouldShowTranslatedMessage =
     translatedError !== undefined && !isValidationError;

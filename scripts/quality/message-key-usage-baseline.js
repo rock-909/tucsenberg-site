@@ -65,6 +65,12 @@ const TRANSLATOR_BINDING_OVERRIDES = [
     namespace: "structured-data",
     reason: "structured-data translator is passed by page builders",
   },
+  {
+    file: "src/components/footer/Footer.tsx",
+    identifier: "translateWithFallback",
+    namespace: "",
+    reason: "footer runtime helper consumes full configured message keys",
+  },
 ];
 
 const TRANSLATOR_PARAMETER_OVERRIDES = [
@@ -127,6 +133,30 @@ const MESSAGE_OBJECT_KEY_CONSUMERS = [
 ];
 
 const MESSAGE_DERIVED_KEY_CONSUMERS = [
+  {
+    kind: "property-values",
+    file: "src/config/pages.config.ts",
+    propertyName: "navigationKey",
+    prefix: "",
+    suffixes: [""],
+    reason: "main navigation consumes the active page definition keys",
+  },
+  {
+    kind: "collection-values",
+    file: "src/config/single-site.ts",
+    sourceName: "FOOTER_TRANSLATION_KEYS",
+    prefix: "",
+    suffixes: [""],
+    reason: "footer links consume the configured translation key values",
+  },
+  {
+    kind: "property-values",
+    file: "src/config/single-site.ts",
+    propertyName: "translationKey",
+    prefix: "",
+    suffixes: [""],
+    reason: "footer column headings consume their literal translation keys",
+  },
   {
     kind: "collection-values",
     file: "src/config/single-site-page-expression.ts",
@@ -230,7 +260,10 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     file: "src/config/contact-form-config.ts",
     sourceName: "DEFAULT_FIELD_CONFIGS",
     valueProperty: "i18nKey",
-    excludeValues: ["website"],
+    entryFilters: [
+      { property: "enabled", equals: true },
+      { property: "type", notEquals: "hidden" },
+    ],
     prefix: "contact.form.",
     suffixes: [""],
     reason: "visible contact field labels derive from the form configuration",
@@ -239,6 +272,13 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     kind: "collection-values",
     file: "src/config/contact-form-config.ts",
     sourceName: "PLACEHOLDER_KEYS",
+    entryKeySource: {
+      sourceName: "DEFAULT_FIELD_CONFIGS",
+      filters: [
+        { property: "enabled", equals: true },
+        { property: "type", notEquals: "hidden" },
+      ],
+    },
     prefix: "contact.form.",
     suffixes: [""],
     reason: "contact field placeholders derive from the placeholder map",
@@ -252,23 +292,13 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     reason: "Turnstile states translate the exact configured status labels",
   },
   {
-    kind: "exact-keys",
-    file: "src/components/forms/contact-form-container.tsx",
-    anchors: ["useTranslations(API_ERROR_NAMESPACE)", "translateApi"],
-    keys: [
-      "apiErrors.RATE_LIMIT_EXCEEDED",
-      "apiErrors.SERVICE_UNAVAILABLE",
-      "apiErrors.INVALID_JSON_BODY",
-      "apiErrors.PAYLOAD_TOO_LARGE",
-      "apiErrors.CONTACT_VALIDATION_FAILED",
-      "apiErrors.CONTACT_PROCESSING_ERROR",
-      "apiErrors.CONTACT_SUBMISSION_EXPIRED",
-      "apiErrors.TURNSTILE_REQUIRED",
-      "apiErrors.TURNSTILE_REJECTED",
-      "apiErrors.TURNSTILE_UNAVAILABLE",
-      "apiErrors.UNKNOWN_ERROR",
-    ],
-    reason: "the contact client translates this exact response-code domain",
+    kind: "collection-values",
+    file: "src/components/forms/contact-form-feedback.tsx",
+    sourceName: "CONTACT_FORM_API_ERROR_CODES",
+    propertyAccessValue: "property-name",
+    prefix: "apiErrors.",
+    suffixes: [""],
+    reason: "the contact client enforces this response-code translation domain",
   },
   {
     kind: "call-arguments",
@@ -285,29 +315,12 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     reason: "email copy consumes only the properties reached from this object",
   },
   {
-    kind: "exact-keys",
+    kind: "collection-values",
     file: "src/lib/contact/submit-canonical-contact.ts",
-    anchors: ["FIELD_ERROR_KEY_PREFIX", "mapZodIssueToErrorKey"],
-    keys: [
-      "contact.form.errors.generic",
-      "contact.form.errors.fullName.required",
-      "contact.form.errors.fullName.tooShort",
-      "contact.form.errors.fullName.tooLong",
-      "contact.form.errors.fullName.invalid",
-      "contact.form.errors.email.required",
-      "contact.form.errors.email.invalid",
-      "contact.form.errors.email.tooLong",
-      "contact.form.errors.company.tooShort",
-      "contact.form.errors.company.tooLong",
-      "contact.form.errors.company.invalid",
-      "contact.form.errors.message.required",
-      "contact.form.errors.message.tooShort",
-      "contact.form.errors.message.tooLong",
-      "contact.form.errors.phone.invalid",
-      "contact.form.errors.subject.length",
-      "contact.form.errors.website.shouldBeEmpty",
-    ],
-    reason: "the canonical contact validator emits this exact finite key set",
+    sourceName: "CONTACT_FORM_VALIDATION_DETAIL_KEYS",
+    prefix: "contact.form.",
+    suffixes: [""],
+    reason: "the contact validator enforces this finite detail-key domain",
   },
 ];
 
@@ -706,6 +719,19 @@ const UNUSED_MESSAGE_KEYS = [
   "apiErrors.SUBSCRIBE_PROCESSING_ERROR",
   "apiErrors.INQUIRY_VALIDATION_FAILED",
   "apiErrors.INQUIRY_PROCESSING_ERROR",
+  "errors.generic",
+  "navigation.contact",
+  "error",
+  "title",
+  "contact.form.phone",
+  "contact.form.phonePlaceholder",
+  "email",
+  "emailPlaceholder",
+  "phone",
+  "organization.name",
+  "organization.description",
+  "website.name",
+  "website.description",
 ];
 
 module.exports = {

@@ -120,6 +120,19 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
+  it("does not count a matching bare string as a message consumer", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.dead"],
+        content: 'export const fixture = "example.dead";',
+      }),
+    ).toContainEqual({
+      file: "messages",
+      error:
+        'message key has no detected consumer and is not baselined "example.dead"',
+    });
+  });
+
   it("rejects stale unused baselines after deletion or new consumption", () => {
     expect(
       collect({
@@ -217,6 +230,66 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
+  it("filters configured collection values with runtime entry rules", () => {
+    expect(
+      collect({
+        catalogKeys: ["form.active", "form.disabled", "form.activePlaceholder"],
+        content: [
+          "const FIELDS = {",
+          '  active: { enabled: true, type: "text", i18nKey: "active" },',
+          '  disabled: { enabled: false, type: "tel", i18nKey: "disabled" },',
+          "};",
+          'const PLACEHOLDERS = { active: "activePlaceholder", disabled: "disabledPlaceholder" };',
+        ].join("\n"),
+        derivedKeyConsumers: [
+          {
+            kind: "collection-values",
+            file: "src/example.ts",
+            sourceName: "FIELDS",
+            valueProperty: "i18nKey",
+            entryFilters: [{ property: "enabled", equals: true }],
+            prefix: "form.",
+            suffixes: [""],
+            reason: "fixture",
+          },
+          {
+            kind: "collection-values",
+            file: "src/example.ts",
+            sourceName: "PLACEHOLDERS",
+            entryKeySource: {
+              sourceName: "FIELDS",
+              filters: [{ property: "enabled", equals: true }],
+            },
+            prefix: "form.",
+            suffixes: [""],
+            reason: "fixture",
+          },
+        ],
+        unusedKeyAllowlist: ["form.disabled"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("derives enum-like values from property access collections", () => {
+    expect(
+      collect({
+        catalogKeys: ["apiErrors.FAILED"],
+        content: "const CODES = [API_ERROR_CODES.FAILED] as const;",
+        derivedKeyConsumers: [
+          {
+            kind: "collection-values",
+            file: "src/example.ts",
+            sourceName: "CODES",
+            propertyAccessValue: "property-name",
+            prefix: "apiErrors.",
+            suffixes: [""],
+            reason: "fixture",
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
   it("rejects stale configured object consumers", () => {
     expect(
       collect({
@@ -288,16 +361,17 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
-  it("rejects stale derived consumer anchors", () => {
+  it("rejects stale derived consumers when their declaration disappears", () => {
     expect(
       collect({
         catalogKeys: [],
         derivedKeyConsumers: [
           {
-            kind: "exact-keys",
+            kind: "collection-values",
             file: "src/example.ts",
-            anchors: ["REMOVED_ANCHOR"],
-            keys: ["example.used"],
+            sourceName: "REMOVED_KEYS",
+            prefix: "example.",
+            suffixes: [""],
             reason: "fixture",
           },
         ],
@@ -305,7 +379,7 @@ describe("message key usage gate", () => {
     ).toContainEqual({
       file: "scripts/quality/message-key-usage-baseline.js",
       error:
-        'derived message key consumer is stale "src/example.ts#exact-keys"',
+        'derived message key consumer is stale "src/example.ts#collection-values"',
     });
   });
 
