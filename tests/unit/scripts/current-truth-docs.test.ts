@@ -7,7 +7,10 @@ import {
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
   RETIRED_PUBLIC_TRUTH_PATTERNS,
+  collectBacktickedRepoPathFindings,
   collectCurrentTruthDocFindings,
+  collectDocumentInventoryFindings,
+  collectGuardrailRegistryFindings,
   findOutOfOrderCommand,
   getReleaseProofDocsCommandBlock,
 } from "../../../scripts/starter-checks.js";
@@ -313,6 +316,88 @@ describe("current-truth docs guard", () => {
         error: 'unknown package script command "pnpm missing:script"',
       }),
     );
+  });
+
+  it("rejects a tracked document that is missing from the inventory", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md":
+        "| Path | Class | Notes |\n| --- | --- | --- |",
+      "docs/new-current-doc.md": "# New current doc",
+    });
+    tempDirs.push(repoDir);
+
+    expect(
+      collectDocumentInventoryFindings(repoDir, ["docs/new-current-doc.md"]),
+    ).toEqual([
+      {
+        file: "docs/项目基础/文档清单.md",
+        error:
+          'tracked document is missing from inventory "docs/new-current-doc.md"',
+      },
+    ]);
+  });
+
+  it("rejects a missing current source path but ignores a negated path", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| Path | Class | Notes |\n| --- | --- | --- |",
+      "docs/current.md": "Use `src/missing.ts` as the runtime entry.",
+      "docs/negated.md": "Do not create `src/proxy.ts` for this project.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, [
+        "docs/current.md",
+        "docs/negated.md",
+      ]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/missing.ts"',
+      },
+    ]);
+  });
+
+  it("rejects registered GSE ids without a production consumer", () => {
+    const files = {
+      "docs/项目基础/维护规则.md":
+        "## Active production structural exceptions\n\n| ID | File | Rule | Reason | Verification |\n| --- | --- | --- | --- | --- |\n| GSE-20260716-live-flow | src/app/example.ts | max-lines | reason | verification |",
+      "src/app/example.ts": "export const value = 1;",
+      "src/app/__tests__/example.test.ts":
+        "// guardrail-exception GSE-20260716-live-flow: tests cannot consume production exceptions",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectGuardrailRegistryFindings(repoDir, [
+        "src/app/example.ts",
+        "src/app/__tests__/example.test.ts",
+      ]),
+    ).toEqual([
+      {
+        file: "docs/项目基础/维护规则.md",
+        error:
+          'registered guardrail exception has no production consumer "gse-20260716-live-flow"',
+      },
+    ]);
+  });
+
+  it("accepts registered GSE ids with a production consumer", () => {
+    const files = {
+      "docs/项目基础/维护规则.md":
+        "## Active production structural exceptions\n\n| ID | File | Rule | Reason | Verification |\n| --- | --- | --- | --- | --- |\n| GSE-20260716-live-flow | src/app/example.ts | max-lines | reason | verification |",
+      "src/app/example.ts":
+        "// eslint-disable-next-line max-lines -- guardrail-exception GSE-20260716-live-flow: reason\nexport const value = 1;",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectGuardrailRegistryFindings(repoDir, ["src/app/example.ts"]),
+    ).toEqual([]);
   });
 
   it("flags release runbook command block drift from the manifest", () => {

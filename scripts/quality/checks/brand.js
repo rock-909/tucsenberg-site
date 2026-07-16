@@ -57,18 +57,16 @@ const FORBIDDEN_BRAND_MARKERS = [
   "PETG pneumatic",
 ];
 const FORBIDDEN_BRAND_PATTERNS = FORBIDDEN_BRAND_MARKERS.map((marker) => {
-  const needle =
-    marker === marker.toLowerCase() ? marker.toLowerCase() : marker;
-
   return {
     marker,
-    pattern: new RegExp(escapeRegExp(needle), "g"),
+    pattern: new RegExp(escapeRegExp(marker.toLowerCase()), "g"),
   };
 });
 const SELF_PATHS = new Set([
   "scripts/starter-checks.js",
   "scripts/quality/checks/brand.js",
 ]);
+const HISTORICAL_PATH_PREFIXES = ["docs/技术难题/审查2026-07/"];
 
 function toRepoPath(rootDir, absolutePath) {
   return path.relative(rootDir, absolutePath).split(path.sep).join("/");
@@ -117,17 +115,25 @@ function escapeRegExp(value) {
 
 function scanBrandFile(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
-  if (SELF_PATHS.has(toRepoPath(ROOT, filePath))) return [];
+  const repoPath = toRepoPath(ROOT, filePath);
+  if (
+    SELF_PATHS.has(repoPath) ||
+    HISTORICAL_PATH_PREFIXES.some((prefix) => repoPath.startsWith(prefix))
+  ) {
+    return [];
+  }
 
+  return scanBrandContent(content, repoPath);
+}
+
+function scanBrandContent(content, file = "<content>") {
   const findings = [];
+  const normalizedContent = content.toLowerCase();
   for (const { marker, pattern } of FORBIDDEN_BRAND_PATTERNS) {
-    const haystack =
-      marker === marker.toLowerCase() ? content.toLowerCase() : content;
-
-    for (const match of haystack.matchAll(pattern)) {
+    for (const match of normalizedContent.matchAll(pattern)) {
       const index = match.index ?? 0;
       findings.push({
-        file: toRepoPath(ROOT, filePath),
+        file,
         line: getLineNumber(content, index),
         marker,
       });
@@ -159,4 +165,5 @@ function runBrandCheck() {
 
 module.exports = {
   runBrandCheck,
+  scanBrandContent,
 };

@@ -1,5 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
+const {
+  collectRegisteredGuardrailExceptionIds,
+  isProductionFile,
+} = require("./eslint-disable");
 const {
   getReleaseProofDocsCommandBlock,
   getReleaseProofSequence,
@@ -375,6 +380,191 @@ function collectMarkdownFiles(rootDir, relativeDir) {
   return results;
 }
 
+function hasGitMetadata(rootDir) {
+  return fs.existsSync(path.join(rootDir, ".git"));
+}
+
+function collectTrackedMarkdownDocs(rootDir) {
+  if (!hasGitMetadata(rootDir)) return [];
+
+  const output = execFileSync(
+    "git",
+    ["-c", "core.quotepath=false", "ls-files", "-z", "--", "docs"],
+    { cwd: rootDir, encoding: "utf8" },
+  );
+  return output
+    .split("\0")
+    .filter((file) => file.endsWith(".md"))
+    .sort();
+}
+
+function collectDocumentInventoryFindings(rootDir, trackedDocs) {
+  const inventoryPath = "docs/项目基础/文档清单.md";
+  const inventory = readTruthFile(rootDir, inventoryPath);
+  const docs = trackedDocs ?? collectTrackedMarkdownDocs(rootDir);
+
+  return docs
+    .filter((file) => !inventory.includes(`\`${file}\``))
+    .map((file) => ({
+      file: inventoryPath,
+      error: `tracked document is missing from inventory "${file}"`,
+    }));
+}
+
+function inventoryMarksCurrent(inventory, relativePath) {
+  return inventory
+    .split("\n")
+    .some(
+      (line) =>
+        line.includes(`\`${relativePath}\``) && line.includes("`current-"),
+    );
+}
+
+function inventoryMarksHistoricalProof(inventory, relativePath) {
+  return inventory
+    .split("\n")
+    .some(
+      (line) =>
+        line.includes(`\`${relativePath}\``) &&
+        line.includes("`historical-proof`"),
+    );
+}
+
+function normalizeDocumentedRepoPath(rawPath) {
+  const trimmed = rawPath.trim().replace(/[.,;]$/u, "");
+  if (/\s/u.test(trimmed)) return null;
+  return trimmed.replace(/(?::\d[\d,-]*|#L\d+(?:-L\d+)?)$/u, "");
+}
+
+function documentedRepoPathExists(rootDir, documentedPath) {
+  if (fs.existsSync(path.join(rootDir, documentedPath))) return true;
+
+  const firstPatternIndex = documentedPath.search(/[?*{]/u);
+  if (firstPatternIndex !== -1) {
+    const staticPrefix = documentedPath
+      .slice(0, firstPatternIndex)
+      .replace(/\/$/u, "");
+    if (staticPrefix && fs.existsSync(path.join(rootDir, staticPrefix))) {
+      return true;
+    }
+  }
+
+  try {
+    return fs.globSync(documentedPath, { cwd: rootDir }).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
+  if (documentedFiles === undefined && !hasGitMetadata(rootDir)) return [];
+
+  const inventory = readTruthFile(rootDir, "docs/项目基础/文档清单.md");
+  const currentDocs = documentedFiles ?? [
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ...collectMarkdownFiles(rootDir, ".claude/rules"),
+    ...collectTrackedMarkdownDocs(rootDir).filter(
+      (file) =>
+        inventoryMarksCurrent(inventory, file) &&
+        !inventoryMarksHistoricalProof(inventory, file) &&
+        !file.startsWith("docs/技术难题/整库审查2026-07/"),
+    ),
+  ];
+  const findings = [];
+
+  for (const file of currentDocs) {
+    const content = readTruthFile(rootDir, file);
+    for (const match of content.matchAll(/`((?:src|tests)\/[^`\n]+)`/gu)) {
+      const documentedPath = normalizeDocumentedRepoPath(match[1]);
+      if (!documentedPath) continue;
+      if (documentedRepoPathExists(rootDir, documentedPath)) continue;
+      const lineStart = content.lastIndexOf("\n", match.index) + 1;
+      const lineEnd = content.indexOf("\n", match.index);
+      const line = content.slice(
+        lineStart,
+        lineEnd === -1 ? undefined : lineEnd,
+      );
+      const previousLineStart = content.lastIndexOf(
+        "\n",
+        Math.max(0, lineStart - 2),
+      );
+      const context = content.slice(
+        previousLineStart + 1,
+        lineEnd === -1 ? undefined : lineEnd,
+      );
+      if (
+        /\b(?:do not|does not|must not|never|not rename|not created|no live)\b/iu.test(
+          context,
+        ) ||
+        /(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)/u.test(context)
+      ) {
+        continue;
+      }
+      const basename = path.posix.basename(documentedPath);
+      if (!basename.includes(".") && !/[?*{]/u.test(documentedPath)) {
+        continue;
+      }
+      findings.push({
+        file,
+        error: `documented repository path does not exist "${documentedPath}"`,
+      });
+    }
+  }
+
+  return findings;
+}
+
+function collectGuardrailRegistryFindings(rootDir, productionSourceFiles) {
+  if (productionSourceFiles === undefined && !hasGitMetadata(rootDir))
+    return [];
+
+  const registerPath = "docs/项目基础/维护规则.md";
+  const registeredIds = collectRegisteredGuardrailExceptionIds(
+    readTruthFile(rootDir, registerPath),
+  );
+  if (registeredIds.size === 0) return [];
+
+  const candidateSourceFiles =
+    productionSourceFiles ??
+    execFileSync(
+      "git",
+      ["ls-files", "-z", "--", "src", "*.js", "*.mjs", "*.ts", "*.tsx"],
+      { cwd: rootDir, encoding: "utf8" },
+    )
+      .split("\0")
+      .filter(Boolean);
+  const sourceFiles = candidateSourceFiles.filter(
+    (file) => isProductionFile(file) && /\.(?:[cm]?[jt]sx?)$/u.test(file),
+  );
+  const consumedIds = new Set();
+
+  for (const file of sourceFiles) {
+    const content = readTruthFile(rootDir, file);
+    for (const match of content.matchAll(
+      /guardrail-exception\s+(GSE-\d{8}-[a-z0-9-]+)/giu,
+    )) {
+      consumedIds.add(match[1].toLowerCase());
+    }
+  }
+
+  return [...registeredIds]
+    .filter((id) => !consumedIds.has(id))
+    .map((id) => ({
+      file: registerPath,
+      error: `registered guardrail exception has no production consumer "${id}"`,
+    }));
+}
+
+function collectDocLivenessFindings(rootDir) {
+  return [
+    ...collectDocumentInventoryFindings(rootDir),
+    ...collectBacktickedRepoPathFindings(rootDir),
+    ...collectGuardrailRegistryFindings(rootDir),
+  ];
+}
+
 function isApprovedHistoricalDoc(relativePath) {
   return (
     HISTORICAL_DERIVATION_DOCS.has(relativePath) ||
@@ -586,6 +776,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
 
   failures.push(...collectMarkdownTruthFindings(rootDir));
   failures.push(...collectRuleFrontmatterGlobFindings(rootDir));
+  failures.push(...collectDocLivenessFindings(rootDir));
 
   const packageJsonPath = path.join(rootDir, "package.json");
   if (fs.existsSync(packageJsonPath)) {
@@ -684,6 +875,9 @@ module.exports = {
   HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],
   RETIRED_PUBLIC_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
+  collectBacktickedRepoPathFindings,
+  collectDocumentInventoryFindings,
+  collectGuardrailRegistryFindings,
   collectRuleFrontmatterGlobFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,
