@@ -73,8 +73,17 @@ describe("weekly dependency audit workflow", () => {
       if: "steps.audit.outcome == 'failure'",
       uses: "actions/github-script@v8",
     });
-    expect(issueStep.with?.script).toContain("github.paginate(");
-    expect(issueStep.with?.script).toContain("!issue.pull_request");
+    expect(issueStep.with?.script).toContain(
+      'const title = "Weekly production dependency audit failed"',
+    );
+    expect(issueStep.with?.script).toContain(
+      "github.paginate(github.rest.issues.listForRepo",
+    );
+    expect(issueStep.with?.script).toContain(
+      "!issue.pull_request && issue.title === title",
+    );
+    expect(issueStep.with?.script).toContain("github.rest.issues.create({");
+    expect(issueStep.with?.script).toContain("title,\n");
     expect(failStep).toEqual(
       expect.objectContaining({
         if: "${{ !cancelled() && steps.audit.outcome == 'failure' }}",
