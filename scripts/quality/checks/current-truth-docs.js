@@ -496,8 +496,9 @@ const POSITIVE_PATH_STATE_SOURCE =
   "(?:used|kept|read|run|imported|referenced|replaced|chosen|adopted|updated|moved|created|added|renamed|required|supported|present|active|current|canonical)";
 const ABSENCE_PERMITTING_PATH_STATE_SOURCE =
   "(?:used|kept|read|run|imported|referenced|chosen|adopted|created|added|required|supported|present|active|current|canonical)";
-const NEGATIVE_DIRECTIVE_SOURCE =
-  "(?:do not|does not|must not|should not|may not|cannot|can not|never)";
+const NEGATIVE_MODAL_SOURCE =
+  "(?:(?:must|should|may|can)\\s+(?:not|never)|cannot|never)";
+const NEGATIVE_DIRECTIVE_SOURCE = `(?:(?:do|does)\\s+not|${NEGATIVE_MODAL_SOURCE})`;
 const ABSENCE_PERMITTING_ACTION_SOURCE =
   "(?:create|use|import|reference|add|adopt|choose|read|run)";
 const NEGATED_ABSENCE_ACTION_PATTERN = new RegExp(
@@ -508,8 +509,10 @@ const NEGATED_TARGET_PATTERN = new RegExp(
   `\\b${NEGATIVE_DIRECTIVE_SOURCE}\\s+(?:(?:rename|move)\\s+\`path\`\\s+(?:to|as|into)|replace\\s+\`path\`\\s+with)\\s*$`,
   "iu",
 );
-const NEGATED_PASSIVE_TARGET_PATTERN =
-  /`path`\s+(?:(?:must|should|may) not|cannot|can not|never)\s+be\s+(?:(?:renamed|moved)\s+(?:to|as|into)|replaced\s+with)\s*$/iu;
+const NEGATED_PASSIVE_TARGET_PATTERN = new RegExp(
+  `\`path\`\\s+(?:${NEGATIVE_MODAL_SOURCE}\\s+be|is\\s+never)\\s+(?:(?:renamed|moved)\\s+(?:to|as|into)|replaced\\s+with)\\s*$`,
+  "iu",
+);
 const CHINESE_NEGATED_ABSENCE_ACTION_PATTERN =
   /(?:不要|不得|禁止)\s*(?:创建|使用|导入|引用|添加|采用|选择|运行|读取)[^，。；：！？]{0,72}$/iu;
 const CHINESE_NEGATED_TARGET_PATTERN =
@@ -517,7 +520,7 @@ const CHINESE_NEGATED_TARGET_PATTERN =
 const NEGATED_STATE_PREFIX_PATTERN =
   /(?:\b(?:not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不存在|未恢复|没有现役)[^，。；：！？]{0,72})\s*$/iu;
 const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(
-  `^\`[^\`]+\`\\s+(?:is not\\s+${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|does not exist|is (?:prohibited|forbidden)|(?:(?:must|should|may) not|cannot|can not)\\s+(?:(?:be\\s+)?${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|exist))\\b`,
+  `^\`[^\`]+\`\\s+(?:is\\s+(?:not|never)\\s+${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|does not exist|is (?:prohibited|forbidden)|${NEGATIVE_MODAL_SOURCE}\\s+(?:(?:be\\s+)?${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|exist))\\b`,
   "iu",
 );
 const POSITIVE_PATH_PREDICATE_PATTERN = new RegExp(

@@ -648,6 +648,9 @@ describe("current-truth docs guard", () => {
         "`src/required.ts` should not be missing.",
         "`src/not-missing.ts` is not missing.",
         "`src/not-used.ts` is not used.",
+        "`src/never-used.ts` should never be used.",
+        "`src/never-imported.ts` can never be imported.",
+        "`src/never-created.ts` is never created.",
       ].join("\n"),
     };
     const repoDir = createTempRepo(files);
@@ -682,9 +685,11 @@ describe("current-truth docs guard", () => {
         "You cannot move `src/cannot-move-source.ts` to `src/cannot-move-target.ts`.",
         "You may not replace `src/may-replace-source.ts` with `src/may-replace-target.ts`.",
         "You can not rename `src/can-not-rename-source.ts` to `src/can-not-rename-target.ts`.",
+        "You must never rename `src/must-never-rename-source.ts` to `src/must-never-rename-target.ts`.",
         "`src/passive-rename-source.ts` must not be renamed to `src/passive-rename-target.ts`.",
         "`src/passive-move-source.ts` must not be moved to `src/passive-move-target.ts`.",
         "`src/passive-replace-source.ts` must not be replaced with `src/passive-replace-target.ts`.",
+        "`src/passive-never-source.ts` must never be renamed to `src/passive-never-target.ts`.",
         "`src/passive-source-only.ts` must not be renamed.",
       ].join("\n"),
     };
@@ -705,9 +710,11 @@ describe("current-truth docs guard", () => {
         "src/cannot-move-source.ts",
         "src/may-replace-source.ts",
         "src/can-not-rename-source.ts",
+        "src/must-never-rename-source.ts",
         "src/passive-rename-source.ts",
         "src/passive-move-source.ts",
         "src/passive-replace-source.ts",
+        "src/passive-never-source.ts",
         "src/passive-source-only.ts",
       ].map(missingCurrentDocPath),
     );
