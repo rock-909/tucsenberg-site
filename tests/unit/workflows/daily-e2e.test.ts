@@ -23,6 +23,9 @@ describe("daily E2E proof lane", () => {
       readFileSync(".github/workflows/daily-e2e.yml", "utf8"),
     ) as Workflow;
     const steps = workflow.jobs?.e2e?.steps ?? [];
+    const buildStep = steps.find(
+      (step) => step.name === "Build production app",
+    );
     const testStep = steps.find((step) => step.name === "Run daily E2E");
 
     expect(workflow.on?.schedule).toEqual([{ cron: "0 10 * * *" }]);
@@ -31,7 +34,11 @@ describe("daily E2E proof lane", () => {
       CI_DAILY: "true",
       PLAYWRIGHT_PROFILE_LANE: "all",
     });
+    expect(buildStep?.env).toMatchObject({
+      SECURITY_HEADERS_ENABLED: "false",
+    });
 
+    expect(existsSync("tests/e2e/about-page-rendering.spec.ts")).toBe(true);
     expect(existsSync("tests/e2e/core-page-visual-calibration.spec.ts")).toBe(
       true,
     );
@@ -40,12 +47,15 @@ describe("daily E2E proof lane", () => {
       true,
     );
     expect(existsSync("tests/e2e/seo-validation.spec.ts")).toBe(true);
+    expect(existsSync("tests/e2e/theme-persistence.spec.ts")).toBe(true);
 
     for (const spec of [
+      "tests/e2e/about-page-rendering.spec.ts",
       "tests/e2e/core-page-visual-calibration.spec.ts",
       "tests/e2e/navigation.spec.ts",
       "tests/e2e/product-family-contact-handoff.spec.ts",
       "tests/e2e/seo-validation.spec.ts",
+      "tests/e2e/theme-persistence.spec.ts",
     ]) {
       expect(testStep?.run, spec).toContain(spec);
     }

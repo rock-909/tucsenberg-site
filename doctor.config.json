@@ -65,7 +65,6 @@
           "src/lib/security/__tests__/distributed-rate-limit.test.ts",
           "src/lib/security/__tests__/rate-limit-key-strategies.test.ts",
           "tests/e2e/contact-form-smoke.spec.ts",
-          "tests/e2e/navigation.spec.ts",
           "tests/e2e/no-js-html-contract.spec.ts",
           "tests/e2e/test-environment-setup.ts"
         ],

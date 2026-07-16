@@ -13,7 +13,8 @@ import {
 const corePages = ["/about", "/products", "/contact"] as const;
 
 async function preparePage(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+  expect(response?.status(), `${path} should render a real page`).toBe(200);
   await waitForLoadWithFallback(page, {
     context: `core visual calibration ${path}`,
     loadTimeout: 10_000,
