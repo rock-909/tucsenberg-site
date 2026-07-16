@@ -80,6 +80,15 @@ describe("CI workflow contract", () => {
     expect(qualityJob).not.toContain(FULL_COMPONENT_CHECK_COMMAND);
   });
 
+  it("runs an honestly named preview configuration smoke in the quality job", () => {
+    const qualityJob = getQualityJob(readCiWorkflow());
+
+    expect(qualityJob).toContain("name: preview config smoke");
+    expect(qualityJob).toContain(
+      "APP_ENV=preview node scripts/starter-checks.js validate-production-config",
+    );
+  });
+
   it("keeps Semgrep blocking scope narrow in CI", () => {
     const workflow = readCiWorkflow();
 
