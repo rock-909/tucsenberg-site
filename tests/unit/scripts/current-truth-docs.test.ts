@@ -408,6 +408,19 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("accepts the documented inherited-starter lifecycle class", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |\n| `docs/inherited.md` | `inherited-starter-reference` | Retained upstream reference. |",
+      "docs/inherited.md": "# Inherited reference",
+    });
+    tempDirs.push(repoDir);
+
+    expect(
+      collectDocumentInventoryFindings(repoDir, ["docs/inherited.md"]),
+    ).toEqual([]);
+  });
+
   it("rejects a missing current source path but ignores a negated path", () => {
     const files = {
       "docs/项目基础/文档清单.md":
@@ -673,6 +686,7 @@ describe("current-truth docs guard", () => {
         "`src/never-used.ts` should never be used.",
         "`src/never-imported.ts` can never be imported.",
         "`src/never-created.ts` is never created.",
+        "`src/never-exists.ts` never exists.",
       ].join("\n"),
     };
     const repoDir = createTempRepo(files);

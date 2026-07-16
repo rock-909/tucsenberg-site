@@ -41,6 +41,7 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
   "current-entry",
   "current-reference",
   "current-proof",
+  "inherited-starter-reference",
   "historical-proof",
   "method-workflow",
   "candidate-backlog",
@@ -50,12 +51,7 @@ const TRUTH_DOC_CHECKS = [
   {
     file: "docs/项目基础/文档清单.md",
     required: [
-      "current-entry",
-      "current-reference",
-      "current-proof",
-      "historical-proof",
-      "method-workflow",
-      "candidate-backlog",
+      ...DOCUMENT_LIFECYCLE_CLASSES,
       "Docs existence closeout",
       "docs/技术难题/",
       "docs/design/",
@@ -520,7 +516,7 @@ const CHINESE_NEGATED_TARGET_PATTERN =
 const NEGATED_STATE_PREFIX_PATTERN =
   /(?:\b(?:not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不存在|未恢复|没有现役)[^，。；：！？]{0,72})\s*$/iu;
 const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(
-  `^\`[^\`]+\`\\s+(?:is\\s+(?:not|never)\\s+${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|does not exist|is (?:prohibited|forbidden)|${NEGATIVE_MODAL_SOURCE}\\s+(?:(?:be\\s+)?${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|exist))\\b`,
+  `^\`[^\`]+\`\\s+(?:is\\s+(?:not|never)\\s+${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|does not exist|never exists|is (?:prohibited|forbidden)|${NEGATIVE_MODAL_SOURCE}\\s+(?:(?:be\\s+)?${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|exist))\\b`,
   "iu",
 );
 const POSITIVE_PATH_PREDICATE_PATTERN = new RegExp(
