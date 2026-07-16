@@ -634,7 +634,11 @@ describe("current-truth docs guard", () => {
     const files = {
       "docs/项目基础/文档清单.md":
         "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
-      "docs/current.md": "`src/required.ts` should not be missing.",
+      "docs/current.md": [
+        "`src/required.ts` should not be missing.",
+        "`src/not-missing.ts` is not missing.",
+        "`src/not-used.ts` is not used.",
+      ].join("\n"),
     };
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
@@ -645,6 +649,85 @@ describe("current-truth docs guard", () => {
       {
         file: "docs/current.md",
         error: 'documented repository path does not exist "src/required.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/not-missing.ts"',
+      },
+    ]);
+  });
+
+  it("requires preserved sources while exempting rename and replace targets", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": [
+        "Do not delete `src/delete.ts`.",
+        "Never remove `src/remove.ts`.",
+        "You must not delete `src/must-keep.ts`.",
+        "Do not rename `src/rename-source.ts` to `src/rename-target.ts`.",
+        "Do not move `src/move-source.ts` to `src/move-target.ts`.",
+        "Do not replace `src/replace-source.ts` with `src/replace-target.ts`.",
+      ].join("\n"),
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/delete.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/remove.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/must-keep.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "src/rename-source.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/move-source.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "src/replace-source.ts"',
+      },
+    ]);
+  });
+
+  it("applies the same source and target roles to Chinese directives", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": [
+        "不要删除 `src/keep.ts`。",
+        "当前不把 `src/source.ts` 盲目改成 `src/target.ts`。",
+        "不要创建 `src/absent.ts`。",
+      ].join("\n"),
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/keep.ts"',
+      },
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/source.ts"',
       },
     ]);
   });
