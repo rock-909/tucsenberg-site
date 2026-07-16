@@ -104,6 +104,11 @@ const FOOTER_TRANSLATION_KEYS = {
   terms: "footer.sections.support.terms",
 } as const satisfies Record<FooterLinkPageType, string>;
 
+const FOOTER_COLUMN_TRANSLATION_KEYS = {
+  navigation: "footer.sections.navigation.title",
+  support: "footer.sections.support.title",
+} as const;
+
 function getFooterLinkItem(pageType: FooterLinkPageType) {
   const href = SINGLE_SITE_ROUTE_HREFS[pageType];
   const label = FOOTER_LABELS[pageType];
@@ -152,13 +157,13 @@ export function getSingleSiteFooterColumns(): SiteFooterColumnConfig[] {
     {
       key: "navigation",
       title: "Navigation",
-      translationKey: "footer.sections.navigation.title",
+      translationKey: FOOTER_COLUMN_TRANSLATION_KEYS.navigation,
       links: navigationLinks,
     },
     {
       key: "support",
       title: "Support",
-      translationKey: "footer.sections.support.title",
+      translationKey: FOOTER_COLUMN_TRANSLATION_KEYS.support,
       links: supportLinks,
     },
   ];

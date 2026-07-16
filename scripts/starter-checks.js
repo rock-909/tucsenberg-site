@@ -47,6 +47,10 @@ const {
   validateLocale,
 } = require("./quality/checks/translations");
 const {
+  collectMessageKeyUsageFindings,
+  runMessageKeyUsageCheck,
+} = require("./quality/checks/message-key-usage");
+const {
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
@@ -59,7 +63,10 @@ const {
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
   RETIRED_PUBLIC_TRUTH_PATTERNS,
+  collectBacktickedRepoPathFindings,
   collectCurrentTruthDocFindings,
+  collectDocumentInventoryFindings,
+  collectGuardrailRegistryFindings,
   findCommandLineIndex,
   findOutOfOrderCommand,
   runTruthDocsCheck,
@@ -71,6 +78,10 @@ const {
 const {
   runCloudflareStaticAssetHeaderCli,
 } = require("./quality/checks/cloudflare-static-asset-headers");
+const {
+  collectPrerenderStaticFindings,
+  runPrerenderStaticCheck,
+} = require("./quality/checks/prerender-static");
 const {
   runValidateProductionConfigCli,
   shouldValidateProductionRuntimeContract,
@@ -117,11 +128,13 @@ Commands:
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest and static MDX import map (--check verifies freshness)
   translations        Check split critical/deferred translation shapes
+  message-key-usage   Check message catalog leaves against real consumers
   validate-production-config Validate production and public-launch config gates
   eslint-disable      Check eslint-disable exception hygiene
   component-governance Check component registry, Storybook, and UI wrapper drift
   content-readiness   Check buyer-visible catalog residue (--strict-client-launch promotes launch blockers to errors)
   client-boundary     Check top-level use client budget
+  prerender-static    Check localized Next.js build output stays prerendered
   cf-preview-smoke    Probe local Cloudflare preview behavior
   public-preview-smoke Probe public preview page route health
   deployed-smoke      Probe deployed URL route health
@@ -143,11 +156,13 @@ async function main(argv = process.argv.slice(2)) {
         check: args.includes("--check"),
       }),
     translations: () => runTranslationCheck(),
+    "message-key-usage": () => runMessageKeyUsageCheck(),
     "validate-production-config": () => runValidateProductionConfigCli(),
     "eslint-disable": () => runEslintDisableCheck(),
     "component-governance": () => runComponentGovernanceCli(),
     "content-readiness": () => runContentReadinessCli(args),
     "client-boundary": () => runClientBoundaryCli(),
+    "prerender-static": () => runPrerenderStaticCheck(),
     "cf-preview-smoke": () => runCloudflarePreviewSmoke(args),
     "public-preview-smoke": () => runPublicPreviewSmoke(args),
     "deployed-smoke": () => runDeployedSmoke(args),
@@ -203,9 +218,14 @@ module.exports = {
   collectCloudflareOfficialCompareFailures,
   collectComponentGovernanceFindings,
   collectContentReadinessFindings,
+  collectBacktickedRepoPathFindings,
   collectCurrentTruthDocFindings,
+  collectDocumentInventoryFindings,
+  collectGuardrailRegistryFindings,
   collectLeafPaths,
+  collectMessageKeyUsageFindings,
   collectPairs,
+  collectPrerenderStaticFindings,
   collectRegisteredGuardrailExceptionIds,
   compareLocales,
   createContentManifestContext,

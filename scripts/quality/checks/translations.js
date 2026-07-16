@@ -470,6 +470,7 @@ function runTranslationCheck() {
 module.exports = {
   collectLeafPaths,
   compareLocales,
+  composeCatalogMessages,
   runTranslationCheck,
   validateLocale,
 };

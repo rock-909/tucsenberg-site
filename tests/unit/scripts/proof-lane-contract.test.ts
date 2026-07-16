@@ -91,7 +91,7 @@ describe("package proof command surface", () => {
     );
     expect(scripts["brand:check"]).toBe("node scripts/starter-checks.js brand");
     expect(scripts["content:check"]).toBe(
-      "node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs && node scripts/starter-checks.js translations",
+      "node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs && node scripts/starter-checks.js translations && node scripts/starter-checks.js message-key-usage",
     );
     expect(scripts["component:check"]).toBe(
       "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build",

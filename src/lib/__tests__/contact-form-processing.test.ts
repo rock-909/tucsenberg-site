@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CONTACT_FORM_CONFIG } from "@/config/contact-form-config";
+import { createContactFormSchemaFromConfig } from "@/config/contact-form-validation";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import {
   type ContactFormWithToken,
+  mapContactValidationIssueToMessageKey,
   submitCanonicalContactSubmission,
   validateContactSubmissionPayload,
 } from "@/lib/contact/submit-canonical-contact";
+import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import { contactLeadSchema, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 
@@ -173,6 +177,39 @@ describe("canonical contact submission", () => {
         success: true,
         data: expect.objectContaining({ email: "buyer+rfq@example.com" }),
       }),
+    );
+  });
+
+  it("keeps the supported email-domain error inside the translated detail domain", () => {
+    const schema = createContactFormSchemaFromConfig(
+      {
+        ...CONTACT_FORM_CONFIG,
+        validation: {
+          ...CONTACT_FORM_CONFIG.validation,
+          emailDomainWhitelist: ["allowed.com"],
+        },
+      },
+      contactFieldValidators,
+    );
+    const result = schema.safeParse({
+      fullName: "Alice Example",
+      email: "alice@blocked.com",
+      company: "Example Co.",
+      subject: "Product inquiry",
+      message: "We need help scoping a flood barrier project.",
+      website: "",
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    const domainIssue = result.error.issues.find(
+      (issue) => issue.path[0] === "email",
+    );
+
+    if (!domainIssue)
+      throw new Error("Expected an email-domain validation issue");
+    expect(mapContactValidationIssueToMessageKey(domainIssue)).toBe(
+      "errors.email.domainNotAllowed",
     );
   });
 

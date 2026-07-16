@@ -66,6 +66,7 @@ const mockT = vi.fn((key: string) => {
     CONTACT_SUBMISSION_EXPIRED:
       "This form expired. Please refresh the page and try again.",
     TURNSTILE_REJECTED: "Security verification failed. Please try again.",
+    UNKNOWN_ERROR: "Something went wrong. Please try again.",
   };
 
   const normalizedKey = key.split(".").pop() ?? key;
@@ -459,6 +460,23 @@ describe("ContactFormContainer - ErrorDisplay", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText("Form submission expired or invalid")).toBeNull();
+  });
+
+  it("normalizes API codes outside the contact response domain", () => {
+    mockContactForm({
+      state: {
+        success: false,
+        errorCode: "INQUIRY_PROCESSING_ERROR",
+        timestamp: "2026-05-05T00:00:00.000Z",
+      },
+      submitStatus: "error",
+    });
+
+    render(<ContactFormContainer />);
+
+    expect(
+      screen.getByText("Something went wrong. Please try again."),
+    ).toBeInTheDocument();
   });
 
   it("should not display ErrorDisplay when no error", () => {

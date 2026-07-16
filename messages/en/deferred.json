@@ -258,7 +258,8 @@
         "email": {
           "required": "Email address is required",
           "invalid": "Please enter a valid email address",
-          "tooLong": "Email must be less than 100 characters"
+          "tooLong": "Email must be less than 100 characters",
+          "domainNotAllowed": "Please use an approved email domain"
         },
         "company": {
           "tooShort": "Company name must be at least 2 characters",

@@ -2,6 +2,7 @@ import { memo } from "react";
 import {
   API_ERROR_CODES,
   FORM_NETWORK_ERROR,
+  type ApiErrorCode,
 } from "@/constants/api-error-codes";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 import { translateApiError } from "@/lib/api/translate-error-code";
@@ -11,6 +12,30 @@ import {
   StatusCallout,
   type StatusCalloutTone,
 } from "@/components/ui/status-callout";
+
+const CONTACT_FORM_API_ERROR_CODES = [
+  "RATE_LIMIT_EXCEEDED",
+  "SERVICE_UNAVAILABLE",
+  "INVALID_JSON_BODY",
+  "PAYLOAD_TOO_LARGE",
+  "CONTACT_VALIDATION_FAILED",
+  "CONTACT_PROCESSING_ERROR",
+  "CONTACT_SUBMISSION_EXPIRED",
+  "TURNSTILE_REQUIRED",
+  "TURNSTILE_REJECTED",
+  "TURNSTILE_UNAVAILABLE",
+  "UNKNOWN_ERROR",
+] as const satisfies readonly ApiErrorCode[];
+
+const CONTACT_FORM_API_ERROR_CODE_SET = new Set<string>(
+  CONTACT_FORM_API_ERROR_CODES,
+);
+
+function normalizeContactFormApiErrorCode(errorCode: string): string {
+  return CONTACT_FORM_API_ERROR_CODE_SET.has(errorCode)
+    ? errorCode
+    : API_ERROR_CODES.UNKNOWN_ERROR;
+}
 
 /**
  * 获取状态消息配置
@@ -133,7 +158,10 @@ function getErrorDisplayState(
     state.errorCode === FORM_NETWORK_ERROR
       ? translateForm("networkError")
       : state.errorCode
-        ? translateApiError(translateApi, state.errorCode)
+        ? translateApiError(
+            translateApi,
+            normalizeContactFormApiErrorCode(state.errorCode),
+          )
         : undefined;
   const shouldShowTranslatedMessage =
     translatedError !== undefined && !isValidationError;

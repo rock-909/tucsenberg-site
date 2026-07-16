@@ -251,6 +251,31 @@ function analyzeSource(filePath, content, options = {}) {
   return findings;
 }
 
+function collectConsumedGuardrailExceptionIds(filePath, content) {
+  const ids = new Set();
+  if (!isProductionFile(filePath)) return ids;
+
+  for (const commentLine of extractCommentLines(filePath, content)) {
+    const directiveMatch = commentLine.text.match(
+      /^eslint-disable(?:-next-line|-line)?\b/,
+    );
+    if (!directiveMatch) continue;
+
+    const parsed = parseDisableDirective(commentLine.text, directiveMatch[0]);
+    if (
+      !parsed ||
+      !parsed.rules.some((rule) => STRUCTURAL_GUARDRAIL_RULES.has(rule))
+    ) {
+      continue;
+    }
+
+    const exception = parseGuardrailException(parsed.reason);
+    if (exception) ids.add(exception.id);
+  }
+
+  return ids;
+}
+
 function analyzeFile(filePath, options = {}) {
   const absolute = path.join(ROOT, filePath);
   let content;
@@ -296,6 +321,7 @@ function runEslintDisableCheck() {
 module.exports = {
   analyzeFile,
   analyzeSource,
+  collectConsumedGuardrailExceptionIds,
   collectRegisteredGuardrailExceptionIds,
   getActiveGuardrailExceptionSection,
   isProductionFile,

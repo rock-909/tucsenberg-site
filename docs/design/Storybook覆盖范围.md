@@ -25,7 +25,7 @@
 
 ### Tier 1: Business components
 
-**范围**：`src/components/forms/`、`src/components/products/`、`src/components/contact/`、`src/components/footer/`、`src/components/trust/` 等业务组件目录。
+**范围**：`src/components/forms/`、`src/components/products/`、`src/components/contact/`、`src/components/footer/` 等现有业务组件目录。
 
 状态：后续补齐，不是 Phase 1 blocker。
 
