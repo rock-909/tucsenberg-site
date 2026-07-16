@@ -9,12 +9,12 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
-import { suppressExpectedCspConsole } from "./test-utils";
+import { suppressExpectedCspWarnings } from "./test-utils";
 
 describe("CSP Report API Route - 安全性测试", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    suppressExpectedCspConsole();
+    suppressExpectedCspWarnings();
   });
 
   afterEach(() => {
@@ -34,7 +34,7 @@ describe("CSP Report API Route - 安全性测试", () => {
       "column-number": 10,
       "source-file": "https://example.com/page",
       "status-code": 200,
-      "script-sample": 'eval("malicious code")',
+      "script-sample": "console.log('policy sample')",
     },
   };
 
