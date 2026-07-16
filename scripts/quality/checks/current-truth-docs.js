@@ -490,6 +490,28 @@ function documentedRepoPathExists(rootDir, documentedPath) {
   }
 }
 
+const PATH_INSTRUCTION_VERB_SOURCE =
+  "(?:use|keep|read|run|import|reference|replace|choose|adopt|update|move|create|add)";
+
+function commaBelongsToNegatedActionList(normalizedClause, commaIndex) {
+  const remainingClause = normalizedClause.slice(commaIndex + 1);
+  if (/^\s*instead\b/iu.test(remainingClause)) return false;
+
+  const nextBoundaryIndex = remainingClause.search(
+    /[.;!?，。；！？]|\b(?:but|however|yet)\b|(?:但是|然而|但)/iu,
+  );
+  const activeSegment = remainingClause.slice(
+    0,
+    nextBoundaryIndex === -1 ? undefined : nextBoundaryIndex,
+  );
+  const coordinatedActionPattern = new RegExp(
+    `,\\s*(?:and|or)\\s+${PATH_INSTRUCTION_VERB_SOURCE}(?:\\s+\`path\`|\\s*$)`,
+    "iu",
+  );
+
+  return coordinatedActionPattern.test(activeSegment);
+}
+
 function isNegatedDocumentedPath(content, lineStart, matchIndex) {
   const currentLinePrefix = content.slice(lineStart, matchIndex);
   const currentLineEnd = content.indexOf("\n", matchIndex);
@@ -523,10 +545,22 @@ function isNegatedDocumentedPath(content, lineStart, matchIndex) {
   }
 
   const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
-  const clauseResetPattern =
-    /[.;!?，。；！？]|,(?=\s*(?:use|keep|read|run|import|reference|replace|choose|adopt|update|move|create|add)\b)|\b(?:but|however|yet)\b|(?:但是|然而|但)/giu;
+  const normalizedClause = `${clausePrefix}${currentLineSuffix}`.replace(
+    /`[^`]*`/gu,
+    "`path`",
+  );
+  const clauseResetPattern = new RegExp(
+    `[.;!?，。；！？]|,(?=\\s*(?:instead\\s+)?${PATH_INSTRUCTION_VERB_SOURCE}(?:\\s+\`path\`|\\s*$))|\\b(?:but|however|yet)\\b|(?:但是|然而|但)`,
+    "giu",
+  );
   let activeClauseStart = 0;
   for (const match of normalizedClausePrefix.matchAll(clauseResetPattern)) {
+    if (
+      match[0] === "," &&
+      commaBelongsToNegatedActionList(normalizedClause, match.index ?? 0)
+    ) {
+      continue;
+    }
     activeClauseStart = (match.index ?? 0) + match[0].length;
   }
   const activeClausePrefix = normalizedClausePrefix.slice(activeClauseStart);

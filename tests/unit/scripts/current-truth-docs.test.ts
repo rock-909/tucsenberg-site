@@ -529,6 +529,57 @@ describe("current-truth docs guard", () => {
     ).toEqual([]);
   });
 
+  it("resets negation when an instead clause gives the active path", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use `src/legacy.ts`, instead use `src/current-missing.ts`.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error:
+          'documented repository path does not exist "src/current-missing.ts"',
+      },
+    ]);
+  });
+
+  it("keeps coordinated action lists under the leading negation", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use `src/a.ts`, create `src/b.ts`, or add `src/c.ts`.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([]);
+  });
+
+  it("does not treat a negated noun phrase as a positive instruction", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use `src/a.ts`, use of `src/b.ts` is also prohibited.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([]);
+  });
+
   it("inherits an explicit negative heading into Markdown list items", () => {
     const files = {
       "docs/项目基础/文档清单.md":
