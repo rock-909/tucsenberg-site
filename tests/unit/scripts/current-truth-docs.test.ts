@@ -6,7 +6,7 @@ import {
   CHECKS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
-  RETIRED_CURRENT_TRUTH_PATTERNS,
+  RETIRED_PUBLIC_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   findOutOfOrderCommand,
   getReleaseProofDocsCommandBlock,
@@ -151,7 +151,7 @@ describe("current-truth docs guard", () => {
     const files = createValidFiles();
     const auditFinding = "docs/技术难题/审查2026-07/findings-example.md";
     files[auditFinding] =
-      `${HISTORICAL_BANNER}\n# 审查发现\n${RETIRED_CURRENT_TRUTH_PATTERNS.join("\n")}`;
+      `${HISTORICAL_BANNER}\n# 审查发现\n${RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n")}`;
     files["docs/项目基础/文档清单.md"] +=
       `\n| \`${auditFinding}\` | \`historical-proof\` | Audit finding. |`;
     const repoDir = createTempRepo(files);
@@ -192,15 +192,15 @@ describe("current-truth docs guard", () => {
     );
   });
 
-  it("rejects retired paths and commands from current docs", () => {
+  it("rejects retired public paths from current docs", () => {
     const files = createValidFiles();
-    files["README.md"] = RETIRED_CURRENT_TRUTH_PATTERNS.join("\n");
+    files["README.md"] = RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n");
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
 
     const findings = collectCurrentTruthDocFindings(repoDir);
 
-    for (const pattern of RETIRED_CURRENT_TRUTH_PATTERNS) {
+    for (const pattern of RETIRED_PUBLIC_TRUTH_PATTERNS) {
       expect(findings).toContainEqual({
         file: "README.md",
         error: `forbidden retired current-truth pattern "${pattern}"`,
@@ -212,7 +212,7 @@ describe("current-truth docs guard", () => {
     const files = createValidFiles();
     const historicalPath = "docs/superpowers/plans/retired-profile-example.md";
     files[historicalPath] =
-      `${HISTORICAL_BANNER}\n# Old plan\n${RETIRED_CURRENT_TRUTH_PATTERNS.join("\n")}`;
+      `${HISTORICAL_BANNER}\n# Old plan\n${RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n")}`;
     files["docs/项目基础/文档清单.md"] +=
       `\n| \`${historicalPath}\` | \`historical-proof\` | Old plan. |`;
     const repoDir = createTempRepo(files);
