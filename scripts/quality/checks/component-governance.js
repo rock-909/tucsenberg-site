@@ -3,7 +3,7 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  findRadixPackageReference,
+  getRadixModuleReferenceSummary,
 } = require("../../component-governance-registry-truth");
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
@@ -120,28 +120,31 @@ function isGovernedUiSource(file) {
   );
 }
 
-function findCssRadixReference(source) {
+function getCssRadixModuleReferenceSummary(source) {
   const commentStrippedSource = source.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
     comment.replace(/[^\n]/g, " "),
   );
-  const match = COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN.exec(
-    commentStrippedSource,
+  const matches = commentStrippedSource.matchAll(
+    new RegExp(COMPONENT_GOVERNANCE_RADIX_CSS_IMPORT_PATTERN.source, "gm"),
   );
-  if (!match) return null;
-
-  return {
+  const references = Array.from(matches, (match) => ({
     specifier: match[1],
     line: commentStrippedSource.slice(0, match.index).split("\n").length,
+  }));
+
+  return {
+    packageReference: references[0] ?? null,
+    themesReference:
+      references.find(({ specifier }) =>
+        /^@radix-ui\/themes(?:\/.*)?$/.test(specifier),
+      ) ?? null,
   };
 }
 
-function findSourceRadixPackageReference(file, source) {
-  if (!file.endsWith(".css")) return findRadixPackageReference(source);
-
-  const reference = findCssRadixReference(source);
-  return reference && /^@radix-ui\/[^/]+(?:\/.*)?$/.test(reference.specifier)
-    ? reference
-    : null;
+function getSourceRadixModuleReferenceSummary(file, source) {
+  return file.endsWith(".css")
+    ? getCssRadixModuleReferenceSummary(source)
+    : getRadixModuleReferenceSummary(source);
 }
 
 function getUiPrimitiveNames(rootDir) {
@@ -377,29 +380,25 @@ function collectTextScanFindings(rootDir, errors) {
     const isOutsideUiWrapper = !file.startsWith(
       `${COMPONENT_GOVERNANCE_UI_ROOT}/`,
     );
-    const radixPackageReference = findSourceRadixPackageReference(file, source);
-    const radixThemesReference =
-      radixPackageReference &&
-      /^@radix-ui\/themes(?:\/.*)?$/.test(radixPackageReference.specifier)
-        ? radixPackageReference
-        : null;
+    const { packageReference, themesReference } =
+      getSourceRadixModuleReferenceSummary(file, source);
 
-    if (radixThemesReference) {
+    if (themesReference) {
       errors.push(
         createFinding(
           file,
           "radix-themes-import-forbidden",
           "Production UI must not import the retired @radix-ui/themes package.",
-          radixThemesReference.line,
+          themesReference.line,
         ),
       );
-    } else if (isOutsideUiWrapper && radixPackageReference) {
+    } else if (isOutsideUiWrapper && packageReference) {
       errors.push(
         createFinding(
           file,
           "radix-import-outside-ui",
           "Production UI must import Radix through src/components/ui wrappers.",
-          radixPackageReference.line,
+          packageReference.line,
         ),
       );
     }

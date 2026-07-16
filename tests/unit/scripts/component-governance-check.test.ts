@@ -651,6 +651,37 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("finds Radix Themes after another Radix reference in the same UI wrapper", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/ui/button.tsx": [
+          'import { Slot } from "@radix-ui/react-slot";',
+          'import { Theme } from "@radix-ui/themes";',
+          "export function Button() { return <Theme><Slot /></Theme>; }",
+        ].join("\n"),
+        "src/components/ui/vendor.css": [
+          '@import "@radix-ui/colors/blue.css";',
+          '@import "@radix-ui/themes/styles.css";',
+        ].join("\n"),
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/button.tsx",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor.css",
+    );
+  });
+
   it("fails when Radix Themes subpath imports are used", () => {
     const rootDir = createFixture(
       baseFiles({

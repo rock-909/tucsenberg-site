@@ -59,24 +59,35 @@ function collectModuleReferences(source) {
   return references;
 }
 
-function findModuleReference(source, packagePattern) {
+function findModuleReference(references, packagePattern) {
   return (
-    collectModuleReferences(source).find(({ specifier }) =>
-      packagePattern.test(specifier),
-    ) ?? null
+    references.find(({ specifier }) => packagePattern.test(specifier)) ?? null
   );
 }
 
+function getRadixModuleReferenceSummary(source) {
+  const references = collectModuleReferences(source);
+
+  return {
+    packageReference: findModuleReference(references, RADIX_PACKAGE_PATTERN),
+    primitiveReference: findModuleReference(
+      references,
+      RADIX_PRIMITIVE_PATTERN,
+    ),
+    themesReference: findModuleReference(references, RADIX_THEMES_PATTERN),
+  };
+}
+
 function findRadixPackageReference(source) {
-  return findModuleReference(source, RADIX_PACKAGE_PATTERN);
+  return getRadixModuleReferenceSummary(source).packageReference;
 }
 
 function findRadixThemesReference(source) {
-  return findModuleReference(source, RADIX_THEMES_PATTERN);
+  return getRadixModuleReferenceSummary(source).themesReference;
 }
 
 function findRadixPrimitiveReference(source) {
-  return findModuleReference(source, RADIX_PRIMITIVE_PATTERN);
+  return getRadixModuleReferenceSummary(source).primitiveReference;
 }
 
 function getExpectedClientBoundary(source) {
@@ -84,15 +95,16 @@ function getExpectedClientBoundary(source) {
 }
 
 function getExpectedRadixLayer(source) {
-  const usesPrimitive = findRadixPrimitiveReference(source) !== null;
+  const { primitiveReference } = getRadixModuleReferenceSummary(source);
 
-  if (usesPrimitive) return "primitive";
+  if (primitiveReference) return "primitive";
   return "local";
 }
 
 module.exports = {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
+  getRadixModuleReferenceSummary,
   findRadixPackageReference,
   findRadixPrimitiveReference,
   findRadixThemesReference,
