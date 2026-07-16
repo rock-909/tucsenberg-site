@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 import {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  getExpectedThemeBoundary,
   RADIX_THEMES_IMPORT_PATTERN,
 } from "../../scripts/component-governance-registry-truth.js";
 
@@ -37,7 +36,7 @@ const PROTECTED_NATIVE_CHECKBOX_SURFACES = [
   "src/components/cookie",
 ] as const;
 const REQUIRED_STORY_VALUE = "required";
-const RADIX_LAYER_VALUES = ["primitive", "themes", "local", "mixed"] as const;
+const RADIX_LAYER_VALUES = ["primitive", "local"] as const;
 const SURFACE_VALUES = [
   "control",
   "navigation",
@@ -51,16 +50,10 @@ const SURFACE_VALUES = [
   "theme",
 ] as const;
 const CLIENT_BOUNDARY_VALUES = ["server-safe", "client"] as const;
-const THEME_BOUNDARY_VALUES = [
-  "self-contained",
-  "parent-scoped",
-  "none",
-] as const;
 const REQUIRED_AGENT_INDEX_FIELDS = [
   "radixLayer",
   "surface",
   "clientBoundary",
-  "themeBoundary",
   "useWhen",
   "avoidWhen",
 ] as const;
@@ -77,7 +70,7 @@ interface ComponentGovernanceRegistry {
   components: Record<string, ComponentGovernanceRegistryItem>;
 }
 
-type ComponentRadixLayer = "primitive" | "themes" | "local" | "mixed";
+type ComponentRadixLayer = "primitive" | "local";
 type ComponentSurface =
   | "control"
   | "navigation"
@@ -90,7 +83,6 @@ type ComponentSurface =
   | "utility"
   | "theme";
 type ComponentClientBoundary = "server-safe" | "client";
-type ComponentThemeBoundary = "self-contained" | "parent-scoped" | "none";
 
 interface ComponentGovernanceRegistryItem {
   avoidWhen?: string;
@@ -98,7 +90,6 @@ interface ComponentGovernanceRegistryItem {
   radixLayer?: ComponentRadixLayer;
   story?: string;
   surface?: ComponentSurface;
-  themeBoundary?: ComponentThemeBoundary;
   useWhen?: string;
 }
 
@@ -309,10 +300,6 @@ describe("component governance", () => {
         `${componentName} should use an approved clientBoundary`,
       ).toContain(component.clientBoundary);
       expect(
-        THEME_BOUNDARY_VALUES,
-        `${componentName} should use an approved themeBoundary`,
-      ).toContain(component.themeBoundary);
-      expect(
         component.useWhen,
         `${componentName} useWhen should be a short agent-facing sentence`,
       ).toEqual(expect.any(String));
@@ -333,10 +320,6 @@ describe("component governance", () => {
         component.radixLayer,
         `${componentName} radixLayer should match its Radix imports`,
       ).toBe(getExpectedRadixLayer(source));
-      expect(
-        component.themeBoundary,
-        `${componentName} themeBoundary should match Radix Themes scoping in source`,
-      ).toBe(getExpectedThemeBoundary(source));
     }
   });
 
@@ -347,35 +330,24 @@ describe("component governance", () => {
       expect.objectContaining({
         radixLayer: "local",
         surface: "narrative",
-        themeBoundary: "none",
       }),
     );
-    expect(registry.components["data-card"]).toEqual(
+    expect(registry.components.input).toEqual(
       expect.objectContaining({
-        radixLayer: "themes",
-        surface: "data",
-        themeBoundary: "self-contained",
+        radixLayer: "local",
+        surface: "form",
       }),
     );
-    expect(registry.components["contact-form-control"]).toEqual(
+    expect(registry.components["status-callout"]).toEqual(
       expect.objectContaining({
-        radixLayer: "themes",
-        surface: "form-internal",
-        themeBoundary: "parent-scoped",
-      }),
-    );
-    expect(registry.components["radix-theme"]).toEqual(
-      expect.objectContaining({
-        radixLayer: "themes",
-        surface: "theme",
-        themeBoundary: "self-contained",
+        radixLayer: "local",
+        surface: "feedback",
       }),
     );
     expect(registry.components.dialog).toEqual(
       expect.objectContaining({
         radixLayer: "primitive",
         surface: "control",
-        themeBoundary: "none",
         useWhen: expect.stringContaining("modal"),
       }),
     );
@@ -383,7 +355,6 @@ describe("component governance", () => {
       expect.objectContaining({
         radixLayer: "primitive",
         surface: "control",
-        themeBoundary: "none",
         useWhen: expect.stringContaining("drawer"),
       }),
     );
@@ -399,7 +370,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "form",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
     expect(registry.components.select).toEqual(
@@ -407,7 +377,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "form",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
     expect(registry.components["radio-group"]).toEqual(
@@ -415,7 +384,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "form",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
 
@@ -424,7 +392,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "navigation",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
     expect(registry.components.tooltip).toEqual(
@@ -432,7 +399,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "feedback",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
     expect(registry.components.popover).toEqual(
@@ -440,7 +406,6 @@ describe("component governance", () => {
         radixLayer: "primitive",
         surface: "control",
         clientBoundary: "client",
-        themeBoundary: "none",
       }),
     );
 
@@ -450,6 +415,7 @@ describe("component governance", () => {
     expect(dependencies).toHaveProperty("@radix-ui/react-checkbox");
     expect(dependencies).toHaveProperty("@radix-ui/react-select");
     expect(dependencies).toHaveProperty("@radix-ui/react-radio-group");
+    expect(dependencies).not.toHaveProperty("@radix-ui/themes");
   });
 
   it("keeps the completed AIFS primitive wrapper baseline explicit", () => {
@@ -551,11 +517,10 @@ describe("component governance", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps direct Radix Themes imports inside approved UI wrappers", () => {
+  it("keeps the retired Radix Themes package out of production source", () => {
     const violations = walkFiles(SOURCE_ROOT)
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
-      .filter((filePath) => !filePath.startsWith(`${UI_WRAPPER_ROOT}/`))
       .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))
       .filter((filePath) => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files

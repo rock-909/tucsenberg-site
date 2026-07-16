@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { Badge } from "@/components/ui/badge";
 
 describe("Badge", () => {
-  it("renders as a span inside the Radix Themes badge pilot surface", () => {
+  it("renders as a semantic local span", () => {
     render(
       <Badge data-testid="badge">
         <svg aria-hidden="true" data-testid="badge-icon" />
@@ -15,10 +15,6 @@ describe("Badge", () => {
     const badge = screen.getByTestId("badge");
     expect(badge.tagName).toBe("SPAN");
     expect(badge).toHaveAttribute("data-slot", "badge");
-    expect(badge.closest("[data-ui-pilot]")).toHaveAttribute(
-      "data-ui-pilot",
-      "radix-themes-badge",
-    );
     expect(badge).toHaveTextContent("Ready");
     expect(badge).toContainElement(screen.getByTestId("badge-icon"));
   });
@@ -37,10 +33,6 @@ describe("Badge", () => {
 
       const badge = screen.getByText("Variant");
       expect(badge).toHaveAttribute("data-slot", "badge");
-      expect(badge.closest("[data-ui-pilot]")).toHaveAttribute(
-        "data-ui-pilot",
-        "radix-themes-badge",
-      );
     },
   );
 

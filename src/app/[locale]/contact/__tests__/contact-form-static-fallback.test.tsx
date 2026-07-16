@@ -44,14 +44,11 @@ describe("ContactFormStaticFallback", () => {
 
     expect(fallback).toBeInTheDocument();
     expect(fallback?.tagName).toBe("FORM");
-    expect(fallback?.closest('[data-slot="data-card"]')).toHaveClass(
+    expect(fallback?.closest('[data-slot="card"]')).toHaveClass(
       "mx-auto",
       "w-full",
       "max-w-2xl",
     );
-    expect(
-      fallback?.closest('[data-ui-pilot="radix-themes-data-card"]'),
-    ).toBeInTheDocument();
     expect(screen.getByLabelText("Full name")).toBeDisabled();
     expect(screen.getByLabelText("Full name")).toBeRequired();
     expect(screen.getByLabelText("Email")).toBeDisabled();

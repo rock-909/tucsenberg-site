@@ -1,4 +1,4 @@
-import { DataCard } from "@/components/ui/data-card";
+import { Card } from "@/components/ui/card";
 import { FormPrivacyNotice } from "@/components/forms/form-privacy-notice";
 import {
   buildFormFieldsFromConfig,
@@ -159,7 +159,7 @@ export function ContactFormStaticFallback({
   const honeypotField = configuredFields.find((field) => field.isHoneypot);
 
   return (
-    <DataCard className="mx-auto w-full max-w-2xl">
+    <Card className="mx-auto w-full max-w-2xl p-6">
       <form
         className="space-y-6 p-6"
         data-contact-form-fallback="static"
@@ -229,6 +229,6 @@ export function ContactFormStaticFallback({
           {pick("submit")}
         </button>
       </form>
-    </DataCard>
+    </Card>
   );
 }

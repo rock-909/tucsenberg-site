@@ -107,6 +107,23 @@ afterEach(() => {
 });
 
 describe("message key usage gate", () => {
+  it("ignores tracked source paths deleted in the current worktree", () => {
+    const { rootDir } = createSource("export {};");
+
+    expect(
+      collectMessageKeyUsageFindings({
+        rootDir,
+        catalogKeys: new Set(),
+        sourceFiles: ["src/deleted-component.test.tsx"],
+        dynamicPrefixAllowlist: [],
+        derivedKeyConsumers: [],
+        objectKeyConsumers: [],
+        translatorParameterOverrides: [],
+        unusedKeyAllowlist: [],
+      }),
+    ).toEqual([]);
+  });
+
   it("baselines the known runtime default locale email residue exactly", () => {
     const key = ["emailTemplates", "runtimeDefaultLocale"].join(".");
     expect(UNUSED_MESSAGE_KEYS).toContain(key);

@@ -18,7 +18,6 @@ interface ComponentGovernanceRegistryItem {
   radixLayer: string;
   story: string;
   surface: string;
-  themeBoundary: string;
   useWhen: string;
 }
 
@@ -28,7 +27,6 @@ interface UiComponentIndexRow {
   componentName: string;
   radixLayer: string;
   surface: string;
-  themeBoundary: string;
   useWhen: string;
 }
 
@@ -62,7 +60,7 @@ function parseUiComponentIndexRows(
       .slice(1, -1)
       .map((cell) => stripTableCell(cell.trim()));
 
-    if (cells.length !== 7) {
+    if (cells.length !== 6) {
       continue;
     }
 
@@ -71,7 +69,6 @@ function parseUiComponentIndexRows(
       radixLayer,
       surface,
       clientBoundary,
-      themeBoundary,
       useWhen,
       avoidWhen,
     ] = cells;
@@ -81,7 +78,6 @@ function parseUiComponentIndexRows(
       radixLayer,
       surface,
       clientBoundary,
-      themeBoundary,
       useWhen,
       avoidWhen,
     });
@@ -108,7 +104,6 @@ describe("UI component registry docs index", () => {
       expect(row?.radixLayer).toBe(component.radixLayer);
       expect(row?.surface).toBe(component.surface);
       expect(row?.clientBoundary).toBe(component.clientBoundary);
-      expect(row?.themeBoundary).toBe(component.themeBoundary);
       expect(row?.useWhen).toBe(component.useWhen);
       expect(row?.avoidWhen).toBe(component.avoidWhen);
     }

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { StatusCallout } from "@/components/ui/status-callout";
 
 describe("StatusCallout", () => {
-  it("renders error tone as an assertive alert on the named Radix callout", () => {
+  it("renders error tone as an assertive alert", () => {
     render(
       <StatusCallout tone="error" title="Submission failed">
         Please check the form and try again.
@@ -15,15 +15,10 @@ describe("StatusCallout", () => {
 
     expect(callout).toHaveAttribute("aria-live", "assertive");
     expect(callout).toHaveAttribute("data-slot", "status-callout");
-    expect(callout).not.toHaveAttribute("data-ui-pilot");
     expect(screen.getByText("Submission failed")).toBeInTheDocument();
     expect(
       screen.getByText("Please check the form and try again."),
     ).toBeInTheDocument();
-    expect(screen.getByTestId("radix-theme-pilot")).toHaveAttribute(
-      "data-ui-pilot",
-      "radix-themes-status-callout",
-    );
   });
 
   it.each([
@@ -38,24 +33,13 @@ describe("StatusCallout", () => {
     expect(callout).toHaveTextContent(message);
   });
 
-  it("self-contains the Radix Themes boundary for business callers", () => {
+  it("keeps status semantics on one native element", () => {
     render(<StatusCallout>Self-contained notice</StatusCallout>);
 
     const callout = screen.getByRole("status");
-    const boundary = screen.getByTestId("radix-theme-pilot");
 
-    expect(boundary).toHaveAttribute(
-      "data-ui-pilot",
-      "radix-themes-status-callout",
-    );
-    expect(boundary).toHaveClass("contents");
+    expect(callout.tagName).toBe("DIV");
     expect(callout).toHaveAttribute("data-slot", "status-callout");
-    expect(callout).not.toHaveAttribute("data-ui-pilot");
-    expect(
-      document.querySelectorAll(
-        '[data-ui-pilot="radix-themes-status-callout"]',
-      ),
-    ).toHaveLength(1);
   });
 
   it("forwards refs to the root HTMLDivElement", () => {
@@ -65,7 +49,6 @@ describe("StatusCallout", () => {
 
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
     expect(ref.current).toHaveAttribute("data-slot", "status-callout");
-    expect(ref.current).not.toHaveAttribute("data-ui-pilot");
   });
 
   it("can render static notices without live-region semantics", () => {

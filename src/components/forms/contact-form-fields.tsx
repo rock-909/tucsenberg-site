@@ -3,11 +3,9 @@
  */
 
 import { memo } from "react";
-import {
-  ContactFormTextInput,
-  ContactFormTextarea,
-} from "@/components/ui/contact-form-control";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   buildFormFieldsFromConfig,
   CONTACT_FORM_CONFIG,
@@ -141,7 +139,7 @@ export const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
                   />
                 ) : null}
               </Label>
-              <ContactFormTextInput
+              <Input
                 id={field.key}
                 name={field.key}
                 type={field.type}
@@ -161,7 +159,7 @@ export const FormFields = memo(({ t, isPending }: FormFieldsProps) => {
           <Label htmlFor={field.key} className={getFieldLabelClass(field)}>
             {t(field.labelKey)}
           </Label>
-          <ContactFormTextarea
+          <Textarea
             id={field.key}
             name={field.key}
             placeholder={getFieldPlaceholder(field, t)}

@@ -1,10 +1,5 @@
 @import "tailwindcss" source(none);
 
-/* Radix Themes pilot CSS is intentionally imported through the single global
-   CSS entry so Next.js CSS order stays reviewable. Project tokens below remain
-   the runtime color truth source for the pilot mapping. */
-@import "@radix-ui/themes/styles.css" layer(components);
-
 @source "../app";
 @source "../components";
 @source "../config/footer-style-tokens.ts";
@@ -411,81 +406,6 @@
   --badge-radius: var(--radius-round);
   --badge-padding-x: 0.75rem;
   --badge-padding-y: 0.25rem;
-}
-
-/* ==================== RADIX THEMES PILOT MAPPING ==================== */
-/* Keep Radix Themes scoped to approved local wrappers. These variables map the
-   pilot back to project-owned tokens instead of accepting vendor defaults. */
-
-:where(.showcase-radix-theme-pilot.radix-themes) {
-  --default-font-family: var(--font-sans), var(--font-chinese);
-  --heading-font-family: var(--font-sans), var(--font-chinese);
-  --strong-font-family: var(--font-sans), var(--font-chinese);
-  --code-font-family: var(--font-mono);
-  --default-font-size: var(--text-base);
-  --default-line-height: 1.5;
-
-  --color-background: var(--background);
-  --color-panel-solid: var(--card);
-  --color-panel-translucent: color-mix(in oklch, var(--card) 92%, transparent);
-  --color-surface: color-mix(in oklch, var(--card) 94%, transparent);
-
-  --accent-1: var(--brand-1);
-  --accent-2: var(--brand-2);
-  --accent-3: var(--brand-3);
-  --accent-4: var(--brand-4);
-  --accent-5: var(--brand-5);
-  --accent-6: var(--brand-6);
-  --accent-7: var(--brand-7);
-  --accent-8: var(--brand-8);
-  --accent-9: var(--brand-9);
-  --accent-10: var(--brand-10);
-  --accent-11: var(--brand-11);
-  --accent-12: var(--brand-12);
-  --accent-a1: color-mix(in oklch, var(--brand-1) 35%, transparent);
-  --accent-a2: color-mix(in oklch, var(--brand-2) 45%, transparent);
-  --accent-a3: color-mix(in oklch, var(--brand-3) 55%, transparent);
-  --accent-a4: color-mix(in oklch, var(--brand-4) 60%, transparent);
-  --accent-a5: color-mix(in oklch, var(--brand-5) 62%, transparent);
-  --accent-a6: color-mix(in oklch, var(--brand-6) 64%, transparent);
-  --accent-a7: color-mix(in oklch, var(--brand-7) 66%, transparent);
-  --accent-a8: color-mix(in oklch, var(--brand-8) 68%, transparent);
-  --accent-a9: color-mix(in oklch, var(--brand-9) 72%, transparent);
-  --accent-a10: color-mix(in oklch, var(--brand-10) 76%, transparent);
-  --accent-a11: color-mix(in oklch, var(--brand-11) 82%, transparent);
-  --accent-a12: color-mix(in oklch, var(--brand-12) 88%, transparent);
-  --accent-contrast: var(--primary-foreground);
-  --accent-surface: var(--primary-light);
-  --accent-indicator: var(--primary);
-  --accent-track: var(--brand-6);
-
-  --gray-1: var(--neutral-1);
-  --gray-2: var(--neutral-2);
-  --gray-3: var(--neutral-3);
-  --gray-4: var(--neutral-4);
-  --gray-5: var(--neutral-5);
-  --gray-6: var(--neutral-6);
-  --gray-7: var(--neutral-7);
-  --gray-8: var(--neutral-8);
-  --gray-9: var(--neutral-9);
-  --gray-10: var(--neutral-10);
-  --gray-11: var(--neutral-11);
-  --gray-12: var(--neutral-12);
-
-  --focus-1: var(--brand-1);
-  --focus-2: var(--brand-2);
-  --focus-3: var(--brand-3);
-  --focus-4: var(--brand-4);
-  --focus-5: var(--brand-5);
-  --focus-6: var(--brand-6);
-  --focus-7: var(--brand-7);
-  --focus-8: var(--ring);
-  --focus-9: var(--primary);
-  --focus-10: var(--primary-dark);
-  --focus-11: var(--brand-11);
-  --focus-12: var(--brand-12);
-  --focus-a5: color-mix(in oklch, var(--ring) 35%, transparent);
-  --focus-a8: color-mix(in oklch, var(--ring) 55%, transparent);
 }
 
 /* ==================== TAILWIND THEME BINDINGS ==================== */

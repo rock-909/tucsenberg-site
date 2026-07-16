@@ -3,7 +3,6 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  getExpectedThemeBoundary,
 } = require("../../component-governance-registry-truth");
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
@@ -16,12 +15,11 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS = [
   "radixLayer",
   "surface",
   "clientBoundary",
-  "themeBoundary",
   "useWhen",
   "avoidWhen",
 ];
 const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
-  radixLayer: new Set(["primitive", "themes", "local", "mixed"]),
+  radixLayer: new Set(["primitive", "local"]),
   surface: new Set([
     "control",
     "navigation",
@@ -35,25 +33,12 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
     "theme",
   ]),
   clientBoundary: new Set(["server-safe", "client"]),
-  themeBoundary: new Set(["self-contained", "parent-scoped", "none"]),
 };
 const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
   /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
 const COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
-const COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN =
-  /from\s+["']@\/components\/ui\/radix-theme["']/;
-const COMPONENT_GOVERNANCE_RADIX_THEMES_APPROVED_WRAPPERS = new Set([
-  "src/components/ui/radix-theme.tsx",
-  "src/components/ui/contact-form-shell.tsx",
-  "src/components/ui/contact-form-control.tsx",
-  "src/components/ui/input.tsx",
-  "src/components/ui/textarea.tsx",
-  "src/components/ui/status-callout.tsx",
-  "src/components/ui/badge.tsx",
-  "src/components/ui/data-card.tsx",
-]);
 const COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN =
   /(?:from\s+["']@radix-ui\/themes(?:\/[^"']*)?["']|import\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\)|require\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\))/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
@@ -248,12 +233,6 @@ function collectRegistryAgentSourceTruthFindings(
       detail:
         "Registry radixLayer must match Radix imports in the wrapper source.",
     },
-    {
-      field: "themeBoundary",
-      expected: getExpectedThemeBoundary(source),
-      detail:
-        "Registry themeBoundary must match Radix Themes scoping in the wrapper source.",
-    },
   ];
 
   for (const check of sourceTruthChecks) {
@@ -371,42 +350,12 @@ function collectTextScanFindings(rootDir, errors) {
     const importsRadixThemes =
       COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN.test(source);
 
-    if (
-      isOutsideUiWrapper &&
-      COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN.test(source)
-    ) {
+    if (importsRadixThemes) {
       errors.push(
         createFinding(
           file,
-          "radix-theme-pilot-import-outside-ui-wrapper",
-          "RadixThemePilot may only be imported inside approved src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN,
-          ),
-        ),
-      );
-    } else if (isOutsideUiWrapper && importsRadixThemes) {
-      errors.push(
-        createFinding(
-          file,
-          "radix-themes-import-outside-ui-wrapper",
-          "Radix Themes may only be imported through approved src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN,
-          ),
-        ),
-      );
-    } else if (
-      importsRadixThemes &&
-      !COMPONENT_GOVERNANCE_RADIX_THEMES_APPROVED_WRAPPERS.has(file)
-    ) {
-      errors.push(
-        createFinding(
-          file,
-          "radix-themes-import-unapproved-ui-wrapper",
-          "Radix Themes may only be imported by approved pilot UI wrappers.",
+          "radix-themes-import-forbidden",
+          "Production UI must not import the retired @radix-ui/themes package.",
           getPatternLineNumber(
             source,
             COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN,

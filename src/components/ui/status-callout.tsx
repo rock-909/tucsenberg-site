@@ -1,6 +1,4 @@
-import { Callout } from "@radix-ui/themes";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
-import { RadixThemePilot } from "@/components/ui/radix-theme";
 import { cn } from "@/lib/utils";
 
 export type StatusCalloutTone = "info" | "success" | "warning" | "error";
@@ -41,23 +39,21 @@ function StatusCallout({
   const defaultAriaLive = tone === "error" ? "assertive" : "polite";
 
   return (
-    <RadixThemePilot className="contents" surface="status-callout">
-      <Callout.Root
-        ref={ref}
-        className={cn(
-          "rounded-lg border p-4 text-sm",
-          TONE_CLASS_NAMES[tone],
-          className,
-        )}
-        data-slot="status-callout"
-        role={live ? (role ?? defaultRole) : role}
-        aria-live={live ? (ariaLive ?? defaultAriaLive) : ariaLive}
-        {...props}
-      >
-        {title ? <p className="font-medium">{title}</p> : null}
-        <div className={title ? "mt-1" : undefined}>{children}</div>
-      </Callout.Root>
-    </RadixThemePilot>
+    <div
+      ref={ref}
+      className={cn(
+        "grid gap-2 rounded-lg border p-4 text-sm",
+        TONE_CLASS_NAMES[tone],
+        className,
+      )}
+      data-slot="status-callout"
+      role={live ? (role ?? defaultRole) : role}
+      aria-live={live ? (ariaLive ?? defaultAriaLive) : ariaLive}
+      {...props}
+    >
+      {title ? <p className="font-medium">{title}</p> : null}
+      <div className={title ? "mt-1" : undefined}>{children}</div>
+    </div>
   );
 }
 

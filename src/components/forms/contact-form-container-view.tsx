@@ -6,7 +6,7 @@ import type {
   TurnstileStatus,
 } from "@/components/forms/use-contact-form";
 import { Button } from "@/components/ui/button";
-import { ContactFormShell } from "@/components/ui/contact-form-shell";
+import { Card } from "@/components/ui/card";
 import {
   ErrorDisplay,
   StatusMessage,
@@ -111,7 +111,10 @@ export function ContactFormContainerView({
   );
 
   return (
-    <ContactFormShell>
+    <Card
+      className="mx-auto w-full max-w-2xl p-6"
+      data-testid="contact-form-shell"
+    >
       <form
         action={formAction}
         aria-busy={isPending}
@@ -166,6 +169,6 @@ export function ContactFormContainerView({
           </p>
         ) : null}
       </form>
-    </ContactFormShell>
+    </Card>
   );
 }
