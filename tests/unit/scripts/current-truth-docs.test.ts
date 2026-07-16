@@ -580,6 +580,29 @@ describe("current-truth docs guard", () => {
     ).toEqual([]);
   });
 
+  it("recognizes standalone negative predicates without hiding positive ones", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md": [
+        "Use of `src/prohibited.ts` is prohibited.",
+        "`src/must-not-use.ts` must not be used.",
+        "Use of `src/required.ts` is required.",
+      ].join("\n"),
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/required.ts"',
+      },
+    ]);
+  });
+
   it("inherits an explicit negative heading into Markdown list items", () => {
     const files = {
       "docs/项目基础/文档清单.md":

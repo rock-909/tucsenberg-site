@@ -569,7 +569,7 @@ function isNegatedDocumentedPath(content, lineStart, matchIndex) {
     /(?:\b(?:do not|does not|must not|never|not rename|not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不要|不得|禁止|不存在|未恢复|没有现役|不把|不改)[^，。；：！？]{0,72})\s*$/iu.test(
       activeClausePrefix,
     ) ||
-    /^`[^`]+`\s+(?:is not created|does not exist|is not present)\b/iu.test(
+    /^`[^`]+`\s+(?:is not created|does not exist|is not present|is (?:prohibited|forbidden)|(?:must|should|may) not\b|cannot\b|can not\b)/iu.test(
       currentLineSuffix,
     )
   );
