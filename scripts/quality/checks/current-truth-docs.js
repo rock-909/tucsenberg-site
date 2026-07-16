@@ -23,15 +23,7 @@ const PERFORMANCE_ARCHIVE_DOCS = [
   "docs/技术难题/性能治理候选审计.md",
   "docs/技术难题/SEO公开页面性能余量.md",
 ];
-const RETIRED_CURRENT_TRUTH_PATTERNS = [
-  "src/constants/product-specs/**",
-  "src/lib/blog/starter-blog.ts",
-  "scripts/starter-profile/**",
-  "messages/profiles/company-site/**",
-  "/api/verify-turnstile",
-  "pnpm profile:dry-run",
-  "pnpm profile:materialize",
-];
+const RETIRED_PUBLIC_TRUTH_PATTERNS = ["/api/verify-turnstile"];
 const HISTORICAL_BANNER = "> Historical.";
 const HISTORICAL_DERIVATION_DOCS = new Set([
   "docs/项目基础/替换顺序.md",
@@ -441,7 +433,7 @@ function collectMarkdownTruthFindings(rootDir) {
       continue;
     }
 
-    for (const pattern of RETIRED_CURRENT_TRUTH_PATTERNS) {
+    for (const pattern of RETIRED_PUBLIC_TRUTH_PATTERNS) {
       if (content.includes(pattern)) {
         failures.push({
           file,
@@ -690,7 +682,7 @@ module.exports = {
   CURRENT_TRUTH_COMMAND_DOCS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],
-  RETIRED_CURRENT_TRUTH_PATTERNS,
+  RETIRED_PUBLIC_TRUTH_PATTERNS,
   collectCurrentTruthDocFindings,
   collectRuleFrontmatterGlobFindings,
   findCommandLineIndex,

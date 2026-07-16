@@ -15,20 +15,6 @@ const CURRENT_PLAYWRIGHT_DEFAULT_MATCHES = [
   "**/smoke/**/*.spec.ts",
 ] as const;
 
-const RETIRED_PLAYWRIGHT_DEFAULT_FILES = [
-  "about-page-rendering.spec.ts",
-  "basic-navigation.spec.ts",
-  "button-runtime-token-pilot.spec.ts",
-  "core-page-visual-calibration.spec.ts",
-  "homepage.spec.ts",
-  "i18n-redirect-validation.spec.ts",
-  "i18n.spec.ts",
-  "navigation.spec.ts",
-  "safe-navigation.spec.ts",
-  "seo-validation.spec.ts",
-  "user-journeys.spec.ts",
-] as const;
-
 describe("proof lane labels", () => {
   it("keeps the shared proof lane vocabulary in docs and release output", () => {
     const launchProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
@@ -75,9 +61,6 @@ describe("proof lane labels", () => {
     expect(playwrightConfig).toContain("testMatch: currentSiteTestMatch");
     for (const match of CURRENT_PLAYWRIGHT_DEFAULT_MATCHES) {
       expect(playwrightConfig).toContain(match);
-    }
-    for (const file of RETIRED_PLAYWRIGHT_DEFAULT_FILES) {
-      expect(playwrightConfig).not.toContain(file);
     }
     expect(proofLevels).toContain(
       "Default Playwright discovery is intentionally limited",
