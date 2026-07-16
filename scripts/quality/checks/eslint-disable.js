@@ -1,6 +1,7 @@
 const { execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const { parser } = require("typescript-eslint");
 
 const ROOT = process.cwd();
 
@@ -164,128 +165,25 @@ function parseDisableDirective(line, directive) {
   return { rules, reason };
 }
 
-/** Prev non-whitespace outside strings/comments — `/` after these is treated as regex. */
-function isRegexLiteralStart(prevSignificant) {
-  if (prevSignificant === null) return true;
-  return "([{,;=!&|?:+-*%~^<>".includes(prevSignificant);
+function normalizeCommentLine(line) {
+  const trimmed = line.trim();
+  return trimmed.startsWith("*") ? trimmed.slice(1).trim() : trimmed;
 }
 
-function skipStringLiteral(line, start) {
-  const quote = line[start];
-  let i = start + 1;
-  while (i < line.length) {
-    if (line[i] === "\\") {
-      i += 2;
-      continue;
-    }
-    if (quote === "`" && line[i] === "$" && line[i + 1] === "{") {
-      i = skipTemplateExpression(line, i + 2);
-      continue;
-    }
-    if (line[i] === quote) return i + 1;
-    i += 1;
-  }
-  return line.length;
-}
+function extractCommentLines(filePath, content) {
+  const result = parser.parseForESLint(content, {
+    comment: true,
+    filePath,
+    loc: true,
+    range: true,
+  });
 
-function skipTemplateExpression(line, start) {
-  let i = start;
-  let depth = 1;
-  while (i < line.length && depth > 0) {
-    if (line[i] === "\\") {
-      i += 2;
-      continue;
-    }
-    if (line[i] === "{") depth += 1;
-    else if (line[i] === "}") depth -= 1;
-    i += 1;
-  }
-  return i;
-}
-
-function skipRegexLiteral(line, start) {
-  let i = start + 1;
-  while (i < line.length) {
-    if (line[i] === "\\") {
-      i += 2;
-      continue;
-    }
-    if (line[i] === "[") {
-      i += 1;
-      while (i < line.length && line[i] !== "]") {
-        if (line[i] === "\\") i += 1;
-        i += 1;
-      }
-      i += 1;
-      continue;
-    }
-    if (line[i] === "/") {
-      i += 1;
-      break;
-    }
-    i += 1;
-  }
-  while (i < line.length && /[a-z]/i.test(line[i] ?? "")) i += 1;
-  return i;
-}
-
-/**
- * Return bodies of real // and /* comments on one source line.
- * Skips string / template / regex contents so URL, quoted text, and /.../ cannot
- * be mistaken for comments or eslint-disable directives.
- */
-function extractCommentBodies(line) {
-  const bodies = [];
-  let i = 0;
-  let prevSignificant = null;
-
-  while (i < line.length) {
-    const char = line[i];
-    const next = line[i + 1];
-
-    if (char === '"' || char === "'" || char === "`") {
-      i = skipStringLiteral(line, i);
-      prevSignificant = char;
-      continue;
-    }
-
-    if (char === "/" && next === "/") {
-      bodies.push(line.slice(i + 2).trim());
-      break;
-    }
-
-    if (char === "/" && next === "*") {
-      i += 2;
-      const end = line.indexOf("*/", i);
-      if (end === -1) {
-        bodies.push(line.slice(i).trim());
-        break;
-      }
-      bodies.push(line.slice(i, end).trim());
-      i = end + 2;
-      prevSignificant = "/";
-      continue;
-    }
-
-    if (char === "/" && isRegexLiteralStart(prevSignificant)) {
-      i = skipRegexLiteral(line, i);
-      prevSignificant = "/";
-      continue;
-    }
-
-    if (!/\s/.test(char)) prevSignificant = char;
-    i += 1;
-  }
-
-  return bodies;
-}
-
-function commentBodiesForLine(rawLine) {
-  const trimmed = rawLine.trim();
-  if (trimmed.startsWith("//")) return [trimmed.slice(2).trim()];
-  if (trimmed.startsWith("/*")) return [trimmed.slice(2).trim()];
-  if (trimmed.startsWith("*")) return [trimmed.slice(1).trim()];
-  return extractCommentBodies(rawLine);
+  return (result.ast.comments ?? []).flatMap((comment) =>
+    comment.value.split("\n").map((line, lineOffset) => ({
+      line: comment.loc.start.line + lineOffset,
+      text: normalizeCommentLine(line),
+    })),
+  );
 }
 
 function analyzeSource(filePath, content, options = {}) {
@@ -296,66 +194,59 @@ function analyzeSource(filePath, content, options = {}) {
   const testFile = isTestFile(filePath);
   const productionFile = isProductionFile(filePath);
 
-  for (let i = 0; i < lines.length; i += 1) {
-    const rawLine = lines[i] ?? "";
-    const trimmed = rawLine.trim();
-    const commentBodies = commentBodiesForLine(rawLine);
+  for (const commentLine of extractCommentLines(filePath, content)) {
+    const directiveText = commentLine.text;
+    const directiveMatch = directiveText.match(
+      /^eslint-disable(?:-next-line|-line)?\b/,
+    );
+    if (!directiveMatch) continue;
 
-    for (const directiveText of commentBodies) {
-      const directiveMatch = directiveText.match(
-        /^eslint-disable(?:-next-line|-line)?\b/,
-      );
-      if (!directiveMatch) continue;
+    const directive = directiveMatch[0];
+    const parsed = parseDisableDirective(directiveText, directive);
+    if (!parsed) continue;
 
-      const directive = directiveMatch[0];
-      const parsed = parseDisableDirective(directiveText, directive);
-      if (!parsed) continue;
+    const violations = [];
+    if (parsed.rules.length === 0) {
+      violations.push("missing explicit rule name");
+    }
 
-      const violations = [];
-      if (parsed.rules.length === 0) {
-        violations.push("missing explicit rule name");
+    for (const rule of parsed.rules) {
+      if (!isValidRuleName(rule)) {
+        violations.push(`invalid rule name: ${rule}`);
       }
+    }
 
-      for (const rule of parsed.rules) {
-        if (!isValidRuleName(rule)) {
-          violations.push(`invalid rule name: ${rule}`);
-        }
-      }
+    if (productionFile && parsed.reason.length === 0) {
+      violations.push("missing production-code reason");
+    }
 
-      if (productionFile && parsed.reason.length === 0) {
-        violations.push("missing production-code reason");
+    const structuralRules = parsed.rules.filter((rule) =>
+      STRUCTURAL_GUARDRAIL_RULES.has(rule),
+    );
+    if (
+      structuralRules.length > 0 &&
+      productionFile &&
+      !testFile &&
+      !isStructuralGuardrailExemptPath(filePath)
+    ) {
+      const exception = parseGuardrailException(parsed.reason);
+      if (!exception) {
+        violations.push(
+          "missing guardrail exception id (use `-- guardrail-exception GSE-YYYYMMDD-short-slug: real boundary ...`)",
+        );
+      } else if (!registeredGuardrailExceptionIds.has(exception.id)) {
+        violations.push(`unregistered guardrail exception id: ${exception.id}`);
       }
+    }
 
-      const structuralRules = parsed.rules.filter((rule) =>
-        STRUCTURAL_GUARDRAIL_RULES.has(rule),
-      );
-      if (
-        structuralRules.length > 0 &&
-        productionFile &&
-        !testFile &&
-        !isStructuralGuardrailExemptPath(filePath)
-      ) {
-        const exception = parseGuardrailException(parsed.reason);
-        if (!exception) {
-          violations.push(
-            "missing guardrail exception id (use `-- guardrail-exception GSE-YYYYMMDD-short-slug: real boundary ...`)",
-          );
-        } else if (!registeredGuardrailExceptionIds.has(exception.id)) {
-          violations.push(
-            `unregistered guardrail exception id: ${exception.id}`,
-          );
-        }
-      }
-
-      if (violations.length > 0) {
-        findings.push({
-          filePath,
-          line: i + 1,
-          directive,
-          content: trimmed,
-          violations,
-        });
-      }
+    if (violations.length > 0) {
+      findings.push({
+        filePath,
+        line: commentLine.line,
+        directive,
+        content: (lines[commentLine.line - 1] ?? "").trim(),
+        violations,
+      });
     }
   }
 

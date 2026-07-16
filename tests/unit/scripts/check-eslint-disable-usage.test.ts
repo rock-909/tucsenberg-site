@@ -327,6 +327,27 @@ export const text = "// eslint-disable-line no-unused-vars";
     expect(findings).toEqual([]);
   });
 
+  it("detects eslint-disable inside a template expression", () => {
+    const findings = analyzeSource(
+      "src/lib/example.ts",
+      `
+export const text = \`\${value /* eslint-disable-line no-unused-vars */}\`;
+      `,
+      {
+        registeredGuardrailExceptionIds: collectRegisteredGuardrailExceptionIds(
+          REGISTER_WITH_CONTACT_EXCEPTION,
+        ),
+      },
+    );
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        directive: "eslint-disable-line",
+        violations: ["missing production-code reason"],
+      }),
+    ]);
+  });
+
   it("does not require guardrail registry entries for test files", () => {
     const findings = analyzeSource(
       "src/lib/security/__tests__/distributed-rate-limit.test.ts",
