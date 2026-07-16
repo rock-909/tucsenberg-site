@@ -178,30 +178,26 @@ function analyzeSource(filePath, content, options = {}) {
     if (trimmed.startsWith("/*")) return trimmed.slice(2).trim();
     if (trimmed.startsWith("*")) return trimmed.slice(1).trim();
 
-    const jsxBlockIdx = trimmed.indexOf("{/*");
+    // Locate the comment that actually wraps the directive. First `//` / `/*` on
+    // the line is wrong when a URL or regex earlier on the same line contains them.
+    const directiveMatch = ESLINT_DIRECTIVE_PATTERN.exec(trimmed);
+    if (!directiveMatch || directiveMatch.index === undefined) return null;
+
+    const before = trimmed.slice(0, directiveMatch.index);
+    const jsxBlockIdx = before.lastIndexOf("{/*");
     if (jsxBlockIdx !== -1) {
       return trimmed.slice(jsxBlockIdx + 3).trim();
     }
 
-    // Trailing comments: `stmt; // eslint-disable-line …` / `stmt; /* eslint-disable … */`
-    // ESLINT_DIRECTIVE_PATTERN already matched somewhere on the line; recover the comment body.
-    const lineCommentIdx = trimmed.indexOf("//");
-    if (
-      lineCommentIdx !== -1 &&
-      ESLINT_DIRECTIVE_PATTERN.test(trimmed.slice(lineCommentIdx))
-    ) {
+    const lineCommentIdx = before.lastIndexOf("//");
+    const blockCommentIdx = before.lastIndexOf("/*");
+    if (lineCommentIdx === -1 && blockCommentIdx === -1) return null;
+
+    if (lineCommentIdx > blockCommentIdx) {
       return trimmed.slice(lineCommentIdx + 2).trim();
     }
 
-    const blockCommentIdx = trimmed.indexOf("/*");
-    if (
-      blockCommentIdx !== -1 &&
-      ESLINT_DIRECTIVE_PATTERN.test(trimmed.slice(blockCommentIdx))
-    ) {
-      return trimmed.slice(blockCommentIdx + 2).trim();
-    }
-
-    return null;
+    return trimmed.slice(blockCommentIdx + 2).trim();
   }
 
   for (let i = 0; i < lines.length; i += 1) {
