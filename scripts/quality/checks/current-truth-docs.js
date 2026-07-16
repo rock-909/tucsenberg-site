@@ -496,7 +496,8 @@ const POSITIVE_PATH_STATE_SOURCE =
   "(?:used|kept|read|run|imported|referenced|replaced|chosen|adopted|updated|moved|created|added|renamed|required|supported|present|active|current|canonical)";
 const ABSENCE_PERMITTING_PATH_STATE_SOURCE =
   "(?:used|kept|read|run|imported|referenced|chosen|adopted|created|added|required|supported|present|active|current|canonical)";
-const NEGATIVE_DIRECTIVE_SOURCE = "(?:do not|does not|must not|never)";
+const NEGATIVE_DIRECTIVE_SOURCE =
+  "(?:do not|does not|must not|should not|may not|cannot|can not|never)";
 const ABSENCE_PERMITTING_ACTION_SOURCE =
   "(?:create|use|import|reference|add|adopt|choose|read|run)";
 const NEGATED_ABSENCE_ACTION_PATTERN = new RegExp(
@@ -512,7 +513,7 @@ const NEGATED_PASSIVE_TARGET_PATTERN =
 const CHINESE_NEGATED_ABSENCE_ACTION_PATTERN =
   /(?:不要|不得|禁止)\s*(?:创建|使用|导入|引用|添加|采用|选择|运行|读取)[^，。；：！？]{0,72}$/iu;
 const CHINESE_NEGATED_TARGET_PATTERN =
-  /(?:(?:不把|(?:不要|不得|禁止)(?:把|将))\s*`path`[^，。；：！？]{0,40}(?:改成|重命名为|移动到|移到|替换为)|(?:不要|不得|禁止)\s*(?:(?:移动|移)\s*`path`\s*(?:到|至)|重命名\s*`path`\s*(?:为|成)|替换\s*`path`\s*(?:为|成)))\s*$/iu;
+  /(?:(?:不把|不将|(?:不要|不得|禁止)(?:把|将))\s*`path`[^，。；：！？]{0,40}(?:改成|重命名为|移动到|移到|替换为)|(?:不要|不得|禁止)\s*(?:(?:移动|移)\s*`path`\s*(?:到|至)|重命名\s*`path`\s*(?:为|成)|替换\s*`path`\s*(?:为|成)))\s*$/iu;
 const NEGATED_STATE_PREFIX_PATTERN =
   /(?:\b(?:not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不存在|未恢复|没有现役)[^，。；：！？]{0,72})\s*$/iu;
 const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(
