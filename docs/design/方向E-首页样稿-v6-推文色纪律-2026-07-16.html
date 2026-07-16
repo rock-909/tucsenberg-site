@@ -1,0 +1,694 @@
+<title>Tucsenberg 设计方案 v6 · 冷调工程风 · 推文色纪律版</title>
+<style>
+:root{
+  /* ---- 方向E tokens · light 基准（色值实测自 column.com）---- */
+  --bg:#FDFDFE; --surface:#FFFFFF; --ink:#12161E; --ink2:#575A64; --ink3:#6B6E78;
+  --brand:#111A4A; --on-brand:#FFFFFF; --brand-hover:#080B32;
+  --line:#E3E4E8; --line-soft:#EEEFF2;
+  --accent:#1E4199; --accent-ink:#1B2D70; --accent-tint:#EEF4FB;
+  --wash1:rgba(136,222,235,.18); --wash2:rgba(148,239,183,.12);
+  --warn:#A90101; --warn-bg:rgba(169,1,1,.04);
+  --ok:#167E6C;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0A0E22; --surface:#101534; --ink:#E9EDF8; --ink2:#A8B0C8; --ink3:#737C99;
+  --brand:#A2C1ED; --on-brand:#0A0E22; --brand-hover:#C4D6F2;
+  --line:#232B4D; --line-soft:#181F3D;
+  --accent:#7EA7E9; --accent-ink:#A2C1ED; --accent-tint:#141C3F;
+  --wash1:rgba(136,222,235,.08); --wash2:rgba(148,239,183,.05);
+  --warn:#F5A2AE; --warn-bg:rgba(245,162,174,.07);
+  --ok:#7CE5A8;
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0E22; --surface:#101534; --ink:#E9EDF8; --ink2:#A8B0C8; --ink3:#737C99;
+  --brand:#A2C1ED; --on-brand:#0A0E22; --brand-hover:#C4D6F2;
+  --line:#232B4D; --line-soft:#181F3D;
+  --accent:#7EA7E9; --accent-ink:#A2C1ED; --accent-tint:#141C3F;
+  --wash1:rgba(136,222,235,.08); --wash2:rgba(148,239,183,.05);
+  --warn:#F5A2AE; --warn-bg:rgba(245,162,174,.07);
+  --ok:#7CE5A8;
+}
+:root[data-theme="light"]{
+  --bg:#FDFDFE; --surface:#FFFFFF; --ink:#12161E; --ink2:#575A64; --ink3:#6B6E78;
+  --brand:#111A4A; --on-brand:#FFFFFF; --brand-hover:#080B32;
+  --line:#E3E4E8; --line-soft:#EEEFF2;
+  --accent:#1E4199; --accent-ink:#1B2D70; --accent-tint:#EEF4FB;
+  --wash1:rgba(136,222,235,.18); --wash2:rgba(148,239,183,.12);
+  --warn:#A90101; --warn-bg:rgba(169,1,1,.04);
+  --ok:#167E6C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== 方案说明条（非站内元素）===== */
+.meta-strip{background:var(--surface);border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:11.5px;color:var(--ink3);padding:10px 20px;
+  display:flex;gap:18px;flex-wrap:wrap;justify-content:center;letter-spacing:.04em}
+.meta-strip b{color:var(--ink2);font-weight:600}
+
+/* ===== Vercel 式工程图纸框：居中框 + 两侧通页竖线 ===== */
+.sheet{max-width:1120px;margin:0 auto;border-left:1px solid var(--line);
+  border-right:1px solid var(--line);position:relative;background:var(--bg)}
+/* 顶部刻度带 */
+.ticks{height:26px;border-bottom:1px solid var(--line);
+  background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 40px);
+  background-position:bottom;background-size:100% 8px;background-repeat:no-repeat}
+/* 区块分界：mono 标签压线 */
+.sect{border-bottom:1px solid var(--line);position:relative}
+.sect-tag{position:absolute;top:-1px;left:0;transform:translateY(-50%);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);
+  background:var(--bg);padding:2px 14px 2px 24px;text-transform:uppercase}
+.pad{padding:0 56px}
+@media(max-width:760px){.pad{padding:0 22px}}
+
+/* ===== NAV ===== */
+nav{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;border-bottom:1px solid var(--line);background:var(--surface)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+.logo-mark{width:26px;height:26px;border-radius:50%;background:
+  conic-gradient(from 210deg,var(--brand) 0 40%,transparent 40% 100%),
+  radial-gradient(circle at 50% 50%,var(--line-soft) 0 30%,transparent 31%);
+  border:1.5px solid var(--brand)}
+.nav-links{display:flex;gap:26px;font-size:13.5px}
+.nav-links a{color:var(--ink3);transition:color .2s ease}
+.nav-links a:hover{color:var(--ink2)}
+.nav-links a.on{color:var(--ink);font-weight:600}
+.nav-cta{font-size:13px;font-weight:600;background:var(--brand);color:var(--on-brand);
+  padding:8px 16px;border-radius:6px;border:1px solid var(--brand);cursor:pointer;
+  transition:background .2s ease,color .2s ease}
+.nav-cta:hover{background:var(--brand-hover)}
+@media(max-width:860px){.nav-links{display:none}}
+
+/* ===== HERO ===== */
+.hero{position:relative;overflow:hidden;padding:84px 0 0}
+.hero-wash{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(52% 42% at 18% 22%,var(--wash1),transparent 70%),
+             radial-gradient(46% 38% at 86% 64%,var(--wash2),transparent 72%)}
+.hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+  gap:64px;align-items:start}
+@media(max-width:860px){.hero-grid{grid-template-columns:1fr;gap:44px}}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;color:var(--ink2);
+  text-transform:uppercase;display:flex;align-items:center;gap:9px;margin:0 0 22px}
+.eyebrow::before{content:"";width:7px;height:7px;background:var(--ink3);
+  clip-path:polygon(50% 0,100% 100%,0 100%)}
+h1{font-size:clamp(34px,5vw,56px);line-height:1.04;letter-spacing:-.035em;font-weight:750;
+  margin:0 0 22px;text-wrap:balance}
+.hero-sub{font-size:17px;color:var(--ink2);max-width:56ch;margin:0 0 14px}
+.hero-kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;color:var(--ink2);
+  margin:0 0 30px;text-transform:uppercase}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{font-size:14.5px;font-weight:600;padding:12px 22px;border-radius:6px;cursor:pointer;
+  border:1px solid transparent;transition:background .2s ease,color .2s ease}
+.btn-pri{background:var(--brand);color:var(--on-brand)}
+.btn-pri:hover{background:var(--brand-hover)}
+.btn-ink{background:var(--ink);color:var(--bg)}
+.btn-ink:hover{opacity:.88}
+.btn-sec{background:transparent;color:var(--ink);border-color:var(--ink3)}
+.btn-sec:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+a.btn{display:inline-block;text-align:center}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* 数字条：Range 式嵌右栏 + Waymo 式脚注 */
+.stats{display:flex;flex-direction:column;border-left:1px solid var(--line)}
+.stat{padding:20px 0 20px 26px;border-bottom:1px solid var(--line-soft)}
+.stat:last-child{border-bottom:0}
+.stat-n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;
+  font-weight:700;letter-spacing:-.02em;line-height:1}
+.stat-n em{font-style:normal;color:var(--ink3);font-size:16px;margin-left:2px}
+.stat-l{font-size:13.5px;color:var(--ink2);margin-top:7px}
+.stat-src{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-top:5px;letter-spacing:.03em}
+/* 主题动效：水位上升 × L型挡水板（滚动联动；每页唯一的 ambient 名额给它） */
+.waterline{position:relative;height:150px;margin-top:56px;overflow:hidden}
+.waterline .scene{position:absolute;inset:0;width:100%;height:100%}
+.water{transition:transform .15s linear;will-change:transform}
+.wavA,.wavB{fill:var(--wash1);animation:driftX 26s linear infinite}
+.wavB{fill:var(--wash2);animation-duration:38s;animation-direction:reverse}
+@keyframes driftX{to{transform:translateX(-1200px)}}
+.wbody{fill:var(--wash1)}
+.barrier-p{fill:var(--brand)}
+.ground-l{stroke:var(--line);stroke-width:2}
+.wl-lbl{position:absolute;bottom:12px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;color:var(--ink3);text-transform:uppercase}
+.wl-l{left:26px}.wl-r{right:26px}
+@media (prefers-reduced-motion:reduce){
+  .wavA,.wavB{animation:none}
+  .water{transition:none}
+}
+/* 信任条 */
+.trust{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+@media(max-width:760px){.trust{grid-template-columns:1fr}}
+.trust div{padding:16px 24px;font-size:13.5px;color:var(--ink2);
+  border-right:1px solid var(--line-soft);display:flex;gap:9px;align-items:baseline}
+.trust div:last-child{border-right:0}
+.trust b{color:var(--ink);font-weight:600}
+.trust span.m{font-family:var(--mono);color:var(--ink3);font-size:12px}
+
+/* ===== 产品五卡 ===== */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border-top:1px solid var(--line)}
+@media(max-width:860px){.cards{grid-template-columns:1fr}}
+.card{background:var(--bg);padding:30px 28px 26px;position:relative}
+.card:hover{background:var(--surface)}
+.card-code{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink3);margin:0 0 42px}
+.card-img{height:70px;margin:0 0 18px;border:1px solid var(--line-soft);border-radius:4px;
+  background:linear-gradient(160deg,var(--line-soft),transparent 70%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em}
+.card h3{font-size:16.5px;letter-spacing:-.015em;margin:0 0 8px}
+.card p{font-size:13.8px;color:var(--ink2);margin:0 0 14px}
+.card-spec{font-family:var(--mono);font-size:11px;color:var(--ink3);margin:0 0 14px;
+  letter-spacing:.02em;border-top:1px solid var(--line-soft);padding-top:10px}
+.card-link{font-size:13px;font-weight:600;color:var(--ink)}
+.badge-dev{position:absolute;top:26px;right:24px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.1em;color:var(--warn);border:1px solid var(--warn);border-radius:3px;
+  padding:2px 7px;opacity:.85}
+
+/* ===== 选型表 ===== */
+.sec-head{padding-top:64px;margin:0 0 10px;font-size:clamp(24px,3vw,32px);
+  letter-spacing:-.025em;font-weight:700;text-wrap:balance}
+.sec-lede{color:var(--ink2);max-width:60ch;margin:0 0 34px;font-size:15.5px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;background:var(--bg)}
+tbody tr:last-child td{border-bottom:0}
+td .main{font-weight:600}
+td .sub{display:block;font-size:12px;color:var(--ink3);margin-top:2px}
+td.line-code{font-family:var(--mono);font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.info{display:inline-flex;width:15px;height:15px;border:1px solid var(--ink3);border-radius:50%;
+  font-size:10px;color:var(--ink3);align-items:center;justify-content:center;
+  vertical-align:2px;margin-left:5px;cursor:help;font-family:var(--mono)}
+/* 诚实边界块 */
+.honest{border:1px solid var(--line);border-left:3px solid var(--warn);background:var(--warn-bg);
+  border-radius:6px;padding:16px 20px;font-size:14px;color:var(--ink2);margin:22px 0 64px;max-width:74ch}
+.honest b{color:var(--ink)}
+
+/* ===== 流程刻度带（Paradigm 式）===== */
+.steps-rail{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);
+  border-radius:8px;overflow:hidden;background:var(--surface);margin-bottom:64px}
+@media(max-width:860px){.steps-rail{grid-template-columns:1fr}}
+.step{padding:22px 20px 24px;border-right:1px solid var(--line-soft);position:relative}
+.step:last-child{border-right:0}
+.step::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:var(--line-soft)}
+.step.on::before{background:var(--ink)}
+.step-no{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink3);margin:0 0 10px}
+.step.on .step-no{color:var(--ink);font-weight:600}
+.step h4{font-size:14px;margin:0 0 6px;letter-spacing:-.01em}
+.step p{font-size:12.5px;color:var(--ink2);margin:0}
+
+/* ===== Who we supply 四客户卡 ===== */
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:64px}
+@media(max-width:1000px){.cards4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.cards4{grid-template-columns:1fr}}
+.aud{background:var(--surface);padding:26px 24px}
+.aud-tag{font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:var(--ink3);
+  text-transform:uppercase;margin:0 0 12px}
+.aud h4{font-size:15px;margin:0 0 8px;letter-spacing:-.01em}
+.aud p{font-size:13px;color:var(--ink2);margin:0}
+
+/* ===== 页尾微型 RFQ ===== */
+.mini-rfq{display:flex;gap:10px;max-width:640px;margin:0 auto 12px;flex-wrap:wrap}
+.mini-rfq input{flex:1 1 200px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:6px;background:var(--surface);color:var(--ink);font-size:14px;font-family:inherit}
+.mini-rfq input::placeholder{color:var(--ink3)}
+.mrfq-note{font-size:12.5px;color:var(--ink3);margin:0 0 8px}
+.mrfq-alt{font-size:13px}
+.mrfq-alt a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+
+/* ===== 数量滑块（Circuit/Resend 式，无价格）===== */
+.slider-band{border:1px solid var(--line);border-radius:8px;background:var(--surface);
+  padding:30px 34px 26px;margin-bottom:64px}
+.slider-q{font-size:15px;font-weight:600;margin:0 0 20px}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.slider-scale{display:flex;justify-content:space-between;font-family:var(--mono);
+  font-size:10.5px;color:var(--ink3);letter-spacing:.05em;margin-top:6px}
+.slider-out{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+@media(max-width:760px){.slider-out{grid-template-columns:1fr}}
+.chip{border:1px solid var(--line);border-radius:6px;padding:13px 16px;font-size:13px;color:var(--ink2)}
+.chip b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:5px;font-weight:600}
+.chip .v{color:var(--ink);font-weight:600}
+.chip.hot{border-color:var(--ink);background:var(--line-soft)}
+.slider-note{font-size:12.5px;color:var(--ink3);margin-top:18px}
+
+/* ===== 信任正文（Column 式）===== */
+.verify{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:56px;
+  padding-top:64px;padding-bottom:64px}
+@media(max-width:860px){.verify{grid-template-columns:1fr;gap:24px}}
+.verify h2{font-size:clamp(22px,2.6vw,28px);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.verify-body p{margin:0 0 14px;color:var(--ink2);font-size:15px;max-width:66ch}
+.verify-body p:last-child{margin:0}
+.verify-body b{color:var(--ink)}
+
+/* ===== FAQ（Relace 式）===== */
+.faq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:56px;
+  padding-top:64px;padding-bottom:72px}
+@media(max-width:860px){.faq{grid-template-columns:1fr;gap:20px}}
+.faq h2{font-size:clamp(22px,2.6vw,28px);letter-spacing:-.02em;margin:0}
+details{border-bottom:1px solid var(--line)}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:18px;
+  padding:17px 2px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--mono);color:var(--ink3);font-weight:400}
+details[open] summary::after{content:"−"}
+details p{margin:0;padding:0 2px 18px;font-size:14px;color:var(--ink2);max-width:66ch}
+
+/* ===== 尾部 CTA + Footer ===== */
+.cta-band{text-align:center;padding:76px 24px}
+.cta-band h2{font-size:clamp(24px,3.2vw,36px);letter-spacing:-.03em;margin:0 0 12px;text-wrap:balance}
+.cta-band p{color:var(--ink2);margin:0 0 28px}
+footer{border-top:1px solid var(--line);padding:30px 56px 40px;
+  display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  font-size:12.5px;color:var(--ink3)}
+footer .fm{font-family:var(--mono);font-size:11px;letter-spacing:.05em}
+
+/* ===== 方案注记 ===== */
+.spec-notes{max-width:1120px;margin:0 auto;padding:44px 56px 70px;
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+@media(max-width:760px){.spec-notes{padding:36px 22px 60px}}
+.spec-notes h2{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink3);
+  text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:10px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+.sw{width:118px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.sw i{display:block;height:44px}
+.sw span{display:block;font-family:var(--mono);font-size:10px;padding:6px 8px;color:var(--ink2)}
+.spec-notes p{font-size:13.5px;color:var(--ink2);max-width:78ch}
+.spec-notes td{font-size:12.5px}
+.spec-notes .tbl-wrap{margin:16px 0 28px}
+.spec-notes pre{background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:18px 20px;font-size:11.5px;line-height:1.7;overflow-x:auto;
+  font-family:var(--mono);color:var(--ink2);margin:16px 0 28px}
+.tok{font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+</style>
+
+<div class="meta-strip">
+  <span><b>设计方案 v6</b> · 方向E · 推文色纪律版</span>
+  <span>黑白灰做底 · 彩色只给 RFQ 转化动作 · 其余按钮/锚点全部中性化 · ink3 加深过 AA</span>
+  <span>浅色为基准 · <b>切换主题查看 Dark 映射</b></span>
+  <span>文案/滑块内容为占位，后续按 SEO 方案调整</span>
+</div>
+
+<div class="sheet">
+<div class="ticks"></div>
+
+<nav>
+  <div class="logo"><div class="logo-mark"></div>Tucsenberg</div>
+  <div class="nav-links"><a href="#products">Products</a><a href="#choose">How to Choose</a><a href="#supply">OEM &amp; Wholesale</a><a href="#verify">Verify Us</a><a href="#faq">Guides</a></div>
+  <div class="nav-cta">Request a Quote</div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="sect hero">
+  <div class="hero-wash"></div>
+  <div class="pad hero-grid">
+    <div>
+      <p class="eyebrow">Factory-direct · Jiangsu, China</p>
+      <h1>Factory-Direct Flood Barriers from China</h1>
+      <p class="hero-kicker">OEM · Private label · Custom-cut</p>
+      <p class="hero-sub">Five product lines, one coordinated factory pool, one QC standard.
+        Sandbag alternatives, garage flood barriers and removable flood gates — for dealers,
+        importers, brands and businesses, from a single carton to mixed full containers.</p>
+      <div class="cta-row">
+        <a class="btn btn-ink" href="#products">See the five lines &amp; specs</a>
+        <a class="btn btn-sec" href="#choose">Which line fits my case?</a>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-n">12<em>h</em></div>
+        <div class="stat-l">Standard items quoted</div>
+        <div class="stat-src">custom configurations: 48 h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">3<em>yr</em></div>
+        <div class="stat-l">Warranty, all standard lines</div>
+        <div class="stat-src">terms published — /warranty</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">5<em>lines</em></div>
+        <div class="stat-l">One pool, one QC standard</div>
+        <div class="stat-src">mixed-line consolidation per container</div>
+      </div>
+    </div>
+  </div>
+  <div class="waterline" aria-hidden="true">
+    <svg class="scene" viewBox="0 0 1200 150" preserveAspectRatio="none">
+      <defs>
+        <clipPath id="waterClip"><rect x="0" y="-160" width="701" height="480"/></clipPath>
+      </defs>
+      <!-- 水体：整组 translateY 由滚动进度驱动，clip 到挡板迎水面为止 -->
+      <g clip-path="url(#waterClip)">
+        <g class="water" id="waterG">
+          <path class="wavA" d="M0,52 C75,40 150,40 225,52 S375,64 450,52 S600,40 675,52 S825,64 900,52 S1050,40 1125,52 S1275,64 1350,52 S1500,40 1575,52 S1725,64 1800,52 S1950,40 2025,52 S2175,64 2250,52 S2400,40 2475,52 L2475,340 L0,340 Z"/>
+          <path class="wavB" d="M0,60 C90,50 180,70 270,60 S450,50 540,60 S720,70 810,60 S990,50 1080,60 S1260,70 1350,60 S1530,50 1620,60 S1800,70 1890,60 S2070,50 2160,60 S2340,70 2430,60 L2430,340 L0,340 Z"/>
+        </g>
+      </g>
+      <!-- 地面（干侧） -->
+      <line class="ground-l" x1="716" y1="142" x2="1200" y2="142"/>
+      <!-- L 型挡水板剖面：竖板 + 迎水侧底板（水重压脚，越淹越稳） -->
+      <path class="barrier-p" d="M700,30 L716,30 L716,142 L634,142 L634,128 L700,128 Z"/>
+    </svg>
+    <span class="wl-lbl wl-l">Rising water</span>
+    <span class="wl-lbl wl-r">Protected side</span>
+  </div>
+  <div class="trust">
+    <div><span class="m">01</span><span><b>Standard items quoted in 12 hours</b></span></div>
+    <div><span class="m">02</span><span><b>3-year warranty</b> on all standard lines</span></div>
+    <div><span class="m">03</span><span>Our factory pool <b>supplies established flood protection brands</b></span></div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTS ================= -->
+<section class="sect" id="products">
+  <span class="sect-tag">Products · 5 lines</span>
+  <div class="cards">
+    <div class="card">
+      <p class="card-code">TB-BW SERIES</p>
+      <div class="card-img">ABS 实拍（owner 素材）</div>
+      <h3>ABS Interlocking Boxwall</h3>
+      <p>Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own.</p>
+      <p class="card-spec">H 50 / 60 / 75 / 85 cm · freestanding · tool-free</p>
+      <span class="card-link">Explore ABS barriers →</span>
+    </div>
+    <div class="card">
+      <p class="card-code">TB-AG SERIES</p>
+      <div class="card-img">产品图（Denilco 授权）</div>
+      <h3>Aluminum Flood Gates</h3>
+      <p>Demountable plank systems for doors, garages and loading docks. Custom-cut to your opening schedule.</p>
+      <p class="card-spec">custom-cut per opening · straight / gable-end / curved</p>
+      <span class="card-link">Explore flood gates →</span>
+    </div>
+    <div class="card">
+      <p class="card-code">TB-FB SERIES</p>
+      <div class="card-img">产品图（Denilco 授权）</div>
+      <h3>Absorbent Flood Bags</h3>
+      <p>Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order.</p>
+      <p class="card-spec">MOQ 300 bags (6 cartons) · single-use · 3-yr shelf life</p>
+      <span class="card-link">Explore flood bags →</span>
+    </div>
+    <div class="card">
+      <p class="card-code">TB-TD SERIES</p>
+      <div class="card-img">产品图（Denilco 授权）</div>
+      <h3>Water &amp; Air-Filled Tube Dams</h3>
+      <p>Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock.</p>
+      <p class="card-spec">H 1 m · sections 5–10 m · deploys on grass &amp; mud</p>
+      <span class="card-link">Explore tube dams →</span>
+    </div>
+    <div class="card">
+      <p class="card-code">TB-CP SERIES</p>
+      <span class="badge-dev">IN DEVELOPMENT</span>
+      <div class="card-img">线框渲染（Range 式）</div>
+      <h3>FRP Composite Planks</h3>
+      <p>Pultruded planks: corrosion-free, non-conductive, built for coastal and industrial sites.</p>
+      <p class="card-spec">pultruded FRP · order-driven tooling · span data on request</p>
+      <span class="card-link">Register interest →</span>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center;background:var(--line-soft)">
+      <p class="card-code" style="margin-bottom:14px">OEM · PRIVATE LABEL</p>
+      <h3 style="letter-spacing:-.02em">Your label on all five lines</h3>
+      <p>Moulded-in logos, printed shells, custom packaging, your manuals and datasheets — carton to container.</p>
+      <span class="card-link">OEM &amp; wholesale →</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW TO CHOOSE ================= -->
+<section class="sect pad" id="choose">
+  <span class="sect-tag">How to choose</span>
+  <h2 class="sec-head">Not sure which material fits?</h2>
+  <p class="sec-lede">Three questions settle most cases. Full five-line comparison in the materials guide.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Your situation</th><th>Start with</th><th>Line</th></tr></thead>
+    <tbody>
+      <tr><td><span class="main">Garage doors, French doors, shopfronts</span><span class="sub">defined openings, repeat use</span></td><td>Aluminum flood gates<span class="info" title="Demountable plank systems, custom-cut per opening">i</span></td><td class="line-code">TB-AG</td></tr>
+      <tr><td><span class="main">Perimeters, driveways, no fixing allowed</span><span class="sub">freestanding, tool-free</span></td><td>ABS boxwall<span class="info" title="Interlocking freestanding barrier, no fixing to the building">i</span></td><td class="line-code">TB-BW</td></tr>
+      <tr><td><span class="main">Emergency stock, leak response</span><span class="sub">low budget per point</span></td><td>Flood bags<span class="info" title="Water-activated sandless sandbags; single-use">i</span></td><td class="line-code">TB-FB</td></tr>
+      <tr><td><span class="main">Long runs on rough ground</span><span class="sub">fast response teams</span></td><td>Tube dams<span class="info" title="Water/air-filled PVC sections, 5–10 m runs">i</span></td><td class="line-code">TB-TD</td></tr>
+      <tr><td><span class="main">Coastal / corrosive sites</span><span class="sub">long-life spec</span></td><td>FRP planks<span class="info" title="Pultruded composite; order-driven production">i</span></td><td class="line-code">TB-CP</td></tr>
+    </tbody>
+  </table></div>
+  <div class="honest"><b>One honest note before you buy anything:</b> a barrier seals an opening — it is not a drainage plan.
+    If water rises through the slab, the soil or the drains, you need drainage, pumps or site work first,
+    and we would rather tell you that now than after you've paid for freight.</div>
+</section>
+
+<!-- ================= HOW WE WORK ================= -->
+<section class="sect pad">
+  <span class="sect-tag">How we work</span>
+  <h2 class="sec-head">RFQ to container, five steps</h2>
+  <p class="sec-lede">Openings, quantities, market — photos and drawings welcome.</p>
+  <div class="steps-rail">
+    <div class="step on"><p class="step-no">STEP 01</p><h4>Send your RFQ</h4><p>Openings, quantities, market. Photos and drawings welcome.</p></div>
+    <div class="step"><p class="step-no">STEP 02</p><h4>Quote in 12 hours</h4><p>Standard items; custom configurations within 48.</p></div>
+    <div class="step"><p class="step-no">STEP 03</p><h4>Paid sample</h4><p>Sample fee credited against your first order.</p></div>
+    <div class="step"><p class="step-no">STEP 04</p><h4>Production &amp; QC</h4><p>One QC standard; inspection report before shipment.</p></div>
+    <div class="step"><p class="step-no">STEP 05</p><h4>Ship carton to container</h4><p>Mixed-line consolidation: gates + boxwall + bags + spares.</p></div>
+  </div>
+</section>
+
+<!-- ================= WHO WE SUPPLY ================= -->
+<section class="sect pad" id="supply">
+  <span class="sect-tag">Who we supply</span>
+  <h2 class="sec-head">Four kinds of buyers, one RFQ form</h2>
+  <p class="sec-lede">Tell us which one you are and we quote accordingly.</p>
+  <div class="cards4">
+    <div class="aud"><p class="aud-tag">Dealers &amp; Distributors</p>
+      <h4>Stable specs, protected margin</h4>
+      <p>Spare-parts continuity and margin room protected by our no-retail-pricing policy.</p></div>
+    <div class="aud"><p class="aud-tag">Importers &amp; Brands · OEM</p>
+      <h4>Private label on all five lines</h4>
+      <p>Moulded logos, custom packaging, your documentation — your brand, our pool.</p></div>
+    <div class="aud"><p class="aud-tag">Contractors &amp; Projects</p>
+      <h4>Cut to your drawings</h4>
+      <p>Custom-cut per approved drawings, mixed-material supply for one site, spec sheets your engineer can read.</p></div>
+    <div class="aud"><p class="aud-tag">Small Business Buyers</p>
+      <h4>Carton and pallet orders welcome</h4>
+      <p>First time importing? We'll walk you through it — samples credit against your first order.</p></div>
+  </div>
+</section>
+
+<!-- ================= QUANTITY SLIDER ================= -->
+<section class="sect pad" id="scale">
+  <span class="sect-tag">Order scale · no prices, quotes only</span>
+  <h2 class="sec-head">What changes as your order grows</h2>
+  <p class="sec-lede">Prices are confirmed at quotation. What we can tell you now is what each scale unlocks.</p>
+  <div class="slider-band">
+    <p class="slider-q">Roughly how much are you looking to move?</p>
+    <input type="range" id="qty" min="0" max="3" step="1" value="1" aria-label="order scale">
+    <div class="slider-scale"><span>1 CARTON</span><span>1 PALLET</span><span>1 CONTAINER</span><span>MIXED CONTAINERS</span></div>
+    <div class="slider-out" id="qty-out"></div>
+    <p class="slider-note">Custom-cut items and moulded branding are quoted per configuration — this selector covers standard lines only.</p>
+  </div>
+</section>
+
+<!-- ================= VERIFY US ================= -->
+<section class="sect pad" id="verify">
+  <span class="sect-tag">Verify us</span>
+  <div class="verify">
+    <h2>We publish what can be checked, and nothing that can't.</h2>
+    <div class="verify-body">
+      <p>Every spec table on this site carries numbers you can hold us to — wall thickness, unit weights,
+        tested UV exposure (ASTM G154). <b>Your spec is written into the quotation and invoice</b>, so it is enforceable, not decorative.</p>
+      <p>Contracts, invoices and bank details always carry the same legal name: <b>Jiangsu Tucson Borg Technology Co., Ltd.</b>
+        If any document shows a different name, stop and contact us.</p>
+      <p>Third-party inspection is welcome — SGS, TÜV, QIMA — and so are factory audits, in person or by video.
+        Judge us by the sample and the spec sheet, not the country line on the box.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="sect pad" id="faq">
+  <span class="sect-tag">FAQ · 9 entries, 3 shown</span>
+  <div class="faq">
+    <h2>Questions buyers actually ask</h2>
+    <div>
+      <details open>
+        <summary>What is your minimum order?</summary>
+        <p>It depends on the line: boxwall from one carton, flood bags from 300 bags (six cartons), tube dams from a single
+        section; gates are quoted per opening schedule. We don't ship single retail units — freight economics punish everyone.
+        Smaller need? Ask about joining our next consolidated shipment.</p>
+      </details>
+      <details>
+        <summary>You're made in China — how do I know the quality is real?</summary>
+        <p>Geography doesn't decide quality; spec discipline does. Ours is checkable: published numbers on every product page,
+        your spec written into the quotation and invoice, third-party inspection welcome, and a paid sample — credited against
+        your first order — before any volume.</p>
+      </details>
+      <details>
+        <summary>Can we audit the factories?</summary>
+        <p>Yes — factory audits are welcome, in person or by video. References available on request.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA + FOOTER ================= -->
+<section class="cta-band">
+  <h2>Protecting openings or building a product line — either way, start with the numbers.</h2>
+  <p class="mrfq-note">Standard items quoted in 12 hours · sample fees credit against your first order</p>
+  <div class="mini-rfq">
+    <input type="email" placeholder="Work email" aria-label="Work email">
+    <input type="text" placeholder="What do you need? e.g. boxwall, 2 pallets, US" aria-label="Requirement">
+    <button class="btn btn-pri">Get a quote</button>
+  </div>
+  <p class="mrfq-alt">Detailed openings or drawings? <a href="#">Use the full RFQ form →</a></p>
+</section>
+<footer>
+  <div><b style="color:var(--ink2)">Tucsenberg</b> — trading name of Jiangsu Tucson Borg Technology Co., Ltd.</div>
+  <div class="fm">EN · sales@ · RFQ SLA 12 h/48 h</div>
+</footer>
+<div class="ticks" style="border-bottom:0;border-top:1px solid var(--line);transform:scaleY(-1)"></div>
+</div>
+
+<!-- ================= 方案注记 ================= -->
+<div class="spec-notes">
+  <h2>设计 Tokens v1.2 · 方向E v6（供 tucsenberg-site DESIGN.md / globals.css 对接）</h2>
+  <p><b>v6 推文色纪律改动（2026-07-16，owner 指定按 @mengxi_ream 推文做法收紧）</b>：页面主色只用黑白灰；
+  彩色只给真正希望买家点击的动作——<b>藏靛只剩 RFQ 转化件</b>（导航 Request a Quote、页尾 Get a quote、完整 RFQ 表单链接）
+  与品牌物（logo、挡板剖面）。其余全部中性化：hero 主按钮改近黑实底、描边按钮改中性描边、
+  eyebrow 标记/数字条单位/当前步骤/滑块手柄/chip 高亮/卡链接/导航激活态由锚点蓝降为 ink 系；
+  唯一保留的功能性蓝=焦点环。同步执行裁决硬伤①：ink3 加深至 #6B6E78（白底约 5.0:1，过 AA）。
+  水青洇染与水位动效不变（水=语义色，不算装饰彩色）。下方 v1 表格为历史基准，与本段冲突处以本段为准。</p>
+  <div class="swatches">
+    <div class="sw"><i style="background:#FDFDFE;border-bottom:1px solid #E3E4E8"></i><span>bg #FDFDFE</span></div>
+    <div class="sw"><i style="background:#12161E"></i><span>ink #12161E 标题近黑 ← gray-900</span></div>
+    <div class="sw"><i style="background:#111A4A"></i><span>brand #111A4A 仅品牌物 ← blue-800</span></div>
+    <div class="sw"><i style="background:#575A64"></i><span>body #575A64 ← gray-600</span></div>
+    <div class="sw"><i style="background:#1E4199"></i><span>accent #1E4199 ← blue-600·仅锚点</span></div>
+    <div class="sw"><i style="background:linear-gradient(90deg,rgba(136,222,235,.5),rgba(148,239,183,.4))"></i><span>wash ← cyan-400/seafoam-400</span></div>
+    <div class="sw"><i style="background:#EEF4FB;border-bottom:1px solid #E3E4E8"></i><span>tint #EEF4FB ← blue-50</span></div>
+    <div class="sw"><i style="background:#A90101"></i><span>warn #A90101 仅警示</span></div>
+  </div>
+
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>token</th><th>light</th><th>dark</th><th>用途（语义即约束）</th></tr></thead>
+    <tbody>
+      <tr><td class="tok">--bg</td><td class="tok">#FDFDFE</td><td class="tok">#0A0E22</td><td>页面大底；dark 保持藏靛偏置，禁用中性黑</td></tr>
+      <tr><td class="tok">--surface</td><td class="tok">#FFFFFF</td><td class="tok">#101534</td><td>卡面、表容器、导航条</td></tr>
+      <tr><td class="tok">--ink</td><td class="tok">#12161E</td><td class="tok">#E9EDF8</td><td>标题与强调文字，<b>近黑而非藏靛</b>（← Column gray-900，其 h1/h2 实测用色）</td></tr>
+      <tr><td class="tok">--brand</td><td class="tok">#111A4A</td><td class="tok">#A2C1ED</td><td><b>品牌藏靛，只给品牌物</b>：主按钮底、描边按钮字与边、导航激活、logo、挡板（← blue-800 = Column :root 主按钮实测值）</td></tr>
+      <tr><td class="tok">--on-brand</td><td class="tok">#FFFFFF</td><td class="tok">#0A0E22</td><td>brand 底上的文字</td></tr>
+      <tr><td class="tok">--brand-hover</td><td class="tok">#080B32</td><td class="tok">#C4D6F2</td><td>主按钮 hover（← blue-900 / blue-200）</td></tr>
+      <tr><td class="tok">--ink-2</td><td class="tok">#575A64</td><td class="tok">#A8B0C8</td><td>正文（← gray-600）</td></tr>
+      <tr><td class="tok">--ink-3</td><td class="tok">#7C7F88</td><td class="tok">#737C99</td><td>辅助说明、未激活导航、型号码、sect 标签</td></tr>
+      <tr><td class="tok">--line</td><td class="tok">#E3E4E8</td><td class="tok">#232B4D</td><td>发丝线、竖线、刻度（← gray-200）</td></tr>
+      <tr><td class="tok">--line-soft</td><td class="tok">#EEEFF2</td><td class="tok">#181F3D</td><td>次级分隔、中性浅面</td></tr>
+      <tr><td class="tok">--accent</td><td class="tok">#1E4199</td><td class="tok">#7EA7E9</td><td><b>锚点蓝，仅五处</b>：文字链接、当前步骤、滑块手柄、聚焦环、eyebrow 标记（← blue-600）</td></tr>
+      <tr><td class="tok">--accent-ink</td><td class="tok">#1B2D70</td><td class="tok">#A2C1ED</td><td>锚点蓝 hover、数字条单位字符</td></tr>
+      <tr><td class="tok">--accent-tint</td><td class="tok">#EEF4FB</td><td class="tok">#141C3F</td><td>蓝浅面：chip 高亮底（← blue-50）</td></tr>
+      <tr><td class="tok">--wash-1</td><td class="tok">cyan-400 @.18</td><td class="tok">@.08</td><td>水青洇染 #88DEEB：hero 氛围、水位线填充</td></tr>
+      <tr><td class="tok">--wash-2</td><td class="tok">seafoam-400 @.12</td><td class="tok">@.05</td><td>水青洇染 #94EFB7：与 wash-1 叠加用</td></tr>
+      <tr><td class="tok">--warn</td><td class="tok">#A90101</td><td class="tok">#F5A2AE</td><td><b>仅警示语义</b>：诚实边界左标线、IN DEVELOPMENT；dark 用 Column red-300</td></tr>
+      <tr><td class="tok">--ok</td><td class="tok">#167E6C</td><td class="tok">#7CE5A8</td><td>成功语义（表单回执等），不做装饰（← seafoam-700）</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>字阶 token</th><th>规格</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td class="tok">display</td><td class="tok">clamp(34,5vw,56)/1.04 · 750 · -0.035em</td><td>H1，紧字距（Webflow 式）</td></tr>
+      <tr><td class="tok">heading</td><td class="tok">clamp(24,3vw,32)/1.2 · 700 · -0.025em</td><td>区块标题</td></tr>
+      <tr><td class="tok">title</td><td class="tok">16.5/1.4 · 600 · -0.015em</td><td>卡标题、FAQ 问题</td></tr>
+      <tr><td class="tok">body</td><td class="tok">15–16/1.55 · 400</td><td>正文，色用 --ink-2</td></tr>
+      <tr><td class="tok">small</td><td class="tok">13.5–14/1.5</td><td>卡正文、表格、导航</td></tr>
+      <tr><td class="tok">caption·mono</td><td class="tok">10.5–11.5 · .10–.16em 字距 · 大写</td><td>eyebrow、sect 标签、刻度、型号码</td></tr>
+      <tr><td class="tok">data·mono</td><td class="tok">tabular-nums 必开</td><td>数字条、规格数字、所有对齐数列</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>动效 token</th><th>值</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td class="tok">--t-hover</td><td class="tok">200ms ease</td><td>按钮反转、导航 scrollspy 亮起、链接——所有 hover/状态切换统一用它</td></tr>
+      <tr><td class="tok">--t-reveal</td><td class="tok">450ms ease-out</td><td>入场类（滚动点亮、数字条计数），IntersectionObserver 触发，仅一次</td></tr>
+      <tr><td class="tok">ambient</td><td class="tok">波浪 26s/38s 循环 + 水位滚动联动</td><td><b>每页至多一个</b>主题动效（本页=水位上升×L型挡板阻水；原理区落地时做滑块版复用同一 SVG）</td></tr>
+      <tr><td class="tok">reduced-motion</td><td class="tok">全部动效 → 无</td><td>硬规则，含 ambient 与 scroll-behavior</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><b>半径与描边</b>：<span class="tok">--r-sm 4px</span>（徽章标签）· <span class="tok">--r 6px</span>（按钮/chip）· <span class="tok">--r-lg 8px</span>(卡/表容器）。发丝线一律 1px <span class="tok">--line</span>；按钮描边 1px <span class="tok">--brand</span>。按钮只有两种形态：<b>实底 brand</b>（每屏至多一个）与 <b>brand 描边</b>（hover 反转实底），无第三种。<b>已确立的设定</b>：水位×L型挡板=全站主题动效母题（hero 滚动联动版已定，原理区滑块版、效果细化迭代进行中）。</p>
+
+<pre>/* tucsenberg tokens v1.1 · 方向E · 色值实测自 column.com */
+:root{
+  --bg:#FDFDFE; --surface:#FFF;
+  --ink:#12161E; --ink-2:#575A64; --ink-3:#7C7F88;      /* 文字=中性近黑系 */
+  --brand:#111A4A; --on-brand:#FFF; --brand-hover:#080B32; /* 藏靛=仅品牌物 */
+  --line:#E3E4E8; --line-soft:#EEEFF2;
+  --accent:#1E4199; --accent-ink:#1B2D70; --accent-tint:#EEF4FB;
+  --wash-1:rgba(136,222,235,.18); --wash-2:rgba(148,239,183,.12);
+  --warn:#A90101; --warn-bg:rgba(169,1,1,.04); --ok:#167E6C;
+  --r-sm:4px; --r:6px; --r-lg:8px;
+  --t-hover:200ms ease; --t-reveal:450ms ease-out;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0A0E22; --surface:#101534;
+  --ink:#E9EDF8; --ink-2:#A8B0C8; --ink-3:#737C99;
+  --brand:#A2C1ED; --on-brand:#0A0E22; --brand-hover:#C4D6F2;
+  --line:#232B4D; --line-soft:#181F3D;
+  --accent:#7EA7E9; --accent-ink:#A2C1ED; --accent-tint:#141C3F;
+  --wash-1:rgba(136,222,235,.08); --wash-2:rgba(148,239,183,.05);
+  --warn:#F5A2AE; --warn-bg:rgba(245,162,174,.07); --ok:#7CE5A8;
+}}
+/* data-theme 手动切换需再覆写一遍两个方向（略，同值） */</pre>
+  <p><b>色彩来源：column.com 实测色板</b>（curl 其 CSS 变量直接对位）。v4.1 修正一处此前的误读：Column 的<b>标题其实是近黑 gray-900</b>（其全站用量最高的字色），<b>藏靛 blue-800 是留给按钮的</b>（:root 级 --btn-bg-primary 实测值）——正因为文字是中性的，那块靛色按钮才"跳"得出来。我们照此拆分 ink（近黑，标题）与 brand（藏靛，仅品牌物：按钮/logo/挡板剖面）。洇染层 cyan-400 #88DEEB + seafoam-400 #94EFB7 水青色不变——对防洪站是语义巧合，水色理直气壮。</p>
+  <p><b>用色纪律不变（codex 会话 2026-07-06：neutral-first）</b>：主 CTA=深藏靛（全区块唯一视觉主动作）；blue-600 #1E4199 只出现在锚点（eyebrow 标记、数字条单位、文字链接、当前步骤、滑块手柄）；型号码/编号/logo 中性；红仍只两处（诚实边界左标线、IN DEVELOPMENT）。Dark 映射保持藏靛偏置（bg #0A0E22 不是中性黑），warn 在暗底用 Column 自己的 red-300 #F5A2AE。</p>
+  <p><b>版式装置</b>：整页装在 Vercel 式居中框（两侧通页竖线+首尾刻度带），区块分界用压线 mono 标签。<b>字体</b>：标题=系统无衬线 750 字重、-0.035em 紧字距（Webflow 式）；eyebrow/型号/规格数字=等宽（Polar Signals 式），数字列 tabular-nums。</p>
+  <p><b>动效已实现一处</b>：hero 底部水位线双层缓移（主题语义=水位，26s/38s 反向，reduced-motion 自动停）。落地时的完整清单：滚动逐字点亮（Webflow）、数字条入场计数、logo 跑马灯——每页仍只保留一个主题动效。</p>
+  <p><b>信任的摆法</b>：无徽章墙。hero 数字条每条带来源小字（Waymo 式）；Verify us 区正文点名 SGS/TÜV/QIMA 与同名抬头承诺（Column 式），全部是 About 页已有的真实事实。</p>
+  <p><b>数量滑块</b>：Circuit/Resend 的壳 + 我们的芯——四档刻度（carton→pallet→container→mixed），输出的是每档解锁什么（MOQ/混柜/OEM 经济性/交期档），无一处价格。</p>
+  <p><b>v5 业务审计改动</b>：①信任条维持 home.md 原版三点（Q5 背调素材放第一屏被否——Q5 内容不进 Q1 位置；数字条与信任条的内容重复列入文案优化清单，属内容层）；②第六卡从"怎么选"（与 hero 次按钮重复）改为 <b>OEM/private label</b>——D3 一级卖点显性化，蓝 tint 底=全网格唯一有色卡；③五产品卡各加一行<b>规格微行</b>（数字全部来自 charter D9 与既有文案，无新造）——numbers not adjectives 从第一触点开始；④补回 home.md 的 <b>Who we supply</b> 四客户卡（D1 全客层自我识别 + audience 路由的页面对应物）；⑤页尾 CTA 带内嵌<b>微型 RFQ</b>（邮箱+一句需求）——8 周判据只数站内 RFQ，把计数动作的摩擦压到最低，详单走完整表单链接。</p>
+</div>
+
+<script>
+const OUT=document.getElementById('qty-out'),R=document.getElementById('qty');
+const DATA=[
+ [['MOQ','Meets boxwall & tube dam minimums','hot'],['Mixing','Single line per carton',''],['Lead time','In-stock: ships in 2–7 days','']],
+ [['MOQ','All five standard lines available','hot'],['Mixing','2–3 lines per pallet',''],['Lead time','In-stock: ships in 2–7 days','']],
+ [['MOQ','Full range, incl. gate opening schedules','hot'],['Mixing','Mixed-line consolidation in one container','hot'],['Lead time','Production runs confirmed at quotation','']],
+ [['MOQ','Volume terms agreed per order','hot'],['OEM','Moulded logos & custom packaging economical at this scale','hot'],['Lead time','Scheduled production; confirmed at quotation','']]
+];
+function render(){
+  OUT.innerHTML=DATA[R.value].map(([k,v,h])=>
+    `<div class="chip ${h}"><b>${k}</b><span class="v">${v}</span></div>`).join('');
+}
+R.addEventListener('input',render);render();
+
+/* scrollspy：滚进哪节，对应导航链接亮起（纯字色，无背景） */
+const links=[...document.querySelectorAll('.nav-links a')];
+const map={};links.forEach(a=>map[a.getAttribute('href').slice(1)]=a);
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(a=>a.classList.remove('on'));
+      const a=map[e.target.id];if(a)a.classList.add('on');
+    }
+  });
+},{rootMargin:'-35% 0px -55% 0px'});
+Object.keys(map).forEach(id=>{const s=document.getElementById(id);if(s)obs.observe(s);});
+
+/* 水位联动：hero 滚出视口的进度 → 水位上升（挡板前的水越滚越高，始终低于板顶） */
+const waterG=document.getElementById('waterG');
+const wlBox=document.querySelector('.waterline');
+if(waterG&&wlBox){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    waterG.style.transform='translateY(34px)';
+  }else{
+    const LO=72,HI=6; /* translateY px：低水位→高水位（波峰仍低于板顶） */
+    const onScroll=()=>{
+      const r=wlBox.getBoundingClientRect(),vh=innerHeight;
+      const p=Math.min(1,Math.max(0,(vh-r.top)/(vh*.92)));
+      waterG.style.transform=`translateY(${LO-(LO-HI)*p}px)`;
+    };
+    addEventListener('scroll',onScroll,{passive:true});onScroll();
+  }
+}
+</script>
