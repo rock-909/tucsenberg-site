@@ -30,6 +30,16 @@ function createTempRepo(files: Record<string, string>): string {
   return tempDir;
 }
 
+function missingCurrentDocPath(pathname: string): {
+  file: string;
+  error: string;
+} {
+  return {
+    file: "docs/current.md",
+    error: `documented repository path does not exist "${pathname}"`,
+  };
+}
+
 const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
   "showcase-current-truth-docs-test-trash",
@@ -668,6 +678,10 @@ describe("current-truth docs guard", () => {
         "Do not rename `src/rename-source.ts` to `src/rename-target.ts`.",
         "Do not move `src/move-source.ts` to `src/move-target.ts`.",
         "Do not replace `src/replace-source.ts` with `src/replace-target.ts`.",
+        "`src/passive-rename-source.ts` must not be renamed to `src/passive-rename-target.ts`.",
+        "`src/passive-move-source.ts` must not be moved to `src/passive-move-target.ts`.",
+        "`src/passive-replace-source.ts` must not be replaced with `src/passive-replace-target.ts`.",
+        "`src/passive-source-only.ts` must not be renamed.",
       ].join("\n"),
     };
     const repoDir = createTempRepo(files);
@@ -675,34 +689,20 @@ describe("current-truth docs guard", () => {
 
     expect(
       collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
-    ).toEqual([
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/delete.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/remove.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/must-keep.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error:
-          'documented repository path does not exist "src/rename-source.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/move-source.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error:
-          'documented repository path does not exist "src/replace-source.ts"',
-      },
-    ]);
+    ).toEqual(
+      [
+        "src/delete.ts",
+        "src/remove.ts",
+        "src/must-keep.ts",
+        "src/rename-source.ts",
+        "src/move-source.ts",
+        "src/replace-source.ts",
+        "src/passive-rename-source.ts",
+        "src/passive-move-source.ts",
+        "src/passive-replace-source.ts",
+        "src/passive-source-only.ts",
+      ].map(missingCurrentDocPath),
+    );
   });
 
   it("applies the same source and target roles to Chinese directives", () => {
@@ -712,6 +712,9 @@ describe("current-truth docs guard", () => {
       "docs/current.md": [
         "不要删除 `src/keep.ts`。",
         "当前不把 `src/source.ts` 盲目改成 `src/target.ts`。",
+        "不要移动 `src/direct-move-source.ts` 到 `src/direct-move-target.ts`。",
+        "不要重命名 `src/direct-rename-source.ts` 为 `src/direct-rename-target.ts`。",
+        "不要替换 `src/direct-replace-source.ts` 为 `src/direct-replace-target.ts`。",
         "不要创建 `src/absent.ts`。",
       ].join("\n"),
     };
@@ -720,16 +723,15 @@ describe("current-truth docs guard", () => {
 
     expect(
       collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
-    ).toEqual([
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/keep.ts"',
-      },
-      {
-        file: "docs/current.md",
-        error: 'documented repository path does not exist "src/source.ts"',
-      },
-    ]);
+    ).toEqual(
+      [
+        "src/keep.ts",
+        "src/source.ts",
+        "src/direct-move-source.ts",
+        "src/direct-rename-source.ts",
+        "src/direct-replace-source.ts",
+      ].map(missingCurrentDocPath),
+    );
   });
 
   it("inherits an explicit negative heading into Markdown list items", () => {
