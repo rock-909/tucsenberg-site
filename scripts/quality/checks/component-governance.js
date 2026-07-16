@@ -3,6 +3,8 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
+  RADIX_PACKAGE_IMPORT_PATTERN,
+  RADIX_THEMES_IMPORT_PATTERN,
 } = require("../../component-governance-registry-truth");
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
@@ -34,13 +36,10 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
   ]),
   clientBoundary: new Set(["server-safe", "client"]),
 };
-const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx)$/;
+const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx|css)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
   /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
-const COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
-const COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN =
-  /(?:from\s+["']@radix-ui\/themes(?:\/[^"']*)?["']|import\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\)|require\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\))/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
   /(?:^|[\s"'`.[_-])rt-[A-Za-z0-9_-]+/;
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_MODULE_PATTERN =
@@ -347,8 +346,7 @@ function collectTextScanFindings(rootDir, errors) {
     const isOutsideUiWrapper = !file.startsWith(
       `${COMPONENT_GOVERNANCE_UI_ROOT}/`,
     );
-    const importsRadixThemes =
-      COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN.test(source);
+    const importsRadixThemes = RADIX_THEMES_IMPORT_PATTERN.test(source);
 
     if (importsRadixThemes) {
       errors.push(
@@ -356,25 +354,19 @@ function collectTextScanFindings(rootDir, errors) {
           file,
           "radix-themes-import-forbidden",
           "Production UI must not import the retired @radix-ui/themes package.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN,
-          ),
+          getPatternLineNumber(source, RADIX_THEMES_IMPORT_PATTERN),
         ),
       );
     } else if (
       isOutsideUiWrapper &&
-      COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN.test(source)
+      RADIX_PACKAGE_IMPORT_PATTERN.test(source)
     ) {
       errors.push(
         createFinding(
           file,
           "radix-import-outside-ui",
           "Production UI must import Radix through src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN,
-          ),
+          getPatternLineNumber(source, RADIX_PACKAGE_IMPORT_PATTERN),
         ),
       );
     }

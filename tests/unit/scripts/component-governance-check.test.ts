@@ -432,6 +432,81 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("fails when Radix packages use side-effect, re-export, or CommonJS imports outside UI wrappers", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/forms/contact-form.tsx":
+          'import "@radix-ui/themes/styles.css";\nexport function ContactForm() { return null; }',
+        "src/components/layout/dialog-loader.tsx":
+          'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+        "src/components/layout/menu-loader.tsx":
+          'const menu = require("@radix-ui/react-dropdown-menu");\nexport { menu };',
+        "src/components/layout/slot-export.tsx":
+          'export { Slot } from "@radix-ui/react-slot";',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/forms/contact-form.tsx",
+    );
+    for (const file of [
+      "src/components/layout/dialog-loader.tsx",
+      "src/components/layout/menu-loader.tsx",
+      "src/components/layout/slot-export.tsx",
+    ]) {
+      expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+  });
+
+  it("fails when a production stylesheet imports the retired Radix Themes CSS", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/app/globals.css": '@import url("@radix-ui/themes/styles.css");\n',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/app/globals.css",
+    );
+  });
+
+  it("classifies dynamically imported Radix Primitives in UI wrappers", () => {
+    const rootDir = createFixture({
+      "src/components/component-governance.registry.json": registry({
+        dialog: {
+          story: "required",
+          radixLayer: "primitive",
+          surface: "control",
+          clientBoundary: "server-safe",
+          useWhen: "Use for governed modal interactions.",
+          avoidWhen: "Do not use for ordinary page layout.",
+        },
+      }),
+      "src/components/ui/dialog.tsx":
+        'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+      "src/components/ui/dialog.stories.tsx":
+        "export default { title: 'UI/Dialog' };",
+    });
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("passed");
+    expect(result.errors).toEqual([]);
+  });
+
   it("fails when the retired Radix Themes package is imported in a UI wrapper", () => {
     const rootDir = createFixture(
       baseFiles({
