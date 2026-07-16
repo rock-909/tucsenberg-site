@@ -58,6 +58,7 @@ function collect({
   dynamicPrefixAllowlist = [],
   derivedKeyConsumers = [],
   objectKeyConsumers = [],
+  translatorParameterOverrides = [],
   unusedKeyAllowlist = [],
 }: {
   catalogKeys: string[];
@@ -70,6 +71,13 @@ function collect({
     prefix: string;
     reason: string;
   }>;
+  translatorParameterOverrides?: Array<{
+    file: string;
+    functionName: string;
+    identifier: string;
+    namespace: string;
+    reason: string;
+  }>;
   unusedKeyAllowlist?: string[];
 }) {
   const { rootDir, file } = createSource(content);
@@ -80,8 +88,7 @@ function collect({
     dynamicPrefixAllowlist,
     derivedKeyConsumers,
     objectKeyConsumers,
-    translatorBindingOverrides: [],
-    translatorParameterOverrides: [],
+    translatorParameterOverrides,
     unusedKeyAllowlist,
   });
 }
@@ -135,7 +142,6 @@ describe("message key usage gate", () => {
         dynamicPrefixAllowlist: [],
         derivedKeyConsumers: [],
         objectKeyConsumers: [],
-        translatorBindingOverrides: [],
         translatorParameterOverrides: [],
         unusedKeyAllowlist: [],
       }),
@@ -499,5 +505,87 @@ describe("message key usage gate", () => {
         ].join("\n"),
       }),
     ).toEqual([]);
+  });
+
+  it("does not count a shadowing local variable as an outer translator", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used", "example.dead"],
+        content: [
+          'const t = useTranslations("example");',
+          "function ordinaryFunction(key: string) { return key; }",
+          "function Nested() {",
+          "  const t = ordinaryFunction;",
+          '  return t("dead");',
+          "}",
+          'export const value = [t("used"), Nested()];',
+        ].join("\n"),
+        unusedKeyAllowlist: ["example.dead"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("does not count an imported same-name function as a nested translator", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.used", "example.dead"],
+        content: [
+          'import { t } from "./ordinary";',
+          'export const ordinary = t("dead");',
+          "export function Example() {",
+          '  const t = useTranslations("example");',
+          '  return t("used");',
+          "}",
+        ].join("\n"),
+        unusedKeyAllowlist: ["example.dead"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("scopes translator parameter overrides to the declared function", () => {
+    expect(
+      collect({
+        catalogKeys: ["apiErrors.used", "apiErrors.dead"],
+        content: [
+          "export function Translated(tApi: (key: string) => string) {",
+          '  return tApi("used");',
+          "}",
+          "export function Ordinary(tApi: (key: string) => string) {",
+          '  return tApi("dead");',
+          "}",
+        ].join("\n"),
+        translatorParameterOverrides: [
+          {
+            file: "src/example.ts",
+            functionName: "Translated",
+            identifier: "tApi",
+            namespace: "apiErrors",
+            reason: "fixture",
+          },
+        ],
+        unusedKeyAllowlist: ["apiErrors.dead"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("rejects a stale translator parameter override", () => {
+    expect(
+      collect({
+        catalogKeys: [],
+        translatorParameterOverrides: [
+          {
+            file: "src/example.ts",
+            functionName: "Removed",
+            identifier: "t",
+            namespace: "example",
+            reason: "fixture",
+          },
+        ],
+      }),
+    ).toContainEqual({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error:
+        'translator parameter override is stale "src/example.ts#Removed:t"',
+    });
   });
 });

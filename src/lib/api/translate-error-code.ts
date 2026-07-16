@@ -11,11 +11,6 @@ import {
 } from "@/constants/api-error-codes";
 
 /**
- * Translation namespace for API error messages
- */
-export const API_ERROR_NAMESPACE = "apiErrors" as const;
-
-/**
  * Check if a string is a valid API error code
  */
 function isValidErrorCode(code: unknown): code is ApiErrorCode {
@@ -33,10 +28,10 @@ function isValidErrorCode(code: unknown): code is ApiErrorCode {
  * ```tsx
  * 'use client';
  * import { useTranslations } from 'next-intl';
- * import { getErrorTranslationKey, API_ERROR_NAMESPACE } from '@/lib/api/translate-error-code';
+ * import { getErrorTranslationKey } from '@/lib/api/translate-error-code';
  *
  * function ErrorMessage({ errorCode }: { errorCode: string }) {
- *   const t = useTranslations(API_ERROR_NAMESPACE);
+ *   const t = useTranslations('apiErrors');
  *   const key = getErrorTranslationKey(errorCode);
  *   return <p>{t(key)}</p>;
  * }
@@ -54,7 +49,7 @@ function getErrorTranslationKey(
 /**
  * Type-safe helper to get translated API error message
  *
- * @param t - Translation function from useTranslations(API_ERROR_NAMESPACE)
+ * @param t - Translation function from useTranslations('apiErrors')
  * @param errorCode - The API error code from response
  * @returns The translated error message
  *
@@ -62,13 +57,10 @@ function getErrorTranslationKey(
  * ```tsx
  * 'use client';
  * import { useTranslations } from 'next-intl';
- * import {
- *   translateApiError,
- *   API_ERROR_NAMESPACE,
- * } from '@/lib/api/translate-error-code';
+ * import { translateApiError } from '@/lib/api/translate-error-code';
  *
  * function MyComponent() {
- *   const t = useTranslations(API_ERROR_NAMESPACE);
+ *   const t = useTranslations('apiErrors');
  *
  *   async function handleSubmit() {
  *     const response = await fetch('/api/subscribe', { method: 'POST', body: ... });

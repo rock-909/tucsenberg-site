@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
-import { API_ERROR_NAMESPACE } from "@/lib/api/translate-error-code";
 import { useContactForm } from "@/components/forms/use-contact-form";
 import { ContactFormContainerView } from "@/components/forms/contact-form-container-view";
 
@@ -11,7 +10,7 @@ import { ContactFormContainerView } from "@/components/forms/contact-form-contai
  */
 export function ContactFormContainer() {
   const t = useTranslations("contact.form");
-  const tApi = useTranslations(API_ERROR_NAMESPACE);
+  const tApi = useTranslations("apiErrors");
   const tAccessibility = useTranslations("accessibility");
   const translateForm = (key: string) => t(key as Parameters<typeof t>[0]);
   const translateApi = (key: string) => tApi(key as Parameters<typeof tApi>[0]);

@@ -1,93 +1,103 @@
-const TRANSLATOR_BINDING_OVERRIDES = [
-  {
-    file: "src/app/[locale]/page.tsx",
-    identifier: "t",
-    namespace: "home",
-    reason: "homepage section helpers receive the home translator",
-  },
-  {
-    file: "src/app/[locale]/products/products-overview-sections.tsx",
-    identifier: "translate",
-    namespace: "catalog",
-    reason: "translator is passed from the catalog page",
-  },
-  {
-    file: "src/app/[locale]/request-quote/request-quote-form-copy.ts",
-    identifier: "t",
-    namespace: "requestQuote.form",
-    reason: "form translator is passed by request-quote page",
-  },
-  {
-    file: "src/app/[locale]/request-quote/request-quote-payload.ts",
-    identifier: "t",
-    namespace: "requestQuote.form",
-    reason: "payload copy shares the request-quote form translator",
-  },
-  {
-    file: "src/components/cookie/cookie-banner.tsx",
-    identifier: "t",
-    namespace: "cookie",
-    reason: "cookie banner subviews receive the cookie translator",
-  },
-  {
-    file: "src/components/forms/contact-form-container-view.tsx",
-    identifier: "translateForm",
-    namespace: "contact.form",
-    reason: "view receives the contact form translator",
-  },
-  {
-    file: "src/components/forms/contact-form-container.tsx",
-    identifier: "tApi",
-    namespace: "apiErrors",
-    reason: "the API namespace constant is imported from the shared helper",
-  },
-  {
-    file: "src/components/forms/contact-form-feedback.tsx",
-    identifier: "translateForm",
-    namespace: "contact.form",
-    reason: "feedback helper receives the contact form translator",
-  },
-  {
-    file: "src/components/forms/contact-form-feedback.tsx",
-    identifier: "t",
-    namespace: "contact.form",
-    reason: "feedback state builder receives the contact form translator",
-  },
-  {
-    file: "src/components/forms/contact-form-fields.tsx",
-    identifier: "t",
-    namespace: "contact.form",
-    reason: "field renderer receives the contact form translator",
-  },
-  {
-    file: "src/components/sections/hero-section.tsx",
-    identifier: "t",
-    namespace: "home",
-    reason: "homepage section helpers receive the home translator",
-  },
-  {
-    file: "src/lib/structured-data-generators.ts",
-    identifier: "t",
-    namespace: "structured-data",
-    reason: "structured-data translator is passed by page builders",
-  },
-  {
-    file: "src/components/footer/Footer.tsx",
-    identifier: "translateWithFallback",
-    namespace: "",
-    reason: "footer runtime helper consumes full configured message keys",
-  },
-];
+const HOME_PAGE = "src/app/[locale]/page.tsx";
+const PRODUCTS_OVERVIEW =
+  "src/app/[locale]/products/products-overview-sections.tsx";
+const CONTACT_FEEDBACK = "src/components/forms/contact-form-feedback.tsx";
+const STRUCTURED_DATA = "src/lib/structured-data-generators.ts";
+
+function parameterOverrides(file, functionNames, identifier, namespace) {
+  return functionNames.map((functionName) => ({
+    file,
+    functionName,
+    identifier,
+    namespace,
+    reason: `${functionName} receives the ${namespace || "root"} translator`,
+  }));
+}
 
 const TRANSLATOR_PARAMETER_OVERRIDES = [
-  {
-    file: "src/app/[locale]/request-quote/page.tsx",
-    functionName: "RequestQuoteAside",
-    identifier: "t",
-    namespace: "requestQuote.page",
-    reason:
-      "aside copy receives the page translator while metadata has its own t",
-  },
+  ...parameterOverrides(
+    HOME_PAGE,
+    [
+      "getHomePageContent",
+      "HomeHowToChooseSection",
+      "HomeStartPathSection",
+      "HomeVerifySection",
+      "HomeFinalAction",
+    ],
+    "t",
+    "home",
+  ),
+  ...parameterOverrides(
+    PRODUCTS_OVERVIEW,
+    ["ProductLineCards", "ProductOverviewPath", "ProductLaunchBoundary"],
+    "translate",
+    "catalog",
+  ),
+  ...parameterOverrides(
+    "src/app/[locale]/request-quote/page.tsx",
+    ["RequestQuoteAside"],
+    "t",
+    "requestQuote.page",
+  ),
+  ...parameterOverrides(
+    "src/app/[locale]/request-quote/request-quote-form-copy.ts",
+    ["createRequestQuoteFormCopy"],
+    "t",
+    "requestQuote.form",
+  ),
+  ...parameterOverrides(
+    "src/app/[locale]/request-quote/request-quote-payload.ts",
+    ["createRequestQuotePayloadCopy"],
+    "t",
+    "requestQuote.form",
+  ),
+  ...parameterOverrides(
+    "src/components/cookie/cookie-banner.tsx",
+    ["MainBanner", "PreferencesPanel"],
+    "t",
+    "cookie",
+  ),
+  ...parameterOverrides(
+    "src/components/forms/contact-form-container-view.tsx",
+    ["ContactFormContainerView"],
+    "translateForm",
+    "contact.form",
+  ),
+  ...parameterOverrides(
+    CONTACT_FEEDBACK,
+    ["getStatusConfig", "StatusMessage"],
+    "t",
+    "contact.form",
+  ),
+  ...parameterOverrides(
+    CONTACT_FEEDBACK,
+    ["getErrorDisplayState", "ErrorDisplay"],
+    "translateForm",
+    "contact.form",
+  ),
+  ...parameterOverrides(
+    "src/components/forms/contact-form-fields.tsx",
+    ["getFieldPlaceholder", "FormFields"],
+    "t",
+    "contact.form",
+  ),
+  ...parameterOverrides(
+    "src/components/sections/hero-section.tsx",
+    ["buildHeroProofItem"],
+    "t",
+    "home",
+  ),
+  ...parameterOverrides(
+    STRUCTURED_DATA,
+    [
+      "getSocialProfileUrls",
+      "generateOrganizationData",
+      "generateWebSiteData",
+      "generateArticleData",
+    ],
+    "t",
+    "structured-data",
+  ),
 ];
 
 const DYNAMIC_MESSAGE_KEY_PREFIXES = [
@@ -162,6 +172,13 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     prefix: "",
     suffixes: [""],
     reason: "footer column headings consume their literal translation keys",
+  },
+  {
+    kind: "call-arguments",
+    file: "src/components/footer/Footer.tsx",
+    callee: "translateWithFallback",
+    prefixes: [""],
+    reason: "footer local fallback calls consume their literal message keys",
   },
   {
     kind: "collection-values",
@@ -744,7 +761,6 @@ module.exports = {
   DYNAMIC_MESSAGE_KEY_PREFIXES,
   MESSAGE_DERIVED_KEY_CONSUMERS,
   MESSAGE_OBJECT_KEY_CONSUMERS,
-  TRANSLATOR_BINDING_OVERRIDES,
   TRANSLATOR_PARAMETER_OVERRIDES,
   UNUSED_MESSAGE_KEYS,
 };

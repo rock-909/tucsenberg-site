@@ -8,7 +8,6 @@ const {
   DYNAMIC_MESSAGE_KEY_PREFIXES,
   MESSAGE_DERIVED_KEY_CONSUMERS,
   MESSAGE_OBJECT_KEY_CONSUMERS,
-  TRANSLATOR_BINDING_OVERRIDES,
   TRANSLATOR_PARAMETER_OVERRIDES,
   UNUSED_MESSAGE_KEYS,
 } = require("../message-key-usage-baseline");
@@ -135,54 +134,103 @@ function getPromiseAllInputs(node) {
   return inputs && ts.isArrayLiteralExpression(inputs) ? inputs.elements : null;
 }
 
+function getBindingIdentifier(bindingName, identifierName) {
+  if (ts.isIdentifier(bindingName)) {
+    return bindingName.text === identifierName ? bindingName : undefined;
+  }
+  for (const element of bindingName.elements) {
+    if (!ts.isBindingElement(element)) continue;
+    const identifier = getBindingIdentifier(element.name, identifierName);
+    if (identifier) return identifier;
+  }
+  return undefined;
+}
+
+function getFunctionName(node) {
+  if (node.name && ts.isIdentifier(node.name)) return node.name.text;
+  let current = node.parent;
+  while (current) {
+    if (ts.isVariableDeclaration(current) && ts.isIdentifier(current.name)) {
+      return current.name.text;
+    }
+    if (ts.isFunctionLike(current)) return null;
+    current = current.parent;
+  }
+  return null;
+}
+
 function collectTranslatorBindings({
   sourceFile,
-  file,
+  checker,
   constants,
-  translatorBindingOverrides,
+  parameterOverrides,
 }) {
   const translatorBindings = new Map();
-  for (const override of translatorBindingOverrides) {
-    if (override.file === file) {
-      translatorBindings.set(override.identifier, override.namespace);
-    }
-  }
+  const matchedParameterOverrides = new Set();
 
   function collectBindings(node) {
-    if (!ts.isVariableDeclaration(node) || !node.initializer) {
-      ts.forEachChild(node, collectBindings);
-      return;
-    }
-    if (ts.isIdentifier(node.name)) {
-      const namespace = getTranslatorNamespaceFromExpression(
-        node.initializer,
-        constants,
-      );
-      if (namespace !== undefined) {
-        translatorBindings.set(node.name.text, namespace);
-      }
-    } else if (ts.isArrayBindingPattern(node.name)) {
-      const inputs = getPromiseAllInputs(node.initializer);
-      for (const [index, binding] of node.name.elements.entries()) {
-        if (!inputs || !ts.isBindingElement(binding)) continue;
-        if (!ts.isIdentifier(binding.name)) continue;
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      if (ts.isIdentifier(node.name)) {
         const namespace = getTranslatorNamespaceFromExpression(
-          inputs[index],
+          node.initializer,
           constants,
         );
-        if (namespace !== undefined) {
-          translatorBindings.set(binding.name.text, namespace);
+        const symbol = checker.getSymbolAtLocation(node.name);
+        if (namespace !== undefined && symbol) {
+          translatorBindings.set(symbol, namespace);
+        }
+      } else if (ts.isArrayBindingPattern(node.name)) {
+        const inputs = getPromiseAllInputs(node.initializer);
+        for (const [index, binding] of node.name.elements.entries()) {
+          if (!inputs || !ts.isBindingElement(binding)) continue;
+          if (!ts.isIdentifier(binding.name)) continue;
+          const namespace = getTranslatorNamespaceFromExpression(
+            inputs[index],
+            constants,
+          );
+          const symbol = checker.getSymbolAtLocation(binding.name);
+          if (namespace !== undefined && symbol) {
+            translatorBindings.set(symbol, namespace);
+          }
+        }
+      }
+    } else if (ts.isParameter(node)) {
+      const functionName = getFunctionName(node.parent);
+      for (const override of parameterOverrides) {
+        if (override.functionName !== functionName) continue;
+        const identifier = getBindingIdentifier(node.name, override.identifier);
+        if (identifier) {
+          const symbol = checker.getSymbolAtLocation(identifier);
+          if (symbol) {
+            translatorBindings.set(symbol, override.namespace);
+            matchedParameterOverrides.add(override);
+          }
         }
       }
     }
     ts.forEachChild(node, collectBindings);
   }
   collectBindings(sourceFile);
-  return translatorBindings;
+  return { matchedParameterOverrides, translatorBindings };
 }
 
-function collectForwardedTranslatorCalls(sourceFile, translatorBindings) {
+function collectForwardedTranslatorCalls(
+  sourceFile,
+  checker,
+  translatorBindings,
+) {
   const forwardedTranslatorCalls = new Set();
+
+  function registerForwardedTranslator(node, translator, body) {
+    const translatorSymbol = checker.getSymbolAtLocation(translator);
+    const forwardedSymbol = checker.getSymbolAtLocation(node.name);
+    const namespace = translatorSymbol
+      ? translatorBindings.get(translatorSymbol)
+      : undefined;
+    if (namespace === undefined || !forwardedSymbol) return;
+    translatorBindings.set(forwardedSymbol, namespace);
+    forwardedTranslatorCalls.add(body);
+  }
 
   function collectForwardedBindings(node) {
     if (
@@ -206,16 +254,11 @@ function collectForwardedTranslatorCalls(sourceFile, translatorBindings) {
           const argument = unwrapExpression(body.arguments[0]);
           if (
             ts.isIdentifier(translator) &&
-            translatorBindings.has(translator.text) &&
             argument &&
             ts.isIdentifier(argument) &&
             argument.text === initializer.parameters[0].name.text
           ) {
-            translatorBindings.set(
-              node.name.text,
-              translatorBindings.get(translator.text),
-            );
-            forwardedTranslatorCalls.add(body);
+            registerForwardedTranslator(node, translator, body);
           }
         }
       }
@@ -228,9 +271,8 @@ function collectForwardedTranslatorCalls(sourceFile, translatorBindings) {
 
 function collectTranslatorCallUsage({
   node,
+  checker,
   translatorBindings,
-  explicitOverrides,
-  parameterOverrides,
   constants,
   staticKeys,
   dynamicPrefixes,
@@ -240,28 +282,10 @@ function collectTranslatorCallUsage({
     translator = translator.expression;
   }
   if (!ts.isIdentifier(translator)) return;
-  const shadowingFunction = getShadowingFunctionParameter(translator);
-  const scopedOverride = shadowingFunction
-    ? parameterOverrides.find(
-        (override) =>
-          override.identifier === translator.text &&
-          override.functionName === getFunctionName(shadowingFunction),
-      )
-    : undefined;
-  const overrideNamespace =
-    scopedOverride?.namespace ?? explicitOverrides.get(translator.text);
-  if (overrideNamespace === undefined && shadowingFunction !== null) {
-    return;
-  }
-  if (
-    overrideNamespace === undefined &&
-    !translatorBindings.has(translator.text)
-  ) {
-    return;
-  }
-
-  const namespace =
-    overrideNamespace ?? translatorBindings.get(translator.text);
+  const symbol = checker.getSymbolAtLocation(translator);
+  if (!symbol) return;
+  const namespace = translatorBindings.get(symbol);
+  if (namespace === undefined) return;
   const keyArgument = unwrapExpression(node.arguments[0]);
   const key = getStaticString(keyArgument, constants);
   if (key !== undefined) {
@@ -271,43 +295,6 @@ function collectTranslatorCallUsage({
   } else {
     dynamicPrefixes.add(namespace ? `${namespace}.` : "");
   }
-}
-
-function bindingNameContains(bindingName, identifierName) {
-  if (ts.isIdentifier(bindingName)) return bindingName.text === identifierName;
-  return bindingName.elements.some(
-    (element) =>
-      ts.isBindingElement(element) &&
-      bindingNameContains(element.name, identifierName),
-  );
-}
-
-function getFunctionName(node) {
-  if (node.name && ts.isIdentifier(node.name)) return node.name.text;
-  if (
-    node.parent &&
-    ts.isVariableDeclaration(node.parent) &&
-    ts.isIdentifier(node.parent.name)
-  ) {
-    return node.parent.name.text;
-  }
-  return null;
-}
-
-function getShadowingFunctionParameter(identifier) {
-  let current = identifier.parent;
-  while (current) {
-    if (
-      ts.isFunctionLike(current) &&
-      current.parameters.some((parameter) =>
-        bindingNameContains(parameter.name, identifier.text),
-      )
-    ) {
-      return current;
-    }
-    current = current.parent;
-  }
-  return null;
 }
 
 function collectRequiredMessagePathUsage({
@@ -337,37 +324,21 @@ function collectRequiredMessagePathUsage({
 }
 
 function collectSourceUsage({
-  file,
-  content,
-  catalogKeys,
+  sourceFile,
+  checker,
   constants,
-  translatorBindingOverrides,
   translatorParameterOverrides,
 }) {
-  const scriptKind = file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
-  const sourceFile = ts.createSourceFile(
-    file,
-    content,
-    ts.ScriptTarget.Latest,
-    true,
-    scriptKind,
-  );
-  const translatorBindings = collectTranslatorBindings({
-    sourceFile,
-    file,
-    constants,
-    translatorBindingOverrides,
-  });
-  const explicitOverrides = new Map(
-    translatorBindingOverrides
-      .filter((override) => override.file === file)
-      .map((override) => [override.identifier, override.namespace]),
-  );
-  const parameterOverrides = translatorParameterOverrides.filter(
-    (override) => override.file === file,
-  );
+  const { matchedParameterOverrides, translatorBindings } =
+    collectTranslatorBindings({
+      sourceFile,
+      checker,
+      constants,
+      parameterOverrides: translatorParameterOverrides,
+    });
   const forwardedTranslatorCalls = collectForwardedTranslatorCalls(
     sourceFile,
+    checker,
     translatorBindings,
   );
   const staticKeys = new Set();
@@ -377,9 +348,8 @@ function collectSourceUsage({
     if (ts.isCallExpression(node) && !forwardedTranslatorCalls.has(node)) {
       collectTranslatorCallUsage({
         node,
+        checker,
         translatorBindings,
-        explicitOverrides,
-        parameterOverrides,
         constants,
         staticKeys,
         dynamicPrefixes,
@@ -395,7 +365,64 @@ function collectSourceUsage({
   }
   collectNode(sourceFile);
 
-  return { dynamicPrefixes, staticKeys };
+  return { dynamicPrefixes, matchedParameterOverrides, staticKeys };
+}
+
+function createSourceProgram({ rootDir, sourceEntries }) {
+  const options = {
+    allowJs: true,
+    checkJs: false,
+    jsx: ts.JsxEmit.Preserve,
+    module: ts.ModuleKind.ESNext,
+    noLib: true,
+    noResolve: true,
+    target: ts.ScriptTarget.Latest,
+  };
+  const entriesByPath = new Map(
+    sourceEntries.map((entry) => [path.resolve(rootDir, entry.file), entry]),
+  );
+  const host = {
+    fileExists: (fileName) => entriesByPath.has(path.resolve(fileName)),
+    getCanonicalFileName: (fileName) => fileName,
+    getCurrentDirectory: () => rootDir,
+    getDefaultLibFileName: () => "lib.d.ts",
+    getDirectories: () => [],
+    getNewLine: () => "\n",
+    getSourceFile(fileName, languageVersion) {
+      const absolutePath = path.resolve(fileName);
+      const entry = entriesByPath.get(absolutePath);
+      if (!entry) return undefined;
+      const scriptKind = entry.file.endsWith("x")
+        ? ts.ScriptKind.TSX
+        : ts.ScriptKind.TS;
+      return ts.createSourceFile(
+        absolutePath,
+        entry.content,
+        languageVersion,
+        true,
+        scriptKind,
+      );
+    },
+    readFile(fileName) {
+      return entriesByPath.get(path.resolve(fileName))?.content;
+    },
+    useCaseSensitiveFileNames: () => true,
+    writeFile: () => undefined,
+  };
+  const program = ts.createProgram({
+    rootNames: [...entriesByPath.keys()],
+    options,
+    host,
+  });
+  return {
+    checker: program.getTypeChecker(),
+    sourceFiles: new Map(
+      sourceEntries.map((entry) => [
+        entry.file,
+        program.getSourceFile(path.resolve(rootDir, entry.file)),
+      ]),
+    ),
+  };
 }
 
 function collectObjectKeyConsumerUsage({ sourceEntries, objectKeyConsumers }) {
@@ -531,26 +558,45 @@ function collectFileStringConstants({ file, content }) {
 }
 
 function collectSourceUsageSummary({
+  rootDir,
   sourceEntries,
-  catalogKeys,
-  translatorBindingOverrides,
   translatorParameterOverrides,
 }) {
   const staticKeys = new Set();
   const dynamicPrefixes = new Set();
+  const matchedParameterOverrides = new Set();
+  const program = createSourceProgram({ rootDir, sourceEntries });
   for (const entry of sourceEntries) {
+    const sourceFile = program.sourceFiles.get(entry.file);
+    if (!sourceFile) continue;
     const constants = collectFileStringConstants(entry);
     const usage = collectSourceUsage({
-      ...entry,
-      catalogKeys,
+      sourceFile,
+      checker: program.checker,
       constants,
-      translatorBindingOverrides,
-      translatorParameterOverrides,
+      translatorParameterOverrides: translatorParameterOverrides.filter(
+        (override) => override.file === entry.file,
+      ),
     });
     for (const key of usage.staticKeys) staticKeys.add(key);
     for (const prefix of usage.dynamicPrefixes) dynamicPrefixes.add(prefix);
+    for (const override of usage.matchedParameterOverrides) {
+      matchedParameterOverrides.add(override);
+    }
   }
-  return { dynamicPrefixes, staticKeys };
+  return { dynamicPrefixes, matchedParameterOverrides, staticKeys };
+}
+
+function collectTranslatorParameterOverrideFindings(
+  translatorParameterOverrides,
+  matchedParameterOverrides,
+) {
+  return translatorParameterOverrides
+    .filter((override) => !matchedParameterOverrides.has(override))
+    .map((override) => ({
+      file: "scripts/quality/message-key-usage-baseline.js",
+      error: `translator parameter override is stale "${override.file}#${override.functionName}:${override.identifier}"`,
+    }));
 }
 
 function collectDynamicPrefixFindings({
@@ -631,7 +677,6 @@ function collectMessageKeyUsageFindings({
   dynamicPrefixAllowlist = DYNAMIC_MESSAGE_KEY_PREFIXES,
   derivedKeyConsumers = MESSAGE_DERIVED_KEY_CONSUMERS,
   objectKeyConsumers = MESSAGE_OBJECT_KEY_CONSUMERS,
-  translatorBindingOverrides = TRANSLATOR_BINDING_OVERRIDES,
   translatorParameterOverrides = TRANSLATOR_PARAMETER_OVERRIDES,
   unusedKeyAllowlist = UNUSED_MESSAGE_KEYS,
 } = {}) {
@@ -640,9 +685,8 @@ function collectMessageKeyUsageFindings({
     content: fs.readFileSync(path.join(rootDir, file), "utf8"),
   }));
   const sourceUsage = collectSourceUsageSummary({
+    rootDir,
     sourceEntries,
-    catalogKeys,
-    translatorBindingOverrides,
     translatorParameterOverrides,
   });
 
@@ -666,6 +710,10 @@ function collectMessageKeyUsageFindings({
   const usedKeys = new Set(staticKeys);
 
   return [
+    ...collectTranslatorParameterOverrideFindings(
+      translatorParameterOverrides,
+      sourceUsage.matchedParameterOverrides,
+    ),
     ...objectKeyUsage.findings,
     ...derivedKeyUsage.findings,
     ...collectDynamicPrefixFindings({
