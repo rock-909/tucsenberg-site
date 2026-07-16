@@ -33,6 +33,8 @@ function writeJson(rootDir: string, relativePath: string, value: unknown) {
 function createBuildFixture({
   aboutPostponed = false,
   contactPostponed = true,
+  locales = ["en"],
+  secondaryAboutPrerendered = true,
   includeAboutRoute = true,
   includeAboutTemplateMeta = true,
 } = {}) {
@@ -43,12 +45,14 @@ function createBuildFixture({
     "/[locale]/contact/page": "app/[locale]/contact/page.js",
   });
   writeJson(rootDir, ".next/prerender-manifest.json", {
-    routes: {
-      ...(includeAboutRoute
-        ? { "/en/about": { srcRoute: "/[locale]/about" } }
-        : {}),
-      "/en/contact": { srcRoute: "/[locale]/contact" },
-    },
+    routes: Object.fromEntries(
+      locales.flatMap((locale) => [
+        ...(includeAboutRoute
+          ? [[`/${locale}/about`, { srcRoute: "/[locale]/about" }]]
+          : []),
+        [`/${locale}/contact`, { srcRoute: "/[locale]/contact" }],
+      ]),
+    ),
   });
   if (includeAboutTemplateMeta) {
     writeJson(rootDir, ".next/server/app/[locale]/about.meta", {
@@ -68,6 +72,15 @@ function createBuildFixture({
     headers: { "x-nextjs-prerender": "1" },
     ...(contactPostponed ? { postponed: "search params" } : {}),
   });
+  for (const locale of locales.filter((value) => value !== "en")) {
+    writeJson(rootDir, `.next/server/app/${locale}/about.meta`, {
+      headers: secondaryAboutPrerendered ? { "x-nextjs-prerender": "1" } : {},
+    });
+    writeJson(rootDir, `.next/server/app/${locale}/contact.meta`, {
+      headers: { "x-nextjs-prerender": "1" },
+      ...(contactPostponed ? { postponed: "search params" } : {}),
+    });
+  }
   return rootDir;
 }
 
@@ -102,7 +115,7 @@ describe("prerender static behavior gate", () => {
     expect(findings).toContainEqual({
       file: "prerender-manifest.json",
       error:
-        'localized route template has no default-locale prerender output "/[locale]/about"',
+        'localized route template has no prerender output for locale "en" "/[locale]/about"',
     });
   });
 
@@ -114,6 +127,25 @@ describe("prerender static behavior gate", () => {
       file: "server/app/en/about.meta",
       error:
         'localized route unexpectedly keeps postponed rendering "/en/about"',
+    });
+  });
+
+  it("checks every configured locale instead of only the default locale", () => {
+    const findings = collectPrerenderStaticFindings({
+      rootDir: createBuildFixture({
+        locales: ["en", "fr"],
+        secondaryAboutPrerendered: false,
+      }),
+      configuredLocales: ["en", "fr"],
+      postponedRouteExemptions: new Map([
+        ["/en/contact", "contact search-param island"],
+        ["/fr/contact", "contact search-param island"],
+      ]),
+    });
+
+    expect(findings).toContainEqual({
+      file: "server/app/fr/about.meta",
+      error: 'localized route is not marked prerendered "/fr/about"',
     });
   });
 

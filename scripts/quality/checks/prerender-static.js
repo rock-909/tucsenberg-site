@@ -2,17 +2,17 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = process.cwd();
-const DEFAULT_LOCALE = require("../../../i18n-locales.config").defaultLocale;
+const { locales: CONFIGURED_LOCALES } = require("../../../i18n-locales.config");
 const DEFAULT_BUILD_DIR = ".next";
 
 // Contact currently keeps a request-dependent search-param island. D2 removes
 // this exemption when the page becomes fully prerendered.
-const POSTPONED_ROUTE_EXEMPTIONS = new Map([
-  [
-    `/${DEFAULT_LOCALE}/contact`,
+const POSTPONED_ROUTE_EXEMPTIONS = new Map(
+  CONFIGURED_LOCALES.map((locale) => [
+    `/${locale}/contact`,
     "contact search-param island; remove in M3-D2",
-  ],
-]);
+  ]),
+);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -58,16 +58,31 @@ function collectTemplateFindings(buildRoot, localizedPageTemplates) {
   return findings;
 }
 
-function collectTemplateRouteFindings(localizedPageTemplates, localizedRoutes) {
-  const prerenderedTemplates = new Set(
-    localizedRoutes.map(([, config]) => config.srcRoute),
-  );
-  return localizedPageTemplates
-    .filter((route) => !prerenderedTemplates.has(route))
-    .map((route) => ({
-      file: "prerender-manifest.json",
-      error: `localized route template has no default-locale prerender output "${route}"`,
-    }));
+function routeUsesLocale(route, locale) {
+  return route === `/${locale}` || route.startsWith(`/${locale}/`);
+}
+
+function collectTemplateRouteFindings(
+  localizedPageTemplates,
+  localizedRoutes,
+  configuredLocales,
+) {
+  const findings = [];
+  for (const locale of configuredLocales) {
+    const prerenderedTemplates = new Set(
+      localizedRoutes
+        .filter(([route]) => routeUsesLocale(route, locale))
+        .map(([, config]) => config.srcRoute),
+    );
+    for (const route of localizedPageTemplates) {
+      if (prerenderedTemplates.has(route)) continue;
+      findings.push({
+        file: "prerender-manifest.json",
+        error: `localized route template has no prerender output for locale "${locale}" "${route}"`,
+      });
+    }
+  }
+  return findings;
 }
 
 function collectLocalizedRouteFindings({
@@ -122,6 +137,7 @@ function collectStaleExemptionFindings(
 function collectPrerenderStaticFindings({
   rootDir = ROOT,
   buildDir = DEFAULT_BUILD_DIR,
+  configuredLocales = CONFIGURED_LOCALES,
   postponedRouteExemptions = POSTPONED_ROUTE_EXEMPTIONS,
 } = {}) {
   const buildRoot = path.join(rootDir, buildDir);
@@ -143,7 +159,7 @@ function collectPrerenderStaticFindings({
   const localizedRoutes = Object.entries(prerenderManifest.routes ?? {})
     .filter(
       ([route, config]) =>
-        route.startsWith(`/${DEFAULT_LOCALE}`) &&
+        configuredLocales.some((locale) => routeUsesLocale(route, locale)) &&
         typeof config?.srcRoute === "string" &&
         config.srcRoute.startsWith("/[locale]"),
     )
@@ -156,7 +172,11 @@ function collectPrerenderStaticFindings({
 
   return [
     ...collectTemplateFindings(buildRoot, localizedPageTemplates),
-    ...collectTemplateRouteFindings(localizedPageTemplates, localizedRoutes),
+    ...collectTemplateRouteFindings(
+      localizedPageTemplates,
+      localizedRoutes,
+      configuredLocales,
+    ),
     ...routeUsage.findings,
     ...collectStaleExemptionFindings(
       postponedRouteExemptions,

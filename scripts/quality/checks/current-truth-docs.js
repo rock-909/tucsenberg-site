@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const {
+  collectConsumedGuardrailExceptionIds,
   collectRegisteredGuardrailExceptionIds,
   isProductionFile,
 } = require("./eslint-disable");
@@ -35,6 +36,14 @@ const HISTORICAL_DERIVATION_DOCS = new Set([
   "docs/项目基础/派生起步.md",
   "docs/项目基础/派生配置.md",
   "docs/项目基础/派生干跑验证.md",
+]);
+const DOCUMENT_LIFECYCLE_CLASSES = new Set([
+  "current-entry",
+  "current-reference",
+  "current-proof",
+  "historical-proof",
+  "method-workflow",
+  "candidate-backlog",
 ]);
 
 const TRUTH_DOC_CHECKS = [
@@ -402,8 +411,21 @@ function collectTrackedMarkdownDocs(rootDir) {
 function inventoryHasFileEntry(inventory, file) {
   const expectedCell = `\`${file}\``;
   return inventory.split("\n").some((line) => {
-    const cells = line.split("|");
-    return cells.length > 2 && cells[1].trim() === expectedCell;
+    const cells = line
+      .trim()
+      .replace(/^\|/u, "")
+      .replace(/\|$/u, "")
+      .split("|")
+      .map((cell) => cell.trim());
+    if (cells.length < 3 || cells[0] !== expectedCell) return false;
+
+    const lifecycleClasses = [...cells[1].matchAll(/`([^`]+)`/gu)].map(
+      (match) => match[1],
+    );
+    const hasValidClasses =
+      lifecycleClasses.length > 0 &&
+      lifecycleClasses.every((value) => DOCUMENT_LIFECYCLE_CLASSES.has(value));
+    return hasValidClasses && cells.slice(2).join("|").trim().length > 0;
   });
 }
 
@@ -478,9 +500,14 @@ function isNegatedDocumentedPath(content, lineStart, matchIndex) {
     matchIndex,
     currentLineEnd === -1 ? undefined : currentLineEnd,
   );
+  const previousLineContinuesClause = /(?:\b(?:and|or)|[,，、:：])\s*$/iu.test(
+    previousLine,
+  );
   const clausePrefix = currentLinePrefix.trim()
     ? currentLinePrefix
-    : `${previousLine}\n${currentLinePrefix}`;
+    : previousLineContinuesClause
+      ? `${previousLine.replace(/[:：]\s*$/u, "")}\n${currentLinePrefix}`
+      : currentLinePrefix;
   const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
 
   return (
@@ -557,10 +584,8 @@ function collectGuardrailRegistryFindings(rootDir, productionSourceFiles) {
 
   for (const file of sourceFiles) {
     const content = readTruthFile(rootDir, file);
-    for (const match of content.matchAll(
-      /guardrail-exception\s+(GSE-\d{8}-[a-z0-9-]+)/giu,
-    )) {
-      consumedIds.add(match[1].toLowerCase());
+    for (const id of collectConsumedGuardrailExceptionIds(file, content)) {
+      consumedIds.add(id);
     }
   }
 

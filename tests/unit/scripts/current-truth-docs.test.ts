@@ -357,6 +357,25 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("rejects inventory rows without a lifecycle class and retention reason", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |\n| `docs/unclassified.json` |  |  |",
+      "docs/unclassified.json": "{}",
+    });
+    tempDirs.push(repoDir);
+
+    expect(
+      collectDocumentInventoryFindings(repoDir, ["docs/unclassified.json"]),
+    ).toEqual([
+      {
+        file: "docs/项目基础/文档清单.md",
+        error:
+          'tracked document is missing from inventory "docs/unclassified.json"',
+      },
+    ]);
+  });
+
   it("rejects a missing current source path but ignores a negated path", () => {
     const files = {
       "docs/项目基础/文档清单.md":
@@ -366,6 +385,8 @@ describe("current-truth docs guard", () => {
         "Do not create `src/proxy.ts` for this project.",
         "Do not rename `src/live.ts` to `src/renamed.ts`.",
         "`src/not-created.ts` is not created.",
+        "Production code must not import `src/test-only-a.ts`, or",
+        "`src/test-only-b.ts`.",
       ].join("\n"),
       "src/live.ts": "export const live = true;",
     };
@@ -433,6 +454,26 @@ describe("current-truth docs guard", () => {
     ]);
   });
 
+  it("does not inherit an unpunctuated negative sentence across lines", () => {
+    const files = {
+      "docs/项目基础/文档清单.md":
+        "| 文件 | 标签 | 作用 |\n| --- | --- | --- |",
+      "docs/current.md":
+        "Do not use the legacy entry\n`src/missing.ts` is the current runtime entry.",
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectBacktickedRepoPathFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/current.md",
+        error: 'documented repository path does not exist "src/missing.ts"',
+      },
+    ]);
+  });
+
   it("rejects registered GSE ids without a production consumer", () => {
     const files = {
       "docs/项目基础/维护规则.md":
@@ -449,6 +490,31 @@ describe("current-truth docs guard", () => {
         "src/app/example.ts",
         "src/app/__tests__/example.test.ts",
       ]),
+    ).toEqual([
+      {
+        file: "docs/项目基础/维护规则.md",
+        error:
+          'registered guardrail exception has no production consumer "gse-20260716-live-flow"',
+      },
+    ]);
+  });
+
+  it("does not count strings, ordinary comments, or non-structural disables as GSE consumers", () => {
+    const files = {
+      "docs/项目基础/维护规则.md":
+        "## Active production structural exceptions\n\n| ID | File | Rule | Reason | Verification |\n| --- | --- | --- | --- | --- |\n| GSE-20260716-live-flow | src/app/example.ts | max-lines | reason | verification |",
+      "src/app/example.ts": [
+        'export const decoy = "guardrail-exception GSE-20260716-live-flow";',
+        "// guardrail-exception GSE-20260716-live-flow: ordinary comment",
+        "// eslint-disable-next-line no-console -- guardrail-exception GSE-20260716-live-flow: non-structural rule",
+        'console.log("decoy");',
+      ].join("\n"),
+    };
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(
+      collectGuardrailRegistryFindings(repoDir, ["src/app/example.ts"]),
     ).toEqual([
       {
         file: "docs/项目基础/维护规则.md",
