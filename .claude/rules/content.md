@@ -39,7 +39,7 @@ For derived projects, replace in this order:
 3. `src/config/single-site-seo.ts`
 4. `content/config/content.json`
 5. `content/pages/{locale}/*.mdx`
-6. `messages/{locale}/{critical,deferred}.json`
+6. `messages/{locale}/messages.json`
 7. product/catalog/spec config and public images
 
 Do not treat starter examples as client-ready facts.

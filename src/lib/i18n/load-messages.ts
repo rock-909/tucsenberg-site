@@ -7,10 +7,8 @@
  * not depend on them.
  */
 
-import { mergeObjects } from "@/lib/merge-objects";
 import { type Locale } from "@/i18n/routing-config";
 import { coerceLocale } from "@/i18n/locale-utils";
-import { type MessageType } from "@/lib/i18n/message-pack-config";
 import { loadComposedRawMessages } from "@/lib/i18n/message-pack-loader";
 import {
   getSiteMessageValues,
@@ -64,12 +62,9 @@ function interpolateSiteMessageValues(
   return value;
 }
 
-async function loadMessageSource(
-  locale: Locale,
-  type: MessageType,
-): Promise<Messages> {
+async function loadMessageSource(locale: Locale): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
-  const loadedMessages = await loadComposedRawMessages(safeLocale, type);
+  const loadedMessages = await loadComposedRawMessages(safeLocale);
 
   return interpolateSiteMessageValues(
     loadedMessages,
@@ -78,42 +73,12 @@ async function loadMessageSource(
   ) as Messages;
 }
 
-function load(locale: Locale, type: MessageType): Promise<Messages> {
-  const safeLocale = coerceLocale(locale);
-  return loadMessageSource(safeLocale, type);
-}
-
-async function loadCompleteMessagesFromSourceInternal(
-  locale: Locale,
-): Promise<Messages> {
-  const safeLocale = coerceLocale(locale);
-  const [critical, deferred] = await Promise.all([
-    loadMessageSource(safeLocale, "critical"),
-    loadMessageSource(safeLocale, "deferred"),
-  ]);
-  return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
-}
-
-export function loadCriticalMessages(locale: Locale): Promise<Messages> {
-  return load(locale, "critical");
-}
-
-export function loadDeferredMessages(locale: Locale): Promise<Messages> {
-  return load(locale, "deferred");
-}
-
 export function loadCompleteMessagesFromSource(
   locale: string,
 ): Promise<Messages> {
-  const safeLocale = coerceLocale(locale);
-  return loadCompleteMessagesFromSourceInternal(safeLocale);
+  return loadMessageSource(coerceLocale(locale));
 }
 
-export async function loadCompleteMessages(locale: Locale): Promise<Messages> {
-  const safeLocale = coerceLocale(locale);
-  const [critical, deferred] = await Promise.all([
-    loadCriticalMessages(safeLocale),
-    loadDeferredMessages(safeLocale),
-  ]);
-  return mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
+export function loadCompleteMessages(locale: Locale): Promise<Messages> {
+  return loadMessageSource(coerceLocale(locale));
 }

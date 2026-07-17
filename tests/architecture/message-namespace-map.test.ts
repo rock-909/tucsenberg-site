@@ -15,9 +15,7 @@ describe("catalog message namespace graph", () => {
       "messages/profiles/catalog/en",
     ]) {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths come from the fixed catalog pack allowlist above
-      expect(existsSync(`${packRoot}/critical.json`), packRoot).toBe(true);
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths come from the fixed catalog pack allowlist above
-      expect(existsSync(`${packRoot}/deferred.json`), packRoot).toBe(true);
+      expect(existsSync(`${packRoot}/messages.json`), packRoot).toBe(true);
     }
   });
 });

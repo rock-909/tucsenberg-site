@@ -9,7 +9,7 @@ import {
 import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import { getStaticSplitMessages } from "@/lib/i18n/static-split-messages";
+import { getStaticComposedMessages } from "@/lib/i18n/static-composed-messages";
 import type {
   FaqItem,
   Locale,
@@ -24,10 +24,6 @@ export interface ContactPageData {
   faqItems: FaqItem[];
   faqSectionTitle: string;
   faqSchema: ReturnType<typeof generateFaqSchemaFromItems> | null;
-}
-
-function getStaticMessages(locale: Locale): Record<string, unknown> {
-  return getStaticSplitMessages(locale);
 }
 
 function assertContactPageMetadata(
@@ -75,7 +71,7 @@ export function getStaticContactPage(locale: Locale): Page {
 
 export function getContactPageData(locale: Locale): ContactPageData {
   const page = getStaticContactPage(locale);
-  const messages = getStaticMessages(locale);
+  const messages = getStaticComposedMessages(locale);
   const copy = getContactCopyFromMessages(messages);
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({

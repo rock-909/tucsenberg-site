@@ -2,8 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   loadCompleteMessages,
   loadCompleteMessagesFromSource,
-  loadCriticalMessages,
-  loadDeferredMessages,
 } from "@/lib/i18n/load-messages";
 
 vi.mock("next/cache", () => ({
@@ -11,22 +9,6 @@ vi.mock("next/cache", () => ({
 }));
 
 describe("load-messages canonical runtime source", () => {
-  it("loads critical messages from split source", async () => {
-    const messages = await loadCriticalMessages("en");
-
-    expect(messages).toBeTruthy();
-    expect(typeof messages).toBe("object");
-    expect(Object.keys(messages).length).toBeGreaterThan(0);
-  });
-
-  it("loads deferred messages from split source", async () => {
-    const messages = await loadDeferredMessages("en");
-
-    expect(messages).toBeTruthy();
-    expect(typeof messages).toBe("object");
-    expect(Object.keys(messages).length).toBeGreaterThan(0);
-  });
-
   it("sanitizes invalid locale to default locale when loading direct source", async () => {
     const invalidLocaleMessages =
       await loadCompleteMessagesFromSource("invalid-locale");
@@ -35,7 +17,7 @@ describe("load-messages canonical runtime source", () => {
     expect(invalidLocaleMessages).toEqual(defaultLocaleMessages);
   });
 
-  it("returns merged complete messages from split source", async () => {
+  it("returns merged complete messages from physical packs", async () => {
     const messages = await loadCompleteMessagesFromSource("en");
 
     expect(messages).toHaveProperty("apiErrors");
@@ -51,7 +33,7 @@ describe("load-messages canonical runtime source", () => {
     expect(cached).toEqual(direct);
   });
 
-  it("uses the shared split bundles without site-specific overlay drift", async () => {
+  it("uses the shared composed packs without site-specific overlay drift", async () => {
     vi.resetModules();
 
     const messages = (await loadCompleteMessagesFromSource("en")) as {

@@ -30,9 +30,10 @@
 /scripts/quality/release-proof-manifest.js @Alx-707 developer@flood-control.com
 /wrangler.jsonc @Alx-707 developer@flood-control.com
 
-# Tier A: translation critical path
-/messages/en/critical.json @Alx-707 developer@flood-control.com
-/messages/en/deferred.json @Alx-707 developer@flood-control.com
+# Tier A: translation authoring truth (physical packs)
+/messages/base/ @Alx-707 developer@flood-control.com
+/messages/profiles/b2b-lead/ @Alx-707 developer@flood-control.com
+/messages/profiles/catalog/ @Alx-707 developer@flood-control.com
 /scripts/starter-checks.js @Alx-707 developer@flood-control.com
 
 # Tier A: health

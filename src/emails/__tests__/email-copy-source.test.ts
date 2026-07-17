@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import baseEnglishDeferredMessages from "@messages/base/en/deferred.json";
+import baseEnglishMessages from "@messages/base/en/messages.json";
 import { EMAIL_COPY } from "@/emails/email-copy";
 import type {
   EmailTemplateData,
@@ -112,13 +112,13 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getEmailTemplates(): EmailTemplates {
-  const messagePack = baseEnglishDeferredMessages as unknown as {
+  const messagePack = baseEnglishMessages as unknown as {
     emailTemplates?: unknown;
   };
 
   if (!isObjectRecord(messagePack.emailTemplates)) {
     throw new Error(
-      "messages/base/en/deferred.json must define emailTemplates before EMAIL_COPY can use message-pack authoring.",
+      "messages/base/en/messages.json must define emailTemplates before EMAIL_COPY can use message-pack authoring.",
     );
   }
 

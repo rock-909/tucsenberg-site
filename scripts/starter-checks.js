@@ -127,7 +127,7 @@ Commands:
   brand               Check old brand residue
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest and static MDX import map (--check verifies freshness)
-  translations        Check split critical/deferred translation shapes
+  translations        Check catalog message pack and compat translation shapes
   message-key-usage   Check message catalog leaves against real consumers
   validate-production-config Validate production and public-launch config gates
   eslint-disable      Check eslint-disable exception hygiene

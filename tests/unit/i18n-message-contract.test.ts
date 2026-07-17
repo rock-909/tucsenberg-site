@@ -1,8 +1,7 @@
-import enCriticalMessages from "../../messages/en/critical.json";
-import enDeferredMessages from "../../messages/en/deferred.json";
-import baseEnCriticalMessages from "../../messages/base/en/critical.json";
-import b2bLeadDeferredMessages from "../../messages/profiles/b2b-lead/en/deferred.json";
-import catalogDeferredMessages from "../../messages/profiles/catalog/en/deferred.json";
+import enMessages from "../../messages/en/messages.json";
+import baseEnMessages from "../../messages/base/en/messages.json";
+import b2bLeadMessages from "../../messages/profiles/b2b-lead/en/messages.json";
+import catalogMessages from "../../messages/profiles/catalog/en/messages.json";
 import { describe, expect, it } from "vitest";
 import {
   API_ERROR_CODES,
@@ -51,20 +50,6 @@ function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function mergeMessages(critical: JsonObject, deferred: JsonObject): JsonObject {
-  const result: JsonObject = { ...critical };
-
-  for (const [key, value] of Object.entries(deferred)) {
-    const existingValue = result[key];
-    result[key] =
-      isJsonObject(existingValue) && isJsonObject(value)
-        ? mergeMessages(existingValue, value)
-        : value;
-  }
-
-  return result;
-}
-
 function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   return keyPath.split(".").reduce<unknown>((current, key) => {
     if (!isJsonObject(current)) return undefined;
@@ -73,12 +58,10 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
 }
 
 describe("real i18n runtime message contract", () => {
-  const runtimeMessageCases = [
-    ["en", mergeMessages(enCriticalMessages, enDeferredMessages)],
-  ] as const;
+  const runtimeMessageCases = [["en", enMessages]] as const;
 
   it.each(runtimeMessageCases)(
-    "keeps degraded-state form keys in the real %s split message bundle",
+    "keeps degraded-state form keys in the real %s message bundle",
     (_locale, messages) => {
       for (const keyPath of REQUIRED_RUNTIME_KEYS) {
         const value = getMessageValue(messages, keyPath);
@@ -103,7 +86,7 @@ describe("real i18n runtime message contract", () => {
   );
 
   it.each(runtimeMessageCases)(
-    "keeps RFQ page and option keys in the real %s split message bundle",
+    "keeps RFQ page and option keys in the real %s message bundle",
     (_locale, messages) => {
       for (const keyPath of REQUEST_QUOTE_RUNTIME_KEYS) {
         const value = getMessageValue(messages, keyPath);
@@ -116,38 +99,23 @@ describe("real i18n runtime message contract", () => {
   );
 
   it("keeps RFQ copy owned by b2b-lead and inherited by catalog", () => {
-    expect(b2bLeadDeferredMessages).toHaveProperty("requestQuote");
-    expect(catalogDeferredMessages).not.toHaveProperty("requestQuote");
-
-    const catalogRuntimeMessages = mergeMessages(
-      enCriticalMessages,
-      enDeferredMessages,
-    );
-
-    expect(catalogRuntimeMessages).toHaveProperty("requestQuote");
+    expect(b2bLeadMessages).toHaveProperty("requestQuote");
+    expect(catalogMessages).not.toHaveProperty("requestQuote");
+    expect(enMessages).toHaveProperty("requestQuote");
   });
 
   it("keeps API error messages aligned with live error codes", () => {
     const liveErrorCodes = Object.values(API_ERROR_CODES).sort();
-    const authoringErrorKeys = Object.keys(
-      baseEnCriticalMessages.apiErrors,
-    ).sort();
+    const authoringErrorKeys = Object.keys(baseEnMessages.apiErrors).sort();
 
     expect(authoringErrorKeys).toEqual(liveErrorCodes);
-    expect(Object.keys(enCriticalMessages.apiErrors).sort()).toEqual(
-      liveErrorCodes,
-    );
+    expect(Object.keys(enMessages.apiErrors).sort()).toEqual(liveErrorCodes);
   });
 
   it("keeps the client-only network fallback on its dedicated form message", () => {
-    expect(baseEnCriticalMessages.apiErrors).not.toHaveProperty(
-      FORM_NETWORK_ERROR,
+    expect(baseEnMessages.apiErrors).not.toHaveProperty(FORM_NETWORK_ERROR);
+    expect(getMessageValue(enMessages, "contact.form.networkError")).toEqual(
+      expect.any(String),
     );
-    expect(
-      getMessageValue(
-        mergeMessages(enCriticalMessages, enDeferredMessages),
-        "contact.form.networkError",
-      ),
-    ).toEqual(expect.any(String));
   });
 });

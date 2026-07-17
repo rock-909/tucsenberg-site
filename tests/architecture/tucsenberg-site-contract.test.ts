@@ -64,15 +64,11 @@ const TARGET_DOWNLOADS = [
 ] as const;
 
 const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
-  "messages/profiles/catalog/en/critical.json",
-  "messages/en/critical.json",
+  "messages/profiles/catalog/en/messages.json",
+  "messages/en/messages.json",
 ] as const;
 
-const ACTIVE_MESSAGE_FILES = [
-  ...ACTIVE_HOMEPAGE_MESSAGE_FILES,
-  "messages/profiles/catalog/en/deferred.json",
-  "messages/en/deferred.json",
-] as const;
+const ACTIVE_MESSAGE_FILES = [...ACTIVE_HOMEPAGE_MESSAGE_FILES] as const;
 
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
 const PUBLIC_SOURCE_EXTENSIONS = new Set([

@@ -4,14 +4,11 @@ const path = require("node:path");
 const ROOT = process.cwd();
 const I18N_LOCALES = require("../../../i18n-locales.config").locales;
 const MESSAGES_DIR = path.join(ROOT, "messages");
-const MESSAGE_TYPES = ["critical", "deferred"];
 const CATALOG_MESSAGE_PACK_IDS = require("../../../messages/message-packs.json");
 const MESSAGE_PACK_IDS = [...new Set(CATALOG_MESSAGE_PACK_IDS)];
 
 const REQUIRED_PACK_FILES = MESSAGE_PACK_IDS.flatMap((packId) =>
-  I18N_LOCALES.flatMap((locale) =>
-    MESSAGE_TYPES.map((type) => getPackRelativePath(packId, locale, type)),
-  ),
+  I18N_LOCALES.map((locale) => getPackRelativePath(packId, locale)),
 );
 
 function isPlainObject(value) {
@@ -22,23 +19,241 @@ function getPackRoot(packId) {
   return packId === "base" ? "messages/base" : `messages/profiles/${packId}`;
 }
 
-function getPackRelativePath(packId, locale, type) {
-  return path.posix.join(getPackRoot(packId), locale, `${type}.json`);
+function getPackRelativePath(packId, locale) {
+  return path.posix.join(getPackRoot(packId), locale, "messages.json");
 }
 
-function getPackAbsolutePath(packId, locale, type) {
-  return path.join(ROOT, getPackRelativePath(packId, locale, type));
+function getPackAbsolutePath(packId, locale) {
+  return path.join(ROOT, getPackRelativePath(packId, locale));
 }
 
-function getLocaleSplitPaths(locale) {
-  return {
-    critical: path.join(MESSAGES_DIR, locale, "critical.json"),
-    deferred: path.join(MESSAGES_DIR, locale, "deferred.json"),
-  };
+function getLocaleCompatPath(locale) {
+  return path.join(MESSAGES_DIR, locale, "messages.json");
+}
+
+function readJsonSource(filePath) {
+  return fs.readFileSync(filePath, "utf8");
 }
 
 function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return JSON.parse(readJsonSource(filePath));
+}
+
+/**
+ * Sibling duplicate object keys are legal-but-lossy JSON: JSON.parse keeps the
+ * last value and drops earlier ones. Scan the raw text so content:check fails
+ * instead of reporting a false "No duplicate keys found".
+ */
+function findDuplicateJsonObjectKeys(source) {
+  const duplicates = [];
+  let i = 0;
+  const length = source.length;
+
+  function lineAt(index) {
+    let line = 1;
+    for (let cursor = 0; cursor < index; cursor += 1) {
+      if (source[cursor] === "\n") {
+        line += 1;
+      }
+    }
+    return line;
+  }
+
+  function skipWhitespace() {
+    while (i < length && /\s/u.test(source[i])) {
+      i += 1;
+    }
+  }
+
+  function readString() {
+    if (source[i] !== '"') {
+      throw new Error(`Expected JSON string at index ${i}`);
+    }
+
+    i += 1;
+    let value = "";
+
+    while (i < length) {
+      const character = source[i];
+
+      if (character === '"') {
+        i += 1;
+        return value;
+      }
+
+      if (character === "\\") {
+        i += 1;
+        if (i >= length) {
+          throw new Error("Unterminated JSON string escape");
+        }
+
+        const escape = source[i];
+        if (escape === "u") {
+          const hex = source.slice(i + 1, i + 5);
+          value += String.fromCharCode(Number.parseInt(hex, 16));
+          i += 5;
+          continue;
+        }
+
+        const escaped = {
+          '"': '"',
+          "\\": "\\",
+          "/": "/",
+          b: "\b",
+          f: "\f",
+          n: "\n",
+          r: "\r",
+          t: "\t",
+        };
+        value += escaped[escape] ?? escape;
+        i += 1;
+        continue;
+      }
+
+      value += character;
+      i += 1;
+    }
+
+    throw new Error("Unterminated JSON string");
+  }
+
+  function parseValue(pathPrefix) {
+    skipWhitespace();
+    if (i >= length) {
+      throw new Error("Unexpected end of JSON");
+    }
+
+    const character = source[i];
+    if (character === "{") {
+      parseObject(pathPrefix);
+      return;
+    }
+    if (character === "[") {
+      parseArray(pathPrefix);
+      return;
+    }
+    if (character === '"') {
+      readString();
+      return;
+    }
+    if (character === "t") {
+      i += 4;
+      return;
+    }
+    if (character === "f") {
+      i += 5;
+      return;
+    }
+    if (character === "n") {
+      i += 4;
+      return;
+    }
+
+    while (i < length && /[0-9eE+\-.]/u.test(source[i])) {
+      i += 1;
+    }
+  }
+
+  function parseObject(pathPrefix) {
+    i += 1;
+    skipWhitespace();
+
+    if (source[i] === "}") {
+      i += 1;
+      return;
+    }
+
+    const seenKeys = new Set();
+
+    while (i < length) {
+      skipWhitespace();
+      const keyStart = i;
+      const key = readString();
+      const keyPath = pathPrefix === "" ? key : `${pathPrefix}.${key}`;
+
+      if (seenKeys.has(key)) {
+        duplicates.push({
+          key,
+          line: lineAt(keyStart),
+          path: keyPath,
+        });
+      } else {
+        seenKeys.add(key);
+      }
+
+      skipWhitespace();
+      if (source[i] !== ":") {
+        throw new Error(`Expected ':' after key at index ${i}`);
+      }
+      i += 1;
+      parseValue(keyPath);
+      skipWhitespace();
+
+      if (source[i] === "}") {
+        i += 1;
+        return;
+      }
+
+      if (source[i] === ",") {
+        i += 1;
+        continue;
+      }
+
+      throw new Error(`Expected ',' or '}' at index ${i}`);
+    }
+  }
+
+  function parseArray(pathPrefix) {
+    i += 1;
+    skipWhitespace();
+
+    if (source[i] === "]") {
+      i += 1;
+      return;
+    }
+
+    let index = 0;
+
+    while (i < length) {
+      const itemPath =
+        pathPrefix === "" ? `[${index}]` : `${pathPrefix}[${index}]`;
+      parseValue(itemPath);
+      index += 1;
+      skipWhitespace();
+
+      if (source[i] === "]") {
+        i += 1;
+        return;
+      }
+
+      if (source[i] === ",") {
+        i += 1;
+        continue;
+      }
+
+      throw new Error(`Expected ',' or ']' at index ${i}`);
+    }
+  }
+
+  skipWhitespace();
+  parseValue("");
+  skipWhitespace();
+  return duplicates;
+}
+
+function reportDuplicateObjectKeys(label, source) {
+  const duplicates = findDuplicateJsonObjectKeys(source);
+
+  if (duplicates.length === 0) {
+    return true;
+  }
+
+  console.error(`   Error: duplicate object keys in ${label}:`);
+  for (const duplicate of duplicates.slice(0, 10)) {
+    console.error(`      - ${duplicate.path} (line ${duplicate.line})`);
+  }
+
+  return false;
 }
 
 function collectLeafPaths(obj, prefix = "") {
@@ -78,21 +293,15 @@ function mergeObjects(target, source) {
 }
 
 function composeCatalogMessages(locale) {
-  const composed = { critical: {}, deferred: {} };
-
-  for (const packId of CATALOG_MESSAGE_PACK_IDS) {
-    for (const type of MESSAGE_TYPES) {
-      const packPath = getPackAbsolutePath(packId, locale, type);
-      const packMessages = readJson(packPath);
-      composed[type] = mergeObjects(composed[type], packMessages);
-    }
-  }
-
-  return composed;
+  return CATALOG_MESSAGE_PACK_IDS.reduce(
+    (composed, packId) =>
+      mergeObjects(composed, readJson(getPackAbsolutePath(packId, locale))),
+    {},
+  );
 }
 
-function validatePackFile(packId, locale, type) {
-  const relativePath = getPackRelativePath(packId, locale, type);
+function validatePackFile(packId, locale) {
+  const relativePath = getPackRelativePath(packId, locale);
   const absolutePath = path.join(ROOT, relativePath);
 
   if (!fs.existsSync(absolutePath)) {
@@ -100,23 +309,17 @@ function validatePackFile(packId, locale, type) {
     return false;
   }
 
-  const messages = readJson(absolutePath);
-  const leafPaths = collectLeafPaths(messages);
-
-  if (leafPaths.length !== new Set(leafPaths).size) {
-    const duplicates = leafPaths.filter(
-      (leafPath, index) => leafPaths.indexOf(leafPath) !== index,
-    );
-    console.error(
-      `   Error: duplicate leaf paths in ${relativePath}: ${duplicates.slice(0, 5).join(", ")}`,
-    );
+  const source = readJsonSource(absolutePath);
+  if (!reportDuplicateObjectKeys(relativePath, source)) {
     return false;
   }
+
+  const messages = JSON.parse(source);
+  const leafPaths = collectLeafPaths(messages);
 
   return {
     packId,
     locale,
-    type,
     leafPaths: new Set(leafPaths),
     leafCount: leafPaths.length,
   };
@@ -162,31 +365,29 @@ function validatePackLocaleParity() {
   let allMatch = true;
 
   for (const packId of MESSAGE_PACK_IDS) {
-    for (const type of MESSAGE_TYPES) {
-      const [firstLocale, ...otherLocales] = I18N_LOCALES;
-      const first = validatePackFile(packId, firstLocale, type);
-      if (!first) {
+    const [firstLocale, ...otherLocales] = I18N_LOCALES;
+    const first = validatePackFile(packId, firstLocale);
+    if (!first) {
+      allMatch = false;
+      continue;
+    }
+
+    for (const locale of otherLocales) {
+      const current = validatePackFile(packId, locale);
+      if (!current) {
         allMatch = false;
         continue;
       }
 
-      for (const locale of otherLocales) {
-        const current = validatePackFile(packId, locale, type);
-        if (!current) {
-          allMatch = false;
-          continue;
-        }
-
-        if (
-          !compareLeafPathSets(
-            `${packId}/${firstLocale}/${type}`,
-            first.leafPaths,
-            `${packId}/${locale}/${type}`,
-            current.leafPaths,
-          )
-        ) {
-          allMatch = false;
-        }
+      if (
+        !compareLeafPathSets(
+          `${packId}/${firstLocale}`,
+          first.leafPaths,
+          `${packId}/${locale}`,
+          current.leafPaths,
+        )
+      ) {
+        allMatch = false;
       }
     }
   }
@@ -200,18 +401,12 @@ function validateComposedCatalogParity() {
   let allMatch = true;
 
   const [firstLocale, ...otherLocales] = I18N_LOCALES;
-  const firstComposed = composeCatalogMessages(firstLocale);
-  const firstAllPaths = new Set([
-    ...collectLeafPaths(firstComposed.critical),
-    ...collectLeafPaths(firstComposed.deferred),
-  ]);
+  const firstAllPaths = new Set(
+    collectLeafPaths(composeCatalogMessages(firstLocale)),
+  );
 
   for (const locale of otherLocales) {
-    const composed = composeCatalogMessages(locale);
-    const allPaths = new Set([
-      ...collectLeafPaths(composed.critical),
-      ...collectLeafPaths(composed.deferred),
-    ]);
+    const allPaths = new Set(collectLeafPaths(composeCatalogMessages(locale)));
 
     if (
       !compareLeafPathSets(
@@ -234,39 +429,28 @@ function validateCompatibilityFiles() {
 
   for (const locale of I18N_LOCALES) {
     const composed = composeCatalogMessages(locale);
-    const { critical: criticalPath, deferred: deferredPath } =
-      getLocaleSplitPaths(locale);
+    const compatibilityPath = getLocaleCompatPath(locale);
+    const relativePath = path.relative(ROOT, compatibilityPath);
 
-    for (const [type, composedMessages] of [
-      ["critical", composed.critical],
-      ["deferred", composed.deferred],
-    ]) {
-      const compatibilityPath =
-        type === "critical" ? criticalPath : deferredPath;
-      const relativePath = path.relative(ROOT, compatibilityPath);
-
-      if (!fs.existsSync(compatibilityPath)) {
-        console.error(
-          `   Error: compatibility file not found: ${relativePath}`,
-        );
-        allMatch = false;
-        continue;
-      }
-
-      const actual = readJson(compatibilityPath);
-      const expectedText = `${JSON.stringify(composedMessages, null, 2)}\n`;
-      const actualText = `${JSON.stringify(actual, null, 2)}\n`;
-
-      if (expectedText !== actualText) {
-        console.error(
-          `   Error: ${relativePath} does not match composed catalog ${type} packs`,
-        );
-        allMatch = false;
-        continue;
-      }
-
-      console.log(`   ${relativePath} matches composed catalog ${type}`);
+    if (!fs.existsSync(compatibilityPath)) {
+      console.error(`   Error: compatibility file not found: ${relativePath}`);
+      allMatch = false;
+      continue;
     }
+
+    const actual = readJson(compatibilityPath);
+    const expectedText = `${JSON.stringify(composed, null, 2)}\n`;
+    const actualText = `${JSON.stringify(actual, null, 2)}\n`;
+
+    if (expectedText !== actualText) {
+      console.error(
+        `   Error: ${relativePath} does not match composed catalog packs`,
+      );
+      allMatch = false;
+      continue;
+    }
+
+    console.log(`   ${relativePath} matches composed catalog packs`);
   }
 
   return allMatch;
@@ -294,50 +478,31 @@ function validateRequiredPackFiles() {
 }
 
 function validateLocale(locale) {
-  console.log(`\nValidating split canonical locale: ${locale}`);
+  console.log(`\nValidating canonical locale: ${locale}`);
 
-  const { critical: criticalPath, deferred: deferredPath } =
-    getLocaleSplitPaths(locale);
+  const compatPath = getLocaleCompatPath(locale);
 
-  if (!fs.existsSync(criticalPath)) {
-    console.error(`   Error: critical.json not found: ${criticalPath}`);
+  if (!fs.existsSync(compatPath)) {
+    console.error(`   Error: messages.json not found: ${compatPath}`);
     return false;
   }
 
-  if (!fs.existsSync(deferredPath)) {
-    console.error(`   Error: deferred.json not found: ${deferredPath}`);
+  const source = readJsonSource(compatPath);
+  if (!reportDuplicateObjectKeys(`messages/${locale}/messages.json`, source)) {
     return false;
   }
 
-  const critical = readJson(criticalPath);
-  const deferred = readJson(deferredPath);
-  const criticalKeys = collectLeafPaths(critical);
-  const deferredKeys = collectLeafPaths(deferred);
-  const criticalSet = new Set(criticalKeys);
-  const deferredSet = new Set(deferredKeys);
+  const messages = JSON.parse(source);
+  const leafKeys = collectLeafPaths(messages);
+  const leafSet = new Set(leafKeys);
 
-  console.log(`   Critical keys: ${criticalKeys.length}`);
-  console.log(`   Deferred keys: ${deferredKeys.length}`);
-  console.log(`   Total keys: ${criticalKeys.length + deferredKeys.length}`);
-
-  const deferredDuplicates = criticalKeys.filter((key) => deferredSet.has(key));
-  if (deferredDuplicates.length > 0) {
-    console.error(
-      `   Error: Found ${deferredDuplicates.length} duplicate keys:`,
-    );
-    deferredDuplicates
-      .slice(0, 10)
-      .forEach((key) => console.error(`      - ${key}`));
-    return false;
-  }
-
+  console.log(`   Total keys: ${leafKeys.length}`);
   console.log("   No duplicate keys found");
 
   return {
     locale,
-    criticalKeys: criticalSet,
-    deferredKeys: deferredSet,
-    totalKeys: criticalKeys.length + deferredKeys.length,
+    leafKeys: leafSet,
+    totalKeys: leafKeys.length,
   };
 }
 
@@ -365,15 +530,12 @@ function compareLocales(localeData) {
       continue;
     }
 
-    const allKeys = new Set([...data.criticalKeys, ...data.deferredKeys]);
-    const firstAllKeys = new Set([
-      ...firstData.criticalKeys,
-      ...firstData.deferredKeys,
-    ]);
-    const missingInLocale = [...firstAllKeys].filter(
-      (key) => !allKeys.has(key),
+    const missingInLocale = [...firstData.leafKeys].filter(
+      (key) => !data.leafKeys.has(key),
     );
-    const extraInLocale = [...allKeys].filter((key) => !firstAllKeys.has(key));
+    const extraInLocale = [...data.leafKeys].filter(
+      (key) => !firstData.leafKeys.has(key),
+    );
 
     if (missingInLocale.length > 0) {
       console.error(
@@ -415,11 +577,9 @@ function runTranslationCheck() {
 
   for (const packId of MESSAGE_PACK_IDS) {
     for (const locale of I18N_LOCALES) {
-      for (const type of MESSAGE_TYPES) {
-        const result = validatePackFile(packId, locale, type);
-        if (!result) {
-          allValid = false;
-        }
+      const result = validatePackFile(packId, locale);
+      if (!result) {
+        allValid = false;
       }
     }
   }
@@ -459,9 +619,7 @@ function runTranslationCheck() {
 
   console.log("\nAll validations passed.");
   for (const [locale, data] of Object.entries(localeData)) {
-    console.log(
-      `${locale.toUpperCase()}: ${data.totalKeys} total keys (${data.criticalKeys.size} critical + ${data.deferredKeys.size} deferred)`,
-    );
+    console.log(`${locale.toUpperCase()}: ${data.totalKeys} total keys`);
   }
 
   return true;
@@ -471,6 +629,7 @@ module.exports = {
   collectLeafPaths,
   compareLocales,
   composeCatalogMessages,
+  findDuplicateJsonObjectKeys,
   runTranslationCheck,
   validateLocale,
 };

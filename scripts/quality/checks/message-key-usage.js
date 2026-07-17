@@ -35,10 +35,7 @@ const UNKNOWN_TRANSLATION_NAMESPACE = Symbol("unknown-translation-namespace");
 
 function getCatalogKeys(locale = DEFAULT_LOCALE) {
   const composed = composeCatalogMessages(locale);
-  return new Set([
-    ...collectLeafPaths(composed.critical),
-    ...collectLeafPaths(composed.deferred),
-  ]);
+  return new Set(collectLeafPaths(composed));
 }
 
 function collectUsageSourceFiles(rootDir = ROOT) {
