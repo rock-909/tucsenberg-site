@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import * as inquiryRoute from "@/app/api/inquiry/route";
-import * as subscribeRoute from "@/app/api/subscribe/route";
 
 /**
  * Auxiliary response contract checks only.
@@ -41,7 +40,6 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
   LEAD_TYPES: {
     PRODUCT: "product",
     CONTACT: "contact",
-    NEWSLETTER: "newsletter",
   },
   productLeadSchema: {
     safeParse: vi.fn((input: Record<string, unknown>) => ({
@@ -49,15 +47,6 @@ vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
       data: {
         ...input,
         type: "product",
-      },
-    })),
-  },
-  newsletterLeadSchema: {
-    safeParse: vi.fn((input: Record<string, unknown>) => ({
-      success: true,
-      data: {
-        ...input,
-        type: "newsletter",
       },
     })),
   },
@@ -126,25 +115,6 @@ describe("lead API family response contract (auxiliary)", () => {
     });
   });
 
-  it("subscribe success uses the family success contract", async () => {
-    const response = await subscribeRoute.POST(
-      makeRequest("/api/subscribe", {
-        email: "newsletter@example.com",
-        turnstileToken: "valid-token",
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expectNoLeadObservabilityHeaders(response);
-    const body = await response.json();
-    expect(body).toEqual({
-      success: true,
-      data: {
-        referenceId: "lead-ref-001",
-      },
-    });
-  });
-
   it("inquiry missing turnstile uses the family error contract", async () => {
     const response = await inquiryRoute.POST(
       makeRequest("/api/inquiry", {
@@ -162,23 +132,6 @@ describe("lead API family response contract (auxiliary)", () => {
     expect(body).toEqual({
       success: false,
       errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
-    });
-  });
-
-  it("subscribe missing email uses the family error contract", async () => {
-    const response = await subscribeRoute.POST(
-      makeRequest("/api/subscribe", {
-        turnstileToken: "valid-token",
-      }),
-    );
-
-    expect(response.status).toBe(400);
-    expectNoLeadObservabilityHeaders(response);
-    const body = await response.json();
-    expect(body).toEqual({
-      success: false,
-      errorCode: API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_REQUIRED,
-      details: ["errors.email.required"],
     });
   });
 
@@ -204,7 +157,7 @@ describe("lead API family response contract (auxiliary)", () => {
     });
   });
 
-  it("inquiry and subscribe map pipeline validation failures to route-specific validation errors", async () => {
+  it("inquiry maps pipeline validation failures to route-specific validation errors", async () => {
     vi.mocked(processLead).mockResolvedValue({
       success: false,
       error: "VALIDATION_ERROR",
@@ -227,19 +180,9 @@ describe("lead API family response contract (auxiliary)", () => {
       400,
       API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
     );
-    await expectRouteError(
-      await subscribeRoute.POST(
-        makeRequest("/api/subscribe", {
-          email: "newsletter@example.com",
-          turnstileToken: "valid-token",
-        }),
-      ),
-      400,
-      API_ERROR_CODES.SUBSCRIBE_VALIDATION_EMAIL_INVALID,
-    );
   });
 
-  it("inquiry and subscribe map pipeline processing failures to route-specific processing errors", async () => {
+  it("inquiry maps pipeline processing failures to route-specific processing errors", async () => {
     vi.mocked(processLead).mockResolvedValue({
       success: false,
       error: "PROCESSING_FAILED",
@@ -262,16 +205,6 @@ describe("lead API family response contract (auxiliary)", () => {
       ),
       500,
       API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    );
-    await expectRouteError(
-      await subscribeRoute.POST(
-        makeRequest("/api/subscribe", {
-          email: "newsletter@example.com",
-          turnstileToken: "valid-token",
-        }),
-      ),
-      500,
-      API_ERROR_CODES.SUBSCRIBE_PROCESSING_ERROR,
     );
   });
 });

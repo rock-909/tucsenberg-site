@@ -90,11 +90,6 @@ describe("processLead", () => {
     requirements: "Brand adaptation needed",
   };
 
-  const validNewsletterLead = {
-    type: LEAD_TYPES.NEWSLETTER,
-    email: "subscriber@example.com",
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockAfter.mockImplementation((callback: () => unknown) => callback);
@@ -437,52 +432,6 @@ describe("processLead", () => {
     expect(mockSendProductInquiryEmail).toHaveBeenCalled();
   });
 
-  it("writes newsletter lead without sending any email", async () => {
-    mockCreateLead.mockResolvedValue({ id: "record-789" });
-
-    const result = await processLead(validNewsletterLead);
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        emailSent: false,
-        ownerNotified: false,
-        recordCreated: true,
-      }),
-    );
-    expect(result).not.toHaveProperty("partialSuccess");
-    expect(result.referenceId?.startsWith("NEW-")).toBe(true);
-    expect(mockCreateLead).toHaveBeenCalledWith(
-      LEAD_TYPES.NEWSLETTER,
-      expect.objectContaining({
-        email: validNewsletterLead.email,
-        referenceId: expect.stringMatching(/^NEW-/),
-      }),
-    );
-    expect(mockSendContactFormEmail).not.toHaveBeenCalled();
-    expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
-    expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
-  });
-
-  it("fails newsletter lead without sending email when Airtable fails", async () => {
-    mockCreateLead.mockRejectedValue(new Error("Airtable failed"));
-
-    const result = await processLead(validNewsletterLead);
-
-    expect(result).toEqual({
-      success: false,
-      emailSent: false,
-      ownerNotified: false,
-      recordCreated: false,
-      referenceId: expect.stringMatching(/^NEW-/),
-      error: "PROCESSING_FAILED",
-    });
-    expect(result).not.toHaveProperty("partialSuccess");
-    expect(mockSendContactFormEmail).not.toHaveBeenCalled();
-    expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
-    expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
-  });
-
   describe("Airtable request budget (never-resolving Airtable must not hang)", () => {
     // Never-resolving CRM mock: proves the response is bounded by the request
     // budget, not by the Airtable SDK's 5-minute default.
@@ -533,28 +482,6 @@ describe("processLead", () => {
         );
         expect(result.referenceId?.startsWith("PRO-")).toBe(true);
         expect(result.error).toBeUndefined();
-      } finally {
-        vi.useRealTimers();
-      }
-    });
-
-    it("fails subscribe within the budget when Airtable never settles (no fake success)", async () => {
-      vi.useFakeTimers();
-      try {
-        mockCreateLead.mockImplementation(neverResolves);
-
-        const resultPromise = processLead(validNewsletterLead);
-        await vi.advanceTimersByTimeAsync(AIRTABLE_REQUEST_TIMEOUT_MS);
-        const result = await resultPromise;
-
-        expect(result).toEqual({
-          success: false,
-          emailSent: false,
-          ownerNotified: false,
-          recordCreated: false,
-          referenceId: expect.stringMatching(/^NEW-/),
-          error: "PROCESSING_FAILED",
-        });
       } finally {
         vi.useRealTimers();
       }

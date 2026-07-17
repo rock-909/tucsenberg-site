@@ -194,7 +194,7 @@ describe("withRateLimit", () => {
       mockCreateRateLimitHeaders.mockReturnValue(mockHeaders);
 
       const wrappedHandler = withRateLimit(
-        "subscribe",
+        "inquiry",
         createMockHandler({ success: true }),
       );
 

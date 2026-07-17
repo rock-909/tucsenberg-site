@@ -5,7 +5,6 @@ import type {
   AirtableRecord,
   ContactLeadData,
   LeadSource,
-  NewsletterLeadData,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { sanitizeAirtableTextField } from "@/lib/airtable/service-internal/field-sanitization";
@@ -35,16 +34,10 @@ const AIRTABLE_ATTRIBUTION_FIELD_NAMES = {
 } satisfies Record<AttributionFieldName, string>;
 
 function getLeadSource(type: LeadType): LeadSource {
-  switch (type) {
-    case LEAD_TYPES.CONTACT:
-      return "Website Contact Form";
-    case LEAD_TYPES.PRODUCT:
-      return "Product Inquiry";
-    case LEAD_TYPES.NEWSLETTER:
-      return "Newsletter Subscription";
-    default:
-      return "Website Contact Form";
+  if (type === LEAD_TYPES.PRODUCT) {
+    return "Product Inquiry";
   }
+  return "Website Contact Form";
 }
 
 function buildBaseFields(
@@ -100,13 +93,6 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
   }
 }
 
-function addNewsletterFields(fields: AirtableFields): void {
-  fields["First Name"] = "";
-  fields["Last Name"] = "";
-  fields["Company"] = "";
-  fields["Message"] = "Newsletter subscription";
-}
-
 function addAttributionFields(
   fields: AirtableFields,
   data: MarketingAttributionFields,
@@ -123,26 +109,18 @@ function addAttributionFields(
 function addTypeSpecificFields(
   fields: AirtableFields,
   type: LeadType,
-  data: ContactLeadData | ProductLeadData | NewsletterLeadData,
+  data: ContactLeadData | ProductLeadData,
 ): void {
-  switch (type) {
-    case LEAD_TYPES.CONTACT:
-      addContactFields(fields, data as ContactLeadData);
-      return;
-    case LEAD_TYPES.PRODUCT:
-      addProductFields(fields, data as ProductLeadData);
-      return;
-    case LEAD_TYPES.NEWSLETTER:
-      addNewsletterFields(fields);
-      return;
-    default:
-      addContactFields(fields, data as ContactLeadData);
+  if (type === LEAD_TYPES.PRODUCT) {
+    addProductFields(fields, data as ProductLeadData);
+    return;
   }
+  addContactFields(fields, data as ContactLeadData);
 }
 
 function buildLeadFields(params: {
   type: LeadType;
-  data: ContactLeadData | ProductLeadData | NewsletterLeadData;
+  data: ContactLeadData | ProductLeadData;
   source: LeadSource;
   now: string;
 }): AirtableFields {
@@ -157,7 +135,7 @@ export async function createLeadRecord(params: {
   base: AirtableNS.Base;
   tableName: string;
   type: LeadType;
-  data: ContactLeadData | ProductLeadData | NewsletterLeadData;
+  data: ContactLeadData | ProductLeadData;
 }): Promise<AirtableRecord> {
   const { base, tableName, type, data } = params;
 

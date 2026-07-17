@@ -24,13 +24,6 @@
           "errorDescription": "Please try again later or contact us directly.",
           "loading": "Sending message..."
         },
-        "newsletter": {
-          "success": "Successfully subscribed!",
-          "successDescription": "Thank you for subscribing to our newsletter.",
-          "error": "Subscription failed",
-          "errorDescription": "Please check your email and try again.",
-          "loading": "Subscribing..."
-        },
         "feedback": {
           "success": "Feedback submitted!",
           "successDescription": "Thank you for your valuable feedback.",
@@ -155,9 +148,6 @@
     "INVALID_REQUEST": "Some required fields are missing or invalid.",
     "PAYLOAD_TOO_LARGE": "The request payload is too large.",
     "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
-    "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED": "Email is required.",
-    "SUBSCRIBE_VALIDATION_EMAIL_INVALID": "Invalid email address.",
-    "SUBSCRIBE_PROCESSING_ERROR": "An error occurred. Please try again.",
     "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
     "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
     "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",

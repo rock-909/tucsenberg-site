@@ -32,7 +32,7 @@ Next.js 16.2.7 (App Router, Cache Components) + React 19.2.7 + TypeScript 6.0.3 
 ```
 src/
 - app/[locale]/       # Localized App Router pages
-- app/api/            # Route handlers for contact, inquiry, subscribe, CSP report, and health (Turnstile verification is inline in the write routes, not its own route)
+- app/api/            # Route handlers for contact, inquiry, CSP report, and health (Turnstile verification is inline in the write routes, not its own route)
 - config/             # Runtime config and starter replacement surfaces
 - config/single-site*.ts # Brand, SEO, navigation, links, and page-expression truth
 - i18n/               # next-intl configuration

@@ -11,7 +11,6 @@ import type {
 } from "@/lib/email/email-data-schema";
 import {
   isContactLead,
-  isProductLead,
   LEAD_TYPES,
   leadSchema,
   type ContactLeadInput,
@@ -65,8 +64,7 @@ function normalizeErrorMessage(error: unknown): string {
  *
  * SDK 层已配置 `requestTimeout`（见 service.ts），但那只覆盖真实 fetch；
  * 这里的进程内预算是买家可感知的硬上限：超时即 reject，交给各渠道既有的
- * try/catch 收敛——contact/inquiry 降级为“未入库、非阻塞”，newsletter 因
- * 仅有存储一个渠道而如实失败。
+ * try/catch 收敛——contact/inquiry 降级为“未入库、非阻塞”。
  */
 function withAirtableBudget<T>(operation: Promise<T>): Promise<T> {
   let budgetTimer: ReturnType<typeof setTimeout> | undefined;
@@ -149,7 +147,7 @@ async function createContactLeadRecord(
         firstName,
         lastName,
         email: lead.email,
-        company: lead.company,
+        ...(lead.company ? { company: lead.company } : {}),
         ...createOptionalSubject(lead.subject),
         message: lead.message,
         referenceId,
@@ -285,12 +283,14 @@ async function createProductLeadRecord(
         firstName,
         lastName,
         email: lead.email,
-        company: lead.company,
+        ...(lead.company ? { company: lead.company } : {}),
         message,
         productName: identity.productName,
-        catalogProductId: identity.catalogProductId,
-        quantity: lead.quantity,
-        requirements: lead.requirements,
+        ...(identity.catalogProductId
+          ? { catalogProductId: identity.catalogProductId }
+          : {}),
+        ...(lead.quantity !== undefined ? { quantity: lead.quantity } : {}),
+        ...(lead.requirements ? { requirements: lead.requirements } : {}),
         referenceId,
         ...pickAttributionFields(lead),
       }),
@@ -331,40 +331,6 @@ async function processProduct(
   };
 }
 
-async function processNewsletter(
-  lead: LeadInput,
-  context: LeadProcessingContext,
-): Promise<LeadResult> {
-  const { referenceId } = context;
-
-  try {
-    // subscribe 仅有 Airtable 一个渠道，其成功合法地取决于入库；预算超时按如实
-    // 失败处理（返回 PROCESSING_FAILED），只是把最坏等待从 5 分钟收敛到预算内。
-    await withAirtableBudget(
-      airtableService.createLead(LEAD_TYPES.NEWSLETTER, {
-        email: lead.email,
-        referenceId,
-      }),
-    );
-  } catch (error) {
-    logger.error("Newsletter Airtable createLead failed", {
-      error: normalizeErrorMessage(error),
-      email: sanitizeEmail(lead.email),
-      referenceId,
-      ...withRequestId(context.requestId),
-    });
-    return createProcessingFailureResult(referenceId);
-  }
-
-  return {
-    success: true,
-    emailSent: false,
-    ownerNotified: false,
-    recordCreated: true,
-    referenceId,
-  };
-}
-
 function processValidLead(
   lead: LeadInput,
   context: LeadProcessingContext,
@@ -372,10 +338,7 @@ function processValidLead(
   if (isContactLead(lead)) {
     return processContact(lead, context);
   }
-  if (isProductLead(lead)) {
-    return processProduct(lead, context);
-  }
-  return processNewsletter(lead, context);
+  return processProduct(lead, context);
 }
 
 export async function processLead(

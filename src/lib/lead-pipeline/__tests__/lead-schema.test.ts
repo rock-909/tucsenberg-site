@@ -9,15 +9,12 @@ import {
   contactLeadSchema,
   isCatalogProductInquiry,
   isContactLead,
-  isNewsletterLead,
   isProductLead,
   LEAD_TYPES,
   leadSchema,
-  newsletterLeadSchema,
   PRODUCT_INQUIRY_KINDS,
   productLeadSchema,
   type ContactLeadInput,
-  type NewsletterLeadInput,
   type ProductLeadInput,
 } from "../lead-schema";
 
@@ -48,13 +45,6 @@ describe("Lead Schema", () => {
         quantity: 10,
       },
     ],
-    [
-      newsletterLeadSchema,
-      {
-        type: LEAD_TYPES.NEWSLETTER,
-        email: "buyer+rfq@example.com",
-      },
-    ],
   ])(
     "preserves plus-addressing accepted by Airtable's Email field",
     (schema, lead) => {
@@ -71,9 +61,13 @@ describe("Lead Schema", () => {
     "rejects formula-capable email %s before the Airtable boundary",
     (email) => {
       expect(
-        newsletterLeadSchema.safeParse({
-          type: LEAD_TYPES.NEWSLETTER,
+        contactLeadSchema.safeParse({
+          type: LEAD_TYPES.CONTACT,
+          fullName: "Buyer Name",
           email,
+          subject: "Product inquiry",
+          message: "This is a test message with enough characters.",
+          turnstileToken: "valid-token",
         }).success,
       ).toBe(false);
     },
@@ -367,32 +361,6 @@ describe("Lead Schema", () => {
     });
   });
 
-  describe("newsletterLeadSchema", () => {
-    it("should validate a valid newsletter subscription", () => {
-      const validNewsletter = {
-        type: LEAD_TYPES.NEWSLETTER,
-        email: "subscriber@example.com",
-      };
-      const result = newsletterLeadSchema.safeParse(validNewsletter);
-      expect(result.success).toBe(true);
-    });
-
-    it("should reject newsletter with invalid email", () => {
-      const invalidNewsletter = {
-        type: LEAD_TYPES.NEWSLETTER,
-        email: "not-an-email",
-      };
-      const result = newsletterLeadSchema.safeParse(invalidNewsletter);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject newsletter without email", () => {
-      const invalidNewsletter = { type: LEAD_TYPES.NEWSLETTER };
-      const result = newsletterLeadSchema.safeParse(invalidNewsletter);
-      expect(result.success).toBe(false);
-    });
-  });
-
   describe("leadSchema (discriminated union)", () => {
     it("should correctly discriminate contact lead", () => {
       const contactLead = {
@@ -426,18 +394,6 @@ describe("Lead Schema", () => {
       }
     });
 
-    it("should correctly discriminate newsletter lead", () => {
-      const newsletterLead = {
-        type: LEAD_TYPES.NEWSLETTER,
-        email: "test@example.com",
-      };
-      const result = leadSchema.safeParse(newsletterLead);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.type).toBe(LEAD_TYPES.NEWSLETTER);
-      }
-    });
-
     it("should reject unknown lead type", () => {
       const invalidLead = {
         type: "unknown",
@@ -447,8 +403,8 @@ describe("Lead Schema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should keep all three discriminated union variants registered", () => {
-      expect(leadSchema.options).toHaveLength(3);
+    it("should keep both discriminated union variants registered", () => {
+      expect(leadSchema.options).toHaveLength(2);
     });
   });
 
@@ -464,7 +420,6 @@ describe("Lead Schema", () => {
       };
       expect(isContactLead(contactLead)).toBe(true);
       expect(isProductLead(contactLead)).toBe(false);
-      expect(isNewsletterLead(contactLead)).toBe(false);
     });
 
     it("isProductLead should correctly identify product leads", () => {
@@ -478,17 +433,6 @@ describe("Lead Schema", () => {
       };
       expect(isProductLead(productLead)).toBe(true);
       expect(isContactLead(productLead)).toBe(false);
-      expect(isNewsletterLead(productLead)).toBe(false);
-    });
-
-    it("isNewsletterLead should correctly identify newsletter leads", () => {
-      const newsletterLead: NewsletterLeadInput = {
-        type: LEAD_TYPES.NEWSLETTER,
-        email: "test@example.com",
-      };
-      expect(isNewsletterLead(newsletterLead)).toBe(true);
-      expect(isContactLead(newsletterLead)).toBe(false);
-      expect(isProductLead(newsletterLead)).toBe(false);
     });
   });
 });

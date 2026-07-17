@@ -186,11 +186,6 @@ describe("Lead Pipeline Utils", () => {
       expect(id.startsWith("PRO-")).toBe(true);
     });
 
-    it("should generate ID with correct prefix for newsletter", () => {
-      const id = generateLeadReferenceId("newsletter");
-      expect(id.startsWith("NEW-")).toBe(true);
-    });
-
     it("should generate unique IDs", () => {
       const ids = new Set<string>();
       for (let i = 0; i < 100; i++) {

@@ -136,7 +136,6 @@ describe("distributed-rate-limit", () => {
     it.each([
       ["contact", RATE_LIMIT_PRESETS.contact.maxRequests],
       ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
-      ["subscribe", RATE_LIMIT_PRESETS.subscribe.maxRequests],
       ["csp", RATE_LIMIT_PRESETS.csp.maxRequests],
     ] as const)("uses the %s preset", async (preset, maxRequests) => {
       const result = await checkDistributedRateLimit(
@@ -161,7 +160,7 @@ describe("distributed-rate-limit", () => {
       expect(mockLoggerError).toHaveBeenCalled();
     });
 
-    it.each(["contact", "inquiry", "subscribe"] as const)(
+    it.each(["contact", "inquiry"] as const)(
       "fails closed for the %s preset when the store operation times out",
       async (preset) => {
         const mod = await import("@/lib/security/stores/rate-limit-store");
@@ -504,12 +503,6 @@ describe("distributed-rate-limit", () => {
       expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(10);
       expect(RATE_LIMIT_PRESETS.inquiry.windowMs).toBe(MINUTE_MS);
       expect(RATE_LIMIT_PRESETS.inquiry.failureMode).toBe("closed");
-    });
-
-    it("should have expected values for subscribe preset", () => {
-      expect(RATE_LIMIT_PRESETS.subscribe.maxRequests).toBe(3);
-      expect(RATE_LIMIT_PRESETS.subscribe.windowMs).toBe(MINUTE_MS);
-      expect(RATE_LIMIT_PRESETS.subscribe.failureMode).toBe("closed");
     });
 
     it("should have expected values for csp preset", () => {

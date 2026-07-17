@@ -129,8 +129,8 @@ describe("turnstile-config", () => {
 
     expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
     expect(mod.isAllowedTurnstileAction("contact_form")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(true);
     expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
+    expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(false);
     expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
     expect(mod.isAllowedTurnstileAction("   ")).toBe(false);
   });

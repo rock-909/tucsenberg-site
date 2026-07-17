@@ -62,8 +62,8 @@ describe("verifyLeadTurnstile", () => {
   it("passes the explicit expectedAction to verifyTurnstileDetailed", async () => {
     const result = await verifyLeadTurnstile(
       createInput({
-        routeLabel: "/api/subscribe",
-        expectedAction: "newsletter_subscribe",
+        routeLabel: "/api/inquiry",
+        expectedAction: "product_inquiry",
       }),
     );
 
@@ -71,7 +71,7 @@ describe("verifyLeadTurnstile", () => {
     expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
       "valid-token",
       "203.0.113.10",
-      { expectedAction: "newsletter_subscribe" },
+      { expectedAction: "product_inquiry" },
     );
   });
 

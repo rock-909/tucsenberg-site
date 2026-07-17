@@ -63,7 +63,7 @@ function getErrorTranslationKey(
  *   const t = useTranslations('apiErrors');
  *
  *   async function handleSubmit() {
- *     const response = await fetch('/api/subscribe', { method: 'POST', body: ... });
+ *     const response = await fetch('/api/inquiry', { method: 'POST', body: ... });
  *     const data = await response.json();
  *
  *     if (!data.success) {

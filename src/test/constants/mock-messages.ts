@@ -46,13 +46,6 @@ const commonMessages = {
         errorDescription: "Please try again later or contact us directly.",
         loading: "Sending message...",
       },
-      newsletter: {
-        success: "Successfully subscribed!",
-        successDescription: "Thank you for subscribing to our newsletter.",
-        error: "Subscription failed",
-        errorDescription: "Please check your email and try again.",
-        loading: "Subscribing...",
-      },
       feedback: {
         success: "Feedback submitted!",
         successDescription: "Thank you for your valuable feedback.",

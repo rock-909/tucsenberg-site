@@ -8,7 +8,7 @@
  */
 
 // ============================================================================
-// Lead Pipeline Limits (contact / product inquiry / newsletter)
+// Lead Pipeline Limits (contact / product inquiry)
 // ============================================================================
 
 /**

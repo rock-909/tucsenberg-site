@@ -141,7 +141,7 @@ export function composeInquiryDescription(parts: {
  * Uses cryptographically secure random bytes instead of Math.random()
  * for better uniqueness guarantees (not for security purposes).
  *
- * @param type - Lead type (contact, product, newsletter)
+ * @param type - Lead type (contact, product)
  * @returns Unique reference ID
  */
 export function generateLeadReferenceId(type: string): string {

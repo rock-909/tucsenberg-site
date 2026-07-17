@@ -1,6 +1,6 @@
 /**
  * Lead Pipeline Schema Definitions
- * Unified Zod schema for all lead sources: contact, product inquiry, newsletter
+ * Unified Zod schema for all lead sources: contact and product inquiry
  */
 
 import { z } from "zod";
@@ -30,7 +30,6 @@ import {
 export const LEAD_TYPES = {
   CONTACT: "contact",
   PRODUCT: "product",
-  NEWSLETTER: "newsletter",
 } as const;
 
 export type LeadType = (typeof LEAD_TYPES)[keyof typeof LEAD_TYPES];
@@ -251,39 +250,19 @@ export const productLeadSchema = z
   });
 
 /**
- * Newsletter subscription lead schema
- * Used for blog/news page email subscriptions
- */
-export const newsletterLeadSchema = z.object({
-  type: z.literal(LEAD_TYPES.NEWSLETTER),
-  email: leadEmailSchema,
-});
-
-/**
  * Unified lead schema using discriminated union
  * Allows type-safe handling of different lead types
  */
-const leadSchemaOptions = {
-  contact: contactLeadSchema,
-  product: productLeadSchema,
-  newsletter: newsletterLeadSchema,
-} as const;
-
-export const leadSchema = z.discriminatedUnion(
-  "type",
-  Object.values(leadSchemaOptions) as [
-    typeof contactLeadSchema,
-    typeof productLeadSchema,
-    typeof newsletterLeadSchema,
-  ],
-);
+export const leadSchema = z.discriminatedUnion("type", [
+  contactLeadSchema,
+  productLeadSchema,
+]);
 
 /**
  * Type exports for external use
  */
 export type ContactLeadInput = z.infer<typeof contactLeadSchema>;
 export type ProductLeadInput = z.infer<typeof productLeadSchema>;
-export type NewsletterLeadInput = z.infer<typeof newsletterLeadSchema>;
 export type LeadInput = z.infer<typeof leadSchema>;
 
 /**
@@ -295,10 +274,6 @@ export function isContactLead(lead: LeadInput): lead is ContactLeadInput {
 
 export function isProductLead(lead: LeadInput): lead is ProductLeadInput {
   return lead.type === LEAD_TYPES.PRODUCT;
-}
-
-export function isNewsletterLead(lead: LeadInput): lead is NewsletterLeadInput {
-  return lead.type === LEAD_TYPES.NEWSLETTER;
 }
 
 /** A product inquiry that targets a real, registry-validated catalog product. */

@@ -204,7 +204,7 @@ describe("LazyTurnstile", () => {
         onError={onError}
         onExpire={onExpire}
         onLoad={onLoad}
-        action="newsletter_subscribe"
+        action="product_inquiry"
         size="compact"
         theme="auto"
         className="custom-turnstile"
@@ -217,7 +217,7 @@ describe("LazyTurnstile", () => {
     });
 
     const widget = screen.getByTestId("turnstile-widget");
-    expect(widget).toHaveAttribute("data-action", "newsletter_subscribe");
+    expect(widget).toHaveAttribute("data-action", "product_inquiry");
     expect(widget).toHaveAttribute("data-size", "compact");
     expect(widget).toHaveAttribute("data-theme", "auto");
     expect(widget).toHaveAttribute("data-classname", "custom-turnstile");

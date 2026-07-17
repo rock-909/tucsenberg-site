@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
   contactLeadSchema,
   isContactLead,
-  isNewsletterLead,
   isProductLead,
   LEAD_TYPES,
 } from "../lead-schema";
@@ -84,26 +83,15 @@ const productLeadArb = fc
       })),
   );
 
-const newsletterLeadArb = fc.record({
-  type: fc.constant(LEAD_TYPES.NEWSLETTER),
-  email: fc.emailAddress(),
-});
-
-const leadInputArb = fc.oneof(
-  contactLeadArb,
-  productLeadArb,
-  newsletterLeadArb,
-);
+const leadInputArb = fc.oneof(contactLeadArb, productLeadArb);
 
 describe("lead-schema property tests", () => {
   it("type guards are mutually exclusive for any valid LeadInput", () => {
     fc.assert(
       fc.property(leadInputArb, (lead) => {
-        const matches = [
-          isContactLead(lead),
-          isProductLead(lead),
-          isNewsletterLead(lead),
-        ].filter(Boolean);
+        const matches = [isContactLead(lead), isProductLead(lead)].filter(
+          Boolean,
+        );
 
         expect(matches).toHaveLength(1);
       }),

@@ -20,7 +20,7 @@ export interface CorsRateLimitedRoute {
 
 /**
  * Build the identical POST/OPTIONS pair shared by the public lead routes
- * (contact, inquiry, subscribe): the handler runs behind the shared
+ * (contact and inquiry): the handler runs behind the shared
  * `withRateLimit` wrapper, its response gets CORS headers, and OPTIONS answers
  * the CORS preflight.
  *
