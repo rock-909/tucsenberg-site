@@ -1,95 +1,16 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import {
+  VALID_BUTTON_REGISTRY_ITEM,
+  baseFiles,
+  createFixture,
+  expectFinding,
+  moveFixtureToTrash,
+  registry,
+} from "./component-governance-check.helpers";
 
 const focusedComponentGovernance = require("../../../scripts/quality/checks/component-governance.js");
 const starterChecksFacade = require("../../../scripts/starter-checks.js");
 const { collectComponentGovernanceFindings } = starterChecksFacade;
-
-interface ComponentGovernanceFinding {
-  file: string;
-  line: number;
-  kind: string;
-  detail: string;
-}
-
-const TEMP_TRASH_ROOT = path.join(
-  os.tmpdir(),
-  "showcase-component-governance-test-trash",
-);
-
-function createFixture(files: Record<string, string>): string {
-  const rootDir = fs.mkdtempSync(
-    path.join(os.tmpdir(), "showcase-component-governance-"),
-  );
-
-  for (const [relativePath, content] of Object.entries(files)) {
-    const fullPath = path.join(rootDir, relativePath);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is created inside a test-owned temporary directory
-    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is created inside a test-owned temporary directory
-    fs.writeFileSync(fullPath, content, "utf8");
-  }
-
-  return rootDir;
-}
-
-function moveFixtureToTrash(rootDir: string): void {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks the test-owned temporary fixture directory
-  if (!fs.existsSync(rootDir)) return;
-
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup moves fixtures to a recoverable os.tmpdir trash folder
-  fs.mkdirSync(TEMP_TRASH_ROOT, { recursive: true });
-  const targetDir = path.join(
-    TEMP_TRASH_ROOT,
-    `${path.basename(rootDir)}-${Date.now()}`,
-  );
-
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixture cleanup uses recoverable rename instead of permanent deletion
-  fs.renameSync(rootDir, targetDir);
-}
-
-const VALID_BUTTON_REGISTRY_ITEM = {
-  story: "required",
-  radixLayer: "primitive",
-  surface: "control",
-  clientBoundary: "server-safe",
-  useWhen: "Use for CTAs and clickable actions.",
-  avoidWhen: "Do not handwrite button styling in pages.",
-};
-
-function registry(components: Record<string, unknown>): string {
-  return JSON.stringify({ version: 1, components }, null, 2);
-}
-
-function baseFiles(extraFiles: Record<string, string> = {}) {
-  return {
-    "src/components/component-governance.registry.json": registry({
-      button: VALID_BUTTON_REGISTRY_ITEM,
-    }),
-    "src/components/ui/button.tsx":
-      'import { Slot } from "@radix-ui/react-slot";\nexport function Button() { return <Slot />; }',
-    "src/components/ui/button.stories.tsx":
-      "export default { title: 'UI/Button' };",
-    ...extraFiles,
-  };
-}
-
-function expectFinding(
-  findings: ComponentGovernanceFinding[],
-  kind: string,
-  file?: string,
-): void {
-  expect(findings).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        kind,
-        ...(file ? { file } : {}),
-      }),
-    ]),
-  );
-}
 
 describe("component-governance-check", () => {
   const fixtureRoots: string[] = [];

@@ -554,6 +554,9 @@ describe("component governance", () => {
     expect(governanceTestScript).toContain(
       "tests/unit/scripts/component-governance-check.test.ts",
     );
+    expect(governanceTestScript).toContain(
+      "tests/unit/scripts/component-governance-check-closure.test.ts",
+    );
     expect(governanceScript).toContain("component-governance");
     expect(componentCheckScript).toBe(COMPONENT_CHECK_SCRIPT);
     expect(componentCheckScript).not.toContain("|| true");

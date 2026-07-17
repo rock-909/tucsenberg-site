@@ -29,6 +29,36 @@ function getStringLiteralValue(node) {
   return ts.isStringLiteralLike(unwrapped) ? unwrapped.text : null;
 }
 
+function isModuleIdentifier(node) {
+  const unwrapped = unwrapTransparentExpression(node);
+  return ts.isIdentifier(unwrapped) && unwrapped.text === "module";
+}
+
+function isRequireCallee(node) {
+  const unwrapped = unwrapTransparentExpression(node);
+
+  if (ts.isIdentifier(unwrapped) && unwrapped.text === "require") {
+    return true;
+  }
+
+  if (
+    ts.isPropertyAccessExpression(unwrapped) &&
+    unwrapped.name.text === "require" &&
+    isModuleIdentifier(unwrapped.expression)
+  ) {
+    return true;
+  }
+
+  if (ts.isElementAccessExpression(unwrapped)) {
+    const propertyName = getStringLiteralValue(unwrapped.argumentExpression);
+    return (
+      propertyName === "require" && isModuleIdentifier(unwrapped.expression)
+    );
+  }
+
+  return false;
+}
+
 function collectModuleReferences(source, filePath) {
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -63,10 +93,8 @@ function collectModuleReferences(source, filePath) {
     } else if (ts.isCallExpression(node) && node.arguments.length > 0) {
       const callTarget = unwrapTransparentExpression(node.expression);
       const isDynamicImport = callTarget.kind === ts.SyntaxKind.ImportKeyword;
-      const isRequireCall =
-        ts.isIdentifier(callTarget) && callTarget.text === "require";
 
-      if (isDynamicImport || isRequireCall) {
+      if (isDynamicImport || isRequireCallee(callTarget)) {
         addReference(node.arguments[0]);
       }
     }
