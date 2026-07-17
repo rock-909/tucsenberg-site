@@ -31,7 +31,7 @@ const READINESS_SCAN_TARGETS = [
     root: "messages",
     extensions: new Set([".json"]),
     allowedPathPattern:
-      /^messages\/(?:base\/[^/]+|profiles\/(?:b2b-lead|catalog)\/[^/]+)\/(?:critical|deferred)\.json$/u,
+      /^messages\/(?:base\/[^/]+|profiles\/(?:b2b-lead|catalog)\/[^/]+)\/messages\.json$/u,
     scanTextRules: true,
   },
   {

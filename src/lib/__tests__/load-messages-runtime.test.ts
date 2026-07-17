@@ -29,7 +29,7 @@ function createRuntimeEnvMock({
   };
 }
 
-interface FactualCriticalMessages {
+interface FactualSourceMessages {
   navigation: {
     siteName: string;
   };
@@ -47,9 +47,6 @@ interface FactualCriticalMessages {
       defaultAuthor: string;
     };
   };
-}
-
-interface FactualDeferredMessages {
   emailTemplates: {
     confirmation: {
       subject: string;
@@ -57,8 +54,7 @@ interface FactualDeferredMessages {
   };
 }
 
-interface FactualCompleteMessages
-  extends FactualCriticalMessages, FactualDeferredMessages {}
+type FactualCompleteMessages = FactualSourceMessages;
 
 const factualPlaceholderPattern =
   /\{(?:siteName|companyName|currentYear|copyright)\}/u;
@@ -254,28 +250,25 @@ describe("load-messages runtime loading", () => {
   });
 
   it("keeps factual brand values as placeholders in source JSON", () => {
-    const enCritical = readMessageJson(
-      "messages/en/critical.json",
-    ) as FactualCriticalMessages;
-    const enDeferred = readMessageJson(
-      "messages/en/deferred.json",
-    ) as FactualDeferredMessages;
+    const enMessages = readMessageJson(
+      "messages/en/messages.json",
+    ) as FactualSourceMessages;
 
-    expect(enCritical.navigation.siteName).toBe("{siteName}");
-    expect(enCritical.footer.copyright).toBe("{copyright}");
+    expect(enMessages.navigation.siteName).toBe("{siteName}");
+    expect(enMessages.footer.copyright).toBe("{copyright}");
 
-    expect(enCritical["structured-data"].organization.name).toBe(
+    expect(enMessages["structured-data"].organization.name).toBe(
       "{companyName}",
     );
-    expect(enCritical["structured-data"].website.name).toBe("{siteName}");
-    expect(enCritical["structured-data"].article.defaultAuthor).toBe(
+    expect(enMessages["structured-data"].website.name).toBe("{siteName}");
+    expect(enMessages["structured-data"].article.defaultAuthor).toBe(
       "{companyName}",
     );
 
-    expect(enDeferred.emailTemplates.confirmation.subject).toEqual(
+    expect(enMessages.emailTemplates.confirmation.subject).toEqual(
       expect.any(String),
     );
-    expect(enDeferred).not.toHaveProperty("organization");
-    expect(enDeferred).not.toHaveProperty("website");
+    expect(enMessages).not.toHaveProperty("organization");
+    expect(enMessages).not.toHaveProperty("website");
   });
 });

@@ -5,18 +5,14 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   CATALOG_MESSAGE_PACK_IDS,
   type MessagePackId,
-  type MessageType,
 } from "@/lib/i18n/message-pack-config";
 import { mergeObjects } from "@/lib/merge-objects";
 import { syncMessageCompat } from "../../scripts/quality/sync-message-compat";
 
 const LOCALES = ["en"] as const;
-const MESSAGE_TYPES = ["critical", "deferred"] as const;
 const REQUIRED_PACK_FILES = [
   ...CATALOG_MESSAGE_PACK_IDS.flatMap((packId) =>
-    LOCALES.flatMap((locale) =>
-      MESSAGE_TYPES.map((type) => getPackPath(packId, locale, type)),
-    ),
+    LOCALES.map((locale) => getPackPath(packId, locale)),
   ),
 ];
 const TEMP_TRASH_ROOT = path.join(os.tmpdir(), "catalog-message-sync-trash");
@@ -27,15 +23,11 @@ function packFileExists(relativePath: string): boolean {
   return fs.existsSync(relativePath);
 }
 
-function getPackPath(
-  packId: MessagePackId,
-  locale: (typeof LOCALES)[number],
-  type: MessageType,
-) {
+function getPackPath(packId: MessagePackId, locale: (typeof LOCALES)[number]) {
   const packRoot =
     packId === "base" ? "messages/base" : `messages/profiles/${packId}`;
 
-  return `${packRoot}/${locale}/${type}.json`;
+  return `${packRoot}/${locale}/messages.json`;
 }
 
 function readJson(filePath: string): Record<string, unknown> {
@@ -46,13 +38,10 @@ function readJson(filePath: string): Record<string, unknown> {
   >;
 }
 
-function composeCatalogMessages(
-  locale: (typeof LOCALES)[number],
-  type: MessageType,
-) {
+function composeCatalogMessages(locale: (typeof LOCALES)[number]) {
   return CATALOG_MESSAGE_PACK_IDS.reduce<Record<string, unknown>>(
     (messages, packId) =>
-      mergeObjects(messages, readJson(getPackPath(packId, locale, type))),
+      mergeObjects(messages, readJson(getPackPath(packId, locale))),
     {},
   );
 }
@@ -63,16 +52,14 @@ function createTempMessageRoot(): string {
   );
   tempRoots.push(rootDir);
   for (const [index, packId] of CATALOG_MESSAGE_PACK_IDS.entries()) {
-    for (const type of MESSAGE_TYPES) {
-      const filePath = path.join(rootDir, getPackPath(packId, "en", type));
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
-      fs.writeFileSync(
-        filePath,
-        `${JSON.stringify({ shared: index, [packId]: type }, null, 2)}\n`,
-      );
-    }
+    const filePath = path.join(rootDir, getPackPath(packId, "en"));
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      filePath,
+      `${JSON.stringify({ shared: index, [packId]: "messages" }, null, 2)}\n`,
+    );
   }
   return rootDir;
 }
@@ -108,17 +95,11 @@ describe("physical message packs", () => {
 
     syncMessageCompat(rootDir);
 
-    expect(readJson(path.join(rootDir, "messages/en/critical.json"))).toEqual({
+    expect(readJson(path.join(rootDir, "messages/en/messages.json"))).toEqual({
       shared: 2,
-      base: "critical",
-      "b2b-lead": "critical",
-      catalog: "critical",
-    });
-    expect(readJson(path.join(rootDir, "messages/en/deferred.json"))).toEqual({
-      shared: 2,
-      base: "deferred",
-      "b2b-lead": "deferred",
-      catalog: "deferred",
+      base: "messages",
+      "b2b-lead": "messages",
+      catalog: "messages",
     });
   });
 
@@ -135,9 +116,9 @@ describe("physical message packs", () => {
       "utf8",
     );
 
-    expect(packLoader).toContain("@messages/base/en/critical.json");
-    expect(loader).not.toContain("@messages/en/critical.json");
-    expect(packLoader).not.toContain("@messages/en/critical.json");
+    expect(packLoader).toContain("@messages/base/en/messages.json");
+    expect(loader).not.toContain("@messages/en/messages.json");
+    expect(packLoader).not.toContain("@messages/en/messages.json");
   });
 
   it("documents physical packs as authoring truth instead of generated compat files", () => {
@@ -154,7 +135,7 @@ describe("physical message packs", () => {
     expect(readme).toContain("messages/profiles/catalog/**");
     expect(readme).toContain("generated compat");
     expect(readme).not.toContain(
-      "UI 文案放在 `messages/{locale}/critical.json` 和 `messages/{locale}/deferred.json`",
+      "UI 文案放在 `messages/{locale}/messages.json`",
     );
 
     expect(replace).toContain("physical packs first");
@@ -169,11 +150,9 @@ describe("physical message packs", () => {
 
   it("keeps generated compatibility messages synced from the active catalog physical packs", () => {
     for (const locale of LOCALES) {
-      for (const type of MESSAGE_TYPES) {
-        expect(readJson(`messages/${locale}/${type}.json`)).toEqual(
-          composeCatalogMessages(locale, type),
-        );
-      }
+      expect(readJson(`messages/${locale}/messages.json`)).toEqual(
+        composeCatalogMessages(locale),
+      );
     }
   });
 });

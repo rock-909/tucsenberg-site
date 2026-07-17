@@ -91,7 +91,7 @@ describe("content-readiness-check", () => {
   it("fails on hard fake buyer-visible content", () => {
     const rootDir = createFixture({
       "content/pages/en/about.mdx": "lorem ipsum\nCall +1 555-123-4567",
-      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         cta: "Contact your company",
       }),
       "src/config/single-site-product-catalog.ts":
@@ -107,7 +107,7 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.warnings,
       "your-company",
-      "messages/profiles/b2b-lead/en/critical.json",
+      "messages/profiles/b2b-lead/en/messages.json",
     );
     expectFinding(
       result.warnings,
@@ -118,7 +118,7 @@ describe("content-readiness-check", () => {
 
   it("warns on neutral starter placeholder wording without failing", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         form: {
           placeholder: "Enter your email address",
         },
@@ -137,7 +137,7 @@ describe("content-readiness-check", () => {
 
   it("exempts form placeholder fields from generic-placeholder residue warnings", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         form: {
           emailPlaceholder: "your@email.com",
           companyPlaceholder: "Your company name",
@@ -157,7 +157,7 @@ describe("content-readiness-check", () => {
 
   it("does not treat JSON keys as buyer-visible residue", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         form: {
           placeholder: "Enter your email address",
           phonePlaceholder: "Phone number",
@@ -419,7 +419,7 @@ describe("content-readiness-check", () => {
 
   it("warns on buyer-visible starter identity residue without failing the default starter check", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         title: "Showcase Website Starter",
       }),
       "content/pages/en/about.mdx": "Welcome to Public Demo Starter Site.",
@@ -437,7 +437,7 @@ describe("content-readiness-check", () => {
 
   it("promotes client-launch residue warnings to errors only in strict client launch mode", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         title: "Showcase Website Starter",
         product: "Sample Product",
         standard: "Example Standard A",
@@ -514,9 +514,9 @@ describe("content-readiness-check", () => {
     expect(result.warnings).toEqual([]);
   });
 
-  it("scans canonical split locale message files", () => {
+  it("scans canonical locale message pack files", () => {
     const rootDir = createFixture({
-      "messages/base/zh/critical.json": JSON.stringify({
+      "messages/base/zh/messages.json": JSON.stringify({
         headline: "lorem ipsum",
       }),
     });
@@ -528,13 +528,13 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.errors,
       "lorem-ipsum",
-      "messages/base/zh/critical.json",
+      "messages/base/zh/messages.json",
     );
   });
 
   it("reports the real JSON value line when keys repeat", () => {
     const rootDir = createFixture({
-      "messages/base/en/critical.json": [
+      "messages/base/en/messages.json": [
         "{",
         '  "first": {',
         '    "label": "Clean label"',
@@ -552,7 +552,7 @@ describe("content-readiness-check", () => {
     expect(result.errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: "messages/base/en/critical.json",
+          file: "messages/base/en/messages.json",
           line: 6,
           ruleId: "lorem-ipsum",
         }),
@@ -562,7 +562,7 @@ describe("content-readiness-check", () => {
 
   it("reports the JSON value line instead of the same-word key line", () => {
     const rootDir = createFixture({
-      "messages/base/en/critical.json": [
+      "messages/base/en/messages.json": [
         "{",
         '  "safe": "Clean copy",',
         '  "placeholder": {',
@@ -579,7 +579,7 @@ describe("content-readiness-check", () => {
     expect(result.warnings).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: "messages/base/en/critical.json",
+          file: "messages/base/en/messages.json",
           line: 4,
           ruleId: "placeholder",
         }),
@@ -589,7 +589,7 @@ describe("content-readiness-check", () => {
 
   it("warns on fake phone values when they are explicit placeholders", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         phonePlaceholder: "+1 (555) 123-4567",
       }),
     });
@@ -601,7 +601,7 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.warnings,
       "fake-phone",
-      "messages/profiles/b2b-lead/en/deferred.json",
+      "messages/profiles/b2b-lead/en/messages.json",
     );
   });
 
@@ -620,7 +620,7 @@ describe("content-readiness-check", () => {
 
   it("warns on generic email placeholders without failing", () => {
     const rootDir = createFixture({
-      "messages/profiles/b2b-lead/en/deferred.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         contact: "Send requests to your@email before launch.",
       }),
     });
@@ -632,7 +632,7 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.warnings,
       "your-email",
-      "messages/profiles/b2b-lead/en/deferred.json",
+      "messages/profiles/b2b-lead/en/messages.json",
     );
   });
 
@@ -701,7 +701,7 @@ describe("content-readiness-check", () => {
         "This page mentions `/images/logo.svg` as an example path.",
         "Real content.",
       ].join("\n"),
-      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         note: "Mention /images/logo.svg only as a replacement note.",
       }),
     });
@@ -802,7 +802,7 @@ describe("content-readiness-check", () => {
       "src/config/single-site.ts": "export const logo = '/images/logo.svg';",
       "public/images/logo.svg": '<svg role="img"></svg>',
       "content/pages/en/about.mdx": "Real company content.",
-      "messages/profiles/b2b-lead/en/critical.json": JSON.stringify({
+      "messages/profiles/b2b-lead/en/messages.json": JSON.stringify({
         cta: "Contact us",
       }),
     });

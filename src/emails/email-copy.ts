@@ -3,9 +3,9 @@ import type {
   ProductInquiryEmailData,
 } from "@/lib/email/email-data-schema";
 import { SITE_CONFIG } from "@/config/paths/site-config";
-import baseEnglishDeferredMessages from "@messages/base/en/deferred.json";
+import baseEnglishMessages from "@messages/base/en/messages.json";
 
-const emailTemplateCopy = baseEnglishDeferredMessages.emailTemplates;
+const emailTemplateCopy = baseEnglishMessages.emailTemplates;
 const TEMPLATE_PLACEHOLDER_PATTERN = /\{([A-Za-z][A-Za-z0-9]*)\}/g;
 
 function formatTemplate(

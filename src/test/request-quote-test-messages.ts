@@ -1,4 +1,4 @@
-import enDeferredMessages from "@messages/en/deferred.json";
+import enMessages from "@messages/en/messages.json";
 import {
   createRequestQuoteFormCopy,
   type RequestQuoteFormCopy,
@@ -24,11 +24,11 @@ function getNestedString(messages: JsonObject, keyPath: string): string {
 }
 
 function getRequestQuoteMessages(): JsonObject {
-  if (!isJsonObject(enDeferredMessages.requestQuote)) {
+  if (!isJsonObject(enMessages.requestQuote)) {
     throw new Error("Missing requestQuote messages");
   }
 
-  return enDeferredMessages.requestQuote;
+  return enMessages.requestQuote;
 }
 
 export function getRequestQuoteFormMessage(keyPath: string): string {

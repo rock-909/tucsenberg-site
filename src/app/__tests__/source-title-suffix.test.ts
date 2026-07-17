@@ -23,7 +23,7 @@ describe("source titles never carry the brand suffix (template owns it)", () => 
   });
   it("message metadata titles", () => {
     const pack = JSON.parse(
-      readFileSync("messages/profiles/b2b-lead/en/deferred.json", "utf8"),
+      readFileSync("messages/profiles/b2b-lead/en/messages.json", "utf8"),
     ) as { requestQuote: { metadata: { title: string } } };
     expect(pack.requestQuote.metadata.title).not.toMatch(BRAND_SUFFIX);
   });

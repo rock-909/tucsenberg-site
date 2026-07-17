@@ -16,7 +16,7 @@ const COPY_BEARING_LOCAL_CONSTANT_TOKENS = new Set([
 ]);
 
 const TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE = [
-  "messages/base/{locale}/deferred.json",
+  "messages/base/{locale}/messages.json",
   "emailTemplates",
   "src/emails/email-copy.ts",
   "src/lib/email/runtime-email-content.ts",
@@ -137,7 +137,7 @@ describe("email copy boundary", () => {
   });
 
   it("keeps transactional email message-pack keys present in the en-only runtime pack", () => {
-    const english = readJsonFile("messages/base/en/deferred.json") as {
+    const english = readJsonFile("messages/base/en/messages.json") as {
       emailTemplates?: unknown;
     };
 
@@ -166,7 +166,7 @@ describe("email copy boundary", () => {
   it("keeps runtime email copy independent from next-intl and page components", () => {
     const source = readFileSync("src/emails/email-copy.ts", "utf8");
 
-    expect(source).toContain("@messages/base/en/deferred.json");
+    expect(source).toContain("@messages/base/en/messages.json");
     expect(source).not.toContain("next-intl");
     expect(source).not.toContain("@/components/");
     expect(source).not.toContain("@/app/");

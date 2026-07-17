@@ -1,9 +1,5 @@
 import { type Locale } from "@/i18n/routing-config";
-import {
-  loadCriticalMessages,
-  loadDeferredMessages,
-} from "@/lib/i18n/load-messages";
-import { mergeObjects } from "@/lib/merge-objects";
+import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 
 type Messages = Record<string, unknown>;
 
@@ -53,11 +49,6 @@ export function pickClientMessages(messages: Messages): Messages {
 }
 
 export async function loadClientMessages(locale: Locale): Promise<Messages> {
-  const [critical, deferred] = await Promise.all([
-    loadCriticalMessages(locale),
-    loadDeferredMessages(locale),
-  ]);
-  const messages = mergeObjects(critical ?? {}, deferred ?? {}) as Messages;
-
+  const messages = await loadCompleteMessages(locale);
   return pickClientMessages(messages);
 }

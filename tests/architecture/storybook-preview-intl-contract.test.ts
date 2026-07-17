@@ -8,8 +8,9 @@ describe("Storybook preview i18n contract", () => {
       "utf8",
     );
 
-    expect(messageSource).toContain('from "@messages/en/critical.json"');
-    expect(messageSource).toContain('from "@messages/en/deferred.json"');
+    expect(messageSource).toContain('from "@messages/en/messages.json"');
+    expect(messageSource).not.toContain("@messages/en/critical.json");
+    expect(messageSource).not.toContain("@messages/en/deferred.json");
     expect(messageSource).not.toContain("@messages/zh/");
     expect(messageSource).not.toMatch(
       /messages\/profiles|\.env|server-only|@\/lib\/env|NEXT_SERVER/u,

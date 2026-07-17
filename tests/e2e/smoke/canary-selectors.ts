@@ -1,4 +1,4 @@
-import deferred from "../../../messages/profiles/b2b-lead/en/deferred.json";
+import b2bLeadMessages from "../../../messages/profiles/b2b-lead/en/messages.json";
 
 export interface CanarySelectors {
   submitLabel: string;
@@ -6,8 +6,8 @@ export interface CanarySelectors {
 }
 
 export function buildCanarySelectors(): CanarySelectors {
-  const submitLabel = deferred.contact.form.submit;
-  const successText = deferred.contact.form.submitSuccess;
+  const submitLabel = b2bLeadMessages.contact.form.submit;
+  const successText = b2bLeadMessages.contact.form.submitSuccess;
   if (!submitLabel || !successText) {
     throw new Error("canary selectors: message truth missing");
   }

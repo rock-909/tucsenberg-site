@@ -323,14 +323,14 @@ const TRUTH_DOC_CHECKS = [
   {
     file: ".claude/rules/i18n.md",
     required: [
-      "messages/base/{locale}/{critical,deferred}.json",
-      "messages/profiles/b2b-lead/{locale}/{critical,deferred}.json",
-      "messages/profiles/catalog/{locale}/{critical,deferred}.json",
+      "messages/base/{locale}/messages.json",
+      "messages/profiles/b2b-lead/{locale}/messages.json",
+      "messages/profiles/catalog/{locale}/messages.json",
       "base -> b2b-lead -> catalog",
       "pnpm messages:sync",
     ],
     forbidden: [
-      "messages/profiles/{profile}/{locale}/{critical,deferred}.json",
+      "messages/profiles/{profile}/{locale}/messages.json",
       "src/sites/**/messages/**",
     ],
   },

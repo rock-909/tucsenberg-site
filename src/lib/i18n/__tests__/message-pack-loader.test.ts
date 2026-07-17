@@ -22,8 +22,8 @@ describe("catalog message loading", () => {
     expect(messages).not.toHaveProperty("customProject");
   });
 
-  it("composes raw split messages without a selectable profile", async () => {
-    await expect(loadComposedRawMessages("en", "critical")).resolves.toEqual(
+  it("composes raw messages without a selectable profile", async () => {
+    await expect(loadComposedRawMessages("en")).resolves.toEqual(
       expect.objectContaining({ home: expect.any(Object) }),
     );
   });

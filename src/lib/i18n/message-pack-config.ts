@@ -1,7 +1,5 @@
 import catalogMessagePacks from "@messages/message-packs.json";
 
-export type MessageType = "critical" | "deferred";
-
 export type MessagePackId = "base" | "b2b-lead" | "catalog";
 
 export const CATALOG_MESSAGE_PACK_IDS =

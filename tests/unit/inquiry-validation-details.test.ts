@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import enCriticalMessages from "../../messages/en/critical.json";
-import enDeferredMessages from "../../messages/en/deferred.json";
+import enMessages from "../../messages/en/messages.json";
 import {
   mapInquiryValidationDetails,
   PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS,
@@ -23,20 +22,6 @@ function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function mergeMessages(critical: JsonObject, deferred: JsonObject): JsonObject {
-  const result: JsonObject = { ...critical };
-
-  for (const [key, value] of Object.entries(deferred)) {
-    const existingValue = result[key];
-    result[key] =
-      isJsonObject(existingValue) && isJsonObject(value)
-        ? mergeMessages(existingValue, value)
-        : value;
-  }
-
-  return result;
-}
-
 function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   return keyPath.split(".").reduce<unknown>((current, key) => {
     if (!isJsonObject(current)) return undefined;
@@ -44,7 +29,7 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   }, messages);
 }
 
-const runtimeMessages = mergeMessages(enCriticalMessages, enDeferredMessages);
+const runtimeMessages = enMessages;
 
 const validBase = {
   type: LEAD_TYPES.PRODUCT,
