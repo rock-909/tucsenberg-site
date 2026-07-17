@@ -25,6 +25,9 @@
 - Before `READY_FOR_CLUSTER`, run `superpowers:verification-before-completion`, self-review the diff, push, and wait for all checks on the latest exact SHA.
 - PR comments use the evidence packet from the design spec. A task PR stops at `READY_FOR_CLUSTER`; it is not individually ACCEPTED.
 - If runtime truth conflicts with this plan, stop that lane and report exact evidence. Do not weaken a gate or invent a compatibility layer on the fly.
+- Codex is the controller. It supplies each task's complete text to `cursor-agent --model composer-2.5-fast` and independently verifies the result; Cursor does not choose scope, dependencies, acceptance or merge order.
+- Use one fresh Cursor chat and one worktree per task. Resume only the same interrupted task by exact chat ID; never carry a prior task forward with `--continue`.
+- Cursor's terminal status must be exactly one of `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT` or `BLOCKED`. An agent report is not completion evidence without diff, fresh commands, exact-SHA CI and the required PR evidence packet.
 
 ## 1. Cluster map
 

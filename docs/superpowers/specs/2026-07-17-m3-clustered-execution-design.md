@@ -35,6 +35,29 @@
 
 Superpowers 决定流程，项目稳定文档、运行时事实和 owner 裁决决定内容。两者冲突时，先遵守项目与用户边界。
 
+### 2.1 Codex 控制器与 Cursor 执行器
+
+Codex 负责规格、依赖顺序、任务提示词、验收和合并建议；Cursor Agent 只负责在指定 worktree 中执行当前任务。当前执行模型固定为本机可用的 `composer-2.5-fast`，不得静默回退到 `auto` 或其他模型。
+
+每个任务使用一个独立 Cursor 会话。同一任务因超时或中断可以按 chat ID 恢复；不得用 `--continue` 把上一任务的隐含上下文带进下一任务。并行 lane 必须使用不同 worktree 和不同会话。
+
+控制器调用形态：
+
+```bash
+cursor-agent \
+  --print \
+  --output-format stream-json \
+  --model composer-2.5-fast \
+  --workspace <task-worktree> \
+  --trust \
+  --force \
+  "<controller-supplied task prompt>"
+```
+
+下发提示词必须直接包含当前任务的完整步骤，而不是只让执行器自行阅读整份计划。至少包含：任务和任务簇、exact base SHA、允许修改的文件、必读规则、Given/When/Then 验收点、先失败测试、focused/broader commands、PR 与证据包要求、禁止动作和停止条件。
+
+Cursor 最终只返回四种状态之一：`DONE`、`DONE_WITH_CONCERNS`、`NEEDS_CONTEXT`、`BLOCKED`。Codex 不以返回文字作为完成证据；仍要检查 git diff、测试输出、PR exact SHA 和 GitHub CI。执行日志保留在控制会话，不把完整 stream JSON 提交进仓库。
+
 ## 3. 不做什么
 
 - 不把 20 个任务压成一个巨型 PR。
