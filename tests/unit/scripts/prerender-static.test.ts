@@ -91,9 +91,11 @@ afterEach(() => {
 });
 
 describe("prerender static behavior gate", () => {
-  it("accepts prerendered locale templates and the documented contact island", () => {
+  it("accepts fully prerendered locale templates without postponed exemptions", () => {
     expect(
-      collectPrerenderStaticFindings({ rootDir: createBuildFixture() }),
+      collectPrerenderStaticFindings({
+        rootDir: createBuildFixture({ contactPostponed: false }),
+      }),
     ).toEqual([]);
   });
 
@@ -152,6 +154,9 @@ describe("prerender static behavior gate", () => {
   it("rejects stale route exemptions after the page becomes fully prerendered", () => {
     const findings = collectPrerenderStaticFindings({
       rootDir: createBuildFixture({ contactPostponed: false }),
+      postponedRouteExemptions: new Map([
+        ["/en/contact", "contact search-param island; remove in M3-D2"],
+      ]),
     });
     expect(findings).toContainEqual({
       file: "scripts/quality/checks/prerender-static.js",

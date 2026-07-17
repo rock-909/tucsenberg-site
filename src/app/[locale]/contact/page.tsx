@@ -18,7 +18,6 @@ import {
   ContactInquiryHandoff,
   ContactMethodsCard,
   ResponseExpectationsCard,
-  type ContactSearchParams,
 } from "@/app/[locale]/contact/contact-page-sections";
 import {
   getContactPageData,
@@ -27,7 +26,6 @@ import {
 
 interface ContactPageProps {
   params: Promise<LocaleParam>;
-  searchParams?: Promise<ContactSearchParams>;
 }
 
 export function generateStaticParams() {
@@ -49,13 +47,7 @@ export async function generateMetadata({
   });
 }
 
-function ContactContentBody({
-  locale,
-  searchParams,
-}: {
-  locale: Locale;
-  searchParams: Promise<ContactSearchParams>;
-}) {
+function ContactContentBody({ locale }: { locale: Locale }) {
   const { page, messages, copy, faqItems, faqSectionTitle, faqSchema } =
     getContactPageData(locale);
 
@@ -82,11 +74,7 @@ function ContactContentBody({
         <ContactInquiryHandoff messages={messages} />
 
         <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <ContactFormWithFallback
-            locale={locale}
-            searchParams={searchParams}
-            messages={messages}
-          />
+          <ContactFormWithFallback locale={locale} messages={messages} />
 
           <div className="space-y-4" data-testid="contact-confidence-column">
             <ResponseExpectationsCard
@@ -105,17 +93,9 @@ function ContactContentBody({
   );
 }
 
-export default async function ContactPage({
-  params,
-  searchParams,
-}: ContactPageProps) {
+export default async function ContactPage({ params }: ContactPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return (
-    <ContactContentBody
-      locale={locale as Locale}
-      searchParams={searchParams ?? Promise.resolve({})}
-    />
-  );
+  return <ContactContentBody locale={locale as Locale} />;
 }

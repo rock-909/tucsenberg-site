@@ -5,14 +5,7 @@ const ROOT = process.cwd();
 const { locales: CONFIGURED_LOCALES } = require("../../../i18n-locales.config");
 const DEFAULT_BUILD_DIR = ".next";
 
-// Contact currently keeps a request-dependent search-param island. D2 removes
-// this exemption when the page becomes fully prerendered.
-const POSTPONED_ROUTE_EXEMPTIONS = new Map(
-  CONFIGURED_LOCALES.map((locale) => [
-    `/${locale}/contact`,
-    "contact search-param island; remove in M3-D2",
-  ]),
-);
+const POSTPONED_ROUTE_EXEMPTIONS = new Map();
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
