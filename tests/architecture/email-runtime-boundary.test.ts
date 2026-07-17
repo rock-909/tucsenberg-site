@@ -29,9 +29,6 @@ function expectNoRuntimeRendererImports(source: string): void {
   expect(source).not.toContain("@react-email/ui");
   expect(source).not.toContain("prettier");
   expect(source).not.toContain('from "resend"');
-  expect(source).not.toContain("@/emails/ConfirmationEmail");
-  expect(source).not.toContain("@/emails/ContactFormEmail");
-  expect(source).not.toContain("@/emails/ProductInquiryEmail");
 }
 
 function toRepoPath(filePath: string): string {

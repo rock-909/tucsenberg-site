@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { logger } from "@/lib/logger";
 import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
@@ -229,63 +229,6 @@ export function TurnstileWidget({
       />
     </div>
   );
-}
-
-/**
- * Hook for managing Turnstile state
- */
-export function useTurnstile() {
-  const [isVerified, setIsVerified] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [error, _setError] = useState<string | null>(null);
-  const [isLoading, _setIsLoading] = useState(false);
-
-  const handleSuccessCallback = useCallback((verificationToken: string) => {
-    setToken(verificationToken);
-    setIsVerified(true);
-    _setError(null);
-    _setIsLoading(false);
-  }, []);
-
-  const handleError = useCallback((errorMessage: string) => {
-    _setError(errorMessage);
-    setIsVerified(false);
-    setToken(null);
-    _setIsLoading(false);
-  }, []);
-
-  const handleExpire = useCallback(() => {
-    setIsVerified(false);
-    setToken(null);
-    _setError(null);
-    _setIsLoading(false);
-  }, []);
-
-  const handleLoad = useCallback(() => {
-    _setIsLoading(true);
-    _setError(null);
-  }, []);
-
-  const reset = useCallback(() => {
-    setIsVerified(false);
-    setToken(null);
-    _setError(null);
-    _setIsLoading(false);
-  }, []);
-
-  return {
-    isVerified,
-    token,
-    error,
-    isLoading,
-    handlers: {
-      onSuccess: handleSuccessCallback,
-      onError: handleError,
-      onExpire: handleExpire,
-      onLoad: handleLoad,
-    },
-    reset,
-  };
 }
 
 // Re-export for convenience

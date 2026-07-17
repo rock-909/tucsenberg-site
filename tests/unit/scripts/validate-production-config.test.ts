@@ -24,7 +24,6 @@ function createValidProductionEnv(): NodeJS.ProcessEnv {
     UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
     UPSTASH_REDIS_REST_TOKEN: "upstash-token",
     RATE_LIMIT_PEPPER: "a".repeat(32),
-    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "b".repeat(32),
     TURNSTILE_SECRET_KEY: "turnstile-secret",
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: "turnstile-site-key",
     RESEND_API_KEY: "resend-api-key",
@@ -153,7 +152,6 @@ describe("validate-production-config runtime contract", () => {
     const result = validateProductionRuntimeContract({
       ...createValidProductionEnv(),
       RATE_LIMIT_PEPPER: "short",
-      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: undefined,
       TURNSTILE_SECRET_KEY: undefined,
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: undefined,
       RESEND_API_KEY: undefined,
@@ -165,9 +163,6 @@ describe("validate-production-config runtime contract", () => {
       expect.arrayContaining([
         expect.stringContaining(
           "RATE_LIMIT_PEPPER must be at least 32 characters",
-        ),
-        expect.stringContaining(
-          "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY is required",
         ),
         expect.stringContaining("TURNSTILE_SECRET_KEY is required"),
         expect.stringContaining("NEXT_PUBLIC_TURNSTILE_SITE_KEY is required"),
@@ -248,9 +243,6 @@ describe("validateProductionConfig CI vs deploy gate", () => {
       expect.arrayContaining([
         expect.stringContaining(
           "Production rate limiting requires Upstash Redis",
-        ),
-        expect.stringContaining(
-          "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY is required",
         ),
       ]),
     );

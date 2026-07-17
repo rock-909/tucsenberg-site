@@ -28,9 +28,6 @@ export const serverEnvSchema = {
     .optional()
     .transform((val) => val === "true"),
 
-  // Cloudflare split-worker Server Action compatibility
-  NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: z.string().min(1).optional(),
-
   // Cloudflare deployment account metadata
   CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
 
@@ -172,8 +169,6 @@ export const runtimeEnv = {
   TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
   TURNSTILE_EXPECTED_ACTION: process.env.TURNSTILE_EXPECTED_ACTION,
   TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
-  NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
-    process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
   LOG_LEVEL: process.env.LOG_LEVEL,
   CONTENT_ENABLE_DRAFTS: process.env.CONTENT_ENABLE_DRAFTS,

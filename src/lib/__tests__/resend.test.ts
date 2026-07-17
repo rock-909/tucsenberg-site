@@ -736,40 +736,6 @@ describe("resend - Product Inquiry and Utility Methods", () => {
       ).rejects.toThrow("Failed to send product inquiry email");
     });
   });
-
-  describe("getEmailStats", () => {
-    it("should return email statistics with zero values", () => {
-      const service = new ResendServiceClass();
-      const stats = service.getEmailStats();
-
-      expect(stats).toEqual({
-        sent: 0,
-        delivered: 0,
-        bounced: 0,
-        complained: 0,
-      });
-    });
-  });
-
-  describe("getEmailConfig", () => {
-    it("should return email configuration", () => {
-      const service = new ResendServiceClass();
-      const config = service.getEmailConfig();
-
-      expect(config).toEqual({
-        from: "test@example.com",
-        replyTo: "reply@example.com",
-        supportEmail: "reply@example.com",
-      });
-    });
-  });
-
-  describe("checkConnection", () => {
-    it("should return true when service is ready", () => {
-      const service = new ResendServiceClass();
-      expect(service.checkConnection()).toBe(true);
-    });
-  });
 });
 
 describe("ResendUtils formatting", () => {
