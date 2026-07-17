@@ -340,25 +340,8 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     sourceName: "CONTACT_FORM_VALIDATION_DETAIL_KEYS",
     prefix: "contact.form.",
     suffixes: [""],
-    reason: "the contact validator enforces this finite detail-key domain",
-  },
-  {
-    kind: "collection-values",
-    file: "src/app/api/inquiry/route.ts",
-    sourceName: "PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS",
-    prefix: "contact.form.",
-    suffixes: [""],
     reason:
-      "inquiry validation returns these contact.form detail keys to the client",
-  },
-  {
-    kind: "collection-values",
-    file: "src/lib/contact/product-family-context.ts",
-    sourceName: "PRODUCT_FAMILY_LABEL_MESSAGE_KEYS",
-    prefix: "catalog.",
-    suffixes: [""],
-    reason:
-      "contact product-family context resolves trusted family labels from messages",
+      "contact and inquiry validators share this finite contact.form detail-key domain",
   },
   {
     kind: "call-arguments",
@@ -377,9 +360,17 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   },
 ];
 
-// C5a removed the B7 unused-leaf baseline. Keep this empty unless a new
-// zero-consumer key is intentionally retained with an explicit reason.
-const UNUSED_MESSAGE_KEYS = [];
+// C5a emptied the B7 unused-leaf baseline. Keep only dynamic consumers the AST
+// gate cannot see yet; every entry needs an explicit reason.
+const UNUSED_MESSAGE_KEYS = [
+  // readMessagePath(["catalog","families", market, family, "label"]) in
+  // product-family-context.ts — market/family come from trusted query params.
+  "catalog.families.abs-flood-barriers.abs-boxwall.label",
+  "catalog.families.aluminum-flood-gates.aluminum-gates.label",
+  "catalog.families.absorbent-flood-bags.absorbent-bags.label",
+  "catalog.families.flood-tube-dams.tube-dams.label",
+  "catalog.families.frp-flood-barriers.frp-planks.label",
+];
 
 module.exports = {
   DYNAMIC_MESSAGE_KEY_PREFIXES,

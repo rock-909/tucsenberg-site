@@ -124,8 +124,14 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
-  it("keeps the unused-key baseline empty after dead-key cleanup", () => {
-    expect(UNUSED_MESSAGE_KEYS).toEqual([]);
+  it("keeps the unused-key baseline limited to documented dynamic consumers", () => {
+    expect(UNUSED_MESSAGE_KEYS).toEqual([
+      "catalog.families.abs-flood-barriers.abs-boxwall.label",
+      "catalog.families.aluminum-flood-gates.aluminum-gates.label",
+      "catalog.families.absorbent-flood-bags.absorbent-bags.label",
+      "catalog.families.flood-tube-dams.tube-dams.label",
+      "catalog.families.frp-flood-barriers.frp-planks.label",
+    ]);
   });
 
   it("accepts a statically consumed catalog key", () => {

@@ -8,15 +8,6 @@ import { readMessagePath } from "@/lib/i18n/read-message-path";
 
 export const PRODUCT_FAMILY_CONTACT_INTENT = "product-family" as const;
 
-/** Message leaves resolved by {@link parseProductFamilyContactContext}. */
-export const PRODUCT_FAMILY_LABEL_MESSAGE_KEYS = [
-  "families.abs-flood-barriers.abs-boxwall.label",
-  "families.aluminum-flood-gates.aluminum-gates.label",
-  "families.absorbent-flood-bags.absorbent-bags.label",
-  "families.flood-tube-dams.tube-dams.label",
-  "families.frp-flood-barriers.frp-planks.label",
-] as const;
-
 type SearchParamValue = string | string[] | undefined;
 
 export interface ProductFamilyContactContext {

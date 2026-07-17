@@ -58,30 +58,6 @@ const PRODUCT_INQUIRY_FIELD_ERROR_KEYS: ValidationFieldErrorKeys = {
   requirements: "errors.requirements",
 };
 
-/** Exact contact.form detail leaves inquiry validation can return to the client. */
-export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
-  "errors.fullName.required",
-  "errors.fullName.invalid",
-  "errors.fullName.tooLong",
-  "errors.fullName.tooShort",
-  "errors.email.required",
-  "errors.email.invalid",
-  "errors.email.tooLong",
-  "errors.company.tooShort",
-  "errors.company.tooLong",
-  "errors.company.invalid",
-  "errors.productInquiryKind.required",
-  "errors.productInquiryKind.invalid",
-  "errors.catalogProductId.required",
-  "errors.catalogProductId.invalid",
-  "errors.buyerInterest.tooLong",
-  "errors.buyerInterest.invalid",
-  "errors.quantity.required",
-  "errors.quantity.invalid",
-  "errors.requirements.invalid",
-  "errors.requirements.tooLong",
-] as const;
-
 async function validateProductInquiryTurnstile(
   token: unknown,
   clientIP: string,
