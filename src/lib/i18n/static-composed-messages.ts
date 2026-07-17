@@ -21,14 +21,10 @@ const STATIC_PACKS: Record<Locale, Record<MessagePackId, StaticMessages>> = {
   },
 };
 
-function composeStaticSplitMessages(locale: Locale): StaticMessages {
+export function getStaticComposedMessages(locale: Locale): StaticMessages {
   return CATALOG_MESSAGE_PACK_IDS.reduce<StaticMessages>(
     (acc, packId) =>
       mergeObjects(acc, STATIC_PACKS[locale][packId]) as StaticMessages,
     {},
   );
-}
-
-export function getStaticSplitMessages(locale: Locale): StaticMessages {
-  return composeStaticSplitMessages(locale);
 }

@@ -82,13 +82,3 @@ export function loadCompleteMessagesFromSource(
 export function loadCompleteMessages(locale: Locale): Promise<Messages> {
   return loadMessageSource(coerceLocale(locale));
 }
-
-/** @deprecated Use loadCompleteMessages — retained for call-site compatibility during C5b. */
-export function loadCriticalMessages(locale: Locale): Promise<Messages> {
-  return loadCompleteMessages(locale);
-}
-
-/** @deprecated Use loadCompleteMessages — retained for call-site compatibility during C5b. */
-export function loadDeferredMessages(locale: Locale): Promise<Messages> {
-  return loadCompleteMessages(locale);
-}

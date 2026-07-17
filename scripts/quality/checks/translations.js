@@ -31,8 +31,229 @@ function getLocaleCompatPath(locale) {
   return path.join(MESSAGES_DIR, locale, "messages.json");
 }
 
+function readJsonSource(filePath) {
+  return fs.readFileSync(filePath, "utf8");
+}
+
 function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return JSON.parse(readJsonSource(filePath));
+}
+
+/**
+ * Sibling duplicate object keys are legal-but-lossy JSON: JSON.parse keeps the
+ * last value and drops earlier ones. Scan the raw text so content:check fails
+ * instead of reporting a false "No duplicate keys found".
+ */
+function findDuplicateJsonObjectKeys(source) {
+  const duplicates = [];
+  let i = 0;
+  const length = source.length;
+
+  function lineAt(index) {
+    let line = 1;
+    for (let cursor = 0; cursor < index; cursor += 1) {
+      if (source[cursor] === "\n") {
+        line += 1;
+      }
+    }
+    return line;
+  }
+
+  function skipWhitespace() {
+    while (i < length && /\s/u.test(source[i])) {
+      i += 1;
+    }
+  }
+
+  function readString() {
+    if (source[i] !== '"') {
+      throw new Error(`Expected JSON string at index ${i}`);
+    }
+
+    i += 1;
+    let value = "";
+
+    while (i < length) {
+      const character = source[i];
+
+      if (character === '"') {
+        i += 1;
+        return value;
+      }
+
+      if (character === "\\") {
+        i += 1;
+        if (i >= length) {
+          throw new Error("Unterminated JSON string escape");
+        }
+
+        const escape = source[i];
+        if (escape === "u") {
+          const hex = source.slice(i + 1, i + 5);
+          value += String.fromCharCode(Number.parseInt(hex, 16));
+          i += 5;
+          continue;
+        }
+
+        const escaped = {
+          '"': '"',
+          "\\": "\\",
+          "/": "/",
+          b: "\b",
+          f: "\f",
+          n: "\n",
+          r: "\r",
+          t: "\t",
+        };
+        value += escaped[escape] ?? escape;
+        i += 1;
+        continue;
+      }
+
+      value += character;
+      i += 1;
+    }
+
+    throw new Error("Unterminated JSON string");
+  }
+
+  function parseValue(pathPrefix) {
+    skipWhitespace();
+    if (i >= length) {
+      throw new Error("Unexpected end of JSON");
+    }
+
+    const character = source[i];
+    if (character === "{") {
+      parseObject(pathPrefix);
+      return;
+    }
+    if (character === "[") {
+      parseArray(pathPrefix);
+      return;
+    }
+    if (character === '"') {
+      readString();
+      return;
+    }
+    if (character === "t") {
+      i += 4;
+      return;
+    }
+    if (character === "f") {
+      i += 5;
+      return;
+    }
+    if (character === "n") {
+      i += 4;
+      return;
+    }
+
+    while (i < length && /[0-9eE+\-.]/u.test(source[i])) {
+      i += 1;
+    }
+  }
+
+  function parseObject(pathPrefix) {
+    i += 1;
+    skipWhitespace();
+
+    if (source[i] === "}") {
+      i += 1;
+      return;
+    }
+
+    const seenKeys = new Set();
+
+    while (i < length) {
+      skipWhitespace();
+      const keyStart = i;
+      const key = readString();
+      const keyPath = pathPrefix === "" ? key : `${pathPrefix}.${key}`;
+
+      if (seenKeys.has(key)) {
+        duplicates.push({
+          key,
+          line: lineAt(keyStart),
+          path: keyPath,
+        });
+      } else {
+        seenKeys.add(key);
+      }
+
+      skipWhitespace();
+      if (source[i] !== ":") {
+        throw new Error(`Expected ':' after key at index ${i}`);
+      }
+      i += 1;
+      parseValue(keyPath);
+      skipWhitespace();
+
+      if (source[i] === "}") {
+        i += 1;
+        return;
+      }
+
+      if (source[i] === ",") {
+        i += 1;
+        continue;
+      }
+
+      throw new Error(`Expected ',' or '}' at index ${i}`);
+    }
+  }
+
+  function parseArray(pathPrefix) {
+    i += 1;
+    skipWhitespace();
+
+    if (source[i] === "]") {
+      i += 1;
+      return;
+    }
+
+    let index = 0;
+
+    while (i < length) {
+      const itemPath =
+        pathPrefix === "" ? `[${index}]` : `${pathPrefix}[${index}]`;
+      parseValue(itemPath);
+      index += 1;
+      skipWhitespace();
+
+      if (source[i] === "]") {
+        i += 1;
+        return;
+      }
+
+      if (source[i] === ",") {
+        i += 1;
+        continue;
+      }
+
+      throw new Error(`Expected ',' or ']' at index ${i}`);
+    }
+  }
+
+  skipWhitespace();
+  parseValue("");
+  skipWhitespace();
+  return duplicates;
+}
+
+function reportDuplicateObjectKeys(label, source) {
+  const duplicates = findDuplicateJsonObjectKeys(source);
+
+  if (duplicates.length === 0) {
+    return true;
+  }
+
+  console.error(`   Error: duplicate object keys in ${label}:`);
+  for (const duplicate of duplicates.slice(0, 10)) {
+    console.error(`      - ${duplicate.path} (line ${duplicate.line})`);
+  }
+
+  return false;
 }
 
 function collectLeafPaths(obj, prefix = "") {
@@ -88,18 +309,13 @@ function validatePackFile(packId, locale) {
     return false;
   }
 
-  const messages = readJson(absolutePath);
-  const leafPaths = collectLeafPaths(messages);
-
-  if (leafPaths.length !== new Set(leafPaths).size) {
-    const duplicates = leafPaths.filter(
-      (leafPath, index) => leafPaths.indexOf(leafPath) !== index,
-    );
-    console.error(
-      `   Error: duplicate leaf paths in ${relativePath}: ${duplicates.slice(0, 5).join(", ")}`,
-    );
+  const source = readJsonSource(absolutePath);
+  if (!reportDuplicateObjectKeys(relativePath, source)) {
     return false;
   }
+
+  const messages = JSON.parse(source);
+  const leafPaths = collectLeafPaths(messages);
 
   return {
     packId,
@@ -271,18 +487,14 @@ function validateLocale(locale) {
     return false;
   }
 
-  const messages = readJson(compatPath);
-  const leafKeys = collectLeafPaths(messages);
-  const leafSet = new Set(leafKeys);
-
-  if (leafKeys.length !== leafSet.size) {
-    const duplicates = leafKeys.filter(
-      (key, index) => leafKeys.indexOf(key) !== index,
-    );
-    console.error(`   Error: Found ${duplicates.length} duplicate keys:`);
-    duplicates.slice(0, 10).forEach((key) => console.error(`      - ${key}`));
+  const source = readJsonSource(compatPath);
+  if (!reportDuplicateObjectKeys(`messages/${locale}/messages.json`, source)) {
     return false;
   }
+
+  const messages = JSON.parse(source);
+  const leafKeys = collectLeafPaths(messages);
+  const leafSet = new Set(leafKeys);
 
   console.log(`   Total keys: ${leafKeys.length}`);
   console.log("   No duplicate keys found");
@@ -417,6 +629,7 @@ module.exports = {
   collectLeafPaths,
   compareLocales,
   composeCatalogMessages,
+  findDuplicateJsonObjectKeys,
   runTranslationCheck,
   validateLocale,
 };
