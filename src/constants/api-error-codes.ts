@@ -27,13 +27,6 @@ export const API_ERROR_CODES = {
   UNSUPPORTED_MEDIA_TYPE: "UNSUPPORTED_MEDIA_TYPE",
 
   // ============================================
-  // Subscribe API
-  // ============================================
-  SUBSCRIBE_VALIDATION_EMAIL_REQUIRED: "SUBSCRIBE_VALIDATION_EMAIL_REQUIRED",
-  SUBSCRIBE_VALIDATION_EMAIL_INVALID: "SUBSCRIBE_VALIDATION_EMAIL_INVALID",
-  SUBSCRIBE_PROCESSING_ERROR: "SUBSCRIBE_PROCESSING_ERROR",
-
-  // ============================================
   // Contact API
   // ============================================
   CONTACT_VALIDATION_FAILED: "CONTACT_VALIDATION_FAILED",

@@ -398,40 +398,6 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
-    it("creates newsletter lead records with canonical Airtable fields and no buyer text", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-
-      mockCreate.mockResolvedValue([
-        createMockRecord({
-          id: "recNewsletter",
-          fields: {},
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ]);
-
-      await service.createLead("newsletter", {
-        email: "Subscriber@Example.COM ",
-        referenceId: "NEW-test-123",
-      });
-
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            Email: "subscriber@example.com",
-            "Reference ID": "NEW-test-123",
-            "First Name": "",
-            "Last Name": "",
-            Company: "",
-            Message: "Newsletter subscription",
-            Status: "New",
-            Source: "Newsletter Subscription",
-            "Submitted At": expect.any(String),
-          }),
-        },
-      ]);
-    });
-
     it("should throw error when service is not configured", async () => {
       const service = new AirtableServiceClass();
 

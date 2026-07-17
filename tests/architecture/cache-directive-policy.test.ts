@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 const CRITICAL_CACHE_POLICY_FILES = [
   "src/app/api/inquiry/route.ts",
-  "src/app/api/subscribe/route.ts",
   "src/app/api/health/route.ts",
 ] as const;
 
@@ -25,8 +24,6 @@ const BANNED_NEXT_CACHE_IMPORTS = new Set<string>([
 const CRITICAL_CACHE_POLICY_SOURCE_READERS = {
   "src/app/api/inquiry/route.ts": () =>
     readFileSync("src/app/api/inquiry/route.ts", "utf8"),
-  "src/app/api/subscribe/route.ts": () =>
-    readFileSync("src/app/api/subscribe/route.ts", "utf8"),
   "src/app/api/health/route.ts": () =>
     readFileSync("src/app/api/health/route.ts", "utf8"),
 } satisfies Record<(typeof CRITICAL_CACHE_POLICY_FILES)[number], () => string>;

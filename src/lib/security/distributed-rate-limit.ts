@@ -32,11 +32,6 @@ export const RATE_LIMIT_PRESETS = {
     windowMs: MINUTE_MS,
     failureMode: "closed" as const,
   },
-  subscribe: {
-    maxRequests: 3,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
   csp: { maxRequests: 100, windowMs: MINUTE_MS, failureMode: "open" as const },
 } as const;
 

@@ -67,11 +67,6 @@ const VALID_CONTACT_LEAD = {
   company: "Test Company",
 };
 
-const VALID_NEWSLETTER_LEAD = {
-  type: LEAD_TYPES.NEWSLETTER,
-  email: "subscriber@example.com",
-};
-
 describe("processLead observability contracts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -229,24 +224,5 @@ describe("processLead observability contracts", () => {
         requestId: "req-top-level",
       }),
     );
-  });
-
-  it("keeps newsletter leads as no-email direct transactions", async () => {
-    mockCreateLead.mockResolvedValue({ id: "record-789" });
-
-    const result = await processLead(VALID_NEWSLETTER_LEAD, {
-      requestId: "req-newsletter",
-    });
-
-    expect(result).toEqual({
-      success: true,
-      emailSent: false,
-      ownerNotified: false,
-      recordCreated: true,
-      referenceId: expect.stringMatching(/^NEW-/),
-    });
-    expect(mockSendContactFormEmail).not.toHaveBeenCalled();
-    expect(mockSendConfirmationEmail).not.toHaveBeenCalled();
-    expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
   });
 });

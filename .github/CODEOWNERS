@@ -12,7 +12,6 @@
 # Tier A: lead/contact pipeline
 /src/app/api/contact/ @Alx-707 developer@flood-control.com
 /src/app/api/inquiry/ @Alx-707 developer@flood-control.com
-/src/app/api/subscribe/ @Alx-707 developer@flood-control.com
 /src/lib/lead-pipeline/ @Alx-707 developer@flood-control.com
 /src/components/forms/ @Alx-707 developer@flood-control.com
 

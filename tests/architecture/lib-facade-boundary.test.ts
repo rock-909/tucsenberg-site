@@ -166,7 +166,6 @@ describe("legacy lib facade boundaries", () => {
     const leadRoutes = [
       "src/app/api/contact/route.ts",
       "src/app/api/inquiry/route.ts",
-      "src/app/api/subscribe/route.ts",
     ];
 
     for (const routePath of leadRoutes) {
@@ -188,9 +187,8 @@ describe("legacy lib facade boundaries", () => {
     expect(source).toContain("submission.errorCode");
   });
 
-  it("keeps inquiry and subscribe response branches inline", () => {
+  it("keeps inquiry response branches inline", () => {
     const inquirySource = read("src/app/api/inquiry/route.ts");
-    const subscribeSource = read("src/app/api/subscribe/route.ts");
 
     expect(inquirySource).not.toContain("createSuccessPayload");
     expect(inquirySource).not.toContain("createErrorResponse");
@@ -202,16 +200,5 @@ describe("legacy lib facade boundaries", () => {
     expect(inquirySource).toContain("createApiSuccessResponse");
     expect(inquirySource).toContain("INQUIRY_VALIDATION_FAILED");
     expect(inquirySource).toContain("INQUIRY_PROCESSING_ERROR");
-
-    expect(subscribeSource).not.toContain("createSuccessResponse");
-    expect(subscribeSource).not.toContain("createErrorResponse");
-    expect(subscribeSource).not.toContain("createLeadFailureResponse");
-    expect(subscribeSource).not.toContain("requireLeadReferenceId");
-    expect(subscribeSource).not.toContain("validateLeadTurnstileToken");
-    expect(subscribeSource).not.toContain("function getSuccessfulReferenceId");
-    expect(subscribeSource).toContain("getSuccessfulLeadReferenceId");
-    expect(subscribeSource).toContain("createApiSuccessResponse");
-    expect(subscribeSource).toContain("SUBSCRIBE_VALIDATION_EMAIL_INVALID");
-    expect(subscribeSource).toContain("SUBSCRIBE_PROCESSING_ERROR");
   });
 });

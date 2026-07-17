@@ -369,7 +369,6 @@ rules:
       include:
         - "src/app/api/contact/route.ts"
         - "src/app/api/inquiry/route.ts"
-        - "src/app/api/subscribe/route.ts"
     metadata:
       category: correctness
       technology: [nextjs]

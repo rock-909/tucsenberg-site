@@ -83,7 +83,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "tests/integration/api/lead-family-contract.test.ts",
         "tests/integration/api/lead-family-protection.test.ts",
         "src/app/api/inquiry/__tests__/route.test.ts",
-        "tests/integration/api/subscribe.test.ts",
       ],
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },

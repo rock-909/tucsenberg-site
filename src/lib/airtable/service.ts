@@ -10,7 +10,6 @@ import type AirtableNS from "airtable";
 import type {
   AirtableRecord,
   ContactLeadData,
-  NewsletterLeadData,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { env, getRuntimeEnvString } from "@/lib/env";
@@ -148,11 +147,11 @@ export class AirtableService {
 
   /**
    * Create a unified lead record in Airtable
-   * Supports contact, product inquiry, and newsletter leads
+   * Supports contact and product inquiry leads
    */
   public async createLead(
     type: LeadType,
-    data: ContactLeadData | ProductLeadData | NewsletterLeadData,
+    data: ContactLeadData | ProductLeadData,
   ): Promise<AirtableRecord> {
     const base = await this.requireBase();
     return createLeadRecord({ base, tableName: this.tableName, type, data });

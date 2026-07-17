@@ -73,11 +73,7 @@ export function isAllowedTurnstileHostname(hostname?: string | null): boolean {
  * Default allowed actions for Turnstile verification.
  * Can be extended via TURNSTILE_ALLOWED_ACTIONS env variable (comma-separated).
  */
-const DEFAULT_ALLOWED_ACTIONS = [
-  "contact_form",
-  "newsletter_subscribe",
-  "product_inquiry",
-] as const;
+const DEFAULT_ALLOWED_ACTIONS = ["contact_form", "product_inquiry"] as const;
 const DEFAULT_ALLOWED_ACTIONS_SET = new Set<string>(DEFAULT_ALLOWED_ACTIONS);
 
 function parseConfiguredActions(): string[] {

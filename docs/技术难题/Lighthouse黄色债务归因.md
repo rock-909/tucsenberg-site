@@ -68,7 +68,7 @@ Lighthouse transfer metrics after repair.
 | `@/lib/env` ← `turnstile.tsx`, `use-rate-limit.ts` | Client | Contact only | Acceptable on contact; optional env split still helps bundle dedup |
 | `@/config/contact-form-validation.ts` → `zod` | Server (no `"use client"`) | API/actions only | **No leakage** — not in client grep path |
 | `@/lib/form-schema/contact-form-schema.ts` → zod validators | Server | Used by server actions | **No leakage** to product/blog pages |
-| `@/lib/lead-pipeline/*` → `zod` | Server | API routes (`/api/inquiry`, `/api/subscribe`) | **No leakage** |
+| `@/lib/lead-pipeline/*` → `zod` | Server | API routes (`/api/inquiry`, `/api/contact`) | **No leakage** |
 | `@/components/forms/contact-form-container.tsx` → `use-contact-form` | Client | Contact page only (`contact-form-island`) | **No leakage** — not imported by product detail |
 | Historical `market-page-sections.tsx` path → product components only | Server | Product detail | **Retired by S2**; historical finding only. No contact/form/zod imports were found when this attribution was recorded. |
 

@@ -9,15 +9,9 @@ import { logger, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { hasTurnstileServiceFailure } from "@/lib/security/turnstile-errors";
 
-export type LeadTurnstileRouteLabel =
-  | "/api/inquiry"
-  | "/api/subscribe"
-  | "contact-canonical";
+export type LeadTurnstileRouteLabel = "/api/inquiry" | "contact-canonical";
 
-export type LeadTurnstileExpectedAction =
-  | "product_inquiry"
-  | "newsletter_subscribe"
-  | "contact_form";
+export type LeadTurnstileExpectedAction = "product_inquiry" | "contact_form";
 
 export interface LeadTurnstileVerificationInput {
   token: unknown;
@@ -92,9 +86,9 @@ export interface LeadTurnstileErrorOutcome {
 /**
  * Map a Lead-family Turnstile verification result to its HTTP error outcome.
  *
- * Centralizes the status/branch decision that inquiry, subscribe, and the
- * canonical contact path previously duplicated. Returns `null` when the
- * request verified and should proceed. Callers own the response envelope
+ * Centralizes the status/branch decision that inquiry and the canonical
+ * contact path previously duplicated. Returns `null` when the request
+ * verified and should proceed. Callers own the response envelope
  * (route `NextResponse` vs. canonical validation object).
  */
 export function mapLeadTurnstileResultToResponse(

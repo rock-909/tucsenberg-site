@@ -68,7 +68,6 @@ browser form -> route handler -> Zod -> Turnstile -> process lead -> parallel ow
 - When Airtable fails but email succeeds, the route returns success and the
   failure is logged as an error for manual CRM backfill.
 - Both channels failing returns failure with a stable error code.
-- Newsletter subscribe remains Airtable-only: record failure returns failure.
 - User-facing `partialSuccess` is not part of the target contract.
 
 Buyer-controlled free-text fields sent to Airtable or another spreadsheet-like
@@ -77,7 +76,7 @@ typed Email field is the narrow exception: the lead schema rejects
 formula-capable prefixes, and the valid address is stored unchanged so ordinary
 plus-addressing keeps working.
 
-When changing contact, inquiry, subscribe, or Airtable field mapping behavior,
+When changing contact, inquiry, or Airtable field mapping behavior,
 update focused lead-family tests for the changed contract. Do not rely on email
 happy-path proof to prove CRM persistence.
 
@@ -95,8 +94,7 @@ happy-path proof to prove CRM persistence.
 | Endpoint | Expected protection |
 | --- | --- |
 | `/api/inquiry` | Turnstile + validation + body size gate + rate limit while wired |
-| `/api/subscribe` | Turnstile + validation + body size gate + rate limit while wired |
-| `/api/contact` | same public route model as inquiry/subscribe |
+| `/api/contact` | same public route model as inquiry |
 | `/api/csp-report` | body size gate + rate limit; never trust payload content |
 | `/api/health` | public health only; no credentials, config dumps, or env details |
 

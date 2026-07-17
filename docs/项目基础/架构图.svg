@@ -96,7 +96,7 @@
 
     <rect x="754" y="526" width="286" height="126" rx="20" class="box"/>
     <text x="780" y="558" class="box-title">Lead capture interfaces</text>
-    <text x="780" y="585" class="box-copy">Contact form, inquiry drawer, newsletter widgets</text>
+    <text x="780" y="585" class="box-copy">Contact form and inquiry drawer</text>
     <text x="780" y="608" class="code">src/components/forms/**</text>
     <text x="780" y="628" class="code">src/components/products/**</text>
 
@@ -164,7 +164,7 @@
 
     <rect x="1062" y="956" width="288" height="100" rx="18" class="accent-box"/>
     <text x="1086" y="988" class="box-title">Unified lead pipeline</text>
-    <text x="1086" y="1015" class="box-copy">Contact / product / newsletter all end here</text>
+    <text x="1086" y="1015" class="box-copy">Contact / product leads end here</text>
     <text x="1086" y="1038" class="code">src/lib/lead-pipeline/{lead-schema,process-lead,utils}.ts</text>
 
     <rect x="918" y="1086" width="270" height="52" rx="16" class="box"/>

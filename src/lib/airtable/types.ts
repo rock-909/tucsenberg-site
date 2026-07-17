@@ -21,10 +21,7 @@ export interface AirtableQueryOptions {
 export type ContactStatus = "New" | "In Progress" | "Completed" | "Archived";
 
 // Lead source type for CRM tracking
-export type LeadSource =
-  | "Website Contact Form"
-  | "Product Inquiry"
-  | "Newsletter Subscription";
+export type LeadSource = "Website Contact Form" | "Product Inquiry";
 
 // Base lead data for CRM
 interface BaseLeadData extends MarketingAttributionFields {
@@ -57,7 +54,3 @@ export interface ProductLeadData extends BaseLeadData {
   quantity?: string | number;
   requirements?: string;
 }
-
-// Newsletter subscription lead data
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally minimal, only email from BaseLeadData
-export interface NewsletterLeadData extends BaseLeadData {}

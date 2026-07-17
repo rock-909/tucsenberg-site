@@ -70,7 +70,7 @@ docs/项目基础/行为合约.md
 ```
 
 Read it before changing routing, navigation, locale switching, 404 behavior,
-contact/inquiry/subscribe flows, product discovery, or critical CTA paths.
+contact/inquiry flows, product discovery, or critical CTA paths.
 
 If behavior changes, update the contract and proving tests in the same branch.
 
