@@ -295,13 +295,20 @@ const TRUTH_DOC_CHECKS = [
   {
     file: "docs/design/页面模式.md",
     required: [
-      "pattern reference, not a route-by-route current-state report",
-      "Historical gap snapshot",
-      "verify current code before creating cleanup work",
+      "pattern reference for new work and refactors",
+      ".text-section",
+      "surface-card",
+      "HeroGuideOverlay",
+      "--footer-bg",
+      "--button-height-default",
     ],
     forbidden: [
       "所有新页面和存量页面重构必须遵循此文件",
       "当前其他页面与本规范的偏差",
+      "Historical gap snapshot",
+      "禁边框用阴影",
+      "shadow-card transition-shadow",
+      "--footer-bg` | `#2c353b`",
     ],
   },
   ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({

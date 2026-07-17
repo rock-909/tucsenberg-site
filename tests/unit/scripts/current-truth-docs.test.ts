@@ -147,7 +147,11 @@ describe("current-truth docs guard", () => {
         }),
         expect.objectContaining({
           file: "docs/design/页面模式.md",
-          required: expect.arrayContaining(["Historical gap snapshot"]),
+          required: expect.arrayContaining([
+            ".text-section",
+            "surface-card",
+            "HeroGuideOverlay",
+          ]),
         }),
       ]),
     );
