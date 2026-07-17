@@ -381,8 +381,9 @@ function collectTextScanFindings(rootDir, errors) {
       );
     }
 
-    if (!isGovernedUiSource(file)) continue;
-
+    // Themes internal class markers can appear in any production source that
+    // carries UI class truth (including src/config and src/lib), not only app
+    // and components trees.
     if (COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN.test(source)) {
       errors.push(
         createFinding(
@@ -396,6 +397,8 @@ function collectTextScanFindings(rootDir, errors) {
         ),
       );
     }
+
+    if (!isGovernedUiSource(file)) continue;
 
     if (COMPONENT_GOVERNANCE_RAW_TAILWIND_PALETTE_CLASS_PATTERN.test(source)) {
       errors.push(
