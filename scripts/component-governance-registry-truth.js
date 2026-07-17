@@ -1,11 +1,14 @@
 const ts = require("typescript");
+const postcss = require("postcss");
 
 const USE_CLIENT_DIRECTIVE_PATTERN = /^\s*["']use client["'];?/m;
 const RADIX_PACKAGE_PATTERN = /^@radix-ui\/[^/]+(?:\/.*)?$/;
 const RADIX_THEMES_PATTERN = /^@radix-ui\/themes(?:\/.*)?$/;
 const RADIX_PRIMITIVE_PATTERN = /^@radix-ui\/react-[^/]+(?:\/.*)?$/;
+const RADIX_CSS_IMPORT_SPECIFIER_PATTERN =
+  /^(?:url\s*\(\s*)?["']?(@radix-ui\/[^\s"');]+)["']?/i;
 
-function unwrapStaticStringExpression(node) {
+function unwrapTransparentExpression(node) {
   let current = node;
 
   while (
@@ -22,7 +25,7 @@ function unwrapStaticStringExpression(node) {
 }
 
 function getStringLiteralValue(node) {
-  const unwrapped = unwrapStaticStringExpression(node);
+  const unwrapped = unwrapTransparentExpression(node);
   return ts.isStringLiteralLike(unwrapped) ? unwrapped.text : null;
 }
 
@@ -58,10 +61,10 @@ function collectModuleReferences(source, filePath) {
     ) {
       addReference(node.moduleReference.expression);
     } else if (ts.isCallExpression(node) && node.arguments.length > 0) {
-      const isDynamicImport =
-        node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const callTarget = unwrapTransparentExpression(node.expression);
+      const isDynamicImport = callTarget.kind === ts.SyntaxKind.ImportKeyword;
       const isRequireCall =
-        ts.isIdentifier(node.expression) && node.expression.text === "require";
+        ts.isIdentifier(callTarget) && callTarget.text === "require";
 
       if (isDynamicImport || isRequireCall) {
         addReference(node.arguments[0]);
@@ -97,101 +100,24 @@ function getRadixModuleReferenceSummary(
   };
 }
 
-function stripCssComments(source) {
-  return source.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
-    comment.replace(/[^\n]/g, " "),
-  );
-}
-
-function skipCssWhitespace(source, start) {
-  let cursor = start;
-  while (/\s/.test(source[cursor] ?? "")) cursor += 1;
-  return cursor;
-}
-
-function readCssQuotedValue(source, start) {
-  const quote = source[start];
-  if (quote !== '"' && quote !== "'") return null;
-
-  let cursor = start + 1;
-  while (cursor < source.length) {
-    if (source[cursor] === "\\") {
-      cursor += 2;
-      continue;
-    }
-    if (source[cursor] === quote) {
-      return {
-        value: source.slice(start + 1, cursor),
-        end: cursor + 1,
-      };
-    }
-    cursor += 1;
-  }
-
-  return null;
-}
-
-function readCssImportSpecifier(source, start) {
-  let cursor = skipCssWhitespace(source, start);
-  const functionName = source.slice(cursor, cursor + 3).toLowerCase();
-
-  if (functionName === "url") {
-    cursor = skipCssWhitespace(source, cursor + 3);
-    if (source[cursor] !== "(") return null;
-    cursor = skipCssWhitespace(source, cursor + 1);
-
-    const quoted = readCssQuotedValue(source, cursor);
-    if (quoted) return { specifier: quoted.value, end: quoted.end };
-
-    const valueStart = cursor;
-    while (
-      cursor < source.length &&
-      source[cursor] !== ")" &&
-      !/\s/.test(source[cursor])
-    ) {
-      cursor += 1;
-    }
-    if (cursor === valueStart) return null;
-    return { specifier: source.slice(valueStart, cursor), end: cursor };
-  }
-
-  const quoted = readCssQuotedValue(source, cursor);
-  return quoted ? { specifier: quoted.value, end: quoted.end } : null;
-}
-
 function collectCssImportReferences(source) {
-  const commentStrippedSource = stripCssComments(source);
   const references = [];
-  let cursor = 0;
+  const root = postcss.parse(source, { from: undefined });
 
-  while (cursor < commentStrippedSource.length) {
-    const quoted = readCssQuotedValue(commentStrippedSource, cursor);
-    if (quoted) {
-      cursor = quoted.end;
-      continue;
-    }
+  root.walkAtRules((atRule) => {
+    if (atRule.name.toLowerCase() !== "import") return;
 
-    const keyword = commentStrippedSource.slice(cursor, cursor + 7);
-    const nextCharacter = commentStrippedSource[cursor + 7] ?? "";
-    if (keyword.toLowerCase() !== "@import" || !/\s/.test(nextCharacter)) {
-      cursor += 1;
-      continue;
-    }
+    const normalizedParams = atRule.params
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .trim();
+    const match = RADIX_CSS_IMPORT_SPECIFIER_PATTERN.exec(normalizedParams);
+    if (!match || !RADIX_PACKAGE_PATTERN.test(match[1])) return;
 
-    const reference = readCssImportSpecifier(commentStrippedSource, cursor + 7);
-    if (!reference) {
-      cursor += 7;
-      continue;
-    }
-
-    if (RADIX_PACKAGE_PATTERN.test(reference.specifier)) {
-      references.push({
-        specifier: reference.specifier,
-        line: commentStrippedSource.slice(0, cursor).split("\n").length,
-      });
-    }
-    cursor = reference.end;
-  }
+    references.push({
+      specifier: match[1],
+      line: atRule.source?.start?.line ?? 1,
+    });
+  });
 
   return references;
 }

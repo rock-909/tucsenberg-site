@@ -555,6 +555,16 @@ describe("component-governance-check", () => {
           'const theme = require("@radix-ui/themes" as string);\nexport { theme };',
         "src/lib/non-null-require.ts":
           'const theme = require(("@radix-ui/themes")!);\nexport { theme };',
+        "src/lib/parenthesized-require-target.ts":
+          'const theme = (require)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/asserted-require-target.ts":
+          'const theme = (require as NodeRequire)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/type-asserted-require-target.ts":
+          'const theme = (<NodeRequire>require)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/satisfies-require-target.ts":
+          'const theme = (require satisfies NodeRequire)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/non-null-require-target.ts":
+          'const theme = require!("@radix-ui/themes");\nexport { theme };',
       }),
     );
     fixtureRoots.push(rootDir);
@@ -570,6 +580,11 @@ describe("component-governance-check", () => {
       "src/lib/parenthesized-require.ts",
       "src/lib/asserted-require.ts",
       "src/lib/non-null-require.ts",
+      "src/lib/parenthesized-require-target.ts",
+      "src/lib/asserted-require-target.ts",
+      "src/lib/type-asserted-require-target.ts",
+      "src/lib/satisfies-require-target.ts",
+      "src/lib/non-null-require-target.ts",
     ]) {
       expectFinding(result.errors, "radix-themes-import-forbidden", file);
     }
@@ -704,6 +719,10 @@ describe("component-governance-check", () => {
           '@import "@radix-ui/colors/blue.css"; @import "@radix-ui/themes/styles.css";',
         "src/components/ui/vendor-uppercase.css":
           '@IMPORT URL("@radix-ui/themes/styles.css");',
+        "src/components/ui/vendor-no-space.css": [
+          '@import"@radix-ui/themes/styles.css";',
+          "@IMPORT'@radix-ui/themes/styles.css';",
+        ].join("\n"),
       }),
     );
     fixtureRoots.push(rootDir);
@@ -730,6 +749,11 @@ describe("component-governance-check", () => {
       result.errors,
       "radix-themes-import-forbidden",
       "src/components/ui/vendor-uppercase.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-no-space.css",
     );
   });
 
