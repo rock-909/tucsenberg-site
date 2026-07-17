@@ -138,7 +138,6 @@ jobs:
           CI: true
           NODE_ENV: production
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
-          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
@@ -173,7 +172,6 @@ jobs:
           NODE_ENV: production
           APP_ENV: ${{ inputs.environment }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
-          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
@@ -195,7 +193,6 @@ jobs:
           NODE_ENV: production
           APP_ENV: ${{ inputs.environment }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
-          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}

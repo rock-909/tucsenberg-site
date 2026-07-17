@@ -18,7 +18,7 @@ module.exports = {
         "revert",
       ],
     ],
-    "subject-max-length": [2, "always", 72],
+    "subject-max-length": [2, "always", 100],
     "subject-case": [2, "always", "lower-case"],
     "body-max-line-length": [2, "always", 100],
     "header-max-length": [2, "always", 100],

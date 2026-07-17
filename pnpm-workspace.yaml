@@ -30,7 +30,6 @@ minimumReleaseAgeExclude:
   - '@storybook/csf-plugin@10.4.6'
   - '@storybook/react-dom-shim@10.4.6'
 overrides:
-  '@react-email/ui>next': 16.2.7
   esbuild@>=0.17.0 <0.28.1: '>=0.28.1'
   playwright@<1.55.1: '>=1.57.0'
   vite@>=7.1.0 <7.3.2: '>=7.3.2'
@@ -78,10 +77,4 @@ peerDependencyRules:
     tsconfck>typescript: '6'
 sharedWorkspaceLockfile: true
 trustPolicy: no-downgrade
-# chokidar@4.0.3 is currently pulled only through react-email. pnpm 11 flags
-# this resolved package as a trust downgrade, but react-email@6.6.5 still
-# depends on chokidar@^4.0.3. Keep the global no-downgrade policy and narrow
-# the exception to this exact resolved package until upstream moves off it.
-trustPolicyExclude:
-  - chokidar@4.0.3
 verifyDepsBeforeRun: true

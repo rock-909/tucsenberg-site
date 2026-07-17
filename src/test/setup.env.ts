@@ -74,7 +74,6 @@ vi.mock("@/lib/env", () => {
     EMAIL_REPLY_TO: "reply@example.com",
     CSP_REPORT_URI: "https://example.com/csp-report",
     ADMIN_API_TOKEN: "test-admin-token",
-    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "test-server-actions-key",
     ALLOW_MEMORY_RATE_LIMIT: false,
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",
     NEXT_PUBLIC_BASE_URL: "https://example.com",

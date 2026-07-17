@@ -180,8 +180,8 @@ body-hashing without a real incident.
 - Browser code reads only `NEXT_PUBLIC_*` helpers exported from `@/lib/env`.
 - Do not expose server secrets through `NEXT_PUBLIC_*`.
 - Sensitive keys include `AIRTABLE_API_KEY`, `RESEND_API_KEY`,
-  `TURNSTILE_SECRET_KEY`, `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`,
-  Cloudflare API tokens, and owner dashboard access keys.
+  `TURNSTILE_SECRET_KEY`, Cloudflare API tokens, and owner dashboard access
+  keys.
 
 For future auth/session cookies, default to `httpOnly`, `secure`, and
 `sameSite: "strict"` unless a specific flow proves otherwise.

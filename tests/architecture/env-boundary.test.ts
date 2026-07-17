@@ -18,7 +18,6 @@ const FORBIDDEN_SERVER_ENV_KEYS = [
   "RATE_LIMIT_PEPPER",
   "UPSTASH_REDIS_REST_TOKEN",
   "KV_REST_API_TOKEN",
-  "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY",
 ] as const;
 
 function read(repoPath: string) {

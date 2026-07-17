@@ -296,13 +296,6 @@ function validateProductionRuntimeContract(env) {
     MIN_SECRET_LENGTH,
     "production rate-limit keys rely on it and runtime already throws when it is missing or weak",
   );
-  validateMinLengthEnv(
-    errors,
-    env,
-    "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY",
-    MIN_SECRET_LENGTH,
-    "Server Actions deployment requires a stable encryption key",
-  );
 
   if (CONTACT_FORM_CONFIG.features.enableTurnstile) {
     validateRequiredEnv(

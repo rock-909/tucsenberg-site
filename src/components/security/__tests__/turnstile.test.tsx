@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TurnstileWidget, useTurnstile } from "@/components/security/turnstile";
+import { TurnstileWidget } from "@/components/security/turnstile";
 import { captureExpectedConsoleErrors } from "@/test/console";
 
 // 最早时机设置环境变量 - 在任何模块导入之前
@@ -277,90 +277,5 @@ describe("TurnstileWidget", () => {
         labels.devBypass,
       );
     });
-  });
-});
-
-describe("useTurnstile Hook", () => {
-  it("应该返回初始状态", () => {
-    const TestComponent = () => {
-      const turnstile = useTurnstile();
-      return (
-        <div>
-          <span data-testid="verified">{turnstile.isVerified.toString()}</span>
-          <span data-testid="loading">{turnstile.isLoading.toString()}</span>
-          <span data-testid="token">{turnstile.token || "null"}</span>
-          <span data-testid="error">{turnstile.error || "null"}</span>
-        </div>
-      );
-    };
-
-    render(<TestComponent />);
-
-    expect(screen.getByTestId("verified")).toHaveTextContent("false");
-    expect(screen.getByTestId("loading")).toHaveTextContent("false");
-    expect(screen.getByTestId("token")).toHaveTextContent("null");
-    expect(screen.getByTestId("error")).toHaveTextContent("null");
-  });
-
-  it("应该支持重置功能", () => {
-    const TestComponent = () => {
-      const turnstile = useTurnstile();
-
-      React.useEffect(() => {
-        turnstile.reset();
-      }, [turnstile]);
-
-      return (
-        <div>
-          <span data-testid="verified">{turnstile.isVerified.toString()}</span>
-          <span data-testid="token">{turnstile.token || "null"}</span>
-        </div>
-      );
-    };
-
-    render(<TestComponent />);
-
-    expect(screen.getByTestId("verified")).toHaveTextContent("false");
-    expect(screen.getByTestId("token")).toHaveTextContent("null");
-  });
-
-  it("应该提供handlers对象", () => {
-    const TestComponent = () => {
-      const turnstile = useTurnstile();
-
-      return (
-        <div>
-          <span data-testid="has-handlers">
-            {typeof turnstile.handlers === "object" ? "true" : "false"}
-          </span>
-          <span data-testid="has-onSuccess">
-            {typeof turnstile.handlers.onSuccess === "function"
-              ? "true"
-              : "false"}
-          </span>
-          <span data-testid="has-onError">
-            {typeof turnstile.handlers.onError === "function"
-              ? "true"
-              : "false"}
-          </span>
-          <span data-testid="has-onExpire">
-            {typeof turnstile.handlers.onExpire === "function"
-              ? "true"
-              : "false"}
-          </span>
-          <span data-testid="has-onLoad">
-            {typeof turnstile.handlers.onLoad === "function" ? "true" : "false"}
-          </span>
-        </div>
-      );
-    };
-
-    render(<TestComponent />);
-
-    expect(screen.getByTestId("has-handlers")).toHaveTextContent("true");
-    expect(screen.getByTestId("has-onSuccess")).toHaveTextContent("true");
-    expect(screen.getByTestId("has-onError")).toHaveTextContent("true");
-    expect(screen.getByTestId("has-onExpire")).toHaveTextContent("true");
-    expect(screen.getByTestId("has-onLoad")).toHaveTextContent("true");
   });
 });

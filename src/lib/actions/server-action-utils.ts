@@ -1,6 +1,6 @@
 /**
  * Server Action 工具函数
- * 提供 Server Actions 的通用工具函数，不包含 'use server' 指令
+ * Defines shared result types without declaring a Server Action.
  */
 
 /**

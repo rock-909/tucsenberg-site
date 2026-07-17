@@ -1,12 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const EMAIL_TEMPLATE_FILES = [
-  "src/emails/ConfirmationEmail.tsx",
-  "src/emails/ContactFormEmail.tsx",
-  "src/emails/ProductInquiryEmail.tsx",
-] as const;
-
 const COPY_BEARING_LOCAL_CONSTANT_PATTERN = /\bconst\s+([A-Z][A-Z0-9_]*)\s*=/g;
 
 const COPY_BEARING_LOCAL_CONSTANT_TOKENS = new Set([
@@ -26,9 +20,6 @@ const TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE = [
   "emailTemplates",
   "src/emails/email-copy.ts",
   "src/lib/email/runtime-email-content.ts",
-  "src/emails/ConfirmationEmail.tsx",
-  "src/emails/ContactFormEmail.tsx",
-  "src/emails/ProductInquiryEmail.tsx",
   "src/lib/resend-utils.ts",
 ] as const;
 
@@ -109,19 +100,6 @@ describe("email copy boundary", () => {
 
     for (const nonCopyExample of nonCopyExamples) {
       expect(hasCopyBearingLocalConstant(nonCopyExample)).toBe(false);
-    }
-  });
-
-  it("routes email templates through the shared copy layer", () => {
-    for (const file of EMAIL_TEMPLATE_FILES) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- test iterates over a fixed email template allowlist
-      const source = readFileSync(file, "utf8");
-
-      expect(source).toContain("@/emails/email-copy");
-      expect(source).not.toContain("const PREVIEW_TEXT =");
-      expect(source).not.toContain("const PREVIEW_PREFIX =");
-      expect(source).not.toContain("const FOOTER_TEXT =");
-      expect(hasCopyBearingLocalConstant(source)).toBe(false);
     }
   });
 

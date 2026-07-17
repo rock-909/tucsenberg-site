@@ -244,45 +244,4 @@ export class ResendService {
       throw new Error("Failed to send product inquiry email", { cause: error });
     }
   }
-
-  /**
-   * 获取邮件发送统计
-   * Get email sending statistics
-   */
-  public getEmailStats(): {
-    sent: number;
-    delivered: number;
-    bounced: number;
-    complained: number;
-  } {
-    return {
-      sent: 0,
-      delivered: 0,
-      bounced: 0,
-      complained: 0,
-    };
-  }
-
-  /**
-   * 获取邮件配置
-   * Get email configuration
-   */
-  public getEmailConfig(): typeof this.emailConfig {
-    return {
-      from: this.emailConfig.from,
-      replyTo: this.emailConfig.replyTo,
-      supportEmail: this.emailConfig.supportEmail,
-    };
-  }
-
-  /**
-   * 检查API连接状态
-   * Check API connection status
-   *
-   * Note: This is a synchronous check that only verifies configuration state.
-   * For actual API connectivity testing, use an async health check endpoint.
-   */
-  public checkConnection(): boolean {
-    return this.isReady();
-  }
 }

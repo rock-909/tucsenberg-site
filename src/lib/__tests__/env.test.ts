@@ -79,8 +79,7 @@ describe("env type safety", () => {
     expect("RESEND_API_KEY" in env).toBe(true);
   });
 
-  it("exposes the production runtime contract vars through the central env object", () => {
-    expect("NEXT_SERVER_ACTIONS_ENCRYPTION_KEY" in env).toBe(true);
+  it("exposes the production rate-limit contract vars through the central env object", () => {
     expect("ALLOW_MEMORY_RATE_LIMIT" in env).toBe(true);
   });
 
