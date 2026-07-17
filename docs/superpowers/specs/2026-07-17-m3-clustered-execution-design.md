@@ -3,7 +3,7 @@
 # M3 任务簇执行与验收设计
 
 - 日期：2026-07-17
-- 状态：待 owner 审阅书面 spec
+- 状态：已批准（2026-07-17）；执行计划见 `docs/superpowers/plans/2026-07-17-m3-clustered-execution.md`
 - 适用范围：`docs/技术难题/整库审查2026-07/执行计划.md` 中尚未完成的 M3 任务
 - 当前基线：`origin/main` 为 `fc2344a`；M3 已验收并合并 13/33
 - 当前未合并工作：C6，PR #113，设计时最新 head 为 `c5fad56c4d85c0dc11c572c6b7a15fcfb4e663b6`
