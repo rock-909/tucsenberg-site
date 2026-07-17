@@ -1,93 +1,13 @@
 {
-  "common": {
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "close": "Close",
-    "success": "Success",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "save": "Save",
-    "edit": "Edit",
-    "delete": "Delete",
-    "search": "Search",
-    "filter": "Filter",
-    "sort": "Sort",
-    "next": "Next",
-    "previous": "Previous",
-    "open": "Open",
-    "toast": {
-      "form": {
-        "contact": {
-          "success": "Message sent successfully!",
-          "successDescription": "Thank you for your message. We'll get back to you soon.",
-          "error": "Failed to send message",
-          "errorDescription": "Please try again later or contact us directly.",
-          "loading": "Sending message..."
-        },
-        "feedback": {
-          "success": "Feedback submitted!",
-          "successDescription": "Thank you for your valuable feedback.",
-          "error": "Failed to submit feedback",
-          "errorDescription": "Please try again later.",
-          "loading": "Submitting feedback..."
-        }
-      }
-    }
-  },
   "theme": {
-    "toggle": "Toggle theme",
-    "toggleLabel": "Theme toggle",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
-    "selectTheme": "Select display theme",
-    "selectDisplayTheme": "Select a display theme:",
     "switchToLight": "Switch to light theme",
     "switchToDark": "Switch to dark theme",
     "switchToSystem": "Switch to system theme"
-  },
-  "language": {
-    "toggle": "Toggle language",
-    "selectLanguage": "Select Language",
-    "english": "English",
-    "chinese": "中文",
-    "switching": "Switching language...",
-    "switchSuccess": "Language switched successfully",
-    "switchError": "Failed to switch language",
-    "fallbackWarning": "Some content may not be available in your selected language",
-    "detectionInfo": "Detection Info",
-    "source": "Source",
-    "confidence": "Confidence",
-    "userPreference": "User preference saved",
-    "detector": {
-      "title": "Detection Info",
-      "source": "Source",
-      "confidence": "Confidence",
-      "userSaved": "✓ User preference saved",
-      "sources": {
-        "browser": "Browser",
-        "cookie": "Cookie",
-        "url": "URL",
-        "header": "Header",
-        "default": "Default",
-        "user": "User",
-        "stored": "Stored",
-        "geo": "Geo",
-        "timezone": "Timezone"
-      }
-    }
-  },
-  "monitoring": {
-    "loadError": "Monitoring component failed to load"
   },
   "accessibility": {
     "skipToContent": "Skip to main content",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
-    "loading": "Content is loading",
-    "error": "An error has occurred",
-    "languageSelector": "Select language",
-    "themeSelector": "Select theme",
     "securityVerificationUnavailable": "Security verification is temporarily unavailable.",
     "turnstileDevBypass": "Dev mode: Turnstile verification bypassed",
     "turnstileTestMode": "Bot protection disabled in test mode",
@@ -120,7 +40,6 @@
     "organization": {
       "name": "{companyName}",
       "description": "Factory-direct flood barrier supply from China",
-      "phone": "Contact sales by email",
       "social": {
         "twitter": "",
         "linkedin": ""
@@ -131,41 +50,28 @@
       "description": "Factory-direct flood barrier supply from China"
     },
     "article": {
-      "defaultTitle": "Article",
-      "defaultDescription": "Article description",
       "defaultAuthor": "{companyName}"
-    },
-    "product": {
-      "defaultName": "Product",
-      "defaultDescription": "Product description"
     }
   },
   "apiErrors": {
     "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again later.",
-    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
     "SERVICE_UNAVAILABLE": "This service is temporarily unavailable. Please try again later.",
     "INVALID_JSON_BODY": "Invalid request format.",
-    "INVALID_REQUEST": "Some required fields are missing or invalid.",
     "PAYLOAD_TOO_LARGE": "The request payload is too large.",
-    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
     "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
     "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
     "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
-    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
-    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later.",
     "TURNSTILE_REQUIRED": "Security verification required.",
     "TURNSTILE_REJECTED": "Security verification failed. Please try again.",
     "TURNSTILE_UNAVAILABLE": "Security verification is temporarily unavailable. Please try again later.",
-    "UNKNOWN_ERROR": "An unknown error occurred."
+    "UNKNOWN_ERROR": "An unknown error occurred.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
+    "INVALID_REQUEST": "Some required fields are missing or invalid.",
+    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
+    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
+    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later."
   },
   "errors": {
-    "global": {
-      "title": "Something went wrong!",
-      "description": "We apologize for the inconvenience. An unexpected error has occurred.",
-      "tryAgain": "Try again",
-      "goHome": "Go to homepage",
-      "devDetails": "Error Details (Development Only)"
-    },
     "products": {
       "title": "Failed to load product information",
       "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
@@ -182,16 +88,7 @@
       "title": "Page not found",
       "description": "The page you're looking for doesn't exist or has been moved.",
       "goHome": "Back to homepage"
-    },
-    "serverError": "Internal server error",
-    "networkError": "Network connection error",
-    "validationError": "Please check your input",
-    "unauthorized": "You are not authorized to access this page",
-    "forbidden": "Access to this resource is forbidden",
-    "timeout": "Request timeout - please try again",
-    "generic": "Something went wrong. Please try again later.",
-    "translationMissing": "Translation not available",
-    "loadingFailed": "Failed to load content"
+    }
   },
   "navigation": {
     "home": "Home",
@@ -199,7 +96,6 @@
     "oemWholesale": "OEM & Wholesale",
     "guides": "Guides",
     "about": "About",
-    "contact": "Contact",
     "contactSales": "Request a Quote",
     "siteName": "{siteName}",
     "siteDescription": "Factory-direct flood barrier supply from China."
@@ -336,9 +232,7 @@
       "title": "Protecting openings or building a product line — either way, start with the numbers.",
       "description": "Send your requirement; standard items quoted in 12 hours.",
       "primary": "Request a Quote",
-      "secondary": "Wholesale & OEM",
-      "trustAriaLabel": "Homepage trust facts",
-      "trust": "Standard items quoted in 12 hours · 3-year warranty on all standard lines · Factory pool supplies established brands"
+      "secondary": "Wholesale & OEM"
     },
     "howToChoose": {
       "title": "How to choose",
@@ -450,20 +344,6 @@
       "detailTitle": "When to open a product page",
       "detailDescription": "Use the detail pages when the buying question depends on material, opening type, deployment method or OEM/private label options."
     },
-    "overviewCards": {
-      "mainOffer": {
-        "title": "ABS, aluminum, bags, tube dams and FRP",
-        "description": "Five product lines, one coordinated factory pool, one QC standard."
-      },
-      "proofMaterials": {
-        "title": "Specs and supply boundaries",
-        "description": "Tables show typical product parameters and where final values must be confirmed at quotation."
-      },
-      "nextStep": {
-        "title": "RFQ-ready next step",
-        "description": "Openings, quantities, market and delivery port are enough to start. Photos and drawings help."
-      }
-    },
     "boundary": {
       "items": {
         "content": "Prices stay in the quotation, not on public pages",
@@ -501,72 +381,13 @@
       "contact": "Request a Quote"
     },
     "market": {
-      "familyNav": {
-        "jumpTo": "Jump to"
-      },
-      "technical": {
-        "title": "Technical Properties"
-      },
-      "certifications": {
-        "title": "Certifications & Compliance"
-      },
-      "trade": {
-        "title": "Trade Information",
-        "moq": "Minimum Order",
-        "leadTime": "Quote Timing",
-        "supplyCapacity": "Supply Capacity",
-        "packaging": "Packaging",
-        "portOfLoading": "Port of Loading"
-      },
-      "specsComingSoon": "Specifications coming soon. Contact us for detailed product data.",
       "landing": {
         "faqTitle": "FAQ",
         "finalCtaTitle": "Request a quote",
         "rfqNoteFallback": "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer.",
         "downloadSpec": "Download spec sheet"
-      },
-      "cta": {
-        "heading": "Need to review {marketLabel}?",
-        "description": "Send an inquiry with dimensions, quantity, market, timeline and photos or drawings if available.",
-        "button": "Request a Quote"
-      },
-      "familyInquiry": {
-        "cta": "Request quote for {familyLabel}"
       }
     },
-    "specTable": {
-      "Height": "Height",
-      "Model": "Model",
-      "Straight unit": "Straight unit",
-      "Curve units (in/out)": "Curve units (in/out)",
-      "Wall thickness": "Wall thickness",
-      "Parameter": "Parameter",
-      "Value": "Value",
-      "": "",
-      "Dry size": "Dry size",
-      "Dry weight": "Dry weight",
-      "Deployed weight": "Deployed weight",
-      "Activation time": "Activation time",
-      "Deployed height": "Deployed height",
-      "Packing": "Packing",
-      "Carton (NW/GW)": "Carton (NW/GW)",
-      "Colours": "Colours",
-      "Section length": "Section length",
-      "Protection height": "Protection height",
-      "Tube wall": "Tube wall",
-      "Ground mat": "Ground mat",
-      "Fabric weight": "Fabric weight",
-      "Section weight": "Section weight",
-      "Tear strength": "Tear strength",
-      "Tensile strength": "Tensile strength",
-      "Flex durability": "Flex durability",
-      "Fire rating": "Fire rating",
-      "Working temperature": "Working temperature",
-      "Inflation": "Inflation",
-      "Area": "Area",
-      "Status": "Status"
-    },
-    "familyCount": "{count} product families",
     "markets": {
       "abs-flood-barriers": {
         "label": "ABS Interlocking Boxwall Flood Barriers",
@@ -592,187 +413,27 @@
     "families": {
       "abs-flood-barriers": {
         "abs-boxwall": {
-          "label": "ABS boxwall units",
-          "description": "Straight, curved and gable-end ABS units for freestanding runs."
+          "label": "ABS boxwall units"
         }
       },
       "aluminum-flood-gates": {
         "aluminum-gates": {
-          "label": "Aluminum demountable systems",
-          "description": "Planks, posts, seals and spares custom-cut to each opening schedule."
+          "label": "Aluminum demountable systems"
         }
       },
       "absorbent-flood-bags": {
         "absorbent-bags": {
-          "label": "Water-activated flood bags",
-          "description": "Flat-packed SAP-core bags for rain and inland freshwater flooding."
+          "label": "Water-activated flood bags"
         }
       },
       "flood-tube-dams": {
         "tube-dams": {
-          "label": "Inflatable tube dam sections",
-          "description": "Five and ten metre PVC sections with pump, skirt, nails and repair kit."
+          "label": "Inflatable tube dam sections"
         }
       },
       "frp-flood-barriers": {
         "frp-planks": {
-          "label": "Pultruded composite planks",
-          "description": "Order-driven FRP plank profiles with span and deflection data compiled per first runs."
-        }
-      }
-    },
-    "technicalLabels": {
-      "material": "Material",
-      "workingTemperature": "Working temperature",
-      "configurations": "Configurations",
-      "plankProfileHeight": "Plank profile height",
-      "postOptions": "Post options",
-      "useBoundary": "Use boundary",
-      "shelfLife": "Shelf life",
-      "protectionHeight": "Protection height",
-      "fillMode": "Fill mode",
-      "profileClass": "Profile class",
-      "status": "Status"
-    },
-    "specs": {
-      "abs-flood-barriers": {
-        "technical": {
-          "material": "UV-stabilised ABS",
-          "workingTemperature": "-40 °C to +95 °C",
-          "configurations": "Straight, inward/outward curve, gable end"
-        },
-        "trade": {
-          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
-          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
-          "supplyCapacity": "Confirmed with each quotation.",
-          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
-          "portOfLoading": "China port confirmed at quotation."
-        },
-        "families": {
-          "abs-boxwall": {
-            "highlights": {
-              "0": "Freestanding L-profile; no anchors, no drilling, no damage to the surface.",
-              "1": "Mechanical locking-and-coupling joint; no tools, no loose pins.",
-              "2": "Straight, inward/outward curve and gable-end units available at every height."
-            },
-            "groups": {
-              "0": {
-                "label": "TB-BW series"
-              }
-            }
-          }
-        }
-      },
-      "aluminum-flood-gates": {
-        "technical": {
-          "material": "6063-T6 aluminum with EPDM seals",
-          "plankProfileHeight": "180 mm",
-          "postOptions": "wall-mount / ground-socket / freestanding"
-        },
-        "trade": {
-          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
-          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
-          "supplyCapacity": "Confirmed with each quotation.",
-          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
-          "portOfLoading": "China port confirmed at quotation."
-        },
-        "families": {
-          "aluminum-gates": {
-            "highlights": {
-              "0": "Custom-cut to your opening schedule from tested profiles.",
-              "1": "Replacement seals, clamps and single planks stay orderable for years.",
-              "2": "Wall-mounted channels, ground-socket posts and freestanding posts."
-            },
-            "groups": {
-              "0": {
-                "label": "TB-AG series"
-              }
-            }
-          }
-        }
-      },
-      "absorbent-flood-bags": {
-        "technical": {
-          "material": "PP non-woven shell with SAP core",
-          "useBoundary": "Fresh water only",
-          "shelfLife": "3 years vacuum-packed, stored cool and dry"
-        },
-        "trade": {
-          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
-          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
-          "supplyCapacity": "Confirmed with each quotation.",
-          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
-          "portOfLoading": "China port confirmed at quotation."
-        },
-        "families": {
-          "absorbent-bags": {
-            "highlights": {
-              "0": "Ships flat and activates to deployed weight in 3-4 minutes.",
-              "1": "Private label from the first order: printed shell, carton design and instruction insert.",
-              "2": "Built for rain and inland freshwater flooding, not salt or brackish water."
-            },
-            "groups": {
-              "0": {
-                "label": "TB-FB series"
-              }
-            }
-          }
-        }
-      },
-      "flood-tube-dams": {
-        "technical": {
-          "material": "0.9 mm PVC tarpaulin, thermally moulded",
-          "protectionHeight": "1 m",
-          "fillMode": "Air standard; water-fill supported where practical"
-        },
-        "trade": {
-          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
-          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
-          "supplyCapacity": "Confirmed with each quotation.",
-          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
-          "portOfLoading": "China port confirmed at quotation."
-        },
-        "families": {
-          "tube-dams": {
-            "highlights": {
-              "0": "Roll out, inflate, pin and connect sections for longer perimeters.",
-              "1": "Works on grass, soil and broken ground where rigid barriers cannot seal.",
-              "2": "Full accessory kit ships in the bag."
-            },
-            "groups": {
-              "0": {
-                "label": "TB-TD series"
-              }
-            }
-          }
-        }
-      },
-      "frp-flood-barriers": {
-        "technical": {
-          "material": "Pultruded fiberglass (FRP)",
-          "profileClass": "180 mm plank profile class",
-          "status": "Order-driven production; testing data being compiled"
-        },
-        "trade": {
-          "moq": "Quoted by line: carton, pallet, LCL, container, or project schedule.",
-          "leadTime": "Standard items quoted within 12 hours; custom configurations within 48.",
-          "supplyCapacity": "Confirmed with each quotation.",
-          "packaging": "Carton, pallet, LCL, container, and mixed-line consolidation.",
-          "portOfLoading": "China port confirmed at quotation."
-        },
-        "families": {
-          "frp-planks": {
-            "highlights": {
-              "0": "Corrosion-free and non-conductive for coastal, chemical and electrical sites.",
-              "1": "Same stacked-plank, post-and-seal logic as aluminum gates.",
-              "2": "Order-driven tooling with span and deflection data compiled per produced profile."
-            },
-            "groups": {
-              "0": {
-                "label": "TB-CP series"
-              }
-            }
-          }
+          "label": "Pultruded composite planks"
         }
       }
     }

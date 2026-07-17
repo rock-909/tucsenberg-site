@@ -55,7 +55,6 @@
  * - `navigation`: 导航链接 (home, about, contact, services, etc.)
  * - `accessibility`: 无障碍文本 (skipToContent, openMenu, etc.)
  * - `theme`: 主题相关 (toggle, light, dark, system, etc.)
- * - `language`: 语言切换 (toggle, selectLanguage, english, chinese, etc.)
  * - `errorBoundary`: 错误边界 (title, description, tryAgain)
  * - `seo`: SEO 元数据 (title, description, siteName, pages, etc.)
  * - `footer`: 页脚内容 (sections, platform, etc.)

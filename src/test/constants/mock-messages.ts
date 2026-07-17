@@ -139,43 +139,6 @@ const themeMessages = {
 } as const;
 
 /**
- * Language 命名空间 - 语言切换相关消息
- * 包含语言选择器、切换状态、检测信息
- */
-const languageMessages = {
-  toggle: "Toggle language",
-  selectLanguage: "Select Language",
-  english: "English",
-  chinese: "中文",
-  switching: "Switching language...",
-  switchSuccess: "Language switched successfully",
-  switchError: "Failed to switch language",
-  fallbackWarning:
-    "Some content may not be available in your selected language",
-  detectionInfo: "Detection Info",
-  source: "Source",
-  confidence: "Confidence",
-  userPreference: "User preference saved",
-  detector: {
-    title: "Detection Info",
-    source: "Source",
-    confidence: "Confidence",
-    userSaved: "✓ User preference saved",
-    sources: {
-      browser: "Browser",
-      cookie: "Cookie",
-      url: "URL",
-      header: "Header",
-      default: "Default",
-      user: "User",
-      stored: "Stored",
-      geo: "Geo",
-      timezone: "Timezone",
-    },
-  },
-} as const;
-
-/**
  * ErrorBoundary 命名空间 - 错误边界组件消息
  * 用于全局错误处理组件
  */
@@ -343,7 +306,6 @@ export const combinedMessages = {
   navigation: navigationMessages,
   accessibility: accessibilityMessages,
   theme: themeMessages,
-  language: languageMessages,
   errorBoundary: errorBoundaryMessages,
   seo: seoMessages,
   footer: footerMessages,

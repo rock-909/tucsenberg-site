@@ -15,7 +15,9 @@ describe("catalog message loading", () => {
     expect(messages).toHaveProperty("contact");
     expect(messages).toHaveProperty("requestQuote");
     expect(messages).toHaveProperty("catalog");
-    expect(messages).toHaveProperty("products");
+    expect(messages).toHaveProperty("emailTemplates");
+    expect(messages).not.toHaveProperty("products");
+    expect(messages).not.toHaveProperty("language");
     expect(messages).not.toHaveProperty("blog");
     expect(messages).not.toHaveProperty("customProject");
   });

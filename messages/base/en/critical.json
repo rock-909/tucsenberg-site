@@ -1,93 +1,13 @@
 {
-  "common": {
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "close": "Close",
-    "success": "Success",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "save": "Save",
-    "edit": "Edit",
-    "delete": "Delete",
-    "search": "Search",
-    "filter": "Filter",
-    "sort": "Sort",
-    "next": "Next",
-    "previous": "Previous",
-    "open": "Open",
-    "toast": {
-      "form": {
-        "contact": {
-          "success": "Message sent successfully!",
-          "successDescription": "Thank you for your message. We'll get back to you soon.",
-          "error": "Failed to send message",
-          "errorDescription": "Please try again later or contact us directly.",
-          "loading": "Sending message..."
-        },
-        "feedback": {
-          "success": "Feedback submitted!",
-          "successDescription": "Thank you for your valuable feedback.",
-          "error": "Failed to submit feedback",
-          "errorDescription": "Please try again later.",
-          "loading": "Submitting feedback..."
-        }
-      }
-    }
-  },
   "theme": {
-    "toggle": "Toggle theme",
-    "toggleLabel": "Theme toggle",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
-    "selectTheme": "Select display theme",
-    "selectDisplayTheme": "Select a display theme:",
     "switchToLight": "Switch to light theme",
     "switchToDark": "Switch to dark theme",
     "switchToSystem": "Switch to system theme"
-  },
-  "language": {
-    "toggle": "Toggle language",
-    "selectLanguage": "Select Language",
-    "english": "English",
-    "chinese": "中文",
-    "switching": "Switching language...",
-    "switchSuccess": "Language switched successfully",
-    "switchError": "Failed to switch language",
-    "fallbackWarning": "Some content may not be available in your selected language",
-    "detectionInfo": "Detection Info",
-    "source": "Source",
-    "confidence": "Confidence",
-    "userPreference": "User preference saved",
-    "detector": {
-      "title": "Detection Info",
-      "source": "Source",
-      "confidence": "Confidence",
-      "userSaved": "✓ User preference saved",
-      "sources": {
-        "browser": "Browser",
-        "cookie": "Cookie",
-        "url": "URL",
-        "header": "Header",
-        "default": "Default",
-        "user": "User",
-        "stored": "Stored",
-        "geo": "Geo",
-        "timezone": "Timezone"
-      }
-    }
-  },
-  "monitoring": {
-    "loadError": "Monitoring component failed to load"
   },
   "accessibility": {
     "skipToContent": "Skip to main content",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
-    "loading": "Content is loading",
-    "error": "An error has occurred",
-    "languageSelector": "Select language",
-    "themeSelector": "Select theme",
     "securityVerificationUnavailable": "Security verification is temporarily unavailable.",
     "turnstileDevBypass": "Dev mode: Turnstile verification bypassed",
     "turnstileTestMode": "Bot protection disabled in test mode",
@@ -120,7 +40,6 @@
     "organization": {
       "name": "{companyName}",
       "description": "Factory-direct flood barrier supply from China",
-      "phone": "Contact sales by email",
       "social": {
         "twitter": "",
         "linkedin": ""
@@ -131,41 +50,28 @@
       "description": "Factory-direct flood barrier supply from China"
     },
     "article": {
-      "defaultTitle": "Article",
-      "defaultDescription": "Article description",
       "defaultAuthor": "{companyName}"
-    },
-    "product": {
-      "defaultName": "Product",
-      "defaultDescription": "Product description"
     }
   },
   "apiErrors": {
     "RATE_LIMIT_EXCEEDED": "Too many requests. Please try again later.",
-    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
     "SERVICE_UNAVAILABLE": "This service is temporarily unavailable. Please try again later.",
     "INVALID_JSON_BODY": "Invalid request format.",
-    "INVALID_REQUEST": "Some required fields are missing or invalid.",
     "PAYLOAD_TOO_LARGE": "The request payload is too large.",
-    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
     "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
     "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
     "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
-    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
-    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later.",
     "TURNSTILE_REQUIRED": "Security verification required.",
     "TURNSTILE_REJECTED": "Security verification failed. Please try again.",
     "TURNSTILE_UNAVAILABLE": "Security verification is temporarily unavailable. Please try again later.",
-    "UNKNOWN_ERROR": "An unknown error occurred."
+    "UNKNOWN_ERROR": "An unknown error occurred.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred. Please try again later.",
+    "INVALID_REQUEST": "Some required fields are missing or invalid.",
+    "UNSUPPORTED_MEDIA_TYPE": "Unsupported content type.",
+    "INQUIRY_VALIDATION_FAILED": "Please review your inquiry details and try again.",
+    "INQUIRY_PROCESSING_ERROR": "We could not send your inquiry right now. Please try again later."
   },
   "errors": {
-    "global": {
-      "title": "Something went wrong!",
-      "description": "We apologize for the inconvenience. An unexpected error has occurred.",
-      "tryAgain": "Try again",
-      "goHome": "Go to homepage",
-      "devDetails": "Error Details (Development Only)"
-    },
     "products": {
       "title": "Failed to load product information",
       "description": "We couldn't load the product details. Please try again or return to the homepage to browse other content.",
@@ -182,15 +88,6 @@
       "title": "Page not found",
       "description": "The page you're looking for doesn't exist or has been moved.",
       "goHome": "Back to homepage"
-    },
-    "serverError": "Internal server error",
-    "networkError": "Network connection error",
-    "validationError": "Please check your input",
-    "unauthorized": "You are not authorized to access this page",
-    "forbidden": "Access to this resource is forbidden",
-    "timeout": "Request timeout - please try again",
-    "generic": "Something went wrong. Please try again later.",
-    "translationMissing": "Translation not available",
-    "loadingFailed": "Failed to load content"
+    }
   }
 }

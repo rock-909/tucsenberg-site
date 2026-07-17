@@ -39,7 +39,9 @@ describe("load-messages canonical runtime source", () => {
     const messages = await loadCompleteMessagesFromSource("en");
 
     expect(messages).toHaveProperty("apiErrors");
-    expect(messages).toHaveProperty("common");
+    expect(messages).toHaveProperty("catalog");
+    expect(messages).toHaveProperty("contact");
+    expect(messages).not.toHaveProperty("common");
   });
 
   it("keeps cached and direct source loading shape-compatible", async () => {
