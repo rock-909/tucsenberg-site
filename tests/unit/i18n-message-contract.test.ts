@@ -20,34 +20,13 @@ const REQUIRED_RUNTIME_KEYS = [
   "contact.form.privacyNotice",
 ] as const;
 
-const INQUIRY_API_VALIDATION_DETAIL_KEYS = [
-  "errors.fullName.required",
-  "errors.fullName.invalid",
-  "errors.fullName.tooLong",
-  "errors.fullName.tooShort",
-  "errors.email.required",
-  "errors.email.invalid",
-  "errors.email.tooLong",
-  "errors.company.tooShort",
-  "errors.company.tooLong",
-  "errors.company.invalid",
-  "errors.productInquiryKind.required",
-  "errors.productInquiryKind.invalid",
-  "errors.catalogProductId.required",
-  "errors.catalogProductId.invalid",
-  "errors.buyerInterest.tooLong",
-  "errors.buyerInterest.invalid",
-  "errors.quantity.required",
-  "errors.quantity.invalid",
-  "errors.requirements.invalid",
-  "errors.requirements.tooLong",
-] as const;
-
 const CONTACT_API_VALIDATION_DETAIL_KEYS = [
   "errors.message.required",
   "errors.message.tooShort",
   "errors.message.tooLong",
   "errors.subject.length",
+  "errors.fullName.tooShort",
+  "errors.company.tooShort",
 ] as const;
 
 const REQUEST_QUOTE_RUNTIME_KEYS = [
@@ -111,20 +90,7 @@ describe("real i18n runtime message contract", () => {
   );
 
   it.each(runtimeMessageCases)(
-    "keeps inquiry API validation detail keys in the real %s contact form bundle",
-    (_locale, messages) => {
-      for (const detailKey of INQUIRY_API_VALIDATION_DETAIL_KEYS) {
-        const keyPath = `contact.form.${detailKey}`;
-        const value = getMessageValue(messages, keyPath);
-
-        expect(typeof value, keyPath).toBe("string");
-        expect(String(value).trim(), keyPath).not.toBe("");
-      }
-    },
-  );
-
-  it.each(runtimeMessageCases)(
-    "keeps contact API validation detail keys in the real %s contact form bundle",
+    "keeps contact-only API validation detail keys in the real %s contact form bundle",
     (_locale, messages) => {
       for (const detailKey of CONTACT_API_VALIDATION_DETAIL_KEYS) {
         const keyPath = `contact.form.${detailKey}`;

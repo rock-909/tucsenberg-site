@@ -112,26 +112,20 @@ const baseLeadFields = {
   ...leadAttributionFields,
 };
 
-const productQuantitySchema: z.ZodType<string | number> = z
+const productQuantitySchema: z.ZodType<string | number | undefined> = z
   .unknown()
-  .transform((value, context) => {
+  .transform((value) => {
+    // Optional field: blank form/API input means "not provided".
     if (
       value === undefined ||
       (typeof value === "string" && value.trim().length === 0)
     ) {
-      context.addIssue({
-        code: "too_small",
-        minimum: 1,
-        inclusive: true,
-        origin: "string",
-        message: "Quantity is required",
-      });
-      return z.NEVER;
+      return undefined;
     }
 
     return typeof value === "string" ? value.trim() : value;
   })
-  .refine(isValidProductQuantity, {
+  .refine((value) => value === undefined || isValidProductQuantity(value), {
     error: "Quantity must be positive when using a numeric string",
   });
 

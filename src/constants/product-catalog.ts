@@ -46,7 +46,15 @@ export function isValidMarketFamilyCombo(
   marketSlug: string,
   familySlug: string,
 ): boolean {
-  return PRODUCT_CATALOG.families.some(
+  return getFamilyByMarketAndSlug(marketSlug, familySlug) !== undefined;
+}
+
+/** Resolve a catalog family row by market + family slug */
+export function getFamilyByMarketAndSlug(
+  marketSlug: string,
+  familySlug: string,
+): ProductFamilyDefinition | undefined {
+  return PRODUCT_CATALOG.families.find(
     (family) => family.marketSlug === marketSlug && family.slug === familySlug,
   );
 }

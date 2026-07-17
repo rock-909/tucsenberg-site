@@ -315,13 +315,15 @@ describe("Lead Schema", () => {
       expect(productLeadSchema.safeParse(minimalLead).success).toBe(true);
     });
 
-    it("rejects a blank quantity string when quantity is supplied", () => {
-      expect(
-        productLeadSchema.safeParse({
-          ...validCatalogProductLead,
-          quantity: "   ",
-        }).success,
-      ).toBe(false);
+    it("treats a blank quantity string as omitted optional input", () => {
+      const result = productLeadSchema.safeParse({
+        ...validCatalogProductLead,
+        quantity: "   ",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.quantity).toBeUndefined();
+      }
     });
 
     it("rejects numeric quantity strings that are zero or negative", () => {

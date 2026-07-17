@@ -25,10 +25,11 @@ function isRequiredMinimum(issue: ZodIssue): boolean {
 }
 
 function isMissingRequiredInvalidType(issue: ZodIssue): boolean {
+  // Zod 4 invalid_type issues often omit `input`. Only treat as missing when
+  // the issue text says undefined was received — wrong types map to .invalid.
   return (
     issue.code === "invalid_type" &&
-    (issue.input === undefined ||
-      issue.message.toLowerCase().includes("received undefined"))
+    issue.message.toLowerCase().includes("received undefined")
   );
 }
 
@@ -46,6 +47,11 @@ function mapZodIssueToValidationDetail(
 ): string {
   const baseKey = getBaseValidationKey(issue, fieldKeys);
 
+  // Unregistered fields must stay on the single shared fallback leaf.
+  if (baseKey === FALLBACK_VALIDATION_DETAIL) {
+    return FALLBACK_VALIDATION_DETAIL;
+  }
+
   switch (issue.code) {
     case "too_small":
       return isRequiredMinimum(issue) || isBlankRequiredIssue(issue)
@@ -58,11 +64,11 @@ function mapZodIssueToValidationDetail(
         ? `${baseKey}.required`
         : `${baseKey}.invalid`;
     case "custom":
-      return `${baseKey}.invalid`;
-    default:
-      return baseKey === FALLBACK_VALIDATION_DETAIL
-        ? FALLBACK_VALIDATION_DETAIL
+      return issue.message.toLowerCase().includes("required")
+        ? `${baseKey}.required`
         : `${baseKey}.invalid`;
+    default:
+      return `${baseKey}.invalid`;
   }
 }
 

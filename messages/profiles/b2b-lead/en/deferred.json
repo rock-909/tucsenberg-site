@@ -100,7 +100,6 @@
           "shouldBeEmpty": "This field should be empty"
         },
         "productInquiryKind": {
-          "required": "Please choose an inquiry type before sending",
           "invalid": "The inquiry type is not recognized"
         },
         "catalogProductId": {
@@ -112,7 +111,6 @@
           "invalid": "Product interest contains invalid characters"
         },
         "quantity": {
-          "required": "Quantity is required",
           "invalid": "Quantity must be a valid amount"
         },
         "requirements": {

@@ -9,10 +9,7 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/api-response";
-import {
-  mapZodIssuesToValidationDetails,
-  type ValidationFieldErrorKeys,
-} from "@/lib/api/validation-error-details";
+import { mapInquiryValidationDetails } from "@/lib/api/inquiry-validation-details";
 import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { isRuntimeProduction } from "@/lib/env";
@@ -46,17 +43,6 @@ interface ProductLeadValidationFailure {
 type ProductLeadValidationResult =
   | ProductLeadValidationSuccess
   | ProductLeadValidationFailure;
-
-const PRODUCT_INQUIRY_FIELD_ERROR_KEYS: ValidationFieldErrorKeys = {
-  fullName: "errors.fullName",
-  email: "errors.email",
-  company: "errors.company",
-  productInquiryKind: "errors.productInquiryKind",
-  catalogProductId: "errors.catalogProductId",
-  buyerInterest: "errors.buyerInterest",
-  quantity: "errors.quantity",
-  requirements: "errors.requirements",
-};
 
 async function validateProductInquiryTurnstile(
   token: unknown,
@@ -98,10 +84,7 @@ function validateLeadData(
 
   return {
     success: false,
-    details: mapZodIssuesToValidationDetails(
-      parsed.error.issues,
-      PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
-    ),
+    details: mapInquiryValidationDetails(parsed.error.issues),
   };
 }
 
