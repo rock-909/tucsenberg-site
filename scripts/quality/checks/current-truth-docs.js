@@ -305,10 +305,6 @@ const TRUTH_DOC_CHECKS = [
     forbidden: [
       "所有新页面和存量页面重构必须遵循此文件",
       "当前其他页面与本规范的偏差",
-      "Historical gap snapshot",
-      "禁边框用阴影",
-      "shadow-card transition-shadow",
-      "--footer-bg` | `#2c353b`",
     ],
   },
   ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({

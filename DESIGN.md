@@ -34,6 +34,11 @@ typography:
     fontSize: "36px"
     fontWeight: 600
     lineHeight: "1.2"
+  section:
+    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontSize: "24px mobile, 28px desktop"
+    fontWeight: 600
+    lineHeight: "1.2"
   heading:
     fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
     fontSize: "32px mobile, 36px desktop"
@@ -263,7 +268,8 @@ new animation dependencies without separate proof.
 ### Hierarchy
 
 - **Display**（600，36px，line-height 1.2）：页面 H1、hero 主标。
-- **Heading**（600，32px mobile / 36px desktop，leading-tight）：section 标题（`.text-heading` 工具类）。
+- **Section**（600，24px mobile / 28px desktop，leading-tight）：**普通 section H2**（`.text-section` / `SectionHead`）。这是全站 section 标题权威；详见 `docs/design/页面模式.md`。
+- **Heading**（600，32px mobile / 36px desktop，leading-tight）：较强展示标题（`.text-heading`），**不是**普通 section H2。
 - **Title**（600–700，20–24px，leading-tight）：卡片标题、子区块标题。
 - **Body**（400，16px，leading-relaxed ≈1.625）：正文（`.text-body`）。最大行宽 65–75ch。
 - **Label**（500，14px）：表单 label、按钮文字。
