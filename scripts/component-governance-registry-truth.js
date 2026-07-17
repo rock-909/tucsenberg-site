@@ -29,86 +29,6 @@ function getStringLiteralValue(node) {
   return ts.isStringLiteralLike(unwrapped) ? unwrapped.text : null;
 }
 
-function isModuleIdentifier(node) {
-  const unwrapped = unwrapTransparentExpression(node);
-  return ts.isIdentifier(unwrapped) && unwrapped.text === "module";
-}
-
-function isRequireCallee(node) {
-  const unwrapped = unwrapTransparentExpression(node);
-
-  if (ts.isIdentifier(unwrapped) && unwrapped.text === "require") {
-    return true;
-  }
-
-  if (
-    ts.isPropertyAccessExpression(unwrapped) &&
-    unwrapped.name.text === "require" &&
-    isModuleIdentifier(unwrapped.expression)
-  ) {
-    return true;
-  }
-
-  if (ts.isElementAccessExpression(unwrapped)) {
-    const propertyName = getStringLiteralValue(unwrapped.argumentExpression);
-    return (
-      propertyName === "require" && isModuleIdentifier(unwrapped.expression)
-    );
-  }
-
-  return false;
-}
-
-function isCreateRequireCallee(node) {
-  const unwrapped = unwrapTransparentExpression(node);
-  return ts.isIdentifier(unwrapped) && unwrapped.text === "createRequire";
-}
-
-function collectModuleLoaderAliases(sourceFile) {
-  const aliases = new Set();
-
-  function visit(node) {
-    if (
-      ts.isVariableDeclaration(node) &&
-      ts.isIdentifier(node.name) &&
-      node.initializer
-    ) {
-      const initializer = unwrapTransparentExpression(node.initializer);
-      const isCreateRequireCall =
-        ts.isCallExpression(initializer) &&
-        isCreateRequireCallee(initializer.expression);
-
-      if (isRequireCallee(initializer) || isCreateRequireCall) {
-        aliases.add(node.name.text);
-      }
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return aliases;
-}
-
-function isModuleLoaderAlias(node, aliases) {
-  const unwrapped = unwrapTransparentExpression(node);
-  return ts.isIdentifier(unwrapped) && aliases.has(unwrapped.text);
-}
-
-function getRequireCallSpecifierArgument(node) {
-  const callee = unwrapTransparentExpression(node.expression);
-
-  if (
-    !ts.isPropertyAccessExpression(callee) ||
-    callee.name.text !== "call" ||
-    !isRequireCallee(callee.expression)
-  ) {
-    return null;
-  }
-
-  return node.arguments[1] ?? null;
-}
-
 function collectModuleReferences(source, filePath) {
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -117,7 +37,6 @@ function collectModuleReferences(source, filePath) {
     true,
   );
   const references = [];
-  const loaderAliases = collectModuleLoaderAliases(sourceFile);
 
   function addReference(node) {
     const specifier = getStringLiteralValue(node);
@@ -141,19 +60,20 @@ function collectModuleReferences(source, filePath) {
       node.moduleReference.expression
     ) {
       addReference(node.moduleReference.expression);
-    } else if (ts.isCallExpression(node) && node.arguments.length > 0) {
+    } else if (ts.isCallExpression(node)) {
       const callTarget = unwrapTransparentExpression(node.expression);
-      const isDynamicImport = callTarget.kind === ts.SyntaxKind.ImportKeyword;
-
-      if (
-        isDynamicImport ||
-        isRequireCallee(callTarget) ||
-        isModuleLoaderAlias(callTarget, loaderAliases)
-      ) {
+      // Keep dynamic import() even when the specifier is not Radix.
+      if (callTarget.kind === ts.SyntaxKind.ImportKeyword) {
         addReference(node.arguments[0]);
-      } else {
-        const requireCallSpecifier = getRequireCallSpecifierArgument(node);
-        if (requireCallSpecifier) addReference(requireCallSpecifier);
+      }
+
+      // Hard package boundary: any call arg that is a static @radix-ui/*
+      // string counts, regardless of require / createRequire / alias / .call.
+      for (const argument of node.arguments) {
+        const specifier = getStringLiteralValue(argument);
+        if (specifier !== null && RADIX_PACKAGE_PATTERN.test(specifier)) {
+          addReference(argument);
+        }
       }
     }
 

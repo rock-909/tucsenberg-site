@@ -8,6 +8,9 @@ import {
 
 const starterChecksFacade = require("../../../scripts/starter-checks.js");
 const { collectComponentGovernanceFindings } = starterChecksFacade;
+const {
+  getRadixModuleReferenceSummary,
+} = require("../../../scripts/component-governance-registry-truth.js");
 
 describe("component-governance-check C1 closure gaps", () => {
   const fixtureRoots: string[] = [];
@@ -76,7 +79,7 @@ describe("component-governance-check C1 closure gaps", () => {
     );
   });
 
-  it("scans production MDX and aliased CommonJS Radix loaders", () => {
+  it("scans production MDX and static @radix-ui call arguments", () => {
     const rootDir = createFixture(
       baseFiles({
         "content/pages/en/radix-themes.mdx": [
@@ -85,14 +88,38 @@ describe("component-governance-check C1 closure gaps", () => {
           '<section className="rt-Card"><Card /></section>',
         ].join("\n"),
         "src/lib/create-require-theme.ts": [
+          'import { createRequire } from "node:module";',
           "const load = createRequire(import.meta.url);",
           'const theme = load("@radix-ui/themes");',
           "export { theme };",
         ].join("\n"),
+        "src/lib/create-require-alias-theme.ts": [
+          'import { createRequire as makeRequire } from "node:module";',
+          "const load = makeRequire(import.meta.url);",
+          'const theme = load("@radix-ui/themes");',
+          "export { theme };",
+        ].join("\n"),
+        "src/lib/create-require-namespace-theme.ts": [
+          'import * as nodeModule from "node:module";',
+          "const load = nodeModule.createRequire(import.meta.url);",
+          'const theme = load("@radix-ui/themes");',
+          "export { theme };",
+        ].join("\n"),
+        "src/lib/create-require-direct-theme.ts": [
+          'import { createRequire } from "node:module";',
+          'const theme = createRequire(import.meta.url)("@radix-ui/themes");',
+          "export { theme };",
+        ].join("\n"),
         "src/lib/require-alias-dialog.ts": [
           "const load = require;",
-          'const dialog = load("@radix-ui/react-dialog");',
+          "const again = load;",
+          'const dialog = again("@radix-ui/react-dialog");',
           "export { dialog };",
+        ].join("\n"),
+        "src/lib/require-alias-call-theme.ts": [
+          "const load = require;",
+          'const theme = load.call(null, "@radix-ui/themes");',
+          "export { theme };",
         ].join("\n"),
         "src/lib/require-call-theme.ts":
           'const theme = require.call(null, "@radix-ui/themes");\nexport { theme };',
@@ -117,6 +144,10 @@ describe("component-governance-check C1 closure gaps", () => {
     );
     for (const file of [
       "src/lib/create-require-theme.ts",
+      "src/lib/create-require-alias-theme.ts",
+      "src/lib/create-require-namespace-theme.ts",
+      "src/lib/create-require-direct-theme.ts",
+      "src/lib/require-alias-call-theme.ts",
       "src/lib/require-call-theme.ts",
     ]) {
       expectFinding(result.errors, "radix-themes-import-forbidden", file);
@@ -126,6 +157,22 @@ describe("component-governance-check C1 closure gaps", () => {
       "src/lib/module-require-call-dialog.ts",
     ]) {
       expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+  });
+
+  it("treats static @radix-ui call args as package references", () => {
+    const cases = [
+      'import { createRequire as makeRequire } from "node:module";\nconst load = makeRequire(import.meta.url);\nload("@radix-ui/themes");',
+      'import * as nodeModule from "node:module";\nconst load = nodeModule.createRequire(import.meta.url);\nload("@radix-ui/themes");',
+      'const load = require;\nconst again = load;\nagain("@radix-ui/themes");',
+      'const load = require;\nload.call(null, "@radix-ui/themes");',
+      'import { createRequire } from "node:module";\ncreateRequire(import.meta.url)("@radix-ui/themes");',
+    ];
+
+    for (const source of cases) {
+      expect(
+        getRadixModuleReferenceSummary(source).themesReference,
+      ).not.toBeNull();
     }
   });
 });
