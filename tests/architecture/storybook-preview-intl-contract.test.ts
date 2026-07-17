@@ -2,18 +2,19 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("Storybook preview i18n contract", () => {
-  it("loads only generated compatibility messages for component previews", () => {
+  it("loads composed physical-pack messages for component previews", () => {
     const messageSource = readFileSync(
       "src/lib/i18n/storybook-messages.ts",
       "utf8",
     );
 
-    expect(messageSource).toContain('from "@messages/en/messages.json"');
+    expect(messageSource).toContain('from "@/lib/i18n/composed-messages"');
+    expect(messageSource).not.toContain("@messages/en/");
     expect(messageSource).not.toContain("@messages/en/critical.json");
     expect(messageSource).not.toContain("@messages/en/deferred.json");
     expect(messageSource).not.toContain("@messages/zh/");
     expect(messageSource).not.toMatch(
-      /messages\/profiles|\.env|server-only|@\/lib\/env|NEXT_SERVER/u,
+      /\.env|server-only|@\/lib\/env|NEXT_SERVER/u,
     );
   });
 

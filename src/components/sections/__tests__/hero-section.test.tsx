@@ -2,14 +2,14 @@ import { readFileSync } from "node:fs";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import enMessages from "../../../../messages/en/messages.json";
+import catalogMessages from "../../../../messages/profiles/catalog/en/messages.json";
 import { HeroSection } from "@/components/sections/hero-section";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 const heroMessageCases = [
   {
     locale: "en",
-    hero: enMessages.home.hero,
+    hero: catalogMessages.home.hero,
     proof: {
       est: "Standard items",
       estLabel: "quoted in 12 hours",

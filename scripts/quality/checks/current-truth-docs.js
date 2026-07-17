@@ -82,7 +82,7 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
       "base -> b2b-lead -> catalog",
-      "pnpm messages:sync",
+      "pnpm content:check",
     ],
   },
   {
@@ -180,7 +180,7 @@ const TRUTH_DOC_CHECKS = [
       "content/config/content.json",
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
-      "pnpm messages:sync",
+      "pnpm content:check",
       "node scripts/starter-checks.js content-readiness",
     ],
   },
@@ -190,7 +190,7 @@ const TRUTH_DOC_CHECKS = [
       "src/constants/tucsenberg-product-page-*.ts",
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
-      "pnpm messages:sync",
+      "pnpm content:check",
     ],
   },
   {
@@ -327,11 +327,12 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/b2b-lead/{locale}/messages.json",
       "messages/profiles/catalog/{locale}/messages.json",
       "base -> b2b-lead -> catalog",
-      "pnpm messages:sync",
+      "pnpm content:check",
     ],
     forbidden: [
       "messages/profiles/{profile}/{locale}/messages.json",
       "src/sites/**/messages/**",
+      "pnpm messages:sync",
     ],
   },
   {

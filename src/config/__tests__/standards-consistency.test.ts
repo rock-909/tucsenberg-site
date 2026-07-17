@@ -91,11 +91,13 @@ describe("starter example standard wording", () => {
   });
 
   it("keeps materialized Tucsenberg catalog copy free of generic starter standards", () => {
-    const enMessages = readProjectFile("messages/en/messages.json");
+    const catalogMessages = readProjectFile(
+      "messages/profiles/catalog/en/messages.json",
+    );
     const tucsenbergPages = readProjectFile(
       "src/constants/tucsenberg-product-pages.ts",
     );
-    const materializedCopy = [enMessages, tucsenbergPages].join("\n");
+    const materializedCopy = [catalogMessages, tucsenbergPages].join("\n");
 
     expect(materializedCopy).not.toContain("Example Standard");
     expect(materializedCopy).not.toContain("示例标准");

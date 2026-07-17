@@ -1,11 +1,8 @@
-import enMessages from "@messages/en/messages.json";
+import type { Locale } from "@/i18n/routing-config";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 
 type StorybookLocale = "en";
 type StorybookMessages = Record<string, unknown>;
-
-const storybookMessagesByLocale = {
-  en: enMessages as StorybookMessages,
-} satisfies Record<StorybookLocale, StorybookMessages>;
 
 export function getStorybookLocale(_value: unknown): StorybookLocale {
   return "en";
@@ -14,5 +11,5 @@ export function getStorybookLocale(_value: unknown): StorybookLocale {
 export function getStorybookMessages(
   locale: StorybookLocale,
 ): StorybookMessages {
-  return storybookMessagesByLocale[locale];
+  return getComposedMessages(locale as Locale);
 }

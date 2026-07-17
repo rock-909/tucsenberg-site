@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 function createRuntimeEnvMock({
@@ -144,11 +142,6 @@ function assertFactualCompleteMessages(
   expectStringPath(value, ["emailTemplates", "confirmation", "subject"]);
 }
 
-function readMessageJson(relativePath: string): unknown {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo message fixtures from explicit call sites
-  return JSON.parse(readFileSync(join(process.cwd(), relativePath), "utf8"));
-}
-
 afterEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
@@ -249,10 +242,10 @@ describe("load-messages runtime loading", () => {
     expect(JSON.stringify(messages)).not.toMatch(factualPlaceholderPattern);
   });
 
-  it("keeps factual brand values as placeholders in source JSON", () => {
-    const enMessages = readMessageJson(
-      "messages/en/messages.json",
-    ) as FactualSourceMessages;
+  it("keeps factual brand values as placeholders in source JSON", async () => {
+    const { getComposedMessages } =
+      await import("@/lib/i18n/composed-messages");
+    const enMessages = getComposedMessages("en") as FactualSourceMessages;
 
     expect(enMessages.navigation.siteName).toBe("{siteName}");
     expect(enMessages.footer.copyright).toBe("{copyright}");

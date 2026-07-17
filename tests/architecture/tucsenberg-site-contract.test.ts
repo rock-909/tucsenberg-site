@@ -65,7 +65,6 @@ const TARGET_DOWNLOADS = [
 
 const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
   "messages/profiles/catalog/en/messages.json",
-  "messages/en/messages.json",
 ] as const;
 
 const ACTIVE_MESSAGE_FILES = [...ACTIVE_HOMEPAGE_MESSAGE_FILES] as const;

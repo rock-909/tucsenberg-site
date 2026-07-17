@@ -1,13 +1,12 @@
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   CATALOG_MESSAGE_PACK_IDS,
   type MessagePackId,
 } from "@/lib/i18n/message-pack-config";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import { mergeObjects } from "@/lib/merge-objects";
-import { syncMessageCompat } from "../../scripts/quality/sync-message-compat";
 
 const LOCALES = ["en"] as const;
 const REQUIRED_PACK_FILES = [
@@ -15,8 +14,6 @@ const REQUIRED_PACK_FILES = [
     LOCALES.map((locale) => getPackPath(packId, locale)),
   ),
 ];
-const TEMP_TRASH_ROOT = path.join(os.tmpdir(), "catalog-message-sync-trash");
-const tempRoots: string[] = [];
 
 function packFileExists(relativePath: string): boolean {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test checks fixed pack paths from REQUIRED_PACK_FILES
@@ -46,61 +43,15 @@ function composeCatalogMessages(locale: (typeof LOCALES)[number]) {
   );
 }
 
-function createTempMessageRoot(): string {
-  const rootDir = fs.mkdtempSync(
-    path.join(os.tmpdir(), "catalog-message-sync-"),
-  );
-  tempRoots.push(rootDir);
-  for (const [index, packId] of CATALOG_MESSAGE_PACK_IDS.entries()) {
-    const filePath = path.join(rootDir, getPackPath(packId, "en"));
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
-    fs.writeFileSync(
-      filePath,
-      `${JSON.stringify({ shared: index, [packId]: "messages" }, null, 2)}\n`,
-    );
-  }
-  return rootDir;
-}
-
 describe("physical message packs", () => {
-  afterEach(() => {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup uses a fixed recoverable temporary trash directory
-    fs.mkdirSync(TEMP_TRASH_ROOT, { recursive: true });
-    for (const rootDir of tempRoots.splice(0)) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks test-owned temporary directories
-      if (!fs.existsSync(rootDir)) continue;
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup moves fixtures to a recoverable temporary trash directory
-      fs.renameSync(
-        rootDir,
-        path.join(TEMP_TRASH_ROOT, `${path.basename(rootDir)}-${Date.now()}`),
-      );
-    }
-  });
-
-  it("provides a supported catalog-only compatibility sync command", () => {
+  it("does not keep a generated compatibility sync command", () => {
     const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8")) as {
       scripts?: Record<string, string>;
     };
 
-    expect(packageJson.scripts?.["messages:sync"]).toBe(
-      "tsx scripts/quality/sync-message-compat.ts",
-    );
-    expect(fs.existsSync("scripts/quality/sync-message-compat.ts")).toBe(true);
-  });
-
-  it("regenerates flat compatibility files from the fixed catalog graph", () => {
-    const rootDir = createTempMessageRoot();
-
-    syncMessageCompat(rootDir);
-
-    expect(readJson(path.join(rootDir, "messages/en/messages.json"))).toEqual({
-      shared: 2,
-      base: "messages",
-      "b2b-lead": "messages",
-      catalog: "messages",
-    });
+    expect(packageJson.scripts?.["messages:sync"]).toBeUndefined();
+    expect(fs.existsSync("scripts/quality/sync-message-compat.ts")).toBe(false);
+    expect(fs.existsSync("messages/en")).toBe(false);
   });
 
   it("keeps every required pack file present", () => {
@@ -109,19 +60,25 @@ describe("physical message packs", () => {
     }
   });
 
-  it("moves runtime imports away from broad compatibility files", () => {
+  it("keeps runtime and static helpers on physical packs only", () => {
     const loader = fs.readFileSync("src/lib/i18n/load-messages.ts", "utf8");
     const packLoader = fs.readFileSync(
       "src/lib/i18n/message-pack-loader.ts",
       "utf8",
     );
+    const composed = fs.readFileSync(
+      "src/lib/i18n/composed-messages.ts",
+      "utf8",
+    );
 
     expect(packLoader).toContain("@messages/base/en/messages.json");
+    expect(composed).toContain("@messages/base/en/messages.json");
     expect(loader).not.toContain("@messages/en/messages.json");
     expect(packLoader).not.toContain("@messages/en/messages.json");
+    expect(composed).not.toContain("@messages/en/messages.json");
   });
 
-  it("documents physical packs as authoring truth instead of generated compat files", () => {
+  it("documents physical packs as the only message authoring surface", () => {
     const readme = fs.readFileSync("README.md", "utf8");
     const replace = fs.readFileSync("docs/项目基础/替换顺序.md", "utf8");
     const messages = fs.readFileSync("docs/项目基础/消息文案.md", "utf8");
@@ -133,26 +90,38 @@ describe("physical message packs", () => {
     expect(readme).toContain("messages/base/**");
     expect(readme).toContain("messages/profiles/b2b-lead/**");
     expect(readme).toContain("messages/profiles/catalog/**");
-    expect(readme).toContain("generated compat");
+    expect(readme).not.toContain("generated compat");
+    expect(readme).not.toContain("pnpm messages:sync");
     expect(readme).not.toContain(
       "UI 文案放在 `messages/{locale}/messages.json`",
     );
 
     expect(replace).toContain("physical packs first");
-    expect(replace).toContain("不要先手改 generated compat 文件");
+    expect(replace).not.toContain("不要先手改 generated compat 文件");
     expect(messages).toContain(
       "Physical message packs are the authoring truth",
     );
+    expect(messages).not.toContain("pnpm messages:sync");
     expect(currentTruthDocs).toContain("messages/base/**");
     expect(currentTruthDocs).toContain("messages/profiles/b2b-lead/**");
     expect(currentTruthDocs).toContain("messages/profiles/catalog/**");
   });
 
-  it("keeps generated compatibility messages synced from the active catalog physical packs", () => {
+  it("keeps the shared composition helper aligned with pack merge order", () => {
     for (const locale of LOCALES) {
-      expect(readJson(`messages/${locale}/messages.json`)).toEqual(
+      expect(getComposedMessages(locale)).toEqual(
         composeCatalogMessages(locale),
       );
     }
+  });
+
+  it("has no leftover generated locale message directory", () => {
+    const messagesRoot = path.join(process.cwd(), "messages");
+    const entries = fs.readdirSync(messagesRoot);
+
+    expect(entries).toEqual(
+      expect.arrayContaining(["base", "profiles", "message-packs.json"]),
+    );
+    expect(entries).not.toContain("en");
   });
 });

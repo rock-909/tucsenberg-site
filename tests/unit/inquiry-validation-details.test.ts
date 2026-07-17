@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import enMessages from "../../messages/en/messages.json";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   mapInquiryValidationDetails,
   PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS,
@@ -29,7 +29,7 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   }, messages);
 }
 
-const runtimeMessages = enMessages;
+const runtimeMessages = getComposedMessages("en");
 
 const validBase = {
   type: LEAD_TYPES.PRODUCT,
