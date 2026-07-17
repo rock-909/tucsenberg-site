@@ -27,7 +27,7 @@ Every content field has one authoring source.
 | Page prose, FAQ, page SEO | `content/pages/{locale}/*.mdx` | Translation JSON |
 | Page structure switches | `src/config/single-site-page-expression.ts` | MDX body copy |
 | Crawl/indexing policy | `src/config/single-site-seo.ts` | Page components |
-| Shared labels/nav/buttons/form chrome | `messages/{locale}/*.json` | MDX frontmatter |
+| Shared labels/nav/buttons/form chrome | `messages/base/**`, `messages/profiles/b2b-lead/**`, `messages/profiles/catalog/**` | MDX frontmatter |
 | Reusable catalog/card data | typed config + i18n namespace | page prose only |
 
 ## Starter replacement order
@@ -39,7 +39,7 @@ For derived projects, replace in this order:
 3. `src/config/single-site-seo.ts`
 4. `content/config/content.json`
 5. `content/pages/{locale}/*.mdx`
-6. `messages/{locale}/messages.json`
+6. physical message packs under `messages/base/**` and `messages/profiles/**`
 7. product/catalog/spec config and public images
 
 Do not treat starter examples as client-ready facts.

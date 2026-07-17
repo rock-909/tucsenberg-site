@@ -183,6 +183,11 @@ const TRUTH_DOC_CHECKS = [
       "pnpm content:check",
       "node scripts/starter-checks.js content-readiness",
     ],
+    forbidden: [
+      "generated compatibility messages",
+      "messages/{locale}/messages.json",
+      "兼容输出：`messages/{locale}/messages.json`",
+    ],
   },
   {
     file: "docs/项目基础/项目基础.md",
@@ -236,11 +241,14 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: "docs/项目基础/架构图.svg",
+    required: ["messages/base/** + profiles/**"],
     forbidden: [
       "scripts/cloudflare/**",
       "Showcase Website Starter Project Architecture Diagram",
       "Showcase Website Starter - Current Project Architecture",
       "bilingual content",
+      "messages/{locale}/*.json",
+      "compat JSON",
     ],
   },
   {
@@ -318,7 +326,11 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-seo.ts",
       "content/config/content.json",
       "docs/superpowers/plans/**",
+      "messages/base/**",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
     ],
+    forbidden: ["messages/{locale}/*.json", "messages/{locale}/messages.json"],
   },
   {
     file: ".claude/rules/i18n.md",

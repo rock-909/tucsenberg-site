@@ -167,6 +167,66 @@ function composeCatalogMessages(locale) {
   );
 }
 
+/**
+ * Ownership packs must not share leaf paths. Runtime deep-merge would silently
+ * let later packs override earlier ones; TypeScript intersection types would
+ * collapse conflicting paths to `never`. Fail closed instead.
+ */
+function findCrossPackLeafConflictsFromMaps(packEntries) {
+  const ownerByLeaf = new Map();
+  const conflicts = [];
+
+  for (const { packId, leafPaths } of packEntries) {
+    for (const leafPath of leafPaths) {
+      const earlierPackId = ownerByLeaf.get(leafPath);
+      if (earlierPackId !== undefined) {
+        conflicts.push({
+          earlierPackId,
+          laterPackId: packId,
+          path: leafPath,
+        });
+        continue;
+      }
+
+      ownerByLeaf.set(leafPath, packId);
+    }
+  }
+
+  return conflicts;
+}
+
+function findCrossPackLeafConflicts(locale) {
+  return findCrossPackLeafConflictsFromMaps(
+    CATALOG_MESSAGE_PACK_IDS.map((packId) => ({
+      packId,
+      leafPaths: collectLeafPaths(
+        readJson(getPackAbsolutePath(packId, locale)),
+      ),
+    })),
+  );
+}
+
+function validateCrossPackOwnership(locale) {
+  console.log(`\nValidating cross-pack ownership for locale: ${locale}`);
+  const conflicts = findCrossPackLeafConflicts(locale);
+
+  if (conflicts.length === 0) {
+    console.log("   No cross-pack leaf ownership conflicts");
+    return true;
+  }
+
+  console.error(
+    `   Error: cross-pack leaf ownership conflicts for locale ${locale}:`,
+  );
+  for (const conflict of conflicts.slice(0, 10)) {
+    console.error(
+      `      - ${conflict.path} owned by ${conflict.earlierPackId} and ${conflict.laterPackId}`,
+    );
+  }
+
+  return false;
+}
+
 function validatePackFile(packId, locale) {
   const relativePath = getPackRelativePath(packId, locale);
   const absolutePath = path.join(ROOT, relativePath);
@@ -406,6 +466,12 @@ function runTranslationCheck() {
     }
   }
 
+  for (const locale of I18N_LOCALES) {
+    if (!validateCrossPackOwnership(locale)) {
+      allValid = false;
+    }
+  }
+
   if (!validatePackLocaleParity()) {
     allValid = false;
   }
@@ -447,6 +513,8 @@ module.exports = {
   collectLeafPaths,
   compareLocales,
   composeCatalogMessages,
+  findCrossPackLeafConflicts,
+  findCrossPackLeafConflictsFromMaps,
   findDuplicateJsonObjectKeys,
   runTranslationCheck,
   validateLocale,

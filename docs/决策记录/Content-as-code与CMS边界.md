@@ -176,7 +176,8 @@ Any CMS or authoring workflow must preserve these rules:
   operator-visible fields for MDX pages.
 - Translated content must be reviewed for business facts, legal statements,
   product claims, and contact promises.
-- Generated compatibility message files are not hand-edited.
+- Physical message packs are the only UI-copy authoring surface; do not create
+  generated locale message copies.
 
 ## Blog and resources boundary
 

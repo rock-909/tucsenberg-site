@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { findDuplicateJsonObjectKeys } from "../../../scripts/quality/checks/translations.js";
+import {
+  findCrossPackLeafConflicts,
+  findCrossPackLeafConflictsFromMaps,
+  findDuplicateJsonObjectKeys,
+} from "../../../scripts/quality/checks/translations.js";
 
 describe("translations duplicate object-key scan", () => {
   it("detects sibling duplicate keys that JSON.parse would silently collapse", () => {
@@ -36,5 +40,26 @@ describe("translations duplicate object-key scan", () => {
     expect(
       findDuplicateJsonObjectKeys('{"submit":"ok","cancel":"ok"}'),
     ).toEqual([]);
+  });
+});
+
+describe("translations cross-pack leaf ownership", () => {
+  it("fails when two packs claim the same leaf path", () => {
+    expect(
+      findCrossPackLeafConflictsFromMaps([
+        { packId: "base", leafPaths: ["shared.value", "only.base"] },
+        { packId: "catalog", leafPaths: ["shared.value", "only.catalog"] },
+      ]),
+    ).toEqual([
+      {
+        earlierPackId: "base",
+        laterPackId: "catalog",
+        path: "shared.value",
+      },
+    ]);
+  });
+
+  it("accepts the live English packs with mutually exclusive ownership", () => {
+    expect(findCrossPackLeafConflicts("en")).toEqual([]);
   });
 });

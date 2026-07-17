@@ -4,8 +4,10 @@
  * Provides compile-time type safety for translation keys via
  * AppConfig.Messages module augmentation.
  *
- * Key types are synthesized from the three physical packs (top-level keys
- * are ownership-disjoint, so intersection matches the runtime deep-merge).
+ * Pack ownership is mutually exclusive at every leaf path
+ * (`content:check` fail-fasts on cross-pack leaf conflicts). With that
+ * invariant, intersecting the three pack types matches the runtime
+ * `base -> b2b-lead -> catalog` composition without silent overrides.
  *
  * @see https://next-intl.dev/docs/workflows/typescript
  */
