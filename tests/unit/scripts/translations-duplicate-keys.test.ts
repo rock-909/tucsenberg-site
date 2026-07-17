@@ -3,6 +3,7 @@ import {
   findCrossPackLeafConflicts,
   findCrossPackLeafConflictsFromMaps,
   findDuplicateJsonObjectKeys,
+  pathsHaveOwnershipConflict,
 } from "../../../scripts/quality/checks/translations.js";
 
 describe("translations duplicate object-key scan", () => {
@@ -53,10 +54,53 @@ describe("translations cross-pack leaf ownership", () => {
     ).toEqual([
       {
         earlierPackId: "base",
+        earlierPath: "shared.value",
         laterPackId: "catalog",
         path: "shared.value",
       },
     ]);
+  });
+
+  it("fails when a later pack nests under an earlier leaf", () => {
+    expect(
+      findCrossPackLeafConflictsFromMaps([
+        { packId: "base", leafPaths: ["foo"] },
+        { packId: "catalog", leafPaths: ["foo.bar"] },
+      ]),
+    ).toEqual([
+      {
+        earlierPackId: "base",
+        earlierPath: "foo",
+        laterPackId: "catalog",
+        path: "foo.bar",
+      },
+    ]);
+  });
+
+  it("fails when a later pack replaces an earlier nested branch", () => {
+    expect(
+      findCrossPackLeafConflictsFromMaps([
+        { packId: "base", leafPaths: ["foo.bar"] },
+        { packId: "catalog", leafPaths: ["foo"] },
+      ]),
+    ).toEqual([
+      {
+        earlierPackId: "base",
+        earlierPath: "foo.bar",
+        laterPackId: "catalog",
+        path: "foo",
+      },
+    ]);
+  });
+
+  it("does not treat shared path prefixes without a segment boundary as conflicts", () => {
+    expect(pathsHaveOwnershipConflict("foo", "foobar")).toBe(false);
+    expect(
+      findCrossPackLeafConflictsFromMaps([
+        { packId: "base", leafPaths: ["foo", "nav.label"] },
+        { packId: "catalog", leafPaths: ["foobar", "nav.labelExtra"] },
+      ]),
+    ).toEqual([]);
   });
 
   it("accepts the live English packs with mutually exclusive ownership", () => {

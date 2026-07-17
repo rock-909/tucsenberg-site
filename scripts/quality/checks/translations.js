@@ -168,27 +168,43 @@ function composeCatalogMessages(locale) {
 }
 
 /**
- * Ownership packs must not share leaf paths. Runtime deep-merge would silently
- * let later packs override earlier ones; TypeScript intersection types would
- * collapse conflicting paths to `never`. Fail closed instead.
+ * Ownership packs must not share a leaf path or a parent/child path pair.
+ * Runtime deep-merge would silently overwrite a whole branch; TypeScript
+ * intersection types would collapse conflicting shapes to `never`.
+ * Segment boundaries use `.` so `foo` conflicts with `foo.bar`, but not `foobar`.
  */
+function isStrictPathPrefix(prefix, path) {
+  return path.startsWith(`${prefix}.`);
+}
+
+function pathsHaveOwnershipConflict(leftPath, rightPath) {
+  return (
+    leftPath === rightPath ||
+    isStrictPathPrefix(leftPath, rightPath) ||
+    isStrictPathPrefix(rightPath, leftPath)
+  );
+}
+
 function findCrossPackLeafConflictsFromMaps(packEntries) {
-  const ownerByLeaf = new Map();
+  const ownerByPath = new Map();
   const conflicts = [];
 
   for (const { packId, leafPaths } of packEntries) {
     for (const leafPath of leafPaths) {
-      const earlierPackId = ownerByLeaf.get(leafPath);
-      if (earlierPackId !== undefined) {
+      for (const [ownedPath, earlierPackId] of ownerByPath) {
+        if (!pathsHaveOwnershipConflict(ownedPath, leafPath)) {
+          continue;
+        }
+
         conflicts.push({
           earlierPackId,
+          earlierPath: ownedPath,
           laterPackId: packId,
           path: leafPath,
         });
-        continue;
       }
 
-      ownerByLeaf.set(leafPath, packId);
+      ownerByPath.set(leafPath, packId);
     }
   }
 
@@ -219,8 +235,12 @@ function validateCrossPackOwnership(locale) {
     `   Error: cross-pack leaf ownership conflicts for locale ${locale}:`,
   );
   for (const conflict of conflicts.slice(0, 10)) {
+    const earlier =
+      conflict.earlierPath === conflict.path
+        ? conflict.path
+        : `${conflict.earlierPath} vs ${conflict.path}`;
     console.error(
-      `      - ${conflict.path} owned by ${conflict.earlierPackId} and ${conflict.laterPackId}`,
+      `      - ${earlier} owned by ${conflict.earlierPackId} and ${conflict.laterPackId}`,
     );
   }
 
@@ -516,6 +536,7 @@ module.exports = {
   findCrossPackLeafConflicts,
   findCrossPackLeafConflictsFromMaps,
   findDuplicateJsonObjectKeys,
+  pathsHaveOwnershipConflict,
   runTranslationCheck,
   validateLocale,
 };

@@ -4,10 +4,11 @@
  * Provides compile-time type safety for translation keys via
  * AppConfig.Messages module augmentation.
  *
- * Pack ownership is mutually exclusive at every leaf path
- * (`content:check` fail-fasts on cross-pack leaf conflicts). With that
- * invariant, intersecting the three pack types matches the runtime
- * `base -> b2b-lead -> catalog` composition without silent overrides.
+ * Pack ownership is mutually exclusive at every leaf path and parent/child
+ * path pair (`content:check` fail-fasts on cross-pack conflicts, including
+ * `foo` vs `foo.bar`). With that invariant, intersecting the three pack types
+ * matches the runtime `base -> b2b-lead -> catalog` composition without silent
+ * branch overrides.
  *
  * @see https://next-intl.dev/docs/workflows/typescript
  */

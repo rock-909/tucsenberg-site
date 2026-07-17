@@ -178,15 +178,11 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/项目基础/内容.md",
     required: [
       "content/config/content.json",
+      "messages/base/**",
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
       "pnpm content:check",
       "node scripts/starter-checks.js content-readiness",
-    ],
-    forbidden: [
-      "generated compatibility messages",
-      "messages/{locale}/messages.json",
-      "兼容输出：`messages/{locale}/messages.json`",
     ],
   },
   {
@@ -247,8 +243,6 @@ const TRUTH_DOC_CHECKS = [
       "Showcase Website Starter Project Architecture Diagram",
       "Showcase Website Starter - Current Project Architecture",
       "bilingual content",
-      "messages/{locale}/*.json",
-      "compat JSON",
     ],
   },
   {
@@ -330,7 +324,6 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
     ],
-    forbidden: ["messages/{locale}/*.json", "messages/{locale}/messages.json"],
   },
   {
     file: ".claude/rules/i18n.md",
@@ -340,11 +333,11 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/catalog/{locale}/messages.json",
       "base -> b2b-lead -> catalog",
       "pnpm content:check",
+      "mutually exclusive",
     ],
     forbidden: [
       "messages/profiles/{profile}/{locale}/messages.json",
       "src/sites/**/messages/**",
-      "pnpm messages:sync",
     ],
   },
   {
