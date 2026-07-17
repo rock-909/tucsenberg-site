@@ -42,7 +42,8 @@ describe("static public pages architecture contract", () => {
     expect(docs).toContain("src/config/pages.config.ts");
     expect(docs).toContain("static public pages");
     expect(docs).toContain("content/pages/{locale}");
-    expect(docs).toContain("messages/{locale}");
+    expect(docs).toContain("messages/base/**");
+    expect(docs).toContain("messages/profiles/");
   });
 
   it("does not include dynamic route page types in the first registry", () => {

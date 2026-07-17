@@ -47,7 +47,6 @@ messages/
 - base/                       # Base physical message packs
 - profiles/b2b-lead/          # Fixed lead-form message ownership layer
 - profiles/catalog/           # Fixed catalog message ownership layer
-- en/                         # Generated compatibility message JSON
 ```
 
 ## Reference Sources
@@ -70,7 +69,6 @@ Verify dependency APIs from current docs before editing.
 pnpm dev
 pnpm brand:check
 pnpm content:check
-pnpm messages:sync
 pnpm component:check
 pnpm website:check
 pnpm website:build:cf

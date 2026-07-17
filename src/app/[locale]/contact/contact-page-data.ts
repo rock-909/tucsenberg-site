@@ -9,7 +9,7 @@ import {
 import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import { getStaticComposedMessages } from "@/lib/i18n/static-composed-messages";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import type {
   FaqItem,
   Locale,
@@ -71,7 +71,7 @@ export function getStaticContactPage(locale: Locale): Page {
 
 export function getContactPageData(locale: Locale): ContactPageData {
   const page = getStaticContactPage(locale);
-  const messages = getStaticComposedMessages(locale);
+  const messages = getComposedMessages(locale);
   const copy = getContactCopyFromMessages(messages);
   const faqItems: FaqItem[] = extractFaqFromMetadata(page.metadata).map(
     (item) => ({

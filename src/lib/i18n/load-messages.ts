@@ -3,8 +3,6 @@
  *
  * Runtime canonical source is physical message packs under
  * `messages/base/**` and `messages/profiles/**`.
- * Flat locale files may still exist for tooling/tests, but server runtime must
- * not depend on them.
  */
 
 import { type Locale } from "@/i18n/routing-config";

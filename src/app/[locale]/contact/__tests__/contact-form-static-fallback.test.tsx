@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import enMessages from "../../../../../messages/en/messages.json";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
+
+const enMessages = getComposedMessages("en");
 
 const messages = {
   contact: {

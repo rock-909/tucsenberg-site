@@ -24,7 +24,6 @@
     "website:lighthouse": "lhci autorun --config=./lighthouserc.js",
     "brand:check": "node scripts/starter-checks.js brand",
     "content:check": "node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs && node scripts/starter-checks.js translations && node scripts/starter-checks.js message-key-usage",
-    "messages:sync": "tsx scripts/quality/sync-message-compat.ts",
     "component:governance:test": "pnpm exec vitest run tests/architecture/component-governance.test.ts tests/architecture/ui-component-index.test.ts tests/unit/scripts/component-governance-check.test.ts tests/unit/scripts/component-governance-check-closure.test.ts",
     "component:governance": "node scripts/starter-checks.js component-governance",
     "component:check": "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build"

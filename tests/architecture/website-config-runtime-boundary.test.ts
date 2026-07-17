@@ -109,6 +109,7 @@ describe("website config runtime boundary", () => {
       "test/, testing/",
       "content/pages/zh",
       "messages/en/, zh/",
+      "- en/                         # Generated compatibility message JSON",
     ] as const;
     const requiredStructureEntries = [
       "config/             # Runtime config and starter replacement surfaces",
@@ -116,7 +117,6 @@ describe("website config runtime boundary", () => {
       "- base/                       # Base physical message packs",
       "- profiles/b2b-lead/          # Fixed lead-form message ownership layer",
       "- profiles/catalog/           # Fixed catalog message ownership layer",
-      "- en/                         # Generated compatibility message JSON",
     ] as const;
 
     for (const instructionFile of instructionFiles) {

@@ -1,9 +1,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const ts = require("typescript");
 
 const ROOT = process.cwd();
 const I18N_LOCALES = require("../../../i18n-locales.config").locales;
-const MESSAGES_DIR = path.join(ROOT, "messages");
 const CATALOG_MESSAGE_PACK_IDS = require("../../../messages/message-packs.json");
 const MESSAGE_PACK_IDS = [...new Set(CATALOG_MESSAGE_PACK_IDS)];
 
@@ -27,10 +27,6 @@ function getPackAbsolutePath(packId, locale) {
   return path.join(ROOT, getPackRelativePath(packId, locale));
 }
 
-function getLocaleCompatPath(locale) {
-  return path.join(MESSAGES_DIR, locale, "messages.json");
-}
-
 function readJsonSource(filePath) {
   return fs.readFileSync(filePath, "utf8");
 }
@@ -41,203 +37,74 @@ function readJson(filePath) {
 
 /**
  * Sibling duplicate object keys are legal-but-lossy JSON: JSON.parse keeps the
- * last value and drops earlier ones. Scan the raw text so content:check fails
- * instead of reporting a false "No duplicate keys found".
+ * last value and drops earlier ones. Use TypeScript's JSON AST so content:check
+ * fails instead of reporting a false "No duplicate keys found".
  */
 function findDuplicateJsonObjectKeys(source) {
+  const sourceFile = ts.parseJsonText("messages.json", source);
   const duplicates = [];
-  let i = 0;
-  const length = source.length;
 
-  function lineAt(index) {
-    let line = 1;
-    for (let cursor = 0; cursor < index; cursor += 1) {
-      if (source[cursor] === "\n") {
-        line += 1;
-      }
+  function propertyName(property) {
+    if (
+      ts.isIdentifier(property.name) ||
+      ts.isStringLiteral(property.name) ||
+      ts.isNumericLiteral(property.name)
+    ) {
+      return property.name.text;
     }
-    return line;
+
+    return property.name.getText(sourceFile).replace(/^"|"$/gu, "");
   }
 
-  function skipWhitespace() {
-    while (i < length && /\s/u.test(source[i])) {
-      i += 1;
-    }
-  }
+  function walk(node, pathPrefix) {
+    if (ts.isObjectLiteralExpression(node)) {
+      const seenKeys = new Set();
 
-  function readString() {
-    if (source[i] !== '"') {
-      throw new Error(`Expected JSON string at index ${i}`);
-    }
-
-    i += 1;
-    let value = "";
-
-    while (i < length) {
-      const character = source[i];
-
-      if (character === '"') {
-        i += 1;
-        return value;
-      }
-
-      if (character === "\\") {
-        i += 1;
-        if (i >= length) {
-          throw new Error("Unterminated JSON string escape");
-        }
-
-        const escape = source[i];
-        if (escape === "u") {
-          const hex = source.slice(i + 1, i + 5);
-          value += String.fromCharCode(Number.parseInt(hex, 16));
-          i += 5;
+      for (const property of node.properties) {
+        if (!ts.isPropertyAssignment(property)) {
           continue;
         }
 
-        const escaped = {
-          '"': '"',
-          "\\": "\\",
-          "/": "/",
-          b: "\b",
-          f: "\f",
-          n: "\n",
-          r: "\r",
-          t: "\t",
-        };
-        value += escaped[escape] ?? escape;
-        i += 1;
-        continue;
+        const key = propertyName(property);
+        const keyPath = pathPrefix === "" ? key : `${pathPrefix}.${key}`;
+
+        if (seenKeys.has(key)) {
+          const { line } = sourceFile.getLineAndCharacterOfPosition(
+            property.getStart(sourceFile),
+          );
+          duplicates.push({
+            key,
+            line: line + 1,
+            path: keyPath,
+          });
+        } else {
+          seenKeys.add(key);
+        }
+
+        walk(property.initializer, keyPath);
       }
 
-      value += character;
-      i += 1;
-    }
-
-    throw new Error("Unterminated JSON string");
-  }
-
-  function parseValue(pathPrefix) {
-    skipWhitespace();
-    if (i >= length) {
-      throw new Error("Unexpected end of JSON");
-    }
-
-    const character = source[i];
-    if (character === "{") {
-      parseObject(pathPrefix);
-      return;
-    }
-    if (character === "[") {
-      parseArray(pathPrefix);
-      return;
-    }
-    if (character === '"') {
-      readString();
-      return;
-    }
-    if (character === "t") {
-      i += 4;
-      return;
-    }
-    if (character === "f") {
-      i += 5;
-      return;
-    }
-    if (character === "n") {
-      i += 4;
       return;
     }
 
-    while (i < length && /[0-9eE+\-.]/u.test(source[i])) {
-      i += 1;
+    if (ts.isArrayLiteralExpression(node)) {
+      node.elements.forEach((element, index) => {
+        const itemPath =
+          pathPrefix === "" ? `[${index}]` : `${pathPrefix}[${index}]`;
+        walk(element, itemPath);
+      });
     }
   }
 
-  function parseObject(pathPrefix) {
-    i += 1;
-    skipWhitespace();
-
-    if (source[i] === "}") {
-      i += 1;
-      return;
-    }
-
-    const seenKeys = new Set();
-
-    while (i < length) {
-      skipWhitespace();
-      const keyStart = i;
-      const key = readString();
-      const keyPath = pathPrefix === "" ? key : `${pathPrefix}.${key}`;
-
-      if (seenKeys.has(key)) {
-        duplicates.push({
-          key,
-          line: lineAt(keyStart),
-          path: keyPath,
-        });
-      } else {
-        seenKeys.add(key);
-      }
-
-      skipWhitespace();
-      if (source[i] !== ":") {
-        throw new Error(`Expected ':' after key at index ${i}`);
-      }
-      i += 1;
-      parseValue(keyPath);
-      skipWhitespace();
-
-      if (source[i] === "}") {
-        i += 1;
-        return;
-      }
-
-      if (source[i] === ",") {
-        i += 1;
-        continue;
-      }
-
-      throw new Error(`Expected ',' or '}' at index ${i}`);
-    }
+  const statement = sourceFile.statements[0];
+  if (
+    statement &&
+    ts.isExpressionStatement(statement) &&
+    statement.expression
+  ) {
+    walk(statement.expression, "");
   }
 
-  function parseArray(pathPrefix) {
-    i += 1;
-    skipWhitespace();
-
-    if (source[i] === "]") {
-      i += 1;
-      return;
-    }
-
-    let index = 0;
-
-    while (i < length) {
-      const itemPath =
-        pathPrefix === "" ? `[${index}]` : `${pathPrefix}[${index}]`;
-      parseValue(itemPath);
-      index += 1;
-      skipWhitespace();
-
-      if (source[i] === "]") {
-        i += 1;
-        return;
-      }
-
-      if (source[i] === ",") {
-        i += 1;
-        continue;
-      }
-
-      throw new Error(`Expected ',' or ']' at index ${i}`);
-    }
-  }
-
-  skipWhitespace();
-  parseValue("");
-  skipWhitespace();
   return duplicates;
 }
 
@@ -298,6 +165,86 @@ function composeCatalogMessages(locale) {
       mergeObjects(composed, readJson(getPackAbsolutePath(packId, locale))),
     {},
   );
+}
+
+/**
+ * Ownership packs must not share a leaf path or a parent/child path pair.
+ * Runtime deep-merge would silently overwrite a whole branch; TypeScript
+ * intersection types would collapse conflicting shapes to `never`.
+ * Segment boundaries use `.` so `foo` conflicts with `foo.bar`, but not `foobar`.
+ */
+function isStrictPathPrefix(prefix, path) {
+  return path.startsWith(`${prefix}.`);
+}
+
+function pathsHaveOwnershipConflict(leftPath, rightPath) {
+  return (
+    leftPath === rightPath ||
+    isStrictPathPrefix(leftPath, rightPath) ||
+    isStrictPathPrefix(rightPath, leftPath)
+  );
+}
+
+function findCrossPackLeafConflictsFromMaps(packEntries) {
+  const ownerByPath = new Map();
+  const conflicts = [];
+
+  for (const { packId, leafPaths } of packEntries) {
+    for (const leafPath of leafPaths) {
+      for (const [ownedPath, earlierPackId] of ownerByPath) {
+        if (!pathsHaveOwnershipConflict(ownedPath, leafPath)) {
+          continue;
+        }
+
+        conflicts.push({
+          earlierPackId,
+          earlierPath: ownedPath,
+          laterPackId: packId,
+          path: leafPath,
+        });
+      }
+
+      ownerByPath.set(leafPath, packId);
+    }
+  }
+
+  return conflicts;
+}
+
+function findCrossPackLeafConflicts(locale) {
+  return findCrossPackLeafConflictsFromMaps(
+    CATALOG_MESSAGE_PACK_IDS.map((packId) => ({
+      packId,
+      leafPaths: collectLeafPaths(
+        readJson(getPackAbsolutePath(packId, locale)),
+      ),
+    })),
+  );
+}
+
+function validateCrossPackOwnership(locale) {
+  console.log(`\nValidating cross-pack ownership for locale: ${locale}`);
+  const conflicts = findCrossPackLeafConflicts(locale);
+
+  if (conflicts.length === 0) {
+    console.log("   No cross-pack leaf ownership conflicts");
+    return true;
+  }
+
+  console.error(
+    `   Error: cross-pack leaf ownership conflicts for locale ${locale}:`,
+  );
+  for (const conflict of conflicts.slice(0, 10)) {
+    const earlier =
+      conflict.earlierPath === conflict.path
+        ? conflict.path
+        : `${conflict.earlierPath} vs ${conflict.path}`;
+    console.error(
+      `      - ${earlier} owned by ${conflict.earlierPackId} and ${conflict.laterPackId}`,
+    );
+  }
+
+  return false;
 }
 
 function validatePackFile(packId, locale) {
@@ -423,39 +370,6 @@ function validateComposedCatalogParity() {
   return allMatch;
 }
 
-function validateCompatibilityFiles() {
-  console.log("\nValidating compatibility files against catalog packs...");
-  let allMatch = true;
-
-  for (const locale of I18N_LOCALES) {
-    const composed = composeCatalogMessages(locale);
-    const compatibilityPath = getLocaleCompatPath(locale);
-    const relativePath = path.relative(ROOT, compatibilityPath);
-
-    if (!fs.existsSync(compatibilityPath)) {
-      console.error(`   Error: compatibility file not found: ${relativePath}`);
-      allMatch = false;
-      continue;
-    }
-
-    const actual = readJson(compatibilityPath);
-    const expectedText = `${JSON.stringify(composed, null, 2)}\n`;
-    const actualText = `${JSON.stringify(actual, null, 2)}\n`;
-
-    if (expectedText !== actualText) {
-      console.error(
-        `   Error: ${relativePath} does not match composed catalog packs`,
-      );
-      allMatch = false;
-      continue;
-    }
-
-    console.log(`   ${relativePath} matches composed catalog packs`);
-  }
-
-  return allMatch;
-}
-
 function validateRequiredPackFiles() {
   console.log("\nValidating required pack files...");
   let allValid = true;
@@ -478,26 +392,14 @@ function validateRequiredPackFiles() {
 }
 
 function validateLocale(locale) {
-  console.log(`\nValidating canonical locale: ${locale}`);
+  console.log(`\nValidating composed locale: ${locale}`);
 
-  const compatPath = getLocaleCompatPath(locale);
-
-  if (!fs.existsSync(compatPath)) {
-    console.error(`   Error: messages.json not found: ${compatPath}`);
-    return false;
-  }
-
-  const source = readJsonSource(compatPath);
-  if (!reportDuplicateObjectKeys(`messages/${locale}/messages.json`, source)) {
-    return false;
-  }
-
-  const messages = JSON.parse(source);
+  const messages = composeCatalogMessages(locale);
   const leafKeys = collectLeafPaths(messages);
   const leafSet = new Set(leafKeys);
 
   console.log(`   Total keys: ${leafKeys.length}`);
-  console.log("   No duplicate keys found");
+  console.log("   Pack duplicate-key scan covered by validatePackFile");
 
   return {
     locale,
@@ -584,15 +486,17 @@ function runTranslationCheck() {
     }
   }
 
+  for (const locale of I18N_LOCALES) {
+    if (!validateCrossPackOwnership(locale)) {
+      allValid = false;
+    }
+  }
+
   if (!validatePackLocaleParity()) {
     allValid = false;
   }
 
   if (!validateComposedCatalogParity()) {
-    allValid = false;
-  }
-
-  if (!validateCompatibilityFiles()) {
     allValid = false;
   }
 
@@ -629,7 +533,10 @@ module.exports = {
   collectLeafPaths,
   compareLocales,
   composeCatalogMessages,
+  findCrossPackLeafConflicts,
+  findCrossPackLeafConflictsFromMaps,
   findDuplicateJsonObjectKeys,
+  pathsHaveOwnershipConflict,
   runTranslationCheck,
   validateLocale,
 };

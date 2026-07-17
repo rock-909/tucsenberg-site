@@ -82,7 +82,7 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
       "base -> b2b-lead -> catalog",
-      "pnpm messages:sync",
+      "pnpm content:check",
     ],
   },
   {
@@ -178,9 +178,10 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/项目基础/内容.md",
     required: [
       "content/config/content.json",
+      "messages/base/**",
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
-      "pnpm messages:sync",
+      "pnpm content:check",
       "node scripts/starter-checks.js content-readiness",
     ],
   },
@@ -190,7 +191,7 @@ const TRUTH_DOC_CHECKS = [
       "src/constants/tucsenberg-product-page-*.ts",
       "messages/profiles/b2b-lead/**",
       "messages/profiles/catalog/**",
-      "pnpm messages:sync",
+      "pnpm content:check",
     ],
   },
   {
@@ -236,6 +237,7 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: "docs/项目基础/架构图.svg",
+    required: ["messages/base/** + profiles/**"],
     forbidden: [
       "scripts/cloudflare/**",
       "Showcase Website Starter Project Architecture Diagram",
@@ -318,6 +320,9 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-seo.ts",
       "content/config/content.json",
       "docs/superpowers/plans/**",
+      "messages/base/**",
+      "messages/profiles/b2b-lead/**",
+      "messages/profiles/catalog/**",
     ],
   },
   {
@@ -327,7 +332,8 @@ const TRUTH_DOC_CHECKS = [
       "messages/profiles/b2b-lead/{locale}/messages.json",
       "messages/profiles/catalog/{locale}/messages.json",
       "base -> b2b-lead -> catalog",
-      "pnpm messages:sync",
+      "pnpm content:check",
+      "mutually exclusive",
     ],
     forbidden: [
       "messages/profiles/{profile}/{locale}/messages.json",

@@ -77,9 +77,8 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - 页面正文：`content/pages/en/*.mdx`
 - 产品数据：`src/constants/tucsenberg-product-page-*.ts`、`src/constants/tucsenberg-product-pages.ts`、`src/config/single-site-product-catalog.ts`、`src/constants/product-standards.ts`
 - UI 文案 authoring truth：`messages/base/**`、`messages/profiles/b2b-lead/**`、`messages/profiles/catalog/**`
-- generated compat 输出：`messages/en/messages.json`
 
-message graph 固定为 `base -> b2b-lead -> catalog`。不要先手改 generated compat 文件；修改 physical packs 后运行 `pnpm messages:sync`，再运行 `pnpm content:check`。
+message graph 固定为 `base -> b2b-lead -> catalog`。修改 physical packs 后运行 `pnpm content:check`。
 
 ## AI 协作入口
 

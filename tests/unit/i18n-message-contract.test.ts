@@ -1,4 +1,3 @@
-import enMessages from "../../messages/en/messages.json";
 import baseEnMessages from "../../messages/base/en/messages.json";
 import b2bLeadMessages from "../../messages/profiles/b2b-lead/en/messages.json";
 import catalogMessages from "../../messages/profiles/catalog/en/messages.json";
@@ -7,8 +6,14 @@ import {
   API_ERROR_CODES,
   FORM_NETWORK_ERROR,
 } from "@/constants/api-error-codes";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 
 type JsonObject = Record<string, unknown>;
+
+const enMessages = getComposedMessages("en") as JsonObject & {
+  apiErrors: Record<string, unknown>;
+  requestQuote?: unknown;
+};
 
 const REQUIRED_RUNTIME_KEYS = [
   "accessibility.securityVerificationUnavailable",

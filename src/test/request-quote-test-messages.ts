@@ -1,10 +1,12 @@
-import enMessages from "@messages/en/messages.json";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   createRequestQuoteFormCopy,
   type RequestQuoteFormCopy,
 } from "@/app/[locale]/request-quote/request-quote-form-copy";
 
 type JsonObject = Record<string, unknown>;
+
+const enMessages = getComposedMessages("en");
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
