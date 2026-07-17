@@ -75,4 +75,57 @@ describe("component-governance-check C1 closure gaps", () => {
       "src/lib/ui-class-helpers.ts",
     );
   });
+
+  it("scans production MDX and aliased CommonJS Radix loaders", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "content/pages/en/radix-themes.mdx": [
+          'import { Card } from "@radix-ui/themes";',
+          "",
+          '<section className="rt-Card"><Card /></section>',
+        ].join("\n"),
+        "src/lib/create-require-theme.ts": [
+          "const load = createRequire(import.meta.url);",
+          'const theme = load("@radix-ui/themes");',
+          "export { theme };",
+        ].join("\n"),
+        "src/lib/require-alias-dialog.ts": [
+          "const load = require;",
+          'const dialog = load("@radix-ui/react-dialog");',
+          "export { dialog };",
+        ].join("\n"),
+        "src/lib/require-call-theme.ts":
+          'const theme = require.call(null, "@radix-ui/themes");\nexport { theme };',
+        "src/lib/module-require-call-dialog.ts":
+          'const dialog = module.require.call(module, "@radix-ui/react-dialog");\nexport { dialog };',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "content/pages/en/radix-themes.mdx",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-internal-class",
+      "content/pages/en/radix-themes.mdx",
+    );
+    for (const file of [
+      "src/lib/create-require-theme.ts",
+      "src/lib/require-call-theme.ts",
+    ]) {
+      expectFinding(result.errors, "radix-themes-import-forbidden", file);
+    }
+    for (const file of [
+      "src/lib/require-alias-dialog.ts",
+      "src/lib/module-require-call-dialog.ts",
+    ]) {
+      expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+  });
 });

@@ -59,6 +59,56 @@ function isRequireCallee(node) {
   return false;
 }
 
+function isCreateRequireCallee(node) {
+  const unwrapped = unwrapTransparentExpression(node);
+  return ts.isIdentifier(unwrapped) && unwrapped.text === "createRequire";
+}
+
+function collectModuleLoaderAliases(sourceFile) {
+  const aliases = new Set();
+
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer
+    ) {
+      const initializer = unwrapTransparentExpression(node.initializer);
+      const isCreateRequireCall =
+        ts.isCallExpression(initializer) &&
+        isCreateRequireCallee(initializer.expression);
+
+      if (isRequireCallee(initializer) || isCreateRequireCall) {
+        aliases.add(node.name.text);
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return aliases;
+}
+
+function isModuleLoaderAlias(node, aliases) {
+  const unwrapped = unwrapTransparentExpression(node);
+  return ts.isIdentifier(unwrapped) && aliases.has(unwrapped.text);
+}
+
+function getRequireCallSpecifierArgument(node) {
+  const callee = unwrapTransparentExpression(node.expression);
+
+  if (
+    !ts.isPropertyAccessExpression(callee) ||
+    callee.name.text !== "call" ||
+    !isRequireCallee(callee.expression)
+  ) {
+    return null;
+  }
+
+  return node.arguments[1] ?? null;
+}
+
 function collectModuleReferences(source, filePath) {
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -67,6 +117,7 @@ function collectModuleReferences(source, filePath) {
     true,
   );
   const references = [];
+  const loaderAliases = collectModuleLoaderAliases(sourceFile);
 
   function addReference(node) {
     const specifier = getStringLiteralValue(node);
@@ -94,8 +145,15 @@ function collectModuleReferences(source, filePath) {
       const callTarget = unwrapTransparentExpression(node.expression);
       const isDynamicImport = callTarget.kind === ts.SyntaxKind.ImportKeyword;
 
-      if (isDynamicImport || isRequireCallee(callTarget)) {
+      if (
+        isDynamicImport ||
+        isRequireCallee(callTarget) ||
+        isModuleLoaderAlias(callTarget, loaderAliases)
+      ) {
         addReference(node.arguments[0]);
+      } else {
+        const requireCallSpecifier = getRequireCallSpecifierArgument(node);
+        if (requireCallSpecifier) addReference(requireCallSpecifier);
       }
     }
 

@@ -12,6 +12,7 @@ const COMPONENT_GOVERNANCE_REGISTRY_PATH =
 const COMPONENT_GOVERNANCE_COMPONENTS_ROOT = "src/components";
 const COMPONENT_GOVERNANCE_APP_ROOT = "src/app";
 const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
+const COMPONENT_GOVERNANCE_PRODUCTION_CONTENT_ROOTS = ["content/pages"];
 const COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES = ["mdx-components.tsx"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
 const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
@@ -38,7 +39,7 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
   ]),
   clientBoundary: new Set(["server-safe", "client"]),
 };
-const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|css)$/;
+const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|css|mdx)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
   /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/|^src\/(?:test|testing)\/)/;
@@ -99,10 +100,15 @@ function walkFiles(rootDir, relativeRoot) {
 }
 
 function getScannedSourceFiles(rootDir) {
-  const files = walkFiles(rootDir, COMPONENT_GOVERNANCE_SOURCE_ROOT).filter(
-    (file) =>
-      COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file) &&
-      !COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file),
+  const files = [
+    COMPONENT_GOVERNANCE_SOURCE_ROOT,
+    ...COMPONENT_GOVERNANCE_PRODUCTION_CONTENT_ROOTS,
+  ].flatMap((sourceRoot) =>
+    walkFiles(rootDir, sourceRoot).filter(
+      (file) =>
+        COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file) &&
+        !COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file),
+    ),
   );
 
   for (const file of COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES) {
@@ -381,9 +387,9 @@ function collectTextScanFindings(rootDir, errors) {
       );
     }
 
-    // Themes internal class markers can appear in any production source that
-    // carries UI class truth (including src/config and src/lib), not only app
-    // and components trees.
+    // Heuristic: Themes internal class markers can appear in any production
+    // source that carries UI class truth, including MDX, src/config, and
+    // src/lib. Selector-AST precision is a later P3 upgrade.
     if (COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN.test(source)) {
       errors.push(
         createFinding(
