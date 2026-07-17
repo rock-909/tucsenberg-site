@@ -1,4 +1,6 @@
-> Historical workflow record. This file records the approved M3 execution design. Current product truth remains in stable project docs and runtime code.
+> Historical.
+>
+> This file records the approved M3 execution design. Current product truth remains in stable project docs and runtime code.
 
 # M3 任务簇执行与验收设计
 
