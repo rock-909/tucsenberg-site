@@ -24,6 +24,7 @@ export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
  * Usage gate binds this list — keep it aligned with behavior tests.
  */
 export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
+  "errors.generic",
   "errors.fullName.required",
   "errors.fullName.invalid",
   "errors.fullName.tooLong",

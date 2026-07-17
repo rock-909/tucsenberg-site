@@ -11,6 +11,11 @@ import {
   PRODUCT_INQUIRY_KINDS,
   productLeadSchema,
 } from "@/lib/lead-pipeline/lead-schema";
+import {
+  getAllMarketFamilyCombos,
+  getFamilyByMarketAndSlug,
+} from "@/constants/product-catalog";
+import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
 
 type JsonObject = Record<string, unknown>;
 
@@ -48,57 +53,57 @@ const validBase = {
   email: "ada@example.com",
 } as const;
 
-const inquiryFailureCases: ReadonlyArray<{
-  label: string;
-  input: Record<string, unknown>;
-  expectedDetails: readonly string[];
-}> = [
+const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
+  { ...validBase, fullName: undefined },
+  { ...validBase, fullName: "" },
+  { ...validBase, fullName: 42 },
+  { ...validBase, fullName: "A".repeat(300) },
+  { ...validBase, email: undefined },
+  { ...validBase, email: "" },
+  { ...validBase, email: 42 },
+  { ...validBase, email: "not-an-email" },
+  { ...validBase, email: `a@${"x".repeat(300)}.com` },
+  { ...validBase, company: 42 },
+  { ...validBase, company: "A".repeat(300) },
+  { ...validBase, productInquiryKind: undefined },
+  { ...validBase, productInquiryKind: "not-a-kind" },
+  { ...validBase, productInquiryKind: 1 },
   {
-    label: "missing fullName",
-    input: { ...validBase, fullName: undefined },
-    expectedDetails: ["errors.fullName.required"],
+    type: LEAD_TYPES.PRODUCT,
+    productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+    fullName: "Ada Lovelace",
+    email: "ada@example.com",
   },
   {
-    label: "wrong-type fullName",
-    input: { ...validBase, fullName: 42 },
-    expectedDetails: ["errors.fullName.invalid"],
+    ...validBase,
+    productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+    catalogProductId: "not-real",
   },
-  {
-    label: "wrong-type company",
-    input: { ...validBase, company: 42 },
-    expectedDetails: ["errors.company.invalid"],
-  },
-  {
-    label: "wrong-type requirements",
-    input: { ...validBase, requirements: 42 },
-    expectedDetails: ["errors.requirements.invalid"],
-  },
-  {
-    label: "wrong-type buyerInterest",
-    input: { ...validBase, buyerInterest: true },
-    expectedDetails: ["errors.buyerInterest.invalid"],
-  },
-  {
-    label: "catalog product without id",
-    input: {
-      ...validBase,
-      productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
-    },
-    expectedDetails: ["errors.catalogProductId.required"],
-  },
-  {
-    label: "invalid productInquiryKind",
-    input: { ...validBase, productInquiryKind: "not-a-kind" },
-    expectedDetails: ["errors.productInquiryKind.invalid"],
-  },
-  {
-    label: "invalid quantity",
-    input: { ...validBase, quantity: false },
-    expectedDetails: ["errors.quantity.invalid"],
-  },
+  { ...validBase, catalogProductId: "abs-flood-barriers" },
+  { ...validBase, buyerInterest: 123 },
+  { ...validBase, buyerInterest: "A".repeat(500) },
+  { ...validBase, quantity: false },
+  { ...validBase, quantity: {} },
+  { ...validBase, requirements: 123 },
+  { ...validBase, requirements: "A".repeat(5000) },
+  { ...validBase, utmSource: "x".repeat(257) },
+  { ...validBase, utmSource: 42 },
+  { ...validBase, gclid: true },
 ];
 
 describe("inquiry validation detail mapping", () => {
+  it("accepts blank quantity as omitted optional input", () => {
+    const parsed = productLeadSchema.safeParse({
+      ...validBase,
+      quantity: "",
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.quantity).toBeUndefined();
+    }
+  });
+
   it("maps wrong-type issues to .invalid instead of .required", () => {
     const parsed = productLeadSchema.safeParse({
       ...validBase,
@@ -126,30 +131,47 @@ describe("inquiry validation detail mapping", () => {
     );
   });
 
-  it.each(inquiryFailureCases)(
-    "emits message-backed details for $label",
-    ({ input, expectedDetails }) => {
+  it("maps unregistered attribution fields to errors.generic only", () => {
+    const tooLong = productLeadSchema.safeParse({
+      ...validBase,
+      utmSource: "x".repeat(257),
+    });
+    const wrongType = productLeadSchema.safeParse({
+      ...validBase,
+      utmSource: 42,
+    });
+
+    expect(tooLong.success).toBe(false);
+    expect(wrongType.success).toBe(false);
+    if (tooLong.success || wrongType.success) return;
+
+    expect(mapInquiryValidationDetails(tooLong.error.issues)).toEqual([
+      "errors.generic",
+    ]);
+    expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
+      "errors.generic",
+    ]);
+  });
+
+  it("keeps emitted details equal to the declared inquiry contract", () => {
+    const emitted = new Set<string>();
+
+    for (const input of inquiryFailureInputs) {
       const parsed = productLeadSchema.safeParse(input);
-      expect(parsed.success).toBe(false);
-      if (parsed.success) return;
-
-      const details = mapInquiryValidationDetails(parsed.error.issues);
-      expect(details).toEqual(expect.arrayContaining([...expectedDetails]));
-
-      for (const detail of details) {
-        expect(PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS).toContain(detail);
-        const value = getMessageValue(
-          runtimeMessages,
-          `contact.form.${detail}`,
-        );
-        expect(typeof value, detail).toBe("string");
-        expect(String(value).trim(), detail).not.toBe("");
+      if (parsed.success) {
+        throw new Error(`expected failure for ${JSON.stringify(input)}`);
       }
-    },
-  );
 
-  it("keeps every declared inquiry detail key present in contact.form messages", () => {
-    for (const detail of PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS) {
+      for (const detail of mapInquiryValidationDetails(parsed.error.issues)) {
+        emitted.add(detail);
+      }
+    }
+
+    expect([...emitted].sort()).toEqual(
+      [...PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS].sort(),
+    );
+
+    for (const detail of emitted) {
       const value = getMessageValue(runtimeMessages, `contact.form.${detail}`);
       expect(typeof value, detail).toBe("string");
       expect(String(value).trim(), detail).not.toBe("");
@@ -181,5 +203,50 @@ describe("shared zod validation detail mapping", () => {
         company: "errors.company",
       }),
     ).toEqual(["errors.company.invalid"]);
+  });
+
+  it("keeps unregistered fields on errors.generic without suffixes", () => {
+    expect(
+      mapZodIssuesToValidationDetails(
+        [
+          {
+            code: "too_big",
+            path: ["utmSource"],
+            message: "Too big",
+          } as never,
+        ],
+        {},
+      ),
+    ).toEqual(["errors.generic"]);
+  });
+});
+
+describe("product family label message contract", () => {
+  it("resolves every catalog family label through runtime context + labelKey", () => {
+    for (const { market, family } of getAllMarketFamilyCombos()) {
+      const familyRow = getFamilyByMarketAndSlug(market, family);
+      expect(familyRow).toBeDefined();
+      if (!familyRow) continue;
+
+      expect(familyRow.labelKey).toBe(`${market}.${family}.label`);
+
+      const context = parseProductFamilyContactContext({
+        searchParams: {
+          intent: "product-family",
+          market,
+          family,
+        },
+        messages: runtimeMessages,
+      });
+
+      expect(context).not.toBeNull();
+      expect(context?.familyLabel).toEqual(
+        getMessageValue(
+          runtimeMessages,
+          `catalog.families.${familyRow.labelKey}`,
+        ),
+      );
+      expect(String(context?.familyLabel).trim()).not.toBe("");
+    }
   });
 });

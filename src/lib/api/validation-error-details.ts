@@ -47,6 +47,11 @@ function mapZodIssueToValidationDetail(
 ): string {
   const baseKey = getBaseValidationKey(issue, fieldKeys);
 
+  // Unregistered fields must stay on the single shared fallback leaf.
+  if (baseKey === FALLBACK_VALIDATION_DETAIL) {
+    return FALLBACK_VALIDATION_DETAIL;
+  }
+
   switch (issue.code) {
     case "too_small":
       return isRequiredMinimum(issue) || isBlankRequiredIssue(issue)
@@ -63,9 +68,7 @@ function mapZodIssueToValidationDetail(
         ? `${baseKey}.required`
         : `${baseKey}.invalid`;
     default:
-      return baseKey === FALLBACK_VALIDATION_DETAIL
-        ? FALLBACK_VALIDATION_DETAIL
-        : `${baseKey}.invalid`;
+      return `${baseKey}.invalid`;
   }
 }
 

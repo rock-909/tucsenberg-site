@@ -1,5 +1,6 @@
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import {
+  getFamilyByMarketAndSlug,
   isValidMarketFamilyCombo,
   isValidMarketSlug,
 } from "@/constants/product-catalog";
@@ -60,6 +61,11 @@ export function parseProductFamilyContactContext({
     return null;
   }
 
+  const family = getFamilyByMarketAndSlug(marketSlug, familySlug);
+  if (!family) {
+    return null;
+  }
+
   return {
     intent,
     marketSlug,
@@ -71,7 +77,7 @@ export function parseProductFamilyContactContext({
     ),
     familyLabel: readMessagePath(
       messages,
-      ["catalog", "families", marketSlug, familySlug, "label"],
+      ["catalog", "families", ...family.labelKey.split(".")],
       familySlug,
     ),
   };

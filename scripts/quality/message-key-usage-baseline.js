@@ -354,11 +354,12 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "collection-values",
     file: "src/config/single-site-product-catalog.ts",
-    sourceName: "PRODUCT_FAMILY_LABEL_MESSAGE_KEYS",
+    sourceName: "families",
+    valueProperty: "labelKey",
     prefix: "catalog.families.",
     suffixes: [""],
     reason:
-      "contact product-family context resolves labels from catalog family rows",
+      "contact product-family context resolves labels from each family row labelKey",
   },
   {
     kind: "call-arguments",
