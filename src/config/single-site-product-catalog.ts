@@ -95,6 +95,15 @@ const families = [
   },
 ] as const satisfies readonly ProductFamilyDefinition[];
 
+/** Message suffixes under `catalog.families.*` for each catalog family row. */
+export const PRODUCT_FAMILY_LABEL_MESSAGE_KEYS = [
+  "abs-flood-barriers.abs-boxwall.label",
+  "aluminum-flood-gates.aluminum-gates.label",
+  "absorbent-flood-bags.absorbent-bags.label",
+  "flood-tube-dams.tube-dams.label",
+  "frp-flood-barriers.frp-planks.label",
+] as const;
+
 export type ProductMarketSlug = (typeof productLines)[number]["slug"];
 
 export const singleSiteProductCatalog = {

@@ -124,14 +124,19 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
-  it("keeps the unused-key baseline limited to documented dynamic consumers", () => {
-    expect(UNUSED_MESSAGE_KEYS).toEqual([
-      "catalog.families.abs-flood-barriers.abs-boxwall.label",
-      "catalog.families.aluminum-flood-gates.aluminum-gates.label",
-      "catalog.families.absorbent-flood-bags.absorbent-bags.label",
-      "catalog.families.flood-tube-dams.tube-dams.label",
-      "catalog.families.frp-flood-barriers.frp-planks.label",
-    ]);
+  it("keeps the unused-key baseline empty after dynamic consumers are registered", () => {
+    expect(UNUSED_MESSAGE_KEYS).toEqual([]);
+  });
+
+  it("keeps family label message keys aligned with catalog family rows", async () => {
+    const { PRODUCT_FAMILY_LABEL_MESSAGE_KEYS, singleSiteProductCatalog } =
+      await import("../../../src/config/single-site-product-catalog.ts");
+
+    expect([...PRODUCT_FAMILY_LABEL_MESSAGE_KEYS]).toEqual(
+      singleSiteProductCatalog.families.map(
+        (family) => `${family.marketSlug}.${family.slug}.label`,
+      ),
+    );
   });
 
   it("accepts a statically consumed catalog key", () => {

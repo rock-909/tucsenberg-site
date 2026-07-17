@@ -1,0 +1,52 @@
+import { type ZodIssue } from "zod";
+import {
+  mapZodIssuesToValidationDetails,
+  type ValidationFieldErrorKeys,
+} from "@/lib/api/validation-error-details";
+
+/**
+ * Inquiry field → contact.form error namespace prefixes.
+ * Contact form has its own FIELD_ERROR_KEY_PREFIX; do not merge the two.
+ */
+export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
+  fullName: "errors.fullName",
+  email: "errors.email",
+  company: "errors.company",
+  productInquiryKind: "errors.productInquiryKind",
+  catalogProductId: "errors.catalogProductId",
+  buyerInterest: "errors.buyerInterest",
+  quantity: "errors.quantity",
+  requirements: "errors.requirements",
+} as const satisfies ValidationFieldErrorKeys;
+
+/**
+ * Detail leaves the inquiry mapper can emit for productLeadSchema.
+ * Usage gate binds this list — keep it aligned with behavior tests.
+ */
+export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
+  "errors.fullName.required",
+  "errors.fullName.invalid",
+  "errors.fullName.tooLong",
+  "errors.email.required",
+  "errors.email.invalid",
+  "errors.email.tooLong",
+  "errors.company.tooLong",
+  "errors.company.invalid",
+  "errors.productInquiryKind.invalid",
+  "errors.catalogProductId.required",
+  "errors.catalogProductId.invalid",
+  "errors.buyerInterest.tooLong",
+  "errors.buyerInterest.invalid",
+  "errors.quantity.invalid",
+  "errors.requirements.invalid",
+  "errors.requirements.tooLong",
+] as const;
+
+export function mapInquiryValidationDetails(
+  issues: readonly ZodIssue[],
+): string[] {
+  return mapZodIssuesToValidationDetails(
+    issues,
+    PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
+  );
+}
