@@ -1,11 +1,16 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const HERO_VIEW_PATH = "src/components/sections/hero-section-view.tsx";
 const HOME_PAGE_PATH = "src/app/[locale]/page.tsx";
+const LOCALE_LAYOUT_PATH = "src/app/[locale]/layout.tsx";
+const LIGHT_BREATHING_PATH = "src/lib/motion/light-breathing.ts";
 const PAGE_EXPRESSION_PATH = "src/config/single-site-page-expression.ts";
 const HERO_SECTION_IMPORT = "@/components/sections/hero-section";
+const LOCALE_APP_ROOT = "src/app/[locale]";
+const SOURCE_FILE_PATTERN = /\.(?:ts|tsx)$/;
 
 const FORBIDDEN_HERO_MOTION_MODULES = new Set([
   "motion/react",
@@ -21,6 +26,30 @@ const FORBIDDEN_HERO_MOTION_BINDINGS = new Set([
   "LightMotionProvider",
   "PageTransition",
 ]);
+
+const FORBIDDEN_ROUTE_MOTION_MODULES = new Set([
+  "motion/react",
+  "framer-motion",
+  "@/components/motion/breathing-reveal",
+  "@/components/motion/light-motion-provider",
+]);
+
+const FORBIDDEN_ROUTE_MOTION_BINDINGS = new Set([
+  "BreathingReveal",
+  "LightMotionProvider",
+  "LazyMotion",
+  "domAnimation",
+]);
+
+const REQUIRED_HOME_MOTION_MODULES = [
+  "@/components/motion/breathing-reveal",
+  "@/components/motion/light-motion-provider",
+] as const;
+
+const REPRESENTATIVE_NON_HOME_ROUTE_PAGES = [
+  "src/app/[locale]/contact/page.tsx",
+  "src/app/[locale]/products/page.tsx",
+] as const;
 
 interface ModuleFacts {
   sourceFile: ts.SourceFile;
@@ -373,6 +402,69 @@ function getForbiddenHeroMotionBindings(names: readonly string[]): string[] {
   return names.filter((name) => FORBIDDEN_HERO_MOTION_BINDINGS.has(name));
 }
 
+function getForbiddenRouteMotionModules(
+  specifiers: readonly string[],
+): string[] {
+  return specifiers.filter((specifier) =>
+    FORBIDDEN_ROUTE_MOTION_MODULES.has(specifier),
+  );
+}
+
+function getForbiddenRouteMotionBindings(names: readonly string[]): string[] {
+  return names.filter((name) => FORBIDDEN_ROUTE_MOTION_BINDINGS.has(name));
+}
+
+function walkFiles(root: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only architecture scan walks the approved app source root
+  return readdirSync(root).flatMap((entry) => {
+    const fullPath = join(root, entry);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-only architecture scan inspects discovered files under the approved app source root
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      return walkFiles(fullPath);
+    }
+
+    return SOURCE_FILE_PATTERN.test(fullPath) ? [fullPath] : [];
+  });
+}
+
+function toRepoPath(filePath: string): string {
+  return relative(process.cwd(), filePath).replaceAll("\\", "/");
+}
+
+function isRouteTestFile(filePath: string): boolean {
+  return (
+    filePath.startsWith("src/app/") &&
+    filePath.includes("/__tests__/") &&
+    (filePath.endsWith(".test.ts") ||
+      filePath.endsWith(".test.tsx") ||
+      filePath.endsWith(".spec.ts") ||
+      filePath.endsWith(".spec.tsx"))
+  );
+}
+
+function listNonHomeLocaleRouteSources(): string[] {
+  return walkFiles(LOCALE_APP_ROOT)
+    .map(toRepoPath)
+    .filter((filePath) => !isRouteTestFile(filePath))
+    .filter((filePath) => filePath !== HOME_PAGE_PATH);
+}
+
+function collectRouteMotionViolations(relativePath: string): {
+  modules: string[];
+  bindings: string[];
+  jsxTags: string[];
+} {
+  const moduleFacts = readModuleFacts(relativePath);
+
+  return {
+    modules: getForbiddenRouteMotionModules(moduleFacts.moduleSpecifiers),
+    bindings: getForbiddenRouteMotionBindings(moduleFacts.importBindingNames),
+    jsxTags: getForbiddenRouteMotionBindings(moduleFacts.jsxTagNames),
+  };
+}
+
 describe("homepage LCP motion boundary", () => {
   it("keeps the first-screen hero outside the client motion graph", () => {
     const heroModule = readModuleFacts(HERO_VIEW_PATH);
@@ -407,5 +499,81 @@ describe("homepage LCP motion boundary", () => {
     expect(
       getForbiddenHeroMotionBindings(collectJsxTagNames(heroInitializer)),
     ).toEqual([]);
+  });
+
+  it("keeps motion/react and the homepage motion provider off the root locale layout", () => {
+    const layoutModule = readModuleFacts(LOCALE_LAYOUT_PATH);
+
+    expect(
+      getForbiddenRouteMotionModules(layoutModule.moduleSpecifiers),
+    ).toEqual([]);
+    expect(
+      getForbiddenRouteMotionBindings(layoutModule.importBindingNames),
+    ).toEqual([]);
+    expect(getForbiddenRouteMotionBindings(layoutModule.jsxTagNames)).toEqual(
+      [],
+    );
+  });
+
+  it("keeps motion/react and homepage motion wrappers out of non-home route sources", () => {
+    const violations = listNonHomeLocaleRouteSources().flatMap(
+      (relativePath) => {
+        const routeViolations = collectRouteMotionViolations(relativePath);
+        const issues = [
+          ...routeViolations.modules.map(
+            (specifier) => `${relativePath} imports ${specifier}`,
+          ),
+          ...routeViolations.bindings.map(
+            (binding) => `${relativePath} binds ${binding}`,
+          ),
+          ...routeViolations.jsxTags.map(
+            (tagName) => `${relativePath} renders <${tagName}>`,
+          ),
+        ];
+
+        return issues;
+      },
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps representative non-home routes free of the homepage motion runtime", () => {
+    for (const relativePath of REPRESENTATIVE_NON_HOME_ROUTE_PAGES) {
+      const routeViolations = collectRouteMotionViolations(relativePath);
+
+      expect(routeViolations.modules).toEqual([]);
+      expect(routeViolations.bindings).toEqual([]);
+      expect(routeViolations.jsxTags).toEqual([]);
+    }
+  });
+
+  it("keeps the homepage as the explicit motion consumer", () => {
+    const pageModule = readModuleFacts(HOME_PAGE_PATH);
+
+    expect(pageModule.moduleSpecifiers).toEqual(
+      expect.arrayContaining([...REQUIRED_HOME_MOTION_MODULES]),
+    );
+    expect(pageModule.importBindingNames).toEqual(
+      expect.arrayContaining(["BreathingReveal", "LightMotionProvider"]),
+    );
+    expect(pageModule.jsxTagNames).toEqual(
+      expect.arrayContaining(["BreathingReveal", "LightMotionProvider"]),
+    );
+  });
+
+  it("keeps breathing reveal content visible before client motion activates", () => {
+    const tokenModule = readModuleFacts(LIGHT_BREATHING_PATH);
+    const hiddenInitializer = getObjectPropertyInitializer(
+      tokenModule,
+      "lightBreathingItemVariants",
+      "hidden",
+    );
+    const hiddenSource =
+      hiddenInitializer?.getText(tokenModule.sourceFile) ?? "";
+
+    expect(hiddenSource).not.toMatch(/opacity\s*:/);
+    expect(hiddenSource).not.toMatch(/visibility\s*:/);
+    expect(hiddenSource).not.toMatch(/display\s*:\s*["']?none/);
   });
 });

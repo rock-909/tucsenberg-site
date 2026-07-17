@@ -28,8 +28,6 @@ export const lightBreathingItemVariants = {
   },
 } as const;
 
-export const lightBreathingStaggerChildren = 0.08;
-
 export const lightBreathingRevealTransition = {
   duration: 0.45,
   ease: LIGHT_BREATHING_EASE,
@@ -48,11 +46,3 @@ export const lightBreathingViewport = {
   margin: "-8% 0px -8% 0px",
   amount: 0.15,
 } as const;
-
-export function getInstantTransition(reducedMotion: boolean | null) {
-  if (reducedMotion) {
-    return { duration: 0 };
-  }
-
-  return lightBreathingRevealTransition;
-}
