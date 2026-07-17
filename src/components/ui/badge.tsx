@@ -1,46 +1,24 @@
-import { Badge as RadixBadge } from "@radix-ui/themes";
 import { forwardRef, type HTMLAttributes } from "react";
 import { type VariantProps } from "class-variance-authority";
 import { badgeVariants } from "@/components/ui/badge-variants";
-import { RadixThemePilot } from "@/components/ui/radix-theme";
 import { cn } from "@/lib/utils";
 
 interface BadgeProps
-  extends
-    Omit<
-      HTMLAttributes<HTMLSpanElement>,
-      "color" | "defaultChecked" | "defaultValue"
-    >,
-    VariantProps<typeof badgeVariants> {
-  autoComplete?: string;
-  disabled?: boolean;
-  form?: string;
-  name?: string;
-  value?: string;
-}
-
-const RADIX_BADGE_VARIANT = {
-  default: "solid",
-  secondary: "soft",
-  success: "soft",
-  warning: "soft",
-  destructive: "surface",
-  outline: "outline",
-} as const;
+  extends HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant, ...props }, ref) => {
     return (
-      <RadixThemePilot className="contents" surface="badge">
-        <RadixBadge
-          ref={ref}
-          className={cn(badgeVariants({ variant }), className)}
-          data-slot="badge"
-          radius="full"
-          variant={RADIX_BADGE_VARIANT[variant ?? "default"]}
-          {...props}
-        />
-      </RadixThemePilot>
+      <span
+        ref={ref}
+        className={cn(
+          "inline-flex items-center rounded-full border px-1.5 py-0.5 text-xs leading-4 font-medium",
+          badgeVariants({ variant }),
+          className,
+        )}
+        data-slot="badge"
+        {...props}
+      />
     );
   },
 );

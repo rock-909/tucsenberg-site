@@ -117,11 +117,11 @@ names stay absent).
 
 ## UI Foundation
 
-Hybrid / pilot-first UI foundation — decision record: `docs/决策记录/UI基础方案.md`.
-Radix Primitives are the default for complex interactions; Tailwind owns page
-layout, responsive structure, and brand expression; runtime color truth stays
-in `src/app/globals.css`. Radix Themes is pilot-only via approved
-`src/components/ui/*` wrappers — hard boundaries in `.claude/rules/ui.md`.
+Local wrappers + Radix Primitives — decision record: `docs/决策记录/UI基础方案.md`.
+Radix Primitives are the default implementation tool for complex interactions;
+Tailwind and project tokens own controls, page layout, responsive structure,
+and brand expression; runtime color truth stays in `src/app/globals.css`.
+`@radix-ui/themes` is retired and forbidden in production UI.
 
 ## AI-assisted Frontend System
 

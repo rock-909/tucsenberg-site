@@ -5,17 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { Textarea } from "@/components/ui/textarea";
 
 describe("Textarea", () => {
-  it("renders inside the Radix form-control surface", () => {
+  it("renders a native textarea with the governed control contract", () => {
     render(<Textarea placeholder="Message" />);
 
     const textarea = screen.getByPlaceholderText("Message");
-    const surface = textarea.closest(
-      "[data-ui-pilot='radix-themes-form-control']",
-    );
 
-    expect(surface).toBeInTheDocument();
-    expect(surface).toHaveClass("contents");
+    expect(textarea.tagName).toBe("TEXTAREA");
     expect(textarea).toHaveAttribute("data-slot", "textarea");
+    expect(textarea).toHaveClass("min-h-20", "border", "rounded-[9px]");
   });
 
   it("forwards native textarea attributes", () => {

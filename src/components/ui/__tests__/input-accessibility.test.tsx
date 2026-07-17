@@ -16,7 +16,7 @@ describe("Input accessibility", () => {
     expect(input).toHaveAttribute("aria-describedby", "search-help");
   });
 
-  it("exposes required and invalid states inside the Radix form-control surface", () => {
+  it("exposes required and invalid states on the native control", () => {
     render(
       <Input
         aria-label="Email"
@@ -29,14 +29,7 @@ describe("Input accessibility", () => {
     const input = screen.getByLabelText("Email");
     expect(input).toHaveAttribute("aria-required", "true");
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(
-      input.closest("[data-ui-pilot='radix-themes-form-control']"),
-    ).toBeInTheDocument();
-    expect(
-      input
-        .closest("[data-ui-pilot='radix-themes-form-control']")
-        ?.querySelector("[data-testid='input']"),
-    ).toBeInTheDocument();
+    expect(input).toHaveAttribute("data-testid", "input");
     expect(input).toHaveAttribute("data-slot", "input");
   });
 });

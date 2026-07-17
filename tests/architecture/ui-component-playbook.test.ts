@@ -38,24 +38,18 @@ describe("UI component playbook", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
     expect(playbook).toContain(
-      "Radix owns standardized controls, interaction, state, form, and data/control surfaces.",
+      "Radix Primitives own complex keyboard, focus, overlay, selection, and disclosure mechanics inside local wrappers.",
     );
     expect(playbook).toContain(
-      "Tailwind owns layout, brand expression, marketing narrative, and visual rhythm.",
+      "Native HTML, Tailwind, and project tokens own ordinary controls, layout, brand expression, marketing narrative, and visual rhythm.",
     );
   });
 
-  it("keeps Card and DataCard selection unambiguous", () => {
+  it("keeps Card as the shared surface wrapper", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
     expect(playbook).toContain(
-      "`Card`: marketing, resources, product story, proof.",
-    );
-    expect(playbook).toContain(
-      "`DataCard`: specs, parameters, trade terms, form fallback, structured data.",
-    );
-    expect(playbook).toContain(
-      "Do not use `DataCard` just because something visually looks like a card.",
+      "`Card`: marketing, resources, product story, proof, structured data, and form shells.",
     );
   });
 
@@ -70,14 +64,13 @@ describe("UI component playbook", () => {
     expect(playbook).toContain("stay native until cookie preference state");
   });
 
-  it("records the Contact form control boundary exception", () => {
+  it("records the contact form native control boundary", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
-    expect(playbook).toContain("Contact form shell");
-    expect(playbook).toContain("`ContactFormShell`");
     expect(playbook).toContain(
-      "Only `src/components/ui/*` wrappers may own Radix theme boundaries.",
+      "Contact form fields reuse `Input` and `Textarea`",
     );
+    expect(playbook).toContain("Contact form panels reuse `Card`");
     expect(playbook).toContain("Contact form checkbox stays native");
   });
 
@@ -108,7 +101,6 @@ describe("UI component playbook", () => {
     expect(playbook).toContain("`radixLayer`");
     expect(playbook).toContain("`surface`");
     expect(playbook).toContain("`clientBoundary`");
-    expect(playbook).toContain("`themeBoundary`");
     expect(playbook).toContain("`useWhen`");
     expect(playbook).toContain("`avoidWhen`");
     expect(playbook).toContain("`组件索引.md` row");
@@ -117,13 +109,11 @@ describe("UI component playbook", () => {
     expect(playbook).toContain("组件索引.md` mirror checks");
   });
 
-  it("keeps data-ui-pilot on the theme boundary only", () => {
+  it("records the retired Radix Themes boundary", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
-    expect(playbook).toContain(
-      "Business code must not import `RadixThemePilot`.",
-    );
-    expect(playbook).toContain("Put `data-ui-pilot` only on the");
-    expect(playbook).toContain("`RadixThemePilot` boundary");
+    expect(playbook).toContain("`@radix-ui/themes` is retired");
+    expect(playbook).toContain("Radix Primitives remain available");
+    expect(playbook).toContain("Production code must not import");
   });
 });

@@ -68,39 +68,40 @@ into `src/components/ui/*` with local stories, tests, docs, and governance.
 
 ## Radix UI foundation
 
-The project uses a hybrid / pilot-first UI foundation. Read
-`docs/决策记录/UI基础方案.md` before adding Radix Themes or changing
-the UI foundation.
+The project uses local UI wrappers plus Radix Primitives. Read
+`docs/决策记录/UI基础方案.md` before changing the UI foundation.
 
 - Radix Primitives are approved for complex interactions.
 - Radix-style 1-12 color roles are approved as the color reasoning model.
-- Tailwind continues to own page layout, responsive structure, and brand expression.
+- Tailwind and project tokens own controls, page layout, responsive structure,
+  and brand expression.
 - Runtime color truth remains in `src/app/globals.css`.
-- Radix Themes is pilot-only and may be used only through approved local UI wrappers.
+- `@radix-ui/themes` is retired and forbidden in production UI.
 
 Business code must import UI from local wrappers, for example
 `@/components/ui/*`.
 
 Do not:
 
-- import `@radix-ui/themes` directly from app pages, sections, product blocks,
-  forms, contact components, or layout components;
+- import, dynamically import, or require `@radix-ui/themes` anywhere in
+  production UI;
 - style `.rt-*` classes or depend on Radix internal DOM;
 - use `!important` to solve Radix/Tailwind conflicts;
-- use Radix Themes to take over hero sections, product storytelling, proof
-  sections, footer art direction, or page narrative structure.
+- keep empty compatibility wrappers for retired vendor boundaries.
 
-Use Radix-backed wrappers for controls and stateful UI. Use Tailwind plus
-project tokens for narrative, static, brand-heavy, and page-layout UI.
+Use Radix Primitive-backed wrappers for genuinely complex interaction. Use
+native HTML plus Tailwind and project tokens for ordinary inputs, textareas,
+badges, status panels, cards, narrative UI, and page layout.
 
 Use this judgment split:
 
-- Admin/control surfaces: prefer governed wrappers and Radix-backed behavior.
+- Complex focus, keyboard, overlay, selection, or disclosure behavior: prefer
+  governed Radix Primitive wrappers.
+- Straightforward native form and semantic HTML behavior: prefer local wrappers.
 - Marketing/storytelling surfaces: prefer Tailwind, project tokens, and local
   section composition.
-- `Card`: marketing, resource, product story, and proof content.
-- `DataCard`: specs, parameters, trade terms, fallback panels, and structured
-  data/control surfaces.
+- `Card`: marketing, resources, product story, proof, structured data, form
+  shells, and fallback panels.
 - `Dialog`: blocking decisions, confirmations, and focused modal interaction.
 - `Sheet`: drawer-style interactions such as mobile navigation.
 - `Popover`: small non-modal panels, compact actions, or extra context.

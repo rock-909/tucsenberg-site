@@ -318,7 +318,7 @@ new animation dependencies without separate proof.
 - **Padding：** `py-6 px-6`（24px 全向）。
 - **Shadow：** none（默认 surface 是 `--card-default-shadow: none`）。
 - **Composition：** 内部用 `Card / CardHeader / CardTitle / CardContent / CardFooter` 子组件，gap-6。
-- **DataCard：** 规格、参数、商务条款专用变体——用于结构化数据展示，和 marketing Card 是不同语义。
+- **结构化数据展示：** 规格、参数和商务条款复用 `Card` 及表格/列表语义，不再维护单独的 `DataCard` 包装层。
 
 **禁止嵌套卡片。** 如果两层信息分组，用 divider / 留白 / 标题层级，不要叠 surface。
 
@@ -329,7 +329,7 @@ new animation dependencies without separate proof.
 - **Padding：** `px-4 py-1`。
 - **Border：** 1px `border-input`，hover 不变，focus-visible 时变 `border-ring` + 3px `ring/50` 外晕。
 - **Error：** `aria-invalid` 时 border 切到 `destructive`、ring 切到 `destructive/20`。
-- **复杂 input（textual types）走 Radix Themes TextField pilot**，由 `RadixThemePilot` wrapper 隔离作用域。
+- **文本输入控件：** 统一走本地 `Input` / `Textarea`，使用原生元素、Tailwind 和项目 token；Radix Themes 已退役。
 
 ### Badges
 

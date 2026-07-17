@@ -1,225 +1,151 @@
-# ADR: Hybrid / Governed Radix UI Foundation
+# ADR: Local UI Wrappers + Radix Primitives
 
 Status: accepted
-Date: 2026-05-13
+Original decision: 2026-05-13
+Current revision: 2026-07-16
 Owner: project maintainers
-Applies to: reusable showcase websites built from this starter
 
 ## Decision
 
-This project does not use a full-site Radix Themes-first migration.
+The project uses one project-owned UI system:
 
-The accepted UI foundation is a hybrid, governed Radix control layer:
+- `src/components/ui/*` is the public component entry for application code;
+- Tailwind and project tokens own layout, responsive structure, controls, brand
+  expression, and visual rhythm;
+- `src/app/globals.css` is the runtime color and token truth;
+- Radix Primitives (`@radix-ui/react-*`) are the default implementation tool for
+  complex interaction behavior inside local wrappers;
+- Radix-style 1-12 color scales remain the color reasoning method;
+- `@radix-ui/themes` is retired and forbidden in production UI.
 
-- Radix Primitives are the default foundation for complex interactions.
-- Radix-style 1-12 color scales are the long-term color discipline.
-- Tailwind continues to own page layout, responsive structure, and brand expression.
-- Project tokens in `src/app/globals.css` remain the runtime color truth source.
-- Radix Themes may be used only inside approved local UI wrappers.
-- The Contact / Inquiry form pilot has passed and is now part of the stable limited control set.
-- The stable limited control set currently covers textual form controls, textarea controls, status callouts, badges, data/control cards, dialog and sheet interaction wrappers, and the dropdown menu primitive.
-- New Radix Themes surfaces must be added through `src/components/ui/*` wrappers, documented in `docs/design/组件使用手册.md`, covered by Storybook/tests, and kept behind component governance.
-- Radix Themes must not take over hero sections, product storytelling, proof sections, footer art direction, grid systems, or page narrative structure.
+Registry, Playbook, Storybook, focused tests, and component governance remain
+the durable discovery and enforcement system. Retiring Radix Themes does not
+retire or weaken those controls.
 
-## Why this is the right split
+## Why
 
-The starter is a marketing and conversion website starter, not a dashboard kit.
-It needs reliable controls and accessible interaction patterns, but it must keep
-brand and narrative freedom for different derived projects.
+Tucsenberg is a marketing and inquiry website, not a dashboard kit. It needs
+reliable keyboard, focus, overlay, menu, form, and state behavior, while keeping
+page composition and brand expression easy to control.
 
-Radix should solve hard interaction details such as focus management, keyboard
-behavior, ARIA wiring, overlays, menus, tabs, labels, and disclosure patterns.
-Tailwind and project tokens should keep owning page composition and brand tone.
+Radix Primitives solve difficult interaction mechanics without imposing a
+global visual system. Tailwind and project tokens keep the rendered result
+small, direct, and consistent with the site.
 
-## Control vs narrative boundary
+The Radix Themes contact-form pilot was technically successful, but later
+measurement showed two long-term costs:
 
-Do not decide by section name alone. Decide by behavior.
+1. its stylesheet was global to the site rather than limited to the pilot route;
+2. it created a second token, radius, component, and debugging model beside the
+   project-owned system.
 
-Use Radix-backed wrappers when an element has interaction, state, or repeated
-control logic:
+The local wrapper boundary made it possible to keep the useful behavior and
+remove the unnecessary theme runtime. The historical experiment and reversal
+are recorded in `docs/决策记录/Radix联系表单试点.md`.
 
-- hover, focus, disabled, selected, loading, pending, success, warning, or error states;
-- inputs, labels, textareas, checkboxes, radio controls, validation, and form feedback;
-- dialog, sheet, popover, tooltip, dropdown, accordion, tabs, navigation menu, and similar UI;
-- data/control components such as badge, callout, table, card, and specification blocks when they carry state or repeated control semantics.
+## Component boundary
 
-Use Tailwind plus project tokens when an element is mainly narrative or brand
-expression:
+Business code imports semantic wrappers from `@/components/ui/*`.
 
-- hero layout and page composition;
-- product storytelling;
-- factory or capability proof;
-- footer art direction;
-- static cards whose job is typography, imagery, and layout only.
+Use local HTML + Tailwind wrappers for straightforward visual components:
 
-Edge case: a hero CTA button may use the project Button wrapper because it is a
-control. The hero layout itself should not become Radix Themes layout by
-default.
+- `Input` and `Textarea` for native form controls;
+- `Badge` for semantic chips;
+- `StatusCallout` for live-region feedback;
+- `Card` for marketing, proof, structured data, form shells, and fallback panels;
+- `SectionHead` and other local layout helpers.
 
-## Stable limited control set
+Use Radix Primitives inside local wrappers when interaction mechanics justify
+them:
 
-The phrase "stable limited control set" means Radix is approved for repeatable
-controls and data/control surfaces, not for whole-page visual ownership.
+- dialog and sheet focus containment;
+- dropdown menus, selects, tabs, radio groups, checkboxes, tooltips, and popovers;
+- labels or slots where the primitive provides a real accessibility or
+  composition benefit.
 
-Current stable wrappers:
+Keep native behavior when it is simpler and safer:
 
-- `Button` for button/CTA behavior through the local wrapper contract.
-- `Label` for form label behavior.
-- `Input` for textual inputs, while `file` and `hidden` keep native behavior.
-- `Textarea` for multiline text entry.
-- `Badge` for small status markers.
-- `StatusCallout` for info, success, warning, and error panels.
-- `DataCard` for data/control cards such as specifications, trade terms, and form fallback surfaces.
-- `DropdownMenu` for menu interactions.
-- `Dialog` for modal decisions, confirmations, and focused blocking interactions.
-- `Sheet` for drawer-style interactions.
+- contact and cookie checkboxes remain native until their specific FormData,
+  no-JS, label-click, state, and E2E contracts are proven after migration;
+- FAQ disclosure remains native `<details>/<summary>`;
+- ordinary inputs, textareas, cards, badges, and status panels do not need a
+  vendor primitive merely to render styled HTML.
 
-Current Contact-form-only exception:
+## Control vs narrative judgment
 
-- `ContactFormTextInput` and `ContactFormTextarea` remain scoped by
-  `ContactFormShell` in this P0. They are not general-purpose form controls.
-  Use `Input` and `Textarea` for ordinary reusable fields.
+Do not decide by page region alone. Decide by behavior.
 
-Agents should start UI selection from
-`docs/design/组件使用手册.md`. If a needed control is missing there,
-add a local wrapper first instead of hand-writing one-off business UI.
+- Complex focus, keyboard, overlay, selection, or disclosure behavior: use a
+  governed Radix Primitive wrapper.
+- Native form behavior or simple semantic HTML: use a local wrapper.
+- Brand-heavy narrative, hero, product story, proof, footer, and page layout:
+  use Tailwind and project tokens.
 
-## Wrapper rule
+A hero CTA can use the project `Button` wrapper because it is a control. The
+hero layout itself remains project-owned.
 
-Business code must not import Radix Themes directly.
+## Governance rules
 
 Allowed:
 
-- `@radix-ui/react-*` inside `src/components/ui/*` wrappers for approved primitives.
-- `@radix-ui/themes` only inside approved stable or pilot `src/components/ui/*` wrappers.
-- tests that verify wrapper behavior.
+- `@radix-ui/react-*` imports inside `src/components/ui/*` wrappers;
+- business code importing local wrappers;
+- Storybook and tests demonstrating real local wrappers;
+- project-owned semantic tokens and Radix-style color scales.
 
 Forbidden:
 
-- app pages importing `@radix-ui/themes`;
-- sections, product blocks, layout components, forms, or contact/business components importing `@radix-ui/themes` directly;
-- styling `.rt-*` classes or depending on Radix Themes internal DOM;
-- adding `!important` to win Radix/Tailwind cascade conflicts;
-- letting Radix default colors become the project brand by accident.
+- any production import, dynamic import, or `require` of `@radix-ui/themes`;
+- direct Radix imports from pages, sections, forms, product, contact, or layout
+  business code;
+- styling or depending on `.rt-*` internal classes;
+- hard-coded vendor palette names as business semantics;
+- using a UI library to own hero, product storytelling, proof, footer, grid, or
+  page narrative structure;
+- keeping empty compatibility wrappers for retired vendor boundaries.
 
-The wrapper rule preserves reversibility. If a Radix Themes wrapper fails in
-production, that wrapper can return to a local implementation without rewriting
-page code.
+`pnpm component:governance` enforces the cheap structural rules. Storybook,
+focused tests, browser proof, and build output verify behavior that a text scan
+cannot prove.
 
-## Contact form pilot outcome
+## Registry and Playbook
 
-The Contact / Inquiry form pilot passed on 2026-05-14. Its acceptance criteria
-below are now the historical proof for the first stable wrapper expansion, not
-an active gate for the current control set.
+Every public file in `src/components/ui/*` must remain discoverable through:
 
-1. CSS stays clean:
-   - no new Radix/Tailwind conflict fixes using `!important`;
-   - no `.rt-*` selectors or dependencies on Radix internal DOM;
-   - local development and production build render the same.
-2. Wrapper boundary holds:
-   - no direct `@radix-ui/themes` imports outside approved UI wrappers;
-   - business code imports UI through local wrapper paths;
-   - existing form behavior remains intact.
-3. Accessibility is no worse:
-   - keyboard tab order works through every field and submit state;
-   - focus ring remains visible;
-   - error summary and field errors remain accessible;
-   - no new serious automated accessibility issues.
-4. Visual tone still fits the business:
-   - the form looks like a procurement/inquiry surface, not a generic SaaS signup card;
-   - radius, shadow, spacing, and panel treatment match the starter's clear and credible tone;
-   - error and success states are clearer than before.
-5. Performance impact is measured:
-   - route-level JS and CSS impact is known;
-   - no meaningful layout shift regression;
-   - the pilot does not push client boundaries into static narrative sections.
-6. Maintenance gets simpler:
-   - wrapper APIs are easier for agents to reuse;
-   - variants become fewer and more semantic;
-   - wrapper code is not larger and harder to understand than the local components it replaces.
+1. `src/components/component-governance.registry.json`;
+2. `docs/design/组件索引.md`;
+3. `docs/design/组件使用手册.md`;
+4. a Storybook story;
+5. focused behavior tests where behavior exists.
 
-Passing the Contact form pilot did not approve a full-site Radix Themes
-migration. It only unlocked the current stable limited control set and future
-bounded wrapper additions documented in `docs/design/组件使用手册.md`.
+The Registry `radixLayer` field has only two live values:
 
-## CSS layer ownership
+- `primitive`: the wrapper imports a Radix Primitive;
+- `local`: the wrapper uses project/local implementation only.
 
-`src/app/globals.css` owns global CSS order and runtime color tokens.
+The retired `themes`, `mixed`, and `themeBoundary` metadata are not retained as
+empty historical fields.
 
-Any new Radix Themes wrapper must document:
+## CSS and color ownership
 
-- where Radix Themes CSS is imported;
-- which cascade layer it uses;
-- how Tailwind base, component, and utility styles interact with it;
-- what development and production rendering proof was captured.
-
-Agents must not fix cascade problems locally with stronger selectors. If cascade
-order is wrong, fix the layer strategy instead of patching the symptom.
-
-## Token mapping
-
-Project-owned tokens remain the source of truth:
+`src/app/globals.css` owns:
 
 - `--brand-1` through `--brand-12`;
 - `--neutral-1` through `--neutral-12`;
-- semantic roles such as `--background`, `--foreground`, `--card`, `--primary`, `--border`, `--ring`, `--success-*`, `--warning-*`, and `--error-*`.
+- semantic roles such as `--background`, `--foreground`, `--card`, `--primary`,
+  `--border`, `--ring`, `--success-*`, `--warning-*`, and `--error-*`;
+- shared sizing, radius, shadow, and component role tokens.
 
-If Radix Themes is used inside an approved wrapper, its `--accent-*`, `--gray-*`,
-`--color-background`, `--color-surface`, focus variables, and typography
-variables must map back to project-owned roles. Radix default palettes or font
-choices must not silently become brand identity.
+Component code consumes semantic roles. It must not recreate a parallel vendor
+theme map.
 
-## Dark mode and i18n scope
+## Change rule
 
-Stable wrapper work does not expand into a dark-mode redesign. Existing theme
-behavior must not regress.
+Adding, replacing, or removing a public wrapper requires the source, consumers,
+Registry, component index, Playbook, Storybook, tests, and stable decision docs
+to move together.
 
-All visible copy, labels, aria labels, validation messages, close labels, empty
-states, and fallback text must remain localizable through the project i18n
-system. Do not accept hard-coded English from a vendor component when the
-project already has a translation path.
-
-## Rollback and expansion rule
-
-If a new Radix Themes wrapper fails technically, remove Radix Themes from that
-wrapper and keep Radix Primitives plus the color discipline.
-
-If a wrapper passes technically but fails visually, freeze Radix Themes inside
-the existing wrapper scope and do not expand it into brand-heavy or narrative
-surfaces.
-
-If any change creates direct business-code dependency on Radix Themes, stop and
-repair the wrapper boundary before doing any visual expansion.
-
-Removing an approved stable wrapper requires the same proof bar as adding one:
-Storybook, tests, governance, and `docs/design/组件使用手册.md` updates must move
-together.
-
-## Automated enforcement
-
-`pnpm component:governance` enforces the cheap guardrails:
-
-- block direct `@radix-ui/themes` imports outside approved UI wrapper paths;
-- block styling or depending on `.rt-*` internal classes;
-- block direct Radix primitive imports outside `src/components/ui/*`;
-- block obvious raw Tailwind production palette classes;
-- block browser UI imports of non-CSS static theme colors.
-
-Documentation alone is not enough. This ADR depends on the automated check
-staying active in the component governance gate.
-
-## Stable takeover exceptions
-
-The stable takeover keeps these local implementations intentionally. These are
-not missed migration items.
-
-- Contact checkboxes stay native until a dedicated checkbox spike proves
-  FormData submission, no-JS fallback behavior, label-click toggling, and stable
-  E2E locators.
-- FAQ disclosure stays native `<details>/<summary>` while the route-level test
-  requires the FAQ section to add no client JavaScript.
-- Narrative `Card` usage stays local. Radix-backed `DataCard` is limited to
-  data/control surfaces where repeated state, structure, or control semantics
-  matter.
-- Hero sections, product story sections, proof sections, footer art direction,
-  grid systems, and page layout stay owned by Tailwind and project tokens.
+Dependency adoption requires runtime evidence, not only developer convenience.
+For a global visual dependency, measure its whole-site CSS and maintenance cost
+before approval. A successful pilot proves feasibility; it does not grant
+permanent adoption.

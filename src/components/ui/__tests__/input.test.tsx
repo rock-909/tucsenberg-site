@@ -5,17 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { Input } from "@/components/ui/input";
 
 describe("Input", () => {
-  it("renders textual inputs inside the Radix form-control surface", () => {
+  it("renders a native input with the governed control contract", () => {
     render(<Input placeholder="Enter text here" data-testid="input" />);
 
     const input = screen.getByPlaceholderText("Enter text here");
-    const surface = input.closest(
-      "[data-ui-pilot='radix-themes-form-control']",
-    );
 
-    expect(surface).toBeInTheDocument();
+    expect(input.tagName).toBe("INPUT");
     expect(input).toHaveAttribute("data-slot", "input");
-    expect(surface).toHaveClass("contents");
+    expect(input).toHaveClass("h-10", "border", "rounded-[9px]");
   });
 
   it.each([
@@ -55,11 +52,7 @@ describe("Input", () => {
     expect(input).toBeRequired();
     expect(input).toHaveAttribute("readonly");
 
-    const surface = input.closest(
-      "[data-ui-pilot='radix-themes-form-control']",
-    );
-    expect(surface).toBeInTheDocument();
-    expect(surface?.querySelector(".custom-input")).toBeInTheDocument();
+    expect(input).toHaveClass("custom-input");
   });
 
   it("emits user input and keyboard/focus events", async () => {
@@ -117,13 +110,10 @@ describe("Input", () => {
     const input = screen.getByTestId("file-input");
     fireEvent.change(input, { target: { files: [file] } });
 
-    expect(
-      input.closest("[data-ui-pilot='radix-themes-form-control']"),
-    ).toBeNull();
     expect(input).toHaveAttribute("data-slot", "input");
     expect(input).toHaveClass(
       "h-10",
-      "rounded-md",
+      "rounded-[9px]",
       "border",
       "file:inline-flex",
       "file:h-7",
@@ -150,9 +140,6 @@ describe("Input", () => {
     const form = screen.getByTestId("form") as HTMLFormElement;
 
     expect(input).toHaveAttribute("type", "hidden");
-    expect(
-      input.closest("[data-ui-pilot='radix-themes-form-control']"),
-    ).toBeNull();
     expect(new FormData(form).get("trackingId")).toBe("lead-123");
   });
 

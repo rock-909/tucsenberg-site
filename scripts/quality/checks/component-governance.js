@@ -3,25 +3,27 @@ const path = require("node:path");
 const {
   getExpectedClientBoundary,
   getExpectedRadixLayer,
-  getExpectedThemeBoundary,
+  getCssRadixModuleReferenceSummary,
+  getRadixModuleReferenceSummary,
 } = require("../../component-governance-registry-truth");
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const COMPONENT_GOVERNANCE_COMPONENTS_ROOT = "src/components";
 const COMPONENT_GOVERNANCE_APP_ROOT = "src/app";
+const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
+const COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES = ["mdx-components.tsx"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
 const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
 const COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS = [
   "radixLayer",
   "surface",
   "clientBoundary",
-  "themeBoundary",
   "useWhen",
   "avoidWhen",
 ];
 const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
-  radixLayer: new Set(["primitive", "themes", "local", "mixed"]),
+  radixLayer: new Set(["primitive", "local"]),
   surface: new Set([
     "control",
     "navigation",
@@ -35,27 +37,11 @@ const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
     "theme",
   ]),
   clientBoundary: new Set(["server-safe", "client"]),
-  themeBoundary: new Set(["self-contained", "parent-scoped", "none"]),
 };
-const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:ts|tsx|js|jsx)$/;
+const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|css)$/;
 const COMPONENT_GOVERNANCE_UI_PRIMITIVE_FILE_PATTERN = /\.(?:tsx|jsx)$/;
 const COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN =
-  /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/)/;
-const COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN = /from\s+["']@radix-ui\//;
-const COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN =
-  /from\s+["']@\/components\/ui\/radix-theme["']/;
-const COMPONENT_GOVERNANCE_RADIX_THEMES_APPROVED_WRAPPERS = new Set([
-  "src/components/ui/radix-theme.tsx",
-  "src/components/ui/contact-form-shell.tsx",
-  "src/components/ui/contact-form-control.tsx",
-  "src/components/ui/input.tsx",
-  "src/components/ui/textarea.tsx",
-  "src/components/ui/status-callout.tsx",
-  "src/components/ui/badge.tsx",
-  "src/components/ui/data-card.tsx",
-]);
-const COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN =
-  /(?:from\s+["']@radix-ui\/themes(?:\/[^"']*)?["']|import\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\)|require\s*\(\s*["']@radix-ui\/themes(?:\/[^"']*)?["']\s*\))/;
+  /(?:\.stories\.[^.]+|\.(?:test|spec)\.[^.]+|\/__tests__\/|^src\/(?:test|testing)\/)/;
 const COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN =
   /(?:^|[\s"'`.[_-])rt-[A-Za-z0-9_-]+/;
 const COMPONENT_GOVERNANCE_STATIC_THEME_COLORS_MODULE_PATTERN =
@@ -113,20 +99,30 @@ function walkFiles(rootDir, relativeRoot) {
 }
 
 function getScannedSourceFiles(rootDir) {
-  const files = [];
+  const files = walkFiles(rootDir, COMPONENT_GOVERNANCE_SOURCE_ROOT).filter(
+    (file) =>
+      COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file) &&
+      !COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file),
+  );
 
-  for (const root of [
-    COMPONENT_GOVERNANCE_COMPONENTS_ROOT,
-    COMPONENT_GOVERNANCE_APP_ROOT,
-  ]) {
-    for (const file of walkFiles(rootDir, root)) {
-      if (!COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN.test(file)) continue;
-      if (COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file)) continue;
-      files.push(file);
-    }
+  for (const file of COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES) {
+    if (exists(rootDir, file)) files.push(file);
   }
 
-  return files;
+  return files.sort();
+}
+
+function isGovernedUiSource(file) {
+  return (
+    file.startsWith(`${COMPONENT_GOVERNANCE_COMPONENTS_ROOT}/`) ||
+    file.startsWith(`${COMPONENT_GOVERNANCE_APP_ROOT}/`)
+  );
+}
+
+function getSourceRadixModuleReferenceSummary(file, source) {
+  return file.endsWith(".css")
+    ? getCssRadixModuleReferenceSummary(source)
+    : getRadixModuleReferenceSummary(source, file);
 }
 
 function getUiPrimitiveNames(rootDir) {
@@ -248,12 +244,6 @@ function collectRegistryAgentSourceTruthFindings(
       detail:
         "Registry radixLayer must match Radix imports in the wrapper source.",
     },
-    {
-      field: "themeBoundary",
-      expected: getExpectedThemeBoundary(source),
-      detail:
-        "Registry themeBoundary must match Radix Themes scoping in the wrapper source.",
-    },
   ];
 
   for (const check of sourceTruthChecks) {
@@ -368,67 +358,30 @@ function collectTextScanFindings(rootDir, errors) {
     const isOutsideUiWrapper = !file.startsWith(
       `${COMPONENT_GOVERNANCE_UI_ROOT}/`,
     );
-    const importsRadixThemes =
-      COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN.test(source);
+    const { packageReference, themesReference } =
+      getSourceRadixModuleReferenceSummary(file, source);
 
-    if (
-      isOutsideUiWrapper &&
-      COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN.test(source)
-    ) {
+    if (themesReference) {
       errors.push(
         createFinding(
           file,
-          "radix-theme-pilot-import-outside-ui-wrapper",
-          "RadixThemePilot may only be imported inside approved src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEME_PILOT_IMPORT_PATTERN,
-          ),
+          "radix-themes-import-forbidden",
+          "Production UI must not import the retired @radix-ui/themes package.",
+          themesReference.line,
         ),
       );
-    } else if (isOutsideUiWrapper && importsRadixThemes) {
-      errors.push(
-        createFinding(
-          file,
-          "radix-themes-import-outside-ui-wrapper",
-          "Radix Themes may only be imported through approved src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN,
-          ),
-        ),
-      );
-    } else if (
-      importsRadixThemes &&
-      !COMPONENT_GOVERNANCE_RADIX_THEMES_APPROVED_WRAPPERS.has(file)
-    ) {
-      errors.push(
-        createFinding(
-          file,
-          "radix-themes-import-unapproved-ui-wrapper",
-          "Radix Themes may only be imported by approved pilot UI wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_THEMES_IMPORT_PATTERN,
-          ),
-        ),
-      );
-    } else if (
-      isOutsideUiWrapper &&
-      COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN.test(source)
-    ) {
+    } else if (isOutsideUiWrapper && packageReference) {
       errors.push(
         createFinding(
           file,
           "radix-import-outside-ui",
           "Production UI must import Radix through src/components/ui wrappers.",
-          getPatternLineNumber(
-            source,
-            COMPONENT_GOVERNANCE_RADIX_IMPORT_PATTERN,
-          ),
+          packageReference.line,
         ),
       );
     }
+
+    if (!isGovernedUiSource(file)) continue;
 
     if (COMPONENT_GOVERNANCE_RADIX_THEMES_INTERNAL_CLASS_PATTERN.test(source)) {
       errors.push(

@@ -55,7 +55,6 @@ const VALID_BUTTON_REGISTRY_ITEM = {
   radixLayer: "primitive",
   surface: "control",
   clientBoundary: "server-safe",
-  themeBoundary: "none",
   useWhen: "Use for CTAs and clickable actions.",
   avoidWhen: "Do not handwrite button styling in pages.",
 };
@@ -237,7 +236,6 @@ describe("component-governance-check", () => {
             radixLayer: "primitive",
             surface: "control",
             clientBoundary: "server-safe",
-            themeBoundary: "none",
             useWhen: "Use for CTAs and clickable actions.",
           },
         }),
@@ -260,7 +258,6 @@ describe("component-governance-check", () => {
             radixLayer: "vendor",
             surface: "control",
             clientBoundary: "server-safe",
-            themeBoundary: "none",
             useWhen: "Use for CTAs and clickable actions.",
             avoidWhen: "Do not handwrite button styling in pages.",
           },
@@ -318,7 +315,7 @@ describe("component-governance-check", () => {
         "src/components/component-governance.registry.json": registry({
           button: {
             ...VALID_BUTTON_REGISTRY_ITEM,
-            radixLayer: "themes",
+            radixLayer: "local",
           },
         }),
         "src/components/ui/button.tsx":
@@ -331,53 +328,6 @@ describe("component-governance-check", () => {
 
     expect(result.status).toBe("failed");
     expectFinding(result.errors, "registry-agent-source-mismatch");
-  });
-
-  it("fails when registry themeBoundary drifts from wrapper source", () => {
-    const rootDir = createFixture({
-      "src/components/component-governance.registry.json": registry({
-        "data-card": {
-          story: "required",
-          radixLayer: "themes",
-          surface: "data",
-          clientBoundary: "server-safe",
-          themeBoundary: "parent-scoped",
-          useWhen:
-            "Use for specs, parameters, trade terms, form fallback, and structured facts.",
-          avoidWhen:
-            "Do not use for persuasive marketing, resources, or product story cards.",
-        },
-      }),
-      "src/components/ui/data-card.tsx":
-        'import { Card as RadixCard } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function DataCard() { return <RadixThemePilot><RadixCard /></RadixThemePilot>; }',
-      "src/components/ui/data-card.stories.tsx":
-        "export default { title: 'UI/DataCard' };",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = collectComponentGovernanceFindings(rootDir);
-
-    expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-source-mismatch");
-  });
-
-  it("fails when business code imports RadixThemePilot outside ui wrappers", () => {
-    const rootDir = createFixture(
-      baseFiles({
-        "src/components/sections/hero-section.tsx":
-          'import { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function HeroSection() { return null; }',
-      }),
-    );
-    fixtureRoots.push(rootDir);
-
-    const result = collectComponentGovernanceFindings(rootDir);
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "radix-theme-pilot-import-outside-ui-wrapper",
-      "src/components/sections/hero-section.tsx",
-    );
   });
 
   it("fails when a required primitive story file is missing", () => {
@@ -419,6 +369,112 @@ describe("component-governance-check", () => {
     );
   });
 
+  it("detects multiline Radix imports and keeps wrapper source truth accurate", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/component-governance.registry.json": registry({
+          button: {
+            ...VALID_BUTTON_REGISTRY_ITEM,
+            radixLayer: "local",
+          },
+        }),
+        "src/components/ui/button.tsx":
+          'import {\n  Slot,\n} from "@radix-ui/react-slot";\nexport function Button() { return <Slot />; }',
+        "src/components/layout/header.tsx":
+          'export {\n  Slot as HeaderSlot,\n} from "@radix-ui/react-slot";',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(result.errors, "registry-agent-source-mismatch");
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/components/layout/header.tsx",
+    );
+  });
+
+  it("scans Radix module references across all production source directories", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/label.ts":
+          'import {\n  Root as Label,\n} from "@radix-ui/react-label";\nexport { Label };',
+        "src/lib/dialog-loader.ts":
+          'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+        "src/lib/menu-loader.ts":
+          'const menu = require("@radix-ui/react-dropdown-menu");\nexport { menu };',
+        "src/lib/slot-export.ts":
+          'export { Slot } from "@radix-ui/react-slot";',
+        "src/lib/themes-side-effect.ts":
+          'import "@radix-ui/themes/styles.css";\nexport const loaded = true;',
+        "src/config/theme-loader.ts":
+          'const themes = require("@radix-ui/themes");\nexport { themes };',
+        "src/i18n/slot-export.ts":
+          'export { Slot } from "@radix-ui/react-slot";',
+        "mdx-components.tsx":
+          'import { Slot } from "@radix-ui/react-slot";\nexport function useMDXComponents() { return { Slot }; }',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    for (const file of [
+      "src/lib/label.ts",
+      "src/lib/dialog-loader.ts",
+      "src/lib/menu-loader.ts",
+      "src/lib/slot-export.ts",
+    ]) {
+      expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/lib/themes-side-effect.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/config/theme-loader.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "src/i18n/slot-export.ts",
+    );
+    expectFinding(
+      result.errors,
+      "radix-import-outside-ui",
+      "mdx-components.tsx",
+    );
+  });
+
+  it("does not treat comments or ordinary strings as Radix module references", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/radix-notes.ts": [
+          '// import { Slot } from "@radix-ui/react-slot";',
+          'const example = `import("@radix-ui/themes")`;',
+          "export { example };",
+        ].join("\n"),
+        "src/app/radix-notes.css": [
+          '/* @import "@radix-ui/themes/styles.css"; */',
+          '.example::before { content: "@import url(@radix-ui/themes/styles.css)"; }',
+        ].join("\n"),
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("passed");
+    expect(result.errors).toEqual([]);
+  });
+
   it("allows direct Radix imports inside src/components/ui", () => {
     const rootDir = createFixture({
       "src/components/component-governance.registry.json": registry({
@@ -437,7 +493,7 @@ describe("component-governance-check", () => {
     expect(result.errors).toEqual([]);
   });
 
-  it("fails when Radix Themes is imported outside approved UI wrappers", () => {
+  it("fails when the retired Radix Themes package is imported in business code", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/forms/contact-form.tsx":
@@ -451,12 +507,12 @@ describe("component-governance-check", () => {
     expect(result.status).toBe("failed");
     expectFinding(
       result.errors,
-      "radix-themes-import-outside-ui-wrapper",
+      "radix-themes-import-forbidden",
       "src/components/forms/contact-form.tsx",
     );
   });
 
-  it("fails when Radix Themes is dynamically loaded outside approved UI wrappers", () => {
+  it("fails when the retired Radix Themes package is dynamically loaded", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/forms/contact-form.tsx":
@@ -472,106 +528,140 @@ describe("component-governance-check", () => {
     expect(result.status).toBe("failed");
     expectFinding(
       result.errors,
-      "radix-themes-import-outside-ui-wrapper",
+      "radix-themes-import-forbidden",
       "src/components/forms/contact-form.tsx",
     );
     expectFinding(
       result.errors,
-      "radix-themes-import-outside-ui-wrapper",
+      "radix-themes-import-forbidden",
       "src/components/contact/contact-card.tsx",
     );
   });
 
-  it("allows Radix Themes imports inside approved stable UI wrappers", () => {
+  it("detects statically known Radix imports behind TypeScript expression wrappers", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/lib/parenthesized-import.ts":
+          'export async function loadTheme() { return import(("@radix-ui/themes")); }',
+        "src/lib/asserted-import.ts":
+          'export async function loadTheme() { return import("@radix-ui/themes" as string); }',
+        "src/lib/satisfies-import.ts":
+          'export async function loadTheme() { return import("@radix-ui/themes" satisfies string); }',
+        "src/lib/type-asserted-import.ts":
+          'export async function loadTheme() { return import(<string>"@radix-ui/themes"); }',
+        "src/lib/parenthesized-require.ts":
+          'const theme = require(("@radix-ui/themes"));\nexport { theme };',
+        "src/lib/asserted-require.ts":
+          'const theme = require("@radix-ui/themes" as string);\nexport { theme };',
+        "src/lib/non-null-require.ts":
+          'const theme = require(("@radix-ui/themes")!);\nexport { theme };',
+        "src/lib/parenthesized-require-target.ts":
+          'const theme = (require)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/asserted-require-target.ts":
+          'const theme = (require as NodeRequire)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/type-asserted-require-target.ts":
+          'const theme = (<NodeRequire>require)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/satisfies-require-target.ts":
+          'const theme = (require satisfies NodeRequire)("@radix-ui/themes");\nexport { theme };',
+        "src/lib/non-null-require-target.ts":
+          'const theme = require!("@radix-ui/themes");\nexport { theme };',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    for (const file of [
+      "src/lib/parenthesized-import.ts",
+      "src/lib/asserted-import.ts",
+      "src/lib/satisfies-import.ts",
+      "src/lib/type-asserted-import.ts",
+      "src/lib/parenthesized-require.ts",
+      "src/lib/asserted-require.ts",
+      "src/lib/non-null-require.ts",
+      "src/lib/parenthesized-require-target.ts",
+      "src/lib/asserted-require-target.ts",
+      "src/lib/type-asserted-require-target.ts",
+      "src/lib/satisfies-require-target.ts",
+      "src/lib/non-null-require-target.ts",
+    ]) {
+      expectFinding(result.errors, "radix-themes-import-forbidden", file);
+    }
+  });
+
+  it("fails when Radix packages use side-effect, re-export, or CommonJS imports outside UI wrappers", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/forms/contact-form.tsx":
+          'import "@radix-ui/themes/styles.css";\nexport function ContactForm() { return null; }',
+        "src/components/layout/dialog-loader.tsx":
+          'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+        "src/components/layout/menu-loader.tsx":
+          'const menu = require("@radix-ui/react-dropdown-menu");\nexport { menu };',
+        "src/components/layout/slot-export.tsx":
+          'export { Slot } from "@radix-ui/react-slot";',
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/forms/contact-form.tsx",
+    );
+    for (const file of [
+      "src/components/layout/dialog-loader.tsx",
+      "src/components/layout/menu-loader.tsx",
+      "src/components/layout/slot-export.tsx",
+    ]) {
+      expectFinding(result.errors, "radix-import-outside-ui", file);
+    }
+  });
+
+  it("fails when a production stylesheet imports the retired Radix Themes CSS", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/app/globals.css": '@import url("@radix-ui/themes/styles.css");\n',
+        "src/app/vendor.css": "@import url(@radix-ui/themes/styles.css);\n",
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/app/globals.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/app/vendor.css",
+    );
+  });
+
+  it("classifies dynamically imported Radix Primitives in UI wrappers", () => {
     const rootDir = createFixture({
       "src/components/component-governance.registry.json": registry({
-        badge: {
+        dialog: {
           story: "required",
-          radixLayer: "themes",
-          surface: "feedback",
+          radixLayer: "primitive",
+          surface: "control",
           clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen:
-            "Use for small status chips or labels with semantic variants.",
-          avoidWhen:
-            "Do not use for long narrative text or raw Radix palette names.",
-        },
-        "data-card": {
-          story: "required",
-          radixLayer: "themes",
-          surface: "data",
-          clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen:
-            "Use for specs, parameters, trade terms, form fallback, and structured facts.",
-          avoidWhen:
-            "Do not use for persuasive marketing, resources, or product story cards.",
-        },
-        input: {
-          story: "required",
-          radixLayer: "themes",
-          surface: "form",
-          clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen: "Use for text, email, search, number, tel, and URL fields.",
-          avoidWhen:
-            "Do not use for file or hidden inputs that must stay native.",
-        },
-        "radix-theme": {
-          story: "required",
-          radixLayer: "themes",
-          surface: "theme",
-          clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen:
-            "Use only inside approved UI wrappers to scope Radix Themes.",
-          avoidWhen:
-            "Do not import from pages, sections, forms, product, contact, or layout code.",
-        },
-        "status-callout": {
-          story: "required",
-          radixLayer: "themes",
-          surface: "feedback",
-          clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen:
-            "Use for info, success, warning, error, unavailable, or form status messages.",
-          avoidWhen: "Do not build ad hoc alert panels in business components.",
-        },
-        textarea: {
-          story: "required",
-          radixLayer: "themes",
-          surface: "form",
-          clientBoundary: "server-safe",
-          themeBoundary: "self-contained",
-          useWhen: "Use for multiline text entry.",
-          avoidWhen: "Do not handwrite textarea styles in business components.",
+          useWhen: "Use for governed modal interactions.",
+          avoidWhen: "Do not use for ordinary page layout.",
         },
       }),
-      "src/components/ui/badge.tsx":
-        'import { Badge } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function LocalBadge() { return <RadixThemePilot><Badge /></RadixThemePilot>; }',
-      "src/components/ui/badge.stories.tsx":
-        "export default { title: 'UI/Badge' };",
-      "src/components/ui/data-card.tsx":
-        'import { Card } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function DataCard() { return <RadixThemePilot><Card /></RadixThemePilot>; }',
-      "src/components/ui/data-card.stories.tsx":
-        "export default { title: 'UI/DataCard' };",
-      "src/components/ui/input.tsx":
-        'import { TextField } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function Input() { return <RadixThemePilot><TextField.Root /></RadixThemePilot>; }',
-      "src/components/ui/input.stories.tsx":
-        "export default { title: 'UI/Input' };",
-      "src/components/ui/radix-theme.tsx":
-        'import { Theme } from "@radix-ui/themes";\nexport function RadixThemePilot({ children }: { children: React.ReactNode }) { return <Theme>{children}</Theme>; }',
-      "src/components/ui/radix-theme.stories.tsx":
-        "export default { title: 'UI/RadixThemePilot' };",
-      "src/components/ui/status-callout.tsx":
-        'import { Callout } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function StatusCallout() { return <RadixThemePilot><Callout.Root /></RadixThemePilot>; }',
-      "src/components/ui/status-callout.stories.tsx":
-        "export default { title: 'UI/StatusCallout' };",
-      "src/components/ui/textarea.tsx":
-        'import { TextArea } from "@radix-ui/themes";\nimport { RadixThemePilot } from "@/components/ui/radix-theme";\nexport function Textarea() { return <RadixThemePilot><TextArea /></RadixThemePilot>; }',
-      "src/components/ui/textarea.stories.tsx":
-        "export default { title: 'UI/Textarea' };",
+      "src/components/ui/dialog.tsx":
+        'export async function loadDialog() { return import("@radix-ui/react-dialog"); }',
+      "src/components/ui/dialog.stories.tsx":
+        "export default { title: 'UI/Dialog' };",
     });
     fixtureRoots.push(rootDir);
 
@@ -581,16 +671,26 @@ describe("component-governance-check", () => {
     expect(result.errors).toEqual([]);
   });
 
-  it("fails when Radix Themes is imported from an unapproved UI wrapper", () => {
-    const rootDir = createFixture({
-      "src/components/component-governance.registry.json": registry({
-        checkbox: { story: "required" },
+  it("fails when the retired Radix Themes package is imported in a UI wrapper", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/ui/input.tsx":
+          'import { TextField } from "@radix-ui/themes";\nexport function Input() { return <TextField.Root />; }',
+        "src/components/ui/input.stories.tsx":
+          "export default { title: 'UI/Input' };",
+        "src/components/component-governance.registry.json": registry({
+          button: VALID_BUTTON_REGISTRY_ITEM,
+          input: {
+            story: "required",
+            radixLayer: "local",
+            surface: "form",
+            clientBoundary: "server-safe",
+            useWhen: "Use for ordinary text entry controls.",
+            avoidWhen: "Do not use for multiline text entry.",
+          },
+        }),
       }),
-      "src/components/ui/checkbox.tsx":
-        'import { Checkbox } from "@radix-ui/themes";\nexport function LocalCheckbox() { return <Checkbox />; }',
-      "src/components/ui/checkbox.stories.tsx":
-        "export default { title: 'UI/Checkbox' };",
-    });
+    );
     fixtureRoots.push(rootDir);
 
     const result = collectComponentGovernanceFindings(rootDir);
@@ -598,12 +698,66 @@ describe("component-governance-check", () => {
     expect(result.status).toBe("failed");
     expectFinding(
       result.errors,
-      "radix-themes-import-unapproved-ui-wrapper",
-      "src/components/ui/checkbox.tsx",
+      "radix-themes-import-forbidden",
+      "src/components/ui/input.tsx",
     );
   });
 
-  it("fails when Radix Themes subpath imports are used outside approved wrappers", () => {
+  it("finds Radix Themes after another Radix reference in the same UI wrapper", () => {
+    const rootDir = createFixture(
+      baseFiles({
+        "src/components/ui/button.tsx": [
+          'import { Slot } from "@radix-ui/react-slot";',
+          'import { Theme } from "@radix-ui/themes";',
+          "export function Button() { return <Theme><Slot /></Theme>; }",
+        ].join("\n"),
+        "src/components/ui/vendor.css": [
+          '@import "@radix-ui/colors/blue.css";',
+          '@import "@radix-ui/themes/styles.css";',
+        ].join("\n"),
+        "src/components/ui/vendor-same-line.css":
+          '@import "@radix-ui/colors/blue.css"; @import "@radix-ui/themes/styles.css";',
+        "src/components/ui/vendor-uppercase.css":
+          '@IMPORT URL("@radix-ui/themes/styles.css");',
+        "src/components/ui/vendor-no-space.css": [
+          '@import"@radix-ui/themes/styles.css";',
+          "@IMPORT'@radix-ui/themes/styles.css';",
+        ].join("\n"),
+      }),
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectComponentGovernanceFindings(rootDir);
+
+    expect(result.status).toBe("failed");
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/button.tsx",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-same-line.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-uppercase.css",
+    );
+    expectFinding(
+      result.errors,
+      "radix-themes-import-forbidden",
+      "src/components/ui/vendor-no-space.css",
+    );
+  });
+
+  it("fails when Radix Themes subpath imports are used", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/forms/contact-form.tsx":
@@ -619,12 +773,12 @@ describe("component-governance-check", () => {
     expect(result.status).toBe("failed");
     expectFinding(
       result.errors,
-      "radix-themes-import-outside-ui-wrapper",
+      "radix-themes-import-forbidden",
       "src/components/forms/contact-form.tsx",
     );
     expectFinding(
       result.errors,
-      "radix-themes-import-outside-ui-wrapper",
+      "radix-themes-import-forbidden",
       "src/components/contact/contact-card.tsx",
     );
   });

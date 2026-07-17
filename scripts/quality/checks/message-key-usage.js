@@ -743,10 +743,12 @@ function collectMessageKeyUsageFindings({
   translatorParameterOverrides = TRANSLATOR_PARAMETER_OVERRIDES,
   unusedKeyAllowlist = UNUSED_MESSAGE_KEYS,
 } = {}) {
-  const sourceEntries = sourceFiles.map((file) => ({
-    file,
-    content: fs.readFileSync(path.join(rootDir, file), "utf8"),
-  }));
+  const sourceEntries = sourceFiles
+    .filter((file) => fs.existsSync(path.join(rootDir, file)))
+    .map((file) => ({
+      file,
+      content: fs.readFileSync(path.join(rootDir, file), "utf8"),
+    }));
   const sourceUsage = collectSourceUsageSummary({
     rootDir,
     sourceEntries,
