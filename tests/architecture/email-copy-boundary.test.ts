@@ -147,7 +147,6 @@ describe("email copy boundary", () => {
       "confirmation",
       "contact",
       "productInquiry",
-      "runtimeDefaultLocale",
     ]);
     expect(getNestedKeys(english.emailTemplates).sort()).toEqual(
       expect.arrayContaining([

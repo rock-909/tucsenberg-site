@@ -50,11 +50,10 @@ interface FactualCriticalMessages {
 }
 
 interface FactualDeferredMessages {
-  organization: {
-    name: string;
-  };
-  website: {
-    name: string;
+  emailTemplates: {
+    confirmation: {
+      subject: string;
+    };
   };
 }
 
@@ -146,8 +145,7 @@ function assertFactualCompleteMessages(
   value: unknown,
 ): asserts value is FactualCompleteMessages {
   assertFactualCriticalMessages(value);
-  expectStringPath(value, ["organization", "name"]);
-  expectStringPath(value, ["website", "name"]);
+  expectStringPath(value, ["emailTemplates", "confirmation", "subject"]);
 }
 
 function readMessageJson(relativePath: string): unknown {
@@ -250,8 +248,8 @@ describe("load-messages runtime loading", () => {
     expect(messages["structured-data"].article.defaultAuthor).toBe(
       SINGLE_SITE_FACTS.company.name,
     );
-    expect(messages.organization.name).toBe(SINGLE_SITE_FACTS.company.name);
-    expect(messages.website.name).toBe(SINGLE_SITE_CONFIG.name);
+    expect(messages).not.toHaveProperty("organization");
+    expect(messages).not.toHaveProperty("website");
     expect(JSON.stringify(messages)).not.toMatch(factualPlaceholderPattern);
   });
 
@@ -274,7 +272,10 @@ describe("load-messages runtime loading", () => {
       "{companyName}",
     );
 
-    expect(enDeferred.organization.name).toBe("{companyName}");
-    expect(enDeferred.website.name).toBe("{siteName}");
+    expect(enDeferred.emailTemplates.confirmation.subject).toEqual(
+      expect.any(String),
+    );
+    expect(enDeferred).not.toHaveProperty("organization");
+    expect(enDeferred).not.toHaveProperty("website");
   });
 });

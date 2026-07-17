@@ -27,7 +27,6 @@ describe("client message scoping", () => {
 
     expect(scoped).toEqual({
       accessibility: { skipToContent: "Skip" },
-      language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
       cookie: { title: "Cookies" },
       errors: { contact: { title: "Unavailable" } },
@@ -40,7 +39,6 @@ describe("client message scoping", () => {
       "accessibility",
       "cookie",
       "errors",
-      "language",
       "navigation",
       "theme",
     ]);
@@ -85,9 +83,9 @@ describe("client message scoping", () => {
     expect(scoped).toHaveProperty("accessibility");
     expect(scoped).toHaveProperty("cookie");
     expect(scoped).toHaveProperty("errors");
-    expect(scoped).toHaveProperty("language");
     expect(scoped).toHaveProperty("navigation");
     expect(scoped).toHaveProperty("theme");
+    expect(scoped).not.toHaveProperty("language");
     expect(scoped).not.toHaveProperty("contact");
     expect(scoped).not.toHaveProperty("apiErrors");
     expect(scoped).not.toHaveProperty("footer");

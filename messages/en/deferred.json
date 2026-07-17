@@ -1,130 +1,11 @@
 {
-  "error": "An error occurred. Please try again.",
-  "turnstileRequired": "Please complete the security verification.",
-  "errorBoundary": {
-    "title": "An error occurred",
-    "description": "Something went wrong. Please try refreshing the page.",
-    "tryAgain": "Try Again"
-  },
   "legal": {
     "effectiveDate": "Effective Date",
     "lastUpdated": "Last Updated",
     "tableOfContents": "Table of Contents",
     "articleAuthorLine": "Written by the Tucsenberg team — factory-direct supplier of the flood barrier systems covered in this guide."
   },
-  "instructions": {
-    "getStarted": "Get started by editing",
-    "saveChanges": "Save and see your changes instantly."
-  },
-  "actions": {
-    "deployNow": "Deploy now",
-    "readDocs": "Read our docs"
-  },
-  "formatting": {
-    "date": {
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "tomorrow": "Tomorrow",
-      "lastUpdated": "Last updated on {date}",
-      "publishedOn": "Published on {date}"
-    },
-    "number": {
-      "currency": "${amount}",
-      "percentage": "{value}%",
-      "fileSize": "{size} {unit}"
-    },
-    "plurals": {
-      "items": {
-        "zero": "No items",
-        "one": "One item",
-        "other": "{count} items"
-      },
-      "users": {
-        "zero": "No users online",
-        "one": "One user online",
-        "other": "{count} users online"
-      },
-      "notifications": {
-        "zero": "No new notifications",
-        "one": "One new notification",
-        "other": "{count} new notifications"
-      }
-    }
-  },
-  "progress": {
-    "title": "Development Progress",
-    "status": "Development Progress",
-    "nearCompletion": "Nearly Complete",
-    "planning": "Planning",
-    "development": "Development",
-    "testing": "Testing",
-    "launch": "Launch",
-    "ariaLabel": "Project development progress indicator",
-    "completed": "Completed",
-    "current": "Current step",
-    "upcoming": "Upcoming"
-  },
-  "themes": {
-    "title": "Theme System",
-    "description": "Dynamic theme switching with light and dark mode support.",
-    "toggle": "Theme Toggle",
-    "language": "Language Switch",
-    "colors": {
-      "title": "Color Palette"
-    },
-    "typography": {
-      "title": "Typography",
-      "bold": "Bold Text",
-      "medium": "Medium Text",
-      "normal": "Normal Text",
-      "muted": "Muted Text"
-    }
-  },
-  "title": "Tucsenberg",
-  "privacy": {
-    "pageTitle": "Privacy Policy",
-    "pageDescription": "Learn how we collect, use, and protect your personal information.",
-    "lastUpdated": "Last Updated",
-    "effectiveDate": "Effective Date",
-    "tableOfContents": "Table of Contents",
-    "sections": {
-      "introduction": "Introduction",
-      "informationCollected": "Information We Collect",
-      "howWeUse": "How We Use Your Information",
-      "sharing": "Information Sharing",
-      "security": "Data Security",
-      "retention": "Data Retention",
-      "rights": "Your Privacy Rights",
-      "children": "Children's Privacy",
-      "changes": "Changes to This Policy",
-      "contact": "Contact"
-    }
-  },
-  "terms": {
-    "pageTitle": "Terms of Service",
-    "pageDescription": "Read our terms and conditions for using our services and purchasing products.",
-    "lastUpdated": "Last Updated",
-    "effectiveDate": "Effective Date",
-    "tableOfContents": "Table of Contents",
-    "sections": {
-      "introduction": "Introduction",
-      "acceptance": "Acceptance of Terms",
-      "services": "Services Description",
-      "orders": "Orders & Contracts",
-      "payment": "Payment Terms",
-      "shipping": "Shipping & Delivery",
-      "warranty": "Warranty & Returns",
-      "liability": "Limitation of Liability",
-      "ip": "Intellectual Property",
-      "confidentiality": "Confidentiality",
-      "termination": "Termination",
-      "governing": "Governing Law",
-      "disputes": "Dispute Resolution",
-      "contact": "Contact Information"
-    }
-  },
   "emailTemplates": {
-    "runtimeDefaultLocale": "en",
     "common": {
       "unknownSubmissionTime": "Unknown submission time",
       "fields": {
@@ -180,7 +61,6 @@
     },
     "title": "Contact",
     "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
-    "features": "Email and RFQ routing for Tucsenberg buyers",
     "inquiryHandoff": {
       "title": "Fastest route",
       "description": "The RFQ form asks the questions we would ask anyway, so your quote comes back faster.",
@@ -218,19 +98,15 @@
       "prepareValue": "Use the RFQ form; it asks the questions we'd ask anyway."
     },
     "form": {
-      "title": "Send an enquiry",
-      "description": "For the fastest quote, use Request a Quote. This form still reaches Tucsenberg.",
       "optional": "optional",
       "fullName": "Full name",
       "email": "Email Address",
       "company": "Company Name",
-      "phone": "Phone Number",
       "subject": "Subject",
       "message": "Message",
       "fullNamePlaceholder": "Enter your full name",
       "emailPlaceholder": "your@email.com",
       "companyPlaceholder": "Your company name",
-      "phonePlaceholder": "WhatsApp or phone number",
       "subjectPlaceholder": "Product line, quantity, or site question",
       "messagePlaceholder": "Share product interest, quantity, market, delivery port, timeline, dimensions, or photos/drawings you can provide.",
       "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
@@ -242,7 +118,6 @@
       "turnstilePending": "Security verification is loading. You can send the form once it is ready.",
       "turnstileFailed": "Security verification did not complete. Please try again.",
       "turnstileExpired": "Security verification expired. Please complete it again.",
-      "success": "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
       "error": "Sorry, there was an error sending your message. Please try again later.",
       "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
       "retryLoad": "Retry loading form",
@@ -266,6 +141,20 @@
           "tooLong": "Company name must be less than 100 characters",
           "invalid": "Company name contains invalid characters"
         },
+        "message": {
+          "required": "Message is required",
+          "tooShort": "Message must be at least 10 characters",
+          "tooLong": "Message must be less than 1000 characters"
+        },
+        "phone": {
+          "invalid": "Please enter a valid phone number"
+        },
+        "subject": {
+          "length": "Subject must be between 5 and 100 characters"
+        },
+        "website": {
+          "shouldBeEmpty": "This field should be empty"
+        },
         "productInquiryKind": {
           "required": "Please choose an inquiry type before sending",
           "invalid": "The inquiry type is not recognized"
@@ -285,29 +174,7 @@
         "requirements": {
           "tooLong": "Requirements must be less than 2000 characters",
           "invalid": "Requirements contain invalid characters"
-        },
-        "message": {
-          "required": "Message is required",
-          "tooShort": "Message must be at least 10 characters",
-          "tooLong": "Message must be less than 1000 characters"
-        },
-        "phone": {
-          "invalid": "Please enter a valid phone number"
-        },
-        "subject": {
-          "length": "Subject must be between 5 and 100 characters"
-        },
-        "website": {
-          "shouldBeEmpty": "This field should be empty"
         }
-      },
-      "validation": {
-        "fullNameRequired": "Full name is required",
-        "fullNameTooShort": "Full name is required",
-        "emailRequired": "Email address is required",
-        "emailInvalid": "Please enter a valid email address",
-        "messageRequired": "Message is required",
-        "messageTooShort": "Message must be at least 10 characters"
       }
     }
   },
@@ -349,122 +216,8 @@
       "successReadingLinkLabel": "ABS vs Aluminum vs FRP vs Water-Filled — How to Choose"
     }
   },
-  "formTemplate": {
-    "form": {
-      "success": "Success",
-      "error": "Unknown error",
-      "submitting": "Submitting...",
-      "submit": "Submit",
-      "selectOption": "Select an option"
-    },
-    "example": {
-      "fields": {
-        "name": {
-          "label": "Name",
-          "placeholder": "Enter your name"
-        },
-        "email": {
-          "label": "Email",
-          "placeholder": "Enter your email"
-        },
-        "message": {
-          "label": "Message",
-          "placeholder": "Enter your message"
-        }
-      }
-    }
-  },
-  "stats": {
-    "technologies": "Technologies",
-    "typescript": "TypeScript Coverage",
-    "performance": "Performance Score",
-    "languages": "Languages"
-  },
-  "email": "Email Address",
-  "emailPlaceholder": "your@email.com",
-  "phone": "Phone Number",
-  "organization": {
-    "name": "{companyName}",
-    "description": "Factory-direct flood barrier supply from China",
-    "phone": "Contact sales by email",
-    "social": {}
-  },
-  "website": {
-    "name": "{siteName}",
-    "description": "Factory-direct flood barrier supply from China"
-  },
-  "trust": {
-    "testimonials": {
-      "title": "What Our Clients Say",
-      "subtitle": "Trusted by businesses worldwide"
-    },
-    "partners": {
-      "title": "Our Partners",
-      "subtitle": "Collaborating with industry leaders"
-    },
-    "certifications": {
-      "title": "Certifications & Standards",
-      "subtitle": "Quality you can trust"
-    },
-    "stats": {
-      "title": "By the Numbers",
-      "yearsInBusiness": "Years in Business",
-      "countriesServed": "Countries Served",
-      "satisfactionRate": "Client Satisfaction",
-      "projectsCompleted": "Projects Delivered"
-    }
-  },
   "faq": {
     "sectionTitle": "Frequently Asked Questions",
     "items": {}
-  },
-  "products": {
-    "pageTitle": "Products",
-    "pageDescription": "Explore our comprehensive range of high-quality products for your business needs.",
-    "emptyState": "No products available. Please check back later.",
-    "viewDetails": "View Details",
-    "requestQuote": "Request Quote",
-    "allCategories": "All Categories",
-    "allStandards": "All Standards",
-    "standardsFilterAriaLabel": "Filter by standards",
-    "featured": "Featured",
-    "breadcrumb": {
-      "home": "Home",
-      "products": "Products"
-    },
-    "card": {
-      "moq": "MOQ",
-      "leadTime": "Lead Time",
-      "supplyCapacity": "Capacity"
-    },
-    "detail": {
-      "specifications": "Specifications",
-      "tradeInfo": "Trade Information",
-      "certifications": "Certifications",
-      "relatedProducts": "Related Products",
-      "downloadPdf": "Download product PDF",
-      "labels": {
-        "moq": "Minimum Order",
-        "leadTime": "Lead Time",
-        "supplyCapacity": "Supply Capacity",
-        "packaging": "Packaging",
-        "portOfLoading": "Port of Loading"
-      }
-    },
-    "inquiry": {
-      "title": "Product Inquiry",
-      "description": "Interested in this product? Send us an inquiry for quote details and availability.",
-      "productName": "Product",
-      "quantity": "Quantity Required",
-      "quantityPlaceholder": "e.g., 500 pieces",
-      "targetPrice": "Quote context (optional)",
-      "targetPricePlaceholder": "Add budget notes only if useful for your team",
-      "requirements": "Special Requirements",
-      "requirementsPlaceholder": "Please describe any special requirements such as customization, packaging, or certifications...",
-      "submit": "Send Inquiry",
-      "submitting": "Sending...",
-      "error": "Failed to send inquiry. Please try again later.",
-      "turnstileRequired": "Please complete the security verification."
-    }
   }
 }

@@ -124,9 +124,14 @@ describe("message key usage gate", () => {
     ).toEqual([]);
   });
 
-  it("baselines the known runtime default locale email residue exactly", () => {
-    const key = ["emailTemplates", "runtimeDefaultLocale"].join(".");
-    expect(UNUSED_MESSAGE_KEYS).toContain(key);
+  it("keeps the unused-key baseline limited to documented dynamic consumers", () => {
+    expect(UNUSED_MESSAGE_KEYS).toEqual([
+      "catalog.families.abs-flood-barriers.abs-boxwall.label",
+      "catalog.families.aluminum-flood-gates.aluminum-gates.label",
+      "catalog.families.absorbent-flood-bags.absorbent-bags.label",
+      "catalog.families.flood-tube-dams.tube-dams.label",
+      "catalog.families.frp-flood-barriers.frp-planks.label",
+    ]);
   });
 
   it("accepts a statically consumed catalog key", () => {

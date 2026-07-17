@@ -38,15 +38,19 @@ describe("Storybook preview i18n contract", () => {
     const englishMessages = getStorybookMessages("en") as {
       "structured-data"?: {
         article?: { defaultAuthor?: string; defaultTitle?: string };
+        organization?: { name?: string };
       };
     };
 
-    expect(englishMessages["structured-data"]?.article?.defaultTitle).toBe(
-      "Article",
+    expect(englishMessages["structured-data"]?.organization?.name).toBe(
+      "{companyName}",
     );
     expect(englishMessages["structured-data"]?.article?.defaultAuthor).toBe(
       "{companyName}",
     );
+    expect(
+      englishMessages["structured-data"]?.article?.defaultTitle,
+    ).toBeUndefined();
   });
 
   it("keeps Storybook previews on the active English locale", async () => {

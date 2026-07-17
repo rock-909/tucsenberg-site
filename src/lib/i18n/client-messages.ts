@@ -9,16 +9,16 @@ type Messages = Record<string, unknown>;
 
 // Namespaces every route needs on the client: skip link and mobile-nav labels
 // (accessibility), cookie banner (cookie), the not-found/error views (errors),
-// language and navigation chrome, and the theme switcher. `contact` and
-// `apiErrors` are NOT here on purpose: on the client only the contact form
-// consumes them, so the contact route supplies them through a local provider
-// (see contact-page-sections.tsx). Keeping them out of the root provider stops
+// navigation chrome, and the theme switcher. There is no language switcher on
+// the current site, so `language` is not shipped. `contact` and `apiErrors`
+// are NOT here on purpose: on the client only the contact form consumes them,
+// so the contact route supplies them through a local provider (see
+// contact-page-sections.tsx). Keeping them out of the root provider stops
 // every non-contact page from shipping the contact form copy.
 const CLIENT_MESSAGE_NAMESPACES = [
   "accessibility",
   "cookie",
   "errors",
-  "language",
   "navigation",
   "theme",
 ] as const;
