@@ -64,7 +64,6 @@ const families = [
     description:
       "Straight, curved and gable-end ABS units for freestanding runs.",
     marketSlug: "abs-flood-barriers",
-    labelKey: "abs-flood-barriers.abs-boxwall.label",
   },
   {
     slug: "aluminum-gates",
@@ -72,7 +71,6 @@ const families = [
     description:
       "Planks, posts, seals and spares custom-cut to each opening schedule.",
     marketSlug: "aluminum-flood-gates",
-    labelKey: "aluminum-flood-gates.aluminum-gates.label",
   },
   {
     slug: "absorbent-bags",
@@ -80,7 +78,6 @@ const families = [
     description:
       "Flat-packed SAP-core bags for rain and inland freshwater flooding.",
     marketSlug: "absorbent-flood-bags",
-    labelKey: "absorbent-flood-bags.absorbent-bags.label",
   },
   {
     slug: "tube-dams",
@@ -88,7 +85,6 @@ const families = [
     description:
       "Five and ten metre PVC sections with pump, skirt, nails and repair kit.",
     marketSlug: "flood-tube-dams",
-    labelKey: "flood-tube-dams.tube-dams.label",
   },
   {
     slug: "frp-planks",
@@ -96,7 +92,6 @@ const families = [
     description:
       "Order-driven FRP plank profiles with span and deflection data compiled per first runs.",
     marketSlug: "frp-flood-barriers",
-    labelKey: "frp-flood-barriers.frp-planks.label",
   },
 ] as const satisfies readonly ProductFamilyDefinition[];
 

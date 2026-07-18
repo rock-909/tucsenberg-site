@@ -41,24 +41,6 @@ export function isValidMarketSlug(slug: string): boolean {
   return PRODUCT_CATALOG.markets.some((market) => market.slug === slug);
 }
 
-/** Check if a market + family combination is valid */
-export function isValidMarketFamilyCombo(
-  marketSlug: string,
-  familySlug: string,
-): boolean {
-  return getFamilyByMarketAndSlug(marketSlug, familySlug) !== undefined;
-}
-
-/** Resolve a catalog family row by market + family slug */
-export function getFamilyByMarketAndSlug(
-  marketSlug: string,
-  familySlug: string,
-): ProductFamilyDefinition | undefined {
-  return PRODUCT_CATALOG.families.find(
-    (family) => family.marketSlug === marketSlug && family.slug === familySlug,
-  );
-}
-
 /** Return all market slugs for static generation */
 export function getAllMarketSlugs(): readonly string[] {
   return PRODUCT_CATALOG.markets.map((market) => market.slug);

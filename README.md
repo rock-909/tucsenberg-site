@@ -55,7 +55,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 
 ## 技术基础
 
-- Next.js 16.2.7 App Router
+- Next.js 16.2.10 App Router
 - React 19.2.7
 - TypeScript 6.0.3
 - Tailwind CSS 4.3.0
@@ -64,7 +64,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - Radix / shadcn-style UI
 - Storybook
 - Vitest / Playwright
-- Cloudflare / OpenNext 1.19.11 / Wrangler 4.100.0
+- Cloudflare / OpenNext 1.20.1 / Wrangler 4.100.0
 
 完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/项目基础/技术栈.md`。
 

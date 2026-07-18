@@ -1,7 +1,6 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useSearchParams } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/test/render-async-page";
@@ -89,7 +88,6 @@ describe("ContactPage MDX migration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetContactCopyFromMessages.mockReturnValue(contactCopy);
-    vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
   });
 
   it("renders hero and body from MDX while keeping the form", async () => {
@@ -275,72 +273,6 @@ describe("ContactPage MDX migration", () => {
     expect(handoff.textContent).not.toContain(".pdf");
     expect(handoff.textContent).not.toContain("/api/");
     expect(handoff.textContent).not.toContain("login");
-  });
-
-  it("renders validated product family context from Contact query params", async () => {
-    vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams({
-        intent: "product-family",
-        market: "abs-flood-barriers",
-        family: "abs-boxwall",
-      }),
-    );
-
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-    });
-
-    await renderAsyncPage(page as React.JSX.Element);
-
-    expect(screen.getByText("You are asking about:")).toBeInTheDocument();
-    expect(
-      screen.getByText(/ABS Interlocking Boxwall Flood Barriers/),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/ABS boxwall units/)).toBeInTheDocument();
-  });
-
-  it("ignores invalid product family context without rendering raw query text", async () => {
-    vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams({
-        intent: "product-family",
-        market: "abs-flood-barriers",
-        family: "<script>alert(1)</script>",
-      }),
-    );
-
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-    });
-
-    await renderAsyncPage(page as React.JSX.Element);
-
-    expect(screen.queryByText("You are asking about:")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("<script>alert(1)</script>"),
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
-  });
-
-  it("keeps the product family notice in the same left column as the form", async () => {
-    vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams({
-        intent: "product-family",
-        market: "abs-flood-barriers",
-        family: "abs-boxwall",
-      }),
-    );
-
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-    });
-
-    await renderAsyncPage(page as React.JSX.Element);
-
-    const formColumn = screen.getByTestId("contact-form-column");
-    expect(formColumn).toContainElement(
-      screen.getByTestId("product-family-context-notice"),
-    );
-    expect(formColumn).toContainElement(screen.getByTestId("contact-form"));
   });
 
   it("does not protect the entire Contact page from browser translation", async () => {

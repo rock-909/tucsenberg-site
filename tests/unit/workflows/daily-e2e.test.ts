@@ -44,7 +44,7 @@ describe("daily E2E proof lane", () => {
     );
     expect(existsSync("tests/e2e/navigation.spec.ts")).toBe(true);
     expect(existsSync("tests/e2e/not-found-recovery.spec.ts")).toBe(true);
-    expect(existsSync("tests/e2e/product-family-contact-handoff.spec.ts")).toBe(
+    expect(existsSync("tests/e2e/product-interest-rfq-handoff.spec.ts")).toBe(
       true,
     );
     expect(existsSync("tests/e2e/seo-validation.spec.ts")).toBe(true);
@@ -55,7 +55,7 @@ describe("daily E2E proof lane", () => {
       "tests/e2e/core-page-visual-calibration.spec.ts",
       "tests/e2e/navigation.spec.ts",
       "tests/e2e/not-found-recovery.spec.ts",
-      "tests/e2e/product-family-contact-handoff.spec.ts",
+      "tests/e2e/product-interest-rfq-handoff.spec.ts",
       "tests/e2e/seo-validation.spec.ts",
       "tests/e2e/theme-persistence.spec.ts",
     ]) {

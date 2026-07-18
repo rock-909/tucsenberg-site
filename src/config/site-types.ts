@@ -148,8 +148,6 @@ export interface ProductFamilyDefinition {
   label: string;
   description: string;
   marketSlug: string;
-  /** Message key under `catalog.families.*` for the family label. */
-  labelKey: string;
 }
 
 export interface ProductCatalog {

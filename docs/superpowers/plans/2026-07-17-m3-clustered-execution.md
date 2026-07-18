@@ -157,6 +157,17 @@ pnpm component:check
 - [ ] On D5b tip run `pnpm website:check`, `pnpm component:check`, `pnpm react:doctor --base origin/main`, then `pnpm website:build:cf` after the website check build has completed; run Cloudflare dry-run.
 - [ ] Supply member PRs, exact SHAs, base chain, D1/D2 range-diff, build/static/Motion evidence and owner deferrals. Mark only the cluster `READY_FOR_ACCEPTANCE` and stop.
 
+### Cluster 1 CHANGES_REQUIRED follow-up (2026-07-18)
+
+Acceptance review on PR #118 found dead MDX importer output, a misnamed Contact product-family handoff, stale D4c ESLint truth, and missing SectionHead proof. This follow-up branch closes those gaps only; it is **not** public launch completion and does not start Cluster 2.
+
+- [x] Retire `mdx-importers.generated.ts` and keep `content-manifest.generated.ts` as the sole generated content artifact.
+- [x] Remove the fake Contact product-family URL/notice path; keep real product interest → `/request-quote` proof in `tests/e2e/product-interest-rfq-handoff.spec.ts`.
+- [x] Trash unused `DESIGN.json`; keep `DESIGN.md`, Registry, Playbook, Storybook, and component governance.
+- [x] Pin `eslint-config-next` to `16.2.10`, drop the root `@next/eslint-plugin-next` devDependency, and refresh active stack docs to Next 16.2.10 / OpenNext Cloudflare 1.20.1.
+- [x] Add minimal `SectionHead` semantic and `.text-section` size-contract tests.
+- [x] Inline `ContactFormWithFallback` and remove the single-call forwarding wrapper.
+
 ---
 
 ## 3. Cluster 2: SEO, structured data and security foundations

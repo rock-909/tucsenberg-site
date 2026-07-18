@@ -25,7 +25,7 @@ Do not rely on chat memory for project truth. If a decision must survive session
 
 ## Stack
 
-Next.js 16.2.7 (App Router, Cache Components) + React 19.2.7 + TypeScript 6.0.3 + Tailwind CSS 4.3.0 + next-intl 4.13.0
+Next.js 16.2.10 (App Router, Cache Components) + React 19.2.7 + TypeScript 6.0.3 + Tailwind CSS 4.3.0 + next-intl 4.13.0
 
 ## Structure
 

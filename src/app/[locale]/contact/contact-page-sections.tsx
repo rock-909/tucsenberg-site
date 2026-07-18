@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
-import { ProductFamilyContextNoticeClient } from "@/components/contact/product-family-context-notice-client";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -230,18 +228,13 @@ export function ContactFaqSection({
   );
 }
 
-function ContactFormColumn({
+export function ContactFormWithFallback({
   locale,
   messages,
 }: {
   locale: Locale;
   messages: Record<string, unknown>;
 }) {
-  const productFamilyContextLabel = readRequiredMessagePath(messages, [
-    "contact",
-    "context",
-    "productFamilyLabel",
-  ]);
   const formLoadError = readRequiredMessagePath(messages, [
     "contact",
     "form",
@@ -255,12 +248,6 @@ function ContactFormColumn({
 
   return (
     <div className="min-w-0 space-y-6" data-testid="contact-form-column">
-      <Suspense fallback={null}>
-        <ProductFamilyContextNoticeClient
-          label={productFamilyContextLabel}
-          messages={pickMessages(messages, ["catalog"])}
-        />
-      </Suspense>
       {/* The contact form is the only client consumer of the `contact` and
           `apiErrors` message namespaces. Provide them (plus `accessibility`,
           which the form's Turnstile labels use) locally here instead of from
@@ -278,14 +265,4 @@ function ContactFormColumn({
       </NextIntlClientProvider>
     </div>
   );
-}
-
-export function ContactFormWithFallback({
-  locale,
-  messages,
-}: {
-  locale: Locale;
-  messages: Record<string, unknown>;
-}) {
-  return <ContactFormColumn locale={locale} messages={messages} />;
 }

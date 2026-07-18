@@ -182,9 +182,6 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
   rfqNoteFallback:
     "Tell us the opening or perimeter, ground type, quantity, market and timeline. Photos and drawings help us give a cleaner answer.",
   downloadSpec: "Download spec sheet",
-  "families.abs-flood-barriers.abs-boxwall.label": "ABS boxwall units",
-  "families.abs-flood-barriers.abs-boxwall.description":
-    "Straight, curved and gable-end ABS units for freestanding runs.",
 };
 
 describe("Market Landing Page", () => {

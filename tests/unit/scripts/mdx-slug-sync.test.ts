@@ -874,22 +874,14 @@ describe("content-slug-sync core", () => {
       });
 
       const context = createContentManifestContext(tmpDir);
-      fs.mkdirSync(path.dirname(context.importersOutput), { recursive: true });
       fs.mkdirSync(path.dirname(context.manifestTsOutput), { recursive: true });
-      fs.writeFileSync(context.importersOutput, "stale importers");
       fs.writeFileSync(context.manifestTsOutput, "stale manifest");
 
       expect(runContentManifestGenerator(context, { check: true })).toBe(false);
-      expect(fs.readFileSync(context.importersOutput, "utf8")).toBe(
-        "stale importers",
-      );
       expect(fs.readFileSync(context.manifestTsOutput, "utf8")).toBe(
         "stale manifest",
       );
-      expect(consoleError).toHaveBeenCalledTimes(4);
-      expect(consoleError).toHaveBeenCalledWith(
-        `  - ${context.importersOutput}`,
-      );
+      expect(consoleError).toHaveBeenCalledTimes(3);
       expect(consoleError).toHaveBeenCalledWith(
         `  - ${context.manifestTsOutput}`,
       );
@@ -926,11 +918,6 @@ describe("content-slug-sync core", () => {
       const context = createContentManifestContext(tmpDir);
 
       expect(runContentManifestGenerator(context)).toBe(true);
-      expect(
-        fs
-          .readdirSync(path.dirname(context.importersOutput))
-          .some((file) => file.startsWith("mdx-importers.generated.ts.tmp-")),
-      ).toBe(false);
       expect(
         fs
           .readdirSync(path.dirname(context.manifestTsOutput))
