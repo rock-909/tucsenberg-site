@@ -15,6 +15,7 @@ import {
   CONFIG_PREFILL_MAX_LENGTH,
   createInquiryPayload,
 } from "@/components/forms/inquiry-payload";
+import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
@@ -66,11 +67,21 @@ const FORBIDDEN_CONTROL_NAMES = [
   "budget",
 ] as const;
 
-function renderInquiryForm(source: "contact" | "request-quote" = "contact") {
+const GENERAL_CONTEXT: ValidatedInquiryContext = { kind: "general-context" };
+
+function renderInquiryForm(
+  source: "contact" | "request-quote" = "contact",
+  context: ValidatedInquiryContext = GENERAL_CONTEXT,
+) {
   const copy = createTestInquiryFormCopy();
   const fallback = <InquiryFormStaticFallback copy={copy} />;
   const utils = render(
-    <InquiryForm copy={copy} fallback={fallback} source={source} />,
+    <InquiryForm
+      context={context}
+      copy={copy}
+      fallback={fallback}
+      source={source}
+    />,
   );
   return { copy, ...utils };
 }
@@ -260,7 +271,12 @@ describe("InquiryForm contract", () => {
     const copy = createTestInquiryFormCopy();
     const fallback = <InquiryFormStaticFallback copy={copy} />;
     const { container } = render(
-      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+      <InquiryForm
+        context={GENERAL_CONTEXT}
+        copy={copy}
+        fallback={fallback}
+        source="contact"
+      />,
     );
     const { fullName, email, form } = getFormControls(container);
 
@@ -292,7 +308,12 @@ describe("InquiryForm contract", () => {
     const copy = createTestInquiryFormCopy();
     const fallback = <InquiryFormStaticFallback copy={copy} />;
     const { container } = render(
-      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+      <InquiryForm
+        context={GENERAL_CONTEXT}
+        copy={copy}
+        fallback={fallback}
+        source="contact"
+      />,
     );
     const { fullName, email, message, form } = getFormControls(container);
 
@@ -359,7 +380,12 @@ describe("InquiryForm contract", () => {
     const copy = createTestInquiryFormCopy();
     const fallback = <InquiryFormStaticFallback copy={copy} />;
     const { container } = render(
-      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+      <InquiryForm
+        context={GENERAL_CONTEXT}
+        copy={copy}
+        fallback={fallback}
+        source="contact"
+      />,
     );
     const { fullName, email, message, form } = getFormControls(container);
 
@@ -403,16 +429,21 @@ function setRequestQuoteSearch(search: string) {
 }
 
 describe("InquiryForm hydration", () => {
-  it("SSR renders the static fallback without a live form or URL context", () => {
-    vi.stubGlobal("location", {
-      ...window.location,
-      search: "?interest=frp-planks&config=estimator-summary",
-    });
-
+  it("SSR renders the static fallback without a live form or validated context", () => {
     const copy = createTestInquiryFormCopy();
     const fallback = <InquiryFormStaticFallback copy={copy} />;
     const html = renderToString(
-      <InquiryForm copy={copy} fallback={fallback} source="request-quote" />,
+      <InquiryForm
+        context={{
+          kind: "catalog-context",
+          catalogProductId: "frp-flood-barriers",
+          displayLabel: "FRP Composite Planks",
+          initialMessage: "estimator-summary",
+        }}
+        copy={copy}
+        fallback={fallback}
+        source="request-quote"
+      />,
     );
 
     expect(html).toContain('data-testid="inquiry-form-static-fallback"');
@@ -422,13 +453,16 @@ describe("InquiryForm hydration", () => {
     expect(html).not.toContain('data-testid="inquiry-form"');
   });
 
-  it("hydrates request-quote URL context only after the live form mounts", async () => {
-    setRequestQuoteSearch("?interest=frp-planks&config=Visible%20prefill");
-    const { container, copy } = renderInquiryForm("request-quote");
+  it("hydrates validated context only after the live form mounts", async () => {
+    const { container, copy } = renderInquiryForm("request-quote", {
+      kind: "general-context",
+      buyerInterest: "reseller project",
+      initialMessage: "Visible prefill",
+    });
 
     expect(
       screen.getByTestId("inquiry-buyer-interest-context"),
-    ).toHaveTextContent("frp-planks");
+    ).toHaveTextContent("reseller project");
     expect(
       screen.getByTestId("inquiry-buyer-interest-context"),
     ).toHaveTextContent(copy.contextLabel);
@@ -436,7 +470,7 @@ describe("InquiryForm hydration", () => {
   });
 });
 
-describe("InquiryForm URL handoff", () => {
+describe("InquiryForm validated context", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn(async () =>
@@ -447,19 +481,16 @@ describe("InquiryForm URL handoff", () => {
     );
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it("caps interest, shows it as untrusted context, and submits buyerInterest only", async () => {
-    const interest = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH + 50);
-    setRequestQuoteSearch(`?interest=${encodeURIComponent(interest)}`);
-    const { container, copy } = renderInquiryForm("request-quote");
-    const capped = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH);
+  it("renders the server-resolved catalog label and submits catalog identity", async () => {
+    const { container, copy } = renderInquiryForm("request-quote", {
+      kind: "catalog-context",
+      catalogProductId: "frp-flood-barriers",
+      displayLabel: "FRP Composite Planks",
+    });
 
     expect(
       screen.getByTestId("inquiry-buyer-interest-context"),
-    ).toHaveTextContent(capped);
+    ).toHaveTextContent("FRP Composite Planks");
     expect(
       screen.getByTestId("inquiry-buyer-interest-context"),
     ).toHaveTextContent(copy.contextLabel);
@@ -475,16 +506,41 @@ describe("InquiryForm URL handoff", () => {
 
     await waitFor(() => expect(fetch).toHaveBeenCalled());
     expect(getFetchBody()).toMatchObject({
-      buyerInterest: capped,
+      productInquiryKind: "catalog-product",
+      catalogProductId: "frp-flood-barriers",
+    });
+    expect(getFetchBody()).not.toHaveProperty("buyerInterest");
+  });
+
+  it("submits general RFQ with buyerInterest and no catalog ID", async () => {
+    const interest = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH);
+    const { container } = renderInquiryForm("request-quote", {
+      kind: "general-context",
+      buyerInterest: interest,
+    });
+
+    const { fullName, email, form } = getFormControls(container);
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "RFQ Buyer" } });
+    fireEvent.change(email, { target: { value: "rfq@example.com" } });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(getFetchBody()).toMatchObject({
+      buyerInterest: interest,
       productInquiryKind: "general-rfq",
     });
     expect(getFetchBody()).not.toHaveProperty("catalogProductId");
   });
 
-  it("caps config, pre-fills the visible message, and keeps it editable", async () => {
-    const config = "c".repeat(CONFIG_PREFILL_MAX_LENGTH + 20);
-    setRequestQuoteSearch(`?config=${encodeURIComponent(config)}`);
-    const { container } = renderInquiryForm("request-quote");
+  it("pre-fills, edits, and clears the initial message", async () => {
+    const { container } = renderInquiryForm("request-quote", {
+      kind: "general-context",
+      initialMessage: "c".repeat(CONFIG_PREFILL_MAX_LENGTH),
+    });
     const { message } = getFormControls(container);
 
     expect(message).toHaveValue("c".repeat(CONFIG_PREFILL_MAX_LENGTH));
@@ -492,11 +548,44 @@ describe("InquiryForm URL handoff", () => {
       target: { value: "Edited estimator summary" },
     });
     expect(message).toHaveValue("Edited estimator summary");
+    fireEvent.change(message, { target: { value: "" } });
+    expect(message).toHaveValue("");
   });
 
-  it("ignores URL context in contact mode", () => {
-    setRequestQuoteSearch("?interest=frp-planks&config=should-not-appear");
-    const { container } = renderInquiryForm("contact");
+  it("keeps attribution, honeypot, and Turnstile fields in catalog submissions", async () => {
+    const { container } = renderInquiryForm("request-quote", {
+      kind: "catalog-context",
+      catalogProductId: "abs-flood-barriers",
+      displayLabel: "ABS Interlocking Boxwall",
+    });
+    const { fullName, email, form } = getFormControls(container);
+    const honeypot = form.querySelector<HTMLInputElement>(
+      'input[name="website"]',
+    );
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Ada Buyer" } });
+    fireEvent.change(email, { target: { value: "ada@example.com" } });
+    fireEvent.change(honeypot!, {
+      target: { value: "https://spam.example" },
+    });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(getFetchBody()).toMatchObject({
+      productInquiryKind: "catalog-product",
+      catalogProductId: "abs-flood-barriers",
+      website: "https://spam.example",
+      turnstileToken: "mock-inquiry-turnstile-token",
+    });
+  });
+
+  it("ignores request-quote context when contact uses general-context", () => {
+    setRequestQuoteSearch("?catalogProductId=frp-flood-barriers&config=hidden");
+    const { container } = renderInquiryForm("contact", GENERAL_CONTEXT);
 
     expect(screen.queryByTestId("inquiry-buyer-interest-context")).toBeNull();
     expect(getFormControls(container).message).toHaveValue("");
@@ -525,7 +614,12 @@ describe("createInquiryPayload", () => {
     formData.set("email", "payload@example.com");
     formData.set("message", "Need details");
 
-    expect(createInquiryPayload(formData, "token-1", "aluminum gates")).toEqual(
+    expect(
+      createInquiryPayload(formData, "token-1", {
+        kind: "general-context",
+        buyerInterest: "aluminum gates",
+      }),
+    ).toEqual(
       expect.objectContaining({
         fullName: "Payload Buyer",
         email: "payload@example.com",
@@ -533,6 +627,25 @@ describe("createInquiryPayload", () => {
         buyerInterest: "aluminum gates",
         productInquiryKind: "general-rfq",
         turnstileToken: "token-1",
+      }),
+    );
+  });
+
+  it("builds the catalog product body from validated context", () => {
+    const formData = new FormData();
+    formData.set("fullName", "Payload Buyer");
+    formData.set("email", "payload@example.com");
+
+    expect(
+      createInquiryPayload(formData, "token-1", {
+        kind: "catalog-context",
+        catalogProductId: "abs-flood-barriers",
+        displayLabel: "ABS Interlocking Boxwall",
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        productInquiryKind: "catalog-product",
+        catalogProductId: "abs-flood-barriers",
       }),
     );
   });

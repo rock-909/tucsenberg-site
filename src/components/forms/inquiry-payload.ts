@@ -4,6 +4,7 @@ import {
   MAX_LEAD_PRODUCT_NAME_LENGTH,
 } from "@/constants/validation-limits";
 import { PRODUCT_INQUIRY_KINDS } from "@/lib/lead-pipeline/product-inquiry-kinds";
+import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import {
   pickAttributionFieldsFromFormData,
   type MarketingAttributionFields,
@@ -14,7 +15,10 @@ export const CONFIG_PREFILL_MAX_LENGTH = MAX_INQUIRY_CONFIG_PREFILL_LENGTH;
 interface InquiryPayload extends MarketingAttributionFields {
   readonly fullName: string;
   readonly email: string;
-  readonly productInquiryKind: typeof PRODUCT_INQUIRY_KINDS.GENERAL_RFQ;
+  readonly productInquiryKind:
+    | typeof PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT
+    | typeof PRODUCT_INQUIRY_KINDS.GENERAL_RFQ;
+  readonly catalogProductId?: string;
   readonly message?: string;
   readonly buyerInterest?: string;
   readonly website: string;
@@ -55,20 +59,27 @@ export function capConfigPrefill(raw: string | null): string | undefined {
 export function createInquiryPayload(
   formData: FormData,
   turnstileToken: string,
-  buyerInterest?: string,
+  context: ValidatedInquiryContext,
 ): InquiryPayload {
   const fullName = getOptionalString(formData, "fullName");
   const email = getOptionalString(formData, "email");
   const message = getOptionalString(formData, "message");
   const website = getOptionalString(formData, "website");
+  const identity =
+    context.kind === "catalog-context"
+      ? {
+          productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+          catalogProductId: context.catalogProductId,
+        }
+      : { productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ };
 
   return {
     fullName,
     email,
-    productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
+    ...identity,
     website,
     ...(message ? { message } : {}),
-    ...(buyerInterest ? { buyerInterest } : {}),
+    ...(context.buyerInterest ? { buyerInterest: context.buyerInterest } : {}),
     turnstileToken,
     ...pickAttributionFieldsFromFormData(formData),
   };

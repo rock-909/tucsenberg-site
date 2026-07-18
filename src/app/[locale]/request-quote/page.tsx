@@ -126,6 +126,7 @@ export default async function RequestQuotePage({
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <InquiryForm
+            context={{ kind: "general-context" }}
             copy={inquiryCopy}
             fallback={inquiryFallback}
             source="request-quote"

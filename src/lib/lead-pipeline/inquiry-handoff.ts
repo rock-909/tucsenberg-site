@@ -1,12 +1,38 @@
 import type { ProductMarketSlug } from "@/config/single-site-product-catalog";
 import {
-  capBuyerInterest,
-  capConfigPrefill,
-} from "@/components/forms/inquiry-payload";
+  MAX_INQUIRY_CONFIG_PREFILL_LENGTH,
+  MAX_LEAD_PRODUCT_NAME_LENGTH,
+} from "@/constants/validation-limits";
 import {
   getMarketBySlug,
   isProductMarketSlug,
 } from "@/constants/product-catalog";
+
+function capBuyerInterest(raw: string | null | undefined): string | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  return trimmed.slice(0, MAX_LEAD_PRODUCT_NAME_LENGTH);
+}
+
+function capConfigPrefill(raw: string | null | undefined): string | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  return trimmed.slice(0, MAX_INQUIRY_CONFIG_PREFILL_LENGTH);
+}
 
 export type InquirySearchParams = Record<string, string | string[] | undefined>;
 

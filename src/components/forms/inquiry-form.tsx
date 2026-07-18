@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  type FormEvent,
-  type ReactNode,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { type FormEvent, type ReactNode, useSyncExternalStore } from "react";
 import {
   InquiryBuyerInterestContext,
   InquiryFormFields,
@@ -16,8 +11,6 @@ import {
 } from "@/components/forms/inquiry-form-copy";
 import { InquiryFormStatus } from "@/components/forms/inquiry-form-status";
 import {
-  capBuyerInterest,
-  capConfigPrefill,
   createInquiryPayload,
   getInquiryMessageMaxLength,
 } from "@/components/forms/inquiry-payload";
@@ -27,6 +20,7 @@ import {
 } from "@/components/forms/inquiry-response";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { useLeadFormSubmission } from "@/lib/forms/use-lead-form-submission";
+import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 
 export type { InquiryFormSource } from "@/components/forms/inquiry-form-copy";
 export type { InquiryFormCopy } from "@/components/forms/inquiry-form-copy";
@@ -35,6 +29,7 @@ export interface InquiryFormProps {
   readonly source: InquiryFormSource;
   readonly copy: InquiryFormCopy;
   readonly fallback: ReactNode;
+  readonly context: ValidatedInquiryContext;
 }
 
 const unsubscribeHydration = () => undefined;
@@ -42,38 +37,26 @@ const subscribeHydration = () => unsubscribeHydration;
 const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
-function readRequestQuoteUrlContext(): {
-  buyerInterest?: string | undefined;
-  configPrefill?: string | undefined;
-} {
-  const params = new URLSearchParams(window.location.search);
-  const buyerInterest = capBuyerInterest(params.get("interest"));
-  const configPrefill = capConfigPrefill(params.get("config"));
-
-  return {
-    ...(buyerInterest ? { buyerInterest } : {}),
-    ...(configPrefill ? { configPrefill } : {}),
-  };
-}
-
 function InquiryFormLive({
   source,
   copy,
+  context,
 }: {
   source: InquiryFormSource;
   copy: InquiryFormCopy;
+  context: ValidatedInquiryContext;
 }) {
-  const urlContext = useMemo(
-    () => (source === "request-quote" ? readRequestQuoteUrlContext() : {}),
-    [source],
-  );
-  const { buyerInterest, configPrefill } = urlContext;
+  const visibleContext =
+    context.kind === "catalog-context"
+      ? context.displayLabel
+      : context.buyerInterest;
+  const { initialMessage } = context;
 
   const kernel = useLeadFormSubmission<InquirySubmitState>({
     endpoint: "/api/inquiry",
     leadEventTag: source === "contact" ? "contact" : "rfq",
     buildBody: (formData, turnstileToken) =>
-      createInquiryPayload(formData, turnstileToken, buyerInterest),
+      createInquiryPayload(formData, turnstileToken, context),
     decode: decodeInquirySubmitState,
     isSuccess: (result) => result.status === "success",
     toNetworkError: () => ({ status: "error", errorKind: "server" }),
@@ -96,7 +79,6 @@ function InquiryFormLive({
 
   const ariaLabel =
     source === "contact" ? copy.contactAriaLabel : copy.requestQuoteAriaLabel;
-  const initialMessage = source === "request-quote" ? configPrefill : undefined;
   const fieldDetails =
     displayState.status === "error" && displayState.errorKind === "field"
       ? displayState.fieldDetails
@@ -114,9 +96,9 @@ function InquiryFormLive({
         data-testid="inquiry-form"
         onSubmit={handleSubmit}
       >
-        {buyerInterest ? (
+        {visibleContext ? (
           <InquiryBuyerInterestContext
-            buyerInterest={buyerInterest}
+            buyerInterest={visibleContext}
             copy={copy}
           />
         ) : null}
@@ -147,7 +129,12 @@ function InquiryFormLive({
   );
 }
 
-export function InquiryForm({ source, copy, fallback }: InquiryFormProps) {
+export function InquiryForm({
+  source,
+  copy,
+  fallback,
+  context,
+}: InquiryFormProps) {
   const isHydrated = useSyncExternalStore(
     subscribeHydration,
     getClientHydrationSnapshot,
@@ -158,5 +145,5 @@ export function InquiryForm({ source, copy, fallback }: InquiryFormProps) {
     return fallback;
   }
 
-  return <InquiryFormLive copy={copy} source={source} />;
+  return <InquiryFormLive copy={copy} context={context} source={source} />;
 }
