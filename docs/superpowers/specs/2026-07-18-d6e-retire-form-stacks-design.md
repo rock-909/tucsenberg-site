@@ -97,6 +97,9 @@ Move to Trash, then stage their deletion, the complete old Contact implementatio
 - `src/components/contact/contact-form-island.tsx` and its load-error component;
 - legacy Contact form containers, views, fields, feedback, hooks, cooldown hook,
   fixtures, tests, and stories;
+- `NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS` from the env schema, public runtime
+  mapping, `.env.example`, and its dedicated tests; no replacement browser
+  cooldown setting is introduced;
 - the obsolete config-driven Contact static fallback;
 - Contact config/schema builders and `submit-canonical-contact`;
 - `ServerActionResult` and its utilities when their remaining consumers reach
@@ -119,10 +122,12 @@ tombstone because historical access logs were unavailable. Its approved design
 assigns final deletion to D6e. D6e removes the route, its test, the retired error
 code/message, and tombstone-only documentation.
 
-The active `/api/inquiry` route will stop adapting the pre-D6a `requirements`
-input. It will construct the canonical schema input directly from the current
-payload fields. The deprecated `requirements` input member and adapter are
-removed.
+The active `/api/inquiry` route will stop adapting the pre-D6a `company`,
+`quantity`, and `requirements` inputs. It will construct the canonical schema
+input directly from the current form and validated handoff. The public buyer
+input is only `fullName`, `email`, and optional `message`; product identity,
+buyer interest, and calculator summary come from the already validated context.
+The deprecated input members and adapter are removed.
 
 This does not remove the downstream owner-facing `requirements` field. The
 canonical buyer `message` must still map into the product email requirements and
@@ -133,7 +138,7 @@ are removed after all legacy callers disappear. `processValidatedInquiry` remain
 the only production processing entry.
 
 Canonical limits that still protect `fullName`, `email`, `message`, attribution,
-product identity, and quantity context remain in the current lead schema. They
+product identity, and validated context remain in the current lead schema. They
 must not be copied from `CONTACT_FORM_CONFIG` into a second constants module.
 
 ## Delivery retirement
@@ -144,13 +149,18 @@ Remove only the Contact-specific branches from retained delivery modules:
 - Contact owner-email builder and sender;
 - disabled buyer confirmation-email branch and its feature flag;
 - Contact email data schema;
-- Contact Airtable input type, converter, and service method;
+- Contact Airtable input type, `addContactFields()`, and the Contact dispatch
+  branch inside record creation;
 - Contact-only mocks and tests.
 
 Keep the product/general inquiry path. A general inquiry is still represented by
 the current product-lead pipeline with validated general context. Owner email and
 Airtable must continue receiving the canonical buyer message, attribution, and
 resolved product/general identity.
+
+Keep `AirtableService.createLead()` and `createLeadRecord()` as the single live
+write path. Their input narrows to the product/general inquiry model after the
+Contact union member is deleted.
 
 ## Message ownership
 
@@ -161,6 +171,13 @@ Delete these physical message subtrees:
 - `emailTemplates.contact`;
 - `emailTemplates.confirmation`;
 - retired Contact API error messages.
+
+Also shrink `emailTemplates.common` leaf-by-leaf to the fields consumed by the
+live Product Inquiry email. Remove Contact/confirmation-only leaves such as
+phone, subject, submitted time, and unknown submission time. If company and
+quantity no longer exist in the canonical inquiry model, remove those email
+leaves too. The remaining common leaves must be positively consumed by the live
+email builder.
 
 Keep `inquiry.form` as the single form namespace. Keep Contact page-specific
 `contact.panel` and `contact.inquiryHandoff`. Keep `requestQuote.metadata` and
@@ -229,11 +246,16 @@ Update stable truth for:
 - component governance and playbook;
 - client-boundary budget;
 - maintenance/replacement docs;
+- the public Privacy Policy so its direct collection statement names only
+  `fullName`, `email`, and optional `message`, separately explains validated
+  product/calculator context and permitted attribution, and removes the
+  nonexistent photo/drawing upload claim;
 - Cluster 3B execution status.
 
 Do not touch D7a-owned component-level English fallback cleanup, locale coercion,
 same-locale source retry, global-error English, Footer fallback, or SVG/Canvas
-copy.
+copy. Correcting the Privacy Policy's description of current data collection is
+runtime-truth maintenance, not the deferred legal-signature action.
 
 ## Acceptance criteria
 
@@ -267,4 +289,3 @@ and RFQ message trees have no remaining compatibility consumers.
 The task is not `READY_FOR_CLUSTER` until focused tests, `content:check`,
 `component:check`, Knip, dependency-cruiser, full Vitest, focused Playwright,
 React Doctor, production build, and exact-SHA CI all pass.
-
