@@ -1,3 +1,5 @@
+> Historical.
+
 # D6e Retire Duplicate Form Stacks Design
 
 ## Status and scope

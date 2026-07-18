@@ -3,7 +3,6 @@ paths:
   - "src/app/api/**/*"
   - "src/lib/security/**/*"
   - "src/lib/api/**"
-  - "src/lib/actions/**"
   - "src/lib/lead-pipeline/lead-schema.ts"
   - "src/config/security.ts"
   - "next.config.ts"
