@@ -1,6 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import RequestQuotePage, { generateMetadata } from "../page";
+
+const capturedInquiryFormProps = vi.hoisted(() => ({
+  latest: null as {
+    context: ValidatedInquiryContext;
+  } | null,
+}));
 
 const { mockGenerateMetadataForPath, mockJsonLdGraphScript } = vi.hoisted(
   () => ({
@@ -68,10 +75,32 @@ vi.mock("@/components/seo/json-ld-script", () => ({
   },
 }));
 
+vi.mock("@/components/forms/inquiry-form", () => ({
+  InquiryForm: ({ context }: { context: ValidatedInquiryContext }) => {
+    capturedInquiryFormProps.latest = { context };
+    return (
+      <div data-testid="mock-inquiry-form">
+        {context.kind === "catalog-context" ? (
+          <span data-testid="catalog-context-label">
+            {context.displayLabel}
+          </span>
+        ) : null}
+        {context.initialMessage ? (
+          <textarea
+            data-testid="initial-message"
+            defaultValue={context.initialMessage}
+          />
+        ) : null}
+      </div>
+    );
+  },
+}));
+
 describe("RequestQuotePage", () => {
   beforeEach(() => {
     mockGenerateMetadataForPath.mockClear();
     mockJsonLdGraphScript.mockClear();
+    capturedInquiryFormProps.latest = null;
   });
 
   it("uses the owner-approved RFQ meta title", async () => {
@@ -91,6 +120,7 @@ describe("RequestQuotePage", () => {
   it("renders the owner-approved RFQ form fields and success copy", async () => {
     const page = await RequestQuotePage({
       params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({}),
     });
 
     render(page);
@@ -98,28 +128,80 @@ describe("RequestQuotePage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Get real numbers, fast" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("form", { name: "Request a quote" }),
-    ).toHaveAttribute("data-analytics-event", "rfq_submit");
-    const nameField = screen.getByLabelText("Full name");
-    expect(nameField).toBeRequired();
-    const emailField = screen.getByLabelText("Email address");
-    expect(emailField).toHaveAttribute("type", "email");
-    expect(emailField).toBeRequired();
-    const messageField = screen.getByLabelText(/^Message/i);
-    expect(messageField.tagName).toBe("TEXTAREA");
-    expect(messageField).not.toBeRequired();
-    expect(
-      screen.getByText(/product interest, opening sizes/i),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("mock-inquiry-form")).toBeInTheDocument();
+    expect(capturedInquiryFormProps.latest?.context).toEqual({
+      kind: "general-context",
+    });
     expect(
       screen.getByText("Received. You'll hear from a person, not a sequence."),
     ).toBeInTheDocument();
   });
 
+  it("passes catalog-context for a valid catalogProductId", async () => {
+    const page = await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        catalogProductId: "frp-flood-barriers",
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByTestId("catalog-context-label")).toHaveTextContent(
+      "FRP Composite Planks",
+    );
+    expect(capturedInquiryFormProps.latest?.context).toEqual({
+      kind: "catalog-context",
+      catalogProductId: "frp-flood-barriers",
+      displayLabel: "FRP Composite Planks",
+    });
+  });
+
+  it("downgrades forged or repeated catalogProductId values to general-context", async () => {
+    const forgedPage = await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        catalogProductId: "forged-product",
+      }),
+    });
+    render(forgedPage);
+    expect(screen.queryByTestId("catalog-context-label")).toBeNull();
+    expect(capturedInquiryFormProps.latest?.context).toEqual({
+      kind: "general-context",
+    });
+
+    const repeatedPage = await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        catalogProductId: ["abs-flood-barriers", "frp-flood-barriers"],
+      }),
+    });
+    render(repeatedPage);
+    expect(capturedInquiryFormProps.latest?.context).toEqual({
+      kind: "general-context",
+    });
+  });
+
+  it("passes estimator config into the validated initial message", async () => {
+    const page = await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({
+        catalogProductId: "abs-flood-barriers",
+        config: "Estimated 12 straight units",
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByTestId("initial-message")).toHaveValue(
+      "Estimated 12 straight units",
+    );
+  });
+
   it("injects request-quote WebPage JSON-LD through the shared graph script", async () => {
     const page = await RequestQuotePage({
       params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({}),
     });
 
     render(page);

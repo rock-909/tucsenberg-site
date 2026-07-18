@@ -12,11 +12,13 @@ import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
+import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
 
 interface RequestQuotePageProps {
   params: Promise<LocaleParam>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const STANDARD_QUOTE_HOURS = 12;
@@ -75,8 +77,11 @@ function RequestQuoteAside({
 
 export default async function RequestQuotePage({
   params,
+  searchParams,
 }: RequestQuotePageProps) {
   const { locale } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const inquiryContext = resolveInquiryContext(resolvedSearchParams);
   setRequestLocale(locale);
   const tPage = await getTranslations({
     locale,
@@ -126,7 +131,7 @@ export default async function RequestQuotePage({
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <InquiryForm
-            context={{ kind: "general-context" }}
+            context={inquiryContext}
             copy={inquiryCopy}
             fallback={inquiryFallback}
             source="request-quote"
