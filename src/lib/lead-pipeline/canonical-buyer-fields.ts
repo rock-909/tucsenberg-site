@@ -72,6 +72,6 @@ export const canonicalBuyerMessageSchema: z.ZodType<string | undefined> = z
   .pipe(
     z.union([
       z.undefined(),
-      z.string().max(MAX_LEAD_MESSAGE_LENGTH).overwrite(sanitizeMultilineText),
+      z.string().overwrite(sanitizeMultilineText).max(MAX_LEAD_MESSAGE_LENGTH),
     ]),
   );

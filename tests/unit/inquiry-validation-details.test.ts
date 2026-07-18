@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MAX_LEAD_MESSAGE_LENGTH } from "@/constants/validation-limits";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   mapInquiryValidationDetails,
@@ -88,10 +89,29 @@ describe("inquiry validation detail mapping", () => {
     }
   });
 
+  it("accepts message when raw length exceeds max but normalization shrinks below max", () => {
+    const rawMessage = `Hello${" ".repeat(MAX_LEAD_MESSAGE_LENGTH)}world`;
+
+    expect(rawMessage.length).toBeGreaterThan(MAX_LEAD_MESSAGE_LENGTH);
+
+    const parsed = productLeadSchema.safeParse({
+      ...validBase,
+      message: rawMessage,
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.message).toBe("Hello world");
+      expect(parsed.data.message!.length).toBeLessThanOrEqual(
+        MAX_LEAD_MESSAGE_LENGTH,
+      );
+    }
+  });
+
   it("maps canonical message too_long to errors.message.tooLong after normalization", () => {
     const tooLong = productLeadSchema.safeParse({
       ...validBase,
-      message: "A".repeat(5000),
+      message: "A".repeat(MAX_LEAD_MESSAGE_LENGTH + 1),
     });
     const wrongType = productLeadSchema.safeParse({
       ...validBase,

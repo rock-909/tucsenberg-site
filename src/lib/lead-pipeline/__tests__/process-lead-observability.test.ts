@@ -51,7 +51,7 @@ vi.mock("@/config/contact-form-config", () => ({
     NAME_MAX_LENGTH: 50,
     COMPANY_MAX_LENGTH: 100,
     MESSAGE_MIN_LENGTH: 10,
-    MESSAGE_MAX_LENGTH: 1000,
+    MESSAGE_MAX_LENGTH: 2000,
     SUBJECT_MIN_LENGTH: 5,
     SUBJECT_MAX_LENGTH: 100,
   },

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
+import { MAX_LEAD_MESSAGE_LENGTH } from "@/constants/validation-limits";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import {
   buildFormFieldsFromConfig,
@@ -20,7 +21,9 @@ describe("contact form configuration builder", () => {
     expect(source).not.toContain("ANIMATION_DURATION");
     expect(source).not.toContain("PERCENTAGE_");
     expect(source).not.toContain("COUNT_");
-    expect(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MAX_LENGTH).toBe(1000);
+    expect(CONTACT_FORM_VALIDATION_CONSTANTS.MESSAGE_MAX_LENGTH).toBe(
+      MAX_LEAD_MESSAGE_LENGTH,
+    );
     expect(CONTACT_FORM_VALIDATION_CONSTANTS.MS_PER_SECOND).toBe(1000);
   });
 
