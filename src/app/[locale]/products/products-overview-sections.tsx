@@ -182,11 +182,13 @@ export function ProductsPageCta({
   title,
   description,
   guideLabel,
+  specificationsGuideLabel,
   requestQuoteLabel,
 }: {
   title: string;
   description: string;
   guideLabel: string;
+  specificationsGuideLabel: string;
   requestQuoteLabel: string;
 }) {
   return (
@@ -199,6 +201,11 @@ export function ProductsPageCta({
         <Button size="lg" asChild>
           <Link href={SINGLE_SITE_ROUTE_HREFS.materialsGuide}>
             {guideLabel}
+          </Link>
+        </Button>
+        <Button variant="secondary" size="lg" asChild>
+          <Link href={SINGLE_SITE_ROUTE_HREFS.specificationsGuide}>
+            {specificationsGuideLabel}
           </Link>
         </Button>
         <Button variant="secondary" size="lg" asChild>

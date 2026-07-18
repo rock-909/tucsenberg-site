@@ -5,7 +5,7 @@
  * ensuring type safety across the application.
  */
 
-import type { ProductStandardId } from "@/constants/product-standards";
+import type { TucsenbergProductStandardId } from "@/config/site-types";
 import type { Locale } from "@/i18n/routing-config";
 
 // Base content metadata interface
@@ -82,7 +82,7 @@ export interface ProductMetadata extends ContentMetadata {
   coverImage: string;
   images?: string[];
   category: string;
-  standards?: ProductStandardId[];
+  standards?: TucsenbergProductStandardId[];
   pdfUrl?: string;
   moq?: string;
   leadTime?: string;
@@ -120,7 +120,7 @@ export interface ProductSummary {
   coverImage: string;
   images?: string[];
   category: string;
-  standards?: ProductStandardId[];
+  standards?: TucsenbergProductStandardId[];
   pdfUrl?: string;
   categories?: string[];
   tags?: string[];
@@ -174,7 +174,7 @@ export interface ProductListOptions {
   offset?: number;
   category?: string;
   tags?: string[];
-  standards?: ProductStandardId[];
+  standards?: TucsenbergProductStandardId[];
   featured?: boolean;
 }
 

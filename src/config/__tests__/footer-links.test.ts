@@ -10,6 +10,7 @@ const EXPECTED_TUCSENBERG_NAVIGATION_LINKS = [
   "products",
   "oemWholesale",
   "materialsGuide",
+  "specificationsGuide",
   "about",
 ] as const;
 
@@ -76,5 +77,21 @@ describe("footer-links", () => {
     expect(supportColumn?.links.map((link) => link.key)).toEqual([
       ...EXPECTED_TUCSENBERG_SUPPORT_LINKS,
     ]);
+  });
+
+  it("links the specifications guide from the active footer navigation column", () => {
+    const navigationColumn = FOOTER_COLUMNS.find(
+      (column) => column.key === "navigation",
+    );
+    const specificationsGuideLink = navigationColumn?.links.find(
+      (link) => link.key === "specificationsGuide",
+    );
+
+    expect(specificationsGuideLink).toEqual(
+      expect.objectContaining({
+        href: "/guides/flood-barrier-specifications",
+        translationKey: "footer.sections.navigation.specificationsGuide",
+      }),
+    );
   });
 });

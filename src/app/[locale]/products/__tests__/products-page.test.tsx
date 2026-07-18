@@ -281,6 +281,7 @@ describe("Feature: Product Overview Page", () => {
       expect(hrefs).toEqual(
         expect.arrayContaining([
           "/guides/flood-barrier-materials-guide",
+          "/guides/flood-barrier-specifications",
           "/request-quote",
         ]),
       );
@@ -350,6 +351,9 @@ describe("Feature: Product Overview Page", () => {
         "/guides/flood-barrier-materials-guide",
       );
       expect(
+        screen.getByRole("link", { name: "View specifications guide" }),
+      ).toHaveAttribute("href", "/guides/flood-barrier-specifications");
+      expect(
         screen.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/request-quote");
 
@@ -372,6 +376,9 @@ describe("Feature: Product Overview Page", () => {
         "href",
         "/guides/flood-barrier-materials-guide",
       );
+      expect(
+        screen.getByRole("link", { name: "View specifications guide" }),
+      ).toHaveAttribute("href", "/guides/flood-barrier-specifications");
       expect(
         screen.getByRole("link", { name: "Request a Quote" }),
       ).toHaveAttribute("href", "/request-quote");

@@ -767,7 +767,7 @@ export default [
     name: "catalog-replacement-boundary-imports",
     files: [
       "src/config/single-site-product-catalog.ts",
-      "src/constants/product-standards.ts",
+      "src/config/site-types.ts",
     ],
     rules: {
       "no-restricted-imports": "off",

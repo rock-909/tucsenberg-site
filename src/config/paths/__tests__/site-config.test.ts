@@ -18,7 +18,6 @@ describe("site-config", () => {
       titleTemplate: "%s | [PROJECT_NAME]",
       defaultTitle: "[PROJECT_NAME]",
       defaultDescription: "Modern B2B Enterprise Web Platform with Next.js",
-      keywords: ["Next.js", "React", "TypeScript", "B2B", "Enterprise"],
     },
     social: {
       twitter: "[TWITTER_URL]",

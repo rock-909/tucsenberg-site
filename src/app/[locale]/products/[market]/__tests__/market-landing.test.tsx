@@ -440,6 +440,26 @@ describe("Market Landing Page", () => {
       ).toHaveAttribute("href", "/downloads/spec-sheet-tb-bw.pdf");
     });
 
+    it("links to the specifications guide from the ABS specifications section", async () => {
+      await renderPage("abs-flood-barriers");
+
+      const specificationsSection = screen
+        .getByRole("heading", { name: "Specifications" })
+        .closest("section");
+      expect(specificationsSection).not.toBeNull();
+
+      const guideLink = within(specificationsSection as HTMLElement).getByRole(
+        "link",
+        {
+          name: /Demountable flood barrier specifications explained/i,
+        },
+      );
+      expect(guideLink).toHaveAttribute(
+        "href",
+        "/guides/flood-barrier-specifications",
+      );
+    });
+
     it("renders the final CTA heading", async () => {
       await renderPage("abs-flood-barriers");
 

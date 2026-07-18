@@ -53,6 +53,10 @@ describe("Footer Component", () => {
         href: "/guides/flood-barrier-materials-guide",
         text: "Materials Guide",
       },
+      {
+        href: "/guides/flood-barrier-specifications",
+        text: "Specifications Guide",
+      },
       { href: "/about", text: "About" },
     ]);
     expect(navigationLinks).not.toContainEqual({

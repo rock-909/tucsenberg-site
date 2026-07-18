@@ -149,7 +149,7 @@ const TRUTH_DOC_CHECKS = [
       "src/config/single-site-page-expression.ts",
       "src/config/single-site-seo.ts",
       "src/config/single-site-product-catalog.ts",
-      "src/constants/product-standards.ts",
+      "src/config/site-types.ts",
       "src/constants/tucsenberg-product-pages.ts",
       "messages/base/**",
       "messages/profiles/b2b-lead/**",
@@ -198,7 +198,7 @@ const TRUTH_DOC_CHECKS = [
     file: "docs/项目基础/替换边界.md",
     required: ["content/config/content.json", "`content/pages/{locale}/*.mdx`"],
     forbidden: [
-      "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
+      "edit `src/config/single-site-product-catalog.ts`, `src/config/site-types.ts`, and `src/constants/product-specs/**` first",
     ],
   },
   {

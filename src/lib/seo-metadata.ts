@@ -6,18 +6,12 @@ import { siteFacts } from "@/config/site-facts";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 import { interpolate } from "@/lib/interpolate";
-import {
-  generateCanonicalURL,
-  generateLanguageAlternates,
-} from "@/lib/seo/url-generator";
 
-// 重新导出类型以保持向后兼容
 export type { Locale, PageType } from "@/config/paths";
 
 interface SEOConfig {
   title?: string;
   description?: string;
-  keywords?: string[];
   image?: string;
   type?: "website" | "article" | "product";
   publishedTime?: string;
@@ -32,13 +26,11 @@ interface StaticPageMetadata {
   readonly seo?: {
     readonly title?: string;
     readonly description?: string;
-    readonly keywords?: string[];
     readonly ogImage?: string;
   };
 }
 
 interface StaticPageMetadataConfigOptions {
-  readonly includeKeywords?: boolean;
   readonly includeImage?: boolean;
   readonly includeEmptyDescription?: boolean;
 }
@@ -53,8 +45,6 @@ function resolveLocale(locale: Locale): Locale {
 /** Replace ICU-style {placeholders} with siteFacts values in SEO strings. */
 const SEO_INTERPOLATION_MAP: Record<string, string | number> = {
   established: siteFacts.company.established,
-  countries: siteFacts.stats.exportCountries,
-  employees: siteFacts.company.employees,
 };
 
 function interpolateSeoString(text: string): string {
@@ -101,24 +91,16 @@ function buildLanguagesForPath(path: string): Record<string, string> {
   return Object.fromEntries(entries);
 }
 
-/**
- * Apply base fields to merged config
- */
 function applyBaseFields(target: SEOConfig, base: SEOConfig): void {
   if (base.type !== undefined) target.type = base.type;
-  if (base.keywords !== undefined) target.keywords = base.keywords;
   if (base.image !== undefined) target.image = base.image;
 }
 
-/**
- * Apply custom fields to merged config
- */
 function applyCustomFields(
   target: SEOConfig,
   custom: Partial<SEOConfig>,
 ): void {
   if (custom.type !== undefined) target.type = custom.type;
-  if (custom.keywords !== undefined) target.keywords = custom.keywords;
   if (custom.image !== undefined) target.image = custom.image;
   if (custom.title !== undefined) target.title = custom.title;
   if (custom.description !== undefined) target.description = custom.description;
@@ -147,167 +129,13 @@ function mergeSEOConfig(
   return mergedConfig;
 }
 
-function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
-  const definition =
-    getPublicStaticPageDefinition(pageType) ??
-    getPublicStaticPageDefinition("home");
-
-  const sharedDefaults: SEOConfig = {
+function createStaticPageSeoDefaults(_pageType: PageType): SEOConfig {
+  return {
     type: "website",
     image: DEFAULT_OG_IMAGE,
   };
-
-  if (definition === undefined) {
-    return {
-      ...sharedDefaults,
-      keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-    };
-  }
-
-  switch (definition.seoKey) {
-    case "home":
-      return {
-        ...sharedDefaults,
-        keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-      };
-    case "content.pages.about":
-      return {
-        ...sharedDefaults,
-        keywords: ["About", "Company", "Team", "Enterprise"],
-      };
-    case "content.pages.oem-wholesale":
-      return {
-        ...sharedDefaults,
-        keywords: ["OEM", "Wholesale", "Private Label", "Flood Barriers"],
-      };
-    case "content.pages.contact":
-      return {
-        ...sharedDefaults,
-        keywords: ["Contact", "Support", "Business"],
-      };
-    case "content.pages.flood-barrier-materials-guide":
-      return {
-        ...sharedDefaults,
-        keywords: ["Flood Barrier Materials", "ABS", "Aluminum", "FRP"],
-      };
-    case "catalog.overview":
-      return {
-        ...sharedDefaults,
-        keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
-      };
-    case "content.pages.flood-barrier-specifications":
-      return {
-        ...sharedDefaults,
-        keywords: ["Flood Barrier Specifications", "Product Tables", "RFQ"],
-      };
-    case "content.pages.request-quote":
-      return {
-        ...sharedDefaults,
-        keywords: ["Request Quote", "RFQ", "Flood Barrier Supply"],
-      };
-    case "content.pages.warranty":
-      return {
-        ...sharedDefaults,
-        keywords: ["Warranty", "Product Support", "Flood Barriers"],
-      };
-    case "content.pages.privacy":
-      return {
-        ...sharedDefaults,
-        keywords: ["Privacy", "Policy", "Data Protection"],
-      };
-    case "content.pages.terms":
-      return {
-        ...sharedDefaults,
-        keywords: ["Terms", "Conditions", "Legal"],
-      };
-    default:
-      return {
-        ...sharedDefaults,
-        keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-      };
-  }
 }
 
-export function generateLocalizedMetadata(
-  locale: Locale,
-  pageType: PageType,
-  config: SEOConfig = {},
-): Metadata {
-  const safeLocale = resolveLocale(locale);
-  const title =
-    config.title !== undefined && config.title.trim().length > 0
-      ? interpolateSeoString(config.title)
-      : SITE_CONFIG.seo.defaultTitle;
-  const description =
-    config.description !== undefined && config.description.trim().length > 0
-      ? interpolateSeoString(config.description)
-      : SITE_CONFIG.seo.defaultDescription;
-  const siteName = SITE_CONFIG.name;
-
-  const metadata: Metadata = {
-    title,
-    description,
-    keywords: config.keywords ?? SITE_CONFIG.seo.keywords,
-
-    // Open Graph本地化
-    openGraph: {
-      title,
-      description,
-      siteName,
-      locale: safeLocale,
-      type: (config.type === "product" ? "website" : config.type) || "website",
-      images: config.image ? [{ url: config.image }] : undefined,
-      publishedTime: config.publishedTime,
-      modifiedTime: config.modifiedTime,
-      authors: config.authors,
-      section: config.section,
-    },
-
-    // Twitter Card
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: config.image ? [config.image] : undefined,
-    },
-
-    // hreflang和canonical链接
-    alternates: {
-      canonical: generateCanonicalURL(pageType, safeLocale),
-      languages: generateLanguageAlternates(pageType),
-    },
-
-    // 其他元数据
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-
-    // 验证标签
-    verification: {
-      google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
-      yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),
-    },
-  };
-
-  return metadata;
-}
-
-/**
- * Generate path-aware metadata for App Router pages.
- *
- * Next.js metadata uses shallow merges: if a page does not explicitly return
- * `alternates` or `openGraph.url`, it may inherit those fields from a parent layout.
- * This helper ensures canonical/hreflang and OG URL are always derived from the
- * actual route path.
- */
 interface GenerateMetadataForPathParams {
   locale: Locale;
   pageType: PageType;
@@ -324,35 +152,87 @@ const INACTIVE_PROFILE_ROBOTS = {
   },
 } as const satisfies Metadata["robots"];
 
+const ACTIVE_PROFILE_ROBOTS = {
+  index: true,
+  follow: true,
+  googleBot: {
+    index: true,
+    follow: true,
+    "max-video-preview": -1,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+  },
+} as const satisfies Metadata["robots"];
+
 function shouldIndexRuntimeEnvironment(): boolean {
   return getRuntimeAppEnv() === "production";
+}
+
+function resolveMetadataTitle(config: SEOConfig): string {
+  if (config.title !== undefined && config.title.trim().length > 0) {
+    return interpolateSeoString(config.title);
+  }
+
+  return SITE_CONFIG.seo.defaultTitle;
+}
+
+function resolveMetadataDescription(config: SEOConfig): string {
+  if (
+    config.description !== undefined &&
+    config.description.trim().length > 0
+  ) {
+    return interpolateSeoString(config.description);
+  }
+
+  return SITE_CONFIG.seo.defaultDescription;
 }
 
 export function generateMetadataForPath(
   params: GenerateMetadataForPathParams,
 ): Metadata {
   const { locale, pageType, path, config } = params;
-
   const seoConfig = createPageSEOConfig(pageType, config ?? {});
-  const metadata = generateLocalizedMetadata(locale, pageType, seoConfig);
-
+  const safeLocale = resolveLocale(locale);
   const canonical = buildCanonicalForPath(locale, path);
   const languages = buildLanguagesForPath(path);
+  const title = resolveMetadataTitle(seoConfig);
+  const description = resolveMetadataDescription(seoConfig);
+  const siteName = SITE_CONFIG.name;
+  const openGraphType =
+    (seoConfig.type === "product" ? "website" : seoConfig.type) || "website";
 
-  metadata.alternates = {
-    canonical,
-    languages,
-  };
-
-  const { openGraph } = metadata;
-  if (openGraph && typeof openGraph === "object") {
-    (openGraph as { url?: string | URL }).url = canonical;
-    metadata.openGraph = openGraph;
-  } else {
-    metadata.openGraph = {
+  const metadata: Metadata = {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName,
+      locale: safeLocale,
+      type: openGraphType,
       url: canonical,
-    } as unknown as Metadata["openGraph"];
-  }
+      images: seoConfig.image ? [{ url: seoConfig.image }] : undefined,
+      publishedTime: seoConfig.publishedTime,
+      modifiedTime: seoConfig.modifiedTime,
+      authors: seoConfig.authors,
+      section: seoConfig.section,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: seoConfig.image ? [seoConfig.image] : undefined,
+    },
+    alternates: {
+      canonical,
+      languages,
+    },
+    robots: ACTIVE_PROFILE_ROBOTS,
+    verification: {
+      google: getRuntimeEnvString("GOOGLE_SITE_VERIFICATION"),
+      yandex: getRuntimeEnvString("YANDEX_VERIFICATION"),
+    },
+  };
 
   if (
     !shouldIndexRuntimeEnvironment() ||
@@ -375,21 +255,21 @@ export function createStaticPageMetadataConfig(
     ...(description || (options.includeEmptyDescription && description === "")
       ? { description }
       : {}),
-    ...(options.includeKeywords && metadata.seo?.keywords
-      ? { keywords: metadata.seo.keywords }
-      : {}),
     ...(options.includeImage && metadata.seo?.ogImage
       ? { image: metadata.seo.ogImage }
       : {}),
   };
 }
 
-/**
- * 生成页面特定的SEO配置
- */
 export function createPageSEOConfig(
   pageType: PageType,
   customConfig: Partial<SEOConfig> = {},
 ): SEOConfig {
-  return mergeSEOConfig(createStaticPageSeoDefaults(pageType), customConfig);
+  const definition = getPublicStaticPageDefinition(pageType);
+  const baseConfig =
+    definition === undefined
+      ? createStaticPageSeoDefaults("home")
+      : createStaticPageSeoDefaults(pageType);
+
+  return mergeSEOConfig(baseConfig, customConfig);
 }

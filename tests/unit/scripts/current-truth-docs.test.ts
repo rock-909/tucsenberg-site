@@ -225,7 +225,7 @@ describe("current-truth docs guard", () => {
         expect.objectContaining({
           file: "docs/项目基础/替换边界.md",
           forbidden: expect.arrayContaining([
-            "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
+            "edit `src/config/single-site-product-catalog.ts`, `src/config/site-types.ts`, and `src/constants/product-specs/**` first",
           ]),
         }),
       ]),
