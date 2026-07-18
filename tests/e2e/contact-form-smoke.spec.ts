@@ -43,45 +43,14 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     // 等待页面主要内容加载
     await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => {});
 
-    // 检查是否存在表单
-    const formCount = await page.locator("form").count();
-    let hasForm = formCount > 0;
+    // Progressive enhancement: the static no-JS fallback has no form until the
+    // island loads the live client form after scroll / intersection.
+    await page
+      .getByTestId("contact-form-column")
+      .scrollIntoViewIfNeeded({ timeout: 10_000 });
 
-    // 检查是否存在错误状态（Error Boundary 渲染的错误提示）
-    // 使用多种选择器确保检测到错误状态
-    const errorIndicators = [
-      page.getByText("Contact form temporarily unavailable"),
-      page.getByRole("button", { name: "Retry" }),
-    ];
-
-    let hasError = false;
-    for (const indicator of errorIndicators) {
-      if ((await indicator.count()) > 0) {
-        hasError = true;
-        break;
-      }
-    }
-
-    // 如果既没有表单也没有检测到明确的错误状态，视为异常情况
-    if (!hasForm && !hasError) {
-      // 再次检查页面内容，可能是加载问题
-      await page.waitForTimeout(2000);
-      const formCountRetry = await page.locator("form").count();
-      hasForm = formCountRetry > 0;
-      if (!hasForm) {
-        hasError = true;
-      }
-    }
-
-    if (hasError) {
-      throw new Error(
-        `Contact form rendered an error state in test-mode smoke: ${targetUrl}`,
-      );
-    }
-
-    if (!hasForm) {
-      throw new Error(`Contact form did not render: ${targetUrl}`);
-    }
+    const fullNameInput = page.locator('input[name="fullName"]').first();
+    await expect(fullNameInput).toBeEditable({ timeout: 15_000 });
 
     await expect(page).toHaveTitle(expectedContactTitle);
     await expectInteractiveContactForm(page);
@@ -133,7 +102,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       await gotoContactPage(page, test.info());
 
       const submitButton = page.getByRole("button", {
-        name: /send enquiry|send inquiry|submit/i,
+        name: /send inquiry|submit/i,
       });
       await expect(submitButton).toBeDisabled();
     });
@@ -152,18 +121,17 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       const count = await requiredInputs.count();
       expect(count).toBeGreaterThan(0);
 
-      // 验证核心必填字段（fullName, email, message）。隐私已改为提交按钮旁的
-      // 声明式文案，不再是必填复选框，因此不在必填字段断言之列。
-      // 注意：Production 环境的 company 字段可能不是 required（与本地代码不同步）
+      // Verify core required fields (fullName, email). Message is optional.
       await expect(page.locator('input[name="fullName"]')).toHaveAttribute(
         "required",
       );
       await expect(page.locator('input[name="email"]')).toHaveAttribute(
         "required",
       );
-      await expect(page.locator('textarea[name="message"]')).toHaveAttribute(
-        "required",
-      );
+      await expect(
+        page.locator('textarea[name="message"]'),
+      ).not.toHaveAttribute("required");
+      await expect(page.locator('input[name="company"]')).toHaveCount(0);
     });
 
     test("应该验证邮箱格式", async ({ page }) => {
@@ -181,8 +149,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 检查所有必需字段
       await expect(page.locator('input[name="fullName"]')).toBeVisible();
       await expect(page.locator('input[name="email"]')).toBeVisible();
-      await expect(page.locator('input[name="company"]')).toBeVisible();
       await expect(page.locator('textarea[name="message"]')).toBeVisible();
+      await expect(page.locator('input[name="company"]')).toHaveCount(0);
 
       // 检查提交按钮旁的隐私声明（替代旧的隐私复选框）
       await expect(page.getByTestId("form-privacy-notice")).toBeVisible();
@@ -194,10 +162,10 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     test("英文页面应该显示英文标签", async ({ page }) => {
       await gotoContactPage(page, test.info());
 
-      // 检查英文标签
-      await expect(page.getByText(/full name/i).first()).toBeVisible();
-      await expect(page.getByText(/email/i).first()).toBeVisible();
-      await expect(page.getByText(/company/i).first()).toBeVisible();
+      // InquiryForm labels come from inquiry.form, not legacy contact.form.
+      await expect(page.getByLabel(/^full name/i)).toBeVisible();
+      await expect(page.getByLabel(/^email address/i)).toBeVisible();
+      await expect(page.locator('input[name="company"]')).toHaveCount(0);
     });
 
     test("联系页不暴露中文语言入口", async ({ page }) => {
@@ -282,7 +250,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
       // 检查提交按钮可见
       const submitButton = page.getByRole("button", {
-        name: /send enquiry|send inquiry|submit/i,
+        name: /send inquiry|submit/i,
       });
       await expect(submitButton).toBeVisible();
     });
@@ -334,11 +302,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
       await page.fill('input[name="fullName"]', "Test User");
       await page.fill('input[name="email"]', "test@example.com");
-      await page.fill('input[name="company"]', "Test Company");
-      await page.fill(
-        'textarea[name="message"]',
-        "Test message for rate limiting",
-      );
+      await page.fill('textarea[name="message"]', "Optional test message.");
 
       const privacyCheckbox = page.getByRole("checkbox", {
         name: /privacy|accept/i,
@@ -354,7 +318,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
         "test@example.com",
       );
       await expect(page.locator('textarea[name="message"]')).toHaveValue(
-        "Test message for rate limiting",
+        "Optional test message.",
       );
     });
   });
@@ -369,7 +333,6 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
       // 填写完整表单，验证本地 UI 可填写和提交入口可见。
       await page.fill('input[name="fullName"]', "John Doe");
       await page.fill('input[name="email"]', "john.doe@example.com");
-      await page.fill('input[name="company"]', "Acme Corp");
       await page.fill(
         'textarea[name="message"]',
         "This is a test message from E2E tests.",
@@ -385,7 +348,7 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
 
       // 检查提交入口。本地 smoke 不声明真实提交成功。
       const submitButton = page.getByRole("button", {
-        name: /send enquiry|send inquiry|submit/i,
+        name: /send inquiry|submit/i,
       });
       await expect(submitButton).toBeVisible();
     });

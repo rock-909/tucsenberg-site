@@ -74,7 +74,7 @@ function ContactContentBody({ locale }: { locale: Locale }) {
         <ContactInquiryHandoff messages={messages} />
 
         <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <ContactFormWithFallback locale={locale} messages={messages} />
+          <ContactFormWithFallback messages={messages} />
 
           <div className="space-y-4" data-testid="contact-confidence-column">
             <ResponseExpectationsCard

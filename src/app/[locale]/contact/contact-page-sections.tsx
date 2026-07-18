@@ -1,4 +1,3 @@
-import { NextIntlClientProvider } from "next-intl";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
@@ -8,13 +7,10 @@ import {
   getPublicContactPhone,
 } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
-import {
-  CONTACT_CLIENT_MESSAGE_NAMESPACES,
-  pickMessages,
-} from "@/lib/i18n/client-messages";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import type { FaqItem, Locale } from "@/types/content.types";
-import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
+import type { FaqItem } from "@/types/content.types";
+import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
+import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
 
 const CONTACT_HANDOFF_ITEM_KEYS = ["need", "context", "timing"] as const;
@@ -229,10 +225,8 @@ export function ContactFaqSection({
 }
 
 export function ContactFormWithFallback({
-  locale,
   messages,
 }: {
-  locale: Locale;
   messages: Record<string, unknown>;
 }) {
   const formLoadError = readRequiredMessagePath(messages, [
@@ -245,24 +239,17 @@ export function ContactFormWithFallback({
     "form",
     "retryLoad",
   ]);
+  const inquiryCopy = createInquiryFormCopyFromMessages(messages);
+  const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
 
   return (
     <div className="min-w-0 space-y-6" data-testid="contact-form-column">
-      {/* The contact form is the only client consumer of the `contact` and
-          `apiErrors` message namespaces. Provide them (plus `accessibility`,
-          which the form's Turnstile labels use) locally here instead of from
-          the site-wide root provider, so non-contact pages stop shipping the
-          contact form copy. */}
-      <NextIntlClientProvider
-        locale={locale}
-        messages={pickMessages(messages, CONTACT_CLIENT_MESSAGE_NAMESPACES)}
-      >
-        <ContactFormIsland
-          errorMessage={formLoadError}
-          fallback={<ContactFormStaticFallback messages={messages} />}
-          retryLabel={formRetryLabel}
-        />
-      </NextIntlClientProvider>
+      <ContactFormIsland
+        errorMessage={formLoadError}
+        fallback={inquiryFallback}
+        inquiryCopy={inquiryCopy}
+        retryLabel={formRetryLabel}
+      />
     </div>
   );
 }

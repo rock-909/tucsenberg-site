@@ -18,6 +18,8 @@ vi.mock("next-intl/server", async () => {
     getRequestQuoteMetadataMessage,
     getRequestQuotePageMessage,
   } = await import("@/test/request-quote-test-messages");
+  const { getInquiryFormMessage } =
+    await import("@/test/inquiry-test-messages");
 
   return {
     setRequestLocale: vi.fn(),
@@ -29,13 +31,17 @@ vi.mock("next-intl/server", async () => {
         namespace:
           | "requestQuote.form"
           | "requestQuote.metadata"
-          | "requestQuote.page";
+          | "requestQuote.page"
+          | "inquiry.form";
       }) => {
         if (namespace === "requestQuote.form") {
           return (key: string) => getRequestQuoteFormMessage(key);
         }
         if (namespace === "requestQuote.metadata") {
           return (key: string) => getRequestQuoteMetadataMessage(key);
+        }
+        if (namespace === "inquiry.form") {
+          return (key: string) => getInquiryFormMessage(key);
         }
 
         return (key: string, values?: Record<string, string | number>) =>
@@ -95,19 +101,19 @@ describe("RequestQuotePage", () => {
     expect(
       screen.getByRole("form", { name: "Request a quote" }),
     ).toHaveAttribute("data-analytics-event", "rfq_submit");
-    const nameField = screen.getByLabelText("Your name");
+    const nameField = screen.getByLabelText("Full name");
     expect(nameField).toBeRequired();
-    const emailField = screen.getByLabelText("Work email");
+    const emailField = screen.getByLabelText("Email address");
     expect(emailField).toHaveAttribute("type", "email");
     expect(emailField).toBeRequired();
-    const messageField = screen.getByLabelText("What do you need?");
+    const messageField = screen.getByLabelText(/^Message/i);
     expect(messageField.tagName).toBe("TEXTAREA");
     expect(messageField).not.toBeRequired();
-    expect(screen.getByText(/product line, opening sizes/)).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
-      ),
+      screen.getByText(/product interest, opening sizes/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Received. You'll hear from a person, not a sequence."),
     ).toBeInTheDocument();
   });
 

@@ -6,8 +6,8 @@ export interface CanarySelectors {
 }
 
 export function buildCanarySelectors(): CanarySelectors {
-  const submitLabel = b2bLeadMessages.contact.form.submit;
-  const successText = b2bLeadMessages.contact.form.submitSuccess;
+  const submitLabel = b2bLeadMessages.inquiry.form.submit;
+  const successText = b2bLeadMessages.inquiry.form.success;
   if (!submitLabel || !successText) {
     throw new Error("canary selectors: message truth missing");
   }

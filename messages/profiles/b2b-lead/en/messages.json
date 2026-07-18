@@ -149,6 +149,30 @@
       "successReadingLinkLabel": "ABS vs Aluminum vs FRP vs Water-Filled — How to Choose"
     }
   },
+  "inquiry": {
+    "form": {
+      "optional": "optional",
+      "fullName": "Full name",
+      "email": "Email address",
+      "message": "Message",
+      "messageHint": "Optional — share product interest, opening sizes, quantity, delivery country or port, or just say hello.",
+      "contextLabel": "Product interest from your link",
+      "submit": "Send inquiry",
+      "submitting": "Sending...",
+      "success": "Received. You'll hear from a person, not a sequence.",
+      "referenceLabel": "Reference",
+      "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
+      "noJsExplanation": "The secure inquiry form needs JavaScript because bot verification cannot run without it.",
+      "noJsEmailPrefix": "Email us directly at",
+      "contactAriaLabel": "Contact inquiry",
+      "requestQuoteAriaLabel": "Request a quote",
+      "errors": {
+        "fieldSummary": "Please review the highlighted fields and try again.",
+        "securitySummary": "Security verification did not complete. Please try again.",
+        "serverSummary": "We could not send your inquiry right now. Please try again shortly."
+      }
+    }
+  },
   "faq": {
     "sectionTitle": "Frequently Asked Questions",
     "items": {}

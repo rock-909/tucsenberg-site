@@ -6,8 +6,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const reportError = vi.fn();
 const intersectionCallbacks: IntersectionObserverCallback[] = [];
 
-function LoadedContactForm() {
-  return <form aria-label="Contact form">Loaded contact form</form>;
+import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
+
+const inquiryCopy = createTestInquiryFormCopy();
+
+function LoadedInquiryForm() {
+  return (
+    <form aria-label={inquiryCopy.contactAriaLabel}>Loaded inquiry form</form>
+  );
 }
 
 async function renderIsland() {
@@ -19,6 +25,7 @@ async function renderIsland() {
       <ContactFormIsland
         errorMessage="The form could not load."
         fallback={<div>Loading inquiry form</div>}
+        inquiryCopy={inquiryCopy}
         retryLabel="Retry loading form"
       />,
     ),
@@ -45,11 +52,11 @@ function mockContactFormModule() {
   vi.doMock("@/components/forms/contact-form", () => {
     throw new Error("forms contact wrapper should not load");
   });
-  vi.doMock("@/components/forms/contact-form-container", () => {
+  vi.doMock("@/components/forms/inquiry-form", () => {
     loadAttempts.push("load");
 
     return {
-      ContactFormContainer: LoadedContactForm,
+      InquiryForm: LoadedInquiryForm,
     };
   });
 
@@ -66,14 +73,14 @@ function mockContactFormModuleWithRetry() {
   vi.doMock("@/components/forms/contact-form", () => {
     throw new Error("forms contact wrapper should not load");
   });
-  vi.doMock("@/components/forms/contact-form-container", () => {
+  vi.doMock("@/components/forms/inquiry-form", () => {
     loadAttempts.push("load");
 
     if (shouldFail) {
       throw new Error("chunk unavailable");
     }
 
-    return { ContactFormContainer: LoadedContactForm };
+    return { InquiryForm: LoadedInquiryForm };
   });
 
   return {
@@ -159,7 +166,7 @@ describe("ContactFormIsland", () => {
 
     await waitFor(() => expect(contactFormModule.loadAttempts).toHaveLength(1));
     expect(
-      await screen.findByRole("form", { name: "Contact form" }),
+      await screen.findByRole("form", { name: inquiryCopy.contactAriaLabel }),
     ).toBeInTheDocument();
     expect(contactFormModule.loadAttempts).toHaveLength(1);
   });
@@ -187,7 +194,7 @@ describe("ContactFormIsland", () => {
     });
 
     expect(
-      await screen.findByRole("form", { name: "Contact form" }),
+      await screen.findByRole("form", { name: inquiryCopy.contactAriaLabel }),
     ).toBeInTheDocument();
     expect(contactFormModule.loadAttempts).toHaveLength(2);
   });

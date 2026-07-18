@@ -5,7 +5,7 @@ test("buyer fills contact form, clicks submit, sees success", async ({
   page,
 }) => {
   const selectors = buildCanarySelectors();
-  await page.route("**/api/contact", (route) =>
+  await page.route("**/api/inquiry", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -28,10 +28,6 @@ test("buyer fills contact form, clicks submit, sees success", async ({
 
   await fullName.fill("E2E Buyer");
   await page.locator('input[name="email"]').fill("buyer@example.com");
-  await page.locator('input[name="subject"]').fill("Journey check");
-  await page
-    .locator('textarea[name="message"]')
-    .fill("Ten characters minimum message.");
 
   // LazyTurnstile mounts after idle/IO; wait for the test-mode token to settle.
   await expect(page.getByTestId("turnstile-mock")).toBeVisible({
