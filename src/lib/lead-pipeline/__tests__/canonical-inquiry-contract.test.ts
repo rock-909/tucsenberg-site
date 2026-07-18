@@ -214,6 +214,101 @@ describe("canonical inquiry contract", () => {
     );
   });
 
+  it("delivers general-rfq canonical message to owner email and Airtable", async () => {
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+        message: "Need flood protection for warehouse",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "jane@example.com",
+        productName: expect.any(String),
+        requirements: expect.stringContaining("Need flood protection"),
+      }),
+    );
+
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      LEAD_TYPES.PRODUCT,
+      expect.objectContaining({
+        email: "jane@example.com",
+        requirements: expect.stringContaining("Need flood protection"),
+      }),
+    );
+  });
+
+  it("delivers catalog-product inquiry with server-validated identity to both sinks", async () => {
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+        productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+        catalogProductId: "abs-flood-barriers",
+        message: "Need flood protection for warehouse",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "jane@example.com",
+        productName: expect.any(String),
+        requirements: expect.stringContaining("Need flood protection"),
+      }),
+    );
+
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      LEAD_TYPES.PRODUCT,
+      expect.objectContaining({
+        email: "jane@example.com",
+        requirements: expect.stringContaining("Need flood protection"),
+        catalogProductId: "abs-flood-barriers",
+      }),
+    );
+  });
+
+  it("accepts optional empty message and still delivers to both sinks", async () => {
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+        message: "",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockSendProductInquiryEmail).toHaveBeenCalled();
+    expect(mockCreateLead).toHaveBeenCalled();
+  });
+
+  it("returns success when only Airtable succeeds and email fails", async () => {
+    mockSendProductInquiryEmail.mockRejectedValue(new Error("email down"));
+
+    const airtableOnly = await processLead(
+      productLeadSchema.parse({
+        type: LEAD_TYPES.PRODUCT,
+        ...GENERAL_RFQ_BASE,
+        message: "Need flood protection",
+      }),
+    );
+
+    expect(airtableOnly.success).toBe(true);
+    expect(airtableOnly.emailSent).toBe(false);
+    expect(airtableOnly.recordCreated).toBe(true);
+  });
+
   it("accepts a general inquiry without product context", async () => {
     const { POST } = await loadInquiryRoute();
     const response = await POST(makeInquiryRequest(GENERAL_RFQ_BASE));

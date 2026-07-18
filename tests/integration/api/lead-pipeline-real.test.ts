@@ -247,6 +247,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(airtableCreateMock).toHaveBeenCalledTimes(1);
     const fields = getCapturedAirtableFields();
     expect(fields["Requirements"]).toBe(CANONICAL_BUYER_MESSAGE);
+    expect(fields["Email"]).toBe("buyer@example.com");
 
     const resendCalls = getResendCalls();
     expect(resendCalls).toHaveLength(1);
@@ -260,6 +261,86 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(html).not.toContain("need <custom> height");
 
     expect(text).toContain(`Requirements: ${CANONICAL_BUYER_MESSAGE}`);
+    expect(text).toContain("buyer@example.com");
+  });
+
+  it("delivers general-rfq inquiry with canonical message to both external sinks", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        turnstileToken: "valid-turnstile-token",
+        productInquiryKind: "general-rfq",
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+        message: "Need flood protection for warehouse",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+
+    const fields = getCapturedAirtableFields();
+    expect(fields["Email"]).toBe("jane@example.com");
+    expect(fields["Requirements"]).toContain("Need flood protection");
+
+    const resendBody = parseJsonBody(getResendCalls()[0]?.init);
+    expect(resendBody.reply_to).toBe("jane@example.com");
+    expect(resendBody.text as string).toContain("Need flood protection");
+  });
+
+  it("accepts optional empty message on general-rfq and still delivers", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        turnstileToken: "valid-turnstile-token",
+        productInquiryKind: "general-rfq",
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getResendCalls()).toHaveLength(1);
+  });
+
+  it("airtable-only success: succeeds when email fails but Airtable persists", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+    );
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        ...CANONICAL_MESSAGE_INQUIRY_BODY,
+        email: "jane@example.com",
+        message: "Need flood protection",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(getResendCalls()).toHaveLength(1);
+    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getCapturedAirtableFields()["Requirements"]).toContain(
+      "Need flood protection",
+    );
+    expect(consoleError).toHaveBeenCalledTimes(2);
   });
 
   it("maps legacy requirements into Airtable Requirements when message is absent", async () => {
