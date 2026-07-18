@@ -6,7 +6,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Finish the remaining 15 M3 tasks in five acceptance clusters while keeping each PR independently testable and requiring one Codex acceptance review per integrated cluster.
+**Goal:** Complete all of M3 in five acceptance clusters. Cluster 1 is closed; the remaining 15 tasks are in Clusters 2, 3A, 3B, and 4. Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
 
 **Architecture:** A task PR is the implementation unit; a cluster is the acceptance unit. Dependent PRs are stacked. Parallel lanes fork from one proven base, then linearize into one cluster tip before review. After `ACCEPTED`, one owner `MERGE_CLUSTER` instruction authorizes sequential merge and exact-SHA revalidation until a semantic change forces a stop.
 
