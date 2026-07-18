@@ -151,6 +151,33 @@ describe("CatalogBreadcrumb", () => {
     expect(productsLink).toHaveAttribute("data-prefetch", "default");
   });
 
+  it("uses canonical JSON-LD URLs without a locale prefix", async () => {
+    const { buildCatalogBreadcrumbJsonLd } =
+      await import("../catalog-breadcrumb-jsonld");
+    const market = {
+      slug: "abs-flood-barriers",
+      label: "ABS Flood Barriers",
+      standardLabel: "ABS",
+      description: "test",
+      sizeSystem: "inch" as const,
+      standardIds: [],
+    };
+
+    const jsonLd = await buildCatalogBreadcrumbJsonLd({ market });
+
+    expect(jsonLd.itemListElement).toHaveLength(3);
+    expect(jsonLd.itemListElement[0].item).toBe("https://www.example.com/");
+    expect(jsonLd.itemListElement[1].item).toBe(
+      "https://www.example.com/products",
+    );
+    expect(jsonLd.itemListElement[2].item).toBe(
+      "https://www.example.com/products/abs-flood-barriers",
+    );
+    for (const element of jsonLd.itemListElement) {
+      expect(String(element.item)).not.toMatch(/\/en(?:\/|$)/u);
+    }
+  });
+
   it("renders JSON-LD BreadcrumbList structured data", async () => {
     const CatalogBreadcrumb = await importComponent();
     const market = {

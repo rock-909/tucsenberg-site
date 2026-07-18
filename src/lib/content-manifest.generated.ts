@@ -81,7 +81,7 @@ const _entries: ContentEntry[] = [
       "draft": false,
       "seo": {
         "title": "Contact Tucsenberg — Flood Barrier Supplier, China",
-        "description": "Fastest route: the RFQ form — it asks the questions we'd ask anyway, so your quote comes back faster.",
+        "description": "Contact Tucsenberg — factory-direct flood barriers from China. Reply within 12 hours; pricing follows when project details are sufficient.",
         "keywords": [
           "Contact Tucsenberg",
           "flood barrier supplier China",

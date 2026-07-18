@@ -44,6 +44,10 @@ test.describe("Rendered SEO contract", () => {
         "content",
         /.+/,
       );
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        "content",
+        /.+/,
+      );
 
       const enAlternate = page.locator('link[rel="alternate"][hreflang="en"]');
       const defaultAlternate = page.locator(

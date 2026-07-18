@@ -78,6 +78,8 @@ function buildCanonicalForPath(locale: Locale, path: string): string {
   ).toString();
 }
 
+export { buildCanonicalForPath };
+
 function buildLanguagesForPath(path: string): Record<string, string> {
   const normalizedPath = normalizePath(path);
 
@@ -150,76 +152,78 @@ function createStaticPageSeoDefaults(pageType: PageType): SEOConfig {
     getPublicStaticPageDefinition(pageType) ??
     getPublicStaticPageDefinition("home");
 
+  const sharedDefaults: SEOConfig = {
+    type: "website",
+    image: DEFAULT_OG_IMAGE,
+  };
+
   if (definition === undefined) {
     return {
-      type: "website",
+      ...sharedDefaults,
       keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-      image: DEFAULT_OG_IMAGE,
     };
   }
 
   switch (definition.seoKey) {
     case "home":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-        image: DEFAULT_OG_IMAGE,
       };
     case "content.pages.about":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["About", "Company", "Team", "Enterprise"],
       };
     case "content.pages.oem-wholesale":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["OEM", "Wholesale", "Private Label", "Flood Barriers"],
       };
     case "content.pages.contact":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Contact", "Support", "Business"],
       };
     case "content.pages.flood-barrier-materials-guide":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Flood Barrier Materials", "ABS", "Aluminum", "FRP"],
       };
     case "catalog.overview":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
       };
     case "content.pages.flood-barrier-specifications":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Flood Barrier Specifications", "Product Tables", "RFQ"],
       };
     case "content.pages.request-quote":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Request Quote", "RFQ", "Flood Barrier Supply"],
       };
     case "content.pages.warranty":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Warranty", "Product Support", "Flood Barriers"],
       };
     case "content.pages.privacy":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Privacy", "Policy", "Data Protection"],
       };
     case "content.pages.terms":
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: ["Terms", "Conditions", "Legal"],
       };
     default:
       return {
-        type: "website",
+        ...sharedDefaults,
         keywords: [...SITE_CONFIG.seo.keywords, "B2B Solution"],
-        image: DEFAULT_OG_IMAGE,
       };
   }
 }

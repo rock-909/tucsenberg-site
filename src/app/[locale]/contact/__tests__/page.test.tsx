@@ -296,7 +296,7 @@ describe("ContactPage MDX migration", () => {
       "Contact Tucsenberg — Flood Barrier Supplier, China",
     );
     expect(enMetadata.description).toBe(
-      "Fastest route: the RFQ form — it asks the questions we'd ask anyway, so your quote comes back faster.",
+      "Contact Tucsenberg — factory-direct flood barriers from China. Reply within 12 hours; pricing follows when project details are sufficient.",
     );
     expect(enMetadata.other?.google).not.toBe("notranslate");
   });
