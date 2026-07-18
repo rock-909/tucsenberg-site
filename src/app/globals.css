@@ -48,31 +48,6 @@
   --neutral-11: oklch(0.278 0.01 250);
   --neutral-12: oklch(0.1884 0.0128 248.5103);
 
-  /* Legacy scale aliases kept for low-churn compatibility. */
-  --gray-50: var(--neutral-1);
-  --gray-100: var(--neutral-3);
-  --gray-200: var(--neutral-4);
-  --gray-300: var(--neutral-5);
-  --gray-400: var(--neutral-6);
-  --gray-500: var(--neutral-8);
-  --gray-600: var(--neutral-9);
-  --gray-700: var(--neutral-10);
-  --gray-800: var(--neutral-11);
-  --gray-900: var(--neutral-12);
-  --gray-950: oklch(0.12 0.008 250);
-
-  --blue-50: var(--brand-2);
-  --blue-100: var(--brand-3);
-  --blue-200: var(--brand-5);
-  --blue-300: var(--brand-6);
-  --blue-400: var(--brand-8);
-  --blue-500: var(--brand-9);
-  --blue-600: var(--brand-10);
-  --blue-700: var(--brand-11);
-  --blue-800: var(--brand-12);
-  --blue-900: oklch(0.2 0.05 240);
-  --blue-950: oklch(0.16 0.04 240);
-
   /* Border Radius — tweakcn Twitter preset */
   --radius: 1.3rem;
   --radius-none: 0;
@@ -89,7 +64,6 @@
   /* Surfaces — tweakcn Twitter: white canvas + #f7f8f8 cards */
   --card: var(--neutral-2);
   --card-foreground: var(--neutral-12);
-  --section-muted: var(--accent);
   --popover: var(--neutral-1);
   --popover-foreground: var(--neutral-12);
 
@@ -176,23 +150,12 @@
   --shadow-xl:
     0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
     0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
-  --shadow-inset: inset 0 1px 0
-    color-mix(in oklch, var(--neutral-12) 6%, transparent);
-  --shadow-accent: 0 0 0 3px
-    color-mix(in oklch, var(--primary) 20%, transparent);
-
-  /* Shadow-Border (shadow as border for smooth transitions) */
-  --shadow-card-active:
-    0 0 0 1px var(--primary),
-    0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent);
 
   /* Section Divider */
   --divider: var(--neutral-5);
 
   /* Grid System */
   --grid-guide: color-mix(in oklch, var(--neutral-12) 6%, transparent);
-  --grid-divider: var(--neutral-4);
-  --grid-crosshair: var(--neutral-6);
 
   /* Animation */
   --duration-instant: 50ms;
@@ -229,7 +192,6 @@
 
   /* Container */
   --container-max: 1080px;
-  --nav-h: 56px;
 
   /* Footer surface — white canvas with divider, not a gray band */
   --footer-bg: var(--neutral-1);
@@ -276,8 +238,6 @@
   --neutral-11: oklch(0.84 0.004 248);
   --neutral-12: oklch(0.9328 0.0025 228.7857);
 
-  --gray-950: oklch(0.1 0.012 260);
-
   --success-muted: oklch(0.22 0.03 155);
   --success-border: oklch(0.34 0.05 155);
   --success-foreground: oklch(0.82 0.08 155);
@@ -307,8 +267,6 @@
   --shadow-xl:
     0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
     0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
-  --shadow-inset: inset 0 1px 0
-    color-mix(in oklch, var(--neutral-12) 8%, transparent);
 
   --footer-bg: var(--neutral-2);
   --footer-text: var(--neutral-10);
@@ -389,8 +347,6 @@
   /* Card — tweakcn Twitter radius, flat surface */
   --card-radius: var(--radius-lg);
   --card-padding: 1.5rem;
-  --card-default-shadow: none;
-  --card-elevated-shadow: var(--shadow-md);
 
   /* Input */
   --input-height: 2.5rem;
@@ -456,7 +412,6 @@
   /* Shadow-Border System (box-shadow as border for smooth transitions) */
   --shadow-border: var(--shadow-xs);
   --shadow-card: var(--shadow-sm);
-  --shadow-card-hover: var(--shadow-md);
 }
 
 /* ==================== BASE LAYER ==================== */

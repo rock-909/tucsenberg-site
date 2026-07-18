@@ -72,7 +72,7 @@ rounded:
 spacing:
   unit: "4px"
   container-max: "1080px"
-  nav-h: "64px"
+  site-header-height: "64px"
   section-y-mobile: "56px"
   section-y-desktop: "72px"
   card-padding: "24px"
@@ -289,14 +289,7 @@ new animation dependencies without separate proof.
 
 - **1px `--border`**（`neutral-5`）——边框是这个系统的"地基阴影"
 - **`neutral-2` 卡片底色** —— 比 canvas 暗 ≈2 个百分点
-- **`--shadow-inset`** —— 仅在按下态使用的内阴影（6% 不透明黑）
-- **`--shadow-card-active`** —— focus 时的双层 ring（实色 + 12% 半透明扩散），不是漂浮感
-
-### Shadow Vocabulary
-
-- **Active focus ring** (`--shadow-card-active`)：`0 0 0 1px primary, 0 0 0 4px primary/12%`。focus / selected 卡片专用。
-- **Inset press** (`--shadow-inset`)：`inset 0 1px 0 neutral-12/6%`。按下态轻微下沉。
-- **Accent halo** (`--shadow-accent`)：`0 0 0 3px primary/20%`。仅用于焦点环或选中态强调。
+- **Focus ring** —— 组件 focus 使用 `outline` / `ring-ring` 语义，不用漂浮阴影
 
 ### Named Rule
 
@@ -322,7 +315,7 @@ new animation dependencies without separate proof.
 - **Background：** `card`（neutral-2 温白）。
 - **Border：** 1px `border`（neutral-5）——这是 elevation 唯一来源。
 - **Padding：** `py-6 px-6`（24px 全向）。
-- **Shadow：** none（默认 surface 是 `--card-default-shadow: none`）。
+- **Shadow：** none（默认 surface 无 box-shadow；深度来自 1px border + card 底色）。
 - **Composition：** 内部用 `Card / CardHeader / CardTitle / CardContent / CardFooter` 子组件，gap-6。
 - **结构化数据展示：** 规格、参数和商务条款复用 `Card` 及表格/列表语义，不再维护单独的 `DataCard` 包装层。
 

@@ -110,21 +110,6 @@
         "name": "shadow-xs through shadow-xl",
         "value": "0px 2px 0px 0px hsl(... / 0)",
         "purpose": "Defined but transparent. Reserved interface for shadow-as-border transitions. Do not 'fix' to visible shadows without a system change."
-      },
-      {
-        "name": "shadow-inset",
-        "value": "inset 0 1px 0 color-mix(in oklch, var(--neutral-12) 6%, transparent)",
-        "purpose": "Pressed-state subtle inset for buttons."
-      },
-      {
-        "name": "shadow-accent",
-        "value": "0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent)",
-        "purpose": "Focus halo / selected accent."
-      },
-      {
-        "name": "shadow-card-active",
-        "value": "0 0 0 1px var(--primary), 0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent)",
-        "purpose": "Active / selected card double-ring."
       }
     ],
     "motion": [
