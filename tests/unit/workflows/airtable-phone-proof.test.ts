@@ -39,7 +39,7 @@ function requireStep(predicate: (step: WorkflowStep) => boolean): WorkflowStep {
 }
 
 describe("Airtable phone proof workflow", () => {
-  it("is manual-only with minimal permissions and dispatch checkout ref", () => {
+  it("is manual-only with minimal permissions and exact-SHA checkout ref", () => {
     expect(Object.keys(workflow.on ?? {})).toEqual(["workflow_dispatch"]);
     expect(workflow.on?.workflow_dispatch).toMatchObject({
       inputs: {
@@ -54,7 +54,7 @@ describe("Airtable phone proof workflow", () => {
 
     const checkout = requireStep((step) => step.uses === "actions/checkout@v6");
     expect(checkout.with).toMatchObject({
-      ref: "${{ github.ref }}",
+      ref: "${{ github.sha }}",
       "persist-credentials": false,
     });
   });
