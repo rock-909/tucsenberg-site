@@ -43,5 +43,10 @@ export function adaptLegacyInquiryPayload(
     adapted.message = adapted.requirements;
   }
 
+  // Canonical message wins; legacy requirements must not shadow-validate.
+  if (adapted.message !== undefined) {
+    adapted.requirements = undefined;
+  }
+
   return adapted;
 }

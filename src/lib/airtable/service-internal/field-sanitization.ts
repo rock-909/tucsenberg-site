@@ -1,3 +1,4 @@
+import { isValidLeadPhone } from "@/lib/form-schema/lead-phone-grammar";
 import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 
 /**
@@ -19,13 +20,16 @@ export function sanitizeAirtableTextField(value: string): string {
 
 /**
  * Phone numbers are dialable content, not spreadsheet formulas. International
- * numbers beginning with `+` must stay unchanged so Airtable stores a callable
- * value without a leading apostrophe. Only true formula starters (`=` / `@`)
- * are escaped.
+ * numbers beginning with `+` that pass shared lead phone grammar stay unchanged
+ * so Airtable stores a callable value without a leading apostrophe. All other
+ * spreadsheet formula prefixes use the shared prefix truth.
  */
 export function sanitizeAirtablePhoneField(value: string): string {
   const trimmed = value.trim();
-  if (/^[=@]/.test(trimmed)) {
+  if (trimmed.startsWith("+") && isValidLeadPhone(trimmed)) {
+    return trimmed;
+  }
+  if (hasSpreadsheetFormulaPrefix(trimmed)) {
     return `'${trimmed}`;
   }
   return trimmed;

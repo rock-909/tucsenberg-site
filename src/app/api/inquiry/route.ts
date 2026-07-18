@@ -74,7 +74,6 @@ function validateLeadData(
     catalogProductId: adapted.catalogProductId,
     buyerInterest: adapted.buyerInterest,
     quantity: adapted.quantity,
-    requirements: adapted.requirements,
     company: adapted.company,
     ...pickAttributionFields(adapted),
   });

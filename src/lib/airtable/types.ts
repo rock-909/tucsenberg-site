@@ -4,8 +4,11 @@
 
 import type { MarketingAttributionFields } from "@/lib/marketing/attribution-fields";
 
-// 重新导出生产链路仍在使用的 Airtable 类型
-export type { AirtableRecord } from "@/lib/airtable/record-schema";
+/** Minimal createLead return shape from the Airtable SDK write path. */
+export interface CreatedAirtableRecord {
+  id: string;
+  createdTime?: string;
+}
 
 // Airtable 查询选项类型
 export interface AirtableQueryOptions {

@@ -149,7 +149,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordData.fields,
         createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([
@@ -386,6 +385,35 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
+    it("escapes spreadsheet formula prefixes on phone except validated leading + numbers", async () => {
+      const service = new AirtableServiceClass();
+      setServiceReady(service);
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec-formula-phone",
+          fields: {},
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await service.createLead("product", {
+        firstName: "Pat",
+        lastName: "Lee",
+        email: "pat@example.com",
+        phone: "-123456",
+        message: "Product inquiry",
+        productName: "ABS Flood Barriers",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            "WhatsApp / Phone": "'-123456",
+          }),
+        },
+      ]);
+    });
+
     it("neutralizes spreadsheet formula prefixes in product lead text fields", async () => {
       const service = new AirtableServiceClass();
       setServiceReady(service);
@@ -499,7 +527,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordDataSpecial.fields,
         createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([
@@ -540,7 +567,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordDataLong.fields,
         createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([

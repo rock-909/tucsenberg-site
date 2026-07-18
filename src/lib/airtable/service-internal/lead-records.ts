@@ -2,8 +2,8 @@ import "server-only";
 
 import type AirtableNS from "airtable";
 import type {
-  AirtableRecord,
   ContactLeadData,
+  CreatedAirtableRecord,
   LeadSource,
   ProductLeadData,
 } from "@/lib/airtable/types";
@@ -180,7 +180,7 @@ export async function createLeadRecord(params: {
   tableName: string;
   type: LeadType;
   data: ContactLeadData | ProductLeadData;
-}): Promise<AirtableRecord> {
+}): Promise<CreatedAirtableRecord> {
   const { base, tableName, type, data } = params;
 
   try {
@@ -212,8 +212,9 @@ export async function createLeadRecord(params: {
 
     return {
       id: createdRecord.id,
-      fields: createdRecord.fields as AirtableRecord["fields"],
-      createdTime: createdRecord.get("Created Time") as string,
+      ...(createdRecord.get("Created Time")
+        ? { createdTime: createdRecord.get("Created Time") as string }
+        : {}),
     };
   } catch (error) {
     logger.error(

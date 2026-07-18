@@ -50,7 +50,11 @@ describe.skipIf(!PROOF_ENABLED)(
 
       createdRecordId = record.id;
 
-      const stored = record.fields["WhatsApp / Phone"];
+      const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY! }).base(
+        process.env.AIRTABLE_BASE_ID!,
+      );
+      const fetched = await base.table(TABLE_NAME).find(record.id);
+      const stored = fetched.fields["WhatsApp / Phone"];
       expect(stored).toBe(PROOF_PHONE);
       expect(String(stored)).not.toMatch(/^'/);
     });

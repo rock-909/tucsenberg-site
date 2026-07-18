@@ -157,7 +157,6 @@ describe("Airtable Service - Main Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordData.fields,
         createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalled();

@@ -194,9 +194,17 @@ describe("contact-field-validators", () => {
       ),
     ).toContain(maxDigits.slice(0, 3));
     expect(schema.parse(maxDigits)).toBe(maxDigits);
+    expect(schema.parse("+8613800138000")).toBe("+8613800138000");
     expect(schema.safeParse(`${maxDigits}9`).success).toBe(false);
 
-    for (const invalidPhone of ["abc123", "123abc", "+12+34"]) {
+    for (const invalidPhone of [
+      "abc123",
+      "123abc",
+      "+12+34",
+      "-123456",
+      "--123",
+      "123-",
+    ]) {
       const result = schema.safeParse(invalidPhone);
       expect(result.success).toBe(false);
       if (!result.success) {

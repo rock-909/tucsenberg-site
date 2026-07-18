@@ -276,4 +276,46 @@ describe("canonical inquiry contract", () => {
       }),
     );
   });
+
+  it("accepts canonical message when legacy requirements is oversized or conflicting", async () => {
+    const { POST } = await loadInquiryRoute();
+
+    for (const requirements of ["X".repeat(2500), "Conflicting legacy note"]) {
+      const response = await POST(
+        makeInquiryRequest({
+          ...GENERAL_RFQ_BASE,
+          message: "Canonical buyer text",
+          requirements,
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    }
+
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      LEAD_TYPES.PRODUCT,
+      expect.objectContaining({
+        requirements: "Canonical buyer text",
+      }),
+    );
+  });
+
+  it("rejects illegal phone hyphen placement before lead processing", async () => {
+    const { POST } = await loadInquiryRoute();
+
+    for (const phone of ["-123456", "--123", "123-"]) {
+      const response = await POST(
+        makeInquiryRequest({
+          ...GENERAL_RFQ_BASE,
+          phone,
+        }),
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
+    }
+
+    expect(mockCreateLead).not.toHaveBeenCalled();
+  });
 });

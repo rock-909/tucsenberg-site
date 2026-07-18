@@ -5,13 +5,13 @@
  */
 
 import { z } from "zod";
-import { PHONE_MAX_DIGITS } from "@/constants/count";
 import {
   MAX_LEAD_EMAIL_LENGTH,
   MAX_LEAD_MESSAGE_LENGTH,
   MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PHONE_LENGTH,
 } from "@/constants/validation-limits";
+import { isValidLeadPhone } from "@/lib/form-schema/lead-phone-grammar";
 import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import {
   sanitizeMultilineText,
@@ -19,15 +19,6 @@ import {
 } from "@/lib/security/validation";
 
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
-
-export function isValidLeadPhone(value: string): boolean {
-  const normalized = value.replace(/[\s\-()]/g, "");
-  if (!/^[+]?[0-9]+$/.test(normalized)) {
-    return false;
-  }
-  const digitsOnly = normalized.replace("+", "");
-  return digitsOnly.length > 0 && digitsOnly.length <= PHONE_MAX_DIGITS;
-}
 
 function normalizeOptionalInput(value: unknown): unknown {
   if (value === undefined) {

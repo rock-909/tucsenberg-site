@@ -7,6 +7,7 @@ import {
   type ContactFormFieldValidatorContext,
   type ContactFormFieldValidators,
 } from "@/config/contact-form-validation";
+import { isValidLeadPhone } from "@/lib/form-schema/lead-phone-grammar";
 import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 
 const applyOptionality = (
@@ -106,15 +107,9 @@ export function message({ field, config }: ContactFormFieldValidatorContext) {
 }
 
 export function phone({ field }: ContactFormFieldValidatorContext) {
-  const { PHONE_MAX_DIGITS } = CONTACT_FORM_VALIDATION_CONSTANTS;
   const schema = z.string().refine((value) => {
     if (!value) return true;
-    const normalized = value.replace(/[\s\-()]/g, "");
-    if (!/^[+]?[0-9]+$/.test(normalized)) {
-      return false;
-    }
-    const digitsOnly = normalized.replace("+", "");
-    return digitsOnly.length <= PHONE_MAX_DIGITS;
+    return isValidLeadPhone(value);
   }, "Please enter a valid phone number");
 
   return applyOptionality(schema, field);

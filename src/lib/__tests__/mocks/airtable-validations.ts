@@ -4,10 +4,6 @@ import { vi } from "vitest";
  * Mock validations for Airtable testing
  * 测试用 Airtable 验证模块 Mock
  */
-export const airtableRecordSchema = {
-  parse: vi.fn((data) => data),
-};
-
 export const validationHelpers = {
   sanitizeInput: vi.fn((input) => input),
   isSpamContent: vi.fn(() => false),
