@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
-import { ProductFamilyContextNotice } from "@/components/contact/product-family-context-notice";
+import { ProductFamilyContextNoticeClient } from "@/components/contact/product-family-context-notice-client";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -10,7 +10,6 @@ import {
   getPublicContactPhone,
 } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
-import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
 import {
   CONTACT_CLIENT_MESSAGE_NAMESPACES,
   pickMessages,
@@ -19,8 +18,6 @@ import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import type { FaqItem, Locale } from "@/types/content.types";
 import { ContactFormStaticFallback } from "@/app/[locale]/contact/contact-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
-
-export type ContactSearchParams = Record<string, string | string[] | undefined>;
 
 const CONTACT_HANDOFF_ITEM_KEYS = ["need", "context", "timing"] as const;
 
@@ -233,20 +230,13 @@ export function ContactFaqSection({
   );
 }
 
-async function ContactFormColumn({
+function ContactFormColumn({
   locale,
-  searchParams,
   messages,
 }: {
   locale: Locale;
-  searchParams: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  const productFamilyContext = parseProductFamilyContactContext({
-    searchParams: resolvedSearchParams,
-    messages,
-  });
   const productFamilyContextLabel = readRequiredMessagePath(messages, [
     "contact",
     "context",
@@ -265,10 +255,12 @@ async function ContactFormColumn({
 
   return (
     <div className="min-w-0 space-y-6" data-testid="contact-form-column">
-      <ProductFamilyContextNotice
-        context={productFamilyContext}
-        label={productFamilyContextLabel}
-      />
+      <Suspense fallback={null}>
+        <ProductFamilyContextNoticeClient
+          label={productFamilyContextLabel}
+          messages={pickMessages(messages, ["catalog"])}
+        />
+      </Suspense>
       {/* The contact form is the only client consumer of the `contact` and
           `apiErrors` message namespaces. Provide them (plus `accessibility`,
           which the form's Turnstile labels use) locally here instead of from
@@ -290,20 +282,10 @@ async function ContactFormColumn({
 
 export function ContactFormWithFallback({
   locale,
-  searchParams,
   messages,
 }: {
   locale: Locale;
-  searchParams: Promise<ContactSearchParams>;
   messages: Record<string, unknown>;
 }) {
-  return (
-    <Suspense fallback={<ContactFormStaticFallback messages={messages} />}>
-      <ContactFormColumn
-        locale={locale}
-        searchParams={searchParams}
-        messages={messages}
-      />
-    </Suspense>
-  );
+  return <ContactFormColumn locale={locale} messages={messages} />;
 }

@@ -116,6 +116,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     const html = await page.content();
     expectExactlyOneMain(html);
     expect(html).toContain('id="main-content"');
+    expect(html).toContain('data-testid="contact-form-column"');
     expect(html).toContain("<form");
 
     const fullNameInput = page.getByLabel(site.fullNameLabel).first();

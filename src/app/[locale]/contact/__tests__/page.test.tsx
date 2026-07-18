@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useSearchParams } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import ContactPage, { generateMetadata } from "@/app/[locale]/contact/page";
 import { renderAsyncPage } from "@/test/render-async-page";
@@ -88,6 +89,7 @@ describe("ContactPage MDX migration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetContactCopyFromMessages.mockReturnValue(contactCopy);
+    vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
   });
 
   it("renders hero and body from MDX while keeping the form", async () => {
@@ -106,23 +108,22 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
-  it("keeps the static Suspense fallback scoped to the form column", async () => {
+  it("keeps the static form fallback inside the form column", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
 
-    const fallback = screen.getByTestId("suspense-fallback");
-
-    expect(fallback).toBeInTheDocument();
-    const staticForm = fallback.querySelector(
+    const formColumn = screen.getByTestId("contact-form-column");
+    const staticForm = formColumn.querySelector(
       '[data-contact-form-fallback="static"]',
     );
+
     expect(staticForm).not.toBeNull();
     expect(staticForm?.tagName).toBe("FORM");
     expect(
-      within(fallback).getByRole("button", { name: /send enquiry/i }),
+      within(formColumn).getByRole("button", { name: /send enquiry/i }),
     ).toBeDisabled();
     expect(
       screen.queryByTestId("contact-page-fallback"),
@@ -277,13 +278,16 @@ describe("ContactPage MDX migration", () => {
   });
 
   it("renders validated product family context from Contact query params", async () => {
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams({
         intent: "product-family",
         market: "abs-flood-barriers",
         family: "abs-boxwall",
       }),
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
@@ -296,13 +300,16 @@ describe("ContactPage MDX migration", () => {
   });
 
   it("ignores invalid product family context without rendering raw query text", async () => {
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams({
         intent: "product-family",
         market: "abs-flood-barriers",
         family: "<script>alert(1)</script>",
       }),
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);
@@ -315,13 +322,16 @@ describe("ContactPage MDX migration", () => {
   });
 
   it("keeps the product family notice in the same left column as the form", async () => {
-    const page = await ContactPage({
-      params: Promise.resolve({ locale: "en" }),
-      searchParams: Promise.resolve({
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams({
         intent: "product-family",
         market: "abs-flood-barriers",
         family: "abs-boxwall",
       }),
+    );
+
+    const page = await ContactPage({
+      params: Promise.resolve({ locale: "en" }),
     });
 
     await renderAsyncPage(page as React.JSX.Element);

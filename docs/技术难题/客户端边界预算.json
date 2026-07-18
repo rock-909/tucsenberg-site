@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "maxClientBoundaries": 44,
+  "maxClientBoundaries": 45,
   "allowedClientBoundaries": [
     "src/app/[locale]/contact/error.tsx",
     "src/app/[locale]/products/error.tsx",
@@ -8,6 +8,7 @@
     "src/app/global-error.tsx",
     "src/components/attribution-bootstrap.tsx",
     "src/components/contact/contact-form-island.tsx",
+    "src/components/contact/product-family-context-notice-client.tsx",
     "src/components/cookie/cookie-banner.tsx",
     "src/components/cookie/cookie-consent-island.tsx",
     "src/components/cookie/lazy-cookie-banner.tsx",
