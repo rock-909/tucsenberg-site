@@ -367,7 +367,6 @@ describe("CSP Report API Route", () => {
 
     it("应该处理生产环境的特殊日志记录", async () => {
       const consoleError = captureExpectedConsoleErrors(
-        "Production CSP Violation",
         "SUSPICIOUS CSP VIOLATION DETECTED",
       );
       vi.doMock("@/lib/env", async (importOriginal) => {

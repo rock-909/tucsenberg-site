@@ -93,9 +93,6 @@
         "subject": {
           "length": "Subject must be between 5 and 100 characters"
         },
-        "website": {
-          "shouldBeEmpty": "This field should be empty"
-        },
         "productInquiryKind": {
           "invalid": "The inquiry type is not recognized"
         },

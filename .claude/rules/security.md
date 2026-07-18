@@ -141,7 +141,12 @@ future hardening and must not be mistaken for the forbidden new replay/hashing
 complexity called out in the rate-limiter section above:
 
 - A `website` honeypot field (`contact-form-config.ts`): real browsers leave it
-  empty; a filled value marks the submission as bot traffic.
+  empty; a filled value is treated as bot traffic and returns the same public
+  `200` success envelope as a real submission, including a normal
+  contact-shaped `CON-` reference id. Honeypot hits are identified only by the
+  server-side `Contact honeypot triggered` log event (with the same reference
+  id). Do not expose honeypot-specific validation errors or markers in the
+  public JSON.
 - A `submittedAt` freshness window (`submit-canonical-contact.ts`): submissions
   whose page-render timestamp is older than ten minutes are rejected as
   stale-page submissions. This is a staleness guard, not replay protection — it
@@ -171,6 +176,8 @@ body-hashing without a real incident.
 - Current nonce CSP feasibility decision lives in
   `docs/项目基础/技术栈.md`.
 - CSP reports go to `/api/csp-report`.
+- Each accepted CSP violation is logged once: routine reports use `logger.warn`;
+  suspicious patterns use a single `logger.error`.
 - Do not use unfiltered `dangerouslySetInnerHTML`.
 - URL values must allow only `https://`, `http://`, or site-relative `/`.
 

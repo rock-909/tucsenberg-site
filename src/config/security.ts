@@ -3,7 +3,6 @@ import {
   getRuntimeEnvString,
   isRuntimeDevelopment,
   isRuntimeProduction,
-  isRuntimeTest,
 } from "../lib/env";
 
 export interface SecurityHeader {
@@ -141,24 +140,16 @@ export function generateCSP(): string {
 /**
  * Security headers configuration
  */
-function isSecurityHeadersEnabled(testMode = false): boolean {
-  if (testMode) {
-    return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
-  }
-
-  if (isRuntimeTest()) {
-    return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
-  }
-
+function isSecurityHeadersEnabled(): boolean {
   return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
 }
 
-export function getSecurityHeaders(testMode = false): SecurityHeader[] {
-  if (!isSecurityHeadersEnabled(testMode)) {
+export function getSecurityHeaders(): SecurityHeader[] {
+  if (!isSecurityHeadersEnabled()) {
     return [];
   }
 
-  const securityConfig = getSecurityConfig(testMode);
+  const securityConfig = getSecurityConfig();
   const cspHeaderKey = securityConfig.cspReportOnly
     ? "Content-Security-Policy-Report-Only"
     : "Content-Security-Policy";
@@ -233,34 +224,19 @@ export function getSecurityHeaders(testMode = false): SecurityHeader[] {
 export const SECURITY_MODES = {
   strict: {
     cspReportOnly: false,
-    enforceHTTPS: true,
-    strictTransportSecurity: true,
-    contentTypeOptions: true,
-    frameOptions: "DENY",
-    xssProtection: true,
   },
   moderate: {
     cspReportOnly: false,
-    enforceHTTPS: true,
-    strictTransportSecurity: true,
-    contentTypeOptions: true,
-    frameOptions: "SAMEORIGIN",
-    xssProtection: true,
   },
   relaxed: {
     cspReportOnly: true,
-    enforceHTTPS: false,
-    strictTransportSecurity: false,
-    contentTypeOptions: true,
-    frameOptions: "SAMEORIGIN",
-    xssProtection: false,
   },
 } as const;
 
 /**
  * Get security configuration based on mode
  */
-export function getSecurityConfig(_testMode = false) {
+export function getSecurityConfig() {
   const rawMode = getRuntimeEnvString("NEXT_PUBLIC_SECURITY_MODE") || "strict";
 
   const mode =

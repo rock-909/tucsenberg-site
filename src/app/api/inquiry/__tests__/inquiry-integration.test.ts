@@ -22,10 +22,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
-import {
-  verifyTurnstile,
-  verifyTurnstileDetailed,
-} from "@/lib/security/turnstile";
+import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { POST } from "../route";
 
 // ── External service mocks ──────────────────────────────────────────
@@ -55,7 +52,6 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 
 // Turnstile — external Cloudflare API
 vi.mock("@/lib/security/turnstile", () => ({
-  verifyTurnstile: vi.fn(() => Promise.resolve(true)),
   verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
@@ -210,7 +206,6 @@ describe("/api/inquiry — integration (protection chain)", () => {
     });
 
     it("turnstile verification failure returns 400 with TURNSTILE_REJECTED", async () => {
-      vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
       vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
         success: false,
       });

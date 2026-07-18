@@ -2,10 +2,7 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
-import {
-  verifyTurnstile,
-  verifyTurnstileDetailed,
-} from "@/lib/security/turnstile";
+import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { OPTIONS, POST } from "../route";
 
 // Mock dependencies before imports
@@ -44,7 +41,6 @@ vi.mock("@/lib/lead-pipeline/process-lead", () => ({
 }));
 
 vi.mock("@/lib/security/turnstile", () => ({
-  verifyTurnstile: vi.fn(() => Promise.resolve(true)),
   verifyTurnstileDetailed: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
@@ -553,7 +549,6 @@ describe("/api/inquiry route", () => {
     });
 
     it("should return 400 when turnstile verification fails", async () => {
-      vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
       vi.mocked(verifyTurnstileDetailed).mockResolvedValueOnce({
         success: false,
       });

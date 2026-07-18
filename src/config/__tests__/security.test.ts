@@ -90,7 +90,7 @@ describe("Security Configuration", () => {
     it("should return security headers when enabled", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       expect(headers).toHaveLength(10);
 
       const headerKeys = headers.map((h) => h.key);
@@ -106,14 +106,14 @@ describe("Security Configuration", () => {
     it("should return empty array when disabled", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       expect(headers).toHaveLength(0);
     });
 
     it("should emit static CSP without nonce directives", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
 
       const cspHeader = headers.find(
         (h) => h.key === "Content-Security-Policy",
@@ -124,7 +124,7 @@ describe("Security Configuration", () => {
     it("should set correct X-Frame-Options", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const frameHeader = headers.find((h) => h.key === "X-Frame-Options");
       expect(frameHeader?.value).toBe("DENY");
     });
@@ -132,7 +132,7 @@ describe("Security Configuration", () => {
     it("should set correct HSTS header", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const hstsHeader = headers.find(
         (h) => h.key === "Strict-Transport-Security",
       );
@@ -145,7 +145,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "strict");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const headerKeys = headers.map((h) => h.key);
 
       expect(headerKeys).toContain("Content-Security-Policy");
@@ -156,7 +156,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const headerKeys = headers.map((h) => h.key);
 
       expect(headerKeys).toContain("Content-Security-Policy-Report-Only");
@@ -167,7 +167,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const headerKeys = headers.map((h) => h.key);
 
       expect(headerKeys).toContain("Content-Security-Policy");
@@ -178,7 +178,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const cspHeader = headers.find(
         (h) =>
           h.key === "Content-Security-Policy" ||
@@ -192,7 +192,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const cspHeader = headers.find(
         (h) =>
           h.key === "Content-Security-Policy" ||
@@ -208,7 +208,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const cspHeader = headers.find(
         (h) =>
           h.key === "Content-Security-Policy" ||
@@ -224,7 +224,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const reportingHeader = headers.find(
         (h) => h.key === "Reporting-Endpoints",
       );
@@ -236,7 +236,7 @@ describe("Security Configuration", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
 
-      const headers = getSecurityHeaders(true);
+      const headers = getSecurityHeaders();
       const reportingHeader = headers.find(
         (h) => h.key === "Reporting-Endpoints",
       );
@@ -251,56 +251,37 @@ describe("Security Configuration", () => {
     it("should return strict mode by default", () => {
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "");
 
-      const config = getSecurityConfig(true);
+      const config = getSecurityConfig();
       expect(config).toEqual(SECURITY_MODES.strict);
     });
 
     it("should return moderate mode when configured", () => {
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
 
-      const config = getSecurityConfig(true);
+      const config = getSecurityConfig();
       expect(config).toEqual(SECURITY_MODES.moderate);
     });
 
     it("should return relaxed mode when configured", () => {
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
 
-      const config = getSecurityConfig(true);
+      const config = getSecurityConfig();
       expect(config).toEqual(SECURITY_MODES.relaxed);
     });
   });
 
   describe("SECURITY_MODES", () => {
-    it("should have correct strict mode configuration", () => {
+    it("should keep only the live cspReportOnly switch per mode", () => {
       expect(SECURITY_MODES.strict).toEqual({
         cspReportOnly: false,
-        enforceHTTPS: true,
-        strictTransportSecurity: true,
-        contentTypeOptions: true,
-        frameOptions: "DENY",
-        xssProtection: true,
       });
-    });
 
-    it("should have correct moderate mode configuration", () => {
       expect(SECURITY_MODES.moderate).toEqual({
         cspReportOnly: false,
-        enforceHTTPS: true,
-        strictTransportSecurity: true,
-        contentTypeOptions: true,
-        frameOptions: "SAMEORIGIN",
-        xssProtection: true,
       });
-    });
 
-    it("should have correct relaxed mode configuration", () => {
       expect(SECURITY_MODES.relaxed).toEqual({
         cspReportOnly: true,
-        enforceHTTPS: false,
-        strictTransportSecurity: false,
-        contentTypeOptions: true,
-        frameOptions: "SAMEORIGIN",
-        xssProtection: false,
       });
     });
   });

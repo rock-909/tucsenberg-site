@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { logger } from "@/lib/logger";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { POST } from "../route";
@@ -179,4 +180,31 @@ describe("/api/contact canonical integration", () => {
       expect(processLead).not.toHaveBeenCalled();
     },
   );
+
+  it("returns the same success envelope for honeypot hits without revealing the trap", async () => {
+    const response = await POST(
+      createContactRequest({
+        ...createValidContactBody(),
+        website: "https://bot.example/spam",
+      }),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({
+      success: true,
+      data: {
+        referenceId: expect.stringMatching(/^CON-/),
+      },
+    });
+    expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+    expect(processLead).not.toHaveBeenCalled();
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      "Contact honeypot triggered",
+      expect.objectContaining({
+        referenceId: data.data.referenceId,
+        ip: "[REDACTED_IP]",
+      }),
+    );
+  });
 });
