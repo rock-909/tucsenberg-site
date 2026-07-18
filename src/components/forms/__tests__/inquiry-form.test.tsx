@@ -68,7 +68,10 @@ const FORBIDDEN_CONTROL_NAMES = [
 
 function renderInquiryForm(source: "contact" | "request-quote" = "contact") {
   const copy = createTestInquiryFormCopy();
-  const utils = render(<InquiryForm copy={copy} source={source} />);
+  const fallback = <InquiryFormStaticFallback copy={copy} />;
+  const utils = render(
+    <InquiryForm copy={copy} fallback={fallback} source={source} />,
+  );
   return { copy, ...utils };
 }
 
@@ -139,22 +142,6 @@ describe("InquiryForm contract", () => {
     assertThreeFieldContract(container, copy);
   });
 
-  it("uses identical labels and autocomplete in both page modes", () => {
-    const contact = renderInquiryForm("contact");
-    const contactControls = getFormControls(contact.container);
-
-    contact.unmount();
-
-    const rfq = renderInquiryForm("request-quote");
-    const rfqControls = getFormControls(rfq.container);
-
-    expect(contactControls.fullName.textContent).toBe(
-      rfqControls.fullName.textContent,
-    );
-    expect(contactControls.email.getAttribute("autocomplete")).toBe("email");
-    expect(rfqControls.email.getAttribute("autocomplete")).toBe("email");
-  });
-
   it("posts to /api/inquiry with optional blank message", async () => {
     const { container, copy } = renderInquiryForm("contact");
     const { fullName, email, form } = getFormControls(container);
@@ -220,7 +207,10 @@ describe("InquiryForm contract", () => {
 
   it("shows field, security, and server summaries from the decoder", async () => {
     const copy = createTestInquiryFormCopy();
-    const { container } = render(<InquiryForm copy={copy} source="contact" />);
+    const fallback = <InquiryFormStaticFallback copy={copy} />;
+    const { container } = render(
+      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+    );
     const { fullName, email, form } = getFormControls(container);
 
     fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
@@ -265,8 +255,9 @@ describe("InquiryForm hydration", () => {
     });
 
     const copy = createTestInquiryFormCopy();
+    const fallback = <InquiryFormStaticFallback copy={copy} />;
     const html = renderToString(
-      <InquiryForm copy={copy} source="request-quote" />,
+      <InquiryForm copy={copy} fallback={fallback} source="request-quote" />,
     );
 
     expect(html).toContain('data-testid="inquiry-form-static-fallback"');

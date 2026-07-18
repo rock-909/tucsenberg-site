@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    // @ts-expect-error - inject test Turnstile site key for Playwright runs
+    window.NEXT_PUBLIC_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  });
+});
+
 test("product interest reaches the RFQ submission without claiming product identity", async ({
   page,
 }) => {
@@ -35,6 +42,10 @@ test("product interest reaches the RFQ submission without claiming product ident
   await expect(page).toHaveURL(/\/request-quote\?interest=frp-planks$/);
 
   const form = page.locator('form[data-lead-path="api-inquiry"]');
+  await form.scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("inquiry-form")).toBeVisible({
+    timeout: 15_000,
+  });
   await form.locator('[name="fullName"]').fill("Nightly Buyer");
   await form.locator('[name="email"]').fill("nightly@example.com");
   await form.locator('[name="message"]').fill("Need FRP barrier details.");

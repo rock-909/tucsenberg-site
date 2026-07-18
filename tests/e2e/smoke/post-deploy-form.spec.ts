@@ -1,4 +1,9 @@
-import { expect, test } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type Page,
+} from "@playwright/test";
 import { buildCanarySelectors } from "./canary-selectors";
 import { isDeployedCanaryUrl } from "./post-deploy-canary-url";
 
@@ -30,20 +35,116 @@ const canaryTargetUrl =
 const isPostDeploy =
   process.env.POST_DEPLOY_TEST === "1" && isDeployedCanaryUrl(canaryTargetUrl);
 
-interface AirtableContactRecordFields {
+interface AirtableInquiryRecordFields {
   "First Name"?: unknown;
   "Last Name"?: unknown;
   Email?: unknown;
   Company?: unknown;
+  "Product Name"?: unknown;
+  Requirements?: unknown;
+  Message?: unknown;
+  "Reference ID"?: unknown;
 }
 
-interface AirtableContactRecord {
+interface AirtableInquiryRecord {
   id?: string;
-  fields?: AirtableContactRecordFields;
+  fields?: AirtableInquiryRecordFields;
 }
 
-interface AirtableContactListResponse {
-  records?: AirtableContactRecord[];
+interface AirtableInquiryListResponse {
+  records?: AirtableInquiryRecord[];
+}
+
+const GENERAL_RFQ_PRODUCT_LABEL = "General RFQ (no catalog product)";
+const AIRTABLE_BASE_URL = "https://api.airtable.com/v0";
+
+async function waitForEditableInquiryForm(page: Page) {
+  await page.goto("/contact");
+  await page.waitForLoadState("load");
+
+  const inquiryForm = page.getByTestId("inquiry-form");
+  await inquiryForm.scrollIntoViewIfNeeded();
+  await expect(
+    inquiryForm,
+    "Shared InquiryForm did not become editable on the deployed contact page",
+  ).toBeVisible({ timeout: 15000 });
+
+  return inquiryForm;
+}
+
+async function submitInquiryForm(page: Page, email: string, message: string) {
+  await page.fill('input[name="fullName"]', "Smoke Test");
+  await page.fill('input[name="email"]', email);
+  await page.fill('textarea[name="message"]', message);
+  await page.waitForTimeout(3000);
+
+  const inquiryRequestPromise = page.waitForRequest(
+    (req) => req.url().includes("/api/inquiry") && req.method() === "POST",
+    { timeout: 20000 },
+  );
+  const selectors = buildCanarySelectors();
+  const submitButton = page.getByRole("button", {
+    name: selectors.submitLabel,
+  });
+
+  await expect(
+    submitButton,
+    "Submit button stayed disabled on the deployed contact flow",
+  ).toBeEnabled();
+
+  await submitButton.click();
+
+  return {
+    inquiryRequest: await inquiryRequestPromise,
+    selectors,
+  };
+}
+
+async function expectDeployedSuccess(page: Page, successPrefix: string) {
+  const successIndicator = page.getByText(successPrefix);
+  const errorIndicator = page
+    .getByText(/error|failed|try again/i)
+    .or(page.getByText(/错误|失败|重试/i));
+
+  const result = await Promise.race([
+    successIndicator
+      .first()
+      .waitFor({ timeout: 15000 })
+      .then(() => "success"),
+    errorIndicator
+      .first()
+      .waitFor({ timeout: 15000 })
+      .then(() => "error"),
+  ]).catch(() => "timeout");
+
+  expect(result, "Deployed contact flow did not reach a success state").toBe(
+    "success",
+  );
+}
+
+async function fetchAirtableRecord(
+  request: APIRequestContext,
+  params: { baseId: string; apiKey: string; email: string; tableName: string },
+) {
+  await new Promise((resolve) => {
+    setTimeout(resolve, 5000);
+  });
+
+  const airtableResponse = await request.get(
+    `${AIRTABLE_BASE_URL}/${params.baseId}/${encodeURIComponent(params.tableName)}`,
+    {
+      headers: { Authorization: `Bearer ${params.apiKey}` },
+      params: {
+        filterByFormula: `{Email}="${params.email}"`,
+        maxRecords: "1",
+      },
+    },
+  );
+
+  expect(airtableResponse.ok()).toBe(true);
+  const body = (await airtableResponse.json()) as AirtableInquiryListResponse;
+  expect(body.records?.length ?? 0).toBeGreaterThanOrEqual(1);
+  return body.records?.[0];
 }
 
 test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
@@ -53,7 +154,7 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
   );
 
   const CANARY_EMAIL = `smoke-test+${Date.now()}@example.com`;
-  const AIRTABLE_BASE_URL = "https://api.airtable.com/v0";
+  const CANARY_MESSAGE = "Automated post-deploy verification — please ignore";
 
   test("form submission creates Airtable record with split name fields", async ({
     page,
@@ -68,83 +169,39 @@ test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
       "Missing AIRTABLE_BASE_ID or AIRTABLE_API_KEY",
     );
 
-    // 1. Navigate to contact page
-    await page.goto("/contact");
-    await page.waitForLoadState("load");
-
-    // 2. Fill form
-    await page.fill('input[name="fullName"]', "Smoke Test");
-    await page.fill('input[name="email"]', CANARY_EMAIL);
-    await page.fill('input[name="company"]', "Automated Test");
-    await page.fill(
-      'textarea[name="message"]',
-      "Automated post-deploy verification — please ignore",
+    await waitForEditableInquiryForm(page);
+    const { inquiryRequest, selectors } = await submitInquiryForm(
+      page,
+      CANARY_EMAIL,
+      CANARY_MESSAGE,
     );
 
-    // Privacy is a submit-adjacent statement now, not a checkbox — nothing to
-    // tick before submitting.
+    const inquiryBody = inquiryRequest.postDataJSON() as Record<
+      string,
+      unknown
+    >;
+    expect(inquiryBody.email).toBe(CANARY_EMAIL);
+    expect(inquiryBody.fullName).toBe("Smoke Test");
+    expect(inquiryBody.message).toBe(CANARY_MESSAGE);
+    expect(inquiryBody.productInquiryKind).toBe("general-rfq");
 
-    // 3. Wait for Turnstile to initialize on the deployed page
-    await page.waitForTimeout(3000);
+    await expectDeployedSuccess(page, selectors.successPrefix);
 
-    // 4. Submit form
-    const selectors = buildCanarySelectors();
-    const submitButton = page.getByRole("button", {
-      name: selectors.submitLabel,
+    const record = await fetchAirtableRecord(request, {
+      baseId,
+      apiKey,
+      email: CANARY_EMAIL,
+      tableName,
     });
 
-    await expect(
-      submitButton,
-      "Submit button stayed disabled on the deployed contact flow",
-    ).toBeEnabled();
-
-    await submitButton.click();
-
-    // 5. Wait for success or error feedback
-    const successIndicator = page.getByText(selectors.successPrefix);
-    const errorIndicator = page
-      .getByText(/error|failed|try again/i)
-      .or(page.getByText(/错误|失败|重试/i));
-
-    const result = await Promise.race([
-      successIndicator
-        .first()
-        .waitFor({ timeout: 15000 })
-        .then(() => "success"),
-      errorIndicator
-        .first()
-        .waitFor({ timeout: 15000 })
-        .then(() => "error"),
-    ]).catch(() => "timeout");
-
-    expect(result, "Deployed contact flow did not reach a success state").toBe(
-      "success",
-    );
-
-    // 6. Verify Airtable record exists
-    await page.waitForTimeout(5000); // Wait for async write
-
-    const airtableResponse = await request.get(
-      `${AIRTABLE_BASE_URL}/${baseId}/${encodeURIComponent(tableName)}`,
-      {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        params: {
-          filterByFormula: `{Email}="${CANARY_EMAIL}"`,
-          maxRecords: "1",
-        },
-      },
-    );
-
-    expect(airtableResponse.ok()).toBe(true);
-    const body = (await airtableResponse.json()) as AirtableContactListResponse;
-    expect(body.records?.length ?? 0).toBeGreaterThanOrEqual(1);
-
-    const record = body.records?.[0];
     expect(record?.fields?.["First Name"]).toBe("Smoke");
     expect(record?.fields?.["Last Name"]).toBe("Test");
-    expect(record?.fields?.Company).toBe("Automated Test");
+    expect(record?.fields?.Email).toBe(CANARY_EMAIL);
+    expect(record?.fields?.["Product Name"]).toBe(GENERAL_RFQ_PRODUCT_LABEL);
+    expect(record?.fields?.Requirements).toBe(CANARY_MESSAGE);
+    expect(typeof record?.fields?.["Reference ID"]).toBe("string");
+    expect(record?.fields?.Company ?? "").toBe("");
 
-    // 7. Clean up: delete test record
     const recordId = record?.id;
     if (recordId) {
       await request.delete(

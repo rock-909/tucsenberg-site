@@ -4,9 +4,12 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
-import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
+import {
+  createInquiryFormCopy,
+  type InquiryFormCopy,
+} from "@/components/forms/inquiry-form-copy";
 import { InquiryForm } from "@/components/forms/inquiry-form";
-import { loadCompleteMessages } from "@/lib/i18n/load-messages";
+import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
@@ -83,10 +86,16 @@ export default async function RequestQuotePage({
     locale,
     namespace: "requestQuote.metadata",
   });
+  const tInquiryForm = await getTranslations({
+    locale,
+    namespace: "inquiry.form",
+  });
   const translatePage = (key: string) =>
     tPage(key as Parameters<typeof tPage>[0]);
-  const messages = await loadCompleteMessages(locale);
-  const inquiryCopy = createInquiryFormCopyFromMessages(messages);
+  const inquiryCopy: InquiryFormCopy = createInquiryFormCopy((key) =>
+    tInquiryForm(key as Parameters<typeof tInquiryForm>[0]),
+  );
+  const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
   const typedLocale = locale as Locale;
   const pagePath = getLocalizedPath("requestQuote", typedLocale);
   const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
@@ -116,7 +125,11 @@ export default async function RequestQuotePage({
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <InquiryForm copy={inquiryCopy} source="request-quote" />
+          <InquiryForm
+            copy={inquiryCopy}
+            fallback={inquiryFallback}
+            source="request-quote"
+          />
           <RequestQuoteAside
             successCopy={inquiryCopy.success}
             t={translatePage}

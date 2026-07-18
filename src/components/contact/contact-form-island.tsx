@@ -14,6 +14,7 @@ import {
 
 type ContactFormComponent = ComponentType<{
   copy: InquiryFormCopy;
+  fallback: ReactNode;
   source: InquiryFormSource;
 }>;
 type ContactFormLoadErrorComponent = ComponentType<{
@@ -238,7 +239,11 @@ export function ContactFormIsland({
 
   return (
     <div ref={containerRef}>
-      <LoadedInquiryFormComponent copy={inquiryCopy} source="contact" />
+      <LoadedInquiryFormComponent
+        copy={inquiryCopy}
+        fallback={fallback}
+        source="contact"
+      />
     </div>
   );
 }

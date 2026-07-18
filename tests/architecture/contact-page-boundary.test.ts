@@ -49,9 +49,7 @@ describe("Contact page source boundaries", () => {
 
     expect(source).toContain("InquiryFormStaticFallback");
     expect(source).toContain("inquiry-form-static-fallback");
-    expect(source).toContain(
-      "fallback={<InquiryFormStaticFallback copy={inquiryCopy} />}",
-    );
+    expect(source).toContain("fallback={inquiryFallback}");
   });
 
   it("keeps the no-JS fallback informational without fake form markup", () => {

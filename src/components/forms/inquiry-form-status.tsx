@@ -1,40 +1,8 @@
-import { type ReactNode } from "react";
 import { type InquiryFormCopy } from "@/components/forms/inquiry-form-copy";
 import { type InquirySubmitState } from "@/components/forms/inquiry-response";
 import { FormPrivacyNotice } from "@/components/forms/form-privacy-notice";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { cn } from "@/lib/utils";
-
-const STATUS_TONE_CLASS_NAMES = {
-  info: "border-[var(--info-border)] bg-[var(--info-muted)] text-[var(--info-foreground)]",
-  success:
-    "border-[var(--success-border)] bg-[var(--success-muted)] text-[var(--success-foreground)]",
-  error:
-    "border-[var(--error-border)] bg-[var(--error-muted)] text-[var(--error-foreground)]",
-} as const;
-
-function InquiryStatusCallout({
-  children,
-  tone = "info",
-}: {
-  children: ReactNode;
-  tone?: keyof typeof STATUS_TONE_CLASS_NAMES;
-}) {
-  const isError = tone === "error";
-
-  return (
-    <div
-      aria-live={isError ? "assertive" : "polite"}
-      className={cn(
-        "rounded-lg border p-4 text-sm",
-        STATUS_TONE_CLASS_NAMES[tone],
-      )}
-      role={isError ? "alert" : "status"}
-    >
-      {children}
-    </div>
-  );
-}
+import { StatusCallout } from "@/components/ui/status-callout";
 
 function getErrorSummary(
   copy: InquiryFormCopy,
@@ -72,19 +40,19 @@ export function InquiryFormStatus({
   return (
     <>
       {displayState.status === "success" ? (
-        <InquiryStatusCallout tone="success">
+        <StatusCallout tone="success">
           <p>
             {copy.success} {copy.referenceLabel}: {displayState.referenceId}
           </p>
-        </InquiryStatusCallout>
+        </StatusCallout>
       ) : null}
 
       {errorSummary ? (
-        <InquiryStatusCallout tone="error">{errorSummary}</InquiryStatusCallout>
+        <StatusCallout tone="error">{errorSummary}</StatusCallout>
       ) : null}
 
       {displayState.status === "submitting" ? (
-        <InquiryStatusCallout>{copy.submitting}</InquiryStatusCallout>
+        <StatusCallout>{copy.submitting}</StatusCallout>
       ) : null}
 
       <FormPrivacyNotice text={copy.privacyNotice} />

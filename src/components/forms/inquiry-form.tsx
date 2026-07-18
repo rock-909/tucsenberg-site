@@ -1,6 +1,11 @@
 "use client";
 
-import { type FormEvent, useMemo, useSyncExternalStore } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import {
   InquiryBuyerInterestContext,
   InquiryFormFields,
@@ -9,7 +14,6 @@ import {
   type InquiryFormCopy,
   type InquiryFormSource,
 } from "@/components/forms/inquiry-form-copy";
-import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { InquiryFormStatus } from "@/components/forms/inquiry-form-status";
 import {
   capBuyerInterest,
@@ -30,6 +34,7 @@ export type { InquiryFormCopy } from "@/components/forms/inquiry-form-copy";
 export interface InquiryFormProps {
   readonly source: InquiryFormSource;
   readonly copy: InquiryFormCopy;
+  readonly fallback: ReactNode;
 }
 
 const unsubscribeHydration = () => undefined;
@@ -137,7 +142,7 @@ function InquiryFormLive({
   );
 }
 
-export function InquiryForm({ source, copy }: InquiryFormProps) {
+export function InquiryForm({ source, copy, fallback }: InquiryFormProps) {
   const isHydrated = useSyncExternalStore(
     subscribeHydration,
     getClientHydrationSnapshot,
@@ -145,7 +150,7 @@ export function InquiryForm({ source, copy }: InquiryFormProps) {
   );
 
   if (!isHydrated) {
-    return <InquiryFormStaticFallback copy={copy} />;
+    return fallback;
   }
 
   return <InquiryFormLive copy={copy} source={source} />;

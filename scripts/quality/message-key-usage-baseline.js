@@ -132,6 +132,10 @@ const DYNAMIC_MESSAGE_KEY_PREFIXES = [
     "contact.inquiryHandoff.items.",
     "contact handoff cards are keyed by the fixed need/context/timing tuple",
   ],
+  [
+    "inquiry.form.",
+    "createInquiryFormCopyFromMessages maps the fixed createInquiryFormCopy key set through key.split('.')",
+  ],
   ["catalog.markets.", "catalog product cards are keyed by product slugs"],
   ["catalog.path.items.", "catalog path cards are keyed by config"],
   ["catalog.detail.items.", "catalog detail items are keyed by config"],

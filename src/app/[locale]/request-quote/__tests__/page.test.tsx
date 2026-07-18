@@ -18,6 +18,8 @@ vi.mock("next-intl/server", async () => {
     getRequestQuoteMetadataMessage,
     getRequestQuotePageMessage,
   } = await import("@/test/request-quote-test-messages");
+  const { getInquiryFormMessage } =
+    await import("@/test/inquiry-test-messages");
 
   return {
     setRequestLocale: vi.fn(),
@@ -29,13 +31,17 @@ vi.mock("next-intl/server", async () => {
         namespace:
           | "requestQuote.form"
           | "requestQuote.metadata"
-          | "requestQuote.page";
+          | "requestQuote.page"
+          | "inquiry.form";
       }) => {
         if (namespace === "requestQuote.form") {
           return (key: string) => getRequestQuoteFormMessage(key);
         }
         if (namespace === "requestQuote.metadata") {
           return (key: string) => getRequestQuoteMetadataMessage(key);
+        }
+        if (namespace === "inquiry.form") {
+          return (key: string) => getInquiryFormMessage(key);
         }
 
         return (key: string, values?: Record<string, string | number>) =>
@@ -47,14 +53,6 @@ vi.mock("next-intl/server", async () => {
 
 vi.mock("@/lib/seo-metadata", () => ({
   generateMetadataForPath: mockGenerateMetadataForPath,
-}));
-
-vi.mock("@/lib/i18n/load-messages", () => ({
-  loadCompleteMessages: vi.fn(async () =>
-    import("@/lib/i18n/composed-messages").then(({ getComposedMessages }) =>
-      getComposedMessages("en"),
-    ),
-  ),
 }));
 
 vi.mock("@/components/seo/json-ld-script", () => ({

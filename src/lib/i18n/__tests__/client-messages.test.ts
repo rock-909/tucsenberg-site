@@ -44,11 +44,10 @@ describe("client message scoping", () => {
     ]);
   });
 
-  it("keeps the contact form copy off the site-wide client payload", () => {
-    // Only the contact form consumes these on the client; they must be
-    // supplied by the contact route's local provider, not shipped everywhere.
+  it("keeps legacy contact message packs off the site-wide client payload", () => {
     expect(getClientMessageNamespaces()).not.toContain("contact");
     expect(getClientMessageNamespaces()).not.toContain("apiErrors");
+    expect(getClientMessageNamespaces()).not.toContain("inquiry");
     expect([...CONTACT_CLIENT_MESSAGE_NAMESPACES].sort()).toEqual([
       "accessibility",
       "apiErrors",

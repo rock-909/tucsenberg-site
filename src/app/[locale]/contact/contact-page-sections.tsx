@@ -1,4 +1,3 @@
-import { NextIntlClientProvider } from "next-intl";
 import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
@@ -8,12 +7,8 @@ import {
   getPublicContactPhone,
 } from "@/config/public-trust";
 import { siteFacts } from "@/config/site-facts";
-import {
-  CONTACT_CLIENT_MESSAGE_NAMESPACES,
-  pickMessages,
-} from "@/lib/i18n/client-messages";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
-import type { FaqItem, Locale } from "@/types/content.types";
+import type { FaqItem } from "@/types/content.types";
 import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
@@ -230,10 +225,8 @@ export function ContactFaqSection({
 }
 
 export function ContactFormWithFallback({
-  locale,
   messages,
 }: {
-  locale: Locale;
   messages: Record<string, unknown>;
 }) {
   const formLoadError = readRequiredMessagePath(messages, [
@@ -247,24 +240,16 @@ export function ContactFormWithFallback({
     "retryLoad",
   ]);
   const inquiryCopy = createInquiryFormCopyFromMessages(messages);
+  const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
 
   return (
     <div className="min-w-0 space-y-6" data-testid="contact-form-column">
-      {/* The contact form island is the only client consumer of the legacy
-          `contact`/`apiErrors` namespaces plus the shared `inquiry.form`
-          copy. Provide them locally here instead of from the site-wide root
-          provider. */}
-      <NextIntlClientProvider
-        locale={locale}
-        messages={pickMessages(messages, CONTACT_CLIENT_MESSAGE_NAMESPACES)}
-      >
-        <ContactFormIsland
-          errorMessage={formLoadError}
-          fallback={<InquiryFormStaticFallback copy={inquiryCopy} />}
-          inquiryCopy={inquiryCopy}
-          retryLabel={formRetryLabel}
-        />
-      </NextIntlClientProvider>
+      <ContactFormIsland
+        errorMessage={formLoadError}
+        fallback={inquiryFallback}
+        inquiryCopy={inquiryCopy}
+        retryLabel={formRetryLabel}
+      />
     </div>
   );
 }

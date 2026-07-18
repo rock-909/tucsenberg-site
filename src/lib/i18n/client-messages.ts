@@ -6,11 +6,10 @@ type Messages = Record<string, unknown>;
 // Namespaces every route needs on the client: skip link and mobile-nav labels
 // (accessibility), cookie banner (cookie), the not-found/error views (errors),
 // navigation chrome, and the theme switcher. There is no language switcher on
-// the current site, so `language` is not shipped. `contact` and `apiErrors`
-// are NOT here on purpose: on the client only the contact form consumes them,
-// so the contact route supplies them through a local provider (see
-// contact-page-sections.tsx). Keeping them out of the root provider stops
-// every non-contact page from shipping the contact form copy.
+// the current site, so `language` is not shipped. Contact and RFQ inquiry copy
+// is server-built through `inquiry.form` and passed into client islands as
+// typed props, so legacy `contact`/`apiErrors` message packs stay off the
+// site-wide client payload until D6e retires the old frontend stack.
 const CLIENT_MESSAGE_NAMESPACES = [
   "accessibility",
   "cookie",
@@ -19,8 +18,8 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "theme",
 ] as const;
 
-// Namespaces the contact form needs on the client, provided locally on the
-// contact route instead of site-wide.
+// Legacy contact-form namespaces retained for D6e retirement work. The active
+// shared InquiryForm no longer consumes them through a route-local provider.
 export const CONTACT_CLIENT_MESSAGE_NAMESPACES = [
   "accessibility",
   "apiErrors",
