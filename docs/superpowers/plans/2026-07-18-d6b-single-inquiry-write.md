@@ -1,3 +1,5 @@
+> Historical.
+>
 > Historical implementation plan.
 >
 > This plan implements `docs/superpowers/specs/2026-07-18-d6b-single-inquiry-write-design.md`.

@@ -1,3 +1,5 @@
+> Historical.
+>
 > Historical implementation design.
 >
 > Stable product truth remains in current project docs and runtime code.
