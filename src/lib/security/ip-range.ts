@@ -61,6 +61,7 @@ export function ipv4ToInteger(ip: string): number | null {
   let value = 0;
   for (const segment of segments) {
     if (!/^\d+$/u.test(segment)) return null;
+    if (segment.length > 1 && segment[0] === "0") return null;
 
     const octet = Number.parseInt(segment, 10);
     if (octet > IPV4_MAX_OCTET) {
@@ -83,11 +84,34 @@ export function integerToIpv4(value: number): string {
   ].join(".");
 }
 
-function normalizeIPv6Segments(segments: string[]): string[] | null {
+interface IPv6SegmentSideOptions {
+  side: "left" | "right";
+  hasCompression: boolean;
+}
+
+function normalizeIPv6Segments(
+  segments: string[],
+  options: IPv6SegmentSideOptions,
+): string[] | null {
   const lastSegment = segments.at(-1);
   if (lastSegment?.includes(".")) {
+    if (options.hasCompression && options.side === "left") {
+      return null;
+    }
+
     const ipv4Value = ipv4ToInteger(lastSegment);
     if (ipv4Value === null) return null;
+
+    if (options.hasCompression) {
+      if (
+        options.side !== "right" ||
+        segments.slice(0, -1).some((segment) => segment.includes("."))
+      ) {
+        return null;
+      }
+    } else if (segments.length !== 7) {
+      return null;
+    }
 
     const normalized = segments.slice(0, -1);
     normalized.push(
@@ -107,8 +131,14 @@ export function ipv6ToBigInt(ip: string): bigint | null {
   const leftRaw = hasCompression ? ip.slice(0, compressionIndex) : ip;
   const rightRaw = hasCompression ? ip.slice(compressionIndex + 2) : "";
 
-  const leftSegments = normalizeIPv6Segments(splitIPv6Side(leftRaw));
-  const rightSegments = normalizeIPv6Segments(splitIPv6Side(rightRaw));
+  const leftSegments = normalizeIPv6Segments(splitIPv6Side(leftRaw), {
+    side: "left",
+    hasCompression,
+  });
+  const rightSegments = normalizeIPv6Segments(splitIPv6Side(rightRaw), {
+    side: "right",
+    hasCompression,
+  });
 
   if (leftSegments === null || rightSegments === null) return null;
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { SITE_CONFIG } from "@/config/paths";
 import { siteFacts } from "@/config/site-facts";
 import {
-  buildLegalPageSchema,
   buildWebPageSchema,
   generateArticleData,
   generateOrganizationData,
@@ -33,32 +32,50 @@ const mockTranslator = ((key: string) => {
 
 describe("structured-data generators", () => {
   describe("Given legal and conversion pages need valid WebPage nodes", () => {
-    it("When building a privacy-style legal schema, Then @type is WebPage not PrivacyPolicy", () => {
-      const schema = buildLegalPageSchema({
-        schemaType: "WebPage",
+    it("When building a privacy-style WebPage, Then the graph uses stable site identities", () => {
+      const pageUrl = new URL("/privacy", SITE_CONFIG.baseUrl).toString();
+      const schema = buildWebPageSchema({
         locale: "en",
         name: "Privacy Policy",
         description: "How we handle data.",
-        publishedAt: "2024-01-01",
+        url: pageUrl,
+        datePublished: "2024-01-01",
       });
 
-      expect(schema["@type"]).toBe("WebPage");
+      expect(schema).toMatchObject({
+        "@type": "WebPage",
+        "@id": pageUrl,
+        url: pageUrl,
+        datePublished: "2024-01-01",
+        isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
+        about: { "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl) },
+      });
       expect(schema).not.toHaveProperty("additionalType");
     });
 
-    it("When building a terms-style legal schema, Then no invalid additionalType is emitted", () => {
-      const schema = buildLegalPageSchema({
-        schemaType: "WebPage",
+    it("When building a terms-style WebPage, Then optional dates obey exact optional fields", () => {
+      const pageUrl = new URL("/terms", SITE_CONFIG.baseUrl).toString();
+      const schema = buildWebPageSchema({
         locale: "en",
         name: "Terms of Service",
+        url: pageUrl,
+        dateModified: "2024-02-01",
       });
 
-      expect(schema["@type"]).toBe("WebPage");
+      expect(schema).toMatchObject({
+        "@type": "WebPage",
+        "@id": pageUrl,
+        url: pageUrl,
+        dateModified: "2024-02-01",
+        isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
+        about: { "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl) },
+      });
+      expect(schema).not.toHaveProperty("datePublished");
       expect(schema).not.toHaveProperty("additionalType");
     });
 
     it("When building a request-quote WebPage, Then the node references stable site identities", () => {
-      const pageUrl = `${SITE_CONFIG.baseUrl}/request-quote`;
+      const pageUrl = new URL("/request-quote", SITE_CONFIG.baseUrl).toString();
       const schema = buildWebPageSchema({
         locale: "en",
         name: "Request a Quote",

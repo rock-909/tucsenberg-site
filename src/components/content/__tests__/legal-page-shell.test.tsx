@@ -4,8 +4,25 @@ import {
   buildShellPageSchema,
   LegalPageShell,
 } from "@/components/content/legal-page-shell";
+import {
+  organizationStructuredDataId,
+  websiteStructuredDataId,
+} from "@/lib/structured-data-generators";
+import { SITE_CONFIG } from "@/config/paths";
 
 const mockJsonLdGraphScript = vi.hoisted(() => vi.fn());
+
+vi.mock("@/config/paths", () => ({
+  SITE_CONFIG: {
+    baseUrl: "https://www.example.com",
+  },
+}));
+
+vi.mock("@/config/paths/site-config", () => ({
+  SITE_CONFIG: {
+    baseUrl: "https://www.example.com",
+  },
+}));
 
 vi.mock("@/components/seo/json-ld-script", () => ({
   JsonLdGraphScript: ({
@@ -52,7 +69,8 @@ describe("LegalPageShell structured data", () => {
     mockJsonLdGraphScript.mockClear();
   });
 
-  it("Given privacy legal metadata, When the shell renders, Then JSON-LD uses WebPage", async () => {
+  it("Given privacy legal metadata, When the shell renders, Then WebPage JSON-LD uses the page URL graph", async () => {
+    const pageUrl = "https://www.example.com/privacy";
     const schema = await buildShellPageSchema({
       metadata: {
         title: "Privacy Policy",
@@ -65,13 +83,23 @@ describe("LegalPageShell structured data", () => {
       },
       locale: "en",
       schemaType: "WebPage",
+      pageUrl,
     });
 
-    expect(schema["@type"]).toBe("WebPage");
+    expect(schema).toMatchObject({
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+      isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
+      about: {
+        "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl),
+      },
+    });
     expect(schema).not.toHaveProperty("additionalType");
   });
 
-  it("Given terms legal metadata, When the shell renders, Then JSON-LD has no additionalType", async () => {
+  it("Given terms legal metadata, When the shell renders, Then WebPage JSON-LD has no additionalType", async () => {
+    const pageUrl = "https://www.example.com/terms";
     const schema = await buildShellPageSchema({
       metadata: {
         title: "Terms of Service",
@@ -84,9 +112,14 @@ describe("LegalPageShell structured data", () => {
       },
       locale: "en",
       schemaType: "WebPage",
+      pageUrl,
     });
 
-    expect(schema["@type"]).toBe("WebPage");
+    expect(schema).toMatchObject({
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+    });
     expect(schema).not.toHaveProperty("additionalType");
   });
 
@@ -112,25 +145,25 @@ describe("LegalPageShell structured data", () => {
     });
   });
 
-  it("Given frontmatter FAQ items, When the shell renders, Then FAQPage is injected once", async () => {
+  it("Given legal metadata with FAQ frontmatter, When the shell renders, Then FAQPage is not injected", async () => {
     const page = await LegalPageShell({
       metadata: {
-        title: "OEM & Wholesale",
-        slug: "oem-wholesale",
-        publishedAt: "2026-07-02",
+        title: "Privacy Policy",
+        slug: "privacy",
+        publishedAt: "2024-01-01",
         faq: [
           {
-            id: "oem-faq-1",
-            question: "Are you a factory or a trading company?",
-            answer: "We are the product company.",
+            id: "privacy-faq-1",
+            question: "Do you sell data?",
+            answer: "No.",
           },
         ],
       },
-      content: "Trade landing body",
+      content: "Privacy body",
       headings: [],
       locale: "en",
       schemaType: "WebPage",
-      pagePath: "/oem-wholesale",
+      pagePath: "/privacy",
     });
 
     render(page);
@@ -145,11 +178,8 @@ describe("LegalPageShell structured data", () => {
           : undefined,
     );
 
-    expect(types).toEqual(
-      expect.arrayContaining(["WebPage", "FAQPage", "BreadcrumbList"]),
-    );
-    expect(screen.getByTestId("legal-content")).toHaveTextContent(
-      "Trade landing body",
-    );
+    expect(types).toEqual(expect.arrayContaining(["WebPage", "BreadcrumbList"]));
+    expect(types).not.toContain("FAQPage");
+    expect(screen.getByTestId("legal-content")).toHaveTextContent("Privacy body");
   });
 });

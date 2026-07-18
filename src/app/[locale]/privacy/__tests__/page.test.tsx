@@ -71,7 +71,6 @@ const mockLegalPage = {
     seo: {
       title: "Privacy Policy SEO",
       description: "Privacy SEO description",
-      keywords: ["privacy policy"],
     },
   },
   content: "## Information We Collect {#info-collect}\n\nWe collect data.",
@@ -117,7 +116,6 @@ describe("Privacy Page", () => {
         seo: {
           title: "Privacy Policy SEO",
           description: "",
-          keywords: ["privacy policy"],
         },
       },
     });

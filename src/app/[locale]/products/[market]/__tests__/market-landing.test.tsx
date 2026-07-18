@@ -91,7 +91,6 @@ vi.mock("@/config/paths", () => ({
     seo: {
       defaultTitle: "Example Showcase Company",
       defaultDescription: "Replaceable showcase catalog example",
-      keywords: ["showcase catalog example"],
     },
   },
   LOCALES_CONFIG: {
@@ -361,6 +360,55 @@ describe("Market Landing Page", () => {
           },
         },
       });
+    });
+
+    it("keeps product URLs canonical when SITE_CONFIG.baseUrl has a trailing slash", async () => {
+      vi.resetModules();
+      vi.doMock("@/config/paths", () => ({
+        SITE_CONFIG: {
+          name: "Example Showcase Company",
+          baseUrl: "https://www.example.com/",
+          brandAssets: {
+            productPhotos: {
+              status: "pending",
+            },
+          },
+          seo: {
+            defaultTitle: "Example Showcase Company",
+            defaultDescription: "Replaceable showcase catalog example",
+          },
+        },
+        LOCALES_CONFIG: {
+          locales: ["en"],
+          defaultLocale: "en",
+        },
+        PATHS_CONFIG: {
+          pages: {
+            products: "/products",
+          },
+        },
+        DYNAMIC_PATHS_CONFIG: {
+          productMarket: {
+            pattern: "/products/[market]",
+            paramName: "market",
+          },
+        },
+        getLocalizedPath: (pageType: string) =>
+          pageType === "products" ? "/products" : "/",
+        getProductMarketPath: (market: string) => `/products/${market}`,
+      }));
+
+      const { generateMetadata } = await import("../page");
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ locale: "en", market: "abs-flood-barriers" }),
+      });
+
+      expect(metadata.alternates?.canonical).toBe(
+        "https://www.example.com/products/abs-flood-barriers",
+      );
+      expect(String(metadata.alternates?.canonical)).not.toContain(
+        "//products",
+      );
     });
   });
 

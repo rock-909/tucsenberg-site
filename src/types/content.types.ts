@@ -23,7 +23,6 @@ export interface ContentMetadata {
   seo?: {
     title?: string;
     description?: string;
-    keywords?: string[];
     ogImage?: string;
   };
 }
@@ -138,7 +137,6 @@ export interface ProductSummary {
   seo?: {
     title?: string;
     description?: string;
-    keywords?: string[];
     ogImage?: string;
   };
 }

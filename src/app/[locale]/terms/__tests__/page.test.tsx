@@ -60,7 +60,6 @@ const mockLegalPage = {
     seo: {
       title: "Terms SEO",
       description: "Terms SEO description",
-      keywords: ["terms"],
     },
   },
   content: "## Introduction {#introduction}\n\nWelcome.",

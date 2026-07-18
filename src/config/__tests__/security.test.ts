@@ -1,10 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  generateCSP,
-  getSecurityConfig,
-  getSecurityHeaders,
-  SECURITY_MODES,
-} from "../security";
+import { generateCSP, getSecurityHeaders } from "../security";
 
 describe("Security Configuration", () => {
   beforeEach(() => {
@@ -163,17 +158,6 @@ describe("Security Configuration", () => {
       expect(headerKeys).not.toContain("Content-Security-Policy");
     });
 
-    it("should output Content-Security-Policy in moderate mode", () => {
-      vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
-      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
-
-      const headers = getSecurityHeaders();
-      const headerKeys = headers.map((h) => h.key);
-
-      expect(headerKeys).toContain("Content-Security-Policy");
-      expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
-    });
-
     it("should include report-uri directive in CSP", () => {
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
       vi.stubEnv("CSP_REPORT_URI", "");
@@ -244,45 +228,6 @@ describe("Security Configuration", () => {
       expect(reportingHeader?.value).toBe(
         'csp-endpoint="https://example.com/csp-report"',
       );
-    });
-  });
-
-  describe("getSecurityConfig", () => {
-    it("should return strict mode by default", () => {
-      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "");
-
-      const config = getSecurityConfig();
-      expect(config).toEqual(SECURITY_MODES.strict);
-    });
-
-    it("should return moderate mode when configured", () => {
-      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "moderate");
-
-      const config = getSecurityConfig();
-      expect(config).toEqual(SECURITY_MODES.moderate);
-    });
-
-    it("should return relaxed mode when configured", () => {
-      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
-
-      const config = getSecurityConfig();
-      expect(config).toEqual(SECURITY_MODES.relaxed);
-    });
-  });
-
-  describe("SECURITY_MODES", () => {
-    it("should keep only the live cspReportOnly switch per mode", () => {
-      expect(SECURITY_MODES.strict).toEqual({
-        cspReportOnly: false,
-      });
-
-      expect(SECURITY_MODES.moderate).toEqual({
-        cspReportOnly: false,
-      });
-
-      expect(SECURITY_MODES.relaxed).toEqual({
-        cspReportOnly: true,
-      });
     });
   });
 });

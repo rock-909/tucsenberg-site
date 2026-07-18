@@ -19,6 +19,9 @@ describe("ip-range", () => {
       expect(ipv4ToInteger("192.168.0.256")).toBeNull();
       expect(ipv4ToInteger("192.168.-1.1")).toBeNull();
       expect(ipv4ToInteger("192.168.one.1")).toBeNull();
+      expect(ipv4ToInteger("001.002.003.004")).toBeNull();
+      expect(ipv4ToInteger("01.2.3.4")).toBeNull();
+      expect(ipv4ToInteger("1.2.3.04")).toBeNull();
     });
   });
 
@@ -55,6 +58,8 @@ describe("ip-range", () => {
       expect(ipv6ToBigInt("1:2:10000:4:5:6:7:8")).toBeNull();
       expect(ipv6ToBigInt("::ffff:999.0.2.128")).toBeNull();
       expect(ipv6ToBigInt("999.0.2.128::1")).toBeNull();
+      expect(ipv6ToBigInt("192.0.2.1::1")).toBeNull();
+      expect(ipv6ToBigInt("1.2.3.4::")).toBeNull();
     });
   });
 

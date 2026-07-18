@@ -8,7 +8,6 @@ const { mockSiteConfig, mockRouting } = vi.hoisted(() => ({
       titleTemplate: "%s | Test Site",
       defaultTitle: "Default Title",
       defaultDescription: "Default Description",
-      keywords: ["test"],
     },
   },
   mockRouting: {

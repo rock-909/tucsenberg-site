@@ -4,12 +4,8 @@ import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { LegalContentRenderer } from "@/components/content/legal-content-renderer";
 import type { HeadingItem } from "@/lib/content/legal-page";
 import {
-  extractFaqFromMetadata,
-  generateFaqSchemaFromItems,
-} from "@/lib/content/mdx-faq";
-import {
   buildBreadcrumbListSchema,
-  buildLegalPageSchema,
+  buildWebPageSchema,
   generateArticleData,
 } from "@/lib/structured-data-generators";
 import { SITE_CONFIG } from "@/config/paths";
@@ -61,16 +57,21 @@ export function buildShellPageSchema(
     return buildShellArticleSchema({ ...input, pageUrl });
   }
 
-  const description = metadata.seo?.description ?? metadata.description;
+  if (!pageUrl) {
+    throw new Error("pageUrl is required for WebPage structured data");
+  }
 
-  return buildLegalPageSchema({
-    schemaType: "WebPage",
+  const description = metadata.seo?.description ?? metadata.description;
+  const modifiedAt =
+    metadata.updatedAt ?? metadata.lastReviewed ?? metadata.publishedAt;
+
+  return buildWebPageSchema({
     locale,
     name: metadata.seo?.title ?? metadata.title,
-    publishedAt: metadata.publishedAt,
-    modifiedAt:
-      metadata.updatedAt ?? metadata.lastReviewed ?? metadata.publishedAt,
+    url: pageUrl,
     ...(description ? { description } : {}),
+    ...(metadata.publishedAt ? { datePublished: metadata.publishedAt } : {}),
+    ...(modifiedAt ? { dateModified: modifiedAt } : {}),
   });
 }
 
@@ -95,20 +96,11 @@ export async function LegalPageShell({
     ...(pageUrl ? { pageUrl } : {}),
   });
 
-  const faqItems = extractFaqFromMetadata(metadata);
   const schemas: Array<Record<string, unknown>> = [schema];
-  if (faqItems.length > 0) {
-    schemas.push(
-      generateFaqSchemaFromItems(faqItems, locale) as unknown as Record<
-        string,
-        unknown
-      >,
-    );
-  }
   if (pageUrl) {
     schemas.push(
       buildBreadcrumbListSchema([
-        { name: tNav("home"), url: SITE_CONFIG.baseUrl },
+        { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
         { name: metadata.title, url: pageUrl },
       ]),
     );

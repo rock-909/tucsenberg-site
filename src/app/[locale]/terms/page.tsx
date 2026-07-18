@@ -65,6 +65,7 @@ async function TermsContent({ locale }: { locale: string }) {
       headings={headings}
       locale={locale}
       schemaType="WebPage"
+      pagePath={getLocalizedPath("terms", locale as Locale)}
     />
   );
 }

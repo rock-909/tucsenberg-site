@@ -380,7 +380,10 @@ export default async function MarketPage({ params }: MarketPageProps) {
     downloadSpec: tLanding("downloadSpec"),
   };
 
-  const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(market.slug)}`;
+  const marketUrl = new URL(
+    getProductMarketPath(market.slug),
+    SITE_CONFIG.baseUrl,
+  ).toString();
   const faqSchema = buildTucsenbergProductFaqSchema(productPage, locale);
   const jsonLdData = await buildMarketPageJsonLdData({
     market,

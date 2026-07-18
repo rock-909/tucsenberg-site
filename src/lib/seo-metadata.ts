@@ -58,8 +58,7 @@ function normalizePath(path: string): string {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
-function buildCanonicalForPath(locale: Locale, path: string): string {
-  resolveLocale(locale);
+function buildCanonicalForPath(path: string): string {
   const normalizedPath = normalizePath(path);
   return new URL(
     normalizedPath === "" ? "/" : normalizedPath,
@@ -88,44 +87,6 @@ function buildLanguagesForPath(path: string): Record<string, string> {
   ]);
 
   return Object.fromEntries(entries);
-}
-
-function applyBaseFields(target: SEOConfig, base: SEOConfig): void {
-  if (base.type !== undefined) target.type = base.type;
-  if (base.image !== undefined) target.image = base.image;
-}
-
-function applyCustomFields(
-  target: SEOConfig,
-  custom: Partial<SEOConfig>,
-): void {
-  if (custom.type !== undefined) target.type = custom.type;
-  if (custom.image !== undefined) target.image = custom.image;
-  if (custom.title !== undefined) target.title = custom.title;
-  if (custom.description !== undefined) target.description = custom.description;
-  if (custom.publishedTime !== undefined)
-    target.publishedTime = custom.publishedTime;
-  if (custom.modifiedTime !== undefined)
-    target.modifiedTime = custom.modifiedTime;
-  if (custom.authors !== undefined) target.authors = custom.authors;
-  if (custom.section !== undefined) target.section = custom.section;
-}
-
-function mergeSEOConfig(
-  baseConfig: SEOConfig,
-  customConfig?: Partial<SEOConfig> | null,
-): SEOConfig {
-  const mergedConfig: SEOConfig = {};
-
-  applyBaseFields(mergedConfig, baseConfig);
-
-  if (customConfig === null || customConfig === undefined) {
-    return mergedConfig;
-  }
-
-  applyCustomFields(mergedConfig, customConfig);
-
-  return mergedConfig;
 }
 
 const STATIC_PAGE_SEO_DEFAULTS = {
@@ -188,9 +149,9 @@ export function generateMetadataForPath(
   params: GenerateMetadataForPathParams,
 ): Metadata {
   const { locale, pageType, path, config } = params;
-  const seoConfig = mergeSEOConfig(STATIC_PAGE_SEO_DEFAULTS, config ?? {});
+  const seoConfig = { ...STATIC_PAGE_SEO_DEFAULTS, ...config };
   const safeLocale = resolveLocale(locale);
-  const canonical = buildCanonicalForPath(locale, path);
+  const canonical = buildCanonicalForPath(path);
   const languages = buildLanguagesForPath(path);
   const title = resolveMetadataTitle(seoConfig);
   const description = resolveMetadataDescription(seoConfig);

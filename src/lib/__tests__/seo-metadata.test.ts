@@ -42,10 +42,31 @@ describe("SEO Metadata", () => {
 
   describe("buildCanonicalForPath", () => {
     it("builds canonical URLs from the route path without locale prefixes", () => {
-      expect(buildCanonicalForPath("en", "/about")).toBe(
-        "https://example.com/about",
+      expect(buildCanonicalForPath("/about")).toBe("https://example.com/about");
+      expect(buildCanonicalForPath("/")).toBe("https://example.com/");
+    });
+
+    it("joins paths safely when SITE_CONFIG.baseUrl has a trailing slash", async () => {
+      vi.resetModules();
+      vi.doMock("@/config/paths", () => ({
+        SITE_CONFIG: {
+          baseUrl: "https://example.com/",
+          name: "Test Site",
+          seo: {
+            titleTemplate: "%s | Test Site",
+            defaultTitle: "Default Title",
+            defaultDescription: "Default Description",
+          },
+        },
+      }));
+
+      const { buildCanonicalForPath: buildCanonical } =
+        await import("../seo-metadata");
+
+      expect(buildCanonical("/products/abs-flood-barriers")).toBe(
+        "https://example.com/products/abs-flood-barriers",
       );
-      expect(buildCanonicalForPath("en", "/")).toBe("https://example.com/");
+      expect(buildCanonical("/")).toBe("https://example.com/");
     });
   });
 
