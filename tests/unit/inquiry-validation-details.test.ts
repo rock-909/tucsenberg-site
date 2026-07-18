@@ -3,6 +3,7 @@ import { MAX_LEAD_MESSAGE_LENGTH } from "@/constants/validation-limits";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   mapInquiryValidationDetails,
+  PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
   PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS,
 } from "@/lib/api/inquiry-validation-details";
 import { mapZodIssuesToValidationDetails } from "@/lib/api/validation-error-details";
@@ -65,8 +66,6 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, buyerInterest: "A".repeat(500) },
   { ...validBase, quantity: false },
   { ...validBase, quantity: {} },
-  { ...validBase, phone: "not-a-phone" },
-  { ...validBase, phone: "A".repeat(40) },
   { ...validBase, message: 123 },
   { ...validBase, message: "A".repeat(5000) },
   { ...validBase, utmSource: "x".repeat(257) },
@@ -132,7 +131,6 @@ describe("inquiry validation detail mapping", () => {
     const parsed = productLeadSchema.safeParse({
       ...validBase,
       company: 123,
-      phone: true,
       message: 999,
       buyerInterest: 789,
     });
@@ -144,7 +142,6 @@ describe("inquiry validation detail mapping", () => {
       expect.arrayContaining([
         "errors.company.invalid",
         "errors.buyerInterest.invalid",
-        "errors.phone.invalid",
         "errors.message.invalid",
       ]),
     );
@@ -176,6 +173,13 @@ describe("inquiry validation detail mapping", () => {
     expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
       "errors.generic",
     ]);
+  });
+
+  it("does not expose phone validation detail keys", () => {
+    expect(PRODUCT_INQUIRY_FIELD_ERROR_KEYS).not.toHaveProperty("phone");
+    expect(PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS).not.toContain(
+      "errors.phone.invalid",
+    );
   });
 
   it("keeps emitted details equal to the declared inquiry contract", () => {
