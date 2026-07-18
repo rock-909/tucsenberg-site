@@ -327,10 +327,10 @@ interface CanonicalInquiryBuyerFields {
 
 **Files:** `src/lib/lead-pipeline/product-identity.ts`, `src/lib/lead-pipeline/product-inquiry-kinds.ts`, product catalog facade, `src/components/products/product-run-calculator.tsx`, product page CTA/link owners, InquiryForm payload builder, product/RFQ tests and E2E.
 
-- [ ] Add failing tests that a catalog product ID becomes product identity only after catalog validation; invalid/missing ID becomes a general inquiry or validation error according to the contract; `buyerInterest` and estimator summary stay description; UTM/source/click-id survive.
-- [ ] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
-- [ ] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
-- [ ] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
+- [x] Add failing tests that a catalog product ID becomes product identity only after catalog validation; invalid/missing ID becomes a general inquiry or validation error according to the contract; `buyerInterest` and estimator summary stay description; UTM/source/click-id survive.
+- [x] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
+- [x] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
+- [x] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
 - [ ] Commit `refactor: derive inquiry product context from validated page handoff`; push and mark `READY_FOR_CLUSTER`.
 
 ### Task D6d: unify success state, Turnstile and response promise

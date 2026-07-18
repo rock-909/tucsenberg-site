@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   generateLocaleStaticParams,
@@ -8,13 +9,12 @@ import {
   createInquiryFormCopy,
   type InquiryFormCopy,
 } from "@/components/forms/inquiry-form-copy";
-import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
-import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
+import { RequestQuoteInquiryForm } from "@/app/[locale]/request-quote/request-quote-inquiry-form";
 
 interface RequestQuotePageProps {
   params: Promise<LocaleParam>;
@@ -80,8 +80,6 @@ export default async function RequestQuotePage({
   searchParams,
 }: RequestQuotePageProps) {
   const { locale } = await params;
-  const resolvedSearchParams = (await searchParams) ?? {};
-  const inquiryContext = resolveInquiryContext(resolvedSearchParams);
   setRequestLocale(locale);
   const tPage = await getTranslations({
     locale,
@@ -130,12 +128,14 @@ export default async function RequestQuotePage({
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <InquiryForm
-            context={inquiryContext}
-            copy={inquiryCopy}
-            fallback={inquiryFallback}
-            source="request-quote"
-          />
+          <Suspense fallback={inquiryFallback}>
+            <RequestQuoteInquiryForm
+              inquiryCopy={inquiryCopy}
+              inquiryFallback={inquiryFallback}
+              locale={locale}
+              {...(searchParams ? { searchParams } : {})}
+            />
+          </Suspense>
           <RequestQuoteAside
             successCopy={inquiryCopy.success}
             t={translatePage}

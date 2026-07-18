@@ -4,7 +4,7 @@
 
 # D6c Validated Product Context Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Route every known product-page and estimator quote handoff through one catalog-validated Request Quote context while keeping the public form at three fields.
 
@@ -23,11 +23,11 @@
 - Test: `src/constants/__tests__/product-catalog.test.ts`
 - Create: `src/lib/lead-pipeline/__tests__/product-identity.test.ts`
 
-- [ ] **Step 1: Add failing facade and strict identity tests**
+- [x] **Step 1: Add failing facade and strict identity tests**
 
 Add tests proving the facade type guard accepts `abs-flood-barriers`, rejects an invented slug, and `resolveProductIdentity` returns the catalog label. Add a controlled drift test that passes an otherwise typed catalog lead whose ID cannot resolve and expects an internal error rather than the raw ID as `productName`.
 
-- [ ] **Step 2: Run the focused tests and confirm RED**
+- [x] **Step 2: Run the focused tests and confirm RED**
 
 ```bash
 pnpm exec vitest run src/constants/__tests__/product-catalog.test.ts src/lib/lead-pipeline/__tests__/product-identity.test.ts
@@ -35,19 +35,19 @@ pnpm exec vitest run src/constants/__tests__/product-catalog.test.ts src/lib/lea
 
 Expected: fail because the type guard and strict identity behavior do not exist.
 
-- [ ] **Step 3: Implement the minimal facade**
+- [x] **Step 3: Implement the minimal facade**
 
 Change `src/constants/product-catalog.ts` to import `singleSiteProductCatalog` and `ProductMarketSlug` directly. Export `isProductMarketSlug(value: string): value is ProductMarketSlug`. Reuse `getMarketBySlug` from `lead-schema.ts` and `product-identity.ts`; do not add a second repository or cache.
 
 In `resolveProductIdentity`, throw an `Error` if a catalog lead cannot resolve. Never return `lead.catalogProductId` as the display label.
 
-- [ ] **Step 4: Run the tests and confirm GREEN**
+- [x] **Step 4: Run the tests and confirm GREEN**
 
 ```bash
 pnpm exec vitest run src/constants/__tests__/product-catalog.test.ts src/lib/lead-pipeline/__tests__/product-identity.test.ts src/lib/lead-pipeline/__tests__/lead-schema.test.ts
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/constants/product-catalog.ts src/constants/__tests__/product-catalog.test.ts src/lib/lead-pipeline/lead-schema.ts src/lib/lead-pipeline/product-identity.ts src/lib/lead-pipeline/__tests__/product-identity.test.ts
@@ -60,7 +60,7 @@ git commit -m "refactor: centralize catalog product lookup"
 - Create: `src/lib/lead-pipeline/inquiry-handoff.ts`
 - Create: `src/lib/lead-pipeline/__tests__/inquiry-handoff.test.ts`
 
-- [ ] **Step 1: Write failing behavior tests**
+- [x] **Step 1: Write failing behavior tests**
 
 Cover these inputs:
 
@@ -73,13 +73,13 @@ Cover these inputs:
 
 Assert one valid scalar ID returns `catalog-context`; invalid/repeated/missing IDs return `general-context`; `interest` and `config` are trimmed and capped; a generated link contains the catalog ID and optional `config` but never invents `productInquiryKind`.
 
-- [ ] **Step 2: Run and confirm RED**
+- [x] **Step 2: Run and confirm RED**
 
 ```bash
 pnpm exec vitest run src/lib/lead-pipeline/__tests__/inquiry-handoff.test.ts
 ```
 
-- [ ] **Step 3: Implement the smallest shared module**
+- [x] **Step 3: Implement the smallest shared module**
 
 Export:
 
@@ -111,13 +111,13 @@ export function createCatalogInquiryHref(
 
 Use `URLSearchParams` and the existing validation limits. Do not introduce a class, interface implementation, signing layer or general-purpose query builder.
 
-- [ ] **Step 4: Run and confirm GREEN**
+- [x] **Step 4: Run and confirm GREEN**
 
 ```bash
 pnpm exec vitest run src/lib/lead-pipeline/__tests__/inquiry-handoff.test.ts
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/lead-pipeline/inquiry-handoff.ts src/lib/lead-pipeline/__tests__/inquiry-handoff.test.ts
@@ -133,7 +133,7 @@ git commit -m "feat: validate request quote product handoff"
 - Modify: `src/components/forms/__tests__/inquiry-form.test.tsx`
 - Modify: `src/app/[locale]/contact/page.tsx`
 
-- [ ] **Step 1: Replace URL-driven tests with context-driven failing tests**
+- [x] **Step 1: Replace URL-driven tests with context-driven failing tests**
 
 Test `InquiryForm` with explicit general and catalog contexts. Assert:
 
@@ -143,13 +143,13 @@ Test `InquiryForm` with explicit general and catalog contexts. Assert:
 - contact passes `general-context` and cannot inherit Request Quote query state;
 - attribution, `website` honeypot and Turnstile token remain in the body.
 
-- [ ] **Step 2: Run and confirm RED**
+- [x] **Step 2: Run and confirm RED**
 
 ```bash
 pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx
 ```
 
-- [ ] **Step 3: Implement the context prop**
+- [x] **Step 3: Implement the context prop**
 
 Add `context: ValidatedInquiryContext` to `InquiryFormProps`. Remove `useMemo`, `readRequestQuoteUrlContext` and all reads of `window.location.search`. Build the payload from the typed context:
 
@@ -165,13 +165,13 @@ const identity =
 
 Keep `buyerInterest` description-only. Use `displayLabel` for catalog visible context and `buyerInterest` for general visible context. Do not render hidden product fields.
 
-- [ ] **Step 4: Run and confirm GREEN**
+- [x] **Step 4: Run and confirm GREEN**
 
 ```bash
 pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx src/app/[locale]/contact/__tests__/page-rendering-basic.test.tsx
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/forms/inquiry-form.tsx src/components/forms/inquiry-payload.ts src/components/forms/inquiry-form-fields.tsx src/components/forms/__tests__/inquiry-form.test.tsx 'src/app/[locale]/contact/page.tsx'
@@ -184,7 +184,7 @@ git commit -m "refactor: pass validated inquiry context to the form"
 - Modify: `src/app/[locale]/request-quote/page.tsx`
 - Modify: `src/app/[locale]/request-quote/__tests__/page.test.tsx`
 
-- [ ] **Step 1: Add failing page behavior tests**
+- [x] **Step 1: Add failing page behavior tests**
 
 Call the page with async `searchParams` and prove:
 
@@ -193,13 +193,13 @@ Call the page with async `searchParams` and prove:
 - estimator `config` appears in the textarea;
 - missing search params still renders a general RFQ.
 
-- [ ] **Step 2: Run and confirm RED**
+- [x] **Step 2: Run and confirm RED**
 
 ```bash
 pnpm exec vitest run 'src/app/[locale]/request-quote/__tests__/page.test.tsx'
 ```
 
-- [ ] **Step 3: Implement Next.js 16 async search params**
+- [x] **Step 3: Implement Next.js 16 async search params**
 
 Extend `RequestQuotePageProps` with:
 
@@ -209,13 +209,13 @@ searchParams?: Promise<Record<string, string | string[] | undefined>>;
 
 Await it in the Server Component, call `resolveInquiryContext`, and pass the result to `InquiryForm`. Keep metadata independent of the query and preserve the existing JSON-LD canonical URL.
 
-- [ ] **Step 4: Run and confirm GREEN**
+- [x] **Step 4: Run and confirm GREEN**
 
 ```bash
 pnpm exec vitest run 'src/app/[locale]/request-quote/__tests__/page.test.tsx' src/components/forms/__tests__/inquiry-form.test.tsx
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add 'src/app/[locale]/request-quote/page.tsx' 'src/app/[locale]/request-quote/__tests__/page.test.tsx'
@@ -237,17 +237,17 @@ git commit -m "feat: resolve request quote context on the server"
 - Modify: `src/components/products/__tests__/product-run-calculator.test.tsx`
 - Modify: `src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx`
 
-- [ ] **Step 1: Add failing CTA and calculator tests**
+- [x] **Step 1: Add failing CTA and calculator tests**
 
 Assert every known product page CTA contains its catalog slug through the shared query contract. Assert both calculators use `catalogProductId`, preserve the editable estimator message, and never emit the old `interest=` identity link.
 
-- [ ] **Step 2: Run and confirm RED**
+- [x] **Step 2: Run and confirm RED**
 
 ```bash
 pnpm exec vitest run src/components/products/__tests__/product-run-calculator.test.tsx 'src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx'
 ```
 
-- [ ] **Step 3: Remove duplicated URL truth**
+- [x] **Step 3: Remove duplicated URL truth**
 
 - change `TucsenbergProductPage.slug` and calculator identity to `ProductMarketSlug`;
 - remove `href` from `TucsenbergProductCta` and all five content objects;
@@ -257,13 +257,13 @@ pnpm exec vitest run src/components/products/__tests__/product-run-calculator.te
 
 Do not build a markdown URL rewriting layer.
 
-- [ ] **Step 4: Run and confirm GREEN**
+- [x] **Step 4: Run and confirm GREEN**
 
 ```bash
 pnpm exec vitest run src/components/products/__tests__/product-run-calculator.test.tsx 'src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx' tests/architecture/tucsenberg-product-pages.test.ts
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/constants/tucsenberg-product-page-types.ts src/constants/tucsenberg-product-page-*.ts src/constants/tucsenberg-product-pages.ts 'src/app/[locale]/products/[market]/page.tsx' src/components/products/product-run-calculator.tsx src/components/products/__tests__/product-run-calculator.test.tsx 'src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx'
@@ -280,7 +280,7 @@ git commit -m "refactor: derive product quote links from catalog ids"
 - Modify: `docs/技术难题/整库审查2026-07/执行计划.md`
 - Modify: `docs/superpowers/plans/2026-07-17-m3-clustered-execution.md`
 
-- [ ] **Step 1: Add the failing end-to-end contract**
+- [x] **Step 1: Add the failing end-to-end contract**
 
 Update the product journey to expect a catalog query from the FRP product page, a visible server-resolved product context on Request Quote, and this `/api/inquiry` body:
 
@@ -294,19 +294,19 @@ Update the product journey to expect a catalog query from the FRP product page, 
 
 Add a general Request Quote assertion that no catalog ID appears without a valid product handoff.
 
-- [ ] **Step 2: Run and confirm RED**
+- [x] **Step 2: Run and confirm RED**
 
 ```bash
 CI=1 pnpm exec playwright test tests/e2e/product-interest-rfq-handoff.spec.ts --project=chromium
 ```
 
-- [ ] **Step 3: Remove the impossible catalog grouping branch**
+- [x] **Step 3: Remove the impossible catalog grouping branch**
 
 Delete `SPECIALTY_MARKET_SLUG`, `specialtyMarketSlug` and the filtering branch. Set `standardMarketSlugs` directly from the catalog and update the test to assert the products page list matches the catalog. Do not add a guard that merely bans the old constant name.
 
 Update BC-009/BC-013 and the lead-pipeline details to describe server-validated catalog handoff. Record D6b as `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; keep M3 merged at 26/33 and mark D6c active until its PR is ready.
 
-- [ ] **Step 4: Run focused and broad verification**
+- [x] **Step 4: Run focused and broad verification**
 
 ```bash
 pnpm content:check
@@ -317,7 +317,7 @@ pnpm react:doctor
 git diff --check
 ```
 
-- [ ] **Step 5: Commit the D6c implementation result**
+- [x] **Step 5: Commit the D6c implementation result**
 
 ```bash
 git add src tests docs
