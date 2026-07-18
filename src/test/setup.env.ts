@@ -121,15 +121,6 @@ vi.mock("@/lib/env", () => {
       const value = readProcessEnvValue(key);
       return value === undefined ? undefined : value === "true";
     },
-    getPublicRuntimeEnvNumber: (key: string) => {
-      const value = readProcessEnvValue(key);
-      if (value === undefined) {
-        return undefined;
-      }
-
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    },
     getRuntimeNodeEnv: () => {
       const value = readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV;
       return value === "development" ||

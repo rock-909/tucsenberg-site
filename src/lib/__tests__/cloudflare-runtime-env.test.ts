@@ -105,11 +105,12 @@ describe("Cloudflare runtime env timing", () => {
     runtimeValues.AIRTABLE_BASE_ID = "appRuntime";
     runtimeValues.AIRTABLE_TABLE_NAME = "Contacts";
 
-    await service.createLead("contact", {
+    await service.createLead({
       firstName: "Runtime",
       lastName: "Tester",
       email: "runtime@example.com",
       message: "Runtime env should be available when Airtable initializes.",
+      productName: "General RFQ",
     });
 
     expect(configure).toHaveBeenCalledWith(

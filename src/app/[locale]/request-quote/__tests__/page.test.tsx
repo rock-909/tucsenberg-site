@@ -13,13 +13,35 @@ const { mockGenerateMetadataForPath, mockJsonLdGraphScript } = vi.hoisted(
 );
 
 vi.mock("next-intl/server", async () => {
-  const {
-    getRequestQuoteFormMessage,
-    getRequestQuoteMetadataMessage,
-    getRequestQuotePageMessage,
-  } = await import("@/test/request-quote-test-messages");
-  const { getInquiryFormMessage } =
-    await import("@/test/inquiry-test-messages");
+  const { getComposedMessages } = await import("@/lib/i18n/composed-messages");
+  const enMessages = getComposedMessages("en") as Record<string, unknown>;
+  const requestQuote = enMessages.requestQuote as Record<
+    Record<string, unknown>,
+    unknown
+  >;
+  const inquiryForm = enMessages.inquiry as { form: Record<string, unknown> };
+
+  function getNestedString(
+    messages: Record<string, unknown>,
+    keyPath: string,
+  ): string {
+    const value = keyPath.split(".").reduce<unknown>((current, key) => {
+      if (
+        typeof current !== "object" ||
+        current === null ||
+        Array.isArray(current)
+      ) {
+        return undefined;
+      }
+      return (current as Record<string, unknown>)[key];
+    }, messages);
+
+    if (typeof value !== "string" || value.trim() === "") {
+      throw new Error(`Missing RFQ test message: ${keyPath}`);
+    }
+
+    return value;
+  }
 
   return {
     setRequestLocale: vi.fn(),
@@ -29,23 +51,33 @@ vi.mock("next-intl/server", async () => {
       }: {
         locale?: string;
         namespace:
-          | "requestQuote.form"
           | "requestQuote.metadata"
           | "requestQuote.page"
           | "inquiry.form";
       }) => {
-        if (namespace === "requestQuote.form") {
-          return (key: string) => getRequestQuoteFormMessage(key);
-        }
         if (namespace === "requestQuote.metadata") {
-          return (key: string) => getRequestQuoteMetadataMessage(key);
+          return (key: string) =>
+            getNestedString(
+              requestQuote.metadata as Record<string, unknown>,
+              key,
+            );
         }
         if (namespace === "inquiry.form") {
-          return (key: string) => getInquiryFormMessage(key);
+          return (key: string) => getNestedString(inquiryForm.form, key);
         }
 
-        return (key: string, values?: Record<string, string | number>) =>
-          getRequestQuotePageMessage(key, values);
+        return (key: string, values?: Record<string, string | number>) => {
+          const message = getNestedString(
+            requestQuote.page as Record<string, unknown>,
+            key,
+          );
+          return Object.entries(values ?? {}).reduce(
+            (current, [token, value]) => {
+              return current.split(`{${token}}`).join(String(value));
+            },
+            message,
+          );
+        };
       },
     ),
   };

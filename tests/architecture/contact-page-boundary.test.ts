@@ -7,7 +7,6 @@ const CONTACT_PAGE_DATA = "src/app/[locale]/contact/contact-page-data.ts";
 const CONTACT_SECTIONS = "src/app/[locale]/contact/contact-page-sections.tsx";
 const INQUIRY_STATIC_FALLBACK =
   "src/components/forms/inquiry-form-static-fallback.tsx";
-const CONTACT_FORM_FIELDS = "src/components/forms/contact-form-fields.tsx";
 
 function read(repoPath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads repo-local files from fixed constants
@@ -134,19 +133,5 @@ describe("Contact page source boundaries", () => {
     expect(source).toContain("mailto:");
     expect(source).not.toContain("<form");
     expect(source).not.toContain('type="submit"');
-  });
-
-  it("keeps FormFields as the only public contact form field export", () => {
-    const source = read(CONTACT_FORM_FIELDS);
-
-    expect(source).toContain("export const FormFields");
-    for (const legacyExport of [
-      "export { AdditionalFields }",
-      "export { CheckboxFields }",
-      "export { ContactFields }",
-      "export { NameFields }",
-    ]) {
-      expect(source).not.toContain(legacyExport);
-    }
   });
 });

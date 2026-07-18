@@ -39,7 +39,7 @@
       "surface": "form",
       "clientBoundary": "client",
       "useWhen": "Use for optional boolean choices or governed checkbox UI after form semantics are proven for the target flow.",
-      "avoidWhen": "Do not use for contact privacy consent, cookie consent, or no-JS critical flows until migration proof exists."
+      "avoidWhen": "Do not use for cookie consent or other no-JS critical consent flows until migration proof exists."
     },
     "dropdown-menu": {
       "story": "required",

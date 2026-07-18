@@ -34,7 +34,6 @@ beforeEach(() => {
   vi.stubEnv("CONTENT_ENABLE_DRAFTS", "false");
   vi.stubEnv("PLAYWRIGHT_TEST", "false");
   vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
-  vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS", "1500");
 });
 
 afterEach(() => {
@@ -64,7 +63,6 @@ describe("real env contract", () => {
     expect(env.CONTENT_ENABLE_DRAFTS).toBe(false);
     expect(env.PLAYWRIGHT_TEST).toBe(true);
     expect(env.SECURITY_HEADERS_ENABLED).toBe(false);
-    expect(env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS).toBe(1500);
   });
 
   it("rejects invalid values through the real schema", async () => {

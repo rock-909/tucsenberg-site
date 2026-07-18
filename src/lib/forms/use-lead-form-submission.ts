@@ -8,7 +8,7 @@ import { appendAttributionToFormData } from "@/lib/marketing/utm";
 import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
 
 /**
- * Shared behavior kernel for the buyer lead forms (contact + request-quote).
+ * Shared behavior kernel for buyer inquiry forms (Contact and Request Quote).
  *
  * It owns only the lifecycle both forms genuinely duplicate:
  * - submit lock (a ref-based in-flight guard against double submit);
@@ -21,11 +21,10 @@ import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
  *   `generate_lead` analytics event on success.
  *
  * It deliberately does NOT own each form's fields, copy, wire payload, error
- * shape, rate limiting, Turnstile status enum, or progressive-enhancement
- * wiring. Those stay per-form and compose on top of this hook. `TResult` is the
- * form-defined decoded result (contact keeps its `ServerActionResult`; the RFQ
- * keeps its `RequestQuoteSubmitState`), so this is not a config-driven universal
- * form component.
+ * shape, or progressive-enhancement wiring. Those stay per-form and compose on
+ * top of this hook. `TResult` is the form-defined decoded result (for example
+ * `InquirySubmitState`), so this is not a config-driven universal form
+ * component.
  */
 export interface LeadSubmissionConfig<TResult> {
   /** Lead API endpoint. Production forms post to `/api/inquiry`. */

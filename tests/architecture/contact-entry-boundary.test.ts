@@ -69,17 +69,12 @@ function rendersImportedJsxIdentifier(
 }
 
 describe("contact entry boundary", () => {
-  it("keeps legacy useContactForm wired to /api/contact outside production pages", () => {
-    const hookSource = read("src/components/forms/use-contact-form.ts");
-    const kernelSource = read("src/lib/forms/use-lead-form-submission.ts");
-
-    expect(hookSource).toContain('endpoint: "/api/contact"');
-    expect(kernelSource).toContain("fetch(config.endpoint");
-  });
-
   it("keeps production contact and request-quote pages on InquiryForm -> /api/inquiry", () => {
     const inquiryFormSource = read("src/components/forms/inquiry-form.tsx");
+    const kernelSource = read("src/lib/forms/use-lead-form-submission.ts");
+
     expect(inquiryFormSource).toContain('endpoint: "/api/inquiry"');
+    expect(kernelSource).toContain("fetch(config.endpoint");
 
     for (const filePath of [
       "src/app/[locale]/contact/contact-page-sections.tsx",
