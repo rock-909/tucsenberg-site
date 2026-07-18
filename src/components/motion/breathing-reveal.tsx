@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import {
-  getInstantTransition,
   lightBreathingItemVariants,
+  lightBreathingRevealTransition,
   lightBreathingViewport,
 } from "@/lib/motion/light-breathing";
 
@@ -38,7 +38,7 @@ export function BreathingReveal({
         visible: {
           ...lightBreathingItemVariants.visible,
           transition: {
-            ...getInstantTransition(reducedMotion),
+            ...lightBreathingRevealTransition,
             delay,
           },
         },

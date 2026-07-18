@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getInstantTransition,
+  lightBreathingItemVariants,
   lightBreathingRevealTransition,
-  lightBreathingStaggerChildren,
   lightBreathingViewport,
 } from "@/lib/motion/light-breathing";
 
 describe("light-breathing motion tokens", () => {
-  it("keeps stagger intervals short for the restrained tier", () => {
-    expect(lightBreathingStaggerChildren).toBeLessThanOrEqual(0.1);
+  it("keeps reveal variants transform-only so content stays visible without JS", () => {
+    expect(lightBreathingItemVariants.hidden).toEqual({ y: 12 });
+    expect(lightBreathingItemVariants.visible).toEqual({ y: 0 });
   });
 
   it("keeps section reveals in the restrained timing band", () => {
@@ -24,9 +24,5 @@ describe("light-breathing motion tokens", () => {
   it("uses the first-pass scroll reveal timing", () => {
     expect(lightBreathingViewport.amount).toBe(0.15);
     expect(lightBreathingViewport.margin).toBe("-8% 0px -8% 0px");
-  });
-
-  it("returns instant transitions when reduced motion is enabled", () => {
-    expect(getInstantTransition(true)).toEqual({ duration: 0 });
   });
 });
