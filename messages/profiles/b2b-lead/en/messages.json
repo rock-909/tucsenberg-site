@@ -37,64 +37,6 @@
       "bestForValue": "Details are sufficient",
       "prepareLabel": "Fastest route",
       "prepareValue": "Use the RFQ form; it asks the questions we'd ask anyway."
-    },
-    "form": {
-      "optional": "optional",
-      "fullName": "Full name",
-      "email": "Email Address",
-      "company": "Company Name",
-      "subject": "Subject",
-      "message": "Message",
-      "fullNamePlaceholder": "Enter your full name",
-      "emailPlaceholder": "your@email.com",
-      "companyPlaceholder": "Your company name",
-      "subjectPlaceholder": "Product line, quantity, or site question",
-      "messagePlaceholder": "Share product interest, quantity, market, delivery port, timeline, dimensions, or photos/drawings you can provide.",
-      "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
-      "submit": "Send Enquiry",
-      "submitting": "Sending...",
-      "submitSuccess": "Received. You'll hear from a person, not a sequence.",
-      "submitError": "We couldn't send your message. Please try again shortly.",
-      "networkError": "We could not submit the form. Please try again.",
-      "turnstilePending": "Security verification is loading. You can send the form once it is ready.",
-      "turnstileFailed": "Security verification did not complete. Please try again.",
-      "turnstileExpired": "Security verification expired. Please complete it again.",
-      "error": "Sorry, there was an error sending your message. Please try again later.",
-      "loadError": "The secure inquiry form could not load. Retry, or use the contact methods on this page.",
-      "retryLoad": "Retry loading form",
-      "rateLimitMessage": "You've recently contacted us. Please wait a moment before sending another message.",
-      "errors": {
-        "generic": "Please review the highlighted fields and try again.",
-        "fullName": {
-          "required": "Full name is required",
-          "tooShort": "Full name is required",
-          "tooLong": "Full name must be less than 50 characters",
-          "invalid": "Full name contains invalid characters"
-        },
-        "email": {
-          "required": "Email address is required",
-          "invalid": "Please enter a valid email address",
-          "tooLong": "Email must be less than 100 characters",
-          "domainNotAllowed": "Please use an approved email domain"
-        },
-        "company": {
-          "tooShort": "Company name must be at least 2 characters",
-          "tooLong": "Company name must be less than 100 characters",
-          "invalid": "Company name contains invalid characters"
-        },
-        "message": {
-          "required": "Message is required",
-          "tooShort": "Message must be at least 10 characters",
-          "tooLong": "Message must be 2000 characters or fewer",
-          "invalid": "Message contains invalid characters"
-        },
-        "phone": {
-          "invalid": "Please enter a valid phone number"
-        },
-        "subject": {
-          "length": "Subject must be between 5 and 100 characters"
-        }
-      }
     }
   },
   "requestQuote": {
@@ -110,29 +52,6 @@
       "confidenceWarranty": "3-year warranty",
       "confidenceSamples": "Sample fees credited",
       "confidencePricing": "No published-price games — the quote is the price conversation"
-    },
-    "form": {
-      "title": "Request a quote",
-      "ariaLabel": "Request a quote",
-      "submit": "Send RFQ",
-      "submitting": "Sending RFQ...",
-      "success": "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
-      "genericError": "We could not send your RFQ. Please review the fields.",
-      "networkError": "Network error. Please try again or email sales@tucsenberg.com.",
-      "turnstilePending": "Security verification is still loading. Please try again.",
-      "referenceLabel": "Reference",
-      "messageHint": "Optional, but anything helps: product line, opening sizes (width × height), quantity, delivery country or port. The more you tell us, the more accurate the first quote — and you can always just say hello and ask.",
-      "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
-      "fields": {
-        "fullName": "Your name",
-        "email": "Work email",
-        "message": "What do you need?"
-      },
-      "payload": {
-        "source": "Submitted via the request-quote form."
-      },
-      "successReading": "While you wait, this is how we match products to sites:",
-      "successReadingLinkLabel": "ABS vs Aluminum vs FRP vs Water-Filled — How to Choose"
     }
   },
   "inquiry": {

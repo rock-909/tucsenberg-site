@@ -9,8 +9,7 @@ const FOOTER_STYLE_TOKEN_SOURCE = "src/config/footer-style-tokens.ts";
 
 const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/ui/button.tsx",
-  "src/components/forms/contact-form-feedback.tsx",
-  "src/components/forms/contact-form-container.tsx",
+  "src/components/forms/inquiry-form.tsx",
   "src/components/security/turnstile.tsx",
   FOOTER_COMPONENT_SOURCE,
 ] as const;

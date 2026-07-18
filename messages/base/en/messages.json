@@ -12,11 +12,7 @@
     "mobileNavigation": "Mobile navigation menu",
     "themeSelector": "Theme selector",
     "footerNavigation": "Footer navigation",
-    "breadcrumb": "Breadcrumb",
-    "securityVerificationUnavailable": "Security verification is temporarily unavailable.",
-    "turnstileDevBypass": "Dev mode: Turnstile verification bypassed",
-    "turnstileTestMode": "Bot protection disabled in test mode",
-    "turnstileLoadFailed": "Security verification failed to load."
+    "breadcrumb": "Breadcrumb"
   },
   "cookie": {
     "title": "Cookie Preferences",
@@ -63,10 +59,6 @@
     "SERVICE_UNAVAILABLE": "This service is temporarily unavailable. Please try again later.",
     "INVALID_JSON_BODY": "Invalid request format.",
     "PAYLOAD_TOO_LARGE": "The request payload is too large.",
-    "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
-    "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
-    "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
-    "CONTACT_ENDPOINT_RETIRED": "This contact endpoint is no longer accepting submissions.",
     "TURNSTILE_REQUIRED": "Security verification required.",
     "TURNSTILE_REJECTED": "Security verification failed. Please try again.",
     "TURNSTILE_UNAVAILABLE": "Security verification is temporarily unavailable. Please try again later.",
@@ -104,46 +96,12 @@
   },
   "emailTemplates": {
     "common": {
-      "unknownSubmissionTime": "Unknown submission time",
       "fields": {
-        "name": "Name",
         "contactName": "Contact Name",
         "email": "Email",
-        "company": "Company",
-        "phone": "Phone",
-        "subject": "Subject",
-        "message": "Message",
-        "submittedAt": "Submitted At",
         "product": "Product",
-        "quantity": "Quantity",
         "requirements": "Requirements"
       }
-    },
-    "confirmation": {
-      "title": "Thank You for Contacting Us",
-      "preview": "We received your enquiry — quote within 12 hours for standard items.",
-      "receivedMessage": "Thank you for reaching out. We have received your enquiry and will reply with a quote within 12 hours for standard items (within 48 hours for custom work).",
-      "summaryIntro": "Here is a summary of your submission:",
-      "urgentHelp": "If you have any urgent questions, please do not hesitate to contact us directly.",
-      "signoff": "Best regards,",
-      "greeting": "Dear {firstName},",
-      "teamName": "The {siteName} Team",
-      "footer": "© {year} {siteName}. All rights reserved.",
-      "subject": "Thank you for contacting us - {siteName}",
-      "summaryLines": {
-        "name": "Name: {firstName} {lastName}",
-        "company": "Company: {company}",
-        "email": "Email: {email}",
-        "subject": "Subject: {subject}",
-        "submitted": "Submitted: {submittedAt}"
-      }
-    },
-    "contact": {
-      "title": "New Contact Form Submission",
-      "preview": "New contact form submission from {firstName} {lastName}",
-      "footer": "This email was sent from the {siteName} website contact form.",
-      "subjectWithTopic": "Contact Form: {subject}",
-      "subjectWithoutTopic": "New Contact from {firstName} {lastName}"
     },
     "productInquiry": {
       "title": "New Product Inquiry",

@@ -111,9 +111,13 @@ Use this judgment split:
   navigation, FAQ disclosure, or mobile drawers.
 - FAQ disclosure stays native `<details>/<summary>`.
 - Use the governed `Checkbox` wrapper for new non-critical checkbox UI.
-- Contact form and cookie consent checkboxes remain migration-proof-first:
-  do not migrate them until wrapper-specific FormData, no-JS fallback,
-  label click, consent state, and stable E2E locator behavior are proven.
+- Cookie consent and other no-JS critical consent checkboxes remain
+  migration-proof-first: do not migrate them until wrapper-specific FormData,
+  no-JS fallback, label click, consent state, and stable E2E locator behavior
+  are proven.
+- Contact and Request Quote share the same `InquiryForm`, `Input`, `Textarea`,
+  `Card`, and static fallback; there is no privacy consent checkbox on either
+  page.
 
 ## Mobile navigation boundaries
 

@@ -225,47 +225,6 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
   return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
 }
 
-function stripD6eRetiredInquiryCopySubtrees(
-  source: string,
-  repoPath: string,
-): string {
-  if (!repoPath.endsWith(".json")) {
-    return source;
-  }
-
-  const parsed = JSON.parse(source) as Record<string, unknown>;
-
-  if (repoPath === "messages/profiles/b2b-lead/en/messages.json") {
-    const requestQuote = parsed.requestQuote;
-    if (
-      typeof requestQuote === "object" &&
-      requestQuote !== null &&
-      "form" in requestQuote
-    ) {
-      const { form: _retiredForm, ...rest } = requestQuote as Record<
-        string,
-        unknown
-      >;
-      parsed.requestQuote = rest;
-    }
-  }
-
-  if (repoPath === "messages/base/en/messages.json") {
-    const emailTemplates = parsed.emailTemplates;
-    if (
-      typeof emailTemplates === "object" &&
-      emailTemplates !== null &&
-      "confirmation" in emailTemplates
-    ) {
-      const { confirmation: _retiredConfirmation, ...rest } =
-        emailTemplates as Record<string, unknown>;
-      parsed.emailTemplates = rest;
-    }
-  }
-
-  return JSON.stringify(parsed);
-}
-
 const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /Showcase Website Starter/iu,
   /Modern B2B showcase starter/iu,
@@ -553,10 +512,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
     const offenders: string[] = [];
 
     for (const filePath of getPublicSourceFiles()) {
-      const source = stripD6eRetiredInquiryCopySubtrees(
-        readRepoFile(filePath),
-        filePath,
-      );
+      const source = readRepoFile(filePath);
 
       for (const copyUnit of collectOwnerCopyUnits(source, filePath)) {
         if (hasForbiddenInquiryQuoteTimePromise(copyUnit)) {

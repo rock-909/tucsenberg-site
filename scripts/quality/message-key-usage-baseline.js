@@ -1,7 +1,6 @@
 const HOME_PAGE = "src/app/[locale]/page.tsx";
 const PRODUCTS_OVERVIEW =
   "src/app/[locale]/products/products-overview-sections.tsx";
-const CONTACT_FEEDBACK = "src/components/forms/contact-form-feedback.tsx";
 const STRUCTURED_DATA = "src/lib/structured-data-generators.ts";
 
 function parameterOverrides(file, functionNames, identifier, namespace) {
@@ -40,18 +39,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "requestQuote.page",
   ),
   ...parameterOverrides(
-    "src/app/[locale]/request-quote/request-quote-form-copy.ts",
-    ["createRequestQuoteFormCopy"],
-    "t",
-    "requestQuote.form",
-  ),
-  ...parameterOverrides(
-    "src/app/[locale]/request-quote/request-quote-payload.ts",
-    ["createRequestQuotePayloadCopy"],
-    "t",
-    "requestQuote.form",
-  ),
-  ...parameterOverrides(
     "src/components/forms/inquiry-form-copy.ts",
     ["createInquiryFormCopy"],
     "t",
@@ -62,30 +49,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     ["MainBanner", "PreferencesPanel"],
     "t",
     "cookie",
-  ),
-  ...parameterOverrides(
-    "src/components/forms/contact-form-container-view.tsx",
-    ["ContactFormContainerView"],
-    "translateForm",
-    "contact.form",
-  ),
-  ...parameterOverrides(
-    CONTACT_FEEDBACK,
-    ["getStatusConfig", "StatusMessage"],
-    "t",
-    "contact.form",
-  ),
-  ...parameterOverrides(
-    CONTACT_FEEDBACK,
-    ["getErrorDisplayState", "ErrorDisplay"],
-    "translateForm",
-    "contact.form",
-  ),
-  ...parameterOverrides(
-    "src/components/forms/contact-form-fields.tsx",
-    ["getFieldPlaceholder", "FormFields"],
-    "t",
-    "contact.form",
   ),
   ...parameterOverrides(
     "src/components/sections/hero-section.tsx",
@@ -140,10 +103,6 @@ const DYNAMIC_MESSAGE_KEY_PREFIXES = [
   ["catalog.path.items.", "catalog path cards are keyed by config"],
   ["catalog.detail.items.", "catalog detail items are keyed by config"],
   ["catalog.boundary.items.", "catalog boundary items are keyed by config"],
-  [
-    "contact.form.",
-    "contact field descriptors and API results provide typed keys",
-  ],
   ["navigation.", "navigation config provides the dynamic mobile link keys"],
   ["theme.", "theme options store their label keys"],
 ].map(([prefix, reason]) => ({ prefix, reason }));
@@ -292,51 +251,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   },
   {
     kind: "collection-values",
-    file: "src/config/contact-form-config.ts",
-    sourceName: "DEFAULT_FIELD_CONFIGS",
-    valueProperty: "i18nKey",
-    entryFilters: [
-      { property: "enabled", equals: true },
-      { property: "type", notEquals: "hidden" },
-    ],
-    prefix: "contact.form.",
-    suffixes: [""],
-    reason: "visible contact field labels derive from the form configuration",
-  },
-  {
-    kind: "collection-values",
-    file: "src/config/contact-form-config.ts",
-    sourceName: "PLACEHOLDER_KEYS",
-    entryKeySource: {
-      sourceName: "DEFAULT_FIELD_CONFIGS",
-      filters: [
-        { property: "enabled", equals: true },
-        { property: "type", notEquals: "hidden" },
-      ],
-    },
-    prefix: "contact.form.",
-    suffixes: [""],
-    reason: "contact field placeholders derive from the placeholder map",
-  },
-  {
-    kind: "collection-values",
-    file: "src/components/forms/contact-form-container-view.tsx",
-    sourceName: "TURNSTILE_STATUS_MESSAGE_KEYS",
-    prefix: "contact.form.",
-    suffixes: [""],
-    reason: "Turnstile states translate the exact configured status labels",
-  },
-  {
-    kind: "collection-values",
-    file: "src/components/forms/contact-form-feedback.tsx",
-    sourceName: "CONTACT_FORM_API_ERROR_CODES",
-    prefix: "apiErrors.",
-    suffixes: [""],
-    reason:
-      "the contact client enforces these literal runtime response-code values",
-  },
-  {
-    kind: "collection-values",
     file: "src/constants/api-error-codes.ts",
     sourceName: "API_ERROR_CODES",
     prefix: "apiErrors.",
@@ -346,20 +260,12 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   },
   {
     kind: "collection-values",
-    file: "src/lib/contact/submit-canonical-contact.ts",
-    sourceName: "CONTACT_FORM_VALIDATION_DETAIL_KEYS",
-    prefix: "contact.form.",
-    suffixes: [""],
-    reason: "the contact validator enforces this finite detail-key domain",
-  },
-  {
-    kind: "collection-values",
     file: "src/lib/api/inquiry-validation-details.ts",
-    sourceName: "PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS",
-    prefix: "contact.form.",
+    sourceName: "PRODUCT_INQUIRY_RENDERABLE_DETAIL_KEYS",
+    prefix: "inquiry.form.",
     suffixes: [""],
     reason:
-      "inquiry validation emits these contact.form detail keys to the client",
+      "inquiry validation emits these inquiry.form detail keys to the client",
   },
   {
     kind: "call-arguments",
@@ -378,7 +284,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   },
 ];
 
-// Keep empty unless a zero-consumer key is intentionally retained with reason.
 const UNUSED_MESSAGE_KEYS = [];
 
 module.exports = {

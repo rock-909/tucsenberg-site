@@ -58,20 +58,22 @@ describe("UI component playbook", () => {
 
     expect(playbook).toContain("FAQ disclosure");
     expect(playbook).toContain("stays native `<details>/<summary>`");
-    expect(playbook).toContain("Contact form checkbox");
-    expect(playbook).toContain("stays native until wrapper-specific");
+    expect(playbook).not.toContain("Contact form checkbox");
     expect(playbook).toContain("Cookie consent checkboxes");
     expect(playbook).toContain("stay native until cookie preference state");
+    expect(playbook).toContain(
+      "Contact and Request Quote share the same `InquiryForm`",
+    );
   });
 
-  it("records the contact form native control boundary", () => {
+  it("records the shared inquiry form composition boundary", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
     expect(playbook).toContain(
-      "Contact form fields reuse `Input` and `Textarea`",
+      "Contact and Request Quote share the same `InquiryForm`",
     );
-    expect(playbook).toContain("Contact form panels reuse `Card`");
-    expect(playbook).toContain("Contact form checkbox stays native");
+    expect(playbook).toContain("`Input` and `Textarea`");
+    expect(playbook).toContain("`Card`");
   });
 
   it("prevents agents from bypassing missing wrappers", () => {
