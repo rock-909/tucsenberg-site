@@ -100,9 +100,7 @@ const nextConfig: NextConfig = {
         : false, // 开发环境保留所有 console 语句
   },
 
-  // Performance optimizations
   experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
     // Next.js 16 已移除 testProxy 配置 - 使用 next/experimental/testing/server 替代
     // 旧配置: testProxy: process.env.CI === 'true',
     // 新方式: 在测试文件中使用 unstable_doesProxyMatch() 和相关 API

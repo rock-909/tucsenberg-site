@@ -5,7 +5,8 @@ const RUNTIME_FILES = [
   "src/lib/content-manifest.ts",
   "src/lib/content-query/queries.ts",
   "src/lib/content/page-dates.ts",
-  "src/lib/mdx-loader.ts",
+  "src/lib/content/legal-page.ts",
+  "src/app/[locale]/static-mdx-page.tsx",
 ] as const;
 
 const FORBIDDEN_RUNTIME_IMPORTS = [
@@ -39,7 +40,7 @@ describe("MDX manifest-only runtime contract", () => {
     }
   });
 
-  it("loads runtime manifest and MDX components from generated artifacts", () => {
+  it("loads static page bodies through manifest string content and the static markdown renderer", () => {
     expect(readSource("src/lib/content-manifest.ts")).toContain(
       "./content-manifest.generated",
     );
@@ -49,8 +50,17 @@ describe("MDX manifest-only runtime contract", () => {
     expect(readSource("src/lib/content/page-dates.ts")).toContain(
       "@/lib/content-manifest",
     );
-    expect(readSource("src/lib/mdx-loader.ts")).toContain(
-      "@/lib/mdx-importers.generated",
+    expect(readSource("src/lib/content/legal-page.ts")).toContain(
+      "@/lib/content-query/queries",
+    );
+    expect(readSource("src/lib/content/legal-page.ts")).toContain(
+      "render-static-markdown-content",
+    );
+    expect(readSource("src/app/[locale]/static-mdx-page.tsx")).toContain(
+      "loadLegalPage",
+    );
+    expect(readSource("src/lib/content/render-legal-content.tsx")).toContain(
+      "render-static-markdown-content",
     );
   });
 
