@@ -6,7 +6,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Complete all of M3 in five acceptance clusters. Cluster 1 is closed; the remaining 15 tasks are in Clusters 2, 3A, 3B, and 4. Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
+**Goal:** Complete all of M3 in five acceptance clusters. Clusters 1 and 2 are closed; the remaining 10 tasks are in Clusters 3A, 3B, and 4. Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
 
 **Architecture:** A task PR is the implementation unit; a cluster is the acceptance unit. Dependent PRs are stacked. Parallel lanes fork from one proven base, then linearize into one cluster tip before review. After `ACCEPTED`, one owner `MERGE_CLUSTER` instruction authorizes sequential merge and exact-SHA revalidation until a semantic change forces a stop.
 
@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-Current planning baseline: `origin/main` `2621e8fdb992bcfcfe6ac050afe5b2d16019524f`, M3 merged 18/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Current execution face: Cluster 2** — D3a #121, D3b #123, D4a #122 and D4b #124 are `READY_FOR_CLUSTER`; D3c #125 is in review-fix closure. After D3c is green, linearize the security stack onto D3c before one cluster-level acceptance review. Re-read live SHA before execution.
+Current planning baseline: `origin/main` `03a1908dba5618c638ee26885bbfdcebe81249f0`, M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED**: member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged in that order; accepted follow-up tip `3a25e1bc138d3121d481742ff3353181d8902e0c`; final main merge `03a1908dba5618c638ee26885bbfdcebe81249f0`. **Next execution face: Cluster 3A**, subject to its real Airtable `WhatsApp / Phone` column and browser-to-Airtable write prerequisites. Re-read live SHA before execution.
 
 ---
 
@@ -252,8 +252,10 @@ pnpm type-check
 
 ### Cluster 2 linearization and acceptance
 
-- [ ] Keep SEO lane in front. Rebase the D4a/D4b stack onto D3c, retarget PR bases, and attach range-diff proof. Any security conflict is a semantic re-review, not a light rebase.
-- [ ] On D4b tip run `pnpm website:check`, structured-data/SEO E2E, Semgrep, `pnpm website:build:cf`, and Cloudflare dry-run. Submit one cluster handoff and stop.
+- [x] Keep SEO lane in front. The final stack was `#121 -> #123 -> #125 -> #122 -> #124`; all five range-diffs were commit-for-commit `=` with no semantic rewrite.
+- [x] Run the cluster-tip gate: focused tests, `pnpm component:check`, `pnpm website:check` (292 files / 2445 tests), SEO Playwright 5/5, Semgrep, `pnpm website:build:cf`, and Wrangler preview dry-run.
+- [x] Close acceptance findings in PR #127. Exact SHA `3a25e1bc138d3121d481742ff3353181d8902e0c` passed three independent review lanes and workflow-dispatch CI run `29631369940` (all six jobs green).
+- [x] Merge in dependency order. Main merge commits: #121 `fa96d2a`, #123 `3ed7535`, #125 `8ba66c9`, #122 `5237f5e`, #124 `7aa2066`, #127 `03a1908`.
 
 ---
 
