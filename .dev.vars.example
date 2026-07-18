@@ -24,6 +24,5 @@ DEPLOYMENT_PLATFORM=cloudflare
 # Runtime security and Cloudflare compatibility values.
 # Keep these server-only unless the key explicitly starts with NEXT_PUBLIC_.
 # RATE_LIMIT_PEPPER=
-# RATE_LIMIT_PEPPER_PREVIOUS=
 # UPSTASH_REDIS_REST_URL=
 # UPSTASH_REDIS_REST_TOKEN=

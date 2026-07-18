@@ -166,13 +166,10 @@ describe("validations - Schema Validation", () => {
       }
     });
 
-    it("should reject honeypot field with content", () => {
+    it("still rejects honeypot field content at the schema layer", () => {
       const invalidData = { ...validFormData, website: "spam content" };
       const result = contactFormSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("should be empty");
-      }
     });
   });
 });

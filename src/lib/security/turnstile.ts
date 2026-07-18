@@ -148,17 +148,6 @@ function handleTurnstileFailure(
 }
 
 /**
- * Verify a Turnstile token (returns boolean).
- */
-export async function verifyTurnstile(
-  token: string,
-  ip: string,
-): Promise<boolean> {
-  const result = await verifyTurnstileDetailed(token, ip);
-  return result.success;
-}
-
-/**
  * Verify a Turnstile token with detailed result.
  */
 export async function verifyTurnstileDetailed(

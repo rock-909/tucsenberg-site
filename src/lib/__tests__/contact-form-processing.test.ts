@@ -10,6 +10,7 @@ import {
 } from "@/lib/contact/submit-canonical-contact";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import { contactLeadSchema, LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
+import { logger } from "@/lib/logger";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 
 const mockProcessLead = vi.hoisted(() => vi.fn());
@@ -29,6 +30,8 @@ vi.mock("@/lib/logger", () => ({
   },
   sanitizeEmail: (email: string | undefined | null) =>
     email ? "[REDACTED_EMAIL]" : "[NO_EMAIL]",
+  sanitizeIP: (ip: string | undefined | null) =>
+    ip ? "[REDACTED_IP]" : "[NO_IP]",
 }));
 
 function createContactFormData(
@@ -358,6 +361,39 @@ describe("canonical contact submission", () => {
         error: "Failed to process contact submission",
         details: null,
         data: null,
+      }),
+    );
+  });
+
+  it("returns a fake success envelope when the honeypot field is filled", async () => {
+    const result = await submitCanonicalContactSubmission(
+      {
+        ...createContactFormData("Product inquiry"),
+        website: "bot-filled",
+      },
+      { clientIP: "203.0.113.10" },
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: null,
+        submissionResult: expect.objectContaining({
+          success: true,
+          emailSent: false,
+          ownerNotified: false,
+          recordCreated: false,
+          referenceId: expect.stringMatching(/^HP-/),
+        }),
+      }),
+    );
+    expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+    expect(mockProcessLead).not.toHaveBeenCalled();
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      "Contact honeypot triggered",
+      expect.objectContaining({
+        referenceId: expect.stringMatching(/^HP-/),
+        ip: "[REDACTED_IP]",
       }),
     );
   });

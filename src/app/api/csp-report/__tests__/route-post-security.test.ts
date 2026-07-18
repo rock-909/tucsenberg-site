@@ -9,7 +9,20 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
+import { logger } from "@/lib/logger";
 import { suppressExpectedCspWarnings } from "./test-utils";
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+  sanitizeIP: (ip: string | undefined | null) =>
+    ip ? "[REDACTED_IP]" : "[NO_IP]",
+  sanitizeLogContext: (context: Record<string, unknown>) => context,
+}));
 
 describe("CSP Report API Route - 安全性测试", () => {
   beforeEach(() => {
@@ -205,4 +218,61 @@ describe("CSP Report API Route - 安全性测试", () => {
   });
 
   // 注意：DoS攻击防护、数据验证和协议安全测试已移至其他专门的测试文件
+
+  describe("structured logging", () => {
+    it("logs suspicious CSP reports exactly once at error severity", async () => {
+      const suspiciousReport = {
+        "csp-report": {
+          ...validCSPReport["csp-report"],
+          "blocked-uri": 'data:text/html,<script>eval("malicious")</script>',
+          "script-sample": 'eval("dangerous code")',
+        },
+      };
+
+      const request = new NextRequest("http://localhost:3000/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify(suspiciousReport),
+        headers: {
+          "content-type": "application/csp-report",
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(vi.mocked(logger.error)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+        expect.objectContaining({
+          blockedUri: 'data:text/html,<script>eval("malicious")</script>',
+        }),
+      );
+      expect(vi.mocked(logger.warn)).not.toHaveBeenCalledWith(
+        "CSP Violation Report",
+        expect.anything(),
+      );
+    });
+
+    it("logs routine CSP reports once at warn severity", async () => {
+      const request = new NextRequest("http://localhost:3000/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify(validCSPReport),
+        headers: {
+          "content-type": "application/csp-report",
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(vi.mocked(logger.warn)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+        "CSP Violation Report",
+        expect.objectContaining({
+          violatedDirective: "script-src",
+        }),
+      );
+      expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
+    });
+  });
 });

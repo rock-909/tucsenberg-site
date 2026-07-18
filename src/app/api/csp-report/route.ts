@@ -266,34 +266,18 @@ function logCSPViolation(
   clientIP: string,
 ): void {
   const violationData = buildViolationData(request, cspReport, clientIP);
-  logger.warn(
-    "CSP Violation Report",
-    sanitizeLogContext({
-      ...violationData,
-      // normalize before sanitization to avoid leaking multi-hop proxy chains
-      ip: sanitizeIP(String(violationData.ip ?? "unknown")),
-    }),
-  );
-
-  if (env.NODE_ENV === "production") {
-    logger.error(
-      "Production CSP Violation",
-      sanitizeLogContext({
-        ...violationData,
-        ip: sanitizeIP(String(violationData.ip ?? "unknown")),
-      }),
-    );
-  }
+  const logContext = sanitizeLogContext({
+    ...violationData,
+    // normalize before sanitization to avoid leaking multi-hop proxy chains
+    ip: sanitizeIP(String(violationData.ip ?? "unknown")),
+  });
 
   if (isSuspiciousReport(cspReport)) {
-    logger.error(
-      "SUSPICIOUS CSP VIOLATION DETECTED",
-      sanitizeLogContext({
-        ...violationData,
-        ip: sanitizeIP(String(violationData.ip ?? "unknown")),
-      }),
-    );
+    logger.error("SUSPICIOUS CSP VIOLATION DETECTED", logContext);
+    return;
   }
+
+  logger.warn("CSP Violation Report", logContext);
 }
 
 async function processReport(

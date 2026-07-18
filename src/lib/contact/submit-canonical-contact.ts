@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { z, type ZodIssue } from "zod";
 import {
   CONTACT_FORM_CONFIG,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/lead-pipeline/lead-schema";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
 import { createOptionalSubject } from "@/lib/lead-pipeline/utils";
-import { logger, sanitizeEmail } from "@/lib/logger";
+import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
 import {
   pickAttributionFields,
   type MarketingAttributionFields,
@@ -60,7 +61,6 @@ const CONTACT_FORM_VALIDATION_DETAIL_KEYS = [
   "errors.message.tooLong",
   "errors.phone.invalid",
   "errors.subject.length",
-  "errors.website.shouldBeEmpty",
 ] as const;
 
 const CONTACT_FORM_VALIDATION_DETAIL_KEY_SET = new Set<string>(
@@ -121,7 +121,7 @@ export interface CanonicalContactSubmissionSuccess {
   success: true;
   error: null;
   details: null;
-  data: ContactFormWithToken;
+  data: ContactFormWithToken | null;
   submissionResult: {
     success: true;
     emailSent: boolean;
@@ -207,9 +207,7 @@ function buildZodIssueErrorKey(issue: ZodIssue): string {
         ? `${baseKey}.required`
         : `${baseKey}.tooShort`;
     case "too_big":
-      return baseKey === "errors.website"
-        ? `${baseKey}.shouldBeEmpty`
-        : `${baseKey}.tooLong`;
+      return `${baseKey}.tooLong`;
     case "custom":
       return handleCustomIssue(baseKey, issue);
     case "invalid_type":
@@ -236,6 +234,21 @@ function createExpiredSubmissionFailure(): ContactValidationFailure {
     details: null,
     data: null,
   };
+}
+
+function isContactHoneypotTriggered(body: unknown): boolean {
+  if (!body || typeof body !== "object") {
+    return false;
+  }
+
+  const { website } = body as { website?: unknown };
+  return typeof website === "string" && website.trim().length > 0;
+}
+
+function generateHoneypotReferenceId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = randomBytes(4).toString("hex");
+  return `HP-${timestamp}-${random}`;
 }
 
 function validateSubmissionTime(
@@ -398,6 +411,29 @@ export async function submitCanonicalContactSubmission(
   body: unknown,
   options: CanonicalContactSubmissionOptions,
 ): Promise<CanonicalContactSubmissionResult> {
+  if (isContactHoneypotTriggered(body)) {
+    const referenceId = generateHoneypotReferenceId();
+    logger.warn("Contact honeypot triggered", {
+      referenceId,
+      ip: sanitizeIP(options.clientIP),
+      ...(options.requestId ? { requestId: options.requestId } : {}),
+    });
+
+    return {
+      success: true,
+      error: null,
+      details: null,
+      data: null,
+      submissionResult: {
+        success: true,
+        emailSent: false,
+        ownerNotified: false,
+        recordCreated: false,
+        referenceId,
+      },
+    };
+  }
+
   const validation = await validateContactSubmission(body, options.clientIP);
   if (!validation.success || !validation.data) {
     return {
