@@ -37,6 +37,7 @@ export async function generateStaticMdxPageMetadata(
     path: getLocalizedPath(config.pageType, locale as Locale),
     config: createStaticPageMetadataConfig(metadata, {
       includeEmptyDescription: true,
+      includeImage: true,
     }),
   });
 }

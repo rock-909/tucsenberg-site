@@ -151,6 +151,38 @@ describe("CatalogBreadcrumb", () => {
     expect(productsLink).toHaveAttribute("data-prefetch", "default");
   });
 
+  it("derives breadcrumb JSON-LD canonical locale from LOCALES_CONFIG", async () => {
+    vi.resetModules();
+    const seoMetadata = await import("@/lib/seo-metadata");
+    const buildCanonicalForPathSpy = vi.spyOn(
+      seoMetadata,
+      "buildCanonicalForPath",
+    );
+    const { LOCALES_CONFIG } = await import("@/config/paths");
+    const { buildCatalogBreadcrumbJsonLd } =
+      await import("../catalog-breadcrumb-jsonld");
+    const market = {
+      slug: "abs-flood-barriers",
+      label: "ABS Flood Barriers",
+      standardLabel: "ABS",
+      description: "test",
+      sizeSystem: "inch" as const,
+      standardIds: [],
+    };
+
+    const jsonLd = await buildCatalogBreadcrumbJsonLd({ market });
+
+    expect(buildCanonicalForPathSpy).toHaveBeenCalledTimes(3);
+    for (const [locale] of buildCanonicalForPathSpy.mock.calls) {
+      expect(locale).toBe(LOCALES_CONFIG.defaultLocale);
+    }
+    for (const element of jsonLd.itemListElement) {
+      expect(String(element.item)).not.toMatch(/\/en(?:\/|$)/u);
+    }
+
+    buildCanonicalForPathSpy.mockRestore();
+  });
+
   it("renders JSON-LD BreadcrumbList structured data", async () => {
     const CatalogBreadcrumb = await importComponent();
     const market = {

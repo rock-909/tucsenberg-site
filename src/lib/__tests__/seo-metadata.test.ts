@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PUBLIC_STATIC_PAGE_TYPES } from "@/config/pages.config";
 import type { PageType } from "@/config/paths";
 // Import after mocks
 import {
@@ -329,6 +330,23 @@ describe("SEO Metadata", () => {
       });
     });
 
+    it("should render default OG and Twitter images from page defaults", () => {
+      const metadata = generateMetadataForPath({
+        locale: "en",
+        pageType: "about",
+        path: "/about",
+        config: {
+          title: "About Tucsenberg",
+          description: "About page description",
+        },
+      });
+
+      expect(metadata.openGraph?.images).toEqual([
+        { url: "/images/facts-og.png" },
+      ]);
+      expect(metadata.twitter?.images).toEqual(["/images/facts-og.png"]);
+    });
+
     it("should override canonical/hreflang and set openGraph.url from path", () => {
       const metadata = generateMetadataForPath({
         locale: "en",
@@ -450,7 +468,15 @@ describe("SEO Metadata", () => {
       expect(config).toEqual({
         type: "website",
         keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
+        image: "/images/facts-og.png",
       });
+    });
+
+    it("should derive the default OG image for every public static page", () => {
+      for (const pageType of PUBLIC_STATIC_PAGE_TYPES) {
+        const config = createPageSEOConfig(pageType);
+        expect(config.image).toBe("/images/facts-og.png");
+      }
     });
 
     it("should fall retired public demo pages back to home config", () => {
@@ -478,6 +504,7 @@ describe("SEO Metadata", () => {
       expect(config).toEqual({
         type: "website",
         keywords: ["custom", "keywords"], // Custom keywords override base
+        image: "/images/facts-og.png",
         title: "Custom Title",
         description: "Custom Description",
       });
@@ -560,6 +587,7 @@ describe("SEO Metadata", () => {
       expect(config).toEqual({
         type: "website",
         keywords: ["Products", "Flood Barriers", "Flood Gates", "B2B"],
+        image: "/images/facts-og.png",
       });
     });
 
