@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6b ACTIVE.** PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6c ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38` and remains unmerged as the direct D6c base. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`; D6b is active. Detailed plan: `docs/superpowers/plans/2026-07-18-d6b-single-inquiry-write.md`.
+**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is active on top of that exact SHA. Detailed D6c plan: `docs/superpowers/plans/2026-07-18-d6c-validated-product-context.md`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
@@ -321,7 +321,7 @@ interface CanonicalInquiryBuyerFields {
 - [ ] Move the Contact route and its only-route tests to Trash after proving no external contract in deploy logs. If real external calls exist, stop and report the payload/volume evidence for an owner decision on a dated adapter or explicit 410. Do not add a permanent redirect or duplicate implementation.
 - [ ] Remove the Contact-specific rate-limit/error branch. Keep honeypot, Turnstile, body-size, rate-limit and attribution in the surviving route.
 - [ ] Run inquiry route/integration, lead-family protection, architecture and E2E tests; `pnpm website:check`.
-- [ ] Commit `refactor: make api inquiry the single validated lead write path`; push and mark `READY_FOR_CLUSTER`.
+- [x] Commit `refactor: make api inquiry the single validated lead write path`; PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`, CI green, Cursor self-review `NO_MATERIAL_FINDINGS`, `READY_FOR_CLUSTER`.
 
 ### Task D6c: derive product context from validated page handoff
 
