@@ -43,7 +43,7 @@
       },
       "proof": {
         "est": "Standard items",
-        "estLabel": "quoted in 12 hours",
+        "estLabel": "reply within 12 hours",
         "countries": "3-year warranty",
         "countriesLabel": "on all standard lines",
         "range": "Factory pool",
@@ -121,8 +121,8 @@
           "description": "Openings, quantities, market. Photos and drawings welcome."
         },
         "content": {
-          "title": "Quote in 12 hours",
-          "description": "Standard items quoted in 12 hours; custom configurations within 48."
+          "title": "Reply within 12 hours",
+          "description": "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials."
         },
         "forms": {
           "title": "Paid sample",
@@ -140,7 +140,7 @@
     },
     "finalCta": {
       "title": "Protecting openings or building a product line — either way, start with the numbers.",
-      "description": "Send your requirement; standard items quoted in 12 hours.",
+      "description": "Send your requirement; we reply within 12 hours.",
       "primary": "Request a Quote",
       "secondary": "Wholesale & OEM"
     },
@@ -185,7 +185,7 @@
         },
         "quoteSpeed": {
           "question": "How fast will I get a price?",
-          "answer": "Standard items: within 12 hours. Custom configurations (cut-to-size, moulded branding): within 48 hours."
+          "answer": "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials."
         },
         "paymentTerms": {
           "question": "What are your payment terms?",
@@ -273,7 +273,7 @@
         },
         "ask": {
           "title": "Send the RFQ",
-          "description": "Standard items are quoted in 12 hours; custom configurations within 48."
+          "description": "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials."
         }
       }
     },

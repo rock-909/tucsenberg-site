@@ -86,7 +86,7 @@ describe("RequestQuotePage", () => {
     expect(mockGenerateMetadataForPath).toHaveBeenCalledWith(
       expect.objectContaining({
         config: expect.objectContaining({
-          title: "Request a Quote — 12-Hour Response on Standard Items",
+          title: "Request a Quote — Reply Within 12 Hours",
         }),
       }),
     );
@@ -101,7 +101,7 @@ describe("RequestQuotePage", () => {
     render(page);
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Get real numbers, fast" }),
+      screen.getByRole("heading", { level: 1, name: "Get real numbers" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("Received. You'll hear from a person, not a sequence."),
@@ -122,7 +122,7 @@ describe("RequestQuotePage", () => {
         data: [
           expect.objectContaining({
             "@type": "WebPage",
-            name: "Request a Quote — 12-Hour Response on Standard Items",
+            name: "Request a Quote — Reply Within 12 Hours",
             url: expect.stringMatching(/\/request-quote$/u),
             isPartOf: expect.objectContaining({
               "@id": expect.stringMatching(/#website$/u),

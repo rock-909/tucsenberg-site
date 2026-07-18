@@ -24,9 +24,6 @@ interface RequestQuotePageProps extends RequestQuotePageParams {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const STANDARD_QUOTE_HOURS = 12;
-const CUSTOM_QUOTE_HOURS = 48;
-
 export function generateStaticParams() {
   return generateLocaleStaticParams();
 }
@@ -123,10 +120,7 @@ export default async function RequestQuotePage({
         <header className="mb-10 max-w-2xl">
           <h1 className="text-heading mb-4">{translatePage("heading")}</h1>
           <p className="text-body text-muted-foreground">
-            {tPage("intro", {
-              standardHours: STANDARD_QUOTE_HOURS,
-              customHours: CUSTOM_QUOTE_HOURS,
-            })}
+            {translatePage("intro")}
           </p>
         </header>
 

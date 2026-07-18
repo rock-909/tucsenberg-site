@@ -94,6 +94,66 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /support, or partnership opportunities/iu,
   /configure a real receiver before public launch/iu,
 ];
+const FORBIDDEN_INQUIRY_RESPONSE_PATTERNS = [
+  /standard items quoted/iu,
+  /quoted within 12 hours/iu,
+  /quoted in 12 hours/iu,
+  /quote within 12 hours/iu,
+  /quotes in 12 hours/iu,
+  /12-hour quotes?/iu,
+  /12-hour response on standard/iu,
+  /custom configurations within 48/iu,
+  /custom within 48/iu,
+  /within 48 hours/iu,
+  /quoted within 48 hours/iu,
+  /get exact pricing in 12 hours/iu,
+] as const;
+
+const INQUIRY_RESPONSE_OWNER_FILES = [
+  "messages/profiles/b2b-lead/en/messages.json",
+  "messages/profiles/catalog/en/messages.json",
+  "content/pages/en/about.mdx",
+  "content/pages/en/contact.mdx",
+  "content/pages/en/flood-barrier-materials-guide.mdx",
+  "content/pages/en/flood-barrier-specifications.mdx",
+  "content/pages/en/oem-wholesale.mdx",
+  "content/pages/en/terms.mdx",
+  "src/config/single-site.ts",
+  "src/constants/tucsenberg-product-meta.ts",
+  "src/constants/tucsenberg-product-page-abs-flood-barriers.ts",
+  "src/constants/tucsenberg-product-page-absorbent-flood-bags.ts",
+  "src/constants/tucsenberg-product-page-aluminum-flood-gates.ts",
+  "src/constants/tucsenberg-product-page-flood-tube-dams.ts",
+  "src/constants/tucsenberg-product-page-frp-flood-barriers.ts",
+  "src/components/security/turnstile-rescue-line.tsx",
+  "src/lib/contact/getContactCopy.ts",
+] as const;
+
+function stripRetiredInquiryMessageSubtrees(source: string, repoPath: string) {
+  if (!repoPath.endsWith(".json")) {
+    return source;
+  }
+
+  const parsed = JSON.parse(source) as Record<string, unknown>;
+
+  if (repoPath === "messages/profiles/b2b-lead/en/messages.json") {
+    const requestQuote = parsed.requestQuote;
+    if (
+      typeof requestQuote === "object" &&
+      requestQuote !== null &&
+      "form" in requestQuote
+    ) {
+      const { form: _retiredForm, ...rest } = requestQuote as Record<
+        string,
+        unknown
+      >;
+      parsed.requestQuote = rest;
+    }
+  }
+
+  return JSON.stringify(parsed);
+}
+
 const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /Showcase Website Starter/iu,
   /Modern B2B showcase starter/iu,
@@ -106,7 +166,7 @@ const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /configure a real receiver before public launch/iu,
   /support, or partnership opportunities/iu,
   /[$€£]\s*\d/u,
-];
+] as const;
 
 function toRepoPath(absolutePath: string): string {
   return relative(process.cwd(), absolutePath).split(sep).join("/");
@@ -348,6 +408,41 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("keeps misleading inquiry quote-time promises out of live owner copy", () => {
+    const offenders: string[] = [];
+
+    for (const ownerFile of INQUIRY_RESPONSE_OWNER_FILES) {
+      const source = stripRetiredInquiryMessageSubtrees(
+        readRepoFile(ownerFile),
+        ownerFile,
+      );
+
+      for (const pattern of FORBIDDEN_INQUIRY_RESPONSE_PATTERNS) {
+        if (pattern.test(source)) {
+          offenders.push(`${ownerFile} :: ${pattern}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("uses the approved inquiry success and reply promise on key surfaces", () => {
+    const b2bLead = readRepoFile("messages/profiles/b2b-lead/en/messages.json");
+    const requestQuoteIntro = readRepoFile(
+      "src/app/[locale]/request-quote/page.tsx",
+    );
+
+    expect(b2bLead).toContain(
+      "Received. You'll hear from a person, not a sequence.",
+    );
+    expect(b2bLead).toMatch(/Reply within 12 hours/i);
+    expect(requestQuoteIntro).not.toContain("CUSTOM_QUOTE_HOURS");
+    expect(
+      readRepoFile("src/components/security/turnstile-rescue-line.tsx"),
+    ).toContain("Reply within 12 hours");
+  });
+
   it("uses the approved Tucsenberg contact page copy", () => {
     const contactPage = readRepoFile("content/pages/en/contact.mdx");
 
@@ -356,10 +451,10 @@ describe("Tucsenberg Phase 1 site contract", () => {
     );
     expect(contactPage).toContain("title: 'Contact'");
     expect(contactPage).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so your quote comes back faster.",
+      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so we can reply sooner with a quote or only the missing essentials.",
     );
     expect(contactPage).toContain(
-      "**Email**: sales@tucsenberg.com — standard items quoted within 12 hours, custom within 48. You'll hear from a person, not a sequence.",
+      "**Email**: sales@tucsenberg.com — we reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. You'll hear from a person, not a sequence.",
     );
     expect(contactPage).not.toContain("**WhatsApp**:");
     expect(contactPage).toContain(

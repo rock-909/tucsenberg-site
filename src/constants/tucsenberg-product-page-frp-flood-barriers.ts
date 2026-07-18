@@ -122,7 +122,7 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     {
       question: "What does it cost?",
       answer:
-        "More than aluminum per metre at first run (tooling amortisation), competitive at reorder. Real numbers come with your opening schedule — quoted within 48 hours as a custom line.",
+        "More than aluminum per metre at first run (tooling amortisation), competitive at reorder. Real numbers come with your opening schedule — we reply within 12 hours once the details are clear enough for pricing.",
     },
   ],
   rfqNote:
