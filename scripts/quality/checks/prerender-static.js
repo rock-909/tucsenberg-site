@@ -5,7 +5,20 @@ const ROOT = process.cwd();
 const { locales: CONFIGURED_LOCALES } = require("../../../i18n-locales.config");
 const DEFAULT_BUILD_DIR = ".next";
 
-const POSTPONED_ROUTE_EXEMPTIONS = new Map();
+const REQUEST_QUOTE_POSTPONED_REASON =
+  "server-validated search-param Partial Prerender on Request Quote";
+
+function buildPostponedRouteExemptions(configuredLocales) {
+  return new Map(
+    configuredLocales.map((locale) => [
+      `/${locale}/request-quote`,
+      REQUEST_QUOTE_POSTPONED_REASON,
+    ]),
+  );
+}
+
+const POSTPONED_ROUTE_EXEMPTIONS =
+  buildPostponedRouteExemptions(CONFIGURED_LOCALES);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -131,8 +144,11 @@ function collectPrerenderStaticFindings({
   rootDir = ROOT,
   buildDir = DEFAULT_BUILD_DIR,
   configuredLocales = CONFIGURED_LOCALES,
-  postponedRouteExemptions = POSTPONED_ROUTE_EXEMPTIONS,
+  postponedRouteExemptions,
 } = {}) {
+  const effectivePostponedRouteExemptions =
+    postponedRouteExemptions ??
+    buildPostponedRouteExemptions(configuredLocales);
   const buildRoot = path.join(rootDir, buildDir);
   const appPathsPath = path.join(buildRoot, "server/app-paths-manifest.json");
   const prerenderPath = path.join(buildRoot, "prerender-manifest.json");
@@ -160,7 +176,7 @@ function collectPrerenderStaticFindings({
   const routeUsage = collectLocalizedRouteFindings({
     buildRoot,
     localizedRoutes,
-    postponedRouteExemptions,
+    postponedRouteExemptions: effectivePostponedRouteExemptions,
   });
 
   return [
@@ -172,7 +188,7 @@ function collectPrerenderStaticFindings({
     ),
     ...routeUsage.findings,
     ...collectStaleExemptionFindings(
-      postponedRouteExemptions,
+      effectivePostponedRouteExemptions,
       routeUsage.usedExemptions,
     ),
   ];

@@ -2,7 +2,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { collectPrerenderStaticFindings } from "../../../scripts/quality/checks/prerender-static.js";
+import {
+  collectPrerenderStaticFindings,
+  POSTPONED_ROUTE_EXEMPTIONS,
+} from "../../../scripts/quality/checks/prerender-static.js";
 
 const tempDirs: string[] = [];
 const TEMP_TRASH_ROOT = path.join(
@@ -30,19 +33,70 @@ function writeJson(rootDir: string, relativePath: string, value: unknown) {
   fs.writeFileSync(filePath, JSON.stringify(value));
 }
 
+function writeRequestQuoteFixture(
+  rootDir: string,
+  requestQuotePostponed: boolean,
+) {
+  writeJson(rootDir, ".next/server/app/[locale]/request-quote.meta", {
+    headers: { "x-nextjs-prerender": "1" },
+    postponed: "template shell",
+  });
+  writeJson(rootDir, ".next/server/app/en/request-quote.meta", {
+    headers: { "x-nextjs-prerender": "1" },
+    ...(requestQuotePostponed ? { postponed: "search params" } : {}),
+  });
+}
+
+function writeSecondaryLocaleMetas(
+  rootDir: string,
+  locales: string[],
+  {
+    contactPostponed,
+    includeRequestQuoteRoute,
+    requestQuotePostponed,
+    secondaryAboutPrerendered,
+  }: {
+    contactPostponed: boolean;
+    includeRequestQuoteRoute: boolean;
+    requestQuotePostponed: boolean;
+    secondaryAboutPrerendered: boolean;
+  },
+) {
+  for (const locale of locales.filter((value) => value !== "en")) {
+    writeJson(rootDir, `.next/server/app/${locale}/about.meta`, {
+      headers: secondaryAboutPrerendered ? { "x-nextjs-prerender": "1" } : {},
+    });
+    writeJson(rootDir, `.next/server/app/${locale}/contact.meta`, {
+      headers: { "x-nextjs-prerender": "1" },
+      ...(contactPostponed ? { postponed: "search params" } : {}),
+    });
+    if (includeRequestQuoteRoute) {
+      writeJson(rootDir, `.next/server/app/${locale}/request-quote.meta`, {
+        headers: { "x-nextjs-prerender": "1" },
+        ...(requestQuotePostponed ? { postponed: "search params" } : {}),
+      });
+    }
+  }
+}
+
 function createBuildFixture({
   aboutPostponed = false,
   contactPostponed = true,
   locales = ["en"],
+  requestQuotePostponed = false,
   secondaryAboutPrerendered = true,
   includeAboutRoute = true,
   includeAboutTemplateMeta = true,
+  includeRequestQuoteRoute = false,
 } = {}) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "prerender-static-"));
   tempDirs.push(rootDir);
   writeJson(rootDir, ".next/server/app-paths-manifest.json", {
     "/[locale]/about/page": "app/[locale]/about/page.js",
     "/[locale]/contact/page": "app/[locale]/contact/page.js",
+    ...(includeRequestQuoteRoute
+      ? { "/[locale]/request-quote/page": "app/[locale]/request-quote/page.js" }
+      : {}),
   });
   writeJson(rootDir, ".next/prerender-manifest.json", {
     routes: Object.fromEntries(
@@ -51,6 +105,14 @@ function createBuildFixture({
           ? [[`/${locale}/about`, { srcRoute: "/[locale]/about" }]]
           : []),
         [`/${locale}/contact`, { srcRoute: "/[locale]/contact" }],
+        ...(includeRequestQuoteRoute
+          ? [
+              [
+                `/${locale}/request-quote`,
+                { srcRoute: "/[locale]/request-quote" },
+              ],
+            ]
+          : []),
       ]),
     ),
   });
@@ -72,15 +134,15 @@ function createBuildFixture({
     headers: { "x-nextjs-prerender": "1" },
     ...(contactPostponed ? { postponed: "search params" } : {}),
   });
-  for (const locale of locales.filter((value) => value !== "en")) {
-    writeJson(rootDir, `.next/server/app/${locale}/about.meta`, {
-      headers: secondaryAboutPrerendered ? { "x-nextjs-prerender": "1" } : {},
-    });
-    writeJson(rootDir, `.next/server/app/${locale}/contact.meta`, {
-      headers: { "x-nextjs-prerender": "1" },
-      ...(contactPostponed ? { postponed: "search params" } : {}),
-    });
+  if (includeRequestQuoteRoute) {
+    writeRequestQuoteFixture(rootDir, requestQuotePostponed);
   }
+  writeSecondaryLocaleMetas(rootDir, locales, {
+    contactPostponed,
+    includeRequestQuoteRoute,
+    requestQuotePostponed,
+    secondaryAboutPrerendered,
+  });
   return rootDir;
 }
 
@@ -94,7 +156,11 @@ describe("prerender static behavior gate", () => {
   it("accepts fully prerendered locale templates without postponed exemptions", () => {
     expect(
       collectPrerenderStaticFindings({
-        rootDir: createBuildFixture({ contactPostponed: false }),
+        rootDir: createBuildFixture({
+          contactPostponed: false,
+          includeRequestQuoteRoute: true,
+          requestQuotePostponed: true,
+        }),
       }),
     ).toEqual([]);
   });
@@ -164,5 +230,55 @@ describe("prerender static behavior gate", () => {
         'stale postponed-route exemption "/en/contact"',
       ),
     });
+  });
+
+  it("accepts postponed Request Quote routes derived from configured locales", () => {
+    expect(
+      collectPrerenderStaticFindings({
+        rootDir: createBuildFixture({
+          contactPostponed: false,
+          includeRequestQuoteRoute: true,
+          requestQuotePostponed: true,
+        }),
+      }),
+    ).toEqual([]);
+    expect(POSTPONED_ROUTE_EXEMPTIONS.get("/en/request-quote")).toContain(
+      "search-param",
+    );
+  });
+
+  it("still rejects postponed rendering on non-exempt localized routes", () => {
+    const findings = collectPrerenderStaticFindings({
+      rootDir: createBuildFixture({
+        aboutPostponed: true,
+        contactPostponed: false,
+        includeRequestQuoteRoute: true,
+        requestQuotePostponed: true,
+      }),
+    });
+    expect(findings).toContainEqual({
+      file: "server/app/en/about.meta",
+      error:
+        'localized route unexpectedly keeps postponed rendering "/en/about"',
+    });
+    expect(findings).not.toContainEqual(
+      expect.objectContaining({
+        file: "server/app/en/request-quote.meta",
+      }),
+    );
+  });
+
+  it("derives Request Quote exemptions for every configured locale without manual duplication", () => {
+    expect(
+      collectPrerenderStaticFindings({
+        rootDir: createBuildFixture({
+          contactPostponed: false,
+          includeRequestQuoteRoute: true,
+          locales: ["en", "fr"],
+          requestQuotePostponed: true,
+        }),
+        configuredLocales: ["en", "fr"],
+      }),
+    ).toEqual([]);
   });
 });
