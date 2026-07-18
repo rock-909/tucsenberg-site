@@ -100,8 +100,8 @@ describe("Airtable Advanced Tests", () => {
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@example.com",
-        company: "Test Company",
-        message: "A".repeat(10000), // Very large message
+        message: "A".repeat(10000),
+        productName: "ABS Flood Barriers",
       };
 
       const mockRecord = {
@@ -113,7 +113,7 @@ describe("Airtable Advanced Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createLead("contact", largeLeadData);
+      const result = await service.createLead(largeLeadData);
 
       expect(result).toBeDefined();
       expect(mockCreate).toHaveBeenCalled();
@@ -128,9 +128,9 @@ describe("Airtable Advanced Tests", () => {
       const specialCharLeadData = {
         firstName: "José",
         lastName: "García-López",
-        email: "jose.garcia@example.com", // Use ASCII-compatible email
-        company: "Tëst Çömpäny",
+        email: "jose.garcia@example.com",
         message: "Special chars: àáâãäåæçèéêë",
+        productName: "Tëst Product",
       };
 
       const mockRecord = {
@@ -142,7 +142,7 @@ describe("Airtable Advanced Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createLead("contact", specialCharLeadData);
+      const result = await service.createLead(specialCharLeadData);
 
       expect(result).toBeDefined();
       expect(mockCreate).toHaveBeenCalledWith([
@@ -180,14 +180,13 @@ describe("Airtable Advanced Tests", () => {
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@example.com",
-        company: "Test Company",
         message: "Test message",
+        productName: "ABS Flood Barriers",
       };
 
-      // Run concurrent lead creations
       const promises = [
-        service.createLead("contact", leadData),
-        service.createLead("contact", { ...leadData, firstName: "Jane" }),
+        service.createLead(leadData),
+        service.createLead({ ...leadData, firstName: "Jane" }),
       ];
 
       const results = await Promise.all(promises);

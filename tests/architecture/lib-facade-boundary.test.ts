@@ -171,15 +171,6 @@ describe("legacy lib facade boundaries", () => {
     expect(source).not.toContain("@/lib/api/lead-route-response");
   });
 
-  it("keeps the contact tombstone on the generic API error helper only", () => {
-    const source = read("src/app/api/contact/route.ts");
-
-    expect(source).toContain("createApiErrorResponse(");
-    expect(source).toContain("CONTACT_ENDPOINT_RETIRED");
-    expect(source).not.toContain("createApiSuccessResponse");
-    expect(source).not.toContain("submitCanonicalContactSubmission");
-  });
-
   it("keeps inquiry response branches inline", () => {
     const inquirySource = read("src/app/api/inquiry/route.ts");
 

@@ -5,7 +5,7 @@ import {
   resolveProductIdentity,
 } from "@/lib/lead-pipeline/product-identity";
 import {
-  LEAD_TYPES,
+  PRODUCT_LEAD_TYPE,
   PRODUCT_INQUIRY_KINDS,
   type ProductLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
@@ -13,7 +13,7 @@ import {
 describe("resolveProductIdentity", () => {
   it("returns the catalog label for a validated catalog product lead", () => {
     const lead: ProductLeadInput = {
-      type: LEAD_TYPES.PRODUCT,
+      type: PRODUCT_LEAD_TYPE,
       productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
       fullName: "Buyer Name",
       email: "buyer@example.com",
@@ -29,7 +29,7 @@ describe("resolveProductIdentity", () => {
 
   it("returns the general RFQ label when no catalog product is attached", () => {
     const lead: ProductLeadInput = {
-      type: LEAD_TYPES.PRODUCT,
+      type: PRODUCT_LEAD_TYPE,
       productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
       fullName: "Buyer Name",
       email: "buyer@example.com",
@@ -45,7 +45,7 @@ describe("resolveProductIdentity", () => {
     vi.spyOn(productCatalog, "getMarketBySlug").mockReturnValue(undefined);
 
     const lead: ProductLeadInput = {
-      type: LEAD_TYPES.PRODUCT,
+      type: PRODUCT_LEAD_TYPE,
       productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
       fullName: "Buyer Name",
       email: "buyer@example.com",

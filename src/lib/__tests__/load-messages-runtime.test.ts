@@ -46,7 +46,7 @@ interface FactualSourceMessages {
     };
   };
   emailTemplates: {
-    confirmation: {
+    productInquiry: {
       subject: string;
     };
   };
@@ -139,7 +139,7 @@ function assertFactualCompleteMessages(
   value: unknown,
 ): asserts value is FactualCompleteMessages {
   assertFactualSourceMessages(value);
-  expectStringPath(value, ["emailTemplates", "confirmation", "subject"]);
+  expectStringPath(value, ["emailTemplates", "productInquiry", "subject"]);
 }
 
 afterEach(() => {
@@ -258,7 +258,7 @@ describe("load-messages runtime loading", () => {
       "{companyName}",
     );
 
-    expect(enMessages.emailTemplates.confirmation.subject).toEqual(
+    expect(enMessages.emailTemplates.productInquiry.subject).toEqual(
       expect.any(String),
     );
     expect(enMessages).not.toHaveProperty("organization");

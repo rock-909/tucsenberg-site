@@ -120,8 +120,9 @@ describe("Airtable Service - Main Operations Tests", () => {
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
-    company: "Test Company",
     message: "This is a test message",
+    productName: "ABS Flood Barriers",
+    catalogProductId: "abs-flood-barriers",
   };
 
   describe("核心服务导出验证", () => {
@@ -137,7 +138,7 @@ describe("Airtable Service - Main Operations Tests", () => {
   });
 
   describe("基本操作集成测试", () => {
-    it("should handle basic lead creation (contact type)", async () => {
+    it("should handle basic lead creation (product inquiry)", async () => {
       const service = new AirtableServiceClass();
 
       // Override service configuration to make it ready
@@ -151,7 +152,7 @@ describe("Airtable Service - Main Operations Tests", () => {
       };
       mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
 
-      const result = await service.createLead("contact", validLeadData);
+      const result = await service.createLead(validLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -185,9 +186,9 @@ describe("Airtable Service - Main Operations Tests", () => {
         // Do nothing - prevent initialization
       });
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Airtable service is not configured");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Airtable service is not configured",
+      );
     });
 
     it("should handle API errors gracefully", async () => {
@@ -197,9 +198,9 @@ describe("Airtable Service - Main Operations Tests", () => {
 
       mockCreate.mockRejectedValue(new Error("API Error"));
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Failed to create lead record",
+      );
     });
   });
 

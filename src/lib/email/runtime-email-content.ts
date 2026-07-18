@@ -1,4 +1,3 @@
-import { SITE_CONFIG } from "@/config/paths/site-config";
 import { EMAIL_COPY } from "@/emails/email-copy";
 import {
   COLORS,
@@ -7,12 +6,7 @@ import {
   SIZES,
   SPACING,
 } from "@/emails/theme";
-import type {
-  EmailTemplateData,
-  ProductInquiryEmailData,
-} from "@/lib/email/email-data-schema";
-import { formatQuantity } from "@/lib/lead-pipeline/utils";
-import { ResendUtils } from "@/lib/resend-utils";
+import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 
 export interface RuntimeEmailContent {
   html: string;
@@ -35,8 +29,6 @@ interface EmailDocumentOptions {
   bodyText: string;
 }
 
-const CURRENT_YEAR = new Date().getFullYear();
-
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -50,10 +42,6 @@ function compactFields(
   fields: Array<EmailFieldContent | null | undefined>,
 ): EmailFieldContent[] {
   return fields.filter((field): field is EmailFieldContent => Boolean(field));
-}
-
-function renderParagraph(text: string): string {
-  return `<p style="margin:0 0 ${SPACING.md} 0;font-size:${FONT_SIZES.md};line-height:1.6;">${escapeHtml(text)}</p>`;
 }
 
 function renderField({ label, value, multiline }: EmailFieldContent): string {
@@ -126,110 +114,16 @@ function renderEmailDocument({
   };
 }
 
-export function buildContactFormEmailContent(
-  data: EmailTemplateData,
-): RuntimeEmailContent {
-  const submittedAt = ResendUtils.formatDateTime(data.submittedAt);
-  const fields = compactFields([
-    {
-      label: EMAIL_COPY.common.fields.name,
-      value: `${data.firstName} ${data.lastName}`,
-    },
-    { label: EMAIL_COPY.common.fields.email, value: data.email },
-    data.company
-      ? { label: EMAIL_COPY.common.fields.company, value: data.company }
-      : null,
-    data.phone
-      ? { label: EMAIL_COPY.common.fields.phone, value: data.phone }
-      : null,
-    data.subject
-      ? { label: EMAIL_COPY.common.fields.subject, value: data.subject }
-      : null,
-    {
-      label: EMAIL_COPY.common.fields.message,
-      value: data.message,
-      multiline: true,
-    },
-    { label: EMAIL_COPY.common.fields.submittedAt, value: submittedAt },
-  ]);
-
-  return renderEmailDocument({
-    title: EMAIL_COPY.contact.title,
-    preview: EMAIL_COPY.contact.preview(data),
-    accentColor: COLORS.primary,
-    footerText: EMAIL_COPY.contact.footer(SITE_CONFIG.name),
-    contentBackgroundColor: COLORS.contentBackground,
-    bodyHtml: renderFields(fields),
-    bodyText: renderPlainFields(fields),
-  });
-}
-
-export function buildConfirmationEmailContent(
-  data: EmailTemplateData,
-): RuntimeEmailContent {
-  const submittedAt = ResendUtils.formatDateTime(data.submittedAt);
-  const summaryLines = EMAIL_COPY.confirmation.summaryLines(data, submittedAt);
-  const bodyText = [
-    EMAIL_COPY.confirmation.greeting(data.firstName),
-    "",
-    EMAIL_COPY.confirmation.receivedMessage,
-    "",
-    EMAIL_COPY.confirmation.summaryIntro,
-    ...summaryLines.map((line) => `- ${line}`),
-    "",
-    EMAIL_COPY.confirmation.urgentHelp,
-    "",
-    EMAIL_COPY.confirmation.signoff,
-    EMAIL_COPY.confirmation.teamName(SITE_CONFIG.name),
-  ].join("\n");
-  const bodyHtml = [
-    renderParagraph(EMAIL_COPY.confirmation.greeting(data.firstName)),
-    renderParagraph(EMAIL_COPY.confirmation.receivedMessage),
-    renderParagraph(EMAIL_COPY.confirmation.summaryIntro),
-    "<section>",
-    ...summaryLines.map(
-      (line) =>
-        `<p style="margin:0 0 6px 0;font-size:${FONT_SIZES.sm};">- ${escapeHtml(
-          line,
-        )}</p>`,
-    ),
-    "</section>",
-    renderParagraph(EMAIL_COPY.confirmation.urgentHelp),
-    renderParagraph(EMAIL_COPY.confirmation.signoff),
-    `<p style="margin:0 0 ${SPACING.md} 0;font-size:${FONT_SIZES.md};line-height:1.6;font-weight:bold;">${escapeHtml(
-      EMAIL_COPY.confirmation.teamName(SITE_CONFIG.name),
-    )}</p>`,
-  ].join("");
-
-  return renderEmailDocument({
-    title: EMAIL_COPY.confirmation.title,
-    preview: EMAIL_COPY.confirmation.preview,
-    accentColor: COLORS.primary,
-    footerText: EMAIL_COPY.confirmation.footer(CURRENT_YEAR, SITE_CONFIG.name),
-    contentBackgroundColor: COLORS.background,
-    bodyHtml,
-    bodyText,
-  });
-}
-
 export function buildProductInquiryEmailContent(
   data: ProductInquiryEmailData,
 ): RuntimeEmailContent {
-  const quantity =
-    data.quantity !== undefined ? formatQuantity(data.quantity) : undefined;
   const fields = compactFields([
     { label: EMAIL_COPY.common.fields.product, value: data.productName },
-    quantity
-      ? { label: EMAIL_COPY.common.fields.quantity, value: quantity }
-      : null,
     {
       label: EMAIL_COPY.common.fields.contactName,
       value: `${data.firstName} ${data.lastName}`,
     },
     { label: EMAIL_COPY.common.fields.email, value: data.email },
-    data.company
-      ? { label: EMAIL_COPY.common.fields.company, value: data.company }
-      : null,
     data.requirements
       ? {
           label: EMAIL_COPY.common.fields.requirements,
@@ -246,22 +140,10 @@ export function buildProductInquiryEmailContent(
     `<p style="margin:0 0 10px 0;font-size:${FONT_SIZES.lg};font-weight:bold;">${escapeHtml(
       data.productName,
     )}</p>`,
-    ...(quantity
-      ? [
-          `<p style="margin:0 0 6px 0;font-weight:bold;color:${COLORS.textLight};font-size:${FONT_SIZES.sm};">${escapeHtml(
-            EMAIL_COPY.common.fields.quantity,
-          )}</p>`,
-          `<p style="margin:0;font-size:${FONT_SIZES.md};font-weight:bold;color:${COLORS.success};">${escapeHtml(
-            quantity,
-          )}</p>`,
-        ]
-      : []),
     "</section>",
   ].join("");
   const bodyFields = fields.filter(
-    (field) =>
-      field.label !== EMAIL_COPY.common.fields.product &&
-      field.label !== EMAIL_COPY.common.fields.quantity,
+    (field) => field.label !== EMAIL_COPY.common.fields.product,
   );
 
   return renderEmailDocument({

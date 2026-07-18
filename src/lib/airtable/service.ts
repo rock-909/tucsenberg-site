@@ -8,12 +8,10 @@ import "server-only";
 // import type 仅用于类型提示，实际模块在运行时按需加载
 import type AirtableNS from "airtable";
 import type {
-  ContactLeadData,
   CreatedAirtableRecord,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { env, getRuntimeEnvString } from "@/lib/env";
-import type { LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { logger } from "@/lib/logger";
 import { resolveAirtableModule } from "@/lib/airtable/service-internal/client";
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
@@ -145,15 +143,11 @@ export class AirtableService {
     return this.base as AirtableNS.Base;
   }
 
-  /**
-   * Create a unified lead record in Airtable
-   * Supports contact and product inquiry leads
-   */
+  /** Create a product/general inquiry record in Airtable. */
   public async createLead(
-    type: LeadType,
-    data: ContactLeadData | ProductLeadData,
+    data: ProductLeadData,
   ): Promise<CreatedAirtableRecord> {
     const base = await this.requireBase();
-    return createLeadRecord({ base, tableName: this.tableName, type, data });
+    return createLeadRecord({ base, tableName: this.tableName, data });
   }
 }

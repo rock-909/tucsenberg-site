@@ -5,8 +5,7 @@ import {
 } from "@/lib/api/validation-error-details";
 
 /**
- * Inquiry field → contact.form error namespace prefixes.
- * Contact form has its own FIELD_ERROR_KEY_PREFIX; do not merge the two.
+ * Inquiry field → inquiry.form error namespace prefixes.
  */
 export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
   fullName: "errors.fullName",
@@ -15,11 +14,9 @@ export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
 } as const satisfies ValidationFieldErrorKeys;
 
 /**
- * Detail leaves the inquiry mapper can emit for productLeadSchema.
- * Usage gate binds this list — keep it aligned with behavior tests.
+ * Detail leaves with matching inquiry.form copy for visible field errors.
  */
-export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
-  "errors.generic",
+export const PRODUCT_INQUIRY_RENDERABLE_DETAIL_KEYS = [
   "errors.fullName.required",
   "errors.fullName.invalid",
   "errors.fullName.tooLong",
@@ -28,6 +25,15 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.email.tooLong",
   "errors.message.invalid",
   "errors.message.tooLong",
+] as const;
+
+/**
+ * Detail leaves the inquiry mapper can emit for productLeadSchema.
+ * Usage gate binds renderable keys — keep it aligned with behavior tests.
+ */
+export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
+  "errors.generic",
+  ...PRODUCT_INQUIRY_RENDERABLE_DETAIL_KEYS,
 ] as const;
 
 export function mapInquiryValidationDetails(

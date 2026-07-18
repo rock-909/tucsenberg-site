@@ -1,11 +1,5 @@
 /**
  * Airtable Service - Create Operations Tests
- *
- * 专门测试创建操作功能，包括：
- * - 创建联系人记录
- * - 可选字段处理
- * - 错误处理
- * - 空数据处理
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -14,14 +8,11 @@ import type {
   AirtableServicePrivate,
 } from "@/test/test-types";
 import type { AirtableService as AirtableServiceType } from "../airtable/service";
-import type { ProductLeadData } from "@/lib/airtable/types";
-import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import {
   configureServiceForTesting,
   createMockBase,
 } from "./mocks/airtable-test-helpers";
 
-// Mock Airtable
 const mockCreate = vi.fn();
 const mockSelectAll = vi.fn();
 const mockSelect = vi.fn().mockReturnValue({
@@ -31,7 +22,6 @@ const mockSelect = vi.fn().mockReturnValue({
 const mockUpdate = vi.fn();
 const mockDestroy = vi.fn();
 
-// Mock record with get method
 const createMockRecord = (data: Record<string, unknown>) => ({
   id: data.id || "rec123456",
   fields: data.fields || {},
@@ -49,7 +39,6 @@ const mockTable = vi.fn().mockReturnValue({
 });
 
 const tableFactory: AirtableBaseLike["table"] = (_name) => {
-  // Parameter renamed with underscore to indicate it's intentionally unused
   return mockTable() as ReturnType<AirtableBaseLike["table"]>;
 };
 
@@ -69,7 +58,6 @@ vi.mock("airtable", () => ({
   },
 }));
 
-// Use TypeScript Mock modules to bypass Vite's special handling
 vi.mock("@/lib/env", async () => {
   const mockEnv = await import("./mocks/airtable-env");
   return mockEnv;
@@ -89,7 +77,6 @@ describe("Airtable Service - Create Operations Tests", () => {
   let AirtableServiceClass: typeof AirtableServiceType;
 
   beforeEach(async () => {
-    // Clear mocks but preserve the mock functions
     mockCreate.mockReset();
     mockSelectAll.mockReset();
     mockSelect.mockReset().mockReturnValue({
@@ -107,7 +94,6 @@ describe("Airtable Service - Create Operations Tests", () => {
     mockBase.mockClear();
     mockConfigure.mockClear();
 
-    // Dynamically import the module to ensure fresh instance
     const module = await import("../airtable/service");
     AirtableServiceClass = module.AirtableService as typeof AirtableServiceType;
   });
@@ -120,46 +106,38 @@ describe("Airtable Service - Create Operations Tests", () => {
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
-    company: "Test Company",
     message: "This is a test message",
+    productName: "ABS Flood Barriers",
+    catalogProductId: "abs-flood-barriers",
   };
 
-  describe("创建 Lead 记录 (contact type)", () => {
-    it("should create lead record successfully", async () => {
+  describe("createLead (product inquiry)", () => {
+    it("creates a product inquiry record successfully", async () => {
       const service = new AirtableServiceClass();
-
-      // Override service configuration to make it ready
       setServiceReady(service);
 
-      // Mock successful creation
-      const mockRecordData = {
-        id: "rec123456",
-        fields: {
-          "First Name": "John",
-          "Last Name": "Doe",
-          Email: "john.doe@example.com",
-          Company: "Test Company",
-          Message: "This is a test message",
-        },
-        createdTime: "2023-01-01T00:00:00Z",
-      };
-      mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec123456",
+          fields: validLeadData,
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
 
-      const result = await service.createLead("contact", validLeadData);
+      const result = await service.createLead(validLeadData);
 
-      expect(result).toEqual({
-        id: "rec123456",
-      });
+      expect(result).toEqual({ id: "rec123456" });
       expect(mockCreate).toHaveBeenCalledWith([
         {
           fields: expect.objectContaining({
             "First Name": "John",
             "Last Name": "Doe",
             Email: "john.doe@example.com",
-            Company: "Test Company",
             Message: "This is a test message",
+            "Product Name": "ABS Flood Barriers",
+            "Product Slug": "abs-flood-barriers",
             Status: "New",
-            Source: "Website Contact Form",
+            Source: "Product Inquiry",
             "Submitted At": expect.any(String),
           }),
         },
@@ -177,7 +155,7 @@ describe("Airtable Service - Create Operations Tests", () => {
         }),
       ]);
 
-      await service.createLead("contact", {
+      await service.createLead({
         ...validLeadData,
         email: "buyer+rfq@example.com",
       });
@@ -191,9 +169,8 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
-    it("maps split full names and optional company into the canonical Airtable fields", async () => {
+    it("maps split full names and optional requirements into canonical Airtable fields", async () => {
       const service = new AirtableServiceClass();
-
       setServiceReady(service);
 
       mockCreate.mockResolvedValue([
@@ -204,12 +181,14 @@ describe("Airtable Service - Create Operations Tests", () => {
         }),
       ]);
 
-      await service.createLead("contact", {
+      await service.createLead({
         firstName: "Smoke",
         lastName: "Test",
         email: "smoke@example.com",
         message: "This is a smoke test message.",
-        referenceId: "CON-test-123",
+        productName: "General RFQ",
+        requirements: "Need custom height",
+        referenceId: "PRO-test-123",
       });
 
       expect(mockCreate).toHaveBeenCalledWith([
@@ -218,169 +197,13 @@ describe("Airtable Service - Create Operations Tests", () => {
             "First Name": "Smoke",
             "Last Name": "Test",
             Email: "smoke@example.com",
-            Company: "",
             Message: "This is a smoke test message.",
-            "Reference ID": "CON-test-123",
-            Source: "Website Contact Form",
+            Requirements: "Need custom height",
+            "Reference ID": "PRO-test-123",
+            Source: "Product Inquiry",
           }),
         },
       ]);
-    });
-
-    it("should write buyer-entered contact subject to Airtable Subject", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-      const buyerSubject = "Need custom distributor website quote";
-      const leadDataWithSubject = {
-        ...validLeadData,
-        subject: buyerSubject,
-      };
-      const mockRecordData = {
-        id: "rec-subject",
-        fields: leadDataWithSubject,
-        createdTime: "2023-01-01T00:00:00Z",
-      };
-      mockCreate.mockResolvedValue([createMockRecord(mockRecordData)]);
-
-      await service.createLead("contact", leadDataWithSubject);
-
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            Subject: buyerSubject,
-          }),
-        },
-      ]);
-    });
-
-    it("should omit Airtable Subject when contact subject is missing", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-      mockCreate.mockResolvedValue([
-        createMockRecord({
-          id: "rec-no-subject",
-          fields: {},
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ]);
-
-      await service.createLead("contact", validLeadData);
-
-      const createCall = mockCreate.mock.calls[0];
-      expect(createCall).toBeDefined();
-      if (!createCall) {
-        throw new Error("Expected Airtable create to be called");
-      }
-      const [records] = createCall;
-      const firstRecord = records[0];
-      expect(firstRecord).toBeDefined();
-      if (!firstRecord) {
-        throw new Error("Expected Airtable create call to include one record");
-      }
-      const { fields } = firstRecord;
-      expect(fields).not.toHaveProperty("Subject");
-    });
-
-    it("should include optional fields when provided", async () => {
-      const service = new AirtableServiceClass();
-
-      // Override service configuration to make it ready
-      setServiceReady(service);
-
-      const leadDataWithOptionals = {
-        ...validLeadData,
-        subject: "Product Inquiry",
-      };
-
-      const mockRecordDataWithOptionals = {
-        id: "rec123456",
-        fields: leadDataWithOptionals,
-        createdTime: "2023-01-01T00:00:00Z",
-      };
-      mockCreate.mockResolvedValue([
-        createMockRecord(mockRecordDataWithOptionals),
-      ]);
-
-      await service.createLead("contact", leadDataWithOptionals);
-
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            "First Name": "John",
-            "Last Name": "Doe",
-            Email: "john.doe@example.com",
-            Company: "Test Company",
-            Message: "This is a test message",
-            Subject: "Product Inquiry",
-            Status: "New",
-            Source: "Website Contact Form",
-            "Submitted At": expect.any(String),
-          }),
-        },
-      ]);
-    });
-
-    it("neutralizes spreadsheet formula prefixes in contact lead text fields", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-
-      mockCreate.mockResolvedValue([
-        createMockRecord({
-          id: "recFormula",
-          fields: {},
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ]);
-
-      await service.createLead("contact", {
-        firstName: '=HYPERLINK("https://example.test")',
-        lastName: "+SUM(1,1)",
-        email: "formula@example.com",
-        company: "-Acme",
-        subject: "@subject",
-        message: " =cmd",
-        referenceId: "CON-formula-123",
-      });
-
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            "First Name": `'=HYPERLINK("https://example.test")`,
-            "Last Name": "'+SUM(1,1)",
-            Company: "'-Acme",
-            Subject: "'@subject",
-            Message: "'=cmd",
-          }),
-        },
-      ]);
-    });
-
-    it("does not write WhatsApp / Phone for product inquiry leads", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-      mockCreate.mockResolvedValueOnce([
-        createMockRecord({
-          id: "rec-no-phone",
-          fields: {},
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ]);
-
-      await service.createLead(LEAD_TYPES.PRODUCT, {
-        firstName: "Ada",
-        lastName: "Buyer",
-        email: "ada@example.com",
-        message: "Need quote",
-        productName: "General RFQ",
-        requirements: "Need quote",
-        phone: "+8613800138000",
-      } as unknown as ProductLeadData);
-
-      const createCall = mockCreate.mock.calls[0]?.[0];
-      expect(createCall).toBeDefined();
-      const firstRecord = createCall?.[0];
-      expect(firstRecord).toBeDefined();
-      expect(firstRecord?.fields).not.toHaveProperty("WhatsApp / Phone");
     });
 
     it("neutralizes spreadsheet formula prefixes in product lead text fields", async () => {
@@ -395,15 +218,13 @@ describe("Airtable Service - Create Operations Tests", () => {
         }),
       ]);
 
-      await service.createLead("product", {
+      await service.createLead({
         firstName: "=Buyer",
         lastName: "+One",
         email: "buyer@example.com",
-        company: "@Buyer Co",
         message: "=message",
         productName: "+Product",
         catalogProductId: "-product-slug",
-        quantity: "@100",
         requirements: "=requirements",
         referenceId: "PROD-formula-123",
       });
@@ -413,171 +234,75 @@ describe("Airtable Service - Create Operations Tests", () => {
           fields: expect.objectContaining({
             "First Name": "'=Buyer",
             "Last Name": "'+One",
-            Company: "'@Buyer Co",
             Message: "'=message",
             "Product Name": "'+Product",
             "Product Slug": "'-product-slug",
-            Quantity: "'@100",
             Requirements: "'=requirements",
           }),
         },
       ]);
     });
 
-    it("should throw error when service is not configured", async () => {
+    it("throws error when service is not configured", async () => {
       const service = new AirtableServiceClass();
-
-      // Explicitly ensure service is not configured and stays that way
       (service as unknown as AirtableServicePrivate).isConfigured = false;
       (service as unknown as AirtableServicePrivate).base = null;
 
-      // Mock ensureReady to do nothing (prevent auto-configuration)
-      vi.spyOn(service as any, "ensureReady").mockImplementation(async () => {
-        // Do nothing - prevent initialization
-      });
+      vi.spyOn(
+        service as AirtableServicePrivate,
+        "ensureReady",
+      ).mockImplementation(async () => {});
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Airtable service is not configured");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Airtable service is not configured",
+      );
     });
 
-    it("should handle creation errors gracefully", async () => {
+    it("handles creation errors gracefully", async () => {
       const service = new AirtableServiceClass();
-
       setServiceReady(service);
-
       mockCreate.mockRejectedValue(new Error("Creation failed"));
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Failed to create lead record",
+      );
     });
 
-    it("should handle empty lead data", async () => {
+    it("handles special characters in lead data", async () => {
       const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const emptyLeadData = {
-        firstName: "",
-        lastName: "",
-        email: "",
-        company: "",
-        message: "",
-      };
-
-      // Empty email should cause creation error
-      await expect(
-        service.createLead("contact", emptyLeadData),
-      ).rejects.toThrow("Failed to create lead record");
-    });
-
-    it("should handle special characters in lead data", async () => {
-      const service = new AirtableServiceClass();
-
       setServiceReady(service);
 
       const specialLeadData = {
         firstName: "José",
         lastName: "García-López",
         email: "jose.garcia@example.com",
-        company: "Test & Co.",
         message: 'Message with "quotes" and special chars: @#$%',
+        productName: "Widget & Co.",
       };
 
-      const mockRecordDataSpecial = {
-        id: "rec123456",
-        fields: specialLeadData,
-        createdTime: "2023-01-01T00:00:00Z",
-      };
-      mockCreate.mockResolvedValue([createMockRecord(mockRecordDataSpecial)]);
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec123456",
+          fields: specialLeadData,
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
 
-      const result = await service.createLead("contact", specialLeadData);
+      const result = await service.createLead(specialLeadData);
 
-      expect(result).toEqual({
-        id: "rec123456",
-      });
+      expect(result).toEqual({ id: "rec123456" });
       expect(mockCreate).toHaveBeenCalledWith([
         {
           fields: expect.objectContaining({
             "First Name": "José",
             "Last Name": "García-López",
             Email: "jose.garcia@example.com",
-            Company: "Test & Co.",
             Message: 'Message with "quotes" and special chars: @#$%',
-            Status: "New",
-            Source: "Website Contact Form",
-            "Submitted At": expect.any(String),
+            "Product Name": "Widget & Co.",
+            Source: "Product Inquiry",
           }),
         },
       ]);
-    });
-
-    it("should handle long text content", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const longMessage = "A".repeat(1000); // Very long message
-      const longLeadData = {
-        ...validLeadData,
-        message: longMessage,
-      };
-
-      const mockRecordDataLong = {
-        id: "rec123456",
-        fields: longLeadData,
-        createdTime: "2023-01-01T00:00:00Z",
-      };
-      mockCreate.mockResolvedValue([createMockRecord(mockRecordDataLong)]);
-
-      const result = await service.createLead("contact", longLeadData);
-
-      expect(result).toEqual({
-        id: "rec123456",
-      });
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            "First Name": "John",
-            "Last Name": "Doe",
-            Email: "john.doe@example.com",
-            Company: "Test Company",
-            Message: longMessage,
-            Status: "New",
-            Source: "Website Contact Form",
-            "Submitted At": expect.any(String),
-          }),
-        },
-      ]);
-    });
-
-    it("should handle network timeout errors", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const timeoutError = new Error("Request timeout");
-      timeoutError.name = "TimeoutError";
-      mockCreate.mockRejectedValue(timeoutError);
-
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
-    });
-
-    it("should handle rate limiting errors", async () => {
-      const service = new AirtableServiceClass();
-
-      setServiceReady(service);
-
-      const rateLimitError = new Error("Rate limit exceeded");
-      rateLimitError.name = "RateLimitError";
-      mockCreate.mockRejectedValue(rateLimitError);
-
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
     });
   });
 });

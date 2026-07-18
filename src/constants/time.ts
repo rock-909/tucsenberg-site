@@ -8,20 +8,11 @@
 // 基础时间单位
 // ============================================================================
 
-export const MILLISECONDS_PER_SECOND = 1000;
-export const SECONDS_PER_MINUTE = 60 as const;
-
-// ============================================================================
-// 常用时间间隔 (毫秒)
-// ============================================================================
-
 const SIX_HUNDRED_MS = 600;
 const TWELVE_HUNDRED_MS = 1200;
 const FIFTEEN_HUNDRED_MS = 1500;
 export const FIVE_SECONDS_MS = 5000;
 export const MINUTE_MS = 60000;
-export const FIVE_MINUTES_MS = 300000;
-export const TEN_MINUTES_MS = 600000;
 
 // ============================================================================
 // 性能优化相关时间常量

@@ -143,9 +143,9 @@ describe("runtime email boundary", () => {
 
     expectNoRuntimeRendererImports(source);
     expectNoRuntimeRendererImports(httpClientSource);
-    expect(source).toContain("buildContactFormEmailContent");
-    expect(source).toContain("buildConfirmationEmailContent");
     expect(source).toContain("buildProductInquiryEmailContent");
+    expect(source).not.toContain("buildContactFormEmailContent");
+    expect(source).not.toContain("buildConfirmationEmailContent");
   });
 
   it("keeps forbidden renderer and SDK packages out of the email runtime graph", () => {

@@ -36,10 +36,7 @@ vi.mock("@/lib/lead-pipeline/process-lead", () => ({
 }));
 
 vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
-  LEAD_TYPES: {
-    PRODUCT: "product",
-    CONTACT: "contact",
-  },
+  PRODUCT_LEAD_TYPE: "product",
   productLeadSchema: {
     safeParse: vi.fn((input: Record<string, unknown>) => ({
       success: true,

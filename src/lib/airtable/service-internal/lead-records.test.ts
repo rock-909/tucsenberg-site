@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { logger } from "@/lib/logger";
-import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
 
@@ -10,12 +9,13 @@ vi.mock("@/lib/logger", async () => {
   return mockLogger;
 });
 
-const validLeadData = {
+const validProductLeadData = {
   firstName: "John",
   lastName: "Doe",
   email: "john.doe@example.com",
-  company: "Test Company",
   message: "Test message",
+  productName: "ABS Flood Barriers",
+  catalogProductId: "abs-flood-barriers",
 };
 
 function createMockBase(create: ReturnType<typeof vi.fn>) {
@@ -32,7 +32,7 @@ describe("createLeadRecord error logging", () => {
   it("logs errorType and statusCode for Airtable SDK-style plain errors", async () => {
     const airtableError = {
       error: "INVALID_VALUE_FOR_COLUMN",
-      message: 'Field "Company" cannot accept the provided value: Test Company',
+      message: 'Field "Product Name" cannot accept the provided value',
       statusCode: 422,
     };
 
@@ -43,8 +43,7 @@ describe("createLeadRecord error logging", () => {
       createLeadRecord({
         base: base as never,
         tableName: "Leads",
-        type: LEAD_TYPES.CONTACT,
-        data: validLeadData,
+        data: validProductLeadData,
       }),
     ).rejects.toThrow("Failed to create lead record");
 
@@ -53,7 +52,6 @@ describe("createLeadRecord error logging", () => {
       expect.objectContaining({
         errorType: "INVALID_VALUE_FOR_COLUMN",
         statusCode: 422,
-        type: LEAD_TYPES.CONTACT,
       }),
     );
 
@@ -62,7 +60,6 @@ describe("createLeadRecord error logging", () => {
       unknown
     >;
     expect(logContext).not.toHaveProperty("message");
-    expect(JSON.stringify(logContext)).not.toContain("Test Company");
     expect(JSON.stringify(logContext)).not.toContain("john.doe@example.com");
     expect(logContext.error).not.toBe("Unknown error");
   });
@@ -75,8 +72,7 @@ describe("createLeadRecord error logging", () => {
       createLeadRecord({
         base: base as never,
         tableName: "Leads",
-        type: LEAD_TYPES.CONTACT,
-        data: validLeadData,
+        data: validProductLeadData,
       }),
     ).rejects.toThrow("Failed to create lead record");
 
@@ -84,7 +80,6 @@ describe("createLeadRecord error logging", () => {
       "Failed to create lead record",
       expect.objectContaining({
         error: "Network timeout",
-        type: LEAD_TYPES.CONTACT,
       }),
     );
   });
@@ -97,8 +92,7 @@ describe("createLeadRecord error logging", () => {
       createLeadRecord({
         base: base as never,
         tableName: "Leads",
-        type: LEAD_TYPES.CONTACT,
-        data: validLeadData,
+        data: validProductLeadData,
       }),
     ).rejects.toThrow("Failed to create lead record");
 
@@ -106,7 +100,6 @@ describe("createLeadRecord error logging", () => {
       "Failed to create lead record",
       expect.objectContaining({
         error: "Unknown error",
-        type: LEAD_TYPES.CONTACT,
       }),
     );
   });

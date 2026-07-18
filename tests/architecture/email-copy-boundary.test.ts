@@ -118,8 +118,6 @@ describe("email copy boundary", () => {
     expect(replaceGuide).toContain("src/lib/email/runtime-email-content.ts");
     expect(replaceGuide).toContain("production sending path");
     expect(replaceGuide).toContain("preview/reference");
-    expect(replaceGuide).toContain("confirmation");
-    expect(replaceGuide).toContain("contact owner notification");
     expect(replaceGuide).toContain("product inquiry owner notification");
 
     expect(messagesGuide).toContain("emailTemplates");
@@ -144,21 +142,17 @@ describe("email copy boundary", () => {
     expect(english.emailTemplates).toBeDefined();
     expect(getObjectKeys(english.emailTemplates)).toEqual([
       "common",
-      "confirmation",
-      "contact",
       "productInquiry",
     ]);
     expect(getNestedKeys(english.emailTemplates).sort()).toEqual(
       expect.arrayContaining([
-        "confirmation.footer",
-        "confirmation.preview",
-        "confirmation.subject",
-        "contact.footer",
-        "contact.preview",
-        "contact.subjectWithTopic",
         "productInquiry.footer",
         "productInquiry.preview",
         "productInquiry.subject",
+        "common.fields.contactName",
+        "common.fields.email",
+        "common.fields.product",
+        "common.fields.requirements",
       ]),
     );
   });
