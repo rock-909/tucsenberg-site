@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { LOCALES_CONFIG } from "@/config/paths";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import type { CatalogBreadcrumbProps } from "@/components/products/catalog-breadcrumb-types";
 import { buildCanonicalForPath } from "@/lib/seo-metadata";
@@ -10,7 +11,7 @@ export async function buildCatalogBreadcrumbJsonLd({
 }: CatalogBreadcrumbProps) {
   const tBreadcrumb = await getTranslations("catalog.breadcrumb");
   const productsPath = getCanonicalPath("products");
-  const canonicalLocale = "en" as const;
+  const canonicalLocale = LOCALES_CONFIG.defaultLocale;
 
   const entries: Array<{ name: string; url: string }> = [
     {
