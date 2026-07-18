@@ -8,6 +8,7 @@ import {
   extractFaqFromMetadata,
   generateFaqSchemaFromItems,
 } from "@/lib/content/mdx-faq";
+import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import { buildBreadcrumbListSchema } from "@/lib/structured-data-generators";
 import { SITE_CONFIG } from "@/config/paths";
 import { FactoryPoolDiagram } from "@/components/products/factory-pool-diagram";
@@ -35,6 +36,7 @@ export async function TradeLandingShell({
 }: TradeLandingShellProps): Promise<ReactNode> {
   const t = await getTranslations({ locale, namespace: "oemLanding" });
   const tNav = await getTranslations({ locale, namespace: "navigation" });
+  const tFaq = await getTranslations({ locale, namespace: "faq" });
 
   const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
   const schema = await buildShellPageSchema({
@@ -102,6 +104,25 @@ export async function TradeLandingShell({
         <article className="mt-12 max-w-[860px] min-w-0 md:mt-16">
           <LegalContentRenderer content={content} />
         </article>
+
+        {faqItems.length > 0 ? (
+          <section
+            className="mt-16 md:mt-20 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-10"
+            data-testid="faq-section"
+          >
+            <h2 className="text-section mb-4 md:mb-0">{tFaq("sectionTitle")}</h2>
+            <div className="max-w-[75ch] min-w-0 divide-y divide-border">
+              {faqItems.map((faq) => (
+                <article key={faq.id} className="py-5 first:pt-0 last:pb-0">
+                  <h3 className="text-lg font-semibold">{faq.question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    <InlineMarkdown text={faq.answer} />
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </>
   );

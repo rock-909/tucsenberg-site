@@ -6,8 +6,10 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { RequestQuoteForm } from "@/app/[locale]/request-quote/request-quote-form";
 import { createRequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
-import { getLocalizedPath } from "@/config/paths";
+import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
+import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { buildWebPageSchema } from "@/lib/structured-data-generators";
 
 interface RequestQuotePageProps {
   params: Promise<LocaleParam>;
@@ -76,6 +78,10 @@ export default async function RequestQuotePage({
     locale,
     namespace: "requestQuote.page",
   });
+  const tMeta = await getTranslations({
+    locale,
+    namespace: "requestQuote.metadata",
+  });
   const tForm = await getTranslations({
     locale,
     namespace: "requestQuote.form",
@@ -85,23 +91,39 @@ export default async function RequestQuotePage({
   const translateForm = (key: string) =>
     tForm(key as Parameters<typeof tForm>[0]);
   const formCopy = createRequestQuoteFormCopy(translateForm);
+  const typedLocale = locale as Locale;
+  const pagePath = getLocalizedPath("requestQuote", typedLocale);
+  const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
 
   return (
-    <div className="mx-auto max-w-[1080px] px-6 py-14 md:py-[72px]">
-      <header className="mb-10 max-w-2xl">
-        <h1 className="text-heading mb-4">{translatePage("heading")}</h1>
-        <p className="text-body text-muted-foreground">
-          {tPage("intro", {
-            standardHours: STANDARD_QUOTE_HOURS,
-            customHours: CUSTOM_QUOTE_HOURS,
-          })}
-        </p>
-      </header>
+    <>
+      <JsonLdGraphScript
+        locale={typedLocale}
+        data={[
+          buildWebPageSchema({
+            locale,
+            name: tMeta("title"),
+            description: tMeta("description"),
+            url: pageUrl,
+          }),
+        ]}
+      />
+      <div className="mx-auto max-w-[1080px] px-6 py-14 md:py-[72px]">
+        <header className="mb-10 max-w-2xl">
+          <h1 className="text-heading mb-4">{translatePage("heading")}</h1>
+          <p className="text-body text-muted-foreground">
+            {tPage("intro", {
+              standardHours: STANDARD_QUOTE_HOURS,
+              customHours: CUSTOM_QUOTE_HOURS,
+            })}
+          </p>
+        </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-        <RequestQuoteForm copy={formCopy} />
-        <RequestQuoteAside successCopy={formCopy.success} t={translatePage} />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+          <RequestQuoteForm copy={formCopy} />
+          <RequestQuoteAside successCopy={formCopy.success} t={translatePage} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

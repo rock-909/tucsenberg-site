@@ -12,8 +12,8 @@ paths:
 
 All schema objects are built through `src/lib/structured-data-generators.ts`.
 
-Pages and component shells may render `<JsonLdScript>`, but they must not
-hand-roll schema objects inline.
+Pages and component shells may render `<JsonLdScript>` or `<JsonLdGraphScript>`,
+but they must not hand-roll schema objects inline.
 
 ## Rendering and escaping
 
@@ -25,9 +25,10 @@ escaping behavior covered by tests.
 
 ## Injection points
 
-- Layout: site-wide Organization and WebSite only.
-- Page: page-specific schemas such as FAQPage, Article, ProductGroup,
-  AboutPage, WebPage, ItemList, and BreadcrumbList.
+- Shared graph: `JsonLdGraphScript` merges stable `#organization` and `#website`
+  identity nodes with page-specific schemas on pages that render structured data.
+- Page: page-specific schemas such as FAQPage, Article, Product, WebPage,
+  ItemList, and BreadcrumbList.
 - Component shell: only when the shell owns page-level rendering, and the
   schema still comes from the shared generators.
 
@@ -45,6 +46,6 @@ Do not add another FAQ helper for the same item shape.
 When changing public page schema output, keep focused tests for the expected
 schema types.
 
-Product-style pages that represent grouped offerings should preserve
-`ProductGroup` and `BreadcrumbList` through the shared graph helpers when those
-concepts apply.
+Product detail pages that represent one catalog item should emit a single
+`Product` node plus supporting graph nodes such as `BreadcrumbList` and
+`FAQPage` when those concepts apply.

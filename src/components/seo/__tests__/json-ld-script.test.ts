@@ -45,9 +45,14 @@ describe("createJsonLdGraphData", () => {
     mockGeneratePageStructuredData.mockResolvedValue({
       organizationData: {
         "@type": "Organization",
+        "@id": "https://www.example.com#organization",
         name: "Example Showcase Company",
       },
-      websiteData: { "@type": "WebSite", name: "Showcase Website Starter" },
+      websiteData: {
+        "@type": "WebSite",
+        "@id": "https://www.example.com#website",
+        name: "Showcase Website Starter",
+      },
     });
   });
 

@@ -65,7 +65,6 @@ async function TermsContent({ locale }: { locale: string }) {
       headings={headings}
       locale={locale}
       schemaType="WebPage"
-      schemaAdditionalType="https://schema.org/TermsOfService"
     />
   );
 }

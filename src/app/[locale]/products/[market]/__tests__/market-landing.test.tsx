@@ -26,20 +26,19 @@ function stringifyMockHref(href: MockHref) {
   return `${href.pathname}${query}`;
 }
 
-function findProductGroupVariant(data: readonly unknown[]) {
-  const productGroup = data.find(
+function findProductSchemaNode(data: readonly unknown[]) {
+  const product = data.find(
     (item) =>
       item !== null &&
       typeof item === "object" &&
-      (item as { "@type"?: unknown })["@type"] === "ProductGroup",
-  ) as { hasVariant?: readonly unknown[] } | undefined;
-  const variant = productGroup?.hasVariant?.[0];
+      (item as { "@type"?: unknown })["@type"] === "Product",
+  );
 
-  if (variant === null || typeof variant !== "object") {
-    throw new Error("ProductGroup variant missing from JSON-LD test payload");
+  if (product === null || typeof product !== "object") {
+    throw new Error("Product node missing from JSON-LD test payload");
   }
 
-  return variant as Record<string, unknown>;
+  return product as Record<string, unknown>;
 }
 
 vi.mock("next/navigation", () => ({
@@ -221,7 +220,7 @@ describe("Market Landing Page", () => {
     });
   }
 
-  async function buildAbsProductVariantForImage(image: TestProductImage) {
+  async function buildAbsProductSchemaForImage(image: TestProductImage) {
     const { buildMarketPageJsonLdData } = await import("../market-jsonld");
     const { getMarketBySlug } = await import("@/constants/product-catalog");
     const { TUCSENBERG_PRODUCT_PAGES } =
@@ -241,7 +240,7 @@ describe("Market Landing Page", () => {
       },
     });
 
-    return findProductGroupVariant(data);
+    return findProductSchemaNode(data);
   }
 
   describe("Scenario 1.1: Page renders with title and standard label", () => {
@@ -284,7 +283,7 @@ describe("Market Landing Page", () => {
       expect(screen.queryByTestId("faq-section")).not.toBeInTheDocument();
     });
 
-    it("adds ProductGroup and BreadcrumbList JSON-LD through the shared graph script", async () => {
+    it("adds Product and BreadcrumbList JSON-LD through the shared graph script", async () => {
       await renderPage("abs-flood-barriers");
 
       const graphCall = mockJsonLdGraphScript.mock.calls.at(-1)?.[0] as
@@ -293,30 +292,26 @@ describe("Market Landing Page", () => {
 
       expect(graphCall?.locale).toBe("en");
       expect(graphCall?.data).toEqual([
-        expect.objectContaining({ "@type": "ProductGroup" }),
+        expect.objectContaining({ "@type": "Product" }),
         expect.objectContaining({ "@type": "BreadcrumbList" }),
         expect.objectContaining({ "@type": "FAQPage" }),
       ]);
-      const productGroup = graphCall?.data.find(
+      const productNode = graphCall?.data.find(
         (item) =>
           item !== null &&
           typeof item === "object" &&
-          (item as { "@type"?: unknown })["@type"] === "ProductGroup",
+          (item as { "@type"?: unknown })["@type"] === "Product",
       );
       const jsonLdPayload = JSON.stringify(graphCall?.data);
-      const variant = productGroup
-        ? findProductGroupVariant([productGroup])
-        : undefined;
 
-      expect(productGroup).toMatchObject({
+      expect(productNode).toMatchObject({
         name: "ABS Interlocking Boxwall Flood Barriers",
         description: expect.stringContaining(
           "A freestanding flood barrier that needs no bolts",
         ),
       });
-      expect(jsonLdPayload).toContain("TB-BW50");
-      expect(jsonLdPayload).toContain("4 mm");
-      expect(variant).not.toHaveProperty("image");
+      expect(jsonLdPayload).not.toContain("ProductGroup");
+      expect(jsonLdPayload).not.toContain("hasVariant");
       expect(jsonLdPayload).not.toMatch(/placeholder/iu);
       expect(jsonLdPayload).not.toContain("brandAssets");
       expect(jsonLdPayload).not.toContain(
@@ -326,7 +321,7 @@ describe("Market Landing Page", () => {
 
     it("emits JSON-LD image only for safe root-relative real product images", async () => {
       await expect(
-        buildAbsProductVariantForImage({
+        buildAbsProductSchemaForImage({
           status: "real",
           src: "/images/tucsenberg-logo.png",
         }),
@@ -335,14 +330,14 @@ describe("Market Landing Page", () => {
       });
 
       await expect(
-        buildAbsProductVariantForImage({
+        buildAbsProductSchemaForImage({
           status: "real",
           src: "//evil.example/product.png",
         }),
       ).resolves.not.toHaveProperty("image");
 
       await expect(
-        buildAbsProductVariantForImage({
+        buildAbsProductSchemaForImage({
           status: "real",
           src: "/../package.json",
         }),

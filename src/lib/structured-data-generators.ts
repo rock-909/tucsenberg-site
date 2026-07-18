@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { siteFacts } from "@/config/site-facts";
 import type {
   ArticleData,
   BreadcrumbData,
@@ -17,22 +18,16 @@ type StructuredDataTranslator = Awaited<
   ReturnType<typeof getTranslations<"structured-data">>
 >;
 
-interface ProductGroupInput {
+interface ProductInput {
   name: string;
   description: string;
   url: string;
   brand: string;
-  products: Array<{
-    name: string;
-    description?: string;
-    image?: string;
-    url?: string;
-  }>;
+  image?: string;
 }
 
 interface LegalPageSchemaInput {
-  schemaType: "PrivacyPolicy" | "WebPage";
-  additionalType?: string;
+  schemaType: "WebPage";
   locale: string;
   name: string;
   description?: string;
@@ -40,15 +35,39 @@ interface LegalPageSchemaInput {
   modifiedAt?: string;
 }
 
+interface WebPageSchemaInput {
+  locale: string;
+  name: string;
+  description?: string;
+  url: string;
+}
+
+export function organizationStructuredDataId(
+  baseUrl: string = FALLBACK_BASE_URL,
+) {
+  return `${baseUrl}#organization`;
+}
+
+export function websiteStructuredDataId(baseUrl: string = FALLBACK_BASE_URL) {
+  return `${baseUrl}#website`;
+}
+
 function getSocialProfileUrls(t: StructuredDataTranslator): string[] {
-  return [
-    t("organization.social.twitter", {
-      defaultValue: SITE_CONFIG.social.twitter,
-    }),
-    t("organization.social.linkedin", {
-      defaultValue: SITE_CONFIG.social.linkedin,
-    }),
-  ].filter((url) => /^https?:\/\//iu.test(url));
+  const twitter =
+    t("organization.social.twitter") ?? SITE_CONFIG.social.twitter;
+  const linkedin =
+    t("organization.social.linkedin") ?? SITE_CONFIG.social.linkedin;
+
+  return [twitter, linkedin].filter((url) => /^https?:\/\//iu.test(url));
+}
+
+function buildOrganizationPostalAddress() {
+  return {
+    "@type": "PostalAddress" as const,
+    streetAddress: siteFacts.company.location.address,
+    addressLocality: siteFacts.company.location.city,
+    addressCountry: siteFacts.company.location.country,
+  };
 }
 
 /**
@@ -58,29 +77,28 @@ export function generateOrganizationData(
   t: StructuredDataTranslator,
   data: OrganizationData = {},
 ) {
+  const baseUrl = data.url ?? FALLBACK_BASE_URL;
   const logoPath = data.logo ?? getPublicLogoPath();
   const telephone = getPublicContactPhone(
     data.phone ?? SITE_CONFIG.contact.phone,
   );
   const sameAs = getSocialProfileUrls(t);
+  const email = data.email ?? SITE_CONFIG.contact.email;
 
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name:
-      data.name ||
-      t("organization.name", {
-        defaultValue: SITE_CONFIG.name,
-      }),
+    "@id": organizationStructuredDataId(baseUrl),
+    name: data.name ?? t("organization.name") ?? SITE_CONFIG.name,
     description:
-      data.description ||
-      t("organization.description", {
-        defaultValue: SITE_CONFIG.description,
-      }),
-    url: data.url || FALLBACK_BASE_URL,
-    ...(logoPath
-      ? { logo: new URL(logoPath, FALLBACK_BASE_URL).toString() }
-      : {}),
+      data.description ??
+      t("organization.description") ??
+      SITE_CONFIG.description,
+    url: baseUrl,
+    ...(email ? { email } : {}),
+    foundingDate: String(siteFacts.company.established),
+    address: buildOrganizationPostalAddress(),
+    ...(logoPath ? { logo: new URL(logoPath, baseUrl).toString() } : {}),
     contactPoint: {
       "@type": "ContactPoint",
       ...(telephone ? { telephone } : {}),
@@ -88,7 +106,6 @@ export function generateOrganizationData(
       availableLanguage: routing.locales,
     },
     ...(sameAs.length > 0 ? { sameAs } : {}),
-    // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }
 
@@ -99,22 +116,22 @@ export function generateWebSiteData(
   t: StructuredDataTranslator,
   data: WebSiteData = {},
 ) {
+  const baseUrl = data.url ?? FALLBACK_BASE_URL;
+
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name:
-      data.name ||
-      t("website.name", {
-        defaultValue: SITE_CONFIG.name,
-      }),
+    "@id": websiteStructuredDataId(baseUrl),
+    name: data.name ?? t("website.name") ?? SITE_CONFIG.name,
     description:
-      data.description ||
-      t("website.description", {
-        defaultValue: SITE_CONFIG.seo.defaultDescription,
-      }),
-    url: data.url || FALLBACK_BASE_URL,
+      data.description ??
+      t("website.description") ??
+      SITE_CONFIG.seo.defaultDescription,
+    url: baseUrl,
+    publisher: {
+      "@id": organizationStructuredDataId(baseUrl),
+    },
     inLanguage: routing.locales,
-    // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }
 
@@ -127,6 +144,7 @@ export function generateArticleData(
   data: ArticleData,
 ) {
   const logoPath = getPublicLogoPath();
+  const organizationId = organizationStructuredDataId(FALLBACK_BASE_URL);
 
   return {
     "@context": "https://schema.org",
@@ -134,18 +152,14 @@ export function generateArticleData(
     headline: data.title,
     description: data.description,
     author: {
-      "@type": "Person",
-      name:
-        data.author ||
-        t("article.defaultAuthor", {
-          defaultValue: `${SITE_CONFIG.name} Team`,
-        }),
+      "@type": "Organization",
+      "@id": organizationId,
+      name: data.author ?? t("article.defaultAuthor") ?? SITE_CONFIG.name,
     },
     publisher: {
       "@type": "Organization",
-      name: t("organization.name", {
-        defaultValue: SITE_CONFIG.name,
-      }),
+      "@id": organizationId,
+      name: t("organization.name") ?? SITE_CONFIG.name,
       ...(logoPath
         ? {
             logo: {
@@ -169,16 +183,15 @@ export function generateArticleData(
       : undefined,
     inLanguage: locale,
     section: data.section,
-    // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }
 
-export function generateProductGroupData(
-  data: ProductGroupInput,
+export function generateProductData(
+  data: ProductInput,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
-    "@type": "ProductGroup",
+    "@type": "Product",
     name: data.name,
     description: data.description,
     url: data.url,
@@ -186,13 +199,7 @@ export function generateProductGroupData(
       "@type": "Brand",
       name: data.brand,
     },
-    hasVariant: data.products.map((product) => ({
-      "@type": "Product",
-      name: product.name,
-      ...(product.description ? { description: product.description } : {}),
-      ...(product.image ? { image: product.image } : {}),
-      ...(product.url ? { url: product.url } : {}),
-    })),
+    ...(data.image ? { image: data.image } : {}),
   };
 }
 
@@ -202,12 +209,31 @@ export function buildLegalPageSchema(
   return {
     "@context": "https://schema.org",
     "@type": data.schemaType,
-    ...(data.additionalType ? { additionalType: data.additionalType } : {}),
     inLanguage: data.locale,
     name: data.name,
     ...(data.description ? { description: data.description } : {}),
     ...(data.publishedAt ? { datePublished: data.publishedAt } : {}),
     ...(data.modifiedAt ? { dateModified: data.modifiedAt } : {}),
+  };
+}
+
+export function buildWebPageSchema(
+  data: WebPageSchemaInput,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": data.url,
+    url: data.url,
+    inLanguage: data.locale,
+    name: data.name,
+    ...(data.description ? { description: data.description } : {}),
+    isPartOf: {
+      "@id": websiteStructuredDataId(FALLBACK_BASE_URL),
+    },
+    about: {
+      "@id": organizationStructuredDataId(FALLBACK_BASE_URL),
+    },
   };
 }
 
@@ -236,6 +262,5 @@ export function generateBreadcrumbData(data: BreadcrumbData) {
         name: item.name,
         item: item.url,
       })) || [],
-    // 移除 ...data 扩展运算符，只使用已验证的属性
   };
 }
