@@ -241,6 +241,23 @@ describe("validations - API and Data Schemas", () => {
         expect(result.data.fields.GCLID).toBe("gclid-123");
       }
     });
+
+    it("should preserve WhatsApp / Phone optional field", () => {
+      const recordWithPhone = {
+        ...validRecord,
+        fields: {
+          ...validRecord.fields,
+          "WhatsApp / Phone": "+1234567890",
+        },
+      };
+
+      const result = airtableRecordSchema.safeParse(recordWithPhone);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.fields["WhatsApp / Phone"]).toBe("+1234567890");
+      }
+    });
   });
 
   describe("emailTemplateDataSchema", () => {

@@ -141,6 +141,40 @@ function buildLeadFields(params: {
   return fields;
 }
 
+interface AirtableLikeError {
+  error: string;
+  message: string;
+  statusCode: number;
+}
+
+function isAirtableLikeError(error: unknown): error is AirtableLikeError {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const candidate = error as Record<string, unknown>;
+  return (
+    typeof candidate.error === "string" &&
+    typeof candidate.message === "string" &&
+    typeof candidate.statusCode === "number"
+  );
+}
+
+function buildCreateLeadRecordLogContext(
+  error: unknown,
+  type: LeadType,
+): Record<string, string | number> {
+  if (error instanceof Error) {
+    return { error: error.message, type };
+  }
+
+  if (isAirtableLikeError(error)) {
+    return { errorType: error.error, statusCode: error.statusCode, type };
+  }
+
+  return { error: "Unknown error", type };
+}
+
 export async function createLeadRecord(params: {
   base: AirtableNS.Base;
   tableName: string;
@@ -182,10 +216,10 @@ export async function createLeadRecord(params: {
       createdTime: createdRecord.get("Created Time") as string,
     };
   } catch (error) {
-    logger.error("Failed to create lead record", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      type,
-    });
+    logger.error(
+      "Failed to create lead record",
+      buildCreateLeadRecordLogContext(error, type),
+    );
     throw new Error("Failed to create lead record", { cause: error });
   }
 }

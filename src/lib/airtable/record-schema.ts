@@ -12,7 +12,7 @@ export const airtableRecordSchema = z.object({
     Email: z.email(),
     Company: z.string(),
     Message: z.string(),
-    Phone: z.string().optional(),
+    "WhatsApp / Phone": z.string().optional(),
     Subject: z.string().optional(),
     "Submitted At": z.string(),
     Status: z
