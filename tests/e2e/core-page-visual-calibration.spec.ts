@@ -93,4 +93,40 @@ test.describe("Core page visual calibration", () => {
 
     expect(pageErrors).toStrictEqual([]);
   });
+
+  test("home FAQ SectionHead uses 24px section heading at 375px viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await preparePage(page, "/");
+
+    const sectionHeading = page.locator(
+      '[data-testid="home-faq-section"] h2.text-section',
+    );
+    await sectionHeading.scrollIntoViewIfNeeded();
+    await expect(sectionHeading).toBeVisible();
+
+    const fontSize = await sectionHeading.evaluate(
+      (element) => window.getComputedStyle(element).fontSize,
+    );
+    expect(fontSize).toBe("24px");
+  });
+
+  test("home FAQ SectionHead uses 28px section heading at 1280px viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await preparePage(page, "/");
+
+    const sectionHeading = page.locator(
+      '[data-testid="home-faq-section"] h2.text-section',
+    );
+    await sectionHeading.scrollIntoViewIfNeeded();
+    await expect(sectionHeading).toBeVisible();
+
+    const fontSize = await sectionHeading.evaluate(
+      (element) => window.getComputedStyle(element).fontSize,
+    );
+    expect(fontSize).toBe("28px");
+  });
 });

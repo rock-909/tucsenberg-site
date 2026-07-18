@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths";
-import {
-  getAllMarketFamilyCombos,
-  getAllMarketSlugs,
-} from "@/constants/product-catalog";
+import { getAllMarketSlugs } from "@/constants/product-catalog";
 import {
   getSingleSiteSitemapPageConfig,
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
@@ -163,21 +160,6 @@ describe("sitemap.ts", () => {
           localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
         );
       }
-    });
-
-    it("should not include product catalog family pages (removed route)", async () => {
-      const result = await sitemap();
-      const urls = result.map((entry) => entry.url);
-      const productsPath = getCanonicalPath("products");
-      const [familyCombo] = getAllMarketFamilyCombos();
-
-      expect(familyCombo).toBeDefined();
-      expect(urls).not.toContain(
-        localizedUrl(
-          defaultLocale,
-          `${productsPath}/${familyCombo?.market}/${familyCombo?.family}`,
-        ),
-      );
     });
 
     it("should have lastModified for entries", async () => {

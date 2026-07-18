@@ -318,33 +318,6 @@
         "label": "FRP Composite Planks",
         "description": "Order-driven pultruded FRP flood planks for coastal, industrial and electrical sites."
       }
-    },
-    "families": {
-      "abs-flood-barriers": {
-        "abs-boxwall": {
-          "label": "ABS boxwall units"
-        }
-      },
-      "aluminum-flood-gates": {
-        "aluminum-gates": {
-          "label": "Aluminum demountable systems"
-        }
-      },
-      "absorbent-flood-bags": {
-        "absorbent-bags": {
-          "label": "Water-activated flood bags"
-        }
-      },
-      "flood-tube-dams": {
-        "tube-dams": {
-          "label": "Inflatable tube dam sections"
-        }
-      },
-      "frp-flood-barriers": {
-        "frp-planks": {
-          "label": "Pultruded composite planks"
-        }
-      }
     }
   },
   "oemLanding": {

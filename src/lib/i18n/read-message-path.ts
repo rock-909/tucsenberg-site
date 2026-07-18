@@ -22,16 +22,6 @@ function readPathValue(messages: MessageRecord, path: readonly string[]) {
   return current;
 }
 
-export function readMessagePath(
-  messages: MessageRecord,
-  path: readonly string[],
-  fallback: string,
-): string {
-  const value = readPathValue(messages, path);
-
-  return typeof value === "string" ? value : fallback;
-}
-
 export function readRequiredMessagePath(
   messages: MessageRecord,
   path: readonly string[],

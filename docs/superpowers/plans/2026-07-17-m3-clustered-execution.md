@@ -121,7 +121,7 @@ pnpm build
 pnpm exec vitest run src/app/[locale]/contact/__tests__/page.test.tsx src/app/[locale]/contact/__tests__/page-rendering.test.tsx src/app/[locale]/contact/__tests__/contact-form-static-fallback.test.tsx
 pnpm build
 node scripts/starter-checks.js prerender-static
-pnpm exec playwright test tests/e2e/no-js-html-contract.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/no-js-html-contract.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 ```
 
 - [ ] Commit `perf: make contact page fully static`, push, CI green, `READY_FOR_CLUSTER`.
@@ -156,6 +156,17 @@ pnpm component:check
 
 - [ ] On D5b tip run `pnpm website:check`, `pnpm component:check`, `pnpm react:doctor --base origin/main`, then `pnpm website:build:cf` after the website check build has completed; run Cloudflare dry-run.
 - [ ] Supply member PRs, exact SHAs, base chain, D1/D2 range-diff, build/static/Motion evidence and owner deferrals. Mark only the cluster `READY_FOR_ACCEPTANCE` and stop.
+
+### Cluster 1 CHANGES_REQUIRED follow-up (2026-07-18)
+
+Acceptance review on PR #118 found dead MDX importer output, a misnamed Contact product-family handoff, stale D4c ESLint truth, and missing SectionHead proof. This follow-up branch closes those gaps only; it is **not** public launch completion and does not start Cluster 2.
+
+- [x] Retire `mdx-importers.generated.ts` and keep `content-manifest.generated.ts` as the sole generated content artifact.
+- [x] Remove the fake Contact product-family URL/notice path; keep real product interest → `/request-quote` proof in `tests/e2e/product-interest-rfq-handoff.spec.ts`.
+- [x] Trash unused `DESIGN.json`; keep `DESIGN.md`, Registry, Playbook, Storybook, and component governance.
+- [x] Pin `eslint-config-next` to `16.2.10`, drop the root `@next/eslint-plugin-next` devDependency, and refresh active stack docs to Next 16.2.10 / OpenNext Cloudflare 1.20.1.
+- [x] Add minimal `SectionHead` semantic and `.text-section` size-contract tests.
+- [x] Inline `ContactFormWithFallback` and remove the single-call forwarding wrapper.
 
 ---
 
@@ -315,7 +326,7 @@ Start only after Cluster 3A is CLOSED on main.
 - [ ] Add failing tests that a catalog product ID becomes product identity only after catalog validation; invalid/missing ID becomes a general inquiry or validation error according to the contract; `buyerInterest` and estimator summary stay description; UTM/source/click-id survive.
 - [ ] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
 - [ ] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
-- [ ] Run lead identity/schema tests, product page tests, calculator tests and product-family handoff E2E; `pnpm build`.
+- [ ] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
 - [ ] Commit `refactor: derive inquiry product context from validated page handoff`; push and mark `READY_FOR_CLUSTER`.
 
 ### Task D6d: unify success state, Turnstile and response promise
@@ -329,7 +340,7 @@ Start only after Cluster 3A is CLOSED on main.
 
 ```bash
 pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx src/lib/forms/__tests__/lead-response.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/security/__tests__/turnstile-config.test.ts src/lib/__tests__/env.test.ts tests/architecture/env-example-parity.test.ts
-pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 pnpm website:check
 ```
 - [ ] Commit `fix: unify inquiry success, turnstile and response expectations`; push and mark `READY_FOR_CLUSTER`.
@@ -348,7 +359,7 @@ pnpm component:check
 pnpm knip:check
 pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
 pnpm test
-pnpm exec playwright test tests/e2e/contact-form-smoke.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/contact-form-smoke.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 pnpm build
 ```
 

@@ -1,8 +1,5 @@
 {
   "contact": {
-    "context": {
-      "productFamilyLabel": "You are asking about:"
-    },
     "title": "Contact",
     "description": "Fastest route: the RFQ form asks the questions we would ask anyway.",
     "inquiryHandoff": {

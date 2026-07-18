@@ -352,16 +352,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
       "inquiry validation emits these contact.form detail keys to the client",
   },
   {
-    kind: "collection-values",
-    file: "src/config/single-site-product-catalog.ts",
-    sourceName: "families",
-    valueProperty: "labelKey",
-    prefix: "catalog.families.",
-    suffixes: [""],
-    reason:
-      "contact product-family context resolves labels from each family row labelKey",
-  },
-  {
     kind: "call-arguments",
     file: "src/components/errors/route-error-view.tsx",
     ownerFunction: "RouteErrorView",

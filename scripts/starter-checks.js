@@ -126,7 +126,7 @@ Commands:
   truth-docs          Check current truth docs and release runbook order
   brand               Check old brand residue
   content-slugs       Check localized MDX slug pairs
-  content-manifest    Generate content manifest and static MDX import map (--check verifies freshness)
+  content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
   message-key-usage   Check message catalog leaves against real consumers
   validate-production-config Validate production and public-launch config gates

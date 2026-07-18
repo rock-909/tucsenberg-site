@@ -53,7 +53,6 @@ Agent rules:
 Do not hand-edit:
 
 - `src/lib/content-manifest.generated.ts`
-- `src/lib/mdx-importers.generated.ts`
 
 Refresh with:
 

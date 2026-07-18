@@ -10,11 +10,6 @@ import {
   PRODUCT_INQUIRY_KINDS,
   productLeadSchema,
 } from "@/lib/lead-pipeline/lead-schema";
-import {
-  getAllMarketFamilyCombos,
-  getFamilyByMarketAndSlug,
-} from "@/constants/product-catalog";
-import { parseProductFamilyContactContext } from "@/lib/contact/product-family-context";
 
 type JsonObject = Record<string, unknown>;
 
@@ -203,35 +198,5 @@ describe("shared zod validation detail mapping", () => {
         {},
       ),
     ).toEqual(["errors.generic"]);
-  });
-});
-
-describe("product family label message contract", () => {
-  it("resolves every catalog family label through runtime context + labelKey", () => {
-    for (const { market, family } of getAllMarketFamilyCombos()) {
-      const familyRow = getFamilyByMarketAndSlug(market, family);
-      expect(familyRow).toBeDefined();
-      if (!familyRow) continue;
-
-      expect(familyRow.labelKey).toBe(`${market}.${family}.label`);
-
-      const context = parseProductFamilyContactContext({
-        searchParams: {
-          intent: "product-family",
-          market,
-          family,
-        },
-        messages: runtimeMessages,
-      });
-
-      expect(context).not.toBeNull();
-      expect(context?.familyLabel).toEqual(
-        getMessageValue(
-          runtimeMessages,
-          `catalog.families.${familyRow.labelKey}`,
-        ),
-      );
-      expect(String(context?.familyLabel).trim()).not.toBe("");
-    }
   });
 });

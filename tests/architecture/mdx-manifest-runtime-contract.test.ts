@@ -76,12 +76,14 @@ describe("MDX manifest-only runtime contract", () => {
     }
   });
 
-  it("does not ship retired showcase-full fixture MDX imports in the materialized site", () => {
-    const source = readSource("src/lib/mdx-importers.generated.ts");
-    expect(source).not.toContain(
+  it("bundles active content source paths in the generated manifest", () => {
+    const manifestSource = readSource("src/lib/content-manifest.generated.ts");
+
+    expect(manifestSource).toContain("content/pages/en/contact.mdx");
+    expect(manifestSource).not.toContain(
       "../../profile-fixtures/showcase-full/content/pages/en/capabilities.mdx",
     );
-    expect(source).not.toMatch(
+    expect(manifestSource).not.toMatch(
       /@content\/pages\/(?:en|zh)\/(?:capabilities|how-it-works|custom-project-support)\.mdx/u,
     );
   });

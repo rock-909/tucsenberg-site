@@ -140,21 +140,10 @@ export interface MarketDefinition {
   description: string;
   sizeSystem: "inch" | "mm";
   standardIds: readonly string[];
-  familySlugs: readonly string[];
-}
-
-export interface ProductFamilyDefinition {
-  slug: string;
-  label: string;
-  description: string;
-  marketSlug: string;
-  /** Message key under `catalog.families.*` for the family label. */
-  labelKey: string;
 }
 
 export interface ProductCatalog {
   readonly markets: readonly MarketDefinition[];
-  readonly families: readonly ProductFamilyDefinition[];
 }
 
 export interface SiteDefinition {
