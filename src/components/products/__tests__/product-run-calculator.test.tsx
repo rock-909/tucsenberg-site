@@ -26,18 +26,19 @@ describe("ProductRunCalculator", () => {
     const cta = screen.getByRole("link", { name: calculator.ctaLabel });
     expect(cta).toHaveAttribute(
       "href",
-      `/request-quote?interest=${calculator.interest}`,
+      `/request-quote?catalogProductId=${calculator.catalogProductId}`,
     );
+    expect(cta.getAttribute("href")).not.toContain("interest=");
 
     fireEvent.change(screen.getByLabelText(calculator.inputLabel), {
       target: { value: "12" },
     });
 
     const href = cta.getAttribute("href") ?? "";
-    expect(href).toContain("interest=abs-flood-barriers");
-    expect(decodeURIComponent(href)).toContain("estimated 12 straight units");
-    // Quote funnel discipline: quantities only, never prices.
-    expect(decodeURIComponent(href)).not.toMatch(/\$|price|USD/i);
+    expect(href).toContain("catalogProductId=abs-flood-barriers");
+    const config = new URL(href, "http://localhost").searchParams.get("config");
+    expect(config).toContain("estimated 12 straight units");
+    expect(config).not.toMatch(/\$|price|USD/i);
   });
 
   it("shows no estimate for empty or non-positive input", () => {

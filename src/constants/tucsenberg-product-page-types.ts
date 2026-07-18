@@ -1,7 +1,8 @@
 import type { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 
+import type { ProductMarketSlug } from "@/config/single-site-product-catalog";
+
 export interface TucsenbergProductCta {
-  href: `/request-quote${string}`;
   label: string;
   /** Quote-SLA promise rendered as a muted line under the button, never inside it (mobile overflow). */
   note?: string;
@@ -89,8 +90,7 @@ export interface TucsenbergProductCalculator {
   /** Honest limits: what the estimate does not cover. */
   disclaimer: string;
   ctaLabel: string;
-  /** interest slug forwarded to the RFQ page. */
-  interest: string;
+  catalogProductId: ProductMarketSlug;
   /** RFQ prefill message; placeholders: {length}, {units}. */
   rfqMessageTemplate: string;
 }
@@ -121,7 +121,7 @@ export interface TucsenbergProductScenes {
 }
 
 export interface TucsenbergProductPage {
-  slug: string;
+  slug: ProductMarketSlug;
   meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
   image: TucsenbergProductImage;
   diagram?: TucsenbergProductDiagram;

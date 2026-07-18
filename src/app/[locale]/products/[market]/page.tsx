@@ -37,6 +37,11 @@ import {
 } from "@/components/products/product-diagrams";
 import { ProductRunCalculator } from "@/components/products/product-run-calculator";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
+import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
+
+function getProductQuoteHref(productPage: TucsenbergProductPage) {
+  return createCatalogInquiryHref(productPage.slug);
+}
 
 export function generateStaticParams() {
   const markets = getAllMarketSlugs();
@@ -319,7 +324,7 @@ function ProductFinalCta({
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button asChild size="lg">
-          <Link href={page.cta.href}>{page.cta.label}</Link>
+          <Link href={getProductQuoteHref(page)}>{page.cta.label}</Link>
         </Button>
         <Button asChild size="lg" variant="outline">
           <a href={page.downloadHref}>{labels.downloadSpec}</a>
@@ -428,7 +433,9 @@ export default async function MarketPage({ params }: MarketPageProps) {
           ) : null}
           <div className="mt-6">
             <Button asChild>
-              <Link href={productPage.cta.href}>{productPage.cta.label}</Link>
+              <Link href={getProductQuoteHref(productPage)}>
+                {productPage.cta.label}
+              </Link>
             </Button>
             {productPage.cta.note ? (
               <p className="mt-2 text-sm leading-6 text-muted-foreground">

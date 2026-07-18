@@ -270,14 +270,34 @@ describe("Market Landing Page", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders product CTA links to the RFQ page", async () => {
+    it("renders product CTA links through the shared catalog query contract", async () => {
       await renderPage("abs-flood-barriers");
 
       const quoteLinks = screen.getAllByRole("link", {
         name: /request a quote/i,
       });
 
-      expect(quoteLinks[0]).toHaveAttribute("href", "/request-quote");
+      expect(quoteLinks[0]).toHaveAttribute(
+        "href",
+        "/request-quote?catalogProductId=abs-flood-barriers",
+      );
+    });
+
+    it("uses the FRP catalog slug instead of legacy interest handoffs", async () => {
+      await renderPage("frp-flood-barriers");
+
+      const registerLink = screen
+        .getAllByRole("link", {
+          name: "Register interest",
+        })
+        .at(0);
+      expect(registerLink).toBeDefined();
+
+      expect(registerLink).toHaveAttribute(
+        "href",
+        "/request-quote?catalogProductId=frp-flood-barriers",
+      );
+      expect(registerLink?.getAttribute("href")).not.toContain("interest=");
     });
 
     it("does not render shared FAQ on market landing pages", async () => {
@@ -447,13 +467,16 @@ describe("Market Landing Page", () => {
   });
 
   describe("Scenario 1.7: CTA links to /request-quote", () => {
-    it("renders CTA section with link to /request-quote", async () => {
+    it("renders CTA section with the validated catalog query contract", async () => {
       await renderPage("abs-flood-barriers");
 
       const ctaLink = screen.getAllByRole("link", {
         name: /request a quote/i,
       })[0];
-      expect(ctaLink).toHaveAttribute("href", "/request-quote");
+      expect(ctaLink).toHaveAttribute(
+        "href",
+        "/request-quote?catalogProductId=abs-flood-barriers",
+      );
     });
 
     it("renders the spec-sheet download link without gating", async () => {
