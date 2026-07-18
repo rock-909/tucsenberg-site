@@ -88,11 +88,11 @@
 
 ## Task 6: Verification, PR, and stop point
 
-- [ ] Run focused Vitest for the shared form, Contact page, Request Quote page, response decoder, submission hook, and URL handoffs.
-- [ ] Run focused Playwright for Contact submit, Request Quote, product-interest handoff, estimator handoff, no-JS, mobile/autofill/keyboard behavior.
-- [ ] Run `pnpm content:check` and `pnpm component:check`.
-- [ ] Run `pnpm website:check`, then `pnpm build`; do not run build variants in parallel.
-- [ ] Run `git diff --check`, inspect `git status -sb`, and confirm no public company phone production surface was removed.
+- [x] Run focused Vitest for the shared form, Contact page, Request Quote page, response decoder, submission hook, and URL handoffs.
+- [x] Run focused Playwright for Contact submit, Request Quote, product-interest handoff, estimator handoff, no-JS, mobile/autofill/keyboard behavior.
+- [x] Run `pnpm content:check` and `pnpm component:check`.
+- [x] Run `pnpm website:check`, then `pnpm build`; do not run build variants in parallel.
+- [x] Run `git diff --check`, inspect `git status -sb`, and confirm no public company phone production surface was removed.
 - [x] Commit `feat: use one low-friction inquiry form across contact and request quote`.
-- [ ] Push, open one PR, wait for exact-SHA CI, and leave `READY_FOR_CLUSTER` with changed files, test evidence, screenshots/DOM evidence, known concerns, and explicit statement that M3 stays `24/33` until D6a merges.
+- [x] Push, open one PR, wait for exact-SHA CI, and leave `READY_FOR_CLUSTER` with changed files, test evidence, screenshots/DOM evidence, known concerns, and explicit statement that M3 stays `24/33` until D6a merges.
 - [ ] Stop. Do not merge and do not start D5a; Codex performs independent task-level acceptance first.
