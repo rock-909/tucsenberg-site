@@ -88,6 +88,28 @@ describe("inquiry validation detail mapping", () => {
     }
   });
 
+  it("maps canonical message too_long to errors.message.tooLong after normalization", () => {
+    const tooLong = productLeadSchema.safeParse({
+      ...validBase,
+      message: "A".repeat(5000),
+    });
+    const wrongType = productLeadSchema.safeParse({
+      ...validBase,
+      message: 123,
+    });
+
+    expect(tooLong.success).toBe(false);
+    expect(wrongType.success).toBe(false);
+    if (tooLong.success || wrongType.success) return;
+
+    expect(mapInquiryValidationDetails(tooLong.error.issues)).toEqual([
+      "errors.message.tooLong",
+    ]);
+    expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
+      "errors.message.invalid",
+    ]);
+  });
+
   it("maps wrong-type issues to .invalid instead of .required", () => {
     const parsed = productLeadSchema.safeParse({
       ...validBase,

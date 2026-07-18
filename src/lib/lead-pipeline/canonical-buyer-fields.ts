@@ -18,13 +18,6 @@ import {
   sanitizePlainText,
 } from "@/lib/security/validation";
 
-export interface CanonicalInquiryBuyerFields {
-  fullName: string;
-  email: string;
-  phone?: string;
-  message?: string;
-}
-
 const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 
 export function isValidLeadPhone(value: string): boolean {
@@ -46,18 +39,16 @@ function normalizeOptionalInput(value: unknown): unknown {
   return typeof value === "string" ? value.trim() : value;
 }
 
-const leadEmailSchema = z
+export const canonicalBuyerFullNameSchema = sanitizedString()
+  .min(1)
+  .max(MAX_LEAD_NAME_LENGTH);
+
+export const canonicalBuyerEmailSchema = z
   .email()
   .trim()
   .min(1)
   .max(MAX_LEAD_EMAIL_LENGTH)
   .refine((email) => !hasSpreadsheetFormulaPrefix(email));
-
-export const canonicalBuyerFullNameSchema = sanitizedString()
-  .min(1)
-  .max(MAX_LEAD_NAME_LENGTH);
-
-export const canonicalBuyerEmailSchema = leadEmailSchema;
 
 export const canonicalBuyerPhoneSchema: z.ZodType<string | undefined> = z
   .unknown()
@@ -78,15 +69,9 @@ export const canonicalBuyerPhoneSchema: z.ZodType<string | undefined> = z
 export const canonicalBuyerMessageSchema: z.ZodType<string | undefined> = z
   .unknown()
   .transform(normalizeOptionalInput)
-  .refine((value) => value === undefined || typeof value === "string", {
-    error: "Invalid message",
-  })
-  .refine(
-    (value) =>
-      value === undefined ||
-      (typeof value === "string" && value.length <= MAX_LEAD_MESSAGE_LENGTH),
-    { error: "Message is too long" },
-  )
-  .transform((value) =>
-    typeof value === "string" ? sanitizeMultilineText(value) : undefined,
+  .pipe(
+    z.union([
+      z.undefined(),
+      z.string().max(MAX_LEAD_MESSAGE_LENGTH).overwrite(sanitizeMultilineText),
+    ]),
   );

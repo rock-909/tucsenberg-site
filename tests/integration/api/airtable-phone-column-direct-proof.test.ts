@@ -1,12 +1,15 @@
 /**
- * Direct Airtable proof for the WhatsApp / Phone column.
+ * Production-path Airtable proof for the WhatsApp / Phone column.
  *
  * Skipped unless real credentials and AIRTABLE_PHONE_PROOF=1 are provided.
- * This is the Cluster 3A external gate — normal CI uses mocked Airtable only.
+ * Writes through AirtableService.createLead → createLeadRecord → buildLeadFields
+ * / addPhoneField / sanitizeAirtablePhoneField. Normal CI uses mocked Airtable only.
  */
 
 import { afterAll, describe, expect, it } from "vitest";
 import Airtable from "airtable";
+import { AirtableService } from "@/lib/airtable/service";
+import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 
 const PROOF_ENABLED =
   process.env.AIRTABLE_PHONE_PROOF === "1" &&
@@ -19,7 +22,7 @@ const PROOF_PHONE = "+8613800138000";
 const TABLE_NAME = process.env.AIRTABLE_TABLE_NAME || "Contacts";
 
 describe.skipIf(!PROOF_ENABLED)(
-  "airtable WhatsApp / Phone direct write proof",
+  "airtable WhatsApp / Phone production write proof",
   () => {
     let createdRecordId: string | undefined;
 
@@ -32,30 +35,22 @@ describe.skipIf(!PROOF_ENABLED)(
       await base.table(TABLE_NAME).destroy(createdRecordId);
     });
 
-    it("writes and reads back the normalized + phone without a leading apostrophe", async () => {
-      const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY! }).base(
-        process.env.AIRTABLE_BASE_ID!,
-      );
+    it("stores the normalized + phone from createLead without a leading apostrophe", async () => {
+      const service = new AirtableService();
+      expect(service.isReady()).toBe(false);
 
-      const created = await base.table(TABLE_NAME).create([
-        {
-          fields: {
-            Email: `c2-phone-proof+${Date.now()}@example.com`,
-            "First Name": "C2",
-            "Last Name": "Proof",
-            Message: "Cluster 3A phone column proof",
-            "WhatsApp / Phone": PROOF_PHONE,
-            Status: "New",
-            Source: "Product Inquiry",
-          },
-        },
-      ]);
+      const record = await service.createLead(LEAD_TYPES.PRODUCT, {
+        firstName: "C2",
+        lastName: "Proof",
+        email: `c2-phone-proof+${Date.now()}@example.com`,
+        message: "Cluster 3A phone column proof via production path",
+        phone: PROOF_PHONE,
+        productName: "General RFQ",
+      });
 
-      const record = Array.isArray(created) ? created[0] : created;
-      createdRecordId = record?.id;
+      createdRecordId = record.id;
 
-      expect(record).toBeDefined();
-      const stored = record!.get("WhatsApp / Phone");
+      const stored = record.fields["WhatsApp / Phone"];
       expect(stored).toBe(PROOF_PHONE);
       expect(String(stored)).not.toMatch(/^'/);
     });

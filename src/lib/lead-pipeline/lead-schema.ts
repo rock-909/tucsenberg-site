@@ -11,7 +11,6 @@ import {
   canonicalBuyerFullNameSchema,
   canonicalBuyerMessageSchema,
   canonicalBuyerPhoneSchema,
-  type CanonicalInquiryBuyerFields,
 } from "@/lib/lead-pipeline/canonical-buyer-fields";
 import {
   PRODUCT_INQUIRY_KINDS,
@@ -21,11 +20,9 @@ import {
   sanitizeMultilineText,
   sanitizePlainText,
 } from "@/lib/security/validation";
-import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
-  MAX_LEAD_EMAIL_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
 } from "@/constants";
@@ -39,8 +36,6 @@ export const LEAD_TYPES = {
 } as const;
 
 export type LeadType = (typeof LEAD_TYPES)[keyof typeof LEAD_TYPES];
-
-export type { CanonicalInquiryBuyerFields };
 
 export { PRODUCT_INQUIRY_KINDS, type ProductInquiryKind };
 
@@ -68,15 +63,6 @@ const sanitizedString = () => z.string().overwrite(sanitizePlainText);
 const multilineSanitizedString = () =>
   z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
-
-// Airtable's Email field stays a real email value; reject formula-capable
-// prefixes here instead of corrupting valid addresses with text escaping.
-const leadEmailSchema = z
-  .email()
-  .trim()
-  .min(1)
-  .max(MAX_LEAD_EMAIL_LENGTH)
-  .refine((email) => !hasSpreadsheetFormulaPrefix(email));
 
 export const leadAttributionFields = {
   utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
@@ -116,7 +102,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: leadEmailSchema,
+  email: canonicalBuyerEmailSchema,
   ...leadAttributionFields,
 };
 

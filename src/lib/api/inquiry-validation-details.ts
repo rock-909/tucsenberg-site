@@ -35,6 +35,7 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.email.tooLong",
   "errors.phone.invalid",
   "errors.message.invalid",
+  "errors.message.tooLong",
   "errors.company.tooLong",
   "errors.company.invalid",
   "errors.productInquiryKind.invalid",
