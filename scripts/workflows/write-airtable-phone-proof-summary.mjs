@@ -1,17 +1,6 @@
 import { appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY;
-const REF = process.env.PROOF_SUMMARY_REF ?? "";
-const SHA = process.env.PROOF_SUMMARY_SHA ?? "";
-const TABLE = process.env.PROOF_SUMMARY_TABLE ?? "";
-const OUTCOME = process.env.PROOF_OUTCOME ?? "";
-
-function fail(message) {
-  console.error(`::error::${message}`);
-  process.exit(1);
-}
-
 function rejectCrLf(value, label) {
   if (/[\r\n]/.test(value)) {
     throw new Error(`${label} must not contain CR or LF characters`);
@@ -44,37 +33,67 @@ function buildSummary({ ref, sha, table, result }) {
   ].join("\n");
 }
 
-function main() {
-  if (!SUMMARY_PATH) {
-    fail("GITHUB_STEP_SUMMARY is required");
+/**
+ * @param {object} options
+ * @param {Record<string, string | undefined>} options.env
+ * @param {(path: string, content: string) => void} options.appendWriter
+ * @param {(message: string) => void} [options.reportError]
+ * @returns {number}
+ */
+export function writeAirtablePhoneProofSummary({
+  env,
+  appendWriter,
+  reportError = () => {},
+}) {
+  const summaryPath = env.GITHUB_STEP_SUMMARY ?? "";
+  const ref = env.PROOF_SUMMARY_REF ?? "";
+  const sha = env.PROOF_SUMMARY_SHA ?? "";
+  const table = env.PROOF_SUMMARY_TABLE ?? "";
+  const outcome = env.PROOF_OUTCOME ?? "";
+
+  if (!summaryPath) {
+    reportError("GITHUB_STEP_SUMMARY is required");
+    return 1;
   }
 
   for (const [label, value] of [
-    ["Ref", REF],
-    ["SHA", SHA],
-    ["Table", TABLE],
-    ["Proof outcome", OUTCOME],
+    ["Ref", ref],
+    ["SHA", sha],
+    ["Table", table],
+    ["Proof outcome", outcome],
   ]) {
     if (value.length === 0) {
-      fail(`${label} is required`);
+      reportError(`${label} is required`);
+      return 1;
     }
     try {
       rejectCrLf(value, label);
     } catch (error) {
-      fail(error instanceof Error ? error.message : String(error));
+      reportError(error instanceof Error ? error.message : String(error));
+      return 1;
     }
   }
 
-  const result = deriveResult(OUTCOME);
-  appendFileSync(SUMMARY_PATH, buildSummary({ ref: REF, sha: SHA, table: TABLE, result }));
+  const result = deriveResult(outcome);
+  appendWriter(
+    summaryPath,
+    buildSummary({ ref, sha, table, result }),
+  );
 
-  if (result === "fail") {
-    process.exit(1);
-  }
+  return result === "fail" ? 1 : 0;
+}
+
+function main() {
+  const exitCode = writeAirtablePhoneProofSummary({
+    env: process.env,
+    appendWriter: appendFileSync,
+    reportError: (message) => {
+      console.error(`::error::${message}`);
+    },
+  });
+  process.exitCode = exitCode;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();
 }
-
-export { buildSummary, deriveResult, escapeHtml, rejectCrLf };

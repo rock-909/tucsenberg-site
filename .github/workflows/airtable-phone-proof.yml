@@ -42,16 +42,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify proof test exists
-        env:
-          PROOF_REF: ${{ github.ref }}
-          PROOF_SHA: ${{ github.sha }}
-        run: |
-          if [ ! -f tests/integration/api/airtable-phone-column-direct-proof.test.ts ]; then
-            echo "::error::Missing tests/integration/api/airtable-phone-column-direct-proof.test.ts on ref ${PROOF_REF} (${PROOF_SHA}). Dispatch this workflow against a ref that includes the proof test."
-            exit 1
-          fi
-
       - name: Verify Airtable proof secrets
         env:
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}

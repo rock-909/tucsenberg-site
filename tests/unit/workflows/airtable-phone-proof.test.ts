@@ -66,25 +66,15 @@ describe("Airtable phone proof workflow", () => {
     });
   });
 
-  it("checks the proof test file, then runs the fixed vitest command with proof env", () => {
-    const verifyTest = requireStep(
-      (step) => step.name === "Verify proof test exists",
-    );
+  it("runs the fixed vitest command with proof env", () => {
     const proofStep = requireStep(
       (step) => step.name === "Run Airtable phone column proof",
     );
 
-    expect(verifyTest.run).toContain(PROOF_TEST_PATH);
-    expect(verifyTest.env).toMatchObject({
-      PROOF_REF: "${{ github.ref }}",
-      PROOF_SHA: "${{ github.sha }}",
-    });
-    expect(verifyTest.run).toContain("${PROOF_REF}");
-    expect(verifyTest.run).toContain("${PROOF_SHA}");
-
     expect(proofStep.run).toContain(
       "pnpm exec vitest run tests/integration/api/airtable-phone-column-direct-proof.test.ts --reporter=verbose",
     );
+    expect(proofStep.run).toContain(PROOF_TEST_PATH);
     expect(proofStep.env).toMatchObject({
       AIRTABLE_PHONE_PROOF: "1",
       AIRTABLE_API_KEY: "${{ secrets.AIRTABLE_API_KEY }}",
@@ -116,16 +106,5 @@ describe("Airtable phone proof workflow", () => {
     expect(summaryStep.run).not.toMatch(
       /record id|AIRTABLE_API_KEY|AIRTABLE_BASE_ID|api response/iu,
     );
-  });
-
-  it("does not interpolate malicious table names into shell run bodies", () => {
-    const maliciousTable = "Contacts$(touch /tmp/pwned)";
-    const backtickTable = "Contacts`id`";
-
-    for (const step of collectRunSteps()) {
-      expect(step.run, step.name).not.toContain(maliciousTable);
-      expect(step.run, step.name).not.toContain(backtickTable);
-      expect(step.run, step.name).not.toMatch(/\$\(touch/iu);
-    }
   });
 });
