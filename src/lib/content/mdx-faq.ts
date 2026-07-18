@@ -6,8 +6,6 @@ import type { FaqItem } from "@/types/content.types";
 export const LAYER1_FACTS: Record<string, string | number> = {
   companyName: siteFacts.company.name,
   established: siteFacts.company.established,
-  exportCountries: siteFacts.stats.exportCountries,
-  employees: siteFacts.company.employees,
 };
 
 export function extractFaqFromMetadata(

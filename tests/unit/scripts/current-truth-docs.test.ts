@@ -213,25 +213,6 @@ describe("current-truth docs guard", () => {
     }
   });
 
-  it("guards stable docs from naming legacy specs as current product truth", () => {
-    expect(CHECKS).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          file: "docs/项目基础/配置.md",
-          required: expect.arrayContaining([
-            "src/constants/tucsenberg-product-pages.ts",
-          ]),
-        }),
-        expect.objectContaining({
-          file: "docs/项目基础/替换边界.md",
-          forbidden: expect.arrayContaining([
-            "edit `src/config/single-site-product-catalog.ts`, `src/constants/product-standards.ts`, and `src/constants/product-specs/**` first",
-          ]),
-        }),
-      ]),
-    );
-  });
-
   it("rejects retired public paths from current docs", () => {
     const files = createValidFiles();
     files["README.md"] = RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n");
@@ -892,6 +873,28 @@ describe("current-truth docs guard", () => {
     );
     expect(findOutOfOrderCommand(["first", "second"], "first\nsecond")).toBe(
       null,
+    );
+  });
+});
+
+describe("current-truth docs product ownership markers", () => {
+  it("guards stable docs from naming legacy specs as current product truth", () => {
+    expect(CHECKS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file: "docs/项目基础/配置.md",
+          required: expect.arrayContaining([
+            "src/constants/tucsenberg-product-pages.ts",
+          ]),
+        }),
+        expect.objectContaining({
+          file: "docs/项目基础/替换边界.md",
+          required: expect.arrayContaining([
+            "src/constants/tucsenberg-product-pages.ts",
+            "src/config/single-site-product-catalog.ts",
+          ]),
+        }),
+      ]),
     );
   });
 });

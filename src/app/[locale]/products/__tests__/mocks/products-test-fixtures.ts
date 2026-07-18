@@ -40,6 +40,7 @@ export const mockCatalogTranslationsEn = {
   "cta.description":
     "Send an RFQ with openings, quantity, market and delivery port.",
   "cta.resources": "View guides",
+  "cta.specificationsGuide": "View specifications guide",
   "cta.contact": "Request a Quote",
   "markets.abs-flood-barriers.label": "ABS Interlocking Boxwall Flood Barriers",
   "markets.abs-flood-barriers.description":
@@ -93,6 +94,7 @@ export const mockCatalogTranslationsZh = {
   "cta.title": "联系前需要更多资料？",
   "cta.description": "可以先查看资料页，也可以在访客准备好时直接联系。",
   "cta.resources": "查看指南",
+  "cta.specificationsGuide": "查看规格指南",
   "cta.contact": "提交询价",
   "markets.abs-flood-barriers.label": "ABS 拼接式挡水板",
   "markets.abs-flood-barriers.description":

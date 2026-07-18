@@ -10,8 +10,14 @@ export interface SiteSeoConfig {
   titleTemplate: string;
   defaultTitle: string;
   defaultDescription: string;
-  keywords: string[];
 }
+
+export type TucsenbergProductStandardId =
+  | "tb_bw"
+  | "tb_ag"
+  | "tb_fb"
+  | "tb_td"
+  | "tb_cp";
 
 export interface SiteSocialConfig {
   twitter: string;
@@ -139,7 +145,7 @@ export interface MarketDefinition {
   standardLabel: string;
   description: string;
   sizeSystem: "inch" | "mm";
-  standardIds: readonly string[];
+  standardIds: readonly TucsenbergProductStandardId[];
 }
 
 export interface ProductCatalog {

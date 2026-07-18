@@ -126,6 +126,8 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
           ],
         ],
       },
+      footer:
+        "Spec deep-dive: [Demountable flood barrier specifications explained](/guides/flood-barrier-specifications) — heights, model codes, unit weights and wall thickness in plain engineering language.",
     },
     {
       title: "What determines your price",

@@ -62,6 +62,7 @@ const FOOTER_NAVIGATION_PAGE_TYPES = [
   "products",
   "oemWholesale",
   "materialsGuide",
+  "specificationsGuide",
   "about",
 ] as const satisfies readonly PageType[];
 
@@ -82,6 +83,7 @@ const FOOTER_LABELS = {
   products: "Products",
   oemWholesale: "OEM & Wholesale",
   materialsGuide: "Materials Guide",
+  specificationsGuide: "Specifications Guide",
   about: "About",
   requestQuote: "Request a Quote",
   contact: "Contact",
@@ -95,6 +97,7 @@ const FOOTER_TRANSLATION_KEYS = {
   products: "footer.sections.navigation.products",
   oemWholesale: "footer.sections.navigation.oemWholesale",
   materialsGuide: "footer.sections.navigation.materialsGuide",
+  specificationsGuide: "footer.sections.navigation.specificationsGuide",
   about: "footer.sections.navigation.about",
   requestQuote: "footer.sections.support.requestQuote",
   contact: "footer.sections.support.contact",
@@ -195,14 +198,6 @@ export const SINGLE_SITE_DEFINITION = {
         "Flood Barrier Manufacturer & Supplier from China | Tucsenberg",
       defaultDescription:
         "Factory-direct flood barriers from China: ABS boxwall, aluminum flood gates, sandless flood bags and tube dams. OEM & private label. Quotes in 12 hours.",
-      keywords: [
-        "flood barrier manufacturer",
-        "flood barrier supplier China",
-        "ABS flood barrier",
-        "aluminum flood gates",
-        "sandless flood bags",
-        "OEM flood barriers",
-      ],
     },
     social,
     contact,

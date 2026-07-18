@@ -73,6 +73,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         title={t("cta.title")}
         description={t("cta.description")}
         guideLabel={t("cta.resources")}
+        specificationsGuideLabel={t("cta.specificationsGuide")}
         requestQuoteLabel={t("cta.contact")}
       />
     </div>

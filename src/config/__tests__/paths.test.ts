@@ -207,7 +207,8 @@ describe("paths configuration", () => {
       expect(SITE_CONFIG.seo.titleTemplate).toContain("%s");
       expect(SITE_CONFIG.seo.defaultTitle).toBeTruthy();
       expect(SITE_CONFIG.seo.defaultDescription).toBeTruthy();
-      expect(Array.isArray(SITE_CONFIG.seo.keywords)).toBe(true);
+      expect(Array.isArray(SITE_CONFIG.seo.defaultDescription)).toBe(false);
+      expect(SITE_CONFIG.seo.defaultDescription.length).toBeGreaterThan(0);
     });
 
     it("should have social media links", () => {

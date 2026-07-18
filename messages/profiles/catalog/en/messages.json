@@ -17,6 +17,7 @@
         "products": "Products",
         "oemWholesale": "OEM & Wholesale",
         "materialsGuide": "Materials Guide",
+        "specificationsGuide": "Specifications Guide",
         "about": "About"
       },
       "support": {
@@ -287,6 +288,7 @@
       "title": "Need exact line, quantity or configuration detail?",
       "description": "Send an RFQ with openings, quantity, market and delivery port.",
       "resources": "View guides",
+      "specificationsGuide": "View specifications guide",
       "contact": "Request a Quote"
     },
     "market": {

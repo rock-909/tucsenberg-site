@@ -75,7 +75,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - 页面表达：`src/config/single-site-page-expression.ts`
 - 导航和链接：`src/config/single-site-navigation.ts`、`src/config/single-site-links.ts`
 - 页面正文：`content/pages/en/*.mdx`
-- 产品数据：`src/constants/tucsenberg-product-page-*.ts`、`src/constants/tucsenberg-product-pages.ts`、`src/config/single-site-product-catalog.ts`、`src/constants/product-standards.ts`
+- 产品数据：`src/constants/tucsenberg-product-page-*.ts`、`src/constants/tucsenberg-product-pages.ts`、`src/config/single-site-product-catalog.ts`
 - UI 文案 authoring truth：`messages/base/**`、`messages/profiles/b2b-lead/**`、`messages/profiles/catalog/**`
 
 message graph 固定为 `base -> b2b-lead -> catalog`。修改 physical packs 后运行 `pnpm content:check`。
