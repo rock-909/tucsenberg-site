@@ -381,6 +381,38 @@ describe("client-boundary build artifacts", () => {
     expect(result.forbiddenSources).toEqual([]);
   });
 
+  it("measures rawBytes as utf-8 file bytes, not js string length", () => {
+    const rootDir = createFixture({});
+    const chunksDir = path.join(rootDir, ".next/static/chunks");
+    const chunkPath = path.join(chunksDir, "inquiry-live.js");
+    const mapPath = path.join(chunksDir, "inquiry-live.js.map");
+    const chunkBody = `export const marker="${INQUIRY_FORM_CHUNK_MARKER}"; export const euro="€";`;
+    const chunkText = `${chunkBody}\n//# sourceMappingURL=inquiry-live.js.map\n`;
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.mkdirSync(chunksDir, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(chunkPath, chunkText, "utf8");
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      mapPath,
+      `${JSON.stringify({
+        version: 3,
+        sources: [`turbopack:///[project]/${INQUIRY_FORM_SOURCE}`],
+      })}\n`,
+    );
+    fixtureRoots.push(rootDir);
+
+    const result = collectInquiryFormBuildArtifactFindings(rootDir);
+    expect(Array.isArray(result)).toBe(false);
+    if (Array.isArray(result)) {
+      throw new Error("expected passing result object");
+    }
+
+    expect(result.rawBytes).toBe(Buffer.byteLength(chunkText, "utf8"));
+    expect(result.rawBytes).toBeGreaterThan(chunkText.length);
+  });
+
   it("fails when the paired InquiryForm sourcemap pulls in forbidden dependencies", () => {
     const rootDir = createFixture({});
     buildInquiryFormChunkFixture(rootDir);

@@ -391,7 +391,8 @@ function collectInquiryFormBuildArtifactFindings(
   }
 
   const chunkPath = inquiryChunks[0];
-  const chunkSource = fs.readFileSync(chunkPath, "utf8");
+  const chunkBytes = fs.readFileSync(chunkPath);
+  const chunkSource = chunkBytes.toString("utf8");
   const resolvedMap = resolveChunkSourceMapPath(
     chunksDir,
     chunkPath,
@@ -421,7 +422,7 @@ function collectInquiryFormBuildArtifactFindings(
     );
   }
 
-  const rawBytes = chunkSource.length;
+  const rawBytes = chunkBytes.byteLength;
   if (rawBytes > INQUIRY_FORM_MAX_RAW_BYTES) {
     findings.push(
       createBuildArtifactError(
@@ -440,7 +441,7 @@ function collectInquiryFormBuildArtifactFindings(
     mapPath: toRepoPath(rootDir, mapPath),
     chunkPath: toRepoPath(rootDir, chunkPath),
     rawBytes,
-    gzipBytes: gzipSync(Buffer.from(chunkSource)).length,
+    gzipBytes: gzipSync(chunkBytes).length,
     forbiddenSources: [],
   };
 }
