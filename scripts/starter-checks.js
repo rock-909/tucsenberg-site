@@ -24,9 +24,16 @@ const {
 } = require("./quality/checks/content-slugs");
 const {
   collectClientBoundaryFiles,
+  collectForbiddenBuildSources,
+  collectInquiryFormBuildArtifactFindings,
   hasTopLevelUseClientDirective,
+  INQUIRY_FORM_CHUNK_MARKER,
+  INQUIRY_FORM_MAX_RAW_BYTES,
+  INQUIRY_FORM_SOURCE,
   runClientBoundaryBudgetCheck,
+  runClientBoundaryBuildArtifactsCli,
   runClientBoundaryCli,
+  runInquiryFormBuildArtifactCheck,
 } = require("./quality/checks/client-boundary");
 const {
   analyzeFile,
@@ -83,11 +90,6 @@ const {
   runPrerenderStaticCheck,
 } = require("./quality/checks/prerender-static");
 const {
-  collectInquiryFormClientChunkFindings,
-  runInquiryFormClientChunkCheck,
-  runInquiryFormClientChunkCli,
-} = require("./quality/checks/inquiry-form-client-chunk");
-const {
   runValidateProductionConfigCli,
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
@@ -138,8 +140,7 @@ Commands:
   eslint-disable      Check eslint-disable exception hygiene
   component-governance Check component registry, Storybook, and UI wrapper drift
   content-readiness   Check buyer-visible catalog residue (--strict-client-launch promotes launch blockers to errors)
-  client-boundary     Check top-level use client budget
-  inquiry-form-client-chunk  Check InquiryForm client chunk after pnpm build
+  client-boundary     Check top-level use client budget (--build-artifacts after pnpm build)
   prerender-static    Check localized Next.js build output stays prerendered
   cf-preview-smoke    Probe local Cloudflare preview behavior
   public-preview-smoke Probe public preview page route health
@@ -167,8 +168,7 @@ async function main(argv = process.argv.slice(2)) {
     "eslint-disable": () => runEslintDisableCheck(),
     "component-governance": () => runComponentGovernanceCli(),
     "content-readiness": () => runContentReadinessCli(args),
-    "client-boundary": () => runClientBoundaryCli(),
-    "inquiry-form-client-chunk": () => runInquiryFormClientChunkCli(),
+    "client-boundary": (commandArgs) => runClientBoundaryCli(commandArgs),
     "prerender-static": () => runPrerenderStaticCheck(),
     "cf-preview-smoke": () => runCloudflarePreviewSmoke(args),
     "public-preview-smoke": () => runPublicPreviewSmoke(args),
@@ -189,7 +189,7 @@ async function main(argv = process.argv.slice(2)) {
   };
 
   const handler = commandHandlers[command];
-  const ok = handler ? await handler() : false;
+  const ok = handler ? await handler(args) : false;
 
   if (!handler) {
     printUsage();
@@ -222,6 +222,8 @@ module.exports = {
   analyzeSource,
   buildKey,
   collectClientBoundaryFiles,
+  collectForbiddenBuildSources,
+  collectInquiryFormBuildArtifactFindings,
   collectCloudflareOfficialCompareFailures,
   collectComponentGovernanceFindings,
   collectContentReadinessFindings,
@@ -244,6 +246,9 @@ module.exports = {
   getActiveGuardrailExceptionSection,
   getReleaseProofDocsCommandBlock,
   hasTopLevelUseClientDirective,
+  INQUIRY_FORM_CHUNK_MARKER,
+  INQUIRY_FORM_MAX_RAW_BYTES,
+  INQUIRY_FORM_SOURCE,
   isProductionFile,
   isStructuralGuardrailExemptPath,
   isTestFile,
@@ -255,6 +260,8 @@ module.exports = {
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
   runClientBoundaryBudgetCheck,
+  runClientBoundaryBuildArtifactsCli,
+  runInquiryFormBuildArtifactCheck,
   runComponentGovernanceCli,
   runContentManifestGenerator,
   runContentReadinessCheck,

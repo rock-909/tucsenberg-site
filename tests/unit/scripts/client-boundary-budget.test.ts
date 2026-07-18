@@ -3,9 +3,15 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  INQUIRY_FORM_CHUNK_MARKER,
+  INQUIRY_FORM_MAX_RAW_BYTES,
+  INQUIRY_FORM_SOURCE,
   collectClientBoundaryFiles,
+  collectForbiddenBuildSources,
+  collectInquiryFormBuildArtifactFindings,
   hasTopLevelUseClientDirective,
   runClientBoundaryBudgetCheck,
+  runInquiryFormBuildArtifactCheck,
 } from "../../../scripts/starter-checks.js";
 
 const TEMP_TRASH_ROOT = path.join(
@@ -13,7 +19,7 @@ const TEMP_TRASH_ROOT = path.join(
   "showcase-client-boundary-test-trash",
 );
 
-function createFixture(files: Record<string, string>): string {
+function createFixture(files: Record<string, string | Buffer>): string {
   const rootDir = fs.mkdtempSync(
     path.join(os.tmpdir(), "showcase-client-boundary-"),
   );
@@ -307,5 +313,123 @@ describe("client-boundary-budget", () => {
         }),
       ]),
     );
+  });
+});
+
+function buildInquiryFormChunkFixture(rootDir: string) {
+  const chunksDir = path.join(rootDir, ".next/static/chunks");
+  const chunkPath = path.join(chunksDir, "inquiry-live.js");
+  const mapPath = path.join(chunksDir, "inquiry-live.js.map");
+
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+  fs.mkdirSync(chunksDir, { recursive: true });
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+  fs.writeFileSync(
+    chunkPath,
+    `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";`.padEnd(512, "/"),
+  );
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+  fs.writeFileSync(
+    mapPath,
+    `${JSON.stringify({
+      version: 3,
+      sources: [
+        `turbopack:///[project]/${INQUIRY_FORM_SOURCE}`,
+        "turbopack:///[project]/src/components/forms/inquiry-form-fields.tsx",
+      ],
+    })}\n`,
+  );
+}
+
+describe("client-boundary build artifacts", () => {
+  const fixtureRoots: string[] = [];
+
+  afterEach(() => {
+    for (const rootDir of fixtureRoots.splice(0)) {
+      moveFixtureToTrash(rootDir);
+    }
+  });
+
+  it("hard fails when build output is missing", () => {
+    const rootDir = createFixture({});
+    fixtureRoots.push(rootDir);
+
+    expect(collectInquiryFormBuildArtifactFindings(rootDir)).toEqual([
+      {
+        error:
+          "missing Next.js client chunk output at .next/static/chunks; run pnpm build first",
+      },
+    ]);
+  });
+
+  it("passes when exactly one InquiryForm chunk and sourcemap are present", () => {
+    const rootDir = createFixture({});
+    buildInquiryFormChunkFixture(rootDir);
+    fixtureRoots.push(rootDir);
+
+    const result = collectInquiryFormBuildArtifactFindings(rootDir);
+    expect(Array.isArray(result)).toBe(false);
+    if (Array.isArray(result)) {
+      throw new Error("expected passing result object");
+    }
+
+    expect(result.status).toBe("passed");
+    expect(result.chunkPath).toBe(".next/static/chunks/inquiry-live.js");
+    expect(result.rawBytes).toBeLessThan(INQUIRY_FORM_MAX_RAW_BYTES);
+    expect(result.forbiddenSources).toEqual([]);
+  });
+
+  it("fails when the InquiryForm sourcemap pulls in forbidden dependencies", () => {
+    const rootDir = createFixture({});
+    buildInquiryFormChunkFixture(rootDir);
+    const mapPath = path.join(
+      rootDir,
+      ".next/static/chunks/inquiry-live.js.map",
+    );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      mapPath,
+      `${JSON.stringify({
+        version: 3,
+        sources: [
+          `turbopack:///[project]/${INQUIRY_FORM_SOURCE}`,
+          "turbopack:///[project]/node_modules/zod/v4/core/core.js",
+        ],
+      })}\n`,
+    );
+    fixtureRoots.push(rootDir);
+
+    expect(collectInquiryFormBuildArtifactFindings(rootDir)).toEqual([
+      {
+        error:
+          "forbidden InquiryForm client dependency in sourcemap: zod: turbopack:///[project]/node_modules/zod/v4/core/core.js",
+      },
+    ]);
+  });
+
+  it("writes a failure report from the build-artifact helper", () => {
+    const rootDir = createFixture({});
+    fixtureRoots.push(rootDir);
+
+    const result = runInquiryFormBuildArtifactCheck(rootDir);
+    expect(result.status).toBe("failed");
+    expect(
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- report path is inside a test-owned temporary fixture directory
+      fs.readFileSync(
+        path.join(rootDir, "reports/quality/client-boundary-budget.json"),
+        "utf8",
+      ),
+    ).toContain("missing Next.js client chunk output");
+  });
+
+  it("flags forbidden source patterns used by the build gate", () => {
+    expect(
+      collectForbiddenBuildSources([
+        `turbopack:///[project]/${INQUIRY_FORM_SOURCE}`,
+        "turbopack:///[project]/src/config/public-trust.ts",
+      ]),
+    ).toEqual([
+      "public-trust: turbopack:///[project]/src/config/public-trust.ts",
+    ]);
   });
 });

@@ -217,7 +217,7 @@ jobs:
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
       - name: InquiryForm client chunk boundary
-        run: node scripts/starter-checks.js inquiry-form-client-chunk
+        run: node scripts/starter-checks.js client-boundary --build-artifacts
 
       - name: Localized prerender behavior check
         run: node scripts/starter-checks.js prerender-static

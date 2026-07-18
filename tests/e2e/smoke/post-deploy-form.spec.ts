@@ -62,14 +62,16 @@ async function waitForEditableInquiryForm(page: Page) {
   await page.goto("/contact");
   await page.waitForLoadState("load");
 
-  const inquiryForm = page.getByTestId("inquiry-form");
-  await inquiryForm.scrollIntoViewIfNeeded();
-  await expect(
-    inquiryForm,
-    "Shared InquiryForm did not become editable on the deployed contact page",
-  ).toBeVisible({ timeout: 15000 });
+  // ContactFormIsland mounts InquiryForm only after contact-form-column enters view.
+  await page
+    .getByTestId("contact-form-column")
+    .scrollIntoViewIfNeeded({ timeout: 5_000 });
 
-  return inquiryForm;
+  const fullName = page.locator('input[name="fullName"]');
+  await expect(
+    fullName,
+    "Shared InquiryForm did not become editable on the deployed contact page",
+  ).toBeEditable({ timeout: 15_000 });
 }
 
 async function submitInquiryForm(page: Page, email: string, message: string) {

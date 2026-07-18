@@ -93,7 +93,7 @@
 - [x] Run `pnpm content:check` and `pnpm component:check`.
 - [x] Run `pnpm website:check`, then `pnpm build`; do not run build variants in parallel.
 - [x] Run `git diff --check`, inspect `git status -sb`, and confirm no public company phone production surface was removed.
-- [x] Review follow-up: keep InquiryForm source import checks in Vitest; run `node scripts/starter-checks.js inquiry-form-client-chunk` only after a fresh `pnpm build` (CI Cloudflare build lane + pre-push build-check).
+- [x] Review follow-up: source import negative-space checks removed; run `node scripts/starter-checks.js client-boundary --build-artifacts` only after a fresh `pnpm build` (CI Cloudflare build lane + pre-push build-check).
 - [x] Commit `feat: use one low-friction inquiry form across contact and request quote`.
 - [x] Push, open one PR, wait for exact-SHA CI, and leave `READY_FOR_CLUSTER` with changed files, test evidence, screenshots/DOM evidence, known concerns, and explicit statement that M3 stays `24/33` until D6a merges.
 - [ ] Stop. Do not merge and do not start D5a; Codex performs independent task-level acceptance first.
