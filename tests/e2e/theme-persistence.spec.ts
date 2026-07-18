@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { waitForStablePage } from "./test-environment-setup";
+import {
+  acceptCookieBannerIfVisible,
+  waitForStablePage,
+} from "./test-environment-setup";
 
 test("dark theme preference survives a page reload", async ({ page }) => {
   const response = await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -22,4 +25,31 @@ test("dark theme preference survives a page reload", async ({ page }) => {
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForStablePage(page);
   await expect(page.locator("html")).toHaveClass(/dark/u);
+});
+
+test("theme switcher changes the page theme via keyboard without losing focus", async ({
+  page,
+}) => {
+  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
+  await acceptCookieBannerIfVisible(page);
+  await waitForStablePage(page);
+
+  const themeGroup = page.getByRole("group", { name: /theme selector/i });
+  const lightButton = themeGroup.getByRole("button", {
+    name: "Switch to light theme",
+  });
+  const darkButton = themeGroup.getByRole("button", {
+    name: "Switch to dark theme",
+  });
+
+  await darkButton.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveClass(/dark/u);
+  await expect(darkButton).toBeFocused();
+
+  await lightButton.focus();
+  await page.keyboard.press("Space");
+  await expect(page.locator("html")).not.toHaveClass(/dark/u);
+  await expect(lightButton).toBeFocused();
 });

@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs";
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
@@ -16,12 +15,26 @@ const themeLabels: Record<string, string> = {
   switchToSystem: "Switch to system theme",
 };
 
+const accessibilityLabels: Record<string, string> = {
+  themeSelector: "TEST theme selector group",
+};
+
+function mockThemeTranslations(namespace?: string) {
+  if (namespace === "accessibility") {
+    return ((key: string) => accessibilityLabels[key] ?? key) as ReturnType<
+      typeof useTranslations
+    >;
+  }
+
+  return ((key: string) => themeLabels[key] ?? key) as ReturnType<
+    typeof useTranslations
+  >;
+}
+
 describe("ThemeSwitcher", () => {
   beforeEach(() => {
-    vi.mocked(useTranslations).mockReturnValue(
-      ((key: string) => themeLabels[key] ?? key) as ReturnType<
-        typeof useTranslations
-      >,
+    vi.mocked(useTranslations).mockImplementation((namespace?: string) =>
+      mockThemeTranslations(namespace),
     );
   });
 
@@ -104,6 +117,48 @@ describe("ThemeSwitcher", () => {
     await user.click(darkButton);
 
     expect(mockSetTheme).toHaveBeenCalledWith("dark");
+  });
+
+  it("exposes translated group semantics and aria-pressed on the active option", async () => {
+    const mockSetTheme = vi.fn();
+    vi.mocked(useTheme).mockReturnValue({
+      theme: "dark",
+      setTheme: mockSetTheme,
+      resolvedTheme: "dark",
+      themes: ["light", "dark", "system"],
+      systemTheme: "dark",
+    });
+
+    const { ThemeSwitcher } = await import("../theme-switcher");
+
+    render(<ThemeSwitcher data-testid="theme-switcher" />);
+
+    const group = screen.getByRole("group", {
+      name: "TEST theme selector group",
+    });
+    expect(group).toBeInTheDocument();
+
+    await screen.findByTestId("theme-switcher-highlight");
+
+    expect(
+      screen.getByRole("button", { name: "Switch to dark theme" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Switch to light theme" }),
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(
+      screen.getByRole("button", { name: "Switch to system theme" }),
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("omits aria-pressed from the disabled hydration skeleton branch", () => {
+    const source = readFileSync("src/components/ui/theme-switcher.tsx", "utf8");
+    const skeletonBranch = source.match(
+      /if \(!isHydrated\) \{([\s\S]*?)\n {2}\}\n\n {2}return/,
+    )?.[1];
+
+    expect(skeletonBranch).toContain("disabled");
+    expect(skeletonBranch).not.toContain("aria-pressed");
   });
 
   it("defaults data-testid to theme-toggle when not provided", async () => {

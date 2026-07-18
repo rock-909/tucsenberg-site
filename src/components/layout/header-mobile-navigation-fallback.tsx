@@ -18,9 +18,7 @@ export function MobileNavigationFallback({
     >
       <summary
         className="relative inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-foreground transition-colors duration-150 hover:bg-accent [&::-webkit-details-marker]:hidden"
-        aria-label={openMenuLabel}
         aria-controls="mobile-navigation"
-        aria-haspopup="dialog"
         data-testid="header-mobile-menu-button"
         onClick={onActivate}
       >

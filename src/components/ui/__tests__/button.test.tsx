@@ -125,10 +125,7 @@ describe("Button Component", () => {
       render(<Button variant="ghost">Ghost</Button>);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "hover:bg-accent",
-        "hover:text-accent-foreground",
-      );
+      expect(button).toHaveClass("hover:bg-accent", "hover:text-foreground");
     });
 
     it("applies link variant styles", () => {

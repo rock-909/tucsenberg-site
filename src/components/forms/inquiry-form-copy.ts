@@ -24,6 +24,20 @@ export interface InquiryFormCopy {
     readonly fieldSummary: string;
     readonly securitySummary: string;
     readonly serverSummary: string;
+    readonly fullName: {
+      readonly required: string;
+      readonly invalid: string;
+      readonly tooLong: string;
+    };
+    readonly email: {
+      readonly required: string;
+      readonly invalid: string;
+      readonly tooLong: string;
+    };
+    readonly message: {
+      readonly invalid: string;
+      readonly tooLong: string;
+    };
   };
 }
 
@@ -48,6 +62,20 @@ export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
       fieldSummary: t("errors.fieldSummary"),
       securitySummary: t("errors.securitySummary"),
       serverSummary: t("errors.serverSummary"),
+      fullName: {
+        required: t("errors.fullName.required"),
+        invalid: t("errors.fullName.invalid"),
+        tooLong: t("errors.fullName.tooLong"),
+      },
+      email: {
+        required: t("errors.email.required"),
+        invalid: t("errors.email.invalid"),
+        tooLong: t("errors.email.tooLong"),
+      },
+      message: {
+        invalid: t("errors.message.invalid"),
+        tooLong: t("errors.message.tooLong"),
+      },
     },
   };
 }

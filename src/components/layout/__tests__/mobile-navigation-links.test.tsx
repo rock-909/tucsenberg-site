@@ -115,6 +115,20 @@ describe("MobileNavigationLinks", () => {
     expect(html).not.toContain("aria-expanded");
   });
 
+  it("uses the accessibility mobile navigation label on the nav landmark", () => {
+    (useTranslations as ReturnType<typeof vi.fn>).mockImplementation(
+      createMockUseTranslations({
+        "accessibility.mobileNavigation": "TEST mobile nav landmark",
+      }),
+    );
+
+    render(<MobileNavigationLinks />);
+
+    expect(
+      screen.getByRole("navigation", { name: "TEST mobile nav landmark" }),
+    ).toBeInTheDocument();
+  });
+
   it("renders every navigation item plus the CTA in order", () => {
     render(<MobileNavigationLinks />);
 

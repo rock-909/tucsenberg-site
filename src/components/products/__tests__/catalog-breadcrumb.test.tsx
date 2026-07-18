@@ -9,6 +9,11 @@ vi.mock("next-intl/server", () => ({
         key === "products" ? "Products" : key === "home" ? "Home" : key;
     }
 
+    if (namespace === "accessibility") {
+      return (key: string) =>
+        key === "breadcrumb" ? "TEST catalog breadcrumb landmark" : key;
+    }
+
     return (key: string) => key;
   }),
 }));
@@ -68,6 +73,11 @@ describe("CatalogBreadcrumb", () => {
     const CatalogBreadcrumb = await importComponent();
     render(await CatalogBreadcrumb({}));
 
+    expect(
+      screen.getByRole("navigation", {
+        name: "TEST catalog breadcrumb landmark",
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("Products")).toBeInTheDocument();
 

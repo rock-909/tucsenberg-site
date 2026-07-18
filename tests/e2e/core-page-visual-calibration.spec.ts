@@ -76,17 +76,27 @@ test.describe("Core page visual calibration", () => {
     }
   }
 
-  test("core pages have no critical or serious a11y issues", async ({
+  test("contact and request-quote surfaces have no critical or serious a11y issues", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     const pageErrors = collectPageErrors(page);
+    const leadSurfaces = ["/contact", "/request-quote"] as const;
 
-    for (const path of corePages) {
+    for (const path of leadSurfaces) {
       await preparePage(page, path);
 
+      await expect(
+        page.getByRole("navigation", { name: "Main navigation" }),
+      ).toBeVisible();
       await expect(page.locator("main#main-content")).toBeVisible();
-      await checkA11y(page, "main#main-content", {
+      await expect(
+        page.getByRole("navigation", { name: "Footer navigation" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("group", { name: "Theme selector" }),
+      ).toBeVisible();
+      await checkA11y(page, "body", {
         includedImpacts: ["critical", "serious"],
       });
     }

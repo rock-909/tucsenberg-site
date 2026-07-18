@@ -44,9 +44,9 @@ describe("MobileMenuButton", () => {
     render(<MobileMenuButton isOpen={false} onClick={vi.fn()} />);
 
     const button = screen.getByRole("button", { name: /menu/i });
-    expect(button).toHaveAttribute("aria-label", "Open navigation menu");
+    expect(button).not.toHaveAttribute("aria-label");
     expect(button).toHaveAttribute("aria-expanded", "false");
-    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).not.toHaveAttribute("aria-haspopup");
     expect(button).toHaveAttribute("data-state", "closed");
     expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
     expect(screen.queryByTestId("close-icon")).not.toBeInTheDocument();
@@ -56,7 +56,7 @@ describe("MobileMenuButton", () => {
     render(<MobileMenuButton isOpen={true} onClick={vi.fn()} />);
 
     const button = screen.getByRole("button", { name: /menu/i });
-    expect(button).toHaveAttribute("aria-label", "Close navigation menu");
+    expect(button).not.toHaveAttribute("aria-label");
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(button).toHaveAttribute("data-state", "open");
     expect(screen.getByTestId("close-icon")).toBeInTheDocument();

@@ -51,13 +51,3 @@ export function isActivePath(currentPath: string, itemPath: string): boolean {
 
   return normalizedCurrentPath.startsWith(normalizedItemPath);
 }
-
-// ARIA labels and accessibility
-export const NAVIGATION_ARIA = Object.freeze({
-  mainNav: "Main navigation",
-  mobileMenuButton: "Toggle mobile menu",
-  mobileMenu: "Mobile navigation menu",
-  languageSelector: "Language selector",
-  themeSelector: "Theme selector",
-  skipToContent: "Skip to main content",
-} as const);

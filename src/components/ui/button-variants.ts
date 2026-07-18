@@ -13,7 +13,7 @@ export const buttonVariants = cva(
           "border-2 border-[var(--button-outline-border)] bg-transparent text-[var(--button-outline-fg)] hover:bg-[var(--button-outline-hover-bg)]",
         secondary:
           "border border-border bg-secondary text-secondary-foreground shadow-[var(--shadow-xs)] hover:border-[var(--button-secondary-hover-border)] hover:shadow-[var(--shadow-sm)]",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent hover:text-foreground",
         link: "text-[var(--button-outline-fg)] underline-offset-4 hover:underline",
         accent:
           "bg-accent text-accent-foreground hover:bg-[var(--button-accent-hover-bg)]",

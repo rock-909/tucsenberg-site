@@ -118,9 +118,8 @@ describe("MobileNavigationInteractive", () => {
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       expect(trigger).toHaveAttribute("type", "button");
-      expect(trigger).toHaveAttribute("aria-label", "Open navigation menu");
+      expect(trigger).not.toHaveAttribute("aria-label");
       expect(trigger).toHaveAttribute("aria-expanded", "false");
-      expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
       expect(trigger).toHaveAttribute("aria-controls", "mobile-navigation");
       expect(screen.getByTestId("menu-icon")).toBeInTheDocument();
       expect(trigger.closest("div")).toHaveClass("header-mobile-only");
@@ -167,10 +166,12 @@ describe("MobileNavigationInteractive", () => {
       fireEvent.click(trigger);
 
       expect(trigger).toHaveAttribute("aria-expanded", "true");
-      expect(trigger).toHaveAttribute("aria-label", "Close navigation menu");
+      expect(screen.getByText("Close navigation menu")).toBeInTheDocument();
       expect(screen.getByTestId("close-icon")).toBeInTheDocument();
-      const nav = screen.getByRole("navigation");
-      expect(nav).toHaveAttribute("aria-label");
+      const nav = screen.getByRole("navigation", {
+        name: "Mobile navigation menu",
+      });
+      expect(nav).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Request a Quote" }),
@@ -298,23 +299,30 @@ describe("MobileNavigationInteractive", () => {
   });
 
   describe("Translation", () => {
-    it("renders localized labels and switches the aria-label (CJK)", () => {
+    it("renders localized labels and switches the screen-reader label (CJK)", () => {
       (useTranslations as ReturnType<typeof vi.fn>).mockImplementation(
         createMockUseTranslations({
           "navigation.home": "首页",
           "navigation.about": "关于我们",
           "accessibility.openMenu": "打开菜单",
           "accessibility.closeMenu": "关闭菜单",
+          "accessibility.mobileNavigation": "TEST mobile nav landmark",
         }),
       );
 
       render(<MobileNavigation />);
 
+      expect(screen.getByTestId("mobile-menu-toggle-label")).toHaveTextContent(
+        "打开菜单",
+      );
       const trigger = screen.getByRole("button");
-      expect(trigger).toHaveAttribute("aria-label", "打开菜单");
+      expect(trigger).not.toHaveAttribute("aria-label");
 
       fireEvent.click(trigger);
-      expect(trigger).toHaveAttribute("aria-label", "关闭菜单");
+      expect(screen.getByText("关闭菜单")).toBeInTheDocument();
+      expect(
+        screen.getByRole("navigation", { name: "TEST mobile nav landmark" }),
+      ).toBeInTheDocument();
       expect(screen.getByText("首页")).toBeInTheDocument();
       expect(screen.getByText("关于我们")).toBeInTheDocument();
     });

@@ -86,7 +86,7 @@
 
   /* Muted */
   --muted: var(--neutral-3);
-  --muted-foreground: var(--neutral-12);
+  --muted-foreground: var(--neutral-9);
 
   /* Status Colors */
   --success: oklch(0.56 0.13 155);
@@ -287,7 +287,7 @@
   --accent: var(--brand-2);
   --accent-foreground: var(--brand-9);
   --muted: var(--neutral-3);
-  --muted-foreground: var(--neutral-8);
+  --muted-foreground: var(--neutral-9);
   --border: var(--neutral-5);
   --border-light: var(--neutral-4);
   --input: var(--neutral-8);

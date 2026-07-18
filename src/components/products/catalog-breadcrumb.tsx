@@ -13,11 +13,13 @@ export async function CatalogBreadcrumb({
   renderJsonLd = true,
 }: CatalogBreadcrumbProps) {
   const tBreadcrumb = await getTranslations("catalog.breadcrumb");
+  const tAccessibility = await getTranslations("accessibility");
   const productsPath = getCanonicalPath("products");
 
   return (
     <>
       <CatalogBreadcrumbView
+        ariaLabel={tAccessibility("breadcrumb")}
         homeLabel={tBreadcrumb("home")}
         productsLabel={tBreadcrumb("products")}
         productsHref={productsPath}
