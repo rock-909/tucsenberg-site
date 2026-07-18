@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is active on top of that exact SHA. Detailed D6d plan: `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
+**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response` (stacked on the D6c exact SHA). D6e remains blocked until D6d is independently reviewed. Detailed D6d plan: `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
@@ -335,23 +335,14 @@ interface CanonicalInquiryBuyerFields {
 
 ### Task D6d: unify success state, Turnstile and response promise
 
-**Detailed plan:** `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
+**Status (2026-07-18): READY_FOR_CLUSTER** on branch `feat/m3-d6d-inquiry-response` (base D6c exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`). **Detailed plan:** `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
 
-- [ ] Clear the three visible fields plus honeypot only after confirmed success; keep the shared reference-ID status. Preserve values on field/security/server/429 failures and prove a fresh Turnstile token allows retry without a browser cooldown.
-- [ ] Make `INQUIRY_TURNSTILE_ACTION` the only widget/server action; remove action props, per-call expected-action parameters and the three action env names.
-- [ ] Make production validation always require the live Turnstile site key and secret, independent of the legacy Contact feature flag. Leave physical deletion of the legacy config engine to D6e.
-- [ ] Replace unconditional 12/48-hour quote promises with the approved 12-hour reply meaning at message, MDX, metadata and product-copy sources; regenerate the content manifest.
-
-**Files:** `src/components/forms/inquiry-form.tsx`, `src/constants/turnstile-constants.ts`, `src/components/security/turnstile.tsx`, `src/components/forms/lazy-turnstile.tsx`, `src/lib/security/turnstile*.ts`, `src/lib/security/lead-turnstile.ts`, `src/lib/env.ts`, `src/lib/public-runtime-env.ts`, production config checks, workflows, deployment docs, active inquiry messages/content and focused tests.
-
-- [ ] Run the detailed plan's focused RED/GREEN sequence, then the task gate:
-
-```bash
-pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx src/lib/forms/__tests__/lead-response.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/security/__tests__/turnstile-config.test.ts src/lib/__tests__/env.test.ts tests/architecture/env-example-parity.test.ts
-pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
-pnpm website:check
-```
-- [ ] Commit `fix: unify inquiry success, turnstile and response expectations`; push and mark `READY_FOR_CLUSTER`.
+- [x] Clear the three visible fields plus honeypot only after confirmed success; keep the shared reference-ID status. Preserve values on field/security/server/429 failures and prove a fresh Turnstile token allows retry without a browser cooldown.
+- [x] Make `INQUIRY_TURNSTILE_ACTION` the only widget/server action; remove action props, per-call expected-action parameters and the three action env names.
+- [x] Make production validation always require the live Turnstile site key and secret, independent of the legacy Contact feature flag. Leave physical deletion of the legacy config engine to D6e.
+- [x] Replace unconditional 12/48-hour quote promises with the approved 12-hour reply meaning at message, MDX, metadata and product-copy sources; regenerate the content manifest.
+- [x] Record BC-012B/BC-012C and updated BC-012 in `docs/项目基础/行为合约.md`.
+- [ ] Independent Codex spec/quality review before D6e starts.
 
 ### Task D6e: retire the duplicate Contact/RFQ form stacks and config engine
 
