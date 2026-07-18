@@ -6,7 +6,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Finish the remaining 20 M3 tasks in five acceptance clusters while keeping each PR independently testable and requiring one Codex acceptance review per integrated cluster.
+**Goal:** Complete all of M3 in five acceptance clusters. Cluster 1 is closed; the remaining 15 tasks are in Clusters 2, 3A, 3B, and 4. Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
 
 **Architecture:** A task PR is the implementation unit; a cluster is the acceptance unit. Dependent PRs are stacked. Parallel lanes fork from one proven base, then linearize into one cluster tip before review. After `ACCEPTED`, one owner `MERGE_CLUSTER` instruction authorizes sequential merge and exact-SHA revalidation until a semantic change forces a stop.
 
@@ -39,11 +39,13 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-Current planning baseline: `origin/main` `fc2344a`, M3 merged 13/33. C6 is PR #113 at `c5fad56c4d85c0dc11c572c6b7a15fcfb4e663b6`. Re-read live SHA before execution.
+Current planning baseline: `origin/main` `e00f9eca140ea416cd5728932a6fef329044225b`, M3 merged 18/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Current execution face: Cluster 2** — SEO lane D3a→D3b→D3c and Security lane D4a→D4b in parallel from the same baseline; linearize security onto D3c before acceptance. Re-read live SHA before execution.
 
 ---
 
 ## 2. Cluster 1: foundation, framework and page shell
+
+**Status (2026-07-18): CLOSED.** Acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`. Member PRs #113/#115/#116/#117/#118 merged; acceptance follow-up #119 merged to `e00f9eca140ea416cd5728932a6fef329044225b`.
 
 ### Task C6: adopt existing design-truth PR into the cluster
 
@@ -51,13 +53,13 @@ Current planning baseline: `origin/main` `fc2344a`, M3 merged 13/33. C6 is PR #1
 **PR:** existing #113.
 **Files:** existing PR diff only; do not add C6 scope.
 
-- [ ] Verify PR #113 exact head and six CI checks:
+- [x] Verify PR #113 exact head and six CI checks:
 
 ```bash
 gh pr view 113 --json headRefOid,statusCheckRollup,mergeable
 ```
 
-- [ ] In `.worktrees/m3-c6`, run:
+- [x] In `.worktrees/m3-c6`, run:
 
 ```bash
 pnpm exec vitest run tests/unit/scripts/current-truth-docs.test.ts src/components/grid/__tests__/hero-guide-overlay.test.tsx
@@ -65,8 +67,8 @@ pnpm content:check
 git diff --check origin/main...HEAD
 ```
 
-- [ ] Confirm the diff still proves: ordinary section H2 uses the 24/28 scale, header is 64px, button sizes match runtime, and the Hero guide overlay is `hidden lg:grid` without an inline display override.
-- [ ] Comment `READY_FOR_CLUSTER` on #113. Do not request individual ACCEPTED and do not merge.
+- [x] Confirm the diff still proves: ordinary section H2 uses the 24/28 scale, header is 64px, button sizes match runtime, and the Hero guide overlay is `hidden lg:grid` without an inline display override.
+- [x] Comment `READY_FOR_CLUSTER` on #113. Do not request individual ACCEPTED and do not merge.
 
 ### Task D4c: upgrade Next.js and OpenNext
 
@@ -74,10 +76,10 @@ git diff --check origin/main...HEAD
 **Files:** `package.json`, `pnpm-lock.yaml`.
 **Docs to read:** installed Next.js upgrade/release docs and `.claude/rules/cloudflare.md`.
 
-- [ ] Create `.worktrees/m3-c1-d4c` on `chore/m3-d4c-framework-bump` from the C6 branch. If the already-created worktree still has no D4c commit, verify it points at C6 and reuse it instead of creating another.
-- [ ] Change `next`, `@next/mdx`, `@next/bundle-analyzer`, and `@next/eslint-plugin-next` to `16.2.10`; change `@opennextjs/cloudflare` to `1.20.1`; refresh the lockfile with `pnpm install`.
-- [ ] Do not migrate middleware to proxy and do not change public runtime behavior in this PR.
-- [ ] Run:
+- [x] Create `.worktrees/m3-c1-d4c` on `chore/m3-d4c-framework-bump` from the C6 branch. If the already-created worktree still has no D4c commit, verify it points at C6 and reuse it instead of creating another.
+- [x] Change `next`, `@next/mdx`, `@next/bundle-analyzer`, and `@next/eslint-plugin-next` to `16.2.10`; change `@opennextjs/cloudflare` to `1.20.1`; refresh the lockfile with `pnpm install`.
+- [x] Do not migrate middleware to proxy and do not change public runtime behavior in this PR.
+- [x] Run:
 
 ```bash
 pnpm type-check
@@ -87,17 +89,17 @@ pnpm website:build:cf
 pnpm exec wrangler deploy --dry-run --env preview
 ```
 
-- [ ] Record before/after Worker size as evidence only. Commit `chore: bump next to 16.2.10 and opennext to 1.20.1`, open a stacked PR based on the C6 branch, wait for CI, and mark `READY_FOR_CLUSTER`.
+- [x] Record before/after Worker size as evidence only. Commit `chore: bump next to 16.2.10 and opennext to 1.20.1`, open a stacked PR based on the C6 branch, wait for CI, and mark `READY_FOR_CLUSTER`.
 
 ### Task D1: keep Motion behind a route-scoped boundary
 
 **Base:** green D4c head.
 **Files:** `src/components/motion/breathing-reveal.tsx`, `src/components/motion/light-motion-provider.tsx`, `src/lib/motion/light-breathing.ts`, `src/lib/motion/__tests__/light-breathing.test.ts`, `tests/architecture/homepage-lcp-motion-boundary.test.ts`, `docs/design/动效治理.md`.
 
-- [ ] Add failing assertions proving `motion/react` stays out of `src/app/[locale]/layout.tsx` and non-home route imports, while the homepage remains the explicit consumer.
-- [ ] Remove `lightBreathingStaggerChildren` if live search still shows test-only consumption. Remove the fake boolean flexibility in `getInstantTransition` if the caller has already returned on reduced motion; keep one direct instant-transition value instead of another abstraction.
-- [ ] Keep `BreathingReveal`, `LazyMotion`, server-rendered visible content and `prefers-reduced-motion`. Do not create a replacement IntersectionObserver/micro-motion framework.
-- [ ] Run:
+- [x] Add failing assertions proving `motion/react` stays out of `src/app/[locale]/layout.tsx` and non-home route imports, while the homepage remains the explicit consumer.
+- [x] Remove `lightBreathingStaggerChildren` if live search still shows test-only consumption. Remove the fake boolean flexibility in `getInstantTransition` if the caller has already returned on reduced motion; keep one direct instant-transition value instead of another abstraction.
+- [x] Keep `BreathingReveal`, `LazyMotion`, server-rendered visible content and `prefers-reduced-motion`. Do not create a replacement IntersectionObserver/micro-motion framework.
+- [x] Run:
 
 ```bash
 pnpm exec vitest run src/lib/motion/__tests__/light-breathing.test.ts tests/architecture/homepage-lcp-motion-boundary.test.ts src/app/[locale]/__tests__/page.test.tsx
@@ -105,17 +107,17 @@ pnpm type-check
 pnpm build
 ```
 
-- [ ] Inspect the fresh build for the homepage Motion chunk and a representative non-home route. Commit `chore: retain motion as a route-scoped advanced capability`, push, CI green, `READY_FOR_CLUSTER`.
+- [x] Inspect the fresh build for the homepage Motion chunk and a representative non-home route. Commit `chore: retain motion as a route-scoped advanced capability`, push, CI green, `READY_FOR_CLUSTER`.
 
 ### Task D2: make Contact fully prerenderable
 
 **Base:** the same green D4c head used by D1.
 **Files:** `src/app/[locale]/contact/page.tsx`, `src/app/[locale]/contact/contact-page-sections.tsx`, create `src/components/contact/product-family-context-notice-client.tsx`, `scripts/quality/checks/prerender-static.js`, `tests/e2e/no-js-html-contract.spec.ts`, contact page tests.
 
-- [ ] Read the installed Next.js `useSearchParams` prerendering documentation.
-- [ ] Add a failing test that the built Contact shell contains `contact-form-column` and `faq-section`, and remove Contact from `POSTPONED_ROUTE_EXEMPTIONS`; before implementation, the build-level gate must report Contact postponed.
-- [ ] Stop awaiting `searchParams` in the server page/section. Move product-family query parsing into the smallest existing client island. Keep the static page copy, fallback and form shell server-rendered.
-- [ ] Run:
+- [x] Read the installed Next.js `useSearchParams` prerendering documentation.
+- [x] Add a failing test that the built Contact shell contains `contact-form-column` and `faq-section`, and remove Contact from `POSTPONED_ROUTE_EXEMPTIONS`; before implementation, the build-level gate must report Contact postponed.
+- [x] Stop awaiting `searchParams` in the server page/section. Move product-family query parsing into the smallest existing client island. Keep the static page copy, fallback and form shell server-rendered.
+- [x] Run:
 
 ```bash
 pnpm exec vitest run src/app/[locale]/contact/__tests__/page.test.tsx src/app/[locale]/contact/__tests__/page-rendering.test.tsx src/app/[locale]/contact/__tests__/contact-form-static-fallback.test.tsx
@@ -124,23 +126,23 @@ node scripts/starter-checks.js prerender-static
 pnpm exec playwright test tests/e2e/no-js-html-contract.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 ```
 
-- [ ] Commit `perf: make contact page fully static`, push, CI green, `READY_FOR_CLUSTER`.
+- [x] Commit `perf: make contact page fully static`, push, CI green, `READY_FOR_CLUSTER`.
 
 ### Task C1-L: linearize D1 and D2
 
-- [ ] Fix the accepted D1 head. Rebase D2 onto D1. Change D2 PR base to the D1 branch.
-- [ ] Run `git range-diff` against the pre-rebase D2 commit range. If there is a conflict, generated-file change or semantic delta, rerun the full D2 focused gate and self-review; otherwise rerun affected tests and CI.
-- [ ] Do not create a merge commit on `main`.
+- [x] Fix the accepted D1 head. Rebase D2 onto D1. Change D2 PR base to the D1 branch.
+- [x] Run `git range-diff` against the pre-rebase D2 commit range. If there is a conflict, generated-file change or semantic delta, rerun the full D2 focused gate and self-review; otherwise rerun affected tests and CI.
+- [x] Do not create a merge commit on `main`.
 
 ### Task D5b: remove dead styles, dead MDX loader and unused assets
 
 **Base:** linearized D2 head.
 **Files:** `src/app/globals.css`, `src/lib/mdx-loader.ts`, `src/lib/__tests__/mdx-loader.test.ts`, `src/app/[locale]/Figtree-Latin.woff2`, `next.config.ts`, Vitest aliases/config if they reference the retired loader, and any source file proven dead by live search.
 
-- [ ] Capture zero-production-reference evidence for every deletion candidate. Distinguish the dead `mdx-loader.ts` path from active generated content-manifest/importer files.
-- [ ] Add or retain tests that render active MDX pages through the current path. Then move only proven dead loader/test/assets to Trash.
-- [ ] Remove dead CSS tokens such as `--nav-h` and the audited unused shadow tokens only after `rg` proves no live consumer. Remove stale `optimizePackageImports` entries only if present at execution time.
-- [ ] Run:
+- [x] Capture zero-production-reference evidence for every deletion candidate. Distinguish the dead `mdx-loader.ts` path from active generated content-manifest/importer files.
+- [x] Add or retain tests that render active MDX pages through the current path. Then move only proven dead loader/test/assets to Trash.
+- [x] Remove dead CSS tokens such as `--nav-h` and the audited unused shadow tokens only after `rg` proves no live consumer. Remove stale `optimizePackageImports` entries only if present at execution time.
+- [x] Run:
 
 ```bash
 pnpm content:check
@@ -150,12 +152,12 @@ pnpm website:check
 pnpm component:check
 ```
 
-- [ ] Commit `chore: remove dead style tokens and dead mdx pipeline`, push, CI green, `READY_FOR_CLUSTER`.
+- [x] Commit `chore: remove dead style tokens and dead mdx pipeline`, push, CI green, `READY_FOR_CLUSTER`.
 
 ### Cluster 1 acceptance handoff
 
-- [ ] On D5b tip run `pnpm website:check`, `pnpm component:check`, `pnpm react:doctor --base origin/main`, then `pnpm website:build:cf` after the website check build has completed; run Cloudflare dry-run.
-- [ ] Supply member PRs, exact SHAs, base chain, D1/D2 range-diff, build/static/Motion evidence and owner deferrals. Mark only the cluster `READY_FOR_ACCEPTANCE` and stop.
+- [x] On D5b tip run `pnpm website:check`, `pnpm component:check`, `pnpm react:doctor --base origin/main`, then `pnpm website:build:cf` after the website check build has completed; run Cloudflare dry-run.
+- [x] Supply member PRs, exact SHAs, base chain, D1/D2 range-diff, build/static/Motion evidence and owner deferrals. Mark only the cluster `READY_FOR_ACCEPTANCE` and stop.
 
 ### Cluster 1 CHANGES_REQUIRED follow-up (2026-07-18)
 
@@ -172,7 +174,7 @@ Acceptance review on PR #118 found dead MDX importer output, a misnamed Contact 
 
 ## 3. Cluster 2: SEO, structured data and security foundations
 
-Start only after Cluster 1 is CLOSED on `main`. Create the SEO and security worktrees from the same new `origin/main`.
+**Status (2026-07-18): current execution face.** Start from `origin/main` `e00f9eca140ea416cd5728932a6fef329044225b`. SEO lane D3a→D3b→D3c and Security lane D4a→D4b run in parallel from the same baseline; linearize security onto D3c before cluster acceptance.
 
 ### Task D3a: canonical, metadata and OG coverage
 
