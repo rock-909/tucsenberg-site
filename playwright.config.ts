@@ -157,7 +157,6 @@ export default defineConfig({
             // See: https://developers.cloudflare.com/turnstile/reference/testing/
             NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA",
             TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA",
-            NEXT_PUBLIC_TURNSTILE_ACTION: "contact_form",
 
             NEXT_PUBLIC_ENABLE_ANALYTICS: "false",
             NEXT_PUBLIC_ENABLE_ERROR_REPORTING: "false",

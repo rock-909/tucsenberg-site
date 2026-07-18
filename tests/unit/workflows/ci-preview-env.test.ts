@@ -48,9 +48,6 @@ function expectPreviewStepEnv(
   expect(step?.env?.NEXT_PUBLIC_TURNSTILE_SITE_KEY, stepName).toBe(
     turnstileSiteKey,
   );
-  expect(step?.env?.NEXT_PUBLIC_TURNSTILE_ACTION, stepName).toBe(
-    "contact_form",
-  );
   expect(step?.env?.NEXT_PUBLIC_SITE_URL, stepName).not.toContain(
     "example.com",
   );

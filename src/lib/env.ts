@@ -21,8 +21,6 @@ export const serverEnvSchema = {
   // Bot Protection (Cloudflare Turnstile)
   TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
   TURNSTILE_ALLOWED_HOSTS: z.string().optional(),
-  TURNSTILE_ALLOWED_ACTIONS: z.string().optional(),
-  TURNSTILE_EXPECTED_ACTION: z.string().optional(),
   TURNSTILE_BYPASS: z
     .string()
     .optional()
@@ -107,7 +105,6 @@ export const clientEnvSchema = {
 
   // Bot Protection (Cloudflare Turnstile Public Key)
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
-  NEXT_PUBLIC_TURNSTILE_ACTION: z.string().optional(),
   NEXT_PUBLIC_TURNSTILE_BYPASS: z
     .string()
     .default("false")
@@ -163,8 +160,6 @@ export const runtimeEnv = {
   AIRTABLE_TABLE_NAME: process.env.AIRTABLE_TABLE_NAME,
   TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
   TURNSTILE_ALLOWED_HOSTS: process.env.TURNSTILE_ALLOWED_HOSTS,
-  TURNSTILE_ALLOWED_ACTIONS: process.env.TURNSTILE_ALLOWED_ACTIONS,
-  TURNSTILE_EXPECTED_ACTION: process.env.TURNSTILE_EXPECTED_ACTION,
   TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
   LOG_LEVEL: process.env.LOG_LEVEL,
@@ -204,7 +199,6 @@ export const runtimeEnv = {
   NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT:
     process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-  NEXT_PUBLIC_TURNSTILE_ACTION: process.env.NEXT_PUBLIC_TURNSTILE_ACTION,
   NEXT_PUBLIC_TURNSTILE_BYPASS: process.env.NEXT_PUBLIC_TURNSTILE_BYPASS,
   NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
   NEXT_PUBLIC_ENABLE_ERROR_REPORTING:

@@ -35,7 +35,6 @@ vi.stubEnv("EMAIL_FROM", "test@example.com");
 vi.stubEnv("EMAIL_REPLY_TO", "reply@example.com");
 vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
 vi.stubEnv("ADMIN_API_TOKEN", "test-admin-token");
-vi.stubEnv("TURNSTILE_ALLOWED_ACTIONS", "contact_form");
 vi.stubEnv("TURNSTILE_BYPASS", "false");
 vi.stubEnv("CLOUDFLARE_ACCOUNT_ID", "test-account-id");
 
@@ -53,7 +52,6 @@ vi.mock("@t3-oss/env-nextjs", () => ({
     EMAIL_REPLY_TO: "reply@example.com",
     CSP_REPORT_URI: "https://example.com/csp-report",
     ADMIN_API_TOKEN: "test-admin-token",
-    TURNSTILE_ALLOWED_ACTIONS: "contact_form",
     TURNSTILE_BYPASS: false,
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",
     NEXT_PUBLIC_BASE_URL: "https://example.com",

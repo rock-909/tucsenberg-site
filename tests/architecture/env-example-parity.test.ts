@@ -331,11 +331,26 @@ describe(".env.example parity", () => {
     expect(envExampleSource).not.toContain(
       "Set ALLOW_MEMORY_RATE_LIMIT=true only for local fallback.",
     );
-    expect(envExample.get("NEXT_PUBLIC_TURNSTILE_ACTION")).toBe("contact_form");
-    expect(envExample.get("TURNSTILE_EXPECTED_ACTION")).toBe("contact_form");
-    expect(envExample.get("TURNSTILE_ALLOWED_ACTIONS")?.split(",")).toContain(
-      "contact_form",
-    );
+    expect(envExample.has("NEXT_PUBLIC_TURNSTILE_ACTION")).toBe(false);
+    expect(envExample.has("TURNSTILE_EXPECTED_ACTION")).toBe(false);
+    expect(envExample.has("TURNSTILE_ALLOWED_ACTIONS")).toBe(false);
+  });
+
+  it("does not keep retired Turnstile action env keys in the schema", () => {
+    const envSource = readRepoFile(ENV_SOURCE_PATH);
+    const schemaKeys = getSchemaKeys(envSource);
+    const retiredTurnstileActionKeys = [
+      "NEXT_PUBLIC_TURNSTILE_ACTION",
+      "TURNSTILE_ALLOWED_ACTIONS",
+      "TURNSTILE_EXPECTED_ACTION",
+    ];
+
+    for (const key of retiredTurnstileActionKeys) {
+      expect(
+        schemaKeys.has(key),
+        `${key} should be removed from env schema`,
+      ).toBe(false);
+    }
   });
 
   it("keeps the Cloudflare local preview env example explicit about its limited scope", () => {
