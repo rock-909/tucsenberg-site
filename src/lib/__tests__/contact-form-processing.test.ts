@@ -374,17 +374,15 @@ describe("canonical contact submission", () => {
       { clientIP: "203.0.113.10" },
     );
 
-    expect(result).toEqual(
+    expect(result.success).toBe(true);
+    expect(result.data).toBeNull();
+    expect(result.submissionResult).toEqual(
       expect.objectContaining({
         success: true,
-        data: null,
-        submissionResult: expect.objectContaining({
-          success: true,
-          emailSent: false,
-          ownerNotified: false,
-          recordCreated: false,
-          referenceId: expect.stringMatching(/^HP-/),
-        }),
+        emailSent: false,
+        ownerNotified: false,
+        recordCreated: false,
+        referenceId: expect.stringMatching(/^CON-/),
       }),
     );
     expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
@@ -392,7 +390,7 @@ describe("canonical contact submission", () => {
     expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
       "Contact honeypot triggered",
       expect.objectContaining({
-        referenceId: expect.stringMatching(/^HP-/),
+        referenceId: result.submissionResult?.referenceId,
         ip: "[REDACTED_IP]",
       }),
     );

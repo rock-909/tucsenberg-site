@@ -45,7 +45,6 @@ describe("rate-limit-key-strategies", () => {
     // Reset environment
     process.env = { ...originalEnv };
     setEnv("RATE_LIMIT_PEPPER", undefined);
-    setEnv("RATE_LIMIT_PEPPER_PREVIOUS", undefined);
     setEnv("NODE_ENV", undefined);
   });
 

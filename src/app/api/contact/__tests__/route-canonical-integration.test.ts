@@ -194,7 +194,7 @@ describe("/api/contact canonical integration", () => {
     expect(data).toEqual({
       success: true,
       data: {
-        referenceId: expect.stringMatching(/^HP-/),
+        referenceId: expect.stringMatching(/^CON-/),
       },
     });
     expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
@@ -202,7 +202,7 @@ describe("/api/contact canonical integration", () => {
     expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
       "Contact honeypot triggered",
       expect.objectContaining({
-        referenceId: expect.stringMatching(/^HP-/),
+        referenceId: data.data.referenceId,
         ip: "[REDACTED_IP]",
       }),
     );

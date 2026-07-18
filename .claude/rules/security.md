@@ -142,8 +142,11 @@ complexity called out in the rate-limiter section above:
 
 - A `website` honeypot field (`contact-form-config.ts`): real browsers leave it
   empty; a filled value is treated as bot traffic and returns the same public
-  `200` success envelope as a real submission, with an `HP-` reference id logged
-  server-side. Do not expose honeypot-specific validation errors to the client.
+  `200` success envelope as a real submission, including a normal
+  contact-shaped `CON-` reference id. Honeypot hits are identified only by the
+  server-side `Contact honeypot triggered` log event (with the same reference
+  id). Do not expose honeypot-specific validation errors or markers in the
+  public JSON.
 - A `submittedAt` freshness window (`submit-canonical-contact.ts`): submissions
   whose page-render timestamp is older than ten minutes are rejected as
   stale-page submissions. This is a staleness guard, not replay protection — it

@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { z, type ZodIssue } from "zod";
 import {
   CONTACT_FORM_CONFIG,
@@ -17,7 +16,10 @@ import {
   leadAttributionFields,
 } from "@/lib/lead-pipeline/lead-schema";
 import { processLead } from "@/lib/lead-pipeline/process-lead";
-import { createOptionalSubject } from "@/lib/lead-pipeline/utils";
+import {
+  createOptionalSubject,
+  generateLeadReferenceId,
+} from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail, sanitizeIP } from "@/lib/logger";
 import {
   pickAttributionFields,
@@ -245,12 +247,6 @@ function isContactHoneypotTriggered(body: unknown): boolean {
   return typeof website === "string" && website.trim().length > 0;
 }
 
-function generateHoneypotReferenceId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = randomBytes(4).toString("hex");
-  return `HP-${timestamp}-${random}`;
-}
-
 function validateSubmissionTime(
   submittedAt: string,
 ): ContactValidationFailure | null {
@@ -412,7 +408,7 @@ export async function submitCanonicalContactSubmission(
   options: CanonicalContactSubmissionOptions,
 ): Promise<CanonicalContactSubmissionResult> {
   if (isContactHoneypotTriggered(body)) {
-    const referenceId = generateHoneypotReferenceId();
+    const referenceId = generateLeadReferenceId("contact");
     logger.warn("Contact honeypot triggered", {
       referenceId,
       ip: sanitizeIP(options.clientIP),
