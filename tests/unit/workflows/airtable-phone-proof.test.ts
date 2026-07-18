@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 const WORKFLOW_PATH = ".github/workflows/airtable-phone-proof.yml";
 const PROOF_TEST_PATH =
   "tests/integration/api/airtable-phone-column-direct-proof.test.ts";
+const SUMMARY_SCRIPT_PATH =
+  "scripts/workflows/write-airtable-phone-proof-summary.mjs";
 
 interface WorkflowStep {
   readonly name?: string;
@@ -13,6 +15,7 @@ interface WorkflowStep {
   readonly uses?: string;
   readonly with?: Record<string, string>;
   readonly env?: Record<string, string>;
+  readonly if?: string;
 }
 
 interface AirtablePhoneProofWorkflow {
@@ -36,6 +39,10 @@ function requireStep(predicate: (step: WorkflowStep) => boolean): WorkflowStep {
     throw new Error("Required Airtable phone proof workflow step is missing");
   }
   return step;
+}
+
+function collectRunSteps(): WorkflowStep[] {
+  return steps.filter((step) => typeof step.run === "string");
 }
 
 describe("Airtable phone proof workflow", () => {
@@ -66,11 +73,15 @@ describe("Airtable phone proof workflow", () => {
     const proofStep = requireStep(
       (step) => step.name === "Run Airtable phone column proof",
     );
-    const summaryStep = requireStep(
-      (step) => step.name === "Record proof result",
-    );
 
     expect(verifyTest.run).toContain(PROOF_TEST_PATH);
+    expect(verifyTest.env).toMatchObject({
+      PROOF_REF: "${{ github.ref }}",
+      PROOF_SHA: "${{ github.sha }}",
+    });
+    expect(verifyTest.run).toContain("${PROOF_REF}");
+    expect(verifyTest.run).toContain("${PROOF_SHA}");
+
     expect(proofStep.run).toContain(
       "pnpm exec vitest run tests/integration/api/airtable-phone-column-direct-proof.test.ts --reporter=verbose",
     );
@@ -80,11 +91,41 @@ describe("Airtable phone proof workflow", () => {
       AIRTABLE_BASE_ID: "${{ secrets.AIRTABLE_BASE_ID }}",
       AIRTABLE_TABLE_NAME: "${{ inputs.airtable_table_name }}",
     });
-    expect(summaryStep.run).toContain("github.sha");
-    expect(summaryStep.run).toContain("github.ref");
-    expect(summaryStep.run).toContain("inputs.airtable_table_name");
-    expect(summaryStep.run).not.toMatch(
-      /record id|AIRTABLE_API_KEY|AIRTABLE_BASE_ID/iu,
+    expect(proofStep.id).toBe("proof");
+  });
+
+  it("keeps workflow expressions out of every run script body", () => {
+    for (const step of collectRunSteps()) {
+      expect(step.run, step.name).not.toMatch(/\$\{\{/u);
+    }
+  });
+
+  it("records proof results through env-backed Node summary writer", () => {
+    const summaryStep = requireStep(
+      (step) => step.name === "Record proof result",
     );
+
+    expect(summaryStep.if).toBe("always()");
+    expect(summaryStep.run).toBe(`node ${SUMMARY_SCRIPT_PATH}`);
+    expect(summaryStep.env).toMatchObject({
+      PROOF_SUMMARY_REF: "${{ github.ref }}",
+      PROOF_SUMMARY_SHA: "${{ github.sha }}",
+      PROOF_SUMMARY_TABLE: "${{ inputs.airtable_table_name }}",
+      PROOF_OUTCOME: "${{ steps.proof.outcome }}",
+    });
+    expect(summaryStep.run).not.toMatch(
+      /record id|AIRTABLE_API_KEY|AIRTABLE_BASE_ID|api response/iu,
+    );
+  });
+
+  it("does not interpolate malicious table names into shell run bodies", () => {
+    const maliciousTable = "Contacts$(touch /tmp/pwned)";
+    const backtickTable = "Contacts`id`";
+
+    for (const step of collectRunSteps()) {
+      expect(step.run, step.name).not.toContain(maliciousTable);
+      expect(step.run, step.name).not.toContain(backtickTable);
+      expect(step.run, step.name).not.toMatch(/\$\(touch/iu);
+    }
   });
 });
