@@ -1,7 +1,6 @@
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   createInquiryFormCopy,
-  createInquiryFormCopyFromMessages,
   type InquiryFormCopy,
 } from "@/components/forms/inquiry-form-copy";
 
@@ -44,8 +43,4 @@ export function getInquiryFormMessage(keyPath: string): string {
 
 export function createTestInquiryFormCopy(): InquiryFormCopy {
   return createInquiryFormCopy(getInquiryFormMessage);
-}
-
-export function createTestInquiryFormCopyFromMessages(): InquiryFormCopy {
-  return createInquiryFormCopyFromMessages(enMessages);
 }

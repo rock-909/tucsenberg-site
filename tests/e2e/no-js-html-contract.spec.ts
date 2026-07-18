@@ -137,6 +137,36 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
+  test("request quote page renders inquiry fallback without JavaScript", async ({
+    page,
+  }) => {
+    await page.goto("http://localhost:3000/request-quote", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(
+      page.getByRole("heading", { name: /request a quote|get real numbers/i }),
+    ).toBeVisible();
+
+    const html = await page.content();
+    expect(html).toContain('data-testid="inquiry-form-static-fallback"');
+    expect(html).not.toMatch(/<form[\s>]/);
+
+    const staticFallback = page
+      .locator('[data-testid="inquiry-form-static-fallback"]:visible')
+      .first();
+
+    await expect(staticFallback).toBeVisible();
+    await expect(
+      staticFallback.getByText(/secure inquiry form needs JavaScript/i),
+    ).toBeVisible();
+    await expect(
+      staticFallback.getByRole("link", { name: /@/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("button")).toHaveCount(0);
+  });
+
   test("key public pages expose one composed main landmark", async ({
     page,
   }) => {

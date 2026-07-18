@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_LEAD_PRODUCT_NAME_LENGTH } from "@/constants/validation-limits";
 import { InquiryForm } from "@/components/forms/inquiry-form";
@@ -247,6 +248,48 @@ describe("InquiryForm contract", () => {
   });
 });
 
+function setRequestQuoteSearch(search: string) {
+  vi.stubGlobal("location", {
+    ...window.location,
+    href: `http://localhost/request-quote${search}`,
+    pathname: "/request-quote",
+    search,
+  });
+}
+
+describe("InquiryForm hydration", () => {
+  it("SSR renders the static fallback without a live form or URL context", () => {
+    vi.stubGlobal("location", {
+      ...window.location,
+      search: "?interest=frp-planks&config=estimator-summary",
+    });
+
+    const copy = createTestInquiryFormCopy();
+    const html = renderToString(
+      <InquiryForm copy={copy} source="request-quote" />,
+    );
+
+    expect(html).toContain('data-testid="inquiry-form-static-fallback"');
+    expect(html).toContain(copy.noJsExplanation);
+    expect(html).not.toMatch(/<form[\s>]/);
+    expect(html).not.toContain("inquiry-buyer-interest-context");
+    expect(html).not.toContain('data-testid="inquiry-form"');
+  });
+
+  it("hydrates request-quote URL context only after the live form mounts", async () => {
+    setRequestQuoteSearch("?interest=frp-planks&config=Visible%20prefill");
+    const { container, copy } = renderInquiryForm("request-quote");
+
+    expect(
+      screen.getByTestId("inquiry-buyer-interest-context"),
+    ).toHaveTextContent("frp-planks");
+    expect(
+      screen.getByTestId("inquiry-buyer-interest-context"),
+    ).toHaveTextContent(copy.contextLabel);
+    expect(getFormControls(container).message).toHaveValue("Visible prefill");
+  });
+});
+
 describe("InquiryForm URL handoff", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -258,22 +301,13 @@ describe("InquiryForm URL handoff", () => {
     );
   });
 
-  function setSearch(search: string) {
-    vi.stubGlobal("location", {
-      ...window.location,
-      href: `http://localhost/request-quote${search}`,
-      pathname: "/request-quote",
-      search,
-    });
-  }
-
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
   it("caps interest, shows it as untrusted context, and submits buyerInterest only", async () => {
     const interest = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH + 50);
-    setSearch(`?interest=${encodeURIComponent(interest)}`);
+    setRequestQuoteSearch(`?interest=${encodeURIComponent(interest)}`);
     const { container, copy } = renderInquiryForm("request-quote");
     const capped = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH);
 
@@ -303,7 +337,7 @@ describe("InquiryForm URL handoff", () => {
 
   it("caps config, pre-fills the visible message, and keeps it editable", async () => {
     const config = "c".repeat(CONFIG_PREFILL_MAX_LENGTH + 20);
-    setSearch(`?config=${encodeURIComponent(config)}`);
+    setRequestQuoteSearch(`?config=${encodeURIComponent(config)}`);
     const { container } = renderInquiryForm("request-quote");
     const { message } = getFormControls(container);
 
@@ -315,7 +349,7 @@ describe("InquiryForm URL handoff", () => {
   });
 
   it("ignores URL context in contact mode", () => {
-    setSearch("?interest=frp-planks&config=should-not-appear");
+    setRequestQuoteSearch("?interest=frp-planks&config=should-not-appear");
     const { container } = renderInquiryForm("contact");
 
     expect(screen.queryByTestId("inquiry-buyer-interest-context")).toBeNull();

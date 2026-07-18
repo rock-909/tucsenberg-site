@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useSyncExternalStore } from "react";
 import {
   InquiryBuyerInterestContext,
   InquiryFormFields,
@@ -9,6 +9,7 @@ import {
   type InquiryFormCopy,
   type InquiryFormSource,
 } from "@/components/forms/inquiry-form-copy";
+import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { InquiryFormStatus } from "@/components/forms/inquiry-form-status";
 import {
   capBuyerInterest,
@@ -31,14 +32,15 @@ export interface InquiryFormProps {
   readonly copy: InquiryFormCopy;
 }
 
+const unsubscribeHydration = () => undefined;
+const subscribeHydration = () => unsubscribeHydration;
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
+
 function readRequestQuoteUrlContext(): {
   buyerInterest?: string | undefined;
   configPrefill?: string | undefined;
 } {
-  if (typeof window === "undefined") {
-    return {};
-  }
-
   const params = new URLSearchParams(window.location.search);
   const buyerInterest = capBuyerInterest(params.get("interest"));
   const configPrefill = capConfigPrefill(params.get("config"));
@@ -49,9 +51,16 @@ function readRequestQuoteUrlContext(): {
   };
 }
 
-export function InquiryForm({ source, copy }: InquiryFormProps) {
-  const [urlContext] = useState(() =>
-    source === "request-quote" ? readRequestQuoteUrlContext() : {},
+function InquiryFormLive({
+  source,
+  copy,
+}: {
+  source: InquiryFormSource;
+  copy: InquiryFormCopy;
+}) {
+  const urlContext = useMemo(
+    () => (source === "request-quote" ? readRequestQuoteUrlContext() : {}),
+    [source],
   );
   const { buyerInterest, configPrefill } = urlContext;
 
@@ -126,4 +135,18 @@ export function InquiryForm({ source, copy }: InquiryFormProps) {
       </form>
     </section>
   );
+}
+
+export function InquiryForm({ source, copy }: InquiryFormProps) {
+  const isHydrated = useSyncExternalStore(
+    subscribeHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
+
+  if (!isHydrated) {
+    return <InquiryFormStaticFallback copy={copy} />;
+  }
+
+  return <InquiryFormLive copy={copy} source={source} />;
 }

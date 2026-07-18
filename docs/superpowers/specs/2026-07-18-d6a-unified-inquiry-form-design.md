@@ -99,4 +99,3 @@ Add one `inquiry.form` message owner in the physical `b2b-lead` pack. Both pages
 4. No-JS test proves the fallback has explanation + public email and no `form`/submit control.
 5. Page and E2E tests prove Contact and Request Quote both use the shared form; product/estimator handoffs still work.
 6. `pnpm component:check`, `pnpm content:check`, focused Vitest/E2E, `pnpm website:check`, and `pnpm build` pass. `pnpm build` and Cloudflare build are never run in parallel.
-

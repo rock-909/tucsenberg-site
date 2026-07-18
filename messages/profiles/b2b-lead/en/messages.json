@@ -162,7 +162,6 @@
       "success": "Received. You'll hear from a person, not a sequence.",
       "referenceLabel": "Reference",
       "privacyNotice": "By submitting this form, you agree to our Privacy Policy and Terms of Service.",
-      "turnstilePending": "Security verification is loading. You can send the form once it is ready.",
       "noJsExplanation": "The secure inquiry form needs JavaScript because bot verification cannot run without it.",
       "noJsEmailPrefix": "Email us directly at",
       "contactAriaLabel": "Contact inquiry",
@@ -170,8 +169,7 @@
       "errors": {
         "fieldSummary": "Please review the highlighted fields and try again.",
         "securitySummary": "Security verification did not complete. Please try again.",
-        "serverSummary": "We could not send your inquiry right now. Please try again shortly.",
-        "networkSummary": "We could not submit the form. Please try again."
+        "serverSummary": "We could not send your inquiry right now. Please try again shortly."
       }
     }
   },
