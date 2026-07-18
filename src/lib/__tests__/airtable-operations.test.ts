@@ -38,8 +38,6 @@ const createMockRecord = (data: Record<string, unknown>) => ({
   fields: data.fields || {},
   createdTime: data.createdTime || "2023-01-01T00:00:00Z",
   get: vi.fn((field: string) => {
-    if (field === "Created Time")
-      return data.createdTime || "2023-01-01T00:00:00Z";
     return (data.fields as Record<string, unknown>)?.[field];
   }),
 });
@@ -157,7 +155,6 @@ describe("Airtable Service - Main Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalled();
     });

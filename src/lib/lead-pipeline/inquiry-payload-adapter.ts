@@ -25,9 +25,9 @@ function normalizeBlankOptional(value: unknown): unknown {
  * Normalize a raw /api/inquiry JSON body before Zod validation.
  *
  * - Blank optional strings become `undefined`.
- * - Legacy RFQ payloads may still send `requirements`; canonical `message`
- *   wins when both are present. Requirements stays available for downstream
- *   legacy mapping until the old frontend stack is retired.
+ * - Legacy RFQ payloads may still send `requirements`; when `message` is
+ *   missing, requirements is promoted to canonical `message`, then cleared
+ *   before validation. Canonical `message` always wins when both are present.
  */
 export function adaptLegacyInquiryPayload(
   data: Record<string, unknown>,

@@ -69,8 +69,6 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, phone: "A".repeat(40) },
   { ...validBase, message: 123 },
   { ...validBase, message: "A".repeat(5000) },
-  { ...validBase, requirements: 123 },
-  { ...validBase, requirements: "A".repeat(5000) },
   { ...validBase, utmSource: "x".repeat(257) },
   { ...validBase, utmSource: 42 },
   { ...validBase, gclid: true },
@@ -136,7 +134,6 @@ describe("inquiry validation detail mapping", () => {
       company: 123,
       phone: true,
       message: 999,
-      requirements: 456,
       buyerInterest: 789,
     });
 
@@ -146,7 +143,6 @@ describe("inquiry validation detail mapping", () => {
     expect(mapInquiryValidationDetails(parsed.error.issues)).toEqual(
       expect.arrayContaining([
         "errors.company.invalid",
-        "errors.requirements.invalid",
         "errors.buyerInterest.invalid",
         "errors.phone.invalid",
         "errors.message.invalid",
@@ -155,7 +151,6 @@ describe("inquiry validation detail mapping", () => {
     expect(mapInquiryValidationDetails(parsed.error.issues)).not.toEqual(
       expect.arrayContaining([
         "errors.company.required",
-        "errors.requirements.required",
         "errors.buyerInterest.required",
       ]),
     );

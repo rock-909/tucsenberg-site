@@ -212,9 +212,6 @@ export async function createLeadRecord(params: {
 
     return {
       id: createdRecord.id,
-      ...(createdRecord.get("Created Time")
-        ? { createdTime: createdRecord.get("Created Time") as string }
-        : {}),
     };
   } catch (error) {
     logger.error(

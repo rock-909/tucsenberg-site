@@ -18,7 +18,6 @@ export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
   catalogProductId: "errors.catalogProductId",
   buyerInterest: "errors.buyerInterest",
   quantity: "errors.quantity",
-  requirements: "errors.requirements",
 } as const satisfies ValidationFieldErrorKeys;
 
 /**
@@ -44,8 +43,6 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.buyerInterest.tooLong",
   "errors.buyerInterest.invalid",
   "errors.quantity.invalid",
-  "errors.requirements.invalid",
-  "errors.requirements.tooLong",
 ] as const;
 
 export function mapInquiryValidationDetails(

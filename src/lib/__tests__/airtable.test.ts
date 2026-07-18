@@ -171,7 +171,6 @@ describe("Airtable Tests - Index", () => {
           Message: "This is a test message",
           Status: "New",
         },
-        get: vi.fn().mockReturnValue("2023-01-01T00:00:00Z"),
       };
 
       mockCreate.mockClear();
@@ -181,7 +180,6 @@ describe("Airtable Tests - Index", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        createdTime: "2023-01-01T00:00:00Z",
       });
 
       expect(mockCreate).toHaveBeenCalledWith([

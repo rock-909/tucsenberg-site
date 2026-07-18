@@ -7,7 +7,6 @@ import type { MarketingAttributionFields } from "@/lib/marketing/attribution-fie
 /** Minimal createLead return shape from the Airtable SDK write path. */
 export interface CreatedAirtableRecord {
   id: string;
-  createdTime?: string;
 }
 
 // Airtable 查询选项类型
