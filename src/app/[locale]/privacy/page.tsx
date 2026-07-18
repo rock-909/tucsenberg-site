@@ -67,7 +67,7 @@ async function PrivacyContent({ locale }: { locale: string }) {
       content={content}
       headings={headings}
       locale={locale}
-      schemaType="PrivacyPolicy"
+      schemaType="WebPage"
     />
   );
 }

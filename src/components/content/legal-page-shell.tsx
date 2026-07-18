@@ -20,8 +20,7 @@ interface LegalPageShellProps {
   content: string;
   headings: HeadingItem[];
   locale: string;
-  schemaType: "PrivacyPolicy" | "WebPage" | "Article";
-  schemaAdditionalType?: string;
+  schemaType: "WebPage" | "Article";
   /** Site-relative path (e.g. "/oem-wholesale"); enables BreadcrumbList output. */
   pagePath?: string;
 }
@@ -30,7 +29,6 @@ export interface ShellSchemaInput {
   metadata: LegalPageMetadata;
   locale: string;
   schemaType: LegalPageShellProps["schemaType"];
-  schemaAdditionalType?: string;
   pageUrl?: string;
 }
 
@@ -57,7 +55,7 @@ async function buildShellArticleSchema(
 export function buildShellPageSchema(
   input: ShellSchemaInput,
 ): Promise<Record<string, unknown>> | Record<string, unknown> {
-  const { metadata, locale, schemaType, schemaAdditionalType, pageUrl } = input;
+  const { metadata, locale, schemaType, pageUrl } = input;
 
   if (schemaType === "Article" && pageUrl) {
     return buildShellArticleSchema({ ...input, pageUrl });
@@ -66,8 +64,7 @@ export function buildShellPageSchema(
   const description = metadata.seo?.description ?? metadata.description;
 
   return buildLegalPageSchema({
-    schemaType: schemaType === "Article" ? "WebPage" : schemaType,
-    ...(schemaAdditionalType ? { additionalType: schemaAdditionalType } : {}),
+    schemaType: "WebPage",
     locale,
     name: metadata.seo?.title ?? metadata.title,
     publishedAt: metadata.publishedAt,
@@ -83,7 +80,6 @@ export async function LegalPageShell({
   headings,
   locale,
   schemaType,
-  schemaAdditionalType,
   pagePath,
 }: LegalPageShellProps): Promise<ReactNode> {
   const t = await getTranslations({ locale, namespace: "legal" });
@@ -96,7 +92,6 @@ export async function LegalPageShell({
     metadata,
     locale,
     schemaType,
-    ...(schemaAdditionalType ? { schemaAdditionalType } : {}),
     ...(pageUrl ? { pageUrl } : {}),
   });
 

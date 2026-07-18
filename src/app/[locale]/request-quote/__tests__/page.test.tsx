@@ -2,12 +2,15 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import RequestQuotePage, { generateMetadata } from "../page";
 
-const { mockGenerateMetadataForPath } = vi.hoisted(() => ({
-  mockGenerateMetadataForPath: vi.fn(async () => ({
-    title: "Request a Quote",
-    description: "Request a quote",
-  })),
-}));
+const { mockGenerateMetadataForPath, mockJsonLdGraphScript } = vi.hoisted(
+  () => ({
+    mockGenerateMetadataForPath: vi.fn(async () => ({
+      title: "Request a Quote",
+      description: "Request a quote",
+    })),
+    mockJsonLdGraphScript: vi.fn(),
+  }),
+);
 
 vi.mock("next-intl/server", async () => {
   const {
@@ -46,9 +49,23 @@ vi.mock("@/lib/seo-metadata", () => ({
   generateMetadataForPath: mockGenerateMetadataForPath,
 }));
 
+vi.mock("@/components/seo/json-ld-script", () => ({
+  JsonLdGraphScript: ({
+    locale,
+    data = [],
+  }: {
+    locale: string;
+    data?: readonly unknown[];
+  }) => {
+    mockJsonLdGraphScript({ locale, data });
+    return null;
+  },
+}));
+
 describe("RequestQuotePage", () => {
   beforeEach(() => {
     mockGenerateMetadataForPath.mockClear();
+    mockJsonLdGraphScript.mockClear();
   });
 
   it("uses the owner-approved RFQ meta title", async () => {
@@ -92,5 +109,32 @@ describe("RequestQuotePage", () => {
         "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("injects request-quote WebPage JSON-LD through the shared graph script", async () => {
+    const page = await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+
+    render(page);
+
+    expect(mockJsonLdGraphScript).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locale: "en",
+        data: [
+          expect.objectContaining({
+            "@type": "WebPage",
+            name: "Request a Quote — 12-Hour Response on Standard Items",
+            url: expect.stringMatching(/\/request-quote$/u),
+            isPartOf: expect.objectContaining({
+              "@id": expect.stringMatching(/#website$/u),
+            }),
+            about: expect.objectContaining({
+              "@id": expect.stringMatching(/#organization$/u),
+            }),
+          }),
+        ],
+      }),
+    );
   });
 });
