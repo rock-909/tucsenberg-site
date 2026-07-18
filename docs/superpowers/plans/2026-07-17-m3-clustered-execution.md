@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-Current planning baseline: `origin/main` `e00f9eca140ea416cd5728932a6fef329044225b`, M3 merged 18/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Current execution face: Cluster 2** — SEO lane D3a→D3b→D3c and Security lane D4a→D4b in parallel from the same baseline; linearize security onto D3c before acceptance. Re-read live SHA before execution.
+Current planning baseline: `origin/main` `2621e8fdb992bcfcfe6ac050afe5b2d16019524f`, M3 merged 18/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Current execution face: Cluster 2** — D3a #121, D3b #123, D4a #122 and D4b #124 are `READY_FOR_CLUSTER`; D3c #125 is in review-fix closure. After D3c is green, linearize the security stack onto D3c before one cluster-level acceptance review. Re-read live SHA before execution.
 
 ---
 
@@ -174,26 +174,34 @@ Acceptance review on PR #118 found dead MDX importer output, a misnamed Contact 
 
 ## 3. Cluster 2: SEO, structured data and security foundations
 
-**Status (2026-07-18): current execution face.** Start from `origin/main` `e00f9eca140ea416cd5728932a6fef329044225b`. SEO lane D3a→D3b→D3c and Security lane D4a→D4b run in parallel from the same baseline; linearize security onto D3c before cluster acceptance.
+**Status (2026-07-18): current execution face.** Cluster start implementation baseline was the Cluster 1 main tip; current `origin/main` is `2621e8fdb992bcfcfe6ac050afe5b2d16019524f` after the docs-only Cluster 1 closeout. SEO lane D3a→D3b→D3c and Security lane D4a→D4b were developed in parallel. D3a/D3b/D4a/D4b are `READY_FOR_CLUSTER`; D3c remains the only implementation item not yet ready. Linearize security onto the final D3c head before cluster acceptance.
+
+| Task | PR | Latest reviewed head | State |
+| --- | --- | --- | --- |
+| D3a | #121 | `919f841b2cbc71fc887c0ab92e637bffcc6b7c9d` | READY_FOR_CLUSTER |
+| D3b | #123 | `a1800ad68c7bcd87bfea129e4a141b5668e10982` | READY_FOR_CLUSTER |
+| D3c | #125 | `7c7f947550014c4101e54020142ce2864f69624d` | CHANGES_REQUIRED closure in progress |
+| D4a | #122 | `21bd2a042c968c121e73889834cc53a392461f36` | READY_FOR_CLUSTER |
+| D4b | #124 | `3b15b95f6dbd2431fd9cfb23c6473421f64b980a` | READY_FOR_CLUSTER |
 
 ### Task D3a: canonical, metadata and OG coverage
 
 **Base:** Cluster 2 start main.
 **Files:** `src/components/products/catalog-breadcrumb-jsonld.ts`, `src/lib/seo-metadata.ts`, `src/app/[locale]/static-mdx-page.tsx`, `content/pages/en/contact.mdx`, `src/components/products/__tests__/catalog-breadcrumb.test.tsx`, `src/lib/__tests__/seo-metadata.test.ts`, `tests/e2e/seo-validation.spec.ts`.
 
-- [ ] Add failing tests that breadcrumb URLs use the canonical root without `/en`, and every public static page receives an OG image unless it explicitly supplies one.
-- [ ] Make breadcrumb generation reuse the same canonical base truth as metadata. Extend `createStaticPageSeoDefaults`/static MDX metadata composition so the image fallback is derived once.
-- [ ] Change Contact metadata copy to promise a reply within 12 hours and quote only when details are sufficient.
-- [ ] Run the three focused test files above plus `pnpm build` and the SEO Playwright spec. Commit `fix: canonical breadcrumb base and og image coverage`; push and mark `READY_FOR_CLUSTER`.
+- [x] Add failing tests that breadcrumb URLs use the canonical root without `/en`, and every public static page receives an OG image unless it explicitly supplies one.
+- [x] Make breadcrumb generation reuse the same canonical base truth as metadata. Extend `createStaticPageSeoDefaults`/static MDX metadata composition so the image fallback is derived once.
+- [x] Change Contact metadata copy to promise a reply within 12 hours and quote only when details are sufficient.
+- [x] Run the three focused test files above plus `pnpm build` and the SEO Playwright spec. Commit `fix: canonical breadcrumb base and og image coverage`; push and mark `READY_FOR_CLUSTER`.
 
 ### Task D3b: correct the JSON-LD graph
 
 **Base:** green D3a head.
 **Files:** `src/app/[locale]/privacy/page.tsx`, `src/app/[locale]/terms/page.tsx`, `src/app/[locale]/request-quote/page.tsx`, `src/app/[locale]/oem-wholesale/page.tsx`, `content/pages/en/oem-wholesale.mdx`, `src/app/[locale]/products/[market]/market-jsonld.ts`, `src/lib/structured-data-generators.ts`, `src/lib/structured-data-types.ts`, `src/components/seo/json-ld-graph-data.ts`, `.claude/rules/structured-data.md`, related structured-data/page tests.
 
-- [ ] Add failing tests for: Privacy as `WebPage`; Terms without invalid `additionalType`; Article author as Organization; Organization email/address/foundingDate and stable `#organization`/`#website` IDs; Request Quote graph injection; product page as one `Product`; OEM FAQ rendered from one source.
-- [ ] Implement those graph changes. Remove the duplicate OEM body FAQ and render the frontmatter FAQ through the existing page pattern. Replace redundant `defaultValue` calls with `??` at the owning boundary.
-- [ ] Run:
+- [x] Add failing tests for: Privacy as `WebPage`; Terms without invalid `additionalType`; Article author as Organization; Organization email/address/foundingDate and stable `#organization`/`#website` IDs; Request Quote graph injection; product page as one `Product`; OEM FAQ rendered from one source.
+- [x] Implement those graph changes. Remove the duplicate OEM body FAQ and render the frontmatter FAQ through the existing page pattern. Replace redundant `defaultValue` calls with `??` at the owning boundary.
+- [x] Run:
 
 ```bash
 pnpm exec vitest run src/lib/__tests__/structured-data.test.ts src/components/seo/__tests__/json-ld-script.test.ts src/app/[locale]/privacy/__tests__/page.test.tsx src/app/[locale]/terms/__tests__/page.test.tsx src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx
@@ -201,7 +209,7 @@ pnpm content:check
 pnpm build
 ```
 
-- [ ] Save schema.org validator evidence in the PR. Commit `fix: json-ld schema types, entity graph and faq single truth`; push and mark `READY_FOR_CLUSTER`.
+- [x] Save available structured-data evidence in the PR without claiming an external validator run that was not performed. Commit `fix: json-ld schema types, entity graph and faq single truth`; push and mark `READY_FOR_CLUSTER`.
 
 ### Task D3c: delete dead SEO mechanisms and add real internal links
 
@@ -219,10 +227,10 @@ pnpm build
 **Base:** Cluster 2 start main, parallel to SEO lane.
 **Files:** `src/app/api/inquiry/route.ts`, `src/app/api/contact/route.ts`, `src/app/api/csp-report/route.ts`, `src/config/security.ts`, `src/lib/security/turnstile.ts`, `src/lib/security/stores/rate-limit-store.ts`, `src/lib/env.ts`, `docs/项目基础/部署.md`, `.claude/rules/security.md`, and their existing tests.
 
-- [ ] Add failing behavior tests that honeypot hits return the same 200 envelope as a normal success while producing a server-identifiable reference; CSP suspicious reports log once; the security config has only live behavior; callers use the detailed Turnstile implementation without a forwarding wrapper.
-- [ ] Collapse `SECURITY_MODES` to the live `cspReportOnly` choice, simplify `isSecurityHeadersEnabled`, and remove `_testMode` only with its tests/callers.
-- [ ] Before deleting `RATE_LIMIT_PEPPER_PREVIOUS` or `KV_*`, collect evidence from production code, `.github`, Cloudflare/GitHub secret names, stable deployment docs and the rotation path. If any live rotation use remains, keep the capability and consolidate its owner instead of deleting it.
-- [ ] Run:
+- [x] Add failing behavior tests that honeypot hits return the same 200 envelope as a normal success while producing a server-identifiable reference; CSP suspicious reports log once; the security config has only live behavior; callers use the detailed Turnstile implementation without a forwarding wrapper.
+- [x] Collapse `SECURITY_MODES` to the live `cspReportOnly` choice, simplify `isSecurityHeadersEnabled`, and remove `_testMode` only with its tests/callers.
+- [x] Before deleting `RATE_LIMIT_PEPPER_PREVIOUS` or `KV_*`, collect evidence from production code, `.github`, Cloudflare/GitHub secret names, stable deployment docs and the rotation path. If any live rotation use remains, keep the capability and consolidate its owner instead of deleting it.
+- [x] Run:
 
 ```bash
 pnpm exec vitest run src/app/api/inquiry/__tests__/route.test.ts src/app/api/contact/__tests__/route.test.ts src/app/api/csp-report/__tests__/route-post-security.test.ts src/config/__tests__/security.test.ts src/lib/security/__tests__/turnstile-config.test.ts src/lib/security/__tests__/rate-limit-store.test.ts src/lib/__tests__/env.test.ts
@@ -230,17 +238,17 @@ pnpm lint:check
 pnpm type-check
 ```
 
-- [ ] Commit `fix: security behavior cleanup batch`; push, require the Semgrep CI job to pass, and mark `READY_FOR_CLUSTER`.
+- [x] Commit `fix: security behavior cleanup batch`; push, require the Semgrep CI job to pass, and mark `READY_FOR_CLUSTER`.
 
 ### Task D4b: IPv6 rate-limit and platform guard
 
 **Base:** green D4a head.
 **Files:** `src/lib/security/rate-limit-key-strategies.ts`, `src/lib/security/ip-range.ts`, `src/lib/security/__tests__/rate-limit-key-strategies.test.ts`, `scripts/quality/checks/production-config.js`, `tests/unit/scripts/validate-production-config.test.ts`.
 
-- [ ] Add failing tests: two IPv6 addresses in the same `/64` produce the same bucket; different `/64` values do not; production Cloudflare config rejects a non-Cloudflare `DEPLOYMENT_PLATFORM`.
-- [ ] Normalize IPv6 keys from the high 64 bits returned by `ipv6ToBigInt`; keep IPv4 behavior unchanged. Add the production platform assertion without weakening preview/local modes.
-- [ ] Run the two focused test files, distributed rate-limit tests, production config validation and `pnpm website:check`.
-- [ ] Commit `fix: normalize ipv6 rate-limit keys and assert deployment platform`; push and mark `READY_FOR_CLUSTER`.
+- [x] Add failing tests: two IPv6 addresses in the same `/64` produce the same bucket; different `/64` values do not; production Cloudflare config rejects a non-Cloudflare `DEPLOYMENT_PLATFORM`.
+- [x] Normalize ordinary IPv6 keys by `/64`; preserve native IPv4 behavior and normalize IPv4-mapped IPv6 to the embedded IPv4 address. Add the production platform assertion without weakening preview/local modes.
+- [x] Run the two focused test files, distributed rate-limit tests, production config validation and `pnpm website:check`.
+- [x] Commit `fix: normalize ipv6 rate-limit keys and assert deployment platform`; push and mark `READY_FOR_CLUSTER`.
 
 ### Cluster 2 linearization and acceptance
 
