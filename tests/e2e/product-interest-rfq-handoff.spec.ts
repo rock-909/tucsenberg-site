@@ -69,6 +69,9 @@ test("product CTA reaches RFQ with validated catalog identity", async ({
     catalogProductId: "frp-flood-barriers",
     message: "Need FRP barrier details.",
   });
+  await expect(form.locator('[name="fullName"]')).toHaveValue("");
+  await expect(form.locator('[name="email"]')).toHaveValue("");
+  await expect(form.locator('[name="message"]')).toHaveValue("");
 });
 
 test("general request quote does not carry a catalog product identity", async ({

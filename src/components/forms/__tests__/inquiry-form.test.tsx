@@ -379,6 +379,135 @@ describe("InquiryForm contract", () => {
     expect(document.getElementById("inquiry-message-hint")).toBeTruthy();
   });
 
+  it("clears fullName, email, and message after contact success while keeping the reference ID", async () => {
+    const { container, copy } = renderInquiryForm("contact");
+    const { fullName, email, message, form } = getFormControls(container);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Ada Buyer" } });
+    fireEvent.change(email, { target: { value: "ada@example.com" } });
+    fireEvent.change(message, {
+      target: { value: "Need flood barrier specs" },
+    });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await screen.findByText(
+      `${copy.success} ${copy.referenceLabel}: inq-ref-1`,
+    );
+    expect(fullName).toHaveValue("");
+    expect(email).toHaveValue("");
+    expect(message).toHaveValue("");
+  });
+
+  it("clears estimator-prefilled message after catalog RFQ success", async () => {
+    const estimatorMessage = "Need span data for 40m opening";
+    const { container, copy } = renderInquiryForm("request-quote", {
+      kind: "catalog-context",
+      catalogProductId: "frp-flood-barriers",
+      displayLabel: "FRP Composite Planks",
+      initialMessage: estimatorMessage,
+    });
+    const { fullName, email, message, form } = getFormControls(container);
+
+    expect(message).toHaveValue(estimatorMessage);
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "RFQ Buyer" } });
+    fireEvent.change(email, { target: { value: "rfq@example.com" } });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await screen.findByText(
+      `${copy.success} ${copy.referenceLabel}: inq-ref-1`,
+    );
+    expect(fullName).toHaveValue("");
+    expect(email).toHaveValue("");
+    expect(message).toHaveValue("");
+  });
+
+  it("preserves filled fields after validation failure", async () => {
+    const { container, copy } = renderInquiryForm("contact");
+    const { fullName, email, message, form } = getFormControls(container);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Error Buyer" } });
+    fireEvent.change(email, { target: { value: "error@example.com" } });
+    fireEvent.change(message, { target: { value: "Keep this text" } });
+
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "INQUIRY_VALIDATION_FAILED",
+          details: ["errors.email.invalid"],
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    expect(
+      await screen.findByText(copy.errors.fieldSummary),
+    ).toBeInTheDocument();
+    expect(fullName).toHaveValue("Error Buyer");
+    expect(email).toHaveValue("error@example.com");
+    expect(message).toHaveValue("Keep this text");
+  });
+
+  it("preserves filled fields after HTTP 429 and accepts retry after fresh Turnstile", async () => {
+    const { container, copy } = renderInquiryForm("contact");
+    const { fullName, email, message, form } = getFormControls(container);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Retry Buyer" } });
+    fireEvent.change(email, { target: { value: "retry@example.com" } });
+    fireEvent.change(message, { target: { value: "Retry message" } });
+
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "RATE_LIMIT_EXCEEDED",
+        }),
+        { status: 429 },
+      ),
+    );
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    expect(
+      await screen.findByText(copy.errors.serverSummary),
+    ).toBeInTheDocument();
+    expect(fullName).toHaveValue("Retry Buyer");
+    expect(email).toHaveValue("retry@example.com");
+    expect(message).toHaveValue("Retry message");
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+    expect(getFetchBody()).toMatchObject({
+      fullName: "Retry Buyer",
+      email: "retry@example.com",
+      message: "Retry message",
+      turnstileToken: "mock-inquiry-turnstile-token",
+    });
+  });
+
   it("keeps summary-only behavior for unknown field details", async () => {
     const copy = createTestInquiryFormCopy();
     const fallback = <InquiryFormStaticFallback copy={copy} />;
