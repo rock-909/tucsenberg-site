@@ -195,6 +195,11 @@ describe("contact-field-validators", () => {
     ).toContain(maxDigits.slice(0, 3));
     expect(schema.parse(maxDigits)).toBe(maxDigits);
 
+    const tooManyDigits = "1".repeat(
+      CONTACT_FORM_VALIDATION_CONSTANTS.PHONE_MAX_DIGITS + 1,
+    );
+    expect(schema.safeParse(tooManyDigits).success).toBe(false);
+
     for (const invalidPhone of ["abc123", "123abc", "+12+34"]) {
       const result = schema.safeParse(invalidPhone);
       expect(result.success).toBe(false);
