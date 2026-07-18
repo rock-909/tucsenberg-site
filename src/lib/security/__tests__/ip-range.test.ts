@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { ipv4ToInteger, ipv6ToBigInt } from "../ip-range";
+import {
+  integerToIpv4,
+  ipv4MappedEmbeddedAddress,
+  ipv4ToInteger,
+  ipv6NetworkPrefix64,
+  ipv6ToBigInt,
+} from "../ip-range";
 
 describe("ip-range", () => {
   describe("ipv4 parsing", () => {
@@ -49,6 +55,45 @@ describe("ip-range", () => {
       expect(ipv6ToBigInt("1:2:10000:4:5:6:7:8")).toBeNull();
       expect(ipv6ToBigInt("::ffff:999.0.2.128")).toBeNull();
       expect(ipv6ToBigInt("999.0.2.128::1")).toBeNull();
+    });
+  });
+
+  describe("ipv4-mapped detection", () => {
+    it("detects embedded IPv4 in mapped addresses", () => {
+      expect(ipv4MappedEmbeddedAddress("::ffff:192.0.2.128")).toBe(
+        ipv4ToInteger("192.0.2.128"),
+      );
+      expect(ipv4MappedEmbeddedAddress("0:0:0:0:0:ffff:192.0.2.128")).toBe(
+        ipv4ToInteger("192.0.2.128"),
+      );
+      expect(ipv4MappedEmbeddedAddress("::ffff:192.0.2.129")).toBe(
+        ipv4ToInteger("192.0.2.129"),
+      );
+    });
+
+    it("does not treat native IPv4 or ordinary IPv6 as mapped", () => {
+      expect(ipv4MappedEmbeddedAddress("192.0.2.128")).toBeNull();
+      expect(ipv4MappedEmbeddedAddress("2001:db8::1")).toBeNull();
+      expect(ipv4MappedEmbeddedAddress("::1")).toBeNull();
+      expect(ipv4MappedEmbeddedAddress("fe80::1")).toBeNull();
+    });
+
+    it("round-trips mapped embedded IPv4 through integerToIpv4", () => {
+      const embedded = ipv4MappedEmbeddedAddress("::ffff:203.0.113.50");
+      expect(embedded).toBe(ipv4ToInteger("203.0.113.50"));
+      expect(integerToIpv4(embedded!)).toBe("203.0.113.50");
+    });
+
+    it("keeps ordinary IPv6 /64 bucketing separate from mapped detection", () => {
+      const samePrefixA = ipv6NetworkPrefix64("2001:db8:1234:5678::1");
+      const samePrefixB = ipv6NetworkPrefix64(
+        "2001:db8:1234:5678:ffff:eeee:dddd:9999",
+      );
+      const differentPrefix = ipv6NetworkPrefix64("2001:db8:1234:5679::1");
+
+      expect(samePrefixA).toBe(samePrefixB);
+      expect(samePrefixA).not.toBe(differentPrefix);
+      expect(ipv4MappedEmbeddedAddress("2001:db8:1234:5678::1")).toBeNull();
     });
   });
 });

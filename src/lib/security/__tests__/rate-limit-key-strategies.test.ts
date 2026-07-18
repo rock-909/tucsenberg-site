@@ -241,6 +241,82 @@ describe("rate-limit-key-strategies", () => {
 
       expect(key1).not.toBe(key2);
     });
+
+    it("should keep IPv4 keys based on the full IPv4 address", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+      mockGetClientIP.mockReturnValue("203.0.113.50");
+
+      const key = await getIPKey(createMockRequest());
+      const expected = `ip:${await hmacKey("203.0.113.50")}`;
+
+      expect(key).toBe(expected);
+    });
+
+    it("should bucket IPv6 addresses in the same /64 to the same key", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      mockGetClientIP.mockReturnValue("2001:db8:1234:5678:aaaa:bbbb:cccc:0001");
+      const expandedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("2001:db8:1234:5678:ffff:eeee:dddd:9999");
+      const alternateHostKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("2001:db8:1234:5678::1");
+      const compressedKey = await getIPKey(createMockRequest());
+
+      expect(alternateHostKey).toBe(expandedKey);
+      expect(compressedKey).toBe(expandedKey);
+    });
+
+    it("should bucket different IPv6 /64 prefixes to different keys", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      mockGetClientIP.mockReturnValue("2001:db8:1234:5678::1");
+      const firstPrefixKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("2001:db8:1234:5679::1");
+      const secondPrefixKey = await getIPKey(createMockRequest());
+
+      expect(firstPrefixKey).not.toBe(secondPrefixKey);
+    });
+
+    it("should keep distinct IPv4-mapped clients in separate buckets", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      mockGetClientIP.mockReturnValue("::ffff:192.0.2.128");
+      const mappedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("::ffff:192.0.2.129");
+      const mappedNeighborKey = await getIPKey(createMockRequest());
+
+      expect(mappedNeighborKey).not.toBe(mappedKey);
+    });
+
+    it("should normalize equivalent IPv4-mapped IPv6 forms to the same key", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      mockGetClientIP.mockReturnValue("::ffff:192.0.2.128");
+      const compressedMappedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("0:0:0:0:0:ffff:192.0.2.128");
+      const expandedMappedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("192.0.2.128");
+      const nativeIpv4Key = await getIPKey(createMockRequest());
+
+      expect(expandedMappedKey).toBe(compressedMappedKey);
+      expect(nativeIpv4Key).toBe(compressedMappedKey);
+    });
+
+    it("should fall back to the raw IP when parsing fails", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+      mockGetClientIP.mockReturnValue("not-an-ip");
+
+      const key = await getIPKey(createMockRequest());
+      const expected = `ip:${await hmacKey("not-an-ip")}`;
+
+      expect(key).toBe(expected);
+    });
   });
 
   describe("resetPepperWarning", () => {
