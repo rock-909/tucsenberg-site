@@ -9,9 +9,7 @@ import {
   MAX_LEAD_EMAIL_LENGTH,
   MAX_LEAD_MESSAGE_LENGTH,
   MAX_LEAD_NAME_LENGTH,
-  MAX_LEAD_PHONE_LENGTH,
 } from "@/constants/validation-limits";
-import { isValidLeadPhone } from "@/lib/form-schema/lead-phone-grammar";
 import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import {
   sanitizeMultilineText,
@@ -40,22 +38,6 @@ export const canonicalBuyerEmailSchema = z
   .min(1)
   .max(MAX_LEAD_EMAIL_LENGTH)
   .refine((email) => !hasSpreadsheetFormulaPrefix(email));
-
-export const canonicalBuyerPhoneSchema: z.ZodType<string | undefined> = z
-  .unknown()
-  .transform(normalizeOptionalInput)
-  .refine((value) => value === undefined || typeof value === "string", {
-    error: "Invalid phone number",
-  })
-  .refine(
-    (value) =>
-      value === undefined ||
-      (typeof value === "string" &&
-        value.length <= MAX_LEAD_PHONE_LENGTH &&
-        isValidLeadPhone(value)),
-    { error: "Invalid phone number" },
-  )
-  .transform((value) => (typeof value === "string" ? value : undefined));
 
 export const canonicalBuyerMessageSchema: z.ZodType<string | undefined> = z
   .unknown()

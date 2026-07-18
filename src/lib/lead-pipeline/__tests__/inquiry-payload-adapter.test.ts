@@ -31,4 +31,14 @@ describe("adaptLegacyInquiryPayload", () => {
     expect(adapted.message).toBe("Short canonical note");
     expect(adapted.requirements).toBeUndefined();
   });
+
+  it("does not promote phone from legacy payloads", () => {
+    const adapted = adaptLegacyInquiryPayload({
+      phone: "+8613800138000",
+      message: "Buyer note",
+    });
+
+    expect(adapted).not.toHaveProperty("phone");
+    expect(adapted.message).toBe("Buyer note");
+  });
 });

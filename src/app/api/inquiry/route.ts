@@ -69,7 +69,6 @@ function validateLeadData(
     productInquiryKind: adapted.productInquiryKind,
     fullName: adapted.fullName,
     email: adapted.email,
-    phone: adapted.phone,
     message: adapted.message,
     catalogProductId: adapted.catalogProductId,
     buyerInterest: adapted.buyerInterest,

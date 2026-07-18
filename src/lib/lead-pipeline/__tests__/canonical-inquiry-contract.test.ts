@@ -9,7 +9,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { sanitizeAirtablePhoneField } from "@/lib/airtable/service-internal/field-sanitization";
+import { logger } from "@/lib/__tests__/mocks/logger";
 import {
   LEAD_TYPES,
   PRODUCT_INQUIRY_KINDS,
@@ -138,27 +138,59 @@ describe("canonical inquiry contract", () => {
     }
   });
 
-  it("keeps +86 phone identical through schema, processLead, email, and Airtable", async () => {
-    const phone = "+8613800138000";
-    const parsed = productLeadSchema.parse({
+  it("drops extra phone before processLead, email, and Airtable", async () => {
+    const parsed = productLeadSchema.safeParse({
       type: LEAD_TYPES.PRODUCT,
       ...GENERAL_RFQ_BASE,
-      phone,
+      phone: "+8613800138000",
     });
 
-    expect(parsed.phone).toBe(phone);
-    expect(sanitizeAirtablePhoneField(parsed.phone!)).toBe(phone);
-    expect(sanitizeAirtablePhoneField(parsed.phone!)).not.toMatch(/^'/);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data).not.toHaveProperty("phone");
+    }
 
-    await processLead(parsed);
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        phone: "+8613800138000",
+        message: "Need pricing",
+      }),
+    );
 
-    expect(mockSendProductInquiryEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ phone }),
+    expect(response.status).toBe(200);
+
+    const emailPayload = mockSendProductInquiryEmail.mock.calls[0]?.[0];
+    expect(emailPayload).toBeDefined();
+    expect(emailPayload).not.toHaveProperty("phone");
+
+    const airtablePayload = mockCreateLead.mock.calls[0]?.[1];
+    expect(airtablePayload).toBeDefined();
+    expect(airtablePayload).not.toHaveProperty("phone");
+  });
+
+  it("does not log buyer phone from extra payload field", async () => {
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        phone: "+8613800138000",
+        message: "Need pricing",
+      }),
     );
-    expect(mockCreateLead).toHaveBeenCalledWith(
-      LEAD_TYPES.PRODUCT,
-      expect.objectContaining({ phone }),
-    );
+
+    expect(response.status).toBe(200);
+
+    const loggedPayloads = [
+      ...logger.info.mock.calls,
+      ...logger.warn.mock.calls,
+      ...logger.error.mock.calls,
+    ].flatMap((call) => call.slice(1));
+
+    for (const payload of loggedPayloads) {
+      expect(JSON.stringify(payload)).not.toContain("+8613800138000");
+    }
   });
 
   it("preserves multiline message through schema, Airtable requirements, and owner email", async () => {
@@ -257,24 +289,21 @@ describe("canonical inquiry contract", () => {
     expect(bothFail.error).toBe("PROCESSING_FAILED");
   });
 
-  it("maps legacy requirements into canonical message without dropping phone", async () => {
+  it("maps legacy requirements into canonical message without phone", async () => {
     const { POST } = await loadInquiryRoute();
     const response = await POST(
       makeInquiryRequest({
         ...GENERAL_RFQ_BASE,
-        phone: "+8613800138000",
         requirements: "Legacy RFQ note",
       }),
     );
 
     expect(response.status).toBe(200);
-    expect(mockCreateLead).toHaveBeenCalledWith(
-      LEAD_TYPES.PRODUCT,
-      expect.objectContaining({
-        phone: "+8613800138000",
-        requirements: "Legacy RFQ note",
-      }),
-    );
+
+    const airtablePayload = mockCreateLead.mock.calls[0]?.[1];
+    expect(airtablePayload).toBeDefined();
+    expect(airtablePayload).toHaveProperty("requirements", "Legacy RFQ note");
+    expect(airtablePayload).not.toHaveProperty("phone");
   });
 
   it("accepts canonical message when legacy requirements is oversized or conflicting", async () => {
@@ -298,24 +327,5 @@ describe("canonical inquiry contract", () => {
         requirements: "Canonical buyer text",
       }),
     );
-  });
-
-  it("rejects illegal phone hyphen placement before lead processing", async () => {
-    const { POST } = await loadInquiryRoute();
-
-    for (const phone of ["-123456", "--123", "123-"]) {
-      const response = await POST(
-        makeInquiryRequest({
-          ...GENERAL_RFQ_BASE,
-          phone,
-        }),
-      );
-      const body = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
-    }
-
-    expect(mockCreateLead).not.toHaveBeenCalled();
   });
 });

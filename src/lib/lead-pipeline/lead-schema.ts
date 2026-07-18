@@ -10,7 +10,6 @@ import {
   canonicalBuyerEmailSchema,
   canonicalBuyerFullNameSchema,
   canonicalBuyerMessageSchema,
-  canonicalBuyerPhoneSchema,
 } from "@/lib/lead-pipeline/canonical-buyer-fields";
 import {
   PRODUCT_INQUIRY_KINDS,
@@ -150,7 +149,6 @@ export const contactLeadSchema = z.object({
   company: sanitizedString()
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.COMPANY_MAX_LENGTH)
     .optional(),
-  phone: canonicalBuyerPhoneSchema.optional(),
   ...baseLeadFields,
 });
 
@@ -206,7 +204,6 @@ export const productLeadSchema = z
     ]),
     fullName: canonicalBuyerFullNameSchema,
     email: canonicalBuyerEmailSchema,
-    phone: canonicalBuyerPhoneSchema.optional(),
     message: canonicalBuyerMessageSchema.optional(),
     catalogProductId: catalogProductIdSchema.optional(),
     buyerInterest: sanitizedString()

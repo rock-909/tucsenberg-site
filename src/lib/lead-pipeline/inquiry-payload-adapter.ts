@@ -5,7 +5,6 @@
  */
 
 const LEGACY_OPTIONAL_BLANK_FIELDS = [
-  "phone",
   "message",
   "company",
   "buyerInterest",
@@ -33,6 +32,7 @@ export function adaptLegacyInquiryPayload(
   data: Record<string, unknown>,
 ): Record<string, unknown> {
   const adapted: Record<string, unknown> = { ...data };
+  delete adapted.phone;
 
   for (const field of LEGACY_OPTIONAL_BLANK_FIELDS) {
     adapted[field] = normalizeBlankOptional(adapted[field]);
