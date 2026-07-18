@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 25/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 merged at `747fd8d`; D6a PR #136 merged at `a23f30c`; PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. **D5a ACTIVE** on exact base `a23f30c`. Do not claim public launch readiness.
+M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6b ACTIVE.** PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -253,7 +253,7 @@ pnpm type-check
 
 ## 4. Cluster 3A: canonical inquiry contract and buyer-facing form
 
-**Status (2026-07-18): ACTIVE.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. C2 and D6a are merged; D5a is the Cluster 3A tip and active execution face. Detailed D5a plan: `docs/superpowers/plans/2026-07-18-d5a-a11y-correctness.md`. **M3 is 25/33; Cluster 3A remains open until D5a passes cluster acceptance and merges.**
+**Status (2026-07-18): CLOSED.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. C2 #130, D6a #136, and D5a #137 are accepted and merged. D5a accepted exact SHA `c4ae0a5` merged to main `96af3549`. **M3 is 26/33; Cluster 3B / D6b is the active execution face.**
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-Start only after Cluster 3A is CLOSED on main.
+**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`; D6b is active. Detailed plan: `docs/superpowers/plans/2026-07-18-d6b-single-inquiry-write.md`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
