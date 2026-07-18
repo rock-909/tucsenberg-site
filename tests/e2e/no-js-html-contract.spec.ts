@@ -60,7 +60,11 @@ test.describe("No-JS HTML contract (English-only)", () => {
 
     const trigger = getHeaderMobileMenuButton(page);
     await expect(trigger).toBeVisible();
-    await expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(trigger).not.toHaveAttribute("aria-label");
+    await expect(trigger).not.toHaveAttribute("aria-haspopup");
+    await expect(page.getByTestId("header-mobile-menu-label")).toHaveText(
+      /open navigation menu/i,
+    );
 
     await trigger.click();
 
