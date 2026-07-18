@@ -100,7 +100,8 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 
 ## Public submission identity
 
-Browser contact submissions go through the `/api/contact` route handler.
+Browser lead submissions go through the `/api/inquiry` route handler. `/api/contact`
+is a temporary non-writing `410` tombstone until D6e removes the legacy stack.
 Middleware must not inject internal client-IP headers for public form flows.
 
 There is no live `'use server'` Server Action contact path; the shared helpers in

@@ -169,12 +169,13 @@ export function InquiryFormFields({
       </div>
 
       <input
+        aria-hidden="true"
         autoComplete="off"
-        hidden
+        className="sr-only"
         id="website"
         name="website"
         tabIndex={-1}
-        type="hidden"
+        type="text"
       />
     </>
   );

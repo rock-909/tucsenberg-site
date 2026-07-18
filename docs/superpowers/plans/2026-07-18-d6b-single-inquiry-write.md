@@ -90,9 +90,9 @@
 ## Task 6: Focused behavior and browser verification
 
 - [x] Run inquiry route, integration, mapper, pipeline, lead-family, architecture, rate-limit, and affected docs tests.
-- [ ] Run Contact and Request Quote browser submission journeys and prove both network requests target `/api/inquiry`. *(Specs already route-mock `/api/inquiry`; local Playwright run failed on `turnstile-mock` visibility against `next start`, not on endpoint choice.)*
+- [x] Run Contact and Request Quote browser submission journeys and prove both network requests target `/api/inquiry`. *(Playwright `contact-submit-journey.spec.ts` + `product-interest-rfq-handoff.spec.ts`: 4/4 passed via repo `playwright.config.ts` webServer `pnpm build && pnpm start`.)*
 - [x] Run `pnpm website:check`.
 - [x] Run `git diff --check`, inspect the final diff, and verify no phone/WhatsApp field or R'12 owner item was added.
-- [ ] Commit `refactor: make api inquiry the single validated lead write path`.
+- [x] Commit `refactor: make api inquiry the single validated lead write path`.
 - [ ] Push, open one PR, wait for exact-SHA CI, perform Cursor self-review, and mark `READY_FOR_CLUSTER` with evidence.
 - [ ] Continue to D6c only after D6b is integrated into the Cluster 3B stack; do not request task-level Codex acceptance.
