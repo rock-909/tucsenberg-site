@@ -121,7 +121,7 @@ pnpm build
 pnpm exec vitest run src/app/[locale]/contact/__tests__/page.test.tsx src/app/[locale]/contact/__tests__/page-rendering.test.tsx src/app/[locale]/contact/__tests__/contact-form-static-fallback.test.tsx
 pnpm build
 node scripts/starter-checks.js prerender-static
-pnpm exec playwright test tests/e2e/no-js-html-contract.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/no-js-html-contract.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 ```
 
 - [ ] Commit `perf: make contact page fully static`, push, CI green, `READY_FOR_CLUSTER`.
@@ -326,7 +326,7 @@ Start only after Cluster 3A is CLOSED on main.
 - [ ] Add failing tests that a catalog product ID becomes product identity only after catalog validation; invalid/missing ID becomes a general inquiry or validation error according to the contract; `buyerInterest` and estimator summary stay description; UTM/source/click-id survive.
 - [ ] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
 - [ ] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
-- [ ] Run lead identity/schema tests, product page tests, calculator tests and product-family handoff E2E; `pnpm build`.
+- [ ] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
 - [ ] Commit `refactor: derive inquiry product context from validated page handoff`; push and mark `READY_FOR_CLUSTER`.
 
 ### Task D6d: unify success state, Turnstile and response promise
@@ -340,7 +340,7 @@ Start only after Cluster 3A is CLOSED on main.
 
 ```bash
 pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx src/lib/forms/__tests__/lead-response.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/security/__tests__/turnstile-config.test.ts src/lib/__tests__/env.test.ts tests/architecture/env-example-parity.test.ts
-pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 pnpm website:check
 ```
 - [ ] Commit `fix: unify inquiry success, turnstile and response expectations`; push and mark `READY_FOR_CLUSTER`.
@@ -359,7 +359,7 @@ pnpm component:check
 pnpm knip:check
 pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
 pnpm test
-pnpm exec playwright test tests/e2e/contact-form-smoke.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-family-contact-handoff.spec.ts
+pnpm exec playwright test tests/e2e/contact-form-smoke.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
 pnpm build
 ```
 

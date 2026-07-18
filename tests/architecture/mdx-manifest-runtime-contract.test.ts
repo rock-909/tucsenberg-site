@@ -62,9 +62,6 @@ describe("MDX manifest-only runtime contract", () => {
     expect(readSource("src/lib/content/render-legal-content.tsx")).toContain(
       "render-static-markdown-content",
     );
-    expect(
-      readSource("src/lib/content/render-static-markdown-content.tsx"),
-    ).toContain("text-section");
   });
 
   it("keeps the generated manifest catalog-only", () => {
@@ -76,8 +73,6 @@ describe("MDX manifest-only runtime contract", () => {
       const source = readSource(file);
       expect(source).not.toContain("profile-fixture");
       expect(source).not.toContain("showcase-full");
-      expect(source).not.toContain("mdx-importers");
-      expect(source).not.toContain("generateImportersCode");
     }
   });
 

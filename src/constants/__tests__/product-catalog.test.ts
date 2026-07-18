@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   getAllMarketSlugs,
-  getFamiliesForMarket,
   getMarketBySlug,
   PRODUCT_CATALOG,
 } from "@/constants/product-catalog";
@@ -23,8 +22,5 @@ describe("product-catalog wrapper", () => {
       "flood-tube-dams",
       "frp-flood-barriers",
     ]);
-    expect(
-      getFamiliesForMarket("abs-flood-barriers").map((family) => family.slug),
-    ).toEqual(["abs-boxwall"]);
   });
 });

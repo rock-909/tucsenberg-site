@@ -85,7 +85,6 @@ describe("CatalogBreadcrumb", () => {
       description: "test",
       sizeSystem: "inch" as const,
       standardIds: [],
-      familySlugs: [],
     };
 
     render(await CatalogBreadcrumb({ market }));
@@ -121,7 +120,6 @@ describe("CatalogBreadcrumb", () => {
       description: "test",
       sizeSystem: "inch" as const,
       standardIds: [],
-      familySlugs: [],
     };
 
     render(await CatalogBreadcrumb({ market, productsPrefetch: false }));
@@ -140,7 +138,6 @@ describe("CatalogBreadcrumb", () => {
       description: "test",
       sizeSystem: "inch" as const,
       standardIds: [],
-      familySlugs: [],
     };
 
     render(await CatalogBreadcrumb({ market }));
@@ -163,7 +160,6 @@ describe("CatalogBreadcrumb", () => {
       description: "test",
       sizeSystem: "inch" as const,
       standardIds: [],
-      familySlugs: [],
     };
 
     const { container } = render(await CatalogBreadcrumb({ market }));

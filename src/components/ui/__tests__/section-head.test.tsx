@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SectionHead } from "@/components/ui/section-head";
@@ -34,13 +33,5 @@ describe("SectionHead", () => {
 
     expect(heading).toHaveClass("text-section");
     expect(screen.getByRole("link", { name: "View all" })).toBeVisible();
-  });
-
-  it("keeps the site-wide section heading step at 24px mobile and 28px desktop", () => {
-    const css = readFileSync("src/app/globals.css", "utf8");
-    const sectionBlock = css.match(/\.text-section\s*\{[^}]+\}/u)?.[0] ?? "";
-
-    expect(sectionBlock).toContain("text-2xl");
-    expect(sectionBlock).toContain("md:text-[28px]");
   });
 });

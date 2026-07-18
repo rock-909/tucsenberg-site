@@ -49,6 +49,7 @@ describe("createStaticMarkdownContent", () => {
 
     const heading = container.querySelector("h2");
     expect(heading).toHaveAttribute("id", "privacy-scope");
+    expect(heading).toHaveClass("text-section");
     expect(heading).toHaveTextContent("Privacy Scope");
     expect(container).not.toHaveTextContent("{#privacy-scope}");
   });

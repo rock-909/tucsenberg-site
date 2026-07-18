@@ -20,7 +20,6 @@ export type {
   ContactInfo,
   MarketDefinition,
   ProductCatalog,
-  ProductFamilyDefinition,
   SiteConfig,
   SiteDefinition,
   SiteFacts,

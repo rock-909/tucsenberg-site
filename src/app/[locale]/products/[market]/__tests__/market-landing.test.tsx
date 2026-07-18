@@ -176,7 +176,6 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
   "market.cta.description":
     "Request a quote or ask about specifications, MOQ, and lead times.",
   "market.cta.button": "Request a Quote",
-  "market.familyInquiry.cta": "Request quote for {familyLabel}",
   faqTitle: "FAQ",
   finalCtaTitle: "Request a quote",
   rfqNoteFallback:

@@ -6,7 +6,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   getAllMarketSlugs,
   getMarketBySlug,
-  isValidMarketSlug,
 } from "@/constants/product-catalog";
 import {
   getProductMarketPath,
@@ -19,7 +18,6 @@ import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { Link } from "@/i18n/routing";
 import type { Locale } from "@/types/content.types";
 import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/market-jsonld";
-import { getMarketPageData } from "@/app/[locale]/products/[market]/market-page-data";
 import { Button } from "@/components/ui/button";
 import {
   getTucsenbergProductPage,
@@ -363,11 +361,11 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const { locale, market: marketSlug } = await params;
   setRequestLocale(locale);
 
-  if (!isValidMarketSlug(marketSlug)) {
+  const market = getMarketBySlug(marketSlug);
+  if (!market) {
     notFound();
   }
 
-  const pageData = getMarketPageData(marketSlug);
   const productPage = getTucsenbergProductPage(marketSlug);
 
   if (!productPage) {
@@ -382,12 +380,10 @@ export default async function MarketPage({ params }: MarketPageProps) {
     downloadSpec: tLanding("downloadSpec"),
   };
 
-  const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(
-    pageData.market.slug,
-  )}`;
+  const marketUrl = `${SITE_CONFIG.baseUrl}${getProductMarketPath(market.slug)}`;
   const faqSchema = buildTucsenbergProductFaqSchema(productPage, locale);
   const jsonLdData = await buildMarketPageJsonLdData({
-    market: pageData.market,
+    market,
     marketUrl,
     productPage,
   });
@@ -399,7 +395,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
     >
       <CatalogBreadcrumb
         homePrefetch={false}
-        market={pageData.market}
+        market={market}
         marketLabel={productPage.title}
         productsPrefetch={false}
         renderJsonLd={false}
