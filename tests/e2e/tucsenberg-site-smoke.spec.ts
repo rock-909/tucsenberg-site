@@ -18,7 +18,7 @@ const pageCases = [
   ],
   ["/guides/flood-barrier-specifications", /Flood Barrier Specifications/i],
   ["/about", /Who you're actually buying from/i],
-  ["/request-quote", /Get real numbers, fast/i],
+  ["/request-quote", /Get real numbers/i],
   ["/contact", /Contact/i],
   ["/warranty", /Warranty Policy/i],
   ["/privacy", /Privacy Policy/i],
