@@ -62,9 +62,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(trigger).toBeVisible();
     await expect(trigger).not.toHaveAttribute("aria-label");
     await expect(trigger).not.toHaveAttribute("aria-haspopup");
-    await expect(page.getByTestId("header-mobile-menu-label")).toHaveText(
-      /open navigation menu/i,
-    );
+    await expect(trigger).toHaveAccessibleName(/open navigation menu/i);
 
     await trigger.click();
 

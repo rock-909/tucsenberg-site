@@ -469,6 +469,30 @@ describe("design token contract", () => {
       ).toBeGreaterThanOrEqual(4.5);
     }
   });
+
+  it("keeps WCAG AA contrast for field error text on form surfaces", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const light = buildThemeTokenMap(css, "light");
+    const dark = buildThemeTokenMap(css, "dark");
+
+    for (const [themeName, tokens] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
+      const errorForeground = resolveOklchColor(tokens, "--error-foreground");
+      const background = resolveOklchColor(tokens, "--background");
+      const card = resolveOklchColor(tokens, "--card");
+
+      expect(
+        contrastRatio(errorForeground, background),
+        `${themeName} --error-foreground vs --background`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(errorForeground, card),
+        `${themeName} --error-foreground vs --card`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
 });
 
 function extractSelectorBodies(css: string, selector: string): string[] {

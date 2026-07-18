@@ -47,9 +47,13 @@ test("theme switcher changes the page theme via keyboard without losing focus", 
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveClass(/dark/u);
   await expect(darkButton).toBeFocused();
+  await expect(darkButton).toHaveAttribute("aria-pressed", "true");
+  await expect(lightButton).toHaveAttribute("aria-pressed", "false");
 
   await lightButton.focus();
   await page.keyboard.press("Space");
   await expect(page.locator("html")).not.toHaveClass(/dark/u);
   await expect(lightButton).toBeFocused();
+  await expect(lightButton).toHaveAttribute("aria-pressed", "true");
+  await expect(darkButton).toHaveAttribute("aria-pressed", "false");
 });

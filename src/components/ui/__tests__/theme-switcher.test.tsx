@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslations } from "next-intl";
@@ -151,14 +152,25 @@ describe("ThemeSwitcher", () => {
     ).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("omits aria-pressed from the disabled hydration skeleton branch", () => {
-    const source = readFileSync("src/components/ui/theme-switcher.tsx", "utf8");
-    const skeletonBranch = source.match(
-      /if \(!isHydrated\) \{([\s\S]*?)\n {2}\}\n\n {2}return/,
-    )?.[1];
+  it("omits aria-pressed from the disabled server-rendered skeleton", async () => {
+    vi.mocked(useTheme).mockReturnValue({
+      theme: undefined,
+      setTheme: vi.fn(),
+      resolvedTheme: undefined,
+      themes: ["light", "dark", "system"],
+      systemTheme: undefined,
+    });
 
-    expect(skeletonBranch).toContain("disabled");
-    expect(skeletonBranch).not.toContain("aria-pressed");
+    const { ThemeSwitcher } = await import("../theme-switcher");
+    const container = document.createElement("div");
+    container.innerHTML = renderToStaticMarkup(<ThemeSwitcher />);
+    const buttons = Array.from(container.querySelectorAll("button"));
+
+    expect(buttons).toHaveLength(3);
+    expect(buttons.every((button) => button.disabled)).toBe(true);
+    expect(
+      buttons.every((button) => !button.hasAttribute("aria-pressed")),
+    ).toBe(true);
   });
 
   it("defaults data-testid to theme-toggle when not provided", async () => {

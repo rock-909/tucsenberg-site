@@ -117,7 +117,6 @@ const accessibilityMessages = {
   loading: "Content is loading",
   error: "An error has occurred",
   languageSelector: "Select language",
-  themeSelector: "Select theme",
   securityVerificationUnavailable:
     "Security verification is temporarily unavailable.",
   turnstileDevBypass: "Dev mode: Turnstile verification bypassed",

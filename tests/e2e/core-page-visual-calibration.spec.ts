@@ -76,7 +76,25 @@ test.describe("Core page visual calibration", () => {
     }
   }
 
-  test("contact and request-quote surfaces have no critical or serious a11y issues", async ({
+  test("core pages have no critical or serious a11y issues", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const pageErrors = collectPageErrors(page);
+
+    for (const path of corePages) {
+      await preparePage(page, path);
+
+      await expect(page.locator("main#main-content")).toBeVisible();
+      await checkA11y(page, "main#main-content", {
+        includedImpacts: ["critical", "serious"],
+      });
+    }
+
+    expect(pageErrors).toStrictEqual([]);
+  });
+
+  test("contact and request-quote full pages have no critical or serious a11y issues", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });

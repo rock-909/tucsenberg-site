@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
+import {
+  MAX_LEAD_EMAIL_LENGTH,
+  MAX_LEAD_NAME_LENGTH,
+} from "@/constants/validation-limits";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
 describe("inquiry form copy", () => {
@@ -34,14 +38,14 @@ describe("inquiry form copy", () => {
       "Full name contains invalid characters",
     );
     expect(copy.errors.fullName.tooLong).toBe(
-      "Full name must be less than 50 characters",
+      `Full name must be ${MAX_LEAD_NAME_LENGTH} characters or fewer`,
     );
     expect(copy.errors.email.required).toBe("Email address is required");
     expect(copy.errors.email.invalid).toBe(
       "Please enter a valid email address",
     );
     expect(copy.errors.email.tooLong).toBe(
-      "Email must be less than 100 characters",
+      `Email must be ${MAX_LEAD_EMAIL_LENGTH} characters or fewer`,
     );
     expect(copy.errors.message.invalid).toBe(
       "Message contains invalid characters",
