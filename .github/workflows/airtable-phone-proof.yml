@@ -1,0 +1,94 @@
+name: Airtable Phone Proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      airtable_table_name:
+        description: Airtable table name
+        type: string
+        default: Contacts
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airtable-phone-proof
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    name: Airtable phone column proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify proof test exists
+        run: |
+          if [ ! -f tests/integration/api/airtable-phone-column-direct-proof.test.ts ]; then
+            echo "::error::Missing tests/integration/api/airtable-phone-column-direct-proof.test.ts on ref ${{ github.ref }} (${{ github.sha }}). Dispatch this workflow against a ref that includes the proof test."
+            exit 1
+          fi
+
+      - name: Verify Airtable proof secrets
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+        run: |
+          if [ -z "$AIRTABLE_API_KEY" ] || [ -z "$AIRTABLE_BASE_ID" ]; then
+            echo "::error::Configure repository secrets AIRTABLE_API_KEY and AIRTABLE_BASE_ID before running this workflow."
+            exit 1
+          fi
+
+      - name: Run Airtable phone column proof
+        id: proof
+        run: >-
+          pnpm exec vitest run
+          tests/integration/api/airtable-phone-column-direct-proof.test.ts
+          --reporter=verbose
+        env:
+          AIRTABLE_PHONE_PROOF: "1"
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          AIRTABLE_TABLE_NAME: ${{ inputs.airtable_table_name }}
+
+      - name: Record proof result
+        if: always()
+        run: |
+          if [ "${{ steps.proof.outcome }}" = "success" ]; then
+            result="pass"
+          else
+            result="fail"
+          fi
+          {
+            echo "## Airtable phone proof"
+            echo
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Ref | \`${{ github.ref }}\` |"
+            echo "| SHA | \`${{ github.sha }}\` |"
+            echo "| Table | \`${{ inputs.airtable_table_name }}\` |"
+            echo "| Result | **${result}** |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$result" = "fail" ]; then
+            exit 1
+          fi
