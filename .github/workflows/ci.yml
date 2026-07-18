@@ -216,6 +216,9 @@ jobs:
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
+      - name: InquiryForm client chunk boundary
+        run: node scripts/starter-checks.js inquiry-form-client-chunk
+
       - name: Localized prerender behavior check
         run: node scripts/starter-checks.js prerender-static
 

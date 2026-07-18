@@ -83,6 +83,11 @@ const {
   runPrerenderStaticCheck,
 } = require("./quality/checks/prerender-static");
 const {
+  collectInquiryFormClientChunkFindings,
+  runInquiryFormClientChunkCheck,
+  runInquiryFormClientChunkCli,
+} = require("./quality/checks/inquiry-form-client-chunk");
+const {
   runValidateProductionConfigCli,
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
@@ -134,6 +139,7 @@ Commands:
   component-governance Check component registry, Storybook, and UI wrapper drift
   content-readiness   Check buyer-visible catalog residue (--strict-client-launch promotes launch blockers to errors)
   client-boundary     Check top-level use client budget
+  inquiry-form-client-chunk  Check InquiryForm client chunk after pnpm build
   prerender-static    Check localized Next.js build output stays prerendered
   cf-preview-smoke    Probe local Cloudflare preview behavior
   public-preview-smoke Probe public preview page route health
@@ -162,6 +168,7 @@ async function main(argv = process.argv.slice(2)) {
     "component-governance": () => runComponentGovernanceCli(),
     "content-readiness": () => runContentReadinessCli(args),
     "client-boundary": () => runClientBoundaryCli(),
+    "inquiry-form-client-chunk": () => runInquiryFormClientChunkCli(),
     "prerender-static": () => runPrerenderStaticCheck(),
     "cf-preview-smoke": () => runCloudflarePreviewSmoke(args),
     "public-preview-smoke": () => runPublicPreviewSmoke(args),
