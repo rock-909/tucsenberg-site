@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getPublicStaticPageDefinition } from "@/config/pages.config";
 import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
 import { shouldIndexPublicPage } from "@/config/single-site-seo";
 import { siteFacts } from "@/config/site-facts";
@@ -129,12 +128,10 @@ function mergeSEOConfig(
   return mergedConfig;
 }
 
-function createStaticPageSeoDefaults(_pageType: PageType): SEOConfig {
-  return {
-    type: "website",
-    image: DEFAULT_OG_IMAGE,
-  };
-}
+const STATIC_PAGE_SEO_DEFAULTS = {
+  type: "website",
+  image: DEFAULT_OG_IMAGE,
+} as const satisfies SEOConfig;
 
 interface GenerateMetadataForPathParams {
   locale: Locale;
@@ -262,14 +259,8 @@ export function createStaticPageMetadataConfig(
 }
 
 export function createPageSEOConfig(
-  pageType: PageType,
+  _pageType: PageType,
   customConfig: Partial<SEOConfig> = {},
 ): SEOConfig {
-  const definition = getPublicStaticPageDefinition(pageType);
-  const baseConfig =
-    definition === undefined
-      ? createStaticPageSeoDefaults("home")
-      : createStaticPageSeoDefaults(pageType);
-
-  return mergeSEOConfig(baseConfig, customConfig);
+  return mergeSEOConfig(STATIC_PAGE_SEO_DEFAULTS, customConfig);
 }
