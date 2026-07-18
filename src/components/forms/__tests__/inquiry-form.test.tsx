@@ -15,7 +15,10 @@ import {
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { createInquiryPayload } from "@/components/forms/inquiry-payload";
-import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
+import {
+  resolveInquiryContext,
+  type ValidatedInquiryContext,
+} from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
@@ -482,6 +485,39 @@ describe("InquiryForm validated context", () => {
     );
   });
 
+  it("does not submit buyerInterest when catalog handoff includes interest query param", async () => {
+    const context = resolveInquiryContext({
+      catalogProductId: "frp-flood-barriers",
+      interest: "hidden coastal project",
+      config: "Need span data",
+    });
+    const { container } = renderInquiryForm("request-quote", context);
+    const { fullName, email, form, message } = getFormControls(container);
+
+    expect(message).toHaveValue("Need span data");
+    expect(
+      screen.getByTestId("inquiry-buyer-interest-context"),
+    ).toHaveTextContent("FRP Composite Planks");
+    expect(
+      screen.getByTestId("inquiry-buyer-interest-context"),
+    ).not.toHaveTextContent("hidden coastal project");
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "RFQ Buyer" } });
+    fireEvent.change(email, { target: { value: "rfq@example.com" } });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(getFetchBody()).toMatchObject({
+      productInquiryKind: "catalog-product",
+      catalogProductId: "frp-flood-barriers",
+    });
+    expect(getFetchBody()).not.toHaveProperty("buyerInterest");
+  });
+
   it("renders the server-resolved catalog label and submits catalog identity", async () => {
     const { container, copy } = renderInquiryForm("request-quote", {
       kind: "catalog-context",
@@ -660,5 +696,27 @@ describe("createInquiryPayload", () => {
         catalogProductId: "abs-flood-barriers",
       }),
     );
+    expect(
+      createInquiryPayload(formData, "token-1", {
+        kind: "catalog-context",
+        catalogProductId: "abs-flood-barriers",
+        displayLabel: "ABS Interlocking Boxwall",
+      }),
+    ).not.toHaveProperty("buyerInterest");
+  });
+
+  it("omits buyerInterest from catalog-context payloads even when interest was in the URL", () => {
+    const formData = new FormData();
+    formData.set("fullName", "Payload Buyer");
+    formData.set("email", "payload@example.com");
+
+    const context = resolveInquiryContext({
+      catalogProductId: "abs-flood-barriers",
+      interest: "hidden interest",
+    });
+
+    expect(
+      createInquiryPayload(formData, "token-1", context),
+    ).not.toHaveProperty("buyerInterest");
   });
 });

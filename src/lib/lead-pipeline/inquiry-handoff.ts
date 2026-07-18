@@ -41,7 +41,6 @@ export type ValidatedInquiryContext =
       kind: "catalog-context";
       catalogProductId: ProductMarketSlug;
       displayLabel: string;
-      buyerInterest?: string;
       initialMessage?: string;
     }
   | {
@@ -78,8 +77,11 @@ export function resolveInquiryContext(
 ): ValidatedInquiryContext {
   const buyerInterest = readOptionalDescription(searchParams, "interest");
   const initialMessage = readOptionalDescription(searchParams, "config");
-  const descriptionFields = {
+  const generalDescriptionFields = {
     ...(buyerInterest ? { buyerInterest } : {}),
+    ...(initialMessage ? { initialMessage } : {}),
+  };
+  const catalogDescriptionFields = {
     ...(initialMessage ? { initialMessage } : {}),
   };
 
@@ -87,7 +89,7 @@ export function resolveInquiryContext(
   if (!catalogProductId) {
     return {
       kind: "general-context",
-      ...descriptionFields,
+      ...generalDescriptionFields,
     };
   }
 
@@ -95,7 +97,7 @@ export function resolveInquiryContext(
   if (!market) {
     return {
       kind: "general-context",
-      ...descriptionFields,
+      ...generalDescriptionFields,
     };
   }
 
@@ -103,7 +105,7 @@ export function resolveInquiryContext(
     kind: "catalog-context",
     catalogProductId,
     displayLabel: market.label,
-    ...descriptionFields,
+    ...catalogDescriptionFields,
   };
 }
 

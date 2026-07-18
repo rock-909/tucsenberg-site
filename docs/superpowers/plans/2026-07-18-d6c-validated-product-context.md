@@ -334,4 +334,3 @@ Do not amend earlier commits. Do not start D6d, push, open a PR or merge; return
 - [x] Product CTAs and calculators derive from one helper; inline product copy does not create a second URL truth.
 - [x] No new dependency, service interface, repository class, signing layer or generic form/query framework is introduced.
 - [x] D6d and D6e work remains out of scope.
-

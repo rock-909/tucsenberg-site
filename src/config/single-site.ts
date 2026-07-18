@@ -5,7 +5,6 @@ import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
 import { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import type {
-  ProductCatalog,
   SiteConfig,
   SiteDefinition,
   SiteFacts,
@@ -258,8 +257,6 @@ export const SINGLE_SITE_DEFINITION = {
 
 export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
 export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;
-export const SINGLE_SITE_PRODUCT_CATALOG: ProductCatalog =
-  SINGLE_SITE_DEFINITION.productCatalog;
 export const SINGLE_SITE_FOOTER_COLUMNS: SiteFooterColumnConfig[] =
   SINGLE_SITE_DEFINITION.footerColumns;
 

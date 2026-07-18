@@ -47,7 +47,9 @@ export function createInquiryPayload(
     ...identity,
     website,
     ...(message ? { message } : {}),
-    ...(context.buyerInterest ? { buyerInterest: context.buyerInterest } : {}),
+    ...(context.kind === "general-context" && context.buyerInterest
+      ? { buyerInterest: context.buyerInterest }
+      : {}),
     turnstileToken,
     ...pickAttributionFieldsFromFormData(formData),
   };

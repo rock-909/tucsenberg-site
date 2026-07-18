@@ -59,7 +59,7 @@ describe("resolveInquiryContext", () => {
     });
   });
 
-  it("keeps buyerInterest and initialMessage on valid catalog handoffs", () => {
+  it("drops interest on valid catalog handoffs but keeps initialMessage", () => {
     expect(
       resolveInquiryContext({
         catalogProductId: "frp-flood-barriers",
@@ -70,7 +70,6 @@ describe("resolveInquiryContext", () => {
       kind: "catalog-context",
       catalogProductId: "frp-flood-barriers",
       displayLabel: "FRP Composite Planks",
-      buyerInterest: "coastal project",
       initialMessage: "Need span data",
     });
   });
