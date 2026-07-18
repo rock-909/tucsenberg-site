@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
+import { pickMessages } from "@/lib/i18n/client-messages";
 import { ProductFamilyContextNoticeClient } from "@/components/contact/product-family-context-notice-client";
 
 const mockUseSearchParams = vi.fn(() => new URLSearchParams());
@@ -10,6 +11,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const enMessages = getComposedMessages("en");
+const catalogMessages = pickMessages(enMessages, ["catalog"]);
 
 describe("ProductFamilyContextNoticeClient", () => {
   beforeEach(() => {
@@ -20,7 +22,7 @@ describe("ProductFamilyContextNoticeClient", () => {
     render(
       <ProductFamilyContextNoticeClient
         label="You are asking about:"
-        messages={enMessages}
+        messages={catalogMessages}
       />,
     );
 
@@ -29,7 +31,12 @@ describe("ProductFamilyContextNoticeClient", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders validated product family context from client search params", () => {
+  it("parses product family context from catalog namespace only", () => {
+    expect(catalogMessages).toHaveProperty("catalog");
+    expect(catalogMessages).not.toHaveProperty("contact");
+    expect(catalogMessages).not.toHaveProperty("apiErrors");
+    expect(catalogMessages).not.toHaveProperty("navigation");
+
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams({
         intent: "product-family",
@@ -41,7 +48,7 @@ describe("ProductFamilyContextNoticeClient", () => {
     render(
       <ProductFamilyContextNoticeClient
         label="You are asking about:"
-        messages={enMessages}
+        messages={catalogMessages}
       />,
     );
 
@@ -64,7 +71,7 @@ describe("ProductFamilyContextNoticeClient", () => {
     render(
       <ProductFamilyContextNoticeClient
         label="You are asking about:"
-        messages={enMessages}
+        messages={catalogMessages}
       />,
     );
 

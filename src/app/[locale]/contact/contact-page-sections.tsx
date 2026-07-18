@@ -258,7 +258,7 @@ function ContactFormColumn({
       <Suspense fallback={null}>
         <ProductFamilyContextNoticeClient
           label={productFamilyContextLabel}
-          messages={messages}
+          messages={pickMessages(messages, ["catalog"])}
         />
       </Suspense>
       {/* The contact form is the only client consumer of the `contact` and
