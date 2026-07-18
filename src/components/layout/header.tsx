@@ -6,7 +6,6 @@
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing-config";
-import { NAVIGATION_ARIA } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { MobileNavigationIsland } from "@/components/layout/header-client";
 import { HEADER_CTA_CLASS } from "@/components/layout/header-utility-control";
@@ -35,6 +34,7 @@ interface HeaderProps {
   contactSalesLabel?: string;
   openMenuLabel?: string;
   closeMenuLabel?: string;
+  mainNavigationLabel?: string;
   mainNavItems?: HeaderNavItem[];
 }
 
@@ -61,6 +61,7 @@ export function Header({
   contactSalesLabel = "Contact",
   openMenuLabel = "Open navigation menu",
   closeMenuLabel = "Close navigation menu",
+  mainNavigationLabel = "Main navigation",
   mainNavItems = EMPTY_MAIN_NAV_ITEMS,
 }: HeaderProps) {
   const { isSticky, isMinimal, isTransparent, showTestIds } = getHeaderState(
@@ -94,6 +95,7 @@ export function Header({
             isMinimal={isMinimal}
             locale={locale}
             mainNavItems={mainNavItems}
+            mainNavigationLabel={mainNavigationLabel}
           />
 
           <HeaderUtilityControls
@@ -112,6 +114,7 @@ function CenterNav({
   isMinimal,
   locale,
   mainNavItems,
+  mainNavigationLabel,
 }: {
   isMinimal: boolean;
   locale?: Locale | undefined;
@@ -120,13 +123,14 @@ function CenterNav({
     href: string;
     label: string;
   }>;
+  mainNavigationLabel: string;
 }) {
   if (isMinimal || !locale || mainNavItems.length === 0) return null;
 
   return (
     <nav
       className="header-nav-center"
-      aria-label={NAVIGATION_ARIA.mainNav}
+      aria-label={mainNavigationLabel}
       data-testid="header-desktop-nav"
     >
       <ul className="header-desktop-only header-nav-links-compact items-center">

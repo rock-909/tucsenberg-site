@@ -146,7 +146,10 @@ export function Footer({
           </div>
 
           <nav
-            aria-label="Footer navigation"
+            aria-label={translateWithFallback(
+              "accessibility.footerNavigation",
+              "Footer navigation",
+            )}
             className="grid grid-cols-2 gap-x-8 gap-y-10"
           >
             {columns.map((section) => (

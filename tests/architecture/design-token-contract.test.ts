@@ -55,7 +55,7 @@ const SEMANTIC_TOKEN_EXPECTATIONS = {
   "--accent": "var(--brand-2)",
   "--accent-foreground": "var(--brand-9)",
   "--muted": "var(--neutral-3)",
-  "--muted-foreground": "var(--neutral-12)",
+  "--muted-foreground": "var(--neutral-9)",
   "--border": "var(--neutral-5)",
   "--border-light": "var(--neutral-4)",
   "--ring": "var(--brand-10)",
@@ -437,6 +437,59 @@ describe("design token contract", () => {
       expect(
         contrastRatio(primaryText, background),
         `${themeName} --primary-text vs --background`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("keeps WCAG AA contrast for muted foreground on background, card, and muted surfaces", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const light = buildThemeTokenMap(css, "light");
+    const dark = buildThemeTokenMap(css, "dark");
+
+    for (const [themeName, tokens] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
+      const mutedForeground = resolveOklchColor(tokens, "--muted-foreground");
+      const background = resolveOklchColor(tokens, "--background");
+      const card = resolveOklchColor(tokens, "--card");
+      const muted = resolveOklchColor(tokens, "--muted");
+
+      expect(
+        contrastRatio(mutedForeground, background),
+        `${themeName} --muted-foreground vs --background`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(mutedForeground, card),
+        `${themeName} --muted-foreground vs --card`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(mutedForeground, muted),
+        `${themeName} --muted-foreground vs --muted`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("keeps WCAG AA contrast for field error text on form surfaces", () => {
+    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
+    const light = buildThemeTokenMap(css, "light");
+    const dark = buildThemeTokenMap(css, "dark");
+
+    for (const [themeName, tokens] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
+      const errorForeground = resolveOklchColor(tokens, "--error-foreground");
+      const background = resolveOklchColor(tokens, "--background");
+      const card = resolveOklchColor(tokens, "--card");
+
+      expect(
+        contrastRatio(errorForeground, background),
+        `${themeName} --error-foreground vs --background`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(errorForeground, card),
+        `${themeName} --error-foreground vs --card`,
       ).toBeGreaterThanOrEqual(4.5);
     }
   });

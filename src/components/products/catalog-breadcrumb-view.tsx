@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export interface CatalogBreadcrumbViewProps {
+  ariaLabel: string;
   homeLabel: string;
   homePrefetch?: boolean;
   productsLabel: string;
@@ -19,6 +20,7 @@ export interface CatalogBreadcrumbViewProps {
 }
 
 export function CatalogBreadcrumbView({
+  ariaLabel,
   homeLabel,
   homePrefetch,
   productsLabel,
@@ -27,7 +29,7 @@ export function CatalogBreadcrumbView({
   marketLabel,
 }: CatalogBreadcrumbViewProps) {
   return (
-    <Breadcrumb>
+    <Breadcrumb aria-label={ariaLabel}>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>

@@ -169,7 +169,21 @@
       "errors": {
         "fieldSummary": "Please review the highlighted fields and try again.",
         "securitySummary": "Security verification did not complete. Please try again.",
-        "serverSummary": "We could not send your inquiry right now. Please try again shortly."
+        "serverSummary": "We could not send your inquiry right now. Please try again shortly.",
+        "fullName": {
+          "required": "Full name is required",
+          "invalid": "Full name contains invalid characters",
+          "tooLong": "Full name must be 100 characters or fewer"
+        },
+        "email": {
+          "required": "Email address is required",
+          "invalid": "Please enter a valid email address",
+          "tooLong": "Email must be 254 characters or fewer"
+        },
+        "message": {
+          "invalid": "Message contains invalid characters",
+          "tooLong": "Message must be 2000 characters or fewer"
+        }
       }
     }
   },

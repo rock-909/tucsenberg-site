@@ -10,6 +10,7 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
+    ariaLabel: "Breadcrumb",
     homeLabel: "Home",
     productsLabel: "Products",
     productsHref: "/products",

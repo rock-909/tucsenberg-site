@@ -69,8 +69,12 @@ describe("MobileNavigationIsland", () => {
 
     const trigger = screen.getByTestId("header-mobile-menu-button");
     expect(trigger).toBeInTheDocument();
-    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger).not.toHaveAttribute("aria-haspopup");
+    expect(trigger).not.toHaveAttribute("aria-label");
     expect(trigger).toHaveAttribute("aria-controls", "mobile-navigation");
+    expect(screen.getByTestId("header-mobile-menu-label")).toHaveTextContent(
+      "Open navigation menu",
+    );
     expect(
       screen.getByTestId("header-mobile-navigation-fallback"),
     ).toBeInTheDocument();

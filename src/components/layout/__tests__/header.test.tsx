@@ -106,11 +106,19 @@ describe("Header Component", () => {
   describe("Default Header", () => {
     it("renders all navigation components", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+          mainNavigationLabel: "TEST desktop main navigation",
+        }),
       );
 
       expect(screen.getByTestId("logo")).toBeInTheDocument();
-      expect(screen.getByTestId("header-desktop-nav")).toBeInTheDocument();
+      expect(
+        screen.getByRole("navigation", {
+          name: "TEST desktop main navigation",
+        }),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
     });
 

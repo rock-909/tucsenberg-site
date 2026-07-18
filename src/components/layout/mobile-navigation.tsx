@@ -1,11 +1,7 @@
 import type { ComponentProps } from "react";
 import { useTranslations } from "next-intl";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
-import {
-  isActivePath,
-  mobileNavigation,
-  NAVIGATION_ARIA,
-} from "@/lib/navigation";
+import { isActivePath, mobileNavigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 
@@ -26,6 +22,7 @@ export function MobileNavigationLinks({
   ...props
 }: MobileNavigationLinksProps) {
   const t = useTranslations("navigation");
+  const tAccessibility = useTranslations("accessibility");
   const resolvedContactSalesLabel = contactSalesLabel ?? t("contactSales");
   const contactHref =
     SINGLE_SITE_HOME_LINK_TARGETS.requestQuote ??
@@ -33,7 +30,7 @@ export function MobileNavigationLinks({
 
   return (
     <nav
-      aria-label={NAVIGATION_ARIA.mobileMenu}
+      aria-label={tAccessibility("mobileNavigation")}
       className={cn("flex flex-col space-y-1", className)}
       {...props}
     >

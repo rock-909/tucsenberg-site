@@ -56,6 +56,7 @@ async function AsyncLocaleLayoutContent({
   const openMenuLabel = tAccessibility("openMenu");
   const closeMenuLabel = tAccessibility("closeMenu");
   const skipToContentLabel = tAccessibility("skipToContent");
+  const mainNavigationLabel = tAccessibility("mainNavigation");
   const mainNavItems = mainNavigation.map((item) => ({
     key: item.key,
     href: item.href,
@@ -85,6 +86,7 @@ async function AsyncLocaleLayoutContent({
             contactSalesLabel={contactSalesLabel}
             openMenuLabel={openMenuLabel}
             closeMenuLabel={closeMenuLabel}
+            mainNavigationLabel={mainNavigationLabel}
             mainNavItems={mainNavItems}
           />
 

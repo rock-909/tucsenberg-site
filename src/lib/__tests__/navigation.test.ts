@@ -4,7 +4,6 @@ import {
   isActivePath,
   mainNavigation,
   mobileNavigation,
-  NAVIGATION_ARIA,
   type NavigationItem,
 } from "../navigation";
 import {
@@ -196,31 +195,6 @@ describe("navigation", () => {
     });
   });
 
-  describe("NAVIGATION_ARIA", () => {
-    it("should have all required ARIA labels", () => {
-      expect(NAVIGATION_ARIA.mainNav).toBe("Main navigation");
-      expect(NAVIGATION_ARIA.mobileMenuButton).toBe("Toggle mobile menu");
-      expect(NAVIGATION_ARIA.mobileMenu).toBe("Mobile navigation menu");
-      expect(NAVIGATION_ARIA.languageSelector).toBe("Language selector");
-      expect(NAVIGATION_ARIA.themeSelector).toBe("Theme selector");
-      expect(NAVIGATION_ARIA.skipToContent).toBe("Skip to main content");
-    });
-
-    it("should have descriptive labels", () => {
-      Object.values(NAVIGATION_ARIA).forEach((label) => {
-        expect(label.length).toBeGreaterThan(TEST_COUNT_CONSTANTS.MEDIUM);
-        expect(label).toMatch(/^[A-Z]/); // Should start with capital letter
-      });
-    });
-
-    it("should be readonly", () => {
-      expect(() => {
-        // @ts-expect-error - Testing readonly property
-        NAVIGATION_ARIA.mainNav = "Changed";
-      }).toThrow();
-    });
-  });
-
   describe("integration tests", () => {
     it("should work with real navigation items", () => {
       const aboutItem = mainNavigation.find((item) => item.key === "about");
@@ -231,6 +205,8 @@ describe("navigation", () => {
     });
 
     it("should handle all navigation items correctly", () => {
+      expect(mainNavigation.length).toBeGreaterThan(TEST_COUNT_CONSTANTS.SMALL);
+
       mainNavigation.forEach((item) => {
         // Test active path detection for each navigation target.
         const isActive = isActivePath(item.href, item.href);

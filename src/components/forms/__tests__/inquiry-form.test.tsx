@@ -236,6 +236,110 @@ describe("InquiryForm contract", () => {
       await screen.findByText(copy.errors.fieldSummary),
     ).toBeInTheDocument();
   });
+
+  it("renders recognized field errors with aria relationships", async () => {
+    const copy = createTestInquiryFormCopy();
+    const fallback = <InquiryFormStaticFallback copy={copy} />;
+    const { container } = render(
+      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+    );
+    const { fullName, email, message, form } = getFormControls(container);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Ada Buyer" } });
+    fireEvent.change(email, { target: { value: "not-an-email" } });
+    fireEvent.change(message, { target: { value: "x".repeat(2001) } });
+
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "INQUIRY_VALIDATION_FAILED",
+          details: [
+            "errors.fullName.invalid",
+            "errors.email.invalid",
+            "errors.message.tooLong",
+            "errors.phone.invalid",
+          ],
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    expect(
+      await screen.findByText(copy.errors.fieldSummary),
+    ).toBeInTheDocument();
+    expect(screen.getByText(copy.errors.fullName.invalid)).toHaveClass(
+      "text-[var(--error-foreground)]",
+    );
+    expect(screen.getByText(copy.errors.email.invalid)).toHaveClass(
+      "text-[var(--error-foreground)]",
+    );
+    expect(screen.getByText(copy.errors.message.tooLong)).toHaveClass(
+      "text-[var(--error-foreground)]",
+    );
+    expect(screen.queryByText("errors.phone.invalid")).not.toBeInTheDocument();
+
+    expect(fullName).toHaveAttribute("aria-invalid", "true");
+    expect(fullName).toHaveAttribute(
+      "aria-describedby",
+      "inquiry-full-name-error",
+    );
+    expect(document.getElementById("inquiry-full-name-error")).toBeTruthy();
+
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-describedby", "inquiry-email-error");
+    expect(document.getElementById("inquiry-email-error")).toBeTruthy();
+
+    expect(message).toHaveAttribute("aria-invalid", "true");
+    expect(message).toHaveAttribute(
+      "aria-describedby",
+      "inquiry-message-hint inquiry-message-error",
+    );
+    expect(document.getElementById("inquiry-message-error")).toBeTruthy();
+    expect(document.getElementById("inquiry-message-hint")).toBeTruthy();
+  });
+
+  it("keeps summary-only behavior for unknown field details", async () => {
+    const copy = createTestInquiryFormCopy();
+    const fallback = <InquiryFormStaticFallback copy={copy} />;
+    const { container } = render(
+      <InquiryForm copy={copy} fallback={fallback} source="contact" />,
+    );
+    const { fullName, email, message, form } = getFormControls(container);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Ada Buyer" } });
+    fireEvent.change(email, { target: { value: "ada@example.com" } });
+
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "INQUIRY_VALIDATION_FAILED",
+          details: ["errors.phone.invalid", "errors.company.tooLong"],
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    expect(
+      await screen.findByText(copy.errors.fieldSummary),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("errors.phone.invalid")).not.toBeInTheDocument();
+    expect(fullName).not.toHaveAttribute("aria-invalid");
+    expect(email).not.toHaveAttribute("aria-invalid");
+    expect(message).not.toHaveAttribute("aria-invalid");
+    expect(message).toHaveAttribute("aria-describedby", "inquiry-message-hint");
+  });
 });
 
 function setRequestQuoteSearch(search: string) {

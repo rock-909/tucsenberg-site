@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { FONT_FAMILY } from "@/emails/theme";
+import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
+import { COLORS, FONT_FAMILY } from "@/emails/theme";
+
+describe("email theme", () => {
+  it("derives COLORS.primary from STATIC_THEME_COLORS.primaryText", () => {
+    expect(COLORS.primary).toBe(STATIC_THEME_COLORS.primaryText);
+    expect(COLORS.primary).toBe("#005993");
+  });
+});
 
 describe("email FONT_FAMILY", () => {
   it("keeps the generic family last so specific fonts still apply", () => {

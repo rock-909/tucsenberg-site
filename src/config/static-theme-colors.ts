@@ -7,13 +7,9 @@
  * This is not the brand truth source; browser UI must consume CSS tokens.
  */
 export const STATIC_THEME_COLORS = {
-  primary: "#005993",
-  primaryHover: "#1781cc",
+  primaryText: "#005993",
   success: "#0f7b5f",
   successLight: "#eefbf4",
-  warning: "#9a5a00",
-  warningLight: "#fff7dc",
-  error: "#f4212e",
   text: "#0f1419",
   textLight: "#536471",
   muted: "#536471",

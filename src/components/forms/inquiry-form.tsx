@@ -97,6 +97,10 @@ function InquiryFormLive({
   const ariaLabel =
     source === "contact" ? copy.contactAriaLabel : copy.requestQuoteAriaLabel;
   const initialMessage = source === "request-quote" ? configPrefill : undefined;
+  const fieldDetails =
+    displayState.status === "error" && displayState.errorKind === "field"
+      ? displayState.fieldDetails
+      : undefined;
 
   return (
     <section className="surface-card p-6 md:p-8">
@@ -120,6 +124,7 @@ function InquiryFormLive({
         <InquiryFormFields
           copy={copy}
           messageMaxLength={getInquiryMessageMaxLength()}
+          {...(fieldDetails ? { fieldDetails } : {})}
           {...(initialMessage ? { initialMessage } : {})}
         />
 

@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { STATIC_THEME_COLORS } from "@/config/static-theme-colors";
+import { COLORS } from "@/emails/theme";
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const IMPORT_FROM_PATTERN = /from\s+["']([^"']+)["']/g;
@@ -66,17 +67,13 @@ describe("static theme colors", () => {
       "background",
       "border",
       "contentBackground",
-      "error",
       "headerText",
       "muted",
-      "primary",
-      "primaryHover",
+      "primaryText",
       "success",
       "successLight",
       "text",
       "textLight",
-      "warning",
-      "warningLight",
     ]);
   });
 
@@ -84,6 +81,11 @@ describe("static theme colors", () => {
     for (const [name, value] of Object.entries(STATIC_THEME_COLORS)) {
       expect(value, name).toMatch(HEX_COLOR_PATTERN);
     }
+  });
+
+  it("maps the email primary alias to primaryText", () => {
+    expect(COLORS.primary).toBe(STATIC_THEME_COLORS.primaryText);
+    expect(COLORS.primary).toBe("#005993");
   });
 
   it("documents the bridge boundary instead of pretending to be brand truth", () => {

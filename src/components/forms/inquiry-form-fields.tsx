@@ -5,8 +5,48 @@ const LABEL_CLASS = "block text-sm leading-none font-medium text-foreground";
 const INPUT_CLASS =
   "min-h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-[var(--shadow-xs)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const HINT_CLASS = "text-xs leading-5 text-muted-foreground";
+const ERROR_CLASS = "text-xs leading-5 text-[var(--error-foreground)]";
 const REQUIRED_CLASS =
   "after:ml-0.5 after:text-destructive after:content-['*']";
+
+const FIELD_ERROR_CODES = {
+  fullName: [
+    "errors.fullName.required",
+    "errors.fullName.invalid",
+    "errors.fullName.tooLong",
+  ],
+  email: [
+    "errors.email.required",
+    "errors.email.invalid",
+    "errors.email.tooLong",
+  ],
+  message: ["errors.message.invalid", "errors.message.tooLong"],
+} as const;
+
+type VisibleField = keyof typeof FIELD_ERROR_CODES;
+
+function resolveFieldError(
+  field: VisibleField,
+  fieldDetails: readonly string[] | undefined,
+  copy: InquiryFormCopy,
+): string | null {
+  if (!fieldDetails?.length) {
+    return null;
+  }
+
+  const codes = FIELD_ERROR_CODES[field];
+  const matchedCode = fieldDetails.find((detail) =>
+    (codes as readonly string[]).includes(detail),
+  );
+
+  if (!matchedCode) {
+    return null;
+  }
+
+  const leaf = matchedCode.split(".").slice(2).join(".");
+  const fieldErrors = copy.errors[field] as Record<string, string>;
+  return fieldErrors[leaf] ?? null;
+}
 
 export function InquiryBuyerInterestContext({
   buyerInterest,
@@ -28,14 +68,19 @@ export function InquiryBuyerInterestContext({
 
 export function InquiryFormFields({
   copy,
+  fieldDetails,
   initialMessage,
   messageMaxLength,
 }: {
   copy: InquiryFormCopy;
+  fieldDetails?: readonly string[];
   initialMessage?: string;
   messageMaxLength: number;
 }) {
   const messageHintId = "inquiry-message-hint";
+  const fullNameError = resolveFieldError("fullName", fieldDetails, copy);
+  const emailError = resolveFieldError("email", fieldDetails, copy);
+  const messageError = resolveFieldError("message", fieldDetails, copy);
 
   return (
     <>
@@ -48,6 +93,10 @@ export function InquiryFormFields({
             {copy.fullName}
           </label>
           <input
+            aria-describedby={
+              fullNameError ? "inquiry-full-name-error" : undefined
+            }
+            aria-invalid={fullNameError ? true : undefined}
             autoComplete="name"
             className={INPUT_CLASS}
             id="inquiry-fullName"
@@ -55,6 +104,11 @@ export function InquiryFormFields({
             required
             type="text"
           />
+          {fullNameError ? (
+            <p className={ERROR_CLASS} id="inquiry-full-name-error">
+              {fullNameError}
+            </p>
+          ) : null}
         </div>
         <div className={FIELD_CLASS}>
           <label
@@ -64,6 +118,8 @@ export function InquiryFormFields({
             {copy.email}
           </label>
           <input
+            aria-describedby={emailError ? "inquiry-email-error" : undefined}
+            aria-invalid={emailError ? true : undefined}
             autoComplete="email"
             className={INPUT_CLASS}
             id="inquiry-email"
@@ -72,6 +128,11 @@ export function InquiryFormFields({
             required
             type="email"
           />
+          {emailError ? (
+            <p className={ERROR_CLASS} id="inquiry-email-error">
+              {emailError}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -83,7 +144,12 @@ export function InquiryFormFields({
           </span>
         </label>
         <textarea
-          aria-describedby={messageHintId}
+          aria-describedby={
+            messageError
+              ? `${messageHintId} inquiry-message-error`
+              : messageHintId
+          }
+          aria-invalid={messageError ? true : undefined}
           className={`${INPUT_CLASS} min-h-32 resize-y leading-6`}
           defaultValue={initialMessage}
           id="inquiry-message"
@@ -95,6 +161,11 @@ export function InquiryFormFields({
         <p className={HINT_CLASS} id={messageHintId}>
           {copy.messageHint}
         </p>
+        {messageError ? (
+          <p className={ERROR_CLASS} id="inquiry-message-error">
+            {messageError}
+          </p>
+        ) : null}
       </div>
     </>
   );

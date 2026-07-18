@@ -16,7 +16,6 @@ import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { usePathname } from "@/i18n/routing";
-import { NAVIGATION_ARIA } from "@/lib/navigation";
 import {
   MobileNavigationLinks,
   type MobileNavigationLinksProps,
@@ -73,9 +72,7 @@ export function MobileMenuButton({
       variant="ghost"
       size="icon"
       className={cn("relative", className)}
-      aria-label={label}
       aria-expanded={isOpen}
-      aria-haspopup="dialog"
       data-state={isOpen ? "open" : "closed"}
       data-testid="header-mobile-menu-button"
       onClick={onClick}
@@ -92,13 +89,15 @@ export function MobileMenuButton({
 function MobileNavigationHeader({
   siteName,
   siteDescription,
+  mobileNavigationLabel,
 }: {
   siteDescription: string;
   siteName: string;
+  mobileNavigationLabel: string;
 }) {
   return (
     <SheetHeader className="text-left">
-      <SheetTitle className="sr-only">{NAVIGATION_ARIA.mobileMenu}</SheetTitle>
+      <SheetTitle className="sr-only">{mobileNavigationLabel}</SheetTitle>
       <div className="text-lg font-semibold" aria-hidden="true">
         {siteName}
       </div>
@@ -130,6 +129,7 @@ export function MobileNavigationInteractive({
   siteDescription,
 }: MobileNavigationInteractiveProps) {
   const tNavigation = useTranslations("navigation");
+  const tAccessibility = useTranslations("accessibility");
   const pathname = usePathname();
   const [menuState, setMenuState] = useState<MobileMenuState>(() => ({
     isOpen: initialOpen,
@@ -179,11 +179,11 @@ export function MobileNavigationInteractive({
           side="right"
           className="w-[300px] overflow-y-auto sm:w-[350px]"
           id="mobile-navigation"
-          aria-label={NAVIGATION_ARIA.mobileMenu}
           data-testid="mobile-menu-content"
           onEscapeKeyDown={() => handleOpenChange(false)}
         >
           <MobileNavigationHeader
+            mobileNavigationLabel={tAccessibility("mobileNavigation")}
             siteDescription={resolvedSiteDescription}
             siteName={resolvedSiteName}
           />

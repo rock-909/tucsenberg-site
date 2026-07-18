@@ -94,6 +94,34 @@ test.describe("Core page visual calibration", () => {
     expect(pageErrors).toStrictEqual([]);
   });
 
+  test("contact and request-quote full pages have no critical or serious a11y issues", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const pageErrors = collectPageErrors(page);
+    const leadSurfaces = ["/contact", "/request-quote"] as const;
+
+    for (const path of leadSurfaces) {
+      await preparePage(page, path);
+
+      await expect(
+        page.getByRole("navigation", { name: "Main navigation" }),
+      ).toBeVisible();
+      await expect(page.locator("main#main-content")).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: "Footer navigation" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("group", { name: "Theme selector" }),
+      ).toBeVisible();
+      await checkA11y(page, "body", {
+        includedImpacts: ["critical", "serious"],
+      });
+    }
+
+    expect(pageErrors).toStrictEqual([]);
+  });
+
   test("home FAQ SectionHead uses 24px section heading at 375px viewport", async ({
     page,
   }) => {

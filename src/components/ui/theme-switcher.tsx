@@ -35,7 +35,8 @@ export type ThemeSwitcherProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
-  const t = useTranslations("theme");
+  const tTheme = useTranslations("theme");
+  const tAccessibility = useTranslations("accessibility");
   const { resolvedTheme, theme, setTheme } = useTheme();
   const isHydrated = useSyncExternalStore(
     subscribeHydration,
@@ -54,20 +55,21 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
     [setTheme],
   );
 
-  // 服务端和客户端首次渲染都返回骨架屏，避免水合不匹配
   if (!isHydrated) {
     return (
       <div
+        aria-label={tAccessibility("themeSelector")}
         className={cn(
           "relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border",
           className,
         )}
+        role="group"
         {...rest}
         data-testid={dataTestId ?? "theme-toggle"}
       >
         {themes.map(({ key, icon: Icon, labelKey }) => (
           <button
-            aria-label={t(labelKey)}
+            aria-label={tTheme(labelKey)}
             className="relative size-6 rounded-full"
             key={key}
             type="button"
@@ -82,10 +84,12 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
 
   return (
     <div
+      aria-label={tAccessibility("themeSelector")}
       className={cn(
         "relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border",
         className,
       )}
+      role="group"
       {...rest}
       data-testid={dataTestId ?? "theme-toggle"}
     >
@@ -94,7 +98,8 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
 
         return (
           <button
-            aria-label={t(labelKey)}
+            aria-label={tTheme(labelKey)}
+            aria-pressed={isActive}
             className="relative size-6 rounded-full"
             key={key}
             onClick={() => handleThemeClick(key as "light" | "dark" | "system")}
