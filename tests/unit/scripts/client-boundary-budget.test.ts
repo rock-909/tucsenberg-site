@@ -320,13 +320,15 @@ function buildInquiryFormChunkFixture(rootDir: string) {
   const chunksDir = path.join(rootDir, ".next/static/chunks");
   const chunkPath = path.join(chunksDir, "inquiry-live.js");
   const mapPath = path.join(chunksDir, "inquiry-live.js.map");
+  const chunkBody =
+    `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";`.padEnd(512, "/");
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
   fs.mkdirSync(chunksDir, { recursive: true });
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
   fs.writeFileSync(
     chunkPath,
-    `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";`.padEnd(512, "/"),
+    `${chunkBody}\n//# sourceMappingURL=inquiry-live.js.map\n`,
   );
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
   fs.writeFileSync(
@@ -379,7 +381,7 @@ describe("client-boundary build artifacts", () => {
     expect(result.forbiddenSources).toEqual([]);
   });
 
-  it("fails when the InquiryForm sourcemap pulls in forbidden dependencies", () => {
+  it("fails when the paired InquiryForm sourcemap pulls in forbidden dependencies", () => {
     const rootDir = createFixture({});
     buildInquiryFormChunkFixture(rootDir);
     const mapPath = path.join(
@@ -403,6 +405,92 @@ describe("client-boundary build artifacts", () => {
       {
         error:
           "forbidden InquiryForm client dependency in sourcemap: zod: turbopack:///[project]/node_modules/zod/v4/core/core.js",
+      },
+    ]);
+  });
+
+  it("fails when an unrelated safe sourcemap would have passed the old map scan", () => {
+    const rootDir = createFixture({});
+    const chunksDir = path.join(rootDir, ".next/static/chunks");
+    const actualChunkPath = path.join(chunksDir, "actual-inquiry.js");
+    const actualMapPath = path.join(chunksDir, "actual-inquiry.js.map");
+    const unrelatedSafeMapPath = path.join(chunksDir, "unrelated-safe.js.map");
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.mkdirSync(chunksDir, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      actualChunkPath,
+      `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";\n//# sourceMappingURL=actual-inquiry.js.map\n`,
+    );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      actualMapPath,
+      `${JSON.stringify({
+        version: 3,
+        sources: [
+          `turbopack:///[project]/${INQUIRY_FORM_SOURCE}`,
+          "turbopack:///[project]/node_modules/zod/v4/core/core.js",
+        ],
+      })}\n`,
+    );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      unrelatedSafeMapPath,
+      `${JSON.stringify({
+        version: 3,
+        sources: [
+          `turbopack:///[project]/${INQUIRY_FORM_SOURCE}`,
+          "turbopack:///[project]/src/components/forms/inquiry-form-fields.tsx",
+        ],
+      })}\n`,
+    );
+    fixtureRoots.push(rootDir);
+
+    expect(collectInquiryFormBuildArtifactFindings(rootDir)).toEqual([
+      {
+        error:
+          "forbidden InquiryForm client dependency in sourcemap: zod: turbopack:///[project]/node_modules/zod/v4/core/core.js",
+      },
+    ]);
+  });
+
+  it("fails when the InquiryForm chunk is missing //# sourceMappingURL", () => {
+    const rootDir = createFixture({});
+    const chunksDir = path.join(rootDir, ".next/static/chunks");
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.mkdirSync(chunksDir, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      path.join(chunksDir, "actual-inquiry.js"),
+      `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";\n`,
+    );
+    fixtureRoots.push(rootDir);
+
+    expect(collectInquiryFormBuildArtifactFindings(rootDir)).toEqual([
+      {
+        error:
+          "InquiryForm client chunk is missing //# sourceMappingURL declaration",
+      },
+    ]);
+  });
+
+  it("fails when //# sourceMappingURL escapes .next/static/chunks", () => {
+    const rootDir = createFixture({});
+    const chunksDir = path.join(rootDir, ".next/static/chunks");
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.mkdirSync(chunksDir, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
+    fs.writeFileSync(
+      path.join(chunksDir, "actual-inquiry.js"),
+      `export const marker="${INQUIRY_FORM_CHUNK_MARKER}";\n//# sourceMappingURL=../outside.js.map\n`,
+    );
+    fixtureRoots.push(rootDir);
+
+    expect(collectInquiryFormBuildArtifactFindings(rootDir)).toEqual([
+      {
+        error:
+          'InquiryForm client chunk sourceMappingURL must stay inside .next/static/chunks, got "../outside.js.map"',
       },
     ]);
   });

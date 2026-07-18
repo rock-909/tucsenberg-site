@@ -279,13 +279,6 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-function listChunkMaps(chunksDir) {
-  return fs
-    .readdirSync(chunksDir)
-    .filter((name) => name.endsWith(".js.map"))
-    .map((name) => path.join(chunksDir, name));
-}
-
 function listChunkScripts(chunksDir) {
   return fs
     .readdirSync(chunksDir)
@@ -293,13 +286,67 @@ function listChunkScripts(chunksDir) {
     .map((name) => path.join(chunksDir, name));
 }
 
-function mapReferencesInquiryForm(mapPath) {
-  const sources = readJson(mapPath).sources ?? [];
+function chunkContainsInquiryFormMarker(chunkPath) {
+  return fs.readFileSync(chunkPath, "utf8").includes(INQUIRY_FORM_CHUNK_MARKER);
+}
+
+function mapReferencesInquiryFormSources(sources) {
   return sources.some((source) => source.includes(INQUIRY_FORM_SOURCE));
 }
 
-function chunkContainsInquiryFormMarker(chunkPath) {
-  return fs.readFileSync(chunkPath, "utf8").includes(INQUIRY_FORM_CHUNK_MARKER);
+function parseChunkSourceMappingUrl(chunkSource) {
+  const matches = [...chunkSource.matchAll(/\/\/# sourceMappingURL=(.+)$/gm)];
+  if (matches.length === 0) {
+    return {
+      error:
+        "InquiryForm client chunk is missing //# sourceMappingURL declaration",
+    };
+  }
+  if (matches.length > 1) {
+    return {
+      error:
+        "InquiryForm client chunk has multiple //# sourceMappingURL declarations",
+    };
+  }
+
+  const sourceMappingUrl = matches[0][1].trim();
+  if (/^(?:data:|https?:|\/\/)/i.test(sourceMappingUrl)) {
+    return {
+      error: `InquiryForm client chunk sourceMappingURL must be a local relative path, got "${sourceMappingUrl}"`,
+    };
+  }
+  if (path.isAbsolute(sourceMappingUrl) || sourceMappingUrl.includes("..")) {
+    return {
+      error: `InquiryForm client chunk sourceMappingURL must stay inside .next/static/chunks, got "${sourceMappingUrl}"`,
+    };
+  }
+
+  return { sourceMappingUrl };
+}
+
+function resolveChunkSourceMapPath(chunksDir, chunkPath, chunkSource) {
+  const parsed = parseChunkSourceMappingUrl(chunkSource);
+  if (parsed.error) {
+    return { error: parsed.error };
+  }
+
+  const mapPath = path.resolve(
+    path.dirname(chunkPath),
+    parsed.sourceMappingUrl,
+  );
+  const relativeMapPath = path.relative(chunksDir, mapPath);
+  if (relativeMapPath.startsWith("..") || path.isAbsolute(relativeMapPath)) {
+    return {
+      error: `InquiryForm client chunk sourceMappingURL resolves outside .next/static/chunks: ${parsed.sourceMappingUrl}`,
+    };
+  }
+  if (!fs.existsSync(mapPath)) {
+    return {
+      error: `InquiryForm client chunk sourceMappingURL target does not exist: ${parsed.sourceMappingUrl}`,
+    };
+  }
+
+  return { mapPath };
 }
 
 function collectForbiddenBuildSources(sources) {
@@ -327,23 +374,10 @@ function collectInquiryFormBuildArtifactFindings(
     ];
   }
 
-  const inquiryMaps = listChunkMaps(chunksDir).filter((mapPath) =>
-    mapReferencesInquiryForm(mapPath),
-  );
   const inquiryChunks = listChunkScripts(chunksDir).filter((chunkPath) =>
     chunkContainsInquiryFormMarker(chunkPath),
   );
   const findings = [];
-
-  if (inquiryMaps.length !== 1) {
-    findings.push(
-      createBuildArtifactError(
-        inquiryMaps.length === 0
-          ? `no client sourcemap references ${INQUIRY_FORM_SOURCE}; InquiryForm client chunk missing from build output`
-          : `expected exactly one InquiryForm client sourcemap, found ${inquiryMaps.length}`,
-      ),
-    );
-  }
 
   if (inquiryChunks.length !== 1) {
     findings.push(
@@ -353,15 +387,31 @@ function collectInquiryFormBuildArtifactFindings(
           : `expected exactly one InquiryForm client chunk, found ${inquiryChunks.length}`,
       ),
     );
-  }
-
-  if (findings.length > 0) {
     return findings;
   }
 
-  const mapPath = inquiryMaps[0];
   const chunkPath = inquiryChunks[0];
+  const chunkSource = fs.readFileSync(chunkPath, "utf8");
+  const resolvedMap = resolveChunkSourceMapPath(
+    chunksDir,
+    chunkPath,
+    chunkSource,
+  );
+  if (resolvedMap.error) {
+    findings.push(createBuildArtifactError(resolvedMap.error));
+    return findings;
+  }
+
+  const mapPath = resolvedMap.mapPath;
   const sources = readJson(mapPath).sources ?? [];
+  if (!mapReferencesInquiryFormSources(sources)) {
+    findings.push(
+      createBuildArtifactError(
+        `InquiryForm client chunk sourcemap does not reference ${INQUIRY_FORM_SOURCE}`,
+      ),
+    );
+  }
+
   const forbiddenSources = collectForbiddenBuildSources(sources);
   for (const forbiddenSource of forbiddenSources) {
     findings.push(
@@ -371,7 +421,7 @@ function collectInquiryFormBuildArtifactFindings(
     );
   }
 
-  const rawBytes = fs.readFileSync(chunkPath).byteLength;
+  const rawBytes = chunkSource.length;
   if (rawBytes > INQUIRY_FORM_MAX_RAW_BYTES) {
     findings.push(
       createBuildArtifactError(
@@ -390,7 +440,7 @@ function collectInquiryFormBuildArtifactFindings(
     mapPath: toRepoPath(rootDir, mapPath),
     chunkPath: toRepoPath(rootDir, chunkPath),
     rawBytes,
-    gzipBytes: gzipSync(fs.readFileSync(chunkPath)).length,
+    gzipBytes: gzipSync(Buffer.from(chunkSource)).length,
     forbiddenSources: [],
   };
 }
