@@ -14,6 +14,8 @@ External diagnosis proved the Airtable Base lacks a `WhatsApp / Phone` column an
 
 Public **company** phone (contact page panel, structured data, production-config gate) remains a separate, preserved system under R'12 deferral boundaries.
 
+**Historical note (not an active prerequisite):** PR #134 metadata/record proof runs confirmed the Base has no `WhatsApp / Phone` column and the current PAT cannot create schema fields. That diagnosis motivated R'13; it does not remain a merge gate after this revision.
+
 ## 2. Owner decision R'13
 
 **R'13 (2026-07-18, durable, supersedes R'2 and revises R'11 for buyer contact collection):**
@@ -30,7 +32,8 @@ Public **company** phone (contact page panel, structured data, production-config
 **Explicitly not changed by R'13:**
 
 - R'12 public company phone and product photos deferral.
-- Disabled legacy Contact form phone stack (C2 boundary — stays until D6e).
+- Disabled legacy Contact form phone stack (UI/config/validator/error keys) — stays until D6e.
+- Pre-#130 Contact email phone shape in `email-data-schema.ts`, `runtime-email-content.ts`, and `resend-*` for the **contact** lead type — stays until D6e.
 - Public company phone config, JSON-LD, contact panel, and strict production gate.
 
 Record R'13 in `docs/技术难题/整库审查2026-07/执行计划.md` owner-decision table during implementation.
@@ -55,9 +58,11 @@ interface CanonicalInquiryBuyerFields {
 | `email` | yes | empty → validation error |
 | `message` | no | blank/whitespace-only → omitted (`undefined`) |
 
-**Silent drop rule:** If a client or legacy caller sends `phone`, Zod object parsing (strip-unknown-keys default) plus removal of `phone` from `productLeadSchema` ensures the value never reaches `adaptLegacyInquiryPayload` promotion, `processLead`, owner email templates, Airtable field mapping, or structured logs that include buyer phone. No new `errors.phone.*` validation detail keys; no HTTP 400 solely because `phone` was present.
+**Silent drop rule:** If a client or legacy caller sends `phone`, Zod object parsing (strip-unknown-keys default) plus explicit adapter stripping ensures the value never reaches `adaptLegacyInquiryPayload` promotion, `processLead`, owner email templates, Airtable field mapping, or structured logs that include buyer phone. No new `errors.phone.*` validation detail keys; no HTTP 400 solely because `phone` was present.
 
-**Legacy adapter:** Keep temporary `requirements` → `message` mapping until D6e. Remove `phone` from `LEGACY_OPTIONAL_BLANK_FIELDS` in `inquiry-payload-adapter.ts`.
+**Legacy adapter:** Keep temporary `requirements` → `message` mapping until D6e. In `inquiry-payload-adapter.ts`, remove `"phone"` from `LEGACY_OPTIONAL_BLANK_FIELDS` **and** explicitly delete `adapted.phone` after spreading raw input (do not rely on blank normalization alone — a non-blank extra phone must not pass through).
+
+**Route:** `/api/inquiry` must not pick `phone` from the adapted payload into `productLeadSchema.safeParse({...})`.
 
 ## 5. Preserve from PR #130 (do not regress)
 
@@ -73,6 +78,7 @@ These shipped or in-flight C2 improvements stay:
 8. Unreachable inquiry `requirements` error cleanup.
 9. Airtable SDK error/logging improvements from C2 follow-ups.
 10. `email-first-storage-optional` parallel delivery policy (BC-012A).
+11. `field-sanitization.ts` and live `sanitizeAirtableTextField` used by all Airtable writes.
 
 ## 6. Remove (vertical retirement)
 
@@ -80,17 +86,20 @@ Remove the phone path introduced by #130 from:
 
 | Layer | Files / surfaces |
 | --- | --- |
-| Schema | `src/lib/lead-pipeline/lead-schema.ts` — drop `phone` from `productLeadSchema`; keep `contactLeadSchema` unchanged until D6e |
+| Schema | `src/lib/lead-pipeline/lead-schema.ts` — drop `phone` from **both** `productLeadSchema` and `contactLeadSchema` (`origin/main` had neither; both additions are from #130) |
 | Canonical fields | `src/lib/lead-pipeline/canonical-buyer-fields.ts` — delete `canonicalBuyerPhoneSchema` |
-| Adapter | `src/lib/lead-pipeline/inquiry-payload-adapter.ts` — remove `phone` from blank normalization list |
+| Adapter | `src/lib/lead-pipeline/inquiry-payload-adapter.ts` — remove `"phone"` from blank normalization list **and** `delete adapted.phone` after spread |
 | Route | `src/app/api/inquiry/route.ts` — stop passing `phone` into schema parse |
 | Validation details | `src/lib/api/inquiry-validation-details.ts` — remove `phone` field key and `errors.phone.invalid` |
-| Lead processing | `src/lib/lead-pipeline/process-lead.ts` — remove phone spreads into email/Airtable payloads |
-| Email | `src/lib/email/email-data-schema.ts`, `src/lib/email/runtime-email-content.ts`, `src/lib/resend-utils.ts`, `src/lib/resend-core.tsx` — remove product-inquiry phone rendering |
-| Airtable | `src/lib/airtable/types.ts`, `src/lib/airtable/service-internal/lead-records.ts`, `src/lib/airtable/service-internal/field-sanitization.ts` — remove `phone`, `addPhoneField`, `sanitizeAirtablePhoneField`, `WhatsApp / Phone` column writes |
+| Lead processing | `src/lib/lead-pipeline/process-lead.ts` — remove #130-added phone spreads into email/Airtable payloads (product and contact paths) |
+| Contact submit | `src/lib/contact/submit-canonical-contact.ts` — remove #130-added `...(formData.phone ? { phone: formData.phone } : {})` from lead input construction |
+| Email | Remove **product-inquiry** phone members introduced by #130 in `src/lib/email/email-data-schema.ts`, `src/lib/email/runtime-email-content.ts`, `src/lib/resend-utils.ts`, `src/lib/resend-core.tsx`. **Keep** pre-#130 contact-lead email phone rendering that existed on `origin/main`. |
+| Airtable | `src/lib/airtable/types.ts` — remove `phone` from **both** `ContactLeadData` and `ProductLeadData` (`origin/main` had neither). `src/lib/airtable/service-internal/lead-records.ts` — delete `addPhoneField` and **both** Contact/Product Airtable writes. `src/lib/airtable/service-internal/field-sanitization.ts` — delete `sanitizeAirtablePhoneField` only; **keep file** and `sanitizeAirtableTextField`. |
 | Grammar | `src/lib/form-schema/lead-phone-grammar.ts` and `src/lib/form-schema/__tests__/lead-phone-grammar.test.ts` — trash (inquiry-only; Contact revert uses origin/main inline phone validator) |
 | Constants | `MAX_LEAD_PHONE_LENGTH` from `src/constants/validation-limits.ts` and re-exports when no live consumer remains |
 | Tests | All phone-penetration, phone grammar, phone sanitization, and phone validation detail tests listed in §7 |
+
+**Do not claim #130-added canonical Contact phone expansion is legacy.** The truly legacy disabled Contact UI/config/validator and pre-#130 Contact email phone shape stay until D6e.
 
 ## 7. Retire dedicated phone-proof infrastructure (PR #134)
 
@@ -122,12 +131,22 @@ Do **not** modify these public company phone surfaces:
 - `scripts/quality/checks/production-config.js`
 - `messages/profiles/b2b-lead/en/messages.json` → `contact.panel.phone`
 
-## 9. C2 boundary — legacy Contact form
+## 9. C2 boundary — legacy Contact form (pre-#130 vs #130-added)
 
-Do **not** refactor the disabled legacy Contact form phone stack in this change.
+**Revert all #130-added Contact downstream phone expansion in this C2 revision.** **Preserve pre-#130 legacy until D6e:**
 
-- Revert `src/lib/form-schema/contact-field-validators.ts` to `origin/main` behavior if needed to remove the `lead-phone-grammar` dependency (inline digit validator from main).
-- Old disabled config, Contact email phone shape for the **contact** lead type, legacy Contact error keys, and Contact-form tests stay until D6e.
+| Surface | C2 revision | D6e retirement |
+| --- | --- | --- |
+| Disabled Contact UI phone field + config | Keep | Remove |
+| `contact-field-validators.ts` inline phone validator (origin/main) | Revert from `lead-phone-grammar` dependency | Remove |
+| Contact error keys / message mocks for disabled form | Keep | Remove |
+| Pre-#130 contact email phone shape (`email-data-schema`, `runtime-email-content`, `resend-*`) | Keep | Remove |
+| #130 `contactLeadSchema.phone` | **Remove now** | — |
+| #130 `submit-canonical-contact` phone spread | **Remove now** | — |
+| #130 `processLead` contact phone spreads | **Remove now** | — |
+| #130 `ContactLeadData.phone` + Airtable `addPhoneField` | **Remove now** | — |
+
+Revert `src/lib/form-schema/contact-field-validators.ts` to `origin/main` behavior to remove the `lead-phone-grammar` dependency (inline digit validator from main). Use the editing tool or restore the exact origin/main function — do not shell-redirect overwrite source files.
 
 ## 10. Privacy copy (narrow change)
 
@@ -148,10 +167,21 @@ node scripts/starter-checks.js content-manifest --check
 | --- | --- |
 | `docs/项目基础/行为合约.md` | BC-013B → three-field contract; remove Airtable phone column and phone-proof test references |
 | `docs/项目基础/发布验证.md` | Remove phone-proof workflow section |
-| `docs/技术难题/整库审查2026-07/执行计划.md` | Add R'13; Cluster 3A → **ACTIVE**; C2 unblocked (no phone column gate); revised acceptance criteria; M3 23/33 → 24/33 on C2 merge then D6a → D5a |
-| `docs/superpowers/plans/2026-07-17-m3-clustered-execution.md` | Cluster 3A three-field contract; remove external phone-column gate and phone-proof acceptance steps; D6a → three visible fields |
+| `docs/技术难题/整库审查2026-07/执行计划.md` | Add R'13; Cluster 3A → **ACTIVE**; C2 unblocked (no phone column gate); revised acceptance criteria; **M3 remains 23/33 until revised C2 merges**, then 24/33; update C2, D6a, D5a, D6b, D6d, D6e, C7/D7 boundary text |
+| `docs/superpowers/plans/2026-07-17-m3-clustered-execution.md` | Cluster 3A three-field contract; remove external phone-column gate and phone-proof acceptance steps; D6a → three visible fields; D5a/D6b/D6d/D6e/C7 alignment |
 | `content/pages/en/privacy.mdx` | Remove WhatsApp collection claim |
 | `src/lib/content-manifest.generated.ts` | Regenerated via starter-checks |
+
+**Downstream task truth (for doc alignment, not implemented in C2):**
+
+| Task | Three-field alignment |
+| --- | --- |
+| **D6a** | Visible fields: `fullName`, `email`, optional `message` only. Explicit: no `input[type=tel]`. |
+| **D5a** | Field-level errors: `fullName`/`email` required; `message` optional. No phone error keys. |
+| **D6b** | Phone is not part of the canonical inquiry contract; `/api/inquiry` is the single write path. |
+| **D6d** | Success reset clears **three** form fields (not four). |
+| **D6e** | Remove remaining disabled legacy Contact phone config/validator/message/types/mocks/tests. **Never** remove public company phone. |
+| **C7 / D7** | Final docs scan removes active four-field contract and Airtable-phone-blocker claims; historical Airtable diagnosis stays a compact note only. |
 
 ## 12. Accounting and sequencing
 
@@ -166,25 +196,27 @@ PR #134 phone-proof merge remains historical; its infrastructure is retired by t
 
 ## 13. Acceptance criteria (merge gate)
 
-Independent exact-SHA review must prove all ten:
+Independent exact-SHA review must prove all eleven:
 
 1. `fullName` and `email` required; missing/invalid → 400 with field details.
 2. Omitted or blank `message` succeeds (200, referenceId).
 3. Non-blank `message` reaches owner email and Airtable `Requirements` (or equivalent description field) consistently.
 4. Extra `phone` in POST body does not reach `processLead`, owner email payload, Airtable create payload, or info/warn logs with buyer phone content.
-5. `PRODUCT_INQUIRY_FIELD_ERROR_KEYS` and `PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS` contain no `phone` keys.
-6. Dedicated phone-proof workflow, script, integration test, and workflow unit tests are retired (Trash + git deletion staged).
-7. Privacy MDX no longer states WhatsApp is collected on enquiry.
-8. Public company phone config and `production-config.js` strict gate remain green unchanged.
-9. Focused inquiry/lead tests and full repo gates pass (`pnpm test`, `pnpm type-check`, `pnpm lint:check`, `pnpm content:check`, `pnpm component:check`, `pnpm build`).
-10. Independent exact-SHA Codex acceptance before merge (Cluster 3A C2 revision).
+5. Route-level contract test proves end-to-end silent drop through email/Airtable mocks; a separate sink test proves direct unsafe `createLead` callers cannot write `WhatsApp / Phone`.
+6. Mocked logger call arguments after posting extra `phone` do not contain the exact phone value.
+7. `PRODUCT_INQUIRY_FIELD_ERROR_KEYS` and `PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS` contain no `phone` keys.
+8. Dedicated phone-proof workflow, script, integration test, and workflow unit tests are retired (Trash + git deletion staged).
+9. Privacy MDX no longer states WhatsApp is collected on enquiry.
+10. Public company phone config and `production-config.js` strict gate remain green unchanged.
+11. Focused inquiry/lead tests and full repo gates pass (`pnpm test`, `pnpm type-check`, `pnpm lint:check`, `pnpm content:check`, `pnpm component:check`, `pnpm build`).
 
 ## 14. Non-goals
 
 - Do not touch main worktree, PR #102, M2, domain/PDF/public-phone-photos/MOQ/legal decisions, Motion, or Radix Primitives.
 - Do not add dependencies, feature flags, or speculative abstractions (Ponytail full: delete dead capability).
 - Do not implement D6a/D6e frontend form changes in the C2 revision PR (backend contract + docs only; D6a follows on green C2).
-- Do not remove Contact lead-type phone from `contactLeadSchema` or `/api/contact` until D6e.
+- Do not remove pre-#130 disabled Contact form phone UI/config/validator or pre-#130 contact email phone rendering until D6e.
+- Do not trash `field-sanitization.ts` — only remove `sanitizeAirtablePhoneField`.
 
 ## 15. Trash discipline
 
@@ -203,7 +235,8 @@ Forbidden: `rm`, `rmdir`, `unlink`, `git rm`, `find -delete`, `git clean`.
 | Check | Result |
 | --- | --- |
 | Placeholders | None — all paths and decisions are concrete |
-| Contradictions | R'13 vs preserved company phone clarified in §8–9; Contact legacy phone explicitly deferred to D6e |
-| Ambiguity | Silent-drop mechanism = Zod schema omission + adapter/route cleanup; no new error type |
-| Scope | Backend C2 vertical only; D6a three-field UI is downstream; Contact stack untouched |
-| Spec ↔ owner brief | All ten acceptance items and preserve/remove lists mapped |
+| Contradictions | `contactLeadSchema.phone` removed with `productLeadSchema.phone` (both #130); pre-#130 Contact legacy preserved until D6e; `field-sanitization.ts` kept |
+| Ambiguity | Silent-drop = Zod strip + explicit `delete adapted.phone`; adapter test asserts output has no `phone` key |
+| Scope | Backend C2 vertical only; D6a three-field UI is downstream; pre-#130 Contact stack untouched until D6e |
+| Spec ↔ owner brief | All acceptance items and preserve/remove lists mapped |
+| M3 accounting | 23/33 until merge; 24/33 after |

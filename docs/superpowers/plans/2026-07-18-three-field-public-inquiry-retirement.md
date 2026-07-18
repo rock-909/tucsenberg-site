@@ -1,10 +1,12 @@
+# Three-Field Public Inquiry Retirement Implementation Plan
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Spec:** `docs/superpowers/specs/2026-07-18-three-field-public-inquiry-design.md`
 
 **Goal:** Vertically retire buyer phone/WhatsApp from the public `/api/inquiry` path, preserving all non-phone C2 work in PR #130, and unblock Cluster 3A without an Airtable phone column.
 
-**Architecture:** Remove `phone` from the Zod schema allowlist so extra payload keys are stripped before `processLead`. Delete phone mapping from email and Airtable product-inquiry writes. Trash the dedicated phone-proof workflow merged by PR #134. Revert `contact-field-validators.ts` to `origin/main` inline phone logic so inquiry-only grammar can be deleted without touching the disabled Contact stack. Update stable docs to record R'13 and the three-field BC-013B contract.
+**Architecture:** Remove `phone` from both Zod schema allowlists (`productLeadSchema` and `contactLeadSchema` — both additions are from #130; `origin/main` had neither) so extra payload keys are stripped before `processLead`. Explicitly delete `adapted.phone` in the legacy adapter after spreading raw input. Delete phone mapping from product-inquiry email and Airtable writes. Revert all #130-added Contact downstream phone expansion (`processLead`, `submit-canonical-contact`, both Airtable types, `addPhoneField`) while preserving pre-#130 contact email phone rendering until D6e. Trash the dedicated phone-proof workflow merged by PR #134. Revert `contact-field-validators.ts` to `origin/main` inline phone logic so inquiry-only grammar can be deleted without removing the disabled Contact stack until D6e. Update stable docs to record R'13 and the three-field BC-013B contract.
 
 **Tech Stack:** Next.js 16.2.10 App Router, React 19, TypeScript 6 strict, Zod 4, Vitest, next-intl 4, Airtable SDK, Resend.
 
@@ -16,9 +18,10 @@
 - Extra `phone` in POST body: silently dropped — no dedicated phone-forbidden error type.
 - Move removed files to `$HOME/.Trash/tucsenberg-three-field-inquiry-$(date +%Y%m%dT%H%M%S)` via `mv` only; never `rm`, `git rm`, `unlink`, `rmdir`, `find -delete`, or `git clean`.
 - Do not modify: `src/config/single-site.ts`, `src/config/public-trust.ts`, `src/lib/structured-data-generators.ts`, `src/app/[locale]/contact/contact-page-sections.tsx`, `scripts/quality/checks/production-config.js`, `messages/profiles/b2b-lead/en/messages.json` (`contact.panel.phone`).
-- Do not refactor disabled legacy Contact form stack or `contactLeadSchema` phone until D6e.
+- Preserve pre-#130 disabled legacy Contact form phone UI/config/validator/error keys and pre-#130 contact email phone shape until D6e. Do **not** claim #130-added canonical Contact phone expansion is legacy.
+- `field-sanitization.ts` **must remain** — it owns live `sanitizeAirtableTextField` used by all Airtable writes. Remove only `sanitizeAirtablePhoneField` and its phone-specific tests.
 - Ponytail full: delete dead capability; no new dependencies, feature flags, or abstractions.
-- TDD: failing test before each production change; focused test first, broader gate before commit.
+- TDD: observe RED before each production change with focused tests. If pre-commit hooks reject a deliberately failing test commit, run the RED locally, apply the production fix, then commit green — do not leave the repo in a failing state on push.
 - Never run `pnpm build` and `pnpm website:build:cf` in parallel.
 
 ---
@@ -30,8 +33,8 @@
 - Modify: `src/lib/lead-pipeline/__tests__/inquiry-payload-adapter.test.ts`
 
 **Interfaces:**
-- Consumes: existing `GENERAL_RFQ_BASE`, `makeInquiryRequest`, `loadInquiryRoute`, mocked `processLead` boundaries.
-- Produces: failing tests named `"drops extra phone before processLead"` and `"maps legacy requirements without phone field"` that later tasks make pass.
+- Consumes: existing `GENERAL_RFQ_BASE`, `makeInquiryRequest`, `loadInquiryRoute`, mocked `processLead` boundaries, mocked `@/lib/logger`.
+- Produces: failing tests named `"drops extra phone before processLead"`, `"does not log buyer phone from extra payload field"`, and `"maps legacy requirements without phone field"` that later tasks make pass.
 
 - [ ] **Step 1: Write the failing canonical contract test**
 
@@ -41,7 +44,8 @@ In `src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts`:
 2. Remove the entire `it("maps legacy requirements into canonical message without dropping phone", ...)` block.
 3. Remove the entire `it("rejects illegal phone hyphen placement before lead processing", ...)` block.
 4. Remove the `sanitizeAirtablePhoneField` import.
-5. Add this test after the blank-message success test:
+5. Import `logger` from `@/lib/__tests__/mocks/logger` for log assertions.
+6. Add this test after the blank-message success test:
 
 ```ts
   it("drops extra phone before processLead, email, and Airtable", async () => {
@@ -77,7 +81,36 @@ In `src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts`:
   });
 ```
 
-6. Add legacy-requirements test without phone:
+7. Add log non-propagation proof in the same file:
+
+```ts
+  it("does not log buyer phone from extra payload field", async () => {
+    const { POST } = await loadInquiryRoute();
+    const response = await POST(
+      makeInquiryRequest({
+        ...GENERAL_RFQ_BASE,
+        phone: "+8613800138000",
+        message: "Need pricing",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+
+    const loggedPayloads = [
+      ...logger.info.mock.calls,
+      ...logger.warn.mock.calls,
+      ...logger.error.mock.calls,
+    ].flatMap((call) => call.slice(1));
+
+    for (const payload of loggedPayloads) {
+      expect(JSON.stringify(payload)).not.toContain("+8613800138000");
+    }
+  });
+```
+
+This route-level test proves end-to-end silent drop through email/Airtable mocks. Task 3 adds a separate sink test for direct unsafe `createLead` callers.
+
+8. Add legacy-requirements test without phone:
 
 ```ts
   it("maps legacy requirements into canonical message without phone", async () => {
@@ -127,14 +160,18 @@ Run:
 pnpm exec vitest run src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/inquiry-payload-adapter.test.ts --reporter=verbose
 ```
 
-Expected: FAIL — parsed data still has `phone`, or `adaptLegacyInquiryPayload` still returns `phone`.
+Expected: **FAIL** — parsed data still has `phone`, `adaptLegacyInquiryPayload` still returns `phone`, and/or logger still receives the exact phone string.
 
-- [ ] **Step 4: Commit test-only change**
+- [ ] **Step 4: Commit test-only change (if hooks allow)**
+
+If pre-commit passes with the RED tests, commit test-only:
 
 ```bash
 git add src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/inquiry-payload-adapter.test.ts
 git commit -m "test: assert three-field inquiry contract drops buyer phone"
 ```
+
+If hooks reject a failing test commit, skip this commit and proceed to Task 2 — the RED was observed locally in Step 3.
 
 ---
 
@@ -150,7 +187,7 @@ git commit -m "test: assert three-field inquiry contract drops buyer phone"
 
 **Interfaces:**
 - Consumes: failing tests from Task 1.
-- Produces: `productLeadSchema` with no `phone` key; deleted `canonicalBuyerPhoneSchema`; adapter without `phone` in `LEGACY_OPTIONAL_BLANK_FIELDS`.
+- Produces: both lead schemas with no `phone` key; deleted `canonicalBuyerPhoneSchema`; adapter that strips `phone` explicitly; route that does not pick `phone`.
 
 - [ ] **Step 1: Delete canonical phone schema**
 
@@ -159,17 +196,20 @@ In `src/lib/lead-pipeline/canonical-buyer-fields.ts`:
 1. Remove imports of `MAX_LEAD_PHONE_LENGTH` and `isValidLeadPhone`.
 2. Delete the entire `canonicalBuyerPhoneSchema` export block (lines defining phone transform/refine).
 
-- [ ] **Step 2: Remove phone from product lead schema**
+- [ ] **Step 2: Remove phone from both lead schemas**
 
 In `src/lib/lead-pipeline/lead-schema.ts`:
 
 1. Remove `canonicalBuyerPhoneSchema` from imports.
 2. In `productLeadSchema` object, delete the `phone: canonicalBuyerPhoneSchema.optional(),` line.
-3. Leave `contactLeadSchema.phone` unchanged.
+3. In `contactLeadSchema` object, delete the `phone: canonicalBuyerPhoneSchema.optional(),` line. Both additions are from #130; `origin/main` had neither.
 
-- [ ] **Step 3: Remove phone from legacy adapter**
+- [ ] **Step 3: Strip phone in legacy adapter**
 
-In `src/lib/lead-pipeline/inquiry-payload-adapter.ts`, remove `"phone",` from `LEGACY_OPTIONAL_BLANK_FIELDS`.
+In `src/lib/lead-pipeline/inquiry-payload-adapter.ts`:
+
+1. Remove `"phone",` from `LEGACY_OPTIONAL_BLANK_FIELDS`.
+2. After `const adapted: Record<string, unknown> = { ...data };`, add `delete adapted.phone;` so non-blank extra phone cannot pass through via spread alone.
 
 - [ ] **Step 4: Stop passing phone in inquiry route**
 
@@ -183,7 +223,7 @@ Run:
 rg 'MAX_LEAD_PHONE_LENGTH' src
 ```
 
-If only `canonical-buyer-fields.ts` and constants re-export remain, delete `MAX_LEAD_PHONE_LENGTH` from `src/constants/validation-limits.ts` and its export from `src/constants/index.ts`. If `contact-form-config` or other Contact-stack files still reference it, keep the constant.
+If only `canonical-buyer-fields.ts` and constants re-export remain, delete `MAX_LEAD_PHONE_LENGTH` from `src/constants/validation-limits.ts` and its export from `src/constants/index.ts`. If disabled Contact-stack config still references it for the legacy form, keep the constant until D6e.
 
 - [ ] **Step 6: Run Task 1 tests**
 
@@ -193,21 +233,22 @@ Run:
 pnpm exec vitest run src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/inquiry-payload-adapter.test.ts --reporter=verbose
 ```
 
-Expected: PASS for the new three-field tests; any remaining phone-specific failures point to Task 3.
+Expected: **PASS** for adapter and schema/route silent-drop tests; any remaining phone-specific delivery failures point to Task 3.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/lib/lead-pipeline/canonical-buyer-fields.ts src/lib/lead-pipeline/lead-schema.ts src/lib/lead-pipeline/inquiry-payload-adapter.ts src/app/api/inquiry/route.ts src/constants/validation-limits.ts src/constants/index.ts
+git add src/lib/lead-pipeline/canonical-buyer-fields.ts src/lib/lead-pipeline/lead-schema.ts src/lib/lead-pipeline/inquiry-payload-adapter.ts src/app/api/inquiry/route.ts src/constants/validation-limits.ts src/constants/index.ts src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/inquiry-payload-adapter.test.ts
 git commit -m "refactor: remove buyer phone from public inquiry schema"
 ```
 
 ---
 
-### Task 3: Remove phone from processLead, email, and Airtable product path
+### Task 3: Remove phone from processLead, email, Airtable, and #130 Contact downstream
 
 **Files:**
 - Modify: `src/lib/lead-pipeline/process-lead.ts`
+- Modify: `src/lib/contact/submit-canonical-contact.ts`
 - Modify: `src/lib/airtable/types.ts`
 - Modify: `src/lib/airtable/service-internal/lead-records.ts`
 - Modify: `src/lib/airtable/service-internal/field-sanitization.ts`
@@ -223,9 +264,11 @@ git commit -m "refactor: remove buyer phone from public inquiry schema"
 
 **Interfaces:**
 - Consumes: schema without `phone` from Task 2.
-- Produces: product inquiry email/Airtable payloads with `fullName`, `email`, `message`/`requirements` only; `ProductLeadData` without `phone`; no `WhatsApp / Phone` Airtable field writes for product leads.
+- Produces: inquiry email/Airtable payloads with `fullName`, `email`, `message`/`requirements` only; both `ContactLeadData` and `ProductLeadData` without `phone`; no `WhatsApp / Phone` Airtable field writes; pre-#130 contact email phone rendering preserved.
 
-- [ ] **Step 1: Write failing Airtable test first**
+- [ ] **Step 1: Write failing Airtable sink test first**
+
+Task 1's route-level test already proves end-to-end silent drop through mocked email/Airtable boundaries. This sink test protects direct unsafe callers that bypass the route.
 
 In `src/lib/__tests__/airtable-create-operations.test.ts`, remove both `it(...)` blocks whose titles mention phone or `WhatsApp / Phone`. Add:
 
@@ -243,12 +286,15 @@ In `src/lib/__tests__/airtable-create-operations.test.ts`, remove both `it(...)`
         message: "Need quote",
         productName: "General RFQ",
         requirements: "Need quote",
-      });
+        phone: "+8613800138000",
+      } as unknown as ProductLeadData);
 
       const createCall = mockCreate.mock.calls[0]?.[0];
       expect(createCall.fields).not.toHaveProperty("WhatsApp / Phone");
     });
 ```
+
+Ensure `ProductLeadData` is imported from `@/lib/airtable/types`. The `as unknown as ProductLeadData` cast is intentional: it simulates a caller bypassing schema validation. Against current code this test **FAILs** because `addPhoneField` still writes the column.
 
 - [ ] **Step 2: Run test to verify failure**
 
@@ -258,70 +304,70 @@ Run:
 pnpm exec vitest run src/lib/__tests__/airtable-create-operations.test.ts -t "does not write WhatsApp" --reporter=verbose
 ```
 
-Expected: FAIL if `addPhoneField` still runs, or PASS after implementation — re-run after Step 3.
+Expected: **FAIL** — `createCall.fields` includes `WhatsApp / Phone` while `addPhoneField` remains.
 
-- [ ] **Step 3: Remove phone from Airtable product mapping**
+- [ ] **Step 3: Remove phone from Airtable mapping**
 
-In `src/lib/airtable/types.ts`, delete `phone?: string;` from `ProductLeadData` only (keep on `ContactLeadData`).
+In `src/lib/airtable/types.ts`, delete `phone?: string;` from **both** `ContactLeadData` and `ProductLeadData` (`origin/main` had neither).
 
 In `src/lib/airtable/service-internal/lead-records.ts`:
 
-1. Remove `sanitizeAirtablePhoneField` import.
+1. Remove `sanitizeAirtablePhoneField` import; keep `sanitizeAirtableTextField` import.
 2. Delete `addPhoneField` function entirely.
-3. Remove `addPhoneField(fields, data.phone)` calls from product record builder(s). Keep contact record phone mapping if present for `/api/contact`.
+3. Remove all `addPhoneField(fields, data.phone)` calls from **both** contact and product record builders.
 
 In `src/lib/airtable/service-internal/field-sanitization.ts`:
 
-1. Delete entire file contents except a minimal re-export stub **only if** another live import exists; otherwise trash the file and its test (see Step 6).
+1. Delete the `sanitizeAirtablePhoneField` export and its implementation only.
+2. **Keep the file** and `sanitizeAirtableTextField` — all other Airtable writes depend on it.
+
+In `src/lib/airtable/service-internal/__tests__/field-sanitization.test.ts`:
+
+1. Remove tests covering `sanitizeAirtablePhoneField` only.
+2. Keep tests for `sanitizeAirtableTextField`.
+
+- [ ] **Step 4: Remove #130 phone spreads from processLead**
+
+In `src/lib/lead-pipeline/process-lead.ts`, remove every `...(lead.phone ? { phone: lead.phone } : {})` spread in **both** product and contact lead handling. Pre-#130 `origin/main` had none of these spreads.
+
+- [ ] **Step 5: Remove #130 phone spread from submit-canonical-contact**
+
+In `src/lib/contact/submit-canonical-contact.ts`, delete the line:
+
+```ts
+    ...(formData.phone ? { phone: formData.phone } : {}),
+```
+
+from `leadInput` construction. Keep pre-#130 contact error keys and validation mapping for the disabled legacy form until D6e.
+
+- [ ] **Step 6: Remove product-inquiry phone from email rendering**
+
+In `src/lib/email/email-data-schema.ts`, remove `phone` from the **product inquiry** zod object only. Keep contact-lead `phone` member that existed on `origin/main`.
+
+In `src/lib/email/runtime-email-content.ts`, remove conditional phone row from **product inquiry** content builder(s). Keep contact email phone row from `origin/main`.
+
+Mirror product-inquiry removals only in `src/lib/resend-utils.ts` and `src/lib/resend-core.tsx`.
+
+Update `src/lib/email/__tests__/runtime-email-content.test.ts` to assert product inquiry HTML does not contain phone label; keep contact email phone coverage if present from pre-#130.
+
+- [ ] **Step 7: Clean lead-records unit test**
+
+In `src/lib/airtable/service-internal/lead-records.test.ts`, remove tests expecting `WhatsApp / Phone` field mapping or phone-specific errors for either lead type.
+
+- [ ] **Step 8: Run focused tests**
 
 Run:
 
 ```bash
-rg 'sanitizeAirtablePhoneField|field-sanitization' src tests
+pnpm exec vitest run src/lib/__tests__/airtable-create-operations.test.ts src/lib/airtable/service-internal/lead-records.test.ts src/lib/airtable/service-internal/__tests__/field-sanitization.test.ts src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/process-lead.test.ts src/lib/email/__tests__/runtime-email-content.test.ts --reporter=verbose
 ```
 
-If zero consumers after lead-records cleanup, move to Trash:
+Expected: **PASS**.
+
+- [ ] **Step 9: Commit**
 
 ```bash
-TRASH_DIR="$HOME/.Trash/tucsenberg-three-field-inquiry-$(date +%Y%m%dT%H%M%S)"
-mkdir -p "$TRASH_DIR"
-mv src/lib/airtable/service-internal/field-sanitization.ts "$TRASH_DIR/"
-mv src/lib/airtable/service-internal/__tests__/field-sanitization.test.ts "$TRASH_DIR/"
-git add -u src/lib/airtable/service-internal/field-sanitization.ts src/lib/airtable/service-internal/__tests__/field-sanitization.test.ts
-```
-
-- [ ] **Step 4: Remove phone from processLead product path**
-
-In `src/lib/lead-pipeline/process-lead.ts`, remove every `...(lead.phone ? { phone: lead.phone } : {})` spread inside **product** lead handling (`processProduct` and product email/Airtable payload builders). Do not remove contact-lead phone spreads.
-
-- [ ] **Step 5: Remove phone from product inquiry email rendering**
-
-In `src/lib/email/email-data-schema.ts`, remove `phone` from the **product inquiry** zod object only.
-
-In `src/lib/email/runtime-email-content.ts`, remove conditional phone row from product inquiry content builder(s). Keep contact email phone row if still used by contact lead type.
-
-Mirror removals in `src/lib/resend-utils.ts` and `src/lib/resend-core.tsx` for product inquiry payloads only.
-
-Update `src/lib/email/__tests__/runtime-email-content.test.ts` to assert product inquiry HTML does not contain phone label when product fixture has no phone field.
-
-- [ ] **Step 6: Clean lead-records unit test**
-
-In `src/lib/airtable/service-internal/lead-records.test.ts`, remove the test expecting `WhatsApp / Phone` field errors for product leads.
-
-- [ ] **Step 7: Run focused tests**
-
-Run:
-
-```bash
-pnpm exec vitest run src/lib/__tests__/airtable-create-operations.test.ts src/lib/airtable/service-internal/lead-records.test.ts src/lib/lead-pipeline/__tests__/canonical-inquiry-contract.test.ts src/lib/lead-pipeline/__tests__/process-lead.test.ts src/lib/email/__tests__/runtime-email-content.test.ts --reporter=verbose
-```
-
-Expected: PASS.
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/lib/lead-pipeline/process-lead.ts src/lib/airtable/types.ts src/lib/airtable/service-internal/lead-records.ts src/lib/email/email-data-schema.ts src/lib/email/runtime-email-content.ts src/lib/resend-utils.ts src/lib/resend-core.tsx src/lib/__tests__/airtable-create-operations.test.ts src/lib/airtable/service-internal/lead-records.test.ts src/lib/email/__tests__/runtime-email-content.test.ts
+git add src/lib/lead-pipeline/process-lead.ts src/lib/contact/submit-canonical-contact.ts src/lib/airtable/types.ts src/lib/airtable/service-internal/lead-records.ts src/lib/airtable/service-internal/field-sanitization.ts src/lib/airtable/service-internal/__tests__/field-sanitization.test.ts src/lib/email/email-data-schema.ts src/lib/email/runtime-email-content.ts src/lib/resend-utils.ts src/lib/resend-core.tsx src/lib/__tests__/airtable-create-operations.test.ts src/lib/airtable/service-internal/lead-records.test.ts src/lib/email/__tests__/runtime-email-content.test.ts
 git commit -m "refactor: stop forwarding buyer phone in inquiry delivery"
 ```
 
@@ -366,7 +412,7 @@ Run:
 pnpm exec vitest run tests/unit/inquiry-validation-details.test.ts --reporter=verbose
 ```
 
-Expected: FAIL on new `does not expose phone` test and/or old phone failure cases still parse differently.
+Expected: **FAIL** on new `does not expose phone` test and/or old phone failure cases still present in mapper.
 
 - [ ] **Step 3: Remove phone from inquiry validation mapper**
 
@@ -377,11 +423,13 @@ In `src/lib/api/inquiry-validation-details.ts`:
 
 - [ ] **Step 4: Revert contact-field-validators phone to origin/main**
 
-Replace `src/lib/form-schema/contact-field-validators.ts` phone implementation with `origin/main` version:
+Open `src/lib/form-schema/contact-field-validators.ts` and restore the exact `origin/main` phone validator implementation (inline digit check). Compare against:
 
 ```bash
-git show origin/main:src/lib/form-schema/contact-field-validators.ts > src/lib/form-schema/contact-field-validators.ts
+git show origin/main:src/lib/form-schema/contact-field-validators.ts
 ```
+
+Use the editing tool to apply the origin/main phone block — **do not** shell-redirect overwrite the file (`git show ... > file` is forbidden).
 
 Verify the file no longer imports `@/lib/form-schema/lead-phone-grammar`.
 
@@ -403,7 +451,7 @@ Run:
 pnpm exec vitest run tests/unit/inquiry-validation-details.test.ts src/lib/__tests__/contact-field-validators.test.ts --reporter=verbose
 ```
 
-Expected: PASS.
+Expected: **PASS**.
 
 - [ ] **Step 7: Commit**
 
@@ -436,7 +484,7 @@ Run:
 pnpm exec vitest run tests/architecture/config-exact-paths-exist.test.ts -t "CODEOWNERS" --reporter=verbose
 ```
 
-Expected: PASS before changes.
+Expected: **PASS** before changes.
 
 - [ ] **Step 2: Move phone-proof files to Trash**
 
@@ -477,7 +525,7 @@ Run:
 pnpm exec vitest run tests/architecture/config-exact-paths-exist.test.ts tests/unit/workflows --reporter=verbose
 ```
 
-Expected: PASS (workflow unit folder may be empty — zero tests is OK).
+Expected: **PASS** (workflow unit folder may be empty — zero tests is OK).
 
 - [ ] **Step 6: Commit**
 
@@ -500,7 +548,7 @@ git commit -m "chore: retire airtable buyer phone proof workflow"
 
 **Interfaces:**
 - Consumes: R'13 text from spec §2.
-- Produces: BC-013B three-field wording; Cluster 3A ACTIVE; R'13 in owner table; privacy without WhatsApp collection claim; no phone-proof section in 发布验证.
+- Produces: BC-013B three-field wording; Cluster 3A ACTIVE; R'13 in owner table; privacy without WhatsApp collection claim; no phone-proof section in 发布验证; full downstream task alignment.
 
 - [ ] **Step 1: Update BC-013B in 行为合约.md**
 
@@ -512,29 +560,43 @@ Replace BC-013B row with:
 
 Delete the entire `## Manual Airtable phone column proof` section through the end of `### Recovery prerequisites (Cluster 3A C2, 2026-07-18)` (inclusive).
 
-- [ ] **Step 3: Update 执行计划.md status and R'13**
+- [ ] **Step 3: Update 执行计划.md status, R'13, and downstream tasks**
 
 In the status header (§ top):
 
 1. Change Cluster 3A from `BLOCKED_BY_EXTERNAL_PREREQUISITE` to **ACTIVE**.
-2. Remove Airtable `WhatsApp / Phone` column as merge blocker for C2.
+2. Remove Airtable `WhatsApp / Phone` column as merge blocker for C2; keep diagnosis as a compact historical note only.
 3. Add R'13 to owner decision list: **R'13 公开 Web 询盘仅收集姓名+邮箱必填、描述选填；不收集买家 phone/WhatsApp；R'2 买家 phone 部分废止；R'11 修订为三字段表单。**
-4. Mark revised C2 acceptance: merge → 24/33 → D6a → D5a.
-5. Retire phone-proof recovery chain bullets; note PR #134 infrastructure retired by R'13.
+4. **M3 remains 23/33 until revised C2 merges**; after merge → 24/33 → D6a → D5a.
+5. Retire phone-proof recovery chain as active prerequisite; note PR #134 infrastructure retired by R'13.
 
 In Task C2 description: replace four-field / WhatsApp references with three-field contract; remove external phone-column gate.
 
-In Task D6a: form renders **three** visible fields (`fullName`, `email`, optional `message`).
+In Task D6a: form renders **three** visible fields (`fullName`, `email`, optional `message`); explicit **no `input[type=tel]`**.
+
+In Task D5a: field-level errors — `fullName`/`email` required, `message` optional; no phone error keys.
+
+In Task D6b: phone is **not** part of the canonical inquiry contract.
+
+In Task D6d: success reset clears **three** fields (not four).
+
+In Task D6e: remove remaining disabled legacy Contact phone config/validator/message/types/mocks/tests; **never** public company phone.
+
+In Task C7 / D7 boundary: final docs scan removes active four-field contract and Airtable-phone-blocker claims.
 
 - [ ] **Step 4: Update m3-clustered-execution plan Cluster 3A section**
 
 In `docs/superpowers/plans/2026-07-17-m3-clustered-execution.md`:
 
 1. Replace Cluster 3A `BLOCKED_BY_EXTERNAL_PREREQUISITE` paragraph with **ACTIVE** and pointer to `docs/superpowers/plans/2026-07-18-three-field-public-inquiry-retirement.md`.
-2. Delete three-stage external phone-column gate (§4 lines 256–264 and Task C2 phone-proof step).
+2. Delete three-stage external phone-column gate and Task C2 phone-proof step; keep compact historical Airtable diagnosis note.
 3. Update Task C2 canonical interface to three fields (no `phone`).
-4. Update Task D6a to three visible fields.
-5. Remove Cluster 3A acceptance bullet requiring `WhatsApp / Phone` Airtable proof.
+4. Update Task D6a to three visible fields, no `input[type=tel]`.
+5. Update Task D5a field-error scope (fullName/email required, message optional).
+6. Update Task D6b (phone not canonical), D6d (reset three fields), D6e (legacy Contact phone cleanup only — not public company phone).
+7. Update C7/D7 final no-reintroduction boundary (no active four-field or Airtable-phone-blocker claims).
+8. Remove Cluster 3A acceptance bullet requiring `WhatsApp / Phone` Airtable proof.
+9. **M3 remains 23/33 until C2 merge.**
 
 - [ ] **Step 5: Update privacy.mdx**
 
@@ -564,7 +626,7 @@ pnpm content:check
 pnpm exec vitest run tests/unit/content-page-placeholders.test.ts --reporter=verbose
 ```
 
-Expected: PASS.
+Expected: **PASS**.
 
 - [ ] **Step 8: Commit**
 
@@ -587,18 +649,19 @@ Run:
 rg 'WhatsApp / Phone|canonicalBuyerPhoneSchema|lead-phone-grammar|errors\.phone' src/app/api/inquiry src/lib/lead-pipeline src/lib/api/inquiry-validation-details.ts
 ```
 
-Expected: no matches (Contact-stack matches elsewhere are allowed until D6e).
+Expected: no matches. Pre-#130 Contact-stack matches elsewhere (disabled form config, contact email phone from origin/main) are allowed until D6e.
 
 - [ ] **Step 2: Confirm preserved public company phone gate untouched**
 
 Run:
 
 ```bash
-pnpm exec vitest run tests/unit/scripts/validate-production-config.test.ts scripts/quality/checks/production-config.js --reporter=verbose 2>/dev/null || pnpm exec vitest run tests/unit/scripts/validate-production-config.test.ts --reporter=verbose
+pnpm exec vitest run tests/unit/scripts/validate-production-config.test.ts --reporter=verbose
+pnpm brand:check
 git diff --name-only origin/main...HEAD | rg 'single-site\.ts|public-trust\.ts|structured-data-generators|contact-page-sections|production-config\.js|contact\.panel\.phone' || true
 ```
 
-Expected: validate-production-config tests PASS; preserved files absent from diff (or only unrelated prior PR #130 changes — no new edits in this task).
+Expected: validate-production-config tests **PASS**; brand check **PASS**; preserved files absent from diff (or only unrelated prior PR #130 changes — no new edits in this task).
 
 - [ ] **Step 3: Full focused inquiry gate**
 
@@ -617,7 +680,7 @@ pnpm exec vitest run \
   --reporter=verbose
 ```
 
-Expected: all PASS.
+Expected: all **PASS**.
 
 - [ ] **Step 4: Repository gates**
 
@@ -633,20 +696,21 @@ pnpm build
 
 Expected: all exit 0. Record test count in PR evidence.
 
-- [ ] **Step 5: Self-review against spec acceptance (10 items)**
+- [ ] **Step 5: Self-review against spec acceptance (11 items)**
 
 Manual checklist — each must be true before `READY_FOR_CLUSTER`:
 
 1. fullName/email required — covered by `canonical-inquiry-contract.test.ts`.
 2. blank message succeeds — same file.
 3. message in email + Airtable — same file + `airtable-create-operations.test.ts`.
-4. extra phone dropped — `"drops extra phone before processLead"`.
-5. no phone validation keys — `inquiry-validation-details.test.ts`.
-6. phone-proof infrastructure trashed — Task 5 + `rg` clean.
-7. privacy no WhatsApp — `privacy.mdx` diff.
-8. public company phone untouched — Step 2.
-9. gates green — Step 4.
-10. stop for independent exact-SHA Codex acceptance — do not self-merge.
+4. extra phone dropped end-to-end — `"drops extra phone before processLead"`.
+5. direct unsafe `createLead` cannot write `WhatsApp / Phone` — Task 3 sink test.
+6. exact phone absent from mocked logger payloads — `"does not log buyer phone from extra payload field"`.
+7. no phone validation keys — `inquiry-validation-details.test.ts`.
+8. phone-proof infrastructure trashed — Task 5 + `rg` clean.
+9. privacy no WhatsApp — `privacy.mdx` diff.
+10. public company phone untouched — Step 2.
+11. gates green — Step 4.
 
 - [ ] **Step 6: Push branch**
 
@@ -663,21 +727,23 @@ Expected: remote updated; wait for default CI on exact head SHA before marking P
 | Spec requirement | Task |
 | --- | --- |
 | Three-field contract | Tasks 1–2 |
-| Silent phone drop | Tasks 1–2 |
+| Silent phone drop (schema + explicit adapter delete) | Tasks 1–2 |
 | Preserve non-phone C2 work | Tasks 2–3 (requirements adapter, catalog identity, attribution untouched) |
-| Remove phone from delivery stack | Task 3 |
+| Remove phone from delivery stack + #130 Contact downstream | Task 3 |
+| Keep `field-sanitization.ts` / `sanitizeAirtableTextField` | Task 3 |
 | Retire phone-proof infra | Task 5 |
 | Preserve public company phone | Global constraints + Task 7 Step 2 |
-| Contact stack boundary | Tasks 2, 4 (contactLeadSchema + validators revert) |
+| Pre-#130 Contact legacy until D6e | Tasks 3–4 |
 | Privacy narrow change | Task 6 |
-| Stable doc updates | Task 6 |
+| Stable doc updates (C2, D6a, D5a, D6b, D6d, D6e, C7/D7) | Task 6 |
 | R'13 recording | Task 6 |
-| Trash discipline | Tasks 3, 4, 5 |
-| Ten acceptance criteria | Task 7 |
+| Trash discipline | Tasks 4, 5 |
+| Eleven acceptance criteria | Task 7 |
+| M3 23/33 until merge | Task 6 + spec §12 |
 
 **Placeholder scan:** No TBD/TODO/FILL/implement later patterns.
 
-**Type consistency:** `ProductLeadData` loses `phone`; `productLeadSchema` infer type aligns; email/Airtable builders use `requirements`/`message` only.
+**Type consistency:** Both lead schemas and both Airtable lead types lose `phone`; email/Airtable builders use `requirements`/`message` only for inquiry; pre-#130 contact email phone rendering preserved until D6e.
 
 ---
 
