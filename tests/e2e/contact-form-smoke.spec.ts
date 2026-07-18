@@ -43,8 +43,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     // 等待页面主要内容加载
     await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => {});
 
-    // Progressive enhancement: the static no-JS fallback has no form until the
-    // island loads the live client form after scroll / intersection.
+    // Progressive enhancement: scroll the form column into view so InquiryForm
+    // and LazyTurnstile can mount before interaction.
     await page
       .getByTestId("contact-form-column")
       .scrollIntoViewIfNeeded({ timeout: 10_000 });

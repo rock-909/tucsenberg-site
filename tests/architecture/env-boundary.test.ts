@@ -187,7 +187,7 @@ describe("env module boundaries", () => {
     expect(source).toContain("export type { PublicRuntimeEnvKey }");
     expect(source).toContain("getPublicRuntimeEnvString");
     expect(source).toContain("getPublicRuntimeEnvBoolean");
-    expect(source).toContain("getPublicRuntimeEnvNumber");
+    expect(source).not.toContain("getPublicRuntimeEnvNumber");
     expect(source).toContain("isPublicRuntimeDevelopment");
     expect(source).toContain("isPublicRuntimeProduction");
     expect(source).toContain('from "./public-runtime-env"');
@@ -215,7 +215,7 @@ describe("env module boundaries", () => {
     expect(source).toContain("process.env.NEXT_PUBLIC_");
     expect(source).toContain("export function getPublicRuntimeEnvString");
     expect(source).toContain("export function getPublicRuntimeEnvBoolean");
-    expect(source).toContain("export function getPublicRuntimeEnvNumber");
+    expect(source).not.toContain("export function getPublicRuntimeEnvNumber");
     expect(source).toContain("export function isPublicRuntimeProduction");
     expect(source).toContain("export function isPublicRuntimeDevelopment");
     expect(source).toContain("NEXT_PUBLIC_BASE_URL");

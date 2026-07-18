@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6d ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; both remain unmerged. D6d is stacked on the D6c exact SHA. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6e ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response`; D6e is ACTIVE on branch `feat/m3-d6e-retire-form-stacks`. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response` (stacked on the D6c exact SHA). D6e remains blocked until D6d is independently reviewed. Detailed D6d plan: `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
+**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response`. **D6e is ACTIVE** on branch `feat/m3-d6e-retire-form-stacks`. Detailed D6e plan: `docs/superpowers/plans/2026-07-18-d6e-retire-form-stacks.md`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 

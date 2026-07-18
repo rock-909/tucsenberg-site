@@ -18,8 +18,8 @@ test("buyer fills contact form, clicks submit, sees success", async ({
   );
   await page.goto("/contact");
 
-  // Contact form island loads via IntersectionObserver — scroll it into view
-  // so the progressive-enhancement shell is replaced by the live client form.
+  // Contact renders InquiryForm directly — scroll the form column into view so
+  // LazyTurnstile can mount before submit.
   await page
     .getByTestId("contact-form-column")
     .scrollIntoViewIfNeeded({ timeout: 5_000 });
@@ -57,7 +57,7 @@ async function expectAccessibleServerFieldErrors(page: Page, path: string) {
           "errors.fullName.invalid",
           "errors.email.invalid",
           "errors.message.tooLong",
-          "errors.phone.invalid",
+          "errors.unregistered.invalid",
         ],
       }),
     }),
@@ -99,7 +99,7 @@ async function expectAccessibleServerFieldErrors(page: Page, path: string) {
   await expect(
     page.getByText("Message must be 2000 characters or fewer"),
   ).toBeVisible();
-  await expect(page.getByText("errors.phone.invalid")).toHaveCount(0);
+  await expect(page.getByText("errors.unregistered.invalid")).toHaveCount(0);
 
   await expect(fullName).toHaveAttribute("aria-invalid", "true");
   await expect(fullName).toHaveAttribute(

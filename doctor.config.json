@@ -35,7 +35,6 @@
           "src/lib/env.ts",
           "src/components/ui/button.tsx",
           "src/components/ui/badge.tsx",
-          "src/lib/contact/submit-canonical-contact.ts",
           "src/lib/structured-data.ts",
           "src/lib/cookie-consent/index.ts"
         ],
@@ -46,7 +45,6 @@
           "src/config/single-site.ts",
           "src/config/paths.ts",
           "src/config/site-types.ts",
-          "src/lib/contact/submit-canonical-contact.ts",
           "src/lib/cookie-consent/types.ts",
           "src/lib/cookie-consent/index.ts",
           "src/test/test-types.ts",
@@ -96,7 +94,7 @@
       },
       {
         "files": [
-          "src/app/[locale]/contact/contact-form-static-fallback.tsx",
+          "src/components/forms/inquiry-form-static-fallback.tsx",
           "src/app/[locale]/contact/contact-page-sections.tsx",
           "src/components/layout/header.tsx",
           "src/components/layout/mobile-navigation-interactive.tsx",
@@ -108,9 +106,9 @@
       },
       {
         "files": [
-          "src/app/[locale]/contact/contact-form-static-fallback.tsx",
+          "src/components/forms/inquiry-form-static-fallback.tsx",
           "src/app/[locale]/contact/contact-page-sections.tsx",
-          "src/components/forms/contact-form-fields.tsx"
+          "src/components/forms/inquiry-form-fields.tsx"
         ],
         "rules": ["react-doctor/design-no-space-on-flex-children"]
       },
@@ -246,7 +244,7 @@
           "src/app/api/csp-report/__tests__/route-get-options.test.ts",
           "src/app/api/inquiry/__tests__/route.test.ts",
           "src/lib/__tests__/load-messages-runtime.test.ts",
-          "src/components/forms/__tests__/contact-form-submission.test.tsx",
+          "src/components/forms/__tests__/inquiry-form.test.tsx",
           "src/lib/__tests__/load-messages.fallback.test.ts",
           "src/lib/__tests__/security-crypto.test.ts",
           "src/lib/security/__tests__/distributed-rate-limit.test.ts",
