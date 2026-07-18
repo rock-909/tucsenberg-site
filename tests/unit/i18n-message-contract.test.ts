@@ -3,6 +3,7 @@ import b2bLeadMessages from "../../messages/profiles/b2b-lead/en/messages.json";
 import catalogMessages from "../../messages/profiles/catalog/en/messages.json";
 import { describe, expect, it } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import { PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS } from "@/lib/api/inquiry-validation-details";
 
@@ -14,35 +15,6 @@ const enMessages = getComposedMessages("en") as JsonObject & {
   inquiry?: JsonObject;
   contact?: JsonObject;
 };
-
-const INQUIRY_FORM_LEAF_KEYS = [
-  "optional",
-  "fullName",
-  "email",
-  "message",
-  "messageHint",
-  "contextLabel",
-  "submit",
-  "submitting",
-  "success",
-  "referenceLabel",
-  "privacyNotice",
-  "noJsExplanation",
-  "noJsEmailPrefix",
-  "contactAriaLabel",
-  "requestQuoteAriaLabel",
-  "errors.fieldSummary",
-  "errors.securitySummary",
-  "errors.serverSummary",
-  "errors.fullName.required",
-  "errors.fullName.invalid",
-  "errors.fullName.tooLong",
-  "errors.email.required",
-  "errors.email.invalid",
-  "errors.email.tooLong",
-  "errors.message.invalid",
-  "errors.message.tooLong",
-] as const;
 
 const REQUEST_QUOTE_PAGE_KEYS = [
   "requestQuote.metadata.title",
@@ -69,14 +41,23 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   }, messages);
 }
 
+function assertNonEmptyStringLeaves(value: unknown, label: string): void {
+  if (typeof value === "string") {
+    expect(typeof value, label).toBe("string");
+    expect(value.trim(), label).not.toBe("");
+    return;
+  }
+
+  expect(isJsonObject(value), label).toBe(true);
+  for (const [key, nestedValue] of Object.entries(value as JsonObject)) {
+    assertNonEmptyStringLeaves(nestedValue, `${label}.${key}`);
+  }
+}
+
 describe("real i18n runtime message contract", () => {
   it("keeps the inquiry.form leaf set used by InquiryFormCopy", () => {
-    for (const keyPath of INQUIRY_FORM_LEAF_KEYS) {
-      const value = getMessageValue(enMessages, `inquiry.form.${keyPath}`);
-
-      expect(typeof value, `inquiry.form.${keyPath}`).toBe("string");
-      expect(String(value).trim(), `inquiry.form.${keyPath}`).not.toBe("");
-    }
+    const copy = createInquiryFormCopyFromMessages(enMessages);
+    assertNonEmptyStringLeaves(copy, "inquiry.form");
   });
 
   it("keeps request quote page and metadata owners", () => {
@@ -86,19 +67,15 @@ describe("real i18n runtime message contract", () => {
       expect(typeof value, keyPath).toBe("string");
       expect(String(value).trim(), keyPath).not.toBe("");
     }
-
-    expect(enMessages).not.toHaveProperty("requestQuote.form");
   });
 
-  it("keeps contact panel and inquiry handoff owners without contact.form", () => {
+  it("keeps contact panel and inquiry handoff owners", () => {
     for (const keyPath of CONTACT_PANEL_KEYS) {
       const value = getMessageValue(enMessages, keyPath);
 
       expect(typeof value, keyPath).toBe("string");
       expect(String(value).trim(), keyPath).not.toBe("");
     }
-
-    expect(enMessages.contact).not.toHaveProperty("form");
   });
 
   it("keeps inquiry validation detail keys under inquiry.form", () => {

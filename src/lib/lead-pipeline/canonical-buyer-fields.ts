@@ -1,7 +1,6 @@
 /**
- * Canonical low-friction inquiry buyer fields shared by /api/inquiry and
- * downstream lead delivery. Legacy Contact/RFQ adapters map older payloads
- * into this contract; they must not define separate validation rules.
+ * Canonical public inquiry buyer fields for /api/inquiry and downstream
+ * owner email and Airtable delivery.
  */
 
 import { z } from "zod";

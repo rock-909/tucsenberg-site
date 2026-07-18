@@ -9,17 +9,6 @@ export interface CreatedAirtableRecord {
   id: string;
 }
 
-export interface AirtableQueryOptions {
-  maxRecords?: number;
-  filterByFormula?: string;
-  sort?: Array<{
-    field: string;
-    direction: "asc" | "desc";
-  }>;
-}
-
-export type ContactStatus = "New" | "In Progress" | "Completed" | "Archived";
-
 interface BaseLeadData extends MarketingAttributionFields {
   email: string;
   referenceId?: string;

@@ -9,12 +9,11 @@ import { logger, sanitizeIP } from "@/lib/logger";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { hasTurnstileServiceFailure } from "@/lib/security/turnstile-errors";
 
-export type LeadTurnstileRouteLabel = "/api/inquiry" | "contact-canonical";
+const LEAD_TURNSTILE_ROUTE_LABEL = "/api/inquiry" as const;
 
 export interface LeadTurnstileVerificationInput {
   token: unknown;
   clientIP: string;
-  routeLabel: LeadTurnstileRouteLabel;
 }
 
 export type LeadTurnstileVerificationResult =
@@ -35,12 +34,11 @@ function normalizeTurnstileToken(token: unknown): string | null {
 export async function verifyLeadTurnstile({
   token,
   clientIP,
-  routeLabel,
 }: LeadTurnstileVerificationInput): Promise<LeadTurnstileVerificationResult> {
   const normalizedToken = normalizeTurnstileToken(token);
   if (!normalizedToken) {
     logger.warn("Lead Turnstile token missing", {
-      routeLabel,
+      routeLabel: LEAD_TURNSTILE_ROUTE_LABEL,
       ip: sanitizeIP(clientIP),
     });
     return { status: "missing" };
@@ -58,7 +56,7 @@ export async function verifyLeadTurnstile({
   const errorCodes = verificationResult.errorCodes ?? [];
   if (hasTurnstileServiceFailure(errorCodes)) {
     logger.error("Lead Turnstile verification unavailable", {
-      routeLabel,
+      routeLabel: LEAD_TURNSTILE_ROUTE_LABEL,
       ip: sanitizeIP(clientIP),
       errorCodes,
     });
@@ -66,7 +64,7 @@ export async function verifyLeadTurnstile({
   }
 
   logger.warn("Lead Turnstile verification failed", {
-    routeLabel,
+    routeLabel: LEAD_TURNSTILE_ROUTE_LABEL,
     ip: sanitizeIP(clientIP),
     errorCodes,
   });
@@ -79,12 +77,10 @@ export interface LeadTurnstileErrorOutcome {
 }
 
 /**
- * Map a Lead-family Turnstile verification result to its HTTP error outcome.
+ * Map a lead Turnstile verification result to its HTTP error outcome.
  *
- * Centralizes the status/branch decision that inquiry and the canonical
- * contact path previously duplicated. Returns `null` when the request
- * verified and should proceed. Callers own the response envelope
- * (route `NextResponse` vs. canonical validation object).
+ * Returns `null` when the request verified and should proceed. Callers own
+ * the response envelope (route `NextResponse` vs. validation object).
  */
 export function mapLeadTurnstileResultToResponse(
   result: LeadTurnstileVerificationResult,

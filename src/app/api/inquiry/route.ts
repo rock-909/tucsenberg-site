@@ -60,7 +60,6 @@ async function validateProductInquiryTurnstile(
   const verificationResult = await verifyLeadTurnstile({
     token,
     clientIP,
-    routeLabel: "/api/inquiry",
   });
 
   const error = mapLeadTurnstileResultToResponse(verificationResult);

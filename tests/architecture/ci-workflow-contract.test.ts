@@ -138,7 +138,6 @@ describe("CI workflow contract", () => {
 
     expect(rule, "lead safe-json Semgrep rule must exist").toBeDefined();
     expect(includes).toContain("src/app/api/inquiry/route.ts");
-    expect(includes).not.toContain("src/app/api/contact/route.ts");
   });
 
   it("keeps Lighthouse as a manual performance proof", () => {

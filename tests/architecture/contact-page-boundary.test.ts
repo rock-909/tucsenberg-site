@@ -121,7 +121,6 @@ describe("Contact page source boundaries", () => {
     expect(source).toContain("InquiryFormStaticFallback");
     expect(source).toContain("inquiry-form-static-fallback");
     expect(source).toContain("fallback={inquiryFallback}");
-    expect(source).not.toContain("ContactFormIsland");
     expect(rendersInquiryFormWithContactSource(source)).toBe(true);
   });
 

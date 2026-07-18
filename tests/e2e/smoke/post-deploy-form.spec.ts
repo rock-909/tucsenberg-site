@@ -62,7 +62,7 @@ async function waitForEditableInquiryForm(page: Page) {
   await page.goto("/contact");
   await page.waitForLoadState("load");
 
-  // ContactFormIsland mounts InquiryForm only after contact-form-column enters view.
+  // Shared InquiryForm mounts after contact-form-column enters view.
   await page
     .getByTestId("contact-form-column")
     .scrollIntoViewIfNeeded({ timeout: 5_000 });

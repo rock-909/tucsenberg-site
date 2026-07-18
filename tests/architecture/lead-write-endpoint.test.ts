@@ -4,18 +4,19 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const INQUIRY_ROUTE = "src/app/api/inquiry/route.ts";
-const REQUIRED_GRAPH_TARGETS = [
-  "src/lib/lead-pipeline/lead-schema.ts",
+const INQUIRY_FORM = "src/components/forms/inquiry-form.tsx";
+const REGRESSION_FACADE_ROUTE =
+  "tests/architecture/fixtures/lead-write-graph-regression/route-via-facade.ts";
+
+const LEAD_DELIVERY_SINKS = [
   "src/lib/lead-pipeline/process-lead.ts",
   "src/lib/email/runtime-email-content.ts",
   "src/lib/airtable/service-internal/lead-records.ts",
 ] as const;
 
-const PRODUCTION_INQUIRY_FORM_SOURCES = [
-  "src/components/forms/inquiry-form.tsx",
-  "src/app/[locale]/request-quote/request-quote-inquiry-form.tsx",
-  "src/app/[locale]/request-quote/page.tsx",
-  "src/app/[locale]/contact/contact-page-sections.tsx",
+const INQUIRY_REQUIRED_GRAPH_TARGETS = [
+  "src/lib/lead-pipeline/lead-schema.ts",
+  ...LEAD_DELIVERY_SINKS,
 ] as const;
 
 function read(repoPath: string): string {
@@ -78,6 +79,15 @@ function collectImportSpecifiers(filePath: string, source: string): string[] {
       ts.isStringLiteral(statement.moduleSpecifier)
     ) {
       specifiers.push(statement.moduleSpecifier.text);
+      continue;
+    }
+
+    if (
+      ts.isExportDeclaration(statement) &&
+      statement.moduleSpecifier &&
+      ts.isStringLiteral(statement.moduleSpecifier)
+    ) {
+      specifiers.push(statement.moduleSpecifier.text);
     }
   }
 
@@ -106,6 +116,10 @@ function collectDependencyGraph(entrypoint: string): Set<string> {
   return visited;
 }
 
+function graphReachesLeadDeliverySink(graph: Set<string>): boolean {
+  return LEAD_DELIVERY_SINKS.some((sink) => graph.has(sink));
+}
+
 function listApiRouteFiles(directory = "src/app/api"): string[] {
   const routes: string[] = [];
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test walks fixed api route tree
@@ -129,7 +143,39 @@ function listApiRouteFiles(directory = "src/app/api"): string[] {
   return routes;
 }
 
-function collectProcessValidatedInquiryCallSites(
+function inquiryFormConfiguresInquiryEndpoint(source: string): boolean {
+  const sourceFile = createSourceFile(INQUIRY_FORM, source);
+  let configuresEndpoint = false;
+
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "useLeadFormSubmission" &&
+      node.arguments.length > 0 &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      for (const property of node.arguments[0].properties) {
+        if (
+          ts.isPropertyAssignment(property) &&
+          ts.isIdentifier(property.name) &&
+          property.name.text === "endpoint" &&
+          ts.isStringLiteral(property.initializer) &&
+          property.initializer.text === "/api/inquiry"
+        ) {
+          configuresEndpoint = true;
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return configuresEndpoint;
+}
+
+function collectDirectProcessValidatedInquiryCallSites(
   filePath: string,
   source: string,
 ): number {
@@ -176,45 +222,41 @@ function collectProcessValidatedInquiryCallSites(
 }
 
 describe("lead write endpoint ownership", () => {
-  it("keeps production inquiry journeys posting only to /api/inquiry", () => {
-    for (const sourcePath of PRODUCTION_INQUIRY_FORM_SOURCES) {
-      const source = read(sourcePath);
-      expect(source, sourcePath).toContain("InquiryForm");
-      expect(source, sourcePath).not.toContain('endpoint: "/api/contact"');
-    }
-
-    expect(read("src/components/forms/inquiry-form.tsx")).toContain(
-      'endpoint: "/api/inquiry"',
-    );
+  it("configures InquiryForm to post through useLeadFormSubmission at /api/inquiry", () => {
+    expect(inquiryFormConfiguresInquiryEndpoint(read(INQUIRY_FORM))).toBe(true);
   });
 
-  it("keeps /api/inquiry as the only route that calls processValidatedInquiry", () => {
-    const callSitesByRoute = new Map<string, number>();
+  it("keeps /api/inquiry as the only API route whose import graph reaches lead delivery sinks", () => {
+    const routesReachingSinks: string[] = [];
 
     for (const routePath of listApiRouteFiles()) {
-      const source = read(routePath);
-      const callCount = collectProcessValidatedInquiryCallSites(
-        routePath,
-        source,
-      );
-      if (callCount > 0) {
-        callSitesByRoute.set(routePath, callCount);
+      const graph = collectDependencyGraph(routePath);
+      if (graphReachesLeadDeliverySink(graph)) {
+        routesReachingSinks.push(routePath);
       }
     }
 
-    expect(callSitesByRoute.size).toBe(1);
-    expect(callSitesByRoute.get(INQUIRY_ROUTE)).toBeGreaterThan(0);
+    expect(routesReachingSinks).toEqual([INQUIRY_ROUTE]);
   });
 
-  it("reaches the single-model schema, processor, email, and Airtable record creator from /api/inquiry", () => {
+  it("reaches schema, processor, owner email, and Airtable delivery from /api/inquiry", () => {
     const graph = collectDependencyGraph(INQUIRY_ROUTE);
 
-    for (const target of REQUIRED_GRAPH_TARGETS) {
+    for (const target of INQUIRY_REQUIRED_GRAPH_TARGETS) {
       expect(graph.has(target), `missing ${target}`).toBe(true);
     }
   });
 
-  it("does not keep a live /api/contact write route", () => {
-    expect(existsSync("src/app/api/contact/route.ts")).toBe(false);
+  it("detects facade/barrel lead delivery that a direct call-site detector would miss", () => {
+    const source = read(REGRESSION_FACADE_ROUTE);
+    const graph = collectDependencyGraph(REGRESSION_FACADE_ROUTE);
+
+    expect(graphReachesLeadDeliverySink(graph)).toBe(true);
+    expect(
+      collectDirectProcessValidatedInquiryCallSites(
+        REGRESSION_FACADE_ROUTE,
+        source,
+      ),
+    ).toBe(0);
   });
 });

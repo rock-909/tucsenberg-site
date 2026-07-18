@@ -70,10 +70,8 @@ function rendersImportedJsxIdentifier(
 
 describe("contact entry boundary", () => {
   it("keeps production contact and request-quote pages on InquiryForm -> /api/inquiry", () => {
-    const inquiryFormSource = read("src/components/forms/inquiry-form.tsx");
     const kernelSource = read("src/lib/forms/use-lead-form-submission.ts");
 
-    expect(inquiryFormSource).toContain('endpoint: "/api/inquiry"');
     expect(kernelSource).toContain("fetch(config.endpoint");
 
     for (const filePath of [

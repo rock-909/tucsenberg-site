@@ -153,8 +153,8 @@ async function createProductLeadRecord(
   }
 }
 
-async function deliverValidatedInquiry(
-  lead: ProductLeadInput,
+export async function processValidatedInquiry(
+  input: ProductLeadInput,
   options: ProcessInquiryOptions = {},
 ): Promise<LeadResult> {
   const { requestId } = options;
@@ -165,15 +165,15 @@ async function deliverValidatedInquiry(
 
     logger.info("Processing lead", {
       type: PRODUCT_LEAD_TYPE,
-      email: sanitizeEmail(lead.email),
+      email: sanitizeEmail(input.email),
       leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
       referenceId,
       ...withRequestId(requestId),
     });
 
     const [emailSent, recordCreated] = await Promise.all([
-      sendProductOwnerEmail(lead, { referenceId, requestId }),
-      createProductLeadRecord(lead, { referenceId, requestId }),
+      sendProductOwnerEmail(input, { referenceId, requestId }),
+      createProductLeadRecord(input, { referenceId, requestId }),
     ]);
 
     if (!emailSent && !recordCreated) {
@@ -196,11 +196,4 @@ async function deliverValidatedInquiry(
     });
     return createProcessingFailureResult(referenceId);
   }
-}
-
-export function processValidatedInquiry(
-  input: ProductLeadInput,
-  options: ProcessInquiryOptions = {},
-): Promise<LeadResult> {
-  return deliverValidatedInquiry(input, options);
 }
