@@ -34,6 +34,11 @@ typography:
     fontSize: "36px"
     fontWeight: 600
     lineHeight: "1.2"
+  section:
+    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontSize: "24px mobile, 28px desktop"
+    fontWeight: 600
+    lineHeight: "1.2"
   heading:
     fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
     fontSize: "32px mobile, 36px desktop"
@@ -67,7 +72,7 @@ rounded:
 spacing:
   unit: "4px"
   container-max: "1080px"
-  nav-h: "56px"
+  nav-h: "64px"
   section-y-mobile: "56px"
   section-y-desktop: "72px"
   card-padding: "24px"
@@ -76,29 +81,29 @@ components:
     backgroundColor: "{colors.brand-11}"
     textColor: "{colors.primary-foreground}"
     rounded: "{rounded.md}"
-    padding: "h 38px, x 20px"
+    padding: "h 40px, x 20px"
   button-default-hover:
     backgroundColor: "{colors.brand-12}"
   button-secondary:
     backgroundColor: "{colors.neutral-12}"
     textColor: "{colors.neutral-1}"
     rounded: "{rounded.md}"
-    padding: "h 38px, x 20px"
+    padding: "h 40px, x 20px"
   button-outline:
     backgroundColor: "transparent"
     textColor: "{colors.primary-text}"
     rounded: "{rounded.md}"
-    padding: "h 38px, x 20px"
+    padding: "h 40px, x 20px"
   button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.foreground}"
     rounded: "{rounded.md}"
-    padding: "h 38px, x 20px"
+    padding: "h 40px, x 20px"
   button-sm:
     height: "32px"
     padding: "x 12px"
   button-lg:
-    height: "40px"
+    height: "48px"
     padding: "x 24px"
   card-default:
     backgroundColor: "{colors.card}"
@@ -263,7 +268,8 @@ new animation dependencies without separate proof.
 ### Hierarchy
 
 - **Display**（600，36px，line-height 1.2）：页面 H1、hero 主标。
-- **Heading**（600，32px mobile / 36px desktop，leading-tight）：section 标题（`.text-heading` 工具类）。
+- **Section**（600，24px mobile / 28px desktop，leading-tight）：**普通 section H2**（`.text-section` / `SectionHead`）。这是全站 section 标题权威；详见 `docs/design/页面模式.md`。
+- **Heading**（600，32px mobile / 36px desktop，leading-tight）：较强展示标题（`.text-heading`），**不是**普通 section H2。
 - **Title**（600–700，20–24px，leading-tight）：卡片标题、子区块标题。
 - **Body**（400，16px，leading-relaxed ≈1.625）：正文（`.text-body`）。最大行宽 65–75ch。
 - **Label**（500，14px）：表单 label、按钮文字。
@@ -301,7 +307,7 @@ new animation dependencies without separate proof.
 ### Buttons
 
 - **Shape：** 圆角 `--radius-md`（≈18.8px）——"圆润但有边"，不是 pill。
-- **Sizing：** 默认 `h-[38px] px-5 py-2.5`；sm = `h-8 px-3`；lg = `h-10 px-6`。
+- **Sizing：** 默认 `h-10`（40px / `--button-height-default`）`px-5 py-2.5`；sm = `h-8`（32px）；lg = `h-12`（48px / `--button-height-lg`）`px-6`。与 `src/app/globals.css` 和 `docs/design/页面模式.md` 一致。
 - **Primary (default)：** 底色 `brand-11`（深蓝），白字，hover 到 `brand-12`。**注意：实际主按钮用的是 `brand-11` 不是 `brand-9`**——为了 4.5:1+ 对比度，比"Twitter 蓝亮色"更深一档。
 - **Secondary：** 底色 `neutral-12`（墨黑），白字，1px border，hover 边框收紧。
 - **Outline：** 透明底，`brand-11` 字 + 2px `brand-11` 边，hover 加 10% wash。

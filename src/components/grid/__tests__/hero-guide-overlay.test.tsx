@@ -14,26 +14,30 @@ describe("HeroGuideOverlay", () => {
     expect(overlay).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("has hidden lg:block for desktop-only display", () => {
+  it("hides below lg via class and never sets inline display", () => {
     const { container } = render(<HeroGuideOverlay />);
 
     const overlay = container.firstChild as HTMLElement;
-    expect(overlay).toHaveClass("hidden", "lg:block");
+    // Tailwind `hidden` = display:none; `lg:grid` = display:grid from lg up.
+    // Inline display:grid previously overrode `hidden` and kept guides on mobile.
+    expect(overlay).toHaveClass("hidden", "lg:grid");
+    expect(overlay).not.toHaveClass("lg:block");
+    expect(overlay.style.display).toBe("");
   });
 
-  it("uses 12-column 8-row grid template", () => {
+  it("uses 12-column 8-row grid template without forcing display", () => {
     const { container } = render(<HeroGuideOverlay />);
 
     const overlay = container.firstChild as HTMLElement;
     expect(overlay.style.gridTemplateColumns).toBe("repeat(12, 1fr)");
     expect(overlay.style.gridTemplateRows).toBe("repeat(8, 1fr)");
+    expect(overlay.style.display).toBe("");
   });
 
   it("renders guide cells", () => {
     const { container } = render(<HeroGuideOverlay />);
 
     const overlay = container.firstChild as HTMLElement;
-    // heroGuides(12, 8) produces cells — at least some should exist
     expect(overlay.children.length).toBeGreaterThan(0);
   });
 
@@ -48,7 +52,10 @@ describe("HeroGuideOverlay", () => {
     const { container } = render(<HeroGuideOverlay />);
 
     const overlay = container.firstChild as HTMLElement;
-    expect(overlay).toHaveClass("left-1/2", "-translate-x-1/2");
-    expect(overlay.style.maxWidth).toBe("1080px");
+    expect(overlay).toHaveClass(
+      "left-1/2",
+      "-translate-x-1/2",
+      "max-w-[1080px]",
+    );
   });
 });

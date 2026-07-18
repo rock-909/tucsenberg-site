@@ -295,9 +295,12 @@ const TRUTH_DOC_CHECKS = [
   {
     file: "docs/design/页面模式.md",
     required: [
-      "pattern reference, not a route-by-route current-state report",
-      "Historical gap snapshot",
-      "verify current code before creating cleanup work",
+      "pattern reference for new work and refactors",
+      ".text-section",
+      "surface-card",
+      "HeroGuideOverlay",
+      "--footer-bg",
+      "--button-height-default",
     ],
     forbidden: [
       "所有新页面和存量页面重构必须遵循此文件",

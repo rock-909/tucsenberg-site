@@ -201,6 +201,16 @@ Before changing brand color, theme, or token structure, read:
 3. `docs/design/色彩系统.md`
 4. `docs/项目基础/维护规则.md`
 
+Before changing section titles, page skeleton, cards, footer, or hero grid
+patterns, read:
+
+1. `docs/design/页面模式.md`
+2. `docs/design/网格系统.md`
+3. `docs/design/设计真相.md`
+
+Ordinary section H2 uses `.text-section` (24px / md:28px) via `SectionHead`.
+Do not treat `DESIGN.md` `.text-heading` (32/36) as the default section title.
+
 ## Tailwind CSS v4
 
 Tailwind config is in `@theme inline` inside `globals.css`; there is no
