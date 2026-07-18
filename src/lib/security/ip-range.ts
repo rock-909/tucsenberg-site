@@ -7,6 +7,10 @@ const IPV4_SEGMENT_MASK = 0xffff;
 const IPV6_BITS_PER_SEGMENT = 16;
 const IPV6_SEGMENT_COUNT = 8;
 const IPV6_PREFIX_SHIFT_BITS = 64n;
+const IPV4_MAPPED_IPV6_PREFIX = 0xffffn;
+const IPV4_ADDRESS_MASK = 0xffffffffn;
+const IPV4_MAPPED_IPV6_PREFIX_SHIFT_BITS = 32n;
+const IPV4_MAPPED_IPV6_UPPER_SHIFT_BITS = 96n;
 const CHAR_CODE_0 = 48;
 const CHAR_CODE_9 = 57;
 const CHAR_CODE_A = 97;
@@ -67,6 +71,16 @@ export function ipv4ToInteger(ip: string): number | null {
   }
 
   return value >>> 0;
+}
+
+export function integerToIpv4(value: number): string {
+  const normalized = value >>> 0;
+  return [
+    (normalized >>> 24) & IPV4_MAX_OCTET,
+    (normalized >>> 16) & IPV4_MAX_OCTET,
+    (normalized >>> 8) & IPV4_MAX_OCTET,
+    normalized & IPV4_MAX_OCTET,
+  ].join(".");
 }
 
 function normalizeIPv6Segments(segments: string[]): string[] | null {
@@ -132,4 +146,21 @@ export function ipv6NetworkPrefix64(ip: string): bigint | null {
   }
 
   return value >> IPV6_PREFIX_SHIFT_BITS;
+}
+
+export function ipv4MappedEmbeddedAddress(ip: string): number | null {
+  const value = ipv6ToBigInt(ip);
+  if (value === null) {
+    return null;
+  }
+
+  if (value >> IPV4_MAPPED_IPV6_UPPER_SHIFT_BITS !== BIGINT_ZERO) {
+    return null;
+  }
+
+  if (value >> IPV4_MAPPED_IPV6_PREFIX_SHIFT_BITS !== IPV4_MAPPED_IPV6_PREFIX) {
+    return null;
+  }
+
+  return Number(value & IPV4_ADDRESS_MASK) >>> 0;
 }

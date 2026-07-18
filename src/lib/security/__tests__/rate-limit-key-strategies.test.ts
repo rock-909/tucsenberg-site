@@ -280,7 +280,7 @@ describe("rate-limit-key-strategies", () => {
       expect(firstPrefixKey).not.toBe(secondPrefixKey);
     });
 
-    it("should normalize IPv4-mapped IPv6 through the shared parser", async () => {
+    it("should keep distinct IPv4-mapped clients in separate buckets", async () => {
       setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
 
       mockGetClientIP.mockReturnValue("::ffff:192.0.2.128");
@@ -289,7 +289,23 @@ describe("rate-limit-key-strategies", () => {
       mockGetClientIP.mockReturnValue("::ffff:192.0.2.129");
       const mappedNeighborKey = await getIPKey(createMockRequest());
 
-      expect(mappedNeighborKey).toBe(mappedKey);
+      expect(mappedNeighborKey).not.toBe(mappedKey);
+    });
+
+    it("should normalize equivalent IPv4-mapped IPv6 forms to the same key", async () => {
+      setEnv("RATE_LIMIT_PEPPER", "a".repeat(32));
+
+      mockGetClientIP.mockReturnValue("::ffff:192.0.2.128");
+      const compressedMappedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("0:0:0:0:0:ffff:192.0.2.128");
+      const expandedMappedKey = await getIPKey(createMockRequest());
+
+      mockGetClientIP.mockReturnValue("192.0.2.128");
+      const nativeIpv4Key = await getIPKey(createMockRequest());
+
+      expect(expandedMappedKey).toBe(compressedMappedKey);
+      expect(nativeIpv4Key).toBe(compressedMappedKey);
     });
 
     it("should fall back to the raw IP when parsing fails", async () => {

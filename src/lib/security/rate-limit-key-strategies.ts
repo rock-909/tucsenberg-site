@@ -16,7 +16,12 @@ import { getRuntimeEnvString, isRuntimeProduction } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { generateHMAC } from "@/lib/security/crypto";
 import { getClientIP } from "@/lib/security/client-ip";
-import { ipv4ToInteger, ipv6NetworkPrefix64 } from "@/lib/security/ip-range";
+import {
+  integerToIpv4,
+  ipv4MappedEmbeddedAddress,
+  ipv4ToInteger,
+  ipv6NetworkPrefix64,
+} from "@/lib/security/ip-range";
 
 /** Key strategy function signature */
 export type KeyStrategy = (request: NextRequest) => Promise<string> | string;
@@ -97,6 +102,11 @@ export async function hmacKey(input: string): Promise<string> {
 function rateLimitIpInput(ip: string): string {
   if (ipv4ToInteger(ip) !== null) {
     return ip;
+  }
+
+  const mappedIpv4 = ipv4MappedEmbeddedAddress(ip);
+  if (mappedIpv4 !== null) {
+    return integerToIpv4(mappedIpv4);
   }
 
   const prefix = ipv6NetworkPrefix64(ip);
