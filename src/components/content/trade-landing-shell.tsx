@@ -58,7 +58,7 @@ export async function TradeLandingShell({
   }
   schemas.push(
     buildBreadcrumbListSchema([
-      { name: tNav("home"), url: SITE_CONFIG.baseUrl },
+      { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
       { name: metadata.title, url: pageUrl },
     ]),
   );

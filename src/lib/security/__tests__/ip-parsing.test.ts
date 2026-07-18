@@ -66,6 +66,11 @@ describe("ip-parsing", () => {
       expect(getIPVersion("2001:::1")).toBe(0);
       expect(getIPVersion(":2001:db8::1")).toBe(0);
       expect(getIPVersion("2001:db8::1:")).toBe(0);
+      expect(getIPVersion("192.0.2.1::1")).toBe(0);
+      expect(getIPVersion("1.2.3.4::")).toBe(0);
+      expect(getIPVersion("001.002.003.004")).toBe(0);
+      expect(getIPVersion("01.2.3.4")).toBe(0);
+      expect(getIPVersion("1.2.3.04")).toBe(0);
       expect(isValidIP("unknown")).toBe(false);
       expect(isValidIP("")).toBe(false);
       expect(isValidIP("   ")).toBe(false);

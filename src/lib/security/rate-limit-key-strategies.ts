@@ -100,8 +100,9 @@ export async function hmacKey(input: string): Promise<string> {
 }
 
 function rateLimitIpInput(ip: string): string {
-  if (ipv4ToInteger(ip) !== null) {
-    return ip;
+  const ipv4Value = ipv4ToInteger(ip);
+  if (ipv4Value !== null) {
+    return integerToIpv4(ipv4Value);
   }
 
   const mappedIpv4 = ipv4MappedEmbeddedAddress(ip);

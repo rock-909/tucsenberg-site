@@ -142,9 +142,7 @@ export const clientEnvSchema = {
     .transform((val) => val === "true"),
 
   // Security
-  NEXT_PUBLIC_SECURITY_MODE: z
-    .enum(["strict", "moderate", "relaxed"])
-    .default("strict"),
+  NEXT_PUBLIC_SECURITY_MODE: z.enum(["strict", "relaxed"]).default("strict"),
 
   // UI tuning
   NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS: z.coerce.number().optional(),

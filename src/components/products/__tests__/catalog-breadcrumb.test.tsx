@@ -151,14 +151,7 @@ describe("CatalogBreadcrumb", () => {
     expect(productsLink).toHaveAttribute("data-prefetch", "default");
   });
 
-  it("derives breadcrumb JSON-LD canonical locale from LOCALES_CONFIG", async () => {
-    vi.resetModules();
-    const seoMetadata = await import("@/lib/seo-metadata");
-    const buildCanonicalForPathSpy = vi.spyOn(
-      seoMetadata,
-      "buildCanonicalForPath",
-    );
-    const { LOCALES_CONFIG } = await import("@/config/paths");
+  it("derives breadcrumb JSON-LD canonical URLs from route paths", async () => {
     const { buildCatalogBreadcrumbJsonLd } =
       await import("../catalog-breadcrumb-jsonld");
     const market = {
@@ -171,16 +164,16 @@ describe("CatalogBreadcrumb", () => {
     };
 
     const jsonLd = await buildCatalogBreadcrumbJsonLd({ market });
+    const urls = jsonLd.itemListElement.map((element) => String(element.item));
 
-    expect(buildCanonicalForPathSpy).toHaveBeenCalledTimes(3);
-    for (const [locale] of buildCanonicalForPathSpy.mock.calls) {
-      expect(locale).toBe(LOCALES_CONFIG.defaultLocale);
+    expect(urls).toEqual([
+      "https://www.example.com/",
+      "https://www.example.com/products",
+      "https://www.example.com/products/abs-flood-barriers",
+    ]);
+    for (const url of urls) {
+      expect(url).not.toMatch(/\/en(?:\/|$)/u);
     }
-    for (const element of jsonLd.itemListElement) {
-      expect(String(element.item)).not.toMatch(/\/en(?:\/|$)/u);
-    }
-
-    buildCanonicalForPathSpy.mockRestore();
   });
 
   it("renders JSON-LD BreadcrumbList structured data", async () => {

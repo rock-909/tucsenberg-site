@@ -26,20 +26,13 @@ interface ProductInput {
   image?: string;
 }
 
-interface LegalPageSchemaInput {
-  schemaType: "WebPage";
-  locale: string;
-  name: string;
-  description?: string;
-  publishedAt?: string;
-  modifiedAt?: string;
-}
-
 interface WebPageSchemaInput {
   locale: string;
   name: string;
   description?: string;
   url: string;
+  datePublished?: string;
+  dateModified?: string;
 }
 
 export function organizationStructuredDataId(
@@ -203,20 +196,6 @@ export function generateProductData(
   };
 }
 
-export function buildLegalPageSchema(
-  data: LegalPageSchemaInput,
-): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": data.schemaType,
-    inLanguage: data.locale,
-    name: data.name,
-    ...(data.description ? { description: data.description } : {}),
-    ...(data.publishedAt ? { datePublished: data.publishedAt } : {}),
-    ...(data.modifiedAt ? { dateModified: data.modifiedAt } : {}),
-  };
-}
-
 export function buildWebPageSchema(
   data: WebPageSchemaInput,
 ): Record<string, unknown> {
@@ -228,6 +207,8 @@ export function buildWebPageSchema(
     inLanguage: data.locale,
     name: data.name,
     ...(data.description ? { description: data.description } : {}),
+    ...(data.datePublished ? { datePublished: data.datePublished } : {}),
+    ...(data.dateModified ? { dateModified: data.dateModified } : {}),
     isPartOf: {
       "@id": websiteStructuredDataId(FALLBACK_BASE_URL),
     },

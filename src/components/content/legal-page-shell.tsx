@@ -4,12 +4,8 @@ import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { LegalContentRenderer } from "@/components/content/legal-content-renderer";
 import type { HeadingItem } from "@/lib/content/legal-page";
 import {
-  extractFaqFromMetadata,
-  generateFaqSchemaFromItems,
-} from "@/lib/content/mdx-faq";
-import {
   buildBreadcrumbListSchema,
-  buildLegalPageSchema,
+  buildWebPageSchema,
   generateArticleData,
 } from "@/lib/structured-data-generators";
 import { SITE_CONFIG } from "@/config/paths";
@@ -22,18 +18,18 @@ interface LegalPageShellProps {
   locale: string;
   schemaType: "WebPage" | "Article";
   /** Site-relative path (e.g. "/oem-wholesale"); enables BreadcrumbList output. */
-  pagePath?: string;
+  pagePath: string;
 }
 
 export interface ShellSchemaInput {
   metadata: LegalPageMetadata;
   locale: string;
   schemaType: LegalPageShellProps["schemaType"];
-  pageUrl?: string;
+  pageUrl: string;
 }
 
 async function buildShellArticleSchema(
-  input: ShellSchemaInput & { pageUrl: string },
+  input: ShellSchemaInput,
 ): Promise<Record<string, unknown>> {
   const { metadata, locale, pageUrl } = input;
   const tSchema = await getTranslations({
@@ -57,20 +53,21 @@ export function buildShellPageSchema(
 ): Promise<Record<string, unknown>> | Record<string, unknown> {
   const { metadata, locale, schemaType, pageUrl } = input;
 
-  if (schemaType === "Article" && pageUrl) {
-    return buildShellArticleSchema({ ...input, pageUrl });
+  if (schemaType === "Article") {
+    return buildShellArticleSchema(input);
   }
 
   const description = metadata.seo?.description ?? metadata.description;
+  const modifiedAt =
+    metadata.updatedAt ?? metadata.lastReviewed ?? metadata.publishedAt;
 
-  return buildLegalPageSchema({
-    schemaType: "WebPage",
+  return buildWebPageSchema({
     locale,
     name: metadata.seo?.title ?? metadata.title,
-    publishedAt: metadata.publishedAt,
-    modifiedAt:
-      metadata.updatedAt ?? metadata.lastReviewed ?? metadata.publishedAt,
+    url: pageUrl,
     ...(description ? { description } : {}),
+    ...(metadata.publishedAt ? { datePublished: metadata.publishedAt } : {}),
+    ...(modifiedAt ? { dateModified: modifiedAt } : {}),
   });
 }
 
@@ -85,34 +82,21 @@ export async function LegalPageShell({
   const t = await getTranslations({ locale, namespace: "legal" });
   const tNav = await getTranslations({ locale, namespace: "navigation" });
 
-  const pageUrl = pagePath
-    ? new URL(pagePath, SITE_CONFIG.baseUrl).toString()
-    : undefined;
+  const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
   const schema = await buildShellPageSchema({
     metadata,
     locale,
     schemaType,
-    ...(pageUrl ? { pageUrl } : {}),
+    pageUrl,
   });
 
-  const faqItems = extractFaqFromMetadata(metadata);
-  const schemas: Array<Record<string, unknown>> = [schema];
-  if (faqItems.length > 0) {
-    schemas.push(
-      generateFaqSchemaFromItems(faqItems, locale) as unknown as Record<
-        string,
-        unknown
-      >,
-    );
-  }
-  if (pageUrl) {
-    schemas.push(
-      buildBreadcrumbListSchema([
-        { name: tNav("home"), url: SITE_CONFIG.baseUrl },
-        { name: metadata.title, url: pageUrl },
-      ]),
-    );
-  }
+  const schemas: Array<Record<string, unknown>> = [
+    schema,
+    buildBreadcrumbListSchema([
+      { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
+      { name: metadata.title, url: pageUrl },
+    ]),
+  ];
 
   const tocHeadings = headings.filter((heading) => heading.level === 2);
   const hasToc = tocHeadings.length > 0;

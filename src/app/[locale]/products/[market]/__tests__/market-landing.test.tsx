@@ -6,6 +6,36 @@ const mockNotFound = vi.fn();
 const mockGetTranslations = vi.fn();
 const mockCatalogBreadcrumb = vi.hoisted(() => vi.fn());
 const mockJsonLdGraphScript = vi.hoisted(() => vi.fn());
+const mockPathsConfig = vi.hoisted(() => ({
+  SITE_CONFIG: {
+    name: "Example Showcase Company",
+    baseUrl: "https://www.example.com",
+    brandAssets: {
+      productPhotos: {
+        status: "pending",
+      },
+    },
+    seo: {
+      defaultTitle: "Example Showcase Company",
+      defaultDescription: "Replaceable showcase catalog example",
+    },
+  },
+  LOCALES_CONFIG: {
+    locales: ["en"],
+    defaultLocale: "en",
+  },
+  PATHS_CONFIG: {
+    pages: {
+      products: "/products",
+    },
+  },
+  DYNAMIC_PATHS_CONFIG: {
+    productMarket: {
+      pattern: "/products/[market]",
+      paramName: "market",
+    },
+  },
+}));
 
 type MockHref =
   | string
@@ -80,35 +110,7 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("@/config/paths", () => ({
-  SITE_CONFIG: {
-    name: "Example Showcase Company",
-    baseUrl: "https://www.example.com",
-    brandAssets: {
-      productPhotos: {
-        status: "pending",
-      },
-    },
-    seo: {
-      defaultTitle: "Example Showcase Company",
-      defaultDescription: "Replaceable showcase catalog example",
-      keywords: ["showcase catalog example"],
-    },
-  },
-  LOCALES_CONFIG: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
-  PATHS_CONFIG: {
-    pages: {
-      products: "/products",
-    },
-  },
-  DYNAMIC_PATHS_CONFIG: {
-    productMarket: {
-      pattern: "/products/[market]",
-      paramName: "market",
-    },
-  },
+  ...mockPathsConfig,
   getLocalizedPath: (pageType: string) =>
     pageType === "products" ? "/products" : "/",
   getProductMarketPath: (market: string) => `/products/${market}`,
@@ -185,6 +187,7 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
 describe("Market Landing Page", () => {
   beforeEach(() => {
     vi.resetModules();
+    mockPathsConfig.SITE_CONFIG.baseUrl = "https://www.example.com";
     mockNotFound.mockClear();
     mockJsonLdGraphScript.mockClear();
     mockCatalogBreadcrumb.mockReset();
@@ -361,6 +364,27 @@ describe("Market Landing Page", () => {
           },
         },
       });
+    });
+
+    it("keeps product URLs canonical when SITE_CONFIG.baseUrl has a trailing slash", async () => {
+      const expectedUrl = "https://www.example.com/products/abs-flood-barriers";
+      mockPathsConfig.SITE_CONFIG.baseUrl = "https://www.example.com/";
+
+      const metadata = await generatePageMetadata("abs-flood-barriers");
+      await renderPage("abs-flood-barriers");
+
+      const graphCall = mockJsonLdGraphScript.mock.calls.at(-1)?.[0] as
+        | { readonly data: readonly unknown[] }
+        | undefined;
+      const productNode = findProductSchemaNode(graphCall?.data ?? []);
+
+      expect(metadata.alternates?.canonical).toBe(expectedUrl);
+      expect(productNode.url).toBe(expectedUrl);
+      expect(productNode.url).toBe(metadata.alternates?.canonical);
+      expect(String(productNode.url)).not.toContain("//products");
+      expect(String(metadata.alternates?.canonical)).not.toContain(
+        "//products",
+      );
     });
   });
 

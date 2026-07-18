@@ -149,8 +149,8 @@ export function getSecurityHeaders(): SecurityHeader[] {
     return [];
   }
 
-  const securityConfig = getSecurityConfig();
-  const cspHeaderKey = securityConfig.cspReportOnly
+  const cspReportOnly = isCspReportOnly();
+  const cspHeaderKey = cspReportOnly
     ? "Content-Security-Policy-Report-Only"
     : "Content-Security-Policy";
 
@@ -217,40 +217,12 @@ export function getSecurityHeaders(): SecurityHeader[] {
 /**
  * Security mode configuration
  *
- * `strict` is kept as the public env value for compatibility. In this starter,
- * it means "enforce the static-compatible CSP header" rather than "nonce-level
- * strict CSP".
+ * `strict` (default) enforces CSP via `Content-Security-Policy`.
+ * `relaxed` emits the same policy as report-only for staging diagnosis.
  */
-export const SECURITY_MODES = {
-  strict: {
-    cspReportOnly: false,
-  },
-  moderate: {
-    cspReportOnly: false,
-  },
-  relaxed: {
-    cspReportOnly: true,
-  },
-} as const;
-
-/**
- * Get security configuration based on mode
- */
-export function getSecurityConfig() {
-  const rawMode = getRuntimeEnvString("NEXT_PUBLIC_SECURITY_MODE") || "strict";
-
-  const mode =
-    rawMode === "moderate" || rawMode === "relaxed" ? rawMode : "strict";
-
-  switch (mode) {
-    case "moderate":
-      return SECURITY_MODES.moderate;
-    case "relaxed":
-      return SECURITY_MODES.relaxed;
-    case "strict":
-    default:
-      return SECURITY_MODES.strict;
-  }
+function isCspReportOnly(): boolean {
+  const mode = getRuntimeEnvString("NEXT_PUBLIC_SECURITY_MODE") || "strict";
+  return mode === "relaxed";
 }
 
 /**

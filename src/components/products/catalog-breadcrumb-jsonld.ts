@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { LOCALES_CONFIG } from "@/config/paths";
 import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import type { CatalogBreadcrumbProps } from "@/components/products/catalog-breadcrumb-types";
 import { buildCanonicalForPath } from "@/lib/seo-metadata";
@@ -11,26 +10,22 @@ export async function buildCatalogBreadcrumbJsonLd({
 }: CatalogBreadcrumbProps) {
   const tBreadcrumb = await getTranslations("catalog.breadcrumb");
   const productsPath = getCanonicalPath("products");
-  const canonicalLocale = LOCALES_CONFIG.defaultLocale;
 
   const entries: Array<{ name: string; url: string }> = [
     {
       name: tBreadcrumb("home"),
-      url: buildCanonicalForPath(canonicalLocale, "/"),
+      url: buildCanonicalForPath("/"),
     },
     {
       name: tBreadcrumb("products"),
-      url: buildCanonicalForPath(canonicalLocale, productsPath),
+      url: buildCanonicalForPath(productsPath),
     },
   ];
 
   if (market) {
     entries.push({
       name: marketLabel || market.label,
-      url: buildCanonicalForPath(
-        canonicalLocale,
-        getProductMarketPath(market.slug),
-      ),
+      url: buildCanonicalForPath(getProductMarketPath(market.slug)),
     });
   }
 

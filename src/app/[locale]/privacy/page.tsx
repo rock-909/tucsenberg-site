@@ -68,6 +68,7 @@ async function PrivacyContent({ locale }: { locale: string }) {
       headings={headings}
       locale={locale}
       schemaType="WebPage"
+      pagePath={getLocalizedPath("privacy", locale as Locale)}
     />
   );
 }

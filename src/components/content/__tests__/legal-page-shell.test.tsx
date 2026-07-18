@@ -1,29 +1,16 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  buildShellPageSchema,
-  LegalPageShell,
-} from "@/components/content/legal-page-shell";
+import { describe, expect, it, vi } from "vitest";
+import { buildShellPageSchema } from "@/components/content/legal-page-shell";
 
-const mockJsonLdGraphScript = vi.hoisted(() => vi.fn());
-
-vi.mock("@/components/seo/json-ld-script", () => ({
-  JsonLdGraphScript: ({
-    locale,
-    data = [],
-  }: {
-    locale: string;
-    data?: readonly unknown[];
-  }) => {
-    mockJsonLdGraphScript({ locale, data });
-    return <script type="application/ld+json" data-testid="json-ld-graph" />;
+vi.mock("@/config/paths", () => ({
+  SITE_CONFIG: {
+    baseUrl: "https://www.example.com",
   },
 }));
 
-vi.mock("@/components/content/legal-content-renderer", () => ({
-  LegalContentRenderer: ({ content }: { content: string }) => (
-    <div data-testid="legal-content">{content}</div>
-  ),
+vi.mock("@/config/paths/site-config", () => ({
+  SITE_CONFIG: {
+    baseUrl: "https://www.example.com",
+  },
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -48,11 +35,8 @@ vi.mock("next-intl/server", () => ({
 }));
 
 describe("LegalPageShell structured data", () => {
-  beforeEach(() => {
-    mockJsonLdGraphScript.mockClear();
-  });
-
-  it("Given privacy legal metadata, When the shell renders, Then JSON-LD uses WebPage", async () => {
+  it("Given privacy legal metadata, When the shell renders, Then WebPage JSON-LD uses the page URL graph", async () => {
+    const pageUrl = "https://www.example.com/privacy";
     const schema = await buildShellPageSchema({
       metadata: {
         title: "Privacy Policy",
@@ -65,13 +49,23 @@ describe("LegalPageShell structured data", () => {
       },
       locale: "en",
       schemaType: "WebPage",
+      pageUrl,
     });
 
-    expect(schema["@type"]).toBe("WebPage");
+    expect(schema).toMatchObject({
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+      isPartOf: { "@id": "https://www.example.com#website" },
+      about: {
+        "@id": "https://www.example.com#organization",
+      },
+    });
     expect(schema).not.toHaveProperty("additionalType");
   });
 
-  it("Given terms legal metadata, When the shell renders, Then JSON-LD has no additionalType", async () => {
+  it("Given terms legal metadata, When the shell renders, Then WebPage JSON-LD has no additionalType", async () => {
+    const pageUrl = "https://www.example.com/terms";
     const schema = await buildShellPageSchema({
       metadata: {
         title: "Terms of Service",
@@ -84,9 +78,14 @@ describe("LegalPageShell structured data", () => {
       },
       locale: "en",
       schemaType: "WebPage",
+      pageUrl,
     });
 
-    expect(schema["@type"]).toBe("WebPage");
+    expect(schema).toMatchObject({
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+    });
     expect(schema).not.toHaveProperty("additionalType");
   });
 
@@ -110,46 +109,5 @@ describe("LegalPageShell structured data", () => {
     expect(schema.author).toMatchObject({
       "@type": "Organization",
     });
-  });
-
-  it("Given frontmatter FAQ items, When the shell renders, Then FAQPage is injected once", async () => {
-    const page = await LegalPageShell({
-      metadata: {
-        title: "OEM & Wholesale",
-        slug: "oem-wholesale",
-        publishedAt: "2026-07-02",
-        faq: [
-          {
-            id: "oem-faq-1",
-            question: "Are you a factory or a trading company?",
-            answer: "We are the product company.",
-          },
-        ],
-      },
-      content: "Trade landing body",
-      headings: [],
-      locale: "en",
-      schemaType: "WebPage",
-      pagePath: "/oem-wholesale",
-    });
-
-    render(page);
-
-    const graphCall = mockJsonLdGraphScript.mock.calls.at(-1)?.[0] as
-      | { data: readonly unknown[] }
-      | undefined;
-    const types = graphCall?.data.map(
-      (node) =>
-        typeof node === "object" && node !== null
-          ? (node as { "@type"?: string })["@type"]
-          : undefined,
-    );
-
-    expect(types).toEqual(
-      expect.arrayContaining(["WebPage", "FAQPage", "BreadcrumbList"]),
-    );
-    expect(screen.getByTestId("legal-content")).toHaveTextContent(
-      "Trade landing body",
-    );
   });
 });
