@@ -5,8 +5,29 @@ import { describe, expect, it } from "vitest";
 
 const INQUIRY_ROUTE = "src/app/api/inquiry/route.ts";
 const INQUIRY_FORM = "src/components/forms/inquiry-form.tsx";
+const LEAD_FORM_SUBMISSION_MODULE = "@/lib/forms/use-lead-form-submission";
 const REGRESSION_FACADE_ROUTE =
   "tests/architecture/fixtures/lead-write-graph-regression/route-via-facade.ts";
+
+const FAKE_LOCAL_USE_LEAD_FORM_SUBMISSION = `
+function useLeadFormSubmission(config: { endpoint: string }) {
+  return config;
+}
+
+useLeadFormSubmission({ endpoint: "/api/inquiry" });
+`;
+
+const ALIASED_USE_LEAD_FORM_SUBMISSION = `
+import { useLeadFormSubmission as submitLead } from "${LEAD_FORM_SUBMISSION_MODULE}";
+
+submitLead({ endpoint: "/api/inquiry" });
+`;
+
+const WRONG_MODULE_USE_LEAD_FORM_SUBMISSION = `
+import { useLeadFormSubmission } from "@/lib/forms/fake-lead-form-submission";
+
+useLeadFormSubmission({ endpoint: "/api/inquiry" });
+`;
 
 const LEAD_DELIVERY_SINKS = [
   "src/lib/lead-pipeline/process-lead.ts",
@@ -143,15 +164,46 @@ function listApiRouteFiles(directory = "src/app/api"): string[] {
   return routes;
 }
 
+function collectUseLeadFormSubmissionBindings(
+  sourceFile: ts.SourceFile,
+): Set<string> {
+  const bindings = new Set<string>();
+
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== LEAD_FORM_SUBMISSION_MODULE
+    ) {
+      continue;
+    }
+
+    const namedBindings = statement.importClause?.namedBindings;
+    if (!namedBindings || !ts.isNamedImports(namedBindings)) continue;
+
+    for (const element of namedBindings.elements) {
+      const importedName = element.propertyName?.text ?? element.name.text;
+      if (importedName === "useLeadFormSubmission") {
+        bindings.add(element.name.text);
+      }
+    }
+  }
+
+  return bindings;
+}
+
 function inquiryFormConfiguresInquiryEndpoint(source: string): boolean {
   const sourceFile = createSourceFile(INQUIRY_FORM, source);
+  const bindings = collectUseLeadFormSubmissionBindings(sourceFile);
+  if (bindings.size === 0) return false;
+
   let configuresEndpoint = false;
 
   const visit = (node: ts.Node): void => {
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      node.expression.text === "useLeadFormSubmission" &&
+      bindings.has(node.expression.text) &&
       node.arguments.length > 0 &&
       ts.isObjectLiteralExpression(node.arguments[0])
     ) {
@@ -175,55 +227,29 @@ function inquiryFormConfiguresInquiryEndpoint(source: string): boolean {
   return configuresEndpoint;
 }
 
-function collectDirectProcessValidatedInquiryCallSites(
-  filePath: string,
-  source: string,
-): number {
-  const sourceFile = createSourceFile(filePath, source);
-  let importedBinding: string | undefined;
-  let callCount = 0;
-
-  for (const statement of sourceFile.statements) {
-    if (
-      !ts.isImportDeclaration(statement) ||
-      !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== "@/lib/lead-pipeline/process-lead"
-    ) {
-      continue;
-    }
-
-    const namedBindings = statement.importClause?.namedBindings;
-    if (!namedBindings || !ts.isNamedImports(namedBindings)) continue;
-
-    for (const element of namedBindings.elements) {
-      const importedName = element.propertyName?.text ?? element.name.text;
-      if (importedName === "processValidatedInquiry") {
-        importedBinding = element.name.text;
-      }
-    }
-  }
-
-  if (!importedBinding) return 0;
-
-  function visit(node: ts.Node): void {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      node.expression.text === importedBinding
-    ) {
-      callCount += 1;
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return callCount;
-}
-
 describe("lead write endpoint ownership", () => {
   it("configures InquiryForm to post through useLeadFormSubmission at /api/inquiry", () => {
     expect(inquiryFormConfiguresInquiryEndpoint(read(INQUIRY_FORM))).toBe(true);
+  });
+
+  it("rejects a same-named local useLeadFormSubmission fake", () => {
+    expect(
+      inquiryFormConfiguresInquiryEndpoint(FAKE_LOCAL_USE_LEAD_FORM_SUBMISSION),
+    ).toBe(false);
+  });
+
+  it("accepts an aliased import from the real useLeadFormSubmission module", () => {
+    expect(
+      inquiryFormConfiguresInquiryEndpoint(ALIASED_USE_LEAD_FORM_SUBMISSION),
+    ).toBe(true);
+  });
+
+  it("rejects useLeadFormSubmission imported from another module", () => {
+    expect(
+      inquiryFormConfiguresInquiryEndpoint(
+        WRONG_MODULE_USE_LEAD_FORM_SUBMISSION,
+      ),
+    ).toBe(false);
   });
 
   it("keeps /api/inquiry as the only API route whose import graph reaches lead delivery sinks", () => {
@@ -247,16 +273,9 @@ describe("lead write endpoint ownership", () => {
     }
   });
 
-  it("detects facade/barrel lead delivery that a direct call-site detector would miss", () => {
-    const source = read(REGRESSION_FACADE_ROUTE);
+  it("detects facade/barrel lead delivery through the import graph", () => {
     const graph = collectDependencyGraph(REGRESSION_FACADE_ROUTE);
 
     expect(graphReachesLeadDeliverySink(graph)).toBe(true);
-    expect(
-      collectDirectProcessValidatedInquiryCallSites(
-        REGRESSION_FACADE_ROUTE,
-        source,
-      ),
-    ).toBe(0);
   });
 });

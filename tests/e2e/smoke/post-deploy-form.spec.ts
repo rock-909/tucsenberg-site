@@ -62,7 +62,7 @@ async function waitForEditableInquiryForm(page: Page) {
   await page.goto("/contact");
   await page.waitForLoadState("load");
 
-  // Shared InquiryForm mounts after contact-form-column enters view.
+  // Scroll the shared form into view before checking editability.
   await page
     .getByTestId("contact-form-column")
     .scrollIntoViewIfNeeded({ timeout: 5_000 });

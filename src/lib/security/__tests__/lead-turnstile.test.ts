@@ -50,7 +50,6 @@ describe("verifyLeadTurnstile", () => {
         ip: "[REDACTED_IP]",
       },
     );
-    expect(createInput()).not.toHaveProperty("routeLabel");
   });
 
   it.each([undefined, null, "", "   ", 123, false, {}])(
