@@ -61,11 +61,25 @@ const contactCopy = {
   },
 };
 
-vi.mock("@/components/contact/contact-form-island", () => ({
-  ContactFormIsland: ({ fallback }: { fallback: React.ReactNode }) => (
-    <section data-testid="contact-form-island">
+vi.mock("@/components/forms/inquiry-form", () => ({
+  InquiryForm: ({
+    source,
+    context,
+    copy,
+    fallback,
+  }: {
+    source: string;
+    context: { kind: string };
+    copy: unknown;
+    fallback: React.ReactNode;
+  }) => (
+    <section
+      data-testid="inquiry-form"
+      data-source={source}
+      data-context-kind={context.kind}
+      data-has-copy={copy ? "true" : "false"}
+    >
       {fallback}
-      <div data-testid="contact-form">Contact Form</div>
     </section>
   ),
 }));
@@ -103,7 +117,15 @@ describe("ContactPage MDX migration", () => {
       within(content).getByRole("heading", { level: 1 }),
     ).toHaveTextContent("Contact");
     expect(screen.getByTestId("mdx-body")).toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+    expect(screen.getByTestId("inquiry-form")).toBeInTheDocument();
+    expect(screen.getByTestId("inquiry-form")).toHaveAttribute(
+      "data-source",
+      "contact",
+    );
+    expect(screen.getByTestId("inquiry-form")).toHaveAttribute(
+      "data-context-kind",
+      "general-context",
+    );
   });
 
   it("keeps the no-JS inquiry fallback inside the form column", async () => {
@@ -130,7 +152,7 @@ describe("ContactPage MDX migration", () => {
       screen.queryByTestId("contact-page-fallback"),
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("contact-page-content")).toBeInTheDocument();
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+    expect(screen.getByTestId("inquiry-form")).toBeInTheDocument();
   });
 
   it("sets the request locale in the page entry before rendering contact content", async () => {
@@ -237,10 +259,8 @@ describe("ContactPage MDX migration", () => {
       screen.getByRole("heading", { level: 1, name: /contact|inquiry/i }),
     ).toBeInTheDocument();
 
-    // The form is present (existing stable contact-form locator: the live form
-    // exposes no `form` role in this harness, so reuse the testid the other
-    // contact tests already rely on without changing form behavior).
-    expect(screen.getByTestId("contact-form")).toBeInTheDocument();
+    // The form is present via the shared InquiryForm composition.
+    expect(screen.getByTestId("inquiry-form")).toBeInTheDocument();
 
     // Confidence (response expectations) sits in the column beside the form,
     // and leads with the response/expect/prepare copy rather than the
@@ -258,7 +278,7 @@ describe("ContactPage MDX migration", () => {
       within(confidenceColumn).getByText("Details are sufficient"),
     ).toBeInTheDocument();
     expect(confidenceColumn).not.toContainElement(
-      screen.getByTestId("contact-form"),
+      screen.getByTestId("inquiry-form"),
     );
     expect(formColumn.compareDocumentPosition(confidenceColumn)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,

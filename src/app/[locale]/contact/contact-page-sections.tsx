@@ -1,4 +1,3 @@
-import { ContactFormIsland } from "@/components/contact/contact-form-island";
 import { FaqAccordion } from "@/components/sections/faq-accordion";
 import { Card } from "@/components/ui/card";
 import { SectionHead } from "@/components/ui/section-head";
@@ -10,6 +9,7 @@ import { siteFacts } from "@/config/site-facts";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import type { FaqItem } from "@/types/content.types";
 import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
+import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import type { ContactPageData } from "@/app/[locale]/contact/contact-page-data";
 
@@ -229,26 +229,16 @@ export function ContactFormWithFallback({
 }: {
   messages: Record<string, unknown>;
 }) {
-  const formLoadError = readRequiredMessagePath(messages, [
-    "contact",
-    "form",
-    "loadError",
-  ]);
-  const formRetryLabel = readRequiredMessagePath(messages, [
-    "contact",
-    "form",
-    "retryLoad",
-  ]);
   const inquiryCopy = createInquiryFormCopyFromMessages(messages);
   const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
 
   return (
     <div className="min-w-0 space-y-6" data-testid="contact-form-column">
-      <ContactFormIsland
-        errorMessage={formLoadError}
+      <InquiryForm
+        source="contact"
+        copy={inquiryCopy}
+        context={{ kind: "general-context" }}
         fallback={inquiryFallback}
-        inquiryCopy={inquiryCopy}
-        retryLabel={formRetryLabel}
       />
     </div>
   );
