@@ -344,22 +344,11 @@ function processValidLead(
   return processProduct(lead, context);
 }
 
-export async function processLead(
-  rawInput: unknown,
+async function deliverValidatedLead(
+  lead: LeadInput,
   options: ProcessLeadOptions = {},
 ): Promise<LeadResult> {
   const { requestId } = options;
-  const validationResult = leadSchema.safeParse(rawInput);
-
-  if (!validationResult.success) {
-    logger.warn("Lead validation failed", {
-      errors: validationResult.error.issues,
-      ...withRequestId(requestId),
-    });
-    return createValidationFailureResult();
-  }
-
-  const lead = validationResult.data;
   let referenceId: string | undefined;
 
   try {
@@ -383,4 +372,29 @@ export async function processLead(
     });
     return createProcessingFailureResult(referenceId);
   }
+}
+
+export function processValidatedInquiry(
+  input: ProductLeadInput,
+  options: ProcessLeadOptions = {},
+): Promise<LeadResult> {
+  return deliverValidatedLead(input, options);
+}
+
+export function processLead(
+  rawInput: unknown,
+  options: ProcessLeadOptions = {},
+): Promise<LeadResult> {
+  const { requestId } = options;
+  const validationResult = leadSchema.safeParse(rawInput);
+
+  if (!validationResult.success) {
+    logger.warn("Lead validation failed", {
+      errors: validationResult.error.issues,
+      ...withRequestId(requestId),
+    });
+    return Promise.resolve(createValidationFailureResult());
+  }
+
+  return deliverValidatedLead(validationResult.data, options);
 }

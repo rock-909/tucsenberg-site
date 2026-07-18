@@ -66,6 +66,7 @@
     "CONTACT_VALIDATION_FAILED": "Please check the highlighted fields and try again.",
     "CONTACT_PROCESSING_ERROR": "We could not submit your message right now. Please try again later.",
     "CONTACT_SUBMISSION_EXPIRED": "This form expired. Please refresh the page and try again.",
+    "CONTACT_ENDPOINT_RETIRED": "This contact endpoint is no longer accepting submissions.",
     "TURNSTILE_REQUIRED": "Security verification required.",
     "TURNSTILE_REJECTED": "Security verification failed. Please try again.",
     "TURNSTILE_UNAVAILABLE": "Security verification is temporarily unavailable. Please try again later.",

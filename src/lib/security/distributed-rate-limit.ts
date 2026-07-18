@@ -22,11 +22,6 @@ import {
 // Rate limit configuration per endpoint
 // failureMode: "open" = allow on storage failure; "closed" = deny on storage failure
 export const RATE_LIMIT_PRESETS = {
-  contact: {
-    maxRequests: 5,
-    windowMs: MINUTE_MS,
-    failureMode: "closed" as const,
-  },
   inquiry: {
     maxRequests: 10,
     windowMs: MINUTE_MS,

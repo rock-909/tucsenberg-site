@@ -1,69 +1,24 @@
 import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
+import { createApiErrorResponse } from "@/lib/api/api-response";
 import {
-  createApiErrorResponse,
-  createApiSuccessResponse,
-} from "@/lib/api/api-response";
-import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
-import { safeParseJson } from "@/lib/api/safe-parse-json";
-import { type RateLimitContext } from "@/lib/api/with-rate-limit";
-import { submitCanonicalContactSubmission } from "@/lib/contact/submit-canonical-contact";
-import { logger, sanitizeIP } from "@/lib/logger";
+  applyCorsHeaders,
+  createCorsPreflightResponse,
+} from "@/lib/api/cors-utils";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
+import { HTTP_GONE } from "@/constants";
 
-function createValidationDetailOptions(
-  details: string[] | null,
-): { details: string[] } | undefined {
-  return details && details.length > 0 ? { details } : undefined;
-}
-
-async function handleContactPost(
-  request: NextRequest,
-  { clientIP }: RateLimitContext,
-): Promise<NextResponse> {
-  const parsedBody = await safeParseJson<Record<string, unknown>>(request, {
-    route: "/api/contact",
+export function POST(request: NextRequest): NextResponse {
+  return applyCorsHeaders({
+    request,
+    response: createApiErrorResponse(
+      API_ERROR_CODES.CONTACT_ENDPOINT_RETIRED,
+      HTTP_GONE,
+    ),
   });
-
-  if (!parsedBody.ok) {
-    return createApiErrorResponse(parsedBody.errorCode, parsedBody.statusCode);
-  }
-
-  try {
-    const submission = await submitCanonicalContactSubmission(parsedBody.data, {
-      clientIP,
-    });
-
-    if (!submission.success) {
-      return createApiErrorResponse(
-        submission.errorCode,
-        submission.statusCode ?? HTTP_BAD_REQUEST,
-        createValidationDetailOptions(submission.details),
-      );
-    }
-
-    const { referenceId } = submission.submissionResult;
-    if (!referenceId) {
-      throw new Error("referenceId missing on successful contact submission");
-    }
-
-    return createApiSuccessResponse({ referenceId });
-  } catch (error) {
-    logger.error("Contact route submission failed unexpectedly", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      ip: sanitizeIP(clientIP),
-    });
-
-    return createApiErrorResponse(
-      API_ERROR_CODES.CONTACT_PROCESSING_ERROR,
-      HTTP_INTERNAL_ERROR,
-    );
-  }
 }
 
-export const { POST, OPTIONS } = createCorsRateLimitedRoute(
-  "contact",
-  handleContactPost,
-);
+export function OPTIONS(request: NextRequest): NextResponse {
+  return createCorsPreflightResponse(request);
+}

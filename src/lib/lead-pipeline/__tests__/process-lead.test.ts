@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
-import { LEAD_TYPES } from "../lead-schema";
-import { processLead } from "../process-lead";
+import { LEAD_TYPES, leadSchema } from "../lead-schema";
+import { processLead, processValidatedInquiry } from "../process-lead";
 
 const mockAfter = vi.hoisted(() => vi.fn());
 const mockCreateLead = vi.hoisted(() => vi.fn());
@@ -109,6 +109,19 @@ describe("processLead", () => {
     expect(mockCreateLead).not.toHaveBeenCalled();
     expect(mockSendContactFormEmail).not.toHaveBeenCalled();
     expect(mockSendProductInquiryEmail).not.toHaveBeenCalled();
+  });
+
+  it("delivers a typed product inquiry without calling leadSchema.safeParse", async () => {
+    const schemaSpy = vi.spyOn(leadSchema, "safeParse");
+    mockSendProductInquiryEmail.mockResolvedValue({ id: "email-123" });
+    mockCreateLead.mockResolvedValue({ id: "record-123" });
+
+    const result = await processValidatedInquiry(validProductLead);
+
+    expect(result.success).toBe(true);
+    expect(schemaSpy).not.toHaveBeenCalled();
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledTimes(1);
+    expect(mockCreateLead).toHaveBeenCalledTimes(1);
   });
 
   it("returns user success when contact record is created and owner email fails", async () => {

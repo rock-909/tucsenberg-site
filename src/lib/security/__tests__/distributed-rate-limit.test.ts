@@ -68,32 +68,32 @@ describe("distributed-rate-limit", () => {
   // =========================================================================
   describe("MemoryRateLimitStore (default)", () => {
     it("should create new entry on first request", async () => {
-      const result = await checkDistributedRateLimit("test-user-1", "contact");
+      const result = await checkDistributedRateLimit("test-user-1", "inquiry");
 
       expect(result.allowed).toBe(true);
       // First request: count=1, remaining=maxRequests-1=5-1=4
-      expect(result.remaining).toBe(5 - 1);
+      expect(result.remaining).toBe(10 - 1);
     });
 
     it("should increment count on subsequent requests", async () => {
       // First request
-      await checkDistributedRateLimit("test-user-2", "contact");
+      await checkDistributedRateLimit("test-user-2", "inquiry");
       // Second request
-      const result = await checkDistributedRateLimit("test-user-2", "contact");
+      const result = await checkDistributedRateLimit("test-user-2", "inquiry");
 
       expect(result.allowed).toBe(true);
       // Second request: count=2, remaining=5-2=3
-      expect(result.remaining).toBe(5 - 1 - 1);
+      expect(result.remaining).toBe(10 - 1 - 1);
     });
 
     it("should reset count after window expires", async () => {
       // Make requests to reach limit
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit("test-user-3", "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit("test-user-3", "inquiry");
       }
 
       // Verify at limit
-      const atLimit = await checkDistributedRateLimit("test-user-3", "contact");
+      const atLimit = await checkDistributedRateLimit("test-user-3", "inquiry");
       expect(atLimit.allowed).toBe(false);
 
       // Advance time past the window
@@ -102,14 +102,14 @@ describe("distributed-rate-limit", () => {
       // Should be allowed again
       const afterReset = await checkDistributedRateLimit(
         "test-user-3",
-        "contact",
+        "inquiry",
       );
       expect(afterReset.allowed).toBe(true);
-      expect(afterReset.remaining).toBe(5 - 1);
+      expect(afterReset.remaining).toBe(10 - 1);
     });
 
     it("should warn about in-memory store on first use", async () => {
-      await checkDistributedRateLimit("test-user-4", "contact");
+      await checkDistributedRateLimit("test-user-4", "inquiry");
 
       expect(mockLoggerWarn).toHaveBeenCalledWith(
         expect.stringContaining("Using in-memory store"),
@@ -117,9 +117,9 @@ describe("distributed-rate-limit", () => {
     });
 
     it("should only warn once about in-memory store", async () => {
-      await checkDistributedRateLimit("user-a", "contact");
-      await checkDistributedRateLimit("user-b", "contact");
-      await checkDistributedRateLimit("user-c", "contact");
+      await checkDistributedRateLimit("user-a", "inquiry");
+      await checkDistributedRateLimit("user-b", "inquiry");
+      await checkDistributedRateLimit("user-c", "inquiry");
 
       // Warning should only be logged once (on store creation)
       const warnCalls = mockLoggerWarn.mock.calls.filter((call) =>
@@ -134,7 +134,6 @@ describe("distributed-rate-limit", () => {
   // =========================================================================
   describe("preset selection coverage", () => {
     it.each([
-      ["contact", RATE_LIMIT_PRESETS.contact.maxRequests],
       ["inquiry", RATE_LIMIT_PRESETS.inquiry.maxRequests],
       ["csp", RATE_LIMIT_PRESETS.csp.maxRequests],
     ] as const)("uses the %s preset", async (preset, maxRequests) => {
@@ -160,7 +159,7 @@ describe("distributed-rate-limit", () => {
       expect(mockLoggerError).toHaveBeenCalled();
     });
 
-    it.each(["contact", "inquiry"] as const)(
+    it.each(["inquiry"] as const)(
       "fails closed for the %s preset when the store operation times out",
       async (preset) => {
         const mod = await import("@/lib/security/stores/rate-limit-store");
@@ -221,7 +220,7 @@ describe("distributed-rate-limit", () => {
 
       const result = await checkDistributedRateLimit(
         "factory-fail-closed",
-        "contact",
+        "inquiry",
       );
 
       expect(result).toMatchObject({
@@ -262,10 +261,10 @@ describe("distributed-rate-limit", () => {
 
   describe("checkDistributedRateLimit", () => {
     it("should allow requests under limit", async () => {
-      // contact preset has maxRequests=5
+      // inquiry preset has maxRequests=10
       const result = await checkDistributedRateLimit(
         "under-limit-user",
-        "contact",
+        "inquiry",
       );
 
       expect(result.allowed).toBe(true);
@@ -276,24 +275,24 @@ describe("distributed-rate-limit", () => {
       const identifier = "remaining-calc-user";
 
       // Make 3 requests
-      await checkDistributedRateLimit(identifier, "contact");
-      await checkDistributedRateLimit(identifier, "contact");
-      const result = await checkDistributedRateLimit(identifier, "contact");
+      await checkDistributedRateLimit(identifier, "inquiry");
+      await checkDistributedRateLimit(identifier, "inquiry");
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
 
-      // After 3 requests: remaining = 5 - 3 = 2
-      expect(result.remaining).toBe(5 - 3);
+      // After 3 requests: remaining = 10 - 3 = 7
+      expect(result.remaining).toBe(10 - 3);
     });
 
     it("should block requests at limit", async () => {
       const identifier = "at-limit-user";
 
-      // Make exactly maxRequests (5) requests
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit(identifier, "contact");
+      // Make exactly maxRequests (10) requests
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit(identifier, "inquiry");
       }
 
-      // 6th request should be blocked
-      const result = await checkDistributedRateLimit(identifier, "contact");
+      // 11th request should be blocked
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
 
       expect(result.allowed).toBe(false);
       expect(result.remaining).toBe(0);
@@ -303,12 +302,12 @@ describe("distributed-rate-limit", () => {
       const identifier = "retry-after-user";
 
       // Exhaust the limit
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit(identifier, "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit(identifier, "inquiry");
       }
 
       // Next request should have retryAfter
-      const result = await checkDistributedRateLimit(identifier, "contact");
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
 
       expect(result.allowed).toBe(false);
       expect(result.retryAfter).not.toBeNull();
@@ -319,11 +318,11 @@ describe("distributed-rate-limit", () => {
       vi.setSystemTime(1_700_000_000_000);
       const identifier = "blocked-metadata-user";
 
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit(identifier, "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit(identifier, "inquiry");
       }
 
-      const result = await checkDistributedRateLimit(identifier, "contact");
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
 
       expect(result).toMatchObject({
         allowed: false,
@@ -338,12 +337,12 @@ describe("distributed-rate-limit", () => {
       const identifier = "window-reset-user";
 
       // Exhaust limit
-      for (let i = 0; i <= 5; i++) {
-        await checkDistributedRateLimit(identifier, "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit(identifier, "inquiry");
       }
 
       // Verify blocked
-      const blocked = await checkDistributedRateLimit(identifier, "contact");
+      const blocked = await checkDistributedRateLimit(identifier, "inquiry");
       expect(blocked.allowed).toBe(false);
 
       // Advance time past the window
@@ -352,7 +351,7 @@ describe("distributed-rate-limit", () => {
       // Should be allowed again
       const afterWindow = await checkDistributedRateLimit(
         identifier,
-        "contact",
+        "inquiry",
       );
       expect(afterWindow.allowed).toBe(true);
     });
@@ -360,20 +359,20 @@ describe("distributed-rate-limit", () => {
     it("should keep non-degraded responses clean during normal operation", async () => {
       const normalResult = await checkDistributedRateLimit(
         "normal-user",
-        "contact",
+        "inquiry",
       );
       expect(normalResult.degraded).toBeUndefined();
     });
 
     it("should track different identifiers separately", async () => {
       // Exhaust limit for user-a
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit("user-a", "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit("user-a", "inquiry");
       }
-      const blockedUserA = await checkDistributedRateLimit("user-a", "contact");
+      const blockedUserA = await checkDistributedRateLimit("user-a", "inquiry");
 
       // user-b should still be allowed
-      const allowedUserB = await checkDistributedRateLimit("user-b", "contact");
+      const allowedUserB = await checkDistributedRateLimit("user-b", "inquiry");
 
       expect(blockedUserA.allowed).toBe(false);
       expect(allowedUserB.allowed).toBe(true);
@@ -382,23 +381,18 @@ describe("distributed-rate-limit", () => {
     it("should track different presets separately", async () => {
       const identifier = "multi-preset-user";
 
-      // Exhaust contact limit (5 requests)
-      for (let i = 0; i < 5; i++) {
-        await checkDistributedRateLimit(identifier, "contact");
+      for (let i = 0; i < 10; i++) {
+        await checkDistributedRateLimit(identifier, "inquiry");
       }
-      const blockedContact = await checkDistributedRateLimit(
-        identifier,
-        "contact",
-      );
-
-      // Same user should still be allowed on inquiry preset (10 requests)
-      const allowedInquiry = await checkDistributedRateLimit(
+      const blockedInquiry = await checkDistributedRateLimit(
         identifier,
         "inquiry",
       );
 
-      expect(blockedContact.allowed).toBe(false);
-      expect(allowedInquiry.allowed).toBe(true);
+      const allowedCsp = await checkDistributedRateLimit(identifier, "csp");
+
+      expect(blockedInquiry.allowed).toBe(false);
+      expect(allowedCsp.allowed).toBe(true);
     });
   });
 
@@ -493,12 +487,6 @@ describe("distributed-rate-limit", () => {
       }
     });
 
-    it("should have expected values for contact preset", () => {
-      expect(RATE_LIMIT_PRESETS.contact.maxRequests).toBe(5);
-      expect(RATE_LIMIT_PRESETS.contact.windowMs).toBe(MINUTE_MS);
-      expect(RATE_LIMIT_PRESETS.contact.failureMode).toBe("closed");
-    });
-
     it("should have expected values for inquiry preset", () => {
       expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(10);
       expect(RATE_LIMIT_PRESETS.inquiry.windowMs).toBe(MINUTE_MS);
@@ -518,27 +506,27 @@ describe("distributed-rate-limit", () => {
   describe("resetRateLimitStore", () => {
     it("should clear all rate limit state", async () => {
       // Create some entries
-      await checkDistributedRateLimit("reset-user-1", "contact");
+      await checkDistributedRateLimit("reset-user-1", "inquiry");
       await checkDistributedRateLimit("reset-user-2", "inquiry");
 
       // Reset the store
       resetRateLimitStore();
 
       // New requests should get full limit (store recreated)
-      const result = await checkDistributedRateLimit("reset-user-1", "contact");
-      expect(result.remaining).toBe(5 - 1);
+      const result = await checkDistributedRateLimit("reset-user-1", "inquiry");
+      expect(result.remaining).toBe(10 - 1);
     });
 
     it("should cause warning to be logged again after reset", async () => {
       // First store creation
-      await checkDistributedRateLimit("first-init", "contact");
+      await checkDistributedRateLimit("first-init", "inquiry");
       const initialWarnCount = mockLoggerWarn.mock.calls.filter((call) =>
         String(call[0]).includes("Using in-memory store"),
       ).length;
 
       // Reset and create new store
       resetRateLimitStore();
-      await checkDistributedRateLimit("second-init", "contact");
+      await checkDistributedRateLimit("second-init", "inquiry");
 
       // Warning should be logged again
       const afterResetWarnCount = mockLoggerWarn.mock.calls.filter((call) =>
@@ -556,14 +544,14 @@ describe("distributed-rate-limit", () => {
     it("should handle exactly maxRequests boundary", async () => {
       const identifier = "boundary-user";
 
-      // Make exactly maxRequests requests (5 for contact)
-      for (let i = 0; i < 5; i++) {
-        const result = await checkDistributedRateLimit(identifier, "contact");
+      // Make exactly maxRequests requests (10 for inquiry)
+      for (let i = 0; i < 10; i++) {
+        const result = await checkDistributedRateLimit(identifier, "inquiry");
         expect(result.allowed).toBe(true);
       }
 
-      // The 6th request should be blocked
-      const result = await checkDistributedRateLimit(identifier, "contact");
+      // The 11th request should be blocked
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
       expect(result.allowed).toBe(false);
       expect(result.remaining).toBe(0);
     });
@@ -573,21 +561,21 @@ describe("distributed-rate-limit", () => {
 
       // Make more requests than the limit
       for (let i = 0; i < 10; i++) {
-        const result = await checkDistributedRateLimit(identifier, "contact");
+        const result = await checkDistributedRateLimit(identifier, "inquiry");
         // Remaining should never be negative
         expect(result.remaining).toBeGreaterThanOrEqual(0);
       }
     });
 
     it("should handle empty identifier", async () => {
-      const result = await checkDistributedRateLimit("", "contact");
+      const result = await checkDistributedRateLimit("", "inquiry");
       expect(result.allowed).toBe(true);
     });
 
     it("should handle special characters in identifier", async () => {
       const result = await checkDistributedRateLimit(
         "user@example.com:192.168.1.1",
-        "contact",
+        "inquiry",
       );
       expect(result.allowed).toBe(true);
     });
@@ -596,7 +584,7 @@ describe("distributed-rate-limit", () => {
       const beforeRequest = Date.now();
       const result = await checkDistributedRateLimit(
         "reset-time-user",
-        "contact",
+        "inquiry",
       );
 
       expect(result.resetTime).toBeGreaterThanOrEqual(beforeRequest);
@@ -659,12 +647,12 @@ describe("distributed-rate-limit", () => {
       });
 
       const identifier = "concurrent-redis-user";
-      const concurrentRequests = 5 + 1;
+      const concurrentRequests = 10 + 1;
 
-      // Fire 10 concurrent requests against a window of 5 (contact preset)
+      // Fire 11 concurrent requests against a window of 10 (inquiry preset)
       const results = await Promise.all(
         Array.from({ length: concurrentRequests }, () =>
-          checkDistributedRateLimit(identifier, "contact"),
+          checkDistributedRateLimit(identifier, "inquiry"),
         ),
       );
 
@@ -672,10 +660,8 @@ describe("distributed-rate-limit", () => {
 
       fetchSpy.mockRestore();
 
-      // With atomic INCR, at most 5 should be allowed.
-      // With non-atomic GET+SET, ALL 10 see count=null (no entry yet),
-      // each creates count=1, and all 10 are allowed.
-      expect(allowedCount).toBeLessThanOrEqual(5);
+      // With atomic INCR, at most 10 should be allowed.
+      expect(allowedCount).toBeLessThanOrEqual(10);
     });
   });
 
@@ -692,7 +678,7 @@ describe("distributed-rate-limit", () => {
 
       const result = await checkDistributedRateLimit(
         "storage-failure-user",
-        "contact",
+        "inquiry",
       );
 
       expect(result).toMatchObject({

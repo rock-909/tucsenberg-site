@@ -167,6 +167,15 @@ export function InquiryFormFields({
           </p>
         ) : null}
       </div>
+
+      <input
+        autoComplete="off"
+        hidden
+        id="website"
+        name="website"
+        tabIndex={-1}
+        type="hidden"
+      />
     </>
   );
 }

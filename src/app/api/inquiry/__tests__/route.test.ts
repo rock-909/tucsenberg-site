@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { processLead } from "@/lib/lead-pipeline/process-lead";
+import * as safeParseJsonModule from "@/lib/api/safe-parse-json";
+import { processValidatedInquiry } from "@/lib/lead-pipeline/process-lead";
+import * as leadSchemaModule from "@/lib/lead-pipeline/lead-schema";
+import { checkDistributedRateLimit } from "@/lib/security/distributed-rate-limit";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { OPTIONS, POST } from "../route";
 
@@ -29,7 +32,7 @@ vi.mock("@/lib/security/distributed-rate-limit", () => ({
 }));
 
 vi.mock("@/lib/lead-pipeline/process-lead", () => ({
-  processLead: vi.fn(() =>
+  processValidatedInquiry: vi.fn(() =>
     Promise.resolve({
       success: true,
       emailSent: true,
@@ -120,6 +123,11 @@ describe("/api/inquiry route", () => {
     };
 
     it("accepts a catalog product inquiry and forwards the validated identity", async () => {
+      const safeParseSpy = vi.spyOn(safeParseJsonModule, "safeParseJson");
+      const schemaSpy = vi.spyOn(
+        leadSchemaModule.productLeadSchema,
+        "safeParse",
+      );
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       const response = await POST(request);
@@ -128,7 +136,7 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.referenceId).toBe("ref-123");
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
           email: "john@example.com",
@@ -136,6 +144,9 @@ describe("/api/inquiry route", () => {
           catalogProductId: "abs-flood-barriers",
         }),
       );
+      expect(safeParseSpy).toHaveBeenCalledTimes(1);
+      expect(schemaSpy).toHaveBeenCalledTimes(1);
+      expect(processValidatedInquiry).toHaveBeenCalledTimes(1);
       expect(response.headers.get("x-request-id")).toBeNull();
       expect(response.headers.get("x-observability-surface")).toBeNull();
     });
@@ -148,10 +159,8 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      const callArgs = vi.mocked(processLead).mock.calls[0]![0] as Record<
-        string,
-        unknown
-      >;
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
       expect(callArgs.productInquiryKind).toBe("general-rfq");
       expect(callArgs.catalogProductId).toBeUndefined();
     });
@@ -169,10 +178,8 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      const callArgs = vi.mocked(processLead).mock.calls[0]![0] as Record<
-        string,
-        unknown
-      >;
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
       expect(callArgs.productInquiryKind).toBe("general-rfq");
       expect(callArgs.buyerInterest).toBe("Aluminum flood gates for a garage");
       expect(callArgs.catalogProductId).toBeUndefined();
@@ -195,7 +202,7 @@ describe("/api/inquiry route", () => {
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
         details: ["errors.catalogProductId.invalid"],
       });
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("rejects a general RFQ that smuggles a catalog product identity", async () => {
@@ -215,10 +222,10 @@ describe("/api/inquiry route", () => {
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
         details: ["errors.catalogProductId.invalid"],
       });
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
-    it("passes attribution fields to processLead", async () => {
+    it("passes attribution fields to processValidatedInquiry", async () => {
       const request = createInquiryRequest(
         JSON.stringify({
           ...validInquiryData,
@@ -233,7 +240,7 @@ describe("/api/inquiry route", () => {
 
       await POST(request);
 
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
           utmSource: "google",
@@ -310,7 +317,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(processLead).toHaveBeenCalledTimes(1);
+      expect(processValidatedInquiry).toHaveBeenCalledTimes(1);
     });
 
     it("should return 413 when payload exceeds the shared JSON body limit", async () => {
@@ -343,7 +350,7 @@ describe("/api/inquiry route", () => {
       expect(secondResponse.status).toBe(200);
       expect(firstData.success).toBe(true);
       expect(secondData.success).toBe(true);
-      expect(processLead).toHaveBeenCalledTimes(2);
+      expect(processValidatedInquiry).toHaveBeenCalledTimes(2);
     });
 
     it("should return 400 when turnstile token is missing", async () => {
@@ -374,7 +381,7 @@ describe("/api/inquiry route", () => {
         errorCode: API_ERROR_CODES.TURNSTILE_REQUIRED,
       });
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should reject invalid email before turnstile and lead processing", async () => {
@@ -392,7 +399,7 @@ describe("/api/inquiry route", () => {
         details: ["errors.email.invalid"],
       });
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should report missing required identity fields before turnstile and lead processing", async () => {
@@ -442,7 +449,7 @@ describe("/api/inquiry route", () => {
         })),
       );
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should treat blank required inquiry fields as required before turnstile and lead processing", async () => {
@@ -486,7 +493,7 @@ describe("/api/inquiry route", () => {
         })),
       );
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should reject a catalog product inquiry with a missing product identity", async () => {
@@ -506,7 +513,7 @@ describe("/api/inquiry route", () => {
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
         details: ["errors.catalogProductId.required"],
       });
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("accepts a catalog product inquiry without a quantity (quantity is optional)", async () => {
@@ -522,7 +529,7 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
           productInquiryKind: "catalog-product",
@@ -545,7 +552,7 @@ describe("/api/inquiry route", () => {
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
         details: ["errors.quantity.invalid"],
       });
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should return 400 when turnstile verification fails", async () => {
@@ -577,11 +584,11 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(503);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
-    it("should handle processLead failure", async () => {
-      vi.mocked(processLead).mockResolvedValueOnce({
+    it("should handle processValidatedInquiry failure", async () => {
+      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: false,
         error: "PROCESSING_ERROR",
         emailSent: false,
@@ -600,7 +607,7 @@ describe("/api/inquiry route", () => {
     });
 
     it("should return success when the record is created but email fails", async () => {
-      vi.mocked(processLead).mockResolvedValueOnce({
+      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: true,
         emailSent: false,
         ownerNotified: false,
@@ -625,7 +632,7 @@ describe("/api/inquiry route", () => {
     });
 
     it("should return processing error when the record is not created", async () => {
-      vi.mocked(processLead).mockResolvedValueOnce({
+      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: false,
         emailSent: false,
         ownerNotified: false,
@@ -644,8 +651,8 @@ describe("/api/inquiry route", () => {
       expect(data.data).toBeUndefined();
     });
 
-    it("should handle validation error from processLead", async () => {
-      vi.mocked(processLead).mockResolvedValueOnce({
+    it("returns processing error if a typed pipeline result is unsuccessful", async () => {
+      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: false,
         error: "VALIDATION_ERROR",
         emailSent: false,
@@ -658,13 +665,42 @@ describe("/api/inquiry route", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(500);
       expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
+    });
+
+    it("uses the inquiry distributed rate-limit preset", async () => {
+      const request = createInquiryRequest(JSON.stringify(validInquiryData));
+
+      await POST(request);
+
+      expect(checkDistributedRateLimit).toHaveBeenCalledWith(
+        expect.any(String),
+        "inquiry",
+      );
+    });
+
+    it("returns a success-shaped reference for a filled website honeypot", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...validInquiryData,
+          website: "https://spam.example",
+        }),
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.referenceId).toMatch(/^PRO-/);
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should handle unexpected errors", async () => {
-      vi.mocked(processLead).mockRejectedValueOnce(
+      vi.mocked(processValidatedInquiry).mockRejectedValueOnce(
         new Error("Unexpected error"),
       );
 
@@ -678,12 +714,12 @@ describe("/api/inquiry route", () => {
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
-    it("should pass lead type product to processLead", async () => {
+    it("should pass lead type product to processValidatedInquiry", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 
       await POST(request);
 
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
         }),
@@ -700,7 +736,7 @@ describe("/api/inquiry route", () => {
 
       await POST(request);
 
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
         }),
@@ -712,7 +748,7 @@ describe("/api/inquiry route", () => {
 
       await POST(request);
 
-      const callArgs = vi.mocked(processLead).mock.calls[0]![0];
+      const callArgs = vi.mocked(processValidatedInquiry).mock.calls[0]![0];
       expect(callArgs).not.toHaveProperty("turnstileToken");
     });
   });

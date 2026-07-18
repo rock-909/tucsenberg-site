@@ -21,7 +21,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { processLead } from "@/lib/lead-pipeline/process-lead";
+import { processValidatedInquiry } from "@/lib/lead-pipeline/process-lead";
 import { verifyTurnstileDetailed } from "@/lib/security/turnstile";
 import { POST } from "../route";
 
@@ -57,7 +57,7 @@ vi.mock("@/lib/security/turnstile", () => ({
 
 // Lead pipeline — external services (Resend + Airtable)
 vi.mock("@/lib/lead-pipeline/process-lead", () => ({
-  processLead: vi.fn(() =>
+  processValidatedInquiry: vi.fn(() =>
     Promise.resolve({
       success: true,
       emailSent: true,
@@ -119,7 +119,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
   });
 
   describe("Happy path — full chain succeeds", () => {
-    it("rate limit → JSON parse → turnstile check → processLead → success", async () => {
+    it("rate limit → JSON parse → turnstile check → processValidatedInquiry → success", async () => {
       const request = createRequest(validInquiryData());
 
       const response = await POST(request);
@@ -138,7 +138,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
         expect.any(String),
         { expectedAction: "product_inquiry" },
       );
-      expect(processLead).toHaveBeenCalledWith(
+      expect(processValidatedInquiry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "product",
           email: "bob@example.com",
@@ -148,12 +148,12 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(response.headers.get("x-observability-surface")).toBeNull();
     });
 
-    it("should exclude turnstileToken from lead data passed to processLead", async () => {
+    it("should exclude turnstileToken from lead data passed to processValidatedInquiry", async () => {
       const request = createRequest(validInquiryData());
 
       await POST(request);
 
-      const callArgs = vi.mocked(processLead).mock.calls[0]![0];
+      const callArgs = vi.mocked(processValidatedInquiry).mock.calls[0]![0];
       expect(callArgs).not.toHaveProperty("turnstileToken");
     });
   });
@@ -173,9 +173,9 @@ describe("/api/inquiry — integration (protection chain)", () => {
       const response = await POST(request);
 
       expect(response.status).toBe(429);
-      // Turnstile and processLead should NOT be called
+      // Turnstile and processValidatedInquiry should NOT be called
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("invalid JSON returns 400 before turnstile check", async () => {
@@ -188,7 +188,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("missing turnstile token returns 400 with TURNSTILE_REQUIRED", async () => {
@@ -202,7 +202,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REQUIRED);
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("turnstile verification failure returns 400 with TURNSTILE_REJECTED", async () => {
@@ -217,12 +217,12 @@ describe("/api/inquiry — integration (protection chain)", () => {
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
-      // processLead should NOT be called
-      expect(processLead).not.toHaveBeenCalled();
+      // processValidatedInquiry should NOT be called
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
-    it("processLead failure returns 500 with INQUIRY_PROCESSING_ERROR", async () => {
-      vi.mocked(processLead).mockResolvedValueOnce({
+    it("processValidatedInquiry failure returns 500 with INQUIRY_PROCESSING_ERROR", async () => {
+      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: false,
         error: "PROCESSING_ERROR",
         emailSent: false,
@@ -241,7 +241,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
   });
 
   describe("Protection chain ordering — earlier gates short-circuit later ones", () => {
-    it("rate limit failure prevents turnstile and processLead even with valid data", async () => {
+    it("rate limit failure prevents turnstile and processValidatedInquiry even with valid data", async () => {
       const { checkDistributedRateLimit } =
         await import("@/lib/security/distributed-rate-limit");
       vi.mocked(checkDistributedRateLimit).mockResolvedValueOnce({
@@ -256,7 +256,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(429);
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("invalid JSON prevents turnstile check even when rate limit passes", async () => {
@@ -273,13 +273,13 @@ describe("/api/inquiry — integration (protection chain)", () => {
 
       expect(response.status).toBe(400);
       expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
-      expect(processLead).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
   });
 
   describe("Unexpected errors", () => {
-    it("processLead throwing returns 500 with INQUIRY_PROCESSING_ERROR", async () => {
-      vi.mocked(processLead).mockRejectedValueOnce(
+    it("processValidatedInquiry throwing returns 500 with INQUIRY_PROCESSING_ERROR", async () => {
+      vi.mocked(processValidatedInquiry).mockRejectedValueOnce(
         new Error("Network timeout"),
       );
 

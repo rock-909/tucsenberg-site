@@ -93,8 +93,8 @@ happy-path proof to prove CRM persistence.
 
 | Endpoint | Expected protection |
 | --- | --- |
-| `/api/inquiry` | Turnstile + validation + body size gate + rate limit while wired |
-| `/api/contact` | same public route model as inquiry |
+| `/api/inquiry` | Turnstile + validation + body size gate + inquiry rate limit + honeypot while wired |
+| `/api/contact` | temporary non-writing `410` tombstone until D6e; no JSON parse, Turnstile, rate limit, or delivery |
 | `/api/csp-report` | body size gate + rate limit; never trust payload content |
 | `/api/health` | public health only; no credentials, config dumps, or env details |
 
@@ -134,29 +134,20 @@ Public write routes parse request bodies through `safeParseJson`
 Keep new routes on this shared parser instead of hand-rolling body reads, so the
 size ceiling, empty-body handling, and array policy stay consistent.
 
-### Contact anti-abuse (existing, not new)
+### Inquiry anti-abuse (active public writer)
 
-`/api/contact` already carries two lightweight anti-abuse checks that predate any
-future hardening and must not be mistaken for the forbidden new replay/hashing
-complexity called out in the rate-limiter section above:
+The shared `InquiryForm` owns a visually hidden, keyboard-inert `website`
+honeypot field. Real browsers leave it empty; a filled value returns the same
+public `200` success envelope as a real submission, including a normal
+product-shaped `PRO-` reference id, and skips Turnstile plus delivery. Honeypot
+hits are identified only by the server-side `Inquiry honeypot triggered` log
+event (with the same reference id). Do not expose honeypot-specific validation
+errors or markers in the public JSON.
 
-- A `website` honeypot field (`contact-form-config.ts`): real browsers leave it
-  empty; a filled value is treated as bot traffic and returns the same public
-  `200` success envelope as a real submission, including a normal
-  contact-shaped `CON-` reference id. Honeypot hits are identified only by the
-  server-side `Contact honeypot triggered` log event (with the same reference
-  id). Do not expose honeypot-specific validation errors or markers in the
-  public JSON.
-- A `submittedAt` freshness window (`submit-canonical-contact.ts`): submissions
-  whose page-render timestamp is older than ten minutes are rejected as
-  stale-page submissions. This is a staleness guard, not replay protection — it
-  does not detect or block duplicate/replayed payloads, and must not be described
-  as if it did.
-
-Both are already-wired mechanisms. They do not count as the "duplicate-submission
-replay detection" that the rate-limiter section forbids adding as a new starter
-default; leave them in place and do not extend them into fingerprinting or
-body-hashing without a real incident.
+Legacy `/api/contact` business code and its separate `submittedAt` freshness
+window remain in source for D6e retirement only. The live contact page posts to
+`/api/inquiry`; `/api/contact` itself is a temporary non-writing `410` tombstone
+until D6e removes the legacy stack.
 
 ## CSP and headers
 

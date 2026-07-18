@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
 import * as inquiryRoute from "@/app/api/inquiry/route";
-import { processLead } from "@/lib/lead-pipeline/process-lead";
+import { processValidatedInquiry } from "@/lib/lead-pipeline/process-lead";
 
 /**
  * Protection contract checks for the remaining lead API family.
@@ -27,7 +27,7 @@ vi.mock("@/lib/security/turnstile", () => ({
 }));
 
 vi.mock("@/lib/lead-pipeline/process-lead", () => ({
-  processLead: vi.fn(async () => ({
+  processValidatedInquiry: vi.fn(async () => ({
     success: true,
     emailSent: true,
     ownerNotified: true,
@@ -87,7 +87,7 @@ describe("lead API family protection contract", () => {
     );
 
     expect(inquiry.status).toBe(200);
-    expect(vi.mocked(processLead)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(processValidatedInquiry)).toHaveBeenCalledTimes(1);
   });
 
   it("write-path family routes return 429 under rate limiting", async () => {
@@ -127,6 +127,6 @@ describe("lead API family protection contract", () => {
     expect((await inquiry.json()).errorCode).toBe(
       API_ERROR_CODES.TURNSTILE_REQUIRED,
     );
-    expect(vi.mocked(processLead)).not.toHaveBeenCalled();
+    expect(vi.mocked(processValidatedInquiry)).not.toHaveBeenCalled();
   });
 });

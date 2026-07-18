@@ -170,6 +170,7 @@
         "fieldSummary": "Please review the highlighted fields and try again.",
         "securitySummary": "Security verification did not complete. Please try again.",
         "serverSummary": "We could not send your inquiry right now. Please try again shortly.",
+        "generic": "Please review the highlighted fields and try again.",
         "fullName": {
           "required": "Full name is required",
           "invalid": "Full name contains invalid characters",
@@ -183,6 +184,24 @@
         "message": {
           "invalid": "Message contains invalid characters",
           "tooLong": "Message must be 2000 characters or fewer"
+        },
+        "company": {
+          "tooLong": "Company name must be less than 100 characters",
+          "invalid": "Company name contains invalid characters"
+        },
+        "productInquiryKind": {
+          "invalid": "The inquiry type is not recognized"
+        },
+        "catalogProductId": {
+          "required": "Please choose a product before sending your inquiry",
+          "invalid": "The selected product is not recognized"
+        },
+        "buyerInterest": {
+          "tooLong": "Product interest is too long",
+          "invalid": "Product interest contains invalid characters"
+        },
+        "quantity": {
+          "invalid": "Quantity must be a valid amount"
         }
       }
     }

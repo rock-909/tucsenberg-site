@@ -45,9 +45,11 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
 
 export function mapInquiryValidationDetails(
   issues: readonly ZodIssue[],
+  source: Record<string, unknown> = {},
 ): string[] {
   return mapZodIssuesToValidationDetails(
     issues,
     PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
+    source,
   );
 }

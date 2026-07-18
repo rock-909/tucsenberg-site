@@ -162,29 +162,22 @@ describe("legacy lib facade boundaries", () => {
     expect(source).not.toContain("JSON.parse");
   });
 
-  it("keeps lead success responses on the generic API success helper", () => {
-    const leadRoutes = [
-      "src/app/api/contact/route.ts",
-      "src/app/api/inquiry/route.ts",
-    ];
+  it("keeps inquiry success responses on the generic API success helper", () => {
+    const source = read("src/app/api/inquiry/route.ts");
 
-    for (const routePath of leadRoutes) {
-      const source = read(routePath);
-      expect(source).toContain("@/lib/api/api-response");
-      expect(source).toContain("createApiSuccessResponse");
-      expect(source).not.toContain("createLeadSuccessPayload");
-      expect(source).not.toContain("@/lib/api/lead-route-response");
-    }
+    expect(source).toContain("@/lib/api/api-response");
+    expect(source).toContain("createApiSuccessResponse");
+    expect(source).not.toContain("createLeadSuccessPayload");
+    expect(source).not.toContain("@/lib/api/lead-route-response");
   });
 
-  it("keeps contact route validation and errors on the canonical submission path", () => {
+  it("keeps the contact tombstone on the generic API error helper only", () => {
     const source = read("src/app/api/contact/route.ts");
 
-    expect(source).not.toContain("createSubmissionErrorResponse");
-    expect(source).not.toContain("as (typeof API_ERROR_CODES)");
-    expect(source).not.toContain("validateContactSubmissionPayload");
     expect(source).toContain("createApiErrorResponse(");
-    expect(source).toContain("submission.errorCode");
+    expect(source).toContain("CONTACT_ENDPOINT_RETIRED");
+    expect(source).not.toContain("createApiSuccessResponse");
+    expect(source).not.toContain("submitCanonicalContactSubmission");
   });
 
   it("keeps inquiry response branches inline", () => {

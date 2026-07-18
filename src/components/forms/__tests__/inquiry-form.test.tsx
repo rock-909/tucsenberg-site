@@ -109,6 +109,17 @@ function assertThreeFieldContract(
   for (const name of FORBIDDEN_CONTROL_NAMES) {
     expect(form.querySelector(`[name="${name}"]`)).toBeNull();
   }
+
+  const honeypot = form.querySelector<HTMLInputElement>(
+    'input[name="website"]',
+  );
+  expect(honeypot).not.toBeNull();
+  expect(honeypot).toHaveAttribute("type", "hidden");
+  expect(honeypot).toHaveAttribute("hidden");
+  expect(honeypot).toHaveAttribute("tabIndex", "-1");
+  expect(
+    within(form).queryByRole("textbox", { name: /website/i }),
+  ).not.toBeInTheDocument();
 }
 
 function getFetchBody(): Record<string, unknown> {
@@ -165,6 +176,7 @@ describe("InquiryForm contract", () => {
       fullName: "Ada Buyer",
       email: "ada@example.com",
       productInquiryKind: "general-rfq",
+      website: "",
       turnstileToken: "mock-inquiry-turnstile-token",
     });
     expect(getFetchBody()).not.toHaveProperty("message");
