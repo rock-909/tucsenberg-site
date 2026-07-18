@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 24/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 merged at `747fd8d` (three-field contract per R'13). **PR #134 merged** (2026-07-18): C2 Airtable proof workflow security follow-up; **not counted among the 33 formal M3 tasks**; proof infrastructure retired by R'13. **D6a ACTIVE**; **D5a WAITING**. **M3 remains 24/33 until D6a merges → 25/33.** Do not claim public launch readiness.
+M3 merged 25/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 merged at `747fd8d`; D6a PR #136 merged at `a23f30c`; PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. **D5a ACTIVE** on exact base `a23f30c`. Do not claim public launch readiness.
 
 ---
 
@@ -253,15 +253,15 @@ pnpm type-check
 
 ## 4. Cluster 3A: canonical inquiry contract and buyer-facing form
 
-**Status (2026-07-18): ACTIVE.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. Implementation plan: `docs/superpowers/plans/2026-07-18-three-field-public-inquiry-retirement.md`. **Historical note:** 2026-07-18 Airtable diagnosis found no `WhatsApp / Phone` column; that motivated R'13 and is no longer a merge gate. PR #134 proof infrastructure is retired. **M3 remains 23/33 until revised C2 merges.**
+**Status (2026-07-18): ACTIVE.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. C2 and D6a are merged; D5a is the Cluster 3A tip and active execution face. Detailed D5a plan: `docs/superpowers/plans/2026-07-18-d5a-a11y-correctness.md`. **M3 is 25/33; Cluster 3A remains open until D5a passes cluster acceptance and merges.**
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
 **Base:** Cluster 2 CLOSED main.
 **Files:** `src/lib/lead-pipeline/lead-schema.ts`, `src/lib/lead-pipeline/process-lead.ts`, `src/lib/lead-pipeline/utils.ts`, `src/lib/airtable/types.ts`, `src/lib/airtable/service-internal/lead-records.ts`, `src/lib/resend-utils.ts`, `src/lib/resend-core.tsx`, `src/lib/api/inquiry-validation-details.ts`, related lead/Airtable/Resend tests and message keys.
 
-- [ ] Add failing tests for the fixed contract: `fullName` and `email` required; `message` optional; extra `phone` silently dropped; no company/subject/quantity requirement; message traverses schema, owner email and Airtable; attribution survives; invalid catalog identity is rejected; general inquiry succeeds without product context.
-- [ ] Make the canonical input own these buyer fields:
+- [x] Add failing tests for the fixed contract: `fullName` and `email` required; `message` optional; extra `phone` silently dropped; no company/subject/quantity requirement; message traverses schema, owner email and Airtable; attribution survives; invalid catalog identity is rejected; general inquiry succeeds without product context.
+- [x] Make the canonical input own these buyer fields:
 
 ```ts
 interface CanonicalInquiryBuyerFields {
@@ -271,10 +271,10 @@ interface CanonicalInquiryBuyerFields {
 }
 ```
 
-- [ ] Keep product/source/UTM context as trusted server context, not visible required fields. Temporary Contact/RFQ adapters may map old payloads into this contract but cannot define separate rules.
-- [ ] Update the owner email and Airtable record mapping to use the same normalized message value only (no buyer phone). Preserve the current rule that the buyer succeeds when at least one delivery channel succeeds; do not make Airtable mandatory for the user-facing response.
-- [ ] Run lead schema, process-lead, multiline, Airtable create, Resend and inquiry integration tests; `pnpm type-check`; `pnpm content:check`; `pnpm build`.
-- [ ] Commit `refactor: establish the canonical low-friction inquiry contract`; push and mark `READY_FOR_CLUSTER` when exact-SHA CI is green.
+- [x] Keep product/source/UTM context as trusted server context, not visible required fields. Temporary Contact/RFQ adapters may map old payloads into this contract but cannot define separate rules.
+- [x] Update the owner email and Airtable record mapping to use the same normalized message value only (no buyer phone). Preserve the current rule that the buyer succeeds when at least one delivery channel succeeds; do not make Airtable mandatory for the user-facing response.
+- [x] Run lead schema, process-lead, multiline, Airtable create, Resend and inquiry integration tests; `pnpm type-check`; `pnpm content:check`; `pnpm build`.
+- [x] Commit `refactor: establish the canonical low-friction inquiry contract`; accepted and merged as PR #130 (`747fd8d`).
 
 ### Task D6a: render one fixed three-field InquiryForm on both pages
 
@@ -283,17 +283,18 @@ interface CanonicalInquiryBuyerFields {
 **Modify:** Contact and Request Quote pages, their tests, messages, product/estimator handoff readers.
 **Do not create:** a schema/config-driven universal form engine.
 
-- [ ] Add failing component/page tests proving both pages render the same field names and labels: `fullName`, `email`, optional `message`; **no `phone`, no `input[type=tel]`**; no company, subject, product selector, quantity, dimensions, country, port, budget, upload or multi-step controls.
-- [ ] Add failing tests for empty optional fields, autofill attributes, keyboard submit, field/server/security error classes, `?interest=` length cap, visible editable estimator summary, normal inquiry without product context, and no-JS explanation instead of a fake submit control.
-- [ ] Implement one `InquiryForm` that submits `/api/inquiry` and uses existing `useLeadFormSubmission` only where it reduces duplication. Keep page-specific headings/SEO outside the form.
-- [ ] Move product/estimator context into hidden or server-validated context fields; do not ask the buyer to select internal product identity.
-- [ ] Run both page suites, new form tests, contact/RFQ/product-handoff E2E, `pnpm component:check`, `pnpm content:check`, and `pnpm build`.
-- [ ] Commit `feat: use one low-friction inquiry form across contact and request quote`; push and mark `READY_FOR_CLUSTER`.
+- [x] Add failing component/page tests proving both pages render the same field names and labels: `fullName`, `email`, optional `message`; **no `phone`, no `input[type=tel]`**; no company, subject, product selector, quantity, dimensions, country, port, budget, upload or multi-step controls.
+- [x] Add failing tests for empty optional fields, autofill attributes, keyboard submit, field/server/security error classes, `?interest=` length cap, visible editable estimator summary, normal inquiry without product context, and no-JS explanation instead of a fake submit control.
+- [x] Implement one `InquiryForm` that submits `/api/inquiry` and uses existing `useLeadFormSubmission` only where it reduces duplication. Keep page-specific headings/SEO outside the form.
+- [x] Move product/estimator context into hidden or server-validated context fields; do not ask the buyer to select internal product identity.
+- [x] Run both page suites, new form tests, contact/RFQ/product-handoff E2E, `pnpm component:check`, `pnpm content:check`, and `pnpm build`.
+- [x] Commit `feat: use one low-friction inquiry form across contact and request quote`; accepted and merged as PR #136 (`a23f30c`).
 
 ### Task D5a: close accessibility correctness on the final form
 
 **Base:** green D6a head.
 **Files:** `src/app/globals.css`, static theme color owner, `src/components/forms/inquiry-form.tsx`, `src/components/ui/theme-switcher.tsx`, navigation/Footer/breadcrumb messages and a11y tests.
+**Detailed plan:** `docs/superpowers/plans/2026-07-18-d5a-a11y-correctness.md`.
 
 - [ ] Add failing tests for field-level `aria-invalid`/`aria-describedby`, required markers only on name/email, optional label on message only, theme-switcher `role="group"`/`aria-pressed`, and translated navigation/Footer/breadcrumb labels.
 - [ ] Recalculate light/dark muted foreground contrast and update only the owning tokens. Add `--primary-text` to static theme colors; remove the four audited dead keys only after live search.
