@@ -114,7 +114,6 @@ describe("TermsPage", () => {
           seo: {
             title: "Terms SEO",
             description: "",
-            keywords: ["terms"],
           },
         },
       });

@@ -18,18 +18,18 @@ interface LegalPageShellProps {
   locale: string;
   schemaType: "WebPage" | "Article";
   /** Site-relative path (e.g. "/oem-wholesale"); enables BreadcrumbList output. */
-  pagePath?: string;
+  pagePath: string;
 }
 
 export interface ShellSchemaInput {
   metadata: LegalPageMetadata;
   locale: string;
   schemaType: LegalPageShellProps["schemaType"];
-  pageUrl?: string;
+  pageUrl: string;
 }
 
 async function buildShellArticleSchema(
-  input: ShellSchemaInput & { pageUrl: string },
+  input: ShellSchemaInput,
 ): Promise<Record<string, unknown>> {
   const { metadata, locale, pageUrl } = input;
   const tSchema = await getTranslations({
@@ -53,12 +53,8 @@ export function buildShellPageSchema(
 ): Promise<Record<string, unknown>> | Record<string, unknown> {
   const { metadata, locale, schemaType, pageUrl } = input;
 
-  if (schemaType === "Article" && pageUrl) {
-    return buildShellArticleSchema({ ...input, pageUrl });
-  }
-
-  if (!pageUrl) {
-    throw new Error("pageUrl is required for WebPage structured data");
+  if (schemaType === "Article") {
+    return buildShellArticleSchema(input);
   }
 
   const description = metadata.seo?.description ?? metadata.description;
@@ -86,25 +82,21 @@ export async function LegalPageShell({
   const t = await getTranslations({ locale, namespace: "legal" });
   const tNav = await getTranslations({ locale, namespace: "navigation" });
 
-  const pageUrl = pagePath
-    ? new URL(pagePath, SITE_CONFIG.baseUrl).toString()
-    : undefined;
+  const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
   const schema = await buildShellPageSchema({
     metadata,
     locale,
     schemaType,
-    ...(pageUrl ? { pageUrl } : {}),
+    pageUrl,
   });
 
-  const schemas: Array<Record<string, unknown>> = [schema];
-  if (pageUrl) {
-    schemas.push(
-      buildBreadcrumbListSchema([
-        { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
-        { name: metadata.title, url: pageUrl },
-      ]),
-    );
-  }
+  const schemas: Array<Record<string, unknown>> = [
+    schema,
+    buildBreadcrumbListSchema([
+      { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
+      { name: metadata.title, url: pageUrl },
+    ]),
+  ];
 
   const tocHeadings = headings.filter((heading) => heading.level === 2);
   const hasToc = tocHeadings.length > 0;

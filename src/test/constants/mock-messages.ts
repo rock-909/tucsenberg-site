@@ -157,8 +157,6 @@ const seoMessages = {
   description:
     "Factory-direct flood barriers from China for flood control projects and wholesale supply.",
   siteName: "Tucsenberg",
-  keywords:
-    "flood barriers, flood gates, flood control products, China flood barrier supplier",
   pages: {
     home: {
       title: "Tucsenberg - Factory-Direct Flood Barriers from China",
