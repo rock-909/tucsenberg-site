@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-Current planning baseline: `origin/main` `56fc41c12dcc509720e06bcd65cb1cc385ed7753`, M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED**: member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged in that order; accepted follow-up tip `3a25e1bc138d3121d481742ff3353181d8902e0c`; code close `03a1908dba5618c638ee26885bbfdcebe81249f0`; documentation closeout #128 merged as `56fc41c12dcc509720e06bcd65cb1cc385ed7753`. **Next execution face: Cluster 3A**. C2 implementation may start, but its merge is blocked until the real Airtable `WhatsApp / Phone` column and a direct write are proven; cluster acceptance additionally requires the browser-to-Airtable proof. Re-read live SHA before execution.
+Current planning baseline: `origin/main` `0b0a0fadc4a4a3e13719a20df1754d0581fabf75`, M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED**: member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged in that order; documentation closeout #128; #131 exact-SHA Airtable phone proof workflow merged at `0b0a0fa`. **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): BLOCKED_BY_EXTERNAL_PREREQUISITE.** C2 code PR #130 (head `b3e580805cb61e224d60fe4ca12e2aa19a037fbf`) has green default CI run `29636922274` (6/6), but the real Airtable phone proof run `29637078424` on that exact head (`run.headSha` = `b3e5808`) passed workflow secret checks, used dispatch table `Contacts`, and still returned `createLead` `errorType NOT_FOUND` / `statusCode 404`. C2 = CODE_COMPLETE_EXTERNAL_PROOF_BLOCKED; not merged; D6a and D5a do not start. Code complete is not external proof complete. Recovery: see `docs/项目基础/发布验证.md` Airtable proof section. This blocker is not one of the five R'12 owner deferrals; remaining M3 clusters 3B and 4 depend on 3A, so there is no other legal M3 task to advance. M2 stays paused; do not claim public launch readiness.
 
 ---
 
@@ -268,6 +268,8 @@ Three-stage external gate:
 3. Cluster 3A cannot be accepted until the finished form proves the full browser -> `/api/inquiry` -> canonical schema -> Airtable path and the final record contains the same value.
 
 If account access or the real column is unavailable, record `BLOCKED_BY_EXTERNAL_PREREQUISITE`. D6a and D5a do not start, and no mock-only result may substitute for either real proof.
+
+**Current blocker (2026-07-18):** PR #130 implements C2; default CI on head `b3e580805cb61e224d60fe4ca12e2aa19a037fbf` is green (run `29636922274`, 6/6). The manual Airtable phone proof on that exact head failed with `createLead` `NOT_FOUND/404` (run `29637078424`; `run.headSha` = `b3e5808`; workflow secrets check passed; dispatch table `Contacts`). Status: CODE_COMPLETE_EXTERNAL_PROOF_BLOCKED. Do not mark C2 READY, do not merge C2, do not start D6a/D5a until a green proof run on the exact C2 SHA succeeds against the real Base, table name, and `WhatsApp / Phone` column.
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
