@@ -39,7 +39,6 @@ async function renderResolvedInquiryForm(
   searchParams: Record<string, string | string[] | undefined>,
 ) {
   const form = await RequestQuoteInquiryForm({
-    locale: "en",
     searchParams: Promise.resolve(searchParams),
     inquiryCopy,
     inquiryFallback,

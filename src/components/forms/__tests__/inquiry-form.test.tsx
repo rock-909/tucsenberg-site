@@ -8,13 +8,13 @@ import {
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_LEAD_PRODUCT_NAME_LENGTH } from "@/constants/validation-limits";
+import {
+  MAX_INQUIRY_CONFIG_PREFILL_LENGTH,
+  MAX_LEAD_PRODUCT_NAME_LENGTH,
+} from "@/constants/validation-limits";
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
-import {
-  CONFIG_PREFILL_MAX_LENGTH,
-  createInquiryPayload,
-} from "@/components/forms/inquiry-payload";
+import { createInquiryPayload } from "@/components/forms/inquiry-payload";
 import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
@@ -473,6 +473,7 @@ describe("InquiryForm hydration", () => {
 describe("InquiryForm validated context", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear();
     global.fetch = vi.fn(async () =>
       Response.json({
         success: true,
@@ -539,11 +540,11 @@ describe("InquiryForm validated context", () => {
   it("pre-fills, edits, and clears the initial message", async () => {
     const { container } = renderInquiryForm("request-quote", {
       kind: "general-context",
-      initialMessage: "c".repeat(CONFIG_PREFILL_MAX_LENGTH),
+      initialMessage: "c".repeat(MAX_INQUIRY_CONFIG_PREFILL_LENGTH),
     });
     const { message } = getFormControls(container);
 
-    expect(message).toHaveValue("c".repeat(CONFIG_PREFILL_MAX_LENGTH));
+    expect(message).toHaveValue("c".repeat(MAX_INQUIRY_CONFIG_PREFILL_LENGTH));
     fireEvent.change(message, {
       target: { value: "Edited estimator summary" },
     });
@@ -553,6 +554,14 @@ describe("InquiryForm validated context", () => {
   });
 
   it("keeps attribution, honeypot, and Turnstile fields in catalog submissions", async () => {
+    window.sessionStorage.setItem(
+      "marketing_attribution",
+      JSON.stringify({
+        utmSource: "google",
+        gclid: "gclid-rfq-123",
+        landingPage: "/en/request-quote",
+      }),
+    );
     const { container } = renderInquiryForm("request-quote", {
       kind: "catalog-context",
       catalogProductId: "abs-flood-barriers",
@@ -580,6 +589,9 @@ describe("InquiryForm validated context", () => {
       catalogProductId: "abs-flood-barriers",
       website: "https://spam.example",
       turnstileToken: "mock-inquiry-turnstile-token",
+      utmSource: "google",
+      gclid: "gclid-rfq-123",
+      landingPage: "/en/request-quote",
     });
   });
 

@@ -16,9 +16,12 @@ import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
 import { RequestQuoteInquiryForm } from "@/app/[locale]/request-quote/request-quote-inquiry-form";
 
-interface RequestQuotePageProps {
+interface RequestQuotePageParams {
   params: Promise<LocaleParam>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+interface RequestQuotePageProps extends RequestQuotePageParams {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const STANDARD_QUOTE_HOURS = 12;
@@ -30,7 +33,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: RequestQuotePageProps): Promise<Metadata> {
+}: RequestQuotePageParams): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({
     locale,
@@ -132,8 +135,7 @@ export default async function RequestQuotePage({
             <RequestQuoteInquiryForm
               inquiryCopy={inquiryCopy}
               inquiryFallback={inquiryFallback}
-              locale={locale}
-              {...(searchParams ? { searchParams } : {})}
+              searchParams={searchParams}
             />
           </Suspense>
           <RequestQuoteAside
