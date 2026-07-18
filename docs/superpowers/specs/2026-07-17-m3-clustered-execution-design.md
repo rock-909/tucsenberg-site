@@ -282,11 +282,13 @@ Cluster 2 必须关闭后才能进入询盘整合。原因是 Turnstile、限流
 C2 -> D6a -> D5a
 ```
 
-硬前置：
+外部条件分三道门：
 
-- Airtable 必须先存在真实 `WhatsApp / Phone` 列。
-- 必须提供一次真实写入该列的回执，不能只用 mock、类型检查或`字段已创建`的口头说明。
-- 没有 Airtable 权限时，此簇进入 `BLOCKED_EXTERNAL`；Cluster 1、2 或其他不依赖 lane 可继续，但 Cluster 3A 不能 ACCEPTED。
+1. C2 可以先按固定字段名 `WhatsApp / Phone` 实现和测试；mock 只用于开发，不算外部证明。
+2. C2 进入 `READY_FOR_CLUSTER`、验收或合并前，必须直接向真实 Airtable 写入一次，并证明该列收到规范化后的完整 phone 值。
+3. Cluster 3A 验收前，必须用完成后的表单证明 browser -> `/api/inquiry` -> canonical schema -> Airtable 全链，并核对最终 record 的同一列。
+
+没有 Airtable 权限、真实列或可用写入证明时，记录 `BLOCKED_BY_EXTERNAL_PREREQUISITE`；D6a/D5a 不开工，mock、类型检查或“字段已创建”的口头说明都不能代替真实回执。
 
 最终买家可见字段固定为：
 

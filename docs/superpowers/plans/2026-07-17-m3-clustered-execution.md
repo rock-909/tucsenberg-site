@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-Current planning baseline: `origin/main` `03a1908dba5618c638ee26885bbfdcebe81249f0`, M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED**: member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged in that order; accepted follow-up tip `3a25e1bc138d3121d481742ff3353181d8902e0c`; final main merge `03a1908dba5618c638ee26885bbfdcebe81249f0`. **Next execution face: Cluster 3A**, subject to its real Airtable `WhatsApp / Phone` column and browser-to-Airtable write prerequisites. Re-read live SHA before execution.
+Current planning baseline: `origin/main` `56fc41c12dcc509720e06bcd65cb1cc385ed7753`, M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED**: member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged in that order; accepted follow-up tip `3a25e1bc138d3121d481742ff3353181d8902e0c`; code close `03a1908dba5618c638ee26885bbfdcebe81249f0`; documentation closeout #128 merged as `56fc41c12dcc509720e06bcd65cb1cc385ed7753`. **Next execution face: Cluster 3A**. C2 implementation may start, but its merge is blocked until the real Airtable `WhatsApp / Phone` column and a direct write are proven; cluster acceptance additionally requires the browser-to-Airtable proof. Re-read live SHA before execution.
 
 ---
 
@@ -261,7 +261,13 @@ pnpm type-check
 
 ## 4. Cluster 3A: canonical inquiry contract and buyer-facing form
 
-Hard start condition: Airtable contains a real `WhatsApp / Phone` column. Hard acceptance condition: one real browser-to-Airtable write proves the column receives the value. Mock-only proof is insufficient.
+Three-stage external gate:
+
+1. C2 implementation may start against the fixed field name `WhatsApp / Phone`; mocks and fixtures may support development but do not satisfy the external gate.
+2. C2 cannot be marked `READY_FOR_CLUSTER`, accepted or merged until a real Airtable write proves that exact column exists and receives the normalized phone value.
+3. Cluster 3A cannot be accepted until the finished form proves the full browser -> `/api/inquiry` -> canonical schema -> Airtable path and the final record contains the same value.
+
+If account access or the real column is unavailable, record `BLOCKED_BY_EXTERNAL_PREREQUISITE`. D6a and D5a do not start, and no mock-only result may substitute for either real proof.
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
@@ -283,7 +289,7 @@ interface CanonicalInquiryBuyerFields {
 - [ ] Keep product/source/UTM context as trusted server context, not visible required fields. Temporary Contact/RFQ adapters may map old payloads into this contract but cannot define separate rules.
 - [ ] Update the owner email and Airtable record mapping to use the same normalized phone/message values. Preserve the current rule that the buyer succeeds when at least one delivery channel succeeds; do not make Airtable mandatory for the user-facing response.
 - [ ] Run lead schema, process-lead, multiline, Airtable create, Resend and inquiry integration tests; `pnpm type-check`; `pnpm content:check`; `pnpm build`.
-- [ ] Perform the real Airtable column write proof. Commit `refactor: establish the canonical low-friction inquiry contract`; push and mark `READY_FOR_CLUSTER`.
+- [ ] Perform the direct real Airtable column write proof on the exact C2 SHA. The record must contain the normalized value in `WhatsApp / Phone`; an international number beginning with `+` must not gain a leading apostrophe. Commit `refactor: establish the canonical low-friction inquiry contract`; push and mark `READY_FOR_CLUSTER` only after this proof succeeds.
 
 ### Task D6a: render one fixed four-field InquiryForm on both pages
 
@@ -312,7 +318,7 @@ interface CanonicalInquiryBuyerFields {
 
 ### Cluster 3A acceptance
 
-- [ ] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run the real Airtable phone write proof; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
+- [ ] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run the full browser-to-Airtable phone proof and assert the final record's `WhatsApp / Phone` value; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
 - [ ] Handoff must include screenshots/DOM evidence for the four-field contract and the Airtable record receipt. Stop for cluster acceptance.
 
 ---
