@@ -6,6 +6,7 @@ const IPV4_MAX_OCTET = 255;
 const IPV4_SEGMENT_MASK = 0xffff;
 const IPV6_BITS_PER_SEGMENT = 16;
 const IPV6_SEGMENT_COUNT = 8;
+const IPV6_PREFIX_SHIFT_BITS = 64n;
 const CHAR_CODE_0 = 48;
 const CHAR_CODE_9 = 57;
 const CHAR_CODE_A = 97;
@@ -122,4 +123,13 @@ export function ipv6ToBigInt(ip: string): bigint | null {
 
     return (accumulator << BigInt(IPV6_BITS_PER_SEGMENT)) + value;
   }, BIGINT_ZERO);
+}
+
+export function ipv6NetworkPrefix64(ip: string): bigint | null {
+  const value = ipv6ToBigInt(ip);
+  if (value === null) {
+    return null;
+  }
+
+  return value >> IPV6_PREFIX_SHIFT_BITS;
 }

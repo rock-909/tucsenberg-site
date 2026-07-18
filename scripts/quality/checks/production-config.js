@@ -337,6 +337,12 @@ function validateProductionRuntimeContract(env) {
     );
   }
 
+  if (readEnv(env, "DEPLOYMENT_PLATFORM") !== "cloudflare") {
+    errors.push(
+      'DEPLOYMENT_PLATFORM must be "cloudflare" for production Cloudflare deployments (set the canonical platform signal in wrangler env.production.vars).',
+    );
+  }
+
   return { warnings, errors };
 }
 

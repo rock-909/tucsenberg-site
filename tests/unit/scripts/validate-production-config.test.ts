@@ -21,6 +21,7 @@ function createChildEnv(overrides: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 function createValidProductionEnv(): NodeJS.ProcessEnv {
   return {
     NODE_ENV: "production",
+    DEPLOYMENT_PLATFORM: "cloudflare",
     UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
     UPSTASH_REDIS_REST_TOKEN: "upstash-token",
     RATE_LIMIT_PEPPER: "a".repeat(32),
@@ -64,6 +65,32 @@ describe("validate-production-config runtime contract", () => {
 
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
+  });
+
+  it("fails when production DEPLOYMENT_PLATFORM is not canonical cloudflare", () => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      DEPLOYMENT_PLATFORM: "self-hosted",
+    });
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('DEPLOYMENT_PLATFORM must be "cloudflare"'),
+      ]),
+    );
+  });
+
+  it("fails when production DEPLOYMENT_PLATFORM is missing", () => {
+    const env = createValidProductionEnv();
+    delete env.DEPLOYMENT_PLATFORM;
+
+    const result = validateProductionRuntimeContract(env);
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('DEPLOYMENT_PLATFORM must be "cloudflare"'),
+      ]),
+    );
   });
 
   it("fails when production security stores are missing", () => {
@@ -221,6 +248,19 @@ describe("validateProductionConfig CI vs deploy gate", () => {
     const env: NodeJS.ProcessEnv = {
       APP_ENV: "preview",
       NODE_ENV: "production",
+    };
+
+    const result = validateProductionConfig(env);
+
+    expect(result.errors).toEqual([]);
+    expect(result.runtimeContractChecked).toBe(false);
+  });
+
+  it("does not fail preview deploys when DEPLOYMENT_PLATFORM is not cloudflare", () => {
+    const env: NodeJS.ProcessEnv = {
+      APP_ENV: "preview",
+      NODE_ENV: "production",
+      DEPLOYMENT_PLATFORM: "development",
     };
 
     const result = validateProductionConfig(env);
