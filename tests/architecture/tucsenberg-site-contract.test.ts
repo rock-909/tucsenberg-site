@@ -153,26 +153,6 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   },
 ] as const;
 
-const INQUIRY_RESPONSE_OWNER_FILES = [
-  "messages/profiles/b2b-lead/en/messages.json",
-  "messages/profiles/catalog/en/messages.json",
-  "content/pages/en/about.mdx",
-  "content/pages/en/contact.mdx",
-  "content/pages/en/flood-barrier-materials-guide.mdx",
-  "content/pages/en/flood-barrier-specifications.mdx",
-  "content/pages/en/oem-wholesale.mdx",
-  "content/pages/en/terms.mdx",
-  "src/config/single-site.ts",
-  "src/constants/tucsenberg-product-meta.ts",
-  "src/constants/tucsenberg-product-page-abs-flood-barriers.ts",
-  "src/constants/tucsenberg-product-page-absorbent-flood-bags.ts",
-  "src/constants/tucsenberg-product-page-aluminum-flood-gates.ts",
-  "src/constants/tucsenberg-product-page-flood-tube-dams.ts",
-  "src/constants/tucsenberg-product-page-frp-flood-barriers.ts",
-  "src/components/security/turnstile-rescue-line.tsx",
-  "src/lib/contact/getContactCopy.ts",
-] as const;
-
 function stripRequestIntent(clause: string): string {
   return REQUEST_INTENT_PHRASES.reduce(
     (text, pattern) => text.replace(pattern, " "),
@@ -245,7 +225,10 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
   return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
 }
 
-function stripRetiredInquiryMessageSubtrees(source: string, repoPath: string) {
+function stripD6eRetiredInquiryCopySubtrees(
+  source: string,
+  repoPath: string,
+): string {
   if (!repoPath.endsWith(".json")) {
     return source;
   }
@@ -264,6 +247,19 @@ function stripRetiredInquiryMessageSubtrees(source: string, repoPath: string) {
         unknown
       >;
       parsed.requestQuote = rest;
+    }
+  }
+
+  if (repoPath === "messages/base/en/messages.json") {
+    const emailTemplates = parsed.emailTemplates;
+    if (
+      typeof emailTemplates === "object" &&
+      emailTemplates !== null &&
+      "confirmation" in emailTemplates
+    ) {
+      const { confirmation: _retiredConfirmation, ...rest } =
+        emailTemplates as Record<string, unknown>;
+      parsed.emailTemplates = rest;
     }
   }
 
@@ -296,6 +292,10 @@ function isPublicSourceFile(repoPath: string): boolean {
   }
 
   return PUBLIC_SOURCE_EXTENSIONS.has(extname(repoPath));
+}
+
+function getPublicSourceFiles(): string[] {
+  return PUBLIC_SOURCE_ROOTS.flatMap((root) => walkPublicSourceFiles(root));
 }
 
 function walkPublicSourceFiles(dir: string, results: string[] = []): string[] {
@@ -467,9 +467,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("keeps forbidden claims out of public-rendered source surfaces", () => {
     const offenders: string[] = [];
 
-    for (const filePath of PUBLIC_SOURCE_ROOTS.flatMap((root) =>
-      walkPublicSourceFiles(root),
-    )) {
+    for (const filePath of getPublicSourceFiles()) {
       const source = readRepoFile(filePath);
 
       for (const pattern of FORBIDDEN_PUBLIC_PATTERNS) {
@@ -538,18 +536,31 @@ describe("Tucsenberg Phase 1 site contract", () => {
     },
   );
 
+  it("covers inquiry quote-time copy through the shared public-source enumeration", () => {
+    const scannedFiles = getPublicSourceFiles();
+
+    for (const root of PUBLIC_SOURCE_ROOTS) {
+      expect(
+        scannedFiles.some((filePath) => filePath.startsWith(`${root}/`)),
+        root,
+      ).toBe(true);
+    }
+
+    expect(scannedFiles).toContain("src/lib/contact/getContactCopy.ts");
+  });
+
   it("keeps misleading inquiry quote-time promises out of live owner copy", () => {
     const offenders: string[] = [];
 
-    for (const ownerFile of INQUIRY_RESPONSE_OWNER_FILES) {
-      const source = stripRetiredInquiryMessageSubtrees(
-        readRepoFile(ownerFile),
-        ownerFile,
+    for (const filePath of getPublicSourceFiles()) {
+      const source = stripD6eRetiredInquiryCopySubtrees(
+        readRepoFile(filePath),
+        filePath,
       );
 
-      for (const copyUnit of collectOwnerCopyUnits(source, ownerFile)) {
+      for (const copyUnit of collectOwnerCopyUnits(source, filePath)) {
         if (hasForbiddenInquiryQuoteTimePromise(copyUnit)) {
-          offenders.push(`${ownerFile} :: ${copyUnit}`);
+          offenders.push(`${filePath} :: ${copyUnit}`);
         }
       }
     }
