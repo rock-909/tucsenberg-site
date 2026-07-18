@@ -47,8 +47,8 @@ describe("structured-data generators", () => {
         "@id": pageUrl,
         url: pageUrl,
         datePublished: "2024-01-01",
-        isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
-        about: { "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl) },
+        isPartOf: { "@id": "https://example.com#website" },
+        about: { "@id": "https://example.com#organization" },
       });
       expect(schema).not.toHaveProperty("additionalType");
     });
@@ -67,8 +67,8 @@ describe("structured-data generators", () => {
         "@id": pageUrl,
         url: pageUrl,
         dateModified: "2024-02-01",
-        isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
-        about: { "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl) },
+        isPartOf: { "@id": "https://example.com#website" },
+        about: { "@id": "https://example.com#organization" },
       });
       expect(schema).not.toHaveProperty("datePublished");
       expect(schema).not.toHaveProperty("additionalType");
@@ -87,8 +87,8 @@ describe("structured-data generators", () => {
         "@type": "WebPage",
         "@id": pageUrl,
         url: pageUrl,
-        isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
-        about: { "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl) },
+        isPartOf: { "@id": "https://example.com#website" },
+        about: { "@id": "https://example.com#organization" },
       });
     });
   });

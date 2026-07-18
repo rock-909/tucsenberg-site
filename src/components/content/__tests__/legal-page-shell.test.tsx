@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildShellPageSchema } from "@/components/content/legal-page-shell";
-import {
-  organizationStructuredDataId,
-  websiteStructuredDataId,
-} from "@/lib/structured-data-generators";
-import { SITE_CONFIG } from "@/config/paths";
 
 vi.mock("@/config/paths", () => ({
   SITE_CONFIG: {
@@ -61,9 +56,9 @@ describe("LegalPageShell structured data", () => {
       "@type": "WebPage",
       "@id": pageUrl,
       url: pageUrl,
-      isPartOf: { "@id": websiteStructuredDataId(SITE_CONFIG.baseUrl) },
+      isPartOf: { "@id": "https://www.example.com#website" },
       about: {
-        "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl),
+        "@id": "https://www.example.com#organization",
       },
     });
     expect(schema).not.toHaveProperty("additionalType");
