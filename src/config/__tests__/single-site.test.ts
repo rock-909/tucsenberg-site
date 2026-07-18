@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SINGLE_SITE_FACTS } from "@/config/single-site";
-import { createPageSEOConfig } from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 
 const PREVIEW_BASE_URL =
   "https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev";
@@ -34,6 +34,14 @@ describe("single-site", () => {
 
   it("keeps the approved Tucsenberg OG image as the live default", () => {
     expect(SINGLE_SITE_FACTS.brandAssets.ogImage).toBe(TUCSENBERG_OG_IMAGE);
-    expect(createPageSEOConfig("home").image).toBe(TUCSENBERG_OG_IMAGE);
+
+    const metadata = generateMetadataForPath({
+      locale: "en",
+      pageType: "home",
+      path: "/",
+    });
+
+    expect(metadata.openGraph?.images).toEqual([{ url: TUCSENBERG_OG_IMAGE }]);
+    expect(metadata.twitter?.images).toEqual([TUCSENBERG_OG_IMAGE]);
   });
 });

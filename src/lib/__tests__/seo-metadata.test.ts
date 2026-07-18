@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PUBLIC_STATIC_PAGE_TYPES } from "@/config/pages.config";
-import type { PageType } from "@/config/paths";
 import {
   buildCanonicalForPath,
-  createPageSEOConfig,
   createStaticPageMetadataConfig,
   generateMetadataForPath,
 } from "../seo-metadata";
@@ -252,52 +249,6 @@ describe("SEO Metadata", () => {
       ).toEqual({
         title: "Page title",
         description: "",
-      });
-    });
-  });
-
-  describe("createPageSEOConfig", () => {
-    it("returns the default OG image for public static pages", () => {
-      expect(createPageSEOConfig("home")).toEqual({
-        type: "website",
-        image: "/images/facts-og.png",
-      });
-    });
-
-    it("derives the default OG image for every public static page", () => {
-      for (const pageType of PUBLIC_STATIC_PAGE_TYPES) {
-        const config = createPageSEOConfig(pageType);
-        expect(config.image).toBe("/images/facts-og.png");
-      }
-    });
-
-    it("merges custom config with base config", () => {
-      const config = createPageSEOConfig("about", {
-        title: "Custom Title",
-        description: "Custom Description",
-      });
-
-      expect(config).toEqual({
-        type: "website",
-        image: "/images/facts-og.png",
-        title: "Custom Title",
-        description: "Custom Description",
-      });
-    });
-
-    it("falls retired public demo pages back to home defaults", () => {
-      expect(createPageSEOConfig("capabilities")).toEqual({
-        type: "website",
-        image: "/images/facts-og.png",
-      });
-    });
-
-    it("handles unknown page types", () => {
-      const config = createPageSEOConfig("unknown" as PageType);
-
-      expect(config).toEqual({
-        type: "website",
-        image: "/images/facts-og.png",
       });
     });
   });

@@ -762,17 +762,6 @@ export default [
     },
   },
 
-  // Catalog replacement surfaces use intentional repo-relative imports
-  {
-    name: "catalog-replacement-boundary-imports",
-    files: [
-      "src/config/single-site-product-catalog.ts",
-    ],
-    rules: {
-      "no-restricted-imports": "off",
-    },
-  },
-
   // Next.js App Router page.tsx 导出守护 - 禁止非标准命名导出
   {
     name: "nextjs-page-export-guards",

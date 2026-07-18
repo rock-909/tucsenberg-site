@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 import { interpolate } from "@/lib/interpolate";
 
-export type { Locale, PageType } from "@/config/paths";
+export type { Locale } from "@/config/paths";
 
 interface SEOConfig {
   title?: string;
@@ -188,7 +188,7 @@ export function generateMetadataForPath(
   params: GenerateMetadataForPathParams,
 ): Metadata {
   const { locale, pageType, path, config } = params;
-  const seoConfig = createPageSEOConfig(pageType, config ?? {});
+  const seoConfig = mergeSEOConfig(STATIC_PAGE_SEO_DEFAULTS, config ?? {});
   const safeLocale = resolveLocale(locale);
   const canonical = buildCanonicalForPath(locale, path);
   const languages = buildLanguagesForPath(path);
@@ -256,11 +256,4 @@ export function createStaticPageMetadataConfig(
       ? { image: metadata.seo.ogImage }
       : {}),
   };
-}
-
-export function createPageSEOConfig(
-  _pageType: PageType,
-  customConfig: Partial<SEOConfig> = {},
-): SEOConfig {
-  return mergeSEOConfig(STATIC_PAGE_SEO_DEFAULTS, customConfig);
 }

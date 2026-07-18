@@ -35,7 +35,6 @@ pre-commit:
         for f in $FILES; do
           # 例外：配置/启动链路必须使用相对路径（TypeScript 路径别名在 Node.js/Next config 加载期不可用）
           if [ "$f" = "src/config/security.ts" ] || [ "$f" = "next.config.ts" ] || [ "$f" = "src/middleware.ts" ] || [ "$f" = "src/lib/env.ts" ]; then continue; fi
-          if [ "$f" = "src/config/single-site-product-catalog.ts" ] || [ "$f" = "src/app/sitemap.ts" ] || [ "$f" = "src/config/single-site-seo.ts" ]; then continue; fi
           # 例外：barrel files (index.ts) 从子模块导入必须使用相对路径
           if [[ "$f" == *"/index.ts" ]]; then continue; fi
           if git diff --cached -- "$f" | grep -qE "^\+.*from ['\"']\./|^\+.*from ['\"']\.\./"; then
