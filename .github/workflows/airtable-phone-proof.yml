@@ -42,13 +42,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify proof test exists
-        run: |
-          if [ ! -f tests/integration/api/airtable-phone-column-direct-proof.test.ts ]; then
-            echo "::error::Missing tests/integration/api/airtable-phone-column-direct-proof.test.ts on ref ${{ github.ref }} (${{ github.sha }}). Dispatch this workflow against a ref that includes the proof test."
-            exit 1
-          fi
-
       - name: Verify Airtable proof secrets
         env:
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
@@ -73,22 +66,9 @@ jobs:
 
       - name: Record proof result
         if: always()
-        run: |
-          if [ "${{ steps.proof.outcome }}" = "success" ]; then
-            result="pass"
-          else
-            result="fail"
-          fi
-          {
-            echo "## Airtable phone proof"
-            echo
-            echo "| Field | Value |"
-            echo "| --- | --- |"
-            echo "| Ref | \`${{ github.ref }}\` |"
-            echo "| SHA | \`${{ github.sha }}\` |"
-            echo "| Table | \`${{ inputs.airtable_table_name }}\` |"
-            echo "| Result | **${result}** |"
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$result" = "fail" ]; then
-            exit 1
-          fi
+        env:
+          PROOF_SUMMARY_REF: ${{ github.ref }}
+          PROOF_SUMMARY_SHA: ${{ github.sha }}
+          PROOF_SUMMARY_TABLE: ${{ inputs.airtable_table_name }}
+          PROOF_OUTCOME: ${{ steps.proof.outcome }}
+        run: node scripts/workflows/write-airtable-phone-proof-summary.mjs

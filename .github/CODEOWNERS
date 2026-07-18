@@ -24,6 +24,7 @@
 /open-next.config.ts @Alx-707 developer@flood-control.com
 /next.config.ts @Alx-707 developer@flood-control.com
 /.github/workflows/ @Alx-707 developer@flood-control.com
+/scripts/workflows/write-airtable-phone-proof-summary.mjs @Alx-707 developer@flood-control.com
 /scripts/quality/checks/cloudflare-*.js @Alx-707 developer@flood-control.com
 /scripts/quality/checks/release-verify.js @Alx-707 developer@flood-control.com
 /scripts/quality/checks/production-config.js @Alx-707 developer@flood-control.com
