@@ -104,7 +104,9 @@ describe("RequestQuotePage", () => {
       screen.getByRole("heading", { level: 1, name: "Get real numbers" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Received. You'll hear from a person, not a sequence."),
+      screen.getByText(
+        /Received\. We reply within 12 hours\. If the details are sufficient, the reply includes a quote\. Otherwise, we ask only for the missing essentials\./u,
+      ),
     ).toBeInTheDocument();
   });
 

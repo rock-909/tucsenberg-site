@@ -94,19 +94,49 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /support, or partnership opportunities/iu,
   /configure a real receiver before public launch/iu,
 ];
-const FORBIDDEN_INQUIRY_RESPONSE_PATTERNS = [
-  /standard items quoted/iu,
-  /quoted within 12 hours/iu,
-  /quoted in 12 hours/iu,
-  /quote within 12 hours/iu,
-  /quotes in 12 hours/iu,
-  /12-hour quotes?/iu,
-  /12-hour response on standard/iu,
-  /custom configurations within 48/iu,
-  /custom within 48/iu,
-  /within 48 hours/iu,
-  /quoted within 48 hours/iu,
+const HYPHEN_HOUR_QUOTE_PATTERN =
+  /\b(?:12|48)-hour\b.{0,15}\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b|\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b.{0,15}\b(?:12|48)-hour\b/iu;
+const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
   /get exact pricing in 12 hours/iu,
+  /12-hour response on standard/iu,
+] as const;
+
+const FORBIDDEN_QUOTE_TIME_FIXTURES = [
+  {
+    label: "quote before 12 hours",
+    text: "Send details for a quote within 12 hours.",
+  },
+  {
+    label: "quoted before within 12 hours",
+    text: "Standard items are quoted within 12 hours.",
+  },
+  {
+    label: "12-hour before quote",
+    text: "Standard 12-hour quote turnaround for catalog lines.",
+  },
+  {
+    label: "custom quote before 48 hours",
+    text: "Custom quote requests are answered within 48 hours.",
+  },
+  {
+    label: "48-hour before custom quote",
+    text: "48-hour custom quote review for non-standard openings.",
+  },
+] as const;
+
+const ALLOWED_QUOTE_TIME_FIXTURES = [
+  {
+    label: "delivery within 48 hours",
+    text: "In-stock cartons ship with delivery within 48 hours.",
+  },
+  {
+    label: "shipping within 48 hours",
+    text: "Express shipping within 48 hours is available on request.",
+  },
+  {
+    label: "approved conditional reply copy",
+    text: "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+  },
 ] as const;
 
 const INQUIRY_RESPONSE_OWNER_FILES = [
@@ -128,6 +158,84 @@ const INQUIRY_RESPONSE_OWNER_FILES = [
   "src/components/security/turnstile-rescue-line.tsx",
   "src/lib/contact/getContactCopy.ts",
 ] as const;
+
+function hasQuoteToHourPromise(text: string): boolean {
+  const quoteTermPattern =
+    /\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b/giu;
+
+  for (const match of text.matchAll(quoteTermPattern)) {
+    if (match.index === undefined) {
+      continue;
+    }
+
+    const quoteContext = text.slice(
+      Math.max(0, match.index - 12),
+      match.index + match[0].length + 12,
+    );
+    if (/\brequest\s+a\s+quotes?\b/iu.test(quoteContext)) {
+      continue;
+    }
+
+    const afterQuote = text.slice(match.index + match[0].length);
+    const hourPromise = afterQuote.match(
+      /^[^.]{0,40}\b(?:within|in)\b[^.]{0,20}\b(?:12|48)(?:\s*-?\s*hours?|\s*hour|\b)/iu,
+    );
+
+    if (!hourPromise) {
+      continue;
+    }
+
+    if (/\breply\b/iu.test(hourPromise[0])) {
+      continue;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+function collectJsonStringValues(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(collectJsonStringValues);
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return Object.values(value).flatMap(collectJsonStringValues);
+  }
+
+  return [];
+}
+
+function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
+  if (repoPath.endsWith(".json")) {
+    return collectJsonStringValues(JSON.parse(source) as unknown);
+  }
+
+  return source
+    .split(/\r?\n/u)
+    .flatMap((line) => line.split(/(?<=[.!?])\s+/u))
+    .map((unit) => unit.trim())
+    .filter((unit) => unit.length > 0);
+}
+
+function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
+  if (hasQuoteToHourPromise(text)) {
+    return true;
+  }
+
+  if (HYPHEN_HOUR_QUOTE_PATTERN.test(text)) {
+    return true;
+  }
+
+  return FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS.some((pattern) =>
+    pattern.test(text),
+  );
+}
 
 function stripRetiredInquiryMessageSubtrees(source: string, repoPath: string) {
   if (!repoPath.endsWith(".json")) {
@@ -408,6 +516,20 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(offenders).toEqual([]);
   });
 
+  it.each(FORBIDDEN_QUOTE_TIME_FIXTURES)(
+    "flags forbidden quote-time promise copy: $label",
+    ({ text }) => {
+      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(true);
+    },
+  );
+
+  it.each(ALLOWED_QUOTE_TIME_FIXTURES)(
+    "allows non-quote SLA timing copy: $label",
+    ({ text }) => {
+      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(false);
+    },
+  );
+
   it("keeps misleading inquiry quote-time promises out of live owner copy", () => {
     const offenders: string[] = [];
 
@@ -417,9 +539,9 @@ describe("Tucsenberg Phase 1 site contract", () => {
         ownerFile,
       );
 
-      for (const pattern of FORBIDDEN_INQUIRY_RESPONSE_PATTERNS) {
-        if (pattern.test(source)) {
-          offenders.push(`${ownerFile} :: ${pattern}`);
+      for (const copyUnit of collectOwnerCopyUnits(source, ownerFile)) {
+        if (hasForbiddenInquiryQuoteTimePromise(copyUnit)) {
+          offenders.push(`${ownerFile} :: ${copyUnit}`);
         }
       }
     }
@@ -428,15 +550,25 @@ describe("Tucsenberg Phase 1 site contract", () => {
   });
 
   it("uses the approved inquiry success and reply promise on key surfaces", () => {
-    const b2bLead = readRepoFile("messages/profiles/b2b-lead/en/messages.json");
+    const b2bLead = getObject(
+      readRepoJson("messages/profiles/b2b-lead/en/messages.json"),
+      "b2b-lead messages",
+    );
+    const inquiry = getObject(b2bLead.inquiry, "b2b-lead inquiry");
+    const form = getObject(inquiry.form, "b2b-lead inquiry.form");
+    const success = form.success;
+
+    expect(typeof success, "inquiry.form.success").toBe("string");
+    const successText = String(success);
+    expect(successText).toMatch(/reply within 12 hours/i);
+    expect(successText).toMatch(/details are sufficient/i);
+    expect(successText).toMatch(/reply includes a quote/i);
+    expect(successText).toMatch(/missing essentials/i);
+
     const requestQuoteIntro = readRepoFile(
       "src/app/[locale]/request-quote/page.tsx",
     );
 
-    expect(b2bLead).toContain(
-      "Received. You'll hear from a person, not a sequence.",
-    );
-    expect(b2bLead).toMatch(/Reply within 12 hours/i);
     expect(requestQuoteIntro).not.toContain("CUSTOM_QUOTE_HOURS");
     expect(
       readRepoFile("src/components/security/turnstile-rescue-line.tsx"),

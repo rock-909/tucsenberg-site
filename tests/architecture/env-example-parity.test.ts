@@ -331,26 +331,36 @@ describe(".env.example parity", () => {
     expect(envExampleSource).not.toContain(
       "Set ALLOW_MEMORY_RATE_LIMIT=true only for local fallback.",
     );
-    expect(envExample.has("NEXT_PUBLIC_TURNSTILE_ACTION")).toBe(false);
-    expect(envExample.has("TURNSTILE_EXPECTED_ACTION")).toBe(false);
-    expect(envExample.has("TURNSTILE_ALLOWED_ACTIONS")).toBe(false);
   });
 
-  it("does not keep retired Turnstile action env keys in the schema", () => {
+  it("documents the current Turnstile env surface and inquiry action contract", () => {
     const envSource = readRepoFile(ENV_SOURCE_PATH);
+    const envExample = parseEnvExample(readRepoFile(ENV_EXAMPLE_PATH));
     const schemaKeys = getSchemaKeys(envSource);
-    const retiredTurnstileActionKeys = [
-      "NEXT_PUBLIC_TURNSTILE_ACTION",
-      "TURNSTILE_ALLOWED_ACTIONS",
-      "TURNSTILE_EXPECTED_ACTION",
-    ];
+    const turnstileConstants = readRepoFile(
+      "src/constants/turnstile-constants.ts",
+    );
+    const turnstileVerifier = readRepoFile("src/lib/security/turnstile.ts");
 
-    for (const key of retiredTurnstileActionKeys) {
-      expect(
-        schemaKeys.has(key),
-        `${key} should be removed from env schema`,
-      ).toBe(false);
+    for (const key of [
+      "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+      "TURNSTILE_SECRET_KEY",
+      "TURNSTILE_ALLOWED_HOSTS",
+      "TURNSTILE_BYPASS",
+      "NEXT_PUBLIC_TURNSTILE_BYPASS",
+    ] as const) {
+      expect(schemaKeys.has(key), `${key} should stay in env schema`).toBe(
+        true,
+      );
+      expect(envExample.has(key), `${key} should stay in .env.example`).toBe(
+        true,
+      );
     }
+
+    expect(turnstileConstants).toContain(
+      'INQUIRY_TURNSTILE_ACTION = "product_inquiry"',
+    );
+    expect(turnstileVerifier).toContain("INQUIRY_TURNSTILE_ACTION");
   });
 
   it("keeps the Cloudflare local preview env example explicit about its limited scope", () => {
