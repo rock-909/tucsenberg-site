@@ -32,9 +32,15 @@ const ERROR_SEMGREP_RULE_IDS = [
   "starter-lead-route-missing-safe-json-body",
 ] as const;
 
+interface SemgrepRulePaths {
+  readonly include?: readonly string[];
+  readonly exclude?: readonly string[];
+}
+
 interface SemgrepRule {
   readonly id: string;
   readonly severity?: string;
+  readonly paths?: SemgrepRulePaths;
 }
 
 interface WorkflowStep {
@@ -121,6 +127,18 @@ describe("CI workflow contract", () => {
       .map((rule) => rule.id);
 
     expect(errorRuleIds).toEqual(ERROR_SEMGREP_RULE_IDS);
+  });
+
+  it("scopes safeParseJson enforcement to the inquiry lead writer only", () => {
+    const semgrepConfig = readSemgrepConfig();
+    const rule = (semgrepConfig.rules ?? []).find(
+      (entry) => entry.id === "starter-lead-route-missing-safe-json-body",
+    );
+    const includes = rule?.paths?.include ?? [];
+
+    expect(rule, "lead safe-json Semgrep rule must exist").toBeDefined();
+    expect(includes).toContain("src/app/api/inquiry/route.ts");
+    expect(includes).not.toContain("src/app/api/contact/route.ts");
   });
 
   it("keeps Lighthouse as a manual performance proof", () => {
