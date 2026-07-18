@@ -1,3 +1,7 @@
+> Historical.
+>
+> This spec records the approved R'13 three-field inquiry contract. Current product truth remains in stable project docs and runtime code.
+
 # Three-Field Public Inquiry Contract Design
 
 - Date: 2026-07-18
