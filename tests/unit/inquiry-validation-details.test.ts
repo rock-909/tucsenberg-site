@@ -133,7 +133,7 @@ describe("inquiry validation detail mapping", () => {
     ).toEqual(["errors.message.invalid"]);
   });
 
-  it("maps wrong-type issues to .invalid instead of .required", () => {
+  it("maps internal field issues to errors.generic instead of field-specific keys", () => {
     const input = {
       ...validBase,
       company: 123,
@@ -146,14 +146,12 @@ describe("inquiry validation detail mapping", () => {
     if (parsed.success) return;
 
     expect(mapInquiryValidationDetails(parsed.error.issues, input)).toEqual(
-      expect.arrayContaining([
-        "errors.company.invalid",
-        "errors.buyerInterest.invalid",
-        "errors.message.invalid",
-      ]),
+      expect.arrayContaining(["errors.generic", "errors.message.invalid"]),
     );
     expect(mapInquiryValidationDetails(parsed.error.issues, input)).not.toEqual(
       expect.arrayContaining([
+        "errors.company.invalid",
+        "errors.buyerInterest.invalid",
         "errors.company.required",
         "errors.buyerInterest.required",
       ]),
@@ -215,12 +213,31 @@ describe("inquiry validation detail mapping", () => {
     expect([...emitted].sort()).toEqual(
       [...PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS].sort(),
     );
+  });
 
-    for (const detail of emitted) {
+  it("keeps inquiry.form copy for every renderable visible detail key", () => {
+    const renderableDetails = PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS.filter(
+      (detail) => detail !== "errors.generic",
+    );
+
+    for (const detail of renderableDetails) {
       const value = getMessageValue(runtimeMessages, `inquiry.form.${detail}`);
       expect(typeof value, detail).toBe("string");
       expect(String(value).trim(), detail).not.toBe("");
     }
+  });
+
+  it("covers errors.generic through the existing field summary copy", () => {
+    const fieldSummary = getMessageValue(
+      runtimeMessages,
+      "inquiry.form.errors.fieldSummary",
+    );
+
+    expect(typeof fieldSummary).toBe("string");
+    expect(String(fieldSummary).trim()).not.toBe("");
+    expect(
+      getMessageValue(runtimeMessages, "inquiry.form.errors.generic"),
+    ).toBeUndefined();
   });
 
   it("keeps detail output stable when only the English Zod message changes", () => {

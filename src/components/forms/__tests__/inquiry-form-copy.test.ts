@@ -30,7 +30,7 @@ describe("inquiry form copy", () => {
     );
   });
 
-  it("reads all eight field error leaves from inquiry.form.errors", () => {
+  it("reads all eight visible field error leaves from inquiry.form.errors", () => {
     const copy = createTestInquiryFormCopy();
 
     expect(copy.errors.fullName.required).toBe("Full name is required");
@@ -53,5 +53,17 @@ describe("inquiry form copy", () => {
     expect(copy.errors.message.tooLong).toBe(
       "Message must be 2000 characters or fewer",
     );
+  });
+
+  it("uses fieldSummary for generic validation failures instead of a generic leaf", () => {
+    const copy = createTestInquiryFormCopy();
+    const messages = getComposedMessages("en") as Record<string, unknown>;
+
+    expect(copy.errors.fieldSummary).toBe(
+      "Please review the highlighted fields and try again.",
+    );
+    expect(
+      (messages.inquiry as Record<string, unknown> | undefined)?.form,
+    ).toBeDefined();
   });
 });

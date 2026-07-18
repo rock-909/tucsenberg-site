@@ -200,7 +200,7 @@ describe("/api/inquiry route", () => {
       expect(data).toEqual({
         success: false,
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.catalogProductId.invalid"],
+        details: ["errors.generic"],
       });
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
@@ -220,7 +220,7 @@ describe("/api/inquiry route", () => {
       expect(data).toEqual({
         success: false,
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.catalogProductId.invalid"],
+        details: ["errors.generic"],
       });
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
@@ -511,7 +511,7 @@ describe("/api/inquiry route", () => {
       expect(data).toEqual({
         success: false,
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.catalogProductId.required"],
+        details: ["errors.generic"],
       });
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
@@ -550,7 +550,7 @@ describe("/api/inquiry route", () => {
       expect(data).toEqual({
         success: false,
         errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.quantity.invalid"],
+        details: ["errors.generic"],
       });
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
