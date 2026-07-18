@@ -108,7 +108,6 @@ export function RequestQuoteSubmitControls({
   return (
     <>
       <LazyTurnstile
-        action="product_inquiry"
         onError={onTurnstileError}
         onExpire={onTurnstileError}
         onSuccess={onTurnstileSuccess}

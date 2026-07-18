@@ -20,20 +20,19 @@ import {
   type ValidatedInquiryContext,
 } from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
+import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({
-    action,
     onError,
     onExpire,
     onSuccess,
   }: {
-    action?: string;
     onError?: () => void;
     onExpire?: () => void;
     onSuccess?: (token: string) => void;
   }) => (
-    <div data-action={action} data-testid="inquiry-turnstile">
+    <div data-action={INQUIRY_TURNSTILE_ACTION} data-testid="inquiry-turnstile">
       <button
         data-testid="inquiry-turnstile-success"
         onClick={() => onSuccess?.("mock-inquiry-turnstile-token")}

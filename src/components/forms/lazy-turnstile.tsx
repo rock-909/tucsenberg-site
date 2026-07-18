@@ -32,7 +32,6 @@ interface LazyTurnstileProps {
   size?: "normal" | "compact";
   tabIndex?: number;
   id?: string;
-  action?: string;
   cData?: string;
   labels?: {
     unavailable: string;
@@ -152,7 +151,6 @@ function buildLazyTurnstileWidgetProps(args: {
     ...(props.onReadyRef ? { onReadyRef: props.onReadyRef } : {}),
     ...(props.tabIndex !== undefined ? { tabIndex: props.tabIndex } : {}),
     ...(props.id !== undefined ? { id: props.id } : {}),
-    ...(props.action !== undefined ? { action: props.action } : {}),
     ...(props.cData !== undefined ? { cData: props.cData } : {}),
   };
 }

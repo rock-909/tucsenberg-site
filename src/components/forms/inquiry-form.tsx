@@ -134,7 +134,6 @@ function InquiryFormLive({
         />
 
         <LazyTurnstile
-          action="product_inquiry"
           onError={kernel.resetTurnstileToken}
           onExpire={kernel.resetTurnstileToken}
           onSuccess={kernel.acquireTurnstileToken}

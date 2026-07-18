@@ -261,7 +261,6 @@ describe("/api/inquiry route", () => {
       expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
         "valid-token",
         expect.any(String),
-        { expectedAction: "product_inquiry" },
       );
     });
 

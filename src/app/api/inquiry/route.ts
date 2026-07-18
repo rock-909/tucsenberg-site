@@ -62,7 +62,6 @@ async function validateProductInquiryTurnstile(
     token,
     clientIP,
     routeLabel: "/api/inquiry",
-    expectedAction: "product_inquiry",
   });
 
   const error = mapLeadTurnstileResultToResponse(verificationResult);

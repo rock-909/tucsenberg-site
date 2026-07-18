@@ -8,28 +8,17 @@ vi.mock("@/lib/logger", () => ({
 
 async function loadTurnstileConfig({
   allowedHosts,
-  expectedAction,
-  allowedActions,
   baseUrl = "https://example.com",
 }: {
   allowedHosts?: string;
-  expectedAction?: string;
-  allowedActions?: string;
   baseUrl?: string | null;
 } = {}) {
   vi.resetModules();
   vi.doMock("@/lib/env", () => ({
     env: {
       TURNSTILE_ALLOWED_HOSTS: allowedHosts,
-      TURNSTILE_ALLOWED_ACTIONS: allowedActions,
-      TURNSTILE_EXPECTED_ACTION: expectedAction,
     },
-    getRuntimeEnvString: (key: string) => {
-      if (key === "TURNSTILE_ALLOWED_ACTIONS") {
-        return allowedActions;
-      }
-      return undefined;
-    },
+    getRuntimeEnvString: () => undefined,
   }));
   vi.doMock("@/config/paths/site-config", () => ({
     SITE_CONFIG: { baseUrl },
@@ -106,42 +95,10 @@ describe("turnstile-config", () => {
     expect(mockWarn).not.toHaveBeenCalled();
   });
 
-  it("uses configured allowed actions and expected action with trimming", async () => {
-    const mod = await loadTurnstileConfig({
-      allowedActions: "contact_form, product_inquiry , custom_action ",
-      expectedAction: " product_inquiry ",
-    });
-
-    expect(mod.getExpectedTurnstileAction()).toBe("product_inquiry");
-    expect(mod.isAllowedTurnstileAction("contact_form")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("custom_action")).toBe(true);
-    expect(mod.isAllowedTurnstileAction(" product_inquiry ")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(false);
-    expect(mod.isAllowedTurnstileAction(null)).toBe(false);
-  });
-
-  it("falls back to default actions and expected action when configured values are blank", async () => {
-    const mod = await loadTurnstileConfig({
-      allowedActions: " , ",
-      expectedAction: "   ",
-    });
-
-    expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
-    expect(mod.isAllowedTurnstileAction("contact_form")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("product_inquiry")).toBe(true);
-    expect(mod.isAllowedTurnstileAction("newsletter_subscribe")).toBe(false);
-    expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
-    expect(mod.isAllowedTurnstileAction("   ")).toBe(false);
-  });
-
-  it("rejects empty hostnames and actions", async () => {
+  it("rejects empty hostnames", async () => {
     const mod = await loadTurnstileConfig();
 
     expect(mod.isAllowedTurnstileHostname(undefined)).toBe(false);
     expect(mod.isAllowedTurnstileHostname(null)).toBe(false);
-    expect(mod.isAllowedTurnstileAction(undefined)).toBe(false);
-    expect(mod.isAllowedTurnstileAction(null)).toBe(false);
-    expect(mod.getExpectedTurnstileAction()).toBe("contact_form");
   });
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 import { logger } from "@/lib/logger";
 import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
 import {
@@ -35,7 +36,6 @@ interface TurnstileProps {
   size?: "normal" | "compact";
   tabIndex?: number;
   id?: string;
-  action?: string;
   cData?: string;
   labels?: TurnstileLabels;
 }
@@ -105,8 +105,6 @@ export function TurnstileWidget({
   size = "normal",
   tabIndex,
   id,
-  action = getPublicRuntimeEnvString("NEXT_PUBLIC_TURNSTILE_ACTION") ||
-    "contact_form",
   cData,
   labels,
 }: TurnstileProps) {
@@ -222,7 +220,7 @@ export function TurnstileWidget({
           theme,
           size,
           tabIndex,
-          action,
+          action: INQUIRY_TURNSTILE_ACTION,
           cData,
         }}
         id={id}
