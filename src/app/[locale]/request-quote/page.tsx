@@ -4,8 +4,9 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
-import { RequestQuoteForm } from "@/app/[locale]/request-quote/request-quote-form";
-import { createRequestQuoteFormCopy } from "@/app/[locale]/request-quote/request-quote-form-copy";
+import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
+import { InquiryForm } from "@/components/forms/inquiry-form";
+import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
@@ -82,15 +83,10 @@ export default async function RequestQuotePage({
     locale,
     namespace: "requestQuote.metadata",
   });
-  const tForm = await getTranslations({
-    locale,
-    namespace: "requestQuote.form",
-  });
   const translatePage = (key: string) =>
     tPage(key as Parameters<typeof tPage>[0]);
-  const translateForm = (key: string) =>
-    tForm(key as Parameters<typeof tForm>[0]);
-  const formCopy = createRequestQuoteFormCopy(translateForm);
+  const messages = await loadCompleteMessages(locale);
+  const inquiryCopy = createInquiryFormCopyFromMessages(messages);
   const typedLocale = locale as Locale;
   const pagePath = getLocalizedPath("requestQuote", typedLocale);
   const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
@@ -120,8 +116,11 @@ export default async function RequestQuotePage({
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <RequestQuoteForm copy={formCopy} />
-          <RequestQuoteAside successCopy={formCopy.success} t={translatePage} />
+          <InquiryForm copy={inquiryCopy} source="request-quote" />
+          <RequestQuoteAside
+            successCopy={inquiryCopy.success}
+            t={translatePage}
+          />
         </div>
       </div>
     </>

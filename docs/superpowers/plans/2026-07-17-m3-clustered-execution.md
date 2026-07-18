@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 — revised to three-field contract per R'13 (`docs/superpowers/plans/2026-07-18-three-field-public-inquiry-retirement.md`); live head/base/CI via `gh pr view 130`. **PR #134 merged** (2026-07-18): C2 Airtable proof workflow security follow-up; **not counted among the 33 formal M3 tasks**; proof infrastructure retired by R'13. **Historical note (2026-07-18 diagnostic):** Base lacked `WhatsApp / Phone` column; that diagnosis motivated R'13 and is no longer a merge gate. **M3 remains 23/33 until revised C2 merges → 24/33 → D6a → D5a.** Do not claim public launch readiness.
+M3 merged 24/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 merged at `747fd8d` (three-field contract per R'13). **PR #134 merged** (2026-07-18): C2 Airtable proof workflow security follow-up; **not counted among the 33 formal M3 tasks**; proof infrastructure retired by R'13. **D6a ACTIVE**; **D5a WAITING**. **M3 remains 24/33 until D6a merges → 25/33.** Do not claim public launch readiness.
 
 ---
 

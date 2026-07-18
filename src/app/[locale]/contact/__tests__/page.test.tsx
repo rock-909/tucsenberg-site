@@ -106,7 +106,7 @@ describe("ContactPage MDX migration", () => {
     expect(screen.getByTestId("contact-form")).toBeInTheDocument();
   });
 
-  it("keeps the static form fallback inside the form column", async () => {
+  it("keeps the no-JS inquiry fallback inside the form column", async () => {
     const page = await ContactPage({
       params: Promise.resolve({ locale: "en" }),
     });
@@ -114,15 +114,18 @@ describe("ContactPage MDX migration", () => {
     await renderAsyncPage(page as React.JSX.Element);
 
     const formColumn = screen.getByTestId("contact-form-column");
-    const staticForm = formColumn.querySelector(
-      '[data-contact-form-fallback="static"]',
+    const staticFallback = within(formColumn).getByTestId(
+      "inquiry-form-static-fallback",
     );
 
-    expect(staticForm).not.toBeNull();
-    expect(staticForm?.tagName).toBe("FORM");
-    expect(
-      within(formColumn).getByRole("button", { name: /send enquiry/i }),
-    ).toBeDisabled();
+    expect(staticFallback).toBeInTheDocument();
+    expect(staticFallback.tagName).not.toBe("FORM");
+    expect(staticFallback.querySelector("form")).toBeNull();
+    expect(within(staticFallback).getByRole("link")).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^mailto:/),
+    );
+    expect(screen.queryByRole("button", { name: /send enquiry/i })).toBeNull();
     expect(
       screen.queryByTestId("contact-page-fallback"),
     ).not.toBeInTheDocument();

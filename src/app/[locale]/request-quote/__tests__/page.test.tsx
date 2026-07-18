@@ -49,6 +49,14 @@ vi.mock("@/lib/seo-metadata", () => ({
   generateMetadataForPath: mockGenerateMetadataForPath,
 }));
 
+vi.mock("@/lib/i18n/load-messages", () => ({
+  loadCompleteMessages: vi.fn(async () =>
+    import("@/lib/i18n/composed-messages").then(({ getComposedMessages }) =>
+      getComposedMessages("en"),
+    ),
+  ),
+}));
+
 vi.mock("@/components/seo/json-ld-script", () => ({
   JsonLdGraphScript: ({
     locale,
@@ -95,19 +103,19 @@ describe("RequestQuotePage", () => {
     expect(
       screen.getByRole("form", { name: "Request a quote" }),
     ).toHaveAttribute("data-analytics-event", "rfq_submit");
-    const nameField = screen.getByLabelText("Your name");
+    const nameField = screen.getByLabelText("Full name");
     expect(nameField).toBeRequired();
-    const emailField = screen.getByLabelText("Work email");
+    const emailField = screen.getByLabelText("Email address");
     expect(emailField).toHaveAttribute("type", "email");
     expect(emailField).toBeRequired();
-    const messageField = screen.getByLabelText("What do you need?");
+    const messageField = screen.getByLabelText(/^Message/i);
     expect(messageField.tagName).toBe("TEXTAREA");
     expect(messageField).not.toBeRequired();
-    expect(screen.getByText(/product line, opening sizes/)).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Received. Standard items: quote within 12 hours. Custom: within 48. You'll hear from a person, not a sequence.",
-      ),
+      screen.getByText(/product interest, opening sizes/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Received. You'll hear from a person, not a sequence."),
     ).toBeInTheDocument();
   });
 

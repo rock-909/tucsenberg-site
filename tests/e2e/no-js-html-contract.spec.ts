@@ -95,7 +95,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(page.getByText("中文")).toHaveCount(0);
   });
 
-  test("contact page renders form structure without JavaScript", async ({
+  test("contact page renders inquiry fallback without JavaScript", async ({
     page,
   }) => {
     await page.goto("http://localhost:3000/contact", {
@@ -117,37 +117,24 @@ test.describe("No-JS HTML contract (English-only)", () => {
     expectExactlyOneMain(html);
     expect(html).toContain('id="main-content"');
     expect(html).toContain('data-testid="contact-form-column"');
-    expect(html).toContain("<form");
+    expect(html).toContain('data-testid="inquiry-form-static-fallback"');
+    expect(html).not.toMatch(/<form[\s>]/);
 
-    const fullNameInput = page.getByLabel(site.fullNameLabel).first();
-    const companyInput = page.locator('input[name="company"]').first();
-    const submitButton = page.getByRole("button", {
-      name: /send enquiry/i,
-    });
+    const formColumn = page.locator(
+      '#main-content [data-testid="contact-form-column"]',
+    );
+    const staticFallback = formColumn
+      .locator('[data-testid="inquiry-form-static-fallback"]:visible')
+      .first();
 
-    await expect(fullNameInput).toBeDisabled();
-    await expect(fullNameInput).toHaveAttribute("required", "");
-    await expect(companyInput).toBeDisabled();
-    await expect(companyInput).not.toHaveAttribute("required", "");
+    await expect(staticFallback).toBeVisible();
     await expect(
-      page.getByText(site.optionalLabel, { exact: true }).first(),
+      staticFallback.getByText(/secure inquiry form needs JavaScript/i),
     ).toBeVisible();
-    await expect(submitButton).toBeDisabled();
-
-    for (const fieldName of ["fullName", "email", "company", "message"]) {
-      expect(html).toContain(`name="${fieldName}"`);
-    }
-
-    const contactForm = page.locator("form").first();
-    // Privacy is now a submit-adjacent statement, not a consent checkbox: the
-    // old required `acceptPrivacy` checkbox must be gone and the statement
-    // present. Submit stays disabled without JavaScript because the Turnstile
-    // token never arrives — it is not, and never was, gated by a privacy
-    // checkbox.
     await expect(
-      contactForm.locator('input[name="acceptPrivacy"]'),
-    ).toHaveCount(0);
-    await expect(contactForm.getByTestId("form-privacy-notice")).toHaveCount(1);
+      staticFallback.getByRole("link", { name: /@/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("button")).toHaveCount(0);
   });
 
   test("key public pages expose one composed main landmark", async ({

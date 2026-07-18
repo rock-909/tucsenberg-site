@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 const CONTACT_ROUTE = "src/app/[locale]/contact/page.tsx";
 const CONTACT_PAGE_DATA = "src/app/[locale]/contact/contact-page-data.ts";
 const CONTACT_SECTIONS = "src/app/[locale]/contact/contact-page-sections.tsx";
-const CONTACT_FALLBACK =
-  "src/app/[locale]/contact/contact-form-static-fallback.tsx";
+const INQUIRY_STATIC_FALLBACK =
+  "src/components/forms/inquiry-form-static-fallback.tsx";
 const CONTACT_FORM_FIELDS = "src/components/forms/contact-form-fields.tsx";
 
 function read(repoPath: string) {
@@ -33,6 +33,8 @@ describe("Contact page source boundaries", () => {
     expect(source).not.toContain("ContactFormStaticFallback");
     expect(source).not.toContain("contact-form-static-fallback");
     expect(source).not.toContain('data-contact-form-fallback="static"');
+    expect(source).not.toContain("InquiryFormStaticFallback");
+    expect(source).not.toContain("inquiry-form-static-fallback");
   });
 
   it("validates manifest metadata before returning typed contact page data", () => {
@@ -45,20 +47,21 @@ describe("Contact page source boundaries", () => {
   it("keeps Suspense fallback wiring in the page sections module", () => {
     const source = read(CONTACT_SECTIONS);
 
-    expect(source).toContain("ContactFormStaticFallback");
-    expect(source).toContain("contact-form-static-fallback");
+    expect(source).toContain("InquiryFormStaticFallback");
+    expect(source).toContain("inquiry-form-static-fallback");
     expect(source).toContain(
-      "fallback={<ContactFormStaticFallback messages={messages} />}",
+      "fallback={<InquiryFormStaticFallback copy={inquiryCopy} />}",
     );
   });
 
-  it("keeps fallback form markup inside the fallback adapter", () => {
-    const source = read(CONTACT_FALLBACK);
+  it("keeps the no-JS fallback informational without fake form markup", () => {
+    const source = read(INQUIRY_STATIC_FALLBACK);
 
-    expect(source).toContain('data-contact-form-fallback="static"');
-    expect(source).toContain("<form");
-    expect(source).toContain('translate="no"');
-    expect(source).toContain("buildFormFieldsFromConfig");
+    expect(source).toContain('data-testid="inquiry-form-static-fallback"');
+    expect(source).toContain("getPublicContactEmail");
+    expect(source).toContain("mailto:");
+    expect(source).not.toContain("<form");
+    expect(source).not.toContain('type="submit"');
   });
 
   it("keeps FormFields as the only public contact form field export", () => {

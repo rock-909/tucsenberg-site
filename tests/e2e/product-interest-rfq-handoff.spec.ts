@@ -39,8 +39,12 @@ test("product interest reaches the RFQ submission without claiming product ident
   await form.locator('[name="email"]').fill("nightly@example.com");
   await form.locator('[name="message"]').fill("Need FRP barrier details.");
 
+  await expect(page.getByTestId("turnstile-mock")).toBeVisible({
+    timeout: 15_000,
+  });
+
   const submit = form.locator('button[type="submit"]');
-  await expect(submit).toBeEnabled();
+  await expect(submit).toBeEnabled({ timeout: 15_000 });
   await submit.click();
 
   await expect(form.getByRole("status")).toContainText("nightly-rfq-1");

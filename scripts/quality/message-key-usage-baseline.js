@@ -52,6 +52,12 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "requestQuote.form",
   ),
   ...parameterOverrides(
+    "src/components/forms/inquiry-form-copy.ts",
+    ["createInquiryFormCopy"],
+    "t",
+    "inquiry.form",
+  ),
+  ...parameterOverrides(
     "src/components/cookie/cookie-banner.tsx",
     ["MainBanner", "PreferencesPanel"],
     "t",

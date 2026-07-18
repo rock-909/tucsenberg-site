@@ -7,8 +7,15 @@ import {
   type ComponentType,
   type ReactNode,
 } from "react";
+import {
+  type InquiryFormCopy,
+  type InquiryFormSource,
+} from "@/components/forms/inquiry-form-copy";
 
-type ContactFormComponent = ComponentType;
+type ContactFormComponent = ComponentType<{
+  copy: InquiryFormCopy;
+  source: InquiryFormSource;
+}>;
 type ContactFormLoadErrorComponent = ComponentType<{
   errorMessage: string;
   onRetry: () => void;
@@ -31,6 +38,7 @@ interface LoadedContactFormLoadError {
 interface ContactFormIslandProps {
   errorMessage: string;
   fallback: ReactNode;
+  inquiryCopy: InquiryFormCopy;
   retryLabel: string;
 }
 
@@ -47,10 +55,9 @@ type ContactFormIslandAction =
   | { contactFormLoadError?: LoadedContactFormLoadError; type: "failed" }
   | { type: "retry" };
 
-const defaultLoadContactForm = async (): Promise<LoadedContactForm> => {
-  const contactFormModule =
-    await import("@/components/forms/contact-form-container");
-  return { Component: contactFormModule.ContactFormContainer };
+const defaultLoadInquiryForm = async (): Promise<LoadedContactForm> => {
+  const inquiryFormModule = await import("@/components/forms/inquiry-form");
+  return { Component: inquiryFormModule.InquiryForm };
 };
 
 const defaultLoadContactFormLoadError =
@@ -108,6 +115,7 @@ function contactFormIslandReducer(
 export function ContactFormIsland({
   errorMessage,
   fallback,
+  inquiryCopy,
   retryLabel,
 }: ContactFormIslandProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -158,7 +166,7 @@ export function ContactFormIsland({
 
     async function load() {
       dispatch({ type: "loading" });
-      const contactForm = await defaultLoadContactForm();
+      const contactForm = await defaultLoadInquiryForm();
       if (isMounted) {
         dispatch({ type: "loaded", contactForm });
       }
@@ -226,11 +234,11 @@ export function ContactFormIsland({
     return <div ref={containerRef}>{fallback}</div>;
   }
 
-  const { Component: LoadedContactFormComponent } = state.loadState;
+  const { Component: LoadedInquiryFormComponent } = state.loadState;
 
   return (
     <div ref={containerRef}>
-      <LoadedContactFormComponent />
+      <LoadedInquiryFormComponent copy={inquiryCopy} source="contact" />
     </div>
   );
 }
