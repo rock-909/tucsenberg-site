@@ -1,4 +1,6 @@
-> Historical implementation plan. Implement with test-first discipline. Stable truth remains in current project docs and runtime code.
+> Historical.
+>
+> This plan implements `docs/superpowers/specs/2026-07-18-d6a-unified-inquiry-form-design.md`. Stable product truth remains in current project docs and runtime code.
 
 # D6a Unified Three-Field Inquiry Form Implementation Plan
 

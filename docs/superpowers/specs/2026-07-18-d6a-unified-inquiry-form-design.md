@@ -1,4 +1,6 @@
-> Historical implementation design. Stable product truth remains in `docs/项目基础/**`, the current remediation plan, and runtime code.
+> Historical.
+>
+> This file records the approved D6a inquiry form design. Current product truth remains in stable project docs and runtime code.
 
 # D6a Unified Three-Field Inquiry Form Design
 
