@@ -7,7 +7,10 @@ import type {
   LeadSource,
   ProductLeadData,
 } from "@/lib/airtable/types";
-import { sanitizeAirtableTextField } from "@/lib/airtable/service-internal/field-sanitization";
+import {
+  sanitizeAirtablePhoneField,
+  sanitizeAirtableTextField,
+} from "@/lib/airtable/service-internal/field-sanitization";
 import { LEAD_TYPES, type LeadType } from "@/lib/lead-pipeline/lead-schema";
 import { formatQuantity } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
@@ -59,6 +62,11 @@ function addReferenceId(fields: AirtableFields, referenceId?: string): void {
   fields["Reference ID"] = referenceId;
 }
 
+function addPhoneField(fields: AirtableFields, phone?: string): void {
+  if (!phone) return;
+  fields["WhatsApp / Phone"] = sanitizeAirtablePhoneField(phone);
+}
+
 function addContactFields(fields: AirtableFields, data: ContactLeadData): void {
   fields["First Name"] = sanitizeAirtableTextField(data.firstName);
   fields["Last Name"] = sanitizeAirtableTextField(data.lastName);
@@ -69,6 +77,7 @@ function addContactFields(fields: AirtableFields, data: ContactLeadData): void {
     fields["Subject"] = sanitizeAirtableTextField(data.subject);
   }
   fields["Message"] = sanitizeAirtableTextField(data.message);
+  addPhoneField(fields, data.phone);
 }
 
 function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
@@ -78,6 +87,7 @@ function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
     ? sanitizeAirtableTextField(data.company)
     : "";
   fields["Message"] = sanitizeAirtableTextField(data.message);
+  addPhoneField(fields, data.phone);
   fields["Product Name"] = sanitizeAirtableTextField(data.productName);
   // Product Slug holds the registry-validated catalog product id, and is empty
   // for a general RFQ, which honestly carries no per-product identity.

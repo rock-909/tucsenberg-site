@@ -22,6 +22,8 @@ export {
   MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
+  MAX_LEAD_PHONE_LENGTH,
+  MAX_LEAD_MESSAGE_LENGTH,
 } from "./validation-limits";
 
 // ============================================================================

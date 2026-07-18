@@ -22,6 +22,7 @@ import {
   createOptionalSubject,
   generateLeadReferenceId,
   generateProductInquiryMessage,
+  resolveProductBuyerText,
   splitName,
 } from "@/lib/lead-pipeline/utils";
 import { resolveProductIdentity } from "@/lib/lead-pipeline/product-identity";
@@ -108,6 +109,7 @@ function createContactEmailData(lead: ContactLeadInput): EmailTemplateData {
     lastName,
     email: lead.email,
     ...(company ? { company } : {}),
+    ...(lead.phone ? { phone: lead.phone } : {}),
     ...createOptionalSubject(lead.subject),
     message: lead.message,
     submittedAt: lead.submittedAt || new Date().toISOString(),
@@ -148,6 +150,7 @@ async function createContactLeadRecord(
         lastName,
         email: lead.email,
         ...(lead.company ? { company: lead.company } : {}),
+        ...(lead.phone ? { phone: lead.phone } : {}),
         ...createOptionalSubject(lead.subject),
         message: lead.message,
         referenceId,
@@ -229,9 +232,10 @@ function createProductEmailData(
 ): ProductInquiryEmailData {
   const { firstName, lastName } = splitName(lead.fullName);
   const { productName } = resolveProductIdentity(lead);
+  const buyerText = resolveProductBuyerText(lead);
   const description = composeInquiryDescription({
     buyerInterest: lead.buyerInterest,
-    requirements: lead.requirements,
+    requirements: buyerText,
   });
 
   return {
@@ -239,6 +243,7 @@ function createProductEmailData(
     lastName,
     email: lead.email,
     company: lead.company,
+    ...(lead.phone ? { phone: lead.phone } : {}),
     productName,
     quantity: lead.quantity,
     requirements: description,
@@ -270,11 +275,12 @@ async function createProductLeadRecord(
   const { firstName, lastName } = splitName(lead.fullName);
   const { referenceId } = context;
   const identity = resolveProductIdentity(lead);
+  const buyerText = resolveProductBuyerText(lead);
   const message = generateProductInquiryMessage({
     productName: identity.productName,
     quantity: lead.quantity,
     buyerInterest: lead.buyerInterest,
-    requirements: lead.requirements,
+    requirements: buyerText,
   });
 
   try {
@@ -284,13 +290,14 @@ async function createProductLeadRecord(
         lastName,
         email: lead.email,
         ...(lead.company ? { company: lead.company } : {}),
+        ...(lead.phone ? { phone: lead.phone } : {}),
         message,
         productName: identity.productName,
         ...(identity.catalogProductId
           ? { catalogProductId: identity.catalogProductId }
           : {}),
         ...(lead.quantity !== undefined ? { quantity: lead.quantity } : {}),
-        ...(lead.requirements ? { requirements: lead.requirements } : {}),
+        ...(buyerText ? { requirements: buyerText } : {}),
         referenceId,
         ...pickAttributionFields(lead),
       }),

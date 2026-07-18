@@ -16,3 +16,17 @@ export function sanitizeAirtableTextField(value: string): string {
   }
   return trimmed;
 }
+
+/**
+ * Phone numbers are dialable content, not spreadsheet formulas. International
+ * numbers beginning with `+` must stay unchanged so Airtable stores a callable
+ * value without a leading apostrophe. Only true formula starters (`=` / `@`)
+ * are escaped.
+ */
+export function sanitizeAirtablePhoneField(value: string): string {
+  const trimmed = value.trim();
+  if (/^[=@]/.test(trimmed)) {
+    return `'${trimmed}`;
+  }
+  return trimmed;
+}

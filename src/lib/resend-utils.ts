@@ -138,6 +138,7 @@ export class ResendUtils {
       lastName: sanitizePlainText(data.lastName),
       email: data.email.toLowerCase().trim(),
       company: data.company ? sanitizePlainText(data.company) : undefined,
+      phone: data.phone ? sanitizePlainText(data.phone) : undefined,
       productName: sanitizePlainText(data.productName),
       quantity,
       requirements: data.requirements

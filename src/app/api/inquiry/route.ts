@@ -14,6 +14,7 @@ import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { isRuntimeProduction } from "@/lib/env";
 import { type RateLimitContext } from "@/lib/api/with-rate-limit";
+import { adaptLegacyInquiryPayload } from "@/lib/lead-pipeline/inquiry-payload-adapter";
 import { processLead, type LeadResult } from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
@@ -62,17 +63,20 @@ async function validateProductInquiryTurnstile(
 function validateLeadData(
   data: Record<string, unknown>,
 ): ProductLeadValidationResult {
+  const adapted = adaptLegacyInquiryPayload(data);
   const parsed = productLeadSchema.safeParse({
     type: LEAD_TYPES.PRODUCT,
-    productInquiryKind: data.productInquiryKind,
-    fullName: data.fullName,
-    catalogProductId: data.catalogProductId,
-    buyerInterest: data.buyerInterest,
-    quantity: data.quantity,
-    requirements: data.requirements,
-    email: data.email,
-    company: data.company,
-    ...pickAttributionFields(data),
+    productInquiryKind: adapted.productInquiryKind,
+    fullName: adapted.fullName,
+    email: adapted.email,
+    phone: adapted.phone,
+    message: adapted.message,
+    catalogProductId: adapted.catalogProductId,
+    buyerInterest: adapted.buyerInterest,
+    quantity: adapted.quantity,
+    requirements: adapted.requirements,
+    company: adapted.company,
+    ...pickAttributionFields(adapted),
   });
 
   if (parsed.success) {

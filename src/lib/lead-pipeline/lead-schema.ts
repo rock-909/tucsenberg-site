@@ -7,6 +7,13 @@ import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import {
+  canonicalBuyerEmailSchema,
+  canonicalBuyerFullNameSchema,
+  canonicalBuyerMessageSchema,
+  canonicalBuyerPhoneSchema,
+  type CanonicalInquiryBuyerFields,
+} from "@/lib/lead-pipeline/canonical-buyer-fields";
+import {
   PRODUCT_INQUIRY_KINDS,
   type ProductInquiryKind,
 } from "@/lib/lead-pipeline/product-inquiry-kinds";
@@ -19,7 +26,6 @@ import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
   MAX_LEAD_EMAIL_LENGTH,
-  MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
 } from "@/constants";
@@ -33,6 +39,8 @@ export const LEAD_TYPES = {
 } as const;
 
 export type LeadType = (typeof LEAD_TYPES)[keyof typeof LEAD_TYPES];
+
+export type { CanonicalInquiryBuyerFields };
 
 export { PRODUCT_INQUIRY_KINDS, type ProductInquiryKind };
 
@@ -156,6 +164,7 @@ export const contactLeadSchema = z.object({
   company: sanitizedString()
     .max(CONTACT_FORM_VALIDATION_CONSTANTS.COMPANY_MAX_LENGTH)
     .optional(),
+  phone: canonicalBuyerPhoneSchema.optional(),
   ...baseLeadFields,
 });
 
@@ -209,17 +218,21 @@ export const productLeadSchema = z
       PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
       PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
     ]),
-    fullName: sanitizedString().min(1).max(MAX_LEAD_NAME_LENGTH),
+    fullName: canonicalBuyerFullNameSchema,
+    email: canonicalBuyerEmailSchema,
+    phone: canonicalBuyerPhoneSchema.optional(),
+    message: canonicalBuyerMessageSchema.optional(),
     catalogProductId: catalogProductIdSchema.optional(),
     buyerInterest: sanitizedString()
       .max(MAX_LEAD_PRODUCT_NAME_LENGTH)
       .optional(),
     quantity: productQuantitySchema.optional(),
     company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
+    /** @deprecated Legacy RFQ field; prefer canonical `message`. */
     requirements: multilineSanitizedString()
       .max(MAX_LEAD_REQUIREMENTS_LENGTH)
       .optional(),
-    ...baseLeadFields,
+    ...leadAttributionFields,
   })
   .superRefine((data, ctx) => {
     if (data.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT) {

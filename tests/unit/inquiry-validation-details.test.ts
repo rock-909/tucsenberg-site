@@ -64,6 +64,10 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, buyerInterest: "A".repeat(500) },
   { ...validBase, quantity: false },
   { ...validBase, quantity: {} },
+  { ...validBase, phone: "not-a-phone" },
+  { ...validBase, phone: "A".repeat(40) },
+  { ...validBase, message: 123 },
+  { ...validBase, message: "A".repeat(5000) },
   { ...validBase, requirements: 123 },
   { ...validBase, requirements: "A".repeat(5000) },
   { ...validBase, utmSource: "x".repeat(257) },
@@ -88,6 +92,8 @@ describe("inquiry validation detail mapping", () => {
     const parsed = productLeadSchema.safeParse({
       ...validBase,
       company: 123,
+      phone: true,
+      message: 999,
       requirements: 456,
       buyerInterest: 789,
     });
@@ -100,6 +106,8 @@ describe("inquiry validation detail mapping", () => {
         "errors.company.invalid",
         "errors.requirements.invalid",
         "errors.buyerInterest.invalid",
+        "errors.phone.invalid",
+        "errors.message.invalid",
       ]),
     );
     expect(mapInquiryValidationDetails(parsed.error.issues)).not.toEqual(

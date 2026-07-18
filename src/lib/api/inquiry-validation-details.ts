@@ -11,6 +11,8 @@ import {
 export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
   fullName: "errors.fullName",
   email: "errors.email",
+  phone: "errors.phone",
+  message: "errors.message",
   company: "errors.company",
   productInquiryKind: "errors.productInquiryKind",
   catalogProductId: "errors.catalogProductId",
@@ -31,6 +33,8 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.email.required",
   "errors.email.invalid",
   "errors.email.tooLong",
+  "errors.phone.invalid",
+  "errors.message.invalid",
   "errors.company.tooLong",
   "errors.company.invalid",
   "errors.productInquiryKind.invalid",

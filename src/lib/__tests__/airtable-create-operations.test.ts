@@ -357,6 +357,35 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
+    it("preserves plus-addressing accepted by Airtable's Email field without a leading apostrophe on phone", async () => {
+      const service = new AirtableServiceClass();
+      setServiceReady(service);
+      mockCreate.mockResolvedValue([
+        createMockRecord({
+          id: "rec-plus-phone",
+          fields: {},
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await service.createLead("product", {
+        firstName: "Pat",
+        lastName: "Lee",
+        email: "pat@example.com",
+        phone: "+8613800138000",
+        message: "Product inquiry",
+        productName: "ABS Flood Barriers",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith([
+        {
+          fields: expect.objectContaining({
+            "WhatsApp / Phone": "+8613800138000",
+          }),
+        },
+      ]);
+    });
+
     it("neutralizes spreadsheet formula prefixes in product lead text fields", async () => {
       const service = new AirtableServiceClass();
       setServiceReady(service);

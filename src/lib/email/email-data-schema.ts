@@ -50,6 +50,7 @@ export const productInquiryEmailDataSchema = z.object({
   lastName: z.string(),
   email: z.email(),
   company: z.string().optional(),
+  phone: z.string().optional(),
   productName: z.string(),
   quantity: z.union([z.string(), z.number()]).optional(),
   requirements: z.string().optional(),

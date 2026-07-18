@@ -136,6 +136,24 @@ export function composeInquiryDescription(parts: {
 }
 
 /**
+ * Resolve the buyer's optional free-text description for product inquiries.
+ * Canonical `message` wins; legacy `requirements` remains until D6e retires
+ * the old RFQ payload builder.
+ */
+export function resolveProductBuyerText(parts: {
+  message?: string | undefined;
+  requirements?: string | undefined;
+}): string | undefined {
+  const canonical = parts.message?.trim();
+  if (canonical) {
+    return canonical;
+  }
+
+  const legacy = parts.requirements?.trim();
+  return legacy ? legacy : undefined;
+}
+
+/**
  * Generate a reference ID for lead tracking
  *
  * Uses cryptographically secure random bytes instead of Math.random()

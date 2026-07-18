@@ -85,7 +85,8 @@
         "message": {
           "required": "Message is required",
           "tooShort": "Message must be at least 10 characters",
-          "tooLong": "Message must be less than 1000 characters"
+          "tooLong": "Message must be less than 1000 characters",
+          "invalid": "Message contains invalid characters"
         },
         "phone": {
           "invalid": "Please enter a valid phone number"
