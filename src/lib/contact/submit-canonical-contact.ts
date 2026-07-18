@@ -359,7 +359,6 @@ async function processValidatedContactSubmission(
     fullName: formData.fullName || "Unknown",
     email: formData.email,
     company: formData.company,
-    ...(formData.phone ? { phone: formData.phone } : {}),
     ...createOptionalSubject(formData.subject),
     message: formData.message,
     turnstileToken: formData.turnstileToken,

@@ -230,9 +230,6 @@ export function buildProductInquiryEmailContent(
     data.company
       ? { label: EMAIL_COPY.common.fields.company, value: data.company }
       : null,
-    data.phone
-      ? { label: EMAIL_COPY.common.fields.phone, value: data.phone }
-      : null,
     data.requirements
       ? {
           label: EMAIL_COPY.common.fields.requirements,

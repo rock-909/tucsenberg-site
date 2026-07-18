@@ -16,7 +16,6 @@ const validLeadData = {
   email: "john.doe@example.com",
   company: "Test Company",
   message: "Test message",
-  phone: "+1234567890",
 };
 
 function createMockBase(create: ReturnType<typeof vi.fn>) {
@@ -33,8 +32,7 @@ describe("createLeadRecord error logging", () => {
   it("logs errorType and statusCode for Airtable SDK-style plain errors", async () => {
     const airtableError = {
       error: "INVALID_VALUE_FOR_COLUMN",
-      message:
-        'Field "WhatsApp / Phone" cannot accept the provided value: +1234567890',
+      message: 'Field "Company" cannot accept the provided value: Test Company',
       statusCode: 422,
     };
 
@@ -64,7 +62,7 @@ describe("createLeadRecord error logging", () => {
       unknown
     >;
     expect(logContext).not.toHaveProperty("message");
-    expect(JSON.stringify(logContext)).not.toContain("+1234567890");
+    expect(JSON.stringify(logContext)).not.toContain("Test Company");
     expect(JSON.stringify(logContext)).not.toContain("john.doe@example.com");
     expect(logContext.error).not.toBe("Unknown error");
   });

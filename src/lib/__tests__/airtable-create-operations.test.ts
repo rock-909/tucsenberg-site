@@ -14,6 +14,8 @@ import type {
   AirtableServicePrivate,
 } from "@/test/test-types";
 import type { AirtableService as AirtableServiceType } from "../airtable/service";
+import type { ProductLeadData } from "@/lib/airtable/types";
+import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import {
   configureServiceForTesting,
   createMockBase,
@@ -353,62 +355,32 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
-    it("preserves plus-addressing accepted by Airtable's Email field without a leading apostrophe on phone", async () => {
+    it("does not write WhatsApp / Phone for product inquiry leads", async () => {
       const service = new AirtableServiceClass();
       setServiceReady(service);
-      mockCreate.mockResolvedValue([
+      mockCreate.mockResolvedValueOnce([
         createMockRecord({
-          id: "rec-plus-phone",
+          id: "rec-no-phone",
           fields: {},
           createdTime: "2023-01-01T00:00:00Z",
         }),
       ]);
 
-      await service.createLead("product", {
-        firstName: "Pat",
-        lastName: "Lee",
-        email: "pat@example.com",
+      await service.createLead(LEAD_TYPES.PRODUCT, {
+        firstName: "Ada",
+        lastName: "Buyer",
+        email: "ada@example.com",
+        message: "Need quote",
+        productName: "General RFQ",
+        requirements: "Need quote",
         phone: "+8613800138000",
-        message: "Product inquiry",
-        productName: "ABS Flood Barriers",
-      });
+      } as unknown as ProductLeadData);
 
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            "WhatsApp / Phone": "+8613800138000",
-          }),
-        },
-      ]);
-    });
-
-    it("escapes spreadsheet formula prefixes on phone except validated leading + numbers", async () => {
-      const service = new AirtableServiceClass();
-      setServiceReady(service);
-      mockCreate.mockResolvedValue([
-        createMockRecord({
-          id: "rec-formula-phone",
-          fields: {},
-          createdTime: "2023-01-01T00:00:00Z",
-        }),
-      ]);
-
-      await service.createLead("product", {
-        firstName: "Pat",
-        lastName: "Lee",
-        email: "pat@example.com",
-        phone: "-123456",
-        message: "Product inquiry",
-        productName: "ABS Flood Barriers",
-      });
-
-      expect(mockCreate).toHaveBeenCalledWith([
-        {
-          fields: expect.objectContaining({
-            "WhatsApp / Phone": "'-123456",
-          }),
-        },
-      ]);
+      const createCall = mockCreate.mock.calls[0]?.[0];
+      expect(createCall).toBeDefined();
+      const firstRecord = createCall?.[0];
+      expect(firstRecord).toBeDefined();
+      expect(firstRecord?.fields).not.toHaveProperty("WhatsApp / Phone");
     });
 
     it("neutralizes spreadsheet formula prefixes in product lead text fields", async () => {

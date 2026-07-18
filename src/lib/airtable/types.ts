@@ -38,7 +38,6 @@ export interface ContactLeadData extends BaseLeadData {
   company?: string;
   subject?: string;
   message: string;
-  phone?: string;
 }
 
 // Product inquiry lead data.
@@ -52,7 +51,6 @@ export interface ProductLeadData extends BaseLeadData {
   lastName: string;
   company?: string;
   message: string;
-  phone?: string;
   productName: string;
   catalogProductId?: string;
   quantity?: string | number;
