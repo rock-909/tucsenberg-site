@@ -55,7 +55,6 @@ export type ValidatedInquiryContext =
       kind: "catalog-context";
       catalogProductId: ProductMarketSlug;
       displayLabel: string;
-      buyerInterest?: string;
       initialMessage?: string;
     }
   | {
@@ -67,17 +66,16 @@ export type ValidatedInquiryContext =
 
 The discriminant is an internal prop only. It is never rendered as a form control and never trusted from a buyer payload.
 
-The same module creates catalog Request Quote links. The public query uses `catalogProductId` for the product and keeps `config` for the visible editable message. A legacy or manually supplied `interest` remains description-only and is capped before use.
+The same module creates catalog Request Quote links. The public query uses `catalogProductId` for the product and keeps `config` for the visible editable message. A legacy or manually supplied `interest` is capped and kept only after the handoff downgrades to `general-context`; when a valid catalog ID resolves to `catalog-context`, `interest` is discarded.
 
 ### Request Quote page validates first
 
 `src/app/[locale]/request-quote/page.tsx` accepts the Next.js 16 async `searchParams` prop. It resolves the context before rendering `InquiryForm`:
 
-- valid catalog ID -> `catalog-context`
+- valid catalog ID -> `catalog-context`; `interest` is discarded
 - missing catalog ID -> `general-context`
-- invalid, repeated or forged catalog ID -> `general-context`, with the forged value discarded
-- `interest` -> optional description only
-- `config` -> optional capped initial message, visible in the textarea and editable/clearable
+- invalid, repeated or forged catalog ID -> `general-context`, with the forged value discarded; capped `interest` may become `buyerInterest`
+- `config` -> optional capped initial message, visible in the textarea and editable/clearable in either context
 
 Reading `searchParams` makes this page request-rendered. That is an accepted consequence of validating request-specific handoff state on the server.
 
@@ -85,9 +83,8 @@ Reading `searchParams` makes this page request-rendered. That is an accepted con
 
 `InquiryForm` receives `context` as a prop and stops reading `window.location.search`.
 
-- `catalog-context` submits `productInquiryKind: "catalog-product"` plus the validated `catalogProductId`
-- `general-context` submits `productInquiryKind: "general-rfq"` and no catalog ID
-- `buyerInterest`, when present, is description only in either state
+- `catalog-context` submits `productInquiryKind: "catalog-product"` plus the validated `catalogProductId`; it does not submit `buyerInterest` even if `interest` was in the URL
+- `general-context` submits `productInquiryKind: "general-rfq"` and no catalog ID; optional capped `interest` becomes description-only `buyerInterest`
 - `initialMessage` is rendered in the existing visible textarea and can be edited or cleared
 - attribution, honeypot and Turnstile behavior remain unchanged
 
@@ -108,9 +105,10 @@ Two product-copy footers currently contain separate plain Request Quote links. T
 | Input | Page context | Submitted identity |
 | --- | --- | --- |
 | No product query | `general-context` | general RFQ |
-| Valid `catalogProductId` | `catalog-context` | catalog product |
-| Unknown product ID | `general-context` | general RFQ; forged value dropped |
-| Repeated product ID | `general-context` | general RFQ |
+| Valid `catalogProductId` | `catalog-context` | catalog product; `interest` dropped |
+| Valid product plus `interest` | `catalog-context` | catalog product; `interest` dropped |
+| Unknown product ID | `general-context` | general RFQ; forged value dropped; capped `interest` may become `buyerInterest` |
+| Repeated product ID | `general-context` | general RFQ; capped `interest` may become `buyerInterest` |
 | Valid product plus estimator `config` | `catalog-context` | catalog product; config remains editable message |
 | Direct API request with invalid catalog ID | n/a | 400 validation error |
 
@@ -122,7 +120,7 @@ Behavior-first tests must prove:
 2. handoff parsing accepts one valid product ID and downgrades invalid/repeated IDs;
 3. link generation uses one query contract for product CTAs and calculators;
 4. Request Quote passes server-validated context to the shared form;
-5. catalog context produces a catalog payload, while general context cannot carry a catalog ID;
+5. catalog context produces a catalog payload without `buyerInterest`, while general context may carry description-only `buyerInterest` and cannot carry a catalog ID;
 6. estimator text is visible, editable and clearable;
 7. contact remains a general inquiry;
 8. attribution and honeypot fields survive the new payload branch;
