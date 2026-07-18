@@ -94,12 +94,18 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /support, or partnership opportunities/iu,
   /configure a real receiver before public launch/iu,
 ];
-const HYPHEN_HOUR_QUOTE_PATTERN =
-  /\b(?:12|48)-hour\b.{0,15}\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b|\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b.{0,15}\b(?:12|48)-hour\b/iu;
+const REQUEST_INTENT_PHRASES = [
+  /request\s+a\s+quotes?/giu,
+  /quote\s+requests?/giu,
+  /quotation\s+requests?/giu,
+] as const;
 const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
   /get exact pricing in 12 hours/iu,
   /12-hour response on standard/iu,
 ] as const;
+const TIMING_12 = /\b(?:12\s*-?\s*hours?|12-hour)\b/iu;
+const TIMING_48 = /\b(?:48\s*-?\s*hours?|48-hour)\b/iu;
+const QUOTE_TERMS = /\b(?:quotes?|quoted|quotations?)\b/iu;
 
 const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   {
@@ -122,6 +128,10 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
     label: "48-hour before custom quote",
     text: "48-hour custom quote review for non-standard openings.",
   },
+  {
+    label: "48-hour custom quotation",
+    text: "Within 48 hours, custom projects receive a quotation.",
+  },
 ] as const;
 
 const ALLOWED_QUOTE_TIME_FIXTURES = [
@@ -136,6 +146,10 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   {
     label: "approved conditional reply copy",
     text: "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+  },
+  {
+    label: "custom quotes separate from shipping timing",
+    text: "Custom quotes exclude freight; shipping within 48 hours.",
   },
 ] as const;
 
@@ -159,40 +173,40 @@ const INQUIRY_RESPONSE_OWNER_FILES = [
   "src/lib/contact/getContactCopy.ts",
 ] as const;
 
-function hasQuoteToHourPromise(text: string): boolean {
-  const quoteTermPattern =
-    /\b(?:quotes?|quoted|quotations?|custom\s+quotes?)\b/giu;
+function stripRequestIntent(clause: string): string {
+  return REQUEST_INTENT_PHRASES.reduce(
+    (text, pattern) => text.replace(pattern, " "),
+    clause,
+  );
+}
 
-  for (const match of text.matchAll(quoteTermPattern)) {
-    if (match.index === undefined) {
-      continue;
-    }
+function normalizeQuoteTimingClause(clause: string): string {
+  const withoutLinks = clause.replace(
+    /\[([^\]]*)\]\([^)]*\)/gu,
+    (_match, linkText: string) => linkText,
+  );
 
-    const quoteContext = text.slice(
-      Math.max(0, match.index - 12),
-      match.index + match[0].length + 12,
-    );
-    if (/\brequest\s+a\s+quotes?\b/iu.test(quoteContext)) {
-      continue;
-    }
+  return stripRequestIntent(withoutLinks).replace(/\/?request-quote\b/giu, " ");
+}
 
-    const afterQuote = text.slice(match.index + match[0].length);
-    const hourPromise = afterQuote.match(
-      /^[^.]{0,40}\b(?:within|in)\b[^.]{0,20}\b(?:12|48)(?:\s*-?\s*hours?|\s*hour|\b)/iu,
-    );
+function splitCopyClauses(text: string): string[] {
+  return text
+    .split(/[;\n\r]+|(?<=[.!?])\s+|\s—\s/u)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause.length > 0);
+}
 
-    if (!hourPromise) {
-      continue;
-    }
+function isForbiddenQuoteTimeClause(clause: string): boolean {
+  const text = normalizeQuoteTimingClause(clause);
 
-    if (/\breply\b/iu.test(hourPromise[0])) {
-      continue;
-    }
-
+  if (TIMING_12.test(text) && QUOTE_TERMS.test(text)) {
     return true;
   }
 
-  return false;
+  return (
+    TIMING_48.test(text) &&
+    (QUOTE_TERMS.test(text) || /\bcustom\b/iu.test(text))
+  );
 }
 
 function collectJsonStringValues(value: unknown): string[] {
@@ -212,29 +226,23 @@ function collectJsonStringValues(value: unknown): string[] {
 }
 
 function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
-  if (repoPath.endsWith(".json")) {
-    return collectJsonStringValues(JSON.parse(source) as unknown);
-  }
+  const strings = repoPath.endsWith(".json")
+    ? collectJsonStringValues(JSON.parse(source) as unknown)
+    : [source];
 
-  return source
-    .split(/\r?\n/u)
-    .flatMap((line) => line.split(/(?<=[.!?])\s+/u))
-    .map((unit) => unit.trim())
-    .filter((unit) => unit.length > 0);
+  return strings.flatMap((text) => splitCopyClauses(text));
 }
 
 function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
-  if (hasQuoteToHourPromise(text)) {
+  if (
+    FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS.some((pattern) =>
+      pattern.test(text),
+    )
+  ) {
     return true;
   }
 
-  if (HYPHEN_HOUR_QUOTE_PATTERN.test(text)) {
-    return true;
-  }
-
-  return FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS.some((pattern) =>
-    pattern.test(text),
-  );
+  return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
 }
 
 function stripRetiredInquiryMessageSubtrees(source: string, repoPath: string) {
