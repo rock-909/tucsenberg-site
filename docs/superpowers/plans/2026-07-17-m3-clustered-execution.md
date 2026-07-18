@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): BLOCKED_BY_EXTERNAL_PREREQUISITE.** C2 code PR #130 — code complete, not accepted, not merged; live head/base/CI via `gh pr view 130 --json headRefOid,baseRefOid,statusCheckRollup` (do not pin SHAs in this plan). **PR #134 merged** (2026-07-18): C2 Airtable proof workflow security follow-up (run-script interpolation/summary injection fail-closed, CODEOWNERS boundary); **not counted among the 33 formal M3 tasks**. **Historical evidence (2026-07-18 diagnostic session, not live SHA/CI):** metadata runs `29638514971` (`a25a2d6`), `29638714341` (`ead2c8b`), and `29639005523` (`4288e3e`) prove the Base has only table `Contacts`, exact column `WhatsApp / Phone` is missing with no reusable phone/WhatsApp field to rename, and Metadata API field creation fails HTTP 403 `INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND` with the current GitHub `AIRTABLE_API_KEY` (metadata read succeeded; schema create denied on run `29639005523`; record create/read/delete and record-write permission remain unproven until a green final-SHA `airtable-phone-proof.yml`). In the 2026-07-18 diagnostic session no controllable browser was connected, so that session could not create the field via UI. C2 = CODE_COMPLETE_EXTERNAL_PROOF_BLOCKED; D6a and D5a do not start; diagnostic branch `test/airtable-metadata-diagnostic-c2` is not for merge. Recovery: (1) unblock the missing column by either manually adding single line text `WhatsApp / Phone` on `Contacts` or updating `AIRTABLE_API_KEY` to a PAT with `schema.bases:write` and Base editor access; (2) rebase #130 onto latest main before merge; (3) wait for all default CI checks on the new exact head SHA; (4) dispatch `airtable-phone-proof.yml` on that final SHA with `Contacts`; (5) if proof fails, inspect record data scopes and Base/table record access from the new error; (6) if green, verify `run.headSha`, stored value `+8613800138000`, no leading apostrophe, and canary cleanup, then accept/merge C2 (24/33) and continue D6a → D5a. Recovery dispatch details: `docs/项目基础/发布验证.md`. This blocker is not an R'12 deferral; no other legal M3 task remains; M2 stays paused; do not claim public launch readiness.
+M3 merged 23/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Next execution face: Cluster 3A**. **Cluster 3A runtime status (2026-07-18): ACTIVE.** C2 code PR #130 — revised to three-field contract per R'13 (`docs/superpowers/plans/2026-07-18-three-field-public-inquiry-retirement.md`); live head/base/CI via `gh pr view 130`. **PR #134 merged** (2026-07-18): C2 Airtable proof workflow security follow-up; **not counted among the 33 formal M3 tasks**; proof infrastructure retired by R'13. **Historical note (2026-07-18 diagnostic):** Base lacked `WhatsApp / Phone` column; that diagnosis motivated R'13 and is no longer a merge gate. **M3 remains 23/33 until revised C2 merges → 24/33 → D6a → D5a.** Do not claim public launch readiness.
 
 ---
 
@@ -253,46 +253,37 @@ pnpm type-check
 
 ## 4. Cluster 3A: canonical inquiry contract and buyer-facing form
 
-Three-stage external gate:
-
-1. C2 implementation may start against the fixed field name `WhatsApp / Phone`; mocks and fixtures may support development but do not satisfy the external gate.
-2. C2 cannot be marked `READY_FOR_CLUSTER`, accepted or merged until a real Airtable write proves that exact column exists and receives the normalized phone value.
-3. Cluster 3A cannot be accepted until the finished form proves the full browser -> `/api/inquiry` -> canonical schema -> Airtable path and the final record contains the same value.
-
-If account access or the real column is unavailable, record `BLOCKED_BY_EXTERNAL_PREREQUISITE`. D6a and D5a do not start, and no mock-only result may substitute for either real proof.
-
-**Current blocker (2026-07-18):** PR #130 implements C2 — code complete, not accepted, not merged; live head/base/CI via `gh pr view 130`. PR #134 (proof workflow security follow-up) is merged on main and does not count toward the 33 formal tasks. **Historical evidence (2026-07-18 diagnostic session):** runs `29638514971` (`a25a2d6`), `29638714341` (`ead2c8b`), and `29639005523` (`4288e3e`) prove: only table `Contacts`; exact column `WhatsApp / Phone` absent with no reusable phone/WhatsApp field; metadata read succeeded; Metadata API `singleLineText` create → HTTP 403 `INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND` (schema create denied); record create/read/delete and record-write permission remain unproven until a green final-SHA `airtable-phone-proof.yml`. Status: CODE_COMPLETE_EXTERNAL_PROOF_BLOCKED. In the 2026-07-18 diagnostic session no controllable browser was connected, so that session could not create the field via UI. Do not mark C2 READY, do not merge C2, do not start D6a/D5a early. `test/airtable-metadata-diagnostic-c2` is not for merge. Recovery: (1) unblock the missing column by either manually adding single line text `WhatsApp / Phone` on `Contacts` or upgrading to a schema-write PAT; (2) rebase #130 onto latest main before merge; (3) wait for all default CI checks on the new exact head SHA; (4) dispatch `airtable-phone-proof.yml` on that final SHA with `Contacts`; (5) if proof fails, inspect record data scopes and Base/table record access from the new error; (6) if green, verify `run.headSha`, `+8613800138000`, no leading apostrophe, canary cleanup, then accept/merge C2 and continue D6a → D5a.
+**Status (2026-07-18): ACTIVE.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. Implementation plan: `docs/superpowers/plans/2026-07-18-three-field-public-inquiry-retirement.md`. **Historical note:** 2026-07-18 Airtable diagnosis found no `WhatsApp / Phone` column; that motivated R'13 and is no longer a merge gate. PR #134 proof infrastructure is retired. **M3 remains 23/33 until revised C2 merges.**
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
 **Base:** Cluster 2 CLOSED main.
 **Files:** `src/lib/lead-pipeline/lead-schema.ts`, `src/lib/lead-pipeline/process-lead.ts`, `src/lib/lead-pipeline/utils.ts`, `src/lib/airtable/types.ts`, `src/lib/airtable/service-internal/lead-records.ts`, `src/lib/resend-utils.ts`, `src/lib/resend-core.tsx`, `src/lib/api/inquiry-validation-details.ts`, related lead/Airtable/Resend tests and message keys.
 
-- [ ] Add failing tests for the fixed contract: `fullName` and `email` required; `phone` and `message` optional; no company/subject/quantity requirement; phone/message traverse schema, owner email and Airtable; attribution survives; invalid catalog identity is rejected; general inquiry succeeds without product context.
+- [ ] Add failing tests for the fixed contract: `fullName` and `email` required; `message` optional; extra `phone` silently dropped; no company/subject/quantity requirement; message traverses schema, owner email and Airtable; attribution survives; invalid catalog identity is rejected; general inquiry succeeds without product context.
 - [ ] Make the canonical input own these buyer fields:
 
 ```ts
 interface CanonicalInquiryBuyerFields {
   fullName: string;
   email: string;
-  phone?: string;
   message?: string;
 }
 ```
 
 - [ ] Keep product/source/UTM context as trusted server context, not visible required fields. Temporary Contact/RFQ adapters may map old payloads into this contract but cannot define separate rules.
-- [ ] Update the owner email and Airtable record mapping to use the same normalized phone/message values. Preserve the current rule that the buyer succeeds when at least one delivery channel succeeds; do not make Airtable mandatory for the user-facing response.
+- [ ] Update the owner email and Airtable record mapping to use the same normalized message value only (no buyer phone). Preserve the current rule that the buyer succeeds when at least one delivery channel succeeds; do not make Airtable mandatory for the user-facing response.
 - [ ] Run lead schema, process-lead, multiline, Airtable create, Resend and inquiry integration tests; `pnpm type-check`; `pnpm content:check`; `pnpm build`.
-- [ ] Perform the direct real Airtable column write proof on the exact C2 SHA. The record must contain the normalized value in `WhatsApp / Phone`; an international number beginning with `+` must not gain a leading apostrophe. Commit `refactor: establish the canonical low-friction inquiry contract`; push and mark `READY_FOR_CLUSTER` only after this proof succeeds.
+- [ ] Commit `refactor: establish the canonical low-friction inquiry contract`; push and mark `READY_FOR_CLUSTER` when exact-SHA CI is green.
 
-### Task D6a: render one fixed four-field InquiryForm on both pages
+### Task D6a: render one fixed three-field InquiryForm on both pages
 
 **Base:** green C2 head.
 **Create:** `src/components/forms/inquiry-form.tsx`, `src/components/forms/inquiry-form-static-fallback.tsx`, `src/components/forms/__tests__/inquiry-form.test.tsx`.
 **Modify:** Contact and Request Quote pages, their tests, messages, product/estimator handoff readers.
 **Do not create:** a schema/config-driven universal form engine.
 
-- [ ] Add failing component/page tests proving both pages render the same field names and labels: `fullName`, `email`, optional `phone`, optional `message`; no company, subject, product selector, quantity, dimensions, country, port, budget, upload or multi-step controls.
+- [ ] Add failing component/page tests proving both pages render the same field names and labels: `fullName`, `email`, optional `message`; **no `phone`, no `input[type=tel]`**; no company, subject, product selector, quantity, dimensions, country, port, budget, upload or multi-step controls.
 - [ ] Add failing tests for empty optional fields, autofill attributes, keyboard submit, field/server/security error classes, `?interest=` length cap, visible editable estimator summary, normal inquiry without product context, and no-JS explanation instead of a fake submit control.
 - [ ] Implement one `InquiryForm` that submits `/api/inquiry` and uses existing `useLeadFormSubmission` only where it reduces duplication. Keep page-specific headings/SEO outside the form.
 - [ ] Move product/estimator context into hidden or server-validated context fields; do not ask the buyer to select internal product identity.
@@ -304,7 +295,7 @@ interface CanonicalInquiryBuyerFields {
 **Base:** green D6a head.
 **Files:** `src/app/globals.css`, static theme color owner, `src/components/forms/inquiry-form.tsx`, `src/components/ui/theme-switcher.tsx`, navigation/Footer/breadcrumb messages and a11y tests.
 
-- [ ] Add failing tests for field-level `aria-invalid`/`aria-describedby`, required markers only on name/email, optional labels on phone/message, theme-switcher `role="group"`/`aria-pressed`, and translated navigation/Footer/breadcrumb labels.
+- [ ] Add failing tests for field-level `aria-invalid`/`aria-describedby`, required markers only on name/email, optional label on message only, theme-switcher `role="group"`/`aria-pressed`, and translated navigation/Footer/breadcrumb labels.
 - [ ] Recalculate light/dark muted foreground contrast and update only the owning tokens. Add `--primary-text` to static theme colors; remove the four audited dead keys only after live search.
 - [ ] Keep the error summary and add individual field errors below their controls. Remove redundant aria labels/`aria-haspopup="dialog"` only where native semantics already supply the name/role.
 - [ ] Run a11y/component tests, axe E2E on both pages, `pnpm component:check`, `pnpm website:check`.
@@ -312,8 +303,8 @@ interface CanonicalInquiryBuyerFields {
 
 ### Cluster 3A acceptance
 
-- [ ] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run the full browser-to-Airtable phone proof and assert the final record's `WhatsApp / Phone` value; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
-- [ ] Handoff must include screenshots/DOM evidence for the four-field contract and the Airtable record receipt. Stop for cluster acceptance.
+- [ ] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
+- [ ] Handoff must include screenshots/DOM evidence for the three-field contract. Stop for cluster acceptance.
 
 ---
 

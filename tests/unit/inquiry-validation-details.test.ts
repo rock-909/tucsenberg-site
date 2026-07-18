@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { MAX_LEAD_MESSAGE_LENGTH } from "@/constants/validation-limits";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   mapInquiryValidationDetails,
+  PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
   PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS,
 } from "@/lib/api/inquiry-validation-details";
 import { mapZodIssuesToValidationDetails } from "@/lib/api/validation-error-details";
@@ -64,8 +66,8 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, buyerInterest: "A".repeat(500) },
   { ...validBase, quantity: false },
   { ...validBase, quantity: {} },
-  { ...validBase, requirements: 123 },
-  { ...validBase, requirements: "A".repeat(5000) },
+  { ...validBase, message: 123 },
+  { ...validBase, message: "A".repeat(5000) },
   { ...validBase, utmSource: "x".repeat(257) },
   { ...validBase, utmSource: 42 },
   { ...validBase, gclid: true },
@@ -84,11 +86,52 @@ describe("inquiry validation detail mapping", () => {
     }
   });
 
+  it("accepts message when raw length exceeds max but normalization shrinks below max", () => {
+    const rawMessage = `Hello${" ".repeat(MAX_LEAD_MESSAGE_LENGTH)}world`;
+
+    expect(rawMessage.length).toBeGreaterThan(MAX_LEAD_MESSAGE_LENGTH);
+
+    const parsed = productLeadSchema.safeParse({
+      ...validBase,
+      message: rawMessage,
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.message).toBe("Hello world");
+      expect(parsed.data.message!.length).toBeLessThanOrEqual(
+        MAX_LEAD_MESSAGE_LENGTH,
+      );
+    }
+  });
+
+  it("maps canonical message too_long to errors.message.tooLong after normalization", () => {
+    const tooLong = productLeadSchema.safeParse({
+      ...validBase,
+      message: "A".repeat(MAX_LEAD_MESSAGE_LENGTH + 1),
+    });
+    const wrongType = productLeadSchema.safeParse({
+      ...validBase,
+      message: 123,
+    });
+
+    expect(tooLong.success).toBe(false);
+    expect(wrongType.success).toBe(false);
+    if (tooLong.success || wrongType.success) return;
+
+    expect(mapInquiryValidationDetails(tooLong.error.issues)).toEqual([
+      "errors.message.tooLong",
+    ]);
+    expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
+      "errors.message.invalid",
+    ]);
+  });
+
   it("maps wrong-type issues to .invalid instead of .required", () => {
     const parsed = productLeadSchema.safeParse({
       ...validBase,
       company: 123,
-      requirements: 456,
+      message: 999,
       buyerInterest: 789,
     });
 
@@ -98,14 +141,13 @@ describe("inquiry validation detail mapping", () => {
     expect(mapInquiryValidationDetails(parsed.error.issues)).toEqual(
       expect.arrayContaining([
         "errors.company.invalid",
-        "errors.requirements.invalid",
         "errors.buyerInterest.invalid",
+        "errors.message.invalid",
       ]),
     );
     expect(mapInquiryValidationDetails(parsed.error.issues)).not.toEqual(
       expect.arrayContaining([
         "errors.company.required",
-        "errors.requirements.required",
         "errors.buyerInterest.required",
       ]),
     );
@@ -131,6 +173,13 @@ describe("inquiry validation detail mapping", () => {
     expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
       "errors.generic",
     ]);
+  });
+
+  it("does not expose phone validation detail keys", () => {
+    expect(PRODUCT_INQUIRY_FIELD_ERROR_KEYS).not.toHaveProperty("phone");
+    expect(PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS).not.toContain(
+      "errors.phone.invalid",
+    );
   });
 
   it("keeps emitted details equal to the declared inquiry contract", () => {

@@ -134,6 +134,25 @@ const VALID_INQUIRY_BODY = {
   requirements: "Custom packaging",
 };
 
+const CANONICAL_BUYER_MESSAGE =
+  "SINK-PROOF-2026-07-18\nLine A: need <custom> height\nLine B: finish & timeline";
+
+const CANONICAL_MESSAGE_INQUIRY_BODY = {
+  turnstileToken: "valid-turnstile-token",
+  productInquiryKind: "general-rfq",
+  fullName: "Jane Buyer",
+  email: "buyer@example.com",
+  message: CANONICAL_BUYER_MESSAGE,
+};
+
+const LEGACY_REQUIREMENTS_INQUIRY_BODY = {
+  turnstileToken: "valid-turnstile-token",
+  productInquiryKind: "general-rfq",
+  fullName: "Jane Buyer",
+  email: "buyer@example.com",
+  requirements: "Legacy RFQ note from requirements field",
+};
+
 // Display name is resolved server-side from the catalog registry, not the client.
 const CATALOG_PRODUCT_LABEL = "ABS Interlocking Boxwall";
 
@@ -214,6 +233,48 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect((resendBody.subject as string).length).toBeGreaterThan(0);
     expect(typeof resendBody.html).toBe("string");
     expect(typeof resendBody.text).toBe("string");
+  });
+
+  it("forwards canonical message through Airtable Requirements and owner email sinks", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(CANONICAL_MESSAGE_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+
+    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    const fields = getCapturedAirtableFields();
+    expect(fields["Requirements"]).toBe(CANONICAL_BUYER_MESSAGE);
+
+    const resendCalls = getResendCalls();
+    expect(resendCalls).toHaveLength(1);
+    const resendBody = parseJsonBody(resendCalls[0]?.init);
+    const html = resendBody.html as string;
+    const text = resendBody.text as string;
+
+    expect(html).toContain("SINK-PROOF-2026-07-18");
+    expect(html).toContain("&lt;custom&gt;");
+    expect(html).toContain("finish &amp; timeline");
+    expect(html).not.toContain("need <custom> height");
+
+    expect(text).toContain(`Requirements: ${CANONICAL_BUYER_MESSAGE}`);
+  });
+
+  it("maps legacy requirements into Airtable Requirements when message is absent", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(LEGACY_REQUIREMENTS_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+
+    const fields = getCapturedAirtableFields();
+    expect(fields["Requirements"]).toBe(
+      LEGACY_REQUIREMENTS_INQUIRY_BODY.requirements,
+    );
   });
 
   it("invalid payload: rejects with a validation code and touches no external sink", async () => {

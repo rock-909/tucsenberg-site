@@ -8,8 +8,8 @@ import "server-only";
 // import type 仅用于类型提示，实际模块在运行时按需加载
 import type AirtableNS from "airtable";
 import type {
-  AirtableRecord,
   ContactLeadData,
+  CreatedAirtableRecord,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { env, getRuntimeEnvString } from "@/lib/env";
@@ -152,7 +152,7 @@ export class AirtableService {
   public async createLead(
     type: LeadType,
     data: ContactLeadData | ProductLeadData,
-  ): Promise<AirtableRecord> {
+  ): Promise<CreatedAirtableRecord> {
     const base = await this.requireBase();
     return createLeadRecord({ base, tableName: this.tableName, type, data });
   }

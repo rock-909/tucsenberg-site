@@ -11,12 +11,12 @@ import {
 export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
   fullName: "errors.fullName",
   email: "errors.email",
+  message: "errors.message",
   company: "errors.company",
   productInquiryKind: "errors.productInquiryKind",
   catalogProductId: "errors.catalogProductId",
   buyerInterest: "errors.buyerInterest",
   quantity: "errors.quantity",
-  requirements: "errors.requirements",
 } as const satisfies ValidationFieldErrorKeys;
 
 /**
@@ -31,6 +31,8 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.email.required",
   "errors.email.invalid",
   "errors.email.tooLong",
+  "errors.message.invalid",
+  "errors.message.tooLong",
   "errors.company.tooLong",
   "errors.company.invalid",
   "errors.productInquiryKind.invalid",
@@ -39,8 +41,6 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.buyerInterest.tooLong",
   "errors.buyerInterest.invalid",
   "errors.quantity.invalid",
-  "errors.requirements.invalid",
-  "errors.requirements.tooLong",
 ] as const;
 
 export function mapInquiryValidationDetails(

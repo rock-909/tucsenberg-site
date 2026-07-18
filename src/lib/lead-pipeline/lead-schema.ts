@@ -7,6 +7,11 @@ import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import {
+  canonicalBuyerEmailSchema,
+  canonicalBuyerFullNameSchema,
+  canonicalBuyerMessageSchema,
+} from "@/lib/lead-pipeline/canonical-buyer-fields";
+import {
   PRODUCT_INQUIRY_KINDS,
   type ProductInquiryKind,
 } from "@/lib/lead-pipeline/product-inquiry-kinds";
@@ -14,12 +19,9 @@ import {
   sanitizeMultilineText,
   sanitizePlainText,
 } from "@/lib/security/validation";
-import { hasSpreadsheetFormulaPrefix } from "@/lib/security/spreadsheet-formula";
 import type { AttributionFieldName } from "@/lib/marketing/attribution-fields";
 import {
   MAX_LEAD_COMPANY_LENGTH,
-  MAX_LEAD_EMAIL_LENGTH,
-  MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
   MAX_LEAD_REQUIREMENTS_LENGTH,
 } from "@/constants";
@@ -61,15 +63,6 @@ const multilineSanitizedString = () =>
   z.string().overwrite(sanitizeMultilineText);
 const MAX_ATTRIBUTION_FIELD_LENGTH = 256;
 
-// Airtable's Email field stays a real email value; reject formula-capable
-// prefixes here instead of corrupting valid addresses with text escaping.
-const leadEmailSchema = z
-  .email()
-  .trim()
-  .min(1)
-  .max(MAX_LEAD_EMAIL_LENGTH)
-  .refine((email) => !hasSpreadsheetFormulaPrefix(email));
-
 export const leadAttributionFields = {
   utmSource: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
   utmMedium: sanitizedString().max(MAX_ATTRIBUTION_FIELD_LENGTH).optional(),
@@ -108,7 +101,7 @@ function isValidProductQuantity(value: unknown): value is string | number {
  * Base lead fields shared across all lead types
  */
 const baseLeadFields = {
-  email: leadEmailSchema,
+  email: canonicalBuyerEmailSchema,
   ...leadAttributionFields,
 };
 
@@ -209,17 +202,20 @@ export const productLeadSchema = z
       PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
       PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
     ]),
-    fullName: sanitizedString().min(1).max(MAX_LEAD_NAME_LENGTH),
+    fullName: canonicalBuyerFullNameSchema,
+    email: canonicalBuyerEmailSchema,
+    message: canonicalBuyerMessageSchema.optional(),
     catalogProductId: catalogProductIdSchema.optional(),
     buyerInterest: sanitizedString()
       .max(MAX_LEAD_PRODUCT_NAME_LENGTH)
       .optional(),
     quantity: productQuantitySchema.optional(),
     company: sanitizedString().max(MAX_LEAD_COMPANY_LENGTH).optional(),
+    /** @deprecated Legacy RFQ field; prefer canonical `message`. */
     requirements: multilineSanitizedString()
       .max(MAX_LEAD_REQUIREMENTS_LENGTH)
       .optional(),
-    ...baseLeadFields,
+    ...leadAttributionFields,
   })
   .superRefine((data, ctx) => {
     if (data.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT) {

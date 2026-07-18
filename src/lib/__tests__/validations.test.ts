@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { airtableRecordSchema } from "@/lib/airtable/record-schema";
 import { emailTemplateDataSchema } from "@/lib/email/email-data-schema";
 import { contactFieldValidators } from "@/lib/form-schema/contact-field-validators";
 import {
@@ -175,74 +174,6 @@ describe("validations - Schema Validation", () => {
 });
 
 describe("validations - API and Data Schemas", () => {
-  describe("airtableRecordSchema", () => {
-    const validRecord = {
-      id: "rec123",
-      fields: {
-        "First Name": "John",
-        "Last Name": "Doe",
-        Email: "john@example.com",
-        Company: "Test Co",
-        Message: "Test message",
-        "Submitted At": "2023-01-01T00:00:00Z",
-      },
-      createdTime: "2023-01-01T00:00:00Z",
-    };
-
-    it("should validate correct Airtable record", () => {
-      const result = airtableRecordSchema.safeParse(validRecord);
-      expect(result.success).toBe(true);
-    });
-
-    it("should set default status to New", () => {
-      const result = airtableRecordSchema.safeParse(validRecord);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.fields.Status).toBe("New");
-      }
-    });
-
-    it("should set default source to Website Contact Form", () => {
-      const result = airtableRecordSchema.safeParse(validRecord);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.fields.Source).toBe("Website Contact Form");
-      }
-    });
-
-    it("should validate with custom status", () => {
-      const recordWithStatus = {
-        ...validRecord,
-        fields: { ...validRecord.fields, Status: "In Progress" as const },
-      };
-      const result = airtableRecordSchema.safeParse(recordWithStatus);
-      expect(result.success).toBe(true);
-    });
-
-    it("should preserve attribution fields on Airtable records", () => {
-      const recordWithAttribution = {
-        ...validRecord,
-        fields: {
-          ...validRecord.fields,
-          "UTM Source": "google",
-          "UTM Medium": "cpc",
-          "UTM Campaign": "flood-barriers",
-          GCLID: "gclid-123",
-          "Landing Page": "/en/contact",
-          "Captured At": "2026-07-04T00:00:00.000Z",
-        },
-      };
-
-      const result = airtableRecordSchema.safeParse(recordWithAttribution);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.fields["UTM Source"]).toBe("google");
-        expect(result.data.fields.GCLID).toBe("gclid-123");
-      }
-    });
-  });
-
   describe("emailTemplateDataSchema", () => {
     const validTemplateData = {
       firstName: "John",

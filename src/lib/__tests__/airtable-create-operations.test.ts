@@ -14,6 +14,8 @@ import type {
   AirtableServicePrivate,
 } from "@/test/test-types";
 import type { AirtableService as AirtableServiceType } from "../airtable/service";
+import type { ProductLeadData } from "@/lib/airtable/types";
+import { LEAD_TYPES } from "@/lib/lead-pipeline/lead-schema";
 import {
   configureServiceForTesting,
   createMockBase,
@@ -35,8 +37,6 @@ const createMockRecord = (data: Record<string, unknown>) => ({
   fields: data.fields || {},
   createdTime: data.createdTime || "2023-01-01T00:00:00Z",
   get: vi.fn((field: string) => {
-    if (field === "Created Time")
-      return data.createdTime || "2023-01-01T00:00:00Z";
     return (data.fields as Record<string, unknown>)?.[field];
   }),
 });
@@ -149,8 +149,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordData.fields,
-        createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([
         {
@@ -357,6 +355,34 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
+    it("does not write WhatsApp / Phone for product inquiry leads", async () => {
+      const service = new AirtableServiceClass();
+      setServiceReady(service);
+      mockCreate.mockResolvedValueOnce([
+        createMockRecord({
+          id: "rec-no-phone",
+          fields: {},
+          createdTime: "2023-01-01T00:00:00Z",
+        }),
+      ]);
+
+      await service.createLead(LEAD_TYPES.PRODUCT, {
+        firstName: "Ada",
+        lastName: "Buyer",
+        email: "ada@example.com",
+        message: "Need quote",
+        productName: "General RFQ",
+        requirements: "Need quote",
+        phone: "+8613800138000",
+      } as unknown as ProductLeadData);
+
+      const createCall = mockCreate.mock.calls[0]?.[0];
+      expect(createCall).toBeDefined();
+      const firstRecord = createCall?.[0];
+      expect(firstRecord).toBeDefined();
+      expect(firstRecord?.fields).not.toHaveProperty("WhatsApp / Phone");
+    });
+
     it("neutralizes spreadsheet formula prefixes in product lead text fields", async () => {
       const service = new AirtableServiceClass();
       setServiceReady(service);
@@ -470,8 +496,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordDataSpecial.fields,
-        createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([
         {
@@ -511,8 +535,6 @@ describe("Airtable Service - Create Operations Tests", () => {
 
       expect(result).toEqual({
         id: "rec123456",
-        fields: mockRecordDataLong.fields,
-        createdTime: "2023-01-01T00:00:00Z",
       });
       expect(mockCreate).toHaveBeenCalledWith([
         {
