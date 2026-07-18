@@ -90,10 +90,3 @@ export const canonicalBuyerMessageSchema: z.ZodType<string | undefined> = z
   .transform((value) =>
     typeof value === "string" ? sanitizeMultilineText(value) : undefined,
   );
-
-export const canonicalBuyerFieldsSchema = z.object({
-  fullName: canonicalBuyerFullNameSchema,
-  email: canonicalBuyerEmailSchema,
-  phone: canonicalBuyerPhoneSchema,
-  message: canonicalBuyerMessageSchema,
-});
