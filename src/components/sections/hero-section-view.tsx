@@ -73,9 +73,9 @@ function HeroProofPanel({
       aria-label={ariaLabel}
       className="mt-6 grid grid-cols-2 gap-2 rounded-xl border border-border bg-muted/40 p-2 font-mono text-[13px] md:grid-cols-4"
     >
-      {items.map((item, index) => (
+      {items.map((item) => (
         <li
-          key={`${item.value}-${index}`}
+          key={`${item.value}::${item.label ?? ""}`}
           className="min-w-0 rounded-lg bg-background/70 px-3 py-2"
         >
           <span className="block font-semibold break-words text-foreground">
