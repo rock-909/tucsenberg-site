@@ -93,20 +93,6 @@
         },
         "subject": {
           "length": "Subject must be between 5 and 100 characters"
-        },
-        "productInquiryKind": {
-          "invalid": "The inquiry type is not recognized"
-        },
-        "catalogProductId": {
-          "required": "Please choose a product before sending your inquiry",
-          "invalid": "The selected product is not recognized"
-        },
-        "buyerInterest": {
-          "tooLong": "Product interest is too long",
-          "invalid": "Product interest contains invalid characters"
-        },
-        "quantity": {
-          "invalid": "Quantity must be a valid amount"
         }
       }
     }

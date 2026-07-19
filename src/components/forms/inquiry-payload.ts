@@ -17,6 +17,7 @@ interface InquiryPayload extends MarketingAttributionFields {
   readonly productInquiryKind: typeof PRODUCT_INQUIRY_KINDS.GENERAL_RFQ;
   readonly message?: string;
   readonly buyerInterest?: string;
+  readonly website: string;
   readonly turnstileToken: string;
 }
 
@@ -59,11 +60,13 @@ export function createInquiryPayload(
   const fullName = getOptionalString(formData, "fullName");
   const email = getOptionalString(formData, "email");
   const message = getOptionalString(formData, "message");
+  const website = getOptionalString(formData, "website");
 
   return {
     fullName,
     email,
     productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
+    website,
     ...(message ? { message } : {}),
     ...(buyerInterest ? { buyerInterest } : {}),
     turnstileToken,

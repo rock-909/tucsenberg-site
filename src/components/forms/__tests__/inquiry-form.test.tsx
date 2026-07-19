@@ -109,6 +109,21 @@ function assertThreeFieldContract(
   for (const name of FORBIDDEN_CONTROL_NAMES) {
     expect(form.querySelector(`[name="${name}"]`)).toBeNull();
   }
+
+  const honeypot = form.querySelector<HTMLInputElement>(
+    'input[name="website"]',
+  );
+  expect(honeypot).not.toBeNull();
+  expect(honeypot).toHaveAttribute("type", "text");
+  expect(honeypot).not.toHaveAttribute("hidden");
+  expect(honeypot).toHaveAttribute("aria-hidden", "true");
+  expect(honeypot).toHaveAttribute("autocomplete", "off");
+  expect(honeypot).toHaveAttribute("tabIndex", "-1");
+  expect(honeypot).toHaveClass("sr-only");
+  expect(
+    within(form).queryByRole("textbox", { name: /website/i }),
+  ).not.toBeInTheDocument();
+  expect(within(form).queryAllByRole("textbox")).not.toContain(honeypot);
 }
 
 function getFetchBody(): Record<string, unknown> {
@@ -142,6 +157,41 @@ describe("InquiryForm contract", () => {
     assertThreeFieldContract(container, copy);
   });
 
+  it("serializes a filled website honeypot into the inquiry payload", async () => {
+    const { container } = renderInquiryForm("contact");
+    const { fullName, email, form } = getFormControls(container);
+    const honeypot = form.querySelector<HTMLInputElement>(
+      'input[name="website"]',
+    );
+
+    expect(honeypot).not.toBeNull();
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    fireEvent.change(fullName, { target: { value: "Ada Buyer" } });
+    fireEvent.change(email, { target: { value: "ada@example.com" } });
+    fireEvent.change(honeypot!, {
+      target: { value: "https://spam.example" },
+    });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/inquiry",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    expect(getFetchBody()).toMatchObject({
+      fullName: "Ada Buyer",
+      email: "ada@example.com",
+      productInquiryKind: "general-rfq",
+      website: "https://spam.example",
+      turnstileToken: "mock-inquiry-turnstile-token",
+    });
+  });
+
   it("posts to /api/inquiry with optional blank message", async () => {
     const { container, copy } = renderInquiryForm("contact");
     const { fullName, email, form } = getFormControls(container);
@@ -165,6 +215,7 @@ describe("InquiryForm contract", () => {
       fullName: "Ada Buyer",
       email: "ada@example.com",
       productInquiryKind: "general-rfq",
+      website: "",
       turnstileToken: "mock-inquiry-turnstile-token",
     });
     expect(getFetchBody()).not.toHaveProperty("message");

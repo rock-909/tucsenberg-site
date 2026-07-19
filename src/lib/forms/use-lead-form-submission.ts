@@ -28,7 +28,7 @@ import { type FormSubmissionStatus } from "@/lib/forms/form-submission-status";
  * form component.
  */
 export interface LeadSubmissionConfig<TResult> {
-  /** Lead API endpoint, e.g. `/api/contact` or `/api/inquiry`. */
+  /** Lead API endpoint. Production forms post to `/api/inquiry`. */
   readonly endpoint: string;
   /** `generate_lead` analytics method fired on success. */
   readonly leadEventTag: LeadEventMethod;

@@ -119,34 +119,39 @@ describe("inquiry validation detail mapping", () => {
     expect(wrongType.success).toBe(false);
     if (tooLong.success || wrongType.success) return;
 
-    expect(mapInquiryValidationDetails(tooLong.error.issues)).toEqual([
-      "errors.message.tooLong",
-    ]);
-    expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
-      "errors.message.invalid",
-    ]);
+    expect(
+      mapInquiryValidationDetails(tooLong.error.issues, {
+        ...validBase,
+        message: "A".repeat(MAX_LEAD_MESSAGE_LENGTH + 1),
+      }),
+    ).toEqual(["errors.message.tooLong"]);
+    expect(
+      mapInquiryValidationDetails(wrongType.error.issues, {
+        ...validBase,
+        message: 123,
+      }),
+    ).toEqual(["errors.message.invalid"]);
   });
 
-  it("maps wrong-type issues to .invalid instead of .required", () => {
-    const parsed = productLeadSchema.safeParse({
+  it("maps internal field issues to errors.generic instead of field-specific keys", () => {
+    const input = {
       ...validBase,
       company: 123,
       message: 999,
       buyerInterest: 789,
-    });
+    };
+    const parsed = productLeadSchema.safeParse(input);
 
     expect(parsed.success).toBe(false);
     if (parsed.success) return;
 
-    expect(mapInquiryValidationDetails(parsed.error.issues)).toEqual(
+    expect(mapInquiryValidationDetails(parsed.error.issues, input)).toEqual(
+      expect.arrayContaining(["errors.generic", "errors.message.invalid"]),
+    );
+    expect(mapInquiryValidationDetails(parsed.error.issues, input)).not.toEqual(
       expect.arrayContaining([
         "errors.company.invalid",
         "errors.buyerInterest.invalid",
-        "errors.message.invalid",
-      ]),
-    );
-    expect(mapInquiryValidationDetails(parsed.error.issues)).not.toEqual(
-      expect.arrayContaining([
         "errors.company.required",
         "errors.buyerInterest.required",
       ]),
@@ -167,12 +172,18 @@ describe("inquiry validation detail mapping", () => {
     expect(wrongType.success).toBe(false);
     if (tooLong.success || wrongType.success) return;
 
-    expect(mapInquiryValidationDetails(tooLong.error.issues)).toEqual([
-      "errors.generic",
-    ]);
-    expect(mapInquiryValidationDetails(wrongType.error.issues)).toEqual([
-      "errors.generic",
-    ]);
+    expect(
+      mapInquiryValidationDetails(tooLong.error.issues, {
+        ...validBase,
+        utmSource: "x".repeat(257),
+      }),
+    ).toEqual(["errors.generic"]);
+    expect(
+      mapInquiryValidationDetails(wrongType.error.issues, {
+        ...validBase,
+        utmSource: 42,
+      }),
+    ).toEqual(["errors.generic"]);
   });
 
   it("does not expose phone validation detail keys", () => {
@@ -191,7 +202,10 @@ describe("inquiry validation detail mapping", () => {
         throw new Error(`expected failure for ${JSON.stringify(input)}`);
       }
 
-      for (const detail of mapInquiryValidationDetails(parsed.error.issues)) {
+      for (const detail of mapInquiryValidationDetails(
+        parsed.error.issues,
+        input,
+      )) {
         emitted.add(detail);
       }
     }
@@ -199,12 +213,50 @@ describe("inquiry validation detail mapping", () => {
     expect([...emitted].sort()).toEqual(
       [...PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS].sort(),
     );
+  });
 
-    for (const detail of emitted) {
-      const value = getMessageValue(runtimeMessages, `contact.form.${detail}`);
+  it("keeps inquiry.form copy for every renderable visible detail key", () => {
+    const renderableDetails = PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS.filter(
+      (detail) => detail !== "errors.generic",
+    );
+
+    for (const detail of renderableDetails) {
+      const value = getMessageValue(runtimeMessages, `inquiry.form.${detail}`);
       expect(typeof value, detail).toBe("string");
       expect(String(value).trim(), detail).not.toBe("");
     }
+  });
+
+  it("covers errors.generic through the existing field summary copy", () => {
+    const fieldSummary = getMessageValue(
+      runtimeMessages,
+      "inquiry.form.errors.fieldSummary",
+    );
+
+    expect(typeof fieldSummary).toBe("string");
+    expect(String(fieldSummary).trim()).not.toBe("");
+    expect(
+      getMessageValue(runtimeMessages, "inquiry.form.errors.generic"),
+    ).toBeUndefined();
+  });
+
+  it("keeps detail output stable when only the English Zod message changes", () => {
+    const structuredIssue = {
+      code: "invalid_type",
+      path: ["email"],
+      message: "Totally different prose",
+      received: "undefined",
+    } as const;
+    const legacyIssue = {
+      code: "invalid_type",
+      path: ["email"],
+      message: "Invalid input: expected string, received undefined",
+      received: "undefined",
+    } as const;
+
+    expect(
+      mapInquiryValidationDetails([structuredIssue], { email: undefined }),
+    ).toEqual(mapInquiryValidationDetails([legacyIssue], { email: undefined }));
   });
 });
 
@@ -213,24 +265,34 @@ describe("shared zod validation detail mapping", () => {
     const requiredIssue = {
       code: "invalid_type",
       path: ["company"],
-      message: "Invalid input: expected string, received undefined",
+      message: "Different required copy",
+      expected: "string",
     } as const;
     const wrongTypeIssue = {
       code: "invalid_type",
       path: ["company"],
-      message: "Invalid input: expected string, received number",
+      message: "Different wrong-type copy",
+      expected: "string",
     } as const;
 
     expect(
-      mapZodIssuesToValidationDetails([requiredIssue], {
-        company: "errors.company",
-      }),
+      mapZodIssuesToValidationDetails(
+        [requiredIssue],
+        {
+          company: "errors.company",
+        },
+        { company: undefined },
+      ),
     ).toEqual(["errors.company.required"]);
 
     expect(
-      mapZodIssuesToValidationDetails([wrongTypeIssue], {
-        company: "errors.company",
-      }),
+      mapZodIssuesToValidationDetails(
+        [wrongTypeIssue],
+        {
+          company: "errors.company",
+        },
+        { company: 123 },
+      ),
     ).toEqual(["errors.company.invalid"]);
   });
 

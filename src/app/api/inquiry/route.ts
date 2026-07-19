@@ -14,9 +14,14 @@ import { createCorsRateLimitedRoute } from "@/lib/api/cors-rate-limited-route";
 import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { isRuntimeProduction } from "@/lib/env";
 import { type RateLimitContext } from "@/lib/api/with-rate-limit";
+import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import { adaptLegacyInquiryPayload } from "@/lib/lead-pipeline/inquiry-payload-adapter";
-import { processLead, type LeadResult } from "@/lib/lead-pipeline/process-lead";
+import {
+  processValidatedInquiry,
+  type LeadResult,
+} from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
+import { generateLeadReferenceId } from "@/lib/lead-pipeline/utils";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import {
   LEAD_TYPES,
@@ -25,7 +30,6 @@ import {
 } from "@/lib/lead-pipeline/lead-schema";
 import { logger, sanitizeIP } from "@/lib/logger";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
 import {
   mapLeadTurnstileResultToResponse,
   verifyLeadTurnstile,
@@ -44,6 +48,11 @@ interface ProductLeadValidationFailure {
 type ProductLeadValidationResult =
   | ProductLeadValidationSuccess
   | ProductLeadValidationFailure;
+
+function isInquiryHoneypotTriggered(data: Record<string, unknown>): boolean {
+  const { website } = data;
+  return typeof website === "string" && website.trim().length > 0;
+}
 
 async function validateProductInquiryTurnstile(
   token: unknown,
@@ -64,7 +73,7 @@ function validateLeadData(
   data: Record<string, unknown>,
 ): ProductLeadValidationResult {
   const adapted = adaptLegacyInquiryPayload(data);
-  const parsed = productLeadSchema.safeParse({
+  const schemaInput = {
     type: LEAD_TYPES.PRODUCT,
     productInquiryKind: adapted.productInquiryKind,
     fullName: adapted.fullName,
@@ -75,7 +84,8 @@ function validateLeadData(
     quantity: adapted.quantity,
     company: adapted.company,
     ...pickAttributionFields(adapted),
-  });
+  };
+  const parsed = productLeadSchema.safeParse(schemaInput);
 
   if (parsed.success) {
     return {
@@ -86,7 +96,7 @@ function validateLeadData(
 
   return {
     success: false,
-    details: mapInquiryValidationDetails(parsed.error.issues),
+    details: mapInquiryValidationDetails(parsed.error.issues, schemaInput),
   };
 }
 
@@ -125,13 +135,25 @@ function createProductInquiryFailureResponse(
     referenceId: result.referenceId,
   });
 
-  const isValidationError = result.error === "VALIDATION_ERROR";
   return createApiErrorResponse(
-    isValidationError
-      ? API_ERROR_CODES.INQUIRY_VALIDATION_FAILED
-      : API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    isValidationError ? HTTP_BAD_REQUEST : HTTP_INTERNAL_ERROR,
+    API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
+    HTTP_INTERNAL_ERROR,
   );
+}
+
+function createInquiryHoneypotSuccessResponse(
+  clientIP: string,
+  startTime: number,
+) {
+  const referenceId = generateLeadReferenceId(LEAD_TYPES.PRODUCT);
+
+  logger.warn("Inquiry honeypot triggered", {
+    referenceId,
+    ip: sanitizeIP(clientIP),
+    processingTime: Date.now() - startTime,
+  });
+
+  return createApiSuccessResponse({ referenceId });
 }
 
 /**
@@ -144,6 +166,7 @@ async function handleInquiryPost(
 ) {
   const parsedBody = await safeParseJson<{
     turnstileToken?: string;
+    website?: string;
     [key: string]: unknown;
   }>(request, { route: "/api/inquiry" });
 
@@ -155,6 +178,11 @@ async function handleInquiryPost(
 
   try {
     const data = parsedBody.data ?? {};
+
+    if (isInquiryHoneypotTriggered(data)) {
+      return createInquiryHoneypotSuccessResponse(clientIP, startTime);
+    }
+
     const leadValidation = validateLeadData(data);
     if (!leadValidation.success) {
       return createApiErrorResponse(
@@ -170,9 +198,7 @@ async function handleInquiryPost(
     );
     if (turnstileError) return turnstileError;
 
-    const result = await processLead({
-      ...leadValidation.data,
-    });
+    const result = await processValidatedInquiry(leadValidation.data);
 
     if (result.success) {
       return createProductInquirySuccessResponse(result, clientIP, startTime);

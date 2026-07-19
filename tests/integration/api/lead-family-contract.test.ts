@@ -1,7 +1,7 @@
 import { NextRequest, type NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERROR_CODES } from "@/constants/api-error-codes";
-import { processLead } from "@/lib/lead-pipeline/process-lead";
+import { processValidatedInquiry } from "@/lib/lead-pipeline/process-lead";
 import * as inquiryRoute from "@/app/api/inquiry/route";
 
 /**
@@ -26,7 +26,7 @@ vi.mock("@/lib/security/turnstile", () => ({
 }));
 
 vi.mock("@/lib/lead-pipeline/process-lead", () => ({
-  processLead: vi.fn(async () => ({
+  processValidatedInquiry: vi.fn(async () => ({
     success: true,
     emailSent: true,
     ownerNotified: true,
@@ -156,8 +156,8 @@ describe("lead API family response contract (auxiliary)", () => {
     });
   });
 
-  it("inquiry maps pipeline validation failures to route-specific validation errors", async () => {
-    vi.mocked(processLead).mockResolvedValue({
+  it("inquiry keeps typed delivery failures on the processing error envelope", async () => {
+    vi.mocked(processValidatedInquiry).mockResolvedValue({
       success: false,
       error: "VALIDATION_ERROR",
       emailSent: false,
@@ -176,13 +176,13 @@ describe("lead API family response contract (auxiliary)", () => {
           catalogProductId: "abs-flood-barriers",
         }),
       ),
-      400,
-      API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
+      500,
+      API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
     );
   });
 
   it("inquiry maps pipeline processing failures to route-specific processing errors", async () => {
-    vi.mocked(processLead).mockResolvedValue({
+    vi.mocked(processValidatedInquiry).mockResolvedValue({
       success: false,
       error: "PROCESSING_FAILED",
       emailSent: false,

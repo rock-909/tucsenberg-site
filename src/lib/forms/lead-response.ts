@@ -1,7 +1,7 @@
 /**
  * Shared success-shape decode for the lead APIs.
  *
- * Both `/api/contact` and `/api/inquiry` return the same success envelope
+ * Production lead writes through `/api/inquiry` return the same success envelope
  * (`{ success: true, data: { referenceId } }`). The two form decoders used to
  * re-implement this check independently and drifted; this is the single place
  * that reads the public reference id. Each form keeps its own *error* mapping

@@ -12,11 +12,6 @@ export const PRODUCT_INQUIRY_FIELD_ERROR_KEYS = {
   fullName: "errors.fullName",
   email: "errors.email",
   message: "errors.message",
-  company: "errors.company",
-  productInquiryKind: "errors.productInquiryKind",
-  catalogProductId: "errors.catalogProductId",
-  buyerInterest: "errors.buyerInterest",
-  quantity: "errors.quantity",
 } as const satisfies ValidationFieldErrorKeys;
 
 /**
@@ -33,21 +28,15 @@ export const PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS = [
   "errors.email.tooLong",
   "errors.message.invalid",
   "errors.message.tooLong",
-  "errors.company.tooLong",
-  "errors.company.invalid",
-  "errors.productInquiryKind.invalid",
-  "errors.catalogProductId.required",
-  "errors.catalogProductId.invalid",
-  "errors.buyerInterest.tooLong",
-  "errors.buyerInterest.invalid",
-  "errors.quantity.invalid",
 ] as const;
 
 export function mapInquiryValidationDetails(
   issues: readonly ZodIssue[],
+  source: Record<string, unknown> = {},
 ): string[] {
   return mapZodIssuesToValidationDetails(
     issues,
     PRODUCT_INQUIRY_FIELD_ERROR_KEYS,
+    source,
   );
 }

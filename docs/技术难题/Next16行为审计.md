@@ -77,7 +77,7 @@ Verdict: mostly clean.
 Verdict: not present as a page-data pattern.
 
 - No evidence of homepage or route content loading through `useEffect`.
-- The obvious client `fetch("/api/contact")` path is form submission behavior,
+- The obvious client `fetch("/api/inquiry")` path is form submission behavior,
   not page data fetching.
 
 ### C. Over-globalized state
