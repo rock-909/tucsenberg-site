@@ -59,3 +59,18 @@
 
 治理红线保留项(dropdown 导出、sharp、cookie dialog、only-export RSC 误报)无法计入修复,
 故满 90 未必可达。能修的全修,剩余按上表挂账说明,不为凑分违反治理规则。
+
+## 执行结果(2026-07-19)
+
+- **分数 69 → 100**;本地 report 命中 24 → 0。
+- A 类 6 组真缺陷全部修复(T1–T6);B 类构建产物忽略配置就位(T7)。
+- 业主选「归档成具名抑制」:剩余 6 项治理保留项在 `doctor.config.json` 加具名
+  `ignore.overrides`(`deslop/unused-dev-dependency`、`react-doctor/only-export-components` ×3、
+  `deslop/unused-export` ×2),各带保留理由,报告归零。
+- **额外修复的真缺陷**:cookie-banner 原有 override 抑制的是旧规则 id
+  `prefer-tag-over-role`,react-doctor 已改名为 `prefer-html-dialog`,旧 override 成死守卫,
+  已改为现行 id(符合 Gate Discipline「守卫保护现行真相」)。
+- **sharp 验证结论**:`next.config.ts` 仅在 Cloudflare 下 `images.unoptimized:true`;
+  本地/非 CF 的 `next build` 仍靠 sharp 优化图片,属构建期真实依赖,静态分析看不到 → 保留 + 具名抑制。
+- 缓存清理:`.next`/`.open-next`/`node_modules/.cache`(约 93M)移废纸篓,冷构建重建通过。
+- 全门禁绿:type-check、lint、2321 测试、build 均通过。
