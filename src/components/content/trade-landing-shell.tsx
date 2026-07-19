@@ -34,9 +34,11 @@ export async function TradeLandingShell({
   locale,
   pagePath,
 }: TradeLandingShellProps): Promise<ReactNode> {
-  const t = await getTranslations({ locale, namespace: "oemLanding" });
-  const tNav = await getTranslations({ locale, namespace: "navigation" });
-  const tFaq = await getTranslations({ locale, namespace: "faq" });
+  const [t, tNav, tFaq] = await Promise.all([
+    getTranslations({ locale, namespace: "oemLanding" }),
+    getTranslations({ locale, namespace: "navigation" }),
+    getTranslations({ locale, namespace: "faq" }),
+  ]);
   const diagramLabels = {
     extrusion: t("diagramLabels.extrusion"),
     moulding: t("diagramLabels.moulding"),

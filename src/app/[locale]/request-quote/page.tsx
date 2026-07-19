@@ -89,18 +89,11 @@ export default async function RequestQuotePage({
 }: RequestQuotePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tPage = await getTranslations({
-    locale,
-    namespace: "requestQuote.page",
-  });
-  const tMeta = await getTranslations({
-    locale,
-    namespace: "requestQuote.metadata",
-  });
-  const tInquiryForm = await getTranslations({
-    locale,
-    namespace: "inquiry.form",
-  });
+  const [tPage, tMeta, tInquiryForm] = await Promise.all([
+    getTranslations({ locale, namespace: "requestQuote.page" }),
+    getTranslations({ locale, namespace: "requestQuote.metadata" }),
+    getTranslations({ locale, namespace: "inquiry.form" }),
+  ]);
   const inquiryCopy: InquiryFormCopy = createInquiryFormCopy(tInquiryForm);
   const asideCopy: RequestQuoteAsideCopy = {
     afterSubmitTitle: tPage("afterSubmitTitle"),
