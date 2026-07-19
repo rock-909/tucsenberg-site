@@ -33,12 +33,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "catalog",
   ),
   ...parameterOverrides(
-    "src/app/[locale]/request-quote/page.tsx",
-    ["RequestQuoteAside"],
-    "t",
-    "requestQuote.page",
-  ),
-  ...parameterOverrides(
     "src/components/forms/inquiry-form-copy.ts",
     ["createInquiryFormCopy"],
     "t",
@@ -250,14 +244,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     suffixes: [""],
     reason:
       "inquiry validation emits these inquiry.form detail keys to the client",
-  },
-  {
-    kind: "call-arguments",
-    file: "src/components/errors/route-error-view.tsx",
-    ownerFunction: "RouteErrorView",
-    callee: "translationFn",
-    prefixes: ["errors.contact.", "errors.products."],
-    reason: "both route boundaries pass their namespace into the shared view",
   },
   {
     kind: "property-accesses",

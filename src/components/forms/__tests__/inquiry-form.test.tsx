@@ -22,40 +22,58 @@ import {
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 
+const lazyTurnstileLabelsSpy = vi.fn();
+
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({
+    labels,
     onError,
     onExpire,
     onSuccess,
   }: {
+    labels: {
+      unavailable: string;
+      loadFailed: string;
+      devBypass: string;
+      testMode: string;
+      rescueBeforeEmail: string;
+      rescueAfterEmail: string;
+      rescueSubject: string;
+    };
     onError?: () => void;
     onExpire?: () => void;
     onSuccess?: (token: string) => void;
-  }) => (
-    <div data-action={INQUIRY_TURNSTILE_ACTION} data-testid="inquiry-turnstile">
-      <button
-        data-testid="inquiry-turnstile-success"
-        onClick={() => onSuccess?.("mock-inquiry-turnstile-token")}
-        type="button"
+  }) => {
+    lazyTurnstileLabelsSpy(labels);
+    return (
+      <div
+        data-action={INQUIRY_TURNSTILE_ACTION}
+        data-testid="inquiry-turnstile"
       >
-        Complete verification
-      </button>
-      <button
-        data-testid="inquiry-turnstile-expire"
-        onClick={() => onExpire?.()}
-        type="button"
-      >
-        Expire verification
-      </button>
-      <button
-        data-testid="inquiry-turnstile-error"
-        onClick={() => onError?.()}
-        type="button"
-      >
-        Fail verification
-      </button>
-    </div>
-  ),
+        <button
+          data-testid="inquiry-turnstile-success"
+          onClick={() => onSuccess?.("mock-inquiry-turnstile-token")}
+          type="button"
+        >
+          Complete verification
+        </button>
+        <button
+          data-testid="inquiry-turnstile-expire"
+          onClick={() => onExpire?.()}
+          type="button"
+        >
+          Expire verification
+        </button>
+        <button
+          data-testid="inquiry-turnstile-error"
+          onClick={() => onError?.()}
+          type="button"
+        >
+          Fail verification
+        </button>
+      </div>
+    );
+  },
 }));
 
 const FORBIDDEN_CONTROL_NAMES = [
@@ -148,6 +166,7 @@ function getFetchBody(): Record<string, unknown> {
 describe("InquiryForm contract", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    lazyTurnstileLabelsSpy.mockClear();
     window.sessionStorage.clear();
     delete (window as unknown as Record<string, unknown>).gtag;
     global.fetch = vi.fn(async () =>
@@ -168,6 +187,12 @@ describe("InquiryForm contract", () => {
   ])("renders the same three-field contract in %s mode", (source) => {
     const { container, copy } = renderInquiryForm(source);
     assertThreeFieldContract(container, copy);
+  });
+
+  it("passes inquiry turnstile copy to LazyTurnstile", () => {
+    const { copy } = renderInquiryForm("contact");
+
+    expect(lazyTurnstileLabelsSpy).toHaveBeenCalledWith(copy.turnstile);
   });
 
   it("serializes a filled website honeypot into the inquiry payload", async () => {

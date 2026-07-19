@@ -66,4 +66,24 @@ describe("inquiry form copy", () => {
       (messages.inquiry as Record<string, unknown> | undefined)?.form,
     ).toBeDefined();
   });
+
+  it("reads all seven turnstile leaves from inquiry.form.turnstile", () => {
+    const copy = createTestInquiryFormCopy();
+
+    expect(copy.turnstile.unavailable).toBe(
+      "Security verification is temporarily unavailable.",
+    );
+    expect(copy.turnstile.loadFailed).toBe(
+      "Security verification failed to load.",
+    );
+    expect(copy.turnstile.devBypass).toBe(
+      "Dev mode: Turnstile verification bypassed",
+    );
+    expect(copy.turnstile.testMode).toBe(
+      "Bot protection disabled in test mode",
+    );
+    expect(copy.turnstile.rescueBeforeEmail).toBe("Email us instead —");
+    expect(copy.turnstile.rescueAfterEmail).toBe("Reply within 12 hours.");
+    expect(copy.turnstile.rescueSubject).toBe("Quote request");
+  });
 });

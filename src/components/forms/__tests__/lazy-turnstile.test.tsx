@@ -7,6 +7,21 @@ import {
   TURNSTILE_WIDGET_HEIGHT_PX,
 } from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
+import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
+
+const sentinelTurnstileLabels = {
+  unavailable: "安全验证暂时不可用。",
+  loadFailed: "安全验证加载失败。",
+  devBypass: "开发模式：Turnstile 验证已跳过",
+  testMode: "测试模式下已关闭机器人防护",
+  rescueBeforeEmail: "请改发邮件 —",
+  rescueAfterEmail: "12 小时内回复。",
+  rescueSubject: "报价咨询",
+};
+
+function createDefaultTestLabels() {
+  return createTestInquiryFormCopy().turnstile;
+}
 
 const {
   idleCallbacks,
@@ -169,7 +184,9 @@ describe("LazyTurnstile", () => {
   });
 
   it("keeps a placeholder until idle or visibility triggers rendering", () => {
-    render(<LazyTurnstile onSuccess={vi.fn()} />);
+    render(
+      <LazyTurnstile onSuccess={vi.fn()} labels={createDefaultTestLabels()} />,
+    );
 
     expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
     expect(
@@ -184,7 +201,13 @@ describe("LazyTurnstile", () => {
   });
 
   it("uses the documented compact placeholder height", () => {
-    render(<LazyTurnstile onSuccess={vi.fn()} size="compact" />);
+    render(
+      <LazyTurnstile
+        onSuccess={vi.fn()}
+        size="compact"
+        labels={createDefaultTestLabels()}
+      />,
+    );
 
     expect(
       getPlaceholderContainer().style.getPropertyValue(
@@ -208,6 +231,7 @@ describe("LazyTurnstile", () => {
         size="compact"
         theme="auto"
         className="custom-turnstile"
+        labels={createDefaultTestLabels()}
       />,
     );
 
@@ -234,7 +258,9 @@ describe("LazyTurnstile", () => {
   });
 
   it("always passes INQUIRY_TURNSTILE_ACTION to the shared widget", async () => {
-    render(<LazyTurnstile onSuccess={vi.fn()} />);
+    render(
+      <LazyTurnstile onSuccess={vi.fn()} labels={createDefaultTestLabels()} />,
+    );
 
     await act(async () => {
       idleCallbacks[0]?.();
@@ -248,7 +274,9 @@ describe("LazyTurnstile", () => {
   });
 
   it("renders when the wrapper enters the viewport", async () => {
-    render(<LazyTurnstile onSuccess={vi.fn()} />);
+    render(
+      <LazyTurnstile onSuccess={vi.fn()} labels={createDefaultTestLabels()} />,
+    );
 
     await act(async () => {
       intersectionCallbacks[0]?.(
@@ -265,12 +293,7 @@ describe("LazyTurnstile", () => {
     mockTurnstileState.shouldThrow = true;
     const onError = vi.fn();
     const onCaughtError = vi.fn();
-    const labels = {
-      unavailable: "安全验证暂时不可用。",
-      loadFailed: "安全验证加载失败。",
-      devBypass: "开发模式：Turnstile 验证已跳过",
-      testMode: "测试模式下已关闭机器人防护",
-    };
+    const labels = sentinelTurnstileLabels;
 
     render(<LazyTurnstile onError={onError} labels={labels} />, {
       onCaughtError,
@@ -283,17 +306,22 @@ describe("LazyTurnstile", () => {
 
     expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      `mailto:sales@tucsenberg.com?subject=${encodeURIComponent(labels.rescueSubject)}`,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      labels.rescueBeforeEmail,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      labels.rescueAfterEmail,
+    );
     expect(onError).toHaveBeenCalledWith(labels.loadFailed);
     expect(onCaughtError).toHaveBeenCalledTimes(1);
   });
 
   it("passes localized availability labels to the shared widget", async () => {
-    const labels = {
-      unavailable: "安全验证暂时不可用。",
-      loadFailed: "安全验证加载失败。",
-      devBypass: "开发模式：Turnstile 验证已跳过",
-      testMode: "测试模式下已关闭机器人防护",
-    };
+    const labels = sentinelTurnstileLabels;
 
     render(<LazyTurnstile onSuccess={vi.fn()} labels={labels} />);
 

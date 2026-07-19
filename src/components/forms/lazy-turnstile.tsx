@@ -21,6 +21,16 @@ type TurnstilePlaceholderStyle = CSSProperties & {
   "--turnstile-placeholder-height": string;
 };
 
+interface LazyTurnstileLabels {
+  unavailable: string;
+  loadFailed: string;
+  devBypass: string;
+  testMode: string;
+  rescueBeforeEmail: string;
+  rescueAfterEmail: string;
+  rescueSubject: string;
+}
+
 interface LazyTurnstileProps {
   onSuccess?: (token: string) => void;
   onError?: (reason?: string) => void;
@@ -33,12 +43,7 @@ interface LazyTurnstileProps {
   tabIndex?: number;
   id?: string;
   cData?: string;
-  labels?: {
-    unavailable: string;
-    loadFailed: string;
-    devBypass: string;
-    testMode: string;
-  };
+  labels: LazyTurnstileLabels;
 }
 
 const TurnstileWidget = lazy(() =>
@@ -115,22 +120,9 @@ function useLazyRender(containerRef: React.RefObject<HTMLDivElement | null>) {
   return shouldRender;
 }
 
-function resolveLazyTurnstileLabels(
-  labels: LazyTurnstileProps["labels"],
-): NonNullable<LazyTurnstileProps["labels"]> {
-  return (
-    labels ?? {
-      unavailable: "Security verification is temporarily unavailable.",
-      loadFailed: "Security verification failed to load.",
-      devBypass: "Dev mode: Turnstile verification bypassed",
-      testMode: "Bot protection disabled in test mode",
-    }
-  );
-}
-
 function buildLazyTurnstileWidgetProps(args: {
   props: LazyTurnstileProps;
-  labelText: NonNullable<LazyTurnstileProps["labels"]>;
+  labelText: LazyTurnstileLabels;
   theme: NonNullable<LazyTurnstileProps["theme"]>;
   size: NonNullable<LazyTurnstileProps["size"]>;
 }) {
@@ -143,6 +135,9 @@ function buildLazyTurnstileWidgetProps(args: {
       unavailable: labelText.unavailable,
       devBypass: labelText.devBypass,
       testMode: labelText.testMode,
+      rescueBeforeEmail: labelText.rescueBeforeEmail,
+      rescueAfterEmail: labelText.rescueAfterEmail,
+      rescueSubject: labelText.rescueSubject,
     },
     ...(props.onSuccess ? { onSuccess: props.onSuccess } : {}),
     ...(props.onError ? { onError: props.onError } : {}),
@@ -164,7 +159,6 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
   const placeholderStyle = createTurnstilePlaceholderStyle(size);
-  const labelText = resolveLazyTurnstileLabels(labels);
   const placeholder = (
     <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
   );
@@ -174,17 +168,21 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
       aria-live="polite"
     >
       <div className="text-sm text-[var(--error-foreground)]">
-        {labelText.unavailable}
+        {labels.unavailable}
       </div>
-      <TurnstileRescueLine />
+      <TurnstileRescueLine
+        beforeEmail={labels.rescueBeforeEmail}
+        afterEmail={labels.rescueAfterEmail}
+        subject={labels.rescueSubject}
+      />
     </output>
   );
   const handleLazyError = () => {
-    onError?.(labelText.loadFailed);
+    onError?.(labels.loadFailed);
   };
   const turnstileProps = buildLazyTurnstileWidgetProps({
     props,
-    labelText,
+    labelText: labels,
     theme,
     size,
   });

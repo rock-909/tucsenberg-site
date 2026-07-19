@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
+import { createTestTurnstileLabels } from "@/test/inquiry-test-messages";
 
 const storyTokenHandler = () => undefined;
 const storyStatusHandler = () => undefined;
+const storyTurnstileLabels = createTestTurnstileLabels();
 
 const meta = {
   title: "Forms/LazyTurnstile",
@@ -17,6 +19,7 @@ const meta = {
     onError: storyStatusHandler,
     onExpire: storyStatusHandler,
     onLoad: storyStatusHandler,
+    labels: storyTurnstileLabels,
   },
 } satisfies Meta<typeof LazyTurnstile>;
 
@@ -49,6 +52,7 @@ export const StorybookFallback: Story = {
         onError={storyStatusHandler}
         onExpire={storyStatusHandler}
         onLoad={storyStatusHandler}
+        labels={storyTurnstileLabels}
         id="storybook-turnstile-fallback"
       />
       <p className="mt-3 text-sm text-muted-foreground">
