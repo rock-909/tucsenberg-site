@@ -179,8 +179,11 @@ production -> oem
 ```
 
 Rename each paired `Label` key and update the switch, order tuple, message pack,
-page fixture, and Hero tests atomically. These are semantic names only; values,
-labels, order, and site-fact inputs remain unchanged.
+page fixture, and Hero tests atomically. These are semantic names only:
+buyer-visible values, labels, and order remain unchanged. If the final message
+strings no longer consume obsolete interpolation parameters, a quality follow-up
+may delete those dead call-site parameters; that cleanup must not change
+rendered copy or order.
 
 `SINGLE_SITE_HOME_FINAL_TRUST_ITEMS` has no production consumer and exists only
 to satisfy its own test. Delete it rather than renaming its dead value.
