@@ -6,7 +6,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Complete all of M3 in five acceptance clusters. Clusters 1 and 2 are closed; the remaining 10 tasks are in Clusters 3A, 3B, and 4. Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
+**Goal:** Complete all of M3 in five acceptance clusters. Clusters 1, 2, 3A, and 3B are closed; the remaining 3 tasks are in Cluster 4 (D7a, D7b, C7). Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
 
 **Architecture:** A task PR is the implementation unit; a cluster is the acceptance unit. Dependent PRs are stacked. Parallel lanes fork from one proven base, then linearize into one cluster tip before review. After `ACCEPTED`, one owner `MERGE_CLUSTER` instruction authorizes sequential merge and exact-SHA revalidation until a semantic change forces a stop.
 
@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6e ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response`; D6e is ACTIVE on branch `feat/m3-d6e-retire-form-stacks`. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged 30/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Cluster 3B = CLOSED** (D6b #138 `4343674`, D6c #139 `b9aa29b`, D6d #140 `03add86`, D6e #141 `f61b35c`; #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328`, cluster exact-SHA CI run `29669943819` all green). **Current execution face: Cluster 4 / D7a (not started).** D7a, D7b, and C7 have not started. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -311,19 +311,23 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response`. **D6e is ACTIVE** on branch `feat/m3-d6e-retire-form-stacks`. Detailed D6e plan: `docs/superpowers/plans/2026-07-18-d6e-retire-form-stacks.md`.
+**Status (2026-07-19): CLOSED.** Cluster 3A closed on main `96af3549`. D6b #138 merged `43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`; D6c #139 merged `b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`; D6d #140 merged `03add864207436c7a52b9818972bad9e05fb7f5f`; D6e #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` and merged to main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. Cluster exact-SHA CI run `29669943819` all green. **Cluster 4 / D7a is the next execution face and has not started.**
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
+**Status:** ACCEPTED and merged as PR #138 (`43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`).
+
 **Files:** `src/app/api/inquiry/route.ts`, `src/app/api/contact/route.ts` and its tests, `src/lib/lead-pipeline/process-lead.ts`, `src/lib/api/inquiry-validation-details.ts`, rate-limit presets, architecture/behavior docs and tests.
 
-- [ ] Add failing tests that `/api/inquiry` accepts the canonical general/contact payload, maps Zod issues structurally, and calls `processValidatedInquiry` with an already validated value. Add an architecture test that production form code has one write endpoint.
-- [ ] Move the Contact route and its only-route tests to Trash after proving no external contract in deploy logs. If real external calls exist, stop and report the payload/volume evidence for an owner decision on a dated adapter or explicit 410. Do not add a permanent redirect or duplicate implementation.
-- [ ] Remove the Contact-specific rate-limit/error branch. Keep honeypot, Turnstile, body-size, rate-limit and attribution in the surviving route.
-- [ ] Run inquiry route/integration, lead-family protection, architecture and E2E tests; `pnpm website:check`.
-- [x] Commit `refactor: make api inquiry the single validated lead write path`; PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`, CI green, Cursor self-review `NO_MATERIAL_FINDINGS`, `READY_FOR_CLUSTER`.
+- [x] Add failing tests that `/api/inquiry` accepts the canonical general/contact payload, maps Zod issues structurally, and calls `processValidatedInquiry` with an already validated value. Add an architecture test that production form code has one write endpoint.
+- [x] Move the Contact route and its only-route tests to Trash after proving no external contract in deploy logs. If real external calls exist, stop and report the payload/volume evidence for an owner decision on a dated adapter or explicit 410. Do not add a permanent redirect or duplicate implementation.
+- [x] Remove the Contact-specific rate-limit/error branch. Keep honeypot, Turnstile, body-size, rate-limit and attribution in the surviving route.
+- [x] Run inquiry route/integration, lead-family protection, architecture and E2E tests; `pnpm website:check`.
+- [x] Commit `refactor: make api inquiry the single validated lead write path`; PR #138 merged.
 
 ### Task D6c: derive product context from validated page handoff
+
+**Status:** ACCEPTED and merged as PR #139 (`b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`).
 
 **Files:** `src/lib/lead-pipeline/product-identity.ts`, `src/lib/lead-pipeline/product-inquiry-kinds.ts`, product catalog facade, `src/components/products/product-run-calculator.tsx`, product page CTA/link owners, InquiryForm payload builder, product/RFQ tests and E2E.
 
@@ -331,27 +335,28 @@ interface CanonicalInquiryBuyerFields {
 - [x] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
 - [x] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
 - [x] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
-- [x] Commit `refactor: derive inquiry product context from validated page handoff`; PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`, workflow `29659345454` green, Cursor self-review `NO_MATERIAL_FINDINGS`, `READY_FOR_CLUSTER`.
+- [x] Commit `refactor: derive inquiry product context from validated page handoff`; PR #139 merged.
 
 ### Task D6d: unify success state, Turnstile and response promise
 
-**Status (2026-07-18): READY_FOR_CLUSTER** on branch `feat/m3-d6d-inquiry-response` (base D6c exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`). **Detailed plan:** `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
+**Status (2026-07-19): ACCEPTED and merged as PR #140 (`03add864207436c7a52b9818972bad9e05fb7f5f`).** **Detailed plan:** `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
 
 - [x] Clear the three visible fields plus honeypot only after confirmed success; keep the shared reference-ID status. Preserve values on field/security/server/429 failures and prove a fresh Turnstile token allows retry without a browser cooldown.
 - [x] Make `INQUIRY_TURNSTILE_ACTION` the only widget/server action; remove action props, per-call expected-action parameters and the three action env names.
 - [x] Make production validation always require the live Turnstile site key and secret, independent of the legacy Contact feature flag. Leave physical deletion of the legacy config engine to D6e.
 - [x] Replace unconditional 12/48-hour quote promises with the approved 12-hour reply meaning at message, MDX, metadata and product-copy sources; regenerate the content manifest.
 - [x] Record BC-012B/BC-012C and updated BC-012 in `docs/项目基础/行为合约.md`.
-- [ ] Independent Codex spec/quality review before D6e starts.
 
 ### Task D6e: retire the duplicate Contact/RFQ form stacks and config engine
 
+**Status (2026-07-19): ACCEPTED and merged as PR #141 (accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` → main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`).** **Detailed plan:** `docs/superpowers/plans/2026-07-18-d6e-retire-form-stacks.md`.
+
 **Files to prove and move to Trash where obsolete:** `src/components/contact/contact-form-island.tsx`, Contact form load/error/story files, `src/components/forms/contact-form-*`, `src/components/forms/use-contact-form.ts`, `src/config/contact-form-config.ts`, `src/config/contact-form-validation.ts`, `src/lib/form-schema/contact-*`, `src/lib/contact/submit-canonical-contact.ts`, only-test fixtures and the complete unreferenced pre-D6a `RequestQuoteForm`/fields/submit-controls/copy/test-helper stack superseded by InquiryForm.
 
-- [ ] Add a positive architecture test that discovers exactly one visible form implementation, one `/api/inquiry` write route, one schema owner, one product-context resolver, one owner-email path, one Airtable path and one response model.
-- [ ] Use live imports and `knip` to classify each old file. Move only obsolete files to Trash; update Registry, Storybook, behavior contracts, security/cloudflare rules and page tests in the same PR.
-- [ ] Merge duplicate Contact/RFQ message namespaces into one inquiry namespace. Keep page-specific headings outside it. Rename `ServerActionResult` and server-action comments to current lead response semantics only where still live.
-- [ ] Run:
+- [x] Add a positive architecture test that discovers exactly one visible form implementation, one `/api/inquiry` write route, one schema owner, one product-context resolver, one owner-email path, one Airtable path and one response model.
+- [x] Use live imports and `knip` to classify each old file. Move only obsolete files to Trash; update Registry, Storybook, behavior contracts, security/cloudflare rules and page tests in the same PR.
+- [x] Merge duplicate Contact/RFQ message namespaces into one inquiry namespace. Keep page-specific headings outside it. Rename `ServerActionResult` and server-action comments to current lead response semantics only where still live.
+- [x] Run:
 
 ```bash
 pnpm component:check
@@ -362,18 +367,18 @@ pnpm exec playwright test tests/e2e/contact-form-smoke.spec.ts tests/e2e/contact
 pnpm build
 ```
 
-- [ ] Commit `refactor: retire the duplicate contact form stack and config engine`; push and mark `READY_FOR_CLUSTER`.
+- [x] Commit `refactor: retire the duplicate contact form stack and config engine`; PR #141 merged.
 
 ### Cluster 3B acceptance
 
-- [ ] On D6e tip perform static searches and runtime journeys proving the seven single-owner claims above. Include Turnstile, honeypot, rate-limit, owner email, Airtable, product and general flows.
-- [ ] Run `pnpm website:check`, `pnpm component:check`, OpenNext build and Cloudflare dry-run. Submit one handoff and stop.
+- [x] On D6e tip perform static searches and runtime journeys proving the seven single-owner claims above. Include Turnstile, honeypot, rate-limit, owner email, Airtable, product and general flows.
+- [x] Run `pnpm website:check`, `pnpm component:check`, OpenNext build and Cloudflare dry-run. Cluster exact-SHA CI run `29669943819` all green. Cluster 3B CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`.
 
 ---
 
 ## 6. Cluster 4: locale and documentation closure
 
-Start only after Cluster 3B is CLOSED.
+**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **Next task: D7a (not started).** D7b and C7 have not started.
 
 ### Task D7a: remove component-level English fallbacks
 
