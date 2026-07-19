@@ -1,3 +1,5 @@
+> Historical. This file preserves dated design or execution context. It is not current Tucsenberg product truth; verify current code and stable docs before acting on it.
+
 # react-doctor 发现项处置 + 缓存清理 — 设计
 
 - 日期: 2026-07-19
