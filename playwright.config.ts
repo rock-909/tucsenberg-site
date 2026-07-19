@@ -9,6 +9,7 @@ config({ path: ".env.test", quiet: true });
  */
 const isCI = Boolean(process.env.CI);
 const isDaily = process.env.CI_DAILY === "true";
+const shouldRebuildServer = process.env.PLAYWRIGHT_REBUILD_SERVER === "true";
 const PLAYWRIGHT_PROFILE_LANE_IDS = new Set(["default", "optional", "all"]);
 
 function normalizePlaywrightProfileLane(rawValue) {
@@ -138,8 +139,11 @@ export default defineConfig({
           // 统一使用生产模式运行 E2E 测试,消除开发模式的 Hydration mismatch 警告
           // 注意：必须使用 NODE_ENV=production 进行构建，否则 React 19 的某些内部 API
           // （如 captureOwnerStack）在 test 模式下不可用，会导致 sitemap.ts 预渲染失败
-          // CI环境下构建由workflow显式执行，这里只启动服务器；本地开发时需要构建
-          command: process.env.CI ? "pnpm start" : "pnpm build && pnpm start",
+          // CI 默认复用 workflow build；release proof 用专用 flag 按 test-mode env 重建
+          command:
+            isCI && !shouldRebuildServer
+              ? "pnpm start"
+              : "pnpm build && pnpm start",
           url: "http://localhost:3000",
           reuseExistingServer: !process.env.CI,
           timeout: process.env.CI ? 60 * 1000 : 180 * 1000, // CI已构建,启动更快

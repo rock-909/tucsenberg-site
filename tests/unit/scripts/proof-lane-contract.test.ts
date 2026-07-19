@@ -77,7 +77,7 @@ describe("release proof manifest contract", () => {
       "pnpm website:build:cf",
       "node scripts/starter-checks.js cf-static-asset-headers",
       "pnpm exec wrangler deploy --dry-run --env preview",
-      "CI=1 pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/contact-form-smoke.spec.ts --project=chromium",
+      "CI=1 PLAYWRIGHT_REBUILD_SERVER=true pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/contact-form-smoke.spec.ts --project=chromium",
     ]);
   });
 });
