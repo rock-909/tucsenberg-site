@@ -11,6 +11,12 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
       "TB-FB absorbent flood bag — flat bag activating with water and stacked deployment",
     caption:
       "Activation and deployment: a flat 0.23 kg bag swells to 20 kg in 3–4 minutes, then stacks like sandbags. Schematic, not to scale. Product photography in preparation.",
+    labels: {
+      shipsFlat: "ships flat · 0.23 kg",
+      addWater: "+ water",
+      activatedWeight: "20 kg in 3–4 min",
+      stacking: "stack like sandbags — two layers per doorway",
+    },
   },
   eyebrow: "TB-FB series",
   title: "Absorbent Flood Bags (Sandless Sandbags) — Bulk & Private Label",

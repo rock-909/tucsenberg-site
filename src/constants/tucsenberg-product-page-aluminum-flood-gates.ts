@@ -11,6 +11,11 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
       "TB-AG aluminum flood gate — stacked planks between channel posts with EPDM seals, front view",
     caption:
       "System front view: 180 mm planks stack between posts; EPDM seals compress on every joint. Schematic, not to scale — cut to your opening schedule at order. Product photography in preparation.",
+    labels: {
+      planks: "6063-T6 planks, stacked to height",
+      seal: "EPDM seal",
+      post: "post",
+    },
   },
   eyebrow: "TB-AG series",
   title: "Aluminum Flood Gates & Demountable Barrier Systems",

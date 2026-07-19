@@ -11,6 +11,11 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
       "TB-TD flood tube dam — cross-section on ground mat with pinned skirt and water side",
     caption:
       "Cross-section: the tube sits on its ground mat with the skirt pinned toward the water side. Schematic, not to scale — section lengths confirmed at quotation. Product photography in preparation.",
+    labels: {
+      waterSide: "water side",
+      skirtAndPins: "skirt + pins",
+      tubeConstruction: "0.9 mm PVC tube — air or water fill",
+    },
   },
   eyebrow: "TB-TD series",
   title: "Water & Air-Filled Flood Tube Dams",

@@ -14,6 +14,12 @@ import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
  * not run — the server-rendered static SVG fallback stays visible.
  */
 
+interface BoxwallCanvasLabels {
+  load: string;
+  floodSide: string;
+  drySide: string;
+}
+
 interface SceneColors {
   ink: string;
   muted: string;
@@ -179,7 +185,11 @@ function drawGround(ctx: CanvasRenderingContext2D, c: SceneColors) {
   ctx.globalAlpha = 1;
 }
 
-function drawLoadArrows(ctx: CanvasRenderingContext2D, c: SceneColors) {
+function drawLoadArrows(
+  ctx: CanvasRenderingContext2D,
+  c: SceneColors,
+  labels: BoxwallCanvasLabels,
+) {
   ctx.strokeStyle = c.water;
   ctx.fillStyle = c.water;
   ctx.lineWidth = 2;
@@ -198,37 +208,53 @@ function drawLoadArrows(ctx: CanvasRenderingContext2D, c: SceneColors) {
   ctx.font = "600 10px ui-monospace, SFMono-Regular, Menlo, monospace";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText("LOAD", 268, 202);
+  ctx.fillText(labels.load, 268, 202);
 }
 
-function drawSideLabels(ctx: CanvasRenderingContext2D, c: SceneColors) {
+function drawSideLabels(
+  ctx: CanvasRenderingContext2D,
+  c: SceneColors,
+  labels: BoxwallCanvasLabels,
+) {
   ctx.font = "600 10px ui-monospace, SFMono-Regular, Menlo, monospace";
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = c.water;
-  ctx.fillText("FLOOD SIDE", 68, 122);
+  ctx.fillText(labels.floodSide, 68, 122);
   ctx.fillStyle = c.muted;
-  ctx.fillText("DRY SIDE", WALL_RIGHT + 8, 122);
+  ctx.fillText(labels.drySide, WALL_RIGHT + 8, 122);
 }
 
-function drawScene(
-  ctx: CanvasRenderingContext2D,
-  colors: SceneColors,
-  t: number,
-) {
+function drawScene({
+  ctx,
+  colors,
+  labels,
+  t,
+}: {
+  ctx: CanvasRenderingContext2D;
+  colors: SceneColors;
+  labels: BoxwallCanvasLabels;
+  t: number;
+}) {
   drawScaleAndGrid(ctx, colors);
   drawWater(ctx, colors, t);
   drawBarrier(ctx, colors);
   drawGround(ctx, colors);
-  drawLoadArrows(ctx, colors);
-  drawSideLabels(ctx, colors);
+  drawLoadArrows(ctx, colors, labels);
+  drawSideLabels(ctx, colors, labels);
 }
 
 // eslint-disable-next-line no-empty-function -- store never changes; unsubscribe is intentionally a no-op
 const noop = () => {};
 const subscribeNoop = () => noop;
 
-export function BoxwallCrossSection({ fallback }: { fallback: ReactNode }) {
+export function BoxwallCrossSection({
+  fallback,
+  labels,
+}: {
+  fallback: ReactNode;
+  labels: BoxwallCanvasLabels;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // false during SSR/hydration (static SVG fallback), true once client-only
@@ -273,7 +299,7 @@ export function BoxwallCrossSection({ fallback }: { fallback: ReactNode }) {
         (width - DESIGN_WIDTH * scale) / 2,
         (height - DESIGN_HEIGHT * scale) / 2,
       );
-      drawScene(ctx, colors, t);
+      drawScene({ ctx, colors, labels, t });
     };
 
     const loop = (now: number) => {
@@ -313,7 +339,7 @@ export function BoxwallCrossSection({ fallback }: { fallback: ReactNode }) {
       themeObserver.disconnect();
       media.removeEventListener("change", start);
     };
-  }, [mounted]);
+  }, [labels, mounted]);
 
   return (
     <div ref={containerRef} className="relative aspect-[4/3] w-full">

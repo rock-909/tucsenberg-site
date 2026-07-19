@@ -1,6 +1,15 @@
 /* eslint-disable no-magic-numbers -- SVG drawing coordinates; naming every x/y would hurt readability */
 import type { ReactNode } from "react";
 
+export interface FactoryPoolDiagramLabels {
+  extrusion: string;
+  moulding: string;
+  welding: string;
+  sewing: string;
+  specAndQc: string;
+  mixedContainer: string;
+}
+
 /**
  * Factory-pool process line drawing for the OEM landing page: four
  * specialised factories feed one spec sheet / QC gate and ship as one mixed
@@ -69,8 +78,10 @@ function FlowArrow({
 
 export function FactoryPoolDiagram({
   ariaLabel,
+  labels,
 }: {
   ariaLabel: string;
+  labels: FactoryPoolDiagramLabels;
 }): ReactNode {
   return (
     <svg
@@ -81,10 +92,10 @@ export function FactoryPoolDiagram({
       viewBox="0 0 480 240"
     >
       {/* Four specialised factories */}
-      <FactoryBlock x={16} y={24} label="extrusion" />
-      <FactoryBlock x={16} y={132} label="moulding" />
-      <FactoryBlock x={108} y={24} label="welding" />
-      <FactoryBlock x={108} y={132} label="sewing" />
+      <FactoryBlock x={16} y={24} label={labels.extrusion} />
+      <FactoryBlock x={16} y={132} label={labels.moulding} />
+      <FactoryBlock x={108} y={24} label={labels.welding} />
+      <FactoryBlock x={108} y={132} label={labels.sewing} />
 
       {/* Convergence into the spec/QC gate */}
       <FlowArrow x1={192} y1={60} x2={224} y2={104} />
@@ -111,7 +122,7 @@ export function FactoryPoolDiagram({
         textAnchor="middle"
         className="fill-muted-foreground font-mono text-[10px]"
       >
-        one spec · one QC
+        {labels.specAndQc}
       </text>
 
       <FlowArrow x1={304} y1={116} x2={340} y2={116} />
@@ -129,7 +140,7 @@ export function FactoryPoolDiagram({
         textAnchor="middle"
         className="fill-muted-foreground font-mono text-[10px]"
       >
-        one mixed container
+        {labels.mixedContainer}
       </text>
     </svg>
   );

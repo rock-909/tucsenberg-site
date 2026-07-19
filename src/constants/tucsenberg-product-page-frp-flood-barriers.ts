@@ -11,6 +11,11 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
       "TB-CP FRP composite flood plank — multi-cell pultruded profile cross-section",
     caption:
       "Profile cross-section: multi-cell pultruded FRP in the 180 mm plank class. Indicative geometry — final profile is confirmed with tooling. Product photography follows first production run.",
+    labels: {
+      heightClass: "180 mm class",
+      profile: "pultruded FRP plank — multi-cell cross-section",
+      properties: "corrosion-free · non-conductive · continuous glass fibre",
+    },
   },
   eyebrow: "TB-CP series",
   title: "FRP Composite Flood Barrier Planks",
