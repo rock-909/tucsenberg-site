@@ -106,8 +106,11 @@ const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
 const TIMING_12 = /\b(?:12\s*-?\s*hours?|12-hour)\b/iu;
 const TIMING_48 = /\b(?:48\s*-?\s*hours?|48-hour)\b/iu;
 const QUOTE_TERMS = /\b(?:quotes?|quoted|quotations?)\b/iu;
-const QUOTE_RESPONSE_SEMANTICS =
-  /\b(?:reply|replies|respond|response|answer|answers|answered|receive|get|provide|turnaround)\b/iu;
+const EXACT_ACCURATE_PRICING = /\b(?:accurate|exact) pricing\b/iu;
+const LOGISTICS_SEMANTICS =
+  /\b(?:shipping|delivery|dispatch|ship|deliver(?:y|ed|ies|ing)?)\b/iu;
+const LOGISTICS_TIMING_FORBIDDEN =
+  /\b(?:accurate|exact) pricing\b|\b(?:quotes?|quoted|quotations?)\b|\b(?:reply|replies|respond|response|answer|answers|answered|receive|get|provide|turnaround)\b/iu;
 
 const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   {
@@ -159,6 +162,21 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
     label: "exact pricing em dash multiline template (tsx)",
     text: "const copy = `Request a quote for exact pricing —\nwe reply within 12 hours.`;",
     repoPath: "src/app/[locale]/request-quote/page.tsx",
+  },
+  {
+    label: "exact pricing within 12 hours (mdx)",
+    text: "Exact pricing within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "accurate pricing available within 12 hours (json)",
+    text: "Accurate pricing available within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "accurate pricing available within 12 hours (ts)",
+    text: 'export const description = "Accurate pricing available within 12 hours.";',
+    repoPath: "src/lib/contact/getContactCopy.ts",
   },
 ] as const;
 
@@ -244,6 +262,74 @@ function isForbiddenQuoteTimeClause(clause: string): boolean {
     TIMING_48.test(text) &&
     (QUOTE_TERMS.test(text) || /\bcustom\b/iu.test(text))
   );
+}
+
+function hasSeparateLogisticsTimingSegment(text: string): boolean {
+  const segments = text.split(/\s—\s/u);
+  if (segments.length < 2) {
+    return false;
+  }
+
+  for (
+    let pricingIndex = 0;
+    pricingIndex < segments.length;
+    pricingIndex += 1
+  ) {
+    const pricingSide = normalizeQuoteTimingClause(
+      segments[pricingIndex] ?? "",
+    );
+    if (!EXACT_ACCURATE_PRICING.test(pricingSide)) {
+      continue;
+    }
+
+    for (let timingIndex = 0; timingIndex < segments.length; timingIndex += 1) {
+      if (timingIndex === pricingIndex) {
+        continue;
+      }
+
+      const logisticsSide = normalizeQuoteTimingClause(
+        segments[timingIndex] ?? "",
+      );
+      if (
+        TIMING_12.test(logisticsSide) &&
+        LOGISTICS_SEMANTICS.test(logisticsSide) &&
+        !LOGISTICS_TIMING_FORBIDDEN.test(logisticsSide)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function hasForbiddenExactAccuratePricing12HourPromise(text: string): boolean {
+  const normalizedFullText = normalizeQuoteTimingClause(text);
+  if (
+    !TIMING_12.test(normalizedFullText) ||
+    !EXACT_ACCURATE_PRICING.test(normalizedFullText)
+  ) {
+    return false;
+  }
+
+  if (hasSeparateLogisticsTimingSegment(text)) {
+    return false;
+  }
+
+  const clauses = splitCopyClauses(text);
+  const hasSameClauseMatch = clauses.some((clause) => {
+    const normalizedClause = normalizeQuoteTimingClause(clause);
+    return (
+      TIMING_12.test(normalizedClause) &&
+      EXACT_ACCURATE_PRICING.test(normalizedClause)
+    );
+  });
+
+  if (hasSameClauseMatch) {
+    return true;
+  }
+
+  return /\s—\s/u.test(text);
 }
 
 function collectJsonStringValues(value: unknown): string[] {
@@ -364,12 +450,7 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
     return true;
   }
 
-  const normalizedFullText = normalizeQuoteTimingClause(text);
-  if (
-    TIMING_12.test(normalizedFullText) &&
-    /\b(?:accurate|exact) pricing\b/iu.test(normalizedFullText) &&
-    QUOTE_RESPONSE_SEMANTICS.test(normalizedFullText)
-  ) {
+  if (hasForbiddenExactAccuratePricing12HourPromise(text)) {
     return true;
   }
 
