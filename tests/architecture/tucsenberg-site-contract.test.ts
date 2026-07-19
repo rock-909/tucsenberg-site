@@ -106,6 +106,8 @@ const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
 const TIMING_12 = /\b(?:12\s*-?\s*hours?|12-hour)\b/iu;
 const TIMING_48 = /\b(?:48\s*-?\s*hours?|48-hour)\b/iu;
 const QUOTE_TERMS = /\b(?:quotes?|quoted|quotations?)\b/iu;
+const QUOTE_RESPONSE_SEMANTICS =
+  /\b(?:reply|replies|respond|response|answer|answers|answered|receive|get|provide|turnaround)\b/iu;
 
 const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   {
@@ -194,6 +196,16 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   {
     label: "exact pricing and shipping timing in separate clauses (json)",
     text: "Learn exact pricing. Shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "accurate pricing em dash delivery within 12 hours (mdx)",
+    text: "The written quote contains accurate pricing — delivery is available within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing em dash shipping within 12 hours (json)",
+    text: "The written quote contains exact pricing — shipping within 12 hours.",
     repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
@@ -355,7 +367,8 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
   const normalizedFullText = normalizeQuoteTimingClause(text);
   if (
     TIMING_12.test(normalizedFullText) &&
-    /\b(?:accurate|exact) pricing\b/iu.test(normalizedFullText)
+    /\b(?:accurate|exact) pricing\b/iu.test(normalizedFullText) &&
+    QUOTE_RESPONSE_SEMANTICS.test(normalizedFullText)
   ) {
     return true;
   }
