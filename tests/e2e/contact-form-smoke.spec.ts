@@ -43,8 +43,8 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     // 等待页面主要内容加载
     await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => {});
 
-    // Progressive enhancement: the static no-JS fallback has no form until the
-    // island loads the live client form after scroll / intersection.
+    // Progressive enhancement: scroll the form column into view so InquiryForm
+    // and LazyTurnstile can mount before interaction.
     await page
       .getByTestId("contact-form-column")
       .scrollIntoViewIfNeeded({ timeout: 10_000 });
@@ -80,22 +80,16 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
   });
 
   test.describe("1. Turnstile 验证流程", () => {
-    test("联系表单内存在 Turnstile 挂载区域", async ({ page }) => {
+    test("the form displays the test-mode bot-protection state", async ({
+      page,
+    }) => {
       await gotoContactPage(page, test.info());
 
-      // 检查表单存在
       const form = page.locator("form").first();
       await expect(form).toBeVisible();
-
-      // LazyTurnstile 始终在表单内渲染一个挂载区域，只是形态会变化：
-      // 懒加载占位骨架（.animate-pulse）→ 真实 widget（Cloudflare iframe）
-      // 或加载失败回退（.turnstile-fallback）。这里断言该区域确实存在，
-      // 而不是像旧写法那样谎称 widget 一定加载成功后再用 console.warn 掩盖失败。
-      // test-mode 懒加载时机下 widget 未必及时出现，但挂载区域一定在。
-      const turnstileRegion = form.locator(
-        'iframe[src*="challenges.cloudflare.com"], .turnstile-fallback, .animate-pulse',
-      );
-      await expect(turnstileRegion.first()).toBeVisible();
+      await expect(
+        form.getByText("Bot protection disabled in test mode"),
+      ).toBeVisible();
     });
 
     test("提交按钮初始状态应该被禁用", async ({ page }) => {

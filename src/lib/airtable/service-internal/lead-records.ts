@@ -2,14 +2,10 @@ import "server-only";
 
 import type AirtableNS from "airtable";
 import type {
-  ContactLeadData,
   CreatedAirtableRecord,
-  LeadSource,
   ProductLeadData,
 } from "@/lib/airtable/types";
 import { sanitizeAirtableTextField } from "@/lib/airtable/service-internal/field-sanitization";
-import { LEAD_TYPES, type LeadType } from "@/lib/lead-pipeline/lead-schema";
-import { formatQuantity } from "@/lib/lead-pipeline/utils";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import {
   ATTRIBUTION_FIELD_NAMES,
@@ -19,6 +15,8 @@ import {
 
 type AirtableFieldValue = string | number | boolean;
 type AirtableFields = Record<string, AirtableFieldValue>;
+
+const PRODUCT_INQUIRY_SOURCE = "Product Inquiry" as const;
 
 const AIRTABLE_ATTRIBUTION_FIELD_NAMES = {
   utmSource: "UTM Source",
@@ -33,24 +31,12 @@ const AIRTABLE_ATTRIBUTION_FIELD_NAMES = {
   capturedAt: "Captured At",
 } satisfies Record<AttributionFieldName, string>;
 
-function getLeadSource(type: LeadType): LeadSource {
-  if (type === LEAD_TYPES.PRODUCT) {
-    return "Product Inquiry";
-  }
-  return "Website Contact Form";
-}
-
-function buildBaseFields(
-  source: LeadSource,
-  email: string,
-  now: string,
-): AirtableFields {
+function buildBaseFields(email: string, now: string): AirtableFields {
   return {
-    // Email is validated by the lead schema and must remain a valid typed value.
     Email: email.toLowerCase().trim(),
     "Submitted At": now,
     Status: "New",
-    Source: source,
+    Source: PRODUCT_INQUIRY_SOURCE,
   };
 }
 
@@ -59,35 +45,14 @@ function addReferenceId(fields: AirtableFields, referenceId?: string): void {
   fields["Reference ID"] = referenceId;
 }
 
-function addContactFields(fields: AirtableFields, data: ContactLeadData): void {
-  fields["First Name"] = sanitizeAirtableTextField(data.firstName);
-  fields["Last Name"] = sanitizeAirtableTextField(data.lastName);
-  fields["Company"] = data.company
-    ? sanitizeAirtableTextField(data.company)
-    : "";
-  if (data.subject) {
-    fields["Subject"] = sanitizeAirtableTextField(data.subject);
-  }
-  fields["Message"] = sanitizeAirtableTextField(data.message);
-}
-
 function addProductFields(fields: AirtableFields, data: ProductLeadData): void {
   fields["First Name"] = sanitizeAirtableTextField(data.firstName);
   fields["Last Name"] = sanitizeAirtableTextField(data.lastName);
-  fields["Company"] = data.company
-    ? sanitizeAirtableTextField(data.company)
-    : "";
   fields["Message"] = sanitizeAirtableTextField(data.message);
   fields["Product Name"] = sanitizeAirtableTextField(data.productName);
-  // Product Slug holds the registry-validated catalog product id, and is empty
-  // for a general RFQ, which honestly carries no per-product identity.
   fields["Product Slug"] = data.catalogProductId
     ? sanitizeAirtableTextField(data.catalogProductId)
     : "";
-  fields["Quantity"] =
-    data.quantity !== undefined && String(data.quantity).trim().length > 0
-      ? sanitizeAirtableTextField(formatQuantity(data.quantity))
-      : "";
   if (data.requirements) {
     fields["Requirements"] = sanitizeAirtableTextField(data.requirements);
   }
@@ -106,28 +71,11 @@ function addAttributionFields(
   }
 }
 
-function addTypeSpecificFields(
-  fields: AirtableFields,
-  type: LeadType,
-  data: ContactLeadData | ProductLeadData,
-): void {
-  if (type === LEAD_TYPES.PRODUCT) {
-    addProductFields(fields, data as ProductLeadData);
-    return;
-  }
-  addContactFields(fields, data as ContactLeadData);
-}
-
-function buildLeadFields(params: {
-  type: LeadType;
-  data: ContactLeadData | ProductLeadData;
-  source: LeadSource;
-  now: string;
-}): AirtableFields {
-  const fields = buildBaseFields(params.source, params.data.email, params.now);
-  addReferenceId(fields, params.data.referenceId);
-  addTypeSpecificFields(fields, params.type, params.data);
-  addAttributionFields(fields, params.data);
+function buildLeadFields(data: ProductLeadData, now: string): AirtableFields {
+  const fields = buildBaseFields(data.email, now);
+  addReferenceId(fields, data.referenceId);
+  addProductFields(fields, data);
+  addAttributionFields(fields, data);
   return fields;
 }
 
@@ -152,31 +100,28 @@ function isAirtableLikeError(error: unknown): error is AirtableLikeError {
 
 function buildCreateLeadRecordLogContext(
   error: unknown,
-  type: LeadType,
 ): Record<string, string | number> {
   if (error instanceof Error) {
-    return { error: error.message, type };
+    return { error: error.message };
   }
 
   if (isAirtableLikeError(error)) {
-    return { errorType: error.error, statusCode: error.statusCode, type };
+    return { errorType: error.error, statusCode: error.statusCode };
   }
 
-  return { error: "Unknown error", type };
+  return { error: "Unknown error" };
 }
 
 export async function createLeadRecord(params: {
   base: AirtableNS.Base;
   tableName: string;
-  type: LeadType;
-  data: ContactLeadData | ProductLeadData;
+  data: ProductLeadData;
 }): Promise<CreatedAirtableRecord> {
-  const { base, tableName, type, data } = params;
+  const { base, tableName, data } = params;
 
   try {
-    const source = getLeadSource(type);
     const now = new Date().toISOString();
-    const fields = buildLeadFields({ type, data, source, now });
+    const fields = buildLeadFields(data, now);
 
     const recordsResult = await base.table(tableName).create([
       {
@@ -194,8 +139,7 @@ export async function createLeadRecord(params: {
 
     logger.info("Lead record created successfully", {
       recordId: createdRecord.id,
-      type,
-      source,
+      source: PRODUCT_INQUIRY_SOURCE,
       email: sanitizeEmail(data.email),
       referenceId: data.referenceId,
     });
@@ -206,7 +150,7 @@ export async function createLeadRecord(params: {
   } catch (error) {
     logger.error(
       "Failed to create lead record",
-      buildCreateLeadRecordLogContext(error, type),
+      buildCreateLeadRecordLogContext(error),
     );
     throw new Error("Failed to create lead record", { cause: error });
   }

@@ -106,31 +106,87 @@ const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
 const TIMING_12 = /\b(?:12\s*-?\s*hours?|12-hour)\b/iu;
 const TIMING_48 = /\b(?:48\s*-?\s*hours?|48-hour)\b/iu;
 const QUOTE_TERMS = /\b(?:quotes?|quoted|quotations?)\b/iu;
+const EXACT_ACCURATE_PRICING = /\b(?:accurate|exact) pricing\b/iu;
+const LOGISTICS_SEMANTICS =
+  /\b(?:shipping|delivery|dispatch|ship|deliver(?:y|ed|ies|ing)?)\b/iu;
+const LOGISTICS_TIMING_FORBIDDEN =
+  /\b(?:accurate|exact) pricing\b|\b(?:quotes?|quoted|quotations?)\b|\b(?:reply|replies|respond|response|answer|answers|answered|receive|get|provide|turnaround)\b/iu;
 
 const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   {
     label: "quote before 12 hours",
     text: "Send details for a quote within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
   },
   {
     label: "quoted before within 12 hours",
     text: "Standard items are quoted within 12 hours.",
+    repoPath: "content/pages/en/oem-wholesale.mdx",
   },
   {
     label: "12-hour before quote",
-    text: "Standard 12-hour quote turnaround for catalog lines.",
+    text: 'export const copy = "Standard 12-hour quote turnaround for catalog lines.";',
+    repoPath: "src/lib/contact/getContactCopy.ts",
   },
   {
     label: "custom quote before 48 hours",
     text: "Custom quote requests are answered within 48 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
   {
     label: "48-hour before custom quote",
-    text: "48-hour custom quote review for non-standard openings.",
+    text: 'export const copy = "48-hour custom quote review for non-standard openings.";',
+    repoPath: "src/app/[locale]/request-quote/page.tsx",
   },
   {
     label: "48-hour custom quotation",
     text: "Within 48 hours, custom projects receive a quotation.",
+    repoPath: "messages/profiles/catalog/en/messages.json",
+  },
+  {
+    label: "exact pricing em dash reply within 12 hours (mdx)",
+    text: "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "accurate pricing em dash reply within 12 hours (ts)",
+    text: 'export const description = "Request a quote for accurate pricing — we reply within 12 hours.";',
+    repoPath: "src/lib/contact/getContactCopy.ts",
+  },
+  {
+    label: "exact pricing em dash reply within 12 hours (json)",
+    text: "Request a quote for exact pricing — we reply within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "exact pricing em dash multiline template (tsx)",
+    text: "const copy = `Request a quote for exact pricing —\nwe reply within 12 hours.`;",
+    repoPath: "src/app/[locale]/request-quote/page.tsx",
+  },
+  {
+    label: "exact pricing within 12 hours (mdx)",
+    text: "Exact pricing within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "accurate pricing available within 12 hours (json)",
+    text: "Accurate pricing available within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "accurate pricing available within 12 hours (ts)",
+    text: 'export const description = "Accurate pricing available within 12 hours.";',
+    repoPath: "src/lib/contact/getContactCopy.ts",
+  },
+  {
+    label: "exact pricing em dash shipping then reply within 12 hours (mdx)",
+    text: "Exact pricing — shipping within 12 hours — we reply within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing em dash reply then shipping within 12 hours (json)",
+    text: "Exact pricing — we reply within 12 hours — shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
 
@@ -138,18 +194,47 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   {
     label: "delivery within 48 hours",
     text: "In-stock cartons ship with delivery within 48 hours.",
+    repoPath: "content/pages/en/warranty.mdx",
   },
   {
     label: "shipping within 48 hours",
-    text: "Express shipping within 48 hours is available on request.",
+    text: 'export const copy = "Express shipping within 48 hours is available on request.";',
+    repoPath: "src/app/[locale]/products/page.tsx",
   },
   {
     label: "approved conditional reply copy",
     text: "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+    repoPath: "content/pages/en/contact.mdx",
   },
   {
-    label: "custom quotes separate from shipping timing",
+    label: "custom quotes separate from shipping timing (semicolon)",
     text: "Custom quotes exclude freight; shipping within 48 hours.",
+    repoPath: "messages/profiles/catalog/en/messages.json",
+  },
+  {
+    label: "custom quotes separate from shipping timing (em dash)",
+    text: "Custom quotes exclude freight — shipping within 48 hours.",
+    repoPath: "content/pages/en/oem-wholesale.mdx",
+  },
+  {
+    label: "exact pricing and shipping timing in separate clauses (mdx)",
+    text: "Learn exact pricing. Shipping within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing and shipping timing in separate clauses (json)",
+    text: "Learn exact pricing. Shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "accurate pricing em dash delivery within 12 hours (mdx)",
+    text: "The written quote contains accurate pricing — delivery is available within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing em dash shipping within 12 hours (json)",
+    text: "The written quote contains exact pricing — shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
 
@@ -189,6 +274,57 @@ function isForbiddenQuoteTimeClause(clause: string): boolean {
   );
 }
 
+function hasSeparateLogisticsTimingSegment(text: string): boolean {
+  const segments = text.split(/\s—\s/u).map(normalizeQuoteTimingClause);
+  if (segments.length < 2) {
+    return false;
+  }
+
+  const timedSegments = segments.filter((segment) => TIMING_12.test(segment));
+  const hasSeparatePricingSegment = segments.some(
+    (segment) =>
+      EXACT_ACCURATE_PRICING.test(segment) && !TIMING_12.test(segment),
+  );
+  const allTimingIsLogisticsOnly =
+    timedSegments.length > 0 &&
+    timedSegments.every(
+      (segment) =>
+        LOGISTICS_SEMANTICS.test(segment) &&
+        !LOGISTICS_TIMING_FORBIDDEN.test(segment),
+    );
+
+  return hasSeparatePricingSegment && allTimingIsLogisticsOnly;
+}
+
+function hasForbiddenExactAccuratePricing12HourPromise(text: string): boolean {
+  const normalizedFullText = normalizeQuoteTimingClause(text);
+  if (
+    !TIMING_12.test(normalizedFullText) ||
+    !EXACT_ACCURATE_PRICING.test(normalizedFullText)
+  ) {
+    return false;
+  }
+
+  if (hasSeparateLogisticsTimingSegment(text)) {
+    return false;
+  }
+
+  const clauses = splitCopyClauses(text);
+  const hasSameClauseMatch = clauses.some((clause) => {
+    const normalizedClause = normalizeQuoteTimingClause(clause);
+    return (
+      TIMING_12.test(normalizedClause) &&
+      EXACT_ACCURATE_PRICING.test(normalizedClause)
+    );
+  });
+
+  if (hasSameClauseMatch) {
+    return true;
+  }
+
+  return /\s—\s/u.test(text);
+}
+
 function collectJsonStringValues(value: unknown): string[] {
   if (typeof value === "string") {
     return [value];
@@ -205,12 +341,97 @@ function collectJsonStringValues(value: unknown): string[] {
   return [];
 }
 
-function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
-  const strings = repoPath.endsWith(".json")
-    ? collectJsonStringValues(JSON.parse(source) as unknown)
-    : [source];
+function deriveCopyClauses(text: string): string[] {
+  return text
+    .split(/[;]+|(?<=[.!?])\s+/u)
+    .map((clause) => clause.replace(/\s*\n\s*/gu, " ").trim())
+    .filter((clause) => clause.length > 0);
+}
 
-  return strings.flatMap((text) => splitCopyClauses(text));
+function collectMdxClauses(source: string): string[] {
+  return source
+    .split(/\n\s*\n/u)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/gu, " ").trim())
+    .filter((paragraph) => paragraph.length > 0)
+    .flatMap(deriveCopyClauses);
+}
+
+function collectJsonClauses(source: string): string[] {
+  return collectJsonStringValues(JSON.parse(source) as unknown).flatMap(
+    deriveCopyClauses,
+  );
+}
+
+function collectTsStaticStrings(source: string, repoPath: string): string[] {
+  const scriptKind = repoPath.endsWith(".tsx")
+    ? ts.ScriptKind.TSX
+    : ts.ScriptKind.TS;
+  const sourceFile = ts.createSourceFile(
+    repoPath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKind,
+  );
+  const strings: string[] = [];
+
+  function visit(node: ts.Node): void {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      strings.push(node.text);
+      return;
+    }
+
+    if (ts.isJsxText(node)) {
+      const text = node.text.trim();
+      if (text.length > 0) {
+        strings.push(text);
+      }
+      return;
+    }
+
+    if (ts.isTemplateExpression(node)) {
+      strings.push(node.head.text);
+      for (const span of node.templateSpans) {
+        strings.push(span.literal.text);
+      }
+      return;
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return strings;
+}
+
+function collectTsClauses(source: string, repoPath: string): string[] {
+  return collectTsStaticStrings(source, repoPath).flatMap(deriveCopyClauses);
+}
+
+function quoteTimeFixtureSource(text: string, repoPath: string): string {
+  if (repoPath.endsWith(".json")) {
+    return JSON.stringify({ copy: text });
+  }
+
+  return text;
+}
+
+function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
+  if (repoPath.endsWith(".json")) {
+    return collectJsonClauses(source);
+  }
+
+  const ext = extname(repoPath);
+
+  if (ext === ".md" || ext === ".mdx") {
+    return collectMdxClauses(source);
+  }
+
+  if (ext === ".ts" || ext === ".tsx") {
+    return collectTsClauses(source, repoPath);
+  }
+
+  return [];
 }
 
 function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
@@ -222,48 +443,11 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
     return true;
   }
 
+  if (hasForbiddenExactAccuratePricing12HourPromise(text)) {
+    return true;
+  }
+
   return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
-}
-
-function stripD6eRetiredInquiryCopySubtrees(
-  source: string,
-  repoPath: string,
-): string {
-  if (!repoPath.endsWith(".json")) {
-    return source;
-  }
-
-  const parsed = JSON.parse(source) as Record<string, unknown>;
-
-  if (repoPath === "messages/profiles/b2b-lead/en/messages.json") {
-    const requestQuote = parsed.requestQuote;
-    if (
-      typeof requestQuote === "object" &&
-      requestQuote !== null &&
-      "form" in requestQuote
-    ) {
-      const { form: _retiredForm, ...rest } = requestQuote as Record<
-        string,
-        unknown
-      >;
-      parsed.requestQuote = rest;
-    }
-  }
-
-  if (repoPath === "messages/base/en/messages.json") {
-    const emailTemplates = parsed.emailTemplates;
-    if (
-      typeof emailTemplates === "object" &&
-      emailTemplates !== null &&
-      "confirmation" in emailTemplates
-    ) {
-      const { confirmation: _retiredConfirmation, ...rest } =
-        emailTemplates as Record<string, unknown>;
-      parsed.emailTemplates = rest;
-    }
-  }
-
-  return JSON.stringify(parsed);
 }
 
 const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
@@ -524,15 +708,25 @@ describe("Tucsenberg Phase 1 site contract", () => {
 
   it.each(FORBIDDEN_QUOTE_TIME_FIXTURES)(
     "flags forbidden quote-time promise copy: $label",
-    ({ text }) => {
-      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(true);
+    ({ text, repoPath }) => {
+      const source = quoteTimeFixtureSource(text, repoPath);
+      expect(
+        collectOwnerCopyUnits(source, repoPath).some(
+          hasForbiddenInquiryQuoteTimePromise,
+        ),
+      ).toBe(true);
     },
   );
 
   it.each(ALLOWED_QUOTE_TIME_FIXTURES)(
     "allows non-quote SLA timing copy: $label",
-    ({ text }) => {
-      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(false);
+    ({ text, repoPath }) => {
+      const source = quoteTimeFixtureSource(text, repoPath);
+      expect(
+        collectOwnerCopyUnits(source, repoPath).some(
+          hasForbiddenInquiryQuoteTimePromise,
+        ),
+      ).toBe(false);
     },
   );
 
@@ -553,10 +747,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
     const offenders: string[] = [];
 
     for (const filePath of getPublicSourceFiles()) {
-      const source = stripD6eRetiredInquiryCopySubtrees(
-        readRepoFile(filePath),
-        filePath,
-      );
+      const source = readRepoFile(filePath);
 
       for (const copyUnit of collectOwnerCopyUnits(source, filePath)) {
         if (hasForbiddenInquiryQuoteTimePromise(copyUnit)) {

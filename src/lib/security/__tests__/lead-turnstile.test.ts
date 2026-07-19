@@ -31,7 +31,6 @@ function createInput(
   return {
     token: "valid-token",
     clientIP: "203.0.113.10",
-    routeLabel: "/api/inquiry",
     ...overrides,
   };
 }
@@ -39,6 +38,18 @@ function createInput(
 describe("verifyLeadTurnstile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("logs the fixed /api/inquiry route label without caller-supplied route input", async () => {
+    await verifyLeadTurnstile(createInput({ token: "" }));
+
+    expect(mockLoggerWarn).toHaveBeenCalledWith(
+      "Lead Turnstile token missing",
+      {
+        routeLabel: "/api/inquiry",
+        ip: "[REDACTED_IP]",
+      },
+    );
   });
 
   it.each([undefined, null, "", "   ", 123, false, {}])(
@@ -59,11 +70,7 @@ describe("verifyLeadTurnstile", () => {
   );
 
   it("calls verifyTurnstileDetailed without a configurable action argument", async () => {
-    const result = await verifyLeadTurnstile(
-      createInput({
-        routeLabel: "/api/inquiry",
-      }),
-    );
+    const result = await verifyLeadTurnstile(createInput());
 
     expect(result).toEqual({ status: "verified" });
     expect(verifyTurnstileDetailed).toHaveBeenCalledWith(

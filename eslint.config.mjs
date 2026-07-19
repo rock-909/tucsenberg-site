@@ -110,7 +110,6 @@ export default [
   {
     name: "ssr-hooks-exception",
     files: [
-      "**/contact-form-container.tsx",
       "**/locale-storage-hooks.ts",
       "**/use-breakpoint.ts",
       "**/use-reduced-motion.ts",

@@ -3,7 +3,6 @@ paths:
   - "src/app/api/**/*"
   - "src/lib/security/**/*"
   - "src/lib/api/**"
-  - "src/lib/actions/**"
   - "src/lib/lead-pipeline/lead-schema.ts"
   - "src/config/security.ts"
   - "next.config.ts"
@@ -94,7 +93,6 @@ happy-path proof to prove CRM persistence.
 | Endpoint | Expected protection |
 | --- | --- |
 | `/api/inquiry` | Turnstile + validation + body size gate + inquiry rate limit + honeypot while wired |
-| `/api/contact` | temporary non-writing `410` tombstone until D6e; no JSON parse, Turnstile, rate limit, or delivery |
 | `/api/csp-report` | body size gate + rate limit; never trust payload content |
 | `/api/health` | public health only; no credentials, config dumps, or env details |
 
@@ -143,11 +141,6 @@ product-shaped `PRO-` reference id, and skips Turnstile plus delivery. Honeypot
 hits are identified only by the server-side `Inquiry honeypot triggered` log
 event (with the same reference id). Do not expose honeypot-specific validation
 errors or markers in the public JSON.
-
-Legacy `/api/contact` business code and its separate `submittedAt` freshness
-window remain in source for D6e retirement only. The live contact page posts to
-`/api/inquiry`; `/api/contact` itself is a temporary non-writing `410` tombstone
-until D6e removes the legacy stack.
 
 ## CSP and headers
 

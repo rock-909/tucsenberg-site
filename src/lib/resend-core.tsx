@@ -6,23 +6,12 @@
 import "server-only";
 
 import { env, getRuntimeEnvString } from "@/lib/env";
-import type {
-  EmailTemplateData,
-  ProductInquiryEmailData,
-} from "@/lib/email/email-data-schema";
+import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 import { ResendHttpEmailClient } from "@/lib/email/resend-http-client";
-import {
-  buildConfirmationEmailContent,
-  buildContactFormEmailContent,
-  buildProductInquiryEmailContent,
-} from "@/lib/email/runtime-email-content";
+import { buildProductInquiryEmailContent } from "@/lib/email/runtime-email-content";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
 
-/**
- * Resend邮件服务配置
- * Resend email service configuration
- */
 export class ResendService {
   private resend: ResendHttpEmailClient | null = null;
   private isConfigured: boolean = false;
@@ -51,10 +40,6 @@ export class ResendService {
     };
   }
 
-  /**
-   * 初始化Resend服务
-   * Initialize Resend service
-   */
   private initializeResend(): void {
     try {
       if (this.isConfigured && this.resend !== null) {
@@ -84,10 +69,6 @@ export class ResendService {
     }
   }
 
-  /**
-   * 检查服务是否已配置
-   * Check if service is configured
-   */
   public isReady(): boolean {
     if (!this.isConfigured || this.resend === null) {
       this.initializeResend();
@@ -95,106 +76,6 @@ export class ResendService {
     return this.isConfigured && this.resend !== null;
   }
 
-  /**
-   * 发送联系表单邮件给管理员
-   * Send contact form email to admin
-   */
-  public async sendContactFormEmail(data: EmailTemplateData): Promise<string> {
-    if (!this.isReady()) {
-      throw new Error("Resend service is not configured");
-    }
-
-    try {
-      const validatedData = ResendUtils.validateEmailData(data);
-      const sanitizedData = ResendUtils.sanitizeEmailData(validatedData);
-
-      const subject = ResendUtils.generateContactSubject(sanitizedData);
-      const emailContent = buildContactFormEmailContent(sanitizedData);
-
-      const result = await this.resend!.send({
-        from: this.emailConfig.from,
-        to: [this.emailConfig.replyTo],
-        replyTo: sanitizedData.email,
-        subject,
-        html: emailContent.html,
-        text: emailContent.text,
-        tags: ResendUtils.getContactFormTags(),
-      });
-
-      if (result.error || !result.data) {
-        throw new Error(
-          `Resend API error: ${result.error?.message ?? "missing message id"}`,
-        );
-      }
-
-      logger.info("Contact form email sent successfully", {
-        messageId: result.data.id,
-        to: sanitizeEmail(this.emailConfig.replyTo),
-        from: sanitizeEmail(sanitizedData.email),
-        subject,
-      });
-
-      return result.data.id;
-    } catch (error) {
-      logger.error("Failed to send contact form email", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        email: sanitizeEmail(data.email),
-      });
-      throw new Error("Failed to send email", { cause: error });
-    }
-  }
-
-  /**
-   * 发送确认邮件给用户
-   * Send confirmation email to user
-   */
-  public async sendConfirmationEmail(data: EmailTemplateData): Promise<string> {
-    if (!this.isReady()) {
-      throw new Error("Resend service is not configured");
-    }
-
-    try {
-      const validatedData = ResendUtils.validateEmailData(data);
-      const sanitizedData = ResendUtils.sanitizeEmailData(validatedData);
-
-      const subject = ResendUtils.generateConfirmationSubject();
-      const emailContent = buildConfirmationEmailContent(sanitizedData);
-
-      const result = await this.resend!.send({
-        from: this.emailConfig.from,
-        to: [sanitizedData.email],
-        replyTo: this.emailConfig.supportEmail,
-        subject,
-        html: emailContent.html,
-        text: emailContent.text,
-        tags: ResendUtils.getConfirmationTags(),
-      });
-
-      if (result.error || !result.data) {
-        throw new Error(
-          `Resend API error: ${result.error?.message ?? "missing message id"}`,
-        );
-      }
-
-      logger.info("Confirmation email sent successfully", {
-        messageId: result.data.id,
-        to: sanitizeEmail(sanitizedData.email),
-        subject,
-      });
-
-      return result.data.id;
-    } catch (error) {
-      logger.error("Failed to send confirmation email", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        email: sanitizeEmail(data.email),
-      });
-      throw new Error("Failed to send confirmation email", { cause: error });
-    }
-  }
-
-  /**
-   * Send product inquiry email to admin
-   */
   public async sendProductInquiryEmail(
     data: ProductInquiryEmailData,
   ): Promise<string> {
@@ -231,7 +112,6 @@ export class ResendService {
         to: sanitizeEmail(this.emailConfig.replyTo),
         from: sanitizeEmail(sanitizedData.email),
         product: sanitizedData.productName,
-        quantity: sanitizedData.quantity,
       });
 
       return result.data.id;

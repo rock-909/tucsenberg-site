@@ -138,13 +138,14 @@ describe("Airtable Tests - Index", () => {
     });
   });
 
-  describe("Basic createLead (contact)", () => {
+  describe("Basic createLead (product inquiry)", () => {
     const validLeadData = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
-      company: "Test Company",
       message: "This is a test message",
+      productName: "ABS Flood Barriers",
+      catalogProductId: "abs-flood-barriers",
     };
 
     it("should create lead record successfully", async () => {
@@ -176,7 +177,7 @@ describe("Airtable Tests - Index", () => {
       mockCreate.mockClear();
       mockCreate.mockResolvedValue([mockRecord]);
 
-      const result = await service.createLead("contact", validLeadData);
+      const result = await service.createLead(validLeadData);
 
       expect(result).toEqual({
         id: "rec123456",
@@ -188,10 +189,11 @@ describe("Airtable Tests - Index", () => {
             "First Name": "John",
             "Last Name": "Doe",
             Email: "john.doe@example.com",
-            Company: "Test Company",
             Message: "This is a test message",
+            "Product Name": "ABS Flood Barriers",
+            "Product Slug": "abs-flood-barriers",
             Status: "New",
-            Source: "Website Contact Form",
+            Source: "Product Inquiry",
           }),
         }),
       ]);
@@ -219,7 +221,7 @@ describe("Airtable Tests - Index", () => {
         },
       ]);
 
-      await service.createLead("contact", {
+      await service.createLead({
         ...validLeadData,
         utmSource: "google",
         utmMedium: "cpc",
@@ -256,9 +258,9 @@ describe("Airtable Tests - Index", () => {
       (service as unknown as AirtableServicePrivate).isConfigured = false;
       (service as unknown as AirtableServicePrivate).base = null;
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Airtable service is not configured");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Airtable service is not configured",
+      );
 
       initSpy.mockRestore();
     });

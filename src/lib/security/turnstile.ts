@@ -2,7 +2,7 @@
  * Turnstile Verification
  *
  * Shared Cloudflare Turnstile verification logic.
- * Used by API routes, Server Actions, and other consumers.
+ * Used by the inquiry route and other protected write consumers.
  */
 
 import { FIVE_SECONDS_MS } from "@/constants/time";

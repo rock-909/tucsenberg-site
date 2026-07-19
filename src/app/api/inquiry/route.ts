@@ -15,7 +15,6 @@ import { safeParseJson } from "@/lib/api/safe-parse-json";
 import { isRuntimeProduction } from "@/lib/env";
 import { type RateLimitContext } from "@/lib/api/with-rate-limit";
 import { HTTP_BAD_REQUEST, HTTP_INTERNAL_ERROR } from "@/constants";
-import { adaptLegacyInquiryPayload } from "@/lib/lead-pipeline/inquiry-payload-adapter";
 import {
   processValidatedInquiry,
   type LeadResult,
@@ -24,7 +23,7 @@ import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-refere
 import { generateLeadReferenceId } from "@/lib/lead-pipeline/utils";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import {
-  LEAD_TYPES,
+  PRODUCT_LEAD_TYPE,
   productLeadSchema,
   type ProductLeadInput,
 } from "@/lib/lead-pipeline/lead-schema";
@@ -61,28 +60,31 @@ async function validateProductInquiryTurnstile(
   const verificationResult = await verifyLeadTurnstile({
     token,
     clientIP,
-    routeLabel: "/api/inquiry",
   });
 
   const error = mapLeadTurnstileResultToResponse(verificationResult);
   return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 
+function normalizeOptionalString(value: unknown): unknown {
+  if (typeof value === "string" && value.trim().length === 0) {
+    return undefined;
+  }
+  return value;
+}
+
 function validateLeadData(
   data: Record<string, unknown>,
 ): ProductLeadValidationResult {
-  const adapted = adaptLegacyInquiryPayload(data);
   const schemaInput = {
-    type: LEAD_TYPES.PRODUCT,
-    productInquiryKind: adapted.productInquiryKind,
-    fullName: adapted.fullName,
-    email: adapted.email,
-    message: adapted.message,
-    catalogProductId: adapted.catalogProductId,
-    buyerInterest: adapted.buyerInterest,
-    quantity: adapted.quantity,
-    company: adapted.company,
-    ...pickAttributionFields(adapted),
+    type: PRODUCT_LEAD_TYPE,
+    productInquiryKind: data.productInquiryKind,
+    fullName: data.fullName,
+    email: data.email,
+    message: normalizeOptionalString(data.message),
+    catalogProductId: normalizeOptionalString(data.catalogProductId),
+    buyerInterest: normalizeOptionalString(data.buyerInterest),
+    ...pickAttributionFields(data),
   };
   const parsed = productLeadSchema.safeParse(schemaInput);
 
@@ -144,7 +146,7 @@ function createInquiryHoneypotSuccessResponse(
   clientIP: string,
   startTime: number,
 ) {
-  const referenceId = generateLeadReferenceId(LEAD_TYPES.PRODUCT);
+  const referenceId = generateLeadReferenceId(PRODUCT_LEAD_TYPE);
 
   logger.warn("Inquiry honeypot triggered", {
     referenceId,

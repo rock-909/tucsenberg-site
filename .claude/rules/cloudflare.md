@@ -4,7 +4,6 @@ paths:
   - "open-next.config.ts"
   - "wrangler.jsonc"
   - "scripts/starter-checks.js"
-  - "src/lib/actions/**"
   - "src/lib/security/**"
 ---
 
@@ -100,15 +99,12 @@ node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
 
 ## Public submission identity
 
-Browser lead submissions go through the `/api/inquiry` route handler. `/api/contact`
-is a temporary non-writing `410` tombstone until D6e removes the legacy stack.
+Browser lead submissions go through the `/api/inquiry` route handler only.
 Middleware must not inject internal client-IP headers for public form flows.
 
-There is no live `'use server'` Server Action contact path; the shared helpers in
-`src/lib/actions/` are ordinary utilities with no `'use server'` directive. Any
-server-side submission code must validate internally and fail closed when request
-identity is unavailable rather than relying on middleware-provided trusted IP
-headers.
+There is no live `'use server'` Server Action contact path. Any server-side
+submission code must validate internally and fail closed when request identity
+is unavailable rather than relying on middleware-provided trusted IP headers.
 
 ## Cache and runtime bindings
 

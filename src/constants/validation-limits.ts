@@ -26,9 +26,6 @@ export const MAX_LEAD_NAME_LENGTH = 100 as const;
 /** Max product name length for product inquiry leads. */
 export const MAX_LEAD_PRODUCT_NAME_LENGTH = MAX_LEAD_COMPANY_LENGTH;
 
-/** Max requirements length for product inquiry leads. */
-export const MAX_LEAD_REQUIREMENTS_LENGTH = 2000 as const;
-
 /** Max optional buyer message length for canonical inquiry leads. */
 export const MAX_LEAD_MESSAGE_LENGTH = 2000 as const;
 

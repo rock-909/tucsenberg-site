@@ -33,8 +33,6 @@ const PUBLIC_RUNTIME_ENV_READERS = {
   NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET: () =>
     process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET,
   NEXT_PUBLIC_SECURITY_MODE: () => process.env.NEXT_PUBLIC_SECURITY_MODE,
-  NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS: () =>
-    process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS,
   NEXT_PUBLIC_DEPLOYMENT_PLATFORM: () =>
     process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
 } as const satisfies Record<string, () => string | undefined>;
@@ -66,19 +64,6 @@ export function getPublicRuntimeEnvBoolean(
   }
 
   return value === "true";
-}
-
-export function getPublicRuntimeEnvNumber(
-  key: PublicRuntimeEnvKey,
-): number | undefined {
-  const value = getPublicRuntimeEnvString(key);
-
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 export function isPublicRuntimeDevelopment(): boolean {

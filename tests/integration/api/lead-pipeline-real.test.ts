@@ -6,27 +6,16 @@ import { captureExpectedConsoleErrors } from "@/test/console";
 /**
  * Real end-to-end lead-pipeline proof.
  *
- * Unlike `lead-family-contract.test.ts` (which mocks the schema, rate limiter,
- * Turnstile, and process-lead to check response shape cheaply), this suite runs
- * the REAL pipeline: real Zod schema, real `processLead`, real in-memory rate
- * limiter, and the real Turnstile verification logic.
+ * Runs the REAL pipeline: real Zod schema, real `processValidatedInquiry`,
+ * real in-memory rate limiter, and the real Turnstile verification logic.
  *
  * Only the external wires are stubbed:
- * - `global.fetch` — Turnstile siteverify (challenges.cloudflare.com) and the
- *   Resend HTTP API (api.resend.com). Set here via `vi.hoisted` BEFORE any
- *   module import so the `resendService` singleton captures this mock as its
- *   default fetch implementation at construction time.
- * - the `airtable` SDK — the CRM wire; we capture the record `create` payload so
- *   we can assert the Airtable FIELD NAMES/values (mapping regressions), not
- *   just call counts.
- *
- * The in-memory rate-limit store is the one the code already selects in test env
- * (no Upstash creds, NODE_ENV=test); it is NOT mocked.
+ * - `global.fetch` — Turnstile siteverify and the Resend HTTP API
+ * - the `airtable` SDK — CRM wire with captured create payloads
  */
 
 const { fetchMock } = vi.hoisted(() => {
   const fetchMock = vi.fn();
-  // Install before module imports so resendService captures this reference.
   globalThis.fetch = fetchMock as unknown as typeof fetch;
   return { fetchMock };
 });
@@ -43,7 +32,6 @@ vi.mock("airtable", () => {
   return { default: { configure, base } };
 });
 
-// Imported AFTER the wire stubs above are hoisted into place.
 import * as inquiryRoute from "@/app/api/inquiry/route";
 import { resetRateLimitStore } from "@/lib/security/distributed-rate-limit";
 
@@ -58,7 +46,6 @@ interface TurnstileSiteverifyResponse {
   "error-codes"?: string[];
 }
 
-// Configurable per-test Turnstile siteverify response (default: valid).
 let turnstileResponse: TurnstileSiteverifyResponse = {
   success: true,
   hostname: "localhost",
@@ -128,10 +115,8 @@ const VALID_INQUIRY_BODY = {
   productInquiryKind: "catalog-product",
   fullName: "Jane Buyer",
   email: "buyer@example.com",
-  company: "Buyer Co",
   catalogProductId: "abs-flood-barriers",
-  quantity: 100,
-  requirements: "Custom packaging",
+  message: "Custom packaging details",
 };
 
 const CANONICAL_BUYER_MESSAGE =
@@ -145,21 +130,11 @@ const CANONICAL_MESSAGE_INQUIRY_BODY = {
   message: CANONICAL_BUYER_MESSAGE,
 };
 
-const LEGACY_REQUIREMENTS_INQUIRY_BODY = {
-  turnstileToken: "valid-turnstile-token",
-  productInquiryKind: "general-rfq",
-  fullName: "Jane Buyer",
-  email: "buyer@example.com",
-  requirements: "Legacy RFQ note from requirements field",
-};
-
-// Display name is resolved server-side from the catalog registry, not the client.
 const CATALOG_PRODUCT_LABEL = "ABS Interlocking Boxwall";
 
 describe("lead pipeline (real end-to-end proof)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Fresh in-memory rate-limit store + queue for each test (real limiter).
     resetRateLimitStore();
 
     turnstileResponse = {
@@ -204,7 +179,6 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(typeof body.data.referenceId).toBe("string");
     expect(body.data.referenceId).toMatch(/^PRO-/);
 
-    // Airtable wire: assert FIELD NAMES + values (mapping regression guard).
     expect(airtableCreateMock).toHaveBeenCalledTimes(1);
     const fields = getCapturedAirtableFields();
     expect(fields).toMatchObject({
@@ -213,17 +187,17 @@ describe("lead pipeline (real end-to-end proof)", () => {
       Status: "New",
       "First Name": "Jane",
       "Last Name": "Buyer",
-      Company: "Buyer Co",
       "Product Name": CATALOG_PRODUCT_LABEL,
       "Product Slug": "abs-flood-barriers",
-      Quantity: "100",
+      Requirements: "Custom packaging details",
     });
+    expect(fields).not.toHaveProperty("Company");
+    expect(fields).not.toHaveProperty("Quantity");
     expect(typeof fields["Reference ID"]).toBe("string");
     expect(fields["Reference ID"]).toBe(body.data.referenceId);
     expect(typeof fields["Message"]).toBe("string");
     expect(fields["Message"]).toContain(CATALOG_PRODUCT_LABEL);
 
-    // Resend wire: assert the outbound email payload for the submitted lead.
     const resendCalls = getResendCalls();
     expect(resendCalls).toHaveLength(1);
     const resendBody = parseJsonBody(resendCalls[0]?.init);
@@ -247,6 +221,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(airtableCreateMock).toHaveBeenCalledTimes(1);
     const fields = getCapturedAirtableFields();
     expect(fields["Requirements"]).toBe(CANONICAL_BUYER_MESSAGE);
+    expect(fields["Email"]).toBe("buyer@example.com");
 
     const resendCalls = getResendCalls();
     expect(resendCalls).toHaveLength(1);
@@ -260,11 +235,18 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(html).not.toContain("need <custom> height");
 
     expect(text).toContain(`Requirements: ${CANONICAL_BUYER_MESSAGE}`);
+    expect(text).toContain("buyer@example.com");
   });
 
-  it("maps legacy requirements into Airtable Requirements when message is absent", async () => {
+  it("delivers general-rfq inquiry with canonical message to both external sinks", async () => {
     const response = await inquiryRoute.POST(
-      makeInquiryRequest(LEGACY_REQUIREMENTS_INQUIRY_BODY),
+      makeInquiryRequest({
+        turnstileToken: "valid-turnstile-token",
+        productInquiryKind: "general-rfq",
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+        message: "Need flood protection for warehouse",
+      }),
     );
     const body = await response.json();
 
@@ -272,9 +254,88 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(body.success).toBe(true);
 
     const fields = getCapturedAirtableFields();
-    expect(fields["Requirements"]).toBe(
-      LEGACY_REQUIREMENTS_INQUIRY_BODY.requirements,
+    expect(fields["Email"]).toBe("jane@example.com");
+    expect(fields["Requirements"]).toContain("Need flood protection");
+
+    const resendBody = parseJsonBody(getResendCalls()[0]?.init);
+    expect(resendBody.reply_to).toBe("jane@example.com");
+    expect(resendBody.text as string).toContain("Need flood protection");
+  });
+
+  it("accepts optional empty message on general-rfq and still delivers", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        turnstileToken: "valid-turnstile-token",
+        productInquiryKind: "general-rfq",
+        fullName: "Jane Buyer",
+        email: "jane@example.com",
+      }),
     );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getResendCalls()).toHaveLength(1);
+  });
+
+  it("airtable-only success: succeeds when email fails but Airtable persists", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+    );
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        ...CANONICAL_MESSAGE_INQUIRY_BODY,
+        email: "jane@example.com",
+        message: "Need flood protection",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(getResendCalls()).toHaveLength(1);
+    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getCapturedAirtableFields()["Requirements"]).toContain(
+      "Need flood protection",
+    );
+    expect(consoleError).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores legacy company, quantity, and requirements payload fields", async () => {
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        ...VALID_INQUIRY_BODY,
+        company: "Legacy Co",
+        quantity: 100,
+        requirements: "Legacy RFQ note",
+        message: "Canonical buyer text",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+
+    const fields = getCapturedAirtableFields();
+    expect(fields["Requirements"]).toBe("Canonical buyer text");
+    expect(fields).not.toHaveProperty("Company");
+    expect(fields).not.toHaveProperty("Quantity");
   });
 
   it("invalid payload: rejects with a validation code and touches no external sink", async () => {

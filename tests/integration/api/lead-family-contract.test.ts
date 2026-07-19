@@ -36,10 +36,7 @@ vi.mock("@/lib/lead-pipeline/process-lead", () => ({
 }));
 
 vi.mock("@/lib/lead-pipeline/lead-schema", () => ({
-  LEAD_TYPES: {
-    PRODUCT: "product",
-    CONTACT: "contact",
-  },
+  PRODUCT_LEAD_TYPE: "product",
   productLeadSchema: {
     safeParse: vi.fn((input: Record<string, unknown>) => ({
       success: true,
@@ -154,31 +151,6 @@ describe("lead API family response contract (auxiliary)", () => {
       success: false,
       errorCode: API_ERROR_CODES.INVALID_JSON_BODY,
     });
-  });
-
-  it("inquiry keeps typed delivery failures on the processing error envelope", async () => {
-    vi.mocked(processValidatedInquiry).mockResolvedValue({
-      success: false,
-      error: "VALIDATION_ERROR",
-      emailSent: false,
-      ownerNotified: false,
-      recordCreated: false,
-    });
-
-    await expectRouteError(
-      await inquiryRoute.POST(
-        makeRequest("/api/inquiry", {
-          turnstileToken: "valid-token",
-          email: "buyer@example.com",
-          fullName: "Buyer",
-          company: "Buyer Co",
-          productInquiryKind: "catalog-product",
-          catalogProductId: "abs-flood-barriers",
-        }),
-      ),
-      500,
-      API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    );
   });
 
   it("inquiry maps pipeline processing failures to route-specific processing errors", async () => {

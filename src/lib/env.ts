@@ -141,9 +141,6 @@ export const clientEnvSchema = {
   // Security
   NEXT_PUBLIC_SECURITY_MODE: z.enum(["strict", "relaxed"]).default("strict"),
 
-  // UI tuning
-  NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS: z.coerce.number().optional(),
-
   // Deployment Platform
   NEXT_PUBLIC_DEPLOYMENT_PLATFORM: z
     .enum(["cloudflare", "development", "self-hosted"])
@@ -211,8 +208,6 @@ export const runtimeEnv = {
   NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET:
     process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET,
   NEXT_PUBLIC_SECURITY_MODE: process.env.NEXT_PUBLIC_SECURITY_MODE,
-  NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS:
-    process.env.NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS,
   NEXT_PUBLIC_DEPLOYMENT_PLATFORM: process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
 };
 
@@ -335,7 +330,6 @@ export function getRuntimeEnvBoolean(
 
 export {
   getPublicRuntimeEnvBoolean,
-  getPublicRuntimeEnvNumber,
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
   isPublicRuntimeProduction,

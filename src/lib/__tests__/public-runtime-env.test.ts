@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getPublicRuntimeEnvBoolean,
-  getPublicRuntimeEnvNumber,
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
   isPublicRuntimeProduction,
@@ -64,18 +63,6 @@ describe("public-runtime-env", () => {
     expect(getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS")).toBe(
       false,
     );
-  });
-
-  it("parses numeric env values and rejects invalid numbers", () => {
-    vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS", "15000");
-    expect(
-      getPublicRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS"),
-    ).toBe(15000);
-
-    vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS", "not-a-number");
-    expect(
-      getPublicRuntimeEnvNumber("NEXT_PUBLIC_CONTACT_FORM_COOLDOWN_MS"),
-    ).toBeUndefined();
   });
 
   it("derives NODE_ENV helpers from public runtime reads", () => {

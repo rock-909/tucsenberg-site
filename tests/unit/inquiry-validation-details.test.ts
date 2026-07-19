@@ -8,8 +8,8 @@ import {
 } from "@/lib/api/inquiry-validation-details";
 import { mapZodIssuesToValidationDetails } from "@/lib/api/validation-error-details";
 import {
-  LEAD_TYPES,
   PRODUCT_INQUIRY_KINDS,
+  PRODUCT_LEAD_TYPE,
   productLeadSchema,
 } from "@/lib/lead-pipeline/lead-schema";
 
@@ -29,7 +29,7 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
 const runtimeMessages = getComposedMessages("en");
 
 const validBase = {
-  type: LEAD_TYPES.PRODUCT,
+  type: PRODUCT_LEAD_TYPE,
   productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
   fullName: "Ada Lovelace",
   email: "ada@example.com",
@@ -45,13 +45,11 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, email: 42 },
   { ...validBase, email: "not-an-email" },
   { ...validBase, email: `a@${"x".repeat(300)}.com` },
-  { ...validBase, company: 42 },
-  { ...validBase, company: "A".repeat(300) },
   { ...validBase, productInquiryKind: undefined },
   { ...validBase, productInquiryKind: "not-a-kind" },
   { ...validBase, productInquiryKind: 1 },
   {
-    type: LEAD_TYPES.PRODUCT,
+    type: PRODUCT_LEAD_TYPE,
     productInquiryKind: PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
     fullName: "Ada Lovelace",
     email: "ada@example.com",
@@ -64,8 +62,6 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
   { ...validBase, catalogProductId: "abs-flood-barriers" },
   { ...validBase, buyerInterest: 123 },
   { ...validBase, buyerInterest: "A".repeat(500) },
-  { ...validBase, quantity: false },
-  { ...validBase, quantity: {} },
   { ...validBase, message: 123 },
   { ...validBase, message: "A".repeat(5000) },
   { ...validBase, utmSource: "x".repeat(257) },
@@ -74,18 +70,6 @@ const inquiryFailureInputs: ReadonlyArray<Record<string, unknown>> = [
 ];
 
 describe("inquiry validation detail mapping", () => {
-  it("accepts blank quantity as omitted optional input", () => {
-    const parsed = productLeadSchema.safeParse({
-      ...validBase,
-      quantity: "",
-    });
-
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.quantity).toBeUndefined();
-    }
-  });
-
   it("accepts message when raw length exceeds max but normalization shrinks below max", () => {
     const rawMessage = `Hello${" ".repeat(MAX_LEAD_MESSAGE_LENGTH)}world`;
 

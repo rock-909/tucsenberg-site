@@ -2,53 +2,32 @@ import baseEnMessages from "../../messages/base/en/messages.json";
 import b2bLeadMessages from "../../messages/profiles/b2b-lead/en/messages.json";
 import catalogMessages from "../../messages/profiles/catalog/en/messages.json";
 import { describe, expect, it } from "vitest";
-import {
-  API_ERROR_CODES,
-  FORM_NETWORK_ERROR,
-} from "@/constants/api-error-codes";
+import { API_ERROR_CODES } from "@/constants/api-error-codes";
+import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
+import { PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS } from "@/lib/api/inquiry-validation-details";
 
 type JsonObject = Record<string, unknown>;
 
 const enMessages = getComposedMessages("en") as JsonObject & {
   apiErrors: Record<string, unknown>;
   requestQuote?: unknown;
+  inquiry?: JsonObject;
+  contact?: JsonObject;
 };
 
-const REQUIRED_RUNTIME_KEYS = [
-  "accessibility.securityVerificationUnavailable",
-  "accessibility.turnstileDevBypass",
-  "accessibility.turnstileTestMode",
-  "accessibility.turnstileLoadFailed",
-  "contact.form.networkError",
-  "contact.form.privacyNotice",
-] as const;
-
-const CONTACT_API_VALIDATION_DETAIL_KEYS = [
-  "errors.message.required",
-  "errors.message.tooShort",
-  "errors.message.tooLong",
-  "errors.subject.length",
-  "errors.fullName.tooShort",
-  "errors.company.tooShort",
-] as const;
-
-const REQUEST_QUOTE_RUNTIME_KEYS = [
+const REQUEST_QUOTE_PAGE_KEYS = [
   "requestQuote.metadata.title",
   "requestQuote.metadata.description",
   "requestQuote.page.heading",
-  "requestQuote.form.title",
-  "requestQuote.form.submit",
-  "requestQuote.form.success",
-  "requestQuote.form.genericError",
-  "requestQuote.form.networkError",
-  "requestQuote.form.turnstilePending",
-  "requestQuote.form.messageHint",
-  "requestQuote.form.privacyNotice",
-  "requestQuote.form.fields.fullName",
-  "requestQuote.form.fields.email",
-  "requestQuote.form.fields.message",
-  "requestQuote.form.payload.source",
+  "requestQuote.page.intro",
+] as const;
+
+const CONTACT_PANEL_KEYS = [
+  "contact.panel.contactTitle",
+  "contact.panel.email",
+  "contact.inquiryHandoff.title",
+  "contact.inquiryHandoff.description",
 ] as const;
 
 function isJsonObject(value: unknown): value is JsonObject {
@@ -62,46 +41,62 @@ function getMessageValue(messages: JsonObject, keyPath: string): unknown {
   }, messages);
 }
 
+function assertNonEmptyStringLeaves(value: unknown, label: string): void {
+  if (typeof value === "string") {
+    expect(typeof value, label).toBe("string");
+    expect(value.trim(), label).not.toBe("");
+    return;
+  }
+
+  expect(isJsonObject(value), label).toBe(true);
+  for (const [key, nestedValue] of Object.entries(value as JsonObject)) {
+    assertNonEmptyStringLeaves(nestedValue, `${label}.${key}`);
+  }
+}
+
 describe("real i18n runtime message contract", () => {
-  const runtimeMessageCases = [["en", enMessages]] as const;
+  it("keeps the inquiry.form leaf set used by InquiryFormCopy", () => {
+    const copy = createInquiryFormCopyFromMessages(enMessages);
+    assertNonEmptyStringLeaves(copy, "inquiry.form");
+  });
 
-  it.each(runtimeMessageCases)(
-    "keeps degraded-state form keys in the real %s message bundle",
-    (_locale, messages) => {
-      for (const keyPath of REQUIRED_RUNTIME_KEYS) {
-        const value = getMessageValue(messages, keyPath);
+  it("keeps request quote page and metadata owners", () => {
+    for (const keyPath of REQUEST_QUOTE_PAGE_KEYS) {
+      const value = getMessageValue(enMessages, keyPath);
 
-        expect(typeof value, keyPath).toBe("string");
-        expect(String(value).trim(), keyPath).not.toBe("");
-      }
-    },
-  );
+      expect(typeof value, keyPath).toBe("string");
+      expect(String(value).trim(), keyPath).not.toBe("");
+    }
+  });
 
-  it.each(runtimeMessageCases)(
-    "keeps contact-only API validation detail keys in the real %s contact form bundle",
-    (_locale, messages) => {
-      for (const detailKey of CONTACT_API_VALIDATION_DETAIL_KEYS) {
-        const keyPath = `contact.form.${detailKey}`;
-        const value = getMessageValue(messages, keyPath);
+  it("keeps contact panel and inquiry handoff owners", () => {
+    for (const keyPath of CONTACT_PANEL_KEYS) {
+      const value = getMessageValue(enMessages, keyPath);
 
-        expect(typeof value, keyPath).toBe("string");
-        expect(String(value).trim(), keyPath).not.toBe("");
-      }
-    },
-  );
+      expect(typeof value, keyPath).toBe("string");
+      expect(String(value).trim(), keyPath).not.toBe("");
+    }
+  });
 
-  it.each(runtimeMessageCases)(
-    "keeps RFQ page and option keys in the real %s message bundle",
-    (_locale, messages) => {
-      for (const keyPath of REQUEST_QUOTE_RUNTIME_KEYS) {
-        const value = getMessageValue(messages, keyPath);
+  it("keeps inquiry validation detail keys under inquiry.form", () => {
+    const renderableDetails = PRODUCT_INQUIRY_VALIDATION_DETAIL_KEYS.filter(
+      (detailKey) => detailKey !== "errors.generic",
+    );
 
-        expect(typeof value, keyPath).toBe("string");
-        expect(String(value).trim(), keyPath).not.toBe("");
-        expect(String(value), keyPath).not.toBe(keyPath);
-      }
-    },
-  );
+    for (const detailKey of renderableDetails) {
+      const value = getMessageValue(enMessages, `inquiry.form.${detailKey}`);
+
+      expect(typeof value, detailKey).toBe("string");
+      expect(String(value).trim(), detailKey).not.toBe("");
+    }
+
+    expect(
+      getMessageValue(enMessages, "inquiry.form.errors.generic"),
+    ).toBeUndefined();
+    expect(
+      getMessageValue(enMessages, "inquiry.form.errors.fieldSummary"),
+    ).toEqual(expect.any(String));
+  });
 
   it("keeps RFQ copy owned by b2b-lead and inherited by catalog", () => {
     expect(b2bLeadMessages).toHaveProperty("requestQuote");
@@ -115,12 +110,5 @@ describe("real i18n runtime message contract", () => {
 
     expect(authoringErrorKeys).toEqual(liveErrorCodes);
     expect(Object.keys(enMessages.apiErrors).sort()).toEqual(liveErrorCodes);
-  });
-
-  it("keeps the client-only network fallback on its dedicated form message", () => {
-    expect(baseEnMessages.apiErrors).not.toHaveProperty(FORM_NETWORK_ERROR);
-    expect(getMessageValue(enMessages, "contact.form.networkError")).toEqual(
-      expect.any(String),
-    );
   });
 });

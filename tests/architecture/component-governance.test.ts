@@ -32,10 +32,7 @@ const STORY_FILE_PATTERN = /\.(?:stories)\.(?:ts|tsx|js|jsx|mdx)$/;
 const TSX_FILE_PATTERN = /\.tsx$/;
 const UI_CHECKBOX_WRAPPER_IMPORT_PATTERN =
   /from\s+["'](?:@\/components\/ui\/checkbox|\.\.[^"']*\/ui\/checkbox)["']/;
-const PROTECTED_NATIVE_CHECKBOX_SURFACES = [
-  "src/components/forms",
-  "src/components/cookie",
-] as const;
+const PROTECTED_NATIVE_CHECKBOX_SURFACES = ["src/components/cookie"] as const;
 const REQUIRED_STORY_VALUE = "required";
 const RADIX_LAYER_VALUES = ["primitive", "local"] as const;
 const SURFACE_VALUES = [
@@ -502,7 +499,7 @@ describe("component governance", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps contact and cookie surfaces from importing the Checkbox wrapper before migration proof", () => {
+  it("keeps cookie surfaces from importing the Checkbox wrapper before migration proof", () => {
     const violations = walkFiles(SOURCE_ROOT)
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))

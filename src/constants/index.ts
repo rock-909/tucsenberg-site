@@ -21,26 +21,18 @@ export {
   MAX_LEAD_COMPANY_LENGTH,
   MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
-  MAX_LEAD_REQUIREMENTS_LENGTH,
   MAX_LEAD_MESSAGE_LENGTH,
 } from "./validation-limits";
 
 // ============================================================================
 // 时间相关常量
 // ============================================================================
-export {
-  MILLISECONDS_PER_SECOND,
-  SECONDS_PER_MINUTE,
-  FIVE_SECONDS_MS,
-  MINUTE_MS,
-  FIVE_MINUTES_MS,
-  TEN_MINUTES_MS,
-} from "./time";
+export { FIVE_SECONDS_MS, MINUTE_MS } from "./time";
 
 // ============================================================================
 // 计数与数值常量
 // ============================================================================
-export { HEX_RADIX, PHONE_MAX_DIGITS, DEFAULT_ICON_SIZE } from "./count";
+export { HEX_RADIX, DEFAULT_ICON_SIZE } from "./count";
 
 // ============================================================================
 // HTTP 状态码常量
@@ -50,7 +42,6 @@ export {
   HTTP_NO_CONTENT,
   HTTP_BAD_REQUEST,
   HTTP_NOT_FOUND,
-  HTTP_GONE,
   HTTP_PAYLOAD_TOO_LARGE,
   HTTP_UNSUPPORTED_MEDIA_TYPE,
   HTTP_TOO_MANY_REQUESTS,

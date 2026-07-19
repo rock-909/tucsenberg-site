@@ -12,7 +12,5 @@
 export const HEX_RADIX = 16 as const;
 
 // -- 验证相关 --
-/** 电话号码最大位数 */
-export const PHONE_MAX_DIGITS = 15 as const;
 /** 默认图标尺寸 (px) */
 export const DEFAULT_ICON_SIZE = 20 as const;

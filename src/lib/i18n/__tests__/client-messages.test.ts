@@ -1,10 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-  CONTACT_CLIENT_MESSAGE_NAMESPACES,
   getClientMessageNamespaces,
   loadClientMessages,
-  pickMessages,
   pickClientMessages,
 } from "@/lib/i18n/client-messages";
 
@@ -19,7 +17,8 @@ describe("client message scoping", () => {
       language: { selectLanguage: "Select Language" },
       navigation: { home: "Home" },
       cookie: { title: "Cookies" },
-      contact: { form: { title: "Contact" } },
+      contact: { panel: { email: "Email" } },
+      inquiry: { form: { submit: "Send inquiry" } },
       apiErrors: { UNKNOWN_ERROR: "Unknown" },
       errors: { contact: { title: "Unavailable" } },
       theme: { switchToDark: "Switch to dark theme" },
@@ -44,33 +43,10 @@ describe("client message scoping", () => {
     ]);
   });
 
-  it("keeps legacy contact message packs off the site-wide client payload", () => {
+  it("keeps inquiry and contact form copy off the site-wide client payload", () => {
     expect(getClientMessageNamespaces()).not.toContain("contact");
     expect(getClientMessageNamespaces()).not.toContain("apiErrors");
     expect(getClientMessageNamespaces()).not.toContain("inquiry");
-    expect([...CONTACT_CLIENT_MESSAGE_NAMESPACES].sort()).toEqual([
-      "accessibility",
-      "apiErrors",
-      "contact",
-    ]);
-  });
-
-  it("can scope the contact route subset when needed", () => {
-    const scoped = pickMessages(
-      {
-        accessibility: { turnstileTestMode: "Test" },
-        contact: { form: { title: "Contact" } },
-        apiErrors: { UNKNOWN_ERROR: "Unknown" },
-        home: { hero: "Server only" },
-      },
-      CONTACT_CLIENT_MESSAGE_NAMESPACES,
-    );
-
-    expect(scoped).toEqual({
-      accessibility: { turnstileTestMode: "Test" },
-      contact: { form: { title: "Contact" } },
-      apiErrors: { UNKNOWN_ERROR: "Unknown" },
-    });
   });
 
   it("loads only site-wide client provider namespaces from split bundles", async () => {
@@ -87,6 +63,7 @@ describe("client message scoping", () => {
     expect(scoped).not.toHaveProperty("language");
     expect(scoped).not.toHaveProperty("contact");
     expect(scoped).not.toHaveProperty("apiErrors");
+    expect(scoped).not.toHaveProperty("inquiry");
     expect(scoped).not.toHaveProperty("footer");
     expect(scoped).not.toHaveProperty("home");
     expect(scoped).not.toHaveProperty("faq");

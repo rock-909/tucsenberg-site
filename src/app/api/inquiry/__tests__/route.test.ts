@@ -106,20 +106,17 @@ describe("/api/inquiry route", () => {
       productInquiryKind: "catalog-product",
       fullName: "John Doe",
       email: "john@example.com",
-      company: "Acme Inc",
       catalogProductId: "abs-flood-barriers",
-      quantity: "100",
-      requirements: "I am interested in your products.",
+      message: "I am interested in your products.",
     };
 
-    // A general RFQ from the Request-a-Quote page: no per-product identity.
     const generalRfqData = {
       turnstileToken: "valid-token",
       type: "product",
       productInquiryKind: "general-rfq",
       fullName: "Rita Buyer",
       email: "rita@example.com",
-      requirements: "Submitted via the request-quote form.",
+      message: "Submitted via the request-quote form.",
     };
 
     it("accepts a catalog product inquiry and forwards the validated identity", async () => {
@@ -515,43 +512,26 @@ describe("/api/inquiry route", () => {
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
-    it("accepts a catalog product inquiry without a quantity (quantity is optional)", async () => {
-      const dataWithoutQuantity: Record<string, unknown> = {
-        ...validInquiryData,
-      };
-      delete dataWithoutQuantity.quantity;
-
-      const request = createInquiryRequest(JSON.stringify(dataWithoutQuantity));
+    it("accepts a catalog product inquiry without legacy adapter fields", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...validInquiryData,
+          company: "Legacy Co",
+          quantity: "100",
+          requirements: "Legacy note",
+        }),
+      );
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(processValidatedInquiry).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "product",
-          productInquiryKind: "catalog-product",
-          catalogProductId: "abs-flood-barriers",
-        }),
-      );
-    });
-
-    it("should reject a non-positive numeric quantity", async () => {
-      const request = createInquiryRequest(
-        JSON.stringify({ ...validInquiryData, quantity: "0" }),
-      );
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data).toEqual({
-        success: false,
-        errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
-        details: ["errors.generic"],
-      });
-      expect(processValidatedInquiry).not.toHaveBeenCalled();
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect(callArgs).not.toHaveProperty("company");
+      expect(callArgs).not.toHaveProperty("quantity");
+      expect(callArgs).not.toHaveProperty("requirements");
     });
 
     it("should return 400 when turnstile verification fails", async () => {
@@ -584,25 +564,6 @@ describe("/api/inquiry route", () => {
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.TURNSTILE_UNAVAILABLE);
       expect(processValidatedInquiry).not.toHaveBeenCalled();
-    });
-
-    it("should handle processValidatedInquiry failure", async () => {
-      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
-        success: false,
-        error: "PROCESSING_ERROR",
-        emailSent: false,
-        ownerNotified: false,
-        recordCreated: false,
-      });
-
-      const request = createInquiryRequest(JSON.stringify(validInquiryData));
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
     it("should return success when the record is created but email fails", async () => {
@@ -648,25 +609,6 @@ describe("/api/inquiry route", () => {
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
       expect(data.data).toBeUndefined();
-    });
-
-    it("returns processing error if a typed pipeline result is unsuccessful", async () => {
-      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
-        success: false,
-        error: "VALIDATION_ERROR",
-        emailSent: false,
-        ownerNotified: false,
-        recordCreated: false,
-      });
-
-      const request = createInquiryRequest(JSON.stringify(validInquiryData));
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
     });
 
     it("uses the inquiry distributed rate-limit preset", async () => {

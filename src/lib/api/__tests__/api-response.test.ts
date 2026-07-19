@@ -20,28 +20,28 @@ describe("createApiErrorResponse", () => {
 
   it("includes safe validation details when details are supplied", async () => {
     const response = createApiErrorResponse(
-      API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+      API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
       HTTP_BAD_REQUEST,
       { details: ["errors.email.invalid"] },
     );
 
     await expect(response.json()).resolves.toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+      errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
       details: ["errors.email.invalid"],
     });
   });
 
   it("omits empty validation details", async () => {
     const response = createApiErrorResponse(
-      API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+      API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
       HTTP_BAD_REQUEST,
       { details: [] },
     );
 
     await expect(response.json()).resolves.toEqual({
       success: false,
-      errorCode: API_ERROR_CODES.CONTACT_VALIDATION_FAILED,
+      errorCode: API_ERROR_CODES.INQUIRY_VALIDATION_FAILED,
     });
   });
 });

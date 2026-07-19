@@ -78,13 +78,13 @@ describe("Airtable Error Handling Tests", () => {
     vi.clearAllMocks();
   });
 
-  describe("Error Handling - createLead (contact)", () => {
+  describe("Error Handling - createLead (product inquiry)", () => {
     const validLeadData = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
-      company: "Test Company",
       message: "This is a test message",
+      productName: "ABS Flood Barriers",
     };
 
     it("should handle API errors during creation", async () => {
@@ -104,9 +104,9 @@ describe("Airtable Error Handling Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("API Error"));
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Failed to create lead record",
+      );
     });
 
     it("should handle validation errors", async () => {
@@ -131,9 +131,9 @@ describe("Airtable Error Handling Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("Invalid email format"));
 
-      await expect(
-        service.createLead("contact", invalidLeadData),
-      ).rejects.toThrow("Failed to create lead record");
+      await expect(service.createLead(invalidLeadData)).rejects.toThrow(
+        "Failed to create lead record",
+      );
     });
 
     it("should handle network timeouts", async () => {
@@ -153,9 +153,9 @@ describe("Airtable Error Handling Tests", () => {
       mockCreate.mockClear();
       mockCreate.mockRejectedValue(new Error("Network timeout"));
 
-      await expect(
-        service.createLead("contact", validLeadData),
-      ).rejects.toThrow("Failed to create lead record");
+      await expect(service.createLead(validLeadData)).rejects.toThrow(
+        "Failed to create lead record",
+      );
     });
   });
 });
