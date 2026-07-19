@@ -59,11 +59,7 @@ async function AsyncLocaleLayoutContent({
   const mainNavItems = mainNavigation.map((item) => ({
     key: item.key,
     href: item.href,
-    label: tNavigation(
-      item.translationKey.replace(/^navigation\./, "") as Parameters<
-        typeof tNavigation
-      >[0],
-    ),
+    label: tNavigation(item.messageKey),
   }));
 
   return (

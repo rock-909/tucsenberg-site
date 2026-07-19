@@ -31,10 +31,10 @@ interface HeaderProps {
   variant?: "default" | "minimal" | "transparent";
   sticky?: boolean;
   locale?: Locale;
-  contactSalesLabel?: string;
-  openMenuLabel?: string;
-  closeMenuLabel?: string;
-  mainNavigationLabel?: string;
+  contactSalesLabel: string;
+  openMenuLabel: string;
+  closeMenuLabel: string;
+  mainNavigationLabel: string;
   mainNavItems?: HeaderNavItem[];
 }
 
@@ -58,10 +58,10 @@ export function Header({
   variant = "default",
   sticky = true,
   locale,
-  contactSalesLabel = "Contact",
-  openMenuLabel = "Open navigation menu",
-  closeMenuLabel = "Close navigation menu",
-  mainNavigationLabel = "Main navigation",
+  contactSalesLabel,
+  openMenuLabel,
+  closeMenuLabel,
+  mainNavigationLabel,
   mainNavItems = EMPTY_MAIN_NAV_ITEMS,
 }: HeaderProps) {
   const { isSticky, isMinimal, isTransparent, showTestIds } = getHeaderState(

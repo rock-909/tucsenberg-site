@@ -28,7 +28,7 @@ describe("Sheet", () => {
     render(
       <Sheet>
         <SheetTrigger data-testid="trigger">Open Sheet</SheetTrigger>
-        <SheetContent data-testid="content">
+        <SheetContent closeLabel="Close sheet" data-testid="content">
           <SheetTitle>Sheet Title</SheetTitle>
         </SheetContent>
       </Sheet>,
@@ -46,7 +46,11 @@ describe("Sheet", () => {
     const { rerender } = render(
       <Sheet open={false}>
         <SheetTrigger>Open</SheetTrigger>
-        <SheetContent side="left" data-testid="content">
+        <SheetContent
+          closeLabel="Close sheet"
+          side="left"
+          data-testid="content"
+        >
           <SheetTitle>Sheet Title</SheetTitle>
         </SheetContent>
       </Sheet>,
@@ -57,7 +61,11 @@ describe("Sheet", () => {
     rerender(
       <Sheet open>
         <SheetTrigger>Open</SheetTrigger>
-        <SheetContent side="left" data-testid="content">
+        <SheetContent
+          closeLabel="Close sheet"
+          side="left"
+          data-testid="content"
+        >
           <SheetTitle>Sheet Title</SheetTitle>
         </SheetContent>
       </Sheet>,
@@ -71,7 +79,7 @@ describe("Sheet", () => {
   it("renders text subcomponents with data slots and merged classes", async () => {
     render(
       <Sheet defaultOpen>
-        <SheetContent>
+        <SheetContent closeLabel="Close sheet">
           <SheetHeader className="custom-header" data-testid="header">
             <SheetTitle className="custom-title">Header Title</SheetTitle>
             <SheetDescription>Header Description</SheetDescription>

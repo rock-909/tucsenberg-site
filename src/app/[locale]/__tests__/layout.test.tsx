@@ -122,9 +122,7 @@ vi.mock("@/i18n/locale-utils", () => ({
 }));
 
 vi.mock("@/lib/navigation", () => ({
-  mainNavigation: [
-    { key: "home", href: "/", translationKey: "navigation.home" },
-  ],
+  mainNavigation: [{ key: "home", href: "/", messageKey: "home" }],
 }));
 
 vi.mock("@/i18n/routing", () => ({

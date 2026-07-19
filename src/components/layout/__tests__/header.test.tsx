@@ -92,6 +92,13 @@ const MAIN_NAV_ITEMS = [
   { key: "products", href: "/products", label: "Products" },
 ];
 
+const HEADER_LABELS = {
+  contactSalesLabel: "Contact",
+  openMenuLabel: "Open navigation menu",
+  closeMenuLabel: "Close navigation menu",
+  mainNavigationLabel: "Main navigation",
+} as const;
+
 describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -107,6 +114,7 @@ describe("Header Component", () => {
     it("renders all navigation components", async () => {
       await renderAsyncComponent(
         Header({
+          ...HEADER_LABELS,
           locale: "en",
           mainNavItems: MAIN_NAV_ITEMS,
           mainNavigationLabel: "TEST desktop main navigation",
@@ -124,7 +132,11 @@ describe("Header Component", () => {
 
     it("does not delay first-screen header controls behind Idle", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       expect(screen.getByTestId("mobile-navigation")).toBeInTheDocument();
@@ -132,7 +144,11 @@ describe("Header Component", () => {
 
     it("places desktop contact CTA in the utility controls", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       const utilityRegion = screen.getByTestId("header-utility-controls");
@@ -145,7 +161,11 @@ describe("Header Component", () => {
 
     it("keeps a compact contact CTA visible in the mobile header", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       const utilityRegion = screen.getByTestId("header-utility-controls");
@@ -172,7 +192,11 @@ describe("Header Component", () => {
       };
 
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       expect(screen.queryByTestId("header-cta")).not.toBeInTheDocument();
@@ -185,7 +209,11 @@ describe("Header Component", () => {
 
     it("protects desktop navigation labels and CTA without broad wrappers", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       expect(screen.getByTestId("header-desktop-nav")).not.toHaveAttribute(
@@ -206,7 +234,7 @@ describe("Header Component", () => {
     });
 
     it("applies default sticky positioning", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(Header({ ...HEADER_LABELS, locale: "en" }));
 
       const header = screen.getByRole("banner");
       expect(header).toHaveClass("sticky", "top-0", "z-50");
@@ -215,7 +243,7 @@ describe("Header Component", () => {
     it("applies custom className when provided", async () => {
       const customClass = "custom-header-class";
       await renderAsyncComponent(
-        Header({ locale: "en", className: customClass }),
+        Header({ ...HEADER_LABELS, locale: "en", className: customClass }),
       );
 
       const header = screen.getByRole("banner");
@@ -223,7 +251,9 @@ describe("Header Component", () => {
     });
 
     it("can disable sticky positioning", async () => {
-      await renderAsyncComponent(Header({ locale: "en", sticky: false }));
+      await renderAsyncComponent(
+        Header({ ...HEADER_LABELS, locale: "en", sticky: false }),
+      );
 
       const header = screen.getByRole("banner");
       expect(header).not.toHaveClass("sticky");
@@ -232,7 +262,9 @@ describe("Header Component", () => {
 
   describe("Header Variants", () => {
     it("renders minimal variant correctly", async () => {
-      await renderAsyncComponent(Header({ locale: "en", variant: "minimal" }));
+      await renderAsyncComponent(
+        Header({ ...HEADER_LABELS, locale: "en", variant: "minimal" }),
+      );
 
       const header = screen.getByRole("banner");
       expect(header).toBeInTheDocument();
@@ -245,7 +277,7 @@ describe("Header Component", () => {
 
     it("renders transparent variant correctly", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", variant: "transparent" }),
+        Header({ ...HEADER_LABELS, locale: "en", variant: "transparent" }),
       );
 
       const header = screen.getByRole("banner");
@@ -257,7 +289,12 @@ describe("Header Component", () => {
 
     it("transparent variant ignores sticky prop", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", variant: "transparent", sticky: true }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          variant: "transparent",
+          sticky: true,
+        }),
       );
 
       const header = screen.getByRole("banner");
@@ -267,7 +304,9 @@ describe("Header Component", () => {
 
   describe("Header variants", () => {
     it("minimal behavior via Header with minimal variant", async () => {
-      await renderAsyncComponent(Header({ locale: "en", variant: "minimal" }));
+      await renderAsyncComponent(
+        Header({ ...HEADER_LABELS, locale: "en", variant: "minimal" }),
+      );
 
       const header = screen.getByRole("banner");
       expect(header).toBeInTheDocument();
@@ -277,7 +316,7 @@ describe("Header Component", () => {
 
     it("transparent behavior via Header with transparent variant", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", variant: "transparent" }),
+        Header({ ...HEADER_LABELS, locale: "en", variant: "transparent" }),
       );
 
       const header = screen.getByRole("banner");
@@ -291,7 +330,12 @@ describe("Header Component", () => {
       const customClass = "custom-class";
 
       await renderAsyncComponent(
-        Header({ locale: "en", variant: "minimal", className: customClass }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          variant: "minimal",
+          className: customClass,
+        }),
       );
       expect(screen.getByRole("banner")).toHaveClass(customClass);
     });
@@ -299,13 +343,13 @@ describe("Header Component", () => {
 
   describe("Accessibility", () => {
     it("has proper banner role", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(Header({ ...HEADER_LABELS, locale: "en" }));
 
       expect(screen.getByRole("banner")).toBeInTheDocument();
     });
 
     it("maintains focus management", async () => {
-      await renderAsyncComponent(Header({ locale: "en" }));
+      await renderAsyncComponent(Header({ ...HEADER_LABELS, locale: "en" }));
 
       // Header should not interfere with focus management
       const header = screen.getByRole("banner");
@@ -316,7 +360,11 @@ describe("Header Component", () => {
   describe("Responsive Behavior", () => {
     it("contains both desktop and mobile navigation", async () => {
       await renderAsyncComponent(
-        Header({ locale: "en", mainNavItems: MAIN_NAV_ITEMS }),
+        Header({
+          ...HEADER_LABELS,
+          locale: "en",
+          mainNavItems: MAIN_NAV_ITEMS,
+        }),
       );
 
       // Both should be present, visibility controlled by CSS

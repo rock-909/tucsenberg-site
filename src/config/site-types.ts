@@ -114,10 +114,12 @@ export interface SiteFacts {
   brandAssets: BrandAssets;
 }
 
+import type { NavigationNamespaceKey } from "@/config/pages.config";
+
 export interface SiteNavigationItem {
   key: string;
   href: string;
-  translationKey: string;
+  messageKey: NavigationNamespaceKey;
   icon?: string;
   external?: boolean;
   children?: SiteNavigationItem[];

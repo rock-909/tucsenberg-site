@@ -26,7 +26,7 @@ describe("Sheet accessibility", () => {
     render(
       <Sheet>
         <SheetTrigger>Open Sheet</SheetTrigger>
-        <SheetContent>
+        <SheetContent closeLabel="Close sheet">
           <SheetTitle>Accessible Sheet</SheetTitle>
           <SheetDescription>Sheet description</SheetDescription>
         </SheetContent>
@@ -47,14 +47,16 @@ describe("Sheet accessibility", () => {
   it("renders a close button with a screen-reader label", async () => {
     render(
       <Sheet defaultOpen>
-        <SheetContent>
+        <SheetContent closeLabel="Close sheet">
           <SheetTitle>Closable Sheet</SheetTitle>
         </SheetContent>
       </Sheet>,
     );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Close sheet" }),
+      ).toBeInTheDocument();
     });
   });
 });

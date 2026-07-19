@@ -54,12 +54,7 @@ export function MobileNavigationLinks({
                 aria-current={isActive ? "page" : undefined}
                 onClick={onNavigate}
               >
-                {t(
-                  item.translationKey.replace(
-                    /^navigation\./,
-                    "",
-                  ) as Parameters<typeof t>[0],
-                )}
+                {t(item.messageKey)}
               </Link>
             </li>
           );

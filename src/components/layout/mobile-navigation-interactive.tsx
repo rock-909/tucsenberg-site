@@ -34,9 +34,9 @@ import {
 interface MobileNavigationInteractiveProps {
   children?: ReactNode;
   className?: string;
-  closeMenuLabel?: string | undefined;
+  closeMenuLabel: string;
   initialOpen?: boolean;
-  openMenuLabel?: string | undefined;
+  openMenuLabel: string;
   siteDescription?: string | undefined;
   siteName?: string | undefined;
 }
@@ -177,6 +177,7 @@ export function MobileNavigationInteractive({
         </SheetTrigger>
         <SheetContent
           side="right"
+          closeLabel={closeMenuLabel}
           className="w-[300px] overflow-y-auto sm:w-[350px]"
           id="mobile-navigation"
           data-testid="mobile-menu-content"

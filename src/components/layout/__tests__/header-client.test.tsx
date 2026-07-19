@@ -63,9 +63,14 @@ describe("header client entry", () => {
   });
 });
 
+const MOBILE_NAV_ISLAND_LABELS = {
+  openMenuLabel: "Open navigation menu",
+  closeMenuLabel: "Close navigation menu",
+} as const;
+
 describe("MobileNavigationIsland", () => {
   it("renders deferred trigger before loading dynamic component", () => {
-    render(<MobileNavigationIsland />);
+    render(<MobileNavigationIsland {...MOBILE_NAV_ISLAND_LABELS} />);
 
     const trigger = screen.getByTestId("header-mobile-menu-button");
     expect(trigger).toBeInTheDocument();
@@ -85,7 +90,7 @@ describe("MobileNavigationIsland", () => {
 
   it("server-renders mobile navigation fallback without loading interactive navigation", () => {
     const html = renderToStaticMarkup(
-      <MobileNavigationIsland>
+      <MobileNavigationIsland {...MOBILE_NAV_ISLAND_LABELS}>
         <nav data-testid="header-mobile-navigation-fallback-links">
           Fallback navigation
         </nav>
@@ -106,6 +111,7 @@ describe("MobileNavigationIsland", () => {
   it("passes localized labels to the hydrated mobile navigation", async () => {
     render(
       <MobileNavigationIsland
+        {...MOBILE_NAV_ISLAND_LABELS}
         openMenuLabel="打开导航菜单"
         closeMenuLabel="关闭导航菜单"
       />,
@@ -125,7 +131,7 @@ describe("MobileNavigationIsland", () => {
   });
 
   it("loads interactive component after trigger click", async () => {
-    render(<MobileNavigationIsland />);
+    render(<MobileNavigationIsland {...MOBILE_NAV_ISLAND_LABELS} />);
 
     await act(async () => {
       fireEvent.click(screen.getByTestId("header-mobile-menu-button"));
@@ -140,7 +146,12 @@ describe("MobileNavigationIsland", () => {
   });
 
   it("marks the deferred menu label as notranslate", () => {
-    render(<MobileNavigationIsland openMenuLabel="Open navigation menu" />);
+    render(
+      <MobileNavigationIsland
+        {...MOBILE_NAV_ISLAND_LABELS}
+        openMenuLabel="Open navigation menu"
+      />,
+    );
 
     expect(screen.getByTestId("header-mobile-menu-label")).toHaveAttribute(
       "translate",
@@ -153,7 +164,7 @@ describe("Island components integration", () => {
   it("mobile island renders without loading hydrated navigation", async () => {
     const { container } = render(
       <>
-        <MobileNavigationIsland />
+        <MobileNavigationIsland {...MOBILE_NAV_ISLAND_LABELS} />
       </>,
     );
 

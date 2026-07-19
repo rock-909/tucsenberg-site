@@ -2,7 +2,35 @@ import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 
 export type InquiryFormSource = "contact" | "request-quote";
 
-type InquiryTranslate = (key: string) => string;
+type InquiryFormMessageKey =
+  | "optional"
+  | "fullName"
+  | "email"
+  | "message"
+  | "messageHint"
+  | "contextLabel"
+  | "submit"
+  | "submitting"
+  | "success"
+  | "referenceLabel"
+  | "privacyNotice"
+  | "noJsExplanation"
+  | "noJsEmailPrefix"
+  | "contactAriaLabel"
+  | "requestQuoteAriaLabel"
+  | "errors.fieldSummary"
+  | "errors.securitySummary"
+  | "errors.serverSummary"
+  | "errors.fullName.required"
+  | "errors.fullName.invalid"
+  | "errors.fullName.tooLong"
+  | "errors.email.required"
+  | "errors.email.invalid"
+  | "errors.email.tooLong"
+  | "errors.message.invalid"
+  | "errors.message.tooLong";
+
+type InquiryTranslate = (key: InquiryFormMessageKey) => string;
 
 export interface InquiryFormCopy {
   readonly optional: string;
@@ -83,7 +111,7 @@ export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
 export function createInquiryFormCopyFromMessages(
   messages: Record<string, unknown>,
 ): InquiryFormCopy {
-  return createInquiryFormCopy((key) =>
+  return createInquiryFormCopy((key: InquiryFormMessageKey) =>
     readRequiredMessagePath(messages, ["inquiry", "form", ...key.split(".")]),
   );
 }

@@ -30,7 +30,7 @@ export const Default: Story = {
       <SheetTrigger asChild>
         <Button variant="outline">Open details</Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent closeLabel="Close sheet">
         <SheetHeader>
           <SheetTitle>Project details</SheetTitle>
           <SheetDescription>
@@ -57,7 +57,7 @@ export const OpenRight: Story = {
       <SheetTrigger asChild>
         <Button variant="outline">Open right sheet</Button>
       </SheetTrigger>
-      <SheetContent side="right">
+      <SheetContent side="right" closeLabel="Close sheet">
         <SheetHeader>
           <SheetTitle>Open sheet preview</SheetTitle>
           <SheetDescription>
@@ -78,7 +78,7 @@ export const SidePlacements: Story = {
           <SheetTrigger asChild>
             <Button variant="outline">Open {side}</Button>
           </SheetTrigger>
-          <SheetContent side={side}>
+          <SheetContent side={side} closeLabel="Close sheet">
             <SheetHeader>
               <SheetTitle>{side} sheet</SheetTitle>
               <SheetDescription>
@@ -98,7 +98,7 @@ export const LongChineseContent: Story = {
       <SheetTrigger asChild>
         <Button variant="outline">打开中文说明</Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent closeLabel="Close sheet">
         <SheetHeader>
           <SheetTitle>页面交接说明</SheetTitle>
           <SheetDescription>
