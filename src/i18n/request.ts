@@ -1,8 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
-import {
-  loadCompleteMessages,
-  loadCompleteMessagesFromSource,
-} from "@/lib/i18n/load-messages";
+import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 import {
   getLocaleCurrency,
   getLocaleTimeZone,
@@ -72,18 +69,21 @@ function createSuccessResponse({
   };
 }
 
-// 辅助函数：创建缓存加载失败后的直接源重试响应
-async function createUncachedRetryResponse(locale: Locale, startTime: number) {
+// 辅助函数：创建同 locale 重试响应
+async function createSameLocaleRetryResponse(
+  locale: Locale,
+  startTime: number,
+) {
   return {
     locale,
-    messages: await loadCompleteMessagesFromSource(locale),
+    messages: await loadCompleteMessages(locale),
     timeZone: getLocaleTimeZone(locale),
     formats: getFormats(locale),
     strictMessageTypeSafety: true,
     metadata: {
       loadTime: performance.now() - startTime,
       error: true,
-      recovery: "uncached-retry" as const,
+      recovery: "same-locale-retry" as const,
     },
   };
 }
@@ -102,6 +102,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
       loadTime,
     });
   } catch {
-    return createUncachedRetryResponse(locale, startTime);
+    return createSameLocaleRetryResponse(locale, startTime);
   }
 });

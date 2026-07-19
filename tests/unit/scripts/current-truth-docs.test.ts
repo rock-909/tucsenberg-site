@@ -16,8 +16,6 @@ import {
   getReleaseProofDocsCommandBlock,
 } from "../../../scripts/starter-checks.js";
 
-/* eslint-disable max-lines -- colocated truth-docs guard fixtures exceed the test-file budget */
-
 function createTempRepo(files: Record<string, string>): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "current-truth-docs-"));
 
@@ -69,9 +67,6 @@ const TEMP_TRASH_ROOT = path.join(
   "showcase-current-truth-docs-test-trash",
 );
 
-const AUDIT_EVIDENCE_INDEX = "docs/技术难题/审查2026-07/README.md";
-const HISTORICAL_AUDIT_BOUNDARY = "历史审查证据，不是当前 runtime truth";
-
 function moveTempRepoToTrash(dir: string): void {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks the test-owned temporary fixture directory
   if (!fs.existsSync(dir)) return;
@@ -116,28 +111,6 @@ function createValidFiles(): Record<string, string> {
   ].join("\n");
 
   return files;
-}
-
-function expectGateAuditHistoricalLifecycleFindings(tempDirs: string[]): void {
-  const historicalPath = "docs/技术难题/门禁机械遵守审查2026-07/执行文档.md";
-  const withoutBanner = createValidFiles();
-  withoutBanner[historicalPath] = "# Gate audit record";
-  withoutBanner["docs/项目基础/文档清单.md"] +=
-    `\n| \`${historicalPath}\` | \`historical-proof\` | Gate audit record. |`;
-  tempDirs.push(createTempRepo(withoutBanner));
-  expect(collectCurrentTruthDocFindings(tempDirs.at(-1)!)).toContainEqual({
-    file: historicalPath,
-    error: `historical document must start with "${HISTORICAL_BANNER}"`,
-  });
-  const withoutInventory = createValidFiles();
-  withoutInventory[historicalPath] =
-    `${HISTORICAL_BANNER}\n# Gate audit record`;
-  tempDirs.push(createTempRepo(withoutInventory));
-  expect(collectCurrentTruthDocFindings(tempDirs.at(-1)!)).toContainEqual({
-    file: historicalPath,
-    error:
-      "historical document is not classified as historical-proof in docs/项目基础/文档清单.md",
-  });
 }
 
 describe("current-truth docs guard", () => {
@@ -232,8 +205,8 @@ describe("current-truth docs guard", () => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths are fixed test-owned documentation fixtures
       const content = fs.readFileSync(path.resolve(file), "utf8");
 
-      expect(content).toContain(AUDIT_EVIDENCE_INDEX);
-      expect(content).toContain(HISTORICAL_AUDIT_BOUNDARY);
+      expect(content).toContain("docs/技术难题/审查2026-07/README.md");
+      expect(content).toContain("历史审查证据，不是当前 runtime truth");
     }
   });
 
@@ -268,15 +241,15 @@ describe("current-truth docs guard", () => {
 
   it("requires both the approved banner and historical inventory classification", () => {
     const files = createValidFiles();
-    const missingBanner = "docs/superpowers/plans/missing-banner.md";
-    const missingInventory = "docs/audits/missing-inventory.md";
-    files[missingBanner] = "# Old plan";
-    files[missingInventory] = `${HISTORICAL_BANNER}\n# Old audit`;
+    const missingBanner = "docs/技术难题/门禁机械遵守审查2026-07/执行文档.md";
+    const missingInventory =
+      "docs/技术难题/门禁机械遵守审查2026-07/官方对标修复执行文档.md";
+    files[missingBanner] = "# Gate audit record";
+    files[missingInventory] = `${HISTORICAL_BANNER}\n# Gate audit record`;
     files["docs/项目基础/文档清单.md"] +=
-      `\n| \`${missingBanner}\` | \`historical-proof\` | Old plan. |`;
+      `\n| \`${missingBanner}\` | \`historical-proof\` | Gate audit record. |`;
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
-
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual(
       expect.arrayContaining([
         {
@@ -290,10 +263,6 @@ describe("current-truth docs guard", () => {
         },
       ]),
     );
-  });
-
-  it("requires banner and inventory for gate audit historical records", () => {
-    expectGateAuditHistoricalLifecycleFindings(tempDirs);
   });
 
   it("flags missing required path markers and forbidden stale path markers", () => {
@@ -926,4 +895,3 @@ describe("current-truth docs product ownership markers", () => {
     );
   });
 });
-/* eslint-enable max-lines -- colocated truth-docs guard fixtures exceed the test-file budget */

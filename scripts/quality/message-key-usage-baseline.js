@@ -140,6 +140,17 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "collection-values",
     file: "src/config/single-site-page-expression.ts",
+    sourceName: "SINGLE_SITE_HOME_PRODUCT_LINES",
+    valueProperty: "key",
+    entryFilters: [{ property: "hasBadge", equals: true }],
+    prefix: "home.productLines.items.",
+    suffixes: [".badge"],
+    reason:
+      "homepage product badges derive from the flagged product-line descriptors",
+  },
+  {
+    kind: "collection-values",
+    file: "src/config/single-site-page-expression.ts",
     sourceName: "SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS",
     prefix: "home.buyerSegments.items.",
     suffixes: [".title", ".description"],

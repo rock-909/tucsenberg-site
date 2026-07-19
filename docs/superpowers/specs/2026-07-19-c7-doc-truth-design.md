@@ -203,9 +203,58 @@ correct the historical-document count from three to four.
 The two new C7 Superpowers documents are registered in
 `docs/项目基础/文档清单.md` as `historical-proof` process records.
 
+### 4.7 Integrated Cluster 4 review follow-up
+
+The first integrated D7a-through-C7 review found two prior-task contract gaps
+and one C7 test-quality issue. They are closed on the C7 tip so the cluster keeps
+one final candidate and one three-PR merge chain.
+
+#### Product badge mapping
+
+`SINGLE_SITE_HOME_PRODUCT_LINES` already owns the optional `hasBadge` flag, but
+the page still hardcodes the FRP badge message key. The runtime must derive the
+badge from the same descriptor `key`. The message-usage gate must add a second
+filtered consumer over the same tuple:
+
+- `valueProperty: "key"`;
+- `entryFilters: [{ property: "hasBadge", equals: true }]`;
+- `suffixes: [".badge"]`.
+
+This keeps product order, route, glyph, ordinary copy, and optional badge
+ownership in one descriptor tuple without a parallel badge array.
+
+#### Same-locale retry truth
+
+Repository history deliberately retired `unstable_cache` for physical message
+JSON because module imports already provide the useful caching boundary. C7 must
+not reintroduce React/Next cache merely to satisfy stale `cached/uncached`
+wording.
+
+`loadCompleteMessagesFromSource` and `loadCompleteMessages` are currently the
+same implementation. Retire the duplicate export and the fake distinction.
+`src/i18n/request.ts` should call `loadCompleteMessages(locale)` once, then call
+the same loader once more with the same locale after a failure. Metadata and
+comments use `same-locale-retry`, not `uncached-retry`.
+
+Tests must prove:
+
+- first call fails and the second same-locale call succeeds;
+- both calls receive the same coerced locale;
+- a second failure remains visible;
+- physical-pack loading, invalid-locale coercion, interpolation, and message
+  shape still pass through the single public loader.
+
+#### Historical lifecycle test simplification
+
+The C7 implementation initially added a one-caller helper and a file-wide
+`max-lines` disable to test the new historical directory. Remove both. Reuse the
+existing "requires both the approved banner and historical inventory
+classification" test with two paths from the gate-audit directory. This proves
+the same behavior with fewer lines and no broader lint exemption.
+
 ## 5. Non-goals
 
-C7 does not:
+C7 does not, apart from the narrow integrated review closure in section 4.7:
 
 - change buyer-visible behavior, form fields, API payloads, routing, CSP,
   Turnstile verification, or Footer rendering;

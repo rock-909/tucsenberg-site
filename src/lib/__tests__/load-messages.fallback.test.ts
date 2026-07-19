@@ -1,24 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  loadCompleteMessages,
-  loadCompleteMessagesFromSource,
-} from "@/lib/i18n/load-messages";
-
-vi.mock("next/cache", () => ({
-  unstable_cache: (fn: unknown) => fn,
-}));
+import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 
 describe("load-messages canonical runtime source", () => {
-  it("sanitizes invalid locale to default locale when loading direct source", async () => {
-    const invalidLocaleMessages =
-      await loadCompleteMessagesFromSource("invalid-locale");
-    const defaultLocaleMessages = await loadCompleteMessagesFromSource("en");
+  it("sanitizes invalid locale to default locale when loading messages", async () => {
+    const invalidLocaleMessages = await loadCompleteMessages("invalid-locale");
+    const defaultLocaleMessages = await loadCompleteMessages("en");
 
     expect(invalidLocaleMessages).toEqual(defaultLocaleMessages);
   });
 
   it("returns merged complete messages from physical packs", async () => {
-    const messages = await loadCompleteMessagesFromSource("en");
+    const messages = await loadCompleteMessages("en");
 
     expect(messages).toHaveProperty("apiErrors");
     expect(messages).toHaveProperty("catalog");
@@ -26,17 +18,10 @@ describe("load-messages canonical runtime source", () => {
     expect(messages).not.toHaveProperty("common");
   });
 
-  it("keeps cached and direct source loading shape-compatible", async () => {
-    const direct = await loadCompleteMessagesFromSource("en");
-    const cached = await loadCompleteMessages("en");
-
-    expect(cached).toEqual(direct);
-  });
-
   it("uses the shared composed packs without site-specific overlay drift", async () => {
     vi.resetModules();
 
-    const messages = (await loadCompleteMessagesFromSource("en")) as {
+    const messages = (await loadCompleteMessages("en")) as {
       seo?: unknown;
       footer?: { description?: string };
       home?: { hero?: { title?: string } };

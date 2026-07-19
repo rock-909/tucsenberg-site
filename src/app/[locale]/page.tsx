@@ -85,7 +85,7 @@ function getHomePageContent(t: HomeTranslator) {
         linkLabel: t(`productLines.items.${productLine.key}.linkLabel`),
         glyph: productLine.glyph,
         ...("hasBadge" in productLine && productLine.hasBadge
-          ? { badge: t("productLines.items.frpFloodBarriers.badge") }
+          ? { badge: t(`productLines.items.${productLine.key}.badge`) }
           : {}),
       }),
     ),
