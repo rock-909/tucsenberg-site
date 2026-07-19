@@ -178,6 +178,16 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
     text: 'export const description = "Accurate pricing available within 12 hours.";',
     repoPath: "src/lib/contact/getContactCopy.ts",
   },
+  {
+    label: "exact pricing em dash shipping then reply within 12 hours (mdx)",
+    text: "Exact pricing — shipping within 12 hours — we reply within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing em dash reply then shipping within 12 hours (json)",
+    text: "Exact pricing — we reply within 12 hours — shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
 ] as const;
 
 const ALLOWED_QUOTE_TIME_FIXTURES = [
@@ -265,42 +275,25 @@ function isForbiddenQuoteTimeClause(clause: string): boolean {
 }
 
 function hasSeparateLogisticsTimingSegment(text: string): boolean {
-  const segments = text.split(/\s—\s/u);
+  const segments = text.split(/\s—\s/u).map(normalizeQuoteTimingClause);
   if (segments.length < 2) {
     return false;
   }
 
-  for (
-    let pricingIndex = 0;
-    pricingIndex < segments.length;
-    pricingIndex += 1
-  ) {
-    const pricingSide = normalizeQuoteTimingClause(
-      segments[pricingIndex] ?? "",
+  const timedSegments = segments.filter((segment) => TIMING_12.test(segment));
+  const hasSeparatePricingSegment = segments.some(
+    (segment) =>
+      EXACT_ACCURATE_PRICING.test(segment) && !TIMING_12.test(segment),
+  );
+  const allTimingIsLogisticsOnly =
+    timedSegments.length > 0 &&
+    timedSegments.every(
+      (segment) =>
+        LOGISTICS_SEMANTICS.test(segment) &&
+        !LOGISTICS_TIMING_FORBIDDEN.test(segment),
     );
-    if (!EXACT_ACCURATE_PRICING.test(pricingSide)) {
-      continue;
-    }
 
-    for (let timingIndex = 0; timingIndex < segments.length; timingIndex += 1) {
-      if (timingIndex === pricingIndex) {
-        continue;
-      }
-
-      const logisticsSide = normalizeQuoteTimingClause(
-        segments[timingIndex] ?? "",
-      );
-      if (
-        TIMING_12.test(logisticsSide) &&
-        LOGISTICS_SEMANTICS.test(logisticsSide) &&
-        !LOGISTICS_TIMING_FORBIDDEN.test(logisticsSide)
-      ) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return hasSeparatePricingSegment && allTimingIsLogisticsOnly;
 }
 
 function hasForbiddenExactAccuratePricing12HourPromise(text: string): boolean {
