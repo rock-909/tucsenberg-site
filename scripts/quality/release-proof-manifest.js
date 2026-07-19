@@ -170,7 +170,8 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "--project=chromium",
       ],
       env: {
-        CI: "",
+        CI: "1",
+        PLAYWRIGHT_REBUILD_SERVER: "true",
       },
       requiresFreePort: 3000,
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,

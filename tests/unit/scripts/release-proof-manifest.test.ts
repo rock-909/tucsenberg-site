@@ -87,7 +87,7 @@ describe("release proof manifest", () => {
     expect(releaseProofFlow).not.toContain("POST_DEPLOY_TEST=1");
   });
 
-  it("rebuilds the local Playwright step outside CI before using port 3000", () => {
+  it("rebuilds the local Playwright step without leaving CI", () => {
     const manifest = loadReleaseProofManifest();
     const playwrightStep = manifest
       .getReleaseProofSteps()
@@ -101,7 +101,12 @@ describe("release proof manifest", () => {
     expect(playwrightStep.args).toEqual(
       expect.arrayContaining(["exec", "playwright", "test"]),
     );
-    expect(playwrightStep.env).toEqual(expect.objectContaining({ CI: "" }));
+    expect(playwrightStep.env).toEqual(
+      expect.objectContaining({
+        CI: "1",
+        PLAYWRIGHT_REBUILD_SERVER: "true",
+      }),
+    );
     expect(playwrightStep.requiresFreePort).toBe(3000);
   });
 
