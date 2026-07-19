@@ -194,6 +194,14 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
+    file: "docs/项目基础/消息文案.md",
+    required: [
+      "theme, accessibility, cookie, structured data, API/errors, legal and email reference copy",
+      "contact, RFQ, inquiry, shared lead-form copy and shared FAQ section chrome",
+      "navigation, footer, home, catalog, OEM landing and product-page UI",
+    ],
+  },
+  {
     file: "docs/项目基础/替换边界.md",
     required: [
       "content/config/content.json",

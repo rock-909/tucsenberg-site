@@ -230,5 +230,5 @@
 
   <line x1="84" y1="1000" x2="1384" y2="1000" class="divider"/>
   <text x="92" y="1188" class="tiny">Reading direction: top to bottom. Main user flow runs from browser to app, then into guarded server paths and the lead pipeline.</text>
-  <text x="1365" y="1188" class="tiny" text-anchor="end">Generated from repo structure on 2026-04-23</text>
+  <text x="1365" y="1188" class="tiny" text-anchor="end">Maintained from the current repo structure</text>
 </svg>

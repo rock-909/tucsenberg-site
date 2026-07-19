@@ -19,15 +19,14 @@ export interface CorsRateLimitedRoute {
 }
 
 /**
- * Build the identical POST/OPTIONS pair shared by the public lead routes
- * (contact and inquiry): the handler runs behind the shared
- * `withRateLimit` wrapper, its response gets CORS headers, and OPTIONS answers
- * the CORS preflight.
+ * Build the POST/OPTIONS pair for a public write route. The handler runs behind
+ * the shared `withRateLimit` wrapper, its response gets CORS headers, and
+ * OPTIONS answers the CORS preflight.
  *
  * @example
  * export const { POST, OPTIONS } = createCorsRateLimitedRoute(
- *   "contact",
- *   handleContactPost,
+ *   "inquiry",
+ *   handleInquiryPost,
  * );
  */
 export function createCorsRateLimitedRoute<T = unknown>(
