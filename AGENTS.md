@@ -146,6 +146,12 @@ over-engineering review layer. Use `ponytail` full mode for every project task
 unless the user explicitly says `stop ponytail`, `normal mode`, or asks for a
 different Ponytail intensity.
 
+The preferred live source is the official `ponytail@ponytail` marketplace
+plugin from `DietrichGebert/ponytail` `main`. Project-local
+`.claude/commands/ponytail*.md` files are thin portability fallbacks: delegate
+to the plugin skill when available, and do not copy the full upstream skill
+body into this repository.
+
 Ponytail is not a replacement for this derived site's product boundaries. It must not
 override i18n, security, accessibility, Cloudflare/OpenNext, content ownership,
 or component governance rules. In this site, "less code" is only better when
