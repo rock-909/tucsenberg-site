@@ -19,7 +19,7 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     [
       "getHomePageContent",
       "HomeHowToChooseSection",
-      "HomeStartPathSection",
+      "HomeBuyingProcessSection",
       "HomeVerifySection",
       "HomeFinalAction",
     ],
@@ -45,12 +45,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "cookie",
   ),
   ...parameterOverrides(
-    "src/components/sections/hero-section.tsx",
-    ["buildHeroProofItem"],
-    "t",
-    "home",
-  ),
-  ...parameterOverrides(
     STRUCTURED_DATA,
     [
       "getSocialProfileUrls",
@@ -65,16 +59,20 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
 
 const DYNAMIC_MESSAGE_KEY_PREFIXES = [
   [
-    "home.problems.items.",
-    "homepage problem cards are keyed by approved config arrays",
+    "home.productLines.items.",
+    "homepage product lines are keyed by the approved product-line descriptors",
   ],
   [
-    "home.answer.items.",
-    "homepage answer cards are keyed by approved config arrays",
+    "home.buyerSegments.items.",
+    "homepage buyer segments are keyed by the approved buyer-segment tuple",
   ],
   [
-    "home.startPath.items.",
-    "homepage paths are keyed by approved config arrays",
+    "home.buyingProcess.items.",
+    "homepage buying steps are keyed by the approved buying-process tuple",
+  ],
+  [
+    "home.hero.proof.",
+    "homepage hero proof items are keyed by the approved hero proof tuple",
   ],
   [
     "home.howToChoose.rows.",
@@ -132,26 +130,36 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
     kind: "collection-values",
     file: "src/config/single-site-page-expression.ts",
-    sourceName: "SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS",
-    prefix: "home.problems.items.",
+    sourceName: "SINGLE_SITE_HOME_PRODUCT_LINES",
+    valueProperty: "key",
+    prefix: "home.productLines.items.",
     suffixes: [".title", ".description", ".linkLabel"],
-    reason: "homepage problem cards derive their exact keys from this tuple",
+    reason:
+      "homepage product cards derive their message keys from the product-line descriptors",
   },
   {
     kind: "collection-values",
     file: "src/config/single-site-page-expression.ts",
-    sourceName: "SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS",
-    prefix: "home.answer.items.",
+    sourceName: "SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS",
+    prefix: "home.buyerSegments.items.",
     suffixes: [".title", ".description"],
-    reason: "homepage answer cards derive their exact keys from this tuple",
+    reason: "homepage buyer segments derive their exact keys from this tuple",
   },
   {
     kind: "collection-values",
     file: "src/config/single-site-page-expression.ts",
-    sourceName: "SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS",
-    prefix: "home.startPath.items.",
+    sourceName: "SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS",
+    prefix: "home.buyingProcess.items.",
     suffixes: [".title", ".description"],
-    reason: "homepage start paths derive their exact keys from this tuple",
+    reason: "homepage buying steps derive their exact keys from this tuple",
+  },
+  {
+    kind: "collection-values",
+    file: "src/config/single-site-page-expression.ts",
+    sourceName: "SINGLE_SITE_HOME_HERO_PROOF_ITEMS",
+    prefix: "home.hero.proof.",
+    suffixes: ["", "Label"],
+    reason: "homepage hero proof items derive their exact keys from this tuple",
   },
   {
     kind: "collection-values",

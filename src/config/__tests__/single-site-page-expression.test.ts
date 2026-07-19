@@ -4,9 +4,11 @@ import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
-  SINGLE_SITE_HOME_FINAL_TRUST_ITEMS,
+  SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS,
+  SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
   SINGLE_SITE_HOME_LINK_TARGETS,
+  SINGLE_SITE_HOME_PRODUCT_LINES,
   SINGLE_SITE_HOME_SCENARIO_ITEMS,
   SINGLE_SITE_HOME_SECTION_ORDER,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
@@ -17,10 +19,10 @@ describe("single-site-page-expression", () => {
   it("keeps the homepage section order aligned with the active page runtime", () => {
     expect(SINGLE_SITE_HOME_SECTION_ORDER).toEqual([
       "hero",
-      "problems",
+      "productLines",
       "howToChoose",
-      "startPath",
-      "answer",
+      "buyingProcess",
+      "buyerSegments",
       "verify",
       "faq",
       "finalCta",
@@ -35,14 +37,60 @@ describe("single-site-page-expression", () => {
     });
   });
 
-  it("keeps homepage and about display item order explicit", () => {
-    expect(SINGLE_SITE_HOME_HERO_PROOF_ITEMS).toEqual([
-      "est",
-      "countries",
-      "range",
-      "production",
+  it("keeps homepage semantic tuples aligned with the live page runtime", () => {
+    expect(SINGLE_SITE_HOME_PRODUCT_LINES).toEqual([
+      {
+        key: "absFloodBarriers",
+        slug: "abs-flood-barriers",
+        glyph: "boxwall",
+      },
+      {
+        key: "aluminumFloodGates",
+        slug: "aluminum-flood-gates",
+        glyph: "gate",
+      },
+      {
+        key: "absorbentFloodBags",
+        slug: "absorbent-flood-bags",
+        glyph: "bag",
+      },
+      {
+        key: "floodTubeDams",
+        slug: "flood-tube-dams",
+        glyph: "tube",
+      },
+      {
+        key: "frpFloodBarriers",
+        slug: "frp-flood-barriers",
+        glyph: "frp",
+        hasBadge: true,
+      },
     ]);
-    expect(SINGLE_SITE_HOME_FINAL_TRUST_ITEMS).toEqual(["countries"]);
+
+    expect(SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS).toEqual([
+      "dealersDistributors",
+      "importersBrands",
+      "contractorsProjects",
+      "smallBusinessBuyers",
+    ]);
+
+    expect(SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS).toEqual([
+      "sendRfq",
+      "quoteResponse",
+      "paidSample",
+      "productionQc",
+      "shipment",
+    ]);
+
+    expect(SINGLE_SITE_HOME_HERO_PROOF_ITEMS).toEqual([
+      "quoteSla",
+      "warranty",
+      "factoryPool",
+      "oem",
+    ]);
+  });
+
+  it("keeps homepage and about display item order explicit", () => {
     expect(SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS).toEqual([
       "quality",
       "innovation",

@@ -690,52 +690,6 @@
   contain-intrinsic-size: auto 1000px;
 }
 
-/* ==================== FONT OPTIMIZATION ==================== */
-
-.font-chinese,
-[lang="zh"] {
-  font-family: var(--font-chinese);
-  font-feature-settings:
-    "kern" 1,
-    "liga" 1,
-    "calt" 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.zh-firstframe-title {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Source Han Sans SC",
-    "Noto Sans CJK SC",
-    "Microsoft YaHei",
-    Arial,
-    sans-serif;
-  font-weight: 600;
-}
-
-:root[lang="zh"] [data-fast-lcp-zh="1"] h1[data-lcp-title="1"] {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Source Han Sans SC",
-    "Noto Sans CJK SC",
-    "Microsoft YaHei",
-    Arial,
-    sans-serif;
-  font-weight: 600;
-}
-
 .font-loading {
   font-display: swap;
   font-synthesis: none;

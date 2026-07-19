@@ -11,13 +11,11 @@ import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { HeroSection } from "@/components/sections/hero-section";
 import { getLocalizedPath } from "@/config/paths";
 import {
+  SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS,
+  SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS,
   SINGLE_SITE_HOME_FAQ_ITEM_KEYS,
   SINGLE_SITE_HOME_HOW_TO_CHOOSE_ROW_KEYS,
-  SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS,
-  SINGLE_SITE_HOME_PRODUCT_CARD_LINKS,
-  SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS,
-  SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS,
-  SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS,
+  SINGLE_SITE_HOME_PRODUCT_LINES,
   SINGLE_SITE_HOME_SECTION_ORDER,
   SINGLE_SITE_HOME_VERIFY_ITEM_KEYS,
   type SingleSiteHomeSectionKey,
@@ -54,17 +52,6 @@ interface HomeProductCardItem extends HomeCardItem {
   badge?: string;
 }
 
-const HOME_PRODUCT_CARD_GLYPHS: Record<
-  (typeof SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS)[number],
-  TucsenbergProductDiagramKind
-> = {
-  structure: "boxwall",
-  content: "gate",
-  deployment: "bag",
-  inquiry: "tube",
-  multilingual: "frp",
-};
-
 interface HomeStepItem extends HomeCardItem {
   number: string;
 }
@@ -90,33 +77,33 @@ export async function generateMetadata({
 
 function getHomePageContent(t: HomeTranslator) {
   return {
-    problems: SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS.map(
-      (key): HomeProductCardItem => ({
-        title: t(`problems.items.${key}.title`),
-        description: t(`problems.items.${key}.description`),
-        href: SINGLE_SITE_HOME_PRODUCT_CARD_LINKS[key],
-        linkLabel: t(`problems.items.${key}.linkLabel`),
-        glyph: HOME_PRODUCT_CARD_GLYPHS[key],
-        ...(key === SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS[0]
-          ? { badge: t("problems.items.multilingual.badge") }
+    productLines: SINGLE_SITE_HOME_PRODUCT_LINES.map(
+      (productLine): HomeProductCardItem => ({
+        title: t(`productLines.items.${productLine.key}.title`),
+        description: t(`productLines.items.${productLine.key}.description`),
+        href: `/products/${productLine.slug}`,
+        linkLabel: t(`productLines.items.${productLine.key}.linkLabel`),
+        glyph: productLine.glyph,
+        ...("hasBadge" in productLine && productLine.hasBadge
+          ? { badge: t("productLines.items.frpFloodBarriers.badge") }
           : {}),
       }),
     ),
-    answers: SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS.map((key) => ({
-      title: t(`answer.items.${key}.title`),
-      description: t(`answer.items.${key}.description`),
+    buyerSegments: SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS.map((key) => ({
+      title: t(`buyerSegments.items.${key}.title`),
+      description: t(`buyerSegments.items.${key}.description`),
     })),
-    startPath: SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS.map(
+    buyingProcess: SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS.map(
       (key, index) => ({
         number: String(index + 1).padStart(2, "0"),
-        title: t(`startPath.items.${key}.title`),
-        description: t(`startPath.items.${key}.description`),
+        title: t(`buyingProcess.items.${key}.title`),
+        description: t(`buyingProcess.items.${key}.description`),
       }),
     ),
   };
 }
 
-function HomeProblemSection({
+function HomeProductLinesSection({
   title,
   description,
   items,
@@ -127,7 +114,7 @@ function HomeProblemSection({
 }) {
   return (
     <section
-      data-testid="home-problem-section"
+      data-testid="home-product-lines-section"
       className="section-divider px-6 py-14 md:py-[72px]"
     >
       <div className="mx-auto max-w-[1080px]">
@@ -233,7 +220,7 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
   );
 }
 
-function HomeCapabilitiesSection({
+function HomeBuyerSegmentsSection({
   title,
   description,
   items,
@@ -244,7 +231,7 @@ function HomeCapabilitiesSection({
 }) {
   return (
     <section
-      data-testid="home-answer-section"
+      data-testid="home-buyer-segments-section"
       className="section-divider px-6 py-14 md:py-[72px]"
     >
       <div className="mx-auto max-w-[1080px]">
@@ -255,13 +242,13 @@ function HomeCapabilitiesSection({
           </p>
         </div>
         <dl
-          data-testid="home-answer-proof-panel"
+          data-testid="home-buyer-segments-proof-panel"
           className="mt-8 grid gap-3 md:grid-cols-2"
         >
           {items.map((item) => (
             <div
               key={item.title}
-              data-testid="home-answer-proof-item"
+              data-testid="home-buyer-segments-proof-item"
               className="min-w-0 rounded-xl border border-border bg-background px-5 py-5"
             >
               <dt className="text-sm font-semibold text-balance text-foreground">
@@ -278,7 +265,7 @@ function HomeCapabilitiesSection({
   );
 }
 
-function HomeStartPathSection({
+function HomeBuyingProcessSection({
   t,
   items,
 }: {
@@ -287,21 +274,23 @@ function HomeStartPathSection({
 }) {
   return (
     <section
-      data-testid="home-start-path-section"
+      data-testid="home-buying-process-section"
       className="section-divider px-6 py-14 md:py-[72px]"
     >
       <div className="mx-auto max-w-[1080px]">
         <div className="max-w-2xl">
-          <h2 className="text-section text-balance">{t("startPath.title")}</h2>
+          <h2 className="text-section text-balance">
+            {t("buyingProcess.title")}
+          </h2>
           <p className="mt-3 text-pretty text-muted-foreground">
-            {t("startPath.description")}
+            {t("buyingProcess.description")}
           </p>
         </div>
         <ol className="mt-6 max-w-3xl divide-y divide-border">
           {items.map((item) => (
             <li key={item.number} className="flex gap-4 py-5 md:gap-6">
               <span
-                data-testid="home-start-path-step-badge"
+                data-testid="home-buying-process-step-badge"
                 className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted font-mono text-[12px] font-semibold text-foreground"
               >
                 {item.number}
@@ -418,12 +407,12 @@ export default async function Home({ params }: HomePageProps) {
   }));
   const homeSections = {
     hero: <HeroSection />,
-    problems: (
+    productLines: (
       <BreathingReveal>
-        <HomeProblemSection
-          title={t("problems.title")}
-          description={t("problems.description")}
-          items={content.problems}
+        <HomeProductLinesSection
+          title={t("productLines.title")}
+          description={t("productLines.description")}
+          items={content.productLines}
         />
       </BreathingReveal>
     ),
@@ -432,12 +421,17 @@ export default async function Home({ params }: HomePageProps) {
         <HomeHowToChooseSection t={t} />
       </BreathingReveal>
     ),
-    answer: (
+    buyingProcess: (
       <BreathingReveal>
-        <HomeCapabilitiesSection
-          title={t("answer.title")}
-          description={t("answer.description")}
-          items={content.answers}
+        <HomeBuyingProcessSection t={t} items={content.buyingProcess} />
+      </BreathingReveal>
+    ),
+    buyerSegments: (
+      <BreathingReveal>
+        <HomeBuyerSegmentsSection
+          title={t("buyerSegments.title")}
+          description={t("buyerSegments.description")}
+          items={content.buyerSegments}
         />
       </BreathingReveal>
     ),
@@ -454,11 +448,6 @@ export default async function Home({ params }: HomePageProps) {
             }))}
           />
         </div>
-      </BreathingReveal>
-    ),
-    startPath: (
-      <BreathingReveal>
-        <HomeStartPathSection t={t} items={content.startPath} />
       </BreathingReveal>
     ),
     verify: (

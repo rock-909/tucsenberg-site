@@ -31,7 +31,12 @@ function readMessageValue(
     return undefined;
   }
 
-  return value.replace(/\{copyright\}/gu, getSiteMessageValues().copyright.en);
+  const siteValues = getSiteMessageValues();
+
+  return value.replace(
+    /\{(siteName|companyName|currentYear)\}/gu,
+    (match, key: string) => siteValues[key as keyof typeof siteValues] ?? match,
+  );
 }
 
 function createNextIntlLikeTranslator(messages: Record<string, unknown>) {

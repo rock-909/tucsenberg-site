@@ -11,14 +11,14 @@ const heroMessageCases = [
     locale: "en",
     hero: catalogMessages.home.hero,
     proof: {
-      est: "Standard items",
-      estLabel: "reply within 12 hours",
-      countries: "3-year warranty",
-      countriesLabel: "on all standard lines",
-      range: "Factory pool",
-      rangeLabel: "supplies established brands",
-      production: "OEM",
-      productionLabel: "private label ready",
+      quoteSla: "Standard items",
+      quoteSlaLabel: "reply within 12 hours",
+      warranty: "3-year warranty",
+      warrantyLabel: "on all standard lines",
+      factoryPool: "Factory pool",
+      factoryPoolLabel: "supplies established brands",
+      oem: "OEM",
+      oemLabel: "private label ready",
     },
   },
 ] as const;
@@ -117,25 +117,27 @@ describe("HeroSection", () => {
     const proofItems = within(proofList).getAllByRole("listitem");
 
     expect(proofItems).toHaveLength(4);
-    expect(within(proofList).getByText("hero.proof.est")).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.estLabel"),
+      within(proofList).getByText("hero.proof.quoteSla"),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.countries"),
+      within(proofList).getByText("hero.proof.quoteSlaLabel"),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.countriesLabel"),
-    ).toBeInTheDocument();
-    expect(within(proofList).getByText("hero.proof.range")).toBeInTheDocument();
-    expect(
-      within(proofList).getByText("hero.proof.rangeLabel"),
+      within(proofList).getByText("hero.proof.warranty"),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.production"),
+      within(proofList).getByText("hero.proof.warrantyLabel"),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.productionLabel"),
+      within(proofList).getByText("hero.proof.factoryPool"),
+    ).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.factoryPoolLabel"),
+    ).toBeInTheDocument();
+    expect(within(proofList).getByText("hero.proof.oem")).toBeInTheDocument();
+    expect(
+      within(proofList).getByText("hero.proof.oemLabel"),
     ).toBeInTheDocument();
   });
 
@@ -146,9 +148,11 @@ describe("HeroSection", () => {
       name: "hero.proofAriaLabel",
     });
     const [firstProofItem] = within(proofList).getAllByRole("listitem");
-    const firstProofValue = within(firstProofItem).getByText("hero.proof.est");
+    const firstProofValue = within(firstProofItem).getByText(
+      "hero.proof.quoteSla",
+    );
     const firstProofLabel = within(firstProofItem).getByText(
-      "hero.proof.estLabel",
+      "hero.proof.quoteSlaLabel",
     );
 
     expect(proofList).toHaveClass(
@@ -169,14 +173,14 @@ describe("HeroSection", () => {
     for (const { hero, proof: expectedProof } of heroMessageCases) {
       const proof = hero.proof;
 
-      expect(proof.est).toBe(expectedProof.est);
-      expect(proof.estLabel).toBe(expectedProof.estLabel);
-      expect(proof.countries).toBe(expectedProof.countries);
-      expect(proof.countriesLabel).toBe(expectedProof.countriesLabel);
-      expect(proof.range).toBe(expectedProof.range);
-      expect(proof.rangeLabel).toBe(expectedProof.rangeLabel);
-      expect(proof.production).toBe(expectedProof.production);
-      expect(proof.productionLabel).toBe(expectedProof.productionLabel);
+      expect(proof.quoteSla).toBe(expectedProof.quoteSla);
+      expect(proof.quoteSlaLabel).toBe(expectedProof.quoteSlaLabel);
+      expect(proof.warranty).toBe(expectedProof.warranty);
+      expect(proof.warrantyLabel).toBe(expectedProof.warrantyLabel);
+      expect(proof.factoryPool).toBe(expectedProof.factoryPool);
+      expect(proof.factoryPoolLabel).toBe(expectedProof.factoryPoolLabel);
+      expect(proof.oem).toBe(expectedProof.oem);
+      expect(proof.oemLabel).toBe(expectedProof.oemLabel);
     }
   });
 });

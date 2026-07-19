@@ -17,42 +17,37 @@ type Messages = Record<string, unknown>;
 
 function interpolateSiteMessageString(
   value: string,
-  locale: Locale,
   siteValues: SiteMessageValues,
 ): string {
   const replacements: Record<string, string> = {
     siteName: siteValues.siteName,
     companyName: siteValues.companyName,
     currentYear: siteValues.currentYear,
-    copyright: siteValues.copyright[locale],
   };
 
   return value.replace(
-    /\{(siteName|companyName|currentYear|copyright)\}/gu,
+    /\{(siteName|companyName|currentYear)\}/gu,
     (match, key: string) => replacements[key] ?? match,
   );
 }
 
 function interpolateSiteMessageValues(
   value: unknown,
-  locale: Locale,
   siteValues: SiteMessageValues,
 ): unknown {
   if (typeof value === "string") {
-    return interpolateSiteMessageString(value, locale, siteValues);
+    return interpolateSiteMessageString(value, siteValues);
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) =>
-      interpolateSiteMessageValues(item, locale, siteValues),
-    );
+    return value.map((item) => interpolateSiteMessageValues(item, siteValues));
   }
 
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
         key,
-        interpolateSiteMessageValues(item, locale, siteValues),
+        interpolateSiteMessageValues(item, siteValues),
       ]),
     );
   }
@@ -63,12 +58,9 @@ function interpolateSiteMessageValues(
 async function loadMessageSource(locale: Locale): Promise<Messages> {
   const safeLocale = coerceLocale(locale);
   const loadedMessages = await loadComposedRawMessages(safeLocale);
+  const siteValues = getSiteMessageValues();
 
-  return interpolateSiteMessageValues(
-    loadedMessages,
-    safeLocale,
-    getSiteMessageValues(),
-  ) as Messages;
+  return interpolateSiteMessageValues(loadedMessages, siteValues) as Messages;
 }
 
 export function loadCompleteMessagesFromSource(

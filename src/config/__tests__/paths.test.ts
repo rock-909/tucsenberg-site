@@ -146,14 +146,7 @@ describe("paths configuration", () => {
     it("should have correct locale configuration", () => {
       expect(LOCALES_CONFIG.locales).toContain(LOCALES_CONFIG.defaultLocale);
       expect(LOCALES_CONFIG.locales.length).toBeGreaterThan(0);
-    });
-
-    it("should have valid prefixes", () => {
-      expect(LOCALES_CONFIG.prefixes.en).toBe("");
-    });
-
-    it("should have display names", () => {
-      expect(LOCALES_CONFIG.displayNames.en).toBe("English");
+      expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);
     });
 
     it("should expose locale time zones and currencies from the registry", () => {
@@ -474,11 +467,9 @@ describe("paths configuration", () => {
     it("should have consistent locale configuration", () => {
       const { locales } = LOCALES_CONFIG;
 
-      // Check that all locales have prefixes
       locales.forEach((locale) => {
-        expect(LOCALES_CONFIG.prefixes).toHaveProperty(locale);
-        expect(LOCALES_CONFIG.displayNames).toHaveProperty(locale);
         expect(LOCALES_CONFIG.timeZones).toHaveProperty(locale);
+        expect(LOCALES_CONFIG.currencies).toHaveProperty(locale);
       });
     });
 
@@ -613,11 +604,10 @@ describe("paths configuration", () => {
 
       expect(supportedLocales).toEqual(expectedLocales);
 
-      // Each locale should have all required configuration
+      // Each locale should have runtime registry coverage
       supportedLocales.forEach((locale) => {
-        expect(LOCALES_CONFIG.prefixes).toHaveProperty(locale);
-        expect(LOCALES_CONFIG.displayNames).toHaveProperty(locale);
         expect(LOCALES_CONFIG.timeZones).toHaveProperty(locale);
+        expect(LOCALES_CONFIG.currencies).toHaveProperty(locale);
       });
     });
   });

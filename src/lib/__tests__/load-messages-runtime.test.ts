@@ -54,28 +54,31 @@ interface FactualSourceMessages {
 
 type FactualCompleteMessages = FactualSourceMessages;
 
-const factualPlaceholderPattern =
-  /\{(?:siteName|companyName|currentYear|copyright)\}/u;
+const factualPlaceholderPattern = /\{(?:siteName|companyName|currentYear)\}/u;
 const heroDiagramKeys = ["panelLabel", "ariaLabel", "caption"] as const;
 const homeB2BSectionPaths = [
-  ["home", "problems", "title"],
-  ["home", "problems", "description"],
-  ["home", "problems", "items", "structure", "title"],
-  ["home", "problems", "items", "content", "title"],
-  ["home", "problems", "items", "deployment", "title"],
-  ["home", "problems", "items", "inquiry", "title"],
-  ["home", "problems", "items", "multilingual", "title"],
-  ["home", "answer", "title"],
-  ["home", "answer", "description"],
-  ["home", "answer", "items", "pageStructure", "title"],
-  ["home", "answer", "items", "replacementSurface", "title"],
-  ["home", "answer", "items", "inquiryPath", "title"],
-  ["home", "answer", "items", "cloudflareFoundation", "title"],
+  ["home", "productLines", "title"],
+  ["home", "productLines", "description"],
+  ["home", "buyerSegments", "title"],
+  ["home", "buyerSegments", "description"],
+  ["home", "buyingProcess", "title"],
+  ["home", "buyingProcess", "description"],
   ["home", "verify", "title"],
   ["home", "verify", "items", "audits", "title"],
   ["home", "verify", "items", "samples", "title"],
   ["home", "verify", "items", "inspection", "title"],
   ["home", "verify", "aboutLink"],
+] as const;
+
+const homeHeroProofPaths = [
+  ["home", "hero", "proof", "quoteSla"],
+  ["home", "hero", "proof", "quoteSlaLabel"],
+  ["home", "hero", "proof", "warranty"],
+  ["home", "hero", "proof", "warrantyLabel"],
+  ["home", "hero", "proof", "factoryPool"],
+  ["home", "hero", "proof", "factoryPoolLabel"],
+  ["home", "hero", "proof", "oem"],
+  ["home", "hero", "proof", "oemLabel"],
 ] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -210,6 +213,85 @@ describe("load-messages runtime loading", () => {
     for (const path of homeB2BSectionPaths) {
       expectNonEmptyStringPath(enMessages, path);
     }
+
+    for (const path of homeHeroProofPaths) {
+      expectNonEmptyStringPath(enMessages, path);
+    }
+
+    for (const key of [
+      "absFloodBarriers",
+      "aluminumFloodGates",
+      "absorbentFloodBags",
+      "floodTubeDams",
+      "frpFloodBarriers",
+    ] as const) {
+      expectStringPath(enMessages, [
+        "home",
+        "productLines",
+        "items",
+        key,
+        "title",
+      ]);
+      expectStringPath(enMessages, [
+        "home",
+        "productLines",
+        "items",
+        key,
+        "description",
+      ]);
+      expectStringPath(enMessages, [
+        "home",
+        "productLines",
+        "items",
+        key,
+        "linkLabel",
+      ]);
+    }
+
+    for (const key of [
+      "dealersDistributors",
+      "importersBrands",
+      "contractorsProjects",
+      "smallBusinessBuyers",
+    ] as const) {
+      expectStringPath(enMessages, [
+        "home",
+        "buyerSegments",
+        "items",
+        key,
+        "title",
+      ]);
+      expectStringPath(enMessages, [
+        "home",
+        "buyerSegments",
+        "items",
+        key,
+        "description",
+      ]);
+    }
+
+    for (const key of [
+      "sendRfq",
+      "quoteResponse",
+      "paidSample",
+      "productionQc",
+      "shipment",
+    ] as const) {
+      expectStringPath(enMessages, [
+        "home",
+        "buyingProcess",
+        "items",
+        key,
+        "title",
+      ]);
+      expectStringPath(enMessages, [
+        "home",
+        "buyingProcess",
+        "items",
+        key,
+        "description",
+      ]);
+    }
   });
 
   it("returns concrete structured-data names from complete source loading", async () => {
@@ -248,7 +330,9 @@ describe("load-messages runtime loading", () => {
     const enMessages = getComposedMessages("en") as FactualSourceMessages;
 
     expect(enMessages.navigation.siteName).toBe("{siteName}");
-    expect(enMessages.footer.copyright).toBe("{copyright}");
+    expect(enMessages.footer.copyright).toBe(
+      "© {currentYear} {siteName}. All rights reserved.",
+    );
 
     expect(enMessages["structured-data"].organization.name).toBe(
       "{companyName}",

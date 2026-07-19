@@ -2,7 +2,11 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import ts from "typescript";
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import {
+  getLocaleCurrency,
+  getLocaleTimeZone,
+  LOCALES_CONFIG,
+} from "@/config/paths/locales-config";
 import { getCanonicalPath } from "@/config/paths/utils";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 
@@ -533,7 +537,9 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("runs as an English-only site", () => {
     expect(LOCALES_CONFIG.locales).toEqual(["en"]);
     expect(LOCALES_CONFIG.defaultLocale).toBe("en");
-    expect(Object.keys(LOCALES_CONFIG.prefixes)).toEqual(["en"]);
+    expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);
+    expect(getLocaleTimeZone("en")).toBe("UTC");
+    expect(getLocaleCurrency("en")).toBe("USD");
   });
 
   it("uses the approved Phase 1 static URL set", () => {

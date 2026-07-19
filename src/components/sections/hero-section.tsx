@@ -9,51 +9,12 @@ import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-exp
 import { siteFacts } from "@/config/site-facts";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
-type HeroProofItemKey = (typeof SINGLE_SITE_HOME_HERO_PROOF_ITEMS)[number];
-
-function assertNever(value: never): never {
-  throw new Error(`Unhandled hero proof item: ${String(value)}`);
-}
-
-function buildHeroProofItem(
-  item: HeroProofItemKey,
-  t: Awaited<ReturnType<typeof getTranslations<"home">>>,
-): HeroSectionContent["proofItems"][number] {
-  switch (item) {
-    case "est":
-      return {
-        value: t("hero.proof.est", {
-          established: siteFacts.company.established,
-        }),
-        label: t("hero.proof.estLabel"),
-      };
-    case "countries":
-      return {
-        value: t("hero.proof.countries", {
-          countries: siteFacts.stats.exportCountries,
-        }),
-        label: t("hero.proof.countriesLabel"),
-      };
-    case "range":
-      return {
-        value: t("hero.proof.range"),
-        label: t("hero.proof.rangeLabel"),
-      };
-    case "production":
-      return {
-        value: t("hero.proof.production"),
-        label: t("hero.proof.productionLabel"),
-      };
-    default:
-      return assertNever(item);
-  }
-}
-
 export async function HeroSection() {
   const t = await getTranslations("home");
-  const proofItems = SINGLE_SITE_HOME_HERO_PROOF_ITEMS.map((item) =>
-    buildHeroProofItem(item, t),
-  );
+  const proofItems = SINGLE_SITE_HOME_HERO_PROOF_ITEMS.map((key) => ({
+    value: t(`hero.proof.${key}`),
+    label: t(`hero.proof.${key}Label`),
+  }));
 
   const boxwallDiagram = ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram;
   if (!boxwallDiagram || boxwallDiagram.kind !== "boxwall") {
