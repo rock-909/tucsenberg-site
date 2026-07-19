@@ -1,6 +1,7 @@
 {
   "$schema": "https://react.doctor/schema/config.json",
   "ignore": {
+    "files": [".open-next/**", ".next/**"],
     "overrides": [
       {
         "files": ["storybook-static/**"],
