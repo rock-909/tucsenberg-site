@@ -138,8 +138,7 @@ export function TurnstileWidget({
   // effect instead of two near-identical ones. Bypass wins if both are on.
   useEffect(() => {
     if (autoResolveTriggeredRef.current) return;
-    // Match bypass mode: only onSuccess. Calling onLoad afterward would clear the token
-    // (contact handleTurnstileLoad resets token + status to "loading").
+    // Bypass and test mode auto-resolve once via onSuccess; no separate load callback.
     if (isBypassMode) {
       autoResolveTriggeredRef.current = true;
       logger.warn("[DEV] Turnstile bypass mode enabled");

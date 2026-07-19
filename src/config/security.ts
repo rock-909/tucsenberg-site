@@ -35,9 +35,9 @@ function resolveCspReportUri(): string {
  * Content Security Policy configuration
  *
  * Boundary: NEXT_PUBLIC_SECURITY_MODE=strict means enforced security headers
- * with a static-compatible CSP. It is not nonce-level strict CSP. A
- * nonce-level policy needs dynamic rendering and a proxy-generated nonce, which
- * is intentionally outside the starter default.
+ * with a static-compatible CSP for the current site deployment. It is not
+ * nonce-level strict CSP. A nonce-level policy needs dynamic rendering and a
+ * proxy-generated nonce, which is intentionally outside this deployment boundary.
  */
 export function generateCSP(): string {
   const isDevelopment = isRuntimeDevelopment();
@@ -60,7 +60,7 @@ export function generateCSP(): string {
     ],
     // Static App Router/RSC emits inline bootstrap script elements. A strict
     // no-inline script-element policy needs nonce/proxy dynamic rendering, which
-    // is intentionally not part of this starter default.
+    // is intentionally outside this site's static-compatible deployment boundary.
     "script-src-elem": [
       "'self'",
       ...(isDevelopment
@@ -226,7 +226,7 @@ function isCspReportOnly(): boolean {
 }
 
 /**
- * CSP report endpoint handler type
+ * Legacy CSP report payload shape for `/api/csp-report`.
  */
 export interface CSPReport {
   "csp-report": {

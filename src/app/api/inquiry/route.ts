@@ -1,6 +1,6 @@
 /**
- * Product Inquiry API Route
- * Handles product-specific inquiries via product page drawer
+ * Shared public inquiry API route.
+ * Contact, Request Quote, and validated catalog context all write through `/api/inquiry`.
  */
 
 import "server-only";
