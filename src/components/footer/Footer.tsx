@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { FOOTER_COLUMNS, type FooterColumnConfig } from "@/config/footer-links";
+import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 import { Link } from "@/i18n/routing";
 
@@ -11,9 +11,17 @@ import { Link } from "@/i18n/routing";
  * wordmark's "=" mark. Spec: docs/design/可迁移设计资产-剖面动画与页脚.md.
  */
 
+type FooterColumnConfig = (typeof FOOTER_COLUMNS)[number];
+type FooterShellMessageKey =
+  | "footer.copyright"
+  | "footer.description"
+  | "accessibility.footerNavigation";
+type FooterConfigMessageKey =
+  | FooterColumnConfig["translationKey"]
+  | FooterColumnConfig["links"][number]["translationKey"];
+type FooterMessageKey = FooterShellMessageKey | FooterConfigMessageKey;
+
 export interface FooterProps {
-  /** 页脚链接列配置，默认使用 single-site 的 Navigation / Support 两列 */
-  columns?: FooterColumnConfig[];
   /** 主题切换插槽（如 ThemeSwitcher），渲染在法务条右侧 */
   themeToggleSlot?: ReactNode;
   /** 额外类名 */
@@ -21,12 +29,6 @@ export interface FooterProps {
   /** 可选 data-theme 透传，方便在独立渲染时指定主题 */
   dataTheme?: string;
 }
-
-type TranslateWithFallback = (
-  key: string | undefined,
-  fallback: string,
-  values?: Record<string, string | number>,
-) => string;
 
 const MICRO_LABEL_CLASS =
   "font-mono text-[11px] font-semibold tracking-[0.1em] uppercase text-[var(--footer-heading)]";
@@ -40,12 +42,12 @@ function FooterSection({
   translate,
 }: {
   section: FooterColumnConfig;
-  translate: TranslateWithFallback;
+  translate: (key: FooterMessageKey) => string;
 }) {
   return (
     <section aria-labelledby={`${section.key}-heading`}>
       <h2 id={`${section.key}-heading`} className={MICRO_LABEL_CLASS}>
-        {translate(section.translationKey, section.title)}
+        {translate(section.translationKey)}
       </h2>
       <ul className="mt-3">
         {section.links.map((link) => (
@@ -57,7 +59,7 @@ function FooterSection({
                 rel="noreferrer noopener"
                 target="_blank"
               >
-                {translate(link.translationKey, link.label)}
+                {translate(link.translationKey)}
               </a>
             ) : (
               <Link
@@ -65,7 +67,7 @@ function FooterSection({
                 href={link.href as "/privacy" | "/terms"}
                 prefetch={false}
               >
-                {translate(link.translationKey, link.label)}
+                {translate(link.translationKey)}
               </Link>
             )}
           </li>
@@ -75,48 +77,16 @@ function FooterSection({
   );
 }
 
-export function Footer({
-  columns = FOOTER_COLUMNS,
-  themeToggleSlot,
-  className,
-  dataTheme,
-}: FooterProps) {
+export function Footer({ themeToggleSlot, className, dataTheme }: FooterProps) {
   const t = useTranslations();
-  const translateDynamicKey = t as unknown as (
-    key: string,
-    values?: Record<string, string | number>,
-  ) => string;
-
-  const translateWithFallback: TranslateWithFallback = (
-    key,
-    fallback,
-    values,
-  ) => {
-    if (!key) return fallback;
-    try {
-      const translated = translateDynamicKey(key, { fallback, ...values });
-      return translated === key ? fallback : translated;
-    } catch {
-      return fallback;
-    }
-  };
+  const translateFooter = (key: FooterMessageKey) => t(key);
 
   const { name: siteName } = SINGLE_SITE_CONFIG;
   const { name: companyName } = SINGLE_SITE_FACTS.company;
   const { email } = SINGLE_SITE_CONFIG.contact;
   // Pure facts, no translatable words — composed from config, not messages.
   const legalLine = `${companyName} · ${email}`;
-  // "{copyright}" placeholder is interpolated from single-site config by the
-  // message loader at runtime; the fallback mirrors that composed value.
-  // Config snapshot year, not new Date(): Cache Components forbid current-time
-  // reads during prerender.
-  const snapshotYear =
-    SINGLE_SITE_FACTS.company.established +
-    SINGLE_SITE_FACTS.company.yearsInBusiness;
-  const copyright = translateWithFallback(
-    "footer.copyright",
-    `© ${snapshotYear} ${siteName}. All rights reserved.`,
-  );
+  const copyright = translateFooter("footer.copyright");
 
   return (
     <footer
@@ -138,25 +108,19 @@ export function Footer({
               </span>
             </p>
             <p className="mt-3 max-w-[34ch] text-[13px] leading-6 text-[var(--footer-text)]">
-              {translateWithFallback(
-                "footer.description",
-                SINGLE_SITE_CONFIG.description,
-              )}
+              {translateFooter("footer.description")}
             </p>
           </div>
 
           <nav
-            aria-label={translateWithFallback(
-              "accessibility.footerNavigation",
-              "Footer navigation",
-            )}
+            aria-label={translateFooter("accessibility.footerNavigation")}
             className="grid grid-cols-2 gap-x-8 gap-y-10"
           >
-            {columns.map((section) => (
+            {FOOTER_COLUMNS.map((section) => (
               <FooterSection
                 key={section.key}
                 section={section}
-                translate={translateWithFallback}
+                translate={translateFooter}
               />
             ))}
           </nav>

@@ -93,7 +93,7 @@ export interface FooterStyleTokens {
 
 // Footer truth is authored in `src/config/single-site.ts`; this module only
 // exposes the active single-site columns together with style tokens.
-export const FOOTER_COLUMNS: FooterColumnConfig[] = SINGLE_SITE_FOOTER_COLUMNS;
+export const FOOTER_COLUMNS = SINGLE_SITE_FOOTER_COLUMNS;
 
 /**
  * @public Footer token surface for downstream layout/theme customization.

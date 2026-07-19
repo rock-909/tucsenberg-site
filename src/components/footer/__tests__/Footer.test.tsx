@@ -5,12 +5,52 @@
  * (spec: docs/design/可迁移设计资产-剖面动画与页脚.md, asset 2).
  */
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Footer } from "@/components/footer/Footer";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
+import { getSiteMessageValues } from "@/lib/i18n/site-message-values";
+
+function readStrictMessage(
+  messages: Record<string, unknown>,
+  path: string,
+): string {
+  const value = path.split(".").reduce<unknown>((current, segment) => {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      Array.isArray(current)
+    ) {
+      return undefined;
+    }
+    return (current as Record<string, unknown>)[segment];
+  }, messages);
+
+  if (typeof value !== "string") {
+    throw new Error(`Missing test message: ${path}`);
+  }
+
+  return value.replace(/\{copyright\}/gu, getSiteMessageValues().copyright.en);
+}
+
+const composedMessages = getComposedMessages("en");
+
+const { mockUseTranslations } = vi.hoisted(() => ({
+  mockUseTranslations: vi.fn(
+    () => (key: string) => readStrictMessage(composedMessages, key),
+  ),
+}));
+
+vi.mock("next-intl", () => ({
+  useTranslations: mockUseTranslations,
+}));
 
 describe("Footer Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("renders without crashing", () => {
     render(<Footer />);
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
@@ -67,6 +107,25 @@ describe("Footer Component", () => {
       href: "/request-quote",
       text: "Request a Quote",
     });
+  });
+
+  it("requires footer section title messages instead of config English fallbacks", () => {
+    expect(
+      readStrictMessage(composedMessages, "footer.sections.navigation.title"),
+    ).toBe("Navigation");
+
+    const incompleteMessages = structuredClone(composedMessages);
+    const sections = (
+      incompleteMessages.footer as Record<
+        string,
+        Record<string, Record<string, unknown>>
+      >
+    ).sections;
+    delete sections.navigation.title;
+
+    expect(() =>
+      readStrictMessage(incompleteMessages, "footer.sections.navigation.title"),
+    ).toThrow("Missing test message: footer.sections.navigation.title");
   });
 
   it("renders the brand wordmark with an accessible site name", () => {
@@ -132,42 +191,8 @@ describe("Footer Component", () => {
     expect(footer).toHaveAttribute("data-theme", "dark");
   });
 
-  it("accepts custom columns and marks external links", () => {
-    render(
-      <Footer
-        columns={[
-          {
-            key: "custom",
-            title: "Custom Section",
-            translationKey: "footer.custom.title",
-            links: [
-              {
-                key: "internal",
-                label: "Internal Link",
-                href: "/products",
-                translationKey: "footer.custom.internal",
-              },
-              {
-                key: "external",
-                label: "External Link",
-                href: "https://example.com",
-                external: true,
-                translationKey: "footer.custom.external",
-              },
-            ],
-          },
-        ]}
-      />,
-    );
-
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Custom Section" }),
-    ).toBeInTheDocument();
-    const internal = screen.getByRole("link", { name: "Internal Link" });
-    expect(internal).not.toHaveAttribute("target");
-    const external = screen.getByRole("link", { name: "External Link" });
-    expect(external).toHaveAttribute("target", "_blank");
-    expect(external).toHaveAttribute("rel", "noreferrer noopener");
+  it("uses the formal footer column configuration", () => {
+    render(<Footer />);
 
     expect(FOOTER_COLUMNS.map((column) => column.key)).toEqual([
       "navigation",

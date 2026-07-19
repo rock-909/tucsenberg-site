@@ -107,15 +107,7 @@ const DYNAMIC_MESSAGE_KEY_PREFIXES = [
   ["theme.", "theme options store their label keys"],
 ].map(([prefix, reason]) => ({ prefix, reason }));
 
-const MESSAGE_OBJECT_KEY_CONSUMERS = [
-  {
-    file: "src/lib/contact/getContactCopy.ts",
-    objectName: "CONTACT_COPY_FALLBACKS",
-    prefix: "contact.",
-    reason:
-      "the contact copy model reads every fallback object key from contact messages",
-  },
-];
+const MESSAGE_OBJECT_KEY_CONSUMERS = [];
 
 const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
@@ -142,14 +134,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     prefix: "",
     suffixes: [""],
     reason: "footer column headings consume their literal translation keys",
-  },
-  {
-    kind: "call-arguments",
-    file: "src/components/footer/Footer.tsx",
-    ownerFunction: "Footer",
-    callee: "translateWithFallback",
-    prefixes: [""],
-    reason: "footer local fallback calls consume their literal message keys",
   },
   {
     kind: "collection-values",
