@@ -111,34 +111,47 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   {
     label: "quote before 12 hours",
     text: "Send details for a quote within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
   },
   {
     label: "quoted before within 12 hours",
     text: "Standard items are quoted within 12 hours.",
+    repoPath: "content/pages/en/oem-wholesale.mdx",
   },
   {
     label: "12-hour before quote",
     text: "Standard 12-hour quote turnaround for catalog lines.",
+    repoPath: "src/lib/contact/getContactCopy.ts",
   },
   {
     label: "custom quote before 48 hours",
     text: "Custom quote requests are answered within 48 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
   {
     label: "48-hour before custom quote",
     text: "48-hour custom quote review for non-standard openings.",
+    repoPath: "src/app/[locale]/request-quote/page.tsx",
   },
   {
     label: "48-hour custom quotation",
     text: "Within 48 hours, custom projects receive a quotation.",
+    repoPath: "messages/profiles/catalog/en/messages.json",
   },
   {
-    label: "exact pricing em dash reply within 12 hours",
+    label: "exact pricing em dash reply within 12 hours (mdx)",
     text: "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
   },
   {
-    label: "accurate pricing em dash reply within 12 hours",
-    text: "Request a quote for accurate pricing — we reply within 12 hours.",
+    label: "accurate pricing em dash reply within 12 hours (ts)",
+    text: 'description: "Request a quote for accurate pricing — we reply within 12 hours."',
+    repoPath: "src/lib/contact/getContactCopy.ts",
+  },
+  {
+    label: "exact pricing em dash reply within 12 hours (json)",
+    text: "Request a quote for exact pricing — we reply within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
 
@@ -146,18 +159,27 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   {
     label: "delivery within 48 hours",
     text: "In-stock cartons ship with delivery within 48 hours.",
+    repoPath: "content/pages/en/warranty.mdx",
   },
   {
     label: "shipping within 48 hours",
     text: "Express shipping within 48 hours is available on request.",
+    repoPath: "src/app/[locale]/products/page.tsx",
   },
   {
     label: "approved conditional reply copy",
     text: "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+    repoPath: "content/pages/en/contact.mdx",
   },
   {
-    label: "custom quotes separate from shipping timing",
+    label: "custom quotes separate from shipping timing (semicolon)",
     text: "Custom quotes exclude freight; shipping within 48 hours.",
+    repoPath: "messages/profiles/catalog/en/messages.json",
+  },
+  {
+    label: "custom quotes separate from shipping timing (em dash)",
+    text: "Custom quotes exclude freight — shipping within 48 hours.",
+    repoPath: "content/pages/en/oem-wholesale.mdx",
   },
 ] as const;
 
@@ -213,12 +235,74 @@ function collectJsonStringValues(value: unknown): string[] {
   return [];
 }
 
-function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
-  const strings = repoPath.endsWith(".json")
-    ? collectJsonStringValues(JSON.parse(source) as unknown)
-    : [source];
+function deriveCopyClauses(text: string): string[] {
+  return text
+    .split(/[;\n\r]+|(?<=[.!?])\s+/u)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause.length > 0);
+}
 
-  return strings.flatMap((text) => splitCopyClauses(text));
+function collectNonJsonBoundedUnits(
+  source: string,
+  repoPath: string,
+): string[] {
+  const ext = extname(repoPath);
+
+  if (ext === ".md" || ext === ".mdx") {
+    const paragraphs = source
+      .split(/\n\s*\n/u)
+      .map((paragraph) => paragraph.trim())
+      .filter((paragraph) => paragraph.length > 0);
+    const lines = source
+      .split(/\n/u)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    return [...new Set([...paragraphs, ...lines])];
+  }
+
+  return source
+    .split(/\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+function quoteTimeFixtureSource(text: string, repoPath: string): string {
+  if (repoPath.endsWith(".json")) {
+    return JSON.stringify({ copy: text });
+  }
+
+  return text;
+}
+
+function scanQuoteTimeCopyUnits(source: string, repoPath: string): string[] {
+  return collectOwnerCopyUnits(source, repoPath);
+}
+
+function hasForbiddenQuoteTimeInCopyUnits(
+  source: string,
+  repoPath: string,
+): boolean {
+  return scanQuoteTimeCopyUnits(source, repoPath).some(
+    hasForbiddenInquiryQuoteTimePromise,
+  );
+}
+
+function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
+  const boundedStrings = repoPath.endsWith(".json")
+    ? collectJsonStringValues(JSON.parse(source) as unknown)
+    : collectNonJsonBoundedUnits(source, repoPath);
+
+  const units = new Set<string>();
+
+  for (const text of boundedStrings) {
+    units.add(text);
+    for (const clause of deriveCopyClauses(text)) {
+      units.add(clause);
+    }
+  }
+
+  return [...units];
 }
 
 function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
@@ -499,15 +583,17 @@ describe("Tucsenberg Phase 1 site contract", () => {
 
   it.each(FORBIDDEN_QUOTE_TIME_FIXTURES)(
     "flags forbidden quote-time promise copy: $label",
-    ({ text }) => {
-      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(true);
+    ({ text, repoPath }) => {
+      const source = quoteTimeFixtureSource(text, repoPath);
+      expect(hasForbiddenQuoteTimeInCopyUnits(source, repoPath)).toBe(true);
     },
   );
 
   it.each(ALLOWED_QUOTE_TIME_FIXTURES)(
     "allows non-quote SLA timing copy: $label",
-    ({ text }) => {
-      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(false);
+    ({ text, repoPath }) => {
+      const source = quoteTimeFixtureSource(text, repoPath);
+      expect(hasForbiddenQuoteTimeInCopyUnits(source, repoPath)).toBe(false);
     },
   );
 
