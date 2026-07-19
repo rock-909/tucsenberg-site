@@ -48,27 +48,35 @@ export async function generateMetadata({
   });
 }
 
+interface RequestQuoteAsideCopy {
+  afterSubmitTitle: string;
+  confidenceTitle: string;
+  confidenceWarranty: string;
+  confidenceSamples: string;
+  confidencePricing: string;
+}
+
 function RequestQuoteAside({
   successCopy,
-  t,
+  copy,
 }: {
   successCopy: string;
-  t: (key: string) => string;
+  copy: RequestQuoteAsideCopy;
 }) {
   return (
     <aside className="space-y-4">
       <section className="surface-card p-6">
-        <h2 className="text-lg font-semibold">{t("afterSubmitTitle")}</h2>
+        <h2 className="text-lg font-semibold">{copy.afterSubmitTitle}</h2>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {successCopy}
         </p>
       </section>
       <section className="surface-card p-6">
-        <h2 className="text-lg font-semibold">{t("confidenceTitle")}</h2>
+        <h2 className="text-lg font-semibold">{copy.confidenceTitle}</h2>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-          <li>{t("confidenceWarranty")}</li>
-          <li>{t("confidenceSamples")}</li>
-          <li>{t("confidencePricing")}</li>
+          <li>{copy.confidenceWarranty}</li>
+          <li>{copy.confidenceSamples}</li>
+          <li>{copy.confidencePricing}</li>
         </ul>
       </section>
     </aside>
@@ -93,11 +101,14 @@ export default async function RequestQuotePage({
     locale,
     namespace: "inquiry.form",
   });
-  const translatePage = (key: string) =>
-    tPage(key as Parameters<typeof tPage>[0]);
-  const inquiryCopy: InquiryFormCopy = createInquiryFormCopy((key) =>
-    tInquiryForm(key as Parameters<typeof tInquiryForm>[0]),
-  );
+  const inquiryCopy: InquiryFormCopy = createInquiryFormCopy(tInquiryForm);
+  const asideCopy: RequestQuoteAsideCopy = {
+    afterSubmitTitle: tPage("afterSubmitTitle"),
+    confidenceTitle: tPage("confidenceTitle"),
+    confidenceWarranty: tPage("confidenceWarranty"),
+    confidenceSamples: tPage("confidenceSamples"),
+    confidencePricing: tPage("confidencePricing"),
+  };
   const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
   const typedLocale = locale as Locale;
   const pagePath = getLocalizedPath("requestQuote", typedLocale);
@@ -118,10 +129,8 @@ export default async function RequestQuotePage({
       />
       <div className="mx-auto max-w-[1080px] px-6 py-14 md:py-[72px]">
         <header className="mb-10 max-w-2xl">
-          <h1 className="text-heading mb-4">{translatePage("heading")}</h1>
-          <p className="text-body text-muted-foreground">
-            {translatePage("intro")}
-          </p>
+          <h1 className="text-heading mb-4">{tPage("heading")}</h1>
+          <p className="text-body text-muted-foreground">{tPage("intro")}</p>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
@@ -134,7 +143,7 @@ export default async function RequestQuotePage({
           </Suspense>
           <RequestQuoteAside
             successCopy={inquiryCopy.success}
-            t={translatePage}
+            copy={asideCopy}
           />
         </div>
       </div>

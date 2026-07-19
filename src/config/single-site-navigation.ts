@@ -1,9 +1,10 @@
 import {
   PUBLIC_STATIC_PAGE_DEFINITIONS,
   getPublicStaticPageDefinition,
+  toNavigationNamespaceKey,
+  type NavigationMessageKey,
 } from "@/config/pages.config";
 import { SINGLE_SITE_ROUTE_HREFS } from "@/config/single-site-links";
-import type { SiteNavigationItem } from "@/config/site-types";
 
 export type { SiteNavigationItem } from "@/config/site-types";
 
@@ -17,7 +18,9 @@ const MAIN_NAVIGATION_PAGE_TYPES = [
   "about",
 ] as const satisfies readonly SingleSiteRoutePageType[];
 
-function requireNavigationKey(pageType: SingleSiteRoutePageType): string {
+function requireNavigationKey(
+  pageType: SingleSiteRoutePageType,
+): NavigationMessageKey {
   const definition = getPublicStaticPageDefinition(pageType);
 
   if (definition === undefined) {
@@ -43,7 +46,7 @@ function requireRouteHref(pageType: SingleSiteRoutePageType): string {
   return href;
 }
 
-export function getSingleSiteNavigation(): SiteNavigationItem[] {
+export function getSingleSiteNavigation() {
   const activePageTypes = new Set(
     PUBLIC_STATIC_PAGE_DEFINITIONS.map((definition) => definition.pageType),
   );
@@ -54,12 +57,13 @@ export function getSingleSiteNavigation(): SiteNavigationItem[] {
           {
             key: pageType,
             href: requireRouteHref(pageType),
-            translationKey: requireNavigationKey(pageType),
+            messageKey: toNavigationNamespaceKey(
+              requireNavigationKey(pageType),
+            ),
           },
         ]
       : [],
   );
 }
 
-export const SINGLE_SITE_NAVIGATION: SiteNavigationItem[] =
-  getSingleSiteNavigation();
+export const SINGLE_SITE_NAVIGATION = getSingleSiteNavigation();

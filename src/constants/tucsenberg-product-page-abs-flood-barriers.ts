@@ -13,6 +13,14 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
       "TB-BW ABS boxwall flood barrier — freestanding L-profile side view with water load sealing the base",
     caption:
       "Principle — the flood's own weight presses the apron down; no fixing to the building. Schematic, not to scale — dimensions confirmed at quotation. Product photography in preparation.",
+    labels: {
+      waterSide: "water side",
+      loadSealsBase: "load seals the base",
+      profile: "interlocking ABS unit — freestanding L-profile",
+      load: "LOAD",
+      floodSide: "FLOOD SIDE",
+      drySide: "DRY SIDE",
+    },
   },
   eyebrow: "TB-BW series",
   title: "ABS Interlocking Boxwall Flood Barriers",

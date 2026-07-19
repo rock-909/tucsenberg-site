@@ -1,4 +1,17 @@
 import type { HeroSectionContent } from "@/components/sections/hero-section-view";
+import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
+
+const boxwallDiagramLabels =
+  ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram?.kind === "boxwall"
+    ? ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram.labels
+    : {
+        waterSide: "water side",
+        loadSealsBase: "load seals the base",
+        profile: "interlocking ABS unit — freestanding L-profile",
+        load: "LOAD",
+        floodSide: "FLOOD SIDE",
+        drySide: "DRY SIDE",
+      };
 
 export const homepageStoryHero = {
   eyebrow: "Modern B2B showcase starter",
@@ -17,6 +30,7 @@ export const homepageStoryHero = {
   ],
   diagram: {
     kind: "boxwall",
+    labels: boxwallDiagramLabels,
     panelLabel: "PRODUCT PRINCIPLE",
     ariaLabel: "Product working-principle line drawing placeholder",
     caption: "Replace with your product's working-principle drawing.",
@@ -40,6 +54,7 @@ export const homepageStoryHeroZh = {
   ],
   diagram: {
     kind: "boxwall",
+    labels: boxwallDiagramLabels,
     panelLabel: "产品原理",
     ariaLabel: "产品工作原理线描占位图",
     caption: "上线前替换为你产品的工作原理图。",

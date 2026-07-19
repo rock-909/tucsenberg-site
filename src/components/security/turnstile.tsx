@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 import { logger } from "@/lib/logger";
-import { TurnstileRescueLine } from "@/components/security/turnstile-rescue-line";
+import {
+  TurnstileRescueLine,
+  type TurnstileRescueLineProps,
+} from "@/components/security/turnstile-rescue-line";
 import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,
@@ -19,6 +22,9 @@ interface TurnstileLabels {
   unavailable: string;
   devBypass: string;
   testMode: string;
+  rescueBeforeEmail: string;
+  rescueAfterEmail: string;
+  rescueSubject: string;
 }
 
 interface TurnstileProps {
@@ -37,7 +43,7 @@ interface TurnstileProps {
   tabIndex?: number;
   id?: string;
   cData?: string;
-  labels?: TurnstileLabels;
+  labels: TurnstileLabels;
 }
 
 interface TurnstileStatusProps {
@@ -45,11 +51,9 @@ interface TurnstileStatusProps {
   label: string;
 }
 
-const DEFAULT_TURNSTILE_LABELS = {
-  unavailable: "Security verification is temporarily unavailable.",
-  devBypass: "Dev mode: Turnstile verification bypassed",
-  testMode: "Bot protection disabled in test mode",
-} satisfies TurnstileLabels;
+interface TurnstileUnavailableStatusProps extends TurnstileStatusProps {
+  rescue: TurnstileRescueLineProps;
+}
 
 function TurnstileBypassStatus({ className, label }: TurnstileStatusProps) {
   return (
@@ -79,21 +83,19 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
 function TurnstileUnavailableStatus({
   className,
   label,
-}: TurnstileStatusProps) {
+  rescue,
+}: TurnstileUnavailableStatusProps) {
   return (
     <output
       className={`turnstile-fallback ${className ?? ""}`}
       aria-live="polite"
     >
       <div className="text-sm text-[var(--error-foreground)]">{label}</div>
-      <TurnstileRescueLine />
+      <TurnstileRescueLine {...rescue} />
     </output>
   );
 }
 
-/**
- * Cloudflare Turnstile CAPTCHA component
- */
 export function TurnstileWidget({
   onSuccess,
   onError,
@@ -116,7 +118,11 @@ export function TurnstileWidget({
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const labelText = labels ?? DEFAULT_TURNSTILE_LABELS;
+  const rescue = {
+    beforeEmail: labels.rescueBeforeEmail,
+    afterEmail: labels.rescueAfterEmail,
+    subject: labels.rescueSubject,
+  };
 
   useEffect(() => {
     if (!onReadyRef) {
@@ -159,16 +165,13 @@ export function TurnstileWidget({
   // Conditional returns after all hooks
   if (isBypassMode) {
     return (
-      <TurnstileBypassStatus
-        className={className}
-        label={labelText.devBypass}
-      />
+      <TurnstileBypassStatus className={className} label={labels.devBypass} />
     );
   }
 
   if (isTestMode) {
     return (
-      <TurnstileMockStatus className={className} label={labelText.testMode} />
+      <TurnstileMockStatus className={className} label={labels.testMode} />
     );
   }
 
@@ -176,7 +179,8 @@ export function TurnstileWidget({
     return (
       <TurnstileUnavailableStatus
         className={className}
-        label={labelText.unavailable}
+        label={labels.unavailable}
+        rescue={rescue}
       />
     );
   }

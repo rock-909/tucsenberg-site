@@ -27,7 +27,7 @@ describe("Sheet integration", () => {
     render(
       <Sheet>
         <SheetTrigger>Open settings</SheetTrigger>
-        <SheetContent>
+        <SheetContent closeLabel="Close sheet">
           <SheetTitle>Settings</SheetTitle>
           <SheetFooter>
             <SheetClose asChild>

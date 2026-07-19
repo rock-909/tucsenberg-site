@@ -13,7 +13,6 @@ import { NavigationProgressBar } from "@/components/navigation/navigation-progre
 import { PageTransition } from "@/components/motion/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LazyThemeSwitcher } from "@/components/ui/lazy-theme-switcher";
-import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 import { loadClientMessages } from "@/lib/i18n/client-messages";
 import { mainNavigation } from "@/lib/navigation";
@@ -60,11 +59,7 @@ async function AsyncLocaleLayoutContent({
   const mainNavItems = mainNavigation.map((item) => ({
     key: item.key,
     href: item.href,
-    label: tNavigation(
-      item.translationKey.replace(/^navigation\./, "") as Parameters<
-        typeof tNavigation
-      >[0],
-    ),
+    label: tNavigation(item.messageKey),
   }));
 
   return (
@@ -99,7 +94,6 @@ async function AsyncLocaleLayoutContent({
 
           {/* 页脚：发丝线三列 + 法务条，法务信息在 Footer 内部取自 single-site 配置 */}
           <Footer
-            columns={FOOTER_COLUMNS}
             themeToggleSlot={
               <LazyThemeSwitcher data-testid="footer-theme-toggle" />
             }

@@ -99,6 +99,11 @@ vi.mock("lucide-react", () => ({
   Check: () => <span data-testid="check-icon">✓</span>,
 }));
 
+const MOBILE_NAV_LABELS = {
+  openMenuLabel: "Open navigation menu",
+  closeMenuLabel: "Close navigation menu",
+} as const;
+
 describe("MobileNavigationInteractive", () => {
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -114,7 +119,7 @@ describe("MobileNavigationInteractive", () => {
 
   describe("Rendering (closed)", () => {
     it("renders the trigger with closed ARIA inside the mobile-only shell", () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       expect(trigger).toHaveAttribute("type", "button");
@@ -131,14 +136,16 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("shows no navigation landmark or items until opened", () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
       expect(screen.queryByText("Home")).not.toBeInTheDocument();
     });
 
     it("applies a custom className to the container", () => {
-      render(<MobileNavigation className="custom-nav" />);
+      render(
+        <MobileNavigation {...MOBILE_NAV_LABELS} className="custom-nav" />,
+      );
 
       expect(screen.getByRole("button").closest("div")).toHaveClass(
         "custom-nav",
@@ -146,7 +153,7 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("exposes accessible focus and touch-target styling on the trigger", () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button");
       expect(trigger).toHaveClass(
@@ -160,13 +167,15 @@ describe("MobileNavigationInteractive", () => {
 
   describe("Open and close", () => {
     it("opens on click, revealing the drawer, close icon and switched label", () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       fireEvent.click(trigger);
 
       expect(trigger).toHaveAttribute("aria-expanded", "true");
-      expect(screen.getByText("Close navigation menu")).toBeInTheDocument();
+      expect(screen.getByTestId("mobile-menu-toggle-label")).toHaveTextContent(
+        "Close navigation menu",
+      );
       expect(screen.getByTestId("close-icon")).toBeInTheDocument();
       const nav = screen.getByRole("navigation", {
         name: "Mobile navigation menu",
@@ -179,7 +188,7 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("closes again when the trigger is clicked a second time", () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       fireEvent.click(trigger);
@@ -191,12 +200,13 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("closes via the drawer's dedicated close button", async () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       fireEvent.click(screen.getByRole("button", { name: /menu/i }));
       expect(screen.getByRole("navigation")).toBeInTheDocument();
 
-      const closeButton = screen.getByText("Close").closest("button");
+      const drawer = screen.getByTestId("mobile-menu-content");
+      const closeButton = drawer.querySelector("button");
       if (!closeButton) {
         throw new Error("Expected the drawer's built-in close button");
       }
@@ -205,7 +215,7 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("closes when a navigation link is clicked", async () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       await user.click(trigger);
@@ -217,7 +227,7 @@ describe("MobileNavigationInteractive", () => {
     it("toggles reliably back to a closed state after rapid clicking", () => {
       // Formerly "handles rapid interactions efficiently": this measures no
       // timing, it proves that an even number of toggles ends up closed.
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       for (let i = 0; i < 10; i++) {
@@ -231,7 +241,7 @@ describe("MobileNavigationInteractive", () => {
 
   describe("Keyboard", () => {
     it("opens with Enter and closes with Escape, returning focus to the trigger", async () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       await user.tab();
@@ -246,7 +256,7 @@ describe("MobileNavigationInteractive", () => {
     });
 
     it("moves focus between navigation items with Tab", async () => {
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       await user.click(screen.getByRole("button", { name: /menu/i }));
 
@@ -270,21 +280,21 @@ describe("MobileNavigationInteractive", () => {
 
   describe("Route awareness", () => {
     it("closes the drawer when the pathname changes", () => {
-      const { rerender } = render(<MobileNavigation />);
+      const { rerender } = render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       fireEvent.click(trigger);
       expect(trigger).toHaveAttribute("aria-expanded", "true");
 
       mockPathname.current = "/about";
-      rerender(<MobileNavigation />);
+      rerender(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 
     it("marks the current route's item with aria-current", () => {
       mockPathname.current = "/about";
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       fireEvent.click(screen.getByRole("button", { name: /menu/i }));
 
@@ -310,7 +320,9 @@ describe("MobileNavigationInteractive", () => {
         }),
       );
 
-      render(<MobileNavigation />);
+      render(
+        <MobileNavigation openMenuLabel="打开菜单" closeMenuLabel="关闭菜单" />,
+      );
 
       expect(screen.getByTestId("mobile-menu-toggle-label")).toHaveTextContent(
         "打开菜单",
@@ -319,7 +331,12 @@ describe("MobileNavigationInteractive", () => {
       expect(trigger).not.toHaveAttribute("aria-label");
 
       fireEvent.click(trigger);
-      expect(screen.getByText("关闭菜单")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("mobile-menu-content").querySelector("button"),
+      ).toHaveTextContent("✕");
+      expect(screen.getByTestId("mobile-menu-content")).toHaveTextContent(
+        "关闭菜单",
+      );
       expect(
         screen.getByRole("navigation", { name: "TEST mobile nav landmark" }),
       ).toBeInTheDocument();
@@ -334,7 +351,7 @@ describe("MobileNavigationInteractive", () => {
         }),
       );
 
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
       fireEvent.click(screen.getByRole("button", { name: /menu/i }));
 
       expect(
@@ -350,7 +367,7 @@ describe("MobileNavigationInteractive", () => {
           namespace ? `${namespace}.${key}` : key,
       );
 
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
       fireEvent.click(screen.getByRole("button", { name: /menu/i }));
 
       expect(screen.getByText("navigation.home")).toBeInTheDocument();
@@ -359,7 +376,7 @@ describe("MobileNavigationInteractive", () => {
 
     it("renders without marking any item active when the pathname is undefined", () => {
       mockPathname.current = undefined;
-      render(<MobileNavigation />);
+      render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       const trigger = screen.getByRole("button", { name: /menu/i });
       fireEvent.click(trigger);
@@ -375,7 +392,9 @@ describe("MobileNavigationInteractive", () => {
         throw new Error("Translation error");
       });
 
-      expect(() => render(<MobileNavigation />)).toThrow("Translation error");
+      expect(() => render(<MobileNavigation {...MOBILE_NAV_LABELS} />)).toThrow(
+        "Translation error",
+      );
     });
   });
 
@@ -383,7 +402,7 @@ describe("MobileNavigationInteractive", () => {
     it("unmounts cleanly", () => {
       // Formerly "handles memory efficiently" / "prevents memory leak": there
       // is no memory measurement, only a clean-teardown assertion.
-      const { unmount } = render(<MobileNavigation />);
+      const { unmount } = render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       expect(screen.getByRole("button")).toBeInTheDocument();
       expect(() => unmount()).not.toThrow();
@@ -393,10 +412,12 @@ describe("MobileNavigationInteractive", () => {
       // Formerly "maintains performance with frequent re-renders" /
       // "optimizes re-renders": no render-count instrumentation, just proof
       // the island survives repeated re-renders and picks up new props.
-      const { rerender } = render(<MobileNavigation />);
+      const { rerender } = render(<MobileNavigation {...MOBILE_NAV_LABELS} />);
 
       for (let i = 0; i < 5; i++) {
-        rerender(<MobileNavigation className={`class-${i}`} />);
+        rerender(
+          <MobileNavigation {...MOBILE_NAV_LABELS} className={`class-${i}`} />,
+        );
       }
 
       const trigger = screen.getByRole("button");

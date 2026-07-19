@@ -10,14 +10,18 @@ interface RouteErrorProps {
 
 export default function ProductsRouteError({ error, reset }: RouteErrorProps) {
   const t = useTranslations("errors.products");
-  const translateError = (key: string) => t(key as Parameters<typeof t>[0]);
 
   return (
     <RouteErrorView
       error={error}
       reset={reset}
       logContext="Products"
-      translationFn={translateError}
+      copy={{
+        title: t("title"),
+        description: t("description"),
+        tryAgain: t("tryAgain"),
+        goHome: t("goHome"),
+      }}
     />
   );
 }

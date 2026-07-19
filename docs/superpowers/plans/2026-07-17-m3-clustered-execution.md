@@ -378,16 +378,18 @@ pnpm build
 
 ## 6. Cluster 4: locale and documentation closure
 
-**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **Next task: D7a (not started).** D7b and C7 have not started.
+**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **D7a planning is complete; implementation has not started.** D7b and C7 have not started.
 
 ### Task D7a: remove component-level English fallbacks
 
-**Files:** `src/components/footer/Footer.tsx`, `src/lib/contact/getContactCopy.ts`, components using `t(key as ...)`, product SVG/Canvas components, `src/lib/i18n/read-message-path.ts`, message usage tests, E2E.
+**Design and plan:** `docs/superpowers/specs/2026-07-19-d7a-english-fallbacks-design.md` and `docs/superpowers/plans/2026-07-19-d7a-english-fallbacks.md`.
 
-- [ ] Add failing tests that a required message missing from a configured locale throws visibly instead of returning embedded English. Keep tests proving `coerceLocale`, same-locale physical-pack retry and global-error English exception.
-- [ ] Replace dynamic translation casts with literal-key unions. Replace Footer/getContactCopy fallback functions with `readRequiredMessagePath`. Pass diagram user-visible text through translated props; keep model codes such as TB-BW literal.
-- [ ] Remove two audited hard-coded aria labels unless D5a has already migrated them; do not duplicate work.
-- [ ] Run i18n request/routing/message tests, message usage gates, full E2E and `pnpm content:check`; commit `refactor: remove component-level english fallbacks without weakening locale recovery`; push and mark `READY_FOR_CLUSTER`.
+**Files:** Footer/Contact required-copy paths, localized translation-key consumers, Inquiry Turnstile copy, production mobile Sheet/Header labels, product/factory SVG and boxwall Canvas, message usage tests, and focused E2E.
+
+- [ ] Add failing tests that required Contact/Footer messages fail visibly. Keep and strengthen proof for `coerceLocale`, same-locale physical-pack retry, and the global-error English exception.
+- [ ] Remove Footer/Contact fallback structures and consumer-side translation casts. Make active Turnstile, Sheet, and Header buyer-visible copy required at existing component boundaries.
+- [ ] Pass factory SVG, product SVG, and Canvas language text through typed data. Keep pure dimensions and model codes such as TB-BW literal. Do not expand into full product-content localization.
+- [ ] Run focused i18n/message/UI tests, message usage gates, `pnpm content:check`, `pnpm component:check`, `pnpm website:check`, and targeted navigation/contact/core-page Playwright. Commit the D7a slices, push, wait for exact-SHA CI, and mark `READY_FOR_CLUSTER`.
 
 ### Task D7b: rename starter-era message keys and delete locale residue
 
@@ -419,6 +421,7 @@ node scripts/starter-checks.js truth-docs
 pnpm website:check
 pnpm component:check
 pnpm website:build:cf
+pnpm exec playwright test
 ```
 - [ ] Handoff must prove there is no component-level silent English fallback, configured locale parity holds, all stable docs describe the final code, and only documented exceptions remain. Stop for acceptance.
 

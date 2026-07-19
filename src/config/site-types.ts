@@ -114,10 +114,12 @@ export interface SiteFacts {
   brandAssets: BrandAssets;
 }
 
+import type { NavigationNamespaceKey } from "@/config/pages.config";
+
 export interface SiteNavigationItem {
   key: string;
   href: string;
-  translationKey: string;
+  messageKey: NavigationNamespaceKey;
   icon?: string;
   external?: boolean;
   children?: SiteNavigationItem[];
@@ -125,7 +127,6 @@ export interface SiteNavigationItem {
 
 export interface SiteFooterLinkItem {
   key: string;
-  label: string;
   href: string;
   external?: boolean;
   showExternalIcon?: boolean;
@@ -134,9 +135,8 @@ export interface SiteFooterLinkItem {
 
 export interface SiteFooterColumnConfig {
   key: string;
-  title: string;
   translationKey: string;
-  links: SiteFooterLinkItem[];
+  links: readonly SiteFooterLinkItem[];
 }
 
 export interface MarketDefinition {
@@ -160,5 +160,5 @@ export interface SiteDefinition {
   navigation: {
     main: SiteNavigationItem[];
   };
-  footerColumns: SiteFooterColumnConfig[];
+  footerColumns: readonly SiteFooterColumnConfig[];
 }

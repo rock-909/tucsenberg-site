@@ -50,6 +50,7 @@ describe("GlobalError", () => {
     it("should render error page structure", () => {
       renderGlobalError();
 
+      expect(document.documentElement).toHaveAttribute("lang", "en");
       expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
       expect(
         screen.getByText(

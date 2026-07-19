@@ -71,6 +71,15 @@
       "noJsEmailPrefix": "Email us directly at",
       "contactAriaLabel": "Contact inquiry",
       "requestQuoteAriaLabel": "Request a quote",
+      "turnstile": {
+        "unavailable": "Security verification is temporarily unavailable.",
+        "loadFailed": "Security verification failed to load.",
+        "devBypass": "Dev mode: Turnstile verification bypassed",
+        "testMode": "Bot protection disabled in test mode",
+        "rescueBeforeEmail": "Email us instead —",
+        "rescueAfterEmail": "Reply within 12 hours.",
+        "rescueSubject": "Quote request"
+      },
       "errors": {
         "fieldSummary": "Please review the highlighted fields and try again.",
         "securitySummary": "Security verification did not complete. Please try again.",

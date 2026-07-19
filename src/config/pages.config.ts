@@ -1,5 +1,33 @@
 import type { LocalizedPath, PageType } from "@/config/paths/types";
 
+const NAVIGATION_MESSAGE_PREFIX = "navigation." as const;
+
+export const NAVIGATION_MESSAGE_KEYS = [
+  "navigation.home",
+  "navigation.products",
+  "navigation.oemWholesale",
+  "navigation.guides",
+  "navigation.about",
+  "navigation.contactSales",
+] as const;
+
+export type NavigationMessageKey = (typeof NAVIGATION_MESSAGE_KEYS)[number];
+
+export type NavigationNamespaceKey =
+  NavigationMessageKey extends `${typeof NAVIGATION_MESSAGE_PREFIX}${infer Rest}`
+    ? Rest
+    : never;
+
+export function toNavigationNamespaceKey(
+  key: NavigationMessageKey,
+): NavigationNamespaceKey {
+  if (!key.startsWith(NAVIGATION_MESSAGE_PREFIX)) {
+    throw new Error(`Expected navigation message key, received: ${key}`);
+  }
+
+  return key.slice(NAVIGATION_MESSAGE_PREFIX.length) as NavigationNamespaceKey;
+}
+
 const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
 export type PublicStaticPageChangeFrequency =
@@ -47,7 +75,7 @@ interface PublicStaticPageMdxCollection {
 export interface PublicStaticPageDefinition {
   pageType: PageType;
   localizedPaths: LocalizedPath;
-  navigationKey: string | null;
+  navigationKey: NavigationMessageKey | null;
   seoKey: PublicStaticPageSeoKey;
   sitemap: PublicStaticPageSitemapConfig;
   lastmod: PublicStaticPageStaticLastmod | PublicStaticPageMdxLastmod;

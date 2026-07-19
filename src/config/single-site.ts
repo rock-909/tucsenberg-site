@@ -8,7 +8,6 @@ import type {
   SiteConfig,
   SiteDefinition,
   SiteFacts,
-  SiteFooterColumnConfig,
 } from "@/config/site-types";
 
 export type {
@@ -77,20 +76,6 @@ type FooterLinkPageType =
   | (typeof FOOTER_NAVIGATION_PAGE_TYPES)[number]
   | (typeof FOOTER_SUPPORT_PAGE_TYPES)[number];
 
-const FOOTER_LABELS = {
-  home: "Home",
-  products: "Products",
-  oemWholesale: "OEM & Wholesale",
-  materialsGuide: "Materials Guide",
-  specificationsGuide: "Specifications Guide",
-  about: "About",
-  requestQuote: "Request a Quote",
-  contact: "Contact",
-  warranty: "Warranty Policy",
-  privacy: "Privacy Policy",
-  terms: "Terms of Service",
-} as const satisfies Record<FooterLinkPageType, string>;
-
 const FOOTER_TRANSLATION_KEYS = {
   home: "footer.sections.navigation.home",
   products: "footer.sections.navigation.products",
@@ -112,14 +97,9 @@ const FOOTER_COLUMN_TRANSLATION_KEYS = {
 
 function getFooterLinkItem(pageType: FooterLinkPageType) {
   const href = SINGLE_SITE_ROUTE_HREFS[pageType];
-  const label = FOOTER_LABELS[pageType];
   const translationKey = FOOTER_TRANSLATION_KEYS[pageType];
 
-  if (
-    href === undefined ||
-    label === undefined ||
-    translationKey === undefined
-  ) {
+  if (href === undefined || translationKey === undefined) {
     throw new Error(
       `Missing footer link configuration for page type: ${pageType}`,
     );
@@ -127,11 +107,10 @@ function getFooterLinkItem(pageType: FooterLinkPageType) {
 
   return {
     key: pageType,
-    label,
     href,
     external: false,
     translationKey,
-  };
+  } as const;
 }
 
 function filterActiveFooterPages<T extends FooterLinkPageType>(
@@ -143,7 +122,7 @@ function filterActiveFooterPages<T extends FooterLinkPageType>(
   return orderedPageTypes.filter((pageType) => active.has(pageType));
 }
 
-export function getSingleSiteFooterColumns(): SiteFooterColumnConfig[] {
+export function getSingleSiteFooterColumns() {
   const activePageTypes = PUBLIC_STATIC_PAGE_TYPES;
   const navigationLinks = filterActiveFooterPages(
     FOOTER_NAVIGATION_PAGE_TYPES,
@@ -157,17 +136,15 @@ export function getSingleSiteFooterColumns(): SiteFooterColumnConfig[] {
   return [
     {
       key: "navigation",
-      title: "Navigation",
       translationKey: FOOTER_COLUMN_TRANSLATION_KEYS.navigation,
       links: navigationLinks,
     },
     {
       key: "support",
-      title: "Support",
       translationKey: FOOTER_COLUMN_TRANSLATION_KEYS.support,
       links: supportLinks,
     },
-  ];
+  ] as const;
 }
 
 export const TUCSENBERG_REGISTERED_ADDRESS =
@@ -257,7 +234,6 @@ export const SINGLE_SITE_DEFINITION = {
 
 export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
 export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;
-export const SINGLE_SITE_FOOTER_COLUMNS: SiteFooterColumnConfig[] =
-  SINGLE_SITE_DEFINITION.footerColumns;
+export const SINGLE_SITE_FOOTER_COLUMNS = getSingleSiteFooterColumns();
 
 export { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";

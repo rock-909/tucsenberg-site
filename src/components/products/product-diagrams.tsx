@@ -1,16 +1,16 @@
-/* eslint-disable no-magic-numbers -- SVG drawing coordinates; naming every x/y would hurt readability */
+/* eslint-disable no-magic-numbers -- SVG drawing coordinates */
 import type { ReactNode } from "react";
 import type {
+  BagDiagramLabels,
+  BoxwallDiagramLabels,
+  FrpDiagramLabels,
+  GateDiagramLabels,
+  TubeDiagramLabels,
   TucsenbergProductDiagram,
-  TucsenbergProductDiagramKind,
 } from "@/constants/tucsenberg-product-page-types";
 import { BoxwallCrossSection } from "@/components/products/boxwall-cross-section";
 
-/**
- * Honest engineering line drawings (copy strategy: 截面图/线图 over stock
- * imagery until owner photos land). All strokes inherit theme tokens via
- * currentColor so light/dark both stay readable.
- */
+export { ProductLineGlyph } from "@/components/products/product-diagram-glyphs";
 
 function DiagramSvg({
   ariaLabel,
@@ -158,7 +158,13 @@ function Arrow({
   );
 }
 
-function BoxwallDiagram({ ariaLabel }: { ariaLabel: string }) {
+function BoxwallDiagram({
+  ariaLabel,
+  labels,
+}: {
+  ariaLabel: string;
+  labels: BoxwallDiagramLabels;
+}) {
   return (
     <DiagramSvg ariaLabel={ariaLabel}>
       <WaterBody x={24} width={256} level={168} />
@@ -175,19 +181,25 @@ function BoxwallDiagram({ ariaLabel }: { ariaLabel: string }) {
       <Arrow x1={244} y1={210} x2={244} y2={240} />
       <DimLine x={330} y1={84} y2={260} label="50–85 cm" />
       <Annotation x={30} y={156}>
-        water side
+        {labels.waterSide}
       </Annotation>
       <Annotation x={196} y={232}>
-        load seals the base
+        {labels.loadSealsBase}
       </Annotation>
       <Annotation x={470} y={76} anchor="end">
-        interlocking ABS unit — freestanding L-profile
+        {labels.profile}
       </Annotation>
     </DiagramSvg>
   );
 }
 
-function GateDiagram({ ariaLabel }: { ariaLabel: string }) {
+function GateDiagram({
+  ariaLabel,
+  labels,
+}: {
+  ariaLabel: string;
+  labels: GateDiagramLabels;
+}) {
   const plankHeight = 38;
   const plankGap = 5;
   const plankBottoms = [222, 179, 136, 93];
@@ -233,19 +245,25 @@ function GateDiagram({ ariaLabel }: { ariaLabel: string }) {
       ))}
       <DimLine x={382} y1={222} y2={222 + plankHeight} label="180 mm" />
       <Annotation x={132} y={54}>
-        6063-T6 planks, stacked to height
+        {labels.planks}
       </Annotation>
       <Annotation x={356} y={130}>
-        EPDM seal
+        {labels.seal}
       </Annotation>
       <Annotation x={62} y={170} anchor="middle">
-        post
+        {labels.post}
       </Annotation>
     </DiagramSvg>
   );
 }
 
-function BagDiagram({ ariaLabel }: { ariaLabel: string }) {
+function BagDiagram({
+  ariaLabel,
+  labels,
+}: {
+  ariaLabel: string;
+  labels: BagDiagramLabels;
+}) {
   return (
     <DiagramSvg ariaLabel={ariaLabel}>
       <rect
@@ -259,11 +277,11 @@ function BagDiagram({ ariaLabel }: { ariaLabel: string }) {
         strokeWidth={2}
       />
       <Annotation x={116} y={110} anchor="middle">
-        ships flat · 0.23 kg
+        {labels.shipsFlat}
       </Annotation>
       <Arrow x1={196} y1={128} x2={252} y2={128} />
       <Annotation x={224} y={112} anchor="middle">
-        + water
+        {labels.addWater}
       </Annotation>
       <rect
         x={268}
@@ -276,7 +294,7 @@ function BagDiagram({ ariaLabel }: { ariaLabel: string }) {
         strokeWidth={2}
       />
       <Annotation x={342} y={84} anchor="middle">
-        20 kg in 3–4 min
+        {labels.activatedWeight}
       </Annotation>
       <GroundLine y={272} />
       {[
@@ -299,13 +317,19 @@ function BagDiagram({ ariaLabel }: { ariaLabel: string }) {
         />
       ))}
       <Annotation x={240} y={296} anchor="middle">
-        stack like sandbags — two layers per doorway
+        {labels.stacking}
       </Annotation>
     </DiagramSvg>
   );
 }
 
-function TubeDiagram({ ariaLabel }: { ariaLabel: string }) {
+function TubeDiagram({
+  ariaLabel,
+  labels,
+}: {
+  ariaLabel: string;
+  labels: TubeDiagramLabels;
+}) {
   return (
     <DiagramSvg ariaLabel={ariaLabel}>
       <WaterBody x={24} width={180} level={186} floor={252} />
@@ -338,19 +362,25 @@ function TubeDiagram({ ariaLabel }: { ariaLabel: string }) {
       <Arrow x1={168} y1={214} x2={212} y2={214} />
       <DimLine x={368} y1={132} y2={252} label="1 m" />
       <Annotation x={30} y={174}>
-        water side
+        {labels.waterSide}
       </Annotation>
       <Annotation x={132} y={236}>
-        skirt + pins
+        {labels.skirtAndPins}
       </Annotation>
       <Annotation x={244} y={120}>
-        0.9 mm PVC tube — air or water fill
+        {labels.tubeConstruction}
       </Annotation>
     </DiagramSvg>
   );
 }
 
-function FrpDiagram({ ariaLabel }: { ariaLabel: string }) {
+function FrpDiagram({
+  ariaLabel,
+  labels,
+}: {
+  ariaLabel: string;
+  labels: FrpDiagramLabels;
+}) {
   return (
     <DiagramSvg ariaLabel={ariaLabel}>
       <rect
@@ -387,105 +417,52 @@ function FrpDiagram({ ariaLabel }: { ariaLabel: string }) {
           strokeWidth={1.5}
         />
       ))}
-      <DimLine x={392} y1={104} y2={216} label="180 mm class" />
+      <DimLine x={392} y1={104} y2={216} label={labels.heightClass} />
       <Annotation x={120} y={92}>
-        pultruded FRP plank — multi-cell cross-section
+        {labels.profile}
       </Annotation>
       <Annotation x={240} y={248} anchor="middle">
-        corrosion-free · non-conductive · continuous glass fibre
+        {labels.properties}
       </Annotation>
     </DiagramSvg>
   );
 }
 
-const GLYPH_PATHS: Record<TucsenbergProductDiagramKind, ReactNode> = {
-  boxwall: (
-    <>
-      <path d="M 24 8 L 29 8 L 29 30 L 10 30 L 10 26 L 24 26 Z" />
-      <path d="M 4 18 q 3 -2.5 6 0 t 6 0" className="text-primary" />
-    </>
-  ),
-  gate: (
-    <>
-      <rect x={6} y={6} width={4} height={24} />
-      <rect x={30} y={6} width={4} height={24} />
-      <line x1={10} y1={12} x2={30} y2={12} />
-      <line x1={10} y1={19} x2={30} y2={19} />
-      <line x1={10} y1={26} x2={30} y2={26} />
-    </>
-  ),
-  bag: (
-    <>
-      <rect x={6} y={20} width={28} height={10} rx={5} />
-      <rect x={12} y={8} width={16} height={5} rx={2.5} />
-      <line x1={20} y1={13} x2={20} y2={18} className="text-primary" />
-    </>
-  ),
-  tube: (
-    <>
-      <circle cx={22} cy={19} r={11} />
-      <line x1={4} y1={30} x2={36} y2={30} />
-      <path d="M 4 16 q 3 -2.5 6 0" className="text-primary" />
-    </>
-  ),
-  frp: (
-    <>
-      <rect x={6} y={10} width={28} height={18} rx={2} />
-      <line x1={16} y1={10} x2={16} y2={28} />
-      <line x1={25} y1={10} x2={25} y2={28} />
-    </>
-  ),
-};
-
-/** Small line glyph for product-line tiles; decorative (aria-hidden). */
-export function ProductLineGlyph({
-  kind,
-  className,
-}: {
-  kind: TucsenbergProductDiagramKind;
-  className?: string;
-}) {
-  return (
-    <svg
-      aria-hidden
-      className={className ?? "size-8 shrink-0"}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      viewBox="0 0 40 36"
-    >
-      {GLYPH_PATHS[kind]}
-    </svg>
-  );
+function renderProductDiagram(diagram: TucsenbergProductDiagram): ReactNode {
+  switch (diagram.kind) {
+    case "boxwall":
+      return (
+        <BoxwallDiagram ariaLabel={diagram.ariaLabel} labels={diagram.labels} />
+      );
+    case "gate":
+      return (
+        <GateDiagram ariaLabel={diagram.ariaLabel} labels={diagram.labels} />
+      );
+    case "bag":
+      return (
+        <BagDiagram ariaLabel={diagram.ariaLabel} labels={diagram.labels} />
+      );
+    case "tube":
+      return (
+        <TubeDiagram ariaLabel={diagram.ariaLabel} labels={diagram.labels} />
+      );
+    case "frp":
+      return (
+        <FrpDiagram ariaLabel={diagram.ariaLabel} labels={diagram.labels} />
+      );
+    default: {
+      const exhaustive: never = diagram;
+      throw new Error(`Unhandled product diagram kind: ${String(exhaustive)}`);
+    }
+  }
 }
 
-const DIAGRAMS: Record<
-  TucsenbergProductDiagramKind,
-  (props: { ariaLabel: string }) => ReactNode
-> = {
-  boxwall: BoxwallDiagram,
-  gate: GateDiagram,
-  bag: BagDiagram,
-  tube: TubeDiagram,
-  frp: FrpDiagram,
-};
-
-/**
- * Full line drawing for card-scale use (products index, home cards) — the
- * engineering-drawing identity carries the visual weight until owner
- * photography lands.
- */
 export function ProductLineDiagram({
-  kind,
-  ariaLabel,
+  diagram,
 }: {
-  kind: TucsenbergProductDiagramKind;
-  ariaLabel: string;
+  diagram: TucsenbergProductDiagram;
 }) {
-  const Diagram = DIAGRAMS[kind];
-  return <Diagram ariaLabel={ariaLabel} />;
+  return renderProductDiagram(diagram);
 }
 
 export function ProductDiagramPanel({
@@ -493,8 +470,7 @@ export function ProductDiagramPanel({
 }: {
   diagram: TucsenbergProductDiagram;
 }) {
-  const Diagram = DIAGRAMS[diagram.kind];
-  const staticDrawing = <Diagram ariaLabel={diagram.ariaLabel} />;
+  const staticDrawing = renderProductDiagram(diagram);
   return (
     <figure
       className="min-w-0 rounded-2xl border border-border bg-card p-4 md:p-5"
@@ -509,7 +485,14 @@ export function ProductDiagramPanel({
         </div>
       ) : null}
       {diagram.animated && diagram.kind === "boxwall" ? (
-        <BoxwallCrossSection fallback={staticDrawing} />
+        <BoxwallCrossSection
+          fallback={staticDrawing}
+          labels={{
+            load: diagram.labels.load,
+            floodSide: diagram.labels.floodSide,
+            drySide: diagram.labels.drySide,
+          }}
+        />
       ) : (
         staticDrawing
       )}

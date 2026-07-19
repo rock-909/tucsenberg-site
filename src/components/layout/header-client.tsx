@@ -11,14 +11,14 @@ const MobileNavigationInteractive = lazy(() =>
 
 interface MobileNavigationIslandProps {
   children?: ReactNode;
-  openMenuLabel?: string;
-  closeMenuLabel?: string;
+  openMenuLabel: string;
+  closeMenuLabel: string;
 }
 
 export function MobileNavigationIsland({
   children,
-  openMenuLabel = "Open navigation menu",
-  closeMenuLabel = "Close navigation menu",
+  openMenuLabel,
+  closeMenuLabel,
 }: MobileNavigationIslandProps) {
   const [isActivated, setIsActivated] = useState(false);
   const fallback = (

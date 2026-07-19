@@ -134,6 +134,7 @@ function InquiryFormLive({
         />
 
         <LazyTurnstile
+          labels={copy.turnstile}
           onError={kernel.resetTurnstileToken}
           onExpire={kernel.resetTurnstileToken}
           onSuccess={kernel.acquireTurnstileToken}

@@ -60,12 +60,41 @@ export type TucsenbergProductDiagramKind =
   | "tube"
   | "frp";
 
-/**
- * Honest technical line drawing shown until owner photos land
- * (copy strategy: 截面图/线图 over stock imagery).
- */
-export interface TucsenbergProductDiagram {
-  kind: TucsenbergProductDiagramKind;
+export interface BoxwallDiagramLabels {
+  waterSide: string;
+  loadSealsBase: string;
+  profile: string;
+  load: string;
+  floodSide: string;
+  drySide: string;
+}
+
+export interface GateDiagramLabels {
+  planks: string;
+  seal: string;
+  post: string;
+}
+
+export interface BagDiagramLabels {
+  shipsFlat: string;
+  addWater: string;
+  activatedWeight: string;
+  stacking: string;
+}
+
+export interface TubeDiagramLabels {
+  waterSide: string;
+  skirtAndPins: string;
+  tubeConstruction: string;
+}
+
+export interface FrpDiagramLabels {
+  heightClass: string;
+  profile: string;
+  properties: string;
+}
+
+interface TucsenbergProductDiagramBase {
   ariaLabel: string;
   caption: string;
   /** Instrument-panel header label (mono microcopy) above the drawing. */
@@ -73,6 +102,42 @@ export interface TucsenbergProductDiagram {
   /** Upgrade the static drawing to the animated canvas cross-section. */
   animated?: boolean;
 }
+
+/**
+ * Honest technical line drawing shown until owner photos land
+ * (copy strategy: 截面图/线图 over stock imagery).
+ */
+export interface BoxwallProductDiagram extends TucsenbergProductDiagramBase {
+  kind: "boxwall";
+  labels: BoxwallDiagramLabels;
+}
+
+export interface GateProductDiagram extends TucsenbergProductDiagramBase {
+  kind: "gate";
+  labels: GateDiagramLabels;
+}
+
+export interface BagProductDiagram extends TucsenbergProductDiagramBase {
+  kind: "bag";
+  labels: BagDiagramLabels;
+}
+
+export interface TubeProductDiagram extends TucsenbergProductDiagramBase {
+  kind: "tube";
+  labels: TubeDiagramLabels;
+}
+
+export interface FrpProductDiagram extends TucsenbergProductDiagramBase {
+  kind: "frp";
+  labels: FrpDiagramLabels;
+}
+
+export type TucsenbergProductDiagram =
+  | BoxwallProductDiagram
+  | GateProductDiagram
+  | BagProductDiagram
+  | TubeProductDiagram
+  | FrpProductDiagram;
 
 /**
  * Straight-run unit estimator (quote funnel: quantities only, never prices).

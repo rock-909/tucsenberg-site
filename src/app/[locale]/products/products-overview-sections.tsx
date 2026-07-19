@@ -67,7 +67,7 @@ export function ProductLineCards({ translate }: { translate: ProductsText }) {
                   aria-hidden
                   className="mb-4 overflow-hidden rounded-md border border-border bg-background p-3"
                 >
-                  <ProductLineDiagram kind={diagram.kind} ariaLabel="" />
+                  <ProductLineDiagram diagram={diagram} />
                 </div>
               ) : null}
               <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">

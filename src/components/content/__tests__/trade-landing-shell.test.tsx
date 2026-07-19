@@ -47,6 +47,12 @@ vi.mock("next-intl/server", () => ({
         diagramLabel: "FACTORY POOL",
         diagramAriaLabel: "Factory pool diagram",
         diagramCaption: "Diagram caption",
+        "diagramLabels.extrusion": "extrusion",
+        "diagramLabels.moulding": "moulding",
+        "diagramLabels.welding": "welding",
+        "diagramLabels.sewing": "sewing",
+        "diagramLabels.specAndQc": "one spec · one QC",
+        "diagramLabels.mixedContainer": "one mixed container",
       },
       navigation: {
         home: "Home",

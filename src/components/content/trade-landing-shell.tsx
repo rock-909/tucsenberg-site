@@ -37,6 +37,14 @@ export async function TradeLandingShell({
   const t = await getTranslations({ locale, namespace: "oemLanding" });
   const tNav = await getTranslations({ locale, namespace: "navigation" });
   const tFaq = await getTranslations({ locale, namespace: "faq" });
+  const diagramLabels = {
+    extrusion: t("diagramLabels.extrusion"),
+    moulding: t("diagramLabels.moulding"),
+    welding: t("diagramLabels.welding"),
+    sewing: t("diagramLabels.sewing"),
+    specAndQc: t("diagramLabels.specAndQc"),
+    mixedContainer: t("diagramLabels.mixedContainer"),
+  };
 
   const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
   const schema = await buildShellPageSchema({
@@ -94,7 +102,7 @@ export async function TradeLandingShell({
               </span>
               <span aria-hidden className="bg-primary size-1.5 rounded-full" />
             </div>
-            <FactoryPoolDiagram ariaLabel={t("diagramAriaLabel")} />
+            <FactoryPoolDiagram ariaLabel={t("diagramAriaLabel")} labels={diagramLabels} />
             <figcaption className="text-muted-foreground border-border mt-3 border-t pt-3 text-xs leading-5">
               {t("diagramCaption")}
             </figcaption>

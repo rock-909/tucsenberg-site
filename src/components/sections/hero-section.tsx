@@ -4,6 +4,7 @@ import {
   HeroSectionView,
   type HeroSectionContent,
 } from "@/components/sections/hero-section-view";
+import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-expression";
 import { siteFacts } from "@/config/site-facts";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
@@ -54,6 +55,11 @@ export async function HeroSection() {
     buildHeroProofItem(item, t),
   );
 
+  const boxwallDiagram = ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram;
+  if (!boxwallDiagram || boxwallDiagram.kind !== "boxwall") {
+    throw new Error("Hero boxwall diagram is missing from product constants");
+  }
+
   const content = {
     eyebrow: t("hero.eyebrow", {
       established: siteFacts.company.established,
@@ -72,6 +78,7 @@ export async function HeroSection() {
     proofItems,
     diagram: {
       kind: "boxwall",
+      labels: boxwallDiagram.labels,
       panelLabel: t("hero.diagram.panelLabel"),
       ariaLabel: t("hero.diagram.ariaLabel"),
       caption: t("hero.diagram.caption"),

@@ -33,12 +33,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "catalog",
   ),
   ...parameterOverrides(
-    "src/app/[locale]/request-quote/page.tsx",
-    ["RequestQuoteAside"],
-    "t",
-    "requestQuote.page",
-  ),
-  ...parameterOverrides(
     "src/components/forms/inquiry-form-copy.ts",
     ["createInquiryFormCopy"],
     "t",
@@ -107,15 +101,7 @@ const DYNAMIC_MESSAGE_KEY_PREFIXES = [
   ["theme.", "theme options store their label keys"],
 ].map(([prefix, reason]) => ({ prefix, reason }));
 
-const MESSAGE_OBJECT_KEY_CONSUMERS = [
-  {
-    file: "src/lib/contact/getContactCopy.ts",
-    objectName: "CONTACT_COPY_FALLBACKS",
-    prefix: "contact.",
-    reason:
-      "the contact copy model reads every fallback object key from contact messages",
-  },
-];
+const MESSAGE_OBJECT_KEY_CONSUMERS = [];
 
 const MESSAGE_DERIVED_KEY_CONSUMERS = [
   {
@@ -142,14 +128,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     prefix: "",
     suffixes: [""],
     reason: "footer column headings consume their literal translation keys",
-  },
-  {
-    kind: "call-arguments",
-    file: "src/components/footer/Footer.tsx",
-    ownerFunction: "Footer",
-    callee: "translateWithFallback",
-    prefixes: [""],
-    reason: "footer local fallback calls consume their literal message keys",
   },
   {
     kind: "collection-values",
@@ -266,14 +244,6 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     suffixes: [""],
     reason:
       "inquiry validation emits these inquiry.form detail keys to the client",
-  },
-  {
-    kind: "call-arguments",
-    file: "src/components/errors/route-error-view.tsx",
-    ownerFunction: "RouteErrorView",
-    callee: "translationFn",
-    prefixes: ["errors.contact.", "errors.products."],
-    reason: "both route boundaries pass their namespace into the shared view",
   },
   {
     kind: "property-accesses",

@@ -4,74 +4,49 @@ import {
   getContactCopy,
   getContactCopyFromMessages,
 } from "@/lib/contact/getContactCopy";
+import type { MessageRecord } from "@/lib/i18n/read-message-path";
 
-const { mockLoadCompleteMessages, mockLoggerWarn } = vi.hoisted(() => ({
+const { mockLoadCompleteMessages } = vi.hoisted(() => ({
   mockLoadCompleteMessages: vi.fn(),
-  mockLoggerWarn: vi.fn(),
 }));
 
 vi.mock("@/lib/i18n/load-messages", () => ({
   loadCompleteMessages: mockLoadCompleteMessages,
 }));
 
-vi.mock("@/lib/logger", () => ({
-  logger: {
-    warn: mockLoggerWarn,
-  },
-}));
-
-describe("getContactCopy", () => {
-  const defaultTranslations = {
-    title: "Contact",
-    description:
-      "Fastest route: the RFQ form asks the questions we would ask anyway.",
-    "panel.contactTitle": "Email & RFQ",
-    "panel.email": "Email",
-    "panel.emailUnavailable": "Use the RFQ form if email is unavailable.",
-    "panel.phone": "Phone",
-    "panel.hoursTitle": "Time zone",
-    "panel.weekdays": "China",
-    "panel.saturday": "Follow-up",
-    "panel.sunday": "US/EU hours",
-    "panel.closed": "Closed",
-    "panel.responseTitle": "What happens next",
-    "panel.responseTimeLabel": "Reply within",
-    "panel.responseTimeValue": "12 hours",
-    "panel.bestForLabel": "Quote when",
-    "panel.bestForValue": "Details are sufficient",
-    "panel.prepareLabel": "Fastest route",
-    "panel.prepareValue":
-      "Use the RFQ form; it asks the questions we'd ask anyway.",
-  } as const;
-
-  const defaultMessages = {
+function createCompleteContactMessages(): MessageRecord {
+  return {
     contact: {
-      title: defaultTranslations.title,
-      description: defaultTranslations.description,
+      title: "Contact",
+      description:
+        "Fastest route: the RFQ form asks the questions we would ask anyway.",
       panel: {
-        contactTitle: defaultTranslations["panel.contactTitle"],
-        email: defaultTranslations["panel.email"],
-        emailUnavailable: defaultTranslations["panel.emailUnavailable"],
-        phone: defaultTranslations["panel.phone"],
-        hoursTitle: defaultTranslations["panel.hoursTitle"],
-        weekdays: defaultTranslations["panel.weekdays"],
-        saturday: defaultTranslations["panel.saturday"],
-        sunday: defaultTranslations["panel.sunday"],
-        closed: defaultTranslations["panel.closed"],
-        responseTitle: defaultTranslations["panel.responseTitle"],
-        responseTimeLabel: defaultTranslations["panel.responseTimeLabel"],
-        responseTimeValue: defaultTranslations["panel.responseTimeValue"],
-        bestForLabel: defaultTranslations["panel.bestForLabel"],
-        bestForValue: defaultTranslations["panel.bestForValue"],
-        prepareLabel: defaultTranslations["panel.prepareLabel"],
-        prepareValue: defaultTranslations["panel.prepareValue"],
+        contactTitle: "Email & RFQ",
+        email: "Email",
+        emailUnavailable: "Use the RFQ form if email is unavailable.",
+        phone: "Phone",
+        hoursTitle: "Time zone",
+        weekdays: "China",
+        saturday: "Follow-up",
+        sunday: "US/EU hours",
+        closed: "Closed",
+        responseTitle: "What happens next",
+        responseTimeLabel: "Reply within",
+        responseTimeValue: "12 hours",
+        bestForLabel: "Quote when",
+        bestForValue: "Details are sufficient",
+        prepareLabel: "Fastest route",
+        prepareValue:
+          "Use the RFQ form; it asks the questions we'd ask anyway.",
       },
     },
   };
+}
 
+describe("getContactCopy", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLoadCompleteMessages.mockResolvedValue(defaultMessages);
+    mockLoadCompleteMessages.mockResolvedValue(createCompleteContactMessages());
   });
 
   it("loads contact copy from the top-level contact namespace", async () => {
@@ -89,129 +64,42 @@ describe("getContactCopy", () => {
     expect(copy.panel.response.prepareValue).toBe(
       "Use the RFQ form; it asks the questions we'd ask anyway.",
     );
-    expect(mockLoggerWarn).not.toHaveBeenCalled();
   });
 
-  it("prefers the top-level contact namespace over the legacy contact copy path", () => {
-    const copy = getContactCopyFromMessages({
-      contact: {
-        title: "Top-level contact",
-        description: "Top-level description",
-        panel: {
-          contactTitle: "Top-level methods",
-          email: "Top-level email",
-          emailUnavailable: "Top-level email unavailable",
-          phone: "Top-level phone",
-          hoursTitle: "Top-level hours",
-          weekdays: "Top-level weekdays",
-          saturday: "Top-level saturday",
-          sunday: "Top-level sunday",
-          closed: "Top-level closed",
-          responseTitle: "Top-level response",
-          responseTimeLabel: "Top-level response label",
-          responseTimeValue: "Top-level response value",
-          bestForLabel: "Top-level best for",
-          bestForValue: "Top-level best value",
-          prepareLabel: "Top-level prepare label",
-          prepareValue: "Top-level prepare value",
-        },
-      },
-      underConstruction: {
-        pages: {
-          contact: {
-            title: "Legacy contact",
-            description: "Legacy description",
-            panel: {
-              contactTitle: "Legacy methods",
-              email: "Legacy email",
-              emailUnavailable: "Legacy email unavailable",
-              phone: "Legacy phone",
-              hoursTitle: "Legacy hours",
-              weekdays: "Legacy weekdays",
-              saturday: "Legacy saturday",
-              sunday: "Legacy sunday",
-              closed: "Legacy closed",
-              responseTitle: "Legacy response",
-              responseTimeLabel: "Legacy response label",
-              responseTimeValue: "Legacy response value",
-              bestForLabel: "Legacy best for",
-              bestForValue: "Legacy best value",
-              prepareLabel: "Legacy prepare label",
-              prepareValue: "Legacy prepare value",
-            },
-          },
-        },
-      },
-    });
+  it("throws the exact path when contact title is missing", () => {
+    const messages = createCompleteContactMessages();
+    delete (messages.contact as Record<string, unknown>).title;
 
-    expect(copy.header.title).toBe("Top-level contact");
-    expect(copy.header.description).toBe("Top-level description");
-    expect(copy.panel.contact.title).toBe("Top-level methods");
-    expect(copy.panel.response.prepareValue).toBe("Top-level prepare value");
-  });
-
-  it("does not read the legacy underConstruction contact namespace as a production fallback", () => {
-    const copy = getContactCopyFromMessages({
-      underConstruction: {
-        pages: {
-          contact: {
-            title: "Legacy contact",
-            description: "Legacy description",
-            panel: {
-              contactTitle: "Legacy methods",
-              email: "Legacy email",
-              emailUnavailable: "Legacy email unavailable",
-              phone: "Legacy phone",
-              hoursTitle: "Legacy hours",
-              weekdays: "Legacy weekdays",
-              saturday: "Legacy saturday",
-              sunday: "Legacy sunday",
-              closed: "Legacy closed",
-              responseTitle: "Legacy response",
-              responseTimeLabel: "Legacy response label",
-              responseTimeValue: "Legacy response value",
-              bestForLabel: "Legacy best for",
-              bestForValue: "Legacy best value",
-              prepareLabel: "Legacy prepare label",
-              prepareValue: "Legacy prepare value",
-            },
-          },
-        },
-      },
-    });
-
-    expect(copy.header.title).toBe("Contact");
-    expect(copy.header.description).toBe(
-      "Fastest route: the RFQ form asks the questions we would ask anyway.",
-    );
-
-    expect(copy.panel.contact.title).toBe("Email & RFQ");
-    expect(copy.panel.contact.emailLabel).toBe("Email");
-    expect(copy.panel.contact.phoneLabel).toBe("Phone");
-
-    expect(copy.panel.hours.title).toBe("Time zone");
-    expect(copy.panel.hours.weekdaysLabel).toBe("China");
-    expect(copy.panel.hours.saturdayLabel).toBe("Follow-up");
-    expect(copy.panel.hours.sundayLabel).toBe("US/EU hours");
-    expect(copy.panel.hours.closedLabel).toBe("Closed");
-    expect(copy.panel.response.title).toBe("What happens next");
-    expect(copy.panel.response.responseTimeValue).toBe("12 hours");
-    expect(copy.panel.response.bestForLabel).toBe("Quote when");
-    expect(copy.panel.response.bestForValue).toBe("Details are sufficient");
-    expect(copy.panel.response.prepareLabel).toBe("Fastest route");
-    expect(mockLoggerWarn).toHaveBeenCalled();
-    expect(mockLoggerWarn).toHaveBeenCalledWith(
-      "Missing contact page copy; using fallback",
-      { key: "title" },
+    expect(() => getContactCopyFromMessages(messages)).toThrow(
+      "Missing required message: contact.title",
     );
   });
 
-  it("falls back to user-readable copy when static messages miss keys", () => {
-    const copy = getContactCopyFromMessages({});
-
-    expect(copy.header.title).toBe("Contact");
-    expect(copy.header.description).toContain("RFQ form");
-    expect(copy.panel.hours.closedLabel).toBe("Closed");
-    expect(mockLoggerWarn).toHaveBeenCalled();
+  it("does not read legacy underConstruction contact copy", () => {
+    expect(() =>
+      getContactCopyFromMessages({
+        underConstruction: { contact: createCompleteContactMessages().contact },
+      }),
+    ).toThrow("Missing required message: contact.title");
   });
+
+  it.each([
+    {
+      missingPath: ["panel", "responseTimeValue"],
+      expectedError:
+        "Missing required message: contact.panel.responseTimeValue",
+    },
+  ])(
+    "throws the exact nested path when $expectedError",
+    ({ missingPath, expectedError }) => {
+      const messages = createCompleteContactMessages();
+      let current = messages.contact as Record<string, unknown>;
+      for (let index = 0; index < missingPath.length - 1; index += 1) {
+        current = current[missingPath[index]!] as Record<string, unknown>;
+      }
+      delete current[missingPath[missingPath.length - 1]!];
+
+      expect(() => getContactCopyFromMessages(messages)).toThrow(expectedError);
+    },
+  );
 });

@@ -780,9 +780,20 @@ describe("Tucsenberg Phase 1 site contract", () => {
     );
 
     expect(requestQuoteIntro).not.toContain("CUSTOM_QUOTE_HOURS");
-    expect(
-      readRepoFile("src/components/security/turnstile-rescue-line.tsx"),
-    ).toContain("Reply within 12 hours");
+
+    const turnstile = getObject(
+      form.turnstile,
+      "b2b-lead inquiry.form.turnstile",
+    );
+    expect(String(turnstile.rescueAfterEmail)).toMatch(
+      /reply within 12 hours/i,
+    );
+
+    const turnstileRescueLine = readRepoFile(
+      "src/components/security/turnstile-rescue-line.tsx",
+    );
+    expect(turnstileRescueLine).toContain("afterEmail");
+    expect(turnstileRescueLine).not.toContain("Reply within 12 hours");
   });
 
   it("uses the approved Tucsenberg contact page copy", () => {

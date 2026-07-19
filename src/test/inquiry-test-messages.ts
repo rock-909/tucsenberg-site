@@ -44,3 +44,7 @@ export function getInquiryFormMessage(keyPath: string): string {
 export function createTestInquiryFormCopy(): InquiryFormCopy {
   return createInquiryFormCopy(getInquiryFormMessage);
 }
+
+export function createTestTurnstileLabels(): InquiryFormCopy["turnstile"] {
+  return createTestInquiryFormCopy().turnstile;
+}

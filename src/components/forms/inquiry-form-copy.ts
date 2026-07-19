@@ -2,7 +2,42 @@ import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 
 export type InquiryFormSource = "contact" | "request-quote";
 
-type InquiryTranslate = (key: string) => string;
+type InquiryFormMessageKey =
+  | "optional"
+  | "fullName"
+  | "email"
+  | "message"
+  | "messageHint"
+  | "contextLabel"
+  | "submit"
+  | "submitting"
+  | "success"
+  | "referenceLabel"
+  | "privacyNotice"
+  | "noJsExplanation"
+  | "noJsEmailPrefix"
+  | "contactAriaLabel"
+  | "requestQuoteAriaLabel"
+  | "errors.fieldSummary"
+  | "errors.securitySummary"
+  | "errors.serverSummary"
+  | "errors.fullName.required"
+  | "errors.fullName.invalid"
+  | "errors.fullName.tooLong"
+  | "errors.email.required"
+  | "errors.email.invalid"
+  | "errors.email.tooLong"
+  | "errors.message.invalid"
+  | "errors.message.tooLong"
+  | "turnstile.unavailable"
+  | "turnstile.loadFailed"
+  | "turnstile.devBypass"
+  | "turnstile.testMode"
+  | "turnstile.rescueBeforeEmail"
+  | "turnstile.rescueAfterEmail"
+  | "turnstile.rescueSubject";
+
+type InquiryTranslate = (key: InquiryFormMessageKey) => string;
 
 export interface InquiryFormCopy {
   readonly optional: string;
@@ -20,6 +55,15 @@ export interface InquiryFormCopy {
   readonly noJsEmailPrefix: string;
   readonly contactAriaLabel: string;
   readonly requestQuoteAriaLabel: string;
+  readonly turnstile: {
+    readonly unavailable: string;
+    readonly loadFailed: string;
+    readonly devBypass: string;
+    readonly testMode: string;
+    readonly rescueBeforeEmail: string;
+    readonly rescueAfterEmail: string;
+    readonly rescueSubject: string;
+  };
   readonly errors: {
     readonly fieldSummary: string;
     readonly securitySummary: string;
@@ -58,6 +102,15 @@ export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
     noJsEmailPrefix: t("noJsEmailPrefix"),
     contactAriaLabel: t("contactAriaLabel"),
     requestQuoteAriaLabel: t("requestQuoteAriaLabel"),
+    turnstile: {
+      unavailable: t("turnstile.unavailable"),
+      loadFailed: t("turnstile.loadFailed"),
+      devBypass: t("turnstile.devBypass"),
+      testMode: t("turnstile.testMode"),
+      rescueBeforeEmail: t("turnstile.rescueBeforeEmail"),
+      rescueAfterEmail: t("turnstile.rescueAfterEmail"),
+      rescueSubject: t("turnstile.rescueSubject"),
+    },
     errors: {
       fieldSummary: t("errors.fieldSummary"),
       securitySummary: t("errors.securitySummary"),
@@ -83,7 +136,7 @@ export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
 export function createInquiryFormCopyFromMessages(
   messages: Record<string, unknown>,
 ): InquiryFormCopy {
-  return createInquiryFormCopy((key) =>
+  return createInquiryFormCopy((key: InquiryFormMessageKey) =>
     readRequiredMessagePath(messages, ["inquiry", "form", ...key.split(".")]),
   );
 }

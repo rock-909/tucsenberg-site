@@ -31,7 +31,7 @@ describe("navigation", () => {
       const item: NavigationItem = {
         key: "test",
         href: "/test",
-        translationKey: "nav.test",
+        messageKey: "home",
         icon: "test-icon",
         external: true,
         children: [],
@@ -39,7 +39,7 @@ describe("navigation", () => {
 
       expect(item.key).toBe("test");
       expect(item.href).toBe("/test");
-      expect(item.translationKey).toBe("nav.test");
+      expect(item.messageKey).toBe("home");
       expect(item.icon).toBe("test-icon");
       expect(item.external).toBe(true);
       expect(Array.isArray(item.children)).toBe(true);
@@ -54,45 +54,45 @@ describe("navigation", () => {
     it("should use the catalog site navigation as the singleton source", () => {
       expect(SINGLE_SITE_NAVIGATION).toEqual(getSingleSiteNavigation());
       expect(mainNavigation).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
+        { key: "home", href: "/", messageKey: "home" },
         {
           key: "products",
           href: "/products",
-          translationKey: "navigation.products",
+          messageKey: "products",
         },
         {
           key: "oemWholesale",
           href: "/oem-wholesale",
-          translationKey: "navigation.oemWholesale",
+          messageKey: "oemWholesale",
         },
         {
           key: "materialsGuide",
           href: "/guides/flood-barrier-materials-guide",
-          translationKey: "navigation.guides",
+          messageKey: "guides",
         },
-        { key: "about", href: "/about", translationKey: "navigation.about" },
+        { key: "about", href: "/about", messageKey: "about" },
       ]);
     });
 
     it("can derive the default materialized catalog navigation explicitly", () => {
       expect(getSingleSiteNavigation()).toEqual([
-        { key: "home", href: "/", translationKey: "navigation.home" },
+        { key: "home", href: "/", messageKey: "home" },
         {
           key: "products",
           href: "/products",
-          translationKey: "navigation.products",
+          messageKey: "products",
         },
         {
           key: "oemWholesale",
           href: "/oem-wholesale",
-          translationKey: "navigation.oemWholesale",
+          messageKey: "oemWholesale",
         },
         {
           key: "materialsGuide",
           href: "/guides/flood-barrier-materials-guide",
-          translationKey: "navigation.guides",
+          messageKey: "guides",
         },
-        { key: "about", href: "/about", translationKey: "navigation.about" },
+        { key: "about", href: "/about", messageKey: "about" },
       ]);
     });
 
@@ -109,9 +109,8 @@ describe("navigation", () => {
       mainNavigation.forEach((item) => {
         expect(item.key).toBeTruthy();
         expect(item.href).toBeTruthy();
-        expect(item.translationKey).toBeTruthy();
+        expect(item.messageKey).toBeTruthy();
         expect(item.href).toMatch(/^\/[a-z-/]*$/);
-        expect(item.translationKey).toMatch(/^navigation\./);
       });
     });
 
