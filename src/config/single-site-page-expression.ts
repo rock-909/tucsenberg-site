@@ -7,7 +7,6 @@ import {
   PRODUCT_CATALOG,
   type ProductMarketSlug,
 } from "@/constants/product-catalog";
-import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
 
 export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
@@ -46,33 +45,27 @@ export const SINGLE_SITE_HOME_PRODUCT_LINES = [
   {
     key: "absFloodBarriers",
     slug: "abs-flood-barriers",
-    glyph: "boxwall",
   },
   {
     key: "aluminumFloodGates",
     slug: "aluminum-flood-gates",
-    glyph: "gate",
   },
   {
     key: "absorbentFloodBags",
     slug: "absorbent-flood-bags",
-    glyph: "bag",
   },
   {
     key: "floodTubeDams",
     slug: "flood-tube-dams",
-    glyph: "tube",
   },
   {
     key: "frpFloodBarriers",
     slug: "frp-flood-barriers",
-    glyph: "frp",
     hasBadge: true,
   },
 ] as const satisfies readonly {
   key: string;
   slug: ProductMarketSlug;
-  glyph: TucsenbergProductDiagramKind;
   hasBadge?: true;
 }[];
 

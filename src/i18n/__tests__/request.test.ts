@@ -20,8 +20,6 @@ interface RequestConfigResult {
   messages: unknown;
   metadata: {
     loadTime?: number;
-    error?: boolean;
-    recovery?: "same-locale-retry";
     cacheUsed?: boolean;
     timestamp?: string;
     smartDetection?: boolean;
@@ -117,40 +115,14 @@ describe("i18n Request Configuration", () => {
     performanceNowSpy.mockRestore();
   });
 
-  it("marks load recovery as a same-locale retry", async () => {
-    mockLoadCompleteMessages
-      .mockRejectedValueOnce(new Error("load failed"))
-      .mockResolvedValueOnce({ common: { loading: "Loading..." } });
-
-    const result = await runConfig(LOCALES_CONFIG.defaultLocale);
-
-    expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
-    expect(result.metadata.error).toBe(true);
-    expect(result.metadata.recovery).toBe("same-locale-retry");
-    expect(result.metadata).not.toHaveProperty("cacheUsed");
-    expect(mockLoadCompleteMessages).toHaveBeenNthCalledWith(
-      1,
-      LOCALES_CONFIG.defaultLocale,
-    );
-    expect(mockLoadCompleteMessages).toHaveBeenNthCalledWith(
-      2,
-      LOCALES_CONFIG.defaultLocale,
-    );
-  });
-
-  it("does not hide failure when the same-locale retry also fails", async () => {
+  it("surfaces deterministic message load failures without retrying", async () => {
     mockLoadCompleteMessages.mockRejectedValue(new Error("source failed"));
 
     await expect(runConfig(LOCALES_CONFIG.defaultLocale)).rejects.toThrow(
       "source failed",
     );
-    expect(mockLoadCompleteMessages).toHaveBeenCalledTimes(2);
-    expect(mockLoadCompleteMessages).toHaveBeenNthCalledWith(
-      1,
-      LOCALES_CONFIG.defaultLocale,
-    );
-    expect(mockLoadCompleteMessages).toHaveBeenNthCalledWith(
-      2,
+    expect(mockLoadCompleteMessages).toHaveBeenCalledOnce();
+    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(
       LOCALES_CONFIG.defaultLocale,
     );
   });

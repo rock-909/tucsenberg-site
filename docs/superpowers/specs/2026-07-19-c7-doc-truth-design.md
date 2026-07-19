@@ -220,10 +220,18 @@ filtered consumer over the same tuple:
 - `entryFilters: [{ property: "hasBadge", equals: true }]`;
 - `suffixes: [".badge"]`.
 
-This keeps product order, route, glyph, ordinary copy, and optional badge
-ownership in one descriptor tuple without a parallel badge array.
+This keeps product order, route, ordinary copy, and optional badge ownership in
+one descriptor tuple without a parallel badge array.
 
-#### Same-locale retry truth
+#### Product diagram ownership
+
+The product page constants already own each product's diagram and diagram kind.
+The home descriptor must not repeat that kind as `glyph` and then scan the page
+registry by kind. Home resolves the existing product page by descriptor `slug`
+and renders that page's diagram. This removes a second product-to-diagram map and
+the unsupported assumption that diagram kinds are unique.
+
+#### Deterministic message-load failure truth
 
 Repository history deliberately retired `unstable_cache` for physical message
 JSON because module imports already provide the useful caching boundary. C7 must
@@ -231,16 +239,17 @@ not reintroduce React/Next cache merely to satisfy stale `cached/uncached`
 wording.
 
 `loadCompleteMessagesFromSource` and `loadCompleteMessages` are currently the
-same implementation. Retire the duplicate export and the fake distinction.
-`src/i18n/request.ts` should call `loadCompleteMessages(locale)` once, then call
-the same loader once more with the same locale after a failure. Metadata and
-comments use `same-locale-retry`, not `uncached-retry`.
+same implementation. Retire the duplicate export and the fake distinction. The
+remaining loader reads fixed bundled JSON modules and performs deterministic
+composition and interpolation. Retrying it immediately with the same locale
+does not change any input or source, so failure must surface after one call.
+
+This supersedes D7a's earlier same-locale retry assumption. Invalid or absent
+locale coercion and the provider-free English global error boundary remain.
 
 Tests must prove:
 
-- first call fails and the second same-locale call succeeds;
-- both calls receive the same coerced locale;
-- a second failure remains visible;
+- a load failure remains visible after exactly one call with the coerced locale;
 - physical-pack loading, invalid-locale coercion, interpolation, and message
   shape still pass through the single public loader.
 

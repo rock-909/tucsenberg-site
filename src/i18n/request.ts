@@ -45,18 +45,11 @@ function getFormats(locale: Locale) {
   };
 }
 
-// 辅助函数：创建成功响应
-interface SuccessResponseArgs {
-  locale: Locale;
-  messages: Record<string, unknown>;
-  loadTime: number;
-}
+export default getRequestConfig(async ({ requestLocale }) => {
+  const startTime = performance.now();
+  const locale = coerceLocale(await requestLocale);
+  const messages = await loadCompleteMessages(locale);
 
-function createSuccessResponse({
-  locale,
-  messages,
-  loadTime,
-}: SuccessResponseArgs) {
   return {
     locale,
     messages,
@@ -64,44 +57,7 @@ function createSuccessResponse({
     formats: getFormats(locale),
     strictMessageTypeSafety: true,
     metadata: {
-      loadTime,
-    },
-  };
-}
-
-// 辅助函数：创建同 locale 重试响应
-async function createSameLocaleRetryResponse(
-  locale: Locale,
-  startTime: number,
-) {
-  return {
-    locale,
-    messages: await loadCompleteMessages(locale),
-    timeZone: getLocaleTimeZone(locale),
-    formats: getFormats(locale),
-    strictMessageTypeSafety: true,
-    metadata: {
       loadTime: performance.now() - startTime,
-      error: true,
-      recovery: "same-locale-retry" as const,
     },
   };
-}
-
-export default getRequestConfig(async ({ requestLocale }) => {
-  const startTime = performance.now();
-  const locale = coerceLocale(await requestLocale);
-
-  try {
-    const messages = await loadCompleteMessages(locale);
-    const loadTime = performance.now() - startTime;
-
-    return createSuccessResponse({
-      locale,
-      messages,
-      loadTime,
-    });
-  } catch {
-    return createSameLocaleRetryResponse(locale, startTime);
-  }
 });

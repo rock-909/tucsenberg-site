@@ -238,7 +238,13 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: "docs/项目基础/架构图.svg",
-    required: ["messages/base/** + profiles/**"],
+    required: [
+      "messages/base/** + profiles/**",
+      "Retired-locale fast 404 + locale routing",
+      "src/app/api/inquiry/route.ts",
+      "src/lib/lead-pipeline/**",
+      "Guides, legal, about",
+    ],
     forbidden: [
       "scripts/cloudflare/**",
       "Showcase Website Starter Project Architecture Diagram",
