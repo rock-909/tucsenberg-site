@@ -566,25 +566,6 @@ describe("/api/inquiry route", () => {
       expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
-    it("should handle processValidatedInquiry failure", async () => {
-      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
-        success: false,
-        error: "PROCESSING_ERROR",
-        emailSent: false,
-        ownerNotified: false,
-        recordCreated: false,
-      });
-
-      const request = createInquiryRequest(JSON.stringify(validInquiryData));
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
-    });
-
     it("should return success when the record is created but email fails", async () => {
       vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: true,

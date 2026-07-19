@@ -220,7 +220,7 @@ describe("/api/inquiry — integration (protection chain)", () => {
     it("processValidatedInquiry failure returns 500 with INQUIRY_PROCESSING_ERROR", async () => {
       vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
         success: false,
-        error: "PROCESSING_ERROR",
+        error: "PROCESSING_FAILED",
         emailSent: false,
         ownerNotified: false,
         recordCreated: false,

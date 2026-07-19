@@ -136,6 +136,10 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
     label: "exact pricing em dash reply within 12 hours",
     text: "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
   },
+  {
+    label: "accurate pricing em dash reply within 12 hours",
+    text: "Request a quote for accurate pricing — we reply within 12 hours.",
+  },
 ] as const;
 
 const ALLOWED_QUOTE_TIME_FIXTURES = [
@@ -229,7 +233,7 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
   const normalizedFullText = normalizeQuoteTimingClause(text);
   if (
     TIMING_12.test(normalizedFullText) &&
-    /\bexact pricing\b/iu.test(normalizedFullText)
+    /\b(?:accurate|exact) pricing\b/iu.test(normalizedFullText)
   ) {
     return true;
   }
