@@ -161,21 +161,12 @@ export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
 const singleSiteContactFallbackHref = getSingleSiteContactFallbackHref();
 const singleSiteActiveRouteTargets = getSingleSiteActiveRouteTargets();
 
-const SPECIALTY_MARKET_SLUG = "specialty-product-systems" as const;
-
-const specialtyMarketSlug = PRODUCT_CATALOG.markets.some(
-  (market) => market.slug === SPECIALTY_MARKET_SLUG,
-)
-  ? SPECIALTY_MARKET_SLUG
-  : undefined;
-
-const standardMarketSlugs = PRODUCT_CATALOG.markets.flatMap((market) =>
-  market.slug === specialtyMarketSlug ? [] : [market.slug],
+const standardMarketSlugs = PRODUCT_CATALOG.markets.map(
+  (market) => market.slug,
 );
 
 export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
   standardMarketSlugs,
-  specialtyMarketSlug,
   marketLanding: {
     ctaHref: singleSiteContactFallbackHref,
   },

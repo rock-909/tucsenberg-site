@@ -2,13 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   getAllMarketSlugs,
   getMarketBySlug,
+  isProductMarketSlug,
   PRODUCT_CATALOG,
 } from "@/constants/product-catalog";
-import { SINGLE_SITE_PRODUCT_CATALOG } from "@/config/single-site";
+import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 
 describe("product-catalog wrapper", () => {
   it("uses the single-site catalog as runtime truth during cutover", () => {
-    expect(PRODUCT_CATALOG).toBe(SINGLE_SITE_PRODUCT_CATALOG);
+    expect(PRODUCT_CATALOG).toBe(singleSiteProductCatalog);
+  });
+
+  it("recognizes only current catalog slugs", () => {
+    expect(isProductMarketSlug("abs-flood-barriers")).toBe(true);
+    expect(isProductMarketSlug("forged-product")).toBe(false);
   });
 
   it("keeps market lookups aligned with the single-site catalog", () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   generateLocaleStaticParams,
@@ -8,15 +9,19 @@ import {
   createInquiryFormCopy,
   type InquiryFormCopy,
 } from "@/components/forms/inquiry-form-copy";
-import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
+import { RequestQuoteInquiryForm } from "@/app/[locale]/request-quote/request-quote-inquiry-form";
 
-interface RequestQuotePageProps {
+interface RequestQuotePageParams {
   params: Promise<LocaleParam>;
+}
+
+interface RequestQuotePageProps extends RequestQuotePageParams {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const STANDARD_QUOTE_HOURS = 12;
@@ -28,7 +33,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: RequestQuotePageProps): Promise<Metadata> {
+}: RequestQuotePageParams): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({
     locale,
@@ -75,6 +80,7 @@ function RequestQuoteAside({
 
 export default async function RequestQuotePage({
   params,
+  searchParams,
 }: RequestQuotePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -125,11 +131,13 @@ export default async function RequestQuotePage({
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <InquiryForm
-            copy={inquiryCopy}
-            fallback={inquiryFallback}
-            source="request-quote"
-          />
+          <Suspense fallback={inquiryFallback}>
+            <RequestQuoteInquiryForm
+              inquiryCopy={inquiryCopy}
+              inquiryFallback={inquiryFallback}
+              searchParams={searchParams}
+            />
+          </Suspense>
           <RequestQuoteAside
             successCopy={inquiryCopy.success}
             t={translatePage}

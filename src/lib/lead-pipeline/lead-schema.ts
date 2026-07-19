@@ -5,7 +5,7 @@
 
 import { z } from "zod";
 import { CONTACT_FORM_VALIDATION_CONSTANTS } from "@/config/contact-form-config";
-import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
+import { isProductMarketSlug } from "@/constants/product-catalog";
 import {
   canonicalBuyerEmailSchema,
   canonicalBuyerFullNameSchema,
@@ -153,19 +153,6 @@ export const contactLeadSchema = z.object({
 });
 
 /**
- * The set of real catalog product ids (market slugs). Sourced from the catalog
- * literal (not the aggregated site config) so lead validation stays free of the
- * runtime/site-URL environment coupling.
- */
-const CATALOG_PRODUCT_IDS: ReadonlySet<string> = new Set(
-  singleSiteProductCatalog.markets.map((market) => market.slug),
-);
-
-function isCatalogProductId(id: string): boolean {
-  return CATALOG_PRODUCT_IDS.has(id);
-}
-
-/**
  * Catalog-product identity field.
  *
  * The identity is the catalog product id (a market slug). It is validated
@@ -176,7 +163,7 @@ const catalogProductIdSchema = z
   .string()
   .trim()
   .min(1)
-  .refine(isCatalogProductId, {
+  .refine(isProductMarketSlug, {
     error: "catalogProductId must match a real catalog product",
   });
 

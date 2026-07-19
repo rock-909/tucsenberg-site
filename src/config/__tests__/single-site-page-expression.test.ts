@@ -84,12 +84,10 @@ describe("single-site-page-expression", () => {
 
   it("keeps product page grouping aligned with the catalog", () => {
     const allMarketSlugs = PRODUCT_CATALOG.markets.map((market) => market.slug);
-    const groupedMarketSlugs = [
-      ...SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.standardMarketSlugs,
-      SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.specialtyMarketSlug,
-    ].filter(Boolean);
 
-    expect(groupedMarketSlugs.sort()).toEqual(allMarketSlugs.sort());
+    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.standardMarketSlugs).toEqual(
+      allMarketSlugs,
+    );
     expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
       "/contact",
     );

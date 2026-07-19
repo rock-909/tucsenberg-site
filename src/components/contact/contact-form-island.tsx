@@ -14,6 +14,7 @@ import {
 
 type ContactFormComponent = ComponentType<{
   copy: InquiryFormCopy;
+  context: { kind: "general-context" };
   fallback: ReactNode;
   source: InquiryFormSource;
 }>;
@@ -240,6 +241,7 @@ export function ContactFormIsland({
   return (
     <div ref={containerRef}>
       <LoadedInquiryFormComponent
+        context={{ kind: "general-context" }}
         copy={inquiryCopy}
         fallback={fallback}
         source="contact"

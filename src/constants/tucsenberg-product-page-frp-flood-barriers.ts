@@ -18,7 +18,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     "A flood plank that never corrodes, conducts nothing, and shrugs off salt air.",
   lead: "Pultruded fiberglass (FRP), in the same stacked-plank logic as aluminum gates. This is our newest line, produced order-driven with our pultrusion partners. This page tells you honestly what's ready, what's in testing, and what it takes to open a profile — because nobody else in this category writes that down.",
   cta: {
-    href: "/request-quote?interest=frp-planks",
     label: "Register interest",
     note: "We'll share span/deflection test data as it completes.",
   },

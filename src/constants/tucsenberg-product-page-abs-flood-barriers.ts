@@ -20,7 +20,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     "Freestanding flood barriers for driveways, doorways and paved perimeters — no drilling, no fixing to the building.",
   lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
   cta: {
-    href: "/request-quote",
     label: "Request a Quote",
     note: "Standard items quoted within 12 hours; custom within 48.",
   },
@@ -140,7 +139,8 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Configuration mix. Corners and gable ends cost more than straights — but they're what makes a wall actually close.",
         "Branding. Moulded-in logo has a mould cost; printed labels and custom packaging are cheap at pallet volume.",
       ],
-      footer: "[Get exact pricing in 12 hours](/request-quote)",
+      footer:
+        "Get exact pricing in 12 hours using the Request a Quote button on this page.",
     },
     {
       title: "Small orders, samples, first-time buyers",
@@ -218,7 +218,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     disclaimer:
       "Straight-run estimate, quantities only — no prices here by design. Corners, gable ends, joint overlap, uneven ground and how the run terminates all change the final count, and a barrier holds water back — it doesn't drain it. Send this estimate with your site details and we'll confirm the exact configuration at quotation.",
     ctaLabel: "Get a quote for this configuration",
-    interest: "abs-flood-barriers",
+    catalogProductId: "abs-flood-barriers",
     rfqMessageTemplate:
       "TB-BW ABS boxwall: protect approx. {length}, estimated {units} straight units (100 cm unit footprint basis). Please confirm corners, gable ends and exact configuration.",
   },

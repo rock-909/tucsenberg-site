@@ -18,7 +18,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     "Where rigid barriers can't seal — grass, mud, gravel, long uneven runs — a tube dam can.",
   lead: "Roll it out, inflate it with the included pump (about 7–8 minutes per 10 m section), pin the skirt, and you have a metre-high wall. Sections connect for runs of any length. We supply them factory-direct with the full accessory kit in the bag.",
   cta: {
-    href: "/request-quote",
     label: "Request a Quote",
     note: "Quoted within 12 hours.",
   },
@@ -170,7 +169,7 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     disclaimer:
       "Straight-run estimate, quantities only — no prices here by design. Sections join with the included splicing sleeves; corners, terrain and how the run terminates change the final count, and height planning matters — overtopping ends protection. Send this estimate with your ground type and we'll confirm the exact configuration at quotation.",
     ctaLabel: "Get a quote for this configuration",
-    interest: "flood-tube-dams",
+    catalogProductId: "flood-tube-dams",
     rfqMessageTemplate:
       "TB-TD flood tube dams: protect approx. {length}, estimated {units} sections of 10 m (TB-TD1000 basis; 5 m sections available for the remainder). Please confirm layout and exact configuration.",
   },

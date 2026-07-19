@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import type { TucsenbergProductCalculator } from "@/constants/tucsenberg-product-page-types";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
+import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
 
 /**
  * Straight-run unit estimator wired as a quote funnel: it outputs quantities
@@ -40,15 +41,15 @@ export function ProductRunCalculator({
   const units = lengthCm > 0 ? Math.ceil(lengthCm / calculator.unitWidthCm) : 0;
 
   const lengthLabel = `${length} ${unit}`;
-  const quoteHref = (
+  const quoteHref =
     units > 0
-      ? `/request-quote?interest=${calculator.interest}&config=${encodeURIComponent(
+      ? createCatalogInquiryHref(
+          calculator.catalogProductId,
           calculator.rfqMessageTemplate
             .replace("{length}", lengthLabel)
             .replace("{units}", String(units)),
-        )}`
-      : `/request-quote?interest=${calculator.interest}`
-  ) as `/request-quote${string}`;
+        )
+      : createCatalogInquiryHref(calculator.catalogProductId);
 
   return (
     <section className="surface-card p-6 md:p-8">

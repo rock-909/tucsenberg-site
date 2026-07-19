@@ -1,4 +1,4 @@
-import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
+import { getMarketBySlug } from "@/constants/product-catalog";
 import {
   PRODUCT_INQUIRY_KINDS,
   type ProductInquiryKind,
@@ -37,13 +37,17 @@ export function resolveProductIdentity(
     lead.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT &&
     lead.catalogProductId
   ) {
-    const market = singleSiteProductCatalog.markets.find(
-      (entry) => entry.slug === lead.catalogProductId,
-    );
+    const market = getMarketBySlug(lead.catalogProductId);
+    if (!market) {
+      throw new Error(
+        "Catalog product identity could not be resolved from the product catalog",
+      );
+    }
+
     return {
       productInquiryKind: lead.productInquiryKind,
       catalogProductId: lead.catalogProductId,
-      productName: market?.label ?? lead.catalogProductId,
+      productName: market.label,
     };
   }
 

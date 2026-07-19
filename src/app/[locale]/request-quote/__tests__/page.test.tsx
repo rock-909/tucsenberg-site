@@ -68,6 +68,10 @@ vi.mock("@/components/seo/json-ld-script", () => ({
   },
 }));
 
+vi.mock("@/app/[locale]/request-quote/request-quote-inquiry-form", () => ({
+  RequestQuoteInquiryForm: () => <div data-testid="mock-inquiry-form" />,
+}));
+
 describe("RequestQuotePage", () => {
   beforeEach(() => {
     mockGenerateMetadataForPath.mockClear();
@@ -88,29 +92,16 @@ describe("RequestQuotePage", () => {
     );
   });
 
-  it("renders the owner-approved RFQ form fields and success copy", async () => {
+  it("renders the owner-approved RFQ page shell and success copy", async () => {
     const page = await RequestQuotePage({
       params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({}),
     });
 
     render(page);
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Get real numbers, fast" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("form", { name: "Request a quote" }),
-    ).toHaveAttribute("data-analytics-event", "rfq_submit");
-    const nameField = screen.getByLabelText("Full name");
-    expect(nameField).toBeRequired();
-    const emailField = screen.getByLabelText("Email address");
-    expect(emailField).toHaveAttribute("type", "email");
-    expect(emailField).toBeRequired();
-    const messageField = screen.getByLabelText(/^Message/i);
-    expect(messageField.tagName).toBe("TEXTAREA");
-    expect(messageField).not.toBeRequired();
-    expect(
-      screen.getByText(/product interest, opening sizes/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText("Received. You'll hear from a person, not a sequence."),
@@ -120,6 +111,7 @@ describe("RequestQuotePage", () => {
   it("injects request-quote WebPage JSON-LD through the shared graph script", async () => {
     const page = await RequestQuotePage({
       params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({}),
     });
 
     render(page);

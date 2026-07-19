@@ -8,14 +8,21 @@
  */
 
 import {
-  SINGLE_SITE_PRODUCT_CATALOG,
-  type MarketDefinition,
-  type ProductCatalog,
-} from "@/config/single-site";
+  singleSiteProductCatalog,
+  type ProductMarketSlug,
+} from "@/config/single-site-product-catalog";
+import type { MarketDefinition, ProductCatalog } from "@/config/site-types";
 
-export type { MarketDefinition, ProductCatalog } from "@/config/single-site";
+export type { MarketDefinition, ProductCatalog, ProductMarketSlug };
 
-export const PRODUCT_CATALOG: ProductCatalog = SINGLE_SITE_PRODUCT_CATALOG;
+export const PRODUCT_CATALOG: ProductCatalog = singleSiteProductCatalog;
+
+/** Type guard for catalog product ids (market slugs). */
+export function isProductMarketSlug(value: string): value is ProductMarketSlug {
+  return singleSiteProductCatalog.markets.some(
+    (market) => market.slug === value,
+  );
+}
 
 /** Get a market definition by its URL slug */
 export function getMarketBySlug(slug: string): MarketDefinition | undefined {
