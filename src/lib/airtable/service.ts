@@ -28,8 +28,8 @@ import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
  * - 8s 可从容覆盖 p99 + 一次限流重试并留出余量；
  * - 8s 约为默认 300s 的 1/37，远低于“分钟级”，买家绝不会等到几分钟。
  *
- * 由于 contact/inquiry 的用户成功以“业主邮件”为准（email-first），该预算只是
- * 尽力而为的 CRM 写入的最坏情况上限；正常响应时延仍由邮件时延决定。
+ * inquiry 路由会并行启动业主邮件与 Airtable 写入；响应会等待两者 settle，
+ * 或等到 Airtable 达到上述预算上限。任一通道成功即视为用户成功。
  */
 export const AIRTABLE_REQUEST_TIMEOUT_MS = 8000;
 

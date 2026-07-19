@@ -140,7 +140,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Branding. Moulded-in logo has a mould cost; printed labels and custom packaging are cheap at pallet volume.",
       ],
       footer:
-        "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
+        "Use the Request a Quote button on this page. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
     },
     {
       title: "Small orders, samples, first-time buyers",

@@ -132,6 +132,10 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
     label: "48-hour custom quotation",
     text: "Within 48 hours, custom projects receive a quotation.",
   },
+  {
+    label: "exact pricing em dash reply within 12 hours",
+    text: "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
+  },
 ] as const;
 
 const ALLOWED_QUOTE_TIME_FIXTURES = [
@@ -218,6 +222,14 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
     FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS.some((pattern) =>
       pattern.test(text),
     )
+  ) {
+    return true;
+  }
+
+  const normalizedFullText = normalizeQuoteTimingClause(text);
+  if (
+    TIMING_12.test(normalizedFullText) &&
+    /\bexact pricing\b/iu.test(normalizedFullText)
   ) {
     return true;
   }

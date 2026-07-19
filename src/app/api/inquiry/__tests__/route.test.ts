@@ -630,25 +630,6 @@ describe("/api/inquiry route", () => {
       expect(data.data).toBeUndefined();
     });
 
-    it("returns processing error if a typed pipeline result is unsuccessful", async () => {
-      vi.mocked(processValidatedInquiry).mockResolvedValueOnce({
-        success: false,
-        error: "VALIDATION_ERROR",
-        emailSent: false,
-        ownerNotified: false,
-        recordCreated: false,
-      });
-
-      const request = createInquiryRequest(JSON.stringify(validInquiryData));
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
-    });
-
     it("uses the inquiry distributed rate-limit preset", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 

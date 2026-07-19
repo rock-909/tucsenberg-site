@@ -9,6 +9,10 @@ const LEAD_FORM_SUBMISSION_MODULE = "@/lib/forms/use-lead-form-submission";
 const INQUIRY_ENDPOINT = "/api/inquiry";
 const REGRESSION_FACADE_ROUTE =
   "tests/architecture/fixtures/lead-write-graph-regression/route-via-facade.ts";
+const REGRESSION_DYNAMIC_IMPORT_ROUTE =
+  "tests/architecture/fixtures/lead-write-graph-regression/route-via-dynamic-import.ts";
+const REGRESSION_NON_LITERAL_DYNAMIC_IMPORT_ROUTE =
+  "tests/architecture/fixtures/lead-write-graph-regression/route-via-non-literal-dynamic-import.ts";
 const ENDPOINT_FIXTURE_ROOT = "tests/architecture/fixtures/lead-write-endpoint";
 const ALIASED_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/aliased.ts`;
 const SHADOWED_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/shadowed.ts`;
@@ -204,24 +208,35 @@ function collectImportSpecifiers(filePath: string, source: string): string[] {
   const sourceFile = createSourceFile(filePath, source);
   const specifiers: string[] = [];
 
-  for (const statement of sourceFile.statements) {
+  const visit = (node: ts.Node): void => {
     if (
-      ts.isImportDeclaration(statement) &&
-      ts.isStringLiteral(statement.moduleSpecifier)
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier)
     ) {
-      specifiers.push(statement.moduleSpecifier.text);
-      continue;
+      specifiers.push(node.moduleSpecifier.text);
     }
 
     if (
-      ts.isExportDeclaration(statement) &&
-      statement.moduleSpecifier &&
-      ts.isStringLiteral(statement.moduleSpecifier)
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
     ) {
-      specifiers.push(statement.moduleSpecifier.text);
+      specifiers.push(node.moduleSpecifier.text);
     }
-  }
 
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      specifiers.push(node.arguments[0].text);
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
   return specifiers;
 }
 
@@ -347,5 +362,19 @@ describe("lead write endpoint ownership", () => {
     const graph = collectDependencyGraph(REGRESSION_FACADE_ROUTE);
 
     expect(graphReachesLeadDeliverySink(graph)).toBe(true);
+  });
+
+  it("detects lead delivery through string-literal dynamic import", () => {
+    const graph = collectDependencyGraph(REGRESSION_DYNAMIC_IMPORT_ROUTE);
+
+    expect(graphReachesLeadDeliverySink(graph)).toBe(true);
+  });
+
+  it("does not invent paths from non-literal dynamic imports", () => {
+    const graph = collectDependencyGraph(
+      REGRESSION_NON_LITERAL_DYNAMIC_IMPORT_ROUTE,
+    );
+
+    expect(graphReachesLeadDeliverySink(graph)).toBe(false);
   });
 });

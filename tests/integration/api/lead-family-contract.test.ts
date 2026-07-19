@@ -153,31 +153,6 @@ describe("lead API family response contract (auxiliary)", () => {
     });
   });
 
-  it("inquiry keeps typed delivery failures on the processing error envelope", async () => {
-    vi.mocked(processValidatedInquiry).mockResolvedValue({
-      success: false,
-      error: "VALIDATION_ERROR",
-      emailSent: false,
-      ownerNotified: false,
-      recordCreated: false,
-    });
-
-    await expectRouteError(
-      await inquiryRoute.POST(
-        makeRequest("/api/inquiry", {
-          turnstileToken: "valid-token",
-          email: "buyer@example.com",
-          fullName: "Buyer",
-          company: "Buyer Co",
-          productInquiryKind: "catalog-product",
-          catalogProductId: "abs-flood-barriers",
-        }),
-      ),
-      500,
-      API_ERROR_CODES.INQUIRY_PROCESSING_ERROR,
-    );
-  });
-
   it("inquiry maps pipeline processing failures to route-specific processing errors", async () => {
     vi.mocked(processValidatedInquiry).mockResolvedValue({
       success: false,
