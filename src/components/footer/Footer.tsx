@@ -12,14 +12,13 @@ import { Link } from "@/i18n/routing";
  */
 
 type FooterColumnConfig = (typeof FOOTER_COLUMNS)[number];
-type FooterShellMessageKey =
-  | "footer.copyright"
-  | "footer.description"
-  | "accessibility.footerNavigation";
 type FooterConfigMessageKey =
   | FooterColumnConfig["translationKey"]
   | FooterColumnConfig["links"][number]["translationKey"];
-type FooterMessageKey = FooterShellMessageKey | FooterConfigMessageKey;
+type FooterSectionTranslator = {
+  has: (key: string) => boolean;
+  (key: string): string;
+};
 
 export interface FooterProps {
   /** 主题切换插槽（如 ThemeSwitcher），渲染在法务条右侧 */
@@ -39,15 +38,23 @@ const LINK_CLASS =
 
 function FooterSection({
   section,
-  translate,
+  t,
 }: {
   section: FooterColumnConfig;
-  translate: (key: FooterMessageKey) => string;
+  t: FooterSectionTranslator;
 }) {
+  const translateConfigKey = (key: FooterConfigMessageKey) => {
+    const messageKey: string = key;
+    if (!t.has(messageKey)) {
+      throw new Error(`Missing required message: ${key}`);
+    }
+    return t(messageKey);
+  };
+
   return (
     <section aria-labelledby={`${section.key}-heading`}>
       <h2 id={`${section.key}-heading`} className={MICRO_LABEL_CLASS}>
-        {translate(section.translationKey)}
+        {translateConfigKey(section.translationKey)}
       </h2>
       <ul className="mt-3">
         {section.links.map((link) => (
@@ -59,7 +66,7 @@ function FooterSection({
                 rel="noreferrer noopener"
                 target="_blank"
               >
-                {translate(link.translationKey)}
+                {translateConfigKey(link.translationKey)}
               </a>
             ) : (
               <Link
@@ -67,7 +74,7 @@ function FooterSection({
                 href={link.href as "/privacy" | "/terms"}
                 prefetch={false}
               >
-                {translate(link.translationKey)}
+                {translateConfigKey(link.translationKey)}
               </Link>
             )}
           </li>
@@ -79,19 +86,27 @@ function FooterSection({
 
 export function Footer({ themeToggleSlot, className, dataTheme }: FooterProps) {
   const t = useTranslations();
-  const translateFooter = (key: FooterMessageKey) => {
-    if (!t.has(key)) {
-      throw new Error(`Missing required message: ${key}`);
-    }
-    return t(key);
-  };
+
+  if (!t.has("footer.copyright")) {
+    throw new Error("Missing required message: footer.copyright");
+  }
+  const copyright = t("footer.copyright");
+
+  if (!t.has("footer.description")) {
+    throw new Error("Missing required message: footer.description");
+  }
+  const footerDescription = t("footer.description");
+
+  if (!t.has("accessibility.footerNavigation")) {
+    throw new Error("Missing required message: accessibility.footerNavigation");
+  }
+  const footerNavigationLabel = t("accessibility.footerNavigation");
 
   const { name: siteName } = SINGLE_SITE_CONFIG;
   const { name: companyName } = SINGLE_SITE_FACTS.company;
   const { email } = SINGLE_SITE_CONFIG.contact;
   // Pure facts, no translatable words — composed from config, not messages.
   const legalLine = `${companyName} · ${email}`;
-  const copyright = translateFooter("footer.copyright");
 
   return (
     <footer
@@ -113,19 +128,19 @@ export function Footer({ themeToggleSlot, className, dataTheme }: FooterProps) {
               </span>
             </p>
             <p className="mt-3 max-w-[34ch] text-[13px] leading-6 text-[var(--footer-text)]">
-              {translateFooter("footer.description")}
+              {footerDescription}
             </p>
           </div>
 
           <nav
-            aria-label={translateFooter("accessibility.footerNavigation")}
+            aria-label={footerNavigationLabel}
             className="grid grid-cols-2 gap-x-8 gap-y-10"
           >
             {FOOTER_COLUMNS.map((section) => (
               <FooterSection
                 key={section.key}
                 section={section}
-                translate={translateFooter}
+                t={t as FooterSectionTranslator}
               />
             ))}
           </nav>
