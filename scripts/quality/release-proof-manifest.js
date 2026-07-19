@@ -170,7 +170,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "--project=chromium",
       ],
       env: {
-        CI: "1",
+        CI: "",
       },
       requiresFreePort: 3000,
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
