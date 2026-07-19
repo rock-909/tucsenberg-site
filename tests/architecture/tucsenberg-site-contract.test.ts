@@ -120,7 +120,7 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   },
   {
     label: "12-hour before quote",
-    text: "Standard 12-hour quote turnaround for catalog lines.",
+    text: 'export const copy = "Standard 12-hour quote turnaround for catalog lines.";',
     repoPath: "src/lib/contact/getContactCopy.ts",
   },
   {
@@ -130,7 +130,7 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   },
   {
     label: "48-hour before custom quote",
-    text: "48-hour custom quote review for non-standard openings.",
+    text: 'export const copy = "48-hour custom quote review for non-standard openings.";',
     repoPath: "src/app/[locale]/request-quote/page.tsx",
   },
   {
@@ -145,13 +145,18 @@ const FORBIDDEN_QUOTE_TIME_FIXTURES = [
   },
   {
     label: "accurate pricing em dash reply within 12 hours (ts)",
-    text: 'description: "Request a quote for accurate pricing — we reply within 12 hours."',
+    text: 'export const description = "Request a quote for accurate pricing — we reply within 12 hours.";',
     repoPath: "src/lib/contact/getContactCopy.ts",
   },
   {
     label: "exact pricing em dash reply within 12 hours (json)",
     text: "Request a quote for exact pricing — we reply within 12 hours.",
     repoPath: "messages/profiles/b2b-lead/en/messages.json",
+  },
+  {
+    label: "exact pricing em dash multiline template (tsx)",
+    text: "const copy = `Request a quote for exact pricing —\nwe reply within 12 hours.`;",
+    repoPath: "src/app/[locale]/request-quote/page.tsx",
   },
 ] as const;
 
@@ -163,7 +168,7 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
   },
   {
     label: "shipping within 48 hours",
-    text: "Express shipping within 48 hours is available on request.",
+    text: 'export const copy = "Express shipping within 48 hours is available on request.";',
     repoPath: "src/app/[locale]/products/page.tsx",
   },
   {
@@ -180,6 +185,16 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
     label: "custom quotes separate from shipping timing (em dash)",
     text: "Custom quotes exclude freight — shipping within 48 hours.",
     repoPath: "content/pages/en/oem-wholesale.mdx",
+  },
+  {
+    label: "exact pricing and shipping timing in separate clauses (mdx)",
+    text: "Learn exact pricing. Shipping within 12 hours.",
+    repoPath: "content/pages/en/contact.mdx",
+  },
+  {
+    label: "exact pricing and shipping timing in separate clauses (json)",
+    text: "Learn exact pricing. Shipping within 12 hours.",
+    repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
 
@@ -237,34 +252,69 @@ function collectJsonStringValues(value: unknown): string[] {
 
 function deriveCopyClauses(text: string): string[] {
   return text
-    .split(/[;\n\r]+|(?<=[.!?])\s+/u)
-    .map((clause) => clause.trim())
+    .split(/[;]+|(?<=[.!?])\s+/u)
+    .map((clause) => clause.replace(/\s*\n\s*/gu, " ").trim())
     .filter((clause) => clause.length > 0);
 }
 
-function collectNonJsonBoundedUnits(
-  source: string,
-  repoPath: string,
-): string[] {
-  const ext = extname(repoPath);
+function collectMdxClauses(source: string): string[] {
+  return source
+    .split(/\n\s*\n/u)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/gu, " ").trim())
+    .filter((paragraph) => paragraph.length > 0)
+    .flatMap(deriveCopyClauses);
+}
 
-  if (ext === ".md" || ext === ".mdx") {
-    const paragraphs = source
-      .split(/\n\s*\n/u)
-      .map((paragraph) => paragraph.trim())
-      .filter((paragraph) => paragraph.length > 0);
-    const lines = source
-      .split(/\n/u)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
+function collectJsonClauses(source: string): string[] {
+  return collectJsonStringValues(JSON.parse(source) as unknown).flatMap(
+    deriveCopyClauses,
+  );
+}
 
-    return [...new Set([...paragraphs, ...lines])];
+function collectTsStaticStrings(source: string, repoPath: string): string[] {
+  const scriptKind = repoPath.endsWith(".tsx")
+    ? ts.ScriptKind.TSX
+    : ts.ScriptKind.TS;
+  const sourceFile = ts.createSourceFile(
+    repoPath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKind,
+  );
+  const strings: string[] = [];
+
+  function visit(node: ts.Node): void {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      strings.push(node.text);
+      return;
+    }
+
+    if (ts.isJsxText(node)) {
+      const text = node.text.trim();
+      if (text.length > 0) {
+        strings.push(text);
+      }
+      return;
+    }
+
+    if (ts.isTemplateExpression(node)) {
+      strings.push(node.head.text);
+      for (const span of node.templateSpans) {
+        strings.push(span.literal.text);
+      }
+      return;
+    }
+
+    ts.forEachChild(node, visit);
   }
 
-  return source
-    .split(/\n/u)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  visit(sourceFile);
+  return strings;
+}
+
+function collectTsClauses(source: string, repoPath: string): string[] {
+  return collectTsStaticStrings(source, repoPath).flatMap(deriveCopyClauses);
 }
 
 function quoteTimeFixtureSource(text: string, repoPath: string): string {
@@ -275,34 +325,22 @@ function quoteTimeFixtureSource(text: string, repoPath: string): string {
   return text;
 }
 
-function scanQuoteTimeCopyUnits(source: string, repoPath: string): string[] {
-  return collectOwnerCopyUnits(source, repoPath);
-}
-
-function hasForbiddenQuoteTimeInCopyUnits(
-  source: string,
-  repoPath: string,
-): boolean {
-  return scanQuoteTimeCopyUnits(source, repoPath).some(
-    hasForbiddenInquiryQuoteTimePromise,
-  );
-}
-
 function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
-  const boundedStrings = repoPath.endsWith(".json")
-    ? collectJsonStringValues(JSON.parse(source) as unknown)
-    : collectNonJsonBoundedUnits(source, repoPath);
-
-  const units = new Set<string>();
-
-  for (const text of boundedStrings) {
-    units.add(text);
-    for (const clause of deriveCopyClauses(text)) {
-      units.add(clause);
-    }
+  if (repoPath.endsWith(".json")) {
+    return collectJsonClauses(source);
   }
 
-  return [...units];
+  const ext = extname(repoPath);
+
+  if (ext === ".md" || ext === ".mdx") {
+    return collectMdxClauses(source);
+  }
+
+  if (ext === ".ts" || ext === ".tsx") {
+    return collectTsClauses(source, repoPath);
+  }
+
+  return [];
 }
 
 function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
@@ -585,7 +623,11 @@ describe("Tucsenberg Phase 1 site contract", () => {
     "flags forbidden quote-time promise copy: $label",
     ({ text, repoPath }) => {
       const source = quoteTimeFixtureSource(text, repoPath);
-      expect(hasForbiddenQuoteTimeInCopyUnits(source, repoPath)).toBe(true);
+      expect(
+        collectOwnerCopyUnits(source, repoPath).some(
+          hasForbiddenInquiryQuoteTimePromise,
+        ),
+      ).toBe(true);
     },
   );
 
@@ -593,7 +635,11 @@ describe("Tucsenberg Phase 1 site contract", () => {
     "allows non-quote SLA timing copy: $label",
     ({ text, repoPath }) => {
       const source = quoteTimeFixtureSource(text, repoPath);
-      expect(hasForbiddenQuoteTimeInCopyUnits(source, repoPath)).toBe(false);
+      expect(
+        collectOwnerCopyUnits(source, repoPath).some(
+          hasForbiddenInquiryQuoteTimePromise,
+        ),
+      ).toBe(false);
     },
   );
 
