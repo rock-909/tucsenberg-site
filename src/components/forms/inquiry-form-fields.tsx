@@ -35,9 +35,8 @@ function resolveFieldError(
   }
 
   const codes = FIELD_ERROR_CODES[field];
-  const matchedCode = fieldDetails.find((detail) =>
-    (codes as readonly string[]).includes(detail),
-  );
+  const codeSet = new Set<string>(codes as readonly string[]);
+  const matchedCode = fieldDetails.find((detail) => codeSet.has(detail));
 
   if (!matchedCode) {
     return null;
