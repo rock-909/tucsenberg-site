@@ -3,7 +3,11 @@ import {
   getSingleSiteContactFallbackHref,
   getSingleSiteAboutPageCtaHref,
 } from "@/config/single-site-links";
-import { PRODUCT_CATALOG } from "@/constants/product-catalog";
+import {
+  PRODUCT_CATALOG,
+  type ProductMarketSlug,
+} from "@/constants/product-catalog";
+import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
 
 export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
@@ -26,10 +30,10 @@ export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 export const SINGLE_SITE_HOME_SECTION_ORDER = [
   "hero",
-  "problems",
+  "productLines",
   "howToChoose",
-  "startPath",
-  "answer",
+  "buyingProcess",
+  "buyerSegments",
   "verify",
   "faq",
   "finalCta",
@@ -38,44 +42,53 @@ export const SINGLE_SITE_HOME_SECTION_ORDER = [
 export type SingleSiteHomeSectionKey =
   (typeof SINGLE_SITE_HOME_SECTION_ORDER)[number];
 
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS = [
-  "structure",
-  "content",
-  "deployment",
-  "inquiry",
-  "multilingual",
+export const SINGLE_SITE_HOME_PRODUCT_LINES = [
+  {
+    key: "absFloodBarriers",
+    slug: "abs-flood-barriers",
+    glyph: "boxwall",
+  },
+  {
+    key: "aluminumFloodGates",
+    slug: "aluminum-flood-gates",
+    glyph: "gate",
+  },
+  {
+    key: "absorbentFloodBags",
+    slug: "absorbent-flood-bags",
+    glyph: "bag",
+  },
+  {
+    key: "floodTubeDams",
+    slug: "flood-tube-dams",
+    glyph: "tube",
+  },
+  {
+    key: "frpFloodBarriers",
+    slug: "frp-flood-barriers",
+    glyph: "frp",
+    hasBadge: true,
+  },
+] as const satisfies readonly {
+  key: string;
+  slug: ProductMarketSlug;
+  glyph: TucsenbergProductDiagramKind;
+  hasBadge?: true;
+}[];
+
+export const SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS = [
+  "dealersDistributors",
+  "importersBrands",
+  "contractorsProjects",
+  "smallBusinessBuyers",
 ] as const;
 
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_ANSWER_KEYS = [
-  "pageStructure",
-  "replacementSurface",
-  "inquiryPath",
-  "cloudflareFoundation",
-] as const;
-
-export const SINGLE_SITE_HOME_PUBLIC_DEMO_START_PATH_KEYS = [
-  "brand",
-  "content",
-  "forms",
-  "deploy",
-  "ship",
-] as const;
-
-/** Deep-link targets for the five home product cards, keyed by problem item. */
-export const SINGLE_SITE_HOME_PRODUCT_CARD_LINKS = {
-  structure: "/products/abs-flood-barriers",
-  content: "/products/aluminum-flood-gates",
-  deployment: "/products/absorbent-flood-bags",
-  inquiry: "/products/flood-tube-dams",
-  multilingual: "/products/frp-flood-barriers",
-} as const satisfies Record<
-  (typeof SINGLE_SITE_HOME_PUBLIC_DEMO_PROBLEM_KEYS)[number],
-  string
->;
-
-/** Home product cards that carry a status badge (message key `badge`). */
-export const SINGLE_SITE_HOME_PRODUCT_CARD_BADGE_KEYS = [
-  "multilingual",
+export const SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS = [
+  "sendRfq",
+  "quoteResponse",
+  "paidSample",
+  "productionQc",
+  "shipment",
 ] as const;
 
 /** Q5 summary on home: how a buyer verifies us without leaving the page flow. */
@@ -106,13 +119,11 @@ export const SINGLE_SITE_HOME_FAQ_ITEM_KEYS = [
 ] as const;
 
 export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
-  "est",
-  "countries",
-  "range",
-  "production",
+  "quoteSla",
+  "warranty",
+  "factoryPool",
+  "oem",
 ] as const;
-
-export const SINGLE_SITE_HOME_FINAL_TRUST_ITEMS = ["countries"] as const;
 
 export const SINGLE_SITE_HOME_SCENARIO_ITEMS = [
   "item1",

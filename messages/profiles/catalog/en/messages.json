@@ -42,14 +42,14 @@
         "secondary": "Wholesale & OEM"
       },
       "proof": {
-        "est": "Standard items",
-        "estLabel": "reply within 12 hours",
-        "countries": "3-year warranty",
-        "countriesLabel": "on all standard lines",
-        "range": "Factory pool",
-        "rangeLabel": "supplies established brands",
-        "production": "OEM",
-        "productionLabel": "private label ready"
+        "quoteSla": "Standard items",
+        "quoteSlaLabel": "reply within 12 hours",
+        "warranty": "3-year warranty",
+        "warrantyLabel": "on all standard lines",
+        "factoryPool": "Factory pool",
+        "factoryPoolLabel": "supplies established brands",
+        "oem": "OEM",
+        "oemLabel": "private label ready"
       },
       "diagram": {
         "panelLabel": "TB-BW BOXWALL · WORKING PRINCIPLE",
@@ -58,31 +58,31 @@
       },
       "proofAriaLabel": "Tucsenberg quote, warranty and factory-pool facts"
     },
-    "problems": {
+    "productLines": {
       "title": "Five product lines",
       "description": "Sandbag alternatives, garage flood barriers and removable flood gates for dealers, importers, brands and businesses.",
       "items": {
-        "structure": {
+        "absFloodBarriers": {
           "title": "ABS Interlocking Boxwall — TB-BW series",
           "description": "Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own.",
           "linkLabel": "Explore ABS barriers"
         },
-        "content": {
+        "aluminumFloodGates": {
           "title": "Aluminum Flood Gates — TB-AG series",
           "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule.",
           "linkLabel": "Explore flood gates"
         },
-        "deployment": {
+        "absorbentFloodBags": {
           "title": "Absorbent Flood Bags — TB-FB series",
           "description": "Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order in our range.",
           "linkLabel": "Explore flood bags"
         },
-        "inquiry": {
+        "floodTubeDams": {
           "title": "Water & Air-Filled Tube Dams — TB-TD series",
           "description": "Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock.",
           "linkLabel": "Explore tube dams"
         },
-        "multilingual": {
+        "frpFloodBarriers": {
           "title": "FRP Composite Planks — TB-CP series",
           "description": "Pultruded composite planks: corrosion-free, non-conductive, built for coastal and industrial sites. In development with our pultrusion partners.",
           "linkLabel": "Register interest",
@@ -90,49 +90,49 @@
         }
       }
     },
-    "answer": {
+    "buyerSegments": {
       "title": "Who we supply",
       "description": "The same product range supports trade stock, private label programs, custom-cut project schedules and small-batch first orders.",
       "items": {
-        "pageStructure": {
+        "dealersDistributors": {
           "title": "Dealers & Distributors",
           "description": "Stable specs, spare-parts continuity, margin room protected by our no-retail-pricing policy."
         },
-        "replacementSurface": {
+        "importersBrands": {
           "title": "Importers & Brands (OEM)",
           "description": "Private label across all five lines; moulded logos, custom packaging, your documentation."
         },
-        "inquiryPath": {
+        "contractorsProjects": {
           "title": "Contractors & Projects",
           "description": "Custom-cut per approved drawings, mixed-material supply for one site, spec sheets your engineer can read."
         },
-        "cloudflareFoundation": {
+        "smallBusinessBuyers": {
           "title": "Small Business Buyers",
           "description": "Carton and pallet orders welcome. First time importing? We'll walk you through it."
         }
       }
     },
-    "startPath": {
+    "buyingProcess": {
       "title": "How we work",
       "description": "From RFQ to mixed-line shipment, the buying path is built for standard stock, custom-cut openings and OEM/private label supply.",
       "items": {
-        "brand": {
+        "sendRfq": {
           "title": "Send your RFQ",
           "description": "Openings, quantities, market. Photos and drawings welcome."
         },
-        "content": {
+        "quoteResponse": {
           "title": "Reply within 12 hours",
           "description": "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials."
         },
-        "forms": {
+        "paidSample": {
           "title": "Paid sample",
           "description": "Sample fee credited against your first order."
         },
-        "deploy": {
+        "productionQc": {
           "title": "Production & QC",
           "description": "One QC standard across the factory pool; inspection report before shipment."
         },
-        "ship": {
+        "shipment": {
           "title": "Ship carton to container",
           "description": "Mixed-line consolidation in one container: gates + boxwall + bags + spares."
         }

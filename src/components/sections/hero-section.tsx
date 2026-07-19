@@ -20,29 +20,29 @@ function buildHeroProofItem(
   t: Awaited<ReturnType<typeof getTranslations<"home">>>,
 ): HeroSectionContent["proofItems"][number] {
   switch (item) {
-    case "est":
+    case "quoteSla":
       return {
-        value: t("hero.proof.est", {
+        value: t("hero.proof.quoteSla", {
           established: siteFacts.company.established,
         }),
-        label: t("hero.proof.estLabel"),
+        label: t("hero.proof.quoteSlaLabel"),
       };
-    case "countries":
+    case "warranty":
       return {
-        value: t("hero.proof.countries", {
+        value: t("hero.proof.warranty", {
           countries: siteFacts.stats.exportCountries,
         }),
-        label: t("hero.proof.countriesLabel"),
+        label: t("hero.proof.warrantyLabel"),
       };
-    case "range":
+    case "factoryPool":
       return {
-        value: t("hero.proof.range"),
-        label: t("hero.proof.rangeLabel"),
+        value: t("hero.proof.factoryPool"),
+        label: t("hero.proof.factoryPoolLabel"),
       };
-    case "production":
+    case "oem":
       return {
-        value: t("hero.proof.production"),
-        label: t("hero.proof.productionLabel"),
+        value: t("hero.proof.oem"),
+        label: t("hero.proof.oemLabel"),
       };
     default:
       return assertNever(item);

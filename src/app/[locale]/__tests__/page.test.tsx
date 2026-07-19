@@ -21,48 +21,96 @@ const homeMessages: Record<string, string> = {
   "hero.diagram.panelLabel": "Product principle",
   "hero.diagram.ariaLabel": "Working-principle line drawing",
   "hero.diagram.caption": "How the product works, in one drawing.",
-  "hero.proof.est": "Product",
-  "hero.proof.estLabel": "systems",
-  "hero.proof.countries": "Application",
-  "hero.proof.countriesLabel": "fit",
-  "hero.proof.range": "Delivery",
-  "hero.proof.rangeLabel": "proof",
-  "hero.proof.production": "Inquiry",
-  "hero.proof.productionLabel": "ready",
-  "problems.title": "B2B buyers need proof close to each claim.",
-  "problems.description":
-    "The first screens should help a buyer judge product fit, application fit, and delivery confidence before they decide to contact the company.",
-  "problems.items.structure.title": "Product fit",
-  "problems.items.structure.description":
-    "Show product families, service lines, and detail paths so visitors can see whether the offer covers their need.",
-  "problems.items.content.title": "Application fit",
-  "problems.items.content.description":
-    "Connect the offer to use cases, operating constraints, and buyer questions instead of only showing generic cards.",
-  "problems.items.deployment.title": "Delivery confidence",
-  "problems.items.deployment.description":
-    "Place response paths, standards, workflow, and proof slots near the claims they support.",
-  "problems.items.inquiry.title": "Inquiry readiness",
-  "problems.items.inquiry.description":
-    "Make the next step clear so a buyer knows what to review before sending a request.",
-  "problems.items.multilingual.title": "Multilingual review",
-  "problems.items.multilingual.description":
-    "Keep English and Chinese copy parallel so international buyers see the same decision path.",
-  "answer.title":
-    "The starter turns those buyer questions into reusable website sections.",
-  "answer.description":
-    "It keeps the first screens focused on products, applications, delivery proof, and inquiry next steps while leaving every example easy to replace.",
-  "answer.items.pageStructure.title": "Product system sections",
-  "answer.items.pageStructure.description":
-    "Use categories, overview cards, detail pages, and resource links to explain the offer without building a product tile wall.",
-  "answer.items.replacementSurface.title": "Application story sections",
-  "answer.items.replacementSurface.description":
-    "Use scenarios, constraints, and fit notes to show where the product or service belongs.",
-  "answer.items.inquiryPath.title": "Delivery and quality proof",
-  "answer.items.inquiryPath.description":
-    "Use response paths, standards, workflow notes, and evidence slots without inventing fake customers or certifications.",
-  "answer.items.cloudflareFoundation.title": "Inquiry path",
-  "answer.items.cloudflareFoundation.description":
-    "Keep contact and product routes connected so evaluation can turn into a prepared inquiry.",
+  "hero.proof.quoteSla": "Standard items",
+  "hero.proof.quoteSlaLabel": "reply within 12 hours",
+  "hero.proof.warranty": "3-year warranty",
+  "hero.proof.warrantyLabel": "on all standard lines",
+  "hero.proof.factoryPool": "Factory pool",
+  "hero.proof.factoryPoolLabel": "supplies established brands",
+  "hero.proof.oem": "OEM",
+  "hero.proof.oemLabel": "private label ready",
+  "productLines.title": "Five product lines",
+  "productLines.description": "Product-line sentinel description.",
+  "productLines.items.absFloodBarriers.title":
+    "ABS Interlocking Boxwall — TB-BW series",
+  "productLines.items.absFloodBarriers.description": "ABS description",
+  "productLines.items.absFloodBarriers.linkLabel": "Explore ABS barriers",
+  "productLines.items.aluminumFloodGates.title":
+    "Aluminum Flood Gates — TB-AG series",
+  "productLines.items.aluminumFloodGates.description": "Gate description",
+  "productLines.items.aluminumFloodGates.linkLabel": "Explore flood gates",
+  "productLines.items.absorbentFloodBags.title":
+    "Absorbent Flood Bags — TB-FB series",
+  "productLines.items.absorbentFloodBags.description": "Bag description",
+  "productLines.items.absorbentFloodBags.linkLabel": "Explore flood bags",
+  "productLines.items.floodTubeDams.title":
+    "Water & Air-Filled Tube Dams — TB-TD series",
+  "productLines.items.floodTubeDams.description": "Tube description",
+  "productLines.items.floodTubeDams.linkLabel": "Explore tube dams",
+  "productLines.items.frpFloodBarriers.title":
+    "FRP Composite Planks — TB-CP series",
+  "productLines.items.frpFloodBarriers.description": "FRP description",
+  "productLines.items.frpFloodBarriers.linkLabel": "Register interest",
+  "productLines.items.frpFloodBarriers.badge": "New — register interest",
+  "buyerSegments.title": "Who we supply",
+  "buyerSegments.description": "Buyer segment sentinel description.",
+  "buyerSegments.items.dealersDistributors.title": "Dealers & Distributors",
+  "buyerSegments.items.dealersDistributors.description": "Dealer description",
+  "buyerSegments.items.importersBrands.title": "Importers & Brands (OEM)",
+  "buyerSegments.items.importersBrands.description": "Importer description",
+  "buyerSegments.items.contractorsProjects.title": "Contractors & Projects",
+  "buyerSegments.items.contractorsProjects.description":
+    "Contractor description",
+  "buyerSegments.items.smallBusinessBuyers.title": "Small Business Buyers",
+  "buyerSegments.items.smallBusinessBuyers.description":
+    "Small-business description",
+  "buyingProcess.title": "How we work",
+  "buyingProcess.description": "Buying process sentinel description.",
+  "buyingProcess.items.sendRfq.title": "Send your RFQ",
+  "buyingProcess.items.sendRfq.description": "RFQ description",
+  "buyingProcess.items.quoteResponse.title": "Reply within 12 hours",
+  "buyingProcess.items.quoteResponse.description": "Quote description",
+  "buyingProcess.items.paidSample.title": "Paid sample",
+  "buyingProcess.items.paidSample.description": "Sample description",
+  "buyingProcess.items.productionQc.title": "Production & QC",
+  "buyingProcess.items.productionQc.description": "Production description",
+  "buyingProcess.items.shipment.title": "Ship carton to container",
+  "buyingProcess.items.shipment.description": "Shipment description",
+  "howToChoose.title": "How to choose",
+  "howToChoose.description": "Three questions settle most cases:",
+  "howToChoose.columns.situation": "Your situation",
+  "howToChoose.columns.startWith": "Start with",
+  "howToChoose.rows.openings.situation": "Garage doors",
+  "howToChoose.rows.openings.startWith": "Aluminum flood gates",
+  "howToChoose.rows.perimeters.situation": "Perimeters",
+  "howToChoose.rows.perimeters.startWith": "ABS boxwall",
+  "howToChoose.rows.emergency.situation": "Emergency stock",
+  "howToChoose.rows.emergency.startWith": "Flood bags",
+  "howToChoose.rows.longRuns.situation": "Long runs",
+  "howToChoose.rows.longRuns.startWith": "Tube dams",
+  "howToChoose.rows.coastal.situation": "Coastal sites",
+  "howToChoose.rows.coastal.startWith": "FRP planks",
+  "howToChoose.honestNote": "One honest note before you buy anything.",
+  "howToChoose.guideLink": "Full comparison guide",
+  "faq.title": "Frequently asked questions",
+  "faq.items.minimumOrder.question": "What is your minimum order?",
+  "faq.items.minimumOrder.answer": "It depends on the line.",
+  "faq.items.quoteSpeed.question": "How fast will I get a price?",
+  "faq.items.quoteSpeed.answer": "We reply within 12 hours.",
+  "faq.items.paymentTerms.question": "What are your payment terms?",
+  "faq.items.paymentTerms.answer": "30% deposit, 70% before shipment.",
+  "faq.items.samples.question": "Can I get samples?",
+  "faq.items.samples.answer": "Yes — paid samples plus freight.",
+  "faq.items.oem.question": "Do you offer OEM / private label?",
+  "faq.items.oem.answer": "On every line.",
+  "faq.items.warranty.question": "What warranty do you give?",
+  "faq.items.warranty.answer": "3 years on materials and workmanship.",
+  "faq.items.leadTime.question": "What's the lead time?",
+  "faq.items.leadTime.answer": "In-stock configurations ship in 2–7 days.",
+  "faq.items.madeInChina.question": "You're made in China — how do I know?",
+  "faq.items.madeInChina.answer": "Judge us by the sample and the spec sheet.",
+  "faq.items.audit.question": "Can we audit the factories?",
+  "faq.items.audit.answer": "Yes — factory audits are welcome.",
   "verify.title": "Check us before you trust us",
   "verify.description": "Three ways to verify this supplier before ordering.",
   "verify.items.audits.title": "Factory audits welcome",
@@ -72,21 +120,6 @@ const homeMessages: Record<string, string> = {
   "verify.items.inspection.title": "Third-party inspection accepted",
   "verify.items.inspection.description": "Appoint your own inspection agent.",
   "verify.aboutLink": "[Who you're actually buying from →](/about)",
-  "startPath.title": "A practical path from starter to public launch.",
-  "startPath.description":
-    "Use this demo as the beginning of the site, then replace the parts that must belong to the real owner.",
-  "startPath.items.brand.title": "Replace brand facts",
-  "startPath.items.brand.description":
-    "Company name, domain, logo, colors, contact details, and legal identity become real owner-confirmed facts.",
-  "startPath.items.content.title": "Replace page content",
-  "startPath.items.content.description":
-    "Home, product or service copy, proof assets, blog guidance, images, and legal pages become real launch content.",
-  "startPath.items.forms.title": "Connect forms",
-  "startPath.items.forms.description":
-    "Contact submissions, email delivery, anti-abuse checks, and response ownership point to real accounts.",
-  "startPath.items.deploy.title": "Deploy and verify",
-  "startPath.items.deploy.description":
-    "Cloudflare preview, form canary, traffic visibility, and owner signoff prove readiness separately from local checks.",
   "finalCta.title":
     "Start from a real website foundation, then replace what must become yours.",
   "finalCta.description":
@@ -124,7 +157,13 @@ vi.mock("@/config/single-site-links", async (importOriginal) => ({
 }));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(() => (key: string) => homeMessages[key] ?? key),
+  getTranslations: vi.fn(() => (key: string) => {
+    const value = homeMessages[key];
+    if (value === undefined) {
+      throw new Error(`Missing home test message: ${key}`);
+    }
+    return value;
+  }),
   setRequestLocale: vi.fn(),
 }));
 
@@ -196,25 +235,41 @@ describe("Home Page", () => {
           name: /products, applications, and delivery proof/,
         }),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("home-problem-section")).toBeInTheDocument();
-      expect(screen.getByTestId("home-answer-section")).toBeInTheDocument();
-      expect(screen.getByTestId("home-start-path-section")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("home-product-lines-section"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("home-buyer-segments-section"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("home-buying-process-section"),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("home-final-action")).toBeInTheDocument();
-      const problemSection = within(screen.getByTestId("home-problem-section"));
-      expect(problemSection.getByText("Product fit")).toBeInTheDocument();
-      expect(problemSection.getByText("Application fit")).toBeInTheDocument();
+      const productLinesSection = within(
+        screen.getByTestId("home-product-lines-section"),
+      );
       expect(
-        problemSection.getByText("Delivery confidence"),
-      ).toBeInTheDocument();
-      const answerSection = within(screen.getByTestId("home-answer-section"));
-      expect(
-        answerSection.getByText("Product system sections"),
+        productLinesSection.getByText(
+          "ABS Interlocking Boxwall — TB-BW series",
+        ),
       ).toBeInTheDocument();
       expect(
-        answerSection.getByText("Application story sections"),
+        productLinesSection.getByText("Aluminum Flood Gates — TB-AG series"),
       ).toBeInTheDocument();
       expect(
-        answerSection.getByText("Delivery and quality proof"),
+        productLinesSection.getByText("Absorbent Flood Bags — TB-FB series"),
+      ).toBeInTheDocument();
+      const buyerSegmentsSection = within(
+        screen.getByTestId("home-buyer-segments-section"),
+      );
+      expect(
+        buyerSegmentsSection.getByText("Dealers & Distributors"),
+      ).toBeInTheDocument();
+      expect(
+        buyerSegmentsSection.getByText("Importers & Brands (OEM)"),
+      ).toBeInTheDocument();
+      expect(
+        buyerSegmentsSection.getByText("Contractors & Projects"),
       ).toBeInTheDocument();
       const heroSection = within(screen.getByTestId("hero-section"));
       expect(heroSection.getByTestId("hero-diagram")).toBeInTheDocument();
@@ -239,11 +294,11 @@ describe("Home Page", () => {
 
       const sectionTestIds = {
         hero: "hero-section",
-        problems: "home-problem-section",
+        productLines: "home-product-lines-section",
         howToChoose: "home-how-to-choose-section",
-        answer: "home-answer-section",
+        buyingProcess: "home-buying-process-section",
+        buyerSegments: "home-buyer-segments-section",
         verify: "home-verify-section",
-        startPath: "home-start-path-section",
         faq: "home-faq-section",
         finalCta: "home-final-action",
       } as const;
@@ -308,33 +363,42 @@ describe("Home Page", () => {
 
       render(HomeComponent);
 
-      const problemSection = screen.getByTestId("home-problem-section");
-      const answerSection = screen.getByTestId("home-answer-section");
-      const startPathSection = screen.getByTestId("home-start-path-section");
-
-      expect(problemSection).toHaveClass("section-divider");
-      expect(answerSection).toHaveClass("section-divider");
-      expect(startPathSection).toHaveClass("section-divider");
-
-      const problemArticles = within(problemSection).getAllByRole("article");
-      expect(problemArticles[0]).toHaveClass("surface-card");
-
-      // Rhythm over uniformity: proof items are an open bordered grid (no
-      // nested panel card), and the step list runs as an open divided list.
-      const answerProofPanel = within(answerSection).getByTestId(
-        "home-answer-proof-panel",
+      const productLinesSection = screen.getByTestId(
+        "home-product-lines-section",
       );
-      expect(answerProofPanel).not.toHaveClass("surface-card");
-      expect(answerProofPanel).toHaveClass("grid");
+      const buyerSegmentsSection = screen.getByTestId(
+        "home-buyer-segments-section",
+      );
+      const buyingProcessSection = screen.getByTestId(
+        "home-buying-process-section",
+      );
+
+      expect(productLinesSection).toHaveClass("section-divider");
+      expect(buyerSegmentsSection).toHaveClass("section-divider");
+      expect(buyingProcessSection).toHaveClass("section-divider");
+
+      const productLineArticles =
+        within(productLinesSection).getAllByRole("article");
+      expect(productLineArticles[0]).toHaveClass("surface-card");
+
+      const buyerSegmentsProofPanel = within(buyerSegmentsSection).getByTestId(
+        "home-buyer-segments-proof-panel",
+      );
+      expect(buyerSegmentsProofPanel).not.toHaveClass("surface-card");
+      expect(buyerSegmentsProofPanel).toHaveClass("grid");
       expect(
-        within(answerProofPanel).getAllByTestId("home-answer-proof-item")[0],
+        within(buyerSegmentsProofPanel).getAllByTestId(
+          "home-buyer-segments-proof-item",
+        )[0],
       ).toHaveClass("rounded-xl");
 
-      const startPathList = within(startPathSection).getByRole("list");
-      expect(startPathList).toHaveClass("divide-y");
-      expect(startPathList).not.toHaveClass("grid");
+      const buyingProcessList = within(buyingProcessSection).getByRole("list");
+      expect(buyingProcessList).toHaveClass("divide-y");
+      expect(buyingProcessList).not.toHaveClass("grid");
       expect(
-        within(startPathList).getAllByTestId("home-start-path-step-badge")[0],
+        within(buyingProcessList).getAllByTestId(
+          "home-buying-process-step-badge",
+        )[0],
       ).toHaveClass("rounded-full");
     });
 
