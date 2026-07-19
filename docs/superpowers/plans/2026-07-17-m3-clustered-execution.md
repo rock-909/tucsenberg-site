@@ -6,7 +6,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Complete all of M3 in five acceptance clusters. Clusters 1, 2, 3A, and 3B are closed; the remaining 3 tasks are in Cluster 4 (D7a, D7b, C7). Keep each PR independently testable, with one Codex acceptance review per integrated cluster.
+**Goal:** Complete all of M3 in five acceptance clusters. All 33 formal tasks and all five clusters are now closed; M2 remains paused and public-launch readiness remains a separate decision.
 
 **Architecture:** A task PR is the implementation unit; a cluster is the acceptance unit. Dependent PRs are stacked. Parallel lanes fork from one proven base, then linearize into one cluster tip before review. After `ACCEPTED`, one owner `MERGE_CLUSTER` instruction authorizes sequential merge and exact-SHA revalidation until a semantic change forces a stop.
 
@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 30/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Cluster 3B = CLOSED** (D6b #138 `4343674`, D6c #139 `b9aa29b`, D6d #140 `03add86`, D6e #141 `f61b35c`; #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328`, cluster exact-SHA CI run `29669943819` all green). **Cluster 4 is not ACCEPTED and not CLOSED.** **D7a #143 / `583312c` = READY_FOR_CLUSTER, unmerged.** **D7b #144 / `85c9be5` = READY_FOR_CLUSTER, unmerged.** **C7 = current implementation/candidate task.** **M2 remains paused (R'12).** PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged **33/33**. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Cluster 3B = CLOSED** (D6b #138 `4343674`, D6c #139 `b9aa29b`, D6d #140 `03add86`, D6e #141 `f61b35c`; #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328`, cluster exact-SHA CI run `29669943819` all green). **Cluster 4 = CLOSED** (#143 main `c43a7c4`; #144 accepted SHA `d2c79d2`, CI `29678308091`, main `b5d6a14`; #145 accepted SHA `c4a050a4`, CI `29678505225`, main `b0984ef`). Final integration proof exposed and closed one non-counted release-gate false-red in PR #146 (accepted SHA `4332b9d`, CI `29680106662`, main `0196529`). **M2 remains paused (R'12).** PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -208,11 +208,11 @@ pnpm build
 **Base:** green D3b head.
 **Files:** `src/lib/seo-metadata.ts`, `src/lib/seo/url-generator.ts`, `src/lib/seo/__tests__/url-generator.test.ts`, `src/config/site-types.ts`, `src/constants/product-standards.ts`, `src/app/[locale]/products/page.tsx`, the ABS product-page owner under `src/constants/`, `src/config/footer-links.ts`, `src/app/[locale]/products/__tests__/products-page.test.tsx`, `src/config/__tests__/footer-links.test.ts`.
 
-- [ ] Use `rg` to prove `generateLocalizedMetadata`, the URL generator, meta-keyword fields, zero-value interpolation entries and `PRODUCT_STANDARDS` have no independent live owner beyond the chain being removed.
-- [ ] Update tests to assert rendered canonical/alternates and real links, not the deleted helper shape. Remove the dead chain and narrow types to current Tucsenberg product identifiers.
-- [ ] Add specification-guide links to Products, ABS and Footer through existing navigation/content owners. Do not touch tube-dam MOQ.
-- [ ] Run `pnpm exec vitest run src/lib/__tests__/seo-metadata.test.ts src/config/__tests__/footer-links.test.ts src/app/[locale]/products/__tests__/products-page.test.tsx`, then `pnpm content:check`, `pnpm knip:check`, `pnpm build`, and `tests/e2e/seo-validation.spec.ts`.
-- [ ] Commit `chore: remove dead seo mechanisms and add guide internal links`; push and mark `READY_FOR_CLUSTER`.
+- [x] Use `rg` to prove `generateLocalizedMetadata`, the URL generator, meta-keyword fields, zero-value interpolation entries and `PRODUCT_STANDARDS` have no independent live owner beyond the chain being removed.
+- [x] Update tests to assert rendered canonical/alternates and real links, not the deleted helper shape. Remove the dead chain and narrow types to current Tucsenberg product identifiers.
+- [x] Add specification-guide links to Products, ABS and Footer through existing navigation/content owners. Do not touch tube-dam MOQ.
+- [x] Run `pnpm exec vitest run src/lib/__tests__/seo-metadata.test.ts src/config/__tests__/footer-links.test.ts src/app/[locale]/products/__tests__/products-page.test.tsx`, then `pnpm content:check`, `pnpm knip:check`, `pnpm build`, and `tests/e2e/seo-validation.spec.ts`.
+- [x] Commit `chore: remove dead seo mechanisms and add guide internal links`; accepted and merged as PR #125 (`f53770a` -> main `8ba66c9`).
 
 ### Task D4a: security behavior cleanup
 
@@ -253,7 +253,7 @@ pnpm type-check
 
 ## 4. Cluster 3A: canonical inquiry contract and buyer-facing form
 
-**Status (2026-07-18): CLOSED.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. C2 #130, D6a #136, and D5a #137 are accepted and merged. D5a accepted exact SHA `c4ae0a5` merged to main `96af3549`. **M3 is 26/33; Cluster 3B / D6b is the active execution face.**
+**Status (2026-07-18): CLOSED.** Owner decision R'13 retires buyer phone/WhatsApp from the public inquiry path. C2 #130, D6a #136, and D5a #137 are accepted and merged. D5a accepted exact SHA `c4ae0a5` merged to main `96af3549`. Cluster 3B and Cluster 4 subsequently closed; M3 reached 33/33 on main `b0984ef0bc13bafe6ebd8cf1b70a3c980c473edd`.
 
 ### Task C2: establish the canonical low-friction inquiry data contract
 
@@ -296,22 +296,22 @@ interface CanonicalInquiryBuyerFields {
 **Files:** `src/app/globals.css`, static theme color owner, `src/components/forms/inquiry-form.tsx`, `src/components/ui/theme-switcher.tsx`, navigation/Footer/breadcrumb messages and a11y tests.
 **Detailed plan:** `docs/superpowers/plans/2026-07-18-d5a-a11y-correctness.md`.
 
-- [ ] Add failing tests for field-level `aria-invalid`/`aria-describedby`, required markers only on name/email, optional label on message only, theme-switcher `role="group"`/`aria-pressed`, and translated navigation/Footer/breadcrumb labels.
-- [ ] Recalculate light/dark muted foreground contrast and update only the owning tokens. Add `--primary-text` to static theme colors; remove the four audited dead keys only after live search.
-- [ ] Keep the error summary and add individual field errors below their controls. Remove redundant aria labels/`aria-haspopup="dialog"` only where native semantics already supply the name/role.
-- [ ] Run a11y/component tests, axe E2E on both pages, `pnpm component:check`, `pnpm website:check`.
-- [ ] Commit `fix: a11y correctness batch with field-level form errors`; push and mark `READY_FOR_CLUSTER`.
+- [x] Add failing tests for field-level `aria-invalid`/`aria-describedby`, required markers only on name/email, optional label on message only, theme-switcher `role="group"`/`aria-pressed`, and translated navigation/Footer/breadcrumb labels.
+- [x] Recalculate light/dark muted foreground contrast and update only the owning tokens. Add `--primary-text` to static theme colors; remove the four audited dead keys only after live search.
+- [x] Keep the error summary and add individual field errors below their controls. Remove redundant aria labels/`aria-haspopup="dialog"` only where native semantics already supply the name/role.
+- [x] Run a11y/component tests, axe E2E on both pages, `pnpm component:check`, `pnpm website:check`.
+- [x] Commit `fix: a11y correctness batch with field-level form errors`; accepted and merged as PR #137 (`c4ae0a5` -> main `96af3549`).
 
 ### Cluster 3A acceptance
 
-- [ ] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
-- [ ] Handoff must include screenshots/DOM evidence for the three-field contract. Stop for cluster acceptance.
+- [x] On D5a tip run Contact, RFQ, product and estimator journeys with Turnstile test mode; run `pnpm component:check`, `pnpm website:check`, then OpenNext build.
+- [x] Handoff included component/browser DOM evidence for the three-field contract; Cluster 3A was accepted and closed on main `96af3549`.
 
 ---
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-19): CLOSED.** Cluster 3A closed on main `96af3549`. D6b #138 merged `43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`; D6c #139 merged `b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`; D6d #140 merged `03add864207436c7a52b9818972bad9e05fb7f5f`; D6e #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` and merged to main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. Cluster exact-SHA CI run `29669943819` all green. **Cluster 4 is not ACCEPTED and not CLOSED; D7a/D7b are READY_FOR_CLUSTER and unmerged; C7 is the current implementation/candidate task.**
+**Status (2026-07-19): CLOSED.** Cluster 3A closed on main `96af3549`. D6b #138 merged `43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`; D6c #139 merged `b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`; D6d #140 merged `03add864207436c7a52b9818972bad9e05fb7f5f`; D6e #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` and merged to main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. Cluster exact-SHA CI run `29669943819` all green. Cluster 4 subsequently closed on main `b0984ef0bc13bafe6ebd8cf1b70a3c980c473edd`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
@@ -378,7 +378,7 @@ pnpm build
 
 ## 6. Cluster 4: locale and documentation closure
 
-**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **Cluster 4 is not ACCEPTED and not CLOSED.** **D7a #143 / `583312c` = READY_FOR_CLUSTER, unmerged.** **D7b #144 / `85c9be5` = READY_FOR_CLUSTER, unmerged.** **C7 = current implementation/candidate task.**
+**Status (2026-07-19): CLOSED.** Cluster 4 was accepted as an integrated candidate at `939894e`, then merged in dependency order. D7a #143 merged to main `c43a7c46f1b74104185888794fc79fb551d50f3f`; rebased D7b SHA `d2c79d23b0fcf5379bcdb054972f93f10fcc494d` passed CI `29678308091` and merged to main `b5d6a148189b2dc59efe45be0385ff723ddf96e3`; rebased C7 SHA `c4a050a410aee91dfe38c32fb9b7ea2f2aa8914d` passed CI `29678505225` and merged to main `b0984ef0bc13bafe6ebd8cf1b70a3c980c473edd`.
 
 ### Task D7a: remove component-level English fallbacks
 
@@ -386,33 +386,33 @@ pnpm build
 
 **Files:** Footer/Contact required-copy paths, localized translation-key consumers, Inquiry Turnstile copy, production mobile Sheet/Header labels, product/factory SVG and boxwall Canvas, message usage tests, and focused E2E.
 
-- [ ] Add failing tests that required Contact/Footer messages fail visibly. Keep and strengthen proof for `coerceLocale`, same-locale physical-pack retry, and the global-error English exception.
-- [ ] Remove Footer/Contact fallback structures and consumer-side translation casts. Make active Turnstile, Sheet, and Header buyer-visible copy required at existing component boundaries.
-- [ ] Pass factory SVG, product SVG, and Canvas language text through typed data. Keep pure dimensions and model codes such as TB-BW literal. Do not expand into full product-content localization.
-- [ ] Run focused i18n/message/UI tests, message usage gates, `pnpm content:check`, `pnpm component:check`, `pnpm website:check`, and targeted navigation/contact/core-page Playwright. Commit the D7a slices, push, wait for exact-SHA CI, and mark `READY_FOR_CLUSTER`.
+- [x] Add failing tests that required Contact/Footer messages fail visibly. Keep and strengthen proof for `coerceLocale`, same-locale physical-pack retry, and the global-error English exception.
+- [x] Remove Footer/Contact fallback structures and consumer-side translation casts. Make active Turnstile, Sheet, and Header buyer-visible copy required at existing component boundaries.
+- [x] Pass factory SVG, product SVG, and Canvas language text through typed data. Keep pure dimensions and model codes such as TB-BW literal. Do not expand into full product-content localization.
+- [x] Run focused i18n/message/UI tests, message usage gates, `pnpm content:check`, `pnpm component:check`, `pnpm website:check`, and targeted navigation/contact/core-page Playwright. Accepted and merged as PR #143 (`583312c` -> main `c43a7c4`).
 
 ### Task D7b: rename starter-era message keys and delete locale residue
 
 **Files:** `messages/profiles/catalog/en/messages.json`, `messages/base/en/messages.json`, `src/config/single-site-page-expression.ts`, `src/app/[locale]/page.tsx`, `src/lib/i18n/site-message-values.ts`, `src/config/paths/locales-config.ts`, `src/app/globals.css`, message/runtime/page tests.
 
-- [ ] Add failing tests for the final semantic names before renaming: `productLines` instead of `problems`, product-specific item IDs, real inquiry/factory names instead of `cloudflareFoundation`, `quoteSla`/`warranty` instead of inherited metric names.
-- [ ] Rename keys atomically across physical packs, page-expression arrays, consumers, mocks and tests. Move copyright into the message pack; remove the dead zh copyright branch, zh CSS rules, `emailTemplates.runtimeDefaultLocale` and the three proven-unused locale config fields.
-- [ ] Run `pnpm content:check`, message pack/usage tests, homepage tests, `pnpm test`, `pnpm build`; commit `refactor: rename starter-era message keys to product semantics`; push and mark `READY_FOR_CLUSTER`.
+- [x] Add failing tests for the final semantic names before renaming: `productLines` instead of `problems`, product-specific item IDs, real inquiry/factory names instead of `cloudflareFoundation`, `quoteSla`/`warranty` instead of inherited metric names.
+- [x] Rename keys atomically across physical packs, page-expression arrays, consumers, mocks and tests. Move copyright into the message pack; remove the dead zh copyright branch, zh CSS rules, `emailTemplates.runtimeDefaultLocale` and the three proven-unused locale config fields.
+- [x] Run `pnpm content:check`, message pack/usage tests, homepage tests, `pnpm test`, `pnpm build`; accepted exact SHA `d2c79d2` and merged as PR #144 to main `b5d6a14`.
 
 ### Task C7: correct final docs and comments
 
 **Base:** green D7b head.
 **Files:** the exact live comments/docs listed in v7 C7, including `AGENTS.md`, `.claude/rules/security.md`, `.claude/rules/conventions.md`, `.claude/rules/i18n.md`, project foundation docs, architecture docs, monitoring and execution records.
 
-- [ ] Re-run every stale-path/comment search from C7 against the final code. Update only statements proven false. Add Historical banners and inventory entries where required; do not create negative-space forbidden rules for retired names.
-- [ ] Keep `AGENTS.md` self-contained. If shared prose is deduplicated, Claude may refer to AGENTS; AGENTS must not depend on CLAUDE.
-- [ ] Update the M3 execution plan status from live merged PR evidence, not expected counts. Do not claim M2/public launch complete.
-- [ ] Run `node scripts/starter-checks.js truth-docs`, `pnpm content:check`, Prettier, link/path checks and `git diff --check`.
-- [ ] Commit `docs: fix remaining doc-vs-reality drift from 2026-07 audit`; push and mark `READY_FOR_CLUSTER`.
+- [x] Re-run every stale-path/comment search from C7 against the final code. Update only statements proven false. Add Historical banners and inventory entries where required; do not create negative-space forbidden rules for retired names.
+- [x] Keep `AGENTS.md` self-contained. If shared prose is deduplicated, Claude may refer to AGENTS; AGENTS must not depend on CLAUDE.
+- [x] Update the M3 execution plan status from live merged PR evidence, not expected counts. Do not claim M2/public launch complete.
+- [x] Run `node scripts/starter-checks.js truth-docs`, `pnpm content:check`, Prettier, link/path checks and `git diff --check`.
+- [x] Commit `docs: fix remaining doc-vs-reality drift from 2026-07 audit`; accepted exact SHA `c4a050a` and merged as PR #145 to main `b0984ef`.
 
 ### Cluster 4 acceptance
 
-- [ ] On C7 tip run:
+- [x] On C7 tip run:
 
 ```bash
 pnpm content:check
@@ -423,29 +423,29 @@ pnpm component:check
 pnpm website:build:cf
 pnpm exec playwright test
 ```
-- [ ] Handoff must prove there is no component-level silent English fallback, configured locale parity holds, all stable docs describe the final code, and only documented exceptions remain. Stop for acceptance.
+- [x] Handoff proved the documented locale and truth contracts; Cluster 4 received independent contract, P2 and quality review and closed on main `b0984ef`.
 
 ---
 
 ## 7. ACCEPTED cluster merge procedure
 
-- [ ] After Codex `ACCEPTED` and owner `MERGE_CLUSTER`, merge the first PR only.
-- [ ] Fetch new `origin/main`; rebase the next PR; compare old/new series with `git range-diff`; rerun focused tests and latest-SHA CI.
-- [ ] If rebase is conflict-free and semantically identical, perform light exact-SHA verification and continue. If any semantic change, generated-file change, conflict or failed check appears, pause the authorization and request targeted review.
-- [ ] Repeat until the final member PR merges. On current `origin/main`, rerun the cluster core gate before marking `CLOSED`.
+- [x] After Codex `ACCEPTED` and owner `MERGE_CLUSTER`, merge the first PR only.
+- [x] Fetch new `origin/main`; rebase the next PR; compare old/new series with `git range-diff`; rerun focused tests and latest-SHA CI.
+- [x] If rebase is conflict-free and semantically identical, perform light exact-SHA verification and continue. If any semantic change, generated-file change, conflict or failed check appears, pause the authorization and request targeted review.
+- [x] Repeat until the final member PR merges. Cluster 4 closed after #143, rebased #144 and rebased #145 merged in dependency order; the post-merge core gate was rerun on current main after proof-gate follow-up #146.
 
 ## 8. Final M3 integration acceptance
 
-- [ ] Reconcile all 33 M3 tasks against the base-to-tip diff and live PR/merge evidence.
-- [ ] Run `pnpm website:check`, `pnpm component:check`, React Doctor, full Playwright/release proof and `git diff --check`.
-- [ ] Run `pnpm build`, then `pnpm website:build:cf`, then Cloudflare production dry-run.
-- [ ] Exercise Contact, Request Quote, product CTA, estimator, no-JS, reduced-motion, Turnstile, rate-limit, owner email, Airtable, SEO/schema and i18n flows.
-- [ ] Report M3 engineering acceptance, M2 status and public-launch readiness as three separate conclusions. Owner-deferred domain, PDF, phone/photo, tube-dam MOQ and legal sign-off remain explicit until supplied.
+- [x] Reconcile all 33 M3 task IDs against the base-to-tip diff and live PR/merge evidence: B7 + C9 + D17 are unique and merged; 36 task-bearing PRs carried the work because C1 and C5a required closure follow-ups.
+- [x] Run the final engineering gates. Evidence: `pnpm website:check` passed 285 files / 2319 tests plus build; `pnpm component:check` passed 54 governance tests and Storybook; React Doctor found no changed source files; current-main full Playwright passed 42/43 with the real-service canary intentionally skipped; `CI=1 pnpm release:verify` passed 35/35 local smoke; `git diff --check` passed.
+- [x] Run `pnpm build`, then `pnpm website:build:cf`, then the Cloudflare preview artifact dry-run. Final release proof passed all three and measured `2007.92 KiB` gzip. Production-domain build/dry-run remains in M2 because R'12 forbids inventing the public domain.
+- [x] Exercise Contact, Request Quote, product CTA, estimator, no-JS, reduced-motion, Turnstile, rate-limit, owner email, Airtable, SEO/schema and i18n through local/test-mode behavior proof. Full Playwright, release smoke and unit/integration suites passed; the real deployed Turnstile, owner-email receipt and Airtable-record canary remain M2/public-launch proof.
+- [x] Report three separate conclusions: M3 engineering acceptance passed; M2 remains paused; public-launch readiness is not proven. Owner-deferred domain, PDF, phone/photo, tube-dam MOQ and legal sign-off remain explicit until supplied.
 
 ## 9. Plan self-review checklist
 
-- [ ] Every task C6/D4c/D1/D2/D5b/D3a/D3b/D3c/D4a/D4b/C2/D6a/D5a/D6b/D6c/D6d/D6e/D7a/D7b/C7 has files, behavior, focused verification, commit and handoff steps.
-- [ ] No step delegates its substance to an older plan, an unspecified previous step or an unfinished marker.
-- [ ] Cluster dependencies and linearization order match the design spec.
-- [ ] Airtable proof blocks only Cluster 3A; the five owner deferrals block M2, not unrelated M3 work.
-- [ ] CI green remains READY evidence, never ACCEPTED evidence.
+- [x] Every implementation task has files, behavior, focused verification, commit and handoff steps inline or in its named detailed plan; C6 is the explicit existing-PR adoption exception.
+- [x] No step delegates its substance to an older plan, an unspecified previous step or an unfinished marker.
+- [x] Cluster dependencies and linearization order match the design spec.
+- [x] R'13 retired the buyer-phone Airtable proof path; the five owner deferrals block M2, not unrelated M3 work.
+- [x] CI green remains READY evidence, never ACCEPTED evidence.
