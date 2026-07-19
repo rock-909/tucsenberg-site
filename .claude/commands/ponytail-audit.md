@@ -1,24 +1,11 @@
 ---
 name: ponytail-audit
-description: Audit the whole repo for over-engineering only
+description: Audit the repository for over-engineering
 user-invocable: true
 ---
 
-Audit the entire repository for over-engineering only, not correctness.
-
-Scan the whole tree, not just a diff. Rank biggest cuts first.
-
-One line per finding:
-
-`<tag> <what to cut>. <replacement>. [path]`
-
-Tags:
-
-- `delete`: dead code or speculative feature
-- `stdlib`: reinvented standard library
-- `native`: code or dependency doing what the platform already does
-- `yagni`: abstraction with one implementation
-- `shrink`: same logic, fewer lines
-
-End with the net lines and dependencies removable. If nothing should be cut:
-`Lean already. Ship.`
+Use the installed `ponytail:ponytail-audit` skill if it is available.
+Otherwise audit the whole repository for code, abstractions, dependencies, and
+configuration that can be deleted or replaced with an existing project or
+platform capability. Rank findings and give a concrete replacement and net
+reduction for every item.
