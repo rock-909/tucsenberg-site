@@ -17,7 +17,7 @@ export function TurnstileRescueLine() {
       >
         {TURNSTILE_RESCUE_EMAIL}
       </a>
-      . Same 12-hour quote commitment.
+      . Reply within 12 hours.
     </p>
   );
 }

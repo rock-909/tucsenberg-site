@@ -74,6 +74,17 @@ describe("TurnstileWidget", () => {
         siteKey: "test-site-key-12345",
       });
     });
+
+    it("uses INQUIRY_TURNSTILE_ACTION for the widget action", () => {
+      render(<TurnstileWidget onSuccess={vi.fn()} />);
+
+      const mockCall = getMockTurnstile().mock.calls[0];
+      expect(mockCall?.[0]).toMatchObject({
+        options: {
+          action: "product_inquiry",
+        },
+      });
+    });
   });
 
   describe("组件配置", () => {

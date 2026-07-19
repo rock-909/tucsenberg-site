@@ -324,7 +324,6 @@ export async function validateContactSubmission(
     token: formData.turnstileToken,
     clientIP,
     routeLabel: "contact-canonical",
-    expectedAction: "contact_form",
   });
 
   const turnstileError = mapLeadTurnstileResultToResponse(verificationResult);

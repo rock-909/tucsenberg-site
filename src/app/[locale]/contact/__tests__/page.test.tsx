@@ -43,11 +43,11 @@ const contactCopy = {
       phoneLabel: "Phone",
     },
     response: {
-      title: "Quote response",
-      responseTimeLabel: "Standard items",
+      title: "What happens next",
+      responseTimeLabel: "Reply within",
       responseTimeValue: "12 hours",
-      bestForLabel: "Custom configurations",
-      bestForValue: "48 hours",
+      bestForLabel: "Quote when",
+      bestForValue: "Details are sufficient",
       prepareLabel: "Fastest route",
       prepareValue: "Use the RFQ form; it asks the questions we'd ask anyway.",
     },
@@ -160,9 +160,9 @@ describe("ContactPage MDX migration", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(/Email & WhatsApp/i)).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Quote response" }),
+      screen.getByRole("heading", { name: "What happens next" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Standard items")).toBeInTheDocument();
+    expect(screen.getByText("Reply within")).toBeInTheDocument();
     expect(screen.getByText("12 hours")).toBeInTheDocument();
   });
 
@@ -251,10 +251,12 @@ describe("ContactPage MDX migration", () => {
     // Response / expect / prepare confidence copy the page actually renders
     // from existing contact panel content, scoped to the confidence column.
     expect(
-      within(confidenceColumn).getAllByText(/standard|custom|quote/i).length,
+      within(confidenceColumn).getAllByText(/reply|quote|details/i).length,
     ).toBeGreaterThan(0);
     expect(within(confidenceColumn).getByText("12 hours")).toBeInTheDocument();
-    expect(within(confidenceColumn).getByText("48 hours")).toBeInTheDocument();
+    expect(
+      within(confidenceColumn).getByText("Details are sufficient"),
+    ).toBeInTheDocument();
     expect(confidenceColumn).not.toContainElement(
       screen.getByTestId("contact-form"),
     );

@@ -94,6 +94,178 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /support, or partnership opportunities/iu,
   /configure a real receiver before public launch/iu,
 ];
+const REQUEST_INTENT_PHRASES = [
+  /request\s+a\s+quotes?/giu,
+  /quote\s+requests?/giu,
+  /quotation\s+requests?/giu,
+] as const;
+const FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS = [
+  /get exact pricing in 12 hours/iu,
+  /12-hour response on standard/iu,
+] as const;
+const TIMING_12 = /\b(?:12\s*-?\s*hours?|12-hour)\b/iu;
+const TIMING_48 = /\b(?:48\s*-?\s*hours?|48-hour)\b/iu;
+const QUOTE_TERMS = /\b(?:quotes?|quoted|quotations?)\b/iu;
+
+const FORBIDDEN_QUOTE_TIME_FIXTURES = [
+  {
+    label: "quote before 12 hours",
+    text: "Send details for a quote within 12 hours.",
+  },
+  {
+    label: "quoted before within 12 hours",
+    text: "Standard items are quoted within 12 hours.",
+  },
+  {
+    label: "12-hour before quote",
+    text: "Standard 12-hour quote turnaround for catalog lines.",
+  },
+  {
+    label: "custom quote before 48 hours",
+    text: "Custom quote requests are answered within 48 hours.",
+  },
+  {
+    label: "48-hour before custom quote",
+    text: "48-hour custom quote review for non-standard openings.",
+  },
+  {
+    label: "48-hour custom quotation",
+    text: "Within 48 hours, custom projects receive a quotation.",
+  },
+] as const;
+
+const ALLOWED_QUOTE_TIME_FIXTURES = [
+  {
+    label: "delivery within 48 hours",
+    text: "In-stock cartons ship with delivery within 48 hours.",
+  },
+  {
+    label: "shipping within 48 hours",
+    text: "Express shipping within 48 hours is available on request.",
+  },
+  {
+    label: "approved conditional reply copy",
+    text: "We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+  },
+  {
+    label: "custom quotes separate from shipping timing",
+    text: "Custom quotes exclude freight; shipping within 48 hours.",
+  },
+] as const;
+
+function stripRequestIntent(clause: string): string {
+  return REQUEST_INTENT_PHRASES.reduce(
+    (text, pattern) => text.replace(pattern, " "),
+    clause,
+  );
+}
+
+function normalizeQuoteTimingClause(clause: string): string {
+  const withoutLinks = clause.replace(
+    /\[([^\]]*)\]\([^)]*\)/gu,
+    (_match, linkText: string) => linkText,
+  );
+
+  return stripRequestIntent(withoutLinks).replace(/\/?request-quote\b/giu, " ");
+}
+
+function splitCopyClauses(text: string): string[] {
+  return text
+    .split(/[;\n\r]+|(?<=[.!?])\s+|\s—\s/u)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause.length > 0);
+}
+
+function isForbiddenQuoteTimeClause(clause: string): boolean {
+  const text = normalizeQuoteTimingClause(clause);
+
+  if (TIMING_12.test(text) && QUOTE_TERMS.test(text)) {
+    return true;
+  }
+
+  return (
+    TIMING_48.test(text) &&
+    (QUOTE_TERMS.test(text) || /\bcustom\b/iu.test(text))
+  );
+}
+
+function collectJsonStringValues(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(collectJsonStringValues);
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return Object.values(value).flatMap(collectJsonStringValues);
+  }
+
+  return [];
+}
+
+function collectOwnerCopyUnits(source: string, repoPath: string): string[] {
+  const strings = repoPath.endsWith(".json")
+    ? collectJsonStringValues(JSON.parse(source) as unknown)
+    : [source];
+
+  return strings.flatMap((text) => splitCopyClauses(text));
+}
+
+function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
+  if (
+    FORBIDDEN_INQUIRY_RESPONSE_EXTRA_PATTERNS.some((pattern) =>
+      pattern.test(text),
+    )
+  ) {
+    return true;
+  }
+
+  return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
+}
+
+function stripD6eRetiredInquiryCopySubtrees(
+  source: string,
+  repoPath: string,
+): string {
+  if (!repoPath.endsWith(".json")) {
+    return source;
+  }
+
+  const parsed = JSON.parse(source) as Record<string, unknown>;
+
+  if (repoPath === "messages/profiles/b2b-lead/en/messages.json") {
+    const requestQuote = parsed.requestQuote;
+    if (
+      typeof requestQuote === "object" &&
+      requestQuote !== null &&
+      "form" in requestQuote
+    ) {
+      const { form: _retiredForm, ...rest } = requestQuote as Record<
+        string,
+        unknown
+      >;
+      parsed.requestQuote = rest;
+    }
+  }
+
+  if (repoPath === "messages/base/en/messages.json") {
+    const emailTemplates = parsed.emailTemplates;
+    if (
+      typeof emailTemplates === "object" &&
+      emailTemplates !== null &&
+      "confirmation" in emailTemplates
+    ) {
+      const { confirmation: _retiredConfirmation, ...rest } =
+        emailTemplates as Record<string, unknown>;
+      parsed.emailTemplates = rest;
+    }
+  }
+
+  return JSON.stringify(parsed);
+}
+
 const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /Showcase Website Starter/iu,
   /Modern B2B showcase starter/iu,
@@ -106,7 +278,7 @@ const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
   /configure a real receiver before public launch/iu,
   /support, or partnership opportunities/iu,
   /[$€£]\s*\d/u,
-];
+] as const;
 
 function toRepoPath(absolutePath: string): string {
   return relative(process.cwd(), absolutePath).split(sep).join("/");
@@ -120,6 +292,10 @@ function isPublicSourceFile(repoPath: string): boolean {
   }
 
   return PUBLIC_SOURCE_EXTENSIONS.has(extname(repoPath));
+}
+
+function getPublicSourceFiles(): string[] {
+  return PUBLIC_SOURCE_ROOTS.flatMap((root) => walkPublicSourceFiles(root));
 }
 
 function walkPublicSourceFiles(dir: string, results: string[] = []): string[] {
@@ -291,9 +467,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("keeps forbidden claims out of public-rendered source surfaces", () => {
     const offenders: string[] = [];
 
-    for (const filePath of PUBLIC_SOURCE_ROOTS.flatMap((root) =>
-      walkPublicSourceFiles(root),
-    )) {
+    for (const filePath of getPublicSourceFiles()) {
       const source = readRepoFile(filePath);
 
       for (const pattern of FORBIDDEN_PUBLIC_PATTERNS) {
@@ -348,6 +522,78 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(offenders).toEqual([]);
   });
 
+  it.each(FORBIDDEN_QUOTE_TIME_FIXTURES)(
+    "flags forbidden quote-time promise copy: $label",
+    ({ text }) => {
+      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(true);
+    },
+  );
+
+  it.each(ALLOWED_QUOTE_TIME_FIXTURES)(
+    "allows non-quote SLA timing copy: $label",
+    ({ text }) => {
+      expect(hasForbiddenInquiryQuoteTimePromise(text)).toBe(false);
+    },
+  );
+
+  it("covers inquiry quote-time copy through the shared public-source enumeration", () => {
+    const scannedFiles = getPublicSourceFiles();
+
+    for (const root of PUBLIC_SOURCE_ROOTS) {
+      expect(
+        scannedFiles.some((filePath) => filePath.startsWith(`${root}/`)),
+        root,
+      ).toBe(true);
+    }
+
+    expect(scannedFiles).toContain("src/lib/contact/getContactCopy.ts");
+  });
+
+  it("keeps misleading inquiry quote-time promises out of live owner copy", () => {
+    const offenders: string[] = [];
+
+    for (const filePath of getPublicSourceFiles()) {
+      const source = stripD6eRetiredInquiryCopySubtrees(
+        readRepoFile(filePath),
+        filePath,
+      );
+
+      for (const copyUnit of collectOwnerCopyUnits(source, filePath)) {
+        if (hasForbiddenInquiryQuoteTimePromise(copyUnit)) {
+          offenders.push(`${filePath} :: ${copyUnit}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("uses the approved inquiry success and reply promise on key surfaces", () => {
+    const b2bLead = getObject(
+      readRepoJson("messages/profiles/b2b-lead/en/messages.json"),
+      "b2b-lead messages",
+    );
+    const inquiry = getObject(b2bLead.inquiry, "b2b-lead inquiry");
+    const form = getObject(inquiry.form, "b2b-lead inquiry.form");
+    const success = form.success;
+
+    expect(typeof success, "inquiry.form.success").toBe("string");
+    const successText = String(success);
+    expect(successText).toMatch(/reply within 12 hours/i);
+    expect(successText).toMatch(/details are sufficient/i);
+    expect(successText).toMatch(/reply includes a quote/i);
+    expect(successText).toMatch(/missing essentials/i);
+
+    const requestQuoteIntro = readRepoFile(
+      "src/app/[locale]/request-quote/page.tsx",
+    );
+
+    expect(requestQuoteIntro).not.toContain("CUSTOM_QUOTE_HOURS");
+    expect(
+      readRepoFile("src/components/security/turnstile-rescue-line.tsx"),
+    ).toContain("Reply within 12 hours");
+  });
+
   it("uses the approved Tucsenberg contact page copy", () => {
     const contactPage = readRepoFile("content/pages/en/contact.mdx");
 
@@ -356,10 +602,10 @@ describe("Tucsenberg Phase 1 site contract", () => {
     );
     expect(contactPage).toContain("title: 'Contact'");
     expect(contactPage).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so your quote comes back faster.",
+      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so we can reply sooner with a quote or only the missing essentials.",
     );
     expect(contactPage).toContain(
-      "**Email**: sales@tucsenberg.com — standard items quoted within 12 hours, custom within 48. You'll hear from a person, not a sequence.",
+      "**Email**: sales@tucsenberg.com — we reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. You'll hear from a person, not a sequence.",
     );
     expect(contactPage).not.toContain("**WhatsApp**:");
     expect(contactPage).toContain(

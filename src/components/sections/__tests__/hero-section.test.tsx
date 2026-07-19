@@ -12,7 +12,7 @@ const heroMessageCases = [
     hero: catalogMessages.home.hero,
     proof: {
       est: "Standard items",
-      estLabel: "quoted in 12 hours",
+      estLabel: "reply within 12 hours",
       countries: "3-year warranty",
       countriesLabel: "on all standard lines",
       range: "Factory pool",

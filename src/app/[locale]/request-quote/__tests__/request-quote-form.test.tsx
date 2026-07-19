@@ -7,22 +7,21 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRequestQuoteFormCopy } from "@/test/request-quote-test-messages";
+import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 import { RequestQuoteForm } from "../request-quote-form";
 import { parseInquiryResponse } from "../request-quote-response";
 
 vi.mock("@/components/forms/lazy-turnstile", () => ({
   LazyTurnstile: ({
-    action,
     onError,
     onExpire,
     onSuccess,
   }: {
-    action?: string;
     onError?: () => void;
     onExpire?: () => void;
     onSuccess?: (token: string) => void;
   }) => (
-    <div data-action={action} data-testid="rfq-turnstile">
+    <div data-action={INQUIRY_TURNSTILE_ACTION} data-testid="rfq-turnstile">
       <button
         data-testid="rfq-turnstile-success"
         onClick={() => onSuccess?.("mock-rfq-turnstile-token")}

@@ -39,6 +39,9 @@ test("buyer fills contact form, clicks submit, sees success", async ({
   await expect(submit).toBeEnabled({ timeout: 15_000 });
   await submit.click();
   await expect(page.getByText(selectors.successPrefix)).toBeVisible();
+  await expect(fullName).toHaveValue("");
+  await expect(page.locator('input[name="email"]')).toHaveValue("");
+  await expect(page.locator('textarea[name="message"]')).toHaveValue("");
 });
 
 async function expectAccessibleServerFieldErrors(page: Page, path: string) {

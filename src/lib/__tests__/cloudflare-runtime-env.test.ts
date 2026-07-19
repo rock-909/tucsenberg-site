@@ -128,7 +128,7 @@ describe("Cloudflare runtime env timing", () => {
         JSON.stringify({
           success: true,
           hostname: "tucsenberg-site-preview.faints-pudgier-9r.workers.dev",
-          action: "contact_form",
+          action: "product_inquiry",
         }),
         { status: 200 },
       ),
@@ -141,8 +141,6 @@ describe("Cloudflare runtime env timing", () => {
         ...createEnvMock(runtimeValues).env,
         TURNSTILE_SECRET_KEY: undefined,
         TURNSTILE_ALLOWED_HOSTS: undefined,
-        TURNSTILE_ALLOWED_ACTIONS: undefined,
-        TURNSTILE_EXPECTED_ACTION: undefined,
       },
     }));
     vi.doMock("@/config/paths/site-config", () => ({
@@ -159,7 +157,6 @@ describe("Cloudflare runtime env timing", () => {
     runtimeValues.TURNSTILE_SECRET_KEY = "runtime-turnstile-secret";
     runtimeValues.TURNSTILE_ALLOWED_HOSTS =
       "tucsenberg-site-preview.faints-pudgier-9r.workers.dev";
-    runtimeValues.TURNSTILE_EXPECTED_ACTION = "contact_form";
 
     await expect(
       verifyTurnstileDetailed("token", "203.0.113.10"),
@@ -167,5 +164,52 @@ describe("Cloudflare runtime env timing", () => {
 
     const body = fetchMock.mock.calls[0]?.[1]?.body;
     expect(String(body)).toContain("secret=runtime-turnstile-secret");
+  });
+
+  it("rejects Turnstile responses whose action does not match INQUIRY_TURNSTILE_ACTION", async () => {
+    vi.resetModules();
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          hostname: "example.com",
+          action: "contact_form",
+        }),
+        { status: 200 },
+      ),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+    vi.doMock("@/lib/env", () => ({
+      env: {
+        TURNSTILE_SECRET_KEY: "runtime-turnstile-secret",
+        TURNSTILE_ALLOWED_HOSTS: "example.com",
+      },
+      getRuntimeEnvString: (key: string) => {
+        if (key === "TURNSTILE_SECRET_KEY") {
+          return "runtime-turnstile-secret";
+        }
+        if (key === "TURNSTILE_ALLOWED_HOSTS") {
+          return "example.com";
+        }
+        return undefined;
+      },
+      getRuntimeEnvBoolean: () => undefined,
+    }));
+    vi.doMock("@/config/paths/site-config", () => ({
+      SITE_CONFIG: { baseUrl: "https://example.com" },
+    }));
+    vi.doMock("@/lib/logger", () => ({
+      logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() },
+      sanitizeIP: () => "[REDACTED_IP]",
+    }));
+
+    const { verifyTurnstileDetailed } =
+      await import("@/lib/security/turnstile");
+
+    await expect(
+      verifyTurnstileDetailed("token", "203.0.113.10"),
+    ).resolves.toEqual({ success: false, errorCodes: ["invalid-action"] });
   });
 });

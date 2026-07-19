@@ -6,12 +6,11 @@
  */
 
 import { FIVE_SECONDS_MS } from "@/constants/time";
+import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
 import { env, getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import {
   getAllowedTurnstileHosts,
-  getExpectedTurnstileAction,
-  isAllowedTurnstileAction,
   isAllowedTurnstileHostname,
 } from "@/lib/security/turnstile-config";
 
@@ -20,10 +19,6 @@ interface TurnstileVerificationResult {
   hostname?: string;
   action?: string;
   "error-codes"?: string[];
-}
-
-interface VerifyTurnstileOptions {
-  expectedAction?: string;
 }
 
 function buildTurnstilePayload(
@@ -93,30 +88,15 @@ function validateTurnstileHostnameResponse(
 function validateTurnstileActionResponse(
   result: TurnstileVerificationResult,
   ip: string,
-  expectedAction?: string,
 ): boolean {
-  if (expectedAction) {
-    const actualAction = result.action?.trim();
-    if (actualAction === expectedAction) {
-      return true;
-    }
-
-    logger.warn("Turnstile verification rejected due to mismatched action", {
-      action: result.action,
-      expectedAction,
-      ip: sanitizeIP(ip),
-    });
-    return false;
-  }
-
-  if (isAllowedTurnstileAction(result.action)) {
+  const actualAction = result.action?.trim();
+  if (actualAction === INQUIRY_TURNSTILE_ACTION) {
     return true;
   }
 
-  const configuredExpectedAction = getExpectedTurnstileAction();
   logger.warn("Turnstile verification rejected due to mismatched action", {
     action: result.action,
-    expectedAction: configuredExpectedAction,
+    expectedAction: INQUIRY_TURNSTILE_ACTION,
     ip: sanitizeIP(ip),
   });
   return false;
@@ -153,7 +133,6 @@ function handleTurnstileFailure(
 export async function verifyTurnstileDetailed(
   token: string,
   ip: string,
-  options: VerifyTurnstileOptions = {},
 ): Promise<{ success: boolean; errorCodes?: string[] }> {
   try {
     if (shouldBypassTurnstile(ip)) {
@@ -179,7 +158,7 @@ export async function verifyTurnstileDetailed(
       return { success: false, errorCodes: ["invalid-hostname"] };
     }
 
-    if (!validateTurnstileActionResponse(result, ip, options.expectedAction)) {
+    if (!validateTurnstileActionResponse(result, ip)) {
       return { success: false, errorCodes: ["invalid-action"] };
     }
 

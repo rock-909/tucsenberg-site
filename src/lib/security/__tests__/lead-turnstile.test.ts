@@ -32,7 +32,6 @@ function createInput(
     token: "valid-token",
     clientIP: "203.0.113.10",
     routeLabel: "/api/inquiry",
-    expectedAction: "product_inquiry",
     ...overrides,
   };
 }
@@ -59,11 +58,10 @@ describe("verifyLeadTurnstile", () => {
     },
   );
 
-  it("passes the explicit expectedAction to verifyTurnstileDetailed", async () => {
+  it("calls verifyTurnstileDetailed without a configurable action argument", async () => {
     const result = await verifyLeadTurnstile(
       createInput({
         routeLabel: "/api/inquiry",
-        expectedAction: "product_inquiry",
       }),
     );
 
@@ -71,7 +69,6 @@ describe("verifyLeadTurnstile", () => {
     expect(verifyTurnstileDetailed).toHaveBeenCalledWith(
       "valid-token",
       "203.0.113.10",
-      { expectedAction: "product_inquiry" },
     );
   });
 

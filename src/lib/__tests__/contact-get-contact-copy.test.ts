@@ -34,11 +34,11 @@ describe("getContactCopy", () => {
     "panel.saturday": "Follow-up",
     "panel.sunday": "US/EU hours",
     "panel.closed": "Closed",
-    "panel.responseTitle": "Quote response",
-    "panel.responseTimeLabel": "Standard items",
+    "panel.responseTitle": "What happens next",
+    "panel.responseTimeLabel": "Reply within",
     "panel.responseTimeValue": "12 hours",
-    "panel.bestForLabel": "Custom configurations",
-    "panel.bestForValue": "48 hours",
+    "panel.bestForLabel": "Quote when",
+    "panel.bestForValue": "Details are sufficient",
     "panel.prepareLabel": "Fastest route",
     "panel.prepareValue":
       "Use the RFQ form; it asks the questions we'd ask anyway.",
@@ -194,9 +194,10 @@ describe("getContactCopy", () => {
     expect(copy.panel.hours.saturdayLabel).toBe("Follow-up");
     expect(copy.panel.hours.sundayLabel).toBe("US/EU hours");
     expect(copy.panel.hours.closedLabel).toBe("Closed");
-    expect(copy.panel.response.title).toBe("Quote response");
+    expect(copy.panel.response.title).toBe("What happens next");
     expect(copy.panel.response.responseTimeValue).toBe("12 hours");
-    expect(copy.panel.response.bestForLabel).toBe("Custom configurations");
+    expect(copy.panel.response.bestForLabel).toBe("Quote when");
+    expect(copy.panel.response.bestForValue).toBe("Details are sufficient");
     expect(copy.panel.response.prepareLabel).toBe("Fastest route");
     expect(mockLoggerWarn).toHaveBeenCalled();
     expect(mockLoggerWarn).toHaveBeenCalledWith(

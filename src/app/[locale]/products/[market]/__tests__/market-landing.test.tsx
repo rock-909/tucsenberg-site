@@ -375,7 +375,7 @@ describe("Market Landing Page", () => {
       expect(metadata).toMatchObject({
         title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
         description:
-          "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Quoted within 12 hours.",
+          "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Reply within 12 hours.",
         alternates: {
           canonical: "https://www.example.com/products/abs-flood-barriers",
           languages: {

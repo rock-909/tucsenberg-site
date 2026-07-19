@@ -19,7 +19,7 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
   lead: "Roll it out, inflate it with the included pump (about 7–8 minutes per 10 m section), pin the skirt, and you have a metre-high wall. Sections connect for runs of any length. We supply them factory-direct with the full accessory kit in the bag.",
   cta: {
     label: "Request a Quote",
-    note: "Quoted within 12 hours.",
+    note: "Reply within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-td.pdf",
   proofStrip: [
@@ -174,5 +174,5 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
       "TB-TD flood tube dams: protect approx. {length}, estimated {units} sections of 10 m (TB-TD1000 basis; 5 m sections available for the remainder). Please confirm layout and exact configuration.",
   },
   rfqNote:
-    "Tell us run length, ground type, whether you need air or water fill, and what pump or water source the site will have. Quoted within 12 hours. In-stock sections ship in 2–7 days.",
+    "Tell us run length, ground type, whether you need air or water fill, and what pump or water source the site will have. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. In-stock sections ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

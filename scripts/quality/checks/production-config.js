@@ -19,21 +19,6 @@ function isVitestRuntime() {
   return process.env.VITEST === "true" || Boolean(process.env.VITEST_WORKER_ID);
 }
 
-function loadContactFormConfigModule() {
-  if (isVitestRuntime()) {
-    return {
-      CONTACT_FORM_CONFIG: {
-        features: {
-          enableTurnstile: true,
-        },
-      },
-    };
-  }
-
-  ensureTypeScriptRequireRuntime();
-  return require("../../../src/config/contact-form-config");
-}
-
 function loadPublicTrustModule() {
   if (isVitestRuntime()) {
     const fakePhonePattern =
@@ -271,7 +256,6 @@ function shouldValidateProductionRuntimeContract(env) {
 function validateProductionRuntimeContract(env) {
   const warnings = [];
   const errors = [];
-  const { CONTACT_FORM_CONFIG } = loadContactFormConfigModule();
   const hasUpstash = hasPair(
     env,
     "UPSTASH_REDIS_REST_URL",
@@ -297,20 +281,18 @@ function validateProductionRuntimeContract(env) {
     "production rate-limit keys rely on it and runtime already throws when it is missing or weak",
   );
 
-  if (CONTACT_FORM_CONFIG.features.enableTurnstile) {
-    validateRequiredEnv(
-      errors,
-      env,
-      "TURNSTILE_SECRET_KEY",
-      "Contact form verification depends on server-side Turnstile validation",
-    );
-    validateRequiredEnv(
-      errors,
-      env,
-      "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
-      "the live Contact form widget depends on a public Turnstile site key",
-    );
-  }
+  validateRequiredEnv(
+    errors,
+    env,
+    "TURNSTILE_SECRET_KEY",
+    "the live inquiry form always renders Turnstile and server verification depends on the secret key",
+  );
+  validateRequiredEnv(
+    errors,
+    env,
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+    "the live inquiry form always renders Turnstile and the public widget depends on a site key",
+  );
 
   validateRequiredEnv(
     errors,

@@ -1,6 +1,11 @@
 "use client";
 
-import { type FormEvent, type ReactNode, useSyncExternalStore } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   InquiryBuyerInterestContext,
   InquiryFormFields,
@@ -51,6 +56,7 @@ function InquiryFormLive({
       ? context.displayLabel
       : context.buyerInterest;
   const { initialMessage } = context;
+  const formRef = useRef<HTMLFormElement>(null);
 
   const kernel = useLeadFormSubmission<InquirySubmitState>({
     endpoint: "/api/inquiry",
@@ -60,6 +66,22 @@ function InquiryFormLive({
     decode: decodeInquirySubmitState,
     isSuccess: (result) => result.status === "success",
     toNetworkError: () => ({ status: "error", errorKind: "server" }),
+    onSuccess: () => {
+      const form = formRef.current;
+      if (!form) {
+        return;
+      }
+
+      form.reset();
+      for (const name of ["fullName", "email", "message"] as const) {
+        const control = form.elements.namedItem(name);
+        if (control instanceof HTMLInputElement) {
+          control.value = "";
+        } else if (control instanceof HTMLTextAreaElement) {
+          control.value = "";
+        }
+      }
+    },
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -87,6 +109,7 @@ function InquiryFormLive({
   return (
     <section className="surface-card p-6 md:p-8">
       <form
+        ref={formRef}
         aria-label={ariaLabel}
         className="space-y-6"
         data-analytics-event={
@@ -111,7 +134,6 @@ function InquiryFormLive({
         />
 
         <LazyTurnstile
-          action="product_inquiry"
           onError={kernel.resetTurnstileToken}
           onExpire={kernel.resetTurnstileToken}
           onSuccess={kernel.acquireTurnstileToken}

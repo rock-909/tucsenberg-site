@@ -176,7 +176,7 @@ describe("Home Page", () => {
         "Flood Barrier Manufacturer & Supplier from China | Tucsenberg",
       );
       expect(metadata.description).toBe(
-        "Factory-direct flood barriers from China: ABS boxwall, aluminum flood gates, sandless flood bags and tube dams. OEM & private label. Quotes in 12 hours.",
+        "Factory-direct flood barriers from China: ABS boxwall, aluminum flood gates, sandless flood bags and tube dams. OEM & private label. Reply within 12 hours.",
       );
       expect(metadata.description).not.toBe(homeMessages["hero.subtitle"]);
     });

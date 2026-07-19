@@ -21,7 +21,7 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     "One boundary before anything else: a flood gate protects a defined opening. It earns its money when the door or garage really is where the water comes in — not when water rises through the slab, the soil or the drains, and not when the wall around the opening is itself porous. And rain can still fall or blow in behind any barrier, so plan for a pump or a drain on the protected side. Unsure which case is yours? Send site photos with your RFQ and we'll tell you which.",
   cta: {
     label: "Request a Quote",
-    note: "Standard items quoted within 12 hours; custom cut lists within 48.",
+    note: "Reply within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-ag.pdf",
   proofStrip: [
@@ -117,7 +117,7 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
         "Finish and branding — anodising and plank marking are line items, quoted before you commit.",
       ],
       footer:
-        "Send your opening schedule — standard configurations quoted within 12 hours, custom cut lists within 48. Use the Request a Quote button on this page for exact pricing.",
+        "Send your opening schedule — we reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. Use the Request a Quote button on this page.",
     },
     {
       title: "For dealers and installers",
@@ -174,5 +174,5 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
     },
   ],
   rfqNote:
-    "Send your opening schedule — width × height per opening, mounting surface, photos if you have them. Standard items quoted within 12 hours; custom cut lists within 48. In-stock standard planks ship in 2–7 days.",
+    "Send your opening schedule — width × height per opening, mounting surface, photos if you have them. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. In-stock standard planks ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

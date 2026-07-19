@@ -108,7 +108,6 @@ jobs:
             "NEXT_PUBLIC_SITE_URL",
             "NEXT_PUBLIC_DEPLOYMENT_PLATFORM",
             "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
-            "NEXT_PUBLIC_TURNSTILE_ACTION",
           ];
 
           if (!vars || typeof vars !== "object" || Array.isArray(vars)) {

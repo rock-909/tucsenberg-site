@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
-import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
+import {
+  INQUIRY_TURNSTILE_ACTION,
+  TURNSTILE_WIDGET_HEIGHT_PX,
+} from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 
 const {
@@ -15,7 +18,6 @@ const {
   const mockTurnstileState = { shouldThrow: false };
   const MockTurnstileWidget = vi.fn(
     ({
-      action,
       size,
       theme,
       className,
@@ -25,7 +27,6 @@ const {
       onExpire,
       onLoad,
     }: {
-      action?: string;
       size?: string;
       theme?: string;
       className?: string;
@@ -46,7 +47,7 @@ const {
       return (
         <div
           data-testid="turnstile-widget"
-          data-action={action}
+          data-action={INQUIRY_TURNSTILE_ACTION}
           data-size={size}
           data-theme={theme}
           data-classname={className}
@@ -204,7 +205,6 @@ describe("LazyTurnstile", () => {
         onError={onError}
         onExpire={onExpire}
         onLoad={onLoad}
-        action="product_inquiry"
         size="compact"
         theme="auto"
         className="custom-turnstile"
@@ -233,7 +233,7 @@ describe("LazyTurnstile", () => {
     expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
-  it("lets the shared widget decide the default action when none is provided", async () => {
+  it("always passes INQUIRY_TURNSTILE_ACTION to the shared widget", async () => {
     render(<LazyTurnstile onSuccess={vi.fn()} />);
 
     await act(async () => {
@@ -241,8 +241,9 @@ describe("LazyTurnstile", () => {
       await vi.dynamicImportSettled();
     });
 
-    expect(screen.getByTestId("turnstile-widget")).not.toHaveAttribute(
+    expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
       "data-action",
+      "product_inquiry",
     );
   });
 

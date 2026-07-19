@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6c ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38` and remains unmerged as the direct D6c base. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged 26/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Current execution face: Cluster 3B / D6d ACTIVE.** D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; both remain unmerged. D6d is stacked on the D6c exact SHA. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is active on top of that exact SHA. Detailed D6c plan: `docs/superpowers/plans/2026-07-18-d6c-validated-product-context.md`.
+**Status (2026-07-18): ACTIVE.** Cluster 3A is closed on main `96af3549`. D6b is `READY_FOR_CLUSTER` on PR #138 exact SHA `fe2019d976df937ab9525aab10ba10776bfb5e38`; D6c is `READY_FOR_CLUSTER` on PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`; D6d is `READY_FOR_CLUSTER` on branch `feat/m3-d6d-inquiry-response` (stacked on the D6c exact SHA). D6e remains blocked until D6d is independently reviewed. Detailed D6d plan: `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
@@ -331,27 +331,22 @@ interface CanonicalInquiryBuyerFields {
 - [x] Replace plain `/request-quote`, interest-only and estimator-specific handoffs with one helper that carries validated catalog ID plus visible editable description. Remove `SPECIALTY_MARKET_SLUG` and other dead product-identity branches after zero-use proof.
 - [x] Express validated server state as a `catalog-context | general-context` discriminated union. Do not expose the discriminant as a buyer field.
 - [x] Run lead identity/schema tests, product page tests, calculator tests and product-interest RFQ handoff E2E; `pnpm build`.
-- [ ] Commit `refactor: derive inquiry product context from validated page handoff`; push and mark `READY_FOR_CLUSTER`.
+- [x] Commit `refactor: derive inquiry product context from validated page handoff`; PR #139 exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`, workflow `29659345454` green, Cursor self-review `NO_MATERIAL_FINDINGS`, `READY_FOR_CLUSTER`.
 
 ### Task D6d: unify success state, Turnstile and response promise
 
-**Files:** `src/components/forms/inquiry-form.tsx`, `src/lib/forms/lead-response.ts`, `src/lib/forms/use-lead-form-submission.ts`, `src/constants/turnstile-constants.ts`, `src/components/security/turnstile.tsx`, `src/lib/security/turnstile-config.ts`, `src/lib/env.ts`, `.env.example`, deployment docs, inquiry messages, `src/components/forms/__tests__/inquiry-form.test.tsx`, Turnstile/env tests.
+**Status (2026-07-18): READY_FOR_CLUSTER** on branch `feat/m3-d6d-inquiry-response` (base D6c exact SHA `e67fb86a4ed8fcdbe50fa15ae313883506dc61cd`). **Detailed plan:** `docs/superpowers/plans/2026-07-18-d6d-inquiry-response.md`.
 
-- [ ] Add failing tests that Contact/RFQ share success/error rendering, success shows reference ID, fields and Turnstile reset, server 429 remains authoritative, and analytics source differs without branching submission logic.
-- [ ] Remove the client five-minute cooldown. Keep server rate limiting. Collapse Turnstile action to one leaf constant; remove `NEXT_PUBLIC_TURNSTILE_ACTION`, dead enable switches and duplicate action values after all consumers migrate.
-- [ ] Update all response copy to reply-within-12-hours and conditional quotation. Do not promise an accurate quote from an empty optional description.
-- [ ] Run:
+- [x] Clear the three visible fields plus honeypot only after confirmed success; keep the shared reference-ID status. Preserve values on field/security/server/429 failures and prove a fresh Turnstile token allows retry without a browser cooldown.
+- [x] Make `INQUIRY_TURNSTILE_ACTION` the only widget/server action; remove action props, per-call expected-action parameters and the three action env names.
+- [x] Make production validation always require the live Turnstile site key and secret, independent of the legacy Contact feature flag. Leave physical deletion of the legacy config engine to D6e.
+- [x] Replace unconditional 12/48-hour quote promises with the approved 12-hour reply meaning at message, MDX, metadata and product-copy sources; regenerate the content manifest.
+- [x] Record BC-012B/BC-012C and updated BC-012 in `docs/项目基础/行为合约.md`.
+- [ ] Independent Codex spec/quality review before D6e starts.
 
-```bash
-pnpm exec vitest run src/components/forms/__tests__/inquiry-form.test.tsx src/lib/forms/__tests__/lead-response.test.ts src/components/security/__tests__/turnstile.test.tsx src/lib/security/__tests__/turnstile-config.test.ts src/lib/__tests__/env.test.ts tests/architecture/env-example-parity.test.ts
-pnpm exec playwright test tests/e2e/contact-submit-journey.spec.ts tests/e2e/product-interest-rfq-handoff.spec.ts
-pnpm website:check
-```
-- [ ] Commit `fix: unify inquiry success, turnstile and response expectations`; push and mark `READY_FOR_CLUSTER`.
+### Task D6e: retire the duplicate Contact/RFQ form stacks and config engine
 
-### Task D6e: retire the duplicate Contact form stack and config engine
-
-**Files to prove and move to Trash where obsolete:** `src/components/contact/contact-form-island.tsx`, Contact form load/error/story files, `src/components/forms/contact-form-*`, `src/components/forms/use-contact-form.ts`, `src/config/contact-form-config.ts`, `src/config/contact-form-validation.ts`, `src/lib/form-schema/contact-*`, `src/lib/contact/submit-canonical-contact.ts`, only-test fixtures and old request-quote form fragments superseded by InquiryForm.
+**Files to prove and move to Trash where obsolete:** `src/components/contact/contact-form-island.tsx`, Contact form load/error/story files, `src/components/forms/contact-form-*`, `src/components/forms/use-contact-form.ts`, `src/config/contact-form-config.ts`, `src/config/contact-form-validation.ts`, `src/lib/form-schema/contact-*`, `src/lib/contact/submit-canonical-contact.ts`, only-test fixtures and the complete unreferenced pre-D6a `RequestQuoteForm`/fields/submit-controls/copy/test-helper stack superseded by InquiryForm.
 
 - [ ] Add a positive architecture test that discovers exactly one visible form implementation, one `/api/inquiry` write route, one schema owner, one product-context resolver, one owner-email path, one Airtable path and one response model.
 - [ ] Use live imports and `knip` to classify each old file. Move only obsolete files to Trash; update Registry, Storybook, behavior contracts, security/cloudflare rules and page tests in the same PR.

@@ -19,7 +19,7 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
   lead: "A flood bag that ships flat and weighs 230 grams — until water touches it. The super-absorbent polymer core swells to a 20 kg sandbag in 3–4 minutes: no sand, no shoveling, no pre-storm labor. We supply them factory-direct by the carton and by the pallet, with your label if you want it. It's the lowest-friction first order in our range.",
   cta: {
     label: "Request a Quote",
-    note: "Standard cartons quoted within 12 hours.",
+    note: "Reply within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-fb.pdf",
   proofStrip: [
@@ -189,5 +189,5 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     },
   ],
   rfqNote:
-    "Tell us your market, quantity band and whether you need private label. Standard cartons quoted within 12 hours. In-stock cartons ship in 2–7 days.",
+    "Tell us your market, quantity band and whether you need private label. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. In-stock cartons ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

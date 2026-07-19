@@ -58,6 +58,21 @@ describe("validate-production-config runtime contract", () => {
     );
   });
 
+  it("requires Turnstile keys unconditionally in production", () => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      TURNSTILE_SECRET_KEY: undefined,
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: undefined,
+    });
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("TURNSTILE_SECRET_KEY is required"),
+        expect.stringContaining("NEXT_PUBLIC_TURNSTILE_SITE_KEY is required"),
+      ]),
+    );
+  });
+
   it("passes when the release-critical production contract is satisfied", () => {
     const result = validateProductionRuntimeContract(
       createValidProductionEnv(),

@@ -21,7 +21,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
   cta: {
     label: "Request a Quote",
-    note: "Standard items quoted within 12 hours; custom within 48.",
+    note: "Reply within 12 hours.",
   },
   downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
   proofStrip: [
@@ -140,7 +140,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Branding. Moulded-in logo has a mould cost; printed labels and custom packaging are cheap at pallet volume.",
       ],
       footer:
-        "Get exact pricing in 12 hours using the Request a Quote button on this page.",
+        "Request a quote for exact pricing using the Request a Quote button on this page — we reply within 12 hours.",
     },
     {
       title: "Small orders, samples, first-time buyers",
@@ -223,5 +223,5 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
       "TB-BW ABS boxwall: protect approx. {length}, estimated {units} straight units (100 cm unit footprint basis). Please confirm corners, gable ends and exact configuration.",
   },
   rfqNote:
-    "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. Standard items quoted within 12 hours; custom configurations within 48. In-stock configurations ship in 2–7 days.",
+    "Tell us the opening or perimeter you're protecting, the ground surface (photos help), the height you need, and roughly how many metres. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. In-stock configurations ship in 2–7 days.",
 } as const satisfies TucsenbergProductPage;

@@ -8,13 +8,13 @@ export const TUCSENBERG_PRODUCT_META = {
   "abs-flood-barriers": {
     title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
     description:
-      "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Quoted within 12 hours.",
+      "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Reply within 12 hours.",
     updatedAt: "2026-07-05T00:00:00Z",
   },
   "aluminum-flood-gates": {
     title: "Aluminum Flood Gates for Doors & Garages — Custom-Cut",
     description:
-      "Demountable aluminum flood gates (flood boards): 6063-T6 planks, EPDM seals, custom-cut to your openings — doors, garages, loading docks. 12-hour quotes.",
+      "Demountable aluminum flood gates (flood boards): 6063-T6 planks, EPDM seals, custom-cut to your openings — doors, garages, loading docks. Reply within 12 hours.",
     updatedAt: "2026-07-05T00:00:00Z",
   },
   "absorbent-flood-bags": {
@@ -26,7 +26,7 @@ export const TUCSENBERG_PRODUCT_META = {
   "flood-tube-dams": {
     title: "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs",
     description:
-      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. 12-hour quotes.",
+      "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. Reply within 12 hours.",
     updatedAt: "2026-07-06T00:00:00Z",
   },
   "frp-flood-barriers": {

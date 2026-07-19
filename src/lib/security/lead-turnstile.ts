@@ -11,13 +11,10 @@ import { hasTurnstileServiceFailure } from "@/lib/security/turnstile-errors";
 
 export type LeadTurnstileRouteLabel = "/api/inquiry" | "contact-canonical";
 
-export type LeadTurnstileExpectedAction = "product_inquiry" | "contact_form";
-
 export interface LeadTurnstileVerificationInput {
   token: unknown;
   clientIP: string;
   routeLabel: LeadTurnstileRouteLabel;
-  expectedAction: LeadTurnstileExpectedAction;
 }
 
 export type LeadTurnstileVerificationResult =
@@ -39,7 +36,6 @@ export async function verifyLeadTurnstile({
   token,
   clientIP,
   routeLabel,
-  expectedAction,
 }: LeadTurnstileVerificationInput): Promise<LeadTurnstileVerificationResult> {
   const normalizedToken = normalizeTurnstileToken(token);
   if (!normalizedToken) {
@@ -53,7 +49,6 @@ export async function verifyLeadTurnstile({
   const verificationResult = await verifyTurnstileDetailed(
     normalizedToken,
     clientIP,
-    { expectedAction },
   );
 
   if (verificationResult.success) {
