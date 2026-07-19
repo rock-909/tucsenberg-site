@@ -146,15 +146,17 @@ errors or markers in the public JSON.
 
 - Security header behavior lives in `src/config/security.ts` and Next.js
   native `headers()` in `next.config.ts`.
-- Middleware owns locale redirects, locale cookies, and leaked middleware
-  cookie cleanup. It does not own CSP or generic security headers.
+- Middleware owns retired-locale fast-404 plus next-intl routing delegation. It
+  does not own CSP, generic security headers, locale-cookie setup, or leaked
+  cookie cleanup.
 - Do not use `NextResponse.next({ headers })` to push broad response headers
   from middleware/proxy. It can break framework-owned responses such as Server
   Actions and streaming.
 - `NEXT_PUBLIC_SECURITY_MODE=strict` means enforced security headers with a
   static-compatible CSP. It is not nonce-level strict CSP.
-- CSP is static by starter default. Do not add dynamic nonce handling unless a
-  dedicated dynamic rendering proof plan justifies the trade-off.
+- CSP stays static-compatible for the current site deployment. Do not add
+  dynamic nonce handling unless a dedicated dynamic rendering proof plan
+  justifies the trade-off.
 - A nonce CSP lane needs a proxy-generated nonce plus Cloudflare/OpenNext proof;
   do not mix that into ordinary security cleanup.
 - Current nonce CSP feasibility decision lives in

@@ -88,12 +88,12 @@ external fetches, user actions, or dynamic route params.
 
 ## Known dependency debt
 
-- `eslint-plugin-import` 2.32 is pulled in transitively by `eslint-config-next`.
-  Its `peerDependencies` cap at ESLint `^9`, and it runs through the
-  `@eslint/compat` bridge (the official method for using older-style plugins
-  under flat config). Do not freely upgrade, pin, or replace it. Any change here
-  must confirm the `@eslint/compat` bridge still holds and that
-  `eslint-config-next` has not moved to a different import plugin.
+- `eslint-plugin-import` 2.32.0 is a direct pinned devDependency and is also
+  consumed by `eslint-config-next`. Its `peerDependencies` cap at ESLint `^9`,
+  and it runs through the `@eslint/compat` bridge via `fixupConfigRules` (the
+  official method for using older-style plugins under flat config). Do not treat
+  it as transitive-only or forbid pinning without confirming the bridge still
+  holds and that `eslint-config-next` has not moved to a different import plugin.
 
 ## Route deletion checklist
 
