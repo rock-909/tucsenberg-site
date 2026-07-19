@@ -39,7 +39,7 @@
 | 3B | D6b -> D6c -> D6d -> D6e | none | D6e |
 | 4 | D7a -> D7b -> C7 | none | C7 |
 
-M3 merged 30/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Cluster 3B = CLOSED** (D6b #138 `4343674`, D6c #139 `b9aa29b`, D6d #140 `03add86`, D6e #141 `f61b35c`; #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328`, cluster exact-SHA CI run `29669943819` all green). **Current execution face: Cluster 4 / D7a (not started).** D7a, D7b, and C7 have not started. PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
+M3 merged 30/33. **Cluster 1 = CLOSED** (acceptance tip `f24c415870d787ea15a4bfe25ff205d137f64b79`; member PRs #113/#115/#116/#117/#118/#119 merged). **Cluster 2 = CLOSED** (member PRs #121/#123/#125/#122/#124 and acceptance follow-up #127 merged). **Cluster 3A = CLOSED** (C2 #130, D6a #136, D5a #137; D5a accepted exact SHA `c4ae0a5` and merged to main `96af3549`). **Cluster 3B = CLOSED** (D6b #138 `4343674`, D6c #139 `b9aa29b`, D6d #140 `03add86`, D6e #141 `f61b35c`; #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328`, cluster exact-SHA CI run `29669943819` all green). **Cluster 4 is not ACCEPTED and not CLOSED.** **D7a #143 / `583312c` = READY_FOR_CLUSTER, unmerged.** **D7b #144 / `85c9be5` = READY_FOR_CLUSTER, unmerged.** **C7 = current implementation/candidate task.** **M2 remains paused (R'12).** PR #134 was a non-counted proof follow-up whose infrastructure is retired by R'13. Do not claim public launch readiness.
 
 ---
 
@@ -311,7 +311,7 @@ interface CanonicalInquiryBuyerFields {
 
 ## 5. Cluster 3B: one inquiry write pipeline
 
-**Status (2026-07-19): CLOSED.** Cluster 3A closed on main `96af3549`. D6b #138 merged `43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`; D6c #139 merged `b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`; D6d #140 merged `03add864207436c7a52b9818972bad9e05fb7f5f`; D6e #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` and merged to main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. Cluster exact-SHA CI run `29669943819` all green. **Cluster 4 / D7a is the next execution face and has not started.**
+**Status (2026-07-19): CLOSED.** Cluster 3A closed on main `96af3549`. D6b #138 merged `43436742a4a83c1e50a83b7dd9fdf5db6f2ecb45`; D6c #139 merged `b9aa29bffc8dff0dcbbf98f073f0d4b2c1d6845d`; D6d #140 merged `03add864207436c7a52b9818972bad9e05fb7f5f`; D6e #141 accepted exact SHA `198828d2932f45886f10cc4161da06d2cdabb328` and merged to main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. Cluster exact-SHA CI run `29669943819` all green. **Cluster 4 is not ACCEPTED and not CLOSED; D7a/D7b are READY_FOR_CLUSTER and unmerged; C7 is the current implementation/candidate task.**
 
 ### Task D6b: make `/api/inquiry` the only write route and parse once
 
@@ -378,7 +378,7 @@ pnpm build
 
 ## 6. Cluster 4: locale and documentation closure
 
-**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **D7a planning is complete; implementation has not started.** D7b and C7 have not started.
+**Status (2026-07-19): current execution face.** Cluster 3B is CLOSED on main `f61b35c1a90ffd6e120a065f4f0d86da8fa3be80`. **Cluster 4 is not ACCEPTED and not CLOSED.** **D7a #143 / `583312c` = READY_FOR_CLUSTER, unmerged.** **D7b #144 / `85c9be5` = READY_FOR_CLUSTER, unmerged.** **C7 = current implementation/candidate task.**
 
 ### Task D7a: remove component-level English fallbacks
 
