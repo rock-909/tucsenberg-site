@@ -29,7 +29,7 @@
         "terms": "Terms of Service"
       }
     },
-    "copyright": "{copyright}",
+    "copyright": "© {currentYear} {siteName}. All rights reserved.",
     "description": "Factory-direct flood barrier supply from China."
   },
   "home": {

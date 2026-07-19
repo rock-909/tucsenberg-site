@@ -54,8 +54,7 @@ interface FactualSourceMessages {
 
 type FactualCompleteMessages = FactualSourceMessages;
 
-const factualPlaceholderPattern =
-  /\{(?:siteName|companyName|currentYear|copyright)\}/u;
+const factualPlaceholderPattern = /\{(?:siteName|companyName|currentYear)\}/u;
 const heroDiagramKeys = ["panelLabel", "ariaLabel", "caption"] as const;
 const homeB2BSectionPaths = [
   ["home", "productLines", "title"],
@@ -331,7 +330,9 @@ describe("load-messages runtime loading", () => {
     const enMessages = getComposedMessages("en") as FactualSourceMessages;
 
     expect(enMessages.navigation.siteName).toBe("{siteName}");
-    expect(enMessages.footer.copyright).toBe("{copyright}");
+    expect(enMessages.footer.copyright).toBe(
+      "© {currentYear} {siteName}. All rights reserved.",
+    );
 
     expect(enMessages["structured-data"].organization.name).toBe(
       "{companyName}",

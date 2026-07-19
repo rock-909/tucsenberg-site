@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 
 const CHECKED_IN_SITE_YEAR = "2026";
 
@@ -17,8 +18,10 @@ describe("site message values", () => {
 
     const values = getSiteMessageValues();
 
-    expect(values.currentYear).toBe(CHECKED_IN_SITE_YEAR);
-    expect(values.copyright.en).toContain(`© ${CHECKED_IN_SITE_YEAR}`);
-    expect(values.copyright.zh).toContain(`© ${CHECKED_IN_SITE_YEAR}`);
+    expect(values).toEqual({
+      siteName: SINGLE_SITE_CONFIG.name,
+      companyName: SINGLE_SITE_FACTS.company.name,
+      currentYear: CHECKED_IN_SITE_YEAR,
+    });
   });
 });
