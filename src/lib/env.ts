@@ -47,9 +47,9 @@ export const serverEnvSchema = {
 
   // Distributed storage and rate limiting
   RATE_LIMIT_PEPPER: z.string().min(1).optional(),
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_URL: z.url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
-  KV_REST_API_URL: z.string().url().optional(),
+  KV_REST_API_URL: z.url().optional(),
   KV_REST_API_TOKEN: z.string().min(1).optional(),
   ALLOW_MEMORY_RATE_LIMIT: z
     .string()
@@ -82,16 +82,16 @@ export const serverEnvSchema = {
     .string()
     .default("true")
     .transform((val) => val === "true"),
-  CSP_REPORT_URI: z.string().url().optional(),
+  CSP_REPORT_URI: z.url().optional(),
   CORS_ALLOWED_ORIGINS: z.string().optional(),
 };
 
 export const clientEnvSchema = {
   // Base Configuration
-  NEXT_PUBLIC_BASE_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_WEBSITE_BASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_BASE_URL: z.url().default("http://localhost:3000"),
+  NEXT_PUBLIC_SITE_URL: z.url().optional(),
+  NEXT_PUBLIC_WEBSITE_BASE_URL: z.url().optional(),
+  NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL: z.url().optional(),
   NEXT_PUBLIC_APP_NAME: z.string().default("Example Showcase Company"),
   NEXT_PUBLIC_APP_VERSION: z.string().default("1.0.0"),
   NEXT_PUBLIC_SITE_KEY: z.string().default("tucsenberg"),
