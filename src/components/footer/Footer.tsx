@@ -16,8 +16,8 @@ type FooterConfigMessageKey =
   | FooterColumnConfig["translationKey"]
   | FooterColumnConfig["links"][number]["translationKey"];
 type FooterSectionTranslator = {
-  has: (key: string) => boolean;
-  (key: string): string;
+  has: (key: FooterConfigMessageKey) => boolean;
+  (key: FooterConfigMessageKey): string;
 };
 
 export interface FooterProps {
@@ -44,11 +44,10 @@ function FooterSection({
   t: FooterSectionTranslator;
 }) {
   const translateConfigKey = (key: FooterConfigMessageKey) => {
-    const messageKey: string = key;
-    if (!t.has(messageKey)) {
+    if (!t.has(key)) {
       throw new Error(`Missing required message: ${key}`);
     }
-    return t(messageKey);
+    return t(key);
   };
 
   return (
@@ -137,11 +136,7 @@ export function Footer({ themeToggleSlot, className, dataTheme }: FooterProps) {
             className="grid grid-cols-2 gap-x-8 gap-y-10"
           >
             {FOOTER_COLUMNS.map((section) => (
-              <FooterSection
-                key={section.key}
-                section={section}
-                t={t as FooterSectionTranslator}
-              />
+              <FooterSection key={section.key} section={section} t={t} />
             ))}
           </nav>
         </div>
