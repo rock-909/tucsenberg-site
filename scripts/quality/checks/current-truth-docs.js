@@ -723,7 +723,8 @@ function isApprovedHistoricalDoc(relativePath) {
     // 它们如实记载了已退役路由/API 名，不应被 forbidden pattern 追溯定罪——
     // 整目录纳入 historical 豁免（加横幅 + 文档清单登记），而不是改写 findings 内容。
     relativePath.startsWith("docs/技术难题/审查2026-07/") ||
-    relativePath.startsWith("docs/技术难题/整库整改2026-07/")
+    relativePath.startsWith("docs/技术难题/整库整改2026-07/") ||
+    relativePath.startsWith("docs/技术难题/门禁机械遵守审查2026-07/")
   );
 }
 

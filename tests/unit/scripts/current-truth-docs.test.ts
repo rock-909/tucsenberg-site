@@ -16,6 +16,8 @@ import {
   getReleaseProofDocsCommandBlock,
 } from "../../../scripts/starter-checks.js";
 
+/* eslint-disable max-lines -- colocated truth-docs guard fixtures exceed the test-file budget */
+
 function createTempRepo(files: Record<string, string>): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "current-truth-docs-"));
 
@@ -114,6 +116,28 @@ function createValidFiles(): Record<string, string> {
   ].join("\n");
 
   return files;
+}
+
+function expectGateAuditHistoricalLifecycleFindings(tempDirs: string[]): void {
+  const historicalPath = "docs/技术难题/门禁机械遵守审查2026-07/执行文档.md";
+  const withoutBanner = createValidFiles();
+  withoutBanner[historicalPath] = "# Gate audit record";
+  withoutBanner["docs/项目基础/文档清单.md"] +=
+    `\n| \`${historicalPath}\` | \`historical-proof\` | Gate audit record. |`;
+  tempDirs.push(createTempRepo(withoutBanner));
+  expect(collectCurrentTruthDocFindings(tempDirs.at(-1)!)).toContainEqual({
+    file: historicalPath,
+    error: `historical document must start with "${HISTORICAL_BANNER}"`,
+  });
+  const withoutInventory = createValidFiles();
+  withoutInventory[historicalPath] =
+    `${HISTORICAL_BANNER}\n# Gate audit record`;
+  tempDirs.push(createTempRepo(withoutInventory));
+  expect(collectCurrentTruthDocFindings(tempDirs.at(-1)!)).toContainEqual({
+    file: historicalPath,
+    error:
+      "historical document is not classified as historical-proof in docs/项目基础/文档清单.md",
+  });
 }
 
 describe("current-truth docs guard", () => {
@@ -266,6 +290,10 @@ describe("current-truth docs guard", () => {
         },
       ]),
     );
+  });
+
+  it("requires banner and inventory for gate audit historical records", () => {
+    expectGateAuditHistoricalLifecycleFindings(tempDirs);
   });
 
   it("flags missing required path markers and forbidden stale path markers", () => {
@@ -898,3 +926,4 @@ describe("current-truth docs product ownership markers", () => {
     );
   });
 });
+/* eslint-enable max-lines -- colocated truth-docs guard fixtures exceed the test-file budget */
