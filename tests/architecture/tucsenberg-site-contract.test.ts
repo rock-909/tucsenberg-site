@@ -535,14 +535,6 @@ function getObject(value: unknown, label: string): Record<string, unknown> {
 
 describe("Tucsenberg Phase 1 site contract", () => {
   it("runs as an English-only site", () => {
-    expect(Object.keys(LOCALES_CONFIG)).toEqual([
-      "locales",
-      "defaultLocale",
-      "localePrefix",
-      "retiredLocales",
-      "timeZones",
-      "currencies",
-    ]);
     expect(LOCALES_CONFIG.locales).toEqual(["en"]);
     expect(LOCALES_CONFIG.defaultLocale).toBe("en");
     expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);

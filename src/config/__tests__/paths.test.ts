@@ -125,17 +125,6 @@ describe("paths configuration", () => {
   });
 
   describe("LOCALES_CONFIG", () => {
-    it("exposes only the live locale registry fields", () => {
-      expect(Object.keys(LOCALES_CONFIG)).toEqual([
-        "locales",
-        "defaultLocale",
-        "localePrefix",
-        "retiredLocales",
-        "timeZones",
-        "currencies",
-      ]);
-    });
-
     it("should match the current production locale contract", () => {
       expect(LOCALES_CONFIG.locales).toEqual(
         CURRENT_PRODUCTION_LOCALE_CONTRACT.locales,

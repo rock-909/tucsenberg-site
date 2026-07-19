@@ -45,12 +45,6 @@ const TRANSLATOR_PARAMETER_OVERRIDES = [
     "cookie",
   ),
   ...parameterOverrides(
-    "src/components/sections/hero-section.tsx",
-    ["buildHeroProofItem"],
-    "t",
-    "home",
-  ),
-  ...parameterOverrides(
     STRUCTURED_DATA,
     [
       "getSocialProfileUrls",
@@ -75,6 +69,10 @@ const DYNAMIC_MESSAGE_KEY_PREFIXES = [
   [
     "home.buyingProcess.items.",
     "homepage buying steps are keyed by the approved buying-process tuple",
+  ],
+  [
+    "home.hero.proof.",
+    "homepage hero proof items are keyed by the approved hero proof tuple",
   ],
   [
     "home.howToChoose.rows.",
@@ -154,6 +152,14 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
     prefix: "home.buyingProcess.items.",
     suffixes: [".title", ".description"],
     reason: "homepage buying steps derive their exact keys from this tuple",
+  },
+  {
+    kind: "collection-values",
+    file: "src/config/single-site-page-expression.ts",
+    sourceName: "SINGLE_SITE_HOME_HERO_PROOF_ITEMS",
+    prefix: "home.hero.proof.",
+    suffixes: ["", "Label"],
+    reason: "homepage hero proof items derive their exact keys from this tuple",
   },
   {
     kind: "collection-values",
