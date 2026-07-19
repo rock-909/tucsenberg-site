@@ -279,6 +279,29 @@ describe("message key binding hardening", () => {
     ).toEqual([]);
   });
 
+  it("filters array descriptors before deriving configured values", () => {
+    expect(
+      collect({
+        catalogKeys: ["example.active.badge", "example.inactive.badge"],
+        content:
+          'const ITEMS = [{ key: "active", hasBadge: true }, { key: "inactive" }] as const;',
+        derivedKeyConsumers: [
+          {
+            kind: "collection-values",
+            file: "src/example.ts",
+            sourceName: "ITEMS",
+            valueProperty: "key",
+            entryFilters: [{ property: "hasBadge", equals: true }],
+            prefix: "example.",
+            suffixes: [".badge"],
+            reason: "fixture",
+          },
+        ],
+        unusedKeyAllowlist: ["example.inactive.badge"],
+      }),
+    ).toEqual([]);
+  });
+
   it("does not let an unrelated local object satisfy a property-values consumer", () => {
     expect(
       collect({
