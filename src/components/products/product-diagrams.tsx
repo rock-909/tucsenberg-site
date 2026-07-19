@@ -12,6 +12,10 @@ import { BoxwallCrossSection } from "@/components/products/boxwall-cross-section
 
 export { ProductLineGlyph } from "@/components/products/product-diagram-glyphs";
 
+const GATE_PLANK_HEIGHT = 38;
+const GATE_PLANK_GAP = 5;
+const GATE_PLANK_BOTTOMS = [222, 179, 136, 93];
+
 function DiagramSvg({
   ariaLabel,
   children,
@@ -200,9 +204,6 @@ function GateDiagram({
   ariaLabel: string;
   labels: GateDiagramLabels;
 }) {
-  const plankHeight = 38;
-  const plankGap = 5;
-  const plankBottoms = [222, 179, 136, 93];
   return (
     <DiagramSvg ariaLabel={ariaLabel}>
       <GroundLine />
@@ -218,32 +219,32 @@ function GateDiagram({
           strokeWidth={2}
         />
       ))}
-      {plankBottoms.map((y) => (
+      {GATE_PLANK_BOTTOMS.map((y) => (
         <rect
           key={y}
           x={132}
           y={y}
           width={216}
-          height={plankHeight}
+          height={GATE_PLANK_HEIGHT}
           className="fill-card text-foreground"
           stroke="currentColor"
           strokeWidth={2}
         />
       ))}
-      {plankBottoms.slice(0, 3).map((y) => (
+      {GATE_PLANK_BOTTOMS.slice(0, 3).map((y) => (
         <line
           key={`seal-${y}`}
           x1={134}
-          y1={y - plankGap + 2}
+          y1={y - GATE_PLANK_GAP + 2}
           x2={346}
-          y2={y - plankGap + 2}
+          y2={y - GATE_PLANK_GAP + 2}
           className="text-primary"
           stroke="currentColor"
           strokeWidth={3}
           strokeDasharray="8 6"
         />
       ))}
-      <DimLine x={382} y1={222} y2={222 + plankHeight} label="180 mm" />
+      <DimLine x={382} y1={222} y2={222 + GATE_PLANK_HEIGHT} label="180 mm" />
       <Annotation x={132} y={54}>
         {labels.planks}
       </Annotation>

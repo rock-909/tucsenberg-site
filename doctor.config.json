@@ -1,10 +1,27 @@
 {
   "$schema": "https://react.doctor/schema/config.json",
   "ignore": {
+    "files": [".open-next/**", ".next/**"],
     "overrides": [
       {
         "files": ["storybook-static/**"],
         "rules": ["deslop/unused-file"]
+      },
+      {
+        "files": ["package.json"],
+        "rules": ["deslop/unused-dev-dependency"]
+      },
+      {
+        "files": [
+          "src/app/[locale]/static-mdx-page.tsx",
+          "src/components/content/legal-page-shell.tsx",
+          "src/components/products/product-diagrams.tsx"
+        ],
+        "rules": ["react-doctor/only-export-components"]
+      },
+      {
+        "files": ["src/components/ui/dropdown-menu.tsx"],
+        "rules": ["deslop/unused-export"]
       },
       {
         "files": [".claude/skills/**", ".codex/skills/**"],
@@ -194,7 +211,7 @@
       },
       {
         "files": ["src/components/cookie/cookie-banner.tsx"],
-        "rules": ["react-doctor/prefer-tag-over-role"]
+        "rules": ["react-doctor/prefer-html-dialog"]
       },
       {
         "files": [
