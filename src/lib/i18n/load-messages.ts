@@ -63,12 +63,6 @@ async function loadMessageSource(locale: Locale): Promise<Messages> {
   return interpolateSiteMessageValues(loadedMessages, siteValues) as Messages;
 }
 
-export function loadCompleteMessagesFromSource(
-  locale: string,
-): Promise<Messages> {
-  return loadMessageSource(coerceLocale(locale));
-}
-
-export function loadCompleteMessages(locale: Locale): Promise<Messages> {
+export function loadCompleteMessages(locale: string): Promise<Messages> {
   return loadMessageSource(coerceLocale(locale));
 }

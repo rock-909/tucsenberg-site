@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
+import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
 import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
   SINGLE_SITE_ABOUT_STATS_ITEMS,
@@ -42,30 +43,29 @@ describe("single-site-page-expression", () => {
       {
         key: "absFloodBarriers",
         slug: "abs-flood-barriers",
-        glyph: "boxwall",
       },
       {
         key: "aluminumFloodGates",
         slug: "aluminum-flood-gates",
-        glyph: "gate",
       },
       {
         key: "absorbentFloodBags",
         slug: "absorbent-flood-bags",
-        glyph: "bag",
       },
       {
         key: "floodTubeDams",
         slug: "flood-tube-dams",
-        glyph: "tube",
       },
       {
         key: "frpFloodBarriers",
         slug: "frp-flood-barriers",
-        glyph: "frp",
         hasBadge: true,
       },
     ]);
+
+    for (const productLine of SINGLE_SITE_HOME_PRODUCT_LINES) {
+      expect(getTucsenbergProductPage(productLine.slug)?.diagram).toBeDefined();
+    }
 
     expect(SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS).toEqual([
       "dealersDistributors",

@@ -194,6 +194,14 @@ const TRUTH_DOC_CHECKS = [
     ],
   },
   {
+    file: "docs/项目基础/消息文案.md",
+    required: [
+      "theme, accessibility, cookie, structured data, API/errors, legal and email reference copy",
+      "contact, RFQ, inquiry, shared lead-form copy and shared FAQ section chrome",
+      "navigation, footer, home, catalog, OEM landing and product-page UI",
+    ],
+  },
+  {
     file: "docs/项目基础/替换边界.md",
     required: [
       "content/config/content.json",
@@ -238,7 +246,13 @@ const TRUTH_DOC_CHECKS = [
   },
   {
     file: "docs/项目基础/架构图.svg",
-    required: ["messages/base/** + profiles/**"],
+    required: [
+      "messages/base/** + profiles/**",
+      "Retired-locale fast 404 + locale routing",
+      "src/app/api/inquiry/route.ts",
+      "src/lib/lead-pipeline/**",
+      "Guides, legal, about",
+    ],
     forbidden: [
       "scripts/cloudflare/**",
       "Showcase Website Starter Project Architecture Diagram",
@@ -723,7 +737,8 @@ function isApprovedHistoricalDoc(relativePath) {
     // 它们如实记载了已退役路由/API 名，不应被 forbidden pattern 追溯定罪——
     // 整目录纳入 historical 豁免（加横幅 + 文档清单登记），而不是改写 findings 内容。
     relativePath.startsWith("docs/技术难题/审查2026-07/") ||
-    relativePath.startsWith("docs/技术难题/整库整改2026-07/")
+    relativePath.startsWith("docs/技术难题/整库整改2026-07/") ||
+    relativePath.startsWith("docs/技术难题/门禁机械遵守审查2026-07/")
   );
 }
 

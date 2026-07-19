@@ -22,8 +22,8 @@ import {
 } from "@/config/single-site-page-expression";
 import { FaqSectionView } from "@/components/sections/faq-section-view";
 import { ProductLineDiagram } from "@/components/products/product-diagrams";
-import { getTucsenbergProductDiagramByKind } from "@/constants/tucsenberg-product-pages";
-import type { TucsenbergProductDiagramKind } from "@/constants/tucsenberg-product-page-types";
+import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
+import type { TucsenbergProductDiagram } from "@/constants/tucsenberg-product-page-types";
 import { generateFaqSchemaFromItems } from "@/lib/content/mdx-faq";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import {
@@ -48,7 +48,7 @@ interface HomeCardItem {
 interface HomeProductCardItem extends HomeCardItem {
   href: string;
   linkLabel: string;
-  glyph: TucsenbergProductDiagramKind;
+  diagram: TucsenbergProductDiagram | undefined;
   badge?: string;
 }
 
@@ -83,9 +83,9 @@ function getHomePageContent(t: HomeTranslator) {
         description: t(`productLines.items.${productLine.key}.description`),
         href: `/products/${productLine.slug}`,
         linkLabel: t(`productLines.items.${productLine.key}.linkLabel`),
-        glyph: productLine.glyph,
+        diagram: getTucsenbergProductPage(productLine.slug)?.diagram,
         ...("hasBadge" in productLine && productLine.hasBadge
-          ? { badge: t("productLines.items.frpFloodBarriers.badge") }
+          ? { badge: t(`productLines.items.${productLine.key}.badge`) }
           : {}),
       }),
     ),
@@ -134,9 +134,9 @@ function HomeProductLinesSection({
                 aria-hidden
                 className="relative mb-4 overflow-hidden rounded-md border border-border bg-background p-2"
               >
-                <ProductLineDiagram
-                  diagram={getTucsenbergProductDiagramByKind(item.glyph)!}
-                />
+                {item.diagram ? (
+                  <ProductLineDiagram diagram={item.diagram} />
+                ) : null}
                 {item.badge ? (
                   <span className="absolute top-2 right-2 inline-flex w-fit rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                     {item.badge}

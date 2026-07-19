@@ -20,22 +20,15 @@ interface RequestConfigResult {
   messages: unknown;
   metadata: {
     loadTime?: number;
-    error?: boolean;
-    recovery?: "uncached-retry";
     cacheUsed?: boolean;
     timestamp?: string;
     smartDetection?: boolean;
   };
 }
 
-const {
-  mockGetRequestConfig,
-  mockLoadCompleteMessages,
-  mockLoadCompleteMessagesFromSource,
-} = vi.hoisted(() => ({
+const { mockGetRequestConfig, mockLoadCompleteMessages } = vi.hoisted(() => ({
   mockGetRequestConfig: vi.fn(),
   mockLoadCompleteMessages: vi.fn(),
-  mockLoadCompleteMessagesFromSource: vi.fn(),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -44,7 +37,6 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("@/lib/i18n/load-messages", () => ({
   loadCompleteMessages: mockLoadCompleteMessages,
-  loadCompleteMessagesFromSource: mockLoadCompleteMessagesFromSource,
 }));
 
 describe("i18n Request Configuration", () => {
@@ -52,9 +44,6 @@ describe("i18n Request Configuration", () => {
     vi.clearAllMocks();
     vi.resetModules();
     mockLoadCompleteMessages.mockResolvedValue({
-      common: { loading: "Loading..." },
-    });
-    mockLoadCompleteMessagesFromSource.mockResolvedValue({
       common: { loading: "Loading..." },
     });
   });
@@ -126,30 +115,14 @@ describe("i18n Request Configuration", () => {
     performanceNowSpy.mockRestore();
   });
 
-  it("marks cached-load recovery as an uncached source retry", async () => {
-    mockLoadCompleteMessages.mockRejectedValue(new Error("load failed"));
-
-    const result = await runConfig(LOCALES_CONFIG.defaultLocale);
-
-    expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
-    expect(result.metadata.error).toBe(true);
-    expect(result.metadata.recovery).toBe("uncached-retry");
-    expect(result.metadata).not.toHaveProperty("cacheUsed");
-    expect(mockLoadCompleteMessagesFromSource).toHaveBeenCalledWith(
-      LOCALES_CONFIG.defaultLocale,
-    );
-  });
-
-  it("does not hide failure when the uncached source retry also fails", async () => {
-    mockLoadCompleteMessages.mockRejectedValue(new Error("load failed"));
-    mockLoadCompleteMessagesFromSource.mockRejectedValue(
-      new Error("source failed"),
-    );
+  it("surfaces deterministic message load failures without retrying", async () => {
+    mockLoadCompleteMessages.mockRejectedValue(new Error("source failed"));
 
     await expect(runConfig(LOCALES_CONFIG.defaultLocale)).rejects.toThrow(
       "source failed",
     );
-    expect(mockLoadCompleteMessagesFromSource).toHaveBeenCalledWith(
+    expect(mockLoadCompleteMessages).toHaveBeenCalledOnce();
+    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(
       LOCALES_CONFIG.defaultLocale,
     );
   });

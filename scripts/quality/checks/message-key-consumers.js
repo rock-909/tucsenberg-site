@@ -331,18 +331,25 @@ function createConsumerCollector({ unwrapExpression, getStaticString }) {
   }
 
   function collectFilteredPropertyValues(initializer, consumer, values) {
-    if (
-      !consumer.valueProperty ||
-      !consumer.entryFilters ||
-      !ts.isObjectLiteralExpression(initializer)
-    ) {
+    if (!consumer.valueProperty || !consumer.entryFilters) return null;
+    const unwrapped = unwrapExpression(initializer);
+    if (!unwrapped) return null;
+    let entryNodes = [];
+    if (ts.isObjectLiteralExpression(unwrapped)) {
+      for (const property of unwrapped.properties) {
+        if (!ts.isPropertyAssignment(property)) {
+          return { status: "unsupported" };
+        }
+        entryNodes.push(unwrapExpression(property.initializer));
+      }
+    } else if (ts.isArrayLiteralExpression(unwrapped)) {
+      entryNodes = unwrapped.elements.map((element) =>
+        unwrapExpression(element),
+      );
+    } else {
       return null;
     }
-    for (const property of initializer.properties) {
-      if (!ts.isPropertyAssignment(property)) {
-        return { status: "unsupported" };
-      }
-      const entry = unwrapExpression(property.initializer);
+    for (const entry of entryNodes) {
       if (!entry || !ts.isObjectLiteralExpression(entry)) {
         return { status: "unsupported" };
       }

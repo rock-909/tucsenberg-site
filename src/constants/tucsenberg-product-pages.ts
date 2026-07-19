@@ -1,8 +1,4 @@
-import type {
-  TucsenbergProductDiagram,
-  TucsenbergProductDiagramKind,
-  TucsenbergProductPage,
-} from "@/constants/tucsenberg-product-page-types";
+import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import { ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-absorbent-flood-bags";
 import { ALUMINUM_FLOOD_GATES_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-aluminum-flood-gates";
@@ -38,15 +34,4 @@ export function getTucsenbergProductPage(
   return Object.hasOwn(TUCSENBERG_PRODUCT_PAGES, slug)
     ? TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug]
     : undefined;
-}
-
-export function getTucsenbergProductDiagramByKind(
-  kind: TucsenbergProductDiagramKind,
-): TucsenbergProductDiagram | undefined {
-  for (const page of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
-    if (page.diagram?.kind === kind) {
-      return page.diagram;
-    }
-  }
-  return undefined;
 }

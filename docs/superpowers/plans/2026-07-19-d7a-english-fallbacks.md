@@ -53,6 +53,10 @@ Hard boundaries:
 - Do not use permanent deletion commands. This task should not remove files.
 - Run `pnpm build` and `pnpm website:build:cf` serially if both are ever needed.
 
+> Cluster 4 acceptance correction: C7 supersedes the same-locale retry boundary.
+> The physical message loader is deterministic and now fails after one call;
+> invalid-locale coercion and global-error English remain unchanged.
+
 ## 1. File map
 
 ### Required message failure

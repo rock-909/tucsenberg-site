@@ -22,6 +22,11 @@ copy is missing. Missing required messages must fail with the exact message path
 The change must keep request-level locale recovery, same-locale physical-pack
 retry, and the provider-free English global error boundary.
 
+> Cluster 4 acceptance correction: C7 later proved that the same-locale retry
+> repeated the same deterministic bundled-module loader with no changed input or
+> source. That retry requirement is superseded. Invalid-locale coercion and the
+> provider-free English global error boundary remain current.
+
 ## Live inventory
 
 The old audit counts have drifted. Current production code contains:

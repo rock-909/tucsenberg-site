@@ -14,7 +14,7 @@ import {
 export { FOOTER_STYLE_TOKENS };
 
 /**
- * @public Footer link item contract for downstream starter customization.
+ * @public Footer link item contract for the current single-site Footer.
  */
 export type FooterLinkItem = SiteFooterLinkItem;
 export type FooterColumnConfig = SiteFooterColumnConfig;

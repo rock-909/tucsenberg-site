@@ -67,9 +67,6 @@ const TEMP_TRASH_ROOT = path.join(
   "showcase-current-truth-docs-test-trash",
 );
 
-const AUDIT_EVIDENCE_INDEX = "docs/技术难题/审查2026-07/README.md";
-const HISTORICAL_AUDIT_BOUNDARY = "历史审查证据，不是当前 runtime truth";
-
 function moveTempRepoToTrash(dir: string): void {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks the test-owned temporary fixture directory
   if (!fs.existsSync(dir)) return;
@@ -208,8 +205,8 @@ describe("current-truth docs guard", () => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths are fixed test-owned documentation fixtures
       const content = fs.readFileSync(path.resolve(file), "utf8");
 
-      expect(content).toContain(AUDIT_EVIDENCE_INDEX);
-      expect(content).toContain(HISTORICAL_AUDIT_BOUNDARY);
+      expect(content).toContain("docs/技术难题/审查2026-07/README.md");
+      expect(content).toContain("历史审查证据，不是当前 runtime truth");
     }
   });
 
@@ -244,15 +241,15 @@ describe("current-truth docs guard", () => {
 
   it("requires both the approved banner and historical inventory classification", () => {
     const files = createValidFiles();
-    const missingBanner = "docs/superpowers/plans/missing-banner.md";
-    const missingInventory = "docs/audits/missing-inventory.md";
-    files[missingBanner] = "# Old plan";
-    files[missingInventory] = `${HISTORICAL_BANNER}\n# Old audit`;
+    const missingBanner = "docs/技术难题/门禁机械遵守审查2026-07/执行文档.md";
+    const missingInventory =
+      "docs/技术难题/门禁机械遵守审查2026-07/官方对标修复执行文档.md";
+    files[missingBanner] = "# Gate audit record";
+    files[missingInventory] = `${HISTORICAL_BANNER}\n# Gate audit record`;
     files["docs/项目基础/文档清单.md"] +=
-      `\n| \`${missingBanner}\` | \`historical-proof\` | Old plan. |`;
+      `\n| \`${missingBanner}\` | \`historical-proof\` | Gate audit record. |`;
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
-
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual(
       expect.arrayContaining([
         {

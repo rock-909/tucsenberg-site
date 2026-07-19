@@ -298,16 +298,14 @@ describe("load-messages runtime loading", () => {
     vi.doMock("@/lib/env", () => createRuntimeEnvMock({ ci: true }));
 
     const [
-      { loadCompleteMessagesFromSource },
+      { loadCompleteMessages },
       { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS },
     ] = await Promise.all([
       import("@/lib/i18n/load-messages"),
       import("@/config/single-site"),
     ]);
 
-    const [messages] = await Promise.all([
-      loadCompleteMessagesFromSource("en"),
-    ]);
+    const [messages] = await Promise.all([loadCompleteMessages("en")]);
     assertFactualCompleteMessages(messages);
 
     expect(messages["structured-data"].organization.name).toBe(

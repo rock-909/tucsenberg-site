@@ -64,7 +64,7 @@
 
     <rect x="724" y="308" width="310" height="78" rx="18" class="box"/>
     <text x="750" y="338" class="box-title">Middleware gate</text>
-    <text x="750" y="361" class="box-copy">Locale redirect, locale cookie cleanup</text>
+    <text x="750" y="361" class="box-copy">Retired-locale fast 404 + locale routing</text>
     <text x="750" y="380" class="code">src/middleware.ts</text>
 
     <rect x="1074" y="308" width="278" height="78" rx="18" class="box"/>
@@ -84,7 +84,7 @@
 
     <rect x="118" y="526" width="286" height="126" rx="20" class="box"/>
     <text x="144" y="558" class="box-title">Page shells and route views</text>
-    <text x="144" y="585" class="box-copy">Home, about, products, blog, contact, legal pages</text>
+    <text x="144" y="585" class="box-copy">Home, products, guides, contact, legal</text>
     <text x="144" y="608" class="code">src/app/[locale]/page.tsx</text>
     <text x="144" y="628" class="code">src/app/[locale]/*/page.tsx</text>
 
@@ -96,7 +96,7 @@
 
     <rect x="754" y="526" width="286" height="126" rx="20" class="box"/>
     <text x="780" y="558" class="box-title">Lead capture interfaces</text>
-    <text x="780" y="585" class="box-copy">Contact form and inquiry drawer</text>
+    <text x="780" y="585" class="box-copy">Shared inquiry forms and product handoff</text>
     <text x="780" y="608" class="code">src/components/forms/**</text>
     <text x="780" y="628" class="code">src/components/products/**</text>
 
@@ -125,7 +125,7 @@
 
     <rect x="310" y="818" width="176" height="124" rx="18" class="box"/>
     <text x="334" y="850" class="box-title">MDX content</text>
-    <text x="334" y="877" class="box-copy">Posts and legal/about draft content</text>
+    <text x="334" y="877" class="box-copy">Guides, legal, about</text>
     <text x="334" y="900" class="code">content/**</text>
     <text x="334" y="920" class="code">scripts/starter-checks.js content-manifest</text>
 
@@ -146,25 +146,25 @@
 
     <rect x="774" y="816" width="260" height="102" rx="18" class="box"/>
     <text x="798" y="848" class="box-title">Server adapters</text>
-    <text x="798" y="875" class="box-copy">Route handlers + compatibility action</text>
-    <text x="798" y="898" class="code">src/lib/actions/contact.ts</text>
-    <text x="798" y="918" class="code">src/app/api/inquiry/route.ts</text>
+    <text x="798" y="875" class="box-copy">Single public inquiry route</text>
+    <text x="798" y="898" class="code">src/app/api/inquiry/route.ts</text>
+    <text x="798" y="918" class="code">src/lib/lead-pipeline/**</text>
 
     <rect x="1062" y="816" width="288" height="102" rx="18" class="box"/>
     <text x="1086" y="848" class="box-title">Validation and anti-abuse</text>
     <text x="1086" y="875" class="box-copy">Schema checks, rate limit, client IP, Turnstile</text>
-    <text x="1086" y="898" class="code">src/lib/form-schema/**</text>
+    <text x="1086" y="898" class="code">src/lib/lead-pipeline/lead-schema.ts</text>
     <text x="1086" y="918" class="code">src/lib/security/**</text>
 
     <rect x="774" y="956" width="260" height="100" rx="18" class="box"/>
-    <text x="798" y="988" class="box-title">Contact core</text>
-    <text x="798" y="1015" class="box-copy">One canonical contact path</text>
-    <text x="798" y="1038" class="code">src/lib/contact/**</text>
-    <text x="798" y="1058" class="code">src/lib/contact/submit-canonical-contact.ts</text>
+    <text x="798" y="988" class="box-title">Lead processing core</text>
+    <text x="798" y="1015" class="box-copy">One canonical inquiry write path</text>
+    <text x="798" y="1038" class="code">src/lib/lead-pipeline/**</text>
+    <text x="798" y="1058" class="code">src/lib/lead-pipeline/process-lead.ts</text>
 
     <rect x="1062" y="956" width="288" height="100" rx="18" class="accent-box"/>
     <text x="1086" y="988" class="box-title">Unified lead pipeline</text>
-    <text x="1086" y="1015" class="box-copy">Contact / product leads end here</text>
+    <text x="1086" y="1015" class="box-copy">RFQ + catalog + buyer-interest leads</text>
     <text x="1086" y="1038" class="code">src/lib/lead-pipeline/{lead-schema,process-lead,utils}.ts</text>
 
     <rect x="918" y="1086" width="270" height="52" rx="16" class="box"/>
@@ -230,5 +230,5 @@
 
   <line x1="84" y1="1000" x2="1384" y2="1000" class="divider"/>
   <text x="92" y="1188" class="tiny">Reading direction: top to bottom. Main user flow runs from browser to app, then into guarded server paths and the lead pipeline.</text>
-  <text x="1365" y="1188" class="tiny" text-anchor="end">Generated from repo structure on 2026-04-23</text>
+  <text x="1365" y="1188" class="tiny" text-anchor="end">Maintained from the current repo structure</text>
 </svg>

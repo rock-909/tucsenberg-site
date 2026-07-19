@@ -4,7 +4,7 @@ This page records the staged operating plan for cookies, analytics, SEO/SEM
 monitoring, and lead attribution.
 
 It is a maintenance runbook, not proof. Verified launch evidence belongs in
-`../proof/launch.md`.
+`上线验证.md`.
 
 ## Current baseline
 
