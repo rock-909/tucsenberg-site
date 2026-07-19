@@ -12,10 +12,10 @@ import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import { getSiteMessageValues } from "@/lib/i18n/site-message-values";
 
-function readStrictMessage(
+function readMessageValue(
   messages: Record<string, unknown>,
   path: string,
-): string {
+): string | undefined {
   const value = path.split(".").reduce<unknown>((current, segment) => {
     if (
       typeof current !== "object" ||
@@ -28,17 +28,29 @@ function readStrictMessage(
   }, messages);
 
   if (typeof value !== "string") {
-    throw new Error(`Missing test message: ${path}`);
+    return undefined;
   }
 
   return value.replace(/\{copyright\}/gu, getSiteMessageValues().copyright.en);
 }
 
+function createNextIntlLikeTranslator(messages: Record<string, unknown>) {
+  const translate = ((key: string) => {
+    const value = readMessageValue(messages, key);
+    return value ?? key;
+  }) as ((key: string) => string) & { has: (key: string) => boolean };
+
+  translate.has = (key: string) =>
+    readMessageValue(messages, key) !== undefined;
+
+  return translate;
+}
+
 const composedMessages = getComposedMessages("en");
 
 const { mockUseTranslations } = vi.hoisted(() => ({
-  mockUseTranslations: vi.fn(
-    () => (key: string) => readStrictMessage(composedMessages, key),
+  mockUseTranslations: vi.fn(() =>
+    createNextIntlLikeTranslator(composedMessages),
   ),
 }));
 
@@ -49,6 +61,9 @@ vi.mock("next-intl", () => ({
 describe("Footer Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseTranslations.mockImplementation(() =>
+      createNextIntlLikeTranslator(composedMessages),
+    );
   });
 
   it("renders without crashing", () => {
@@ -109,11 +124,20 @@ describe("Footer Component", () => {
     });
   });
 
-  it("requires footer section title messages instead of config English fallbacks", () => {
-    expect(
-      readStrictMessage(composedMessages, "footer.sections.navigation.title"),
-    ).toBe("Navigation");
+  it("throws with the full message path when footer.copyright is missing", () => {
+    const incompleteMessages = structuredClone(composedMessages);
+    delete (incompleteMessages.footer as Record<string, unknown>).copyright;
 
+    mockUseTranslations.mockImplementation(() =>
+      createNextIntlLikeTranslator(incompleteMessages),
+    );
+
+    expect(() => render(<Footer />)).toThrow(
+      "Missing required message: footer.copyright",
+    );
+  });
+
+  it("throws with the full message path when a footer config translation key is missing", () => {
     const incompleteMessages = structuredClone(composedMessages);
     const sections = (
       incompleteMessages.footer as Record<
@@ -123,9 +147,13 @@ describe("Footer Component", () => {
     ).sections;
     delete sections.navigation.title;
 
-    expect(() =>
-      readStrictMessage(incompleteMessages, "footer.sections.navigation.title"),
-    ).toThrow("Missing test message: footer.sections.navigation.title");
+    mockUseTranslations.mockImplementation(() =>
+      createNextIntlLikeTranslator(incompleteMessages),
+    );
+
+    expect(() => render(<Footer />)).toThrow(
+      "Missing required message: footer.sections.navigation.title",
+    );
   });
 
   it("renders the brand wordmark with an accessible site name", () => {

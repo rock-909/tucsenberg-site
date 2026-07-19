@@ -168,7 +168,7 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
       aria-live="polite"
     >
       <div className="text-sm text-[var(--error-foreground)]">
-        {labels.unavailable}
+        {labels.loadFailed}
       </div>
       <TurnstileRescueLine
         beforeEmail={labels.rescueBeforeEmail}

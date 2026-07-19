@@ -305,7 +305,10 @@ describe("LazyTurnstile", () => {
     });
 
     expect(screen.queryByTestId("turnstile-widget")).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+    expect(screen.getByRole("status")).toHaveTextContent(labels.loadFailed);
+    expect(screen.getByRole("status")).not.toHaveTextContent(
+      labels.unavailable,
+    );
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
       `mailto:sales@tucsenberg.com?subject=${encodeURIComponent(labels.rescueSubject)}`,

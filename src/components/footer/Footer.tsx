@@ -79,7 +79,12 @@ function FooterSection({
 
 export function Footer({ themeToggleSlot, className, dataTheme }: FooterProps) {
   const t = useTranslations();
-  const translateFooter = (key: FooterMessageKey) => t(key);
+  const translateFooter = (key: FooterMessageKey) => {
+    if (!t.has(key)) {
+      throw new Error(`Missing required message: ${key}`);
+    }
+    return t(key);
+  };
 
   const { name: siteName } = SINGLE_SITE_CONFIG;
   const { name: companyName } = SINGLE_SITE_FACTS.company;
