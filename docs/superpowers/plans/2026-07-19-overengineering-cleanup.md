@@ -6,7 +6,7 @@
 
 **Goal:** Remove verified over-engineering found by the 2026-07-19 ponytail audit: negative-space guards, test-only production code, duplicate/replaceable dependencies, a vacuous dep-cruiser rule, dead token surfaces, dual prop protocols, and the phrase-pinning half of the truth-docs gate — while preserving every live invariant (lead delivery graph proof, doc inventory gate, LCP motion boundary).
 
-**Architecture:** Three sequential PRs. Batch 1 is pure deletion and dependency swaps (near-zero risk). Batch 2 consolidates code that has tests attached. Batch 3 reworks the truth-docs CI gate itself and is isolated so gate regressions cannot mix with code changes. Every finding in this plan was re-verified against the working tree on 2026-07-19 (callers grepped, CI wiring confirmed, Node 24 pinned in `engines`, `.nvmrc`, and all workflows).
+**Architecture:** Three sequential PRs. Batch 1 is pure deletion and dependency swaps (near-zero risk). Batch 2 consolidates code that has tests attached. Batch 3 reworks the truth-docs CI gate itself and is isolated so gate regressions cannot mix with code changes. Every finding in this plan was re-verified against the working tree on 2026-07-19 (callers grepped, CI wiring confirmed, Node 24 pinned in `engines`, `.nvmrc`, and all workflows). During execution on 2026-07-20, Task 2's React Doctor override references were found by the full test gate and added to the task scope before implementation continued.
 
 **Tech Stack:** Next.js 16 App Router, TypeScript strict, Vitest, Playwright, dependency-cruiser 17 (wired into CI at `.github/workflows/ci.yml:79` and lefthook, `-T err` = only `severity: "error"` rules block), pnpm, Node >=24 <25.
 
@@ -97,10 +97,11 @@ git commit -m "docs: add overengineering cleanup plan"
 
 ### Task 2: Delete the negative-space lib facade guard
 
-`tests/architecture/lib-facade-boundary.test.ts` (188 lines) is dropped for two reasons, stated precisely: the first four test blocks assert that already-deleted files stay deleted and old import names stay absent (the guard class `CLAUDE.md` Gate Discipline forbids); the last three blocks (lines 153–187) are *source-shape* string assertions on the csp-report and inquiry routes (`toContain`/`not.toContain` on source text) whose live behavior is already covered by the routes' own behavior tests. No other file imports it.
+`tests/architecture/lib-facade-boundary.test.ts` (188 lines) is dropped for two reasons, stated precisely: the first four test blocks assert that already-deleted files stay deleted and old import names stay absent (the guard class `CLAUDE.md` Gate Discipline forbids); the last three blocks (lines 153–187) are *source-shape* string assertions on the csp-report and inquiry routes (`toContain`/`not.toContain` on source text) whose live behavior is already covered by the routes' own behavior tests. No code imports it. `doctor.config.json` lists the file in two React Doctor override arrays, so those stale configuration entries must be removed in the same task; `tests/architecture/config-exact-paths-exist.test.ts` enforces that configured paths remain live.
 
 **Files:**
 - Delete: `tests/architecture/lib-facade-boundary.test.ts`
+- Modify: `doctor.config.json` (remove both exact override entries for the deleted test)
 
 - [ ] **Step 1: Prove the surviving behavior coverage passes BEFORE deleting**
 
@@ -118,9 +119,15 @@ Expected: PASS. If any of these fail, STOP — the shape assertions are not yet 
 mkdir -p "$HOME/.Trash"
 mv tests/architecture/lib-facade-boundary.test.ts "$HOME/.Trash/lib-facade-boundary.test.ts.$(date +%s)"
 git add -u -- tests/architecture/lib-facade-boundary.test.ts
+```
+
+Remove both `"tests/architecture/lib-facade-boundary.test.ts"` entries from `doctor.config.json`, preserving the surrounding override rules and every other path. Then stage only that config edit:
+
+```bash
+git add -- doctor.config.json
 pnpm test
 ```
-Expected: all tests pass; the removed file simply no longer runs.
+Expected: all tests pass; the removed file no longer runs, and the exact-path guard confirms React Doctor has no stale reference to it.
 
 - [ ] **Step 3: Commit**
 
