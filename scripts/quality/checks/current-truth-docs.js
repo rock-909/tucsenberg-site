@@ -13,22 +13,6 @@ const {
 
 const ROOT = process.cwd();
 const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
-const PERFORMANCE_ARCHIVE_DOCS = [
-  "docs/技术难题/全量性能审计.md",
-  "docs/技术难题/LCP首屏动效边界.md",
-  "docs/技术难题/Lighthouse预算治理.md",
-  "docs/技术难题/Lighthouse预取策略.md",
-  "docs/技术难题/Lighthouse产品详情负载.md",
-  "docs/技术难题/Lighthouse共享负载.md",
-  "docs/技术难题/Lighthouse黄色债务归因.md",
-  "docs/技术难题/Lighthouse黄色债务基线.md",
-  "docs/技术难题/Lighthouse黄色债务第一轮收口.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮基线.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮收口.md",
-  "docs/技术难题/Lighthouse零黄色归因.md",
-  "docs/技术难题/性能治理候选审计.md",
-  "docs/技术难题/SEO公开页面性能余量.md",
-];
 const RETIRED_PUBLIC_TRUTH_PATTERNS = ["/api/verify-turnstile"];
 const HISTORICAL_BANNER = "> Historical.";
 const HISTORICAL_DERIVATION_DOCS = new Set([
