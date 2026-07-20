@@ -257,9 +257,6 @@ importers:
       lefthook:
         specifier: 2.1.9
         version: 2.1.9
-      playwright:
-        specifier: ^1.60.0
-        version: 1.60.0
       postcss:
         specifier: ^8.5.15
         version: 8.5.15
