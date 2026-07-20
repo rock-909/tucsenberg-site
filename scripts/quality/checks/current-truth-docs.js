@@ -13,22 +13,6 @@ const {
 
 const ROOT = process.cwd();
 const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
-const PERFORMANCE_ARCHIVE_DOCS = [
-  "docs/技术难题/全量性能审计.md",
-  "docs/技术难题/LCP首屏动效边界.md",
-  "docs/技术难题/Lighthouse预算治理.md",
-  "docs/技术难题/Lighthouse预取策略.md",
-  "docs/技术难题/Lighthouse产品详情负载.md",
-  "docs/技术难题/Lighthouse共享负载.md",
-  "docs/技术难题/Lighthouse黄色债务归因.md",
-  "docs/技术难题/Lighthouse黄色债务基线.md",
-  "docs/技术难题/Lighthouse黄色债务第一轮收口.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮基线.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮收口.md",
-  "docs/技术难题/Lighthouse零黄色归因.md",
-  "docs/技术难题/性能治理候选审计.md",
-  "docs/技术难题/SEO公开页面性能余量.md",
-];
 const RETIRED_PUBLIC_TRUTH_PATTERNS = ["/api/verify-turnstile"];
 const HISTORICAL_BANNER = "> Historical.";
 const HISTORICAL_DERIVATION_DOCS = new Set([
@@ -47,321 +31,51 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
   "candidate-backlog",
 ]);
 
-const TRUTH_DOC_CHECKS = [
-  {
-    file: "docs/项目基础/文档清单.md",
-    required: [
-      ...DOCUMENT_LIFECYCLE_CLASSES,
-      "Docs existence closeout",
-      "docs/技术难题/",
-      "docs/design/",
-      "docs/决策记录/",
-      "docs/superpowers/",
-      "specs/**",
-      "plans/**",
-      "docs/技术难题/性能实验优化方法论.md",
-      "docs/技术难题/审查2026-07/交接文档.md",
-      "docs/audits/上线就绪问题清单-2026-07-05.md",
-    ],
-    forbidden: ["review-needed", "Follow-up buckets"],
-  },
-  {
-    file: "docs/README.md",
-    required: [
-      "性能实验优化方法论.md",
-      "Superpowers 上游当前默认输出路径",
-      "docs/superpowers/specs/**",
-      "docs/superpowers/plans/**",
-      "技术难题/审查2026-07/交接文档.md",
-    ],
-  },
-  {
-    file: "README.md",
-    required: [
-      "src/constants/tucsenberg-product-page-*.ts",
-      "messages/profiles/b2b-lead/**",
-      "messages/profiles/catalog/**",
-      "base -> b2b-lead -> catalog",
-      "pnpm content:check",
-    ],
-  },
-  {
-    file: "docs/项目基础/AI协作边界.md",
-    required: [
-      "Upstream `obra/superpowers` currently writes specs and implementation plans",
-      "docs/superpowers/specs/**",
-      "docs/superpowers/plans/**",
-      "Older upstream history used `docs/plans/**`",
-      "Local `.superpowers/**` state is not a repo document path",
-    ],
-  },
-  {
-    file: "docs/项目基础/维护入口.md",
-    required: ["旧 starter workflow 说明已经移出 `docs/`"],
-    forbidden: ["website-production-workflow.excalidraw"],
-  },
-  {
-    file: "docs/技术难题/性能实验优化方法论.md",
-    required: [
-      "这是方法笔记，不是当前 Tucsenberg launch proof。",
-      "docs/项目基础/上线验证.md",
-    ],
-  },
-  {
-    file: "docs/项目基础/项目基础索引.md",
-    required: ["架构树.md", "集成.md"],
-  },
-  {
-    file: "docs/决策记录/Radix联系表单试点.md",
-    required: [
-      "Historical route/build artifact note",
-      "Current Tucsenberg is English-only",
-      "not a current route promise",
-    ],
-  },
-  {
-    file: "docs/技术难题/验证入口.md",
-    required: [
-      "Cloudflare构建警告.md",
-      "ReactDoctor基线.md",
-      "路由模式基线.md",
-      "Storybook警告基线.md",
-      "旧 mock 方法笔记已经移出 `docs/`",
-      "审查2026-07/交接文档.md",
-    ],
-  },
-  // 交接文档已整篇转为 historical（docs/技术难题/审查2026-07/ 目录豁免），
-  // 原 required 锁的是时点快照（commit 哈希 42aaabe/8c6dc3a、"0 error / 3 warning"
-  // 输出、"尚未 push" 状态），会强制文档保留过时陈述。required 只锁活的真相，
-  // 禁止锁时点快照——整条移除。
-  {
-    file: "docs/技术难题/性能记录.md",
-    required: [
-      "性能实验优化方法论.md",
-      "a reusable method note, not current launch proof",
-    ],
-  },
-  {
-    // 维护规则.md 原在 TRUTH_DOC_CHECKS 里出现 4 次，forbidden 列表互相重叠。
-    // 合并为单一条目：required 保留唯一一份，forbidden 取 4 条的去重并集。
-    file: "docs/项目基础/维护规则.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-      "src/config/single-site-product-catalog.ts",
-      "src/constants/tucsenberg-product-pages.ts",
-      "messages/base/**",
-      "messages/profiles/b2b-lead/**",
-      "messages/profiles/catalog/**",
-    ],
-    forbidden: [
-      "src/sites/message-overrides.ts",
-      "src/sites/**/messages/**",
-      "review-needed",
-      "src/lib/lead-pipeline/**",
-      "messages/en.json",
-      "messages/zh.json",
-      "scripts/cloudflare/**",
-      "pnpm review:tier-a:staged",
-      "pnpm review:lead-family",
-      "pnpm review:homepage-sections",
-      "pnpm review:locale-runtime",
-      "pnpm review:clusters",
-      "pnpm review:cluster",
-      "pnpm quality:gate",
-      "src/lib/lead-pipeline/metrics.ts",
-      "src/lib/lead-pipeline/pipeline-observability.ts",
-    ],
-  },
-  {
-    file: "docs/项目基础/内容.md",
-    required: [
-      "content/config/content.json",
-      "messages/base/**",
-      "messages/profiles/b2b-lead/**",
-      "messages/profiles/catalog/**",
-      "pnpm content:check",
-      "node scripts/starter-checks.js content-readiness",
-    ],
-  },
-  {
-    file: "docs/项目基础/项目基础.md",
-    required: [
-      "src/constants/tucsenberg-product-page-*.ts",
-      "messages/profiles/b2b-lead/**",
-      "messages/profiles/catalog/**",
-      "pnpm content:check",
-    ],
-  },
-  {
-    file: "docs/项目基础/消息文案.md",
-    required: [
-      "theme, accessibility, cookie, structured data, API/errors, legal and email reference copy",
-      "contact, RFQ, inquiry, shared lead-form copy and shared FAQ section chrome",
-      "navigation, footer, home, catalog, OEM landing and product-page UI",
-    ],
-  },
-  {
-    file: "docs/项目基础/替换边界.md",
-    required: [
-      "content/config/content.json",
-      "`content/pages/{locale}/*.mdx`",
-      "src/constants/tucsenberg-product-pages.ts",
-      "src/config/single-site-product-catalog.ts",
-    ],
-  },
-  {
-    file: "docs/项目基础/配置.md",
-    required: [
-      "content/config/content.json",
-      "src/constants/tucsenberg-product-pages.ts",
-    ],
-  },
-  {
-    file: "docs/项目基础/发布验证.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-      "scripts/quality/release-proof-manifest.js",
-    ],
-    forbidden: [
-      "src/sites/**/messages/**",
-      "pnpm ci:local",
-      "pnpm review:tier-a:staged",
-      "pnpm review:clusters",
-      "CF_APPLY_GENERATED_PATCH=true pnpm build:cf",
-      "node scripts/clean-next-build-artifacts.mjs",
-      "CI=1 pnpm exec playwright test --all-projects",
-      "pnpm review:translation-quartet",
-      "pnpm review:translate-compat",
-    ],
-  },
-  {
-    file: "docs/项目基础/验证等级.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-    ],
-    forbidden: ["src/sites/**", "pnpm ci:local", "pnpm quality:gate"],
-  },
-  {
-    file: "docs/项目基础/架构图.svg",
-    required: [
-      "messages/base/** + profiles/**",
-      "Retired-locale fast 404 + locale routing",
-      "src/app/api/inquiry/route.ts",
-      "src/lib/lead-pipeline/**",
-      "Guides, legal, about",
-    ],
-    forbidden: [
-      "scripts/cloudflare/**",
-      "Showcase Website Starter Project Architecture Diagram",
-      "Showcase Website Starter - Current Project Architecture",
-      "bilingual content",
-    ],
-  },
-  {
-    file: "docs/项目基础/生命周期.md",
-    forbidden: ["This starter has two lifecycle contexts:"],
-  },
-  {
-    file: "docs/design/色彩系统.md",
-    forbidden: [
-      "# Showcase Website Starter Color System",
-      "The starter should look clear, credible, modern, and easy to replace.",
-    ],
-  },
-  {
-    file: "docs/design/组件治理.md",
-    forbidden: ["This starter is built for AI-assisted development."],
-  },
-  {
-    file: "docs/design/设计真相.md",
-    required: [
-      "Tucsenberg current site design truth",
-      "当前公开站点是 English-only，没有 `/zh` 设计入口。",
-      "inherited starter design baseline",
-    ],
-    forbidden: [
-      "这份文档只记录 starter 当前已经确认的设计真相。",
-      "Current truth: starter uses a replaceable role-based color system.",
-    ],
-  },
-  {
-    file: "docs/design/动效治理.md",
-    required: ["canonical motion rulebook for the Tucsenberg site"],
-    forbidden: [
-      "canonical motion rulebook for the starter",
-      "Motion in this starter",
-    ],
-  },
-  {
-    file: "docs/design/设计系统说明.md",
-    required: [
-      "Tucsenberg inherited design governance workspace",
-      "必须服从 `docs/design/设计真相.md` 与当前运行态",
-    ],
-    forbidden: [
-      "external/",
-      "不作为 starter 当前真相源",
-      "恢复为 starter baseline",
-    ],
-  },
-  {
-    file: "docs/design/页面模式.md",
-    required: [
-      "pattern reference for new work and refactors",
-      ".text-section",
-      "surface-card",
-      "HeroGuideOverlay",
-      "--footer-bg",
-      "--button-height-default",
-    ],
-    forbidden: [
-      "所有新页面和存量页面重构必须遵循此文件",
-      "当前其他页面与本规范的偏差",
-    ],
-  },
-  ...PERFORMANCE_ARCHIVE_DOCS.map((file) => ({
-    file,
-    required: ["Historical starter proof."],
-    ...(file === "docs/技术难题/全量性能审计.md"
-      ? {
-          forbidden: ["The current starter is in a healthy performance state."],
-        }
-      : {}),
-  })),
-  {
-    file: ".claude/rules/content.md",
-    required: [
-      "src/config/single-site-page-expression.ts",
-      "src/config/single-site-seo.ts",
-      "content/config/content.json",
-      "docs/superpowers/plans/**",
-      "messages/base/**",
-      "messages/profiles/b2b-lead/**",
-      "messages/profiles/catalog/**",
-    ],
-  },
-  {
-    file: ".claude/rules/i18n.md",
-    required: [
-      "messages/base/{locale}/messages.json",
-      "messages/profiles/b2b-lead/{locale}/messages.json",
-      "messages/profiles/catalog/{locale}/messages.json",
-      "base -> b2b-lead -> catalog",
-      "pnpm content:check",
-      "mutually exclusive",
-    ],
-    forbidden: [
-      "messages/profiles/{profile}/{locale}/messages.json",
-      "src/sites/**/messages/**",
-    ],
-  },
-  {
-    file: ".claude/rules/testing.md",
-    required: ["docs/项目基础/行为合约.md"],
-  },
+// 锚点文档必须存在；措辞不再钉死 —— 措辞真相由文档清单与路径存在性检查守护。
+const REQUIRED_TRUTH_FILES = [
+  "docs/项目基础/文档清单.md",
+  "docs/README.md",
+  "README.md",
+  "docs/项目基础/AI协作边界.md",
+  "docs/项目基础/维护入口.md",
+  "docs/技术难题/性能实验优化方法论.md",
+  "docs/项目基础/项目基础索引.md",
+  "docs/决策记录/Radix联系表单试点.md",
+  "docs/技术难题/验证入口.md",
+  "docs/技术难题/性能记录.md",
+  "docs/项目基础/维护规则.md",
+  "docs/项目基础/内容.md",
+  "docs/项目基础/项目基础.md",
+  "docs/项目基础/消息文案.md",
+  "docs/项目基础/替换边界.md",
+  "docs/项目基础/配置.md",
+  "docs/项目基础/发布验证.md",
+  "docs/项目基础/验证等级.md",
+  "docs/项目基础/架构图.svg",
+  "docs/项目基础/生命周期.md",
+  "docs/design/色彩系统.md",
+  "docs/design/组件治理.md",
+  "docs/design/设计真相.md",
+  "docs/design/动效治理.md",
+  "docs/design/设计系统说明.md",
+  "docs/design/页面模式.md",
+  "docs/技术难题/全量性能审计.md",
+  "docs/技术难题/LCP首屏动效边界.md",
+  "docs/技术难题/Lighthouse预算治理.md",
+  "docs/技术难题/Lighthouse预取策略.md",
+  "docs/技术难题/Lighthouse产品详情负载.md",
+  "docs/技术难题/Lighthouse共享负载.md",
+  "docs/技术难题/Lighthouse黄色债务归因.md",
+  "docs/技术难题/Lighthouse黄色债务基线.md",
+  "docs/技术难题/Lighthouse黄色债务第一轮收口.md",
+  "docs/技术难题/Lighthouse黄色债务第二轮基线.md",
+  "docs/技术难题/Lighthouse黄色债务第二轮收口.md",
+  "docs/技术难题/Lighthouse零黄色归因.md",
+  "docs/技术难题/性能治理候选审计.md",
+  "docs/技术难题/SEO公开页面性能余量.md",
+  ".claude/rules/content.md",
+  ".claude/rules/i18n.md",
+  ".claude/rules/testing.md",
 ];
 
 const CURRENT_TRUTH_COMMAND_DOCS = [
@@ -510,137 +224,15 @@ function documentedRepoPathExists(rootDir, documentedPath) {
   }
 }
 
-const PATH_INSTRUCTION_VERB_SOURCE =
-  "(?:use|keep|read|run|import|reference|replace|choose|adopt|update|move|create|add)";
-const POSITIVE_PATH_STATE_SOURCE =
-  "(?:used|kept|read|run|imported|referenced|replaced|chosen|adopted|updated|moved|created|added|renamed|required|supported|present|active|current|canonical)";
-const ABSENCE_PERMITTING_PATH_STATE_SOURCE =
-  "(?:used|kept|read|run|imported|referenced|chosen|adopted|created|added|required|supported|present|active|current|canonical)";
-const NEGATIVE_MODAL_SOURCE =
-  "(?:(?:must|should|may|can)\\s+(?:not|never)|cannot|never)";
-const NEGATIVE_DIRECTIVE_SOURCE = `(?:(?:do|does)\\s+not|${NEGATIVE_MODAL_SOURCE})`;
-const ABSENCE_PERMITTING_ACTION_SOURCE =
-  "(?:create|use|import|reference|add|adopt|choose|read|run)";
-const NEGATED_ABSENCE_ACTION_PATTERN = new RegExp(
-  `\\b${NEGATIVE_DIRECTIVE_SOURCE}\\s+${ABSENCE_PERMITTING_ACTION_SOURCE}\\b[^.;:!?，。；：！？]{0,120}$`,
-  "iu",
-);
-const NEGATED_TARGET_PATTERN = new RegExp(
-  `\\b${NEGATIVE_DIRECTIVE_SOURCE}\\s+(?:(?:rename|move)\\s+\`path\`\\s+(?:to|as|into)|replace\\s+\`path\`\\s+with)\\s*$`,
-  "iu",
-);
-const NEGATED_PASSIVE_TARGET_PATTERN = new RegExp(
-  `\`path\`\\s+(?:${NEGATIVE_MODAL_SOURCE}\\s+be|is\\s+(?:not|never))\\s+(?:(?:renamed|moved)\\s+(?:to|as|into)|replaced\\s+with)\\s*$`,
-  "iu",
-);
-const CHINESE_NEGATED_ABSENCE_ACTION_PATTERN =
-  /(?:不要|不得|禁止)\s*(?:创建|使用|导入|引用|添加|采用|选择|运行|读取)[^，。；：！？]{0,72}$/iu;
-const CHINESE_NEGATED_TARGET_PATTERN =
-  /(?:(?:不把|不将|(?:不要|不得|禁止)(?:把|将))\s*`path`[^，。；：！？]{0,40}(?:改(?:成|为)|重命名(?:为|成)|(?:移动|移)(?:到|至)|替换(?:为|成))|(?:不要|不得|禁止)\s*(?:(?:移动|移)\s*`path`\s*(?:到|至)|重命名\s*`path`\s*(?:为|成)|替换\s*`path`\s*(?:为|成)))\s*$/iu;
-const NEGATED_STATE_PREFIX_PATTERN =
-  /(?:\b(?:not created|no live)\b[^.;:!?，。；：！？]{0,120}|(?:不存在|未恢复|没有现役)[^，。；：！？]{0,72})\s*$/iu;
-const NEGATIVE_PATH_PREDICATE_PATTERN = new RegExp(
-  `^\`[^\`]+\`\\s+(?:is\\s+(?:not|never)\\s+${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|does not exist|never exists|is (?:prohibited|forbidden)|${NEGATIVE_MODAL_SOURCE}\\s+(?:(?:be\\s+)?${ABSENCE_PERMITTING_PATH_STATE_SOURCE}|exist))\\b`,
-  "iu",
-);
-const POSITIVE_PATH_PREDICATE_PATTERN = new RegExp(
-  `^\`[^\`]+\`\\s+(?:is\\s+(?:the\\s+)?${POSITIVE_PATH_STATE_SOURCE}|(?:must|should)\\s+(?:exist|be\\s+${POSITIVE_PATH_STATE_SOURCE})|exists)\\b`,
-  "iu",
-);
+// 显式豁免：默认所有反引号 src/tests 路径都必须存在；只有行内带
+// truth-docs:allow-missing 标记（HTML 注释形式）的行允许路径缺失。
+// 混合句（同行既有活路径又有故意缺失路径）应拆句后再打标记。
+const ALLOW_MISSING_MARKER = "truth-docs:allow-missing";
 
-function commaBelongsToNegatedActionList(normalizedClause, commaIndex) {
-  const remainingClause = normalizedClause.slice(commaIndex + 1);
-  if (/^\s*instead\b/iu.test(remainingClause)) return false;
-
-  const nextBoundaryIndex = remainingClause.search(
-    /[.;!?，。；！？]|\b(?:but|however|yet)\b|(?:但是|然而|但)/iu,
-  );
-  const activeSegment = remainingClause.slice(
-    0,
-    nextBoundaryIndex === -1 ? undefined : nextBoundaryIndex,
-  );
-  const coordinatedActionPattern = new RegExp(
-    `,\\s*(?:and|or)\\s+${PATH_INSTRUCTION_VERB_SOURCE}(?:\\s+\`path\`|\\s*$)`,
-    "iu",
-  );
-
-  return coordinatedActionPattern.test(activeSegment);
-}
-
-function isNegatedByDirective(activeClausePrefix) {
-  return (
-    NEGATED_ABSENCE_ACTION_PATTERN.test(activeClausePrefix) ||
-    NEGATED_TARGET_PATTERN.test(activeClausePrefix) ||
-    NEGATED_PASSIVE_TARGET_PATTERN.test(activeClausePrefix) ||
-    CHINESE_NEGATED_ABSENCE_ACTION_PATTERN.test(activeClausePrefix) ||
-    CHINESE_NEGATED_TARGET_PATTERN.test(activeClausePrefix) ||
-    NEGATED_STATE_PREFIX_PATTERN.test(activeClausePrefix)
-  );
-}
-
-function isNegatedDocumentedPath(content, lineStart, matchIndex) {
-  const currentLinePrefix = content.slice(lineStart, matchIndex);
-  const currentLineEnd = content.indexOf("\n", matchIndex);
-  const currentLineSuffix = content.slice(
-    matchIndex,
-    currentLineEnd === -1 ? undefined : currentLineEnd,
-  );
-  const linePrefix = currentLinePrefix.trim();
-  const isListItem = /^(?:[-*+]|\d+[.)])\s*$/u.test(linePrefix);
-  let clausePrefix = currentLinePrefix;
-
-  if (!linePrefix || isListItem) {
-    let previousLineEnd = Math.max(0, lineStart - 1);
-    while (previousLineEnd > 0) {
-      const previousLineStart =
-        content.lastIndexOf("\n", previousLineEnd - 1) + 1;
-      const previousLine = content.slice(previousLineStart, previousLineEnd);
-      const previousTrimmed = previousLine.trim();
-
-      if (!previousTrimmed) break;
-      if (isListItem && /^(?:[-*+]|\d+[.)])\s+/u.test(previousTrimmed)) {
-        previousLineEnd = Math.max(0, previousLineStart - 1);
-        continue;
-      }
-
-      if (/(?:\b(?:and|or)|[:：])\s*$/iu.test(previousLine)) {
-        clausePrefix = `${previousLine.replace(/[:：]\s*$/u, "")}\n${currentLinePrefix}`;
-      }
-      break;
-    }
-  }
-
-  const normalizedClausePrefix = clausePrefix.replace(/`[^`]*`/gu, "`path`");
-  const normalizedClause = `${clausePrefix}${currentLineSuffix}`.replace(
-    /`[^`]*`/gu,
-    "`path`",
-  );
-  const clauseResetPattern = new RegExp(
-    `[.;!?，。；！？]|,(?=\\s*(?:instead\\s+)?${PATH_INSTRUCTION_VERB_SOURCE}(?:\\s+\`path\`|\\s*$))|\\b(?:but|however|yet)\\b|(?:但是|然而|但)`,
-    "giu",
-  );
-  let activeClauseStart = 0;
-  for (const match of normalizedClausePrefix.matchAll(clauseResetPattern)) {
-    if (
-      match[0] === "," &&
-      commaBelongsToNegatedActionList(normalizedClause, match.index ?? 0)
-    ) {
-      continue;
-    }
-    activeClauseStart = (match.index ?? 0) + match[0].length;
-  }
-  if (POSITIVE_PATH_PREDICATE_PATTERN.test(currentLineSuffix)) {
-    const positiveClauseCommaIndex = normalizedClausePrefix.lastIndexOf(",");
-    if (positiveClauseCommaIndex >= activeClauseStart) {
-      activeClauseStart = positiveClauseCommaIndex + 1;
-    }
-  }
-  const activeClausePrefix = normalizedClausePrefix.slice(activeClauseStart);
-
-  return (
-    isNegatedByDirective(activeClausePrefix) ||
-    NEGATIVE_PATH_PREDICATE_PATTERN.test(currentLineSuffix)
-  );
+function lineAllowsMissingDocumentedPath(content, lineStart, matchIndex) {
+  const lineEnd = content.indexOf("\n", matchIndex);
+  const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+  return line.includes(ALLOW_MISSING_MARKER);
 }
 
 function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
@@ -668,7 +260,7 @@ function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
       if (!documentedPath) continue;
       if (documentedRepoPathExists(rootDir, documentedPath)) continue;
       const lineStart = content.lastIndexOf("\n", match.index) + 1;
-      if (isNegatedDocumentedPath(content, lineStart, match.index)) {
+      if (lineAllowsMissingDocumentedPath(content, lineStart, match.index)) {
         continue;
       }
       findings.push({
@@ -908,33 +500,12 @@ function collectPnpmPackageScriptCommands(content) {
 function collectCurrentTruthDocFindings(rootDir = ROOT) {
   const failures = [];
 
-  for (const check of TRUTH_DOC_CHECKS) {
-    const fullPath = path.join(rootDir, check.file);
-    if (!fs.existsSync(fullPath)) {
+  for (const file of REQUIRED_TRUTH_FILES) {
+    if (!fs.existsSync(path.join(rootDir, file))) {
       failures.push({
-        file: check.file,
-        error: `missing required current-truth file "${check.file}"`,
+        file,
+        error: `missing required current-truth file "${file}"`,
       });
-      continue;
-    }
-
-    const content = readTruthFile(rootDir, check.file);
-    for (const pattern of check.forbidden ?? []) {
-      if (content.includes(pattern)) {
-        failures.push({
-          file: check.file,
-          error: `forbidden current-truth pattern "${pattern}"`,
-        });
-      }
-    }
-
-    for (const pattern of check.required ?? []) {
-      if (!content.includes(pattern)) {
-        failures.push({
-          file: check.file,
-          error: `missing current-truth pattern "${pattern}"`,
-        });
-      }
     }
   }
 
@@ -1033,7 +604,7 @@ function runTruthDocsCheck() {
 }
 
 module.exports = {
-  CHECKS: TRUTH_DOC_CHECKS,
+  REQUIRED_TRUTH_FILES,
   CURRENT_TRUTH_COMMAND_DOCS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],

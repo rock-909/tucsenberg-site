@@ -765,6 +765,10 @@ This batch touches the CI gate itself (`node scripts/starter-checks.js truth-doc
 - Modify: `scripts/starter-checks.js` (two `CHECKS: TRUTH_DOC_CHECKS` sites, lines ~69 and ~213)
 - Modify: `.claude/rules/cloudflare.md` (mark the intentionally absent `src/proxy.ts`)
 - Modify: `.claude/rules/code-quality.md` (mark the intentionally absent `src/testing/**` and `src/constants/test-*` patterns)
+- Modify: `docs/design/Storybook覆盖范围.md` (separate the live component directories from the retired `src/components/contact/` path)
+- Modify: `docs/技术难题/路由模式基线.md` (separate live `src/middleware.ts` truth from intentionally absent `src/proxy.ts`)
+- Modify: `docs/项目基础/上线验证.md` (same mixed-path split for the release runbook)
+- Modify: `docs/项目基础/技术栈.md` (same mixed-path split for the platform decision record)
 
 **Interfaces:**
 - Produces: `REQUIRED_TRUTH_FILES: string[]` (replaces the exported `CHECKS`); `lineAllowsMissingDocumentedPath(content, lineStart, matchIndex): boolean` (replaces `isNegatedDocumentedPath` — same signature, one call site in `collectBacktickedRepoPathFindings` renamed).
@@ -875,7 +879,7 @@ For each finding, decide per path:
 - **Path intentionally absent** (retired/forbidden file): append ` <!-- truth-docs:allow-missing -->` at the end of that line. If the same line ALSO contains a live path that is not positively referenced on another checked line, split the sentence first so the marker only covers the absent path.
 - **Path is a stale reference**: fix the doc instead of marking.
 
-The current `main` produces exactly three intentional-missing findings. Apply these explicit edits:
+The exact Batch 3 base (`13879fc0416047d043f7b625d40e94d2ee87bced`) produces seven intentional-missing findings. The original plan accounted for only the first three; the first execution sweep exposed four additional negated/retired-path lines that the old grammar parser also skipped. Apply these explicit edits:
 
 `.claude/rules/cloudflare.md` — replace the mixed-path sentence with:
 
@@ -892,6 +896,38 @@ The live `src/middleware.ts` remains guarded by the preceding sentence, "Keep `s
 Production code must not import `src/test/**`.
 Production code must not import `src/testing/**`. <!-- truth-docs:allow-missing -->
 Production code must not import `src/constants/test-*`. <!-- truth-docs:allow-missing -->
+```
+
+`docs/design/Storybook覆盖范围.md` — keep the live component directories on their own guarded line, then isolate the retired directory:
+
+```markdown
+**范围**：现有业务组件目录，例如 `src/components/forms/`、`src/components/products/`、`src/components/footer/`、`src/components/navigation/`。
+不要引用已删除的目录（例如旧 `trust/`）。
+不要引用已退役的 `src/components/contact/`。 <!-- truth-docs:allow-missing -->
+```
+
+`docs/技术难题/路由模式基线.md` — replace the mixed-path sentence with:
+
+```markdown
+Keep `src/middleware.ts` as the current runtime entrypoint.
+Do not introduce `src/proxy.ts` just to silence a framework warning. <!-- truth-docs:allow-missing -->
+Cloudflare/OpenNext support is not acceptable for a blind migration. Proxy migration is a separate runtime lane; see `../项目基础/技术栈.md`.
+```
+
+`docs/项目基础/上线验证.md` — replace the mixed-path bullet with:
+
+```markdown
+- Keep `src/middleware.ts` as the current runtime entrypoint.
+- Do not introduce `src/proxy.ts` just to silence framework warning. <!-- truth-docs:allow-missing -->
+- Cloudflare/OpenNext support is not acceptable for a blind migration. The Next.js deprecation warning is a known platform-transition warning.
+```
+
+`docs/项目基础/技术栈.md` — replace the mixed-path bullet with:
+
+```markdown
+- 当前保持 `src/middleware.ts` 作为 runtime entrypoint。
+- 当前不引入 `src/proxy.ts`。 <!-- truth-docs:allow-missing -->
+- Proxy 迁移必须是独立 runtime lane，不能和 CSP、i18n、Cloudflare 或文档清理混在一起。
 ```
 
 Re-run the gate. Expected: no other missing-path findings. If another file appears because `main` changed, STOP, classify that path, add the exact file to this task's Files list and commit command, then continue.
@@ -921,7 +957,12 @@ git add -- \
   scripts/quality/checks/current-truth-docs.js \
   scripts/starter-checks.js \
   .claude/rules/cloudflare.md \
-  .claude/rules/code-quality.md
+  .claude/rules/code-quality.md \
+  docs/design/Storybook覆盖范围.md \
+  docs/技术难题/路由模式基线.md \
+  docs/项目基础/上线验证.md \
+  docs/项目基础/技术栈.md \
+  docs/superpowers/plans/2026-07-19-overengineering-cleanup.md
 git commit -m "refactor: replace truth-docs phrase pinning with structural checks"
 ```
 
