@@ -6,7 +6,7 @@
 
 **Goal:** Remove verified over-engineering found by the 2026-07-19 ponytail audit: negative-space guards, test-only production code, duplicate/replaceable dependencies, a vacuous dep-cruiser rule, dead token surfaces, dual prop protocols, and the phrase-pinning half of the truth-docs gate — while preserving every live invariant (lead delivery graph proof, doc inventory gate, LCP motion boundary).
 
-**Architecture:** Three sequential PRs. Batch 1 is pure deletion and dependency swaps (near-zero risk). Batch 2 consolidates code that has tests attached. Batch 3 reworks the truth-docs CI gate itself and is isolated so gate regressions cannot mix with code changes. Every finding in this plan was re-verified against the working tree on 2026-07-19 (callers grepped, CI wiring confirmed, Node 24 pinned in `engines`, `.nvmrc`, and all workflows). During execution on 2026-07-20, Task 2's React Doctor override references were found by the full test gate and added to the task scope before implementation continued.
+**Architecture:** Three sequential PRs. Batch 1 is pure deletion and dependency swaps (near-zero risk). Batch 2 consolidates code that has tests attached. Batch 3 reworks the truth-docs CI gate itself and is isolated so gate regressions cannot mix with code changes. Every finding in this plan was re-verified against the working tree on 2026-07-19 (callers grepped, CI wiring confirmed, Node 24 pinned in `engines`, `.nvmrc`, and all workflows). During execution on 2026-07-20, Task 2's React Doctor override references were found by the full test gate and added to the task scope; Task 3's caller check was also corrected from a content-self-match assumption to an import-only search.
 
 **Tech Stack:** Next.js 16 App Router, TypeScript strict, Vitest, Playwright, dependency-cruiser 17 (wired into CI at `.github/workflows/ci.yml:79` and lefthook, `-T err` = only `severity: "error"` rules block), pnpm, Node >=24 <25.
 
@@ -145,12 +145,16 @@ Verified on 2026-07-19: `useCurrentTime` and `form-status-styles` have **zero** 
 - Delete: `src/components/forms/form-status-styles.ts`
 - Delete: `src/components/forms/__tests__/form-status-styles.test.ts`
 
-- [ ] **Step 1: Re-confirm zero callers (cheap safety, greps must return only the files being deleted)**
+- [ ] **Step 1: Re-confirm the files exist and have no production importers**
 
 ```bash
-grep -rln "use-current-time\|useCurrentTime\|form-status-styles" src tests scripts
+test -f src/hooks/use-current-time.ts
+test -f src/hooks/__tests__/use-current-time.test.tsx
+test -f src/components/forms/form-status-styles.ts
+test -f src/components/forms/__tests__/form-status-styles.test.ts
+rg -l "from ['\"][^'\"]*(use-current-time|form-status-styles)['\"]" src tests scripts
 ```
-Expected output: exactly the four paths listed above. If anything else appears, STOP and report.
+Expected `rg` output: exactly the two self-test paths (`src/hooks/__tests__/use-current-time.test.tsx` and `src/components/forms/__tests__/form-status-styles.test.ts`). The two production files do not need to contain their own filenames. If any other importer appears, STOP and report.
 
 - [ ] **Step 2: Remove (Trash + staged deletion) and verify**
 
