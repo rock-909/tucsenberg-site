@@ -139,7 +139,6 @@
           "src/config/__tests__/site-facts.test.ts",
           "src/config/__tests__/standards-consistency.test.ts",
           "tests/architecture/component-governance.test.ts",
-          "tests/architecture/lib-facade-boundary.test.ts",
           "tests/unit/content-page-placeholders.test.ts",
           "tests/unit/scripts/current-truth-docs.test.ts",
           "tests/unit/scripts/proof-lane-contract.test.ts"
@@ -162,8 +161,7 @@
           "scripts/starter-checks.js",
           "src/config/paths/__tests__/site-config.test.ts",
           "tests/architecture/design-token-contract.test.ts",
-          "tests/architecture/env-boundary.test.ts",
-          "tests/architecture/lib-facade-boundary.test.ts"
+          "tests/architecture/env-boundary.test.ts"
         ],
         "rules": ["react-doctor/js-set-map-lookups"]
       },
