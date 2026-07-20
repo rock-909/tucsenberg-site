@@ -2,7 +2,6 @@
 
 @source "../app";
 @source "../components";
-@source "../config/footer-style-tokens.ts";
 @source "../lib/content";
 @source "../../content";
 @source "../../mdx-components.tsx";

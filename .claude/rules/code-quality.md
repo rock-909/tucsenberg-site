@@ -74,7 +74,7 @@ deliberate, measured choice, not an oversight.
 Measured on 2026-07-12 by flipping the flag to `true`: 38 new violations across
 8 files. About 36 of them are exactly the literals this section already permits
 as direct — animation durations and opacity (`src/lib/motion/light-breathing.ts`),
-style tokens (`src/config/footer-style-tokens.ts`), layout dimensions
+layout dimensions
 (`src/config/pages.config.ts`), SEO/site config (`src/config/single-site*.ts`),
 and Lighthouse score/budget thresholds (`lighthouserc.js`). Turning the flag on
 would force naming that config/motion idiom class, fighting this section's own

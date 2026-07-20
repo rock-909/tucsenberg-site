@@ -1,11 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { FOOTER_STYLE_TOKENS } from "@/config/footer-style-tokens";
 
 const GLOBALS_CSS = "src/app/globals.css";
 const FOOTER_LAYOUT_SOURCE = "src/app/[locale]/layout.tsx";
 const FOOTER_COMPONENT_SOURCE = "src/components/footer/Footer.tsx";
-const FOOTER_STYLE_TOKEN_SOURCE = "src/config/footer-style-tokens.ts";
 
 const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/ui/button.tsx",
@@ -93,9 +91,6 @@ const FOOTER_SURFACE_TOKEN_EXPECTATIONS = {
   "--footer-link": "var(--neutral-9)",
   "--footer-divider": "color-mix(in oklch, var(--neutral-12) 10%, transparent)",
 } as const;
-
-const FOOTER_STYLE_TOKEN_TAILWIND_SOURCE =
-  '@source "../config/footer-style-tokens.ts";';
 
 function readRepoFile(filePath: string) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo files
@@ -214,19 +209,6 @@ describe("design token contract", () => {
     }
   });
 
-  it("keeps footer browser UI config in a semantic light/dark link contract", () => {
-    const footerTokenSource = stripCssComments(
-      readRepoFile(FOOTER_STYLE_TOKEN_SOURCE),
-    );
-
-    expect(footerTokenSource).toContain('text: "text-[var(--footer-text)]"');
-    expect(footerTokenSource).toContain(
-      'hoverText: "hover:text-[var(--footer-link)]"',
-    );
-    expect(footerTokenSource).not.toContain('text: ""');
-    expect(footerTokenSource).not.toContain('hoverText: ""');
-  });
-
   it("keeps footer surface roles wired through footer-specific tokens", () => {
     const css = stripCssComments(readRepoFile(GLOBALS_CSS));
     const footerLayoutSource = stripCssComments(
@@ -251,22 +233,6 @@ describe("design token contract", () => {
     // The legal identity bar is rendered inside Footer itself; layout must not
     // reintroduce footer-styled text outside the footer token contract.
     expect(footerLayoutSource).not.toContain("text-[var(--footer-");
-  });
-
-  it("keeps runtime font truth aligned across design docs and footer tokens", () => {
-    const globals = readRepoFile(GLOBALS_CSS);
-    const design = readRepoFile("DESIGN.md");
-    const truth = readRepoFile("docs/design/设计真相.md");
-    const footerTokens = readRepoFile(FOOTER_STYLE_TOKEN_SOURCE);
-
-    expect(globals).toContain("--font-sans");
-    expect(design).toContain("system stack");
-    expect(truth).toContain("system stack");
-    expect(FOOTER_STYLE_TOKENS.typography.fontFamily).toBe(
-      "var(--font-sans), var(--font-chinese)",
-    );
-    expect(footerTokens).not.toContain("Geist");
-    expect(truth).not.toContain("Figtree");
   });
 
   it("keeps selected production UI files off raw brand palette classes", () => {
@@ -314,22 +280,12 @@ describe("design token contract", () => {
   });
 
   it("keeps footer browser UI config off raw Tailwind palette classes", () => {
-    const footerSources = [FOOTER_STYLE_TOKEN_SOURCE, FOOTER_COMPONENT_SOURCE];
+    const source = stripCssComments(readRepoFile(FOOTER_COMPONENT_SOURCE));
 
-    for (const filePath of footerSources) {
-      const source = stripCssComments(readRepoFile(filePath));
-
-      expect(
-        source.match(BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN),
-        `${filePath} should use semantic tokens instead of raw Tailwind palette classes because it feeds browser-rendered footer UI`,
-      ).toBeNull();
-    }
-  });
-
-  it("includes footer browser UI config in Tailwind source scanning", () => {
-    const css = stripCssComments(readRepoFile(GLOBALS_CSS));
-
-    expect(css).toContain(FOOTER_STYLE_TOKEN_TAILWIND_SOURCE);
+    expect(
+      source.match(BANNED_FOOTER_RAW_PALETTE_CLASS_PATTERN),
+      `${FOOTER_COMPONENT_SOURCE} should use semantic tokens instead of raw Tailwind palette classes because it feeds browser-rendered footer UI`,
+    ).toBeNull();
   });
 
   it("does not keep old brand color values in the browser runtime CSS", () => {
