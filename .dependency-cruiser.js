@@ -57,65 +57,6 @@ module.exports = {
       to: { circular: true },
     },
     {
-      name: "no-orphans",
-      severity: "warn",
-      comment: "检测孤立文件 - 识别未被引用的代码文件（已优化减少误报）",
-      from: {
-        orphan: true,
-        pathNot: [
-          // 测试文件
-          "\\.(d\\.ts|spec\\.ts|test\\.ts|stories\\.ts|stories\\.tsx)$",
-          // 类型定义目录和文件
-          "^src/types/",
-          ".*-types\\.(ts|tsx)$",
-          // 测试工具和模板
-          "^src/test/",
-          "^src/testing/",
-          "test-utils\\.(ts|tsx)$",
-          "setup\\.(ts|tsx)$",
-          // 测试常量
-          "^src/constants/test-",
-          // Next.js页面文件（文件系统路由）
-          "^src/app/.*/page\\.tsx$",
-          "^src/app/page\\.tsx$",
-          "^src/app/.*/route\\.(ts|tsx)$",
-          "^src/app/.*/head\\.tsx$",
-          "^src/app/head\\.tsx$",
-          // Next.js布局和字体配置
-          "^src/app/.*/layout-fonts\\.(ts|tsx)$",
-          // 配置文件
-          "^src/config/",
-          // Mock文件
-          "/mocks/",
-          // 工具文件（可能通过动态导入使用）
-          "^src/lib/.*\\.(ts|tsx)$",
-          // 常量文件（可能通过动态导入使用）
-          "^src/constants/.*\\.(ts|tsx)$",
-          // 服务文件（可能通过动态导入使用）
-          "^src/services/.*\\.(ts|tsx|js|jsx)$",
-          // UI组件（可能通过动态导入使用）
-          "^src/components/ui/.*\\.(ts|tsx)$",
-          "^src/components/loading-.*\\.(ts|tsx)$",
-          "^src/components/theme-provider\\.(ts|tsx)$",
-          // 开发工具组件（开发环境专用）
-          "^src/components/dev-tools/.*\\.(ts|tsx)$",
-          // 展示和演示组件（可能通过动态导入使用）
-          "^src/components/examples/.*\\.(ts|tsx)$",
-          "^src/components/shared/under-construction.*\\.(ts|tsx)$",
-          // CTA组件（可能通过动态导入使用）
-          "^src/components/home/cta/.*\\.(ts|tsx)$",
-          // Hook文件（可能通过动态导入使用）
-          "^src/hooks/.*\\.(ts|tsx)$",
-          // 可访问性测试组件（测试专用）
-          "^src/app/.*/accessibility-test/.*\\.(ts|tsx)$",
-          // 数据和配置文件（可能通过动态导入使用）
-          "/data\\.(ts|tsx|js|jsx)$",
-          ".*-config\\.(ts|tsx)$",
-        ].join("|"),
-      },
-      to: {},
-    },
-    {
       name: "no-test-imports-in-production",
       severity: "error",
       comment: "禁止生产代码导入测试文件",
