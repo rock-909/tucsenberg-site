@@ -123,8 +123,9 @@ enabling the global flag.
 - ESLint: zero warnings
 - Build: no errors
 
-Production code must not import `src/test/**`, `src/testing/**`, or
-`src/constants/test-*`.
+Production code must not import `src/test/**`.
+Production code must not import `src/testing/**`. <!-- truth-docs:allow-missing -->
+Production code must not import `src/constants/test-*`. <!-- truth-docs:allow-missing -->
 
 ## Upgrade drift
 

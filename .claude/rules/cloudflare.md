@@ -67,7 +67,8 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 
 Keep `src/middleware.ts` as the runtime entrypoint.
 
-Do not rename `src/middleware.ts` to `src/proxy.ts` in this starter. Cloudflare/OpenNext support is not acceptable for a blind migration.
+Do not introduce `src/proxy.ts` in this starter. <!-- truth-docs:allow-missing -->
+Cloudflare/OpenNext support is not acceptable for a blind migration.
 Next.js warns that `middleware` is deprecated, but this repo treats that as a known
 platform-transition warning, not as a reason to risk the locale-routing entrypoint.
 Current decision record:
