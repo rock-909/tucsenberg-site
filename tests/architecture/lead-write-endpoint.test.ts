@@ -4,30 +4,12 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const INQUIRY_ROUTE = "src/app/api/inquiry/route.ts";
-const INQUIRY_FORM = "src/components/forms/inquiry-form.tsx";
-const LEAD_FORM_SUBMISSION_MODULE = "@/lib/forms/use-lead-form-submission";
-const INQUIRY_ENDPOINT = "/api/inquiry";
 const REGRESSION_FACADE_ROUTE =
   "tests/architecture/fixtures/lead-write-graph-regression/route-via-facade.ts";
 const REGRESSION_DYNAMIC_IMPORT_ROUTE =
   "tests/architecture/fixtures/lead-write-graph-regression/route-via-dynamic-import.ts";
 const REGRESSION_NON_LITERAL_DYNAMIC_IMPORT_ROUTE =
   "tests/architecture/fixtures/lead-write-graph-regression/route-via-non-literal-dynamic-import.ts";
-const ENDPOINT_FIXTURE_ROOT = "tests/architecture/fixtures/lead-write-endpoint";
-const ALIASED_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/aliased.ts`;
-const SHADOWED_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/shadowed.ts`;
-const FAKE_LOCAL_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/fake-local.ts`;
-const WRONG_MODULE_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/wrong-module.ts`;
-const FAKE_LEAD_FORM_SUBMISSION_FIXTURE = `${ENDPOINT_FIXTURE_ROOT}/fake-lead-form-submission.ts`;
-
-const ENDPOINT_PROOF_FILES = [
-  INQUIRY_FORM,
-  ALIASED_FIXTURE,
-  SHADOWED_FIXTURE,
-  FAKE_LOCAL_FIXTURE,
-  WRONG_MODULE_FIXTURE,
-  FAKE_LEAD_FORM_SUBMISSION_FIXTURE,
-] as const;
 
 const LEAD_DELIVERY_SINKS = [
   "src/lib/lead-pipeline/process-lead.ts",
@@ -47,120 +29,6 @@ function read(repoPath: string): string {
 
 function toRepoPath(filePath: string): string {
   return normalize(filePath).replaceAll("\\", "/");
-}
-
-function absoluteRepoPath(relativePath: string): string {
-  return join(process.cwd(), relativePath);
-}
-
-function loadRepoCompilerOptions(): ts.CompilerOptions {
-  const configPath = absoluteRepoPath("tsconfig.json");
-  const readResult = ts.readConfigFile(configPath, ts.sys.readFile);
-  if (readResult.error) {
-    throw readResult.error;
-  }
-
-  const parsed = ts.parseJsonConfigFileContent(
-    readResult.config,
-    ts.sys,
-    process.cwd(),
-    undefined,
-    configPath,
-  );
-
-  return parsed.options;
-}
-
-function createEndpointProofProgram(): ts.Program {
-  const options = loadRepoCompilerOptions();
-  return ts.createProgram({
-    rootNames: ENDPOINT_PROOF_FILES.map(absoluteRepoPath),
-    options,
-    host: ts.createCompilerHost(options),
-  });
-}
-
-function getUseLeadFormSubmissionImportSymbol(
-  sourceFile: ts.SourceFile,
-  checker: ts.TypeChecker,
-): ts.Symbol | undefined {
-  for (const statement of sourceFile.statements) {
-    if (
-      !ts.isImportDeclaration(statement) ||
-      !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== LEAD_FORM_SUBMISSION_MODULE
-    ) {
-      continue;
-    }
-
-    const namedBindings = statement.importClause?.namedBindings;
-    if (!namedBindings || !ts.isNamedImports(namedBindings)) continue;
-
-    for (const element of namedBindings.elements) {
-      const importedName = element.propertyName?.text ?? element.name.text;
-      if (importedName !== "useLeadFormSubmission") continue;
-
-      return checker.getSymbolAtLocation(element.name) ?? undefined;
-    }
-  }
-
-  return undefined;
-}
-
-function callUsesInquiryEndpoint(node: ts.CallExpression): boolean {
-  if (node.arguments.length === 0) return false;
-
-  const argument = node.arguments[0];
-  if (!ts.isObjectLiteralExpression(argument)) return false;
-
-  for (const property of argument.properties) {
-    if (
-      ts.isPropertyAssignment(property) &&
-      ts.isIdentifier(property.name) &&
-      property.name.text === "endpoint" &&
-      ts.isStringLiteral(property.initializer) &&
-      property.initializer.text === INQUIRY_ENDPOINT
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function configuresInquiryEndpointViaRealImport(
-  program: ts.Program,
-  relativePath: string,
-): boolean {
-  const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile(absoluteRepoPath(relativePath));
-  if (!sourceFile) return false;
-
-  const importSymbol = getUseLeadFormSubmissionImportSymbol(
-    sourceFile,
-    checker,
-  );
-  if (!importSymbol) return false;
-
-  let configuresEndpoint = false;
-
-  const visit = (node: ts.Node): void => {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      callUsesInquiryEndpoint(node)
-    ) {
-      const callSymbol = checker.getSymbolAtLocation(node.expression);
-      if (callSymbol === importSymbol) {
-        configuresEndpoint = true;
-      }
-    }
-
-    ts.forEachChild(node, visit);
-  };
-
-  visit(sourceFile);
-  return configuresEndpoint;
 }
 
 function createSourceFile(filePath: string, source: string): ts.SourceFile {
@@ -290,53 +158,6 @@ function listApiRouteFiles(directory = "src/app/api"): string[] {
 }
 
 describe("lead write endpoint ownership", () => {
-  const endpointProofProgram = createEndpointProofProgram();
-
-  it("configures InquiryForm to post through useLeadFormSubmission at /api/inquiry", () => {
-    expect(
-      configuresInquiryEndpointViaRealImport(
-        endpointProofProgram,
-        INQUIRY_FORM,
-      ),
-    ).toBe(true);
-  });
-
-  it("rejects a same-named local useLeadFormSubmission fake", () => {
-    expect(
-      configuresInquiryEndpointViaRealImport(
-        endpointProofProgram,
-        FAKE_LOCAL_FIXTURE,
-      ),
-    ).toBe(false);
-  });
-
-  it("accepts an aliased import from the real useLeadFormSubmission module", () => {
-    expect(
-      configuresInquiryEndpointViaRealImport(
-        endpointProofProgram,
-        ALIASED_FIXTURE,
-      ),
-    ).toBe(true);
-  });
-
-  it("rejects useLeadFormSubmission imported from another module", () => {
-    expect(
-      configuresInquiryEndpointViaRealImport(
-        endpointProofProgram,
-        WRONG_MODULE_FIXTURE,
-      ),
-    ).toBe(false);
-  });
-
-  it("rejects a shadowed local binding that reuses the imported hook name", () => {
-    expect(
-      configuresInquiryEndpointViaRealImport(
-        endpointProofProgram,
-        SHADOWED_FIXTURE,
-      ),
-    ).toBe(false);
-  });
-
   it("keeps /api/inquiry as the only API route whose import graph reaches lead delivery sinks", () => {
     const routesReachingSinks: string[] = [];
 

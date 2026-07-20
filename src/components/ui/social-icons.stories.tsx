@@ -65,9 +65,8 @@ export const Links: Story = {
       />
       <SocialIconLink
         href="https://example.com"
-        icon="external"
-        label="Website"
-        ariaLabel="Company website"
+        platform="website"
+        aria-label="Company website"
       />
     </div>
   ),

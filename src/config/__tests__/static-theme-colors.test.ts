@@ -12,10 +12,6 @@ const BROWSER_UI_SCAN_ROOTS = [
   "src/app",
   "src/styles",
 ] as const;
-const EXPLICIT_BROWSER_UI_FILES = [
-  "src/config/footer-style-tokens.ts",
-  "src/config/footer-links.ts",
-] as const;
 
 function collectFiles(directoryPath: string): string[] {
   let entries: string[];
@@ -101,7 +97,6 @@ describe("static theme colors", () => {
       ...BROWSER_UI_SCAN_ROOTS.flatMap((directoryPath) =>
         collectFiles(directoryPath),
       ),
-      ...EXPLICIT_BROWSER_UI_FILES,
     ].filter(
       (filePath, index, allFiles) =>
         allFiles.indexOf(filePath) === index &&

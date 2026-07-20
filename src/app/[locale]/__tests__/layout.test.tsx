@@ -113,7 +113,6 @@ vi.mock("@/components/ui/lazy-theme-switcher", () => ({
 
 vi.mock("@/config/footer-links", () => ({
   FOOTER_COLUMNS: [],
-  FOOTER_STYLE_TOKENS: {},
 }));
 
 vi.mock("@/i18n/locale-utils", () => ({

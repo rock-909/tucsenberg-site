@@ -57,6 +57,20 @@ module.exports = {
       to: { circular: true },
     },
     {
+      name: "no-motion-wrapper-outside-home",
+      severity: "error",
+      comment:
+        "LCP 首屏边界：非首页不得进入本地 motion wrapper 图（历史证明：docs/技术难题/LCP首屏动效边界.md；motion/react 直接导入由 homepage-lcp-motion-boundary.test.ts 守护）",
+      from: {
+        path: "^src/",
+        pathNot:
+          "^src/(app/\\[locale\\]/page\\.tsx$|components/motion/|lib/motion/|test/)",
+      },
+      to: {
+        path: "^src/components/motion/(breathing-reveal|light-motion-provider)",
+      },
+    },
+    {
       name: "no-test-imports-in-production",
       severity: "error",
       comment: "禁止生产代码导入测试文件",
