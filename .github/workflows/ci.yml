@@ -51,6 +51,10 @@ jobs:
             pnpm react:doctor --base "$(git rev-parse HEAD^)"
           fi
 
+      - name: React Doctor 全量对账（非阻塞）
+        continue-on-error: true
+        run: pnpm react:doctor:reconcile
+
       - name: TypeScript 检查
         run: pnpm type-check
 

@@ -10,7 +10,7 @@ function readRepoFile(relativePath: string) {
 }
 
 describe("generated warning baseline contract", () => {
-  it("keeps React Doctor wired as an error gate plus manual JSON report", () => {
+  it("keeps React Doctor wired as an error gate plus full reconciliation", () => {
     const packageJson = JSON.parse(readRepoFile("package.json")) as {
       scripts: Record<string, string>;
     };
@@ -20,6 +20,9 @@ describe("generated warning baseline contract", () => {
     );
     expect(packageJson.scripts["react:doctor:report"]).toBe(
       "npx --loglevel=error -y react-doctor@latest --json --no-score --blocking none",
+    );
+    expect(packageJson.scripts["react:doctor:reconcile"]).toBe(
+      "node scripts/react-doctor-reconcile.js",
     );
     expect(packageJson.scripts["react:doctor"]).toContain(
       "react-doctor@latest",

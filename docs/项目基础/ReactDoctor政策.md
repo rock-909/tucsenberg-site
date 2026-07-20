@@ -1,8 +1,8 @@
 # React Doctor Policy
 
 The calibrated cleanup target is `0 error / 0 warning / 0 total`.
-The command uses `npx --loglevel=error react-doctor@latest` so Codex and Claude skills follow the
-current React Doctor release.
+The commands use `npx --loglevel=error react-doctor@latest` so Codex and Claude
+skills follow the current React Doctor release.
 
 ## Target
 
@@ -18,6 +18,18 @@ a regression in this baseline.
   by a narrow file/rule exception with proof.
 - `react:doctor` and `react:doctor:report` use `npx --loglevel=error react-doctor@latest`; do not
   add `react-doctor` back as a permanent devDependency.
+- `react:doctor:reconcile` runs the full report and validates catalog-backed
+  override rule IDs against the exact React Doctor version recorded by that
+  report. It is advisory in CI: findings and unknown IDs are visible but do not
+  block unrelated pull requests.
+- Reconciliation protects two truths only: the full report is complete and has
+  zero diagnostics, and every catalog-backed override rule ID exists. The
+  native rules catalog does not expose `deslop/*` or `knip/*`; those IDs remain
+  covered by the zero-report guard, not the ID-existence check.
+- Built-in lint overrides must use canonical `react-doctor/*` IDs rather than
+  legacy aliases such as `effect/*` or `react/*`.
+- Reconciliation does not claim that every override currently suppresses a
+  diagnostic.
 - `doctor.config.json` may suppress only narrow file/rule combinations.
 - Do not add broad `ignore.rules` or whole-directory `ignore.files` entries for convenience.
 - Generated artifacts such as `storybook-static/**` are not project source and

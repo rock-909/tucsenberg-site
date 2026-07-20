@@ -95,22 +95,6 @@
       },
       {
         "files": [
-          "mdx-components.tsx",
-          "src/app/[locale]/page.tsx",
-          "src/app/[locale]/products/page.tsx",
-          "src/app/global-error.tsx",
-          "src/components/sections/hero-section-view.tsx",
-          "src/components/ui/section-head.tsx",
-          "src/stories/color-directions.stories.tsx"
-        ],
-        "rules": ["react-doctor/design-no-bold-heading"]
-      },
-      {
-        "files": ["src/components/ui/__tests__/separator.test.tsx"],
-        "rules": ["react-doctor/design-no-default-tailwind-palette"]
-      },
-      {
-        "files": [
           "src/components/forms/inquiry-form-static-fallback.tsx",
           "src/app/[locale]/contact/contact-page-sections.tsx",
           "src/components/layout/header.tsx",
@@ -205,7 +189,7 @@
       },
       {
         "files": ["src/components/security/turnstile.tsx"],
-        "rules": ["effect/no-event-handler", "react-doctor/no-event-handler"]
+        "rules": ["react-doctor/no-event-handler"]
       },
       {
         "files": ["src/components/cookie/cookie-banner.tsx"],
@@ -272,7 +256,7 @@
       },
       {
         "files": ["src/components/seo/json-ld-script.tsx"],
-        "rules": ["react/no-danger", "react-doctor/no-danger"]
+        "rules": ["react-doctor/no-danger"]
       }
     ]
   }

@@ -44,6 +44,7 @@ interface SemgrepRule {
 }
 
 interface WorkflowStep {
+  readonly "continue-on-error"?: boolean;
   readonly name?: string;
   readonly run?: string;
 }
@@ -109,6 +110,16 @@ describe("CI workflow contract", () => {
     expect(qualitySteps).toContainEqual({
       name: "preview config smoke",
       run: "APP_ENV=preview node scripts/starter-checks.js validate-production-config",
+    });
+  });
+
+  it("keeps the full React Doctor reconciliation visible but non-blocking", () => {
+    const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
+
+    expect(qualitySteps).toContainEqual({
+      name: "React Doctor 全量对账（非阻塞）",
+      "continue-on-error": true,
+      run: "pnpm react:doctor:reconcile",
     });
   });
 

@@ -17,6 +17,7 @@
     "knip:check": "knip",
     "react:doctor": "npx --loglevel=error -y react-doctor@latest --verbose --scope changed --blocking error",
     "react:doctor:report": "npx --loglevel=error -y react-doctor@latest --json --no-score --blocking none",
+    "react:doctor:reconcile": "node scripts/react-doctor-reconcile.js",
     "release:verify": "node scripts/starter-checks.js release-verify",
     "website:check": "pnpm type-check && pnpm lint:check && pnpm test && pnpm build",
     "website:build:cf": "pnpm exec opennextjs-cloudflare build",
