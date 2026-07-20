@@ -3,13 +3,12 @@ import { describe, expect, it } from "vitest";
 import { SocialIconLink, TwitterIcon } from "../social-icons";
 
 describe("Social icons accessibility", () => {
-  it("renders legacy social links with accessible names and hidden labels", () => {
+  it("renders social links with accessible names", () => {
     render(
       <SocialIconLink
         href="https://example.com/twitter"
-        icon="twitter"
-        label="Twitter"
-        ariaLabel="Follow us on Twitter"
+        platform="twitter"
+        aria-label="Follow us on Twitter"
       />,
     );
 
@@ -17,7 +16,6 @@ describe("Social icons accessibility", () => {
     expect(link).toHaveAttribute("href", "https://example.com/twitter");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    expect(screen.getByText("Twitter")).toHaveClass("sr-only");
   });
 
   it("renders platform links with caller-provided accessible names", () => {
