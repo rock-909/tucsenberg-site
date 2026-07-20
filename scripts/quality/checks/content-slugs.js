@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const matter = require("gray-matter");
-const { glob } = require("glob");
 const yaml = require("js-yaml");
 
 const DEFAULT_COLLECTIONS = ["pages"];
@@ -104,7 +103,7 @@ function collectPairs(
   );
   const pairMap = new Map();
 
-  for (const filePath of glob.sync(basePattern).sort()) {
+  for (const filePath of fs.globSync(basePattern).sort()) {
     const key = buildKey(
       rootDir,
       filePath,
@@ -117,7 +116,7 @@ function collectPairs(
     pairMap.set(key, entry);
   }
 
-  for (const filePath of glob.sync(targetPattern).sort()) {
+  for (const filePath of fs.globSync(targetPattern).sort()) {
     const key = buildKey(
       rootDir,
       filePath,
@@ -445,7 +444,7 @@ function validateContentFrontmatterContract(options) {
           ),
         );
         const filePaths = Array.from(
-          new Set(patterns.flatMap((pattern) => glob.sync(pattern))),
+          new Set(patterns.flatMap((pattern) => fs.globSync(pattern))),
         ).sort();
         for (const filePath of filePaths) {
           totalFiles += 1;

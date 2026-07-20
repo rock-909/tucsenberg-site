@@ -1,8 +1,10 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
-import { config } from "dotenv";
 
-// 加载测试环境配置
-config({ path: ".env.test", quiet: true });
+// 加载测试环境配置（loadEnvFile 对缺失文件会抛错，所以先判存在）
+if (existsSync(".env.test")) {
+  process.loadEnvFile(".env.test");
+}
 
 /**
  * @see https://playwright.dev/docs/test-configuration
