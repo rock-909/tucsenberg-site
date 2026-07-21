@@ -1,0 +1,329 @@
+{
+  "runtime": "next start",
+  "launchCommand": "pnpm start",
+  "base": "http://localhost:3000",
+  "targetSha": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+  "buildId": "9ab5f6c",
+  "requestMode": {
+    "redirect": "manual",
+    "timeoutMs": 15000
+  },
+  "proxyEnv": {
+    "ALL_PROXY": null,
+    "HTTP_PROXY": null,
+    "HTTPS_PROXY": null,
+    "all_proxy": null,
+    "http_proxy": null,
+    "https_proxy": null
+  },
+  "sequential": [
+    {
+      "pathname": "/",
+      "status": 200,
+      "ms": 94,
+      "bodyBytes": 254140,
+      "location": null,
+      "xOpenNext": null,
+      "etag": "\"5e0cxy5jg05fu6\""
+    },
+    {
+      "pathname": "/invalid/contact",
+      "status": 404,
+      "ms": 17,
+      "bodyBytes": 47518,
+      "location": null,
+      "xOpenNext": null,
+      "etag": "\"7cychvf2610nu\""
+    },
+    {
+      "pathname": "/products",
+      "status": 200,
+      "ms": 14,
+      "bodyBytes": 138659,
+      "location": null,
+      "xOpenNext": null,
+      "etag": "\"ako7xl3qsf2yxg\""
+    },
+    {
+      "pathname": "/contact",
+      "status": 200,
+      "ms": 12,
+      "bodyBytes": 77570,
+      "location": null,
+      "xOpenNext": null,
+      "etag": "\"enldut8a0k1nsy\""
+    },
+    {
+      "pathname": "/request-quote",
+      "status": 200,
+      "ms": 186,
+      "bodyBytes": 63756,
+      "location": null,
+      "xOpenNext": null,
+      "etag": null
+    },
+    {
+      "pathname": "/api/health",
+      "status": 200,
+      "ms": 9,
+      "bodyBytes": 15,
+      "location": null,
+      "xOpenNext": null,
+      "etag": null
+    },
+    {
+      "pathname": "/zh",
+      "status": 404,
+      "ms": 4,
+      "bodyBytes": 9,
+      "location": null,
+      "xOpenNext": null,
+      "etag": null
+    },
+    {
+      "pathname": "/zh/contact",
+      "status": 404,
+      "ms": 2,
+      "bodyBytes": 9,
+      "location": null,
+      "xOpenNext": null,
+      "etag": null
+    }
+  ],
+  "waves": [
+    {
+      "wave": 1,
+      "totalMs": 34,
+      "results": [
+        {
+          "pathname": "/",
+          "status": 200,
+          "ms": 28,
+          "bodyBytes": 254140,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"5e0cxy5jg05fu6\""
+        },
+        {
+          "pathname": "/invalid/contact",
+          "status": 404,
+          "ms": 18,
+          "bodyBytes": 47518,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"7cychvf2610nu\""
+        },
+        {
+          "pathname": "/products",
+          "status": 200,
+          "ms": 30,
+          "bodyBytes": 138659,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"ako7xl3qsf2yxg\""
+        },
+        {
+          "pathname": "/contact",
+          "status": 200,
+          "ms": 30,
+          "bodyBytes": 77570,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"enldut8a0k1nsy\""
+        },
+        {
+          "pathname": "/request-quote",
+          "status": 200,
+          "ms": 34,
+          "bodyBytes": 63756,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/api/health",
+          "status": 200,
+          "ms": 28,
+          "bodyBytes": 15,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh",
+          "status": 404,
+          "ms": 31,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh/contact",
+          "status": 404,
+          "ms": 31,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "totalMs": 27,
+      "results": [
+        {
+          "pathname": "/",
+          "status": 200,
+          "ms": 26,
+          "bodyBytes": 254140,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"5e0cxy5jg05fu6\""
+        },
+        {
+          "pathname": "/invalid/contact",
+          "status": 404,
+          "ms": 25,
+          "bodyBytes": 47518,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"7cychvf2610nu\""
+        },
+        {
+          "pathname": "/products",
+          "status": 200,
+          "ms": 25,
+          "bodyBytes": 138659,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"ako7xl3qsf2yxg\""
+        },
+        {
+          "pathname": "/contact",
+          "status": 200,
+          "ms": 25,
+          "bodyBytes": 77570,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"enldut8a0k1nsy\""
+        },
+        {
+          "pathname": "/request-quote",
+          "status": 200,
+          "ms": 26,
+          "bodyBytes": 63756,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/api/health",
+          "status": 200,
+          "ms": 18,
+          "bodyBytes": 15,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh",
+          "status": 404,
+          "ms": 24,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh/contact",
+          "status": 404,
+          "ms": 24,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "totalMs": 28,
+      "results": [
+        {
+          "pathname": "/",
+          "status": 200,
+          "ms": 26,
+          "bodyBytes": 254140,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"5e0cxy5jg05fu6\""
+        },
+        {
+          "pathname": "/invalid/contact",
+          "status": 404,
+          "ms": 26,
+          "bodyBytes": 47518,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"7cychvf2610nu\""
+        },
+        {
+          "pathname": "/products",
+          "status": 200,
+          "ms": 25,
+          "bodyBytes": 138659,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"ako7xl3qsf2yxg\""
+        },
+        {
+          "pathname": "/contact",
+          "status": 200,
+          "ms": 25,
+          "bodyBytes": 77570,
+          "location": null,
+          "xOpenNext": null,
+          "etag": "\"enldut8a0k1nsy\""
+        },
+        {
+          "pathname": "/request-quote",
+          "status": 200,
+          "ms": 27,
+          "bodyBytes": 63756,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/api/health",
+          "status": 200,
+          "ms": 14,
+          "bodyBytes": 15,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh",
+          "status": 404,
+          "ms": 25,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        },
+        {
+          "pathname": "/zh/contact",
+          "status": 404,
+          "ms": 25,
+          "bodyBytes": 9,
+          "location": null,
+          "xOpenNext": null,
+          "etag": null
+        }
+      ]
+    }
+  ]
+}

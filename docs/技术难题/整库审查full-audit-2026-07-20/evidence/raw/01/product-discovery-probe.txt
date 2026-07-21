@@ -1,0 +1,55 @@
+{
+  "status": "passed",
+  "products": [
+    {
+      "slug": "abs-flood-barriers",
+      "pageSlug": "abs-flood-barriers",
+      "calculatorCatalogProductId": "abs-flood-barriers",
+      "quoteHref": "/request-quote?catalogProductId=abs-flood-barriers",
+      "downloadHref": "/downloads/spec-sheet-tb-bw.pdf",
+      "downloadExists": true,
+      "jsonLdNameMatchesPage": true,
+      "jsonLdDescriptionMatchesPage": true
+    },
+    {
+      "slug": "aluminum-flood-gates",
+      "pageSlug": "aluminum-flood-gates",
+      "calculatorCatalogProductId": null,
+      "quoteHref": "/request-quote?catalogProductId=aluminum-flood-gates",
+      "downloadHref": "/downloads/spec-sheet-tb-ag.pdf",
+      "downloadExists": true,
+      "jsonLdNameMatchesPage": true,
+      "jsonLdDescriptionMatchesPage": true
+    },
+    {
+      "slug": "absorbent-flood-bags",
+      "pageSlug": "absorbent-flood-bags",
+      "calculatorCatalogProductId": null,
+      "quoteHref": "/request-quote?catalogProductId=absorbent-flood-bags",
+      "downloadHref": "/downloads/spec-sheet-tb-fb.pdf",
+      "downloadExists": true,
+      "jsonLdNameMatchesPage": true,
+      "jsonLdDescriptionMatchesPage": true
+    },
+    {
+      "slug": "flood-tube-dams",
+      "pageSlug": "flood-tube-dams",
+      "calculatorCatalogProductId": "flood-tube-dams",
+      "quoteHref": "/request-quote?catalogProductId=flood-tube-dams",
+      "downloadHref": "/downloads/spec-sheet-tb-td.pdf",
+      "downloadExists": true,
+      "jsonLdNameMatchesPage": true,
+      "jsonLdDescriptionMatchesPage": true
+    },
+    {
+      "slug": "frp-flood-barriers",
+      "pageSlug": "frp-flood-barriers",
+      "calculatorCatalogProductId": null,
+      "quoteHref": "/request-quote?catalogProductId=frp-flood-barriers",
+      "downloadHref": "/downloads/product-catalog.pdf",
+      "downloadExists": true,
+      "jsonLdNameMatchesPage": true,
+      "jsonLdDescriptionMatchesPage": true
+    }
+  ]
+}

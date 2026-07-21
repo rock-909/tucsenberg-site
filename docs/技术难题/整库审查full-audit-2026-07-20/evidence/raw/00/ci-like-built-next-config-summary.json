@@ -1,0 +1,24 @@
+{
+  ".next/required-server-files.json": {
+    "buildId": null,
+    "productionBrowserSourceMaps": true,
+    "images": {
+      "unoptimized": false,
+      "loader": "default",
+      "path": "/_next/image"
+    },
+    "cacheComponents": true,
+    "compress": true
+  },
+  ".open-next/server-functions/default/.next/required-server-files.json": {
+    "buildId": null,
+    "productionBrowserSourceMaps": true,
+    "images": {
+      "unoptimized": false,
+      "loader": "default",
+      "path": "/_next/image"
+    },
+    "cacheComponents": true,
+    "compress": true
+  }
+}

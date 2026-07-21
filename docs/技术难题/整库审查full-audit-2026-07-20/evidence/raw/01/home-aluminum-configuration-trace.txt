@@ -1,0 +1,124 @@
+=== Live homepage Aluminum card copy ===
+    61	    "productLines": {
+    62	      "title": "Five product lines",
+    63	      "description": "Sandbag alternatives, garage flood barriers and removable flood gates for dealers, importers, brands and businesses.",
+    64	      "items": {
+    65	        "absFloodBarriers": {
+    66	          "title": "ABS Interlocking Boxwall — TB-BW series",
+    67	          "description": "Freestanding, tool-free, no fixing to the building. The fastest line to deploy and the easiest to brand as your own.",
+    68	          "linkLabel": "Explore ABS barriers"
+    69	        },
+    70	        "aluminumFloodGates": {
+    71	          "title": "Aluminum Flood Gates — TB-AG series",
+    72	          "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule.",
+    73	          "linkLabel": "Explore flood gates"
+    74	        },
+    75	        "absorbentFloodBags": {
+    76	          "title": "Absorbent Flood Bags — TB-FB series",
+    77	          "description": "Sandless sandbags that activate in minutes. Carton quantities, private label packaging, the lowest-friction first order in our range.",
+    78	          "linkLabel": "Explore flood bags"
+    79	        },
+    80	        "floodTubeDams": {
+    81	          "title": "Water & Air-Filled Tube Dams — TB-TD series",
+    82	          "description": "Perimeter protection where rigid barriers can't seal: long runs, rough ground, emergency and municipal stock.",
+    83	          "linkLabel": "Explore tube dams"
+    84	        },
+    85	        "frpFloodBarriers": {
+    86	          "title": "FRP Composite Planks — TB-CP series",
+    87	          "description": "Pultruded composite planks: corrosion-free, non-conductive, built for coastal and industrial sites. In development with our pultrusion partners.",
+    88	          "linkLabel": "Register interest",
+    89	          "badge": "New — register interest"
+    90	        }
+=== Homepage renders that message against Aluminum route ===
+    78	function getHomePageContent(t: HomeTranslator) {
+    79	  return {
+    80	    productLines: SINGLE_SITE_HOME_PRODUCT_LINES.map(
+    81	      (productLine): HomeProductCardItem => ({
+    82	        title: t(`productLines.items.${productLine.key}.title`),
+    83	        description: t(`productLines.items.${productLine.key}.description`),
+    84	        href: `/products/${productLine.slug}`,
+    85	        linkLabel: t(`productLines.items.${productLine.key}.linkLabel`),
+    86	        diagram: getTucsenbergProductPage(productLine.slug)?.diagram,
+    87	        ...("hasBadge" in productLine && productLine.hasBadge
+    88	          ? { badge: t(`productLines.items.${productLine.key}.badge`) }
+    89	          : {}),
+    90	      }),
+    91	    ),
+=== Aluminum product truth ===
+    20	  eyebrow: "TB-AG series",
+    21	  title: "Aluminum Flood Gates & Demountable Barrier Systems",
+    22	  subtitle:
+    23	    "The trade standard for protecting defined openings — doors, garages, loading docks, shopfronts.",
+    24	  lead: "Measure once, install the fixings once; from then on the opening seals in minutes, every season, with planks that stack between posts and store flat the rest of the year. We supply the planks, posts, seals and spares factory-direct, custom-cut to your opening schedule. Depending on your market you may know this category as flood boards (UK), removable flood panels or garage flood barriers — same system, same parts.",
+    25	  leadNote:
+    26	    "One boundary before anything else: a flood gate protects a defined opening. It earns its money when the door or garage really is where the water comes in — not when water rises through the slab, the soil or the drains, and not when the wall around the opening is itself porous. And rain can still fall or blow in behind any barrier, so plan for a pump or a drain on the protected side. Unsure which case is yours? Send site photos with your RFQ and we'll tell you which.",
+    27	  cta: {
+    28	    label: "Request a Quote",
+    29	    note: "Reply within 12 hours.",
+    30	  },
+    31	  downloadHref: "/downloads/spec-sheet-tb-ag.pdf",
+    32	  proofStrip: [
+    33	    "6063-T6 · ≥2.0 mm wall",
+    34	    "180 mm plank profile",
+    35	    "Up to 1.8 m stacked",
+    36	    "EPDM seals, replaceable",
+    37	    "Custom-cut to your openings",
+    38	    "3-year warranty",
+    39	  ],
+    71	  sections: [
+    72	    {
+    73	      title: "The system, part by part",
+    74	      bullets: [
+    75	        "Planks. Extruded aluminum profiles, 180 mm per plank, stacked to your protection height. Alloy and temper are the numbers to ask any supplier for — ours: 6063-T6, wall thickness ≥2.0 mm. A supplier who won't name alloy and wall thickness is telling you something.",
+    76	        "Seals. EPDM rubber on every horizontal joint and at the base — compression sealing, the same principle the category has used for decades. Replacement seals sold separately, forever.",
+    77	        "Posts, three ways. Wall-mounted channels (openings with sound reveals), ground-socket posts (wide openings, removable — nothing above ground off-season), and freestanding posts for runs where nothing may be drilled.",
+    78	        "Top clamps / tensioners. Screw-down clamps at the posts lock the stack tight so planks can't lift or rattle — exact form confirmed per configuration at quotation.",
+    79	      ],
+    80	    },
+    81	    {
+    82	      title: "Configurations",
+    83	      bullets: [
+    84	        "Single opening — doorways, garage doors: two channels + planks. The bread-and-butter configuration.",
+    85	        "Wide spans — beyond roughly 3 m, intermediate ground-socket posts split the span. We quote post count from your opening width and protection height — water load grows with the square of depth, so the same span doesn't hold at every height.",
+    86	        "Perimeter runs — corner posts take the system around building lines; combined with [boxwall](/products/abs-flood-barriers) where fixing isn't allowed.",
+    87	        "Custom-cut, always. Every order is cut to your opening schedule — send widths and heights (photos and drawings welcome), we deliver planks per opening, labelled. From tested profiles, per approved drawings; we don't do site engineering or stamped drawings, and we say so upfront.",
+    88	      ],
+    89	    },
+    90	    {
+    91	      title: "Specifications",
+    92	      table: {
+    93	        columns: ["Parameter", "Value"],
+    94	        rows: [
+    95	          ["Plank profile height", "180 mm"],
+    96	          ["Alloy / temper", "6063-T6"],
+    97	          ["Wall thickness", "≥2.0 mm"],
+    98	          [
+    99	            "Plank weight",
+   100	            "typical 4.5–6.5 kg/m class — confirmed per profile at quotation",
+   101	          ],
+   102	          [
+   103	            "Standard protection height",
+   104	            "up to 1.8 m stacked; above on engineering review",
+   105	          ],
+   106	          [
+   107	            "Span between posts",
+   108	            "height-dependent — up to ~3 m single span at typical heights; post count quoted from width × protection height",
+   109	          ],
+   110	          ["Seals", "EPDM, replaceable"],
+   111	          ["Post options", "wall-mount / ground-socket / freestanding"],
+   112	          ["Surface finish", "mill finish standard; anodised on request"],
+   113	        ],
+   114	      },
+=== Full production search for curved and gable-end claims ===
+messages/profiles/catalog/en/messages.json:72:          "description": "Demountable plank systems for doors, garages and loading docks. Straight, gable-end and curved configurations, custom-cut to your opening schedule.",
+src/constants/tucsenberg-product-meta.ts:11:      "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Reply within 12 hours.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:105:            "straight, inward/outward curve, gable end",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:120:          "Curve units (in/out)",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:147:        "Configuration mix. Corners and gable ends cost more than straights — but they're what makes a wall actually close.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:227:      "Straight-run estimate, quantities only — no prices here by design. Corners, gable ends, joint overlap, uneven ground and how the run terminates all change the final count, and a barrier holds water back — it doesn't drain it. Send this estimate with your site details and we'll confirm the exact configuration at quotation.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:231:      "TB-BW ABS boxwall: protect approx. {length}, estimated {units} straight units (100 cm unit footprint basis). Please confirm corners, gable ends and exact configuration.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:29:  lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:52:        note: "Walls off a sloped approach with curved units — no rails, no drilling.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:56:        note: "A single carton covers a standard opening; gable ends close the run.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:60:        note: "Straight, curved and gable-end units follow property lines.",
+src/constants/tucsenberg-product-page-abs-flood-barriers.ts:82:        "Corners, curves and gable ends. Inward-curve, outward-curve and gable-end units are available at every height, so the wall follows driveways, entrances and property lines — the same configuration family our factory pool has shipped to US flood brands for years.",

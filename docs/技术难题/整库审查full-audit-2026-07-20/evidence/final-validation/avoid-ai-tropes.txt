@@ -1,0 +1,40 @@
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/00-审查报告.md
+No AI-trope patterns detected (text length: 8772 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/01-质量地图.md
+No AI-trope patterns detected (text length: 20829 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/03-证据日志.md
+No AI-trope patterns detected (text length: 10677 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/04-修复建议排序.md
+No AI-trope patterns detected (text length: 4916 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/05-过程复盘.md
+No AI-trope patterns detected (text length: 3651 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/adversarial-review.md
+No AI-trope patterns detected (text length: 18999 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/candidate-ledger.md
+No AI-trope patterns detected (text length: 8078 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/reconciliation.md
+No AI-trope patterns detected (text length: 10542 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/07/candidate-refutations.md
+No AI-trope patterns detected (text length: 3906 chars).
+
+
+FILE: docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/07/change-cost-drills.md
+No AI-trope patterns detected (text length: 4895 chars).
+
+

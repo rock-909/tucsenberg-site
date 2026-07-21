@@ -1,0 +1,27 @@
+{
+  "path": "docs/技术难题/整库审查full-audit-2026-07-20/02-findings.json",
+  "expected": {
+    "total": 16,
+    "severities": {
+      "P0": 0,
+      "P1": 6,
+      "P2": 8,
+      "P3": 2
+    },
+    "multi_lane": 2,
+    "single_source": 14
+  },
+  "actual": {
+    "total": 16,
+    "severities": {
+      "P0": 0,
+      "P1": 6,
+      "P2": 8,
+      "P3": 2
+    },
+    "multi_lane": 2,
+    "single_source": 14,
+    "duplicate_ids": []
+  },
+  "ok": true
+}

@@ -1,0 +1,29 @@
+{
+  "subject": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+  "deploy": {
+    "concurrency": {
+      "group": "${{ github.workflow }}-${{ inputs.environment }}",
+      "cancel-in-progress": true
+    },
+    "productionMutationStepIndex": 14,
+    "postDeployIsSeparateDependentJob": true,
+    "postDeployNeeds": "build-and-deploy",
+    "workflowEnvironmentField": null,
+    "concurrencyContractMentions": false
+  },
+  "daily": {
+    "testEnv": {
+      "CI_DAILY": "true",
+      "PLAYWRIGHT_PROFILE_LANE": "all"
+    },
+    "configHasZeroRetryEscape": true,
+    "workflowUsesZeroRetryEscape": null,
+    "parsesPlaywrightJson": false,
+    "exactShaRun": {
+      "id": 29741888689,
+      "conclusion": "success",
+      "observed": "1 flaky / 144 passed"
+    },
+    "zeroRetryRepeatEvidence": "../raw/06/daily-flaky-adversarial-rerun.txt"
+  }
+}

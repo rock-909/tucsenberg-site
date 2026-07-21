@@ -1,0 +1,5 @@
+{
+  "referenceId": "PRO-AUDIT-REF",
+  "containsReferenceId": false,
+  "text": "New Product Inquiry\n\nNew product inquiry received.\n\nProduct: ABS Interlocking Boxwall\nContact Name: Ada Buyer\nEmail: ada@example.com\nRequirements: Need 10 units\n\nThis inquiry was submitted through the Tucsenberg website."
+}

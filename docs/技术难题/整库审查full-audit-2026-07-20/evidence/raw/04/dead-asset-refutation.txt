@@ -1,0 +1,129 @@
+base_commit=9ab5f6c4f158281fd16c987e0cdd02622919d90e
+
+# Next.js public-folder semantics (installed 16.2.10 docs)
+     1	---
+     2	title: public Folder
+     3	nav_title: public
+     4	description: Next.js allows you to serve static files, like images, in the public directory. You can learn how it works here.
+     5	---
+     6	
+     7	{/* The content of this doc is shared between the app and pages router. You can use the `<PagesOnly>Content</PagesOnly>` component to add content that is specific to the Pages Router. Any shared content should not be wrapped in a component. */}
+     8	
+     9	Next.js can serve static files, like images, under a folder called `public` in the root directory. Files inside `public` can then be referenced by your code starting from the base URL (`/`).
+    10	
+    11	For example, the file `public/avatars/me.png` can be viewed by visiting the `/avatars/me.png` path. The code to display that image might look like:
+    12	
+    13	```jsx filename="avatar.js"
+    14	import Image from 'next/image'
+    15	
+    16	export function Avatar({ id, alt }) {
+    17	  return <Image src={`/avatars/${id}.png`} alt={alt} width="64" height="64" />
+    18	}
+    19	
+    20	export function AvatarOfMe() {
+    21	  return <Avatar id="me" alt="A portrait of me" />
+    22	}
+    23	```
+    24	
+    25	## Caching
+    26	
+    27	Next.js cannot safely cache assets in the `public` folder because they may change. The default caching headers applied are:
+    28	
+    29	```jsx
+    30	Cache-Control: public, max-age=0
+    31	```
+    32	
+
+# Tracked asset inventory
+public/images/about-og.jpg
+public/images/hero/showcase-hero.svg
+public/images/og-image.jpg
+public/images/og-image.svg
+public/images/tucsenberg-logo-square.png
+public/images/tucsenberg-logo.png
+public/images/tucsenberg-og.png
+public/next.svg
+
+## about-og.jpg production-scope references
+(none)
+-- all non-history implementation/test references --
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:scripts/quality/checks/content-slugs.js:24:  "/images/about-og.jpg",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:226:        createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:229:        ...createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:245:        createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:248:        ...createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:311:        createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/content-slug-sync.test.ts:314:        ...createValidPageFrontmatter("/images/about-og.jpg"),
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:tests/unit/scripts/mdx-slug-sync.test.ts:527:          ogImage: "/images/about-og.jpg",
+
+## showcase-hero.svg production-scope references
+(none)
+-- all non-history implementation/test references --
+(none)
+
+## og-image.jpg production-scope references
+(none)
+-- all non-history implementation/test references --
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:public/images/README.md:7:### og-image.jpg
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:public/images/README.md:45:- ✅ SEO configuration updated to reference `/images/og-image.jpg`
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:scripts/quality/checks/content-slugs.js:23:  "/images/og-image.jpg",
+
+## og-image.svg production-scope references
+(none)
+-- all non-history implementation/test references --
+(none)
+
+## next.svg production-scope references
+(none)
+-- all non-history implementation/test references --
+(none)
+
+## tucsenberg-logo-square.png production-scope references
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:217:        square: "/images/tucsenberg-logo-square.png",
+-- all non-history implementation/test references --
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:217:        square: "/images/tucsenberg-logo-square.png",
+
+## tucsenberg-logo.png production-scope references
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:349:          src: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:352:        image: "https://www.example.com/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/site-facts.test.ts:78:      "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:215:        horizontal: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:216:        horizontalPng: "/images/tucsenberg-logo.png",
+-- all non-history implementation/test references --
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:349:          src: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:352:        image: "https://www.example.com/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/site-facts.test.ts:78:      "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:215:        horizontal: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:216:        horizontalPng: "/images/tucsenberg-logo.png",
+
+## tucsenberg-og.png production-scope references
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/single-site.test.ts:7:const TUCSENBERG_OG_IMAGE = "/images/tucsenberg-og.png";
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:224:      ogImage: "/images/tucsenberg-og.png",
+-- all non-history implementation/test references --
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/single-site.test.ts:7:const TUCSENBERG_OG_IMAGE = "/images/tucsenberg-og.png";
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:224:      ogImage: "/images/tucsenberg-og.png",
+
+# Current consumers resolve only the horizontal logo and configured OG image
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:349:          src: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/app/[locale]/products/[market]/__tests__/market-landing.test.tsx:352:        image: "https://www.example.com/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/components/layout/logo.tsx:8:import { getPublicLogoPath } from "@/config/public-trust";
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/components/layout/logo.tsx:57:  const logoPath = getPublicLogoPath();
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/single-site.test.ts:7:const TUCSENBERG_OG_IMAGE = "/images/tucsenberg-og.png";
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/single-site.test.ts:36:    expect(SINGLE_SITE_FACTS.brandAssets.ogImage).toBe(TUCSENBERG_OG_IMAGE);
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/site-facts.test.ts:53:      getPublicLogoPath,
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/site-facts.test.ts:77:    expect(getPublicLogoPath(siteFacts.brandAssets.logo)).toBe(
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/__tests__/site-facts.test.ts:78:      "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/public-trust.ts:73:export function getPublicLogoPath(
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:215:        horizontal: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:216:        horizontalPng: "/images/tucsenberg-logo.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:217:        square: "/images/tucsenberg-logo-square.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/config/single-site.ts:224:      ogImage: "/images/tucsenberg-og.png",
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/lib/seo-metadata.ts:38:const DEFAULT_OG_IMAGE = siteFacts.brandAssets.ogImage;
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/lib/structured-data-generators.ts:11:  getPublicLogoPath,
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/lib/structured-data-generators.ts:74:  const logoPath = data.logo ?? getPublicLogoPath();
+9ab5f6c4f158281fd16c987e0cdd02622919d90e:src/lib/structured-data-generators.ts:139:  const logoPath = getPublicLogoPath();
+
+# Starter/replacement history
+62651ad chore: set real tucsenberg copy on og share card
+e94ad59 chore: replace starter showcase placeholders with tucsenberg brand
+d73b094 init: materialized from showcase-website-starter (profile=catalog) for Tucsenberg flood barrier site

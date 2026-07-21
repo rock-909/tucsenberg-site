@@ -1,0 +1,30 @@
+{
+  "findings": "docs/技术难题/整库审查full-audit-2026-07-20/02-findings.json",
+  "reports": [
+    "docs/技术难题/整库审查full-audit-2026-07-20/00-审查报告.md",
+    "docs/技术难题/整库审查full-audit-2026-07-20/01-质量地图.md",
+    "docs/技术难题/整库审查full-audit-2026-07-20/03-证据日志.md",
+    "docs/技术难题/整库审查full-audit-2026-07-20/04-修复建议排序.md",
+    "docs/技术难题/整库审查full-audit-2026-07-20/05-过程复盘.md"
+  ],
+  "inventory": "docs/项目基础/文档清单.md",
+  "actual": {
+    "findings_evidence_entries": 50,
+    "unique_finding_reference_strings": 49,
+    "formal_evidence_uses": 27,
+    "unique_formal_evidence_references": 26,
+    "missing_formal_evidence": [],
+    "static_source_fragments": 42,
+    "missing_static_source_fragments": [],
+    "report_evidence_token_uses": 50,
+    "unique_report_evidence_references": 31,
+    "missing_report_evidence_references": [],
+    "report_files_on_disk": 52,
+    "registered_report_files": 52,
+    "unregistered_files": [],
+    "registered_but_missing": [],
+    "duplicate_registrations": [],
+    "empty_files": []
+  },
+  "ok": true
+}

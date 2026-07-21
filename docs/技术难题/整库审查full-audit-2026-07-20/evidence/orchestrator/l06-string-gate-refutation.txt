@@ -1,0 +1,38 @@
+subject:
+9ab5f6c4f158281fd16c987e0cdd02622919d90e
+fixture source:
+--- working fixture: open-next.config.ts
+// defineCloudflareConfig appears only in a comment; this is not executable config.
+export const broken = true;
+--- working fixture: wrangler.jsonc
+{
+  // Required snippets appear only in comments:
+  // ".open-next/worker.js" "ASSETS" "nodejs_compat" "global_fetch_strictly_public"
+  "name": "comments-only"
+}
+--- working fixture: .github/workflows/cloudflare-deploy.yml
+name: Broken Cloudflare deploy fixture
+
+# Required workflow commands appear only in comments, so no deploy or smoke runs.
+# node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"
+# pnpm exec opennextjs-cloudflare deploy --env production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  broken:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "no Cloudflare proof or deploy is executed"
+probe result:
+{
+  "failures": [],
+  "accepted": true
+}
+production gate implementation uses raw includes:
+73:      content.includes(`"${check.match}"`) ||
+74:      content.includes(`'${check.match}'`)
+82:  return content.includes(check.match);
+105:        (snippet) => !content.includes(snippet),
+182:      if (!cloudflareWorkflow.includes(snippet)) {

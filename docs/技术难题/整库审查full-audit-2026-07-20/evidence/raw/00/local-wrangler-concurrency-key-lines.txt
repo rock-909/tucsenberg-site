@@ -1,0 +1,14 @@
+[wrangler:info] Ready on http://127.0.0.1:8787
+▲ [WARNING] Next.js cannot guarantee that Cache Components will run as expected due to the current runtime's implementation of `setTimeout()`.
+✘ [ERROR] Uncaught Error: The Workers runtime canceled this request because it detected that your Worker's code had hung and would never generate a response. Refer to: https://developers.cloudflare.com/workers/observability/errors/ 
+[wrangler:info] GET /request-quote 500 Internal Server Error (19ms)
+[wrangler:info] GET /products 500 Internal Server Error (15ms)
+[wrangler:info] GET /contact 500 Internal Server Error (15ms)
+[wrangler:info] GET /request-quote 500 Internal Server Error (48ms)
+[wrangler:info] GET / 500 Internal Server Error (34ms)
+[wrangler:info] GET /invalid/contact 500 Internal Server Error (31ms)
+[wrangler:info] GET /products 500 Internal Server Error (49ms)
+[wrangler:info] GET /contact 500 Internal Server Error (51ms)
+[wrangler:info] GET / 500 Internal Server Error (52ms)
+[wrangler:info] GET /invalid/contact 500 Internal Server Error (52ms)
+[wrangler:info] GET /api/health 500 Internal Server Error (12ms)

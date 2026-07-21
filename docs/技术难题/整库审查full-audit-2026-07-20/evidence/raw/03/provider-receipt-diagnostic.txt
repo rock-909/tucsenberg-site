@@ -1,0 +1,29 @@
+Product owner email failed {
+  error: 'simulated email outage',
+  email: '[REDACTED_EMAIL]',
+  referenceId: 'PRO-mrt1qtwg-4bb39d7e'
+}
+{
+  "malformedSdkRecord": {
+    "hasIdProperty": true,
+    "idType": "undefined",
+    "idValue": null
+  },
+  "malformedResendReceipt": {
+    "data": {
+      "id": "   "
+    },
+    "error": null
+  },
+  "pipelineResult": {
+    "success": true,
+    "emailSent": false,
+    "ownerNotified": false,
+    "recordCreated": true,
+    "referenceId": "PRO-mrt1qtwg-4bb39d7e"
+  },
+  "calls": {
+    "airtableCalls": 1,
+    "emailCalls": 1
+  }
+}
