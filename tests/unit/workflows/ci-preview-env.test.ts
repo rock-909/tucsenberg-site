@@ -67,12 +67,34 @@ describe("CI preview environment contract", () => {
     expect(testStep?.run).toContain("tests/e2e/table-keyboard-scroll.spec.ts");
   });
 
-  it("runs Cloudflare build proof against a public preview URL, not the launch domain", () => {
+  it("keeps the client-boundary proof immediately after the isolated analysis build", () => {
+    const workflow = readCiWorkflow();
+    const cloudflareBuildSteps =
+      workflow.jobs?.["cloudflare-build"]?.steps ?? [];
+    const analysisStepIndex = cloudflareBuildSteps.findIndex(
+      (candidate) => candidate.run === "pnpm build",
+    );
+    const clientBoundaryStepIndex = cloudflareBuildSteps.findIndex(
+      (candidate) =>
+        candidate.run ===
+        "node scripts/starter-checks.js client-boundary --build-artifacts",
+    );
+    const cloudflareBuildStepIndex = cloudflareBuildSteps.findIndex(
+      (candidate) => candidate.name === "Cloudflare/OpenNext 构建",
+    );
+    const analysisStep = cloudflareBuildSteps[analysisStepIndex];
+
+    expect(analysisStep?.name).toContain("分析构建");
+    expect(analysisStep?.env?.DEPLOYMENT_PLATFORM).toBeUndefined();
+    expect(clientBoundaryStepIndex).toBe(analysisStepIndex + 1);
+    expect(clientBoundaryStepIndex).toBeLessThan(cloudflareBuildStepIndex);
+  });
+
+  it("runs canonical Cloudflare build proof against a public preview URL", () => {
     const workflow = readCiWorkflow();
     const cloudflareBuildSteps = workflow.jobs?.["cloudflare-build"]?.steps;
 
     for (const stepName of [
-      "构建检查",
       "Cloudflare/OpenNext 构建",
       "Cloudflare/Wrangler dry-run",
     ]) {
@@ -81,6 +103,28 @@ describe("CI preview environment contract", () => {
       );
 
       expectPreviewStepEnv(step, stepName);
+      expect(step?.env).toMatchObject({
+        DEPLOYMENT_PLATFORM: "cloudflare",
+        NEXT_PUBLIC_DEPLOYMENT_PLATFORM: "cloudflare",
+      });
     }
+  });
+
+  it("proves the generated Next and OpenNext artifact configuration", () => {
+    const workflow = readCiWorkflow();
+    const cloudflareBuildSteps =
+      workflow.jobs?.["cloudflare-build"]?.steps ?? [];
+    const cloudflareBuildStepIndex = cloudflareBuildSteps.findIndex(
+      (candidate) => candidate.name === "Cloudflare/OpenNext 构建",
+    );
+    const artifactProofStepIndex = cloudflareBuildSteps.findIndex(
+      (candidate) => candidate.name === "验证 Cloudflare artifact config",
+    );
+    const artifactProof = cloudflareBuildSteps[artifactProofStepIndex]?.run;
+
+    expect(artifactProofStepIndex).toBe(cloudflareBuildStepIndex + 1);
+    expect(artifactProof).toBe(
+      "node scripts/quality/checks/cloudflare-artifact-config.js",
+    );
   });
 });
