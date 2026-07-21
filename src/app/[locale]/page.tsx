@@ -183,7 +183,13 @@ function HomeHowToChooseSection({ t }: { t: HomeTranslator }) {
             {t("howToChoose.description")}
           </p>
         </div>
-        <div className="mt-8 overflow-x-auto rounded-2xl border border-border">
+        <div
+          aria-label={t("howToChoose.title")}
+          className="mt-8 overflow-x-auto rounded-2xl border border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          data-scrollable-table="true"
+          role="region"
+          tabIndex={0}
+        >
           <table className="min-w-full divide-y divide-border text-left text-sm">
             <thead className="bg-muted/60 text-foreground">
               <tr>

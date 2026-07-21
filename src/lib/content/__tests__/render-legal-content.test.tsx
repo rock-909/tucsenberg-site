@@ -84,6 +84,24 @@ describe("createStaticMarkdownContent", () => {
     expect(screen.getByRole("cell", { name: "GDPR" })).toBeVisible();
   });
 
+  it("makes markdown tables keyboard reachable with header context", () => {
+    render(
+      <>
+        {createStaticMarkdownContent(
+          [
+            "| Region | Standard |",
+            "| --- | --- |",
+            "| EU | GDPR |",
+          ].join("\n"),
+        )}
+      </>,
+    );
+
+    expect(
+      screen.getByRole("region", { name: "Region, Standard" }),
+    ).toHaveAttribute("tabindex", "0");
+  });
+
   it("flushes lists and tables before following paragraphs", () => {
     render(
       <>
