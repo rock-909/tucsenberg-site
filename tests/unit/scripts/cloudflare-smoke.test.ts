@@ -327,6 +327,18 @@ describe("cloudflare preview smoke", () => {
   });
 
   it("starts every route in a smoke round before the first response settles", async () => {
+    const discoveryFetchMock = createPreviewFetchMock();
+    vi.stubGlobal("fetch", discoveryFetchMock);
+    await runCloudflarePreviewSmoke([
+      "--base-url",
+      "https://preview.example",
+      "--include-api-health",
+      "--rounds",
+      "1",
+    ]);
+    const expectedPaths = discoveryFetchMock.mock.calls.map(([input]) =>
+      getRequestPath(input),
+    );
     let releaseRoot!: () => void;
     const started: string[] = [];
 
@@ -355,9 +367,7 @@ describe("cloudflare preview smoke", () => {
     ]);
 
     await vi.waitFor(() => {
-      expect(started).toEqual(
-        expect.arrayContaining(["/products", "/contact", "/api/health"]),
-      );
+      expect(started).toEqual(expectedPaths);
     });
 
     releaseRoot();
