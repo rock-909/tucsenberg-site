@@ -101,6 +101,7 @@ async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
     headers: {
       "user-agent": "cloudflare-preview-smoke",
     },
+    signal: AbortSignal.timeout(DEPLOY_SMOKE_REQUEST_TIMEOUT_MS),
   });
 
   return {

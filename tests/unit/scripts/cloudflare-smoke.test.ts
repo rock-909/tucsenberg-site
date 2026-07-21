@@ -285,6 +285,47 @@ describe("public preview smoke", () => {
 });
 
 describe("cloudflare preview smoke", () => {
+  it("rejects the smoke run when a hung request is aborted", async () => {
+    const controller = new AbortController();
+    const timeoutError = new DOMException("request timed out", "TimeoutError");
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, "timeout")
+      .mockReturnValue(controller.signal);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener(
+              "abort",
+              () => reject(init.signal?.reason),
+              { once: true },
+            );
+          }),
+      ),
+    );
+
+    const smoke = runCloudflarePreviewSmoke([
+      "--base-url",
+      "https://preview.example",
+    ]);
+    controller.abort(timeoutError);
+
+    const outcome = await Promise.race([
+      smoke.then(
+        () => ({ status: "resolved" as const }),
+        (reason: unknown) => ({ reason, status: "rejected" as const }),
+      ),
+      new Promise<{ status: "pending" }>((resolve) => {
+        setImmediate(() => resolve({ status: "pending" }));
+      }),
+    ]);
+
+    expect(outcome).toEqual({ reason: timeoutError, status: "rejected" });
+    expect(timeoutSpy).toHaveBeenCalledWith(30000);
+  });
+
   it("starts every route in a smoke round before the first response settles", async () => {
     let releaseRoot!: () => void;
     const started: string[] = [];
