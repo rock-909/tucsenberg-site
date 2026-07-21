@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://docs.coderabbit.ai/schema/coderabbit.yaml
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 #
 # CodeRabbit 审查配置 —— tucsenberg-site
 # 目标：用中文审查 PR，聚焦现有 pnpm 门禁盖不到的地方（逻辑/安全/可读性），
@@ -49,19 +49,19 @@ reviews:
         测试改动重点看是否真的覆盖了逻辑分支，
         而不是把快照/计数等时间点状态钉死成断言。
 
-# 内置工具：只开与本仓库相关且和现有门禁互补的。
-# eslint 项目 CI 已跑，这里关掉避免重复；开安全类工具补现有门禁的盲区。
-tools:
-  eslint:
-    enabled: false
-  ruff:
-    enabled: false
-  shellcheck:
-    enabled: false
-  gitleaks:      # 扫密钥泄漏
-    enabled: true
-  semgrep:       # 扫安全反模式
-    enabled: true
+  # 内置工具：只开与本仓库相关且和现有门禁互补的。
+  # eslint 项目 CI 已跑，这里关掉避免重复；开安全类工具补现有门禁的盲区。
+  tools:
+    eslint:
+      enabled: false
+    ruff:
+      enabled: false
+    shellcheck:
+      enabled: false
+    gitleaks:      # 扫密钥泄漏
+      enabled: true
+    semgrep:       # 扫安全反模式
+      enabled: true
 
 chat:
   auto_reply: true
