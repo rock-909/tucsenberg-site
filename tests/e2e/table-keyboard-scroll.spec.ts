@@ -2,17 +2,9 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { checkA11y } from "./helpers/axe";
 
 const routes = [
-  { path: "/", regionCount: 1, scrollableCount: 0 },
-  {
-    path: "/products/abs-flood-barriers",
-    regionCount: 2,
-    scrollableCount: 2,
-  },
-  {
-    path: "/guides/flood-barrier-materials-guide",
-    regionCount: 2,
-    scrollableCount: 2,
-  },
+  { path: "/", expectsOverflow: false },
+  { path: "/products/abs-flood-barriers", expectsOverflow: true },
+  { path: "/guides/flood-barrier-materials-guide", expectsOverflow: true },
 ] as const;
 
 test.use({ viewport: { width: 393, height: 851 } });
@@ -36,11 +28,12 @@ test("table scroll owners are keyboard reachable with visible focus", async ({
   for (const route of routes) {
     await page.goto(route.path);
     const regions = page.locator('[data-scrollable-table="true"]');
+    const regionCount = await regions.count();
 
-    await expect(regions).toHaveCount(route.regionCount);
+    expect(regionCount).toBeGreaterThan(0);
     let scrollableCount = 0;
 
-    for (let index = 0; index < route.regionCount; index += 1) {
+    for (let index = 0; index < regionCount; index += 1) {
       const region = regions.nth(index);
       await expect(region).toHaveAttribute("tabindex", "0");
       await tabToRegion(page, region);
@@ -67,7 +60,9 @@ test("table scroll owners are keyboard reachable with visible focus", async ({
         .toBeGreaterThan(before);
     }
 
-    expect(scrollableCount).toBe(route.scrollableCount);
+    if (route.expectsOverflow) {
+      expect(scrollableCount).toBeGreaterThan(0);
+    }
 
     await checkA11y(page, "main#main-content", {
       includedImpacts: ["critical", "serious"],

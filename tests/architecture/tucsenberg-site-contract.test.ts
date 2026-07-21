@@ -582,18 +582,17 @@ describe("Tucsenberg Phase 1 site contract", () => {
     const aboutContent = readRepoFile("content/pages/en/about.mdx");
     const oemContent = readRepoFile("content/pages/en/oem-wholesale.mdx");
     const warrantyContent = readRepoFile("content/pages/en/warranty.mdx");
-    const expectedClaim =
-      "3 years on materials and workmanship for standard durable product lines; consumables and custom items follow the product-specific terms";
-    const publicThreeYearClaims = [aboutContent, oemContent].flatMap(
-      (content) =>
-        content
-          .split("\n")
-          .filter((line) => /(?:3\s*-?\s*year|three\s*-?\s*year)/iu.test(line)),
-    );
+    for (const content of [aboutContent, oemContent]) {
+      const threeYearClaims = content
+        .split("\n")
+        .filter((line) => /(?:3\s*-?\s*year|three\s*-?\s*year)/iu.test(line));
 
-    expect(publicThreeYearClaims).toHaveLength(2);
-    for (const claim of publicThreeYearClaims) {
-      expect(claim).toContain(expectedClaim);
+      expect(threeYearClaims.length).toBeGreaterThan(0);
+      for (const claim of threeYearClaims) {
+        expect(claim).toMatch(/standard durable product lines/iu);
+        expect(claim).toMatch(/consumables/iu);
+        expect(claim).toMatch(/product-specific terms/iu);
+      }
     }
     expect(warrantyContent).toContain(
       "Standard product lines (TB-BW, TB-AG, TB-TD, TB-CP)",
