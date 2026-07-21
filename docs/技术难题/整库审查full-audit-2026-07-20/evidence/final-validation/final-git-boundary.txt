@@ -1,0 +1,237 @@
+{
+  "target": "origin/main@9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+  "allowed_paths": [
+    "docs/技术难题/整库审查full-audit-2026-07-20/**",
+    "docs/项目基础/文档清单.md"
+  ],
+  "actual": {
+    "branch_status": "## main...origin/main",
+    "head": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+    "local_origin_main": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+    "merge_base": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+    "changed_path_count": 53,
+    "changes": [
+      {
+        "status": " M",
+        "path": "docs/项目基础/文档清单.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/00-审查报告.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/01-质量地图.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/02-findings.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/03-证据日志.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/04-修复建议排序.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/05-过程复盘.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/audit-config-validator.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/avoid-ai-tropes.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/coverage-check.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/current-truth-docs.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/evidence-reference-check.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/final-git-boundary.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/final-remote-sha.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/findings-counts-check.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/final-validation/findings-validator.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/manifest.sha256"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/adversarial-review.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/candidate-ledger.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l05-lighthouse-config-refutation.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l05-table-keyboard-refutation.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l06-concurrency-gate-refutation.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l06-deploy-daily-refutation.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l06-platform-env-refutation.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l06-string-gate-refutation.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/l06-unsafe-switch-refutation.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/orchestrator/reconciliation.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/production-units.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/ci-like-built-next-config-summary.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/local-next-start-concurrency-probe.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/local-wrangler-concurrency-key-lines.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/platform-env-built-next-config-summary.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/runtime-concurrency-comparison.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/airtable-empty-id-probe.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/home-aluminum-configuration-trace.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/product-discovery-probe.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/rfq-warranty-trace.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/02/production-contract-probe.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/02/security-runtime-effects.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/03/owner-email-reference-id-diagnostic.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/03/provider-receipt-diagnostic.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/dead-asset-refutation.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/image-summary.tsv"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/pdf-key-claim-scan.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/pdf-summary.tsv"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/spec-sheet-tb-bw.png"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/supplier-checklist.png"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/05/en-route-headers.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/05/product-rfq-playwright.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/06/daily-flaky-adversarial-rerun.txt"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/06/github-daily-e2e-exact-sha.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/07/candidate-refutations.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/07/change-cost-drills.md"
+      }
+    ],
+    "tracked_diff": [
+      "docs/项目基础/文档清单.md"
+    ],
+    "staged_diff": [],
+    "report_file_count": 52,
+    "ignored_report_files": [],
+    "invisible_report_files": [],
+    "boundary_violations": []
+  },
+  "ok": true
+}

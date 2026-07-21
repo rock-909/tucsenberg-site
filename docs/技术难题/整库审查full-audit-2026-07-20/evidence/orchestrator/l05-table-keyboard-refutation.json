@@ -1,0 +1,51 @@
+{
+  "buildId": "9ab5f6c",
+  "results": [
+    {
+      "route": "/products/abs-flood-barriers",
+      "regions": [
+        {
+          "overflowX": "auto",
+          "clientWidth": 293,
+          "scrollWidth": 365,
+          "tabIndex": -1,
+          "focusableDescendants": 0,
+          "activeAfterProgrammaticFocus": true,
+          "scrollLeftAfterArrow": 0
+        },
+        {
+          "overflowX": "auto",
+          "clientWidth": 343,
+          "scrollWidth": 420,
+          "tabIndex": -1,
+          "focusableDescendants": 0,
+          "activeAfterProgrammaticFocus": true,
+          "scrollLeftAfterArrow": 0
+        }
+      ]
+    },
+    {
+      "route": "/guides/flood-barrier-materials-guide",
+      "regions": [
+        {
+          "overflowX": "auto",
+          "clientWidth": 345,
+          "scrollWidth": 626,
+          "tabIndex": -1,
+          "focusableDescendants": 0,
+          "activeAfterProgrammaticFocus": true,
+          "scrollLeftAfterArrow": 0
+        },
+        {
+          "overflowX": "auto",
+          "clientWidth": 345,
+          "scrollWidth": 366,
+          "tabIndex": -1,
+          "focusableDescendants": 0,
+          "activeAfterProgrammaticFocus": true,
+          "scrollLeftAfterArrow": 0
+        }
+      ]
+    }
+  ]
+}

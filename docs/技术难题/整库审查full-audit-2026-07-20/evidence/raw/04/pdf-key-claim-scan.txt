@@ -1,0 +1,51 @@
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/product-catalog.txt ---
+24:OEM · Private Label · Custom-Cut | Standard items quoted within 12 hours
+51: 2               Quote in 12 hours for standard items; custom configurations within 48
+82: TB-FB flood bags         leaks, thresholds, low       ~12 cm/layer, stack    none                carton (MOQ
+85: TB-TD tube dams          long runs, rough ground      1m                     none — ground       from 10 m
+152: • Water load improves the ground seal — the flood                • UV-stabilised ABS, tested to ASTM G154-2016
+196: • Wide spans — beyond ~3 m, removable intermediate posts split the span; we quote post count from your
+203:   for your installer — not site engineering, not stamped drawings. Coastal spec? Ask us to quote FRP planks
+217:kg dry → deployed                min activation                   shelf life, vacuum-packed     bags MOQ (cartons)
+270:1m                              5 / 10 m                    0.9                        ~7.5
+271:protection height               section lengths             mm PVC tube wall           min inflation / 10 m
+283: Section length ×               5m×1m                                          10 m × 1 m
+286: Tube / ground mat              0.9 mm PVC tarpaulin, thermally moulded · 0.6 mm mat (10.8 × 2 m on 10 m
+289: Fabric · weight                1,120 g/m², anti-UV surface with reflective marking · 52 kg ±5% per 10 m section
+293: Ratings                        fire EN 13501 B1 · working temperature −30 °C to +70 °C
+295: Inflation                      ~450 s to 6 PSI per 10 m section, pump included
+306:Trade entry from 10 metres. OEM printed sleeves, custom section lengths, your carton and manual.
+329:Everywhere else, aluminum remains the value answer — and we'll tell you so in the quote.
+333: Tooling                      One-time pultrusion die cost, quoted per profile, amortised across your first run
+365: • Lead time: in-stock ships in 2–7 days; production   mould contribution, quoted before you commit
+381:   Get a quote: send your product mix, quantities and port to sales@tucsenberg.com — standard items quoted
+382:   within 12 hours, custom configurations within 48. RFQ form at tucsenberg.com.
+393:                                         rather re-quote than surprise-invoice
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/spec-sheet-tb-ag.txt ---
+9:180 mm                          6063-T6                        1.8 m                          12 h
+10:plank profile height            alloy · temper, ≥2.0 mm wall   standard stacked height        standard-item quote
+23: Span between posts                           height-dependent — ~3 m single span at typical heights; post count quoted
+42:  • Quoted from your opening schedule — width × height per opening, mounting surface, photos welcome
+50:    your opening schedule: standard configurations quoted within 12 hours, custom cut lists within 48.
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/spec-sheet-tb-bw.txt ---
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/spec-sheet-tb-fb.txt ---
+10:flat to deployed (±5%)          activation in fresh water        shelf life, vacuum-packed        bags MOQ · carton = 50
+43: • MOQ 300 bags (six cartons); pallet and container tiers above — consolidates with gates and boxwall in one
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/spec-sheet-tb-td.txt ---
+9:1m                              5 / 10 m                        ~450 s                            52 kg
+10:protection height per tube      section lengths, spliceable     inflation to 6 PSI (pump incl.)   per 10 m section (±5%)
+14:with the included pump (about 7–8 minutes per 10 m section), pin the skirt, and you have a metre-high wall.
+19: Models                                        TB-TD500 (5 m section) · TB-TD1000 (10 m section)
+21: Ground mat                                    0.6 mm PVC, 10.8 m × 2 m per 10 m section
+24: Fire rating                                   EN 13501 B1
+41:  • MOQ from 10 metres — a single section qualifies the product; consolidates with gates, boxwall and bag cartons
+48:    Tell us run length, ground type, air or water fill, and what pump or water source the site will have — quoted
+49:    within 12 hours.
+
+--- .context/audits/full-audit-2026-07-20/evidence/04-content-seo-i18n-assets/pdfs/supplier-checklist.txt ---
+1:                          Every quote looks similar until you read the spec sheet. These ten questions separate a serio

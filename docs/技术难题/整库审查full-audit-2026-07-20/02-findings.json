@@ -1,0 +1,653 @@
+[
+  {
+    "id": "FPH-001",
+    "source_finding_ids": [
+      "FPH-L00-001"
+    ],
+    "title": "Cloudflare/OpenNext 并发请求可卡住 Worker，并连带打坏页面和健康检查",
+    "severity": "P1",
+    "domain": "robustness",
+    "source_lane": "00-baseline-runtime",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "runtime",
+        "reference": "evidence/raw/00/runtime-concurrency-comparison.json",
+        "summary": "同一目标 SHA、同一路由和同一超时条件下，Node 顺序与三轮并发均通过；OpenNext/Workerd 顺序通过后，并发出现页面 500、后续超时和 /api/health 失败。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/00/local-wrangler-concurrency-key-lines.txt",
+        "summary": "Workerd 记录了 Cache Components 定时器兼容警告、hung-request cancellation 和多条 500。"
+      },
+      {
+        "type": "runtime",
+        "reference": "evidence/raw/00/local-next-start-concurrency-probe.json",
+        "summary": "普通 Next.js Node runtime 的对照探针没有复现 500 或超时。"
+      }
+    ],
+    "impact": "少量并发买家、爬虫、监控或重试就可能让页面返回 500，并使后续健康检查也失效。顺序 smoke、构建成功和 CI 绿灯都可能漏掉这个上线阻断模式。",
+    "root_cause": "目标版本组合在 Next.js Cache Components 经 OpenNext/Workerd 运行时存在并发调度不兼容。现有证据能把问题隔离到 Cloudflare runtime 路径，但不能在本轮确定最终责任属于 Next.js、OpenNext 还是 Workerd。",
+    "root_cause_class": "runtime-drift",
+    "recommended_fix": "在独立修复轮先选最小可逆方案：关闭当前发布环境的 cacheComponents，或升级到已确认修复的 Next/OpenNext/Workerd 组合；同时把有限并发探针接入强制 Cloudflare 证明链。",
+    "verification_needed": "对同一候选产物依次运行 8 路顺序请求和多轮并发请求，要求本地 Workerd 与绑定 SHA 的部署预览均无 500、超时、hung-request cancellation，负载后 /api/health 仍正常；再跑正常构建、OpenNext、dry-run、页面 smoke 和真实询盘 canary。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "同步 lockfile 依赖、清空代理变量、确认产物先顺序通过，并用同 SHA 的 next start 做并发对照，尝试排除依赖陈旧、代理干扰、产物整体损坏和通用应用并发缺陷。",
+      "result": "只有 OpenNext/Workerd 路径稳定出现页面 500、后续超时和健康检查失败，Node 对照全过，因此 finding 存活；公开 preview 只作辅助证据，不承担目标 SHA 归因。"
+    }
+  },
+  {
+    "id": "FPH-002",
+    "source_finding_ids": [
+      "FPH-L01-001"
+    ],
+    "title": "通用买家页面把三年材料和工艺保修错误扩张到 TB-FB 消耗品",
+    "severity": "P1",
+    "domain": "content",
+    "source_lane": "01-business-correctness",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "messages/profiles/b2b-lead/en/messages.json:42-54; src/app/[locale]/request-quote/page.tsx:51-82,98-104,129-140",
+        "summary": "通用 RFQ 侧栏对所有产品无条件显示三年保修。"
+      },
+      {
+        "type": "file",
+        "reference": "content/pages/en/about.mdx:39-46; content/pages/en/oem-wholesale.mdx:77-84; content/pages/en/warranty.mdx:18-25",
+        "summary": "About 和 OEM 页面给出统一三年承诺，而正式保修页把 TB-FB 排除在耐用品三年材料和工艺保修之外。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/01/rfq-warranty-trace.txt",
+        "summary": "全链路静态对账确认 TB-FB 的三年是未使用真空包装的 shelf life，不是三年材料和工艺保修。"
+      }
+    ],
+    "impact": "洪水袋买家会在询盘和供应商尽调页面看到比正式政策更宽的书面承诺，报价或售后再收窄会造成信任损失和承诺争议。",
+    "root_cause": "同一保修事实在 RFQ 消息包和多个 MDX 页面独立手写，通用页面丢失了耐用品与消耗品的范围边界。",
+    "root_cause_class": "duplicate-truth",
+    "recommended_fix": "把通用 RFQ reassurance 改为不声明统一期限的真实表述，并在 About/OEM 明确限定为标准耐用品；保留 TB-FB 的到货符合规格和三年 shelf life 口径，不新增产品分支框架。",
+    "verification_needed": "渲染 TB-FB 进入的 RFQ、About、OEM、Warranty 页面，确认通用页面不再承诺 TB-FB 三年材料和工艺保修；增加按产品类别核对保修范围的行为测试。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "尝试把通用文字解释为仅指 standard durable lines，并检查首页和正式保修页是否已给出足够限定。",
+      "result": "RFQ、About 和 OEM 的买家可见文字都没有限定，TB-FB CTA 又进入同一 RFQ；正式政策和 TB-FB 资料明确区分 shelf life 与 warranty，无法推翻矛盾。"
+    }
+  },
+  {
+    "id": "FPH-003",
+    "source_finding_ids": [
+      "FPH-L01-002"
+    ],
+    "title": "首页 Aluminum 卡片误写了 ABS 专属的曲线和山墙端配置",
+    "severity": "P1",
+    "domain": "content",
+    "source_lane": "01-business-correctness",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "messages/profiles/catalog/en/messages.json:61-73; src/app/[locale]/page.tsx:78-90",
+        "summary": "首页 Aluminum 卡片实时显示 straight、gable-end 和 curved configurations。"
+      },
+      {
+        "type": "file",
+        "reference": "src/constants/tucsenberg-product-page-aluminum-flood-gates.ts:20-39,71-114",
+        "summary": "Aluminum 产品真相只定义叠板、三类立柱、角柱和按开口定尺，没有曲线或山墙端单元。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/01/home-aluminum-configuration-trace.txt",
+        "summary": "全量生产内容搜索把曲线和山墙端能力归给 ABS，未找到 Aluminum 支持证据。"
+      }
+    ],
+    "impact": "首页会把买家引到 Aluminum 规格中不存在的配置，造成询盘预期错误、报价返工，并削弱产品资料可信度。",
+    "root_cause": "首页卡片独立保存产品能力文案，错误借用了 ABS Boxwall 的配置事实，没有与 Aluminum 产品真相保持一致。",
+    "root_cause_class": "duplicate-truth",
+    "recommended_fix": "只改首页 Aluminum 卡片这一条描述，使用现有真实能力；不要为一条文案新建产品能力抽象。",
+    "verification_needed": "渲染首页核对 Aluminum 卡片，全库搜索确认 curve/gable-end 只指向 ABS，并保留首页链接和产品 slug 对账测试。",
+    "linus_gate": "Keep",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "反向搜索产品常量、消息包、MDX 和 TB-AG 资料，尝试找到 Aluminum 支持曲线或山墙端配置的独立证据。",
+      "result": "没有找到支持证据，所有正面来源都把这些配置归给 ABS，首页卡片是唯一反向声称。"
+    }
+  },
+  {
+    "id": "FPH-004",
+    "source_finding_ids": [
+      "FPH-L01-003",
+      "FPH-L03-001"
+    ],
+    "title": "无效 provider ID 可被当成成功，最终向买家报告并不存在的投递成功",
+    "severity": "P1",
+    "domain": "data-integrity",
+    "source_lane": "01-business-correctness + 03-robustness-observability",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "evidence/raw/03/provider-receipt-diagnostic.txt",
+        "summary": "诊断在 Resend 明确失败、Airtable 返回缺失 ID 的对象时复现 success=true、emailSent=false、recordCreated=true。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/01/airtable-empty-id-probe.txt",
+        "summary": "独立车道探针复现 Airtable SDK 风格对象可产生 id=undefined，并被 pipeline 计为记录创建成功。"
+      },
+      {
+        "type": "file",
+        "reference": "src/lib/email/resend-http-client.ts:47-50,121-131; src/lib/airtable/service-internal/lead-records.ts:126-149; src/lib/lead-pipeline/process-lead.ts:127-143,174-189",
+        "summary": "两个 provider 边界都没有统一要求 trim 后的非空 ID，上层把 fulfilled promise 直接等同于通道成功。"
+      }
+    ],
+    "impact": "当一个通道失败、另一个通道只返回无效回执时，买家仍会看到成功和 reference ID，但系统没有可证明的邮件投递或 Airtable 记录，形成真实丢单路径。",
+    "root_cause": "Provider adapter 没有把外部回执归一化为经过验证的非空 ID，业务 pipeline 又把 Promise 完成当作已投递。",
+    "root_cause_class": "false-success",
+    "recommended_fix": "在 Resend 和 Airtable adapter 边界统一要求 typeof id === string 且 id.trim() 非空；无效回执直接返回 provider failure，让 pipeline 只消费已验证回执，不在每个调用方重复校验。",
+    "verification_needed": "空、缺失、全空白的 Resend/Airtable ID 都必须失败；邮件失败加无效 Airtable receipt 必须得到整体失败；任一通道返回有效 ID 时仍保留现有 partial-success 合同；真实 canary 再核对 provider ID 与邮件或记录。",
+    "linus_gate": "Keep",
+    "verification": {
+      "status": "multi-lane-corroborated",
+      "refutation_attempt": "Lane 01 和 Lane 03 独立沿 Airtable/provider 边界执行了不同探针，主线程又重跑整体 false-success 诊断，并核对现有类型和测试是否能排除 malformed receipt。",
+      "result": "两条独立车道都证明缺失 Airtable ID 可穿过边界，Lane 03 还证明全空白 Resend ID；类型声明和现有测试都不能提供运行时保证。"
+    }
+  },
+  {
+    "id": "FPH-005",
+    "source_finding_ids": [
+      "FPH-L02-001",
+      "FPH-L06-001"
+    ],
+    "title": "严格生产门接受测试模式、关闭安全头和 relaxed security",
+    "severity": "P1",
+    "domain": "gates",
+    "source_lane": "02-security-trust-boundary + 06-gates-tests-credibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "evidence/orchestrator/l06-unsafe-switch-refutation.json",
+        "summary": "在其余生产条件完整的 fixture 中，NEXT_PUBLIC_TEST_MODE=true、SECURITY_HEADERS_ENABLED=false、NEXT_PUBLIC_SECURITY_MODE=relaxed 都得到空 warnings/errors；已知的 ALLOW_MEMORY_RATE_LIMIT 控制项会 hard fail。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/02/production-contract-probe.txt",
+        "summary": "安全车道独立执行生产合同探针，得到相同接受结果。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/02/security-runtime-effects.txt",
+        "summary": "本地 production 探针确认这些开关会让安全头清零、CSP 变为 report-only，或让表单自动使用固定 Turnstile 测试 token。"
+      },
+      {
+        "type": "file",
+        "reference": "scripts/quality/checks/production-config.js:256-328; src/config/security.ts:143-155,217-225; src/components/security/turnstile.tsx:113-149",
+        "summary": "严格合同未禁止三项生产危险值，运行时代码会直接执行这些值。"
+      }
+    ],
+    "impact": "当其他上线输入补齐后，严格生产门仍可能放行没有项目安全头、只有 report-only CSP，或让正常询盘携带无效测试 token 的部署。前两项削弱浏览器安全，后一项会直接阻断询盘。",
+    "root_cause": "生产合同只检查关键能力是否配置，没有同时定义会关闭或替换这些能力的生产禁用开关；部署 workflow 只传递了 Wrangler production vars 的部分投影。",
+    "root_cause_class": "fake-green-gate",
+    "recommended_fix": "在现有 validateProductionRuntimeContract 中集中拒绝三项危险值，并确保生产 workflow 把所有影响运行时的有效值交给同一校验；客户端 test mode 还应增加 production 自卫条件。",
+    "verification_needed": "三项危险值单独及组合都必须让严格合同失败，安全 fixture 继续通过；解析 workflow 证明有效 production vars 在构建和部署前进入校验；随后核对实际部署响应头和真实 Turnstile 询盘。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "multi-lane-corroborated",
+      "refutation_attempt": "安全车道和门禁车道分别执行完整生产 fixture，并检查默认值、当前 wrangler 配置、现有 in-memory guard 和开发专用 bypass。",
+      "result": "当前仓库没有主动启用这些危险值，但两条独立车道都证明严格合同会接受它们，且本地运行态确实执行对应行为，因此 gate defect 成立。"
+    }
+  },
+  {
+    "id": "FPH-006",
+    "source_finding_ids": [
+      "FPH-L05-001"
+    ],
+    "title": "移动端四个关键表格无法通过键盘横向滚动",
+    "severity": "P1",
+    "domain": "accessibility",
+    "source_lane": "05-ui-performance-accessibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "runtime",
+        "reference": "evidence/orchestrator/l05-table-keyboard-refutation.json",
+        "summary": "主线程 exact-build Pixel 5 反证探针记录四个区域真实横向溢出 21 至 281 像素，均没有 tab stop、可聚焦后代或方向键滚动。"
+      },
+      {
+        "type": "file",
+        "reference": "src/app/[locale]/products/[market]/page.tsx:57-67; src/lib/content/render-static-markdown-content.tsx:83-96",
+        "summary": "两个共享表格 wrapper 都是没有 tab stop 和可见焦点状态的 overflow-x-auto div。"
+      }
+    ],
+    "impact": "窄屏上的键盘和开关设备用户无法读取四张规格或比较表右侧的内容，产品评估链被部分阻断。",
+    "root_cause": "横向溢出只按视觉和触摸滚动处理，真正的 scroll owner 没有进入顺序焦点，也没有可接收键盘滚动的后代。",
+    "recommended_fix": "保留表格，在所有实际横向滚动容器上增加顺序焦点、清晰焦点环和必要上下文；同时覆盖同类首页表格 wrapper，避免同一缺陷再次出现。",
+    "verification_needed": "Pixel 5 宽度下 Tab 能到达每个溢出表格，方向键能改变 scrollLeft，焦点可见，两个页面 Axe 不再报告该违规；再跑 16 页移动端 sweep。",
+    "linus_gate": "Keep",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "检查是否只是文档级溢出、隐藏表格、破图或 Axe 误报，并用独立键盘探针测量四个区域。",
+      "result": "页面没有文档级溢出或破图，四个命名区域都真实裁切、没有 tab stop 或可聚焦后代，方向键也不滚动，因此 finding 存活。"
+    }
+  },
+  {
+    "id": "FPH-007",
+    "source_finding_ids": [
+      "FPH-L00-002"
+    ],
+    "title": "CI 的 Cloudflare 构建证明没有使用 canonical Cloudflare platform signal",
+    "severity": "P2",
+    "domain": "gates",
+    "source_lane": "00-baseline-runtime",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": ".github/workflows/ci.yml:211-248; next.config.ts:22-24,80-88",
+        "summary": "CI Cloudflare job 构建时没有 DEPLOYMENT_PLATFORM/NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare，而这些变量会改变 sourcemap 和 images.unoptimized。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/00/ci-like-built-next-config-summary.json",
+        "summary": "CI 同形构建得到 productionBrowserSourceMaps=true、images.unoptimized=false。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/00/platform-env-built-next-config-summary.json",
+        "summary": "加入 canonical Cloudflare signal 后，.next 与 .open-next 均变为 sourcemaps=false、images.unoptimized=true。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/orchestrator/l06-platform-env-refutation.txt",
+        "summary": "主线程核对表明 production workflow 确实传递 canonical vars，因此缺口限定在 CI 证明覆盖，不等同于生产 workflow 当前构建错误。"
+      }
+    ],
+    "impact": "CI 可以全绿，但它证明的是不同于真实 Cloudflare production 配置的浏览器 bundle 和图片路径。针对真实 production 模式的回归可能逃过名为 Cloudflare 构建证明的 job。",
+    "root_cause": "平台模式是隐式环境开关，CI job 没有复用生产构建合同，而同一 job 的 client-boundary 检查又依赖 production 模式会关闭的 sourcemap。",
+    "root_cause_class": "runtime-drift",
+    "recommended_fix": "让 Cloudflare CI 的 Next/OpenNext 构建使用 canonical platform vars；把依赖 sourcemap 的分析明确拆成独立分析构建，或让它在 production artifact 上工作。",
+    "verification_needed": "Exact-SHA CI 产物中的 .next 和 .open-next required-server-files.json 都应显示 sourcemaps 关闭、images.unoptimized 开启；client-boundary 证明仍需在诚实名称和合同下运行。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "核对 CI 是否本来只承诺 preview、OpenNext 是否会自动修正缺失变量，以及 production workflow 是否已传递 canonical vars。",
+      "result": "Preview 与 production URL 不同本身不是 finding，但构建产物对比证明 CI 连 canonical Cloudflare platform signal 都未使用；production workflow 的正确传递只把严重度限制为 P2。"
+    }
+  },
+  {
+    "id": "FPH-008",
+    "source_finding_ids": [
+      "FPH-L03-002"
+    ],
+    "title": "Partial-success 恢复链没有贯穿买家、owner 邮件和日志的共同 referenceId",
+    "severity": "P2",
+    "domain": "observability",
+    "source_lane": "03-robustness-observability",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "docs/项目基础/行为合约.md:84-101; src/lib/lead-pipeline/process-lead.ts:75-108,145-151",
+        "summary": "行为合同要求 Airtable 失败后用 logged referenceId 回填，但 owner email data 没有收到该 ID。"
+      },
+      {
+        "type": "file",
+        "reference": "src/lib/email/email-data-schema.ts:3-9; src/lib/email/runtime-email-content.ts:117-157; src/lib/resend-core.tsx:94-117",
+        "summary": "邮件正文不渲染 referenceId，Resend 成功日志只有 provider messageId，没有业务 referenceId。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/03/owner-email-reference-id-diagnostic.txt",
+        "summary": "诊断汇总了 buyer response、owner email 和 provider 日志之间缺少确定性关联键的实际路径。"
+      }
+    ],
+    "impact": "在邮件成功、Airtable 失败的合法路径中，owner 只能按时间、邮箱或产品人工猜测对应日志，无法确定性执行文档承诺的回填。",
+    "root_cause": "Reference ID 在 pipeline 内生成，但 email contract 提前结束；buyer response、owner email 和 provider success log 各自使用不同标识。",
+    "root_cause_class": "owner-workflow-gap",
+    "recommended_fix": "把现有 referenceId 加入 owner email data、正文或主题、Resend tag 和成功日志；对仅测试使用的 requestId seam 要么接入真实来源，要么删除，不新增第二套 correlation abstraction。",
+    "verification_needed": "Partial-success 行为测试必须证明 buyer response、owner email payload、provider success/failure log 共享同一 referenceId，owner 能仅凭邮件中的 ID 定位日志并回填。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "检查时间戳、买家邮箱、产品、Resend messageId 或 Airtable record 是否已经能稳定连接该路径。",
+      "result": "Finding 针对的正是 Airtable 失败路径，此时没有 record；邮件不含业务 ID，失败日志又没有足够业务字段，时间猜测不满足确定性恢复合同。"
+    }
+  },
+  {
+    "id": "FPH-009",
+    "source_finding_ids": [
+      "FPH-L05-002"
+    ],
+    "title": "Lighthouse 全量证明仍只测五个旧 /en URL",
+    "severity": "P2",
+    "domain": "performance",
+    "source_lane": "05-ui-performance-accessibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "lighthouserc.js:23-47",
+        "summary": "Active config 声称 full sweep，但只定义五个 /en 前缀 URL，并写着根路径重定向到 /en。"
+      },
+      {
+        "type": "file",
+        "reference": "docs/项目基础/项目基础.md:18-23; docs/项目基础/内容.md:20",
+        "summary": "当前站点真相是 16 个无 locale 前缀的 canonical 公共页面。"
+      },
+      {
+        "type": "runtime",
+        "reference": "evidence/raw/05/en-route-headers.txt",
+        "summary": "目标运行时的 /en 返回 307 并重定向到 /，与 active config 注释相反。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/orchestrator/l05-lighthouse-config-refutation.json",
+        "summary": "主线程执行配置后确认 CI_DAILY=true 只得到五个旧 URL，而不是 16 页。"
+      }
+    ],
+    "impact": "当前手工性能证明会支付重定向噪声，并漏掉 11 个现行页面，包括 RFQ、四个产品页、两份指南、OEM、Warranty、Privacy 和 Terms。页面特有回归可能不被发现。",
+    "root_cause": "站点退役 locale 前缀后，starter 时代的 Lighthouse 路由清单和注释仍留在 active executable config。",
+    "root_cause_class": "dead-compatibility",
+    "recommended_fix": "把 URL 清单换成 16 个 canonical 无前缀路由，保留现有三次运行和阈值；增加一条小型合同测试，对比 Lighthouse URL 集与当前公共路由真相。",
+    "verification_needed": "新构建下 CI_DAILY=true pnpm website:lighthouse 应直接请求全部 16 个 canonical 页面，不经过 locale 兼容重定向，并保持现有性能与无障碍断言。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "检查 /en 是否仍是 canonical，以及五个 URL 是否只是有意的代表性样本。",
+      "result": "Active config 和文档把它称为 full sweep，执行结果却是五个已退役 URL；直接 canonical 页的代表性 Lighthouse 健康只说明这不是当前速度回归，不能推翻覆盖缺口。"
+    }
+  },
+  {
+    "id": "FPH-010",
+    "source_finding_ids": [
+      "FPH-L06-002"
+    ],
+    "title": "cf-official-compare 会把注释中的字符串当成可执行 Cloudflare 配置",
+    "severity": "P2",
+    "domain": "gates",
+    "source_lane": "06-gates-tests-credibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "scripts/quality/checks/cloudflare-official-compare.js:6-49,68-89,96-190",
+        "summary": "Required/forbidden 配置和 workflow 命令主要使用 content.includes 做源码字符串存在性判断。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/orchestrator/l06-string-gate-refutation.txt",
+        "summary": "Required Wrangler 字段、OpenNext 调用和 deploy/smoke 命令只存在于注释的 fixture 仍返回 failures=[]、accepted=true，并保留了 raw includes 实现行。"
+      },
+      {
+        "type": "file",
+        "reference": "scripts/quality/release-proof-manifest.js:31-41",
+        "summary": "该 source check 是 release proof 的实际步骤，不是未使用 helper。"
+      }
+    ],
+    "impact": "未来编辑可以删掉或破坏真实配置，只要相关字符串还留在注释中，release step 仍会报告成功，owner acceptance 会得到假绿信号。",
+    "root_cause": "门禁验证文本存在，而不是解析 JSONC/YAML/package script 或验证实际构建和 dry-run 行为。",
+    "root_cause_class": "fake-green-gate",
+    "recommended_fix": "删除已被真实 OpenNext build 和 Wrangler dry-run 覆盖的字符串检查；剩余唯一规则用 JSONC/YAML/package JSON 解析或最小 AST 检查实际字段和步骤。",
+    "verification_needed": "把 comments-only fixture 固化为回归测试并要求失败；当前真实 source 正例、OpenNext build 和 Wrangler dry-run 继续通过。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "运行真实仓库 source check、目标 SHA 的 OpenNext build 和 Wrangler dry-run，尝试证明 mutation 只是测试夹具问题。",
+      "result": "当前仓库和产物确实健康，但 comments-only mutation 仍能让实际 release step 假绿，因此 finding 限定为门禁可信度缺陷并存活。"
+    }
+  },
+  {
+    "id": "FPH-011",
+    "source_finding_ids": [
+      "FPH-L06-003"
+    ],
+    "title": "生产 deploy 的 cancel-in-progress 可取消已部署但未完成的验证",
+    "severity": "P2",
+    "domain": "gates",
+    "source_lane": "06-gates-tests-credibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": ".github/workflows/cloudflare-deploy.yml:24-26,223-282",
+        "summary": "Preview 和 production 共用 cancel-in-progress=true；状态变更 deploy 在首个 job，post-deploy verification 在后续依赖 job。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/orchestrator/l06-deploy-daily-refutation.json",
+        "summary": "解析 workflow 确认 production 可被新 run 取消，状态变更 deploy 和 post-deploy verification 位于不同 job，现有合同没有并发策略断言。"
+      }
+    ],
+    "impact": "新 production run 若在旧 run 已部署、但 smoke 尚未结束时启动，可以取消旧验证；若新 run 又在部署前失败，线上已经变化，但两个 run 都没有完成验证。",
+    "root_cause": "适合可替换 CI/preview 的取消策略被直接用于有状态变更的 production workflow，缺少生产发布串行化失败合同。",
+    "root_cause_class": "missing-failure-contract",
+    "recommended_fix": "Production 禁用 in-progress cancellation，让发布连同 post-deploy verification 串行完成；preview 可按需保留取消。增加解析型 workflow contract 锁定差异。",
+    "verification_needed": "合同测试证明 production run 不能取消正在执行的 production run，post-deploy job 仍依赖部署输出；下一次授权生产发布中第二次 dispatch 应排队而不是取消。",
+    "linus_gate": "Keep",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "确认 preview/production 使用不同 group，取消会显示 cancelled，且后续成功 run 能替代并验证旧部署。",
+      "result": "这些限制降低误读风险，但不能排除新 run 在部署前失败、旧部署已生效且验证被取消的窗口，因此 finding 存活。"
+    }
+  },
+  {
+    "id": "FPH-012",
+    "source_finding_ids": [
+      "FPH-L06-004"
+    ],
+    "title": "Daily E2E 首次浏览器失败后重试成功，workflow 仍显示绿色",
+    "severity": "P2",
+    "domain": "tests",
+    "source_lane": "06-gates-tests-credibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "external",
+        "reference": "evidence/raw/06/github-daily-e2e-exact-sha.json",
+        "summary": "Exact-SHA Daily E2E run 29741888689 对目标提交的 workflow conclusion 是 success。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/orchestrator/l06-deploy-daily-refutation.json",
+        "summary": "对 workflow、Playwright 配置和 exact-SHA 日志的归一化结果记录 conclusion=success，同时 observed=1 flaky / 144 passed。"
+      },
+      {
+        "type": "command",
+        "reference": "evidence/raw/06/daily-flaky-adversarial-rerun.txt",
+        "summary": "同一 WebKit 目标在 retries=0、repeat-each=3 下三次通过，因此没有把 suspected FAQ/UI 原因升级为产品 finding。"
+      },
+      {
+        "type": "file",
+        "reference": "playwright.config.ts:87-107; .github/workflows/daily-e2e.yml:56-68",
+        "summary": "Daily workflow 未设置已有的 CI_FLAKE_SAMPLING=1，也不检查 flaky 结果。"
+      }
+    ],
+    "impact": "定时跨浏览器证明可以在出现真实首次失败时保持绿色，只看 GitHub workflow 状态的 owner 无法区分稳定通过和间歇失败。",
+    "root_cause": "Daily job 继承普通 CI 重试策略，却没有把 flaky outcome 当作 sampling failure。",
+    "root_cause_class": "fake-green-gate",
+    "recommended_fix": "Daily E2E 使用项目已有的 CI_FLAKE_SAMPLING=1，把 retries 设为 0；普通 PR smoke 是否保留重试可单独决定。增加 workflow/config 合同测试。",
+    "verification_needed": "配置测试证明 Daily 环境 retries=0；下一次 scheduled run 要么首次全过，要么在间歇失败时明确变红。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "用 retries=0 对同一个 WebKit 目标重复三次，尝试确认它是当前稳定的页面缺陷。",
+      "result": "三次都通过，所以没有把 FAQ/UI 原因升级为产品 finding；但 exact-SHA Daily run 确实在首次失败后仍绿色，门禁策略缺陷成立。"
+    }
+  },
+  {
+    "id": "FPH-013",
+    "source_finding_ids": [
+      "FPH-L06-005"
+    ],
+    "title": "并发 Workerd smoke 只在手工证明车道，强制 smoke 仍是顺序执行",
+    "severity": "P2",
+    "domain": "gates",
+    "source_lane": "06-gates-tests-credibility",
+    "confidence": "high",
+    "evidence_level": "Confirmed by execution",
+    "evidence": [
+      {
+        "type": "command",
+        "reference": "evidence/orchestrator/l06-concurrency-gate-refutation.json",
+        "summary": "归一化 mapping 证明 cf-preview-smoke manual-only 且使用七路并发，mandatory deployed-smoke 顺序执行并带重试；CI 和 workflow 没有调用并发 smoke。"
+      },
+      {
+        "type": "file",
+        "reference": "scripts/quality/checks/cloudflare-smoke.js:201-227,360-465; scripts/quality/release-proof-manifest.js:159-207",
+        "summary": "本地 Workerd smoke 使用 Promise.all 并检查 cookie header，deployed smoke 顺序等待并重试；强制步骤在 manualProofLanes 前结束。"
+      },
+      {
+        "type": "file",
+        "reference": ".github/workflows/ci.yml:185-260; .github/workflows/cloudflare-deploy.yml:155-168,277-327",
+        "summary": "CI 和 deploy workflow 都没有调用 cf-preview-smoke，production 只运行顺序 deployed-smoke。"
+      }
+    ],
+    "impact": "CI、本地 release proof 和 production deploy workflow 都可以在没有覆盖请求重叠和 middleware cookie 泄漏的情况下保持绿色；这正好漏掉本轮已复现的 Workerd 并发故障类别。",
+    "root_cause": "更强的 runtime smoke 被放在 manual lane，强制 deployed 替代项为了启动稳定性改为顺序重试，并保留了更窄的断言集。",
+    "root_cause_class": "fake-green-gate",
+    "recommended_fix": "把唯一合同放进一个强制路径。最小方案是让 deployed-smoke 并发启动独立路由，同时保留每个请求的重试，并加入现有 x-middleware-set-cookie 断言；如需部署前证明，再在 Cloudflare CI 启动 OpenNext preview。",
+    "verification_needed": "回归测试挂起首个响应后，强制 smoke 必须已启动其他路由，并在 x-middleware-set-cookie 出现时失败；manifest/workflow 合同必须证明该并发断言属于 mandatory path。",
+    "linus_gate": "Keep",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "确认 manual 分类是有意设计，production post-deploy smoke 是强制步骤且带重试，并核对是否存在等价强制合同。",
+      "result": "强制 smoke 确实覆盖顺序可达性，但没有并发和 cookie header 断言，无法替代 manual smoke；finding 只确认门禁缺口，不声称当前部署一定失败。"
+    }
+  },
+  {
+    "id": "FPH-014",
+    "source_finding_ids": [
+      "FPH-L07-001"
+    ],
+    "title": "产品数量和关键规格仍在常量、SEO、图示、MDX 和 messages 多处独立维护",
+    "severity": "P2",
+    "domain": "architecture",
+    "source_lane": "07-architecture-maintainability-dependencies",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "src/constants/tucsenberg-product-page-abs-flood-barriers.ts:29,35-42,114-146; src/constants/tucsenberg-product-meta.ts:7-12; src/components/products/product-diagrams.tsx:170-186",
+        "summary": "同一 TB-BW 50-85 cm 高度范围在产品页、SEO 和图示中独立手写。"
+      },
+      {
+        "type": "file",
+        "reference": "content/pages/en/flood-barrier-materials-guide.mdx:18-30",
+        "summary": "比较内容另外拥有产品数量和保护高度描述。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/07/change-cost-drills.md",
+        "summary": "增加产品要跨六个以上 authoring surfaces，并找到多处 active count-bound 文案；修改一个 TB-BW 规格要跨至少四个生产 owner。"
+      }
+    ],
+    "impact": "未来新增第六个产品或修正规格时，即使 registry 和单页测试通过，SEO、图示、指南或营销文案仍可能保留旧事实，形成静默漂移。",
+    "root_cause": "路由身份、页面文案、SEO、图示和比较内容都把同一权威事实作为自由字符串拥有，现有测试只保护单个表面，不保护跨表面一致性。",
+    "root_cause_class": "duplicate-truth",
+    "recommended_fix": "先删除不必要的精确产品数量和重复数字；确实需要显示的少数表面复用现有 typed product value，再只为剩余共享事实加一条窄 parity test，不建设新的产品数据平台。",
+    "verification_needed": "在修复分支改变一个 TB-BW 高度值，证明所有保留的精确范围一起派生或一起失败；增加第六个 catalog fixture，证明 active 页面和消息不再固定声称 five。",
+    "linus_gate": "Simplify",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "检查 registry、Home tuple、metadata、diagram 和 content-manifest tests 是否已经把相同事实跨表面锁在一起。",
+      "result": "现有门禁能发现缺少 registry 项或生成内容陈旧，但不会比较四个事实 owner，也不会盘点固定产品数量文案，candidate 存活。"
+    }
+  },
+  {
+    "id": "FPH-015",
+    "source_finding_ids": [
+      "FPH-L04-001"
+    ],
+    "title": "五个旧图片或 SVG 没有生产消费者但仍暴露在 public surface",
+    "severity": "P3",
+    "domain": "dead-code",
+    "source_lane": "04-content-seo-i18n-assets",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "report",
+        "reference": "evidence/raw/04/dead-asset-refutation.txt",
+        "summary": "目标提交的生产范围搜索没有找到 about-og.jpg、showcase-hero.svg、og-image.jpg、og-image.svg、next.svg 的消费者，并单独确认当前 logo/OG owner。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/04/image-summary.tsv",
+        "summary": "五个文件合计 41,312 bytes，内容是占位 about OG、明确要求替换的 starter hero、旧 starter 平台卡、被 supersede 的 SVG OG 和默认 Next logo。"
+      },
+      {
+        "type": "file",
+        "reference": "src/config/single-site.ts:215-224; src/lib/seo-metadata.ts:37-95; src/config/public-trust.ts:73-77",
+        "summary": "当前生产 owner 使用 tucsenberg-logo.png 和 tucsenberg-og.png，不使用这五个路径。"
+      }
+    ],
+    "impact": "影响较小，但部署会继续公开旧品牌文件，后续维护者也可能误把它们当成仍受支持的 OG 或 hero 资产。",
+    "root_cause": "派生站点替换了 live references，却没有同步收口 public 文件清单和邻近 README。",
+    "root_cause_class": "dead-compatibility",
+    "recommended_fix": "修复轮先确认没有外部直接链接依赖，再移除五个文件并更新 public/images/README.md；保留当前 live logo、OG 和 owner intent 未明确的 square logo。",
+    "verification_needed": "重跑生产引用扫描、content check 和相关资产测试；新 preview 中旧直链不再返回陈旧内容，当前 logo/OG 仍正常。",
+    "linus_gate": "Delete",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "搜索生产 TS/TSX、内容、消息、配置、CSS、helper 生成路径、scripts/tests 和 framework conventions，并把 negative guard 与 runtime consumer 分开。",
+      "result": "五个文件仍没有 live consumer；外部直接链接依赖尚未证明，留作删除前核对，但不改变它们在当前生产代码中的死资产状态。"
+    }
+  },
+  {
+    "id": "FPH-016",
+    "source_finding_ids": [
+      "FPH-L07-002"
+    ],
+    "title": "测试和兼容语义让两个退役符号继续留在生产表面",
+    "severity": "P3",
+    "domain": "dead-code",
+    "source_lane": "07-architecture-maintainability-dependencies",
+    "confidence": "high",
+    "evidence_level": "Confirmed by static evidence",
+    "evidence": [
+      {
+        "type": "file",
+        "reference": "src/lib/contact/getContactCopy.ts:47-157; src/app/[locale]/contact/contact-page-data.ts:72-75",
+        "summary": "运行时直接调用 getContactCopyFromMessages；async getContactCopy(locale) 没有生产 caller，只被测试保活。"
+      },
+      {
+        "type": "file",
+        "reference": "src/constants/validation-limits.ts:20-27; src/constants/index.ts:18-25",
+        "summary": "退役 MAX_LEAD_COMPANY_LENGTH 只作为 active product-name limit 的数字别名和 barrel export 存在。"
+      },
+      {
+        "type": "report",
+        "reference": "evidence/raw/07/candidate-refutations.md",
+        "summary": "全库引用检查排除了 runtime、构建、生成、治理或外部 package 消费者。"
+      }
+    ],
+    "impact": "这些名字让维护者误以为项目支持两个 Contact copy 入口和一个仍在使用的 company 字段限制；Knip 因测试引用而保持绿色，混淆会持续存在。",
+    "root_cause": "早期精简保留了兼容 helper 的测试，退役 company limit 又被复用成方便的数字别名。",
+    "root_cause_class": "dead-compatibility",
+    "recommended_fix": "删除 getContactCopy() 及只为它存在的测试，把断言放到 live function；让 MAX_LEAD_PRODUCT_NAME_LENGTH 直接持有其文档化限制，删除 company alias 和 barrel re-export。",
+    "verification_needed": "rg 确认两个退役符号清零；重跑改到 live function 的 Contact tests、lead schema/handoff tests、pnpm knip:check 和 type-check。",
+    "linus_gate": "Delete",
+    "verification": {
+      "status": "survived-adversarial-review",
+      "refutation_attempt": "搜索 runtime、build tool、generated artifact、治理规则和外部 package 消费者，并核对当前 Contact page 的真实调用。",
+      "result": "只有测试和 re-export 保持它们可达，生产运行时使用其他符号，且仓库不提供外部 package contract，因此 finding 存活。"
+    }
+  }
+]

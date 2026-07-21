@@ -1,0 +1,99 @@
+[WebServer] (node:36213) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [2m$ next build[22m
+[WebServer] (node:36235) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[WebServer] (node:36235) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36246) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36257) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36259) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36258) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36261) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:36255) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] Error: Bail out to client-side rendering: useSearchParams()
+[WebServer]     at <unknown> (src/components/navigation/navigation-progress-bar.tsx:82:24)
+[WebServer]   [90m80 |[0m [36mexport[0m [36mfunction[0m [33mNavigationProgressBar[0m() {
+[WebServer]   [90m81 |[0m   [36mconst[0m pathname = usePathname();
+[WebServer] [31m[1m>[0m [90m82 |[0m   [36mconst[0m searchParams = useSearchParams();
+[WebServer]   [90m   |[0m                        [31m[1m^[0m
+[WebServer]   [90m83 |[0m   [36mconst[0m routeKey = getNavigationRouteKey(pathname, searchParams);
+[WebServer]   [90m84 |[0m   [36mconst[0m reducedMotion = usePrefersReducedMotion();
+[WebServer]   [90m85 |[0m   [36mconst[0m [progress, setProgress] = useState([35m0[0m); {
+[WebServer]   reason: [32m'useSearchParams()'[39m,
+[WebServer]   digest: [32m'BAILOUT_TO_CLIENT_SIDE_RENDERING'[39m
+[WebServer] }
+[WebServer] Error: Bail out to client-side rendering: useSearchParams()
+[WebServer]     at <unknown> (src/components/navigation/navigation-progress-bar.tsx:82:24)
+[WebServer]   [90m80 |[0m [36mexport[0m [36mfunction[0m [33mNavigationProgressBar[0m() {
+[WebServer]   [90m81 |[0m   [36mconst[0m pathname = usePathname();
+[WebServer] [31m[1m>[0m [90m82 |[0m   [36mconst[0m searchParams = useSearchParams();
+[WebServer]   [90m   |[0m                        [31m[1m^[0m
+[WebServer]   [90m83 |[0m   [36mconst[0m routeKey = getNavigationRouteKey(pathname, searchParams);
+[WebServer]   [90m84 |[0m   [36mconst[0m reducedMotion = usePrefersReducedMotion();
+[WebServer]   [90m85 |[0m   [36mconst[0m [progress, setProgress] = useState([35m0[0m); {
+[WebServer]   reason: [32m'useSearchParams()'[39m,
+[WebServer]   digest: [32m'BAILOUT_TO_CLIENT_SIDE_RENDERING'[39m
+[WebServer] }
+[WebServer] (node:36264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [2m$ next start[22m
+[WebServer] (node:36286) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+🚀 Starting global setup for Playwright tests...
+🧪 Setting up test environment...
+   NODE_ENV=test
+   PLAYWRIGHT_TEST=true
+   NEXT_PUBLIC_DISABLE_PERFORMANCE_MONITOR=true
+   NEXT_PUBLIC_TEST_MODE=true
+✅ Test environment configured
+⏳ Waiting for server at http://localhost:3000...
+🧹 Removing interfering elements...
+✅ Interfering elements removed
+⏳ Waiting for page to stabilize...
+✅ Page is stable
+✅ Server is ready and page is stable
+✅ Global setup completed
+
+Running 3 tests using 2 workers
+(node:36301) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36302) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36301) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36302) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+🧹 Removing interfering elements...
+✅ Interfering elements removed
+⏳ Waiting for page to stabilize...
+✅ Page is stable
+🧹 Removing interfering elements...
+✅ Interfering elements removed
+⏳ Waiting for page to stabilize...
+✅ Page is stable
+··(node:36331) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36331) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+🧹 Removing interfering elements...
+✅ Interfering elements removed
+⏳ Waiting for page to stabilize...
+✅ Page is stable
+·🧹 Starting global teardown for Playwright tests...
+🧹 Cleaning up test environment...
+✅ Test environment cleaned up
+✅ Global teardown completed
+
+  3 passed (17.4s)

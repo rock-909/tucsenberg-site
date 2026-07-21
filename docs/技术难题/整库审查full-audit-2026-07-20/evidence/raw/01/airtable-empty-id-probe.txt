@@ -1,0 +1,9 @@
+
+ RUN  v4.1.8 /Users/Data/code/tucsenberg-site
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  02:12:30
+   Duration  890ms (transform 115ms, setup 133ms, import 100ms, tests 6ms, environment 538ms)
+

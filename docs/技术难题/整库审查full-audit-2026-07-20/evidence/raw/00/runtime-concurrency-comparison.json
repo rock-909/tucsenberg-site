@@ -1,0 +1,219 @@
+{
+  "expectedStatuses": {
+    "/": 200,
+    "/invalid/contact": 404,
+    "/products": 200,
+    "/contact": 200,
+    "/request-quote": 200,
+    "/api/health": 200,
+    "/zh": 404,
+    "/zh/contact": 404
+  },
+  "node": {
+    "runtime": "next start",
+    "base": "http://localhost:3000",
+    "targetSha": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+    "buildIdentity": {
+      "buildId": "9ab5f6c"
+    },
+    "proxyEnv": {
+      "ALL_PROXY": null,
+      "HTTP_PROXY": null,
+      "HTTPS_PROXY": null,
+      "all_proxy": null,
+      "http_proxy": null,
+      "https_proxy": null
+    },
+    "sequential": {
+      "total": 8,
+      "expected": 8,
+      "failures": [],
+      "maxMs": 186
+    },
+    "waves": [
+      {
+        "wave": 1,
+        "totalMs": 34,
+        "total": 8,
+        "expected": 8,
+        "failures": [],
+        "maxMs": 34
+      },
+      {
+        "wave": 2,
+        "totalMs": 27,
+        "total": 8,
+        "expected": 8,
+        "failures": [],
+        "maxMs": 26
+      },
+      {
+        "wave": 3,
+        "totalMs": 28,
+        "total": 8,
+        "expected": 8,
+        "failures": [],
+        "maxMs": 27
+      }
+    ]
+  },
+  "workers": {
+    "runtime": "wrangler dev --env preview --local",
+    "base": "http://127.0.0.1:8787",
+    "targetSha": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+    "buildIdentity": {
+      "bytes": 2278,
+      "sha256": "d05223bf4d44c84108a102ab62aa3bc9c5568f0c3ac2064c37be5cc65c64bc45"
+    },
+    "proxyEnv": {
+      "ALL_PROXY": null,
+      "HTTP_PROXY": null,
+      "HTTPS_PROXY": null,
+      "all_proxy": null,
+      "http_proxy": null,
+      "https_proxy": null
+    },
+    "sequential": {
+      "total": 8,
+      "expected": 8,
+      "failures": [],
+      "maxMs": 543
+    },
+    "waves": [
+      {
+        "wave": 1,
+        "totalMs": 54,
+        "total": 8,
+        "expected": 3,
+        "failures": [
+          {
+            "pathname": "/",
+            "status": 500,
+            "error": null,
+            "ms": 54
+          },
+          {
+            "pathname": "/invalid/contact",
+            "status": 500,
+            "error": null,
+            "ms": 54
+          },
+          {
+            "pathname": "/products",
+            "status": 500,
+            "error": null,
+            "ms": 51
+          },
+          {
+            "pathname": "/contact",
+            "status": 500,
+            "error": null,
+            "ms": 54
+          },
+          {
+            "pathname": "/request-quote",
+            "status": 500,
+            "error": null,
+            "ms": 51
+          }
+        ],
+        "maxMs": 54
+      },
+      {
+        "wave": 2,
+        "totalMs": 15005,
+        "total": 8,
+        "expected": 2,
+        "failures": [
+          {
+            "pathname": "/",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15004
+          },
+          {
+            "pathname": "/invalid/contact",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15004
+          },
+          {
+            "pathname": "/products",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15005
+          },
+          {
+            "pathname": "/contact",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15005
+          },
+          {
+            "pathname": "/request-quote",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15005
+          },
+          {
+            "pathname": "/api/health",
+            "status": 500,
+            "error": null,
+            "ms": 17
+          }
+        ],
+        "maxMs": 15005
+      },
+      {
+        "wave": 3,
+        "totalMs": 15003,
+        "total": 8,
+        "expected": 2,
+        "failures": [
+          {
+            "pathname": "/",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15002
+          },
+          {
+            "pathname": "/invalid/contact",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15001
+          },
+          {
+            "pathname": "/products",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15001
+          },
+          {
+            "pathname": "/contact",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15002
+          },
+          {
+            "pathname": "/request-quote",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15001
+          },
+          {
+            "pathname": "/api/health",
+            "status": null,
+            "error": "TimeoutError: The operation was aborted due to timeout",
+            "ms": 15001
+          }
+        ],
+        "maxMs": 15002
+      }
+    ]
+  },
+  "boundary": [
+    "Both probes use the same source SHA, route set, manual redirect handling, 15 second timeout, and cleared proxy variables.",
+    "The Node control uses a fresh ordinary Next build. The Workers probe uses the preserved platform-env OpenNext artifact; the before/after identity files prove the OpenNext worker hash was unchanged by the Node control build.",
+    "The comparison narrows the failure to the Cloudflare/OpenNext runtime path. It does not by itself isolate whether Next Cache Components, OpenNext adapter glue, or workerd scheduling is the final implementation owner."
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "name": "baseline",
+  "override": {},
+  "runtimeContract": {
+    "warnings": [],
+    "errors": []
+  },
+  "fullStrictReport": {
+    "warnings": [],
+    "errors": [
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "SITE_CONFIG.baseUrl is not public-launch ready (configure the real public domain before client launch).",
+      "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED must be true after owner review of content/pages/{locale}/{about,contact,privacy,terms}.mdx (confirm legal/contact page truth before client launch).",
+      "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
+      "brandAssets.productPhotos.status is pending. Neutral product illustrations are allowed for preview, but owner-confirmed product photos must be supplied before launch."
+    ],
+    "runtimeContractChecked": true
+  }
+}
+{
+  "name": "headers-disabled",
+  "override": {
+    "SECURITY_HEADERS_ENABLED": "false"
+  },
+  "runtimeContract": {
+    "warnings": [],
+    "errors": []
+  },
+  "fullStrictReport": {
+    "warnings": [],
+    "errors": [
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "SITE_CONFIG.baseUrl is not public-launch ready (configure the real public domain before client launch).",
+      "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED must be true after owner review of content/pages/{locale}/{about,contact,privacy,terms}.mdx (confirm legal/contact page truth before client launch).",
+      "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
+      "brandAssets.productPhotos.status is pending. Neutral product illustrations are allowed for preview, but owner-confirmed product photos must be supplied before launch."
+    ],
+    "runtimeContractChecked": true
+  }
+}
+{
+  "name": "csp-relaxed",
+  "override": {
+    "NEXT_PUBLIC_SECURITY_MODE": "relaxed"
+  },
+  "runtimeContract": {
+    "warnings": [],
+    "errors": []
+  },
+  "fullStrictReport": {
+    "warnings": [],
+    "errors": [
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "SITE_CONFIG.baseUrl is not public-launch ready (configure the real public domain before client launch).",
+      "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED must be true after owner review of content/pages/{locale}/{about,contact,privacy,terms}.mdx (confirm legal/contact page truth before client launch).",
+      "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
+      "brandAssets.productPhotos.status is pending. Neutral product illustrations are allowed for preview, but owner-confirmed product photos must be supplied before launch."
+    ],
+    "runtimeContractChecked": true
+  }
+}
+{
+  "name": "turnstile-test-mode",
+  "override": {
+    "NEXT_PUBLIC_TEST_MODE": "true"
+  },
+  "runtimeContract": {
+    "warnings": [],
+    "errors": []
+  },
+  "fullStrictReport": {
+    "warnings": [],
+    "errors": [
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL is not public-launch ready (configure the real public domain before production deploy).",
+      "SITE_CONFIG.baseUrl is not public-launch ready (configure the real public domain before client launch).",
+      "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED must be true after owner review of content/pages/{locale}/{about,contact,privacy,terms}.mdx (confirm legal/contact page truth before client launch).",
+      "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
+      "brandAssets.productPhotos.status is pending. Neutral product illustrations are allowed for preview, but owner-confirmed product photos must be supplied before launch."
+    ],
+    "runtimeContractChecked": true
+  }
+}

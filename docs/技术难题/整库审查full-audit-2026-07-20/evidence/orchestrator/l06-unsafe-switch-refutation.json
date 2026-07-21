@@ -1,0 +1,25 @@
+{
+  "subject": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+  "baseline": {
+    "warnings": [],
+    "errors": []
+  },
+  "securityHeadersOff": {
+    "warnings": [],
+    "errors": []
+  },
+  "relaxedMode": {
+    "warnings": [],
+    "errors": []
+  },
+  "publicTestMode": {
+    "warnings": [],
+    "errors": []
+  },
+  "knownBlockedControl": {
+    "warnings": [],
+    "errors": [
+      "Degraded in-memory rate-limit store flag (ALLOW_MEMORY_RATE_LIMIT) cannot be used in production. Configure a durable Redis-compatible store for production deployments."
+    ]
+  }
+}

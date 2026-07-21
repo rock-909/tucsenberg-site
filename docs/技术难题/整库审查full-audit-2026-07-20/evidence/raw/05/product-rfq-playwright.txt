@@ -1,0 +1,40 @@
+[1A[2K[WebServer] (node:10967) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+[1A[2K[WebServer] [2m$ next start[22m
+
+[1A[2K[WebServer] (node:10989) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+🚀 Starting global setup for Playwright tests...
+🧪 Setting up test environment...
+   NODE_ENV=test
+   PLAYWRIGHT_TEST=true
+   NEXT_PUBLIC_DISABLE_PERFORMANCE_MONITOR=true
+   NEXT_PUBLIC_TEST_MODE=true
+✅ Test environment configured
+⏳ Waiting for server at http://localhost:3000...
+🧹 Removing interfering elements...
+✅ Interfering elements removed
+⏳ Waiting for page to stabilize...
+✅ Page is stable
+✅ Server is ready and page is stable
+✅ Global setup completed
+
+Running 2 tests using 1 worker
+
+[1A[2K(node:11010) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:11010) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[1/2] [chromium] › tests/e2e/product-interest-rfq-handoff.spec.ts:10:5 › product CTA reaches RFQ with validated catalog identity
+[1A[2K[2/2] [chromium] › tests/e2e/product-interest-rfq-handoff.spec.ts:77:5 › general request quote does not carry a catalog product identity
+🧹 Starting global teardown for Playwright tests...
+🧹 Cleaning up test environment...
+✅ Test environment cleaned up
+✅ Global teardown completed
+[1A[2K  2 passed (9.5s)

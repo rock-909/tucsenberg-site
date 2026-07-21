@@ -1,0 +1,36 @@
+{
+  "subject": "9ab5f6c4f158281fd16c987e0cdd02622919d90e",
+  "releaseExecutableSteps": [
+    "truth-docs",
+    "content-manifest-freshness",
+    "cloudflare-official-source-compare",
+    "type-check",
+    "lint-check",
+    "middleware-i18n-unit-tests",
+    "lead-family-api-tests",
+    "health-api-tests",
+    "translations",
+    "content-readiness-catalog",
+    "next-build",
+    "cloudflare-build",
+    "cloudflare-static-asset-headers",
+    "wrangler-preview-dry-run",
+    "local-playwright-smoke"
+  ],
+  "cfPreviewSmokeIsExecutableReleaseStep": false,
+  "cfPreviewSmokeIsManualOnly": true,
+  "workflowsCallingCfPreviewSmoke": [],
+  "workflowsCallingDeployedSmoke": [
+    ".github/workflows/cloudflare-deploy.yml"
+  ],
+  "localCfPreviewImplementation": {
+    "usesPromiseAll": true,
+    "expectationCount": 7
+  },
+  "deployedSmokeImplementation": {
+    "usesPromiseAll": false,
+    "usesSequentialForLoop": true,
+    "retries": true
+  },
+  "exactRuntimeFailureArtifact": "../raw/00/runtime-concurrency-comparison.json"
+}

@@ -1,0 +1,37 @@
+{
+  "path": "docs/技术难题/整库审查full-audit-2026-07-20/01-质量地图.md",
+  "allowed_modes": [
+    "fully checked",
+    "sampled",
+    "static-only",
+    "not checked",
+    "blocked",
+    "excluded"
+  ],
+  "expected": {
+    "row_count": 65,
+    "column_count": 7,
+    "modes": {
+      "fully checked": 39,
+      "sampled": 16,
+      "static-only": 2,
+      "not checked": 0,
+      "blocked": 8,
+      "excluded": 0
+    }
+  },
+  "actual": {
+    "row_count": 65,
+    "fixed_column_count": true,
+    "modes": {
+      "fully checked": 39,
+      "sampled": 16,
+      "static-only": 2,
+      "not checked": 0,
+      "blocked": 8,
+      "excluded": 0
+    },
+    "malformed_rows": []
+  },
+  "ok": true
+}

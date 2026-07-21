@@ -1,0 +1,176 @@
+=== Generic RFQ reassurance copy ===
+    42	  "requestQuote": {
+    43	    "metadata": {
+    44	      "title": "Request a Quote — Reply Within 12 Hours",
+    45	      "description": "Send dimensions, quantities, market and timeline. We reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials."
+    46	    },
+    47	    "page": {
+    48	      "heading": "Get real numbers",
+    49	      "intro": "Two required fields, one optional message — send what you know and we reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials.",
+    50	      "afterSubmitTitle": "After you submit",
+    51	      "confidenceTitle": "Quote confidence",
+    52	      "confidenceWarranty": "3-year warranty",
+    53	      "confidenceSamples": "Sample fees credited",
+    54	      "confidencePricing": "No published-price games — the quote is the price conversation"
+    55	    }
+    56	  },
+=== Context-blind rendering ===
+    51	interface RequestQuoteAsideCopy {
+    52	  afterSubmitTitle: string;
+    53	  confidenceTitle: string;
+    54	  confidenceWarranty: string;
+    55	  confidenceSamples: string;
+    56	  confidencePricing: string;
+    57	}
+    58	
+    59	function RequestQuoteAside({
+    60	  successCopy,
+    61	  copy,
+    62	}: {
+    63	  successCopy: string;
+    64	  copy: RequestQuoteAsideCopy;
+    65	}) {
+    66	  return (
+    67	    <aside className="space-y-4">
+    68	      <section className="surface-card p-6">
+    69	        <h2 className="text-lg font-semibold">{copy.afterSubmitTitle}</h2>
+    70	        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+    71	          {successCopy}
+    72	        </p>
+    73	      </section>
+    74	      <section className="surface-card p-6">
+    75	        <h2 className="text-lg font-semibold">{copy.confidenceTitle}</h2>
+    76	        <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+    77	          <li>{copy.confidenceWarranty}</li>
+    78	          <li>{copy.confidenceSamples}</li>
+    79	          <li>{copy.confidencePricing}</li>
+    80	        </ul>
+    81	      </section>
+    82	    </aside>
+    86	export default async function RequestQuotePage({
+    87	  params,
+    88	  searchParams,
+    89	}: RequestQuotePageProps) {
+    90	  const { locale } = await params;
+    91	  setRequestLocale(locale);
+    92	  const [tPage, tMeta, tInquiryForm] = await Promise.all([
+    93	    getTranslations({ locale, namespace: "requestQuote.page" }),
+    94	    getTranslations({ locale, namespace: "requestQuote.metadata" }),
+    95	    getTranslations({ locale, namespace: "inquiry.form" }),
+    96	  ]);
+    97	  const inquiryCopy: InquiryFormCopy = createInquiryFormCopy(tInquiryForm);
+    98	  const asideCopy: RequestQuoteAsideCopy = {
+    99	    afterSubmitTitle: tPage("afterSubmitTitle"),
+   100	    confidenceTitle: tPage("confidenceTitle"),
+   101	    confidenceWarranty: tPage("confidenceWarranty"),
+   102	    confidenceSamples: tPage("confidenceSamples"),
+   103	    confidencePricing: tPage("confidencePricing"),
+   104	  };
+   129	        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+   130	          <Suspense fallback={inquiryFallback}>
+   131	            <RequestQuoteInquiryForm
+   132	              inquiryCopy={inquiryCopy}
+   133	              inquiryFallback={inquiryFallback}
+   134	              searchParams={searchParams}
+   135	            />
+   136	          </Suspense>
+   137	          <RequestQuoteAside
+   138	            successCopy={inquiryCopy.success}
+   139	            copy={asideCopy}
+   140	          />
+   141	        </div>
+=== Other generic buyer surfaces ===
+    39	## Verify us
+    40	
+    41	- **Factory audits welcome** — in person or live video, any factory in the pool
+    42	- **References on request**
+    43	- **Paid samples before volume** — judge the product, not the website
+    44	- **Payment terms that protect you** — 30% deposit, 70% before shipment (T/T); full terms in [OEM & Wholesale](/oem-wholesale)
+    45	- **A written warranty** — [3 years on materials and workmanship](/warranty), exclusions stated plainly
+    46	- Company registration details available on request for your compliance file
+    77	1. **Factory audits welcome** — in person or live video walk-through of any factory in the pool.
+    78	2. **References on request** — we'll connect you with buyers who've shipped with us.
+    79	3. **Paid samples before any volume** — judge the product, not the website.
+    80	4. **Third-party inspection accepted** — appoint any agency of your choice for pre-shipment inspection; we schedule around them, not against them.
+    81	5. **Your spec on the paperwork.** Model, material, dimensions and packing written into the quotation and invoice — so what you approved is what's enforceable, not what a listing photo implied.
+    82	6. **Production evidence before it sails**: photos and video of your actual order at packing, plus the QC report — the sample you approved is the bulk you get.
+    83	7. **Start small — trial orders welcome.** Our minimums are cartons and pallets, not containers; qualify us with a trial order before you commit real volume. Scale when the product earns it.
+    84	8. **A written warranty** — [3 years on materials and workmanship](/warranty), exclusions stated plainly, so responsibility after delivery is on paper, not goodwill.
+    85	
+=== Correctly qualified generic surfaces ===
+    44	      "proof": {
+    45	        "quoteSla": "Standard items",
+    46	        "quoteSlaLabel": "reply within 12 hours",
+    47	        "warranty": "3-year warranty",
+    48	        "warrantyLabel": "on all standard lines",
+    49	        "factoryPool": "Factory pool",
+    50	        "factoryPoolLabel": "supplies established brands",
+   202	        "warranty": {
+   203	          "question": "What warranty do you give?",
+   204	          "answer": "3 years on materials and workmanship for standard lines. Custom-cut and custom-branded items are final sale. [Full terms](/warranty)."
+   205	        },
+=== Warranty policy product split ===
+    18	## Standard product lines (TB-BW, TB-AG, TB-TD, TB-CP)
+    19	
+    20	- **3 years from date of delivery**, materials and workmanship, to the original purchaser.
+    21	- Remedy: replacement of defective items (or replacement parts where the defect is a component), following written notice with photos/video and, where requested, return of a representative sample.
+    22	
+    23	## Consumables (TB-FB absorbent bags; accessory kits: seals, patches, nails)
+    24	
+    25	- Warranted to conform to published specifications and arrive free of defects. Shelf-life for unused bags: 3 years in original vacuum packaging, stored cool and dry. Activation is single-use by design and not a defect.
+    26	
+=== TB-FB spec sheet explicitly separates shelf life from warranty ===
+    24	 Dry size                                      400 × 600 mm                                  400 × 360 × 150 mm
+    25	 Dry / deployed weight                         0.23 kg / 20 kg                               0.25 kg / 20 kg
+    26	 Activation · deployed height                  3–4 min · ~12 cm                              3–4 min · ~12 cm
+    27	 Packing                                       5 per vacuum bag · 50 per carton              4 per vacuum bag · 40 per carton
+    28	 Carton (NW / GW)                              50×36×42 cm · 13.5 / 14.5 kg                  50×36×42 cm · 14.5 / 15.5 kg
+    29	 Materials                                     PP non-woven shell · SAP core (non-toxic) · colours white / black
+    30	 Shelf life                                    3 years vacuum-packed, stored cool & dry, off concrete floors
+    31	
+    32	How many bags per job                                              Honest boundaries
+    33	 • Standard doorway (0.9 m): 5–6 bags                                • For low-level water: door gaps, thresholds, low points,
+    34	 • Double door / single garage (2.4 m): 9–11                           leak response
+    35	 • Double garage (4.9 m): 18–22                                      • Not for knee-high water or structural protection —
+    36	 • Whole-house entry points: 30–50                                     hard barriers outperform any bag
+    37	 • Basis: TB-FB400 laid lengthwise, two layers, ~15%                 • Near neutral buoyancy when swollen: fast-moving
+    38	   overlap — reuse this table in your own sales material               water can shift what sand holds
+    39	   once you stock the line                                           • Shelf life ≠ warranty: bags are warranted to conform
+    40	                                                                       to spec on arrival; activation is single-use by design
+=== All product pages use the same RFQ route builder ===
+    38	import { ProductRunCalculator } from "@/components/products/product-run-calculator";
+    39	import { InlineMarkdown } from "@/lib/content/inline-markdown";
+    40	import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
+    41	
+    42	function getProductQuoteHref(productPage: TucsenbergProductPage) {
+    43	  return createCatalogInquiryHref(productPage.slug);
+    44	}
+    45	
+    46	export function generateStaticParams() {
+   312	function ProductFinalCta({
+   313	  page,
+   314	  labels,
+   315	}: {
+   316	  page: TucsenbergProductPage;
+   317	  labels: ProductLandingLabels;
+   318	}) {
+   319	  return (
+   320	    <section className="rounded-2xl bg-accent px-6 py-10 md:px-10 md:py-12">
+   321	      <h2 className="text-section">{labels.finalCtaTitle}</h2>
+   322	      <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+   323	        {page.rfqNote ?? labels.rfqNoteFallback}
+   324	      </p>
+   325	      <div className="mt-6 flex flex-wrap items-center gap-3">
+   326	        <Button asChild size="lg">
+   327	          <Link href={getProductQuoteHref(page)}>{page.cta.label}</Link>
+   328	        </Button>
+   329	        <Button asChild size="lg" variant="outline">
+   330	          <a href={page.downloadHref}>{labels.downloadSpec}</a>
+   331	        </Button>
+   332	      </div>
+   475	        {productPage.calculator ? (
+   476	          <ProductRunCalculator calculator={productPage.calculator} />
+   477	        ) : null}
+   478	        <ProductFaqSection page={productPage} labels={landingLabels} />
+   479	        <ProductFinalCta page={productPage} labels={landingLabels} />
+   480	      </div>

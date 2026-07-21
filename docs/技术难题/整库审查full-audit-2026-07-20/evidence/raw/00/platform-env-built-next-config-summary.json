@@ -1,0 +1,22 @@
+{
+  ".next/required-server-files.json": {
+    "productionBrowserSourceMaps": false,
+    "images": {
+      "unoptimized": true,
+      "loader": "default",
+      "path": "/_next/image"
+    },
+    "cacheComponents": true,
+    "compress": true
+  },
+  ".open-next/server-functions/default/.next/required-server-files.json": {
+    "productionBrowserSourceMaps": false,
+    "images": {
+      "unoptimized": true,
+      "loader": "default",
+      "path": "/_next/image"
+    },
+    "cacheComponents": true,
+    "compress": true
+  }
+}

@@ -1,0 +1,9 @@
+file	bytes	format	width	height	alpha
+public/images/about-og.jpg	3822	jpeg	800	600	no
+public/images/hero/showcase-hero.svg	2066	svg	1200	900	yes
+public/images/og-image.jpg	32469	jpeg	1200	630	no
+public/images/og-image.svg	1580	svg	1200	630	yes
+public/images/tucsenberg-logo-square.png	30560	png	512	512	yes
+public/images/tucsenberg-logo.png	23753	png	480	339	no
+public/images/tucsenberg-og.png	58123	png	1200	630	yes
+public/next.svg	1375	svg	394	80	yes
