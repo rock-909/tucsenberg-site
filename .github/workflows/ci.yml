@@ -163,7 +163,7 @@ jobs:
           TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
 
       - name: 运行 Tucsenberg E2E
-        run: pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/no-js-html-contract.spec.ts tests/e2e/contact-submit-journey.spec.ts
+        run: pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/no-js-html-contract.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/table-keyboard-scroll.spec.ts
 
   semgrep:
     name: Semgrep 安全扫描

@@ -579,21 +579,38 @@ describe("Tucsenberg Phase 1 site contract", () => {
   });
 
   it("keeps warranty claims scoped by product type", () => {
-    const requestQuoteCopy = readRepoFile(
-      "messages/profiles/b2b-lead/en/messages.json",
-    );
     const aboutContent = readRepoFile("content/pages/en/about.mdx");
     const oemContent = readRepoFile("content/pages/en/oem-wholesale.mdx");
     const warrantyContent = readRepoFile("content/pages/en/warranty.mdx");
+    const expectedClaim =
+      "3 years on materials and workmanship for standard durable product lines; consumables and custom items follow the product-specific terms";
+    const publicThreeYearClaims = [aboutContent, oemContent].flatMap(
+      (content) =>
+        content
+          .split("\n")
+          .filter((line) => /(?:3\s*-?\s*year|three\s*-?\s*year)/iu.test(line)),
+    );
 
-    expect(requestQuoteCopy).not.toContain("3-year warranty");
-    expect(aboutContent).toContain("standard durable product lines");
-    expect(oemContent).toContain("standard durable product lines");
+    expect(publicThreeYearClaims).toHaveLength(2);
+    for (const claim of publicThreeYearClaims) {
+      expect(claim).toContain(expectedClaim);
+    }
     expect(warrantyContent).toContain(
       "Standard product lines (TB-BW, TB-AG, TB-TD, TB-CP)",
     );
     expect(warrantyContent).toContain("Consumables (TB-FB absorbent bags");
     expect(warrantyContent).toContain("Shelf-life for unused bags: 3 years");
+  });
+
+  it("publishes buyer-visible warranty copy with the current content date", () => {
+    for (const filePath of [
+      "content/pages/en/about.mdx",
+      "content/pages/en/oem-wholesale.mdx",
+    ]) {
+      expect(readRepoFile(filePath), filePath).toContain(
+        "updatedAt: '2026-07-21'",
+      );
+    }
   });
 
   it("copies approved PDF downloads into the public download surface", () => {

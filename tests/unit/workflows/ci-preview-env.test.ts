@@ -57,6 +57,16 @@ function expectPreviewStepEnv(
 }
 
 describe("CI preview environment contract", () => {
+  it("runs the table keyboard accessibility contract in the required PR browser lane", () => {
+    const workflow = readCiWorkflow();
+    const browserSteps = workflow.jobs?.e2e?.steps;
+    const testStep = browserSteps?.find(
+      (candidate) => candidate.name === "运行 Tucsenberg E2E",
+    );
+
+    expect(testStep?.run).toContain("tests/e2e/table-keyboard-scroll.spec.ts");
+  });
+
   it("runs Cloudflare build proof against a public preview URL, not the launch domain", () => {
     const workflow = readCiWorkflow();
     const cloudflareBuildSteps = workflow.jobs?.["cloudflare-build"]?.steps;

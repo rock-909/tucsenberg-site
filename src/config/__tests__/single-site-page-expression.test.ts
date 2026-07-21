@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import b2bLeadMessages from "../../../messages/profiles/b2b-lead/en/messages.json";
 import catalogMessages from "../../../messages/profiles/catalog/en/messages.json";
 import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
@@ -25,18 +25,18 @@ describe("single-site-page-expression", () => {
       catalogMessages.home.productLines.items.aluminumFloodGates.description;
     const absProductPayload = JSON.stringify(ABS_FLOOD_BARRIERS_PRODUCT_PAGE);
 
-    expect(aluminumDescription).toMatch(/stacked planks|wall channels|posts/iu);
-    expect(aluminumDescription).not.toMatch(/curved|gable-end/iu);
-    expect(absProductPayload).toMatch(/curve|gable-end/iu);
+    expect(aluminumDescription).toBe(
+      "Demountable stacked-plank systems for doors, garages and loading docks, with wall channels or removable posts custom-cut to your opening schedule.",
+    );
+    expect(aluminumDescription).not.toMatch(/curv|gable[\s-]?end/iu);
+    expect(absProductPayload).toMatch(/curve/iu);
+    expect(absProductPayload).toMatch(/gable[\s-]?end/iu);
   });
 
   it("does not present the RFQ warranty as a catalog-wide 3-year warranty", () => {
-    const requestQuoteCopy = readFileSync(
-      "messages/profiles/b2b-lead/en/messages.json",
-      "utf8",
+    expect(b2bLeadMessages.requestQuote.page.confidenceWarranty).toBe(
+      "Written product-specific warranty terms",
     );
-
-    expect(requestQuoteCopy).not.toContain("3-year warranty");
   });
 
   it("keeps the homepage section order aligned with the active page runtime", () => {
