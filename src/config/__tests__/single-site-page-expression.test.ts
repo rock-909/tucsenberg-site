@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import catalogMessages from "../../../messages/profiles/catalog/en/messages.json";
+import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
 import {
@@ -18,6 +20,16 @@ import {
 } from "@/config/single-site-page-expression";
 
 describe("single-site-page-expression", () => {
+  it("keeps Aluminum homepage capabilities separate from ABS configurations", () => {
+    const aluminumDescription =
+      catalogMessages.home.productLines.items.aluminumFloodGates.description;
+    const absProductPayload = JSON.stringify(ABS_FLOOD_BARRIERS_PRODUCT_PAGE);
+
+    expect(aluminumDescription).toMatch(/stacked planks|wall channels|posts/iu);
+    expect(aluminumDescription).not.toMatch(/curved|gable-end/iu);
+    expect(absProductPayload).toMatch(/curve|gable-end/iu);
+  });
+
   it("does not present the RFQ warranty as a catalog-wide 3-year warranty", () => {
     const requestQuoteCopy = readFileSync(
       "messages/profiles/b2b-lead/en/messages.json",
