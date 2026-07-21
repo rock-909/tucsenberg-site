@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://docs.coderabbit.ai/schema/coderabbit.yaml
+#
+# CodeRabbit 审查配置 —— tucsenberg-site
+# 目标：用中文审查 PR，聚焦现有 pnpm 门禁盖不到的地方（逻辑/安全/可读性），
+# 不与项目自带的 lint / type-check / *:check 门禁重复刷屏。
+
+language: zh-CN
+
+reviews:
+  profile: chill                 # 温和模式，减少低价值评论
+  request_changes_workflow: false # 不阻塞合并，业主保留最终裁决权
+  high_level_summary: true        # 每个 PR 给一段中文高层摘要
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false                 # 草稿 PR 不审查
+    auto_incremental_review: true # 只审查新增提交，避免重复
+
+  # 排除构建产物、依赖、锁文件、生成物 —— 这些没有审查价值
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/.open-next/**"
+    - "!**/dist/**"
+    - "!**/coverage/**"
+    - "!pnpm-lock.yaml"
+    - "!**/*.min.js"
+
+  # 把项目真相喂给 CodeRabbit，让它按本仓库的规则审查，而不是通用规则。
+  # 详细规则见 .claude/rules/ 与 CLAUDE.md。
+  path_instructions:
+    - path: "src/**/*.{ts,tsx}"
+      instructions: >
+        TypeScript strict：禁止 any，对象形状默认用 interface。
+        Server Components 优先，只有需要交互时才用 "use client"。
+        所有面向用户的文案必须走 next-intl 翻译键，禁止硬编码字符串。
+        修 bug 要修根因而非症状，检查是否同类调用点都受影响。
+    - path: "src/app/api/**/*.ts"
+      instructions: >
+        API 路由必须做输入校验、注意 CSP 与安全边界；
+        写入路由需校验 Turnstile。重点看认证、注入、越权与错误处理。
+    - path: "content/**"
+      instructions: >
+        内容与文案改动，重点看 i18n 键是否齐全、英文表达是否符合 B2B 语气，
+        以及是否与 config/single-site*.ts 的品牌/SEO 真相一致。
+    - path: "**/*.test.{ts,tsx}"
+      instructions: >
+        测试改动重点看是否真的覆盖了逻辑分支，
+        而不是把快照/计数等时间点状态钉死成断言。
+
+# 内置工具：只开与本仓库相关且和现有门禁互补的。
+# eslint 项目 CI 已跑，这里关掉避免重复；开安全类工具补现有门禁的盲区。
+tools:
+  eslint:
+    enabled: false
+  ruff:
+    enabled: false
+  shellcheck:
+    enabled: false
+  gitleaks:      # 扫密钥泄漏
+    enabled: true
+  semgrep:       # 扫安全反模式
+    enabled: true
+
+chat:
+  auto_reply: true
