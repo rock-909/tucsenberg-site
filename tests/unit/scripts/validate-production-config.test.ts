@@ -1,10 +1,17 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  renameSync,
+} from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import { load } from "js-yaml";
 import ts from "typescript";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
@@ -55,11 +62,31 @@ const SAFE_PRODUCTION_PUBLIC_KEYS = [
   "NEXT_PUBLIC_SECURITY_MODE",
 ] as const;
 
+const ROOT_DIR = path.resolve(import.meta.dirname, "../../..");
+const tempDirs: string[] = [];
+const TEMP_TRASH_ROOT = path.join(
+  os.tmpdir(),
+  "tucsenberg-production-export-test-trash",
+);
+
+afterEach(() => {
+  for (const tempDir of tempDirs.splice(0)) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks a test-owned temp directory
+    if (!existsSync(tempDir)) continue;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup moves fixtures to a recoverable temp trash directory
+    mkdirSync(TEMP_TRASH_ROOT, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- both paths are test-owned temp directories
+    renameSync(
+      tempDir,
+      path.join(TEMP_TRASH_ROOT, `${path.basename(tempDir)}-${Date.now()}`),
+    );
+  }
+});
+
 function loadDeployWorkflowSteps(): WorkflowStep[] {
-  const rootDir = path.resolve(import.meta.dirname, "../../..");
   const workflow = load(
     readFileSync(
-      path.join(rootDir, ".github/workflows/cloudflare-deploy.yml"),
+      path.join(ROOT_DIR, ".github/workflows/cloudflare-deploy.yml"),
       "utf8",
     ),
   ) as WorkflowDocument;
@@ -67,17 +94,21 @@ function loadDeployWorkflowSteps(): WorkflowStep[] {
   return workflow.jobs?.["build-and-deploy"]?.steps ?? [];
 }
 
-function getExecutableRequiredKeys(exportScript: string): string[] {
+function getNodeHeredoc(exportScript: string): string | undefined {
   const nodeScript = exportScript.match(
     /node <<'NODE'\n([\s\S]*?)\nNODE(?:\n|$)/,
   );
-  if (!nodeScript?.[1]) {
-    return [];
-  }
+
+  return nodeScript?.[1];
+}
+
+function getExecutableRequiredKeys(exportScript: string): string[] {
+  const nodeScript = getNodeHeredoc(exportScript);
+  if (!nodeScript) return [];
 
   const sourceFile = ts.createSourceFile(
     "cloudflare-production-export.js",
-    nodeScript[1],
+    nodeScript,
     ts.ScriptTarget.Latest,
     true,
     ts.ScriptKind.JS,
@@ -103,6 +134,42 @@ function getExecutableRequiredKeys(exportScript: string): string[] {
   return requiredKeys.initializer.elements
     .filter(ts.isStringLiteralLike)
     .map((element) => element.text);
+}
+
+function executeProductionExport(exportScript: string): {
+  status: number | null;
+  stderr: string;
+  exportedLines: string[];
+} {
+  const nodeScript = getNodeHeredoc(exportScript);
+  if (!nodeScript) {
+    return {
+      status: null,
+      stderr: "Node heredoc is missing",
+      exportedLines: [],
+    };
+  }
+
+  const tempDir = mkdtempSync(
+    path.join(os.tmpdir(), "tucsenberg-production-export-"),
+  );
+  tempDirs.push(tempDir);
+  const githubEnvPath = path.join(tempDir, "github-env");
+  const result = spawnSync(process.execPath, ["-e", nodeScript], {
+    cwd: ROOT_DIR,
+    encoding: "utf8",
+    env: createChildEnv({ GITHUB_ENV: githubEnvPath }),
+  });
+
+  return {
+    status: result.status,
+    stderr: result.stderr,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is inside the test-owned temp directory
+    exportedLines: existsSync(githubEnvPath)
+      ? // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is inside the test-owned temp directory
+        readFileSync(githubEnvPath, "utf8").trimEnd().split("\n")
+      : [],
+  };
 }
 
 describe("validate-production-config runtime contract", () => {
@@ -183,8 +250,7 @@ describe("validate-production-config runtime contract", () => {
   });
 
   it("exports safe production public switches before the runtime contract gate", () => {
-    const rootDir = path.resolve(import.meta.dirname, "../../..");
-    const wranglerPath = path.join(rootDir, "wrangler.jsonc");
+    const wranglerPath = path.join(ROOT_DIR, "wrangler.jsonc");
     const parsedWrangler = ts.parseConfigFileTextToJson(
       wranglerPath,
       readFileSync(wranglerPath, "utf8"),
@@ -209,6 +275,16 @@ describe("validate-production-config runtime contract", () => {
     });
     expect(getExecutableRequiredKeys(exportScript)).toEqual(
       expect.arrayContaining(SAFE_PRODUCTION_PUBLIC_KEYS),
+    );
+
+    const execution = executeProductionExport(exportScript);
+    expect(execution.status, execution.stderr).toBe(0);
+    expect(execution.exportedLines).toEqual(
+      expect.arrayContaining([
+        "NEXT_PUBLIC_TEST_MODE=false",
+        "SECURITY_HEADERS_ENABLED=true",
+        "NEXT_PUBLIC_SECURITY_MODE=strict",
+      ]),
     );
   });
 
