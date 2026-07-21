@@ -8,6 +8,8 @@
 
 **Goal:** Close all 16 findings from `full-audit-2026-07-20` through five independently testable repair Waves without weakening product, security, accessibility, Cloudflare, or release-proof contracts.
 
+**Post-audit prerequisite already closed:** PR #155 fixed the separately discovered `js-yaml@4.2.0` advisory before this program started. It is outside the audit's 16-finding ownership map and must not be counted as a sixth Wave item.
+
 **Architecture:** The program uses one exact-SHA-controlled Wave at a time. Each Wave starts with a failing behavior proof, applies the smallest root-cause change, runs focused and broader gates, then stops at `READY_FOR_ACCEPTANCE`; CI green is not merge approval. Credential-gated and owner-deferred work remains outside code-completion claims.
 
 **Tech Stack:** Next.js 16.2.10, React 19.2.7, TypeScript 6.0.3, Vitest, Playwright, Lighthouse CI, Cloudflare OpenNext, Wrangler, Resend, Airtable, GitHub Actions, pnpm.
@@ -92,6 +94,8 @@ Expected: every finding begins as `PLANNED`; no old audit command is copied into
 
 ### Task 4: Execute Wave 4, recovery, measurement, and truth ownership
 
+Wave 4 and Wave 5 are P2/P3 hardening. They remain required by this five-Wave repair program, but they are not public-launch blockers.
+
 **Plan:** `docs/superpowers/plans/2026-07-20-repair-wave-4-recovery-measurement-truth-ownership.md`
 
 - [ ] Start only after Wave 1 provider receipt semantics are accepted.
@@ -170,6 +174,7 @@ CI_GREEN -> READY_FOR_ACCEPTANCE -> owner review -> ACCEPTED -> OWNER_MERGE
 
 ### Task 7: Re-open public-launch evaluation only after merge and external proof
 
+- [ ] Treat accepted and merged Waves 1-3 as the code-side launch-blocker prerequisite; report Wave 4-5 status separately rather than promoting P2/P3 hardening into launch blockers.
 - [ ] Merge only after owner approval and in the accepted Wave order.
 - [ ] Re-run exact-`origin/main` local and Cloudflare proofs after merge.
 - [ ] Run the deployed concurrent smoke against the bound SHA.
@@ -184,4 +189,4 @@ CI_GREEN -> READY_FOR_ACCEPTANCE -> owner review -> ACCEPTED -> OWNER_MERGE
 - FPH-004 precedes FPH-008; FPH-001 precedes FPH-013.
 - Local, CI, deployed, real-service, and owner proof are separate.
 - No Wave introduces a CMS, provider factory, universal form engine, or new dependency.
-- The plan does not modify or re-manifest the sealed audit report directory.
+- Implementation Waves do not modify or re-manifest the audit report directory after the docs-only PR is accepted.

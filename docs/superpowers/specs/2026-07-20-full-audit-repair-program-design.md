@@ -85,7 +85,7 @@ PLANNED
 - 没有把凭据受限项、真实部署或 owner 收件确认伪装成本地通过。
 - `git diff --check` 通过，diff 中没有计划外业务变化。
 
-整个项目只有在五个 Wave 都 `ACCEPTED`、依赖顺序闭合、真实部署和 owner-deferred 条件另行完成后，才允许重新启动公开上线审查。修完 16 个 findings 本身仍不等于公开上线就绪。
+公开上线 blocker 与长期 hardening 分开处理：Wave 1-3 覆盖 6 个 P1 和发布证明可信度；它们全部 `ACCEPTED`、合并，并补齐真实部署和 owner-deferred 条件后，才允许重新启动公开上线审查。Wave 4-5 的 P2/P3 恢复、测量、事实收缩和死表面清理仍按本项目顺序执行和集成验收，但不被升级成公开上线前置条件。修完任意 Wave 本身仍不等于公开上线就绪。
 
 ## 7. 不做什么
 
@@ -95,4 +95,4 @@ PLANNED
 - 不为一条保修文案建立产品保修 factory。
 - 不为产品数量和少数规格建立新 CMS 或通用 schema。
 - 不新增依赖来解析当前已经能用 TypeScript、`js-yaml` 和 Node 标准库读取的配置。
-- 不修改审查报告目录中的 52 文件或 `manifest.sha256`。
+- 实施 Wave 不修改已经由 docs-only PR 验收的审查报告目录或 `manifest.sha256`。

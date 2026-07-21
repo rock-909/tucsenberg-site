@@ -1,5 +1,5 @@
 
- RUN  v4.1.8 /Users/Data/code/tucsenberg-site
+ RUN  v4.1.8 <workspace>
 
  ✓ src/config/__tests__/security.test.ts (19 tests | 17 skipped) 42ms
  ✓ src/components/security/__tests__/turnstile.test.tsx (22 tests | 21 skipped) 23ms

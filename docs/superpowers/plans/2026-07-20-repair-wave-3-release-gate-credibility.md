@@ -268,7 +268,7 @@ git commit -m "fix: fail daily e2e on first browser failure"
 
 - [ ] **Step 1: Add a failing mandatory-path concurrency test**
 
-Hold `/` open in `runDeployedSmoke`, then assert `/products`, `/contact`, and `/api/health` were already requested before releasing `/`. Keep per-route retry behavior in the mock.
+Hold `/` open in `runDeployedSmoke`, then assert `/products`, `/contact`, and `/api/health` were already requested before releasing `/`. Keep per-route retry behavior in the mock, but assert that any retry event makes the mandatory deployed result fail even when the retry succeeds.
 
 - [ ] **Step 2: Add a failing deployed cookie-leak test**
 
@@ -287,6 +287,8 @@ it("fails deployed smoke on x-middleware-set-cookie", async () => {
 });
 ```
 
+Add a second behavior test where the first response is `500` or times out and the retry returns `200`. Assert the diagnostic retry is recorded and `runDeployedSmoke()` still resolves to `false`; mandatory green means zero retry events, not eventual recovery.
+
 - [ ] **Step 3: Confirm both tests fail on the current implementation**
 
 ```bash
@@ -297,7 +299,7 @@ Expected: the first route blocks later starts and the response object does not r
 
 - [ ] **Step 4: Reuse Wave 1's round helper**
 
-Replace the deployed `for` loop with one concurrent round using `requestSmokeRound`. Keep retry state local to each route. Extend the returned response shape with:
+Replace the deployed `for` loop with one concurrent round using `requestSmokeRound`. Keep retry state local to each route, but fail the mandatory deployed result when any route records a retry event. Retries may still collect diagnostics; they cannot turn a first-attempt `500`, timeout, or cancellation into green. Extend the returned response shape with:
 
 ```js
 leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),

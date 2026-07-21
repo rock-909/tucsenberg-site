@@ -23,12 +23,12 @@ c714215229996d51f59e14f5b427464ece5185b0b3aace2350e4b522e65234fd  docs/技术难
 96d00023700bfcf28628c8c0c05448d6e9594688c33c264f9231e09c42991e71  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/local-wrangler-concurrency-key-lines.txt
 8788c40ae51d8e31e09b3eb6365d42256d2b52b43e694ae13bd9ae538f795421  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/platform-env-built-next-config-summary.json
 4f18a155277b4e7f76b923d43cdf8698d9bc6f5cbcc5aaabb4056eb5f29fe6de  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/00/runtime-concurrency-comparison.json
-99b0e825347460bb3714caa6b71ce2b4a989f16e04be28b4b57e931b30622433  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/airtable-empty-id-probe.txt
+d260a3073fbb85367df84fd2033aac852fde79046b582514cbd11447dcddb885  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/airtable-empty-id-probe.txt
 90a623b5678e2704d15ec3d7e46eb454def6766b759f7d2f2cd9f52649eeef3d  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/home-aluminum-configuration-trace.txt
 b8438bd5536bde704f7f481f902eed09adafd0c7a0672e7595120e26afb5974a  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/product-discovery-probe.txt
 c2a9d5dd0eb041ac8cdfbd37fa480cb209b12b6f39df4afddbc01cd12a0afaef  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/01/rfq-warranty-trace.txt
 e1ff1f9035cae17d7dc9988b19c2eadf68376147725e17d848b7d2f863dfe4a5  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/02/production-contract-probe.txt
-e510a3d3f03bb8266bfa6e610a6770ae34f085e11e4d7e263ec6d3dffa603f4d  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/02/security-runtime-effects.txt
+ebd7f3e76c7ed8e25dc9d75e28daf6bbc0e05675d11333d7f67f8a663e4104fc  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/02/security-runtime-effects.txt
 3a74d792b4d503b88580714e3af7fc7b32c97eca96ca1135efa6919955cf2894  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/03/owner-email-reference-id-diagnostic.txt
 51a05b25e4dd4926b6d85b4c4f4d5b331b0d477ab757fa631dbd88a36e5c86d6  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/03/provider-receipt-diagnostic.txt
 7435c0a440cff5c70a444162aa2b6c25ca3d9daa36cf16027da558e8967a11b4  docs/技术难题/整库审查full-audit-2026-07-20/evidence/raw/04/dead-asset-refutation.txt
