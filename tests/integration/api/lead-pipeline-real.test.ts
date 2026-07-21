@@ -423,4 +423,38 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(getResendCalls()).toHaveLength(1);
     expect(consoleError).toHaveBeenCalledTimes(4);
   });
+
+  it("rejects when email fails and Airtable returns an invalid receipt", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to create lead record",
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+      "Product Airtable createLead failed",
+    );
+    airtableCreateMock.mockResolvedValue([{ id: undefined }]);
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(VALID_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
+    expect(getResendCalls()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalledTimes(4);
+  });
 });
