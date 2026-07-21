@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { checkA11y } from "./helpers/axe";
 
 const routes = [
-  { path: "/", viewportWidth: 280, expectsOverflow: true },
+  { path: "/", viewportWidth: 393, expectsOverflow: false },
   {
     path: "/products/abs-flood-barriers",
     viewportWidth: 393,

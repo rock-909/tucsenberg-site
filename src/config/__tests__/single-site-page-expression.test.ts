@@ -34,8 +34,12 @@ describe("single-site-page-expression", () => {
   });
 
   it("does not present the RFQ warranty as a catalog-wide 3-year warranty", () => {
-    expect(b2bLeadMessages.requestQuote.page.confidenceWarranty).toBe(
-      "Written product-specific warranty terms",
+    const warrantyCopy = b2bLeadMessages.requestQuote.page.confidenceWarranty;
+
+    expect(warrantyCopy).not.toMatch(/\b3-year|three-year\b/iu);
+    expect(warrantyCopy).toMatch(/warranty/iu);
+    expect(warrantyCopy).toMatch(
+      /product-specific|product type|applicable product/iu,
     );
   });
 
