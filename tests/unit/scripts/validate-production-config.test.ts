@@ -49,6 +49,62 @@ interface WorkflowDocument {
   jobs?: Record<string, { steps?: WorkflowStep[] }>;
 }
 
+const SAFE_PRODUCTION_PUBLIC_KEYS = [
+  "NEXT_PUBLIC_TEST_MODE",
+  "SECURITY_HEADERS_ENABLED",
+  "NEXT_PUBLIC_SECURITY_MODE",
+] as const;
+
+function loadDeployWorkflowSteps(): WorkflowStep[] {
+  const rootDir = path.resolve(import.meta.dirname, "../../..");
+  const workflow = load(
+    readFileSync(
+      path.join(rootDir, ".github/workflows/cloudflare-deploy.yml"),
+      "utf8",
+    ),
+  ) as WorkflowDocument;
+
+  return workflow.jobs?.["build-and-deploy"]?.steps ?? [];
+}
+
+function getExecutableRequiredKeys(exportScript: string): string[] {
+  const nodeScript = exportScript.match(
+    /node <<'NODE'\n([\s\S]*?)\nNODE(?:\n|$)/,
+  );
+  if (!nodeScript?.[1]) {
+    return [];
+  }
+
+  const sourceFile = ts.createSourceFile(
+    "cloudflare-production-export.js",
+    nodeScript[1],
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+  const requiredKeys = sourceFile.statements
+    .flatMap((statement) =>
+      ts.isVariableStatement(statement)
+        ? [...statement.declarationList.declarations]
+        : [],
+    )
+    .find(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === "requiredKeys",
+    );
+  if (
+    !requiredKeys?.initializer ||
+    !ts.isArrayLiteralExpression(requiredKeys.initializer)
+  ) {
+    return [];
+  }
+
+  return requiredKeys.initializer.elements
+    .filter(ts.isStringLiteralLike)
+    .map((element) => element.text);
+}
+
 describe("validate-production-config runtime contract", () => {
   it("enables strict runtime validation only in production mode", () => {
     expect(
@@ -129,18 +185,11 @@ describe("validate-production-config runtime contract", () => {
   it("exports safe production public switches before the runtime contract gate", () => {
     const rootDir = path.resolve(import.meta.dirname, "../../..");
     const wranglerPath = path.join(rootDir, "wrangler.jsonc");
-    const workflowPath = path.join(
-      rootDir,
-      ".github/workflows/cloudflare-deploy.yml",
-    );
     const parsedWrangler = ts.parseConfigFileTextToJson(
       wranglerPath,
       readFileSync(wranglerPath, "utf8"),
     );
-    const workflow = load(
-      readFileSync(workflowPath, "utf8"),
-    ) as WorkflowDocument;
-    const steps = workflow.jobs?.["build-and-deploy"]?.steps ?? [];
+    const steps = loadDeployWorkflowSteps();
     const exportStepIndex = steps.findIndex(
       (step) => step.name === "导出 production public vars（wrangler）",
     );
@@ -158,14 +207,35 @@ describe("validate-production-config runtime contract", () => {
       SECURITY_HEADERS_ENABLED: "true",
       NEXT_PUBLIC_SECURITY_MODE: "strict",
     });
-    for (const key of [
-      "NEXT_PUBLIC_TEST_MODE",
-      "SECURITY_HEADERS_ENABLED",
-      "NEXT_PUBLIC_SECURITY_MODE",
-    ]) {
-      expect(exportScript).toContain(`"${key}"`);
-    }
+    expect(getExecutableRequiredKeys(exportScript)).toEqual(
+      expect.arrayContaining(SAFE_PRODUCTION_PUBLIC_KEYS),
+    );
   });
+
+  it.each(SAFE_PRODUCTION_PUBLIC_KEYS)(
+    "does not accept a commented-out %s required key",
+    (key) => {
+      const steps = loadDeployWorkflowSteps();
+      const exportStep = steps.find(
+        (step) => step.name === "导出 production public vars（wrangler）",
+      );
+      const exportScript = exportStep?.run ?? "";
+      const keyLine = exportScript
+        .split("\n")
+        .find((line) => line.trim() === `"${key}",`);
+      if (!keyLine) {
+        throw new Error(`requiredKeys is missing ${key}`);
+      }
+      const indentation = keyLine.slice(0, -keyLine.trimStart().length);
+      const commentedScript = exportScript.replace(
+        keyLine,
+        `${indentation}// "${key}",`,
+      );
+
+      expect(commentedScript).toContain(`// "${key}",`);
+      expect(getExecutableRequiredKeys(commentedScript)).not.toContain(key);
+    },
+  );
 
   it("fails when production DEPLOYMENT_PLATFORM is not canonical cloudflare", () => {
     const result = validateProductionRuntimeContract({
