@@ -116,9 +116,11 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
 - `unstable_cache` on the Cloudflare/OpenNext runtime behaves as no-cache: the
   runtime's dummy cache throws an `IgnorableError`, so nothing is stored. Any
   new `unstable_cache` use must either carry an explicit bypass rationale or
-  come with Cloudflare proof that it actually caches. Prefer `"use cache"`.
-- New `"use cache"` boundaries must stay narrow and explain why rebuild/redeploy
-  is not enough.
+  come with Cloudflare proof that it actually caches.
+- The runtime uses `cacheComponents: false`, so PPR is inactive. The flag was
+  disabled because the bound OpenNext/Workerd path hung under concurrent
+  requests. Do not add production `"use cache"` boundaries until that runtime
+  path has fresh concurrency proof.
 - Content updates flow through rebuild/redeploy unless a future CMS integration
   proves a different path.
 - On incremental cache choice: OpenNext's official SSG recommendation is
@@ -126,8 +128,9 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
   cost on the free tier). This site deliberately uses the `dummy` incremental
   cache instead, accepting rebuild-to-update as the content-refresh path so that
   no KV/R2/D1 binding is required. Revisit only if content must update without a
-  redeploy. Also note: OpenNext's `enableCacheInterception` is incompatible with
-  PPR, so do not enable it while Cache Components / PPR is in use.
+  redeploy. OpenNext's `enableCacheInterception` is incompatible with PPR;
+  neither feature is enabled now. Reassess them together if Cache Components are
+  re-enabled later.
 - `wrangler.jsonc` must not add `kv_namespaces`, `r2_buckets`, `d1_databases`,
   or `durable_objects` for this starter by default. Older OpenNext setups wired
   KV as the incremental cache store; this repo intentionally omits it.
