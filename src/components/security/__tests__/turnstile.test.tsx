@@ -332,6 +332,7 @@ describe("TurnstileWidget", () => {
 
     it("ignores public test mode in production and renders the real widget", async () => {
       vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "production");
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
       vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "production-site-key");
       const onSuccess = vi.fn();
@@ -345,6 +346,22 @@ describe("TurnstileWidget", () => {
       expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
       await vi.waitFor(() => {
         expect(onSuccess).not.toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+      });
+    });
+
+    it("keeps test mode available for a preview built with NODE_ENV production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "preview");
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+      expect(screen.getByTestId("turnstile-mock")).toHaveTextContent(
+        labels.testMode,
+      );
+      await vi.waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
       });
     });
 

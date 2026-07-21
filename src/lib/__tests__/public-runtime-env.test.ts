@@ -40,6 +40,12 @@ describe("public-runtime-env", () => {
     );
   });
 
+  it("reads the public deployment environment injected by Next config", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "preview");
+
+    expect(getPublicRuntimeEnvString("NEXT_PUBLIC_APP_ENV")).toBe("preview");
+  });
+
   it("rejects non-allowlisted public keys at runtime", () => {
     expect(() =>
       getPublicRuntimeEnvString(

@@ -23,6 +23,12 @@ const isCloudflare =
   process.env.DEPLOYMENT_PLATFORM === "cloudflare" ||
   process.env.DEPLOY_TARGET === "cloudflare";
 const nextConfig: NextConfig = {
+  // Expose only the non-secret deployment label so Client Components can
+  // distinguish a production build from an actual production deployment.
+  env: {
+    NEXT_PUBLIC_APP_ENV: process.env.APP_ENV ?? "local",
+  },
+
   // Keep the same build ID across containers serving the same commit, but do
   // not reuse one fixed ID across releases. This avoids stale _next asset
   // confusion while preserving deterministic multi-container deploys.
