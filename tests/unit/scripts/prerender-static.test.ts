@@ -122,6 +122,35 @@ function createRequestQuotePostponedFixture(locales: string[]) {
   return rootDir;
 }
 
+function createStaticBuildWithoutTemplateShellsFixture({
+  includeAboutRoute = true,
+} = {}) {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "prerender-static-"));
+  tempDirs.push(rootDir);
+  writeJson(rootDir, ".next/server/app-paths-manifest.json", {
+    "/[locale]/about/page": "app/[locale]/about/page.js",
+    "/[locale]/contact/page": "app/[locale]/contact/page.js",
+    "/[locale]/request-quote/page": "app/[locale]/request-quote/page.js",
+  });
+  writeJson(rootDir, ".next/prerender-manifest.json", {
+    routes: {
+      ...(includeAboutRoute
+        ? { "/en/about": { srcRoute: "/[locale]/about" } }
+        : {}),
+      "/en/contact": { srcRoute: "/[locale]/contact" },
+    },
+  });
+  if (includeAboutRoute) {
+    writeJson(rootDir, ".next/server/app/en/about.meta", {
+      headers: { "x-nextjs-prerender": "1" },
+    });
+  }
+  writeJson(rootDir, ".next/server/app/en/contact.meta", {
+    headers: { "x-nextjs-prerender": "1" },
+  });
+  return rootDir;
+}
+
 afterEach(() => {
   for (const tempDir of tempDirs.splice(0)) {
     moveTempDirToTrash(tempDir);
@@ -133,7 +162,7 @@ describe("prerender static behavior gate", () => {
     expect(
       collectPrerenderStaticFindings({
         rootDir: createBuildFixture({ contactPostponed: false }),
-        postponedRouteExemptions: new Map(),
+        dynamicRouteExemptions: new Map(),
       }),
     ).toEqual([]);
   });
@@ -178,7 +207,7 @@ describe("prerender static behavior gate", () => {
         secondaryAboutPrerendered: false,
       }),
       configuredLocales: ["en", "fr"],
-      postponedRouteExemptions: new Map([
+      dynamicRouteExemptions: new Map([
         ["/en/contact", "contact search-param island"],
         ["/fr/contact", "contact search-param island"],
       ]),
@@ -193,14 +222,14 @@ describe("prerender static behavior gate", () => {
   it("rejects stale route exemptions after the page becomes fully prerendered", () => {
     const findings = collectPrerenderStaticFindings({
       rootDir: createBuildFixture({ contactPostponed: false }),
-      postponedRouteExemptions: new Map([
+      dynamicRouteExemptions: new Map([
         ["/en/contact", "contact search-param island; remove in M3-D2"],
       ]),
     });
     expect(findings).toContainEqual({
       file: "scripts/quality/checks/prerender-static.js",
       error: expect.stringContaining(
-        'stale postponed-route exemption "/en/contact"',
+        'stale dynamic-route exemption "/en/contact"',
       ),
     });
   });
@@ -212,5 +241,27 @@ describe("prerender static behavior gate", () => {
         configuredLocales: ["en", "fr"],
       }),
     ).toEqual([]);
+  });
+
+  it("accepts static output without PPR template shells and keeps Request Quote dynamic", () => {
+    expect(
+      collectPrerenderStaticFindings({
+        rootDir: createStaticBuildWithoutTemplateShellsFixture(),
+      }),
+    ).toEqual([]);
+  });
+
+  it("still rejects a missing concrete static route without PPR template shells", () => {
+    expect(
+      collectPrerenderStaticFindings({
+        rootDir: createStaticBuildWithoutTemplateShellsFixture({
+          includeAboutRoute: false,
+        }),
+      }),
+    ).toContainEqual({
+      file: "prerender-manifest.json",
+      error:
+        'localized route template has no prerender output for locale "en" "/[locale]/about"',
+    });
   });
 });
