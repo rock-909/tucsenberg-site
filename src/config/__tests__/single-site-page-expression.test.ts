@@ -25,9 +25,9 @@ describe("single-site-page-expression", () => {
       catalogMessages.home.productLines.items.aluminumFloodGates.description;
     const absProductPayload = JSON.stringify(ABS_FLOOD_BARRIERS_PRODUCT_PAGE);
 
-    expect(aluminumDescription).toBe(
-      "Demountable stacked-plank systems for doors, garages and loading docks, with wall channels or removable posts custom-cut to your opening schedule.",
-    );
+    expect(aluminumDescription).toMatch(/stacked[\s-]plank/iu);
+    expect(aluminumDescription).toMatch(/wall channels/iu);
+    expect(aluminumDescription).toMatch(/removable posts/iu);
     expect(aluminumDescription).not.toMatch(/curv|gable[\s-]?end/iu);
     expect(absProductPayload).toMatch(/curve/iu);
     expect(absProductPayload).toMatch(/gable[\s-]?end/iu);

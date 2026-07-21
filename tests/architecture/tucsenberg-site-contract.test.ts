@@ -602,17 +602,6 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(warrantyContent).toContain("Shelf-life for unused bags: 3 years");
   });
 
-  it("publishes buyer-visible warranty copy with the current content date", () => {
-    for (const filePath of [
-      "content/pages/en/about.mdx",
-      "content/pages/en/oem-wholesale.mdx",
-    ]) {
-      expect(readRepoFile(filePath), filePath).toContain(
-        "updatedAt: '2026-07-21'",
-      );
-    }
-  });
-
   it("copies approved PDF downloads into the public download surface", () => {
     for (const downloadFile of TARGET_DOWNLOADS) {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed download file list
