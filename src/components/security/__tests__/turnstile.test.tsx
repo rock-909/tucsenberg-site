@@ -330,6 +330,24 @@ describe("TurnstileWidget", () => {
       expect(onLoad).not.toHaveBeenCalled();
     });
 
+    it("ignores public test mode in production and renders the real widget", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "production-site-key");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+      expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
+        "data-sitekey",
+        "production-site-key",
+      );
+      expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+      await vi.waitFor(() => {
+        expect(onSuccess).not.toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+      });
+    });
+
     it("uses the provided dev-bypass label", () => {
       vi.stubEnv("NODE_ENV", "development");
       vi.stubEnv("NEXT_PUBLIC_TURNSTILE_BYPASS", "true");

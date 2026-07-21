@@ -319,6 +319,20 @@ function validateProductionRuntimeContract(env) {
     );
   }
 
+  if (isTrue(env, "NEXT_PUBLIC_TEST_MODE")) {
+    errors.push("NEXT_PUBLIC_TEST_MODE=true is forbidden in production.");
+  }
+
+  if (readEnv(env, "SECURITY_HEADERS_ENABLED")?.toLowerCase() === "false") {
+    errors.push("SECURITY_HEADERS_ENABLED=false is forbidden in production.");
+  }
+
+  if (readEnv(env, "NEXT_PUBLIC_SECURITY_MODE")?.toLowerCase() === "relaxed") {
+    errors.push(
+      "NEXT_PUBLIC_SECURITY_MODE=relaxed is forbidden in production.",
+    );
+  }
+
   if (readEnv(env, "DEPLOYMENT_PLATFORM") !== "cloudflare") {
     errors.push(
       'DEPLOYMENT_PLATFORM must be "cloudflare" for production Cloudflare deployments (set the canonical platform signal in wrangler env.production.vars).',

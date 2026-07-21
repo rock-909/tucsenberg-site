@@ -1,5 +1,9 @@
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
+import { load } from "js-yaml";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import {
   shouldValidateProductionRuntimeContract,
@@ -30,7 +34,19 @@ function createValidProductionEnv(): NodeJS.ProcessEnv {
     RESEND_API_KEY: "resend-api-key",
     AIRTABLE_API_KEY: "airtable-api-key",
     AIRTABLE_BASE_ID: "appBaseId",
+    NEXT_PUBLIC_TEST_MODE: "false",
+    SECURITY_HEADERS_ENABLED: "true",
+    NEXT_PUBLIC_SECURITY_MODE: "strict",
   };
+}
+
+interface WorkflowStep {
+  name?: string;
+  run?: string;
+}
+
+interface WorkflowDocument {
+  jobs?: Record<string, { steps?: WorkflowStep[] }>;
 }
 
 describe("validate-production-config runtime contract", () => {
@@ -80,6 +96,75 @@ describe("validate-production-config runtime contract", () => {
 
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
+  });
+
+  it.each([
+    ["NEXT_PUBLIC_TEST_MODE", "true"],
+    ["SECURITY_HEADERS_ENABLED", "false"],
+    ["NEXT_PUBLIC_SECURITY_MODE", "relaxed"],
+  ] as const)("rejects production %s=%s", (key, value) => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      [key]: value,
+    });
+
+    expect(result.errors).toEqual([expect.stringContaining(`${key}=${value}`)]);
+  });
+
+  it("reports every unsafe production switch in one pass", () => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      NEXT_PUBLIC_TEST_MODE: "true",
+      SECURITY_HEADERS_ENABLED: "false",
+      NEXT_PUBLIC_SECURITY_MODE: "relaxed",
+    });
+
+    expect(result.errors).toEqual([
+      expect.stringContaining("NEXT_PUBLIC_TEST_MODE=true"),
+      expect.stringContaining("SECURITY_HEADERS_ENABLED=false"),
+      expect.stringContaining("NEXT_PUBLIC_SECURITY_MODE=relaxed"),
+    ]);
+  });
+
+  it("exports safe production public switches before the runtime contract gate", () => {
+    const rootDir = path.resolve(import.meta.dirname, "../../..");
+    const wranglerPath = path.join(rootDir, "wrangler.jsonc");
+    const workflowPath = path.join(
+      rootDir,
+      ".github/workflows/cloudflare-deploy.yml",
+    );
+    const parsedWrangler = ts.parseConfigFileTextToJson(
+      wranglerPath,
+      readFileSync(wranglerPath, "utf8"),
+    );
+    const workflow = load(
+      readFileSync(workflowPath, "utf8"),
+    ) as WorkflowDocument;
+    const steps = workflow.jobs?.["build-and-deploy"]?.steps ?? [];
+    const exportStepIndex = steps.findIndex(
+      (step) => step.name === "导出 production public vars（wrangler）",
+    );
+    const gateStepIndex = steps.findIndex(
+      (step) => step.name === "阻断：production 严格上线配置",
+    );
+    const exportScript = steps[exportStepIndex]?.run ?? "";
+    const productionVars = parsedWrangler.config?.env?.production?.vars;
+
+    expect(parsedWrangler.error).toBeUndefined();
+    expect(exportStepIndex).toBeGreaterThanOrEqual(0);
+    expect(gateStepIndex).toBeGreaterThan(exportStepIndex);
+    expect(productionVars).toMatchObject({
+      NEXT_PUBLIC_TEST_MODE: "false",
+      SECURITY_HEADERS_ENABLED: "true",
+      NEXT_PUBLIC_SECURITY_MODE: "strict",
+    });
+    for (const key of [
+      "NEXT_PUBLIC_TEST_MODE",
+      "SECURITY_HEADERS_ENABLED",
+      "NEXT_PUBLIC_SECURITY_MODE",
+    ]) {
+      expect(exportScript).toContain(`"${key}"`);
+    }
   });
 
   it("fails when production DEPLOYMENT_PLATFORM is not canonical cloudflare", () => {

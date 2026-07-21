@@ -4,6 +4,9 @@ import { generateCSP, getSecurityHeaders } from "../security";
 describe("Security Configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "strict");
   });
 
   describe("generateCSP", () => {
@@ -103,6 +106,17 @@ describe("Security Configuration", () => {
 
       const headers = getSecurityHeaders();
       expect(headers).toHaveLength(0);
+    });
+
+    it("keeps enforced security headers in production despite unsafe env values", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
+
+      const headerKeys = getSecurityHeaders().map((header) => header.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy");
+      expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
     });
 
     it("should emit static CSP without nonce directives", () => {

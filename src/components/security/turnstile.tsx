@@ -12,6 +12,7 @@ import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
+  isPublicRuntimeProduction,
 } from "@/lib/public-runtime-env";
 
 /**
@@ -115,6 +116,7 @@ export function TurnstileWidget({
     isPublicRuntimeDevelopment() &&
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
   const isTestMode =
+    !isPublicRuntimeProduction() &&
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
