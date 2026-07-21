@@ -349,6 +349,34 @@ describe("TurnstileWidget", () => {
       });
     });
 
+    it.each([
+      ["local", "local"],
+      ["unknown", "unexpected"],
+      ["missing", undefined],
+    ])(
+      "fails closed for a production build with a %s deploy label",
+      async (_label, appEnv) => {
+        vi.stubEnv("NODE_ENV", "production");
+        vi.stubEnv("NEXT_PUBLIC_APP_ENV", appEnv);
+        vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+        vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "production-site-key");
+        const onSuccess = vi.fn();
+
+        render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+        expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
+          "data-sitekey",
+          "production-site-key",
+        );
+        expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+        await vi.waitFor(() => {
+          expect(onSuccess).not.toHaveBeenCalledWith(
+            "TURNSTILE_TEST_MODE_TOKEN",
+          );
+        });
+      },
+    );
+
     it("keeps test mode available for a preview built with NODE_ENV production", async () => {
       vi.stubEnv("NODE_ENV", "production");
       vi.stubEnv("NEXT_PUBLIC_APP_ENV", "preview");

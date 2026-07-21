@@ -12,6 +12,7 @@ import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
+  isPublicRuntimeProduction,
 } from "@/lib/public-runtime-env";
 
 /**
@@ -114,9 +115,11 @@ export function TurnstileWidget({
   const isBypassMode =
     isPublicRuntimeDevelopment() &&
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
-  const isTestMode =
-    getPublicRuntimeEnvString("NEXT_PUBLIC_APP_ENV") !== "production" &&
-    getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
+  const appEnv = getPublicRuntimeEnvString("NEXT_PUBLIC_APP_ENV"),
+    isTestMode =
+      appEnv !== "production" &&
+      (!isPublicRuntimeProduction() || appEnv === "preview") &&
+      getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const rescue = {
@@ -162,7 +165,6 @@ export function TurnstileWidget({
     }
   }, [siteKey, isBypassMode, isTestMode, onError]);
 
-  // Conditional returns after all hooks
   if (isBypassMode) {
     return (
       <TurnstileBypassStatus className={className} label={labels.devBypass} />
@@ -185,11 +187,7 @@ export function TurnstileWidget({
     );
   }
 
-  const handleSuccess = (token: string) => {
-    if (onSuccess) {
-      onSuccess(token);
-    }
-  };
+  const handleSuccess = (token: string) => onSuccess?.(token);
 
   const handleError = (error: string) => {
     logger.error("Turnstile error:", error);
