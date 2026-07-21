@@ -57,13 +57,21 @@ interface MarketPageProps {
 function ProductContentTable({
   table,
   fade,
+  label,
 }: {
   table: TucsenbergProductTable;
   fade: "background" | "card";
+  label: string;
 }) {
   return (
     <div className="relative">
-      <div className="[scrollbar-width:thin] overflow-x-auto rounded-2xl border border-border">
+      <div
+        aria-label={label}
+        className="[scrollbar-width:thin] overflow-x-auto rounded-2xl border border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+        data-scrollable-table="true"
+        role="region"
+        tabIndex={0}
+      >
         <table className="min-w-full divide-y divide-border text-left text-sm">
           <thead className="bg-muted/60 text-foreground">
             <tr>
@@ -160,7 +168,11 @@ function ProductContentSection({
       return (
         <section>
           <h2 className="text-section mb-5">{section.title}</h2>
-          <ProductContentTable table={table} fade="background" />
+          <ProductContentTable
+            table={table}
+            fade="background"
+            label={section.title}
+          />
           {section.footer ? (
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
               <InlineMarkdown text={section.footer} />
@@ -181,7 +193,7 @@ function ProductContentSection({
             <InlineMarkdown text={paragraph} />
           </p>
         ))}
-        <ProductContentTable table={table} fade="card" />
+        <ProductContentTable table={table} fade="card" label={section.title} />
         {section.footer ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             <InlineMarkdown text={section.footer} />
