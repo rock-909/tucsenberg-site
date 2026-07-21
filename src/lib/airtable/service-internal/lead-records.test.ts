@@ -24,9 +24,38 @@ function createMockBase(create: ReturnType<typeof vi.fn>) {
   };
 }
 
-describe("createLeadRecord error logging", () => {
+describe("createLeadRecord", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it.each([undefined, null, "", "   "])(
+    "rejects an Airtable create result with invalid id %j",
+    async (id) => {
+      const mockCreate = vi.fn().mockResolvedValue({ id });
+      const base = createMockBase(mockCreate);
+
+      await expect(
+        createLeadRecord({
+          base: base as never,
+          tableName: "Leads",
+          data: validProductLeadData,
+        }),
+      ).rejects.toThrow("Failed to create lead record");
+    },
+  );
+
+  it("normalizes a valid Airtable record id", async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: " rec-123 " });
+    const base = createMockBase(mockCreate);
+
+    await expect(
+      createLeadRecord({
+        base: base as never,
+        tableName: "Leads",
+        data: validProductLeadData,
+      }),
+    ).resolves.toEqual({ id: "rec-123" });
   });
 
   it("logs errorType and statusCode for Airtable SDK-style plain errors", async () => {

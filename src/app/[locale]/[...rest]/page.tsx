@@ -18,9 +18,8 @@ export function generateMetadata(): Metadata {
  * the custom not-found.tsx in the [locale] segment. This ensures
  * users see the localized 404 page with a "Go Home" button.
  *
- * cacheComponents requires generateStaticParams to return at least
- * one entry. The placeholder paths will call notFound() during
- * pre-render, which Next.js handles by generating 404 pages.
+ * The placeholder paths call notFound() during prerender so the localized
+ * custom 404 output is generated for each configured locale.
  */
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({

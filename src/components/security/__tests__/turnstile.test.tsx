@@ -325,9 +325,70 @@ describe("TurnstileWidget", () => {
         labels.testMode,
       );
       await vi.waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+        expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
       expect(onLoad).not.toHaveBeenCalled();
+    });
+
+    it("ignores public test mode in production and renders the real widget", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "production-site-key");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+      expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
+        "data-sitekey",
+        "production-site-key",
+      );
+      expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+      await vi.waitFor(() => {
+        expect(onSuccess).not.toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
+      });
+    });
+
+    it.each([
+      ["local", "local"],
+      ["unknown", "unexpected"],
+      ["missing", undefined],
+    ])(
+      "fails closed for a production build with a %s deploy label",
+      async (_label, appEnv) => {
+        vi.stubEnv("NODE_ENV", "production");
+        vi.stubEnv("NEXT_PUBLIC_APP_ENV", appEnv);
+        vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+        vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "production-site-key");
+        const onSuccess = vi.fn();
+
+        render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+        expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
+          "data-sitekey",
+          "production-site-key",
+        );
+        expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
+        await vi.waitFor(() => {
+          expect(onSuccess).not.toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
+        });
+      },
+    );
+
+    it("keeps test mode available for a preview built with NODE_ENV production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "preview");
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      const onSuccess = vi.fn();
+
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
+
+      expect(screen.getByTestId("turnstile-mock")).toHaveTextContent(
+        labels.testMode,
+      );
+      await vi.waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
+      });
     });
 
     it("uses the provided dev-bypass label", () => {

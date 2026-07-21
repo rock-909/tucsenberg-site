@@ -91,6 +91,33 @@ describe("current-truth docs guard", () => {
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
   });
 
+  it("keeps current Cache Components and PPR claims aligned with runtime config", () => {
+    const nextConfig = fs.readFileSync(path.resolve("next.config.ts"), "utf8");
+    const configuredValue = nextConfig.match(
+      /\bcacheComponents:\s*(true|false)/u,
+    )?.[1];
+    const currentRuntimeDocs = [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".claude/rules/conventions.md",
+      ".claude/rules/cloudflare.md",
+      ".claude/rules/i18n.md",
+      "docs/项目基础/技术栈.md",
+      "docs/技术难题/路由模式基线.md",
+    ].map((file) => {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed repo-owned truth-doc paths
+      return [file, fs.readFileSync(path.resolve(file), "utf8")] as const;
+    });
+
+    expect(configuredValue).toBeDefined();
+    for (const [file, source] of currentRuntimeDocs) {
+      expect(
+        source,
+        `${file} must match next.config.ts cache runtime truth`,
+      ).toContain(`cacheComponents: ${configuredValue}`);
+    }
+  });
+
   it("exempts bannered + inventoried 2026-07 audit findings from retired-pattern scan", () => {
     const files = createValidFiles();
     const auditFinding = "docs/技术难题/审查2026-07/findings-example.md";

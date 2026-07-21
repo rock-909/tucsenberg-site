@@ -23,6 +23,12 @@ const isCloudflare =
   process.env.DEPLOYMENT_PLATFORM === "cloudflare" ||
   process.env.DEPLOY_TARGET === "cloudflare";
 const nextConfig: NextConfig = {
+  // Expose only the non-secret deployment label so Client Components can
+  // distinguish a production build from an actual production deployment.
+  env: {
+    NEXT_PUBLIC_APP_ENV: process.env.APP_ENV ?? "local",
+  },
+
   // Keep the same build ID across containers serving the same commit, but do
   // not reuse one fixed ID across releases. This avoids stale _next asset
   // confusion while preserving deterministic multi-container deploys.
@@ -56,12 +62,11 @@ const nextConfig: NextConfig = {
 
   /* config options here */
 
-  // Enable Next.js 16 Cache Components mode.
-  // 2026-04-26: One product FAQ helper keeps a Cache Components boundary for
-  // build correctness, but runtime tag invalidation is not part of launch.
-  // Content updates flow through redeploys.
+  // Production code has no required "use cache" boundary. Keep Cache Components
+  // disabled because the bound OpenNext/Workerd path hung under concurrent requests.
+  // Content updates continue to flow through redeploys.
   // See open-next.config.ts and wrangler.jsonc: no R2/D1/DO cache stack.
-  cacheComponents: true,
+  cacheComponents: false,
 
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
   compress: true,

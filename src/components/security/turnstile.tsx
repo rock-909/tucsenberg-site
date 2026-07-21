@@ -2,7 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
+import {
+  INQUIRY_TURNSTILE_ACTION,
+  TURNSTILE_DUMMY_TEST_TOKEN,
+} from "@/constants/turnstile-constants";
 import { logger } from "@/lib/logger";
 import {
   TurnstileRescueLine,
@@ -12,6 +15,7 @@ import {
   getPublicRuntimeEnvBoolean,
   getPublicRuntimeEnvString,
   isPublicRuntimeDevelopment,
+  isPublicRuntimeProduction,
 } from "@/lib/public-runtime-env";
 
 /**
@@ -114,8 +118,11 @@ export function TurnstileWidget({
   const isBypassMode =
     isPublicRuntimeDevelopment() &&
     getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TURNSTILE_BYPASS") === true;
-  const isTestMode =
-    getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
+  const appEnv = getPublicRuntimeEnvString("NEXT_PUBLIC_APP_ENV"),
+    isTestMode =
+      appEnv !== "production" &&
+      (!isPublicRuntimeProduction() || appEnv === "preview") &&
+      getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const rescue = {
@@ -145,7 +152,8 @@ export function TurnstileWidget({
       onSuccess?.("TURNSTILE_BYPASS_TOKEN");
     } else if (isTestMode) {
       autoResolveTriggeredRef.current = true;
-      onSuccess?.("TURNSTILE_TEST_MODE_TOKEN");
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
+      onSuccess?.(TURNSTILE_DUMMY_TEST_TOKEN);
     }
   }, [isBypassMode, isTestMode, onSuccess]);
 
@@ -161,7 +169,6 @@ export function TurnstileWidget({
     }
   }, [siteKey, isBypassMode, isTestMode, onError]);
 
-  // Conditional returns after all hooks
   if (isBypassMode) {
     return (
       <TurnstileBypassStatus className={className} label={labels.devBypass} />
@@ -184,11 +191,7 @@ export function TurnstileWidget({
     );
   }
 
-  const handleSuccess = (token: string) => {
-    if (onSuccess) {
-      onSuccess(token);
-    }
-  };
+  const handleSuccess = (token: string) => onSuccess?.(token);
 
   const handleError = (error: string) => {
     logger.error("Turnstile error:", error);

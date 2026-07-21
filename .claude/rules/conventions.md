@@ -71,20 +71,21 @@ external fetches, user actions, or dynamic route params.
 ## Cache
 
 - Use `React.cache()` for request-level dedupe only.
-- Non-conversion pages may use a narrow `"use cache"` + `cacheLife()` boundary
-  when Next.js build behavior needs it.
+- The runtime uses `cacheComponents: false`, so do not add production
+  `"use cache"` or `cacheLife()` boundaries without the Cloudflare/OpenNext
+  concurrency proof required by `cloudflare.md`.
 - Do not add runtime tag invalidation in production code; see
   `cloudflare.md`.
 - Reserve `*Cached` suffix for exported helpers that actually define a cache
   boundary.
-- Do not add new `unstable_cache` usage. The installed docs
+- Do not add new `unstable_cache` usage. If Cache Components are proved safe and
+  re-enabled later, the installed docs
   (`node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_cache.md`)
-  state: "This API has been replaced by `use cache` in Next.js 16." Use a narrow
-  `"use cache"` boundary instead.
-- Do not place an empty or near-empty `<Suspense>` fallback at the body level of
-  `[locale]/layout.tsx`. It silently drops the whole site's static shell with no
-  build error (an official caching-docs pitfall) and no current fence guards
-  against it.
+  state: "This API has been replaced by `use cache` in Next.js 16." Prefer a
+  narrow `"use cache"` boundary in that future lane.
+- If Cache Components are re-enabled, do not place an empty or near-empty
+  `<Suspense>` fallback at the body level of `[locale]/layout.tsx`. It can
+  silently drop the whole site's static shell with no build error.
 
 ## Known dependency debt
 

@@ -1,6 +1,17 @@
 import { spawnSync } from "node:child_process";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  renameSync,
+} from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { load } from "js-yaml";
+import ts from "typescript";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
@@ -30,6 +41,134 @@ function createValidProductionEnv(): NodeJS.ProcessEnv {
     RESEND_API_KEY: "resend-api-key",
     AIRTABLE_API_KEY: "airtable-api-key",
     AIRTABLE_BASE_ID: "appBaseId",
+    NEXT_PUBLIC_TEST_MODE: "false",
+    SECURITY_HEADERS_ENABLED: "true",
+    NEXT_PUBLIC_SECURITY_MODE: "strict",
+  };
+}
+
+interface WorkflowStep {
+  name?: string;
+  run?: string;
+}
+
+interface WorkflowDocument {
+  jobs?: Record<string, { steps?: WorkflowStep[] }>;
+}
+
+const SAFE_PRODUCTION_PUBLIC_KEYS = [
+  "NEXT_PUBLIC_TEST_MODE",
+  "SECURITY_HEADERS_ENABLED",
+  "NEXT_PUBLIC_SECURITY_MODE",
+] as const;
+
+const ROOT_DIR = path.resolve(import.meta.dirname, "../../..");
+const tempDirs: string[] = [];
+const TEMP_TRASH_ROOT = path.join(
+  os.tmpdir(),
+  "tucsenberg-production-export-test-trash",
+);
+
+afterEach(() => {
+  for (const tempDir of tempDirs.splice(0)) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup only checks a test-owned temp directory
+    if (!existsSync(tempDir)) continue;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup moves fixtures to a recoverable temp trash directory
+    mkdirSync(TEMP_TRASH_ROOT, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- both paths are test-owned temp directories
+    renameSync(
+      tempDir,
+      path.join(TEMP_TRASH_ROOT, `${path.basename(tempDir)}-${Date.now()}`),
+    );
+  }
+});
+
+function loadDeployWorkflowSteps(): WorkflowStep[] {
+  const workflow = load(
+    readFileSync(
+      path.join(ROOT_DIR, ".github/workflows/cloudflare-deploy.yml"),
+      "utf8",
+    ),
+  ) as WorkflowDocument;
+
+  return workflow.jobs?.["build-and-deploy"]?.steps ?? [];
+}
+
+function getNodeHeredoc(exportScript: string): string | undefined {
+  const nodeScript = exportScript.match(
+    /node <<'NODE'\n([\s\S]*?)\nNODE(?:\n|$)/,
+  );
+
+  return nodeScript?.[1];
+}
+
+function getExecutableRequiredKeys(exportScript: string): string[] {
+  const nodeScript = getNodeHeredoc(exportScript);
+  if (!nodeScript) return [];
+
+  const sourceFile = ts.createSourceFile(
+    "cloudflare-production-export.js",
+    nodeScript,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+  const requiredKeys = sourceFile.statements
+    .flatMap((statement) =>
+      ts.isVariableStatement(statement)
+        ? [...statement.declarationList.declarations]
+        : [],
+    )
+    .find(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === "requiredKeys",
+    );
+  if (
+    !requiredKeys?.initializer ||
+    !ts.isArrayLiteralExpression(requiredKeys.initializer)
+  ) {
+    return [];
+  }
+
+  return requiredKeys.initializer.elements
+    .filter(ts.isStringLiteralLike)
+    .map((element) => element.text);
+}
+
+function executeProductionExport(exportScript: string): {
+  status: number | null;
+  stderr: string;
+  exportedLines: string[];
+} {
+  const nodeScript = getNodeHeredoc(exportScript);
+  if (!nodeScript) {
+    return {
+      status: null,
+      stderr: "Node heredoc is missing",
+      exportedLines: [],
+    };
+  }
+
+  const tempDir = mkdtempSync(
+    path.join(os.tmpdir(), "tucsenberg-production-export-"),
+  );
+  tempDirs.push(tempDir);
+  const githubEnvPath = path.join(tempDir, "github-env");
+  const result = spawnSync(process.execPath, ["-e", nodeScript], {
+    cwd: ROOT_DIR,
+    encoding: "utf8",
+    env: createChildEnv({ GITHUB_ENV: githubEnvPath }),
+  });
+
+  return {
+    status: result.status,
+    stderr: result.stderr,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is inside the test-owned temp directory
+    exportedLines: existsSync(githubEnvPath)
+      ? // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is inside the test-owned temp directory
+        readFileSync(githubEnvPath, "utf8").trimEnd().split("\n")
+      : [],
   };
 }
 
@@ -81,6 +220,98 @@ describe("validate-production-config runtime contract", () => {
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
   });
+
+  it.each([
+    ["NEXT_PUBLIC_TEST_MODE", "true"],
+    ["SECURITY_HEADERS_ENABLED", "false"],
+    ["NEXT_PUBLIC_SECURITY_MODE", "relaxed"],
+  ] as const)("rejects production %s=%s", (key, value) => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      [key]: value,
+    });
+
+    expect(result.errors).toEqual([expect.stringContaining(`${key}=${value}`)]);
+  });
+
+  it("reports every unsafe production switch in one pass", () => {
+    const result = validateProductionRuntimeContract({
+      ...createValidProductionEnv(),
+      NEXT_PUBLIC_TEST_MODE: "true",
+      SECURITY_HEADERS_ENABLED: "false",
+      NEXT_PUBLIC_SECURITY_MODE: "relaxed",
+    });
+
+    expect(result.errors).toEqual([
+      expect.stringContaining("NEXT_PUBLIC_TEST_MODE=true"),
+      expect.stringContaining("SECURITY_HEADERS_ENABLED=false"),
+      expect.stringContaining("NEXT_PUBLIC_SECURITY_MODE=relaxed"),
+    ]);
+  });
+
+  it("exports safe production public switches before the runtime contract gate", () => {
+    const wranglerPath = path.join(ROOT_DIR, "wrangler.jsonc");
+    const parsedWrangler = ts.parseConfigFileTextToJson(
+      wranglerPath,
+      readFileSync(wranglerPath, "utf8"),
+    );
+    const steps = loadDeployWorkflowSteps();
+    const exportStepIndex = steps.findIndex(
+      (step) => step.name === "导出 production public vars（wrangler）",
+    );
+    const gateStepIndex = steps.findIndex(
+      (step) => step.name === "阻断：production 严格上线配置",
+    );
+    const exportScript = steps[exportStepIndex]?.run ?? "";
+    const productionVars = parsedWrangler.config?.env?.production?.vars;
+
+    expect(parsedWrangler.error).toBeUndefined();
+    expect(exportStepIndex).toBeGreaterThanOrEqual(0);
+    expect(gateStepIndex).toBeGreaterThan(exportStepIndex);
+    expect(productionVars).toMatchObject({
+      NEXT_PUBLIC_TEST_MODE: "false",
+      SECURITY_HEADERS_ENABLED: "true",
+      NEXT_PUBLIC_SECURITY_MODE: "strict",
+    });
+    expect(getExecutableRequiredKeys(exportScript)).toEqual(
+      expect.arrayContaining(SAFE_PRODUCTION_PUBLIC_KEYS),
+    );
+
+    const execution = executeProductionExport(exportScript);
+    expect(execution.status, execution.stderr).toBe(0);
+    expect(execution.exportedLines).toEqual(
+      expect.arrayContaining([
+        "NEXT_PUBLIC_TEST_MODE=false",
+        "SECURITY_HEADERS_ENABLED=true",
+        "NEXT_PUBLIC_SECURITY_MODE=strict",
+      ]),
+    );
+  });
+
+  it.each(SAFE_PRODUCTION_PUBLIC_KEYS)(
+    "does not accept a commented-out %s required key",
+    (key) => {
+      const steps = loadDeployWorkflowSteps();
+      const exportStep = steps.find(
+        (step) => step.name === "导出 production public vars（wrangler）",
+      );
+      const exportScript = exportStep?.run ?? "";
+      const keyLine = exportScript
+        .split("\n")
+        .find((line) => line.trim() === `"${key}",`);
+      if (!keyLine) {
+        throw new Error(`requiredKeys is missing ${key}`);
+      }
+      const indentation = keyLine.slice(0, -keyLine.trimStart().length);
+      const commentedScript = exportScript.replace(
+        keyLine,
+        `${indentation}// "${key}",`,
+      );
+
+      expect(commentedScript).toContain(`// "${key}",`);
+      expect(getExecutableRequiredKeys(commentedScript)).not.toContain(key);
+    },
+  );
 
   it("fails when production DEPLOYMENT_PLATFORM is not canonical cloudflare", () => {
     const result = validateProductionRuntimeContract({

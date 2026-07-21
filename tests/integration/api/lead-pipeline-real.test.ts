@@ -37,6 +37,8 @@ import { resetRateLimitStore } from "@/lib/security/distributed-rate-limit";
 
 const TURNSTILE_SITEVERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+const TURNSTILE_ALWAYS_PASS_TEST_SECRET = "1x0000000000000000000000000000000AA";
+const TURNSTILE_DUMMY_TEST_TOKEN = "XXXX.DUMMY.TOKEN.XXXX";
 const RESEND_EMAILS_URL = "https://api.resend.com/emails";
 
 interface TurnstileSiteverifyResponse {
@@ -136,6 +138,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetRateLimitStore();
+    vi.stubEnv("APP_ENV", "local");
+    vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "false");
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret-key");
 
     turnstileResponse = {
       success: true,
@@ -208,6 +213,104 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(typeof resendBody.html).toBe("string");
     expect(typeof resendBody.text).toBe("string");
   });
+
+  it("accepts the exact official preview test contract through Siteverify", async () => {
+    vi.stubEnv("APP_ENV", "preview");
+    vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+    vi.stubEnv("TURNSTILE_SECRET_KEY", TURNSTILE_ALWAYS_PASS_TEST_SECRET);
+    turnstileResponse = {
+      success: true,
+      hostname: "dummy.test",
+      action: "dummy_test_action",
+    };
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest({
+        ...VALID_INQUIRY_BODY,
+        turnstileToken: TURNSTILE_DUMMY_TEST_TOKEN,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ success: true });
+    const siteverifyCall = fetchMock.mock.calls.find(
+      ([input]) => resolveFetchUrl(input) === TURNSTILE_SITEVERIFY_URL,
+    );
+    expect(siteverifyCall).toBeDefined();
+    const siteverifyBody = siteverifyCall?.[1]?.body;
+    expect(siteverifyBody).toBeInstanceOf(URLSearchParams);
+    expect((siteverifyBody as URLSearchParams).get("secret")).toBe(
+      TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+    );
+    expect((siteverifyBody as URLSearchParams).get("response")).toBe(
+      TURNSTILE_DUMMY_TEST_TOKEN,
+    );
+  });
+
+  it.each([
+    [
+      "production env",
+      "production",
+      "true",
+      TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+      TURNSTILE_DUMMY_TEST_TOKEN,
+    ],
+    [
+      "unknown env",
+      "staging",
+      "true",
+      TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+      TURNSTILE_DUMMY_TEST_TOKEN,
+    ],
+    [
+      "disabled test mode",
+      "preview",
+      "false",
+      TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+      TURNSTILE_DUMMY_TEST_TOKEN,
+    ],
+    [
+      "non-test secret",
+      "preview",
+      "true",
+      "real-secret-key",
+      TURNSTILE_DUMMY_TEST_TOKEN,
+    ],
+    [
+      "non-dummy token",
+      "preview",
+      "true",
+      TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+      "real-widget-token",
+    ],
+  ])(
+    "does not trust dummy Siteverify metadata with %s",
+    async (_case, appEnv, testMode, secretKey, token) => {
+      vi.stubEnv("APP_ENV", appEnv);
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", testMode);
+      vi.stubEnv("TURNSTILE_SECRET_KEY", secretKey);
+      turnstileResponse = {
+        success: true,
+        hostname: "dummy.test",
+        action: "dummy_test_action",
+      };
+
+      const response = await inquiryRoute.POST(
+        makeInquiryRequest({
+          ...VALID_INQUIRY_BODY,
+          turnstileToken: token,
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({
+        success: false,
+        errorCode: API_ERROR_CODES.TURNSTILE_REJECTED,
+      });
+      expect(airtableCreateMock).not.toHaveBeenCalled();
+      expect(getResendCalls()).toHaveLength(0);
+    },
+  );
 
   it("forwards canonical message through Airtable Requirements and owner email sinks", async () => {
     const response = await inquiryRoute.POST(
@@ -398,6 +501,40 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "Product Airtable createLead failed",
     );
     airtableCreateMock.mockRejectedValue(new Error("airtable down"));
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(VALID_INQUIRY_BODY),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_PROCESSING_ERROR);
+    expect(getResendCalls()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalledTimes(4);
+  });
+
+  it("rejects when email fails and Airtable returns an invalid receipt", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to create lead record",
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+      "Product Airtable createLead failed",
+    );
+    airtableCreateMock.mockResolvedValue([{ id: undefined }]);
     fetchMock.mockImplementation(async (input: unknown) => {
       const url = resolveFetchUrl(input);
       if (url === TURNSTILE_SITEVERIFY_URL) {

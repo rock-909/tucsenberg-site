@@ -36,8 +36,8 @@ async function AsyncLocaleLayoutContent({
   locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
-  // Do not read runtime headers here; Cache Components need this layout to stay
-  // prerenderable. Static CSP is emitted from next.config.ts.
+  // Do not read runtime headers here; keep the layout prerenderable. Static CSP
+  // is emitted from next.config.ts.
 
   const [tNavigation, tAccessibility, clientMessages] = await Promise.all([
     getTranslations({

@@ -1,4 +1,5 @@
 import {
+  getRuntimeAppEnv,
   getRuntimeEnvBoolean,
   getRuntimeEnvString,
   isRuntimeDevelopment,
@@ -140,8 +141,16 @@ export function generateCSP(): string {
 /**
  * Security headers configuration
  */
+function isProductionDeployment(): boolean {
+  const appEnv = getRuntimeAppEnv();
+  return appEnv === "production" || (!appEnv && isRuntimeProduction());
+}
+
 function isSecurityHeadersEnabled(): boolean {
-  return getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false;
+  return (
+    isProductionDeployment() ||
+    getRuntimeEnvBoolean("SECURITY_HEADERS_ENABLED") !== false
+  );
 }
 
 export function getSecurityHeaders(): SecurityHeader[] {
@@ -221,6 +230,8 @@ export function getSecurityHeaders(): SecurityHeader[] {
  * `relaxed` emits the same policy as report-only for staging diagnosis.
  */
 function isCspReportOnly(): boolean {
+  if (isProductionDeployment()) return false;
+
   const mode = getRuntimeEnvString("NEXT_PUBLIC_SECURITY_MODE") || "strict";
   return mode === "relaxed";
 }

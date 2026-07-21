@@ -137,15 +137,22 @@ export async function createLeadRecord(params: {
       throw new Error("Failed to create lead record");
     }
 
+    const recordId =
+      typeof createdRecord.id === "string" ? createdRecord.id.trim() : "";
+
+    if (recordId.length === 0) {
+      throw new Error("Airtable success response is missing a record id");
+    }
+
     logger.info("Lead record created successfully", {
-      recordId: createdRecord.id,
+      recordId,
       source: PRODUCT_INQUIRY_SOURCE,
       email: sanitizeEmail(data.email),
       referenceId: data.referenceId,
     });
 
     return {
-      id: createdRecord.id,
+      id: recordId,
     };
   } catch (error) {
     logger.error(

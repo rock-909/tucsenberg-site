@@ -285,6 +285,142 @@ describe("public preview smoke", () => {
 });
 
 describe("cloudflare preview smoke", () => {
+  it("rejects the smoke run when a hung request is aborted", async () => {
+    const controller = new AbortController();
+    const timeoutError = new DOMException("request timed out", "TimeoutError");
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, "timeout")
+      .mockReturnValue(controller.signal);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener(
+              "abort",
+              () => reject(init.signal?.reason),
+              { once: true },
+            );
+          }),
+      ),
+    );
+
+    const smoke = runCloudflarePreviewSmoke([
+      "--base-url",
+      "https://preview.example",
+    ]);
+    controller.abort(timeoutError);
+
+    const outcome = await Promise.race([
+      smoke.then(
+        () => ({ status: "resolved" as const }),
+        (reason: unknown) => ({ reason, status: "rejected" as const }),
+      ),
+      new Promise<{ status: "pending" }>((resolve) => {
+        setImmediate(() => resolve({ status: "pending" }));
+      }),
+    ]);
+
+    expect(outcome).toEqual({ reason: timeoutError, status: "rejected" });
+    expect(timeoutSpy).toHaveBeenCalledWith(30000);
+  });
+
+  it("starts every route in a smoke round before the first response settles", async () => {
+    const discoveryFetchMock = createPreviewFetchMock();
+    vi.stubGlobal("fetch", discoveryFetchMock);
+    await runCloudflarePreviewSmoke([
+      "--base-url",
+      "https://preview.example",
+      "--include-api-health",
+      "--rounds",
+      "1",
+    ]);
+    const expectedPaths = discoveryFetchMock.mock.calls.map(([input]) =>
+      getRequestPath(input),
+    );
+    let releaseRoot!: () => void;
+    const started: string[] = [];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const pathname = getRequestPath(input);
+        started.push(pathname);
+
+        if (pathname === "/") {
+          return new Promise<Response>((resolve) => {
+            releaseRoot = () => resolve(response(200, "root"));
+          });
+        }
+
+        return createPreviewFetchMock()(input);
+      }),
+    );
+
+    const proof = runCloudflarePreviewSmoke([
+      "--base-url",
+      "https://preview.example",
+      "--include-api-health",
+      "--rounds",
+      "1",
+    ]);
+
+    await vi.waitFor(() => {
+      expect(started).toEqual(expectedPaths);
+    });
+
+    releaseRoot();
+    await expect(proof).resolves.toBe(true);
+  });
+
+  it.each(["0", "1.5"])("rejects invalid round count %s", async (rounds) => {
+    await expect(
+      runCloudflarePreviewSmoke([
+        "--base-url",
+        "https://preview.example",
+        "--rounds",
+        rounds,
+      ]),
+    ).rejects.toThrow("--rounds must be a positive integer");
+  });
+
+  it("runs every preview route for each requested round", async () => {
+    const fetchMock = createPreviewFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      runCloudflarePreviewSmoke([
+        "--base-url",
+        "https://preview.example",
+        "--include-api-health",
+        "--rounds",
+        "2",
+      ]),
+    ).resolves.toBe(true);
+
+    expect(
+      fetchMock.mock.calls.map(([input]) => getRequestPath(input)),
+    ).toEqual([
+      "/",
+      "/invalid/contact",
+      "/products",
+      "/contact",
+      "/request-quote",
+      "/zh",
+      "/zh/contact",
+      "/api/health",
+      "/",
+      "/invalid/contact",
+      "/products",
+      "/contact",
+      "/request-quote",
+      "/zh",
+      "/zh/contact",
+      "/api/health",
+    ]);
+  });
+
   it("proves preview pages, removed locale routes, and optional api-health probes", async () => {
     const fetchMock = createPreviewFetchMock();
     vi.stubGlobal("fetch", fetchMock);

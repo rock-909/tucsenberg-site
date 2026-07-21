@@ -5,20 +5,20 @@ const ROOT = process.cwd();
 const { locales: CONFIGURED_LOCALES } = require("../../../i18n-locales.config");
 const DEFAULT_BUILD_DIR = ".next";
 
-const REQUEST_QUOTE_POSTPONED_REASON =
-  "server-validated search-param Partial Prerender on Request Quote";
+const REQUEST_QUOTE_DYNAMIC_REASON =
+  "server-validated search-param rendering on Request Quote";
 
-function buildPostponedRouteExemptions(configuredLocales) {
+function buildDynamicRouteExemptions(configuredLocales) {
   return new Map(
     configuredLocales.map((locale) => [
       `/${locale}/request-quote`,
-      REQUEST_QUOTE_POSTPONED_REASON,
+      REQUEST_QUOTE_DYNAMIC_REASON,
     ]),
   );
 }
 
-const POSTPONED_ROUTE_EXEMPTIONS =
-  buildPostponedRouteExemptions(CONFIGURED_LOCALES);
+const DYNAMIC_ROUTE_EXEMPTIONS =
+  buildDynamicRouteExemptions(CONFIGURED_LOCALES);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -72,8 +72,10 @@ function collectTemplateRouteFindings(
   localizedPageTemplates,
   localizedRoutes,
   configuredLocales,
+  dynamicRouteExemptions,
 ) {
   const findings = [];
+  const usedExemptions = new Set();
   for (const locale of configuredLocales) {
     const prerenderedTemplates = new Set(
       localizedRoutes
@@ -82,19 +84,24 @@ function collectTemplateRouteFindings(
     );
     for (const route of localizedPageTemplates) {
       if (prerenderedTemplates.has(route)) continue;
+      const localizedRoute = route.replace("[locale]", locale);
+      if (dynamicRouteExemptions.has(localizedRoute)) {
+        usedExemptions.add(localizedRoute);
+        continue;
+      }
       findings.push({
         file: "prerender-manifest.json",
         error: `localized route template has no prerender output for locale "${locale}" "${route}"`,
       });
     }
   }
-  return findings;
+  return { findings, usedExemptions };
 }
 
 function collectLocalizedRouteFindings({
   buildRoot,
   localizedRoutes,
-  postponedRouteExemptions,
+  dynamicRouteExemptions,
 }) {
   const findings = [];
   const usedExemptions = new Set();
@@ -117,7 +124,7 @@ function collectLocalizedRouteFindings({
       });
     }
     if (typeof meta.postponed !== "string") continue;
-    if (postponedRouteExemptions.has(route)) usedExemptions.add(route);
+    if (dynamicRouteExemptions.has(route)) usedExemptions.add(route);
     else {
       findings.push({
         file: metaRelativePath,
@@ -128,15 +135,12 @@ function collectLocalizedRouteFindings({
   return { findings, usedExemptions };
 }
 
-function collectStaleExemptionFindings(
-  postponedRouteExemptions,
-  usedExemptions,
-) {
-  return [...postponedRouteExemptions]
+function collectStaleExemptionFindings(dynamicRouteExemptions, usedExemptions) {
+  return [...dynamicRouteExemptions]
     .filter(([route]) => !usedExemptions.has(route))
     .map(([route, reason]) => ({
       file: "scripts/quality/checks/prerender-static.js",
-      error: `stale postponed-route exemption "${route}": ${reason}`,
+      error: `stale dynamic-route exemption "${route}": ${reason}`,
     }));
 }
 
@@ -144,11 +148,10 @@ function collectPrerenderStaticFindings({
   rootDir = ROOT,
   buildDir = DEFAULT_BUILD_DIR,
   configuredLocales = CONFIGURED_LOCALES,
-  postponedRouteExemptions,
+  dynamicRouteExemptions,
 } = {}) {
-  const effectivePostponedRouteExemptions =
-    postponedRouteExemptions ??
-    buildPostponedRouteExemptions(configuredLocales);
+  const effectiveDynamicRouteExemptions =
+    dynamicRouteExemptions ?? buildDynamicRouteExemptions(configuredLocales);
   const buildRoot = path.join(rootDir, buildDir);
   const appPathsPath = path.join(buildRoot, "server/app-paths-manifest.json");
   const prerenderPath = path.join(buildRoot, "prerender-manifest.json");
@@ -173,23 +176,34 @@ function collectPrerenderStaticFindings({
         config.srcRoute.startsWith("/[locale]"),
     )
     .sort(([left], [right]) => left.localeCompare(right));
+  const hasTemplateShells = localizedPageTemplates.some((route) =>
+    fs.existsSync(path.join(buildRoot, getMetaRelativePath(route))),
+  );
+  const templateRouteUsage = collectTemplateRouteFindings(
+    localizedPageTemplates,
+    localizedRoutes,
+    configuredLocales,
+    effectiveDynamicRouteExemptions,
+  );
   const routeUsage = collectLocalizedRouteFindings({
     buildRoot,
     localizedRoutes,
-    postponedRouteExemptions: effectivePostponedRouteExemptions,
+    dynamicRouteExemptions: effectiveDynamicRouteExemptions,
   });
+  const usedExemptions = new Set([
+    ...templateRouteUsage.usedExemptions,
+    ...routeUsage.usedExemptions,
+  ]);
 
   return [
-    ...collectTemplateFindings(buildRoot, localizedPageTemplates),
-    ...collectTemplateRouteFindings(
-      localizedPageTemplates,
-      localizedRoutes,
-      configuredLocales,
-    ),
+    ...(hasTemplateShells
+      ? collectTemplateFindings(buildRoot, localizedPageTemplates)
+      : []),
+    ...templateRouteUsage.findings,
     ...routeUsage.findings,
     ...collectStaleExemptionFindings(
-      effectivePostponedRouteExemptions,
-      routeUsage.usedExemptions,
+      effectiveDynamicRouteExemptions,
+      usedExemptions,
     ),
   ];
 }
@@ -209,7 +223,7 @@ function runPrerenderStaticCheck() {
 }
 
 module.exports = {
-  POSTPONED_ROUTE_EXEMPTIONS,
+  DYNAMIC_ROUTE_EXEMPTIONS,
   collectPrerenderStaticFindings,
   runPrerenderStaticCheck,
 };
