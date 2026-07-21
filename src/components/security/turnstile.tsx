@@ -2,7 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
+import {
+  INQUIRY_TURNSTILE_ACTION,
+  TURNSTILE_DUMMY_TEST_TOKEN,
+} from "@/constants/turnstile-constants";
 import { logger } from "@/lib/logger";
 import {
   TurnstileRescueLine,
@@ -149,7 +152,8 @@ export function TurnstileWidget({
       onSuccess?.("TURNSTILE_BYPASS_TOKEN");
     } else if (isTestMode) {
       autoResolveTriggeredRef.current = true;
-      onSuccess?.("TURNSTILE_TEST_MODE_TOKEN");
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
+      onSuccess?.(TURNSTILE_DUMMY_TEST_TOKEN);
     }
   }, [isBypassMode, isTestMode, onSuccess]);
 

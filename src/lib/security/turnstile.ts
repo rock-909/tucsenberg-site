@@ -5,7 +5,11 @@
  */
 
 import { FIVE_SECONDS_MS } from "@/constants/time";
-import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
+import {
+  INQUIRY_TURNSTILE_ACTION,
+  TURNSTILE_ALWAYS_PASS_TEST_SECRET,
+  TURNSTILE_DUMMY_TEST_TOKEN,
+} from "@/constants/turnstile-constants";
 import { env, getRuntimeEnvBoolean, getRuntimeEnvString } from "@/lib/env";
 import { logger, sanitizeIP } from "@/lib/logger";
 import {
@@ -114,6 +118,18 @@ function shouldBypassTurnstile(ip: string): boolean {
   return false;
 }
 
+function isOfficialPreviewTestContract(
+  token: string,
+  secretKey: string,
+): boolean {
+  return (
+    getRuntimeEnvString("APP_ENV") === "preview" &&
+    getRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true &&
+    secretKey === TURNSTILE_ALWAYS_PASS_TEST_SECRET &&
+    token === TURNSTILE_DUMMY_TEST_TOKEN
+  );
+}
+
 function handleTurnstileFailure(
   result: TurnstileVerificationResult,
   ip: string,
@@ -153,11 +169,17 @@ export async function verifyTurnstileDetailed(
       return handleTurnstileFailure(result, ip);
     }
 
-    if (!validateTurnstileHostnameResponse(result, ip)) {
+    if (
+      !isOfficialPreviewTestContract(token, secretKey) &&
+      !validateTurnstileHostnameResponse(result, ip)
+    ) {
       return { success: false, errorCodes: ["invalid-hostname"] };
     }
 
-    if (!validateTurnstileActionResponse(result, ip)) {
+    if (
+      !isOfficialPreviewTestContract(token, secretKey) &&
+      !validateTurnstileActionResponse(result, ip)
+    ) {
       return { success: false, errorCodes: ["invalid-action"] };
     }
 

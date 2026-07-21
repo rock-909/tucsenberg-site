@@ -325,7 +325,7 @@ describe("TurnstileWidget", () => {
         labels.testMode,
       );
       await vi.waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+        expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
       expect(onLoad).not.toHaveBeenCalled();
     });
@@ -345,7 +345,7 @@ describe("TurnstileWidget", () => {
       );
       expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
       await vi.waitFor(() => {
-        expect(onSuccess).not.toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+        expect(onSuccess).not.toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
     });
 
@@ -370,9 +370,7 @@ describe("TurnstileWidget", () => {
         );
         expect(screen.queryByTestId("turnstile-mock")).not.toBeInTheDocument();
         await vi.waitFor(() => {
-          expect(onSuccess).not.toHaveBeenCalledWith(
-            "TURNSTILE_TEST_MODE_TOKEN",
-          );
+          expect(onSuccess).not.toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
         });
       },
     );
@@ -389,7 +387,7 @@ describe("TurnstileWidget", () => {
         labels.testMode,
       );
       await vi.waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith("TURNSTILE_TEST_MODE_TOKEN");
+        expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
     });
 
