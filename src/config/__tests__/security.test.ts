@@ -110,6 +110,7 @@ describe("Security Configuration", () => {
 
     it("keeps enforced security headers in production despite unsafe env values", () => {
       vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("APP_ENV", "production");
       vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
       vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
 
@@ -117,6 +118,37 @@ describe("Security Configuration", () => {
 
       expect(headerKeys).toContain("Content-Security-Policy");
       expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
+    });
+
+    it("fails closed when APP_ENV is unavailable in a production build", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("APP_ENV", "");
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
+
+      const headerKeys = getSecurityHeaders().map((header) => header.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy");
+      expect(headerKeys).not.toContain("Content-Security-Policy-Report-Only");
+    });
+
+    it("allows preview deployments to disable security headers", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("APP_ENV", "preview");
+      vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
+
+      expect(getSecurityHeaders()).toHaveLength(0);
+    });
+
+    it("allows preview deployments to use report-only CSP", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("APP_ENV", "preview");
+      vi.stubEnv("NEXT_PUBLIC_SECURITY_MODE", "relaxed");
+
+      const headerKeys = getSecurityHeaders().map((header) => header.key);
+
+      expect(headerKeys).toContain("Content-Security-Policy-Report-Only");
+      expect(headerKeys).not.toContain("Content-Security-Policy");
     });
 
     it("should emit static CSP without nonce directives", () => {
