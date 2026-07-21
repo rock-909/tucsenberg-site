@@ -93,7 +93,7 @@ function createTableElement(state: RenderState): ReactNode | null {
         className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l to-transparent md:hidden"
       />
       <div
-        aria-label={state.tableHeaders.join(", ")}
+        aria-label={state.tableHeaders.filter(Boolean).join(", ")}
         className="overflow-x-auto [scrollbar-width:thin] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         data-scrollable-table="true"
         role="region"

@@ -102,6 +102,20 @@ describe("createStaticMarkdownContent", () => {
     ).toHaveAttribute("tabindex", "0");
   });
 
+  it("omits empty table headers from the region label", () => {
+    render(
+      <>
+        {createStaticMarkdownContent(
+          ["| | Standard |", "| --- | --- |", "| EU | GDPR |"].join("\n"),
+        )}
+      </>,
+    );
+
+    expect(
+      screen.getByRole("region", { name: "Standard", exact: true }),
+    ).toHaveAttribute("tabindex", "0");
+  });
+
   it("flushes lists and tables before following paragraphs", () => {
     render(
       <>

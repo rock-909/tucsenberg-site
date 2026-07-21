@@ -2,9 +2,17 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { checkA11y } from "./helpers/axe";
 
 const routes = [
-  { path: "/", expectsOverflow: false },
-  { path: "/products/abs-flood-barriers", expectsOverflow: true },
-  { path: "/guides/flood-barrier-materials-guide", expectsOverflow: true },
+  { path: "/", viewportWidth: 280, expectsOverflow: true },
+  {
+    path: "/products/abs-flood-barriers",
+    viewportWidth: 393,
+    expectsOverflow: true,
+  },
+  {
+    path: "/guides/flood-barrier-materials-guide",
+    viewportWidth: 393,
+    expectsOverflow: true,
+  },
 ] as const;
 
 test.use({ viewport: { width: 393, height: 851 } });
@@ -26,6 +34,7 @@ test("table scroll owners are keyboard reachable with visible focus", async ({
   page,
 }) => {
   for (const route of routes) {
+    await page.setViewportSize({ width: route.viewportWidth, height: 851 });
     await page.goto(route.path);
     const regions = page.locator('[data-scrollable-table="true"]');
     const regionCount = await regions.count();
