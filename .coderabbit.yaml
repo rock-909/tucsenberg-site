@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit 审查配置 —— tucsenberg-site
+# 目标：用中文审查 PR，聚焦现有 pnpm 门禁盖不到的地方（逻辑/安全/可读性），
+# 不与项目自带的 lint / type-check / *:check 门禁重复刷屏。
+
+language: zh-CN
+
+reviews:
+  profile: chill                 # 温和模式，减少低价值评论
+  request_changes_workflow: false # 不自动提交 request changes；合并仍以仓库保护规则为准
+  high_level_summary: true        # 每个 PR 给一段中文高层摘要
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false                 # 草稿 PR 不审查
+    auto_incremental_review: true # 只审查新增提交，避免重复
+
+  # 只排除构建产物和压缩产物；锁文件保留在供应链审查范围内。
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/.open-next/**"
+    - "!**/dist/**"
+    - "!**/coverage/**"
+    - "!**/*.min.js"
+
+  # 把项目真相喂给 CodeRabbit，让它按本仓库的规则审查，而不是通用规则。
+  # 详细规则见 .claude/rules/ 与 CLAUDE.md。
+  path_instructions:
+    - path: "src/**/*.{ts,tsx}"
+      instructions: >
+        TypeScript strict：禁止 any，对象形状默认用 interface。
+        Server Components 优先，只有需要交互时才用 "use client"。
+        所有面向用户的文案必须走 next-intl 翻译键，禁止硬编码字符串。
+        修 bug 要修根因而非症状，检查是否同类调用点都受影响。
+    - path: "src/app/api/**/*.ts"
+      instructions: >
+        API 路由必须按端点契约做输入校验和安全防护。
+        /api/inquiry 需要 Turnstile、body size、rate limit 和 honeypot；
+        /api/csp-report 只按 CSP report 契约检查 body size、content-type 和 rate limit，
+        不要求 Turnstile。重点看认证、注入、越权与错误处理。
+    - path: "content/**"
+      instructions: >
+        内容与文案改动，重点看 i18n 键是否齐全、英文表达是否符合 B2B 语气，
+        以及是否与 config/single-site*.ts 的品牌/SEO 真相一致。
+    - path: "**/*.{test,spec}.{ts,tsx}"
+      instructions: >
+        测试改动重点看是否真的覆盖了逻辑分支，
+        而不是把快照/计数等时间点状态钉死成断言。
+
+  # 关闭已由仓库 CI 覆盖的工具；保留 CodeRabbit 默认分析并启用密钥扫描。
+  tools:
+    eslint:
+      enabled: false
+    reactDoctor:
+      enabled: false
+    ruff:
+      enabled: false
+    shellcheck:
+      enabled: false
+    gitleaks:      # 扫密钥泄漏
+      enabled: true
+    semgrep:       # 仓库 CI 已运行 Semgrep
+      enabled: false
+
+  # CodeRabbit 只做只读审查，不生成修复 PR，也不直接写入分支。
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    autofix:
+      enabled: false
+    fix_ci:
+      enabled: false
+    resolve_merge_conflict:
+      enabled: false
+
+chat:
+  auto_reply: true
