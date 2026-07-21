@@ -56,12 +56,11 @@ const nextConfig: NextConfig = {
 
   /* config options here */
 
-  // Enable Next.js 16 Cache Components mode.
-  // 2026-04-26: One product FAQ helper keeps a Cache Components boundary for
-  // build correctness, but runtime tag invalidation is not part of launch.
-  // Content updates flow through redeploys.
+  // Production code has no required "use cache" boundary. Keep Cache Components
+  // disabled because the bound OpenNext/Workerd path hung under concurrent requests.
+  // Content updates continue to flow through redeploys.
   // See open-next.config.ts and wrangler.jsonc: no R2/D1/DO cache stack.
-  cacheComponents: true,
+  cacheComponents: false,
 
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
   compress: true,
