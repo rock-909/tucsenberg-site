@@ -45,9 +45,10 @@ function getErrorMessage(payload: unknown, status: number): string {
 }
 
 function getSuccessData(payload: unknown): { id: string } | null {
-  if (!isJsonObject(payload)) return null;
+  if (!isJsonObject(payload) || typeof payload.id !== "string") return null;
 
-  return typeof payload.id === "string" ? { id: payload.id } : null;
+  const id = payload.id.trim();
+  return id.length > 0 ? { id } : null;
 }
 
 function isAbortError(error: unknown): boolean {
@@ -119,7 +120,7 @@ export class ResendHttpEmailClient {
       }
 
       const data = getSuccessData(responsePayload);
-      if (!data || data.id.length === 0) {
+      if (!data) {
         return {
           data: null,
           error: {

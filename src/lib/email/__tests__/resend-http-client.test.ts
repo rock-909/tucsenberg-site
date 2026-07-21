@@ -79,31 +79,29 @@ describe("ResendHttpEmailClient", () => {
     });
   });
 
-  it("fails closed when a 2xx response is missing a message id", async () => {
-    const fetchFn: typeof fetch = async () => createJsonResponse({});
+  it.each([undefined, null, "", "   "])(
+    "fails closed for invalid message id %j",
+    async (id) => {
+      const fetchFn: typeof fetch = async () => createJsonResponse({ id });
+      const client = new ResendHttpEmailClient("test-api-key", fetchFn);
+
+      await expect(client.send(SAMPLE_PAYLOAD)).resolves.toEqual({
+        data: null,
+        error: {
+          message: "Resend success response is missing a message id",
+        },
+      });
+    },
+  );
+
+  it("normalizes a valid message id", async () => {
+    const fetchFn: typeof fetch = async () =>
+      createJsonResponse({ id: " email-id " });
     const client = new ResendHttpEmailClient("test-api-key", fetchFn);
 
-    const result = await client.send(SAMPLE_PAYLOAD);
-
-    expect(result).toEqual({
-      data: null,
-      error: {
-        message: "Resend success response is missing a message id",
-      },
-    });
-  });
-
-  it("fails closed when a 2xx response has an empty message id", async () => {
-    const fetchFn: typeof fetch = async () => createJsonResponse({ id: "" });
-    const client = new ResendHttpEmailClient("test-api-key", fetchFn);
-
-    const result = await client.send(SAMPLE_PAYLOAD);
-
-    expect(result).toEqual({
-      data: null,
-      error: {
-        message: "Resend success response is missing a message id",
-      },
+    await expect(client.send(SAMPLE_PAYLOAD)).resolves.toEqual({
+      data: { id: "email-id" },
+      error: null,
     });
   });
 
