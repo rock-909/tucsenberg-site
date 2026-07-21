@@ -578,6 +578,24 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
+  it("keeps warranty claims scoped by product type", () => {
+    const requestQuoteCopy = readRepoFile(
+      "messages/profiles/b2b-lead/en/messages.json",
+    );
+    const aboutContent = readRepoFile("content/pages/en/about.mdx");
+    const oemContent = readRepoFile("content/pages/en/oem-wholesale.mdx");
+    const warrantyContent = readRepoFile("content/pages/en/warranty.mdx");
+
+    expect(requestQuoteCopy).not.toContain("3-year warranty");
+    expect(aboutContent).toContain("standard durable product lines");
+    expect(oemContent).toContain("standard durable product lines");
+    expect(warrantyContent).toContain(
+      "Standard product lines (TB-BW, TB-AG, TB-TD, TB-CP)",
+    );
+    expect(warrantyContent).toContain("Consumables (TB-FB absorbent bags");
+    expect(warrantyContent).toContain("Shelf-life for unused bags: 3 years");
+  });
+
   it("copies approved PDF downloads into the public download surface", () => {
     for (const downloadFile of TARGET_DOWNLOADS) {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed download file list

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
@@ -17,6 +18,15 @@ import {
 } from "@/config/single-site-page-expression";
 
 describe("single-site-page-expression", () => {
+  it("does not present the RFQ warranty as a catalog-wide 3-year warranty", () => {
+    const requestQuoteCopy = readFileSync(
+      "messages/profiles/b2b-lead/en/messages.json",
+      "utf8",
+    );
+
+    expect(requestQuoteCopy).not.toContain("3-year warranty");
+  });
+
   it("keeps the homepage section order aligned with the active page runtime", () => {
     expect(SINGLE_SITE_HOME_SECTION_ORDER).toEqual([
       "hero",
