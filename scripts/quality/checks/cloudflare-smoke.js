@@ -61,6 +61,7 @@ function parseCloudflarePreviewSmokeArgs(args) {
   const parsed = {
     baseUrl: DEFAULT_CF_PREVIEW_BASE_URL,
     includeApiHealth: false,
+    rounds: 1,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -78,7 +79,16 @@ function parseCloudflarePreviewSmokeArgs(args) {
       continue;
     }
 
+    if (arg === "--rounds" && i + 1 < args.length) {
+      parsed.rounds = Number(args[++i]);
+      continue;
+    }
+
     throw new Error(`Unknown argument: ${arg}`);
+  }
+
+  if (!Number.isInteger(parsed.rounds) || parsed.rounds < 1) {
+    throw new Error("--rounds must be a positive integer");
   }
 
   return parsed;
@@ -101,6 +111,10 @@ async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
     leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),
     body: await response.text(),
   };
+}
+
+async function requestSmokeRound(expectations, request) {
+  return Promise.all(expectations.map(({ pathname }) => request(pathname)));
 }
 
 function pushFailureUnless(condition, message, failures) {
@@ -199,26 +213,28 @@ async function runPublicPreviewSmoke(args = []) {
 }
 
 async function runCloudflarePreviewSmoke(args = []) {
-  const { baseUrl, includeApiHealth } = parseCloudflarePreviewSmokeArgs(args);
+  const { baseUrl, includeApiHealth, rounds } =
+    parseCloudflarePreviewSmokeArgs(args);
   const failures = [];
+  const expectations = [
+    ...CF_PREVIEW_SMOKE_EXPECTATIONS,
+    ...(includeApiHealth ? [{ pathname: "/api/health", status: 200 }] : []),
+  ];
 
   console.log(
     `[cf-preview-smoke] Probing ${baseUrl} (${includeApiHealth ? "strict" : "page/header"} mode)`,
   );
 
-  const pageResponses = await Promise.all(
-    CF_PREVIEW_SMOKE_EXPECTATIONS.map(({ pathname }) =>
-      requestCloudflarePreviewSmoke(baseUrl, pathname),
-    ),
-  );
-  const apiHealthResponse = includeApiHealth
-    ? await requestCloudflarePreviewSmoke(baseUrl, "/api/health")
-    : null;
+  const responses = [];
+  for (let round = 0; round < rounds; round++) {
+    responses.push(
+      ...(await requestSmokeRound(expectations, (pathname) =>
+        requestCloudflarePreviewSmoke(baseUrl, pathname),
+      )),
+    );
+  }
 
-  for (const response of [
-    ...pageResponses,
-    ...(apiHealthResponse ? [apiHealthResponse] : []),
-  ]) {
+  for (const response of responses) {
     pushFailureUnless(
       response.leakedMiddlewareCookie === null,
       `Unexpected x-middleware-set-cookie leak on ${response.pathname}`,
@@ -226,36 +242,24 @@ async function runCloudflarePreviewSmoke(args = []) {
     );
   }
 
-  for (const [index, response] of pageResponses.entries()) {
-    pushExpectedStatus(
-      response,
-      CF_PREVIEW_SMOKE_EXPECTATIONS[index].status,
-      failures,
-    );
-    pushFailureUnless(
-      !response.body.includes("Application error"),
-      `Unexpected application error surfaced on ${response.pathname}`,
-      failures,
-    );
+  for (const [index, response] of responses.entries()) {
+    const expectation = expectations[index % expectations.length];
+    pushExpectedStatus(response, expectation.status, failures);
     pushFailureUnless(
       !response.body.includes("Unexpected loadManifest"),
       `Unexpected manifest loader failure surfaced on ${response.pathname}`,
       failures,
     );
+    if (response.pathname !== "/api/health") {
+      pushFailureUnless(
+        !response.body.includes("Application error"),
+        `Unexpected application error surfaced on ${response.pathname}`,
+        failures,
+      );
+    }
   }
 
-  if (apiHealthResponse) {
-    pushFailureUnless(
-      apiHealthResponse.status === 200,
-      `Expected /api/health to return 200, got ${apiHealthResponse.status}`,
-      failures,
-    );
-    pushFailureUnless(
-      !apiHealthResponse.body.includes("Unexpected loadManifest"),
-      "Unexpected manifest loader failure surfaced on /api/health",
-      failures,
-    );
-  } else {
+  if (!includeApiHealth) {
     console.log(
       "[cf-preview-smoke] Skipping /api/health (diagnostic-only in local preview).",
     );
