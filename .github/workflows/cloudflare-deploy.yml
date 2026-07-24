@@ -23,7 +23,9 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }}
-  cancel-in-progress: true
+  # Preview may cancel a superseded run; production never cancels so an
+  # in-flight production deploy runs through post-deploy verification.
+  cancel-in-progress: ${{ inputs.environment != 'production' }}
 
 jobs:
   build-and-deploy:

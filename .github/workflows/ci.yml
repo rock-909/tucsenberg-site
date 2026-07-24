@@ -208,7 +208,7 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
-      - name: 构建检查
+      - name: 分析构建（保留 sourcemap，供 client-boundary 使用）
         run: pnpm build
         env:
           NODE_ENV: production
@@ -229,10 +229,15 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
+          DEPLOYMENT_PLATFORM: cloudflare
+          NEXT_PUBLIC_DEPLOYMENT_PLATFORM: cloudflare
           NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
+
+      - name: 验证 Cloudflare artifact config
+        run: node scripts/quality/checks/cloudflare-artifact-config.js
 
       - name: Cloudflare/Wrangler dry-run
         if: ${{ github.event_name != 'pull_request' }}
@@ -240,6 +245,8 @@ jobs:
         env:
           NODE_ENV: production
           APP_ENV: preview
+          DEPLOYMENT_PLATFORM: cloudflare
+          NEXT_PUBLIC_DEPLOYMENT_PLATFORM: cloudflare
           NEXT_PUBLIC_SITE_URL: ${{ vars.CLOUDFLARE_PREVIEW_URL || 'https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev' }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY || secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}

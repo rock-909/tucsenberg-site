@@ -48,4 +48,20 @@ describe("Playwright CI web server", () => {
     expect(config.retries).toBe(2);
     expect(config.workers).toBe(2);
   });
+
+  it("disables retries under daily flake sampling so first failures stay red", async () => {
+    vi.stubEnv("CI", "1");
+    vi.stubEnv("CI_DAILY", "true");
+    vi.stubEnv("CI_FLAKE_SAMPLING", "1");
+    vi.stubEnv("PLAYWRIGHT_PROFILE_LANE", "all");
+    vi.stubEnv("PLAYWRIGHT_REBUILD_SERVER", "");
+    vi.stubEnv("STAGING_URL", "");
+    vi.resetModules();
+
+    const { default: config } = (await import("../../playwright.config")) as {
+      default: PlaywrightTestConfig;
+    };
+
+    expect(config.retries).toBe(0);
+  });
 });

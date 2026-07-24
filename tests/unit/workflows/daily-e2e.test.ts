@@ -32,6 +32,7 @@ describe("daily E2E proof lane", () => {
     expect(workflow.permissions).toEqual({ contents: "read" });
     expect(testStep?.env).toMatchObject({
       CI_DAILY: "true",
+      CI_FLAKE_SAMPLING: "1",
       PLAYWRIGHT_PROFILE_LANE: "all",
     });
     expect(buildStep?.env).toMatchObject({
