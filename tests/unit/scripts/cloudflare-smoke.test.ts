@@ -558,16 +558,19 @@ describe("deployed smoke", () => {
     ]);
 
     expect(result.status).toBe(0);
-    expect(paths).toEqual([
-      "/",
-      "/invalid/contact",
-      "/products",
-      "/contact",
-      "/request-quote",
-      "/api/health",
-      "/zh",
-      "/zh/contact",
-    ]);
+    // Concurrent probing makes arrival order non-deterministic; assert the set.
+    expect([...paths].sort()).toEqual(
+      [
+        "/",
+        "/invalid/contact",
+        "/products",
+        "/contact",
+        "/request-quote",
+        "/api/health",
+        "/zh",
+        "/zh/contact",
+      ].sort(),
+    );
     expect(result.stdout).toContain("[post-deploy-smoke] All checks passed");
   });
 
@@ -582,5 +585,78 @@ describe("deployed smoke", () => {
     ).rejects.toThrow(
       "Both --header-name and --header-value must be provided together",
     );
+  });
+
+  it("probes the mandatory deployed routes concurrently", async () => {
+    let releaseRoot!: () => void;
+    const rootHeld = new Promise<void>((resolve) => {
+      releaseRoot = resolve;
+    });
+    const requested = new Set<string>();
+    const deployedFetchMock = createDeployedFetchMock();
+    const fetchMock = vi.fn(
+      async (
+        input: RequestInfo | URL,
+        init?: RequestInit,
+      ): Promise<Response> => {
+        const pathname = getRequestPath(input);
+        requested.add(pathname);
+        // Hold "/" open; a sequential probe would never reach the other routes.
+        if (pathname === "/") await rootHeld;
+        return deployedFetchMock(input, init);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const smokePromise = runDeployedSmoke([
+      "--base-url",
+      "https://deployed.example",
+      "--header-name",
+      "x-smoke-secret",
+      "--header-value",
+      "proof",
+    ]);
+
+    await vi.waitFor(() => {
+      expect(requested.has("/products")).toBe(true);
+      expect(requested.has("/contact")).toBe(true);
+      expect(requested.has("/api/health")).toBe(true);
+    });
+
+    releaseRoot();
+    await expect(smokePromise).resolves.toBe(true);
+  });
+
+  it("fails deployed smoke when a route leaks x-middleware-set-cookie", async () => {
+    captureExpectedConsoleErrors(
+      "[post-deploy-smoke] Failures detected:",
+      "  - Unexpected x-middleware-set-cookie leak on ",
+    );
+    const deployedFetchMock = createDeployedFetchMock();
+    const fetchMock = vi.fn(
+      async (
+        input: RequestInfo | URL,
+        init?: RequestInit,
+      ): Promise<Response> => {
+        // Correct status per route, but middleware cookie leaks through.
+        const base = await deployedFetchMock(input, init);
+        return new Response(await base.text(), {
+          status: base.status,
+          headers: { "x-middleware-set-cookie": "locale=en" },
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      runDeployedSmoke([
+        "--base-url",
+        "https://deployed.example",
+        "--header-name",
+        "x-smoke-secret",
+        "--header-value",
+        "proof",
+      ]),
+    ).resolves.toBe(false);
   });
 });

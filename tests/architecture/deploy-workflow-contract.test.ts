@@ -12,9 +12,11 @@ interface DeployWorkflow {
     string,
     {
       readonly needs?: string | readonly string[];
+      readonly "continue-on-error"?: boolean;
       readonly steps?: readonly {
         readonly name?: string;
         readonly run?: string;
+        readonly "continue-on-error"?: boolean;
       }[];
     }
   >;
@@ -135,5 +137,17 @@ describe("Cloudflare deploy serialization contract", () => {
     expect(
       normalizeNeeds(workflow.jobs?.["post-deploy-verification"]?.needs),
     ).toContain("build-and-deploy");
+  });
+
+  it("locks the deployed smoke as the mandatory, non-optional health check", () => {
+    const workflow = loadDeployWorkflow();
+    const job = workflow.jobs?.["post-deploy-verification"];
+    const healthStep = job?.steps?.find((step) => step.name === "健康检查");
+
+    expect(healthStep?.run).toContain(
+      'node ./scripts/starter-checks.js deployed-smoke --base-url "${{ needs.build-and-deploy.outputs.deployment_url }}"',
+    );
+    expect(job?.["continue-on-error"]).toBeUndefined();
+    expect(healthStep?.["continue-on-error"]).toBeUndefined();
   });
 });

@@ -396,6 +396,7 @@ async function requestDeployedSmoke(baseUrl, pathname, headers, retryEvents) {
         pathname,
         status: response.status,
         location: response.headers.get("location"),
+        leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),
         body,
         retries,
       };
@@ -432,18 +433,22 @@ async function runDeployedSmoke(args = []) {
 
   console.log(`[post-deploy-smoke] Probing ${baseUrl}`);
 
-  const responses = [];
-
-  for (const { pathname } of DEPLOYED_SMOKE_EXPECTATIONS) {
-    responses.push(
-      await requestDeployedSmoke(baseUrl, pathname, headers, retryEvents),
-    );
-  }
+  // One concurrent round so every mandatory route is probed together; per-route
+  // retry state stays local inside requestDeployedSmoke.
+  const responses = await requestSmokeRound(
+    DEPLOYED_SMOKE_EXPECTATIONS,
+    (pathname) => requestDeployedSmoke(baseUrl, pathname, headers, retryEvents),
+  );
 
   for (const [index, response] of responses.entries()) {
     pushExpectedStatus(
       response,
       DEPLOYED_SMOKE_EXPECTATIONS[index].status,
+      failures,
+    );
+    pushFailureUnless(
+      response.leakedMiddlewareCookie === null,
+      `Unexpected x-middleware-set-cookie leak on ${response.pathname}`,
       failures,
     );
   }
