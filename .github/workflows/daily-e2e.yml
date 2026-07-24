@@ -65,6 +65,8 @@ jobs:
           tests/e2e/theme-persistence.spec.ts
         env:
           CI_DAILY: "true"
+          # Zero Playwright retries so a first-attempt browser failure stays red.
+          CI_FLAKE_SAMPLING: "1"
           PLAYWRIGHT_PROFILE_LANE: all
 
       - name: Upload Playwright artifacts
