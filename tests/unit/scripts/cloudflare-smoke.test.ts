@@ -620,6 +620,7 @@ describe("deployed smoke", () => {
     await vi.waitFor(() => {
       expect(requested.has("/products")).toBe(true);
       expect(requested.has("/contact")).toBe(true);
+      expect(requested.has("/request-quote")).toBe(true);
       expect(requested.has("/api/health")).toBe(true);
     });
 
