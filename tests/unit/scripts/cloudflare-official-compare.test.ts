@@ -1,0 +1,170 @@
+import fs from "node:fs";
+import { createRequire } from "node:module";
+import os from "node:os";
+import path from "node:path";
+
+import { afterEach, describe, expect, it } from "vitest";
+
+const REPO_ROOT = path.resolve(__dirname, "../../..");
+const SCRIPT_PATH = path.join(
+  REPO_ROOT,
+  "scripts/quality/checks/cloudflare-official-compare.js",
+);
+const TEST_TRASH_DIR = path.join(
+  os.tmpdir(),
+  "tucsenberg-cloudflare-official-compare-test-trash",
+);
+const requireModule = createRequire(path.join(REPO_ROOT, "package.json"));
+const tempDirs: string[] = [];
+
+interface Failure {
+  readonly file: string;
+  readonly missing: readonly string[];
+  readonly forbidden: readonly string[];
+}
+interface CloudflareOfficialCompareModule {
+  readonly collectCloudflareOfficialCompareFailures: (
+    rootDir?: string,
+  ) => Failure[];
+}
+
+function loadChecker(): CloudflareOfficialCompareModule {
+  return requireModule(SCRIPT_PATH) as CloudflareOfficialCompareModule;
+}
+
+function writeFixtureFile(
+  rootDir: string,
+  relativePath: string,
+  content: string,
+): void {
+  const filePath = path.join(rootDir, relativePath);
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- writes a test-owned fixture under a temp root
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- writes a test-owned fixture under a temp root
+  fs.writeFileSync(filePath, content);
+}
+
+// Valid open-next config + package.json so only the surface under test fails.
+function writePassingSideFiles(rootDir: string): void {
+  writeFixtureFile(
+    rootDir,
+    "open-next.config.ts",
+    'import { defineCloudflareConfig } from "@opennextjs/cloudflare";\nexport default defineCloudflareConfig({});\n',
+  );
+  writeFixtureFile(
+    rootDir,
+    "package.json",
+    JSON.stringify({
+      scripts: { "website:build:cf": "pnpm exec opennextjs-cloudflare build" },
+    }),
+  );
+}
+
+function writePassingDeployWorkflow(rootDir: string): void {
+  writeFixtureFile(
+    rootDir,
+    ".github/workflows/cloudflare-deploy.yml",
+    [
+      "jobs:",
+      "  deploy:",
+      "    steps:",
+      '      - run: node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
+      "      - run: pnpm exec opennextjs-cloudflare deploy --env production",
+    ].join("\n"),
+  );
+}
+
+function createFixture(): string {
+  const rootDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "tucsenberg-cloudflare-official-compare-"),
+  );
+  tempDirs.push(rootDir);
+  return rootDir;
+}
+
+function moveFixtureToTrash(rootDir: string): void {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- creates the test-owned temp trash root
+  fs.mkdirSync(TEST_TRASH_DIR, { recursive: true });
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- cleanup moves a test-owned fixture to recoverable temp trash
+  fs.renameSync(rootDir, path.join(TEST_TRASH_DIR, path.basename(rootDir)));
+}
+
+afterEach(() => {
+  for (const tempDir of tempDirs.splice(0)) {
+    moveFixtureToTrash(tempDir);
+  }
+});
+
+describe("Cloudflare official-compare source contract", () => {
+  it("rejects required config that appears only in comments", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingDeployWorkflow(rootDir);
+    // Required wrangler values present only in a comment must NOT satisfy.
+    writeFixtureFile(
+      rootDir,
+      "wrangler.jsonc",
+      [
+        "{",
+        '  // "main": ".open-next/worker.js", "binding": "ASSETS",',
+        '  // "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"]',
+        '  "name": "fixture"',
+        "}",
+      ].join("\n"),
+    );
+    // Required deploy commands present only in comments must NOT satisfy.
+    writeFixtureFile(
+      rootDir,
+      ".github/workflows/cloudflare-deploy.yml",
+      [
+        '# node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
+        "# pnpm exec opennextjs-cloudflare deploy --env production",
+        "jobs:",
+        "  deploy:",
+        "    steps:",
+        "      - run: echo noop",
+      ].join("\n"),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ file: "wrangler.jsonc" }),
+        expect.objectContaining({
+          file: ".github/workflows/cloudflare-deploy.yml",
+        }),
+      ]),
+    );
+  });
+
+  it("does not trip on a forbidden token that appears only in a comment", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingDeployWorkflow(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "wrangler.jsonc",
+      [
+        "{",
+        '  "main": ".open-next/worker.js",',
+        '  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],',
+        "  // historical note: r2_buckets and d1_databases were never added",
+        '  "assets": { "binding": "ASSETS" }',
+        "}",
+      ].join("\n"),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([]);
+  });
+
+  it("passes against the real repository configuration", () => {
+    expect(loadChecker().collectCloudflareOfficialCompareFailures()).toEqual(
+      [],
+    );
+  });
+});
