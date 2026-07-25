@@ -1,5 +1,9 @@
 # AGENTS.md
 
+Written for coding agents that read this file directly. Claude Code has its own
+`CLAUDE.md` and loads `.claude/rules/*.md` automatically by path, so the two
+files differ where the tooling differs — keep both true, not identical.
+
 ## Project
 
 **tucsenberg-site** - derived English B2B website for Tucsenberg flood barrier products.
@@ -35,7 +39,23 @@ For other dependency-specific work, prefer official docs or version-locked local
 
 ## Rules
 
-Before editing, read the matching rule file under `.claude/rules/` — each file's `paths:` frontmatter states what it governs, and each file carries its own pointers to the deeper design and decision docs.
+Detailed rules live in `.claude/rules/*.md`. Each file's `paths:` frontmatter is
+the authority on what it governs; the table below is a reading shortcut, not a
+second source of truth. Read the matching file before editing, and follow the
+pointers it carries into the design and decision docs.
+
+| Editing | Read |
+| --- | --- |
+| Components, page sections, stories, design tokens, Tailwind | `ui.md` |
+| Routes, layouts, metadata, caching, client boundaries | `conventions.md` |
+| Any TypeScript: types, imports, naming, logging | `coding-standards.md` |
+| Complexity, lint exceptions, magic numbers, dependency hygiene | `code-quality.md` |
+| Tests, fixtures, mocks, behavior proof | `testing.md` |
+| API routes, security config, lead schema, `next.config.ts` | `security.md` |
+| Middleware, `open-next.config.ts`, `wrangler.jsonc`, deployment | `cloudflare.md` |
+| `content/`, `messages/`, site config, content queries | `content.md` |
+| Translation keys, locale routing, i18n plumbing | `i18n.md` |
+| JSON-LD, FAQ schema, SEO components | `structured-data.md` |
 
 ## Validation
 
