@@ -16,9 +16,12 @@ const CLS_BUDGET = 0.1;
 
 // Widths where the form and its sidebar stack, so a growing form pushes the
 // sidebar down. At >=1024px they sit side by side and cannot push each other.
+// One per reserved-height band in InquiryForm, so a band that drifts out of
+// step with the live form cannot hide behind a neighbour that still fits.
 const STACKED_VIEWPORTS = [
   { name: "small mobile", width: 360, height: 800 },
   { name: "lighthouse mobile", width: 412, height: 823 },
+  { name: "large phone", width: 640, height: 900 },
   { name: "tablet", width: 768, height: 1024 },
 ] as const;
 
@@ -52,8 +55,13 @@ async function measureCumulativeLayoutShift(
   await page.goto(`http://localhost:3000${path}`, {
     waitUntil: "networkidle",
   });
-  // Hydration swaps the form in after the network settles; give the observer
-  // room to record any shift that swap causes.
+
+  // A page stuck on the static card never swaps, so it never shifts and would
+  // score a passing 0. Prove the swap happened before trusting the number.
+  await expect(page.locator("#main-content form")).toBeVisible();
+  await expect(page.locator("[data-inquiry-form-reserve]")).toHaveCount(0);
+
+  // Give the observer room to record any shift the swap caused.
   await page.waitForTimeout(1200);
 
   return page.evaluate(() => window.__clsTotal ?? 0);
