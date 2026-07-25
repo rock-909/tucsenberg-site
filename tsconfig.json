@@ -52,7 +52,9 @@
     "messages/**/*.json",
     "content/**/*.mdx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-lighthouse/types/**/*.ts",
+    ".next-lighthouse/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
