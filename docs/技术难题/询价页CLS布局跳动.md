@@ -13,7 +13,7 @@ runner 抖动。其余 15 条正式路由全部通过。
 
 跳动元素（Lighthouse `layout-shifts` 明细）：
 
-```
+```text
 selector: div > div.mx-auto > div.grid > aside.space-y-4
 snippet:  <aside class="space-y-4">
 score:    0.2032069227031071

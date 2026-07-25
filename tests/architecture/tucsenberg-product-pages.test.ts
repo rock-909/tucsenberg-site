@@ -26,10 +26,22 @@ function resolvePublicImagePath(src: string): string {
 }
 
 // Catalog-count prose only. Quantities that describe a real measurement
-// ("five to six bags across a doorway") stay legal — the defect is copy whose
-// truth depends on how many lines or material classes currently exist.
-const COUNT_BOUND_CATALOG_COPY =
-  /\ball five\b|\bfive (?:product )?lines\b|\bfive (?:material )?classes\b|\bfive materials\b|\bfive flood barrier\b/iu;
+// ("five to six bags across a doorway", "4–5 mm") stay legal — the defect is
+// copy whose truth depends on how many lines or material classes exist today.
+// Matches a count word or digit followed by a catalog noun, so `5 product
+// lines` and `five material categories` are caught as well as `five lines`.
+const CATALOG_COUNT_WORD = String.raw`\d+|one|two|three|four|five|six|seven|eight|nine|ten`;
+// Only catalog qualifiers may sit between the count and the noun. An arbitrary
+// gap would swallow unrelated prose such as "3 years on materials", and a bare
+// "all <count>" would swallow real groupings such as "all three layers" (the
+// perimeter/openings/low-points split, which does not track the line count).
+const CATALOG_QUALIFIER = String.raw`product|material|flood\s+barrier`;
+const CATALOG_NOUN = String.raw`lines|classes|families|categories|materials|ranges`;
+// eslint-disable-next-line security/detect-non-literal-regexp -- composed from the fixed literals above, no external input
+const COUNT_BOUND_CATALOG_COPY = new RegExp(
+  String.raw`\b(?:${CATALOG_COUNT_WORD})\s+(?:(?:${CATALOG_QUALIFIER})\s+){0,2}(?:${CATALOG_NOUN})\b`,
+  "iu",
+);
 
 // Every file that authors buyer-facing catalog prose. The product page
 // constants belong here too: the first pass only covered the three files the
@@ -50,6 +62,31 @@ describe("Tucsenberg catalog copy is not bound to the current line count", () =>
       const copy = readFileSync(join(process.cwd(), relativePath), "utf8");
 
       expect(copy, relativePath).not.toMatch(COUNT_BOUND_CATALOG_COPY);
+    }
+  });
+
+  it("catches count-bound phrasings without flagging real measurements", () => {
+    for (const offender of [
+      "Five product lines, one factory pool",
+      "5 product lines, one factory pool",
+      "private label across all five lines",
+      "compares all 5 classes",
+      "an honest comparison of five flood barrier material classes",
+      "six product families ship from one pool",
+      "five material categories at a glance",
+    ]) {
+      expect(offender).toMatch(COUNT_BOUND_CATALOG_COPY);
+    }
+
+    for (const legitimate of [
+      "Two layers across a standard doorway — five to six bags.",
+      "3 years on materials and workmanship for standard lines",
+      "Most importers juggle three or four Chinese factories",
+      "One RFQ covers all three layers; we consolidate across the pool",
+      "50–85 cm heights",
+      "wall thickness 4–5 mm",
+    ]) {
+      expect(legitimate).not.toMatch(COUNT_BOUND_CATALOG_COPY);
     }
   });
 });

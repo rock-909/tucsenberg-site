@@ -14,6 +14,11 @@ import {
 import { SITE_CONFIG } from "@/config/paths/site-config";
 import { EMAIL_COPY } from "@/emails/email-copy";
 
+interface ResendTag {
+  name: string;
+  value: string;
+}
+
 export const EMAIL_CONFIG = {
   from: SITE_CONFIG.contact.email,
   replyTo: SITE_CONFIG.contact.email,
@@ -46,9 +51,7 @@ export class ResendUtils {
     return EMAIL_COPY.productInquiry.subject(data);
   }
 
-  static getProductInquiryTags(
-    referenceId: string,
-  ): Array<{ name: string; value: string }> {
+  static getProductInquiryTags(referenceId: string): ResendTag[] {
     return [
       { name: "type", value: "product-inquiry" },
       { name: "source", value: "website" },
