@@ -115,8 +115,12 @@ module.exports = {
       // APP_ENV=production is required, not cosmetic: without it the runtime
       // emits `noindex` and every SEO assertion fails on measurement setup
       // rather than on real page quality. Dynamic routes read it at request
-      // time, so it must be set on the server, and on the build that
-      // pre-renders the static pages (`APP_ENV=production pnpm build`).
+      // time, so it must be set on the server; static pages bake `robots` in
+      // at build time, so it must also be set on the build. Leaving that to
+      // whoever runs the command did not work — `pnpm website:check` ends in a
+      // bare `pnpm build`, and measuring on top of that leftover scored 9
+      // routes at 0.69 with `is-crawlable: Page is blocked from indexing`.
+      // The `website:lighthouse` script now runs the production build itself.
       startServerCommand: "APP_ENV=production pnpm start",
       startServerReadyPattern: "Local:",
       startServerReadyTimeout: 60000,
