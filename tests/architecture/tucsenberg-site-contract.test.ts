@@ -8,6 +8,8 @@ import {
   LOCALES_CONFIG,
 } from "@/config/paths/locales-config";
 import { getCanonicalPath } from "@/config/paths/utils";
+import { getPublicContactEmail } from "@/config/public-trust";
+import { TUCSENBERG_REGISTERED_ADDRESS } from "@/config/single-site";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 
 const TARGET_STATIC_PATHS = [
@@ -74,6 +76,19 @@ const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
 const ACTIVE_MESSAGE_FILES = [...ACTIVE_HOMEPAGE_MESSAGE_FILES] as const;
 
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
+const TUCSENBERG_EMAIL_PATTERN = /[\w.+-]+@tucsenberg\.com/gu;
+// A distinctive fragment of the registered address: a file containing it is
+// stating the company address and must state the configured one in full.
+const REGISTERED_ADDRESS_ANCHOR = "Houhe Village";
+const REPLY_WINDOW_PATTERN = /repl(?:y|ies)[^.]{0,40}?within (\d+) hours?/giu;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /\bTODO\b/u,
+  /\bTBD\b/u,
+  /lorem ipsum/iu,
+  /replace with your/iu,
+  /demo starter/iu,
+  /\byour-\w+@/iu,
+] as const;
 const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".ts",
   ".tsx",
@@ -241,6 +256,10 @@ const ALLOWED_QUOTE_TIME_FIXTURES = [
     repoPath: "messages/profiles/b2b-lead/en/messages.json",
   },
 ] as const;
+
+function hasPlaceholderCopy(text: string): boolean {
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
 
 function stripRequestIntent(clause: string): string {
   return REQUEST_INTENT_PHRASES.reduce(
@@ -799,12 +818,6 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(successText).toMatch(/reply includes a quote/i);
     expect(successText).toMatch(/missing essentials/i);
 
-    const requestQuoteIntro = readRepoFile(
-      "src/app/[locale]/request-quote/page.tsx",
-    );
-
-    expect(requestQuoteIntro).not.toContain("CUSTOM_QUOTE_HOURS");
-
     const turnstile = getObject(
       form.turnstile,
       "b2b-lead inquiry.form.turnstile",
@@ -820,24 +833,66 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(turnstileRescueLine).not.toContain("Reply within 12 hours");
   });
 
-  it("uses the approved Tucsenberg contact page copy", () => {
+  it("states the configured contact facts on the contact page", () => {
+    const configuredEmail = getPublicContactEmail();
     const contactPage = readRepoFile("content/pages/en/contact.mdx");
 
-    expect(contactPage).toContain(
-      "seo:\n  title: 'Contact Tucsenberg — Flood Barrier Supplier, China'",
-    );
-    expect(contactPage).toContain("title: 'Contact'");
-    expect(contactPage).toContain(
-      "**Fastest route**: the [RFQ form](/request-quote) — it asks the questions we'd ask anyway, so we can reply sooner with a quote or only the missing essentials.",
-    );
-    expect(contactPage).toContain(
-      "**Email**: sales@tucsenberg.com — we reply within 12 hours. If the details are sufficient, the reply includes a quote. Otherwise, we ask only for the missing essentials. You'll hear from a person, not a sequence.",
-    );
-    expect(contactPage).not.toContain("**WhatsApp**:");
-    expect(contactPage).toContain(
-      "No. 47, Houhe Village, Dongwangji Town, Guanyun County, Lianyungang City, Jiangsu, China",
-    );
-    expect(contactPage).not.toContain("public demo starter");
-    expect(contactPage).not.toContain("replace with your real response window");
+    expect(configuredEmail, "site config contact email").toBeTypeOf("string");
+    expect(contactPage).toContain(configuredEmail!);
+    expect(contactPage).toContain(TUCSENBERG_REGISTERED_ADDRESS);
+    expect(contactPage).toMatch(/\[RFQ form\]\(\/request-quote\)/u);
+    expect(hasPlaceholderCopy(contactPage)).toBe(false);
+  });
+
+  // The email, the registered address and the reply window are each written by
+  // hand on several surfaces. Freezing one copy's wording proved nothing: the
+  // owner changing a fact in config would leave every other surface stale and
+  // green. These three assert agreement instead of wording.
+  it("states one contact email across every buyer-visible surface", () => {
+    const configured = getPublicContactEmail();
+    const offenders: string[] = [];
+
+    for (const filePath of getPublicSourceFiles()) {
+      for (const found of readRepoFile(filePath).matchAll(
+        TUCSENBERG_EMAIL_PATTERN,
+      )) {
+        if (found[0] !== configured)
+          offenders.push(`${filePath} :: ${found[0]}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("states one registered address across every buyer-visible surface", () => {
+    const offenders: string[] = [];
+
+    for (const filePath of getPublicSourceFiles()) {
+      const source = readRepoFile(filePath);
+
+      if (
+        source.includes(REGISTERED_ADDRESS_ANCHOR) &&
+        !source.includes(TUCSENBERG_REGISTERED_ADDRESS)
+      ) {
+        offenders.push(filePath);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("states one reply window across every buyer-visible surface", () => {
+    const windows = new Map<string, string[]>();
+
+    for (const filePath of getPublicSourceFiles()) {
+      for (const found of readRepoFile(filePath).matchAll(
+        REPLY_WINDOW_PATTERN,
+      )) {
+        const hours = found[1]!;
+        windows.set(hours, [...(windows.get(hours) ?? []), filePath]);
+      }
+    }
+
+    expect(windows.size, `reply windows found: ${[...windows.keys()]}`).toBe(1);
   });
 });
