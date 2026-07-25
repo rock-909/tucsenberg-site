@@ -35,6 +35,7 @@ const currentSiteTestMatch = [
   "**/tucsenberg-site-smoke.spec.ts",
   "**/contact-form-smoke.spec.ts",
   "**/no-js-html-contract.spec.ts",
+  "**/not-found-status.spec.ts",
   "**/smoke/**/*.spec.ts",
 ] as const;
 const hasExplicitE2eFileSelection = process.argv.some(
