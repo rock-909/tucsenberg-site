@@ -15,6 +15,26 @@ function expectExactlyOneMain(html: string) {
   expect((html.match(/<main\b/g) ?? []).length).toBe(1);
 }
 
+/**
+ * The inquiry form reserves the live form's height so hydration does not shift
+ * the page. Without JavaScript that swap never happens, so a <noscript> rule
+ * zeroes the reservation. If that rule stops applying, no-JS visitors get
+ * hundreds of pixels of dead space under the email card and nothing else in
+ * this suite would notice.
+ */
+async function expectNoReservedGap(page: import("@playwright/test").Page) {
+  // Not scoped to #main-content: on /request-quote the form sits behind a
+  // Suspense boundary, and with JS disabled that subtree is appended outside
+  // <main>. The static-fallback assertions above already work the same way.
+  const reserve = page.locator("[data-inquiry-form-reserve]:visible").first();
+  await expect(reserve).toBeVisible();
+
+  const minHeight = await reserve.evaluate(
+    (element) => getComputedStyle(element).minHeight,
+  );
+  expect(minHeight, "noscript must zero the reserved height").toBe("0px");
+}
+
 test.describe("No-JS HTML contract (English-only)", () => {
   test.use({ javaScriptEnabled: false });
 
@@ -137,6 +157,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
       staticFallback.getByRole("link", { name: /@/i }),
     ).toBeVisible();
     await expect(page.getByRole("button")).toHaveCount(0);
+    await expectNoReservedGap(page);
   });
 
   test("request quote page renders inquiry fallback without JavaScript", async ({
@@ -167,6 +188,10 @@ test.describe("No-JS HTML contract (English-only)", () => {
       staticFallback.getByRole("link", { name: /@/i }),
     ).toBeVisible();
     await expect(page.getByRole("button")).toHaveCount(0);
+    // No reserved-gap assertion here: /request-quote renders the form behind a
+    // Suspense boundary, so without JS the visible card is the page-level
+    // fallback, which carries no reservation to zero out. /contact renders
+    // InquiryForm directly and covers that branch.
   });
 
   test("key public pages expose one composed main landmark", async ({
