@@ -6,9 +6,9 @@ files differ where the tooling differs — keep both true, not identical.
 
 ## Project
 
-**tucsenberg-site** - derived English B2B website for Tucsenberg flood barrier products.
-
-**Goal**: Maintain the current Tucsenberg flood barrier website: English-only product discovery, OEM / wholesale inquiry conversion, specification evaluation, PDF download, and Cloudflare/OpenNext deployment.
+**tucsenberg-site** — English B2B website for Tucsenberg flood barrier products.
+It exists to convert OEM / wholesale inquiries: product discovery, specification
+evaluation, PDF download, RFQ. Deployed on Cloudflare via OpenNext.
 
 It is not a generic starter anymore. Runtime profile selection, profile fixtures, the old blog source, and materialization tooling have been retired. The site currently ships English only; the i18n framework stays in place and more locales will be added later. Inherited starter naming survives only in checks, compatibility filenames, or clearly marked history.
 
@@ -61,15 +61,13 @@ pointers it carries into the design and decision docs.
 
 `pnpm build` and `pnpm website:build:cf` write to the same `.next` directory - never run them in parallel.
 
-Use the smallest validation that proves the change:
+Use the smallest validation that proves the change; `pnpm run` lists the
+scripts. Three that the script names do not give away:
 
-- Type-only changes: `pnpm type-check`
-- Lint-sensitive edits: `pnpm lint:check`
-- Unit-tested logic: `pnpm test`
-- Next.js/runtime changes: `pnpm build`
-- Cloudflare/OpenNext changes: run `pnpm build` before `pnpm website:build:cf`
-- Broad local app checks: `pnpm website:check`
-- Release-facing changes: follow `docs/项目基础/上线验证.md` and `pnpm release:verify`
+- Cloudflare/OpenNext changes: run `pnpm build` before `pnpm website:build:cf`.
+- Broad local app checks: `pnpm website:check`.
+- Release-facing changes: follow `docs/项目基础/上线验证.md`, then
+  `pnpm release:verify`.
 
 ## Constraints
 
@@ -109,6 +107,3 @@ Governance truth: `docs/design/组件使用手册.md`, `docs/design/设计真相
 `pnpm component:check` are the hard gate. Historical specs and plans under
 `docs/superpowers/**` are background only unless a stable doc promotes the
 same rule.
-
-Registry and Playbook are how an agent finds the right component without reading
-every file. Improve them freely; do not make component discovery worse.
