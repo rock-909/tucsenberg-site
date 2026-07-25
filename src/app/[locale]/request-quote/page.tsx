@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   generateLocaleStaticParams,
@@ -9,12 +8,13 @@ import {
   createInquiryFormCopy,
   type InquiryFormCopy,
 } from "@/components/forms/inquiry-form-copy";
+import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
+import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
-import { RequestQuoteInquiryForm } from "@/app/[locale]/request-quote/request-quote-inquiry-form";
 
 interface RequestQuotePageParams {
   params: Promise<LocaleParam>;
@@ -89,6 +89,10 @@ export default async function RequestQuotePage({
 }: RequestQuotePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // searchParams already makes this route dynamic, so a Suspense boundary
+  // around the form buys no prerendering — it only moved the form out of
+  // <main> in the streamed HTML, where no-JS visitors never see it.
+  const inquiryContext = resolveInquiryContext(await searchParams);
   const [tPage, tMeta, tInquiryForm] = await Promise.all([
     getTranslations({ locale, namespace: "requestQuote.page" }),
     getTranslations({ locale, namespace: "requestQuote.metadata" }),
@@ -127,13 +131,12 @@ export default async function RequestQuotePage({
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <Suspense fallback={inquiryFallback}>
-            <RequestQuoteInquiryForm
-              inquiryCopy={inquiryCopy}
-              inquiryFallback={inquiryFallback}
-              searchParams={searchParams}
-            />
-          </Suspense>
+          <InquiryForm
+            context={inquiryContext}
+            copy={inquiryCopy}
+            fallback={inquiryFallback}
+            source="request-quote"
+          />
           <RequestQuoteAside
             successCopy={inquiryCopy.success}
             copy={asideCopy}

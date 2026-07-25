@@ -59,11 +59,14 @@ describe("Cache Components page boundaries", () => {
     }
   });
 
-  it("keeps specialized legal pages behind their route-local Suspense boundary", () => {
+  it("keeps specialized legal pages on their own shell, awaited in the page", () => {
     for (const { routeOwner, source } of LEGAL_ROUTE_SOURCES) {
-      expect(source, routeOwner).toContain('import { Suspense } from "react";');
-      expect(source, routeOwner).toContain("<Suspense");
       expect(source, routeOwner).toContain("LegalPageShell");
+      // No Suspense: these routes are fully prerendered, so a boundary has no
+      // request-time wait to cover and only streams the body into a hidden
+      // container outside <main>, leaving no-JS visitors on a skeleton.
+      // tests/e2e/no-js-html-contract.spec.ts proves the rendered result.
+      expect(source, routeOwner).not.toContain("<Suspense");
     }
   });
 });
