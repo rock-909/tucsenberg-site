@@ -16,6 +16,31 @@ function expectExactlyOneMain(html: string) {
 }
 
 /**
+ * A Suspense boundary whose fallback re-renders the same subtree makes React
+ * emit the page body twice: once in <main> and once in a trailing hidden
+ * container it relocates with inline JS. No-JS visitors never get that
+ * relocation, and every visitor pays for the duplicate bytes. Counting the H1
+ * catches the whole class, on any route, without naming the boundary.
+ */
+async function expectBodyRenderedOnce(page: import("@playwright/test").Page) {
+  // allTextContents() counts hidden elements too, which is the point: the
+  // duplicate lives in a hidden trailing container.
+  const headings = await page.locator("h1").allTextContents();
+  // Floor first, or the rest passes vacuously on a page that lost its H1:
+  // zero headings are trivially unique and trivially all inside main. A floor
+  // rather than an exact count, so a route that legitimately ships more than
+  // one H1 does not have to fight this helper.
+  expect(
+    headings.length,
+    "page must expose an H1 without JavaScript",
+  ).toBeGreaterThan(0);
+  expect(new Set(headings).size, "page body must not be rendered twice").toBe(
+    headings.length,
+  );
+  await expect(page.locator("#main-content h1")).toHaveCount(headings.length);
+}
+
+/**
  * The inquiry form reserves the live form's height so hydration does not shift
  * the page. Without JavaScript that swap never happens, so a <noscript> rule
  * zeroes the reservation. If that rule stops applying, no-JS visitors get
@@ -23,10 +48,13 @@ function expectExactlyOneMain(html: string) {
  * this suite would notice.
  */
 async function expectNoReservedGap(page: import("@playwright/test").Page) {
-  // Not scoped to #main-content: on /request-quote the form sits behind a
-  // Suspense boundary, and with JS disabled that subtree is appended outside
-  // <main>. The static-fallback assertions above already work the same way.
-  const reserve = page.locator("[data-inquiry-form-reserve]:visible").first();
+  // Scoped to #main-content: every inquiry form must render inside the main
+  // landmark on the server. A page that defers the form past a streaming
+  // boundary leaves its only reservation in the trailing hidden container,
+  // which no-JS visitors never see relocated — this locator fails there.
+  const reserve = page
+    .locator("#main-content [data-inquiry-form-reserve]:visible")
+    .first();
   await expect(reserve).toBeVisible();
 
   const minHeight = await reserve.evaluate(
@@ -68,6 +96,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     // bailout, NOT a whole-page bailout — so we do not assert its absence.
     expect(html).toMatch(site.homeHeading);
     expect(html).toContain('id="main-content"');
+    await expectBodyRenderedOnce(page);
   });
 
   test("mobile homepage exposes English-only navigation fallback without JavaScript", async ({
@@ -158,6 +187,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     ).toBeVisible();
     await expect(page.getByRole("button")).toHaveCount(0);
     await expectNoReservedGap(page);
+    await expectBodyRenderedOnce(page);
   });
 
   test("request quote page renders inquiry fallback without JavaScript", async ({
@@ -173,11 +203,14 @@ test.describe("No-JS HTML contract (English-only)", () => {
     ).toBeVisible();
 
     const html = await page.content();
+    expectExactlyOneMain(html);
     expect(html).toContain('data-testid="inquiry-form-static-fallback"');
     expect(html).not.toMatch(/<form[\s>]/);
 
     const staticFallback = page
-      .locator('[data-testid="inquiry-form-static-fallback"]:visible')
+      .locator(
+        '#main-content [data-testid="inquiry-form-static-fallback"]:visible',
+      )
       .first();
 
     await expect(staticFallback).toBeVisible();
@@ -188,10 +221,14 @@ test.describe("No-JS HTML contract (English-only)", () => {
       staticFallback.getByRole("link", { name: /@/i }),
     ).toBeVisible();
     await expect(page.getByRole("button")).toHaveCount(0);
-    // No reserved-gap assertion here: /request-quote renders the form behind a
-    // Suspense boundary, so without JS the visible card is the page-level
-    // fallback, which carries no reservation to zero out. /contact renders
-    // InquiryForm directly and covers that branch.
+    await expectNoReservedGap(page);
+    await expectBodyRenderedOnce(page);
+    // Exactly one card in the whole document. Comparing the total against the
+    // inside-main count instead would pass on two copies that both sit inside
+    // main; an absolute count catches that too.
+    await expect(
+      page.locator('[data-testid="inquiry-form-static-fallback"]'),
+    ).toHaveCount(1);
   });
 
   test("key public pages expose one composed main landmark", async ({
@@ -203,6 +240,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
       });
 
       expectExactlyOneMain(await page.content());
+      await expectBodyRenderedOnce(page);
     }
   });
 

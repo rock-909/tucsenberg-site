@@ -38,6 +38,13 @@ function loadLighthouseConfig(daily: boolean): LighthouseConfig {
   }
 }
 
+// The assertMatrix patterns are matched against full URLs by lhci, so these
+// tests need an origin. Take it from the config itself rather than hardcoding
+// one: the measurement port is deliberately not 3000 and may move again.
+function configOrigin(config: LighthouseConfig): string {
+  return new URL(config.ci.collect.url[0] as string).origin;
+}
+
 function toCanonicalPath(url: string): string {
   const { pathname } = new URL(url);
   const withoutLocale = pathname.startsWith(LOCALE_PREFIX)
@@ -82,7 +89,9 @@ describe("lighthouse route contract", () => {
   });
 
   it("applies the product-detail assertion set to every product route", () => {
-    const { assertMatrix } = loadLighthouseConfig(true).ci.assert;
+    const config = loadLighthouseConfig(true);
+    const { assertMatrix } = config.ci.assert;
+    const origin = configOrigin(config);
     const productPaths = Object.keys(TUCSENBERG_PRODUCT_PAGES).map(
       (slug) => `/products/${slug}`,
     );
@@ -90,9 +99,7 @@ describe("lighthouse route contract", () => {
     for (const path of productPaths) {
       const matched = assertMatrix.filter((entry) =>
         // eslint-disable-next-line security/detect-non-literal-regexp -- patterns come from the repo's own lighthouserc.js, which lhci evaluates as regex
-        new RegExp(entry.matchingUrlPattern).test(
-          `http://localhost:3000${path}`,
-        ),
+        new RegExp(entry.matchingUrlPattern).test(`${origin}${path}`),
       );
 
       expect(matched).toHaveLength(1);
@@ -101,7 +108,9 @@ describe("lighthouse route contract", () => {
   });
 
   it("keeps the indexable assertion set on every non-product route", () => {
-    const { assertMatrix } = loadLighthouseConfig(true).ci.assert;
+    const config = loadLighthouseConfig(true);
+    const { assertMatrix } = config.ci.assert;
+    const origin = configOrigin(config);
     const indexablePaths = getSingleSitePublicStaticPages().map(
       (path) => path || "/",
     );
@@ -109,9 +118,7 @@ describe("lighthouse route contract", () => {
     for (const path of indexablePaths) {
       const matched = assertMatrix.filter((entry) =>
         // eslint-disable-next-line security/detect-non-literal-regexp -- patterns come from the repo's own lighthouserc.js, which lhci evaluates as regex
-        new RegExp(entry.matchingUrlPattern).test(
-          `http://localhost:3000${path}`,
-        ),
+        new RegExp(entry.matchingUrlPattern).test(`${origin}${path}`),
       );
 
       expect(matched).toHaveLength(1);

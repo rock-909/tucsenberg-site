@@ -1,5 +1,4 @@
-import { render } from "@testing-library/react";
-import { Suspense } from "react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PrivacyPage, { generateMetadata } from "@/app/[locale]/privacy/page";
 import type { Locale } from "@/types/content.types";
@@ -135,14 +134,18 @@ describe("Privacy Page", () => {
     });
   });
 
-  it("应该返回带加载骨架的隐私页面入口", async () => {
-    const PrivacyPageComponent = await PrivacyPage({
-      params: Promise.resolve(createParams("en")),
-    });
+  it("直接渲染法务正文，不留任何流式边界", async () => {
+    render(
+      await PrivacyPage({
+        params: Promise.resolve(createParams("en")),
+      }),
+    );
 
-    expect(PrivacyPageComponent.type).toBe(Suspense);
-    const { container } = render(PrivacyPageComponent.props.fallback);
-
-    expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
+    // 正文必须是页面自己 await 出来的结果。挂在 Suspense 后面会让正文流到
+    // <main> 外的隐藏容器，禁用脚本的访客只剩骨架屏。
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Privacy Policy" }),
+    ).toBeInTheDocument();
+    expect(document.querySelectorAll(".animate-pulse")).toHaveLength(0);
   });
 });

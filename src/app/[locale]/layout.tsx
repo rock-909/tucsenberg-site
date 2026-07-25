@@ -97,10 +97,13 @@ async function AsyncLocaleLayoutContent({
           />
 
           {/* 主要内容 */}
+          {/* 不要给 PageTransition 加 Suspense：它只用 usePathname，而
+              cacheComponents 关闭时该 hook 不需要边界（见 node_modules 内
+              use-pathname.md）。加了边界反而让 fallback 与内容各渲染一次
+              children，整页正文在 HTML 里出现两遍，其中一份还落在 <main> 外
+              的隐藏容器里，禁用脚本时永远搬不回来。 */}
           <main id="main-content" className="flex-1">
-            <Suspense fallback={children}>
-              <PageTransition>{children}</PageTransition>
-            </Suspense>
+            <PageTransition>{children}</PageTransition>
           </main>
 
           {/* 页脚：发丝线三列 + 法务条，法务信息在 Footer 内部取自 single-site 配置 */}

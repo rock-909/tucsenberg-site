@@ -47,6 +47,7 @@ export default defineConfig({
     exclude: [
       "node_modules",
       ".next",
+      ".next-lighthouse",
       "dist",
       "build",
       "coverage",

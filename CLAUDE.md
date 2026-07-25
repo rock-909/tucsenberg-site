@@ -47,8 +47,12 @@ docs. Verify dependency APIs from current docs before editing.
 
 ## Validation
 
-`pnpm build` and `pnpm website:build:cf` write to the same `.next` directory —
-never run them in parallel.
+`pnpm build` and `pnpm website:build:cf` write the same `.next` directory —
+never run them in parallel. So does the Playwright webServer, which rebuilds
+before running E2E locally. `pnpm website:lighthouse` is exempt: it builds into
+its own `.next-lighthouse` tree and serves on port 4173, so a 20-minute
+measurement cannot be corrupted by a concurrent build or by another worktree's
+server on port 3000.
 
 Use the smallest validation that proves the change:
 

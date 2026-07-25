@@ -34,6 +34,7 @@ export default [
       "performance-audit/**",
       "reports/**",
       ".next/**",
+      ".next-lighthouse/**",
       ".trash-next-artifacts/**",
       ".context/**",
       ".stryker-tmp/**",
@@ -905,6 +906,7 @@ export default [
     ignores: [
       "node_modules/**",
       ".next/**",
+      ".next-lighthouse/**",
       ".trash-next-artifacts/**",
       "out/**",
       "build/**",

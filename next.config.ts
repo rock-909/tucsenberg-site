@@ -23,6 +23,14 @@ const isCloudflare =
   process.env.DEPLOYMENT_PLATFORM === "cloudflare" ||
   process.env.DEPLOY_TARGET === "cloudflare";
 const nextConfig: NextConfig = {
+  // Everything writes `.next` by default. `next start` reads this same config,
+  // so setting NEXT_DIST_DIR on both build and start gives a command its own
+  // output tree. Only `website:lighthouse` does that today: a measurement that
+  // takes 20+ minutes must not race a build, an E2E sweep, or another agent
+  // session rebuilding underneath it — see
+  // docs/技术难题/无谓的流式边界让正文落到主内容区之外.md.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
+
   // Expose only the non-secret deployment label so Client Components can
   // distinguish a production build from an actual production deployment.
   env: {
