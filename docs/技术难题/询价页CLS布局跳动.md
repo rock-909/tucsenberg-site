@@ -2,11 +2,11 @@
 
 Date: 2026-07-25
 Discovered by: Wave 4 / FPH-009 把 Lighthouse 审计范围从 5 条路由扩到全部 16 条
-Status: **未修复 — 需要独立改动**
+Status: **已修复** — 2026-07-25
 
 ## 事实
 
-`/request-quote` 的 CLS 实测 **0.203**，超过 `lighthouserc.js` 的 `0.15` 硬阈值。
+`/request-quote` 的 CLS 实测曾为 **0.203**，超过 `lighthouserc.js` 的 `0.15` 硬阈值。
 
 三轮测量数值完全一致（`0.2032069227031071`），说明是确定性的布局跳动，不是
 runner 抖动。其余 15 条正式路由全部通过。
@@ -21,62 +21,98 @@ score:    0.2032069227031071
 
 即 "After you submit / 信心" 侧栏被上方内容挤下去。
 
-## 根因
+## 根因（修复时更正过一次）
 
-`src/app/[locale]/request-quote/page.tsx` 把询价表单包在 Suspense 边界里：
+**最初的判断是错的。** 本文档最早把根因记为 `page.tsx` 的 Suspense 边界
+（fallback 与真表单高度不同，流式替换时撑开）。实测服务端 HTML 推翻了这一点：
 
-```tsx
-<Suspense fallback={inquiryFallback}>
-  <RequestQuoteInquiryForm ... />
-</Suspense>
+```bash
+curl -s http://localhost:3000/request-quote | grep -o 'inquiry-form-static-fallback'
+# 命中；同时 grep 'type="submit"' 无命中
 ```
 
-`RequestQuoteInquiryForm` 内部 `await searchParams`，所以先渲染 fallback、再流式
-替换成真表单。而 fallback 是 `InquiryFormStaticFallback`——一张约 150px 高的
-"无 JS 说明"卡片，真表单是完整询价表单（700px+）。移动端单列布局下，表单一撑开
-就把下方 `<aside>` 推下去。
+`/contact` 的服务端 HTML 同样只有静态卡片。也就是说**服务端从来不渲染真表单**，
+Suspense 边界并不产生高度差。
 
-**高度差是结构性的，不是可以微调的偏差。**
+真正的根因在 `src/components/forms/inquiry-form.tsx`：
 
-## 仓库内已有正确范式
+```tsx
+const isHydrated = useSyncExternalStore(...);
+if (!isHydrated) {
+  return fallback;   // 约 160px 的"需要 JavaScript"卡片
+}
+return <InquiryFormLive ... />;  // 466–696px 的完整表单
+```
 
-`/contact` 使用同一个 `InquiryForm` 与同一个静态兜底，但**不套 Suspense**
-（`src/app/[locale]/contact/contact-page-sections.tsx`），其 CLS 通过。
+浏览器脚本就绪后组件把矮卡片换成完整表单，中间**没有预留高度**，
+所以排在它后面的元素被整体下推。
 
-差别只在 `/request-quote` 需要 `searchParams`。当前 `cacheComponents: false`，
-且该路由构建产物已经是 `ƒ`（按请求渲染），所以这个 Suspense 边界并没有换来静态
-预渲染。
+`/contact` 用的是同一个组件、同样会换，但它的表单排在长篇正文之后、位于首屏之外，
+CLS 只统计视口内的位移，所以没被记分。**这是一类问题，不是询价页独有的。**
 
-## 为什么本次不修
+各断点实测高度（`412px` 为 Lighthouse 移动端视口）：
 
-这是测量范围扩大后**新发现**的缺陷，不属于 FPH-009 本身（FPH-009 是"只测了 5 条
-路由"）。修它要改询价页渲染结构，需要独立的证明面：
+| 视口宽 | 完整表单高度 |
+| --- | --- |
+| 320px | 696px |
+| 360px | 676px |
+| 390px | 632px |
+| 412px | 612px |
+| 640px | 568px |
+| 768px | 466px |
+| ≥1024px | 与侧栏左右并排，不产生下推 |
 
-- 表单提交路径的 E2E 仍然通过；
-- 无 JS 静态兜底行为不退化（`.claude/rules/ui.md` 对该面有专门约束）；
-- 若将来重新启用 Cache Components，`searchParams` 的 Suspense 边界要求会变，
-  改动需要与那条路线一起复核（见 `.claude/rules/conventions.md`）。
+## 修法
 
-FPH-009 的计划明确要求：实测失败时如实记录真实路由与指标，**不得为让指标好看而
-降阈值或删路由**。因此 `lighthouserc.js` 保持 `0.15` 不变，
-`CI_DAILY=true pnpm website:lighthouse` 目前会因这一条退出码 1。这是真实信号，
-不是配置故障。
+在 `InquiryForm` 的未就绪分支外包一层预留高度的容器，按上表分档：
 
-## 后续
+```tsx
+<div
+  data-inquiry-form-reserve
+  className="min-h-[660px] min-[390px]:min-h-[600px] sm:min-h-[560px] md:min-h-[480px]"
+>
+  <noscript>
+    <style>{"[data-inquiry-form-reserve]{min-height:0}"}</style>
+  </noscript>
+  {fallback}
+</div>
+```
 
-候选方案（需要独立评估，不在本文档定案）：
+三点考虑：
 
-1. 在页面层 `await searchParams` 后直接渲染 `InquiryForm`，与 `/contact` 对齐，
-   去掉流式替换；
-2. 保留 Suspense，但让 fallback 与真表单占据同等高度。
+1. **改在组件里而不是询价页里**，因为 `/contact` 有同样的隐患。
+2. **预留只作用于未就绪状态**，表单出来后按自身高度排版，不留永久空白。
+   分档值贴着实测高度，各档最大预留误差约 36–40px。**误差是像素，不是 CLS 分数**，
+   同样的像素位移在不同视口、不同受影响面积下算出的 CLS 并不相同，
+   所以是否达标以 E2E 实测的 CLS `< 0.1` 为准，不由像素数直接推断。
+3. **真正没有脚本的访客永远不会发生替换**，预留会变成一段死空白，
+   所以用 `<noscript>` 内联样式把预留归零。CSP 的 `style-src` 允许内联样式。
 
-方案 1 更接近根因，但要确认去掉边界后的首字节与流式行为可接受。
+## 为什么没有改成"服务端直接渲染真表单"
 
-## 复现
+`tests/e2e/no-js-html-contract.spec.ts` 明确断言服务端 HTML 中不得出现
+`<form>` 与任何 `<button>`。这条约束有实际理由：没有脚本的原生表单会以 GET
+方式把姓名、邮箱、公司提交到 URL，泄进浏览器历史、服务器日志与 Referer 头。
+要改这条得先解决提交路径，属于另一次改动。
+
+## 防回归
+
+`tests/e2e/layout-stability.spec.ts` 用 `PerformanceObserver` 直接读
+`layout-shift` 条目，在 360/412/640/768 四个竖排断点（每个预留档位各一个）上
+对 `/request-quote` 与 `/contact` 断言 CLS < 0.1。读数前先断言真表单已出现、
+预留容器已消失——否则表单压根没换上来时不会有位移，测试会假绿。
+表单字段将来增删导致分档值失准时，这条会挂，而不是悄悄退化。
+
+`tests/e2e/no-js-html-contract.spec.ts` 另外断言无脚本时预留容器的
+`min-height` 计算值为 `0px`。`<noscript>` 规则若失效，无脚本访客会看到几百像素
+的死空白，而其余断言都发现不了。
+
+## 复现与验证
 
 ```bash
 APP_ENV=production pnpm build
-CI_DAILY=true pnpm website:lighthouse
+CI_DAILY=true APP_ENV=production pnpm website:lighthouse   # 修复后退出码 0
+pnpm exec playwright test tests/e2e/layout-stability.spec.ts
 ```
 
 两处都需要 `APP_ENV=production`：动态路由在请求时读取它，缺失会输出 `noindex`，
