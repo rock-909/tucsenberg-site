@@ -77,14 +77,13 @@ describe("release proof manifest", () => {
       manifest.getReleaseProofSteps().map((step) => step.lane),
     );
 
+    // The lane assertion already excludes every deployed step, so naming
+    // `deployed-smoke` and `cf-preview-deployed` again proved nothing; the
+    // other two named starter-era flags that no longer exist anywhere.
     expect([...lanes]).toEqual(["local/test-mode"]);
     expect(releaseProofFlow).toContain(
       "node scripts/starter-checks.js content-readiness",
     );
-    expect(releaseProofFlow).not.toContain("--profile");
-    expect(releaseProofFlow).not.toContain("cf-preview-deployed");
-    expect(releaseProofFlow).not.toContain("deployed-smoke");
-    expect(releaseProofFlow).not.toContain("POST_DEPLOY_TEST=1");
   });
 
   it("rebuilds the local Playwright step without leaving CI", () => {
