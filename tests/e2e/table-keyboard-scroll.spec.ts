@@ -86,9 +86,16 @@ test("table scroll owners are keyboard reachable with visible focus", async ({
       // 挂载会把焦点抢走，page.keyboard 的方向键就落到别处，表现成随机失败。
       // 重复按只会滚得更远，所以放进 poll 里重试是安全的；方向键真的不起作用时
       // 这条断言照样红。
+      //
+      // delay 是给 webkit 的：桌面 Safari 的方向键滚动是"按住期间持续给速度"的
+      // 动画（KeyboardScrollingAnimator），keydown 和 keyup 之间至少要过一个动画
+      // 帧才有位移。Playwright 默认 press 是零间隔的 down+up，动画在第一帧前就被
+      // 取消，scrollLeft 恒为 0（实测裸页面也一样，与站点无关；偶尔溜进一帧就
+      // 滚 21px，正是之前"时好时坏"的来源）。按住 150ms 模拟真实按键；chromium /
+      // firefox 在 keydown 就完成离散滚动，不受影响。
       await expect
         .poll(async () => {
-          await region.press("ArrowRight");
+          await region.press("ArrowRight", { delay: 150 });
           return region.evaluate((element) => element.scrollLeft);
         })
         .toBeGreaterThan(before);
