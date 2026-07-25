@@ -1,5 +1,3 @@
-import type { Locale } from "@/i18n/routing";
-import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 import {
   readRequiredMessagePath,
   type MessageRecord,
@@ -44,6 +42,10 @@ export interface ContactCopyModel {
   };
 }
 
+/**
+ * Builds the structured copy model for the contact page from already-loaded
+ * messages, reading only the `contact.*` namespace.
+ */
 export function getContactCopyFromMessages(
   messages: MessageRecord,
 ): ContactCopyModel {
@@ -144,15 +146,4 @@ export function getContactCopyFromMessages(
       },
     },
   };
-}
-
-/**
- * Server-side helper to build a structured copy model for the contact page.
- *
- * Depends only on the explicit `locale` parameter and reads `contact.*`.
- */
-export async function getContactCopy(
-  locale: Locale,
-): Promise<ContactCopyModel> {
-  return getContactCopyFromMessages(await loadCompleteMessages(locale));
 }
