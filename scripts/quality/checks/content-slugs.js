@@ -19,10 +19,7 @@ const REQUIRED_FRONTMATTER_STRING_FIELDS = [
 ];
 const REQUIRED_SEO_STRING_FIELDS = ["title", "description"];
 const OPTIONAL_DATE_FIELDS = ["lastReviewed"];
-const STRICT_STARTER_OG_IMAGES = new Set([
-  "/images/og-image.jpg",
-  "/images/about-og.jpg",
-]);
+const PUBLIC_DIR = "public";
 const DATE_FIELD_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const matterOptions = {
   engines: {
@@ -280,6 +277,7 @@ function validateFrontmatterFile({
   collection,
   expectedLocale,
   filePath,
+  rootDir,
   strictFrontmatter,
 }) {
   const issues = [];
@@ -404,15 +402,16 @@ function validateFrontmatterFile({
   if (
     strictFrontmatter &&
     typeof seo.ogImage === "string" &&
-    STRICT_STARTER_OG_IMAGES.has(seo.ogImage)
+    seo.ogImage.startsWith("/") &&
+    !fs.existsSync(path.join(rootDir, PUBLIC_DIR, seo.ogImage.slice(1)))
   ) {
     pushFrontmatterIssue(issues, {
-      type: "starter_og_image",
+      type: "missing_og_image",
       collection,
       locale: expectedLocale,
       filePath,
       field: "seo.ogImage",
-      message: `starter OG image must be replaced: ${seo.ogImage}`,
+      message: `seo.ogImage has no file under ${PUBLIC_DIR}/: ${seo.ogImage}`,
     });
   }
 
@@ -453,6 +452,7 @@ function validateContentFrontmatterContract(options) {
               collection,
               expectedLocale: locale,
               filePath,
+              rootDir,
               strictFrontmatter,
             }),
           );
@@ -475,8 +475,8 @@ function validateContentFrontmatterContract(options) {
       missingSeoFields: issues.filter(
         (issue) => issue.type === "missing_seo_field",
       ).length,
-      starterOgImages: issues.filter(
-        (issue) => issue.type === "starter_og_image",
+      missingOgImages: issues.filter(
+        (issue) => issue.type === "missing_og_image",
       ).length,
     },
   };
@@ -635,7 +635,7 @@ function printFrontmatterContractSummary(result, options) {
     ["Missing Fields", "missing_field"],
     ["Invalid Fields", "invalid_field"],
     ["Missing SEO Fields", "missing_seo_field"],
-    ["Starter OG Images", "starter_og_image"],
+    ["Missing OG Images", "missing_og_image"],
   ];
 
   for (const [label, type] of groups) {
@@ -656,7 +656,7 @@ function printFrontmatterContractSummary(result, options) {
   console.log(`   Missing fields: ${result.stats.missingFields}`);
   console.log(`   Invalid fields: ${result.stats.invalidFields}`);
   console.log(`   Missing SEO fields: ${result.stats.missingSeoFields}`);
-  console.log(`   Starter OG images: ${result.stats.starterOgImages}`);
+  console.log(`   Missing OG images: ${result.stats.missingOgImages}`);
   console.log(`   Total issues: ${result.issues.length}\n`);
 }
 

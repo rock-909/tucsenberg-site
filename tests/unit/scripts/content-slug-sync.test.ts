@@ -89,7 +89,7 @@ function createDefaultSlugFixtures(): void {
   }
 }
 
-function createValidPageFrontmatter(ogImage = "/images/custom-about.jpg") {
+function createValidPageFrontmatter(ogImage = "/images/tucsenberg-og.png") {
   return {
     locale: "en",
     title: "About",
@@ -140,6 +140,13 @@ describe("content-slug-sync CLI", () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "showcase-content-slug-cli-"),
+    );
+    // Strict frontmatter resolves seo.ogImage against public/, so the shared
+    // fixture image has to exist on disk like it does in the repo.
+    fs.mkdirSync(path.join(tmpDir, "public", "images"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, "public", "images", "tucsenberg-og.png"),
+      "",
     );
   });
 
@@ -223,10 +230,10 @@ describe("content-slug-sync CLI", () => {
         "pages",
         "en",
         "about.mdx",
-        createValidPageFrontmatter("/images/about-og.jpg"),
+        createValidPageFrontmatter("/images/never-shipped.png"),
       );
       createMdxFile("pages", "zh", "about.mdx", {
-        ...createValidPageFrontmatter("/images/about-og.jpg"),
+        ...createValidPageFrontmatter("/images/never-shipped.png"),
         locale: "zh",
       });
 
@@ -237,15 +244,15 @@ describe("content-slug-sync CLI", () => {
       expect(result.stdout).not.toContain("Frontmatter/SEO Contract");
     });
 
-    it("should fail strict frontmatter validation on fixture starter OG images", async () => {
+    it("should fail strict frontmatter validation when the OG file is missing", async () => {
       createMdxFile(
         "pages",
         "en",
         "about.mdx",
-        createValidPageFrontmatter("/images/about-og.jpg"),
+        createValidPageFrontmatter("/images/never-shipped.png"),
       );
       createMdxFile("pages", "zh", "about.mdx", {
-        ...createValidPageFrontmatter("/images/about-og.jpg"),
+        ...createValidPageFrontmatter("/images/never-shipped.png"),
         locale: "zh",
       });
 
@@ -253,10 +260,10 @@ describe("content-slug-sync CLI", () => {
 
       expect(result.code).toBe(1);
       expect(result.stdout).toContain("Frontmatter/SEO Contract Validation");
-      expect(result.stdout).toContain("Starter OG Images");
+      expect(result.stdout).toContain("Missing OG Images");
     });
 
-    it("should pass strict frontmatter validation on fixture project OG images", async () => {
+    it("should pass strict frontmatter validation when the OG file ships", async () => {
       createMdxFile("pages", "en", "about.mdx", createValidPageFrontmatter());
       createMdxFile("pages", "zh", "about.mdx", {
         ...createValidPageFrontmatter(),
@@ -308,10 +315,10 @@ describe("content-slug-sync CLI", () => {
         "pages",
         "en",
         "about.mdx",
-        createValidPageFrontmatter("/images/about-og.jpg"),
+        createValidPageFrontmatter("/images/never-shipped.png"),
       );
       createMdxFile("pages", "zh", "about.mdx", {
-        ...createValidPageFrontmatter("/images/about-og.jpg"),
+        ...createValidPageFrontmatter("/images/never-shipped.png"),
         locale: "zh",
       });
 
@@ -327,7 +334,7 @@ describe("content-slug-sync CLI", () => {
         slugSync?: unknown;
         frontmatterContract?: {
           stats?: {
-            starterOgImages?: number;
+            missingOgImages?: number;
           };
         };
       };
@@ -337,7 +344,7 @@ describe("content-slug-sync CLI", () => {
       expect(report.slugSync).toBeDefined();
       expect(report.frontmatterContract).toBeDefined();
       expect(
-        report.frontmatterContract?.stats?.starterOgImages,
+        report.frontmatterContract?.stats?.missingOgImages,
       ).toBeGreaterThan(0);
     });
 
