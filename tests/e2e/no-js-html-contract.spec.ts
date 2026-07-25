@@ -24,6 +24,9 @@ function expectExactlyOneMain(html: string) {
  */
 async function expectBodyRenderedOnce(page: import("@playwright/test").Page) {
   const headings = await page.locator("h1").allTextContents();
+  // Without this floor the whole helper passes vacuously on a page that lost
+  // its H1: zero headings are trivially unique and trivially all inside main.
+  expect(headings.length, "page must expose an H1 without JavaScript").toBe(1);
   expect(new Set(headings).size, "page body must not be rendered twice").toBe(
     headings.length,
   );
