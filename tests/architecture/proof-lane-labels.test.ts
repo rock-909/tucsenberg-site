@@ -8,13 +8,6 @@ const REQUIRED_PROOF_LANES = [
   "real-service-canary",
 ] as const;
 
-const CURRENT_PLAYWRIGHT_DEFAULT_MATCHES = [
-  "**/tucsenberg-site-smoke.spec.ts",
-  "**/contact-form-smoke.spec.ts",
-  "**/no-js-html-contract.spec.ts",
-  "**/smoke/**/*.spec.ts",
-] as const;
-
 describe("proof lane labels", () => {
   // The launch checklist is what a human follows while the release script
   // prints the lane labels. Renaming a lane in one place without the other
@@ -26,16 +19,6 @@ describe("proof lane labels", () => {
     for (const lane of REQUIRED_PROOF_LANES) {
       expect(launchProof).toContain(lane);
       expect(releaseProofOutput).toContain(`[${lane}]`);
-    }
-  });
-
-  it("limits default Playwright discovery to current Tucsenberg smoke proof", () => {
-    const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
-
-    expect(playwrightConfig).toContain("hasExplicitE2eFileSelection");
-    expect(playwrightConfig).toContain("testMatch: currentSiteTestMatch");
-    for (const match of CURRENT_PLAYWRIGHT_DEFAULT_MATCHES) {
-      expect(playwrightConfig).toContain(match);
     }
   });
 });

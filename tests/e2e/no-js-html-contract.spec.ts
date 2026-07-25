@@ -41,6 +41,10 @@ test.describe("No-JS HTML contract (English-only)", () => {
   test("homepage keeps meaningful structure without client boot", async ({
     page,
   }) => {
+    // 桌面视口显式钉住：断言的是桌面导航（header-desktop-nav），移动视口下它
+    // 本来就该隐藏。不钉的话这条用例在 Mobile 项目里必然红。移动端的等价
+    // 契约由下面那条 mobile 用例覆盖。
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("http://localhost:3000/", {
       waitUntil: "domcontentloaded",
     });
@@ -120,6 +124,10 @@ test.describe("No-JS HTML contract (English-only)", () => {
   test("contact page renders inquiry fallback without JavaScript", async ({
     page,
   }) => {
+    // 桌面视口显式钉住：断言的是桌面导航（header-desktop-nav），移动视口下它
+    // 本来就该隐藏。不钉的话这条用例在 Mobile 项目里必然红。移动端的等价
+    // 契约由第 73 行那条 mobile 用例覆盖。
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("http://localhost:3000/contact", {
       waitUntil: "domcontentloaded",
     });
