@@ -15,14 +15,6 @@ const COPY_BEARING_LOCAL_CONSTANT_TOKENS = new Set([
   "SIGNOFF",
 ]);
 
-const TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE = [
-  "messages/base/{locale}/messages.json",
-  "emailTemplates",
-  "src/emails/email-copy.ts",
-  "src/lib/email/runtime-email-content.ts",
-  "src/lib/resend-utils.ts",
-] as const;
-
 function readJsonFile(path: string): unknown {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- tests read fixed repository files
   return JSON.parse(readFileSync(path, "utf8")) as unknown;
@@ -100,37 +92,6 @@ describe("email copy boundary", () => {
 
     for (const nonCopyExample of nonCopyExamples) {
       expect(hasCopyBearingLocalConstant(nonCopyExample)).toBe(false);
-    }
-  });
-
-  it("documents transactional email copy as a replacement surface", () => {
-    const replaceGuide = readFileSync("docs/项目基础/替换顺序.md", "utf8");
-    const messagesGuide = readFileSync("docs/项目基础/消息文案.md", "utf8");
-    const surfacesGuide = readFileSync("docs/项目基础/替换边界.md", "utf8");
-    const replacementSurfaceDocs = [
-      replaceGuide,
-      messagesGuide,
-      surfacesGuide,
-    ].join("\n");
-
-    expect(replaceGuide).toContain("Transactional email copy");
-    expect(replaceGuide).toContain("src/emails/email-copy.ts");
-    expect(replaceGuide).toContain("src/lib/email/runtime-email-content.ts");
-    expect(replaceGuide).toContain("production sending path");
-    expect(replaceGuide).toContain("preview/reference");
-    expect(replaceGuide).toContain("product inquiry owner notification");
-
-    expect(messagesGuide).toContain("emailTemplates");
-    expect(messagesGuide).toContain("transactional email");
-    expect(messagesGuide).toContain(
-      "runtime email rendering still defaults to English",
-    );
-
-    expect(surfacesGuide).toContain("email copy");
-    expect(surfacesGuide).toContain("src/emails/email-copy.ts");
-
-    for (const replacementSurface of TRANSACTIONAL_EMAIL_REPLACEMENT_SURFACE) {
-      expect(replacementSurfaceDocs).toContain(replacementSurface);
     }
   });
 

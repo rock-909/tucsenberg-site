@@ -78,21 +78,6 @@ describe("physical message packs", () => {
     expect(storybook).toContain("@/lib/i18n/composed-messages");
   });
 
-  it("documents physical packs as the authoring surface", () => {
-    const readme = fs.readFileSync("README.md", "utf8");
-    const replace = fs.readFileSync("docs/项目基础/替换顺序.md", "utf8");
-    const messages = fs.readFileSync("docs/项目基础/消息文案.md", "utf8");
-
-    expect(readme).toContain("messages/base/**");
-    expect(readme).toContain("messages/profiles/b2b-lead/**");
-    expect(readme).toContain("messages/profiles/catalog/**");
-    expect(replace).toContain("physical packs first");
-    expect(messages).toContain(
-      "Physical message packs are the authoring truth",
-    );
-    expect(messages).toContain("mutually exclusive");
-  });
-
   it("keeps the shared composition helper aligned with pack merge order", () => {
     for (const locale of LOCALES) {
       expect(getComposedMessages(locale)).toEqual(

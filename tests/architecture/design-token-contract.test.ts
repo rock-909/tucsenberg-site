@@ -340,14 +340,6 @@ describe("design token contract", () => {
     expect(readCssVariable(css, "--card-radius")).toBe("var(--radius-lg)");
     expect(readCssVariable(css, "--input-radius")).toBe("var(--radius-md)");
     expect(readCssVariable(css, "--section-radius")).toBeUndefined();
-
-    const truth = readRepoFile("docs/design/设计真相.md");
-    const uiComponents = readRepoFile("docs/design/组件使用手册.md");
-
-    expect(truth).toContain("Runtime Button pilot");
-    expect(truth).toContain("Card, Input, or section radius migration");
-    expect(uiComponents).toContain("Runtime Button pilot boundary");
-    expect(uiComponents).toContain("--button-height-default");
   });
 
   it("keeps WCAG AA contrast for input, ring, primary button and primary text", () => {

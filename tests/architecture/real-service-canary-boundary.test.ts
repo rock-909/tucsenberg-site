@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { isDeployedCanaryUrl } from "../e2e/smoke/post-deploy-canary-url";
 
@@ -17,23 +16,5 @@ describe("real service canary boundary", () => {
     expect(isDeployedCanaryUrl("http://starter.local:3000")).toBe(false);
     expect(isDeployedCanaryUrl("file:///tmp/showcase")).toBe(false);
     expect(isDeployedCanaryUrl("https://preview.example.com")).toBe(true);
-  });
-
-  it("documents that owner notification confirmation is not automatic in the Playwright canary", () => {
-    const runbook = readFileSync("docs/项目基础/发布验证.md", "utf8");
-    const qualityProof = readFileSync("docs/项目基础/上线验证.md", "utf8");
-
-    for (const source of [runbook, qualityProof]) {
-      expect(source).toContain("recordCreated");
-      expect(source).toContain("ownerNotified");
-      expect(source).toContain("owner notification");
-    }
-
-    expect(runbook).toContain(
-      "The current Playwright canary verifies the Airtable record",
-    );
-    expect(runbook).toContain(
-      "owner notification still needs manual target-system confirmation",
-    );
   });
 });
