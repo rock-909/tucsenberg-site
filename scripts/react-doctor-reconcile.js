@@ -3,6 +3,10 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const SUPPORTED_SCHEMA_VERSION = 3;
+// Both subcommands shell out to `npx`, which downloads from the registry. The
+// CI step is `continue-on-error`, so a hang does not fail fast — it just burns
+// the job until GitHub's own job timeout. Fail loudly instead of hanging.
+const SUBCOMMAND_TIMEOUT_MS = 10 * 60 * 1000;
 const UNLISTED_DIAGNOSTIC_NAMESPACES = new Set(["deslop", "knip"]);
 
 function isRecord(value) {
@@ -185,8 +189,14 @@ function runJsonCommand(command, args, label) {
     cwd: path.resolve(__dirname, ".."),
     encoding: "utf8",
     maxBuffer: 10 * 1024 * 1024,
+    timeout: SUBCOMMAND_TIMEOUT_MS,
   });
 
+  if (result.signal) {
+    throw new Error(
+      `${label} was killed by ${result.signal} (timeout ${SUBCOMMAND_TIMEOUT_MS}ms)`,
+    );
+  }
   if (result.error) throw result.error;
   if (result.status !== 0) {
     throw new Error(

@@ -44,9 +44,6 @@ export default [
       ".codex/**",
       ".omx/**",
       ".eslintcache-audit",
-      // Semgrep fixtures are rule-test inputs, not application source.
-      "tests/semgrep/targets/**",
-      "tests/semgrep/drafts/**",
       // Auto-generated files
       "src/lib/*.generated.ts",
     ],
