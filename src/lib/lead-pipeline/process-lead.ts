@@ -19,13 +19,8 @@ import { logger, sanitizeEmail } from "@/lib/logger";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import { resendService } from "@/lib/resend-instance";
 
-export interface ProcessInquiryOptions {
-  requestId?: string;
-}
-
 interface LeadProcessingContext {
   referenceId: string;
-  requestId?: string | undefined;
 }
 
 export interface LeadResult {
@@ -38,12 +33,6 @@ export interface LeadResult {
 }
 
 const LEAD_DELIVERY_POLICY = "email-first-storage-optional" as const;
-
-function withRequestId(
-  requestId?: string,
-): { requestId: string } | Record<string, never> {
-  return requestId ? { requestId } : {};
-}
 
 function normalizeErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
@@ -74,6 +63,7 @@ function createProcessingFailureResult(referenceId?: string): LeadResult {
 
 function createProductEmailData(
   lead: ProductLeadInput,
+  referenceId: string,
 ): ProductInquiryEmailData {
   const { firstName, lastName } = splitName(lead.fullName);
   const { productName } = resolveProductIdentity(lead);
@@ -84,6 +74,7 @@ function createProductEmailData(
   });
 
   return {
+    referenceId,
     firstName,
     lastName,
     email: lead.email,
@@ -97,14 +88,15 @@ async function sendProductOwnerEmail(
   context: LeadProcessingContext,
 ): Promise<boolean> {
   try {
-    await resendService.sendProductInquiryEmail(createProductEmailData(lead));
+    await resendService.sendProductInquiryEmail(
+      createProductEmailData(lead, context.referenceId),
+    );
     return true;
   } catch (error) {
     logger.error("Product owner email failed", {
       error: normalizeErrorMessage(error),
       email: sanitizeEmail(lead.email),
       referenceId: context.referenceId,
-      ...withRequestId(context.requestId),
     });
     return false;
   }
@@ -147,7 +139,6 @@ async function createProductLeadRecord(
       email: sanitizeEmail(lead.email),
       leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
       referenceId,
-      ...withRequestId(context.requestId),
     });
     return false;
   }
@@ -155,9 +146,7 @@ async function createProductLeadRecord(
 
 export async function processValidatedInquiry(
   input: ProductLeadInput,
-  options: ProcessInquiryOptions = {},
 ): Promise<LeadResult> {
-  const { requestId } = options;
   let referenceId: string | undefined;
 
   try {
@@ -168,12 +157,11 @@ export async function processValidatedInquiry(
       email: sanitizeEmail(input.email),
       leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
       referenceId,
-      ...withRequestId(requestId),
     });
 
     const [emailSent, recordCreated] = await Promise.all([
-      sendProductOwnerEmail(input, { referenceId, requestId }),
-      createProductLeadRecord(input, { referenceId, requestId }),
+      sendProductOwnerEmail(input, { referenceId }),
+      createProductLeadRecord(input, { referenceId }),
     ]);
 
     if (!emailSent && !recordCreated) {
@@ -192,7 +180,6 @@ export async function processValidatedInquiry(
       type: PRODUCT_LEAD_TYPE,
       referenceId,
       error: normalizeErrorMessage(error),
-      ...withRequestId(requestId),
     });
     return createProcessingFailureResult(referenceId);
   }

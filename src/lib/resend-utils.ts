@@ -31,6 +31,7 @@ export class ResendUtils {
     data: ProductInquiryEmailData,
   ): ProductInquiryEmailData {
     return {
+      referenceId: data.referenceId,
       firstName: sanitizePlainText(data.firstName),
       lastName: sanitizePlainText(data.lastName),
       email: data.email.toLowerCase().trim(),
@@ -45,10 +46,13 @@ export class ResendUtils {
     return EMAIL_COPY.productInquiry.subject(data);
   }
 
-  static getProductInquiryTags(): Array<{ name: string; value: string }> {
+  static getProductInquiryTags(
+    referenceId: string,
+  ): Array<{ name: string; value: string }> {
     return [
       { name: "type", value: "product-inquiry" },
       { name: "source", value: "website" },
+      { name: "reference-id", value: referenceId },
     ];
   }
 }

@@ -35,8 +35,8 @@ describe("processValidatedInquiry observability", () => {
     mockSendProductInquiryEmail.mockResolvedValue("email-123");
   });
 
-  it("logs the product type, reference id, and request id without raw PII", async () => {
-    await processValidatedInquiry(LEAD, { requestId: "request-123" });
+  it("logs the product type and reference id without raw PII", async () => {
+    await processValidatedInquiry(LEAD);
 
     expect(logger.info).toHaveBeenCalledWith(
       "Processing lead",
@@ -44,7 +44,6 @@ describe("processValidatedInquiry observability", () => {
         type: PRODUCT_LEAD_TYPE,
         email: "[REDACTED_EMAIL]",
         referenceId: expect.stringMatching(/^PRO-/),
-        requestId: "request-123",
       }),
     );
     const logs = JSON.stringify(vi.mocked(logger.info).mock.calls);
@@ -56,11 +55,11 @@ describe("processValidatedInquiry observability", () => {
     mockCreateLead.mockRejectedValue(new Error("airtable down"));
     mockSendProductInquiryEmail.mockRejectedValue(new Error("email down"));
 
-    await processValidatedInquiry(LEAD, { requestId: "request-456" });
+    const { referenceId } = await processValidatedInquiry(LEAD);
 
     const logs = JSON.stringify(vi.mocked(logger.error).mock.calls);
     expect(logs).toContain("[REDACTED_EMAIL]");
-    expect(logs).toContain("request-456");
+    expect(logs).toContain(referenceId);
     expect(logs).not.toContain("sensitive@example.com");
     expect(logs).not.toContain("Private facility details");
   });

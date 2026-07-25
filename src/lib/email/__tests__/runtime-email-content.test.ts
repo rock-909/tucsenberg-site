@@ -6,6 +6,7 @@ import { buildProductInquiryEmailContent } from "@/lib/email/runtime-email-conte
 describe("runtime email content", () => {
   it("renders product inquiry highlight and body fields without losing buyer details", () => {
     const inquiryData: ProductInquiryEmailData = {
+      referenceId: "PRO-abc123-deadbeef",
       firstName: "Pat",
       lastName: "Lee",
       email: "pat@example.com",
@@ -15,6 +16,8 @@ describe("runtime email content", () => {
 
     const content = buildProductInquiryEmailContent(inquiryData);
 
+    expect(content.text).toContain("Reference: PRO-abc123-deadbeef");
+    expect(content.html).toContain("PRO-abc123-deadbeef");
     expect(content.html).toContain("Enterprise Widget");
     expect(content.html).toContain("Pat Lee");
     expect(content.html).toContain("pat@example.com");
@@ -29,6 +32,7 @@ describe("runtime email content", () => {
 
   it("omits requirements when not provided", () => {
     const inquiryData: ProductInquiryEmailData = {
+      referenceId: "PRO-abc123-deadbeef",
       firstName: "Pat",
       lastName: "Lee",
       email: "pat@example.com",
@@ -43,6 +47,7 @@ describe("runtime email content", () => {
 
   it("escapes special characters in HTML while keeping readable text content", () => {
     const content = buildProductInquiryEmailContent({
+      referenceId: "PRO-abc123-deadbeef",
       firstName: "J&ne",
       lastName: "<Buyer>",
       email: "pat@example.com",

@@ -87,6 +87,7 @@ describe("resend - sendProductInquiryEmail", () => {
   let ResendServiceClass: ResendServiceConstructor;
 
   const validProductInquiryData = {
+    referenceId: "PRO-abc123-deadbeef",
     firstName: "Jane",
     lastName: "Smith",
     email: "jane.smith@example.com",
@@ -131,6 +132,15 @@ describe("resend - sendProductInquiryEmail", () => {
       }),
     );
     expect(payload).not.toHaveProperty("react");
+
+    // One reference the buyer can quote must reach subject, body, and provider metadata.
+    expect(payload.subject).toContain("PRO-abc123-deadbeef");
+    expect(payload.text).toContain("PRO-abc123-deadbeef");
+    expect(payload.html).toContain("PRO-abc123-deadbeef");
+    expect(payload.tags).toContainEqual({
+      name: "reference-id",
+      value: "PRO-abc123-deadbeef",
+    });
   });
 
   it("sanitizes product inquiry data before rendering without expanding buyer placeholders", async () => {
@@ -179,5 +189,31 @@ describe("resend - sendProductInquiryEmail", () => {
     await expect(
       service.sendProductInquiryEmail(validProductInquiryData),
     ).rejects.toThrow("Failed to send product inquiry email");
+  });
+
+  it("logs the reference on both delivery outcomes so a quoted reference is traceable", async () => {
+    const { logger } = await import("@/lib/logger");
+    const service = new ResendServiceClass();
+
+    mockResendSend.mockResolvedValue({
+      data: { id: "product-inquiry-id" },
+      error: null,
+    });
+    await service.sendProductInquiryEmail(validProductInquiryData);
+
+    expect(logger.info).toHaveBeenCalledWith(
+      "Product inquiry email sent successfully",
+      expect.objectContaining({ referenceId: "PRO-abc123-deadbeef" }),
+    );
+
+    mockResendSend.mockRejectedValue(new Error("Network error"));
+    await expect(
+      service.sendProductInquiryEmail(validProductInquiryData),
+    ).rejects.toThrow("Failed to send product inquiry email");
+
+    expect(logger.error).toHaveBeenCalledWith(
+      "Failed to send product inquiry email",
+      expect.objectContaining({ referenceId: "PRO-abc123-deadbeef" }),
+    );
   });
 });

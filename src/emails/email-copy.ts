@@ -27,8 +27,9 @@ export const EMAIL_COPY = {
     preview: emailTemplateCopy.productInquiry.preview,
     footer: () => emailTemplateCopy.productInquiry.footer,
     subject: (data: ProductInquiryEmailData) =>
-      formatTemplate(emailTemplateCopy.productInquiry.subject, {
-        productName: data.productName,
-      }),
+      `[${data.referenceId}] ${formatTemplate(
+        emailTemplateCopy.productInquiry.subject,
+        { productName: data.productName },
+      )}`,
   },
 } as const;

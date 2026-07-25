@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
+import { logger } from "@/lib/logger";
 import {
   PRODUCT_INQUIRY_KINDS,
   PRODUCT_LEAD_TYPE,
@@ -52,6 +53,7 @@ describe("processValidatedInquiry", () => {
     });
     expect(result.referenceId).toMatch(/^PRO-/);
     expect(mockSendProductInquiryEmail).toHaveBeenCalledWith({
+      referenceId: result.referenceId,
       firstName: "Jane",
       lastName: "Buyer",
       email: "jane@example.com",
@@ -73,6 +75,36 @@ describe("processValidatedInquiry", () => {
     );
     expect(mockCreateLead.mock.calls[0]?.[0]).not.toHaveProperty("company");
     expect(mockCreateLead.mock.calls[0]?.[0]).not.toHaveProperty("quantity");
+  });
+
+  it("gives owner email and Airtable the same reference the buyer receives", async () => {
+    const result = await processValidatedInquiry(VALID_LEAD);
+    const { referenceId } = result;
+
+    expect(referenceId).toMatch(/^PRO-/);
+    expect(mockSendProductInquiryEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ referenceId }),
+    );
+    expect(mockCreateLead).toHaveBeenCalledWith(
+      expect.objectContaining({ referenceId }),
+    );
+  });
+
+  it("keeps that reference in both provider failure logs", async () => {
+    mockSendProductInquiryEmail.mockRejectedValue(new Error("email down"));
+    mockCreateLead.mockRejectedValue(new Error("airtable down"));
+
+    const { referenceId } = await processValidatedInquiry(VALID_LEAD);
+
+    expect(referenceId).toMatch(/^PRO-/);
+    expect(logger.error).toHaveBeenCalledWith(
+      "Product owner email failed",
+      expect.objectContaining({ referenceId }),
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      "Product Airtable createLead failed (non-blocking)",
+      expect.objectContaining({ referenceId }),
+    );
   });
 
   it("starts email and Airtable delivery in parallel", async () => {

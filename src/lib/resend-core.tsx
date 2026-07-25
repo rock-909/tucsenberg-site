@@ -98,7 +98,7 @@ export class ResendService {
         subject,
         html: emailContent.html,
         text: emailContent.text,
-        tags: ResendUtils.getProductInquiryTags(),
+        tags: ResendUtils.getProductInquiryTags(sanitizedData.referenceId),
       });
 
       if (result.error || !result.data) {
@@ -108,6 +108,7 @@ export class ResendService {
       }
 
       logger.info("Product inquiry email sent successfully", {
+        referenceId: sanitizedData.referenceId,
         messageId: result.data.id,
         to: sanitizeEmail(this.emailConfig.replyTo),
         from: sanitizeEmail(sanitizedData.email),
@@ -117,6 +118,7 @@ export class ResendService {
       return result.data.id;
     } catch (error) {
       logger.error("Failed to send product inquiry email", {
+        referenceId: data.referenceId,
         error: error instanceof Error ? error.message : "Unknown error",
         email: sanitizeEmail(data.email),
         product: data.productName,

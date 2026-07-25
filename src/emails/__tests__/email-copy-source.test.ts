@@ -16,6 +16,7 @@ interface EmailTemplates {
 }
 
 const productInquiryEmailData: ProductInquiryEmailData = {
+  referenceId: "PRO-abc123-deadbeef",
   firstName: "John",
   lastName: "Doe",
   email: "john.doe@example.com",
@@ -25,6 +26,7 @@ const productInquiryEmailData: ProductInquiryEmailData = {
 
 const productInquiryEmailDataWithPlaceholderLikeInput: ProductInquiryEmailData =
   {
+    referenceId: "PRO-abc123-deadbeef",
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
@@ -91,9 +93,10 @@ describe("email copy source", () => {
       emailTemplates.productInquiry.footer,
     );
     expect(EMAIL_COPY.productInquiry.subject(productInquiryEmailData)).toBe(
-      formatTemplate(emailTemplates.productInquiry.subject, {
-        productName: productInquiryEmailData.productName,
-      }),
+      `[${productInquiryEmailData.referenceId}] ${formatTemplate(
+        emailTemplates.productInquiry.subject,
+        { productName: productInquiryEmailData.productName },
+      )}`,
     );
   });
 
@@ -109,6 +112,6 @@ describe("email copy source", () => {
       EMAIL_COPY.productInquiry.subject(
         productInquiryEmailDataWithPlaceholderLikeInput,
       ),
-    ).toBe("Product Inquiry: {quantity}");
+    ).toBe("[PRO-abc123-deadbeef] Product Inquiry: {quantity}");
   });
 });
