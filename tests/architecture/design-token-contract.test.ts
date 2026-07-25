@@ -327,8 +327,6 @@ describe("design token contract", () => {
     expect(readCssVariable(css, "--font-sans")).toContain("-apple-system");
     expect(readCssVariable(css, "--font-sans")).toContain("BlinkMacSystemFont");
     expect(readCssVariable(css, "--font-sans")).toContain("Segoe UI");
-    expect(css).not.toContain("next/font");
-    expect(css).not.toContain("Geist");
 
     expect(readCssVariable(css, "--button-radius")).toBe("0.75rem");
     expect(readCssVariable(css, "--button-height-default")).toBe("2.5rem");

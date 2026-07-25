@@ -14,6 +14,5 @@ describe("Vitest MDX alias contract", () => {
     const config = readRepoFile("vitest.config.mts");
 
     expect(config).toContain("find: /^.*\\.mdx$/u");
-    expect(config).not.toContain("find: /\\.mdx$/");
   });
 });

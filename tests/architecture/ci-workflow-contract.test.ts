@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 const CI_WORKFLOW_PATH = ".github/workflows/ci.yml";
 const LEFTHOOK_CONFIG_PATH = "lefthook.yml";
-const LIGHTHOUSE_CONFIG_PATH = "lighthouserc.js";
 const PRETTIER_CONFIG_PATH = "prettier.config.mjs";
 const SEMGREP_CONFIG_PATH = "semgrep.yml";
 const COMPONENT_PROOF_COMMANDS = [
@@ -76,6 +75,23 @@ function readSemgrepConfig(): SemgrepConfig {
 
 function readCiWorkflowConfig(): CiWorkflow {
   return yaml.load(readCiWorkflow()) as CiWorkflow;
+}
+
+/** Every `run:` command a parsed workflow/hook config would actually execute. */
+function collectRunCommands(node: unknown, found: string[] = []): string[] {
+  if (Array.isArray(node)) {
+    for (const item of node) collectRunCommands(item, found);
+    return found;
+  }
+
+  if (node && typeof node === "object") {
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "run" && typeof value === "string") found.push(value);
+      else collectRunCommands(value, found);
+    }
+  }
+
+  return found;
 }
 
 function getQualityJob(workflow: string): string {
@@ -152,18 +168,15 @@ describe("CI workflow contract", () => {
   });
 
   it("keeps Lighthouse as a manual performance proof", () => {
-    const workflow = readCiWorkflow();
-    const lefthook = readRepoFile(LEFTHOOK_CONFIG_PATH);
-    const lighthouseConfig = readRepoFile(LIGHTHOUSE_CONFIG_PATH);
+    const automated = [
+      ...collectRunCommands(yaml.load(readCiWorkflow())),
+      ...collectRunCommands(yaml.load(readRepoFile(LEFTHOOK_CONFIG_PATH))),
+    ];
 
-    expect(workflow).not.toContain("website:lighthouse");
-    expect(workflow).not.toContain("lhci");
-    expect(lefthook).not.toContain("performance-test");
-    expect(lefthook).not.toContain("website:lighthouse");
-    expect(lefthook).not.toContain("lhci autorun");
-    expect(lighthouseConfig).toContain(
-      "Lighthouse 是手动性能证明，不接入默认 CI 或 git hook。",
-    );
+    expect(automated.length).toBeGreaterThan(0);
+    expect(
+      automated.filter((command) => /lighthouse|lhci/iu.test(command)),
+    ).toEqual([]);
   });
 
   it("declares the Tailwind Prettier plugin explicitly", () => {

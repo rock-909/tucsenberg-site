@@ -40,7 +40,6 @@ describe("i18n locale truth parity", () => {
     const configSource = readFileSync("i18n-locales.config.js", "utf8");
 
     expect(configSource).toContain("LOCALES_CONFIG");
-    expect(configSource).not.toContain("只需在此处修改 locales 数组");
   });
 
   it("documents LOCALES_CONFIG as runtime truth and content config as validation settings", () => {

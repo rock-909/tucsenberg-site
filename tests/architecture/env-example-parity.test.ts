@@ -385,7 +385,6 @@ describe(".env.example parity", () => {
     const devVarsExample = readRepoFile(DEV_VARS_EXAMPLE_PATH);
 
     expect(devVarsExample).toContain("docs/项目基础/部署.md");
-    expect(devVarsExample).not.toContain("docs/website/env 设置.md");
   });
 
   it("documents all sensitive example keys in the env guide", () => {

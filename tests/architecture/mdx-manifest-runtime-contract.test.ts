@@ -1,5 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 
 const RUNTIME_FILES = [
   "src/lib/content-manifest.ts",
@@ -65,15 +67,17 @@ describe("MDX manifest-only runtime contract", () => {
   });
 
   it("keeps the generated manifest catalog-only", () => {
-    for (const file of [
-      "src/lib/content-manifest.ts",
-      "src/lib/content-manifest.generated.ts",
-      "scripts/quality/checks/content-manifest.js",
-    ]) {
-      const source = readSource(file);
-      expect(source).not.toContain("profile-fixture");
-      expect(source).not.toContain("showcase-full");
-    }
+    expect(CONTENT_MANIFEST.entries.length).toBeGreaterThan(0);
+
+    const offenders = CONTENT_MANIFEST.entries.filter(
+      (entry) =>
+        entry.source !== "active-content" ||
+        !entry.filePath.startsWith("/content/") ||
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- path comes from the generated manifest and is already constrained to /content/ above
+        !existsSync(join(process.cwd(), entry.filePath)),
+    );
+
+    expect(offenders.map((entry) => entry.filePath)).toEqual([]);
   });
 
   it("bundles active content source paths in the generated manifest", () => {
