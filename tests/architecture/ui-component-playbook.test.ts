@@ -22,21 +22,11 @@ describe("UI component playbook", () => {
     expect(readme).toContain("design/设计真相.md");
   });
 
-  it("states its retained AIFS responsibility", () => {
+  it("routes readers on to the rules and the full inventory", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
-    expect(playbook).toContain(
-      "short human/agent component selection playbook",
-    );
-    expect(playbook).toContain("Project-level");
     expect(playbook).toContain(".claude/rules/ui.md");
-    expect(playbook).toContain("full maintained wrapper inventory");
     expect(playbook).toContain("组件索引.md");
-    expect(playbook).toContain("Registry and Playbook are retained");
-    expect(playbook).toContain(
-      "AI discoverability and machine governance will not get weaker",
-    );
-    expect(playbook).toContain("Do not delete, archive, or shrink");
   });
 
   it("records the Radix control boundary and Tailwind narrative boundary", () => {
