@@ -444,7 +444,20 @@ function collectComponentGovernanceFindings(rootDir = process.cwd()) {
   collectRegistryFindings(rootDir, registry, errors);
   collectTextScanFindings(rootDir, errors);
 
+  // A scan that reached no source files is a broken scan, not a clean repo.
+  // Renaming a scan root would otherwise leave this reporting green forever.
+  const scannedFileCount = getScannedSourceFiles(rootDir).length;
+  if (scannedFileCount === 0) {
+    errors.push({
+      file: COMPONENT_GOVERNANCE_SOURCE_ROOT,
+      line: 1,
+      kind: "empty-scan-set",
+      detail: "component governance scanned no source files",
+    });
+  }
+
   return {
+    scannedFileCount,
     status: errors.length === 0 ? "passed" : "failed",
     errors,
     warnings,

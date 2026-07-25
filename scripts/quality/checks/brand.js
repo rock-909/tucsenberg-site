@@ -146,6 +146,15 @@ function runBrandCheck() {
   );
   const findings = files.flatMap(scanBrandFile);
 
+  // Zero findings from zero files is not a pass. If a scan root is renamed or
+  // moved, this check would otherwise report green while inspecting nothing.
+  if (files.length === 0) {
+    console.error(
+      `brand:check failed: scanned no files under ${BRAND_SCAN_ROOTS.join(", ")}`,
+    );
+    return false;
+  }
+
   if (findings.length === 0) {
     console.log("brand:check passed");
     return true;
