@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { getSingleSitePublicStaticPages } from "@/config/single-site-seo";
 import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
@@ -63,13 +64,14 @@ describe("lighthouse route contract", () => {
     expect(urls.map(toCanonicalPath).sort()).toEqual([...expectedPaths].sort());
   });
 
-  it("requests the real locale entry instead of a redirecting root", () => {
+  it("requests canonical prefix-free paths instead of redirecting locale paths", () => {
     const urls = loadLighthouseConfig(true).ci.collect.url;
 
-    // `/` redirects to `/en`; auditing the redirect target keeps the run free of
-    // redirect warnings and hop latency. See the rationale in lighthouserc.js.
+    // localePrefix is 'never', so `/en/x` 302s to `/x`. Auditing the prefixed
+    // form would measure a redirect on every page.
+    expect(LOCALES_CONFIG.localePrefix).toBe("never");
     for (const url of urls) {
-      expect(new URL(url).pathname.startsWith(LOCALE_PREFIX)).toBe(true);
+      expect(new URL(url).pathname.startsWith(LOCALE_PREFIX)).toBe(false);
     }
   });
 
@@ -82,7 +84,7 @@ describe("lighthouse route contract", () => {
   it("applies the product-detail assertion set to every product route", () => {
     const { assertMatrix } = loadLighthouseConfig(true).ci.assert;
     const productPaths = Object.keys(TUCSENBERG_PRODUCT_PAGES).map(
-      (slug) => `${LOCALE_PREFIX}/products/${slug}`,
+      (slug) => `/products/${slug}`,
     );
 
     for (const path of productPaths) {
@@ -101,7 +103,7 @@ describe("lighthouse route contract", () => {
   it("keeps the indexable assertion set on every non-product route", () => {
     const { assertMatrix } = loadLighthouseConfig(true).ci.assert;
     const indexablePaths = getSingleSitePublicStaticPages().map(
-      (path) => `${LOCALE_PREFIX}${path}`,
+      (path) => path || "/",
     );
 
     for (const path of indexablePaths) {

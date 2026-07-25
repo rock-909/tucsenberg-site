@@ -25,20 +25,28 @@ function resolvePublicImagePath(src: string): string {
   return resolvedPath;
 }
 
-const COUNT_BOUND_CATALOG_COPY = /\bfive\b/iu;
+// Catalog-count prose only. Quantities that describe a real measurement
+// ("five to six bags across a doorway") stay legal — the defect is copy whose
+// truth depends on how many lines or material classes currently exist.
+const COUNT_BOUND_CATALOG_COPY =
+  /\ball five\b|\bfive (?:product )?lines\b|\bfive (?:material )?classes\b|\bfive materials\b|\bfive flood barrier\b/iu;
 
-// Buyer-facing copy that names how many lines the catalog has goes false the
-// day a sixth line ships. These are the authoring files that copy lives in.
+// Every file that authors buyer-facing catalog prose. The product page
+// constants belong here too: the first pass only covered the three files the
+// finding named, and four sibling files kept the claim alive.
 const ACTIVE_CATALOG_COPY_FILES = [
   "messages/profiles/catalog/en/messages.json",
   "content/pages/en/oem-wholesale.mdx",
   "content/pages/en/flood-barrier-materials-guide.mdx",
+  ...Object.keys(TUCSENBERG_PRODUCT_PAGES).map(
+    (slug) => `src/constants/tucsenberg-product-page-${slug}.ts`,
+  ),
 ];
 
 describe("Tucsenberg catalog copy is not bound to the current line count", () => {
-  it("never states how many product lines the catalog has", () => {
+  it("never states how many product lines or material classes exist", () => {
     for (const relativePath of ACTIVE_CATALOG_COPY_FILES) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed authoring paths listed above
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- derived from the fixed authoring list above
       const copy = readFileSync(join(process.cwd(), relativePath), "utf8");
 
       expect(copy, relativePath).not.toMatch(COUNT_BOUND_CATALOG_COPY);

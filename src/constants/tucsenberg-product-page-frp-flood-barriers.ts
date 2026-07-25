@@ -110,7 +110,7 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Testing data for the first profiles is being compiled with our pultrusion partners. Register interest below and we'll send span/deflection tables as they complete — no marketing sheet, the actual numbers.",
       ],
       footer:
-        "Where FRP sits among the five materials: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
+        "Where FRP sits among the material classes: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
     },
   ],
   faqs: [

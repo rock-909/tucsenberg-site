@@ -30,11 +30,10 @@
 // Lighthouse 是手动性能证明，不接入默认 CI 或 git hook。
 const isDaily = process.env.CI_DAILY === "true";
 
-// 本站当前只有 en 一个 locale（i18n-locales.config.js），且无 blog 路由。
-// Root path 会 redirect 到 /en，Lighthouse 可以审计它，但会把 redirect 记为
-// warning 并引入 redirect 延迟噪声；`/en` 直接命中真实入口页，CI 信号更稳定。
-// owner 确认后续加语种时，再把新 locale 的 URL 加回来。
-const criticalUrls = ["http://localhost:3000/en"];
+// 本站 localePrefix 为 'never'（src/config/paths/locales-config.ts），正式 URL
+// 不带 locale 段：`/en/x` 会 302 到 `/x`。直接请求无前缀地址，才不会把每一页都
+// 变成一次重定向测量。owner 确认后续加语种时，再按当时的前缀策略调整。
+const criticalUrls = ["http://localhost:3000/"];
 
 // Every canonical public route the site actually ships: the 11 static pages
 // plus all five product-market pages. tests/unit/scripts/
@@ -42,21 +41,21 @@ const criticalUrls = ["http://localhost:3000/en"];
 // product registries, so a new route cannot quietly go unmeasured.
 const allUrls = [
   ...criticalUrls,
-  "http://localhost:3000/en/products",
-  "http://localhost:3000/en/oem-wholesale",
-  "http://localhost:3000/en/guides/flood-barrier-materials-guide",
-  "http://localhost:3000/en/guides/flood-barrier-specifications",
-  "http://localhost:3000/en/about",
-  "http://localhost:3000/en/request-quote",
-  "http://localhost:3000/en/contact",
-  "http://localhost:3000/en/warranty",
-  "http://localhost:3000/en/privacy",
-  "http://localhost:3000/en/terms",
-  "http://localhost:3000/en/products/abs-flood-barriers",
-  "http://localhost:3000/en/products/aluminum-flood-gates",
-  "http://localhost:3000/en/products/absorbent-flood-bags",
-  "http://localhost:3000/en/products/flood-tube-dams",
-  "http://localhost:3000/en/products/frp-flood-barriers",
+  "http://localhost:3000/products",
+  "http://localhost:3000/oem-wholesale",
+  "http://localhost:3000/guides/flood-barrier-materials-guide",
+  "http://localhost:3000/guides/flood-barrier-specifications",
+  "http://localhost:3000/about",
+  "http://localhost:3000/request-quote",
+  "http://localhost:3000/contact",
+  "http://localhost:3000/warranty",
+  "http://localhost:3000/privacy",
+  "http://localhost:3000/terms",
+  "http://localhost:3000/products/abs-flood-barriers",
+  "http://localhost:3000/products/aluminum-flood-gates",
+  "http://localhost:3000/products/absorbent-flood-bags",
+  "http://localhost:3000/products/flood-tube-dams",
+  "http://localhost:3000/products/frp-flood-barriers",
 ];
 
 const sharedLighthouseAssertions = {
@@ -113,7 +112,12 @@ module.exports = {
   ci: {
     collect: {
       url: isDaily ? allUrls : criticalUrls,
-      startServerCommand: "pnpm start",
+      // APP_ENV=production is required, not cosmetic: without it the runtime
+      // emits `noindex` and every SEO assertion fails on measurement setup
+      // rather than on real page quality. Dynamic routes read it at request
+      // time, so it must be set on the server, and on the build that
+      // pre-renders the static pages (`APP_ENV=production pnpm build`).
+      startServerCommand: "APP_ENV=production pnpm start",
       startServerReadyPattern: "Local:",
       startServerReadyTimeout: 60000,
       // 使用 3 次运行配合 optimistic 聚合，更好地过滤 CI 冷启动噪声

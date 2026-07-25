@@ -110,7 +110,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         ],
       },
       footer:
-        "Full comparison across all five materials: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
+        "Full comparison across every material class: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
     },
     {
       title: "Specifications",
@@ -172,7 +172,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Custom colours from moulded-batch quantities — confirmed at quotation",
       ],
       footer:
-        "See [OEM & Wholesale](/oem-wholesale) for how our factory pool handles private label across all five product lines.",
+        "See [OEM & Wholesale](/oem-wholesale) for how our factory pool handles private label across every product line.",
     },
   ],
   faqs: [
