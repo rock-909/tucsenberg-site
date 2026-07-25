@@ -119,17 +119,42 @@ describe("current-truth docs guard", () => {
     }
   });
 
-  it("exempts bannered + inventoried 2026-07 audit findings from retired-pattern scan", () => {
+  // The dated directory name is the historical declaration; a banner and an
+  // inventory class would state the same fact two more times. Any newly dated
+  // audit directory has to work without editing this script.
+  it.each([
+    "docs/技术难题/审查2026-07/findings-example.md",
+    "docs/技术难题/门禁断言审查2026-07-24/证据.md",
+    "docs/技术难题/一个还没开的审查2027-01/findings.md",
+  ])(
+    "exempts dated audit findings from the retired-pattern scan: %s",
+    (auditFinding) => {
+      const files = createValidFiles();
+      files[auditFinding] =
+        `# 审查发现\n${RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n")}`;
+      const repoDir = createTempRepo(files);
+      tempDirs.push(repoDir);
+
+      expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
+    },
+  );
+
+  // The exemption is scoped to dated directories, not to 技术难题 as a whole.
+  it("still scans undated 技术难题 docs for retired patterns", () => {
     const files = createValidFiles();
-    const auditFinding = "docs/技术难题/审查2026-07/findings-example.md";
-    files[auditFinding] =
-      `${HISTORICAL_BANNER}\n# 审查发现\n${RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n")}`;
+    const currentDoc = "docs/技术难题/某个当前笔记.md";
+    files[currentDoc] = RETIRED_PUBLIC_TRUTH_PATTERNS.join("\n");
     files["docs/项目基础/文档清单.md"] +=
-      `\n| \`${auditFinding}\` | \`historical-proof\` | Audit finding. |`;
+      `\n| \`${currentDoc}\` | \`current-reference\` | Note. |`;
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
 
-    expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
+    for (const pattern of RETIRED_PUBLIC_TRUTH_PATTERNS) {
+      expect(collectCurrentTruthDocFindings(repoDir)).toContainEqual({
+        file: currentDoc,
+        error: `forbidden retired current-truth pattern "${pattern}"`,
+      });
+    }
   });
 
   it("indexes the maintainability audit as historical evidence, not runtime truth", () => {
@@ -174,11 +199,12 @@ describe("current-truth docs guard", () => {
     expect(collectCurrentTruthDocFindings(repoDir)).toEqual([]);
   });
 
+  // superpowers/ paths carry no date, so there the banner and the inventory
+  // class are the only signals a reader gets. Both stay required.
   it("requires both the approved banner and historical inventory classification", () => {
     const files = createValidFiles();
-    const missingBanner = "docs/技术难题/门禁机械遵守审查2026-07/执行文档.md";
-    const missingInventory =
-      "docs/技术难题/门禁机械遵守审查2026-07/官方对标修复执行文档.md";
+    const missingBanner = "docs/superpowers/plans/missing-banner.md";
+    const missingInventory = "docs/superpowers/plans/missing-inventory.md";
     files[missingBanner] = "# Gate audit record";
     files[missingInventory] = `${HISTORICAL_BANNER}\n# Gate audit record`;
     files["docs/项目基础/文档清单.md"] +=
