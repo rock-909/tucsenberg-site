@@ -23,64 +23,28 @@ Before making broad project changes, read:
 
 Do not rely on chat memory for project truth. If a decision must survive sessions, write it into `docs/项目基础/`, `docs/design/`, `docs/技术难题/`, `docs/决策记录/`, or the relevant rule file.
 
-## Stack
-
-Next.js 16.2.10 (App Router; `cacheComponents: false`) + React 19.2.7 + TypeScript 6.0.3 + Tailwind CSS 4.3.0 + next-intl 4.13.0
-
-## Structure
-
-```
-src/
-- app/[locale]/       # Localized App Router pages
-- app/api/            # Route handlers for inquiry, CSP report, and health (Turnstile verification is inline in the write route, not its own route)
-- config/             # Runtime config and starter replacement surfaces
-- config/single-site*.ts # Brand, SEO, navigation, links, and page-expression truth
-- i18n/               # next-intl configuration
-- lib/                # Utilities, integrations, security, content, forms, and lead pipeline
-- test/               # Source-level test helpers
-
-content/
-- pages/en/                   # English content pages
-- config/content.json         # Content behavior and readiness configuration
-
-messages/
-- base/                       # Base physical message packs
-- profiles/b2b-lead/          # Fixed lead-form message ownership layer
-- profiles/catalog/           # Fixed catalog message ownership layer
-```
-
 ## Reference Sources
 
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding
 
-Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data may be outdated; the installed package docs are the source of truth.
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 
 <!-- END:nextjs-agent-rules -->
 
-For other dependency-specific work, prefer official docs or version-locked local docs.
+For other dependency-specific work, prefer official docs or version-locked local docs. Verify dependency APIs from current docs before editing.
 
-Verify dependency APIs from current docs before editing.
+## Rules
 
-## Commands
+Before editing, read the matching rule file under `.claude/rules/` — each file's `paths:` frontmatter states what it governs, and each file carries its own pointers to the deeper design and decision docs.
 
-```bash
-pnpm dev
-pnpm brand:check
-pnpm content:check
-pnpm component:check
-pnpm website:check
-pnpm website:build:cf
-pnpm type-check
-pnpm lint:check
-pnpm test
-pnpm build
-```
+## Validation
 
 `pnpm build` and `pnpm website:build:cf` write to the same `.next` directory - never run them in parallel.
 
 Use the smallest validation that proves the change:
+
 - Type-only changes: `pnpm type-check`
 - Lint-sensitive edits: `pnpm lint:check`
 - Unit-tested logic: `pnpm test`
@@ -91,10 +55,8 @@ Use the smallest validation that proves the change:
 
 ## Constraints
 
-1. **TypeScript strict** - No `any`, default `interface` for object shapes
-2. **Server Components first** - `"use client"` only for interactivity
-3. **i18n required** - All user-facing text via translation keys
-4. **Git** - GitHub Flow: `main` is the only long-lived branch; feature branches merge through pull requests.
+1. **i18n required** - All user-facing text via translation keys
+2. **Git** - GitHub Flow: `main` is the only long-lived branch; feature branches merge through pull requests.
 
 ## Correctness and Bug-Fix Discipline
 
@@ -113,13 +75,9 @@ counts, push status) as required assertions. New guards must protect live
 truth, not the negative space of past refactors (e.g. asserting that deleted
 names stay absent).
 
-## UI Foundation
-
-Local wrappers + Radix Primitives — decision record: `docs/决策记录/UI基础方案.md`.
-Radix Primitives are the default implementation tool for complex interactions;
-Tailwind and project tokens own controls, page layout, responsive structure,
-and brand expression; runtime color truth stays in `src/app/globals.css`.
-`@radix-ui/themes` is retired and forbidden in production UI.
+Instruction files are not a place for machine-enforced content assertions. Do
+not add tests or checks that require `AGENTS.md` or `CLAUDE.md` to contain a
+specific sentence; guard the behavior those sentences describe instead.
 
 ## AI-assisted Frontend System
 
@@ -131,49 +89,3 @@ Governance truth: `docs/design/组件使用手册.md`, `docs/design/设计真相
 same rule.
 
 Do not delete, archive, or shrink Registry / Playbook until a later approved retirement proof explicitly authorizes it and confirms equal-or-stronger AI discoverability and machine governance.
-
-## Ponytail Skills
-
-- `ponytail`
-- `ponytail-review`
-- `ponytail-audit`
-- `ponytail-debt`
-- `ponytail-gain`
-- `ponytail-help`
-
-Ponytail is default-on in this project as the simplification and
-over-engineering review layer. Use `ponytail` full mode for every project task
-unless the user explicitly says `stop ponytail`, `normal mode`, or asks for a
-different Ponytail intensity.
-
-The preferred live source is the official `ponytail@ponytail` marketplace
-plugin from `DietrichGebert/ponytail` `main`. Project-local
-`.claude/commands/ponytail*.md` files are thin portability fallbacks: delegate
-to the plugin skill when available, and do not copy the full upstream skill
-body into this repository.
-
-Ponytail is not a replacement for this derived site's product boundaries. It must not
-override i18n, security, accessibility, Cloudflare/OpenNext, content ownership,
-or component governance rules. In this site, "less code" is only better when
-the replacement still preserves the documented replacement surface and
-owner-facing workflow.
-
-## Rule Routing
-
-`AGENTS.md` is the cross-tool entry point. Do not assume non-Claude tools understand `.claude/rules/` frontmatter or path triggers.
-
-Before editing, use this routing table and read only the matching files under `.claude/rules/`:
-
-| Task touches | Read |
-|-------------|------|
-| Next.js routing, layouts, metadata, images, fonts, caching, Server Components | `conventions.md` + `node_modules/next/dist/docs/` |
-| Cloudflare/OpenNext build, preview, deploy, middleware/proxy, runtime behavior | `cloudflare.md` |
-| TypeScript style, imports, naming, logging | `coding-standards.md` |
-| Magic numbers, ESLint disables, complexity, import boundaries | `code-quality.md` |
-| i18n, translations, locale routing, message loading | `i18n.md` |
-| API routes, forms, validation, rate limits, CSP, sensitive server code | `security.md` |
-| UI components, Tailwind, shadcn/ui, `next/image`, `next/font` | `ui.md` |
-| Design tokens, brand color, theme, visual system, color migration | `ui.md` + `DESIGN.md` + `docs/design/设计真相.md` + `docs/design/色彩系统.md` |
-| MDX, page content, content ownership, frontmatter | `content.md` |
-| Tests, mocks, Vitest, Playwright, coverage gates | `testing.md` |
-| JSON-LD, schema.org, structured data builders | `structured-data.md` |

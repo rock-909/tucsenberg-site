@@ -5,9 +5,6 @@ const ROOT = process.cwd();
 
 const BRAND_SCAN_ROOTS = [
   "README.md",
-  "AGENTS.md",
-  "CLAUDE.md",
-  "CLAUDE.local.md",
   "PRODUCT.md",
   "DESIGN.md",
   "HANDOFF.md",

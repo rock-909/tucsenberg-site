@@ -96,9 +96,10 @@ describe("current-truth docs guard", () => {
     const configuredValue = nextConfig.match(
       /\bcacheComponents:\s*(true|false)/u,
     )?.[1];
+    // AGENTS.md / CLAUDE.md are deliberately absent: instruction files carry no
+    // machine-enforced content assertions (see "Gate Discipline" in AGENTS.md).
+    // The cache runtime truth they used to restate lives in the rule files below.
     const currentRuntimeDocs = [
-      "AGENTS.md",
-      "CLAUDE.md",
       ".claude/rules/conventions.md",
       ".claude/rules/cloudflare.md",
       ".claude/rules/i18n.md",
@@ -206,7 +207,7 @@ describe("current-truth docs guard", () => {
         "brand:check": "echo ok",
       },
     });
-    files["AGENTS.md"] = [
+    files[".claude/rules/conventions.md"] = [
       "pnpm install",
       "pnpm exec playwright test",
       "pnpm brand:check",
@@ -235,7 +236,7 @@ describe("current-truth docs guard", () => {
     );
     expect(findings).toContainEqual(
       expect.objectContaining({
-        file: "AGENTS.md",
+        file: ".claude/rules/conventions.md",
         error: 'unknown package script command "pnpm missing:script"',
       }),
     );
