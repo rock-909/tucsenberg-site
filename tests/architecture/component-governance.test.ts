@@ -15,10 +15,6 @@ const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
 const UI_COMPONENT_INDEX_PATH = "docs/design/组件索引.md";
-const AGENTS_MD_PATH = "AGENTS.md";
-const CLAUDE_MD_PATH = "CLAUDE.md";
-const REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE =
-  "Do not delete, archive, or shrink Registry / Playbook until a later approved retirement proof explicitly authorizes it and confirms equal-or-stronger AI discoverability and machine governance.";
 const COMPONENT_CHECK_SCRIPT =
   "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build";
 const PACKAGE_MANIFEST_PATH = "package.json";
@@ -613,8 +609,6 @@ describe("component governance", () => {
 
     const playbook = readFixedText(UI_COMPONENT_PLAYBOOK_PATH);
     const index = readFixedText(UI_COMPONENT_INDEX_PATH);
-    const agents = readFixedText(AGENTS_MD_PATH);
-    const claude = readFixedText(CLAUDE_MD_PATH);
 
     expect(playbook).toContain(
       "short human/agent component selection playbook",
@@ -630,9 +624,5 @@ describe("component governance", () => {
     expect(playbook).toContain("Do not delete, archive, or shrink");
     expect(index).toContain("maintained mirror");
     expect(index).toContain("durable component discovery source for agents");
-    expect(agents).toContain(REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE);
-    expect(claude).toContain(REGISTRY_PLAYBOOK_RETIREMENT_STOP_LINE);
-    expect(agents).not.toContain("until replacement proof exists");
-    expect(claude).not.toContain("until replacement proof exists");
   });
 });

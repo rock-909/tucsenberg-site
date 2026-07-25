@@ -41,6 +41,7 @@ unified_inbox.json
 .factory/
 .kiro/
 .claude/settings.local.json
+.claude/skills/
 .claude/skills-backup-*/
 .claude/skills-reference-*/
 .claude/worktrees/

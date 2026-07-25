@@ -88,9 +88,9 @@ const CURRENT_TRUTH_COMMAND_DOCS = [
   "docs/design/区块重设检查清单.md",
 ];
 
+// AGENTS.md / CLAUDE.md are deliberately excluded: instruction files carry no
+// machine-enforced content assertions (see "Gate Discipline" in AGENTS.md).
 const ROOT_INSTRUCTION_COMMAND_DOCS = [
-  "AGENTS.md",
-  "CLAUDE.md",
   ".claude/rules/conventions.md",
   ".claude/rules/cloudflare.md",
   ".claude/rules/coding-standards.md",
@@ -241,8 +241,6 @@ function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
   const inventory = readTruthFile(rootDir, "docs/项目基础/文档清单.md");
   const currentDocs = documentedFiles ?? [
     "README.md",
-    "AGENTS.md",
-    "CLAUDE.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
     ...collectTrackedMarkdownDocs(rootDir).filter(
       (file) =>
@@ -351,8 +349,6 @@ function collectMarkdownTruthFindings(rootDir) {
     : "";
   const files = [
     "README.md",
-    "AGENTS.md",
-    "CLAUDE.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
     ...collectMarkdownFiles(rootDir, "docs"),
   ]

@@ -53,10 +53,8 @@ For owner-request-to-agent-coding work, classify the request before changing UI.
 Use this order:
 
 1. Rules decide the project boundary.
-2. `src/components/ui/*` is the formal project UI entry.
-3. Storybook stories show approved wrapper usage and owner-visible states.
-4. shadcn skill / MCP may be used as an external reference source.
-5. Tests and `pnpm component:check` are the hard gate.
+2. Storybook stories show approved wrapper usage and owner-visible states.
+3. shadcn skill / MCP may be used as an external reference source.
 
 Storybook MCP, if enabled by a later approved branch, is an internal component
 knowledge source. It is not a project rule source and is not a default CI hard
@@ -198,19 +196,11 @@ Design values live in `src/app/globals.css`.
 - `src/config/static-theme-colors.ts` is only for email and other non-CSS
   surfaces.
 
-Before changing brand color, theme, or token structure, read:
-
-1. `DESIGN.md`
-2. `docs/design/设计真相.md`
-3. `docs/design/色彩系统.md`
-4. `docs/项目基础/维护规则.md`
-
-Before changing section titles, page skeleton, cards, footer, or hero grid
-patterns, read:
-
-1. `docs/design/页面模式.md`
-2. `docs/design/网格系统.md`
-3. `docs/design/设计真相.md`
+Brand color, theme, token structure, section titles, page skeleton, cards,
+footer, and hero grid patterns are design decisions, not code decisions. Read
+`docs/design/设计真相.md` first: it states the current design phase, names the
+visual ruling in force, and links the rest of the design docs. Treat no single
+design doc as a final brand spec.
 
 Ordinary section H2 uses `.text-section` (24px / md:28px) via `SectionHead`.
 Do not treat `DESIGN.md` `.text-heading` (32/36) as the default section title.
