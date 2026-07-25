@@ -20,7 +20,7 @@
  * - 继续保留全局 total-byte-weight warning，作为当前黄债信号。
  * - Route-class budget target 记录在
  *   docs/技术难题/Lighthouse预算治理.md.
- * - route-class 目标升成硬断言前，必须先用多次 14 页 full sweep 证明不会制造
+ * - route-class 目标升成硬断言前，必须先用多次 16 页 full sweep 证明不会制造
  *   false red。
  *
  * 更新时间：2026-05-24 (Wave 3 budget governance)
@@ -36,14 +36,27 @@ const isDaily = process.env.CI_DAILY === "true";
 // owner 确认后续加语种时，再把新 locale 的 URL 加回来。
 const criticalUrls = ["http://localhost:3000/en"];
 
+// Every canonical public route the site actually ships: the 11 static pages
+// plus all five product-market pages. tests/unit/scripts/
+// lighthouse-route-contract.test.ts keeps this list matched to the page and
+// product registries, so a new route cannot quietly go unmeasured.
 const allUrls = [
   ...criticalUrls,
-  // Localized routes – the app uses /en/... paths (English-only site)
-  "http://localhost:3000/en/about",
-  "http://localhost:3000/en/contact",
   "http://localhost:3000/en/products",
-  // Dynamic page: audit one real product-market slug (getAllMarketSlugs)
+  "http://localhost:3000/en/oem-wholesale",
+  "http://localhost:3000/en/guides/flood-barrier-materials-guide",
+  "http://localhost:3000/en/guides/flood-barrier-specifications",
+  "http://localhost:3000/en/about",
+  "http://localhost:3000/en/request-quote",
+  "http://localhost:3000/en/contact",
+  "http://localhost:3000/en/warranty",
+  "http://localhost:3000/en/privacy",
+  "http://localhost:3000/en/terms",
   "http://localhost:3000/en/products/abs-flood-barriers",
+  "http://localhost:3000/en/products/aluminum-flood-gates",
+  "http://localhost:3000/en/products/absorbent-flood-bags",
+  "http://localhost:3000/en/products/flood-tube-dams",
+  "http://localhost:3000/en/products/frp-flood-barriers",
 ];
 
 const sharedLighthouseAssertions = {
@@ -109,11 +122,13 @@ module.exports = {
     assert: {
       assertMatrix: [
         {
-          matchingUrlPattern: "^(?!.*\\/products\\/abs-flood-barriers$).*$",
+          matchingUrlPattern: "^(?!.*\\/products\\/[^/]+$).*$",
           assertions: indexablePageAssertions,
         },
         {
-          matchingUrlPattern: "/products/abs-flood-barriers$",
+          // Product-detail pages carry the shared budget without the SEO
+          // category gate; the pattern covers every slug, not one sample.
+          matchingUrlPattern: "/products/[^/]+$",
           assertions: sharedLighthouseAssertions,
         },
       ],
