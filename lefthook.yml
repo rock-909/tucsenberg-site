@@ -57,7 +57,13 @@ pre-commit:
       stage_fixed: false
 
     structural-clusters-review:
-      run: pnpm exec vitest run tests/unit/middleware.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/health.test.ts --passWithNoTests
+      # vitest 把路径当过滤器：文件改名后它会安静地少跑一个，全没了还会
+      # 因为 --passWithNoTests 直接 exit 0。先断言文件在，再跑。
+      run: |
+        for f in tests/unit/middleware.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/health.test.ts; do
+          [ -f "$f" ] || { echo "❌ structural cluster 测试文件缺失: $f"; exit 1; }
+        done
+        pnpm exec vitest run tests/unit/middleware.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/health.test.ts
       fail_text: 'Structural cluster review 失败 - 请修复命中的 cluster contract / drift'
       stage_fixed: false
 
