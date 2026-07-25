@@ -1,55 +1,22 @@
-# Social Media Share Images
+# Public Images
 
-This directory contains social media sharing images for SEO optimization.
+Every file served from this directory must be referenced by production source
+or content. The `tests/architecture/public-asset-surface.test.ts` contract
+fails on any image that no live page or config points at.
 
-## Required Images
+## Current inventory
 
-### og-image.jpg
-- **Size**: 1200x630px
-- **Format**: JPEG (recommended for social platform compatibility)
-- **Purpose**: Open Graph image for social media sharing
-- **Content**: Should include:
-  - Company logo/branding
-  - Key messaging
-  - Clean, professional design matching brand colors
+| File | Owner | Used for |
+| --- | --- | --- |
+| `tucsenberg-logo.png` | `src/config/single-site.ts` → `brandAssets.logo.horizontal` | Header and structured-data logo |
+| `tucsenberg-logo-square.png` | `src/config/single-site.ts` → `brandAssets.logo.square` | Square/avatar logo slot |
+| `tucsenberg-og.png` | `src/config/single-site.ts` → `brandAssets.ogImage` | Default Open Graph / social preview |
 
-### apple-touch-icon.png (Required for iOS)
-- **Location**: `public/apple-touch-icon.png` (root of public directory)
-- **Size**: 180x180px
-- **Format**: PNG
-- **Purpose**: iOS home screen bookmark icon
-- **Content**: Square icon with your brand logo
-- **Note**: Place this file in `public/` directory (not in `public/images/`)
+`blog/` and `products/` hold `.gitkeep` placeholders only.
 
-To create an Apple Touch Icon:
-1. Create a 180x180px PNG image with your logo
-2. Save as `public/apple-touch-icon.png`
-3. Next.js will automatically serve it at `/apple-touch-icon.png`
+## Adding an image
 
-### twitter-image.jpg (Optional)
-- **Size**: 1200x600px
-- **Format**: JPEG
-- **Purpose**: Twitter Cards specific image
-- **Content**: Similar to og-image but optimized for Twitter's aspect ratio
-
-## Design Guidelines
-
-1. **Brand Consistency**: Use project's color scheme and typography
-2. **Readability**: Ensure text is legible at small sizes
-3. **Professional**: Maintain B2B enterprise aesthetic
-4. **Technology Focus**: Highlight modern tech stack
-5. **Call to Action**: Include subtle CTA or value proposition
-
-## Current Status
-
-- ✅ SEO configuration updated to reference `/images/og-image.jpg`
-- ⏳ Apple Touch Icon: Create `public/apple-touch-icon.png` (180x180px PNG)
-
-## Testing
-
-After adding images, test social sharing on:
-- Facebook Sharing Debugger
-- Twitter Card Validator
-- LinkedIn Post Inspector
-- WhatsApp link preview
-- iOS Safari (add to home screen to test apple-touch-icon)
+1. Add the file here.
+2. Point a config field, component, or content file at its `/images/...` path.
+3. If a content page sets `seo.ogImage`, the path must resolve to a real file —
+   `pnpm content:check --strict-frontmatter` reports `missing_og_image` otherwise.

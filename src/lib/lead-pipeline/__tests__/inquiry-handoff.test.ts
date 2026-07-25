@@ -48,6 +48,10 @@ describe("resolveInquiryContext", () => {
     });
   });
 
+  it("caps buyer interest at the 200-character limit the form promises", () => {
+    expect(MAX_LEAD_PRODUCT_NAME_LENGTH).toBe(200);
+  });
+
   it("caps long interest and config values", () => {
     const interest = "x".repeat(MAX_LEAD_PRODUCT_NAME_LENGTH + 20);
     const config = "c".repeat(MAX_INQUIRY_CONFIG_PREFILL_LENGTH + 20);

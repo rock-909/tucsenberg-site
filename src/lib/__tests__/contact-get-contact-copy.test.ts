@@ -1,18 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Locale } from "@/i18n/routing";
-import {
-  getContactCopy,
-  getContactCopyFromMessages,
-} from "@/lib/contact/getContactCopy";
+import { describe, expect, it } from "vitest";
+import { getContactCopyFromMessages } from "@/lib/contact/getContactCopy";
 import type { MessageRecord } from "@/lib/i18n/read-message-path";
-
-const { mockLoadCompleteMessages } = vi.hoisted(() => ({
-  mockLoadCompleteMessages: vi.fn(),
-}));
-
-vi.mock("@/lib/i18n/load-messages", () => ({
-  loadCompleteMessages: mockLoadCompleteMessages,
-}));
 
 function createCompleteContactMessages(): MessageRecord {
   return {
@@ -43,18 +31,9 @@ function createCompleteContactMessages(): MessageRecord {
   };
 }
 
-describe("getContactCopy", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockLoadCompleteMessages.mockResolvedValue(createCompleteContactMessages());
-  });
-
-  it("loads contact copy from the top-level contact namespace", async () => {
-    const locale: Locale = "en";
-
-    const copy = await getContactCopy(locale);
-
-    expect(mockLoadCompleteMessages).toHaveBeenCalledWith(locale);
+describe("getContactCopyFromMessages", () => {
+  it("reads contact copy from the top-level contact namespace", () => {
+    const copy = getContactCopyFromMessages(createCompleteContactMessages());
 
     expect(copy.header.title).toBe("Contact");
     expect(copy.header.description).toBe(

@@ -117,7 +117,7 @@ interface FrontmatterContractIssue {
     | "missing_field"
     | "invalid_field"
     | "missing_seo_field"
-    | "starter_og_image";
+    | "missing_og_image";
   collection: string;
   locale: string;
   filePath: string;
@@ -133,7 +133,7 @@ interface FrontmatterContractResult {
     missingFields: number;
     invalidFields: number;
     missingSeoFields: number;
-    starterOgImages: number;
+    missingOgImages: number;
   };
 }
 
@@ -159,6 +159,13 @@ describe("content-slug-sync core", () => {
   beforeEach(() => {
     // Create a fresh temp directory for each test
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "mdx-slug-sync-test-"));
+    // The frontmatter contract resolves seo.ogImage against public/, so the
+    // shared fixture image has to exist on disk like it does in the repo.
+    fs.mkdirSync(path.join(tmpDir, "public", "images"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, "public", "images", "tucsenberg-og.png"),
+      "",
+    );
   });
 
   afterEach(() => {
@@ -400,7 +407,7 @@ describe("content-slug-sync core", () => {
         seo: {
           title: "About SEO",
           description: "About SEO description",
-          ogImage: "/images/custom-about.jpg",
+          ogImage: "/images/tucsenberg-og.png",
         },
         ...overrides,
       };
@@ -490,7 +497,7 @@ describe("content-slug-sync core", () => {
       createMdxFile("pages", "en", "about.mdx", {
         ...createValidPageFrontmatter(),
         seo: {
-          ogImage: "/images/custom-about.jpg",
+          ogImage: "/images/tucsenberg-og.png",
         },
       });
 
@@ -518,13 +525,13 @@ describe("content-slug-sync core", () => {
       expect(result.stats.missingSeoFields).toBe(2);
     });
 
-    it("reports starter_og_image for starter OG assets in strict mode", () => {
+    it("reports missing_og_image when the OG file does not exist", () => {
       createMdxFile("pages", "en", "about.mdx", {
         ...createValidPageFrontmatter(),
         seo: {
           title: "About SEO",
           description: "About SEO description",
-          ogImage: "/images/about-og.jpg",
+          ogImage: "/images/never-shipped.png",
         },
       });
 
@@ -540,15 +547,15 @@ describe("content-slug-sync core", () => {
       expect(result.issues).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            type: "starter_og_image",
+            type: "missing_og_image",
             field: "seo.ogImage",
           }),
         ]),
       );
-      expect(result.stats.starterOgImages).toBe(1);
+      expect(result.stats.missingOgImages).toBe(1);
     });
 
-    it("passes strict mode when pages use project-specific OG images", () => {
+    it("passes strict mode when the OG image ships in public", () => {
       createMdxFile("pages", "en", "about.mdx", createValidPageFrontmatter());
 
       const result: FrontmatterContractResult =
@@ -560,7 +567,7 @@ describe("content-slug-sync core", () => {
         });
 
       expect(result.ok).toBe(true);
-      expect(result.stats.starterOgImages).toBe(0);
+      expect(result.stats.missingOgImages).toBe(0);
     });
   });
 
