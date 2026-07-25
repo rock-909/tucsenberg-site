@@ -140,11 +140,16 @@ function collectLeafPaths(obj, prefix = "") {
   return paths;
 }
 
-// Local copy to avoid importing runtime src/ into a build script; keep in sync with src/lib/merge-objects.ts
+// Local copy: this build script cannot require the TypeScript runtime module.
+// Behaviour parity with src/lib/merge-objects.ts is pinned by
+// tests/unit/scripts/merge-objects-parity.test.ts — change both together.
+const MERGE_BLOCKED_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 function mergeObjects(target, source) {
   const result = { ...target };
 
   for (const [key, sourceValue] of Object.entries(source)) {
+    if (MERGE_BLOCKED_KEYS.has(key)) continue;
     if (sourceValue === undefined) continue;
     const targetValue = result[key];
 
@@ -536,6 +541,7 @@ module.exports = {
   findCrossPackLeafConflicts,
   findCrossPackLeafConflictsFromMaps,
   findDuplicateJsonObjectKeys,
+  mergeObjects,
   pathsHaveOwnershipConflict,
   runTranslationCheck,
   validateLocale,
