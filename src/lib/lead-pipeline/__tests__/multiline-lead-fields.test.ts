@@ -23,6 +23,7 @@ describe("multiline lead fields", () => {
     );
 
     const content = buildProductInquiryEmailContent({
+      referenceId: "PRO-abc123-deadbeef",
       firstName: "Jane",
       lastName: "Buyer",
       email: "jane@example.com",

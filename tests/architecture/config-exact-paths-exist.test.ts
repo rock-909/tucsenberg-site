@@ -137,16 +137,16 @@ function collectDepCruiserDeadToFiles(): string[] {
 // are validated against the live catalog. Returns true only when it lands on a
 // real page.tsx — so an audited URL can never silently point at a 404.
 function appRouteResolves(pathnameSegments: string[]): boolean {
-  // The first segment is the locale; it must be a configured public locale.
-  // A retired/unknown locale prefix (e.g. a re-introduced `/zh/...`) is a dead
-  // URL even if the rest of the path exists under [locale].
-  const [localeSegment, ...routeSegments] = pathnameSegments;
-  if (
-    localeSegment === undefined ||
-    !(routing.locales as readonly string[]).includes(localeSegment)
-  ) {
-    return false;
-  }
+  // Canonical URLs carry no locale segment under `localePrefix: 'never'`, but a
+  // future prefix strategy would add one. Accept a leading configured locale;
+  // an unknown prefix (e.g. a re-introduced `/zh/...`) falls through to the
+  // tree walk, which rejects it because no such route directory exists.
+  const [firstSegment, ...restSegments] = pathnameSegments;
+  const routeSegments = (routing.locales as readonly string[]).includes(
+    firstSegment ?? "",
+  )
+    ? restSegments
+    : pathnameSegments;
 
   let dir = "src/app/[locale]";
   for (const segment of routeSegments) {

@@ -707,7 +707,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
         "Factory-Direct Flood Barriers from China",
       );
       expect(hero.subtitle, messageFile).toContain(
-        "Five product lines, one coordinated factory pool, one QC standard.",
+        "One coordinated factory pool, one QC standard.",
       );
       expect(overview.title, messageFile).toBe("Flood Barrier Product Lines");
       expect(Object.keys(markets), messageFile).toEqual(TARGET_PRODUCT_SLUGS);

@@ -119,6 +119,7 @@ export function buildProductInquiryEmailContent(
 ): RuntimeEmailContent {
   const fields = compactFields([
     { label: EMAIL_COPY.common.fields.product, value: data.productName },
+    { label: EMAIL_COPY.common.fields.reference, value: data.referenceId },
     {
       label: EMAIL_COPY.common.fields.contactName,
       value: `${data.firstName} ${data.lastName}`,

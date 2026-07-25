@@ -1,5 +1,6 @@
 import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
+import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 
 export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "abs-flood-barriers",
@@ -20,13 +21,14 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
       load: "LOAD",
       floodSide: "FLOOD SIDE",
       drySide: "DRY SIDE",
+      heightRange: TB_BW_HEIGHT_RANGE.label,
     },
   },
   eyebrow: "TB-BW series",
   title: "ABS Interlocking Boxwall Flood Barriers",
   subtitle:
     "Freestanding flood barriers for driveways, doorways and paved perimeters — no drilling, no fixing to the building.",
-  lead: "A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from 50 to 85 cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.",
+  lead: `A freestanding flood barrier that needs no bolts, no rails, and no preparation on the building. Each ABS unit locks into the next; the approaching water presses the L-shaped base down and seals it against the ground. Heights from ${TB_BW_HEIGHT_RANGE.minimumCm} to ${TB_BW_HEIGHT_RANGE.maximumCm} cm, with straight, curved and gable-end units so the wall actually closes around real sites. We supply dealers, contractors and businesses factory-direct, from a single carton to full containers.`,
   cta: {
     label: "Request a Quote",
     note: "Reply within 12 hours.",
@@ -34,7 +36,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
   proofStrip: [
     "Freestanding — no fixing",
-    "50–85 cm heights",
+    `${TB_BW_HEIGHT_RANGE.label} heights`,
     "−40 °C to +95 °C",
     "UV-stabilised ABS",
     "3-year warranty",
@@ -108,7 +110,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         ],
       },
       footer:
-        "Full comparison across all five materials: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
+        "Full comparison across every material class: [ABS vs Aluminum vs FRP vs Water-Filled — How to Choose](/guides/flood-barrier-materials-guide).",
     },
     {
       title: "Specifications",
@@ -170,7 +172,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
         "Custom colours from moulded-batch quantities — confirmed at quotation",
       ],
       footer:
-        "See [OEM & Wholesale](/oem-wholesale) for how our factory pool handles private label across all five product lines.",
+        "See [OEM & Wholesale](/oem-wholesale) for how our factory pool handles private label across every product line.",
     },
   ],
   faqs: [

@@ -1,3 +1,5 @@
+import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
+
 interface TucsenbergProductMeta {
   title: string;
   description: string;
@@ -7,8 +9,7 @@ interface TucsenbergProductMeta {
 export const TUCSENBERG_PRODUCT_META = {
   "abs-flood-barriers": {
     title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
-    description:
-      "Freestanding ABS interlocking flood barriers, factory-direct from China. 50–85 cm heights; straight, curve and gable-end units. Reply within 12 hours.",
+    description: `Freestanding ABS interlocking flood barriers, factory-direct from China. ${TB_BW_HEIGHT_RANGE.label} heights; straight, curve and gable-end units. Reply within 12 hours.`,
     updatedAt: "2026-07-05T00:00:00Z",
   },
   "aluminum-flood-gates": {

@@ -183,7 +183,7 @@ function BoxwallDiagram({
       <Arrow x1={224} y1={205} x2={268} y2={205} />
       <Arrow x1={210} y1={210} x2={210} y2={240} />
       <Arrow x1={244} y1={210} x2={244} y2={240} />
-      <DimLine x={330} y1={84} y2={260} label="50–85 cm" />
+      <DimLine x={330} y1={84} y2={260} label={labels.heightRange} />
       <Annotation x={30} y={156}>
         {labels.waterSide}
       </Annotation>

@@ -67,6 +67,7 @@ export interface BoxwallDiagramLabels {
   load: string;
   floodSide: string;
   drySide: string;
+  heightRange: string;
 }
 
 export interface GateDiagramLabels {

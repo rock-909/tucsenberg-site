@@ -1,5 +1,6 @@
 import type { HeroSectionContent } from "@/components/sections/hero-section-view";
 import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
+import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 
 const boxwallDiagramLabels =
   ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram?.kind === "boxwall"
@@ -11,6 +12,7 @@ const boxwallDiagramLabels =
         load: "LOAD",
         floodSide: "FLOOD SIDE",
         drySide: "DRY SIDE",
+        heightRange: TB_BW_HEIGHT_RANGE.label,
       };
 
 export const homepageStoryHero = {

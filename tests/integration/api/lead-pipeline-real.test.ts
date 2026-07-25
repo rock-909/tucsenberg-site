@@ -212,6 +212,17 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect((resendBody.subject as string).length).toBeGreaterThan(0);
     expect(typeof resendBody.html).toBe("string");
     expect(typeof resendBody.text).toBe("string");
+
+    // The reference the buyer is shown must be quotable back to the owner:
+    // same value in Airtable, the owner email, and the provider metadata.
+    const referenceId = body.data.referenceId as string;
+    expect(resendBody.subject).toContain(referenceId);
+    expect(resendBody.html).toContain(referenceId);
+    expect(resendBody.text).toContain(referenceId);
+    expect(resendBody.tags).toContainEqual({
+      name: "reference-id",
+      value: referenceId,
+    });
   });
 
   it("accepts the exact official preview test contract through Siteverify", async () => {
