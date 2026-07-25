@@ -40,6 +40,21 @@ Shapes that keep recurring in review here:
 - Asserting a deleted name stays absent. That guards a past refactor, not live
   behavior.
 
+Gates here have failed open more often than they have failed wrong. A check that
+hangs, retries until green, or has no assertion at all is not a check. Shapes
+already fixed in this repo:
+
+- A smoke request with no timeout hangs instead of failing.
+- Playwright retries turn a real first-attempt failure green.
+- An unsafe production switch with nothing asserting against it passes by
+  default.
+- A size gate that runs before a fresh build measures a stale artifact.
+- A byte budget read as JS string `.length` undercounts UTF-8 multibyte content.
+
+Prefer the failing default: set timeouts, disable retries in runs that exist to
+detect flakiness, assert the unsafe value is absent rather than assuming it is,
+and confirm what you measure is freshly built.
+
 ## Default commands
 
 ```bash
