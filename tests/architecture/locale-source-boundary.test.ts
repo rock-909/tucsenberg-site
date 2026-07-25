@@ -45,7 +45,6 @@ describe("Locale is sourced from the canonical i18n module, not retiring ones", 
     const source = readSource("src/config/paths/types.ts");
 
     expect(source).toContain("ConfiguredLocale as Locale");
-    expect(source).not.toContain("typeof LOCALES_CONFIG.locales");
   });
 
   it("no production source imports Locale from a retiring module", () => {

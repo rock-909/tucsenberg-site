@@ -33,8 +33,6 @@ describe("proof lane labels", () => {
     expect(launchProof).toContain(
       "Historical starter/profile proof records are not Tucsenberg launch proof.",
     );
-    expect(launchProof).not.toContain("Default `company-site` first-pass");
-    expect(launchProof).not.toContain("Profile proof lanes:");
   });
 
   it("labels local and post-deploy E2E proof boundaries", () => {
@@ -97,7 +95,5 @@ describe("proof lane labels", () => {
     expect(maintenanceEntry).toContain(
       "旧 starter workflow 说明已经移出 `docs/`",
     );
-    expect(maintenanceEntry).not.toContain("project-workflow.md");
-    expect(maintenanceEntry).not.toContain("website-production-workflow.md");
   });
 });

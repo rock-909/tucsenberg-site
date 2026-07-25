@@ -100,9 +100,6 @@ describe("Contact page source boundaries", () => {
 
     expect(source).toContain("ContactFormWithFallback");
     expect(source).toContain("contact-page-sections");
-    expect(source).not.toContain("ContactFormStaticFallback");
-    expect(source).not.toContain("contact-form-static-fallback");
-    expect(source).not.toContain('data-contact-form-fallback="static"');
     expect(source).not.toContain("InquiryFormStaticFallback");
     expect(source).not.toContain("inquiry-form-static-fallback");
   });

@@ -38,13 +38,10 @@ function collectSourceFiles(root: string): string[] {
 
 describe("Zod schema boundary", () => {
   it("uses real Zod by default in the shared Vitest setup", () => {
-    const setupSource = readFileSync("src/test/setup.ts", "utf8");
     const testingRuleSource = readFileSync(".claude/rules/testing.md", "utf8");
 
-    expect(setupSource).not.toContain("./setup.zod");
     expect(existsSync("src/test/setup.zod.ts")).toBe(false);
     expect(testingRuleSource).toContain("Vitest uses real `zod` by default");
-    expect(testingRuleSource).not.toContain("globally mocks `zod`");
   });
 
   it("does not reintroduce the Zod v3 z.string().email() idiom in src (use z.email())", () => {

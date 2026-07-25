@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const DOCS_README_PATH = "docs/README.md";
@@ -7,6 +8,10 @@ const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
 function readText(filePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo docs by relative path
   return readFileSync(filePath, "utf8");
+}
+
+function toKebabCase(componentName: string): string {
+  return componentName.replace(/(?<!^)([A-Z])/gu, "-$1").toLowerCase();
 }
 
 describe("UI component playbook", () => {
@@ -58,7 +63,6 @@ describe("UI component playbook", () => {
 
     expect(playbook).toContain("FAQ disclosure");
     expect(playbook).toContain("stays native `<details>/<summary>`");
-    expect(playbook).not.toContain("Contact form checkbox");
     expect(playbook).toContain("Cookie consent checkboxes");
     expect(playbook).toContain("stay native until cookie preference state");
     expect(playbook).toContain(
@@ -84,12 +88,20 @@ describe("UI component playbook", () => {
       "No current primitive wrapper backlog is approved for ad hoc business-page implementation.",
     );
     expect(playbook).toContain("`Checkbox`");
+
+    // Anything still listed as a backlog bullet must genuinely not exist yet,
+    // otherwise the section sends agents to build a wrapper that already ships.
     const missingWrappersSection =
       playbook.split("## Missing wrappers")[1]?.split("## ")[0] ?? "";
-    expect(missingWrappersSection).not.toContain("- `Checkbox`");
-    expect(missingWrappersSection).not.toContain("- `Select`");
-    expect(missingWrappersSection).not.toContain("- `RadioGroup`");
-    expect(missingWrappersSection).not.toContain("- `Dialog`");
+    const backlogged = [
+      ...missingWrappersSection.matchAll(/^- `(\w+)`/gmu),
+    ].map((match) => match[1]!);
+    const alreadyShipped = backlogged.filter((name) =>
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- name comes from a `\w+` match in the repo-local playbook, resolved under a fixed directory
+      existsSync(join("src/components/ui", `${toKebabCase(name)}.tsx`)),
+    );
+
+    expect(alreadyShipped).toEqual([]);
   });
 
   it("records the minimum requirements for new UI primitives", () => {

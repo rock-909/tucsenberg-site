@@ -118,11 +118,6 @@ function readPackageManifest(): PackageManifest {
   ) as PackageManifest;
 }
 
-function readFixedText(filePath: string): string {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture tests read fixed repo docs
-  return readFileSync(filePath, "utf8");
-}
-
 function getUiPrimitiveNames(): string[] {
   return readdirSync(UI_WRAPPER_ROOT)
     .filter((entry) => TSX_FILE_PATTERN.test(entry))
@@ -602,27 +597,12 @@ describe("component governance", () => {
     expect(hasStoryImport("export { Example };", importerPath)).toBe(false);
   });
 
+  // Playbook and index wording is asserted once, in ui-component-playbook.test.ts
+  // and ui-component-index.test.ts. Duplicating it here made either copy able to
+  // drift into a false gate.
   it("keeps Registry and Playbook active in the materialized site docs", () => {
     expect(existsSync(COMPONENT_GOVERNANCE_REGISTRY_PATH)).toBe(true);
     expect(existsSync(UI_COMPONENT_PLAYBOOK_PATH)).toBe(true);
     expect(existsSync(UI_COMPONENT_INDEX_PATH)).toBe(true);
-
-    const playbook = readFixedText(UI_COMPONENT_PLAYBOOK_PATH);
-    const index = readFixedText(UI_COMPONENT_INDEX_PATH);
-
-    expect(playbook).toContain(
-      "short human/agent component selection playbook",
-    );
-    expect(playbook).toContain("Project-level");
-    expect(playbook).toContain(".claude/rules/ui.md");
-    expect(playbook).toContain("full maintained wrapper inventory");
-    expect(playbook).toContain("组件索引.md");
-    expect(playbook).toContain("Registry and Playbook are retained");
-    expect(playbook).toContain(
-      "AI discoverability and machine governance will not get weaker",
-    );
-    expect(playbook).toContain("Do not delete, archive, or shrink");
-    expect(index).toContain("maintained mirror");
-    expect(index).toContain("durable component discovery source for agents");
   });
 });
