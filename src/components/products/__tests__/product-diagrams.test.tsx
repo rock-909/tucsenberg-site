@@ -24,6 +24,7 @@ const boxwallSentinel: BoxwallProductDiagram = {
     load: "SENTINEL LOAD",
     floodSide: "SENTINEL FLOOD",
     drySide: "SENTINEL DRY",
+    heightRange: "40–90 cm",
   },
 };
 
@@ -81,8 +82,14 @@ const sentinelCases = [
       "SENTINEL LOAD SEALS",
       "SENTINEL PROFILE",
     ],
-    embeddedEnglish: ["water side", "load seals the base", "interlocking ABS"],
-    dimensionTexts: ["50–85 cm"],
+    embeddedEnglish: [
+      "water side",
+      "load seals the base",
+      "interlocking ABS",
+      // The height range is product data now, so a substituted value must win.
+      "50–85 cm",
+    ],
+    dimensionTexts: ["40–90 cm"],
   },
   {
     name: "gate",

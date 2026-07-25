@@ -1,7 +1,9 @@
-import { existsSync } from "node:fs";
-import { resolve, sep } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve, sep } from "node:path";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
+import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 import {
   getTucsenbergProductPage,
   type TucsenbergProductPage,
@@ -22,6 +24,43 @@ function resolvePublicImagePath(src: string): string {
 
   return resolvedPath;
 }
+
+const COUNT_BOUND_CATALOG_COPY = /\bfive\b/iu;
+
+// Buyer-facing copy that names how many lines the catalog has goes false the
+// day a sixth line ships. These are the authoring files that copy lives in.
+const ACTIVE_CATALOG_COPY_FILES = [
+  "messages/profiles/catalog/en/messages.json",
+  "content/pages/en/oem-wholesale.mdx",
+  "content/pages/en/flood-barrier-materials-guide.mdx",
+];
+
+describe("Tucsenberg catalog copy is not bound to the current line count", () => {
+  it("never states how many product lines the catalog has", () => {
+    for (const relativePath of ACTIVE_CATALOG_COPY_FILES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed authoring paths listed above
+      const copy = readFileSync(join(process.cwd(), relativePath), "utf8");
+
+      expect(copy, relativePath).not.toMatch(COUNT_BOUND_CATALOG_COPY);
+    }
+  });
+});
+
+describe("TB-BW height range has one owner", () => {
+  it("feeds the product page, its metadata, and its diagram from the same value", () => {
+    const page = TUCSENBERG_PRODUCT_PAGES["abs-flood-barriers"];
+    const meta = TUCSENBERG_PRODUCT_META["abs-flood-barriers"];
+    const { label, minimumCm, maximumCm } = TB_BW_HEIGHT_RANGE;
+
+    expect(page.proofStrip).toContain(`${label} heights`);
+    expect(page.lead).toContain(`Heights from ${minimumCm} to ${maximumCm} cm`);
+    expect(meta.description).toContain(`${label} heights`);
+    expect(page.diagram.kind).toBe("boxwall");
+    expect(
+      page.diagram.kind === "boxwall" ? page.diagram.labels.heightRange : null,
+    ).toBe(label);
+  });
+});
 
 describe("Tucsenberg product page copy contract", () => {
   it("covers every live product route with owner-approved product page data", () => {
