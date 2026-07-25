@@ -489,7 +489,10 @@ function collectConfigStringScanUnits(content) {
     });
     collectStringLiteralsFromNode(ast.program, units, content);
   } catch {
-    return [];
+    // Returning [] here would skip the whole file: syntax this parser version
+    // does not know yet would silently exempt a config from the residue scan.
+    // Fall back to the raw content, the same way JSON parse failures do.
+    return [{ value: content, line: 1 }];
   }
 
   return units;
