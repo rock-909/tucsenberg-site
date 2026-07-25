@@ -154,44 +154,51 @@ Commands:
 `);
 }
 
+// Module scope so callers can ask which commands exist. Tests that want to
+// prove a package script is wired to a real check need the command list, not a
+// frozen copy of the command string.
+const COMMAND_HANDLERS = {
+  "truth-docs": () => runTruthDocsCheck(),
+  brand: () => runBrandCheck(),
+  "markdown-fences": () => runMarkdownFenceCheck(),
+  "content-slugs": (args) => runContentSlugCheck(args),
+  "content-manifest": (args) =>
+    runContentManifestGenerator(createContentManifestContext(), {
+      check: args.includes("--check"),
+    }),
+  translations: () => runTranslationCheck(),
+  "message-key-usage": () => runMessageKeyUsageCheck(),
+  "validate-production-config": () => runValidateProductionConfigCli(),
+  "eslint-disable": () => runEslintDisableCheck(),
+  "component-governance": () => runComponentGovernanceCli(),
+  "content-readiness": (args) => runContentReadinessCli(args),
+  "client-boundary": (args) => runClientBoundaryCli(args),
+  "prerender-static": () => runPrerenderStaticCheck(),
+  "cf-preview-smoke": (args) => runCloudflarePreviewSmoke(args),
+  "public-preview-smoke": (args) => runPublicPreviewSmoke(args),
+  "deployed-smoke": (args) => runDeployedSmoke(args),
+  "cf-preview-deployed": () => runCloudflarePreviewDeployedProof(),
+  "cf-official-compare": (args) => runCloudflareOfficialCompareCli(args),
+  "cf-static-asset-headers": () =>
+    runCloudflareStaticAssetHeaderCli({ rootDir: ROOT }),
+  "release-verify": () => runReleaseVerify({ rootDir: ROOT }),
+  "--help": () => {
+    printUsage();
+    return true;
+  },
+  "-h": () => {
+    printUsage();
+    return true;
+  },
+};
+
+const STARTER_CHECK_COMMANDS = Object.keys(COMMAND_HANDLERS).filter(
+  (command) => !command.startsWith("-"),
+);
+
 async function main(argv = process.argv.slice(2)) {
   const [command, ...args] = argv;
-  const commandHandlers = {
-    "truth-docs": () => runTruthDocsCheck(),
-    brand: () => runBrandCheck(),
-    "markdown-fences": () => runMarkdownFenceCheck(),
-    "content-slugs": () => runContentSlugCheck(args),
-    "content-manifest": () =>
-      runContentManifestGenerator(createContentManifestContext(), {
-        check: args.includes("--check"),
-      }),
-    translations: () => runTranslationCheck(),
-    "message-key-usage": () => runMessageKeyUsageCheck(),
-    "validate-production-config": () => runValidateProductionConfigCli(),
-    "eslint-disable": () => runEslintDisableCheck(),
-    "component-governance": () => runComponentGovernanceCli(),
-    "content-readiness": () => runContentReadinessCli(args),
-    "client-boundary": (commandArgs) => runClientBoundaryCli(commandArgs),
-    "prerender-static": () => runPrerenderStaticCheck(),
-    "cf-preview-smoke": () => runCloudflarePreviewSmoke(args),
-    "public-preview-smoke": () => runPublicPreviewSmoke(args),
-    "deployed-smoke": () => runDeployedSmoke(args),
-    "cf-preview-deployed": () => runCloudflarePreviewDeployedProof(),
-    "cf-official-compare": () => runCloudflareOfficialCompareCli(args),
-    "cf-static-asset-headers": () =>
-      runCloudflareStaticAssetHeaderCli({ rootDir: ROOT }),
-    "release-verify": () => runReleaseVerify({ rootDir: ROOT }),
-    "--help": () => {
-      printUsage();
-      return true;
-    },
-    "-h": () => {
-      printUsage();
-      return true;
-    },
-  };
-
-  const handler = commandHandlers[command];
+  const handler = COMMAND_HANDLERS[command];
   const ok = handler ? await handler(args) : false;
 
   if (!handler) {
@@ -213,6 +220,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  STARTER_CHECK_COMMANDS,
   REQUIRED_TRUTH_FILES,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
