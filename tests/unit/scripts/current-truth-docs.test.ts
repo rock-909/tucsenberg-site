@@ -97,7 +97,7 @@ describe("current-truth docs guard", () => {
       /\bcacheComponents:\s*(true|false)/u,
     )?.[1];
     // AGENTS.md / CLAUDE.md are deliberately absent: instruction files carry no
-    // machine-enforced content assertions (see "Gate Discipline" in AGENTS.md).
+    // machine-enforced content assertions (see "判断准则" in AGENTS.md).
     // The cache runtime truth they used to restate lives in the rule files below.
     const currentRuntimeDocs = [
       ".claude/rules/conventions.md",

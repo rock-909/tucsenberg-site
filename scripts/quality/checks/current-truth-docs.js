@@ -89,7 +89,7 @@ const CURRENT_TRUTH_COMMAND_DOCS = [
 ];
 
 // AGENTS.md / CLAUDE.md are deliberately excluded: instruction files carry no
-// machine-enforced content assertions (see "Gate Discipline" in AGENTS.md).
+// machine-enforced content assertions (see "判断准则" in AGENTS.md).
 const ROOT_INSTRUCTION_COMMAND_DOCS = [
   ".claude/rules/conventions.md",
   ".claude/rules/cloudflare.md",
