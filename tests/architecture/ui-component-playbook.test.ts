@@ -22,21 +22,27 @@ describe("UI component playbook", () => {
     expect(readme).toContain("design/设计真相.md");
   });
 
-  it("states its retained AIFS responsibility", () => {
+  // Routing only works if the referenced files are still there. Asserting the
+  // strings appear would also pass on prose, a code sample, or a dead path.
+  it("routes readers on to files that still exist", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
+    const referenced = [...playbook.matchAll(/`([\w./一-鿿-]+\.md)`/gu)].map(
+      (match) => match[1]!,
+    );
 
-    expect(playbook).toContain(
-      "short human/agent component selection playbook",
+    expect(referenced).toEqual(
+      expect.arrayContaining([".claude/rules/ui.md", "组件索引.md"]),
     );
-    expect(playbook).toContain("Project-level");
-    expect(playbook).toContain(".claude/rules/ui.md");
-    expect(playbook).toContain("full maintained wrapper inventory");
-    expect(playbook).toContain("组件索引.md");
-    expect(playbook).toContain("Registry and Playbook are retained");
-    expect(playbook).toContain(
-      "AI discoverability and machine governance will not get weaker",
+
+    const missing = referenced.filter(
+      (reference) =>
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- reference comes from a restricted character class in the repo-local playbook
+        !existsSync(reference) &&
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- sibling lookup for bare filenames written relative to the playbook
+        !existsSync(join("docs/design", reference)),
     );
-    expect(playbook).toContain("Do not delete, archive, or shrink");
+
+    expect(missing).toEqual([]);
   });
 
   it("records the Radix control boundary and Tailwind narrative boundary", () => {

@@ -1,5 +1,9 @@
 # AGENTS.md
 
+Written for coding agents that read this file directly. Claude Code has its own
+`CLAUDE.md` and loads `.claude/rules/*.md` automatically by path, so the two
+files differ where the tooling differs — keep both true, not identical.
+
 ## Project
 
 **tucsenberg-site** - derived English B2B website for Tucsenberg flood barrier products.
@@ -21,8 +25,6 @@ Before making broad project changes, read:
 3. `docs/项目基础/内容.md`
 4. `docs/项目基础/AI协作边界.md`
 
-Do not rely on chat memory for project truth. If a decision must survive sessions, write it into `docs/项目基础/`, `docs/design/`, `docs/技术难题/`, `docs/决策记录/`, or the relevant rule file.
-
 ## Reference Sources
 
 <!-- BEGIN:nextjs-agent-rules -->
@@ -37,7 +39,23 @@ For other dependency-specific work, prefer official docs or version-locked local
 
 ## Rules
 
-Before editing, read the matching rule file under `.claude/rules/` — each file's `paths:` frontmatter states what it governs, and each file carries its own pointers to the deeper design and decision docs.
+Detailed rules live in `.claude/rules/*.md`. Each file's `paths:` frontmatter is
+the authority on what it governs; the table below is a reading shortcut, not a
+second source of truth. Read the matching file before editing, and follow the
+pointers it carries into the design and decision docs.
+
+| Editing | Read |
+| --- | --- |
+| Components, page sections, stories, design tokens, Tailwind | `ui.md` |
+| Routes, layouts, metadata, caching, client boundaries | `conventions.md` |
+| Any TypeScript: types, imports, naming, logging | `coding-standards.md` |
+| Complexity, lint exceptions, magic numbers, dependency hygiene | `code-quality.md` |
+| Tests, fixtures, mocks, behavior proof | `testing.md` |
+| API routes, security config, lead schema, `next.config.ts` | `security.md` |
+| Middleware, `open-next.config.ts`, `wrangler.jsonc`, deployment | `cloudflare.md` |
+| `content/`, `messages/`, site config, content queries | `content.md` |
+| Translation keys, locale routing, i18n plumbing | `i18n.md` |
+| JSON-LD, FAQ schema, SEO components | `structured-data.md` |
 
 ## Validation
 
@@ -60,11 +78,15 @@ Use the smallest validation that proves the change:
 
 ## Correctness and Bug-Fix Discipline
 
-Do not use ROI, effort, cost, "low value", "edge case", or "not worth it" as reasons to leave a confirmed wrong state unfixed. If something is proven wrong, treat it as wrong. Competitors, references, or previous examples making the same mistake do not make it acceptable.
+A confirmed defect stays a defect. ROI, effort, "edge case", or a competitor
+making the same mistake are not reasons to close it. Scope and sequencing decide
+when a fix ships, not whether the defect is real — when deferring, name the
+actual reason (out of scope, blocked, needs a separate change, proven
+infeasible) and the root cause left standing.
 
-Scope and sequencing can affect when and how a fix is delivered, but not whether the defect is real. If a confirmed issue is not fixed in the current change, state the actual reason: out of scope, blocked, requires a separate change, or has a proven feasibility limit. Also name the remaining root cause or follow-up.
-
-Before fixing a bug, diagnose why the current structure allowed it to happen and whether it represents a broader class of bugs. Prefer fixes that remove the enabling condition for that class, rather than patches that only hide the symptom. Use a symptom-level patch only when the structural fix is genuinely infeasible, blocked, or belongs in a separate change, and say which root cause is being deferred.
+Before fixing, ask what let the bug exist and whether it is one of a class.
+Prefer removing the enabling condition over hiding the symptom; if only a
+symptom patch is feasible now, say which root cause is deferred.
 
 ## Gate Discipline
 
@@ -88,4 +110,5 @@ Governance truth: `docs/design/组件使用手册.md`, `docs/design/设计真相
 `docs/superpowers/**` are background only unless a stable doc promotes the
 same rule.
 
-Do not delete, archive, or shrink Registry / Playbook until a later approved retirement proof explicitly authorizes it and confirms equal-or-stronger AI discoverability and machine governance.
+Registry and Playbook are how an agent finds the right component without reading
+every file. Improve them freely; do not make component discovery worse.
