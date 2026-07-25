@@ -21,6 +21,25 @@ commands, or behavior proof.
 | Component DOM/prop change | update paired test first |
 | Client Component, hook, or React behavior change | focused test + React Doctor when relevant |
 
+## Assertions must be able to fail
+
+The most common test defect in this repo is an assertion that passes without
+proving anything. Before keeping a new or changed assertion, break the thing it
+claims to protect and confirm the assertion goes red. An assertion that cannot
+be made to fail is not proof — replace it or delete it.
+
+Shapes that keep recurring in review here:
+
+- `toContain("some/path.md")` also passes on prose, a code sample, or a dead
+  link. Assert that the reference resolves, not that the string appears.
+- A positive assertion whose expected value is a substring of the wrong value:
+  `=en` matches `=en,zh` too. Anchor the match or assert the exact line.
+- Asserting a heading exists without asserting what has to be under it.
+- Covering only the JavaScript path when a no-JS or responsive branch carries
+  the behavior.
+- Asserting a deleted name stays absent. That guards a past refactor, not live
+  behavior.
+
 ## Default commands
 
 ```bash
