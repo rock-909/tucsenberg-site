@@ -67,7 +67,7 @@ describe("weekly dependency audit workflow", () => {
 
     expect(auditStep).toMatchObject({
       "continue-on-error": true,
-      run: "pnpm audit --prod --audit-level high",
+      run: "pnpm audit --prod --audit-level moderate",
     });
     expect(issueStep).toMatchObject({
       if: "steps.audit.outcome == 'failure'",
