@@ -23,10 +23,17 @@ function expectExactlyOneMain(html: string) {
  * catches the whole class, on any route, without naming the boundary.
  */
 async function expectBodyRenderedOnce(page: import("@playwright/test").Page) {
+  // allTextContents() counts hidden elements too, which is the point: the
+  // duplicate lives in a hidden trailing container.
   const headings = await page.locator("h1").allTextContents();
-  // Without this floor the whole helper passes vacuously on a page that lost
-  // its H1: zero headings are trivially unique and trivially all inside main.
-  expect(headings.length, "page must expose an H1 without JavaScript").toBe(1);
+  // Floor first, or the rest passes vacuously on a page that lost its H1:
+  // zero headings are trivially unique and trivially all inside main. A floor
+  // rather than an exact count, so a route that legitimately ships more than
+  // one H1 does not have to fight this helper.
+  expect(
+    headings.length,
+    "page must expose an H1 without JavaScript",
+  ).toBeGreaterThan(0);
   expect(new Set(headings).size, "page body must not be rendered twice").toBe(
     headings.length,
   );
@@ -216,15 +223,12 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
     await expectNoReservedGap(page);
     await expectBodyRenderedOnce(page);
-    // One copy only: a streamed-in form would leave a second, permanently
-    // hidden card in the trailing container that no-JS visitors never see.
+    // Exactly one card in the whole document. Comparing the total against the
+    // inside-main count instead would pass on two copies that both sit inside
+    // main; an absolute count catches that too.
     await expect(
       page.locator('[data-testid="inquiry-form-static-fallback"]'),
-    ).toHaveCount(
-      await page
-        .locator('#main-content [data-testid="inquiry-form-static-fallback"]')
-        .count(),
-    );
+    ).toHaveCount(1);
   });
 
   test("key public pages expose one composed main landmark", async ({

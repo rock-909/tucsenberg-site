@@ -59,7 +59,7 @@ pointers it carries into the design and decision docs.
 
 ## Validation
 
-`pnpm build` and `pnpm website:build:cf` write to the same `.next` directory - never run them in parallel.
+`pnpm build`, `pnpm website:build:cf`, and `pnpm website:lighthouse` all write the same `.next` directory - `website:lighthouse` runs its own production build so it always measures a current artifact. Never run two of them in parallel.
 
 Use the smallest validation that proves the change:
 

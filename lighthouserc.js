@@ -120,7 +120,9 @@ module.exports = {
       // whoever runs the command did not work — `pnpm website:check` ends in a
       // bare `pnpm build`, and measuring on top of that leftover scored 9
       // routes at 0.69 with `is-crawlable: Page is blocked from indexing`.
-      // The `website:lighthouse` script now runs the production build itself.
+      // The `website:lighthouse` script now runs the production build itself,
+      // which also means it writes `.next` — see the parallel-build warning in
+      // AGENTS.md / CLAUDE.md.
       startServerCommand: "APP_ENV=production pnpm start",
       startServerReadyPattern: "Local:",
       startServerReadyTimeout: 60000,

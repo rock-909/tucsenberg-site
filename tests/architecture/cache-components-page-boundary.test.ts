@@ -54,14 +54,16 @@ describe("Cache Components page boundaries", () => {
     }
   });
 
-  it("keeps specialized legal pages on their own shell, awaited in the page", () => {
+  // Deliberately no assertion about Suspense here. Whether these pages defer
+  // their body is a question about the rendered document, and grepping source
+  // text answers it badly: the string also matches a comment, and it would
+  // reject a future boundary that is actually justified. The rendered truth —
+  // body present, once, inside <main>, with scripting disabled — is asserted
+  // by expectBodyRenderedOnce() in tests/e2e/no-js-html-contract.spec.ts,
+  // which covers /privacy and /terms.
+  it("keeps specialized legal pages on their own shell", () => {
     for (const { routeOwner, source } of LEGAL_ROUTE_SOURCES) {
       expect(source, routeOwner).toContain("LegalPageShell");
-      // No Suspense: these routes are fully prerendered, so a boundary has no
-      // request-time wait to cover and only streams the body into a hidden
-      // container outside <main>, leaving no-JS visitors on a skeleton.
-      // tests/e2e/no-js-html-contract.spec.ts proves the rendered result.
-      expect(source, routeOwner).not.toContain("<Suspense");
     }
   });
 });
