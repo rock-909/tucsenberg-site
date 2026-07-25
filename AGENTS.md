@@ -21,19 +21,32 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 
 ## 这个仓库的坑
 
-跟直觉相反、或者从代码里看不出来的：
+都是踩过的，跟直觉相反或者从代码里看不出来：
 
 - **`pnpm build` 和 `pnpm website:build:cf` 写同一个 `.next` 目录。** 并行跑会互相
   覆盖，拿到的是假的构建结果。
+- **往 `docs/` 加文件，必须同时登记进 `docs/项目基础/文档清单.md`。** 漏了 CI 会报
+  `tracked document is missing from inventory`，而这个报错看不出该去改哪儿。
+- **`docs/superpowers/**` 是历史方案，不是现行规则。** 除非有稳定文档把同一条规则
+  重新确立过，否则只当背景。往里加文档要带 `> Historical.` 横幅，同样要登记。
 - **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
   `node scripts/starter-checks.js content-manifest` 重新生成。
 - **commit 的 subject 必须小写、不超过 72 字符。** pre-push 会跑一遍完整构建；确实
   急，可以 `RUN_FAST_PUSH=1` 跳过。
 
+## 动手前先读
+
+改动涉及面比较大的时候：
+
+1. `docs/README.md`
+2. `docs/项目基础/项目基础.md`
+3. `docs/项目基础/内容.md`
+4. `docs/项目基础/AI协作边界.md`
+
 ## 规则路由
 
 详细规则在 `.claude/rules/*.md`。每份文件的 `paths:` 前言才是"它管哪些文件"的权威；
-下表只是查找捷径。改之前读对应那份。
+下表只是查找捷径。改之前读对应那份，并顺着它给的指针继续读设计文档和决策记录。
 
 | 你在改什么 | 读哪份 |
 | --- | --- |
@@ -54,7 +67,7 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 
 - 改 Cloudflare / OpenNext：先 `pnpm build`，再 `pnpm website:build:cf`。
 - 要大范围本地检查：`pnpm website:check`。
-- 上线前：`pnpm release:verify`。
+- 涉及上线：按 `docs/项目基础/上线验证.md` 走，然后 `pnpm release:verify`。
 
 ## 参考资料
 
@@ -82,7 +95,13 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 没动的根因是什么。动手前先问这个 bug 是怎么能存在的——优先拆掉让它成立的条件，
 而不是把症状盖住。
 
-**把关机制。** gate 和测试是为某个意图服务的手段，不是法律。一个检查逼着代码或
-说明写下不属实的内容，该改的是检查。别把时间点快照（commit hash、条数、推送状态）
-钉成必过断言，也别给 `AGENTS.md` / `CLAUDE.md` 加内容断言——要守就守那句话描述的
-行为，守在行为发生的地方。
+**把关机制。** gate 和测试是为某个意图服务的手段，不是法律。一个检查逼着文档或代码
+写下不属实的内容，该改的是检查。别把时间点快照（commit hash、条数、推送状态）钉成
+必过断言，也别给 `AGENTS.md` / `CLAUDE.md` 加内容断言——要守就守那句话描述的行为，
+守在行为发生的地方。
+
+## AI 前端体系
+
+治理正本：`docs/design/组件使用手册.md`、`docs/design/设计真相.md`、
+`.claude/rules/ui.md`，加上组件治理测试。`src/components/ui/*` 是正式的 UI 入口，
+测试和 `pnpm component:check` 是硬门槛。

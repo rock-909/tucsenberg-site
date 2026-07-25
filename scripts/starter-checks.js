@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { runBrandCheck } = require("./quality/checks/brand");
+const { runMarkdownFenceCheck } = require("./quality/checks/markdown-fences");
 const {
   collectComponentGovernanceFindings,
   runComponentGovernanceCli,
@@ -132,6 +133,7 @@ function printUsage() {
 Commands:
   truth-docs          Check current truth docs and release runbook order
   brand               Check old brand residue
+  markdown-fences     Check every markdown code fence declares a language
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
@@ -157,6 +159,7 @@ async function main(argv = process.argv.slice(2)) {
   const commandHandlers = {
     "truth-docs": () => runTruthDocsCheck(),
     brand: () => runBrandCheck(),
+    "markdown-fences": () => runMarkdownFenceCheck(),
     "content-slugs": () => runContentSlugCheck(args),
     "content-manifest": () =>
       runContentManifestGenerator(createContentManifestContext(), {

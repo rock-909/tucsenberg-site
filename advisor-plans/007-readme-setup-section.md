@@ -81,7 +81,7 @@ pnpm install
 cp .env.example .env.local        # Next.js 本地开发环境变量
 cp .dev.vars.example .dev.vars    # Cloudflare 本地预览环境变量
 pnpm dev
-```
+```text
 
 询盘 / 联系表单等钱路功能需要在 `.env.local` 里填入真实服务密钥
 （`AIRTABLE_API_KEY`、`AIRTABLE_BASE_ID`、`RESEND_API_KEY`、
