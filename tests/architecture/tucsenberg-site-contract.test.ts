@@ -96,12 +96,7 @@ const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".md",
   ".mdx",
 ]);
-const EXCLUDED_PATH_SEGMENTS = new Set([
-  "__tests__",
-  "tests",
-  "test",
-  "profile-fixtures",
-]);
+const EXCLUDED_PATH_SEGMENTS = new Set(["__tests__", "tests", "test"]);
 const FORBIDDEN_PUBLIC_PATTERNS = [
   /\bWestern\b/iu,
   /\btariff\b/iu,
