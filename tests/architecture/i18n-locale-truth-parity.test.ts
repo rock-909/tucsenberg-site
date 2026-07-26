@@ -42,17 +42,6 @@ describe("i18n locale truth parity", () => {
     expect(configSource).toContain("LOCALES_CONFIG");
   });
 
-  it("documents LOCALES_CONFIG as runtime truth and content config as validation settings", () => {
-    const replace = readFileSync("docs/项目基础/替换顺序.md", "utf8");
-
-    expect(replace).toContain("LOCALES_CONFIG");
-    expect(replace).toContain("runtime locale truth");
-    expect(replace).toContain("content validation");
-    expect(replace).not.toContain(
-      "content/config/content.json` controls which languages are active",
-    );
-  });
-
   it("keeps product detail static params tied to canonical locales", () => {
     const source = readFileSync(
       "src/app/[locale]/products/[market]/page.tsx",

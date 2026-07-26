@@ -461,6 +461,19 @@ function validateContentFrontmatterContract(options) {
     }
   }
 
+  // Zero issues across zero files is a broken scan, not a clean contract.
+  // Renaming a content root or a collection would otherwise report green.
+  if (totalFiles === 0) {
+    pushFrontmatterIssue(issues, {
+      type: "invalid_field",
+      collection: collections.join(","),
+      locale: locales.join(","),
+      filePath: contentRoots.join(","),
+      field: "scan",
+      message: `frontmatter contract scanned no files under ${contentRoots.join(", ")}`,
+    });
+  }
+
   return {
     ok: issues.length === 0,
     checkedCollections: collections,

@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { getSingleSitePublicStaticPages } from "@/config/single-site-seo";
+import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 import { getHeaderMobileMenuButton } from "./helpers/navigation";
 
 const site = {
@@ -9,7 +11,15 @@ const site = {
   optionalLabel: "optional",
 } as const;
 
-const composedMainPaths = ["/about", "/contact", "/privacy", "/terms"] as const;
+// BC-025 承诺的是"任何公开页面"，之前这里是一份四条的手抄清单（/about /contact
+// /privacy /terms）。产品列表页、OEM、两篇 guide、warranty、五个产品详情页都没走
+// 这条断言——某个没覆盖的页面单独加一个错的 Suspense 边界，门禁照样绿。清单改成
+// 从页面注册表和产品目录推导，跟 lighthouserc.js 那 16 条路由同源，新增路由自动
+// 进入覆盖面。
+const canonicalPublicPaths = [
+  ...getSingleSitePublicStaticPages().map((path) => path || "/"),
+  ...Object.keys(TUCSENBERG_PRODUCT_PAGES).map((slug) => `/products/${slug}`),
+];
 
 function expectExactlyOneMain(html: string) {
   expect((html.match(/<main\b/g) ?? []).length).toBe(1);
@@ -69,6 +79,10 @@ test.describe("No-JS HTML contract (English-only)", () => {
   test("homepage keeps meaningful structure without client boot", async ({
     page,
   }) => {
+    // 桌面视口显式钉住：断言的是桌面导航（header-desktop-nav），移动视口下它
+    // 本来就该隐藏。不钉的话这条用例在 Mobile 项目里必然红。移动端的等价
+    // 契约由下面那条 mobile 用例覆盖。
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("http://localhost:3000/", {
       waitUntil: "domcontentloaded",
     });
@@ -149,6 +163,10 @@ test.describe("No-JS HTML contract (English-only)", () => {
   test("contact page renders inquiry fallback without JavaScript", async ({
     page,
   }) => {
+    // 桌面视口显式钉住：断言的是桌面导航（header-desktop-nav），移动视口下它
+    // 本来就该隐藏。不钉的话这条用例在 Mobile 项目里必然红。移动端的等价
+    // 契约由第 73 行那条 mobile 用例覆盖。
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("http://localhost:3000/contact", {
       waitUntil: "domcontentloaded",
     });
@@ -231,10 +249,15 @@ test.describe("No-JS HTML contract (English-only)", () => {
     ).toHaveCount(1);
   });
 
-  test("key public pages expose one composed main landmark", async ({
+  test("every canonical public page exposes one composed main landmark", async ({
     page,
   }) => {
-    for (const path of composedMainPaths) {
+    // 16 次无脚本 goto，比原来的 4 次慢；默认 30s 不够，慢一点的浏览器档会超时。
+    test.slow();
+    // 注册表读空的话，下面这个循环一次都不跑，断言全部真空通过。
+    expect(canonicalPublicPaths.length).toBeGreaterThan(0);
+
+    for (const path of canonicalPublicPaths) {
       await page.goto(`http://localhost:3000${path}`, {
         waitUntil: "domcontentloaded",
       });

@@ -49,7 +49,7 @@ Verified at commit `338df844`:
 - Importer graph (verified by grep — this is the complete list of files that
   reference any of the trio):
 
-  ```
+  ```text
   src/lib/__tests__/content-parser.test.ts
   src/lib/__tests__/content-utils.test.ts
   src/lib/__tests__/content-validation-advanced.test.ts

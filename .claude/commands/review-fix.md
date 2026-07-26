@@ -120,7 +120,7 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
 ## Example Usage
 
-```
+```text
 /review-fix            # Fetch and fix all unresolved review comments
 ```
 

@@ -27,6 +27,9 @@ rules:
       owasp: 'A07:2021 - Identification and Authentication Failures'
 
   - id: unsafe-eval-usage
+    # Unscoped, so it also covers eval() inside Server Actions. A separate
+    # `nextjs-unsafe-server-action` rule used to claim that case; its pattern
+    # never matched a single file, and this one did.
     pattern-either:
       - pattern: eval(...)
       - pattern: Function(...)
@@ -137,23 +140,6 @@ rules:
       category: security
       technology: [nodejs, database]
       cwe: 'CWE-89: SQL Injection'
-      owasp: 'A03:2021 - Injection'
-
-  - id: nextjs-unsafe-server-action
-    pattern: |
-      export async function $FUNC(...$ARGS) {
-        ...
-        eval($VAR)
-        ...
-      }
-    message: 'Server Actions中避免使用eval()，存在服务器端代码注入风险'
-    languages: [typescript, javascript]
-    severity: ERROR
-    metadata:
-      category: security
-      technology: [nextjs]
-      cwe:
-        'CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code'
       owasp: 'A03:2021 - Injection'
 
   - id: environment-variable-exposure
@@ -283,7 +269,6 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
-        - "src/app/api/whatsapp/**"
     metadata:
       category: correctness
       technology: [nextjs]

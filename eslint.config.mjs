@@ -45,9 +45,6 @@ export default [
       ".codex/**",
       ".omx/**",
       ".eslintcache-audit",
-      // Semgrep fixtures are rule-test inputs, not application source.
-      "tests/semgrep/targets/**",
-      "tests/semgrep/drafts/**",
       // Auto-generated files
       "src/lib/*.generated.ts",
     ],
@@ -194,9 +191,10 @@ export default [
     },
   },
 
-  // 测试目录放宽复杂度但禁用 jest 导入
+  // 测试目录放宽复杂度。jest 导入禁令在 test-files-final-override 里，因为后面
+  // 两个测试块都会把 no-restricted-imports 整条关掉，写在这里的禁令永远不生效。
   {
-    name: "tests-relaxed-but-no-jest",
+    name: "tests-relaxed",
     files: [
       "**/__tests__/**/*.{ts,tsx,js,jsx}",
       "tests/**/*.{ts,tsx,js,jsx}",
@@ -205,31 +203,6 @@ export default [
     rules: {
       complexity: "off",
       "max-params": "off",
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            {
-              name: "jest",
-              message: "项目使用 Vitest，禁止引入 jest.* API",
-            },
-            {
-              name: "@jest/globals",
-              message: "项目使用 Vitest，禁止引入 jest.* API",
-            },
-            {
-              name: "@/components/layout/__tests__/test-utils",
-              message: "🚫 已迁移到集中测试工具，请使用 @/test/utils 替代",
-            },
-          ],
-          patterns: [
-            {
-              group: ["@jest/*"],
-              message: "项目使用 Vitest，禁止引入 jest.* API",
-            },
-          ],
-        },
-      ],
     },
   },
 
@@ -799,8 +772,25 @@ export default [
       security,
     },
     rules: {
-      // 明确禁用架构规则，确保测试文件可以使用相对路径导入
-      "no-restricted-imports": "off",
+      // 测试文件可以用相对路径导入，但 jest API 仍然禁止：项目跑的是 Vitest。
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "jest", message: "项目使用 Vitest，禁止引入 jest.* API" },
+            {
+              name: "@jest/globals",
+              message: "项目使用 Vitest，禁止引入 jest.* API",
+            },
+          ],
+          patterns: [
+            {
+              group: ["@jest/*"],
+              message: "项目使用 Vitest，禁止引入 jest.* API",
+            },
+          ],
+        },
+      ],
       "no-restricted-syntax": "off",
       // 安全规则在测试中完全忽略 - 测试文件中的动态对象访问是正常模式
       "security/detect-object-injection": "off",
@@ -871,10 +861,6 @@ export default [
       "no-loop-func": "off",
       // Allow variable shadowing
       "no-shadow": "off",
-      // Allow duplicate keys
-      "no-dupe-keys": "off",
-      // Allow undefined variables (for dynamic contexts)
-      "no-undef": "off",
       // Allow async functions without await
       "require-await": "off",
       // Allow missing default cases

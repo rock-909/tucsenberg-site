@@ -159,11 +159,15 @@ jobs:
           NEXT_PUBLIC_TEST_MODE: "true"
           NEXT_PUBLIC_BASE_URL: http://localhost:3000
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          # Turnstile 的测试占位读的是 NEXT_PUBLIC_APP_ENV，不是 APP_ENV。
+          NEXT_PUBLIC_APP_ENV: preview
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
           TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
 
+      # 不点名文件：点名过的三份清单（这里、daily-e2e、playwright.config）各不相同，
+      # 结果有 3 个用例文件哪个 workflow 都没跑到。改成让 testDir 说了算。
       - name: 运行 Tucsenberg E2E
-        run: pnpm exec playwright test tests/e2e/tucsenberg-site-smoke.spec.ts tests/e2e/no-js-html-contract.spec.ts tests/e2e/contact-submit-journey.spec.ts tests/e2e/table-keyboard-scroll.spec.ts
+        run: pnpm exec playwright test
 
   semgrep:
     name: Semgrep 安全扫描

@@ -39,29 +39,11 @@ describe("daily E2E proof lane", () => {
       SECURITY_HEADERS_ENABLED: "false",
     });
 
-    expect(existsSync("tests/e2e/about-page-rendering.spec.ts")).toBe(true);
-    expect(existsSync("tests/e2e/core-page-visual-calibration.spec.ts")).toBe(
-      true,
-    );
-    expect(existsSync("tests/e2e/navigation.spec.ts")).toBe(true);
-    expect(existsSync("tests/e2e/not-found-recovery.spec.ts")).toBe(true);
-    expect(existsSync("tests/e2e/product-interest-rfq-handoff.spec.ts")).toBe(
-      true,
-    );
-    expect(existsSync("tests/e2e/seo-validation.spec.ts")).toBe(true);
-    expect(existsSync("tests/e2e/theme-persistence.spec.ts")).toBe(true);
-
-    for (const spec of [
-      "tests/e2e/about-page-rendering.spec.ts",
-      "tests/e2e/core-page-visual-calibration.spec.ts",
-      "tests/e2e/navigation.spec.ts",
-      "tests/e2e/not-found-recovery.spec.ts",
-      "tests/e2e/product-interest-rfq-handoff.spec.ts",
-      "tests/e2e/seo-validation.spec.ts",
-      "tests/e2e/theme-persistence.spec.ts",
-    ]) {
-      expect(testStep?.run, spec).toContain(spec);
-    }
+    // 这里以前钉死 7 个文件名。它守住的是清单，不是覆盖面：ci.yml 点名 4 个、
+    // 这里点名 7 个、playwright.config 白名单 5 个，三份都不一样，于是有 3 个
+    // 用例文件哪个 workflow 都没跑。现在守"这一步不按文件过滤"。
+    expect(testStep?.run?.trim()).toBe("pnpm exec playwright test");
+    expect(existsSync("tests/e2e")).toBe(true);
   });
 
   it("keeps the PR lead proof lane focused on the real pipeline test", () => {

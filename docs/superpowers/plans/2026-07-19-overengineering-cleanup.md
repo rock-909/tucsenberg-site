@@ -512,7 +512,7 @@ Re-run the grep — expected: no matches.
 
 In `.claude/rules/code-quality.md`, in the `no-magic-numbers detectObjects: false` measurement note, delete the example entirely — remove the fragment:
 
-```
+```text
 style tokens (`src/config/footer-style-tokens.ts`),
 ```
 

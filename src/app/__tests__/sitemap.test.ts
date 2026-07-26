@@ -66,7 +66,6 @@ vi.mock("@/lib/content/page-dates", async () => {
 
 describe("sitemap.ts", () => {
   const BASE_URL = "https://example.com";
-  const RETIRED_BENDING_MACHINES_URL = `${BASE_URL}/capabilities/bending-machines`;
   const defaultLocale = "en";
 
   function sitemapPathForCanonical(path: string): string {
@@ -108,14 +107,20 @@ describe("sitemap.ts", () => {
       for (const pagePath of SINGLE_SITE_PUBLIC_STATIC_PAGES) {
         expect(urls).toContain(localizedUrl(defaultLocale, pagePath));
       }
-      expect(urls).not.toContain(RETIRED_BENDING_MACHINES_URL);
       expect(findEntry(result, "en", "/products")).toBeDefined();
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/blog"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/resources"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/capabilities"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/how-it-works"));
-      expect(urls).not.toContain(
-        localizedUrl(defaultLocale, "/custom-project-support"),
+
+      // The whole URL set, derived from config. The old form listed five retired
+      // paths and asserted each stays absent — it could only catch routes someone
+      // remembered to name, and said nothing about a new page leaking in.
+      expect([...new Set(urls)].sort()).toEqual(
+        [
+          ...SINGLE_SITE_PUBLIC_STATIC_PAGES.map((pagePath) =>
+            localizedUrl(defaultLocale, pagePath),
+          ),
+          ...getAllMarketSlugs().map((marketSlug) =>
+            localizedUrl(defaultLocale, getProductMarketPath(marketSlug)),
+          ),
+        ].sort(),
       );
     });
 
@@ -318,23 +323,11 @@ describe("sitemap.ts", () => {
       expect(uniqueUrls.size).toBe(urls.length);
     });
 
-    it("should exclude custom-project-support from the default sitemap", async () => {
-      const result = await sitemap();
-      const customProject = findEntry(
-        result,
-        defaultLocale,
-        "/custom-project-support",
-      );
-
-      expect(customProject).toBeUndefined();
-    });
-
-    it("can generate catalog sitemap entries with product markets but without blog", async () => {
+    it("generates catalog sitemap entries for every configured market", async () => {
       const result = await generateSitemap();
       const urls = result.map((entry) => entry.url);
 
       expect(urls).toContain(localizedUrl(defaultLocale, "/products"));
-      expect(urls).not.toContain(localizedUrl(defaultLocale, "/blog"));
       expect(urls).toContain(localizedUrl(defaultLocale, "/about"));
 
       for (const marketSlug of getAllMarketSlugs()) {

@@ -21,6 +21,40 @@ commands, or behavior proof.
 | Component DOM/prop change | update paired test first |
 | Client Component, hook, or React behavior change | focused test + React Doctor when relevant |
 
+## Assertions must be able to fail
+
+The most common test defect in this repo is an assertion that passes without
+proving anything. Before keeping a new or changed assertion, break the thing it
+claims to protect and confirm the assertion goes red. An assertion that cannot
+be made to fail is not proof — replace it or delete it.
+
+Shapes that keep recurring in review here:
+
+- `toContain("some/path.md")` also passes on prose, a code sample, or a dead
+  link. Assert that the reference resolves, not that the string appears.
+- A positive assertion whose expected value is a substring of the wrong value:
+  `=en` matches `=en,zh` too. Anchor the match or assert the exact line.
+- Asserting a heading exists without asserting what has to be under it.
+- Covering only the JavaScript path when a no-JS or responsive branch carries
+  the behavior.
+- Asserting a deleted name stays absent. That guards a past refactor, not live
+  behavior.
+
+Gates here have failed open more often than they have failed wrong. A check that
+hangs, retries until green, or has no assertion at all is not a check. Shapes
+already fixed in this repo:
+
+- A smoke request with no timeout hangs instead of failing.
+- Playwright retries turn a real first-attempt failure green.
+- An unsafe production switch with nothing asserting against it passes by
+  default.
+- A size gate that runs before a fresh build measures a stale artifact.
+- A byte budget read as JS string `.length` undercounts UTF-8 multibyte content.
+
+Prefer the failing default: set timeouts, disable retries in runs that exist to
+detect flakiness, assert the unsafe value is absent rather than assuming it is,
+and confirm what you measure is freshly built.
+
 ## Default commands
 
 ```bash

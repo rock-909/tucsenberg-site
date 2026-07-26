@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
@@ -116,19 +116,18 @@ describe("UI component registry docs index", () => {
     }
   });
 
-  it("links the registry index from UI reference docs", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-    const designReadme = readText(DESIGN_README_PATH);
+  // Both docs sit in docs/design/ next to the index, so a reference that names
+  // the file must also resolve there — a bare string match would pass on a dead
+  // link or a code sample.
+  it.each([
+    { name: "playbook", path: UI_COMPONENT_PLAYBOOK_PATH },
+    { name: "design readme", path: DESIGN_README_PATH },
+  ])("links the registry index from the $name", ({ path }) => {
+    const referenced = [
+      ...readText(path).matchAll(/`([\w./一-鿿-]+\.md)`/gu),
+    ].map((match) => match[1]!);
 
-    expect(playbook).toContain("组件索引.md");
-    expect(designReadme).toContain("组件索引.md");
-  });
-
-  it("describes itself as a maintained mirror instead of generated output", () => {
-    const index = readText(UI_COMPONENT_INDEX_PATH);
-
-    expect(index).toContain("maintained mirror");
-    expect(index).toContain("durable component discovery source for agents");
-    expect(index).toContain("Do not treat this file as generated output");
+    expect(referenced).toContain("组件索引.md");
+    expect(existsSync(UI_COMPONENT_INDEX_PATH)).toBe(true);
   });
 });

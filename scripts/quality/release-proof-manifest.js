@@ -161,14 +161,8 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       label: "Local Playwright E2E smoke",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
-      args: [
-        "exec",
-        "playwright",
-        "test",
-        "tests/e2e/tucsenberg-site-smoke.spec.ts",
-        "tests/e2e/contact-form-smoke.spec.ts",
-        "--project=chromium",
-      ],
+      // 不点名文件：testDir 下的用例全跑。上线前的本地证明没有理由比 PR 门禁窄。
+      args: ["exec", "playwright", "test", "--project=chromium"],
       env: {
         CI: "1",
         PLAYWRIGHT_REBUILD_SERVER: "true",

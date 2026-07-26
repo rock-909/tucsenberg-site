@@ -507,7 +507,7 @@ git add -u .github/workflows/airtable-phone-proof.yml scripts/workflows/write-ai
 
 In `.github/CODEOWNERS`, delete line:
 
-```
+```text
 /scripts/workflows/write-airtable-phone-proof-summary.mjs @Alx-707 developer@flood-control.com
 ```
 

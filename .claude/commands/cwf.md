@@ -8,7 +8,7 @@ user-invocable: true
 
 用于展示型网站的文案工作流：先明确页面目标和受众，再生成文案，再审查，最后给用户确认定稿。
 
-```
+```text
 cwf = 文案编排器
 ├── Phase 0: 初始化
 ├── Phase 1: 策略规划（positioning-messaging / content-strategy）
@@ -108,7 +108,7 @@ SEO 放最后，避免 SEO 优化破坏说服力。有冲突时说服力优先�
 
 ## 输出结构
 
-```
+```text
 docs/superpowers/plans/workflows/cwf/{page}/
 ├── v1.md
 ├── v{N}-final.md
@@ -119,7 +119,7 @@ messages/                # 可选
 
 ## 完成提示
 
-```
+```text
 文案定稿完成: docs/superpowers/plans/workflows/cwf/{page}/v{N}-final.md
 下一步: /dwf → 读取定稿进入设计流程
 ```

@@ -65,7 +65,7 @@ Verified at commit `338df844`:
   `validateEmailField` (own email regex at ~line 209) etc. The ONLY runtime
   thing other code imports from it is the TYPE `ServerActionResult`:
 
-  ```
+  ```text
   src/components/forms/use-contact-form.ts:6:            import { type ServerActionResult } from "@/lib/actions/server-action-utils";
   src/components/forms/contact-form-story-fixtures.ts:2:  import type { ServerActionResult } …
   src/components/forms/contact-form-feedback.tsx:5:       import { type ServerActionResult } …

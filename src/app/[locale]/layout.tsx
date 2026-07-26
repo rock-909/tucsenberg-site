@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
-import { generateLocaleStaticParams } from "@/app/[locale]/generate-static-params";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
 import { Footer } from "@/components/footer/Footer";
@@ -23,16 +22,6 @@ import type { Locale } from "@/i18n/routing-config";
 
 // 重新导出元数据生成函数
 export const generateMetadata = generateLocaleMetadata;
-
-// 声明本段合法的 locale 取值，并让 Next 直接 404 掉其余取值。
-//
-// 带扩展名的地址被 middleware matcher 排除，拿不到 locale 改写，会原样落到本段，
-// 把 `random.txt` 当作 locale。此前这类请求先跑到 generateMetadata 里抛
-// "Unknown locale" 而返回 500——搜索引擎会当成整站故障。
-// dynamicParams=false 在路由层就拒掉，任何 handler 都拿不到非法 locale。
-// 见 docs/技术难题/带扩展名地址返回500而非404.md
-export const generateStaticParams = generateLocaleStaticParams;
-export const dynamicParams = false;
 
 interface LocaleLayoutProps {
   children: ReactNode;
