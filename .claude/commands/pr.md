@@ -1,8 +1,8 @@
 # Create Pull Request
 
-Submission pipeline: preflight → self-heal → commit → push → PR → CI monitoring → merge → cleanup.
+Submission pipeline: preflight → self-heal → commit → adversarial review → push → PR → CI monitoring → merge → cleanup.
 
-**Code review**: Cloud reviews (CodeRabbit) run automatically after PR creation in Phase 6.
+**Code review**: an independent Codex session reviews the branch **before push** (Phase 4). Cloud PR bots are not used — see `docs/项目基础/AI协作边界.md`.
 
 ## Execution Steps
 
@@ -50,7 +50,7 @@ Submission pipeline: preflight → self-heal → commit → push → PR → CI m
    - If same failure after 3 attempts: **abort**.
    - If non-auto-fixable: **abort immediately**.
 
-### Phase 4: Commit & Push
+### Phase 4: Commit & Adversarial Review
 
 7. **Stage & Commit**: `git add` relevant files, generate conventional commit message:
    - Format: `<type>(<scope>): <description>`
@@ -58,47 +58,60 @@ Submission pipeline: preflight → self-heal → commit → push → PR → CI m
    - Body: required, bullet points
    - Execute `git commit` with HEREDOC message.
 
-8. **Push**: Since preflight passed, use dedup:
+8. **Independent Codex review** (skip if `--no-review`): hand the branch diff to a
+   separate Codex session. It must not share this session's context — a reviewer
+   that already believes the change is correct proves nothing.
+
+   The prompt states the goal as **refutation, not confirmation**: "try to prove
+   this change is wrong". Give it the diff range, the intent of the change, and
+   the claims made about what is proven. Ask for findings ranked by severity,
+   each with a concrete failure scenario.
+
+   Triage every finding against the code yourself before acting — the reviewer
+   can be wrong or working from a stale read:
+   - **Fix**: verified in the current code.
+   - **Reject**: doesn't exist, wrong assumption, or contradicts `.claude/rules/`.
+     Say why in the report.
+   - **Flag to user**: business decision (product behavior, buyer-facing copy,
+     pricing). Only this category pauses for input.
+
+   Fixes go into the same branch as follow-up commits, then re-run preflight.
+
+### Phase 5: Push & Create PR
+
+9. **Push**: Since preflight passed, use dedup:
     ```bash
     RUN_FAST_PUSH=1 git push -u origin <current-branch>
     ```
 
-### Phase 5: Create PR
+10. **Create PR**: Execute `gh pr create --base main --fill`, then output the PR URL.
 
-9. **Create PR**: Execute `gh pr create --base main --fill`.
-
-10. **Report**: Output the PR URL.
-
-### Phase 6: CI & Cloud Review Monitoring (skip if `--no-auto`)
+### Phase 6: CI Monitoring (skip if `--no-auto`)
 
 11. **Wait for CI**: Poll with `gh pr checks <pr-number> --watch`.
     - All pass: continue. Any fail: report and stop.
 
-12. **Wait for cloud reviews**: Check CodeRabbit / Gemini via GraphQL API.
-    - Reviews present, no blockers: proceed.
-    - No reviews after 10 minutes: ask user (wait / merge / abort).
-    - Unresolved threads: suggest `/review-fix`.
-
-13. **Merge decision**: Present summary, wait for explicit "merge" confirmation.
+12. **Merge decision**: Present summary, wait for explicit "merge" confirmation.
 
 ### Phase 7: Merge & Cleanup (only after user confirms)
 
-14. **Merge**: `gh pr merge <pr-number> --squash`
-15. **Switch**: `git checkout main && git pull origin main`
-16. **Cleanup**: `git branch -d <branch-name> && git remote prune origin`
-17. **Report**: PR URL, merge status, current state.
+13. **Merge**: `gh pr merge <pr-number> --squash`
+14. **Switch**: `git checkout main && git pull origin main`
+15. **Cleanup**: `git branch -d <branch-name> && git remote prune origin`
+16. **Report**: PR URL, merge status, current state.
 
 ## Options
 
-- `--no-auto`: Stop after PR creation (Phase 5). Skip CI/review monitoring and merge.
+- `--no-auto`: Stop after PR creation (Phase 5). Skip CI monitoring and merge.
+- `--no-review`: Skip the Phase 4 Codex review. Docs-only or single-line changes.
 
 ## Failure Behavior
 
 - **Preflight fails 3x**: Abort with diagnosis.
 - **Non-auto-fixable failure**: Abort immediately.
+- **Review session unavailable**: Report it and stop before push. Do not silently
+  push unreviewed — a review that did not run must not read as a review that passed.
 - **CI fails**: Report, stop.
-- **Cloud review timeout**: User chooses.
-- **Unresolved threads**: Suggest `/review-fix`.
 
 ## Observability
 
@@ -106,11 +119,12 @@ Append JSON line to `reports/automation-loop.jsonl`:
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bool>,"self_heal_rounds":<0-3>,"pr_number":<number|null>,"ci_pass":<bool|null>,"cloud_reviews":{"coderabbit":<bool|null>,"gemini":<bool|null>},"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bool>,"self_heal_rounds":<0-3>,"review_findings":<count|null>,"review_fixed":<count|null>,"pr_number":<number|null>,"ci_pass":<bool|null>,"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
 ```
 
 ## Notes
 
 - GitHub Flow: all branches merge to `main` via PR
 - No auto-merge: all PRs require explicit merge after review
-- Code review relies on cloud reviewers (CodeRabbit) after PR creation
+- Review happens before push, not after PR creation. A finding caught here costs a
+  commit; the same finding caught after merge costs a revert.

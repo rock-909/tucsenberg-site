@@ -10,6 +10,27 @@ Codex and Claude can collaborate, but durable truth must live in files.
 
 Both should point back to `docs/README.md`; do not maintain two competing encyclopedias.
 
+## Code review
+
+Branches are reviewed by an **independent Codex session before push**, not by a
+cloud PR bot. CodeRabbit was tried and retired: on this repo it reviewed after the
+PR already existed, and its findings arrived too late and too generic to be worth
+the round trip.
+
+Two properties make the current arrangement work, and both must be preserved:
+
+- **Independent context.** The reviewer does not share the authoring session. A
+  reviewer that already believes the change is correct proves nothing.
+- **Refutation, not confirmation.** The prompt asks it to prove the change wrong.
+  "Looks good" is not an outcome the prompt should make easy to reach.
+
+Findings are triaged against the code, not accepted on authority. A reviewer can
+be wrong; rejecting a finding is fine, but the reason belongs in the report.
+
+A review that did not run must never be reported as a review that passed.
+
+Mechanics live in `.claude/commands/pr.md` Phase 4. Do not restate them here.
+
 ## Superpowers
 
 Upstream `obra/superpowers` currently writes specs and implementation plans to:
