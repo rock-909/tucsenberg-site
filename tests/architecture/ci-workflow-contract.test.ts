@@ -110,6 +110,22 @@ describe("CI workflow contract", () => {
     });
   });
 
+  // 这两个检查器写好了很久，但一个入口都没有——只有人工敲 CLI 才会跑，等于
+  // 不存在。接进 CI 之后，除了这条断言没有别的东西拦着谁再把它们摘掉。守的是
+  // 命令本身在跑，不是步骤名怎么写。
+  it("keeps the standalone gate checks wired to a lane that actually runs", () => {
+    const qualityRuns = (readCiWorkflowConfig().jobs?.quality?.steps ?? [])
+      .map((step) => step.run?.trim())
+      .filter((run): run is string => Boolean(run));
+
+    for (const command of [
+      "node scripts/starter-checks.js markdown-fences",
+      "node scripts/starter-checks.js vitest-collection",
+    ]) {
+      expect(qualityRuns).toContain(command);
+    }
+  });
+
   it("keeps the full React Doctor reconciliation visible but non-blocking", () => {
     const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
 
@@ -120,12 +136,33 @@ describe("CI workflow contract", () => {
     });
   });
 
-  it("keeps Semgrep blocking scope narrow in CI", () => {
-    const workflow = readCiWorkflow();
+  // 这条以前叫 "keeps Semgrep blocking scope narrow"，钉的是带 ` src` 的整条命令
+  // 字符串。它守住的正是那个洞：扫描只覆盖 src，scripts/ 下的门禁脚本和执行中的
+  // 根配置全在安全扫描之外，而这条断言让谁想扩大范围都会先把它撞红。改成守扫描
+  // 目标本身——必须是整个仓库，不是点名的子集。
+  it("scans the whole repository, not a hand-picked subset", () => {
+    const command = readCiWorkflow()
+      .split("\n")
+      .map((line) => line.trim())
+      .find((line) => line.startsWith("run: semgrep scan"));
 
-    expect(workflow).toContain(
-      "semgrep scan --error --severity ERROR --config semgrep.yml src",
-    );
+    expect(command).toBeDefined();
+
+    // `semgrep scan [flags] <targets...>`：跳过 flag 和带值 flag 的值，剩下的是目标。
+    const tokens = (command ?? "").replace(/^run:\s*/u, "").split(/\s+/u);
+    const flagsTakingValue = new Set(["--config", "--severity"]);
+    const targets: string[] = [];
+    for (let index = 2; index < tokens.length; index += 1) {
+      const token = tokens[index] ?? "";
+      if (flagsTakingValue.has(token)) {
+        index += 1;
+        continue;
+      }
+      if (token.startsWith("--")) continue;
+      targets.push(token);
+    }
+
+    expect(targets).toEqual(["."]);
   });
 
   // CI scans with `--severity ERROR`, so any rule below that severity is dead

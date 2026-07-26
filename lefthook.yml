@@ -69,14 +69,30 @@ pre-commit:
 
     # 相关测试检查 - 确保组件/库变更后测试同步更新
     # 使用 Vitest 4 的 `vitest related` 子命令
+    #
+    # `--passWithNoTests` 曾经决定这个门的成败：一个文件根本没有相关测试时，vitest
+    # 打印 "No test files found" 然后 exit 0，钩子跟着报"相关测试检查通过"。也就是
+    # 说"没测过"和"测过并通过"被合并成同一个结果——正是这个门声称要挡住的情况。
+    #
+    # 只排除 Storybook 故事：它们的证明在 CI 的 `storybook build`。
+    #
+    # 这里一度还按文件名排除了 App Router 的所有 page/layout/error/not-found，
+    # 理由是"Playwright 冒烟逐页证明"。独立审查把这条打掉了：冒烟对每页只断言
+    # HTTP 200 和一个 H1，而被排除的 `products/[market]/page.tsx` 有 495 行业务
+    # 逻辑和 31 个现成的单测——改坏询价链接生成器，钩子照样绿。真正没有单测的
+    # 只有 6 个文件，已经逐个补上，所以整条按角色排除都不需要了。
     test-related:
       run: |
-        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^src/.+\.(ts|tsx)$' | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' || true)
+        FILES=$(git diff --cached --name-only --diff-filter=ACM \
+          | grep -E '^src/.+\.(ts|tsx)$' \
+          | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' \
+          | grep -v '\.stories\.tsx$' || true)
         if [ -z "$FILES" ]; then
-          echo "✅ 相关测试检查通过 (无源码变更)"; exit 0;
+          echo "✅ 相关测试检查跳过 (本次没有需要单测覆盖的源码变更)"; exit 0;
         fi
         echo "🧪 运行相关测试..."
-        pnpm vitest related $FILES --run --passWithNoTests --reporter=dot 2>/dev/null || {
+        OUTPUT=$(pnpm vitest related $FILES --run --passWithNoTests --reporter=dot 2>&1) || {
+          echo "$OUTPUT";
           echo ""; echo "❌ 相关测试失败 - 可能原因:";
           echo "  1. 组件 DOM 结构变更，但测试中的 getByRole/getByText 未同步";
           echo "  2. 接口属性变更，但 Mock 配置未更新";
@@ -84,6 +100,16 @@ pre-commit:
           echo ""; echo "💡 请检查并同步更新对应的测试文件";
           exit 1;
         }
+        if echo "$OUTPUT" | grep -q "No test files found"; then
+          echo "";
+          echo "❌ 改动的源文件里，有文件没有任何相关测试：";
+          echo "$FILES" | sed 's/^/     /';
+          echo "";
+          echo "💡 补一个测试。真的该由别的车道证明，就说清是哪条，并把排除规则写在";
+          echo "   上面那个过滤器里——附上理由，别默默放行。";
+          exit 1;
+        fi
+        echo "✅ 相关测试通过"
       fail_text: '相关测试失败 - 请确保源码变更后测试同步更新（参见 .claude/rules/testing.md Twin File Principle）'
       stage_fixed: false
 
@@ -100,7 +126,7 @@ pre-push:
     # 构建成功验证（A+：默认执行；紧急场景可用 RUN_FAST_PUSH=1 跳过）
     build-check:
       run: |
-        if [ -n "$RUN_FAST_PUSH" ]; then
+        if [ "$RUN_FAST_PUSH" = "1" ]; then
           echo "⏭️  RUN_FAST_PUSH=1: 跳过构建验证（仅用于紧急推送）";
         else
           node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs --strict-frontmatter && node scripts/starter-checks.js validate-production-config && pnpm build && node scripts/starter-checks.js client-boundary --build-artifacts
@@ -115,7 +141,7 @@ pre-push:
     # 架构检查（A+：全量巡航 + 循环依赖；使用 err 报告减少噪音；可用 RUN_FAST_PUSH=1 跳过应急推送）
     arch-check:
       run: |
-        if [ -n "$RUN_FAST_PUSH" ]; then
+        if [ "$RUN_FAST_PUSH" = "1" ]; then
           echo "⏭️  RUN_FAST_PUSH=1: 跳过架构检查（仅用于紧急推送，CI/后续本地请补跑）";
         else
           pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
@@ -125,10 +151,10 @@ pre-push:
     # 安全检查（A+：本地执行；可用 RUN_FAST_PUSH=1 跳过应急推送）
     security-check:
       run: |
-        if [ -n "$RUN_FAST_PUSH" ]; then
+        if [ "$RUN_FAST_PUSH" = "1" ]; then
           echo "⏭️  RUN_FAST_PUSH=1: 跳过依赖安全审计 pnpm audit（仅用于紧急推送）。注意：PR CI 不跑 pnpm audit，只有 Semgrep 源码扫描；依赖 CVE 仅由每周 weekly-audit 工作流兜底——请尽快本地补跑";
         else
-          pnpm audit --prod --audit-level moderate --ignore-registry-errors
+          pnpm audit --prod --audit-level moderate
         fi
       fail_text: '安全检查失败 - 发现安全漏洞，请修复后推送'
 
@@ -137,7 +163,7 @@ pre-push:
     # 治理面用 @public JSDoc 具名放行（参照 eslint-disable GSE 登记制）。
     dead-export-check:
       run: |
-        if [ -n "$RUN_FAST_PUSH" ]; then
+        if [ "$RUN_FAST_PUSH" = "1" ]; then
           echo "⏭️  RUN_FAST_PUSH=1: 跳过死导出扫描（CI quality 作业会跑 pnpm knip:check 兜底）";
         else
           pnpm knip:check
