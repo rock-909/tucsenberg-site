@@ -653,22 +653,28 @@ describe("current-truth docs guard", () => {
     }
   });
 
-  it("reports required truth anchors that are missing", () => {
-    const files = createValidFiles();
-    const target = "README.md";
-    delete files[target];
-    const repoDir = createTempRepo(files);
-    try {
-      const findings = collectCurrentTruthDocFindings(repoDir);
-      expect(
-        findings.some((f) =>
-          f.error.includes(`missing required current-truth file "${target}"`),
-        ),
-      ).toBe(true);
-    } finally {
-      moveTempRepoToTrash(repoDir);
-    }
-  });
+  // 每个锚点都要单独证明。只删 README 的话，往这个列表里加条目等于什么都没加。
+  // `AGENTS.md` / `CLAUDE.md` 在列表里只查存在：不给指令文件加内容断言是一回事，
+  // 让它们删掉之后没有任何信号是另一回事。
+  it.each(["README.md", "AGENTS.md", "CLAUDE.md", "docs/项目基础/文档清单.md"])(
+    "reports a missing required truth anchor: %s",
+    (target) => {
+      const files = createValidFiles();
+      expect(files).toHaveProperty(target);
+      delete files[target];
+      const repoDir = createTempRepo(files);
+      try {
+        const findings = collectCurrentTruthDocFindings(repoDir);
+        expect(
+          findings.some((f) =>
+            f.error.includes(`missing required current-truth file "${target}"`),
+          ),
+        ).toBe(true);
+      } finally {
+        moveTempRepoToTrash(repoDir);
+      }
+    },
+  );
 
   it("rejects registered GSE ids without a production consumer", () => {
     const files = {

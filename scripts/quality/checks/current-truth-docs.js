@@ -31,8 +31,13 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
   "candidate-backlog",
 ]);
 
-// 这两个是登记体系本身的支点：清单是所有其他文档"必须存在"的来源，README 是
-// 唯一不由清单登记的根入口。它们缺了，整个对账没有立足点。
+// 登记体系本身的支点：清单是所有其他文档"必须存在"的来源，README 是唯一不由
+// 清单登记的根入口。它们缺了，整个对账没有立足点。
+//
+// `AGENTS.md` / `CLAUDE.md` 也在这里，只查存在。这两件事不该绑在一起：不给
+// 指令文件加内容断言（见 AGENTS.md 的判断准则）是一回事，让它们删掉之后没有
+// 任何信号是另一回事。它们是每个会话的入口，删了不会有 import 断裂、不会有
+// 测试变红——和 `.claude/` 下那批 markdown 完全同一类。
 //
 // 其余文档的存在性由清单负责，双向对账：tracked 文档没登记会报，登记了的路径
 // 不存在也会报。这里以前是一份 43 条硬编码路径的手抄清单外加两份命令文档清单，
@@ -42,7 +47,12 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
 // 语义上和旧清单有一处真实差别，是有意的：删一个文档时，只删文件会被清单撞红，
 // 连登记行一起删则通过。那是一次显式的、diff 里看得见的退役决定，而不是悄悄
 // 消失。旧写法要求改门禁脚本本身，强度差别只在这一步的显眼程度。
-const REQUIRED_TRUTH_ANCHORS = ["README.md", "docs/项目基础/文档清单.md"];
+const REQUIRED_TRUTH_ANCHORS = [
+  "README.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "docs/项目基础/文档清单.md",
+];
 
 // pnpm 自带子命令，不是 package script；还有 `pnpm 11` 这种版本号写法。
 const PNPM_BUILTIN_COMMANDS = new Set([
