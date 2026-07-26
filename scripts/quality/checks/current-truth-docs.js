@@ -31,10 +31,17 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
   "candidate-backlog",
 ]);
 
-// 两个不在文档清单覆盖范围内的锚点。清单只登记 `docs/**`，规则目录靠
-// `collectCurrentDocumentedFiles` 遍历，所以这里只剩下两个根文件。
-// 这里以前是一份 43 条硬编码路径的手抄清单，外加两份命令文档清单。三份都是
-// 文件系统的手抄镜像：漏登记一个新文档，它就一条都不检查，而且不会有任何信号。
+// 这两个是登记体系本身的支点：清单是所有其他文档"必须存在"的来源，README 是
+// 唯一不由清单登记的根入口。它们缺了，整个对账没有立足点。
+//
+// 其余文档的存在性由清单负责，双向对账：tracked 文档没登记会报，登记了的路径
+// 不存在也会报。这里以前是一份 43 条硬编码路径的手抄清单外加两份命令文档清单，
+// 三份都是文件系统的手抄镜像——漏登记一个新文档，它就一条都不检查，而且没有
+// 任何信号。
+//
+// 语义上和旧清单有一处真实差别，是有意的：删一个文档时，只删文件会被清单撞红，
+// 连登记行一起删则通过。那是一次显式的、diff 里看得见的退役决定，而不是悄悄
+// 消失。旧写法要求改门禁脚本本身，强度差别只在这一步的显眼程度。
 const REQUIRED_TRUTH_ANCHORS = ["README.md", "docs/项目基础/文档清单.md"];
 
 // pnpm 自带子命令，不是 package script；还有 `pnpm 11` 这种版本号写法。
@@ -144,55 +151,118 @@ function collectDocumentInventoryFindings(rootDir, trackedDocs) {
     }));
 }
 
+const INVENTORY_PATH = "docs/项目基础/文档清单.md";
+
+/**
+ * One inventory row: `| \`path\` | \`label\`, \`label\` | notes |`.
+ *
+ * Cells are parsed positionally rather than by searching the whole line. A
+ * line-wide `includes` lets a row's notes reclassify a different document —
+ * mention `\`docs/current.md\`` in a `historical-proof` row and the real
+ * current doc silently drops out of every derived check.
+ */
+function parseInventoryRow(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|")) return null;
+
+  const cells = trimmed
+    .replace(/^\|/u, "")
+    .replace(/\|$/u, "")
+    .split("|")
+    .map((cell) => cell.trim());
+  if (cells.length < 3) return null;
+  // 表头分隔行。
+  if (/^:?-{3,}:?$/u.test(cells[0])) return null;
+
+  const registered = cells[0].match(/^`([^`]+)`$/u)?.[1];
+  if (!registered) return { malformed: cells[0] };
+
+  return {
+    registered,
+    labels: new Set(
+      [...cells[1].matchAll(/`([^`]+)`/gu)].map((match) => match[1]),
+    ),
+  };
+}
+
+function isSeparatorRow(line) {
+  return /^\|(?:\s*:?-{3,}:?\s*\|)+$/u.test(line.trim());
+}
+
+function collectInventoryRows(rootDir) {
+  const lines = readTruthFile(rootDir, INVENTORY_PATH).split("\n");
+
+  return lines
+    .map((line, index) =>
+      // 表头行的下一行是分隔行，这是 Markdown 表格里表头的定义。
+      isSeparatorRow(lines[index + 1] ?? "") ? null : parseInventoryRow(line),
+    )
+    .filter(Boolean);
+}
+
 /**
  * The other direction: the inventory registers a reason for every tracked doc,
- * so a row whose file is gone is a doc that was deleted without anyone noticing
- * the registry still vouches for it. `collectDocumentInventoryFindings` only
- * walks tracked → registered.
+ * so a row whose file is gone is a doc that was deleted while the registry
+ * still vouches for it. `collectDocumentInventoryFindings` only walks
+ * tracked → registered.
  */
 function collectInventoryPathFindings(rootDir) {
-  const inventoryPath = "docs/项目基础/文档清单.md";
-  const inventory = readTruthFile(rootDir, inventoryPath);
   const findings = [];
 
-  for (const line of inventory.split("\n")) {
-    const cells = line
-      .trim()
-      .replace(/^\|/u, "")
-      .replace(/\|$/u, "")
-      .split("|")
-      .map((cell) => cell.trim());
-    const registered = cells[0]?.match(/^`(docs\/[^`]+)`$/u)?.[1];
-    if (!registered) continue;
-    if (registered.endsWith("/")) continue;
-    if (fs.existsSync(path.join(rootDir, registered))) continue;
+  for (const row of collectInventoryRows(rootDir)) {
+    // 第一格解析不出反引号路径的行不能静默跳过：它读起来仍然像一条登记，
+    // 但两个方向的对账都看不见它。
+    if (row.malformed !== undefined) {
+      findings.push({
+        file: INVENTORY_PATH,
+        error: `inventory row does not name a backticked path "${row.malformed}"`,
+      });
+      continue;
+    }
+    // 目录行也要查——目录连同内容一起删掉、登记行留着，同样是清单在替一个
+    // 不存在的东西背书。
+    if (fs.existsSync(path.join(rootDir, row.registered))) continue;
 
     findings.push({
-      file: inventoryPath,
-      error: `inventory registers a document that no longer exists "${registered}"`,
+      file: INVENTORY_PATH,
+      error: `inventory registers a path that no longer exists "${row.registered}"`,
     });
   }
 
   return findings;
 }
 
-function inventoryMarksCurrent(inventory, relativePath) {
-  return inventory
-    .split("\n")
-    .some(
-      (line) =>
-        line.includes(`\`${relativePath}\``) && line.includes("`current-"),
-    );
+/**
+ * 规则文件必须在清单里登记。
+ *
+ * 这条是删除方向的守卫，不是整洁癖。`.claude/rules/*.md` 靠 frontmatter 的
+ * `paths` 自动加载，删掉一个，它就只是安静地不再生效——没有 import 断裂、
+ * 没有测试变红。登记之后，删文件必须同时删登记行，那是 diff 里看得见的一笔；
+ * 只删文件的话，上面的 inventory→磁盘 对账会立刻报出来。
+ */
+function collectRuleFileInventoryFindings(rootDir) {
+  const registered = new Set(
+    collectInventoryRows(rootDir)
+      .filter((row) => row.registered !== undefined)
+      .map((row) => row.registered),
+  );
+
+  return collectMarkdownFiles(rootDir, ".claude/rules")
+    .filter((file) => !registered.has(file))
+    .map((file) => ({
+      file: INVENTORY_PATH,
+      error: `rule file is missing from inventory "${file}"`,
+    }));
 }
 
-function inventoryMarksHistoricalProof(inventory, relativePath) {
-  return inventory
-    .split("\n")
-    .some(
-      (line) =>
-        line.includes(`\`${relativePath}\``) &&
-        line.includes("`historical-proof`"),
-    );
+/** 一个文档自己那行的标签，不看别人行里怎么提到它。 */
+function getInventoryLabels(rows, relativePath) {
+  const labels = new Set();
+  for (const row of rows) {
+    if (row.registered !== relativePath) continue;
+    for (const label of row.labels) labels.add(label);
+  }
+  return labels;
 }
 
 function normalizeDocumentedRepoPath(rawPath) {
@@ -224,15 +294,35 @@ function documentedRepoPathExists(rootDir, documentedPath) {
   }
 }
 
-// 显式豁免：默认所有反引号 src / tests / docs / .claude 路径都必须存在；只有
-// 行内带 truth-docs:allow-missing 标记（HTML 注释形式）的行允许路径缺失。
-// 混合句（同行既有活路径又有故意缺失路径）应拆句后再打标记。
-const ALLOW_MISSING_MARKER = "truth-docs:allow-missing";
+// 显式豁免：默认所有反引号 src / tests / docs / .claude 路径都必须存在。
+// 标记必须点名它豁免哪条路径：
+//
+//   <!-- truth-docs:allow-missing docs/plans/** -->
+//
+// 整行豁免不行。混合句里既有故意缺失的路径又有当前活路径，整行豁免会把活
+// 路径一起放过，后面往同一行塞任何坏路径都不会被发现。
+const ALLOW_MISSING_MARKER =
+  /truth-docs:allow-missing\s+([^\s>]+(?:\s+[^\s>]+)*?)\s*-->/gu;
 
-function lineAllowsMissingDocumentedPath(content, lineStart, matchIndex) {
+function collectAllowedMissingPaths(line) {
+  const allowed = new Set();
+  for (const match of line.matchAll(ALLOW_MISSING_MARKER)) {
+    for (const documentedPath of match[1].split(/\s+/u)) {
+      allowed.add(documentedPath.replace(/^`|`$/gu, ""));
+    }
+  }
+  return allowed;
+}
+
+function lineAllowsMissingDocumentedPath(
+  content,
+  lineStart,
+  matchIndex,
+  documentedPath,
+) {
   const lineEnd = content.indexOf("\n", matchIndex);
   const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
-  return line.includes(ALLOW_MISSING_MARKER);
+  return collectAllowedMissingPaths(line).has(documentedPath);
 }
 
 /**
@@ -246,19 +336,22 @@ function lineAllowsMissingDocumentedPath(content, lineStart, matchIndex) {
  * `AGENTS.md`).
  */
 function collectCurrentDocumentedFiles(rootDir) {
-  const inventoryPath = path.join(rootDir, "docs/项目基础/文档清单.md");
-  if (!fs.existsSync(inventoryPath)) return [];
-  const inventory = readTruthFile(rootDir, "docs/项目基础/文档清单.md");
+  if (!fs.existsSync(path.join(rootDir, INVENTORY_PATH))) return [];
+  const rows = collectInventoryRows(rootDir);
 
   return [
     "README.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
-    ...collectTrackedMarkdownDocs(rootDir).filter(
-      (file) =>
-        inventoryMarksCurrent(inventory, file) &&
-        !inventoryMarksHistoricalProof(inventory, file) &&
-        !file.startsWith("docs/技术难题/整库审查2026-07/"),
-    ),
+    ...collectTrackedMarkdownDocs(rootDir).filter((file) => {
+      // 同时挂 current-* 和 historical-proof 的文档算当前文档：它自己声明
+      // 里面有仍在用的参考。以前"带 historical-proof 就排除"，等于改一个
+      // 标签就能让整份文档退出路径和命令对账。
+      const labels = getInventoryLabels(rows, file);
+      return (
+        [...labels].some((label) => label.startsWith("current-")) &&
+        !file.startsWith("docs/技术难题/整库审查2026-07/")
+      );
+    }),
   ];
 }
 
@@ -279,7 +372,14 @@ function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
       if (!documentedPath) continue;
       if (documentedRepoPathExists(rootDir, documentedPath)) continue;
       const lineStart = content.lastIndexOf("\n", match.index) + 1;
-      if (lineAllowsMissingDocumentedPath(content, lineStart, match.index)) {
+      if (
+        lineAllowsMissingDocumentedPath(
+          content,
+          lineStart,
+          match.index,
+          documentedPath,
+        )
+      ) {
         continue;
       }
       findings.push({
@@ -511,15 +611,23 @@ function collectPnpmPackageScriptCommands(content) {
   const matches = content.matchAll(/\bpnpm\s+(run\s+)?([A-Za-z0-9:_-]+)/g);
 
   for (const match of matches) {
+    const explicitRun = match[1] !== undefined;
     const scriptName = match[2];
-    if (PNPM_BUILTIN_COMMANDS.has(scriptName)) continue;
-    // `pnpm 11`：文档在写运行时版本要求，不是在调脚本。
-    if (/^\d/u.test(scriptName)) continue;
+    // `pnpm run audit` 明确说了要跑 package script。裸 `pnpm audit` 才是
+    // pnpm 自带子命令，两者不能一起跳过——否则把内置名写在 run 后面就永远
+    // 不会被查出来。
+    if (!explicitRun && PNPM_BUILTIN_COMMANDS.has(scriptName)) continue;
+    // `pnpm 11`：文档在写运行时版本要求，不是在调脚本。只放行纯版本号，
+    // 数字开头的真实脚本名（`2fa:check`）仍然要查。
+    if (/^\d[\d.]*$/u.test(scriptName)) continue;
 
     const lineStart = content.lastIndexOf("\n", match.index) + 1;
     const lineEnd = content.indexOf("\n", match.index);
     const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
     if (line.includes("没有 canonical")) continue;
+    // 记录一个已退役脚本时用 `<!-- truth-docs:allow-missing pnpm:名字 -->`，
+    // 和路径豁免同一套标记，同样必须点名，不是整行放行。
+    if (collectAllowedMissingPaths(line).has(`pnpm:${scriptName}`)) continue;
 
     commands.push({ line, scriptName });
   }
@@ -540,6 +648,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
   }
 
   failures.push(...collectInventoryPathFindings(rootDir));
+  failures.push(...collectRuleFileInventoryFindings(rootDir));
 
   failures.push(...collectMarkdownTruthFindings(rootDir));
   failures.push(...collectRuleFrontmatterGlobFindings(rootDir));

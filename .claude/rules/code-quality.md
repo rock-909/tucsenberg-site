@@ -124,8 +124,8 @@ enabling the global flag.
 - Build: no errors
 
 Production code must not import `src/test/**`.
-Production code must not import `src/testing/**`. <!-- truth-docs:allow-missing -->
-Production code must not import `src/constants/test-*`. <!-- truth-docs:allow-missing -->
+Production code must not import `src/testing/**`. <!-- truth-docs:allow-missing src/testing/** -->
+Production code must not import `src/constants/test-*`. <!-- truth-docs:allow-missing src/constants/test-* -->
 
 ## Upgrade drift
 

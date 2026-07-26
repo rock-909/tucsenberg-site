@@ -34,7 +34,7 @@ a regression in this baseline.
 - Do not add broad `ignore.rules` or whole-directory `ignore.files` entries for convenience.
 - Generated artifacts such as `storybook-static/**` are not project source and
   must not count toward source-quality totals.
-- `.claude/skills/**` and `.codex/skills/**` are tool-owned bundles. Do not <!-- truth-docs:allow-missing -->
+- `.claude/skills/**` and `.codex/skills/**` are tool-owned bundles. Do not <!-- truth-docs:allow-missing .claude/skills/** -->
   treat bundled third-party/runtime scripts inside those directories as project
   source.
 - public-surface `knip/exports` and `knip/types` overrides require owner/API-surface review.

@@ -4,7 +4,7 @@
 
 `docs/` 只保留长期有用的项目基础、技术难题、设计约束和决策记录。Superpowers 只使用当前上游默认的 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**` 两个输出口。
 
-Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`。早期上游历史曾使用 `docs/plans/**`；本项目不恢复这个旧路径，也不把本地 `.superpowers/**` 当作可提交文档路径。 <!-- truth-docs:allow-missing -->
+Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`。早期上游历史曾使用 `docs/plans/**`；本项目不恢复这个旧路径，也不把本地 `.superpowers/**` 当作可提交文档路径。 <!-- truth-docs:allow-missing docs/plans/** -->
 
 ## 先看哪里
 

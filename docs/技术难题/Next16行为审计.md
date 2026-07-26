@@ -52,7 +52,10 @@ proved with current code and fresh browser evidence.
 
 #### Desktop language menu
 
-- `src/components/layout/header-language-menu.tsx` owns its own `isOpen` state.
+站点后来固定为 English-only，这个组件已经删除。以下是当时的行为记录，不是
+当前实现。
+
+- `src/components/layout/header-language-menu.tsx` owns its own `isOpen` state. <!-- truth-docs:allow-missing src/components/layout/header-language-menu.tsx -->
 - Clicking a language item explicitly calls `setIsOpen(false)`.
 - Route pathname changes now also close the menu and refresh locale links from
   the real browser pathname.

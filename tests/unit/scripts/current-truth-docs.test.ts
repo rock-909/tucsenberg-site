@@ -274,6 +274,63 @@ describe("current-truth docs guard", () => {
     );
   });
 
+  // `pnpm run audit` 说的是"跑名叫 audit 的 package script"，不是 pnpm 自带的
+  // audit 子命令。两者一起跳过，等于把内置名写在 run 后面就永远查不出来。
+  it("still checks a package script that shares a name with a pnpm builtin", () => {
+    const files = createValidFiles();
+    files["package.json"] = JSON.stringify({
+      scripts: { "brand:check": "ok" },
+    });
+    files[".claude/rules/conventions.md"] = [
+      "pnpm audit",
+      "pnpm run audit",
+    ].join("\n");
+
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    const findings = collectCurrentTruthDocFindings(repoDir);
+
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        error: 'unknown package script command "pnpm audit"',
+      }),
+    );
+    expect(
+      findings.filter((finding) =>
+        finding.error.includes('unknown package script command "pnpm audit"'),
+      ),
+    ).toHaveLength(1);
+  });
+
+  // `pnpm 11` 是在写运行时版本要求；`pnpm 2fa:check` 是真的脚本名。
+  it("skips a bare version number but not a script name that starts with a digit", () => {
+    const files = createValidFiles();
+    files["package.json"] = JSON.stringify({
+      scripts: { "brand:check": "ok" },
+    });
+    files[".claude/rules/conventions.md"] = [
+      "pnpm 11.1.0",
+      "pnpm 2fa:check",
+    ].join("\n");
+
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    const findings = collectCurrentTruthDocFindings(repoDir);
+
+    expect(findings).not.toContainEqual(
+      expect.objectContaining({
+        error: expect.stringContaining('"pnpm 11'),
+      }),
+    );
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        error: 'unknown package script command "pnpm 2fa:check"',
+      }),
+    );
+  });
+
   it("rejects a tracked document that is missing from the inventory", () => {
     const repoDir = createTempRepo({
       "docs/项目基础/文档清单.md":
@@ -391,16 +448,52 @@ describe("current-truth docs guard", () => {
     }
   });
 
-  it("skips missing paths only on lines with the allow-missing marker", () => {
+  it("skips a missing path the allow-missing marker names", () => {
     const repoDir = createTempRepo({
       ...minimalInventoryFixture,
       "doc.md":
-        "Do not create `src/lib/definitely-missing.ts` <!-- truth-docs:allow-missing -->.\n",
+        "Do not create `src/lib/definitely-missing.ts`. <!-- truth-docs:allow-missing src/lib/definitely-missing.ts -->\n",
     });
     try {
       expect(collectBacktickedRepoPathFindings(repoDir, ["doc.md"])).toEqual(
         [],
       );
+    } finally {
+      moveTempRepoToTrash(repoDir);
+    }
+  });
+
+  // 整行豁免会把同一句里的活路径一起放过，后面往这行塞任何坏路径都不会被
+  // 发现。标记必须点名，没点名的就不算豁免。
+  it("does not exempt a path the marker did not name", () => {
+    const repoDir = createTempRepo({
+      ...minimalInventoryFixture,
+      "doc.md":
+        "Do not create `src/lib/definitely-missing.ts`; proof in `docs/typo-here.md`. <!-- truth-docs:allow-missing src/lib/definitely-missing.ts -->\n",
+    });
+    try {
+      expect(collectBacktickedRepoPathFindings(repoDir, ["doc.md"])).toEqual([
+        {
+          file: "doc.md",
+          error:
+            'documented repository path does not exist "docs/typo-here.md"',
+        },
+      ]);
+    } finally {
+      moveTempRepoToTrash(repoDir);
+    }
+  });
+
+  it("treats a bare marker as naming nothing", () => {
+    const repoDir = createTempRepo({
+      ...minimalInventoryFixture,
+      "doc.md":
+        "Do not create `src/lib/definitely-missing.ts`. <!-- truth-docs:allow-missing -->\n",
+    });
+    try {
+      expect(
+        collectBacktickedRepoPathFindings(repoDir, ["doc.md"]),
+      ).toHaveLength(1);
     } finally {
       moveTempRepoToTrash(repoDir);
     }

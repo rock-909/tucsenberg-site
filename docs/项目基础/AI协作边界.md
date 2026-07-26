@@ -17,7 +17,7 @@ Upstream `obra/superpowers` currently writes specs and implementation plans to:
 - `docs/superpowers/specs/**`
 - `docs/superpowers/plans/**`
 
-Older upstream history used `docs/plans/**`. This project follows the current <!-- truth-docs:allow-missing -->
+Older upstream history used `docs/plans/**`. This project follows the current <!-- truth-docs:allow-missing docs/plans/** -->
 upstream default, not the older path.
 
 Local `.superpowers/**` state is not a repo document path and must not be
@@ -83,5 +83,5 @@ Do not treat old workflow outputs or old plans as Tucsenberg product truth.
 - `.superpowers/`
 - `.omx/`
 - `.context/`
-- `.claude/settings.local.json` <!-- truth-docs:allow-missing -->
+- `.claude/settings.local.json` <!-- truth-docs:allow-missing .claude/settings.local.json -->
 - real `.mcp.json`
