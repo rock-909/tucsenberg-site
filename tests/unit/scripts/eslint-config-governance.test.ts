@@ -20,6 +20,15 @@ interface EslintConfigBlock {
   rules?: Record<string, unknown>;
 }
 
+/**
+ * 仓库自己写的配置块。第三方 preset（`@eslint/js/recommended`、
+ * `typescript-eslint/recommended` 之类）名字里带 `/`，覆盖它们是正常做法，
+ * 不参与下面的重复检测。
+ */
+function isRepoAuthored(block: EslintConfigBlock): boolean {
+  return /^[a-z][a-z0-9-]*$/u.test(block.name ?? "");
+}
+
 async function loadEslintConfig(): Promise<EslintConfigBlock[]> {
   const moduleUrl = `${pathToFileURL(ESLINT_CONFIG_PATH).href}?test=${Date.now()}`;
   const configModule = (await import(moduleUrl)) as {
@@ -86,6 +95,35 @@ describe("eslint config governance", () => {
         "off",
       );
     }
+  });
+
+  // 两个作用域逐字相同的块设置同一条规则时，前面那条永远不会生效——它读起来
+  // 像一道防线，实际什么都不拦。这个仓库里出现过四次：useBreakpoint 导入禁令、
+  // ForIn/Labeled/With 语法禁令、测试文件的 detect-object-injection error、
+  // 以及重复声明的 no-eval 三件套。守的是"配置里写着的规则真的生效"。
+  // 只认逐字相同的 files 作用域：一个块用更宽的 glob 盖住另一个（`**/*.ts`
+  // 盖 `src/lib/**/*.ts`）它抓不到，那要靠逐文件对账，成本不在一个量级。
+  it("never lets one block silently replace another at the identical files scope", async () => {
+    const config = await loadEslintConfig();
+    const seen = new Map<string, string>();
+    const shadowed: string[] = [];
+
+    for (const block of config) {
+      if (!isRepoAuthored(block) || !block.rules) continue;
+
+      const scope = JSON.stringify(block.files ?? "ALL_FILES");
+      for (const rule of Object.keys(block.rules)) {
+        const key = `${scope}::${rule}`;
+        const earlier = seen.get(key);
+
+        if (earlier) {
+          shadowed.push(`${rule} @ ${scope}: ${earlier} → ${block.name}`);
+        }
+        seen.set(key, block.name ?? "(unnamed)");
+      }
+    }
+
+    expect(shadowed).toEqual([]);
   });
 
   it("keeps legacy script baselines file-specific instead of directory-wide", async () => {

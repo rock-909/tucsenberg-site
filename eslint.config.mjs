@@ -193,8 +193,8 @@ const eslintConfig = [
     },
   },
 
-  // 测试目录放宽复杂度。jest 导入禁令在 test-files-final-override 里，因为后面
-  // 两个测试块都会把 no-restricted-imports 整条关掉，写在这里的禁令永远不生效。
+  // 测试目录放宽复杂度。jest 导入禁令统一写在 test-files-final-override，
+  // 那是测试文件这个作用域上唯一设置 no-restricted-imports 的地方。
   {
     name: "tests-relaxed",
     files: [
@@ -205,35 +205,6 @@ const eslintConfig = [
     rules: {
       complexity: "off",
       "max-params": "off",
-    },
-  },
-
-  // CSS-First Responsive Design - Discourage useBreakpoint for layout
-  {
-    name: "css-first-responsive-design",
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    ignores: [
-      // Allow useBreakpoint in its own file and tests
-      "**/hooks/use-breakpoint.ts",
-      "**/hooks/__tests__/use-breakpoint.test.ts",
-      // Legacy ResponsiveLayout tests during migration
-      "**/components/__tests__/responsive-layout.test.tsx",
-    ],
-    rules: {
-      "no-restricted-imports": [
-        "warn",
-        {
-          paths: [
-            {
-              name: "@/hooks/use-breakpoint",
-              message:
-                "⚠️ CSS-First Responsive: Prefer Tailwind responsive classes (sm:, md:, lg:) for layout. " +
-                "useBreakpoint is approved only for: (1) interaction logic requiring width detection, " +
-                "(2) analytics/tracking.",
-            },
-          ],
-        },
-      ],
     },
   },
 
@@ -347,12 +318,9 @@ const eslintConfig = [
       "no-octal-escape": "error",
       "no-param-reassign": "error",
       "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
-      "no-restricted-syntax": [
-        "error",
-        "ForInStatement",
-        "LabeledStatement",
-        "WithStatement",
-      ],
+      // no-restricted-syntax 统一由 architecture-refactor-rules 设置。这里原本还
+      // 禁了 ForInStatement / LabeledStatement / WithStatement，三条分别由本块的
+      // guard-for-in、no-labels、no-with 覆盖，且在生产代码上早被后面的块整条替换掉。
       "no-shadow": "error",
       "no-ternary": "off", // 允许三元运算符，但要谨慎使用
       "no-underscore-dangle": "error",
@@ -495,22 +463,19 @@ const eslintConfig = [
       "require-await": "off", // async测试模式
       "no-throw-literal": "off", // 测试异常抛出
       "no-underscore-dangle": "off", // 私有属性测试访问
-      "no-restricted-imports": "off", // 测试文件允许相对路径导入
+      // no-restricted-imports 与 @typescript-eslint/no-unused-vars 都由
+      // test-files-final-override 设置（作用域与本块逐字相同），这里不重复。
 
       // 🎯 行业标准：测试文件允许any类型（Mock对象复杂性）
       "@typescript-eslint/no-explicit-any": "off", // 测试文件允许any类型 - 符合行业标准
-      "@typescript-eslint/no-unused-vars": [
-        "error", // 保持严格标准，符合coding-standards.md要求
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ], // 强制清理未使用变量，保持代码质量
       "no-unused-vars": [
         "error", // 保持严格标准，与TypeScript规则一致
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ], // 强制清理未使用变量，保持代码整洁
       "@typescript-eslint/no-require-imports": "off", // 测试中可能需要require导入
 
-      // 安全规则统一为error级别
-      "security/detect-object-injection": "error", // 测试数据访问，统一为error级别
+      // detect-object-injection 在 test-files-final-override 里对同一批文件关掉了，
+      // 测试里动态取键是常态；这里不再声明一条永远不生效的 error。
       "security/detect-unsafe-regex": "warn", // 测试正则表达式
       "no-script-url": "off", // 测试URL可能需要
 
@@ -692,10 +657,8 @@ const eslintConfig = [
       "func-names": ["warn", "as-needed"], // 鼓励命名函数，便于调试
       "no-anonymous-default-export": "off", // 允许匿名默认导出（React组件）
 
-      // 安全增强（针对AI编码）
-      "no-eval": "error", // 严格禁止eval
-      "no-implied-eval": "error", // 禁止隐式eval
-      "no-new-func": "error", // 禁止Function构造函数
+      // 安全增强（eval / implied-eval / Function 构造函数的禁令在
+      // ultra-strict-quality-config，作用域与本块完全相同，不在这里重复设置）
 
       // 类型安全增强（仅适用于TypeScript文件）
       "@typescript-eslint/no-unused-expressions": "error", // 禁止未使用的表达式
