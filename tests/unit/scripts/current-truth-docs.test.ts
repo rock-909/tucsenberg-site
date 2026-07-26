@@ -12,6 +12,7 @@ import {
   collectCurrentTruthDocFindings,
   collectDocumentInventoryFindings,
   collectGuardrailRegistryFindings,
+  collectInventoryPathFindings,
   findOutOfOrderCommand,
   getReleaseProofDocsCommandBlock,
 } from "../../../scripts/starter-checks.js";
@@ -62,6 +63,10 @@ function createValidFiles(): Record<string, string> {
   ]) {
     files[file] = "safe baseline text";
   }
+
+  // 清单必须是一张真表格：表头 + 分隔行，后面追加的才是表体登记行。
+  files["docs/项目基础/文档清单.md"] +=
+    "\n\n| 文件 | 标签 | 作用 |\n| --- | --- | --- |";
 
   for (const historicalPath of HISTORICAL_DERIVATION_DOCS) {
     if (!(historicalPath in files)) continue;
@@ -266,12 +271,11 @@ describe("current-truth docs guard", () => {
         error: 'unknown package script command "pnpm brand:check"',
       }),
     );
-    expect(findings).toContainEqual(
-      expect.objectContaining({
-        file: ".claude/rules/conventions.md",
-        error: 'unknown package script command "pnpm missing:script"',
-      }),
-    );
+    expect(findings).toContainEqual({
+      file: ".claude/rules/conventions.md",
+      error:
+        'unknown package script command "pnpm missing:script" in "pnpm missing:script"',
+    });
   });
 
   // `pnpm run audit` 说的是"跑名叫 audit 的 package script"，不是 pnpm 自带的
@@ -291,20 +295,72 @@ describe("current-truth docs guard", () => {
 
     const findings = collectCurrentTruthDocFindings(repoDir);
 
-    expect(findings).toContainEqual(
-      expect.objectContaining({
-        error: 'unknown package script command "pnpm audit"',
-      }),
-    );
+    // 报的必须是 `pnpm run audit` 那一行。只断言"有一条 pnpm audit 错误、
+    // 共 1 条"证明不了方向：把内置名跳过的条件写反，报出来的会变成裸
+    // `pnpm audit` 那一行，数量还是 1 条，测试照样绿。
     expect(
       findings.filter((finding) =>
-        finding.error.includes('unknown package script command "pnpm audit"'),
+        finding.error.startsWith('unknown package script command "pnpm audit"'),
       ),
-    ).toHaveLength(1);
+    ).toEqual([
+      {
+        file: ".claude/rules/conventions.md",
+        error:
+          'unknown package script command "pnpm audit" in "pnpm run audit"',
+      },
+    ]);
   });
 
-  // `pnpm 11` 是在写运行时版本要求；`pnpm 2fa:check` 是真的脚本名。
-  it("skips a bare version number but not a script name that starts with a digit", () => {
+  // `pnpm run --if-present audit` 是合法写法。把 `--if-present` 当脚本名报错，
+  // 只会逼人删掉正确的 flag 或者往 package.json 里塞一个假脚本。
+  it("does not treat a pnpm flag as a script name", () => {
+    const files = createValidFiles();
+    files["package.json"] = JSON.stringify({
+      scripts: { "brand:check": "ok" },
+    });
+    files[".claude/rules/conventions.md"] = "pnpm run --if-present audit";
+
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    expect(collectCurrentTruthDocFindings(repoDir)).not.toContainEqual(
+      expect.objectContaining({
+        error: expect.stringContaining("unknown package script command"),
+      }),
+    );
+  });
+
+  // `pnpm vitest run x`：pnpm 找不到同名脚本时会跑已安装依赖的 bin。
+  it("accepts a pnpm invocation of a declared dependency binary", () => {
+    const files = createValidFiles();
+    files["package.json"] = JSON.stringify({
+      scripts: { "brand:check": "ok" },
+      devDependencies: { vitest: "^3.0.0" },
+    });
+    files[".claude/rules/conventions.md"] = [
+      "pnpm vitest run x",
+      "pnpm definitely-not-installed",
+    ].join("\n");
+
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    const findings = collectCurrentTruthDocFindings(repoDir).filter((finding) =>
+      finding.error.startsWith("unknown package script command"),
+    );
+
+    expect(findings).toEqual([
+      {
+        file: ".claude/rules/conventions.md",
+        error:
+          'unknown package script command "pnpm definitely-not-installed" in "pnpm definitely-not-installed"',
+      },
+    ]);
+  });
+
+  // 裸 `pnpm 11.1.0` 是在写运行时版本要求；`pnpm 2fa:check` 是真的脚本名；
+  // 显式 `pnpm run 11` 是在跑一个叫 11 的脚本，版本号放行不该盖到它头上。
+  it("skips a bare version number but not a digit-leading script name", () => {
     const files = createValidFiles();
     files["package.json"] = JSON.stringify({
       scripts: { "brand:check": "ok" },
@@ -312,23 +368,20 @@ describe("current-truth docs guard", () => {
     files[".claude/rules/conventions.md"] = [
       "pnpm 11.1.0",
       "pnpm 2fa:check",
+      "pnpm run 11",
     ].join("\n");
 
     const repoDir = createTempRepo(files);
     tempDirs.push(repoDir);
 
-    const findings = collectCurrentTruthDocFindings(repoDir);
+    const findings = collectCurrentTruthDocFindings(repoDir).filter((finding) =>
+      finding.error.startsWith("unknown package script command"),
+    );
 
-    expect(findings).not.toContainEqual(
-      expect.objectContaining({
-        error: expect.stringContaining('"pnpm 11'),
-      }),
-    );
-    expect(findings).toContainEqual(
-      expect.objectContaining({
-        error: 'unknown package script command "pnpm 2fa:check"',
-      }),
-    );
+    expect(findings.map((finding) => finding.error)).toEqual([
+      'unknown package script command "pnpm 2fa:check" in "pnpm 2fa:check"',
+      'unknown package script command "pnpm 11" in "pnpm run 11"',
+    ]);
   });
 
   it("rejects a tracked document that is missing from the inventory", () => {
@@ -385,6 +438,76 @@ describe("current-truth docs guard", () => {
         error:
           'tracked document is missing from inventory "docs/unclassified.json"',
       },
+    ]);
+  });
+
+  // 表体中间插一条分隔行，diff 上只多了一条 `| --- |`，看起来什么都没改。
+  // 旧的"下一行像分隔行就当表头"会把它上面那条真登记行整条丢掉，那份文档
+  // 同时退出两个方向的对账，比改 lifecycle 标签更难在 review 里看出来。
+  it("does not let a stray separator row erase the registration above it", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md": [
+        "| 文件 | 标签 | 作用 |",
+        "| --- | --- | --- |",
+        "| `docs/current.md` | `current-reference` | Current. |",
+        "| --- | --- | --- |",
+      ].join("\n"),
+      "docs/current.md": "# Current",
+    });
+    tempDirs.push(repoDir);
+
+    expect(
+      collectDocumentInventoryFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([]);
+    expect(collectInventoryPathFindings(repoDir)).toEqual([
+      {
+        file: "docs/项目基础/文档清单.md",
+        error:
+          'inventory row is not a usable registration "| --- | --- | --- |"',
+      },
+    ]);
+  });
+
+  // 省略首尾竖线也是合法 Markdown 表格。两个方向用两套 parser 时，这种写法
+  // 能同时骗过"已登记"和瞒过"登记指向的路径"，文档就此静默退出全部派生检查。
+  it("reads both reconciliation directions with the same row parser", () => {
+    const repoDir = createTempRepo({
+      "docs/项目基础/文档清单.md": [
+        "文件 | 标签 | 作用",
+        "--- | --- | ---",
+        "`docs/current.md` | `current-reference` | Current.",
+      ].join("\n"),
+      "docs/current.md": "# Current",
+    });
+    tempDirs.push(repoDir);
+
+    expect(
+      collectDocumentInventoryFindings(repoDir, ["docs/current.md"]),
+    ).toEqual([
+      {
+        file: "docs/项目基础/文档清单.md",
+        error: 'tracked document is missing from inventory "docs/current.md"',
+      },
+    ]);
+  });
+
+  // agent / command 定义和规则文件同一类：靠"放在这个目录里"生效，删掉只是
+  // 安静失效，没有 import 断裂也没有测试变红。
+  it("requires .claude agent and command files to be inventoried", () => {
+    const files = createValidFiles();
+    files[".claude/agents/some-agent.md"] = "# Agent";
+    files[".claude/commands/some-command.md"] = "# Command";
+
+    const repoDir = createTempRepo(files);
+    tempDirs.push(repoDir);
+
+    const findings = collectCurrentTruthDocFindings(repoDir)
+      .filter((finding) => finding.error.startsWith(".claude file is missing"))
+      .map((finding) => finding.error);
+
+    expect(findings).toEqual([
+      '.claude file is missing from inventory ".claude/agents/some-agent.md"',
+      '.claude file is missing from inventory ".claude/commands/some-command.md"',
     ]);
   });
 
@@ -489,6 +612,23 @@ describe("current-truth docs guard", () => {
       ...minimalInventoryFixture,
       "doc.md":
         "Do not create `src/lib/definitely-missing.ts`. <!-- truth-docs:allow-missing -->\n",
+    });
+    try {
+      expect(
+        collectBacktickedRepoPathFindings(repoDir, ["doc.md"]),
+      ).toHaveLength(1);
+    } finally {
+      moveTempRepoToTrash(repoDir);
+    }
+  });
+
+  // 标记必须真是 HTML 注释。正文里随手写出这串字也能豁免的话，"点名"就只是
+  // 精确字符串匹配，不是一次写在注释里、看得见的决定。
+  it("ignores the marker wording outside an html comment", () => {
+    const repoDir = createTempRepo({
+      ...minimalInventoryFixture,
+      "doc.md":
+        "Do not create `src/lib/definitely-missing.ts` truth-docs:allow-missing src/lib/definitely-missing.ts -->\n",
     });
     try {
       expect(

@@ -117,41 +117,22 @@ function collectTrackedMarkdownDocs(rootDir) {
   return collectTrackedDocFiles(rootDir).filter((file) => file.endsWith(".md"));
 }
 
-function inventoryHasFileEntry(inventory, file) {
-  const expectedCell = `\`${file}\``;
-  return inventory.split("\n").some((line) => {
-    const cells = line
-      .trim()
-      .replace(/^\|/u, "")
-      .replace(/\|$/u, "")
-      .split("|")
-      .map((cell) => cell.trim());
-    if (cells.length < 3 || cells[0] !== expectedCell) return false;
-
-    const lifecycleClasses = [...cells[1].matchAll(/`([^`]+)`/gu)].map(
-      (match) => match[1],
-    );
-    const hasValidClasses =
-      lifecycleClasses.length > 0 &&
-      lifecycleClasses.every((value) => DOCUMENT_LIFECYCLE_CLASSES.has(value));
-    return hasValidClasses && cells.slice(2).join("|").trim().length > 0;
-  });
-}
-
-function collectDocumentInventoryFindings(rootDir, trackedDocs) {
-  const inventoryPath = "docs/项目基础/文档清单.md";
-  const inventory = readTruthFile(rootDir, inventoryPath);
-  const docs = trackedDocs ?? collectTrackedDocFiles(rootDir);
-
-  return docs
-    .filter((file) => !inventoryHasFileEntry(inventory, file))
-    .map((file) => ({
-      file: inventoryPath,
-      error: `tracked document is missing from inventory "${file}"`,
-    }));
-}
-
 const INVENTORY_PATH = "docs/项目基础/文档清单.md";
+
+function splitRowCells(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|")) return null;
+
+  return trimmed
+    .replace(/^\|/u, "")
+    .replace(/\|$/u, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isSeparatorCells(cells) {
+  return cells.every((cell) => /^:?-{3,}:?$/u.test(cell));
+}
 
 /**
  * One inventory row: `| \`path\` | \`label\`, \`label\` | notes |`.
@@ -161,18 +142,8 @@ const INVENTORY_PATH = "docs/项目基础/文档清单.md";
  * mention `\`docs/current.md\`` in a `historical-proof` row and the real
  * current doc silently drops out of every derived check.
  */
-function parseInventoryRow(line) {
-  const trimmed = line.trim();
-  if (!trimmed.startsWith("|")) return null;
-
-  const cells = trimmed
-    .replace(/^\|/u, "")
-    .replace(/\|$/u, "")
-    .split("|")
-    .map((cell) => cell.trim());
+function parseInventoryRow(cells) {
   if (cells.length < 3) return null;
-  // 表头分隔行。
-  if (/^:?-{3,}:?$/u.test(cells[0])) return null;
 
   const registered = cells[0].match(/^`([^`]+)`$/u)?.[1];
   if (!registered) return { malformed: cells[0] };
@@ -182,22 +153,80 @@ function parseInventoryRow(line) {
     labels: new Set(
       [...cells[1].matchAll(/`([^`]+)`/gu)].map((match) => match[1]),
     ),
+    notes: cells.slice(2).join("|").trim(),
   };
 }
 
-function isSeparatorRow(line) {
-  return /^\|(?:\s*:?-{3,}:?\s*\|)+$/u.test(line.trim());
+/**
+ * 清单里的登记行。表格边界靠状态机认，不靠"下一行像分隔行"。
+ *
+ * 那条旧规则不看自己在不在表里：往表体中间插一条 `| --- | --- | --- |`，
+ * 它上面那条真登记行就被当成表头丢掉，两个方向的对账同时对这份文档失明——
+ * 而 diff 上只多了一条分隔线，比改 lifecycle 标签更难看出是一次降级。
+ * 现在表头只可能是一张表的第一行，表体里再出现分隔行按格式坏掉报。
+ */
+function collectInventoryRows(rootDir) {
+  if (!fs.existsSync(path.join(rootDir, INVENTORY_PATH))) return [];
+  const rows = [];
+  let position = "outside";
+
+  for (const line of readTruthFile(rootDir, INVENTORY_PATH).split("\n")) {
+    const cells = splitRowCells(line);
+    if (cells === null) {
+      position = "outside";
+      continue;
+    }
+    if (position === "outside") {
+      position = "expect-separator";
+      continue;
+    }
+    if (position === "expect-separator") {
+      // 表头下面不是分隔行，这几行就不是 Markdown 表格，里面写的登记不算数。
+      position = isSeparatorCells(cells) ? "body" : "outside";
+      continue;
+    }
+    if (isSeparatorCells(cells)) {
+      rows.push({ malformed: line.trim() });
+      continue;
+    }
+    const row = parseInventoryRow(cells);
+    if (row) rows.push(row);
+  }
+
+  return rows;
 }
 
-function collectInventoryRows(rootDir) {
-  const lines = readTruthFile(rootDir, INVENTORY_PATH).split("\n");
+/**
+ * 一条登记必须同时满足：点名了反引号路径、标签全部是已知生命周期类、备注非空。
+ *
+ * 两个方向共用这一个判定。以前 tracked→登记 用的是整行 `includes` 式的
+ * `inventoryHasFileEntry`，登记→磁盘 用的是按格位解析的 `parseInventoryRow`，
+ * 两套 parser 对"什么算一条登记"的答案不一样：省略首尾竖线的合法 Markdown
+ * 表格能同时骗过前者、瞒过后者，文档看着已登记，却退出了所有派生检查。
+ */
+function isValidRegistration(row) {
+  return (
+    row.registered !== undefined &&
+    row.labels.size > 0 &&
+    [...row.labels].every((label) => DOCUMENT_LIFECYCLE_CLASSES.has(label)) &&
+    row.notes.length > 0
+  );
+}
 
-  return lines
-    .map((line, index) =>
-      // 表头行的下一行是分隔行，这是 Markdown 表格里表头的定义。
-      isSeparatorRow(lines[index + 1] ?? "") ? null : parseInventoryRow(line),
-    )
-    .filter(Boolean);
+function collectDocumentInventoryFindings(rootDir, trackedDocs) {
+  const registered = new Set(
+    collectInventoryRows(rootDir)
+      .filter(isValidRegistration)
+      .map((row) => row.registered),
+  );
+  const docs = trackedDocs ?? collectTrackedDocFiles(rootDir);
+
+  return docs
+    .filter((file) => !registered.has(file))
+    .map((file) => ({
+      file: INVENTORY_PATH,
+      error: `tracked document is missing from inventory "${file}"`,
+    }));
 }
 
 /**
@@ -215,7 +244,7 @@ function collectInventoryPathFindings(rootDir) {
     if (row.malformed !== undefined) {
       findings.push({
         file: INVENTORY_PATH,
-        error: `inventory row does not name a backticked path "${row.malformed}"`,
+        error: `inventory row is not a usable registration "${row.malformed}"`,
       });
       continue;
     }
@@ -232,26 +261,41 @@ function collectInventoryPathFindings(rootDir) {
   return findings;
 }
 
+// `.claude/` 下靠"放在这个目录里"就生效的 markdown：规则文件按 frontmatter 的
+// `paths` 自动加载，agent / command 定义按文件名被调用，营销上下文按目录约定被
+// 读取。共同点是删掉任何一个都不会有 import 断裂、不会有测试变红，只是安静地
+// 不再生效。`.claude/settings.json` 不在这里：它不是文档，删了会有配置行为差异。
+const CLAUDE_REGISTERED_DIRS = [
+  ".claude/rules",
+  ".claude/agents",
+  ".claude/commands",
+];
+
 /**
- * 规则文件必须在清单里登记。
+ * 这些文件必须在清单里登记。
  *
- * 这条是删除方向的守卫，不是整洁癖。`.claude/rules/*.md` 靠 frontmatter 的
- * `paths` 自动加载，删掉一个，它就只是安静地不再生效——没有 import 断裂、
- * 没有测试变红。登记之后，删文件必须同时删登记行，那是 diff 里看得见的一笔；
- * 只删文件的话，上面的 inventory→磁盘 对账会立刻报出来。
+ * 这条是删除方向的守卫，不是整洁癖。登记之后，删文件必须同时删登记行，那是
+ * diff 里看得见的一笔；只删文件的话，上面的 inventory→磁盘 对账会立刻报出来。
  */
-function collectRuleFileInventoryFindings(rootDir) {
+function collectClaudeFileInventoryFindings(rootDir) {
   const registered = new Set(
     collectInventoryRows(rootDir)
-      .filter((row) => row.registered !== undefined)
+      .filter(isValidRegistration)
       .map((row) => row.registered),
   );
 
-  return collectMarkdownFiles(rootDir, ".claude/rules")
+  return CLAUDE_REGISTERED_DIRS.flatMap((dir) =>
+    collectMarkdownFiles(rootDir, dir),
+  )
+    .concat(
+      fs.existsSync(path.join(rootDir, ".claude/product-marketing-context.md"))
+        ? [".claude/product-marketing-context.md"]
+        : [],
+    )
     .filter((file) => !registered.has(file))
     .map((file) => ({
       file: INVENTORY_PATH,
-      error: `rule file is missing from inventory "${file}"`,
+      error: `.claude file is missing from inventory "${file}"`,
     }));
 }
 
@@ -302,14 +346,16 @@ function documentedRepoPathExists(rootDir, documentedPath) {
 }
 
 // 显式豁免：默认所有反引号 src / tests / docs / .claude 路径都必须存在。
-// 标记必须点名它豁免哪条路径：
+// 标记必须是真正的 HTML 注释，而且必须点名它豁免哪条路径：
 //
 //   <!-- truth-docs:allow-missing docs/plans/** -->
 //
 // 整行豁免不行。混合句里既有故意缺失的路径又有当前活路径，整行豁免会把活
-// 路径一起放过，后面往同一行塞任何坏路径都不会被发现。
+// 路径一起放过，后面往同一行塞任何坏路径都不会被发现。一条标记可以点名多条
+// 路径，因为每条都写在 diff 里；但正文里随手写出这串字也能豁免就不行，所以
+// 前面的 `<!--` 是必需的。
 const ALLOW_MISSING_MARKER =
-  /truth-docs:allow-missing\s+([^\s>]+(?:\s+[^\s>]+)*?)\s*-->/gu;
+  /<!--\s*truth-docs:allow-missing\s+([^\s>]+(?:\s+[^\s>]+)*?)\s*-->/gu;
 
 function collectAllowedMissingPaths(line) {
   const allowed = new Set();
@@ -349,16 +395,20 @@ function collectCurrentDocumentedFiles(rootDir) {
   return [
     "README.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
-    ...collectTrackedMarkdownDocs(rootDir).filter((file) => {
+    ...collectTrackedMarkdownDocs(rootDir).filter((file) =>
       // 同时挂 current-* 和 historical-proof 的文档算当前文档：它自己声明
       // 里面有仍在用的参考。以前"带 historical-proof 就排除"，等于改一个
       // 标签就能让整份文档退出路径和命令对账。
-      const labels = getInventoryLabels(rows, file);
-      return (
-        [...labels].some((label) => label.startsWith("current-")) &&
-        !file.startsWith("docs/技术难题/整库审查2026-07/")
-      );
-    }),
+      //
+      // 这里以前还硬编码排除了 `docs/技术难题/整库审查2026-07/` 整个目录。
+      // 那是一整类当前文档凭一个字符串常量退出全部扫描，而且下一轮审查开的
+      // 新目录不会被这个常量覆盖——排除本身也在悄悄漂移。计划文档点名尚未
+      // 创建或已删除的路径，用 `truth-docs:allow-missing` 逐条豁免，写在
+      // 那一行上、看得见。
+      [...getInventoryLabels(rows, file)].some((label) =>
+        label.startsWith("current-"),
+      ),
+    ),
   ];
 }
 
@@ -466,21 +516,14 @@ function isApprovedHistoricalDoc(relativePath) {
   );
 }
 
-function inventoryMarksHistorical(inventory, relativePath) {
-  return inventory
-    .split("\n")
-    .some(
-      (line) =>
-        line.includes(`\`${relativePath}\``) &&
-        line.includes("historical-proof"),
-    );
+// 只看这份文档自己那行的标签。整行 `includes` 会让别人行的备注里提一句
+// `historical-proof` 就替它作数。
+function inventoryMarksHistorical(rows, relativePath) {
+  return getInventoryLabels(rows, relativePath).has("historical-proof");
 }
 
 function collectMarkdownTruthFindings(rootDir) {
-  const inventoryPath = path.join(rootDir, "docs/项目基础/文档清单.md");
-  const inventory = fs.existsSync(inventoryPath)
-    ? readTruthFile(rootDir, "docs/项目基础/文档清单.md")
-    : "";
+  const inventoryRows = collectInventoryRows(rootDir);
   const files = [
     "README.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
@@ -505,7 +548,7 @@ function collectMarkdownTruthFindings(rootDir) {
           error: `historical document must start with "${HISTORICAL_BANNER}"`,
         });
       }
-      if (!inventoryMarksHistorical(inventory, file)) {
+      if (!inventoryMarksHistorical(inventoryRows, file)) {
         failures.push({
           file,
           error:
@@ -601,6 +644,24 @@ function extractBashBlockAfterHeading(markdown, heading) {
   return match ? match[1] : null;
 }
 
+// `pnpm vitest run x` 没有对应的 package script，但它是合法调用：pnpm 找不到
+// 同名脚本时会去跑已安装依赖的 bin。把这类命令当"未知脚本名"报出来，等于逼
+// 文档把真跑过的命令改写成别的写法。
+//
+// 用 package.json 里声明的依赖名判定，不看 node_modules——门禁的结论不该随
+// 本地装没装依赖而变。已知边界：bin 名和包名不一致的依赖仍会被报出来，那时
+// 用 `truth-docs:allow-missing pnpm:<名字>` 点名豁免。
+function getDeclaredDependencyNames(packageJson) {
+  return new Set(
+    ["dependencies", "devDependencies", "optionalDependencies"].flatMap(
+      (key) =>
+        typeof packageJson[key] === "object" && packageJson[key] !== null
+          ? Object.keys(packageJson[key])
+          : [],
+    ),
+  );
+}
+
 function getPackageScripts(packageJson) {
   if (
     typeof packageJson.scripts === "object" &&
@@ -613,20 +674,34 @@ function getPackageScripts(packageJson) {
   return {};
 }
 
+// `pnpm [flags] [run [flags]] <name>`。
+//
+// 名字必须以字母/数字/`:`/`_` 开头，flag 单独捕获：以前名字的字符类里有 `-`，
+// `pnpm run --if-present audit` 会把 `--if-present` 当成脚本名报错，逼人要么
+// 删掉正确的 flag、要么往 package.json 里塞一个假脚本。
+//
+// 已知盲区（漏判方向，不是假绿）：带 flag 的调用一律不查。`--filter foo` 这类
+// 带值 flag 无法只靠正则和值区分开，与其猜错方向不如不查。当前仓库文档里带
+// flag 的 pnpm 调用是 0 条，真出现了再按名单收窄。
+const PNPM_INVOCATION =
+  /\bpnpm(?<preFlags>(?:\s+-\S+)*)\s+(?<run>run(?<postFlags>(?:\s+-\S+)*)\s+)?(?<name>[A-Za-z0-9:_][A-Za-z0-9:_-]*)/gu;
+
 function collectPnpmPackageScriptCommands(content) {
   const commands = [];
-  const matches = content.matchAll(/\bpnpm\s+(run\s+)?([A-Za-z0-9:_-]+)/g);
 
-  for (const match of matches) {
-    const explicitRun = match[1] !== undefined;
-    const scriptName = match[2];
+  for (const match of content.matchAll(PNPM_INVOCATION)) {
+    const { preFlags, run, postFlags, name: scriptName } = match.groups;
+    if (preFlags || postFlags) continue;
+
+    const explicitRun = run !== undefined;
     // `pnpm run audit` 明确说了要跑 package script。裸 `pnpm audit` 才是
     // pnpm 自带子命令，两者不能一起跳过——否则把内置名写在 run 后面就永远
     // 不会被查出来。
     if (!explicitRun && PNPM_BUILTIN_COMMANDS.has(scriptName)) continue;
-    // `pnpm 11`：文档在写运行时版本要求，不是在调脚本。只放行纯版本号，
-    // 数字开头的真实脚本名（`2fa:check`）仍然要查。
-    if (/^\d[\d.]*$/u.test(scriptName)) continue;
+    // 裸 `pnpm 11.1.0`：文档在写运行时版本要求，不是在调脚本。显式
+    // `pnpm run 11` 是在跑一个叫 `11` 的脚本，照查；数字开头的真实脚本名
+    // （`2fa:check`）任何写法下都要查。
+    if (!explicitRun && /^\d[\d.]*$/u.test(scriptName)) continue;
 
     const lineStart = content.lastIndexOf("\n", match.index) + 1;
     const lineEnd = content.indexOf("\n", match.index);
@@ -655,7 +730,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
   }
 
   failures.push(...collectInventoryPathFindings(rootDir));
-  failures.push(...collectRuleFileInventoryFindings(rootDir));
+  failures.push(...collectClaudeFileInventoryFindings(rootDir));
 
   failures.push(...collectMarkdownTruthFindings(rootDir));
   failures.push(...collectRuleFrontmatterGlobFindings(rootDir));
@@ -665,6 +740,7 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = JSON.parse(readTruthFile(rootDir, "package.json"));
     const scripts = getPackageScripts(packageJson);
+    const dependencyNames = getDeclaredDependencyNames(packageJson);
     // 每一份还在声称"当前为真"的文档都要过这一关，不是七份手工点名的。
     const commandDocs = collectCurrentDocumentedFiles(rootDir);
 
@@ -674,13 +750,17 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
 
       const content = readTruthFile(rootDir, doc);
       const commands = collectPnpmPackageScriptCommands(content);
-      for (const { scriptName } of commands) {
+      for (const { scriptName, line } of commands) {
         if (Object.prototype.hasOwnProperty.call(scripts, scriptName)) {
           continue;
         }
+        if (dependencyNames.has(scriptName)) continue;
+        // 带上原始行：`pnpm audit` 和 `pnpm run audit` 归一成同一句错误时，
+        // 测试没法证明究竟是哪一行被识别出来的，把内置名跳过的方向改反了也
+        // 照样绿。
         failures.push({
           file: doc,
-          error: `unknown package script command "pnpm ${scriptName}"`,
+          error: `unknown package script command "pnpm ${scriptName}" in "${line.trim()}"`,
         });
       }
     }
