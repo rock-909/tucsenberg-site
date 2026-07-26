@@ -31,77 +31,45 @@ const DOCUMENT_LIFECYCLE_CLASSES = new Set([
   "candidate-backlog",
 ]);
 
-// 锚点文档必须存在；措辞不再钉死 —— 措辞真相由文档清单与路径存在性检查守护。
-const REQUIRED_TRUTH_FILES = [
-  "docs/项目基础/文档清单.md",
-  "docs/README.md",
-  "README.md",
-  "docs/项目基础/AI协作边界.md",
-  "docs/项目基础/维护入口.md",
-  "docs/技术难题/性能实验优化方法论.md",
-  "docs/项目基础/项目基础索引.md",
-  "docs/决策记录/Radix联系表单试点.md",
-  "docs/技术难题/验证入口.md",
-  "docs/技术难题/性能记录.md",
-  "docs/项目基础/维护规则.md",
-  "docs/项目基础/内容.md",
-  "docs/项目基础/项目基础.md",
-  "docs/项目基础/消息文案.md",
-  "docs/项目基础/替换边界.md",
-  "docs/项目基础/配置.md",
-  "docs/项目基础/发布验证.md",
-  "docs/项目基础/验证等级.md",
-  "docs/项目基础/架构图.svg",
-  "docs/项目基础/生命周期.md",
-  "docs/design/色彩系统.md",
-  "docs/design/组件治理.md",
-  "docs/design/设计真相.md",
-  "docs/design/动效治理.md",
-  "docs/design/设计系统说明.md",
-  "docs/design/页面模式.md",
-  "docs/技术难题/全量性能审计.md",
-  "docs/技术难题/LCP首屏动效边界.md",
-  "docs/技术难题/Lighthouse预算治理.md",
-  "docs/技术难题/Lighthouse预取策略.md",
-  "docs/技术难题/Lighthouse产品详情负载.md",
-  "docs/技术难题/Lighthouse共享负载.md",
-  "docs/技术难题/Lighthouse黄色债务归因.md",
-  "docs/技术难题/Lighthouse黄色债务基线.md",
-  "docs/技术难题/Lighthouse黄色债务第一轮收口.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮基线.md",
-  "docs/技术难题/Lighthouse黄色债务第二轮收口.md",
-  "docs/技术难题/Lighthouse零黄色归因.md",
-  "docs/技术难题/性能治理候选审计.md",
-  "docs/技术难题/SEO公开页面性能余量.md",
-  ".claude/rules/content.md",
-  ".claude/rules/i18n.md",
-  ".claude/rules/testing.md",
-];
+// 两个不在文档清单覆盖范围内的锚点。清单只登记 `docs/**`，规则目录靠
+// `collectCurrentDocumentedFiles` 遍历，所以这里只剩下两个根文件。
+// 这里以前是一份 43 条硬编码路径的手抄清单，外加两份命令文档清单。三份都是
+// 文件系统的手抄镜像：漏登记一个新文档，它就一条都不检查，而且不会有任何信号。
+const REQUIRED_TRUTH_ANCHORS = ["README.md", "docs/项目基础/文档清单.md"];
 
-const CURRENT_TRUTH_COMMAND_DOCS = [
-  "docs/项目基础/维护规则.md",
-  "docs/项目基础/发布验证.md",
-  "docs/项目基础/验证等级.md",
-  "docs/项目基础/上线验证.md",
-  "docs/项目基础/部署.md",
-  "docs/项目基础/技术栈.md",
-  "docs/design/区块重设检查清单.md",
-];
-
-// AGENTS.md / CLAUDE.md are deliberately excluded: instruction files carry no
-// machine-enforced content assertions (see "判断准则" in AGENTS.md).
-const ROOT_INSTRUCTION_COMMAND_DOCS = [
-  ".claude/rules/conventions.md",
-  ".claude/rules/cloudflare.md",
-  ".claude/rules/coding-standards.md",
-  ".claude/rules/code-quality.md",
-  ".claude/rules/i18n.md",
-  ".claude/rules/security.md",
-  ".claude/rules/ui.md",
-  ".claude/rules/content.md",
-  ".claude/rules/testing.md",
-  ".claude/rules/structured-data.md",
-];
+// pnpm 自带子命令，不是 package script；还有 `pnpm 11` 这种版本号写法。
+const PNPM_BUILTIN_COMMANDS = new Set([
+  "add",
+  "audit",
+  "bin",
+  "config",
+  "create",
+  "deploy",
+  "dlx",
+  "env",
+  "exec",
+  "fetch",
+  "import",
+  "init",
+  "install",
+  "licenses",
+  "link",
+  "list",
+  "ls",
+  "outdated",
+  "pack",
+  "patch",
+  "prune",
+  "publish",
+  "rebuild",
+  "remove",
+  "root",
+  "setup",
+  "store",
+  "unlink",
+  "update",
+  "why",
+]);
 
 function readTruthFile(rootDir, relativePath) {
   return fs.readFileSync(path.join(rootDir, relativePath), "utf8");
@@ -176,6 +144,38 @@ function collectDocumentInventoryFindings(rootDir, trackedDocs) {
     }));
 }
 
+/**
+ * The other direction: the inventory registers a reason for every tracked doc,
+ * so a row whose file is gone is a doc that was deleted without anyone noticing
+ * the registry still vouches for it. `collectDocumentInventoryFindings` only
+ * walks tracked → registered.
+ */
+function collectInventoryPathFindings(rootDir) {
+  const inventoryPath = "docs/项目基础/文档清单.md";
+  const inventory = readTruthFile(rootDir, inventoryPath);
+  const findings = [];
+
+  for (const line of inventory.split("\n")) {
+    const cells = line
+      .trim()
+      .replace(/^\|/u, "")
+      .replace(/\|$/u, "")
+      .split("|")
+      .map((cell) => cell.trim());
+    const registered = cells[0]?.match(/^`(docs\/[^`]+)`$/u)?.[1];
+    if (!registered) continue;
+    if (registered.endsWith("/")) continue;
+    if (fs.existsSync(path.join(rootDir, registered))) continue;
+
+    findings.push({
+      file: inventoryPath,
+      error: `inventory registers a document that no longer exists "${registered}"`,
+    });
+  }
+
+  return findings;
+}
+
 function inventoryMarksCurrent(inventory, relativePath) {
   return inventory
     .split("\n")
@@ -224,8 +224,8 @@ function documentedRepoPathExists(rootDir, documentedPath) {
   }
 }
 
-// 显式豁免：默认所有反引号 src/tests 路径都必须存在；只有行内带
-// truth-docs:allow-missing 标记（HTML 注释形式）的行允许路径缺失。
+// 显式豁免：默认所有反引号 src / tests / docs / .claude 路径都必须存在；只有
+// 行内带 truth-docs:allow-missing 标记（HTML 注释形式）的行允许路径缺失。
 // 混合句（同行既有活路径又有故意缺失路径）应拆句后再打标记。
 const ALLOW_MISSING_MARKER = "truth-docs:allow-missing";
 
@@ -235,11 +235,22 @@ function lineAllowsMissingDocumentedPath(content, lineStart, matchIndex) {
   return line.includes(ALLOW_MISSING_MARKER);
 }
 
-function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
-  if (documentedFiles === undefined && !hasGitMetadata(rootDir)) return [];
-
+/**
+ * The docs that currently claim to be true: the root README, the rule files,
+ * and every tracked doc the inventory marks `current-*`.
+ *
+ * Derived, not listed. A hand list here would need editing every time a doc is
+ * added, and the direction it fails in is silent — a new doc simply is not
+ * checked. `AGENTS.md` / `CLAUDE.md` stay out by construction: instruction
+ * files carry no machine-enforced content assertions (see 判断准则 in
+ * `AGENTS.md`).
+ */
+function collectCurrentDocumentedFiles(rootDir) {
+  const inventoryPath = path.join(rootDir, "docs/项目基础/文档清单.md");
+  if (!fs.existsSync(inventoryPath)) return [];
   const inventory = readTruthFile(rootDir, "docs/项目基础/文档清单.md");
-  const currentDocs = documentedFiles ?? [
+
+  return [
     "README.md",
     ...collectMarkdownFiles(rootDir, ".claude/rules"),
     ...collectTrackedMarkdownDocs(rootDir).filter(
@@ -249,11 +260,21 @@ function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
         !file.startsWith("docs/技术难题/整库审查2026-07/"),
     ),
   ];
+}
+
+function collectBacktickedRepoPathFindings(rootDir, documentedFiles) {
+  if (documentedFiles === undefined && !hasGitMetadata(rootDir)) return [];
+
+  const currentDocs = documentedFiles ?? collectCurrentDocumentedFiles(rootDir);
   const findings = [];
 
   for (const file of currentDocs) {
     const content = readTruthFile(rootDir, file);
-    for (const match of content.matchAll(/`((?:src|tests)\/[^`\n]+)`/gu)) {
+    // `docs/` and `.claude/` are in scope alongside source paths: a live doc
+    // pointing at a deleted doc or rule file is the same broken reference.
+    for (const match of content.matchAll(
+      /`((?:src|tests|docs|\.claude)\/[^`\n]+)`/gu,
+    )) {
       const documentedPath = normalizeDocumentedRepoPath(match[1]);
       if (!documentedPath) continue;
       if (documentedRepoPathExists(rootDir, documentedPath)) continue;
@@ -491,8 +512,9 @@ function collectPnpmPackageScriptCommands(content) {
 
   for (const match of matches) {
     const scriptName = match[2];
-    if (scriptName === "exec") continue;
-    if (scriptName === "install") continue;
+    if (PNPM_BUILTIN_COMMANDS.has(scriptName)) continue;
+    // `pnpm 11`：文档在写运行时版本要求，不是在调脚本。
+    if (/^\d/u.test(scriptName)) continue;
 
     const lineStart = content.lastIndexOf("\n", match.index) + 1;
     const lineEnd = content.indexOf("\n", match.index);
@@ -508,7 +530,7 @@ function collectPnpmPackageScriptCommands(content) {
 function collectCurrentTruthDocFindings(rootDir = ROOT) {
   const failures = [];
 
-  for (const file of REQUIRED_TRUTH_FILES) {
+  for (const file of REQUIRED_TRUTH_ANCHORS) {
     if (!fs.existsSync(path.join(rootDir, file))) {
       failures.push({
         file,
@@ -516,6 +538,8 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
       });
     }
   }
+
+  failures.push(...collectInventoryPathFindings(rootDir));
 
   failures.push(...collectMarkdownTruthFindings(rootDir));
   failures.push(...collectRuleFrontmatterGlobFindings(rootDir));
@@ -525,10 +549,8 @@ function collectCurrentTruthDocFindings(rootDir = ROOT) {
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = JSON.parse(readTruthFile(rootDir, "package.json"));
     const scripts = getPackageScripts(packageJson);
-    const commandDocs = [
-      ...CURRENT_TRUTH_COMMAND_DOCS,
-      ...ROOT_INSTRUCTION_COMMAND_DOCS,
-    ];
+    // 每一份还在声称"当前为真"的文档都要过这一关，不是七份手工点名的。
+    const commandDocs = collectCurrentDocumentedFiles(rootDir);
 
     for (const doc of commandDocs) {
       const fullPath = path.join(rootDir, doc);
@@ -612,8 +634,9 @@ function runTruthDocsCheck() {
 }
 
 module.exports = {
-  REQUIRED_TRUTH_FILES,
-  CURRENT_TRUTH_COMMAND_DOCS,
+  REQUIRED_TRUTH_ANCHORS,
+  collectCurrentDocumentedFiles,
+  collectInventoryPathFindings,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS: [...HISTORICAL_DERIVATION_DOCS],
   RETIRED_PUBLIC_TRUTH_PATTERNS,

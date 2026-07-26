@@ -7,7 +7,7 @@ import {
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
   RETIRED_PUBLIC_TRUTH_PATTERNS,
-  REQUIRED_TRUTH_FILES,
+  REQUIRED_TRUTH_ANCHORS,
   collectBacktickedRepoPathFindings,
   collectCurrentTruthDocFindings,
   collectDocumentInventoryFindings,
@@ -53,7 +53,13 @@ function moveTempRepoToTrash(dir: string): void {
 function createValidFiles(): Record<string, string> {
   const files: Record<string, string> = {};
 
-  for (const file of REQUIRED_TRUTH_FILES) {
+  for (const file of [
+    ...REQUIRED_TRUTH_ANCHORS,
+    "docs/README.md",
+    "docs/项目基础/维护规则.md",
+    "docs/项目基础/发布验证.md",
+    ...HISTORICAL_DERIVATION_DOCS,
+  ]) {
     files[file] = "safe baseline text";
   }
 
@@ -414,13 +420,9 @@ describe("current-truth docs guard", () => {
     }
   });
 
-  it("reports required truth files that are missing", () => {
+  it("reports required truth anchors that are missing", () => {
     const files = createValidFiles();
-    const target =
-      REQUIRED_TRUTH_FILES.find(
-        (file) => file !== "docs/项目基础/文档清单.md",
-      ) ?? REQUIRED_TRUTH_FILES[0];
-    if (!target) throw new Error("REQUIRED_TRUTH_FILES must not be empty");
+    const target = "README.md";
     delete files[target];
     const repoDir = createTempRepo(files);
     try {

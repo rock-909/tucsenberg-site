@@ -70,7 +70,7 @@ const {
   runReleaseVerify,
 } = require("./quality/checks/release-verify");
 const {
-  REQUIRED_TRUTH_FILES,
+  REQUIRED_TRUTH_ANCHORS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
   RETIRED_PUBLIC_TRUTH_PATTERNS,
@@ -226,7 +226,7 @@ if (require.main === module) {
 
 module.exports = {
   STARTER_CHECK_COMMANDS,
-  REQUIRED_TRUTH_FILES,
+  REQUIRED_TRUTH_ANCHORS,
   HISTORICAL_BANNER,
   HISTORICAL_DERIVATION_DOCS,
   RELEASE_PROOF_MANIFEST,

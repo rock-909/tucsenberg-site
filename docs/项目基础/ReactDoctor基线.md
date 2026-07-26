@@ -42,7 +42,7 @@ npx --loglevel=error -y react-doctor@latest --json --no-score --blocking none
   `react-doctor@latest` on 2026-06-26.
 - Generated output such as `storybook-static/**` is excluded from project
   source-quality totals.
-- Skill bundles under `.claude/skills/**` and `.codex/skills/**` are
+- Skill bundles under `.claude/skills/**` and `.codex/skills/**` are <!-- truth-docs:allow-missing -->
   tool-owned and may use narrow rule exceptions for bundled non-project code.
 - Do not delete dead-code findings without runtime/script proof.
 - The JSON-LD script wrapper is a documented exception for
