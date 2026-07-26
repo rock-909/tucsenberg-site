@@ -88,6 +88,9 @@ jobs:
       - name: Current truth docs check
         run: node scripts/starter-checks.js truth-docs
 
+      - name: Markdown 代码围栏语言标识检查
+        run: node scripts/starter-checks.js markdown-fences
+
   tests:
     name: 单元与集成测试
     runs-on: ubuntu-latest
@@ -184,7 +187,10 @@ jobs:
           persist-credentials: false
 
       - name: 运行 Semgrep
-        run: semgrep scan --error --severity ERROR --config semgrep.yml src
+        # 扫全仓，不点名目录。原来只扫 src，于是 scripts/ 下的门禁脚本、
+        # eslint.config.mjs、commitlint.config.js 这些真正在执行的代码全都
+        # 不在安全扫描范围内——守门人自己不受门禁保护。全仓扫 4 秒，零新增发现。
+        run: semgrep scan --error --severity ERROR --config semgrep.yml .
 
   cloudflare-build:
     name: Cloudflare 构建证明

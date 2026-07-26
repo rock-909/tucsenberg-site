@@ -27,7 +27,9 @@ const MAGIC_NUMBER_IGNORE_LIST = [
   365, 1000, 1024, 4000, 5000, 60000, 300000,
 ];
 
-export default [
+// 具名再导出：这个文件现在也被 eslint 自己检查（它不再躺在忽略清单里），
+// 匿名默认导出会触发 import/no-anonymous-default-export。
+const eslintConfig = [
   {
     name: "ignores",
     ignores: [
@@ -898,8 +900,6 @@ export default [
       "build/**",
       "dist/**",
       ".conductor/**",
-      "*.config.js",
-      "*.config.mjs",
       "public/**",
       ".env*",
       "coverage/**",
@@ -925,3 +925,5 @@ export default [
     ],
   },
 ];
+
+export default eslintConfig;

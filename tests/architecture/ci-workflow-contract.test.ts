@@ -120,12 +120,33 @@ describe("CI workflow contract", () => {
     });
   });
 
-  it("keeps Semgrep blocking scope narrow in CI", () => {
-    const workflow = readCiWorkflow();
+  // 这条以前叫 "keeps Semgrep blocking scope narrow"，钉的是带 ` src` 的整条命令
+  // 字符串。它守住的正是那个洞：扫描只覆盖 src，scripts/ 下的门禁脚本和执行中的
+  // 根配置全在安全扫描之外，而这条断言让谁想扩大范围都会先把它撞红。改成守扫描
+  // 目标本身——必须是整个仓库，不是点名的子集。
+  it("scans the whole repository, not a hand-picked subset", () => {
+    const command = readCiWorkflow()
+      .split("\n")
+      .map((line) => line.trim())
+      .find((line) => line.startsWith("run: semgrep scan"));
 
-    expect(workflow).toContain(
-      "semgrep scan --error --severity ERROR --config semgrep.yml src",
-    );
+    expect(command).toBeDefined();
+
+    // `semgrep scan [flags] <targets...>`：跳过 flag 和带值 flag 的值，剩下的是目标。
+    const tokens = (command ?? "").replace(/^run:\s*/u, "").split(/\s+/u);
+    const flagsTakingValue = new Set(["--config", "--severity"]);
+    const targets: string[] = [];
+    for (let index = 2; index < tokens.length; index += 1) {
+      const token = tokens[index] ?? "";
+      if (flagsTakingValue.has(token)) {
+        index += 1;
+        continue;
+      }
+      if (token.startsWith("--")) continue;
+      targets.push(token);
+    }
+
+    expect(targets).toEqual(["."]);
   });
 
   // CI scans with `--severity ERROR`, so any rule below that severity is dead
