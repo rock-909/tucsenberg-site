@@ -36,6 +36,9 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
   `node scripts/starter-checks.js content-manifest` 重新生成。
 - **commit 的 subject 必须小写、不超过 72 字符。** pre-push 会跑一遍完整构建；确实
   急，可以 `RUN_FAST_PUSH=1` 跳过。
+- **CodeRabbit 那个绿勾不等于审查过了。** 账号触到限额时它压根不审，PR 上只留一条
+  「Review limit reached」评论，检查状态照样是 pass。要确认它真审了，读评论正文，
+  别看状态。`main` 也没开分支保护，所以没有任何检查是必过的。
 
 ## 动手前先读
 
@@ -90,6 +93,8 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 - **i18n**：用户能看到的文案一律走翻译 key。
 - **Git**：GitHub Flow。`main` 是唯一长期分支，功能分支走 pull request。
+- **推分支之前先过一遍 Codex 审查**，细节见 `docs/项目基础/AI协作边界.md`。
+  服务挂了就在 PR 里写明这次没审，别让"没审"看起来像"审过了"。
 
 ## 判断准则
 

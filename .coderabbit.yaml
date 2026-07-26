@@ -15,7 +15,12 @@ reviews:
   auto_review:
     enabled: true
     drafts: false                 # 草稿 PR 不审查
-    auto_incremental_review: true # 只审查新增提交，避免重复
+    # 每个 PR 只自动审一次。原来开着增量重审，每推一次修正就再烧一次配额，
+    # 结果配额提前用光——用光时 CodeRabbit 不审也照样把检查报成 pass，
+    # 等于把红灯变成了假绿灯。后续提交需要重审就在 PR 里评论
+    # `@coderabbitai review`。推分支前的深度审查交给 Codex，见
+    # docs/项目基础/AI协作边界.md。
+    auto_incremental_review: false
 
   # 只排除构建产物和压缩产物；锁文件保留在供应链审查范围内。
   path_filters:
