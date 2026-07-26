@@ -255,7 +255,14 @@ function collectRuleFileInventoryFindings(rootDir) {
     }));
 }
 
-/** 一个文档自己那行的标签，不看别人行里怎么提到它。 */
+/**
+ * 一个文档自己那行的标签，不看别人行里怎么提到它。
+ *
+ * 已知边界，是有意留的：把一份文档从 `current-reference` 改成
+ * `historical-proof`，它就退出路径和命令对账。那是清单里一次显式的降级，
+ * diff 上看得见，也正是"这份文档不再是当前真相"的正规说法。门禁的职责是让
+ * 这一步必须写出来，不是让它做不到。
+ */
 function getInventoryLabels(rows, relativePath) {
   const labels = new Set();
   for (const row of rows) {
