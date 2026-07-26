@@ -21,23 +21,23 @@ const MISSING_PATHS = [
   "/next.svg",
 ] as const;
 
+// 断言的是 HTTP 状态码，不是渲染结果，所以走 request 而不是 page.goto：导航到一张
+// PNG 在 firefox 上等不到 domcontentloaded，会顶满 30s 超时——测的东西跟浏览器怎么
+// 展示这个响应无关，不该受它影响。
 test.describe("Missing URLs answer 404", () => {
   for (const path of MISSING_PATHS) {
-    test(`${path} returns 404`, async ({ page }) => {
-      const response = await page.goto(`http://localhost:3000${path}`, {
-        waitUntil: "domcontentloaded",
-      });
+    test(`${path} returns 404`, async ({ request }) => {
+      const response = await request.get(`http://localhost:3000${path}`);
 
-      expect(response?.status(), `${path} should be 404`).toBe(404);
+      expect(response.status(), `${path} should be 404`).toBe(404);
     });
   }
 
-  test("a served asset still returns 200", async ({ page }) => {
-    const response = await page.goto(
+  test("a served asset still returns 200", async ({ request }) => {
+    const response = await request.get(
       "http://localhost:3000/images/tucsenberg-og.png",
-      { waitUntil: "domcontentloaded" },
     );
 
-    expect(response?.status()).toBe(200);
+    expect(response.status()).toBe(200);
   });
 });
