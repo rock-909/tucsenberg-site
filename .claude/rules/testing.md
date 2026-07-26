@@ -164,7 +164,12 @@ that it is not validation proof in the test description or file comment.
 Use shared test utilities instead of duplicating mock systems:
 
 - `@/test/utils`
-- `src/test/constants/mock-messages.ts`
+
+Mock translations come from `getComposedMessages("en")` — the same composed
+message graph production loads. Do not hand-write a message catalog for tests.
+The one that used to live here drifted to 153 of its 172 leaf keys naming
+nothing real, so every assertion written against it proved invented copy and
+editing the shipped copy turned nothing red.
 
 ## Skips
 
