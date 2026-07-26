@@ -40,8 +40,15 @@
  *
  * Known blind spots that fail closed — a real call is missed and reported as
  * an orphan, never a fake call passing: command substitution `$(...)`,
- * backticks, `xargs`, multiplexers like `concurrently "node a" "node b"`, and
- * any flagged invocation per the rule above.
+ * backticks, `xargs`, multiplexers like `concurrently "node a" "node b"`,
+ * subshells `( ... )`, brace groups `{ ...; }`, and any flagged invocation per
+ * the rule above.
+ *
+ * One shape fails LOUD rather than closed: a subcommand named by a variable,
+ * `node scripts/starter-checks.js "$CHECK"`, reads as the literal subcommand
+ * `$CHECK` and is reported as an unregistered subcommand. Nothing here spells a
+ * lane that way; if something ever needs to, the fix is to name the subcommand
+ * literally, not to teach this file to guess.
  *
  * One known blind spot fails OPEN, stated rather than papered over: this reads
  * command position, not reachability. A command placed after a top-level
