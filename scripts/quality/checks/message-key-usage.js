@@ -6,6 +6,8 @@ const { composeCatalogMessages, collectLeafPaths } = require("./translations");
 const {
   collectDerivedKeyConsumerUsage,
   collectObjectKeyConsumerUsage,
+  getBindingIdentifier,
+  isConstVariableDeclaration,
 } = require("./message-key-consumers");
 const {
   DYNAMIC_MESSAGE_KEY_PREFIXES,
@@ -185,25 +187,6 @@ function getPromiseAllInputs(node, checker) {
   }
   const inputs = unwrapExpression(initializer.arguments[0]);
   return inputs && ts.isArrayLiteralExpression(inputs) ? inputs.elements : null;
-}
-
-function getBindingIdentifier(bindingName, identifierName) {
-  if (ts.isIdentifier(bindingName)) {
-    return bindingName.text === identifierName ? bindingName : undefined;
-  }
-  for (const element of bindingName.elements) {
-    if (!ts.isBindingElement(element)) continue;
-    const identifier = getBindingIdentifier(element.name, identifierName);
-    if (identifier) return identifier;
-  }
-  return undefined;
-}
-
-function isConstVariableDeclaration(node) {
-  return (
-    ts.isVariableDeclarationList(node.parent) &&
-    (node.parent.flags & ts.NodeFlags.Const) !== 0
-  );
 }
 
 function isConstInitializedVariableDeclaration(node) {
