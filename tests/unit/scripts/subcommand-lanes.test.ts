@@ -46,20 +46,68 @@ describe("subcommand lane reconciler", () => {
     ).toEqual([{ subcommand: "brand" }]);
   });
 
-  it("steps over node's own flags", () => {
+  // `node --check x.js sub` 只解析文件不执行，`-e` / `-p` 根本不读它。没有一份
+  // flag 名单能一直判对，所以任何 flag 都按"判不准"处理，落进 orphan 桶。
+  it("refuses to classify a node command carrying flags", () => {
+    expect(classify("node --check scripts/starter-checks.js brand")).toEqual([
+      {},
+    ]);
     expect(
       classify("node --trace-warnings scripts/starter-checks.js brand"),
-    ).toEqual([{ subcommand: "brand" }]);
+    ).toEqual([{}]);
   });
 
   it("does not count a shell comment that spells the whole command", () => {
     expect(classify("# node scripts/starter-checks.js brand")).toEqual([]);
   });
 
-  it("does not count a trailing comment that spells the whole command", () => {
-    expect(classify("echo ok # node scripts/starter-checks.js brand")).toEqual([
-      {},
-    ]);
+  // 注释里再塞一个 `;`。只写 `echo ok # node ...` 证明不了注释真被剥掉：
+  // 首 token 是 echo，整行本来就不计数，把剥注释整个删掉这条也照样绿。
+  it("does not count a command hidden behind a trailing comment", () => {
+    expect(
+      classify("echo ok # harmless; node scripts/starter-checks.js brand"),
+    ).toEqual([{}]);
+  });
+
+  // 引号里的 `;` `&&` 是字符串内容。按原字符切开的话，一条 echo 就能凭空造出
+  // 任意多条车道，步骤退出 0，门变绿。
+  it("does not split on separators inside quotes", () => {
+    expect(
+      classify('echo "harmless; node scripts/starter-checks.js brand"'),
+    ).toEqual([{}]);
+    expect(
+      classify('echo "x && node scripts/starter-checks.js brand"'),
+    ).toEqual([{}]);
+  });
+
+  // 引号里的 `#` 也是内容：真正的子命令名是 `brand # fake`，它不在注册表里，
+  // 会落进 unknown 桶把门撞红——而不是被当成 `brand` 算作已覆盖。
+  it("keeps a quoted hash inside the subcommand name", () => {
+    expect(
+      classify('node scripts/starter-checks.js "brand # fake" || true'),
+    ).toEqual([{ subcommand: "brand # fake" }, {}]);
+  });
+
+  // 一行开两个 heredoc。只记住第一个 delimiter 的话，第二段正文会被当命令读。
+  it("does not count the body of a second heredoc opened on the same line", () => {
+    expect(
+      classify(
+        [
+          "cat <<A <<B",
+          "payload",
+          "A",
+          "node scripts/starter-checks.js brand",
+          "B",
+        ].join("\n"),
+      ),
+    ).toEqual([{}]);
+  });
+
+  // 注释里的 `\` 是注释内容，不续行。拼上去等于把下一行的真调用一起吃掉。
+  it("does not let a comment's backslash swallow the next line", () => {
+    expect(
+      classify("# comment \\\nnode scripts/starter-checks.js brand"),
+    ).toEqual([{ subcommand: "brand" }]);
   });
 
   it("does not count an existence test on the script path", () => {
@@ -121,10 +169,14 @@ describe("subcommand lane reconciler", () => {
     expect(classify("pnpm run run")).toEqual([{ packageScript: "run" }]);
   });
 
-  it("skips runner flags that swallow their value", () => {
-    expect(classify("pnpm --filter web content:check")).toEqual([
-      { packageScript: "content:check" },
-    ]);
+  // `pnpm --store-dir content:check --version` 里 content:check 是 flag 的值，
+  // 什么都没跑。带值 flag 的名单在 pnpm / npm / yarn 之间不可能同时正确
+  // （`-w` 在 pnpm 是布尔、在 npm 带值），判不准就不算车道。
+  it("refuses to classify a runner command carrying flags", () => {
+    expect(classify("pnpm --store-dir content:check --version")).toEqual([{}]);
+    expect(classify("npm --prefix content:check --version")).toEqual([{}]);
+    expect(classify("pnpm -w content:check")).toEqual([{}]);
+    expect(classify("pnpm --filter web content:check")).toEqual([{}]);
   });
 
   // `pnpm exec x` 跑的是名叫 x 的可执行文件，不是 package script x。

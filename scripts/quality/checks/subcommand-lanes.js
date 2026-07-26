@@ -22,18 +22,33 @@
  *   A key named `run` sitting in `env:` or `with:` is not a command.
  * - A command counts only when the executor is in command position. `echo
  *   "node scripts/starter-checks.js x"` starts with `echo`, so it is text.
- * - Heredoc bodies, line-continuation joins and trailing `#` comments are
- *   handled before tokenizing, so data does not read as commands.
+ * - Splitting is quote-aware. A `;`, `&&` or `#` inside quotes is data. The
+ *   first version split on the raw characters, so one `echo "a; node
+ *   scripts/starter-checks.js b"` line minted a lane out of a string literal.
+ * - Heredoc bodies (all delimiters on a line, not just the first) and
+ *   line-continuation joins are resolved before tokenizing.
  * - Manual runbook lanes are reported in their own bucket. A human being told
  *   to type a command is a lane, but it is not an automated one, and the two
  *   must not be printed as the same thing.
  * - `pnpm run x` runs package script `x`; `pnpm exec x` / `npx x` run a binary
  *   named `x`. Conflating them invents lanes that do not exist.
+ * - Any flag on a `node` or package-runner command aborts classification.
+ *   `node --check scripts/starter-checks.js x` only parses the file, and
+ *   `pnpm --store-dir content:check --version` never runs `content:check` —
+ *   there is no flag list that stays right for pnpm, npm and yarn at once, so
+ *   an unrecognised flag means "cannot tell", which means "not a lane".
  *
- * Known blind spots, all of which fail closed (a real call is missed and gets
- * reported as an orphan, rather than a fake call passing): command
- * substitution `$(...)`, backticks, `xargs`, and multiplexers like
- * `concurrently "node a" "node b"`.
+ * Known blind spots that fail closed — a real call is missed and reported as
+ * an orphan, never a fake call passing: command substitution `$(...)`,
+ * backticks, `xargs`, multiplexers like `concurrently "node a" "node b"`, and
+ * any flagged invocation per the rule above.
+ *
+ * One known blind spot fails OPEN, stated rather than papered over: this reads
+ * command position, not reachability. A command placed after a top-level
+ * `exit 0`, or inside a shell branch that never runs, still counts as a lane.
+ * Closing it needs a shell interpreter, and the cheap approximations are worse
+ * than the hole — real workflow steps here use `exit 1` inside `if` blocks, so
+ * "stop at the first exit" would silently drop live lanes instead.
  */
 
 const { readFileSync, readdirSync } = require("node:fs");
@@ -50,10 +65,8 @@ const PACKAGE_RUNNERS = new Set(["pnpm", "npm", "yarn"]);
 // call, so the rest of the command is re-read as a command of its own.
 const BINARY_RUNNERS = new Set(["npx", "bunx"]);
 const RUNNER_EXEC_WORDS = new Set(["exec", "dlx"]);
-// Runner flags that swallow the next token: `pnpm --filter web build`.
-const RUNNER_VALUE_FLAGS = new Set(["--filter", "-F", "--dir", "-C", "-w"]);
 const ENV_ASSIGNMENT = /^[A-Z_][A-Z0-9_]*=/u;
-const HEREDOC_START = /<<-?\s*["']?([A-Za-z_][A-Za-z0-9_]*)["']?/u;
+const HEREDOC_START = /<<-?\s*["']?([A-Za-z_][A-Za-z0-9_]*)["']?/gu;
 
 function readRepoFile(relativePath) {
   return readFileSync(relativePath, "utf8");
@@ -67,19 +80,30 @@ function isLiteralFalse(condition) {
   return /^\s*(\$\{\{)?\s*false\s*(\}\})?\s*$/u.test(condition);
 }
 
-/** Drop heredoc bodies and join continuation lines, before anything is split. */
+/**
+ * Drop heredoc bodies and join continuation lines, before anything is split.
+ *
+ * All delimiters opened on a line are queued, not just the first: `cat <<A <<B`
+ * opens two bodies back to back, and remembering only `A` handed `B`'s payload
+ * straight to the tokenizer as if it were shell.
+ */
 function normalizeShellLines(shellText) {
   const lines = [];
+  const heredocDelimiters = [];
   let pending = "";
-  let heredocDelimiter = null;
 
   for (const rawLine of shellText.split("\n")) {
-    if (heredocDelimiter !== null) {
-      if (rawLine.trim() === heredocDelimiter) heredocDelimiter = null;
+    if (heredocDelimiters.length > 0) {
+      if (rawLine.trim() === heredocDelimiters[0]) heredocDelimiters.shift();
       continue;
     }
 
     const line = rawLine.trim();
+    // A `\` inside a comment does not continue the line — the backslash is
+    // comment text. Joining anyway swallowed the next line, and with it any
+    // real call on it.
+    if (pending.length === 0 && line.startsWith("#")) continue;
+
     if (line.endsWith("\\")) {
       pending += `${line.slice(0, -1)} `;
       continue;
@@ -89,8 +113,9 @@ function normalizeShellLines(shellText) {
     pending = "";
     if (joined.length === 0) continue;
 
-    const heredoc = HEREDOC_START.exec(joined);
-    if (heredoc) heredocDelimiter = heredoc[1];
+    for (const heredoc of joined.matchAll(HEREDOC_START)) {
+      heredocDelimiters.push(heredoc[1]);
+    }
 
     lines.push(joined);
   }
@@ -99,28 +124,90 @@ function normalizeShellLines(shellText) {
   return lines;
 }
 
-/** `echo ok # node scripts/starter-checks.js brand` — the tail is a comment. */
-function stripTrailingComment(line) {
-  const commentStart = / #.*$/u.exec(line);
-  return commentStart ? line.slice(0, commentStart.index) : line;
+/**
+ * One line → command segments, each `{ tokens, operator }` where `operator` is
+ * what separated this segment from the one before it.
+ *
+ * Quotes are honoured: `;`, `&&` and `#` inside them are data. Splitting on the
+ * raw characters is what let `echo "a; node scripts/starter-checks.js b"` mint
+ * a lane out of a string literal.
+ */
+function scanCommandSegments(line) {
+  const segments = [];
+  const state = { tokens: [], current: "", started: false, quote: null };
+  let operator = null;
+
+  const endToken = () => {
+    if (!state.started) return;
+    state.tokens.push(state.current);
+    state.current = "";
+    state.started = false;
+  };
+  const endSegment = (nextOperator) => {
+    endToken();
+    if (state.tokens.length > 0)
+      segments.push({ tokens: state.tokens, operator });
+    state.tokens = [];
+    operator = nextOperator;
+  };
+  const take = (char) => {
+    state.current += char;
+    state.started = true;
+  };
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+
+    if (state.quote !== null) {
+      if (char === state.quote) state.quote = null;
+      else take(char);
+      state.started = true;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      state.quote = char;
+      state.started = true;
+      continue;
+    }
+    if (char === "\\" && index + 1 < line.length) {
+      take(line[(index += 1)]);
+      continue;
+    }
+    // `#` only opens a comment at a word boundary, the way a shell reads it.
+    if (char === "#" && !state.started) break;
+    if (char === " " || char === "\t") {
+      endToken();
+      continue;
+    }
+
+    const pair = line.slice(index, index + 2);
+    if (pair === "&&" || pair === "||") {
+      endSegment(pair);
+      index += 1;
+    } else if (char === ";" || char === "|" || char === "&") {
+      endSegment(char);
+    } else {
+      take(char);
+    }
+  }
+  endSegment(null);
+
+  return segments;
 }
 
 /**
- * Split one line into separate commands. `true || x` and `false && x` are
- * dropped: the operator makes the right-hand side unreachable, which is the
- * cheapest way to write a lane that never runs.
+ * `true || x` and `false && x` are dropped: the operator makes the right-hand
+ * side unreachable, which is the cheapest way to write a lane that never runs.
  */
 function splitLineIntoCommands(line) {
-  const parts = line.split(/(&&|\|\||[;|])/u);
   const commands = [];
 
-  for (let index = 0; index < parts.length; index += 2) {
-    const segment = (parts[index] ?? "").trim();
-    const precedingOperator = parts[index - 1];
-
-    if (precedingOperator === "||" && commands.at(-1) === "true") continue;
-    if (precedingOperator === "&&" && commands.at(-1) === "false") continue;
-    if (segment.length > 0) commands.push(segment);
+  for (const { tokens, operator } of scanCommandSegments(line)) {
+    const previous = commands.at(-1);
+    const guard = previous?.length === 1 ? previous[0] : null;
+    if (operator === "||" && guard === "true") continue;
+    if (operator === "&&" && guard === "false") continue;
+    commands.push(tokens);
   }
 
   return commands;
@@ -128,29 +215,24 @@ function splitLineIntoCommands(line) {
 
 /** Split a shell snippet into token arrays, one per command. */
 function tokenizeShell(shellText) {
-  return normalizeShellLines(shellText)
-    .filter((line) => !line.startsWith("#"))
-    .map(stripTrailingComment)
-    .flatMap(splitLineIntoCommands)
-    .map((command) =>
-      command
-        .split(/\s+/u)
-        .map((token) => token.replace(/^["']|["']$/gu, ""))
-        .filter((token) => token.length > 0),
-    )
-    .filter((tokens) => tokens.length > 0);
+  return normalizeShellLines(shellText).flatMap(splitLineIntoCommands);
 }
 
 function isStarterChecksPath(token) {
   return token.replace(/^\.\//u, "") === STARTER_CHECKS_PATH;
 }
 
-/** `node [flags] scripts/starter-checks.js <subcommand>` */
+/**
+ * `node scripts/starter-checks.js <subcommand>`, with no flags in between.
+ *
+ * A flag before the path aborts: `node --check scripts/starter-checks.js brand`
+ * only parses the file and exits, and `-e` / `-p` never read it at all. Nothing
+ * in this repo passes node flags to a lane, so "cannot tell" costs nothing.
+ */
 function classifyNodeCommand(tokens) {
-  const pathIndex = tokens.findIndex((token) => !token.startsWith("-"));
-  if (pathIndex === -1 || !isStarterChecksPath(tokens[pathIndex])) return {};
+  const [path, next] = tokens;
+  if (!path || !isStarterChecksPath(path)) return {};
 
-  const next = tokens[pathIndex + 1];
   return next && !next.startsWith("-") ? { subcommand: next } : {};
 }
 
@@ -160,21 +242,16 @@ function classifyNodeCommand(tokens) {
  * worth following is when that binary is `node`.
  */
 function classifyRunnerCommand(tokens, packageScripts) {
-  let index = 0;
-  while (index < tokens.length) {
-    const token = tokens[index];
-    if (RUNNER_VALUE_FLAGS.has(token)) index += 2;
-    else if (token.startsWith("-")) index += 1;
-    else break;
-  }
+  const [target, ...rest] = tokens;
+  // 任何 flag 一律放弃识别。带值 flag 会吞掉下一个 token
+  // （`pnpm --store-dir content:check --version` 根本没跑 content:check），
+  // 而 pnpm / npm / yarn 三家的带值 flag 名单不可能同时正确——`-w` 在 pnpm
+  // 是布尔、在 npm 带值。判不准就不算车道，让它落进 orphan 桶。
+  if (!target || target.startsWith("-")) return {};
 
-  const target = tokens[index];
-  if (!target) return {};
-
-  // `pnpm run <name>` — the next token is the script name even if it is
-  // spelled `run` or `exec`, so it must not go through the flag skipping again.
+  // `pnpm run <name>` — 下一个 token 就是脚本名，哪怕它自己叫 run 或 exec。
   if (target === "run") {
-    const script = tokens[index + 1];
+    const [script] = rest;
     return script && Object.hasOwn(packageScripts, script)
       ? { packageScript: script }
       : {};
@@ -182,7 +259,7 @@ function classifyRunnerCommand(tokens, packageScripts) {
 
   if (RUNNER_EXEC_WORDS.has(target)) {
     // 互相递归：`pnpm exec node x.js` 的后半段当成一条独立命令重新识别。
-    return classifyCommand(tokens.slice(index + 1), packageScripts);
+    return classifyCommand(rest, packageScripts);
   }
 
   return Object.hasOwn(packageScripts, target) ? { packageScript: target } : {};
