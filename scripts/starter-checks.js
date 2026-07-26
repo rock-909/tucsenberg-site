@@ -168,7 +168,7 @@ const COMMAND_HANDLERS = {
   brand: () => runBrandCheck(),
   "markdown-fences": () => runMarkdownFenceCheck(),
   "vitest-collection": () => runVitestCollectionCheck(),
-  "subcommand-lanes": () => runSubcommandLaneCheck(STARTER_CHECK_COMMANDS),
+  "subcommand-lanes": () => runSubcommandLaneCheck(),
   "content-slugs": (args) => runContentSlugCheck(args),
   "content-manifest": (args) =>
     runContentManifestGenerator(createContentManifestContext(), {
@@ -220,13 +220,9 @@ async function main(argv = process.argv.slice(2)) {
   }
 }
 
-if (require.main === module) {
-  main().catch((error) => {
-    console.error("[starter-checks] Unexpected error:", error);
-    process.exit(1);
-  });
-}
-
+// Exports are assigned before the CLI bootstrap on purpose: `subcommand-lanes`
+// reads `STARTER_CHECK_COMMANDS` back from here while `main()` is running, and
+// a bootstrap placed above this line would leave it looking at empty exports.
 module.exports = {
   STARTER_CHECK_COMMANDS,
   REQUIRED_TRUTH_FILES,
@@ -300,3 +296,10 @@ module.exports = {
   validateProductionRuntimeContract,
   validatePublicLaunchTrustContent,
 };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error("[starter-checks] Unexpected error:", error);
+    process.exit(1);
+  });
+}
