@@ -165,11 +165,25 @@ Use shared test utilities instead of duplicating mock systems:
 
 - `@/test/utils`
 
-Mock translations come from `getComposedMessages("en")` — the same composed
-message graph production loads. Do not hand-write a message catalog for tests.
-The one that used to live here drifted to 153 of its 172 leaf keys naming
-nothing real, so every assertion written against it proved invented copy and
-editing the shipped copy turned nothing red.
+Every test translation resolves through `@/test/i18n-messages`, which reads
+`getComposedMessages("en")` — the same composed message graph production loads.
+That module is the only place allowed to define what a test translation is; both
+`@/test/utils` and the global `next-intl` mock in `src/test/setup.constants-and-i18n.ts`
+go through it. Do not hand-write a message catalog for tests. Two of them used to
+exist here: one drifted to 153 of its 172 leaf keys naming nothing real, and the
+one in the global setup invented `navigation.services` and `navigation.contact`.
+Assertions written against either proved invented copy, and editing the shipped
+copy turned nothing red.
+
+Two properties that must hold, and are pinned by
+`src/test/__tests__/mock-translations.test.ts`:
+
+- A key whose real value is the empty string returns the empty string, not the
+  key name. `next-intl` returns the stored value; a `|| key` fallback treats a
+  deliberately blank message as missing and makes the test environment disagree
+  with production.
+- Overriding a key that does not exist in the real packs throws. An override is
+  for changing real copy, not for inventing it.
 
 ## Skips
 

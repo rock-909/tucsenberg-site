@@ -9,37 +9,35 @@ vi.mock("@/constants", async (importOriginal) => {
   };
 });
 
-// Mock next-intl - 提供实际的翻译映射和基础 Provider
-const mockTranslations: Record<string, string> = {
-  "navigation.home": "Home",
-  "navigation.about": "About",
-  "navigation.services": "Services",
-  "navigation.products": "Products",
-  "navigation.oemWholesale": "OEM & Wholesale",
-  "navigation.contact": "Contact",
-  "navigation.contactSales": "Request a Quote",
-};
+// Mock next-intl —— 翻译来自真实合成消息包，不是手写清单。这里曾经写死七条
+// 导航文案，其中 navigation.services 和 navigation.contact 在三个真实消息包里
+// 都不存在：任何断言它们的测试证明的是虚构文案。
+vi.mock("next-intl", async () => {
+  const { getFlatMessages, lookupMessage } =
+    await import("@/test/i18n-messages");
+  const messages = getFlatMessages();
 
-vi.mock("next-intl", () => ({
-  useTranslations: vi.fn(() => (key: string) => {
-    const safeTranslations = new Map(Object.entries(mockTranslations));
-    return safeTranslations.get(key) || key;
-  }),
-  useLocale: vi.fn(() => "en"),
-  useMessages: vi.fn(() => ({})),
-  useFormatter: vi.fn(() => ({
-    dateTime: vi.fn(),
-    number: vi.fn(),
-    relativeTime: vi.fn(),
-  })),
-  NextIntlClientProvider: ({
-    children,
-  }: {
-    children: React.ReactNode;
-    locale?: string;
-    messages?: Record<string, unknown>;
-  }) => React.createElement(React.Fragment, null, children),
-}));
+  return {
+    useTranslations: vi.fn(
+      (namespace?: string) => (key: string) =>
+        lookupMessage(messages, namespace ? `${namespace}.${key}` : key),
+    ),
+    useLocale: vi.fn(() => "en"),
+    useMessages: vi.fn(() => ({})),
+    useFormatter: vi.fn(() => ({
+      dateTime: vi.fn(),
+      number: vi.fn(),
+      relativeTime: vi.fn(),
+    })),
+    NextIntlClientProvider: ({
+      children,
+    }: {
+      children: React.ReactNode;
+      locale?: string;
+      messages?: Record<string, unknown>;
+    }) => React.createElement(React.Fragment, null, children),
+  };
+});
 
 // Mock next-intl/server
 vi.mock("next-intl/server", () => ({
