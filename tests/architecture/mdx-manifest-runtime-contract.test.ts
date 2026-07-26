@@ -68,8 +68,8 @@ describe("MDX manifest-only runtime contract", () => {
 
   // 这里以前还有一条,断言生成的清单里不出现 `showcase-full/...capabilities.mdx`
   // 和几个退役页的 `@content/...` 路径。那是负空间守卫:锁的是几个已经删掉的名字
-  // 保持缺席,永远为真。下面这条覆盖同一个意图,而且更强——它要求每一项都真的
-  // 落在 content/ 下并且文件存在,不管它叫什么名字。
+  // 保持缺席,永远为真。换成下面两条——一条管导出的每一项,一条管这个文件往
+  // 模块图里拉了什么,都不点名任何一个具体的退役页。
   it("keeps the generated manifest catalog-only", () => {
     expect(CONTENT_MANIFEST.entries.length).toBeGreaterThan(0);
 
@@ -77,10 +77,25 @@ describe("MDX manifest-only runtime contract", () => {
       (entry) =>
         entry.source !== "active-content" ||
         !entry.filePath.startsWith("/content/") ||
+        !entry.relativePath.startsWith("content/") ||
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- path comes from the generated manifest and is already constrained to /content/ above
-        !existsSync(join(process.cwd(), entry.filePath)),
+        !existsSync(join(process.cwd(), entry.filePath)) ||
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- same, constrained to content/ above
+        !existsSync(join(process.cwd(), entry.relativePath)),
     );
 
     expect(offenders.map((entry) => entry.filePath)).toEqual([]);
+  });
+
+  // 检查导出的 entries 还不够:生成器完全可以在 entries 之外多写一个静态 import,
+  // 导出的每一项照样干净,而 bundler 已经把那份 MDX 拉进模块图了。整个 manifest
+  // 的存在理由就是运行时不碰 MDX——所以这里守的是"这个文件不 import 任何 .mdx",
+  // 而不是某几个退役文件名缺席。
+  it("pulls no MDX into the module graph", () => {
+    const manifestSource = readSource("src/lib/content-manifest.generated.ts");
+
+    expect(manifestSource).not.toMatch(/from\s+["'][^"']*\.mdx["']/u);
+    expect(manifestSource).not.toMatch(/import\s*\(\s*["'][^"']*\.mdx["']/u);
+    expect(manifestSource).not.toMatch(/require\s*\(\s*["'][^"']*\.mdx["']/u);
   });
 });
