@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ValidatedInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import RequestQuotePage, { generateMetadata } from "../page";
 
-const { mockGenerateMetadataForPath, mockJsonLdGraphScript } = vi.hoisted(
-  () => ({
+const { mockGenerateMetadataForPath, mockJsonLdGraphScript, capturedInquiry } =
+  vi.hoisted(() => ({
     mockGenerateMetadataForPath: vi.fn(async () => ({
       title: "Request a Quote",
       description: "Request a quote",
     })),
     mockJsonLdGraphScript: vi.fn(),
-  }),
-);
+    capturedInquiry: {
+      latest: null as { context: ValidatedInquiryContext } | null,
+    },
+  }));
 
 vi.mock("next-intl/server", async () => {
   const { getComposedMessages } = await import("@/lib/i18n/composed-messages");
@@ -100,14 +103,29 @@ vi.mock("@/components/seo/json-ld-script", () => ({
   },
 }));
 
-vi.mock("@/app/[locale]/request-quote/request-quote-inquiry-form", () => ({
-  RequestQuoteInquiryForm: () => <div data-testid="mock-inquiry-form" />,
+vi.mock("@/components/forms/inquiry-form", () => ({
+  InquiryForm: ({ context }: { context: ValidatedInquiryContext }) => {
+    capturedInquiry.latest = { context };
+    return <div data-testid="mock-inquiry-form" />;
+  },
 }));
+
+async function renderPageWith(
+  searchParams: Record<string, string | string[] | undefined>,
+) {
+  render(
+    await RequestQuotePage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve(searchParams),
+    }),
+  );
+}
 
 describe("RequestQuotePage", () => {
   beforeEach(() => {
     mockGenerateMetadataForPath.mockClear();
     mockJsonLdGraphScript.mockClear();
+    capturedInquiry.latest = null;
   });
 
   it("uses the owner-approved RFQ meta title", async () => {
@@ -168,5 +186,51 @@ describe("RequestQuotePage", () => {
         ],
       }),
     );
+  });
+
+  it("passes catalog-context for a valid catalogProductId", async () => {
+    await renderPageWith({ catalogProductId: "frp-flood-barriers" });
+
+    expect(capturedInquiry.latest?.context).toEqual({
+      kind: "catalog-context",
+      catalogProductId: "frp-flood-barriers",
+      displayLabel: "FRP Composite Planks",
+    });
+  });
+
+  it("downgrades forged or repeated catalogProductId values to general-context", async () => {
+    await renderPageWith({ catalogProductId: "forged-product" });
+    expect(capturedInquiry.latest?.context).toEqual({
+      kind: "general-context",
+    });
+
+    capturedInquiry.latest = null;
+    await renderPageWith({
+      catalogProductId: ["abs-flood-barriers", "frp-flood-barriers"],
+    });
+    expect(capturedInquiry.latest?.context).toEqual({
+      kind: "general-context",
+    });
+  });
+
+  it("passes estimator config into the validated initial message", async () => {
+    await renderPageWith({
+      catalogProductId: "abs-flood-barriers",
+      config: "Estimated 12 straight units",
+    });
+
+    expect(capturedInquiry.latest?.context).toEqual(
+      expect.objectContaining({
+        initialMessage: "Estimated 12 straight units",
+      }),
+    );
+  });
+
+  it("defaults missing search params to general-context", async () => {
+    await renderPageWith({});
+
+    expect(capturedInquiry.latest?.context).toEqual({
+      kind: "general-context",
+    });
   });
 });

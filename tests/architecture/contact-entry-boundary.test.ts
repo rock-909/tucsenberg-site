@@ -76,7 +76,7 @@ describe("contact entry boundary", () => {
 
     for (const filePath of [
       "src/app/[locale]/contact/contact-page-sections.tsx",
-      "src/app/[locale]/request-quote/request-quote-inquiry-form.tsx",
+      "src/app/[locale]/request-quote/page.tsx",
     ]) {
       const source = read(filePath);
       const sourceFile = createSourceFile(filePath, source);

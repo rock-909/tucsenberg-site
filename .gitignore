@@ -4,6 +4,8 @@ node_modules/
 
 # Build outputs
 .next/
+# Isolated build output for `pnpm website:lighthouse` (see lighthouserc.js).
+.next-lighthouse/
 next-env.d.ts
 out/
 dist/

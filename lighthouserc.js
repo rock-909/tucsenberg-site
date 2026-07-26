@@ -33,7 +33,18 @@ const isDaily = process.env.CI_DAILY === "true";
 // 本站 localePrefix 为 'never'（src/config/paths/locales-config.ts），正式 URL
 // 不带 locale 段：`/en/x` 会 302 到 `/x`。直接请求无前缀地址，才不会把每一页都
 // 变成一次重定向测量。owner 确认后续加语种时，再按当时的前缀策略调整。
-const criticalUrls = ["http://localhost:3000/"];
+
+// Deliberately not 3000. That port is shared by `pnpm dev`, `pnpm start`, the
+// Playwright webServer (which adopts whatever is already listening), and every
+// other worktree on this machine. `next start` cannot fall back to another port
+// in production — start-server.js gates the EADDRINUSE retry on isDev and
+// otherwise exits — while lhci only prints a warning when its own server fails
+// to start and then measures whatever else answers (collect.js:171). Together
+// that silently measures a foreign server and reports it as this site.
+const LIGHTHOUSE_PORT = 4173;
+const BASE_URL = `http://localhost:${LIGHTHOUSE_PORT}`;
+
+const criticalUrls = [`${BASE_URL}/`];
 
 // Every canonical public route the site actually ships: the 11 static pages
 // plus all five product-market pages. tests/unit/scripts/
@@ -41,21 +52,21 @@ const criticalUrls = ["http://localhost:3000/"];
 // product registries, so a new route cannot quietly go unmeasured.
 const allUrls = [
   ...criticalUrls,
-  "http://localhost:3000/products",
-  "http://localhost:3000/oem-wholesale",
-  "http://localhost:3000/guides/flood-barrier-materials-guide",
-  "http://localhost:3000/guides/flood-barrier-specifications",
-  "http://localhost:3000/about",
-  "http://localhost:3000/request-quote",
-  "http://localhost:3000/contact",
-  "http://localhost:3000/warranty",
-  "http://localhost:3000/privacy",
-  "http://localhost:3000/terms",
-  "http://localhost:3000/products/abs-flood-barriers",
-  "http://localhost:3000/products/aluminum-flood-gates",
-  "http://localhost:3000/products/absorbent-flood-bags",
-  "http://localhost:3000/products/flood-tube-dams",
-  "http://localhost:3000/products/frp-flood-barriers",
+  `${BASE_URL}/products`,
+  `${BASE_URL}/oem-wholesale`,
+  `${BASE_URL}/guides/flood-barrier-materials-guide`,
+  `${BASE_URL}/guides/flood-barrier-specifications`,
+  `${BASE_URL}/about`,
+  `${BASE_URL}/request-quote`,
+  `${BASE_URL}/contact`,
+  `${BASE_URL}/warranty`,
+  `${BASE_URL}/privacy`,
+  `${BASE_URL}/terms`,
+  `${BASE_URL}/products/abs-flood-barriers`,
+  `${BASE_URL}/products/aluminum-flood-gates`,
+  `${BASE_URL}/products/absorbent-flood-bags`,
+  `${BASE_URL}/products/flood-tube-dams`,
+  `${BASE_URL}/products/frp-flood-barriers`,
 ];
 
 const sharedLighthouseAssertions = {
@@ -115,9 +126,17 @@ module.exports = {
       // APP_ENV=production is required, not cosmetic: without it the runtime
       // emits `noindex` and every SEO assertion fails on measurement setup
       // rather than on real page quality. Dynamic routes read it at request
-      // time, so it must be set on the server, and on the build that
-      // pre-renders the static pages (`APP_ENV=production pnpm build`).
-      startServerCommand: "APP_ENV=production pnpm start",
+      // time, so it must be set on the server; static pages bake `robots` in
+      // at build time, so it must also be set on the build. Leaving that to
+      // whoever runs the command did not work — `pnpm website:check` ends in a
+      // bare `pnpm build`, and measuring on top of that leftover scored 9
+      // routes at 0.69 with `is-crawlable: Page is blocked from indexing`.
+      // `website:lighthouse` therefore builds what it measures, into its own
+      // `.next-lighthouse` tree, so a concurrent build or E2E sweep cannot
+      // swap the artifact out from under a 20-minute measurement.
+      startServerCommand:
+        "NEXT_DIST_DIR=.next-lighthouse APP_ENV=production pnpm start " +
+        `--port ${LIGHTHOUSE_PORT}`,
       startServerReadyPattern: "Local:",
       startServerReadyTimeout: 60000,
       // 使用 3 次运行配合 optimistic 聚合，更好地过滤 CI 冷启动噪声

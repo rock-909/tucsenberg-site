@@ -1,5 +1,4 @@
 import { render } from "@testing-library/react";
-import { Suspense } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
 import TermsPage, { generateMetadata, generateStaticParams } from "../page";
@@ -135,15 +134,18 @@ describe("TermsPage", () => {
   });
 
   describe("TermsPage", () => {
-    it("should render loading skeleton entry", async () => {
-      const component = await TermsPage({
-        params: Promise.resolve(mockParams),
-      });
+    it("renders the legal body directly, with no streaming boundary", async () => {
+      const { container } = render(
+        await TermsPage({
+          params: Promise.resolve(mockParams),
+        }),
+      );
 
-      expect(component.type).toBe(Suspense);
-      const { container } = render(component.props.fallback);
-
-      expect(container.querySelectorAll(".animate-pulse")).toHaveLength(8);
+      // The body must be awaited by the page itself. Behind Suspense it
+      // streams into a hidden container outside <main>, so no-JS visitors
+      // are left staring at the skeleton.
+      expect(container.querySelector("h1")).not.toBeNull();
+      expect(container.querySelectorAll(".animate-pulse")).toHaveLength(0);
     });
   });
 });

@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import {
@@ -38,23 +37,10 @@ export async function generateMetadata({
   });
 }
 
-function TermsLoadingSkeleton() {
-  return (
-    <div className="mx-auto max-w-[720px] px-6 py-8 md:py-12">
-      <div className="mb-6 md:mb-8">
-        <div className="mb-4 h-9 w-48 animate-pulse rounded bg-muted" />
-        <div className="h-5 w-96 animate-pulse rounded bg-muted" />
-      </div>
-      <div className="space-y-4">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="h-4 w-full animate-pulse rounded bg-muted" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-async function TermsContent({ locale }: { locale: string }) {
+// 本页在构建期就整页预渲染，没有请求期数据可等，加 Suspense 只会让正文
+// 流到 <main> 外的隐藏容器里；禁用脚本的访客于是永远停在骨架屏上。
+export default async function TermsPage({ params }: TermsPageProps) {
+  const { locale } = await params;
   setRequestLocale(locale);
   const { metadata, content, headings } = await loadLegalPage("terms", locale);
 
@@ -67,15 +53,5 @@ async function TermsContent({ locale }: { locale: string }) {
       schemaType="WebPage"
       pagePath={getLocalizedPath("terms", locale as Locale)}
     />
-  );
-}
-
-export default async function TermsPage({ params }: TermsPageProps) {
-  const { locale } = await params;
-
-  return (
-    <Suspense fallback={<TermsLoadingSkeleton />}>
-      <TermsContent locale={locale} />
-    </Suspense>
   );
 }

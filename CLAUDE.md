@@ -24,7 +24,10 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 跟直觉相反、或者从代码里看不出来的：
 
 - **`pnpm build` 和 `pnpm website:build:cf` 写同一个 `.next` 目录。** 并行跑会互相
-  覆盖，拿到的是假的构建结果。
+  覆盖，拿到的是假的构建结果。本地跑 E2E 时 Playwright 的 webServer 也会重建
+  `.next`，是第三个写入方。`pnpm website:lighthouse` 不在此列：它单独构建到
+  `.next-lighthouse`，用 4173 端口起服务，所以一次二十分钟的测量不会被并行构建、
+  也不会被别的 worktree 占着 3000 端口的服务污染。
 - **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
   `node scripts/starter-checks.js content-manifest` 重新生成。
 - **commit 的 subject 必须小写、不超过 72 字符。** pre-push 会跑一遍完整构建；确实
