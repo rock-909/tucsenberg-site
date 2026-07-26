@@ -2,7 +2,7 @@
 
 Submission pipeline: preflight → self-heal → commit → adversarial review → push → PR → CI monitoring → merge → cleanup.
 
-**Code review**: an independent Codex session reviews the branch **before push** (Phase 4). Cloud PR bots are not used — see `docs/项目基础/AI协作边界.md`.
+**Code review**: an independent Codex session reviews the branch **before push** (Phase 4). CodeRabbit is switched off but its config is kept — see `docs/项目基础/AI协作边界.md`.
 
 ## Execution Steps
 

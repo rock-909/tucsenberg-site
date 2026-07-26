@@ -13,9 +13,11 @@ Both should point back to `docs/README.md`; do not maintain two competing encycl
 ## Code review
 
 Branches are reviewed by an **independent Codex session before push**, not by a
-cloud PR bot. CodeRabbit was tried and retired: on this repo it reviewed after the
-PR already existed, and its findings arrived too late and too generic to be worth
-the round trip.
+cloud PR bot. CodeRabbit is switched off, not removed: on this repo it reviewed
+after the PR already existed, and its findings arrived too late to be worth the
+round trip. `.coderabbit.yaml` stays in the repo with `auto_review.enabled` and
+`chat.auto_reply` set to `false` — the tuning is real work and re-enabling it is
+those two lines.
 
 Two properties make the current arrangement work, and both must be preserved:
 
@@ -30,6 +32,8 @@ be wrong; rejecting a finding is fine, but the reason belongs in the report.
 A review that did not run must never be reported as a review that passed.
 
 Mechanics live in `.claude/commands/pr.md` Phase 4. Do not restate them here.
+`/review-fix` is the path for handling cloud review threads; it is parked
+alongside `.coderabbit.yaml` and only applies if CodeRabbit is switched back on.
 
 ## Superpowers
 
