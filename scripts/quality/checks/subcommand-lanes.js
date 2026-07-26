@@ -12,55 +12,46 @@
  * runtime execution, so a step guarded by a real `if:` condition still counts
  * as a lane; only a literally-false condition is rejected.
  *
- * The first version of this check counted anything that looked like a call:
- * any YAML key named `run` anywhere in the document, `echo "node
- * scripts/starter-checks.js foo"`, a heredoc body, a runbook string for a human
- * to type. Every one of those is a way to turn the gate green without wiring a
- * lane, which is the exact failure the gate exists to prevent. So:
+ * Three rounds of adversarial review turned earlier versions green without
+ * wiring a lane: a YAML key named `run` under `env:`, `echo "node
+ * scripts/starter-checks.js foo"`, a heredoc body, a `;` inside quotes, a quote
+ * spanning two lines, `\"`, a redirection target. The lesson was that patching
+ * one character at a time loses. Tokenizing now follows the shell's own rules
+ * in `shell-command-scan.js`; this file only decides what a parsed command
+ * invokes. What that leaves:
  *
  * - Only `jobs.*.steps[].run` and lefthook `<hook>.commands.*.run` are read.
  *   A key named `run` sitting in `env:` or `with:` is not a command.
  * - A command counts only when the executor is in command position. `echo
  *   "node scripts/starter-checks.js x"` starts with `echo`, so it is text.
- * - Splitting is quote-aware. A `;`, `&&` or `#` inside quotes is data. The
- *   first version split on the raw characters, so one `echo "a; node
- *   scripts/starter-checks.js b"` line minted a lane out of a string literal.
- * - Heredoc bodies (all delimiters on a line, not just the first) and
- *   line-continuation joins are resolved before tokenizing.
  * - Manual runbook lanes are reported in their own bucket. A human being told
  *   to type a command is a lane, but it is not an automated one, and the two
  *   must not be printed as the same thing.
  * - `pnpm run x` runs package script `x`; `pnpm exec x` / `npx x` run a binary
  *   named `x`. Conflating them invents lanes that do not exist.
- * - Any flag on a `node` or package-runner command aborts classification.
- *   `node --check scripts/starter-checks.js x` only parses the file, and
- *   `pnpm --store-dir content:check --version` never runs `content:check` —
- *   there is no flag list that stays right for pnpm, npm and yarn at once, so
- *   an unrecognised flag means "cannot tell", which means "not a lane".
  *
- * Known blind spots that fail closed — a real call is missed and reported as
- * an orphan, never a fake call passing: command substitution `$(...)`,
- * backticks, `xargs`, multiplexers like `concurrently "node a" "node b"`,
- * subshells `( ... )`, brace groups `{ ...; }`, and any flagged invocation per
- * the rule above.
+ * WHERE IT REFUSES TO GUESS. Three shapes are reported and fail the check
+ * rather than returning "no lane here": a command substitution that names this
+ * script, an executor that comes from a variable, and a flag on a `node` or
+ * package-runner command. A silent empty answer is wrong in both directions —
+ * it drops a real lane, and it also hides the case where the command names a
+ * subcommand that is not registered at all. Nothing in this repo spells a lane
+ * any of those ways, so the cost of demanding a plain spelling is zero today.
  *
- * One shape fails LOUD rather than closed: a subcommand named by a variable,
- * `node scripts/starter-checks.js "$CHECK"`, reads as the literal subcommand
- * `$CHECK` and is reported as an unregistered subcommand. Nothing here spells a
- * lane that way; if something ever needs to, the fix is to name the subcommand
- * literally, not to teach this file to guess.
- *
- * One known blind spot fails OPEN, stated rather than papered over: this reads
- * command position, not reachability. A command placed after a top-level
- * `exit 0`, or inside a shell branch that never runs, still counts as a lane.
- * Closing it needs a shell interpreter, and the cheap approximations are worse
- * than the hole — real workflow steps here use `exit 1` inside `if` blocks, so
- * "stop at the first exit" would silently drop live lanes instead.
+ * WHAT IT STILL DOES NOT SEE, stated rather than papered over: reachability.
+ * This reads command position. A command after a top-level `exit 0`, or inside
+ * a shell branch that never runs, still counts as a lane. Closing that needs a
+ * shell interpreter, and the cheap approximations are worse than the hole —
+ * real steps here use `exit 1` inside `if` blocks, so "stop at the first exit"
+ * would silently drop live lanes instead. `xargs` and multiplexers like
+ * `concurrently "node a" "node b"` are missed the other way: the call is not
+ * seen, and the subcommand is reported as an orphan.
  */
 
 const { readFileSync, readdirSync } = require("node:fs");
 const { join } = require("node:path");
 const yaml = require("js-yaml");
+const { scanShellCommands } = require("./shell-command-scan");
 
 const WORKFLOW_DIR = ".github/workflows";
 const LEFTHOOK_CONFIG = "lefthook.yml";
@@ -73,7 +64,6 @@ const PACKAGE_RUNNERS = new Set(["pnpm", "npm", "yarn"]);
 const BINARY_RUNNERS = new Set(["npx", "bunx"]);
 const RUNNER_EXEC_WORDS = new Set(["exec", "dlx"]);
 const ENV_ASSIGNMENT = /^[A-Z_][A-Z0-9_]*=/u;
-const HEREDOC_START = /<<-?\s*["']?([A-Za-z_][A-Za-z0-9_]*)["']?/gu;
 
 function readRepoFile(relativePath) {
   return readFileSync(relativePath, "utf8");
@@ -87,159 +77,35 @@ function isLiteralFalse(condition) {
   return /^\s*(\$\{\{)?\s*false\s*(\}\})?\s*$/u.test(condition);
 }
 
-/**
- * Drop heredoc bodies and join continuation lines, before anything is split.
- *
- * All delimiters opened on a line are queued, not just the first: `cat <<A <<B`
- * opens two bodies back to back, and remembering only `A` handed `B`'s payload
- * straight to the tokenizer as if it were shell.
- */
-function normalizeShellLines(shellText) {
-  const lines = [];
-  const heredocDelimiters = [];
-  let pending = "";
-
-  for (const rawLine of shellText.split("\n")) {
-    if (heredocDelimiters.length > 0) {
-      if (rawLine.trim() === heredocDelimiters[0]) heredocDelimiters.shift();
-      continue;
-    }
-
-    const line = rawLine.trim();
-    // A `\` inside a comment does not continue the line — the backslash is
-    // comment text. Joining anyway swallowed the next line, and with it any
-    // real call on it.
-    if (pending.length === 0 && line.startsWith("#")) continue;
-
-    if (line.endsWith("\\")) {
-      pending += `${line.slice(0, -1)} `;
-      continue;
-    }
-
-    const joined = `${pending}${line}`;
-    pending = "";
-    if (joined.length === 0) continue;
-
-    for (const heredoc of joined.matchAll(HEREDOC_START)) {
-      heredocDelimiters.push(heredoc[1]);
-    }
-
-    lines.push(joined);
-  }
-
-  if (pending.trim().length > 0) lines.push(pending.trim());
-  return lines;
-}
-
-/**
- * One line → command segments, each `{ tokens, operator }` where `operator` is
- * what separated this segment from the one before it.
- *
- * Quotes are honoured: `;`, `&&` and `#` inside them are data. Splitting on the
- * raw characters is what let `echo "a; node scripts/starter-checks.js b"` mint
- * a lane out of a string literal.
- */
-function scanCommandSegments(line) {
-  const segments = [];
-  const state = { tokens: [], current: "", started: false, quote: null };
-  let operator = null;
-
-  const endToken = () => {
-    if (!state.started) return;
-    state.tokens.push(state.current);
-    state.current = "";
-    state.started = false;
-  };
-  const endSegment = (nextOperator) => {
-    endToken();
-    if (state.tokens.length > 0)
-      segments.push({ tokens: state.tokens, operator });
-    state.tokens = [];
-    operator = nextOperator;
-  };
-  const take = (char) => {
-    state.current += char;
-    state.started = true;
-  };
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-
-    if (state.quote !== null) {
-      if (char === state.quote) state.quote = null;
-      else take(char);
-      state.started = true;
-      continue;
-    }
-    if (char === '"' || char === "'") {
-      state.quote = char;
-      state.started = true;
-      continue;
-    }
-    if (char === "\\" && index + 1 < line.length) {
-      take(line[(index += 1)]);
-      continue;
-    }
-    // `#` only opens a comment at a word boundary, the way a shell reads it.
-    if (char === "#" && !state.started) break;
-    if (char === " " || char === "\t") {
-      endToken();
-      continue;
-    }
-
-    const pair = line.slice(index, index + 2);
-    if (pair === "&&" || pair === "||") {
-      endSegment(pair);
-      index += 1;
-    } else if (char === ";" || char === "|" || char === "&") {
-      endSegment(char);
-    } else {
-      take(char);
-    }
-  }
-  endSegment(null);
-
-  return segments;
-}
-
-/**
- * `true || x` and `false && x` are dropped: the operator makes the right-hand
- * side unreachable, which is the cheapest way to write a lane that never runs.
- */
-function splitLineIntoCommands(line) {
-  const commands = [];
-
-  for (const { tokens, operator } of scanCommandSegments(line)) {
-    const previous = commands.at(-1);
-    const guard = previous?.length === 1 ? previous[0] : null;
-    if (operator === "||" && guard === "true") continue;
-    if (operator === "&&" && guard === "false") continue;
-    commands.push(tokens);
-  }
-
-  return commands;
-}
-
-/** Split a shell snippet into token arrays, one per command. */
-function tokenizeShell(shellText) {
-  return normalizeShellLines(shellText).flatMap(splitLineIntoCommands);
-}
-
 function isStarterChecksPath(token) {
   return token.replace(/^\.\//u, "") === STARTER_CHECKS_PATH;
 }
 
+function describeCommand(tokens) {
+  return JSON.stringify(tokens.join(" "));
+}
+
 /**
- * `node scripts/starter-checks.js <subcommand>`, with no flags in between.
+ * `node scripts/starter-checks.js <subcommand>`.
  *
- * A flag before the path aborts: `node --check scripts/starter-checks.js brand`
- * only parses the file and exits, and `-e` / `-p` never read it at all. Nothing
- * in this repo passes node flags to a lane, so "cannot tell" costs nothing.
+ * A flag anywhere in the command is reported rather than skipped. `node --check
+ * scripts/starter-checks.js brand` only parses the file, and `-e` / `-p` never
+ * read it — but returning "no lane here" also hides the opposite case, where a
+ * flagged command names a subcommand that does not exist and the reconciler
+ * should have said so. Nothing in this repo passes node flags to a lane, so
+ * asking for a flagless spelling costs nothing.
  */
 function classifyNodeCommand(tokens) {
-  const [path, next] = tokens;
-  if (!path || !isStarterChecksPath(path)) return {};
+  const flagIndex = tokens.findIndex((token) => token.startsWith("-"));
+  const pathIndex = tokens.findIndex((token) => isStarterChecksPath(token));
+  if (pathIndex === -1) return {};
+  if (flagIndex !== -1 && flagIndex < pathIndex) {
+    return {
+      undecidable: `node flags before the script path: ${describeCommand(tokens)}`,
+    };
+  }
 
+  const next = tokens[pathIndex + 1];
   return next && !next.startsWith("-") ? { subcommand: next } : {};
 }
 
@@ -250,15 +116,24 @@ function classifyNodeCommand(tokens) {
  */
 function classifyRunnerCommand(tokens, packageScripts) {
   const [target, ...rest] = tokens;
-  // 任何 flag 一律放弃识别。带值 flag 会吞掉下一个 token
+  if (!target) return {};
+  // 带 flag 一律报出来，不再静默返回空。带值 flag 会吞掉下一个 token
   // （`pnpm --store-dir content:check --version` 根本没跑 content:check），
   // 而 pnpm / npm / yarn 三家的带值 flag 名单不可能同时正确——`-w` 在 pnpm
-  // 是布尔、在 npm 带值。判不准就不算车道，让它落进 orphan 桶。
-  if (!target || target.startsWith("-")) return {};
+  // 是布尔、在 npm 带值。判不准就撞红：静默返回空既会漏掉真车道，也会把
+  // "这条命令跑的子命令根本没注册"这种错误一起藏掉。
+  if (target.startsWith("-")) {
+    return {
+      undecidable: `runner flags: ${describeCommand(tokens)}`,
+    };
+  }
 
   // `pnpm run <name>` — 下一个 token 就是脚本名，哪怕它自己叫 run 或 exec。
   if (target === "run") {
     const [script] = rest;
+    if (script?.startsWith("-")) {
+      return { undecidable: `runner flags: ${describeCommand(tokens)}` };
+    }
     return script && Object.hasOwn(packageScripts, script)
       ? { packageScript: script }
       : {};
@@ -273,14 +148,24 @@ function classifyRunnerCommand(tokens, packageScripts) {
 }
 
 /**
- * What one command invokes: a starter-checks subcommand, a package script, or
- * neither. The executor must be in command position — a path named anywhere
- * else is text, not a call.
+ * What one command invokes: a starter-checks subcommand, a package script,
+ * neither, or something this cannot decide.
+ *
+ * The executor must be in command position — a path named anywhere else is
+ * text, not a call.
  */
 function classifyCommand(tokens, packageScripts) {
   const meaningful = tokens.filter((token) => !ENV_ASSIGNMENT.test(token));
   const [executor, ...rest] = meaningful;
   if (!executor) return {};
+
+  // `$CMD scripts/starter-checks.js brand` runs the checker, but which binary
+  // is decided at runtime. Reporting it is the only honest answer.
+  if (executor.includes("$") && meaningful.some(isStarterChecksPath)) {
+    return {
+      undecidable: `executor comes from a variable: ${describeCommand(meaningful)}`,
+    };
+  }
 
   if (NODE_EXECUTORS.has(executor) || executor.endsWith("/node")) {
     return classifyNodeCommand(rest);
@@ -328,10 +213,25 @@ function collectLefthookRunStrings(lefthook) {
 /**
  * Automated lanes something else executes, and manual lanes a human is told to
  * type. Both are lanes; only one of them runs without a person.
+ *
+ * `undecidable` carries every construct the scanner refused to guess at. It is
+ * reported, not dropped: an unreadable command is exactly where a missing lane
+ * would hide.
  */
 function collectLanes() {
   const automated = [];
   const manual = [];
+  const undecidable = [];
+
+  // Commands carry the file they came from: "cannot tell what this runs" is
+  // only actionable if it says where to look.
+  const scanInto = (bucket, shellText, source) => {
+    const scan = scanShellCommands(shellText);
+    bucket.push(...scan.commands.map((tokens) => ({ tokens, source })));
+    undecidable.push(
+      ...scan.undecidable.map((reason) => `${source}: ${reason}`),
+    );
+  };
 
   const workflowFiles = readdirSync(WORKFLOW_DIR).filter((file) =>
     /\.ya?ml$/u.test(file),
@@ -341,54 +241,107 @@ function collectLanes() {
     const workflow = yaml.load(readRepoFile(join(WORKFLOW_DIR, file)));
     const runStrings = collectWorkflowRunStrings(workflow);
     workflowSteps += runStrings.length;
-    automated.push(...runStrings.flatMap(tokenizeShell));
+    for (const runString of runStrings) {
+      scanInto(automated, runString, join(WORKFLOW_DIR, file));
+    }
   }
 
   const lefthook = yaml.load(readRepoFile(LEFTHOOK_CONFIG));
-  automated.push(...collectLefthookRunStrings(lefthook).flatMap(tokenizeShell));
+  for (const runString of collectLefthookRunStrings(lefthook)) {
+    scanInto(automated, runString, LEFTHOOK_CONFIG);
+  }
 
   const { RELEASE_PROOF_MANIFEST } = require("../release-proof-manifest.js");
   for (const step of RELEASE_PROOF_MANIFEST.steps) {
-    if (step.args) automated.push([step.command, ...step.args]);
-    else automated.push(...tokenizeShell(step.command));
+    if (step.args) {
+      automated.push({
+        tokens: [step.command, ...step.args],
+        source: "release-proof-manifest",
+      });
+    } else scanInto(automated, step.command, "release-proof-manifest");
   }
   for (const lane of RELEASE_PROOF_MANIFEST.manualProofLanes ?? []) {
-    manual.push(...tokenizeShell(lane.command));
+    scanInto(manual, lane.command, "release-proof-manifest (manual)");
   }
 
-  return { automated, manual, workflowFiles, workflowSteps };
+  return { automated, manual, undecidable, workflowFiles, workflowSteps };
 }
 
-/** Walk lane commands through package scripts, collecting subcommands hit. */
+/**
+ * Walk lane commands through package scripts, collecting subcommands hit.
+ *
+ * Anything the classifier could not decide is collected too, so a package
+ * script reached from a real lane cannot hide an unreadable command.
+ */
 function collectReachableSubcommands(roots, packageScripts) {
   const reached = new Set();
+  const undecidable = [];
   const visitedScripts = new Set();
   const queue = [...roots];
 
   while (queue.length > 0) {
-    const tokens = queue.pop();
-    const { subcommand, packageScript } = classifyCommand(
-      tokens,
-      packageScripts,
-    );
+    const { tokens, source } = queue.pop();
+    const result = classifyCommand(tokens, packageScripts);
 
-    if (subcommand) reached.add(subcommand);
-    if (!packageScript || visitedScripts.has(packageScript)) continue;
+    if (result.undecidable)
+      undecidable.push(`${source}: ${result.undecidable}`);
+    if (result.subcommand) reached.add(result.subcommand);
+    if (!result.packageScript || visitedScripts.has(result.packageScript)) {
+      continue;
+    }
 
-    visitedScripts.add(packageScript);
+    visitedScripts.add(result.packageScript);
     // pnpm runs pre/post around the script itself; all three are the lane.
     for (const name of [
-      `pre${packageScript}`,
-      packageScript,
-      `post${packageScript}`,
+      `pre${result.packageScript}`,
+      result.packageScript,
+      `post${result.packageScript}`,
     ]) {
-      if (Object.hasOwn(packageScripts, name)) {
-        queue.push(...tokenizeShell(packageScripts[name]));
-      }
+      if (!Object.hasOwn(packageScripts, name)) continue;
+      const scan = scanShellCommands(packageScripts[name]);
+      const scriptSource = `package script "${name}"`;
+      queue.push(
+        ...scan.commands.map((tokens) => ({ tokens, source: scriptSource })),
+      );
+      undecidable.push(
+        ...scan.undecidable.map((reason) => `${scriptSource}: ${reason}`),
+      );
     }
   }
 
-  return reached;
+  return { reached, undecidable };
+}
+
+/**
+ * Print the findings and say whether the lane map may be trusted.
+ *
+ * Split out of the check so the fail-closed rule is testable on its own. It is
+ * the one line this whole file exists to hold: an unreadable command is not a
+ * clean result, and removing it once turned the gate green on a repo it should
+ * have failed.
+ *
+ * `undecidable` is reported before the coverage buckets on purpose — while a
+ * command is unreadable, "no orphans" is an absence of an answer, not one.
+ */
+function reportLaneFindings({ undecidable, orphans, unknown }) {
+  for (const reason of undecidable) {
+    console.error(
+      `[subcommand-lanes] cannot tell what this runs — ${reason}. Spell it as a plain command, or name the subcommand where a reader can see it`,
+    );
+  }
+  for (const command of orphans) {
+    console.error(
+      `[subcommand-lanes] "${command}" is registered but no lane invokes it — wire it into CI, lefthook, or the release proof manifest, or retire it`,
+    );
+  }
+  for (const command of unknown) {
+    console.error(
+      `[subcommand-lanes] a lane invokes "${command}", which is not a registered subcommand — it would print usage and exit 1`,
+    );
+  }
+  return (
+    undecidable.length === 0 && orphans.length === 0 && unknown.length === 0
+  );
 }
 
 function runSubcommandLaneCheck() {
@@ -396,7 +349,13 @@ function runSubcommandLaneCheck() {
   // trimmed list could hide the exact thing this check exists to find.
   const { STARTER_CHECK_COMMANDS } = require("../../starter-checks.js");
   const packageScripts = JSON.parse(readRepoFile(PACKAGE_JSON)).scripts ?? {};
-  const { automated, manual, workflowFiles, workflowSteps } = collectLanes();
+  const {
+    automated,
+    manual,
+    undecidable: laneUndecidable,
+    workflowFiles,
+    workflowSteps,
+  } = collectLanes();
 
   // Empty-scan guard: if the parse produced nothing, the check is not clean,
   // it is blind.
@@ -420,8 +379,10 @@ function runSubcommandLaneCheck() {
     return false;
   }
 
-  const inAutomated = collectReachableSubcommands(automated, packageScripts);
-  const inManual = collectReachableSubcommands(manual, packageScripts);
+  const automatedWalk = collectReachableSubcommands(automated, packageScripts);
+  const manualWalk = collectReachableSubcommands(manual, packageScripts);
+  const inAutomated = automatedWalk.reached;
+  const inManual = manualWalk.reached;
   const manualOnly = STARTER_CHECK_COMMANDS.filter(
     (command) => !inAutomated.has(command) && inManual.has(command),
   );
@@ -431,19 +392,15 @@ function runSubcommandLaneCheck() {
   const unknown = [...inAutomated, ...inManual].filter(
     (command) => !STARTER_CHECK_COMMANDS.includes(command),
   );
+  const undecidable = [
+    ...new Set([
+      ...laneUndecidable,
+      ...automatedWalk.undecidable,
+      ...manualWalk.undecidable,
+    ]),
+  ];
 
-  for (const command of orphans) {
-    console.error(
-      `[subcommand-lanes] "${command}" is registered but no lane invokes it — wire it into CI, lefthook, or the release proof manifest, or retire it`,
-    );
-  }
-  for (const command of unknown) {
-    console.error(
-      `[subcommand-lanes] a lane invokes "${command}", which is not a registered subcommand — it would print usage and exit 1`,
-    );
-  }
-
-  if (orphans.length > 0 || unknown.length > 0) return false;
+  if (!reportLaneFindings({ undecidable, orphans, unknown })) return false;
 
   for (const command of manualOnly) {
     console.log(
@@ -458,8 +415,9 @@ function runSubcommandLaneCheck() {
 
 module.exports = {
   runSubcommandLaneCheck,
+  reportLaneFindings,
   classifyCommand,
-  tokenizeShell,
+  collectLanes,
   collectWorkflowRunStrings,
   collectLefthookRunStrings,
 };

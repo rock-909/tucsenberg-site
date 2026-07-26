@@ -1,10 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 const {
   classifyCommand,
   collectLefthookRunStrings,
   collectWorkflowRunStrings,
-  tokenizeShell,
+  reportLaneFindings,
 } = require("../../../scripts/quality/checks/subcommand-lanes.js");
+const {
+  scanShellCommands,
+} = require("../../../scripts/quality/checks/shell-command-scan.js");
 
 /**
  * The reconciler's whole value is that it does not fail open. Everything below
@@ -20,10 +23,31 @@ const PACKAGE_SCRIPTS = {
 };
 
 function classify(shell: string) {
-  return tokenizeShell(shell).map((tokens: string[]) =>
+  return scanShellCommands(shell).commands.map((tokens: string[]) =>
     classifyCommand(tokens, PACKAGE_SCRIPTS),
   );
 }
+
+/** Subcommands a snippet actually reaches — the thing the gate counts. */
+function subcommands(shell: string) {
+  return classify(shell)
+    .map((result: { subcommand?: string }) => result.subcommand)
+    .filter(Boolean);
+}
+
+/** Everything the scanner or classifier refused to decide. */
+function undecidable(shell: string) {
+  const scan = scanShellCommands(shell);
+  return [
+    ...scan.undecidable,
+    ...scan.commands
+      .map((tokens: string[]) => classifyCommand(tokens, PACKAGE_SCRIPTS))
+      .map((result: { undecidable?: string }) => result.undecidable)
+      .filter(Boolean),
+  ];
+}
+
+const CALL = "node scripts/starter-checks.js brand";
 
 describe("subcommand lane reconciler", () => {
   it("counts a real invocation", () => {
@@ -47,14 +71,31 @@ describe("subcommand lane reconciler", () => {
   });
 
   // `node --check x.js sub` 只解析文件不执行，`-e` / `-p` 根本不读它。没有一份
-  // flag 名单能一直判对，所以任何 flag 都按"判不准"处理，落进 orphan 桶。
+  // flag 名单能一直判对，所以带 flag 一律报出来撞红。
+  //
+  // 断言必须落在"报了什么"上。上一版断言 `[{}]`——那条测试删掉整个 guard 也
+  // 照样绿，因为 `--check` 本来就不是已注册的脚本名，两条路都返回空。
   it("refuses to classify a node command carrying flags", () => {
-    expect(classify("node --check scripts/starter-checks.js brand")).toEqual([
-      {},
-    ]);
+    expect(undecidable("node --check scripts/starter-checks.js brand")).toEqual(
+      [
+        'node flags before the script path: "--check scripts/starter-checks.js brand"',
+      ],
+    );
     expect(
-      classify("node --trace-warnings scripts/starter-checks.js brand"),
-    ).toEqual([{}]);
+      undecidable("node --trace-warnings scripts/starter-checks.js brand"),
+    ).toHaveLength(1);
+    expect(subcommands("node --check scripts/starter-checks.js brand")).toEqual(
+      [],
+    );
+  });
+
+  // flag 在脚本路径之后是子命令自己的参数，跟 node 无关。
+  it("still classifies flags that belong to the subcommand", () => {
+    expect(
+      undecidable(
+        'node ./scripts/starter-checks.js deployed-smoke --base-url "$X"',
+      ),
+    ).toEqual([]);
   });
 
   it("does not count a shell comment that spells the whole command", () => {
@@ -171,12 +212,21 @@ describe("subcommand lane reconciler", () => {
 
   // `pnpm --store-dir content:check --version` 里 content:check 是 flag 的值，
   // 什么都没跑。带值 flag 的名单在 pnpm / npm / yarn 之间不可能同时正确
-  // （`-w` 在 pnpm 是布尔、在 npm 带值），判不准就不算车道。
+  // （`-w` 在 pnpm 是布尔、在 npm 带值），判不准就报出来撞红。
+  //
+  // 同样：断言落在"报了什么"上。断言 `[{}]` 的话，删掉 guard 也不会红——
+  // `--store-dir` 本来就不是脚本名。
   it("refuses to classify a runner command carrying flags", () => {
-    expect(classify("pnpm --store-dir content:check --version")).toEqual([{}]);
-    expect(classify("npm --prefix content:check --version")).toEqual([{}]);
-    expect(classify("pnpm -w content:check")).toEqual([{}]);
-    expect(classify("pnpm --filter web content:check")).toEqual([{}]);
+    expect(undecidable("pnpm --store-dir content:check --version")).toEqual([
+      'runner flags: "--store-dir content:check --version"',
+    ]);
+    expect(undecidable("npm --prefix content:check --version")).toHaveLength(1);
+    expect(undecidable("pnpm -w content:check")).toHaveLength(1);
+    expect(undecidable("pnpm --filter web content:check")).toHaveLength(1);
+    expect(undecidable("pnpm run --if-present content:check")).toHaveLength(1);
+    expect(classify("pnpm --store-dir content:check --version")).toEqual([
+      { undecidable: expect.any(String) },
+    ]);
   });
 
   // `pnpm exec x` 跑的是名叫 x 的可执行文件，不是 package script x。
@@ -193,6 +243,83 @@ describe("subcommand lane reconciler", () => {
 
   it("ignores runner calls that are not package scripts", () => {
     expect(classify("pnpm exec vitest run tests/unit")).toEqual([{}]);
+  });
+
+  // 以下六条是第三轮对抗审查逐条打穿的：每一条都是"纯文本被铸成车道"，
+  // 而且都不是靠再补一个特殊字符修的——扫描器改成按 shell 自己的规则读。
+
+  // 引号状态必须跨物理行。上一版每行独立扫描，多行字符串的第二行被当命令。
+  it("keeps a quote open across physical lines", () => {
+    expect(subcommands(`printf '%s\\n' "harmless\n${CALL}"`)).toEqual([]);
+    expect(subcommands(`printf '%s\\n' 'harmless\n${CALL}'`)).toEqual([]);
+  });
+
+  // 双引号里的 `\"` 是转义的引号，不闭合字符串。
+  it("does not let an escaped quote close a string", () => {
+    expect(subcommands(`printf '%s\\n' "harmless \\"; ${CALL}"`)).toEqual([]);
+  });
+
+  // bash 要求结束符顶格精确匹配；`<<-` 只剥 tab。用 trim() 的话，缩进一个
+  // 空格的假结束行就能提前关掉 heredoc，把正文交给分词器。
+  it("closes a heredoc only on an exact terminator", () => {
+    expect(subcommands(`cat <<EOF\n  EOF\n${CALL}\nEOF`)).toEqual([]);
+    expect(subcommands(`cat <<-EOF\n  EOF\n${CALL}\n\tEOF`)).toEqual([]);
+  });
+
+  // 数字、转义、部分引用的 delimiter 都是合法 heredoc。
+  it("recognises numeric, escaped and partially quoted delimiters", () => {
+    expect(subcommands(`cat <<123\n${CALL}\n123`)).toEqual([]);
+    expect(subcommands(`cat <<\\EOF\n${CALL}\nEOF`)).toEqual([]);
+    // 反向：部分引用的 delimiter 认不出来的话，真调用会被当成 heredoc 正文吃掉。
+    expect(subcommands(`cat <<E"OF"\nbody\nEOF\n${CALL}`)).toEqual(["brand"]);
+  });
+
+  // heredoc 必须在扫描时识别，不能对整行跑正则——否则字符串里的 "<<EOF"
+  // 会开一个幽灵 heredoc，把后面的真调用整段吞掉。
+  it("does not open a heredoc from text inside quotes", () => {
+    expect(subcommands(`printf '%s\\n' "<<EOF"\n${CALL}`)).toEqual(["brand"]);
+  });
+
+  // `true` 接受参数并返回成功，右边照样不执行。上一版只认裸单 token。
+  it("reads the short-circuit guard from the executor, not the whole command", () => {
+    expect(subcommands(`true ignored || ${CALL}`)).toEqual([]);
+    expect(subcommands(`false ignored && ${CALL}`)).toEqual([]);
+  });
+
+  // `printf x >&node ...` 里 node 是重定向目标（一个文件名），不是执行器。
+  it("consumes a redirection target instead of reading it as an executor", () => {
+    expect(
+      subcommands("printf x >&node scripts/starter-checks.js brand"),
+    ).toEqual([]);
+    expect(
+      subcommands("printf x >|node scripts/starter-checks.js brand"),
+    ).toEqual([]);
+    expect(subcommands("printf x 2> /tmp/log")).toEqual([]);
+    // 重定向之后的真调用不受影响。
+    expect(subcommands(`echo x > /tmp/f\n${CALL}`)).toEqual(["brand"]);
+  });
+
+  // 命令替换是个值。仓库里有十几处普通用法（`$(git rev-parse HEAD^)`），
+  // 全部当判不准会让门当场不可用；只有点名这个脚本的才报。
+  it("reports only a command substitution that names the checker", () => {
+    expect(undecidable("REV=$(git rev-parse HEAD^)")).toEqual([]);
+    expect(undecidable(`echo $(${CALL})`)).toHaveLength(1);
+    expect(
+      undecidable("echo `node scripts/starter-checks.js brand`"),
+    ).toHaveLength(1);
+  });
+
+  // 执行器来自变量：确实会跑，但跑的是什么运行时才知道。
+  it("reports an executor that comes from a variable", () => {
+    expect(undecidable("$CMD scripts/starter-checks.js brand")).toEqual([
+      'executor comes from a variable: "$CMD scripts/starter-checks.js brand"',
+    ]);
+  });
+
+  // 分组里的命令确实会跑，上一版整段漏掉。
+  it("reads commands inside a subshell or brace group", () => {
+    expect(subcommands(`( ${CALL} )`)).toEqual(["brand"]);
+    expect(subcommands(`{ ${CALL}; }`)).toEqual(["brand"]);
   });
 
   it("splits chained commands so a later one is not swallowed", () => {
@@ -274,5 +401,47 @@ describe("lane collection reads command positions, not any key named run", () =>
         },
       }),
     ).toEqual(["pnpm lint"]);
+  });
+});
+
+describe("the verdict fails closed", () => {
+  const quiet = () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    return spy;
+  };
+
+  it("passes only when all three buckets are empty", () => {
+    const spy = quiet();
+    expect(
+      reportLaneFindings({ undecidable: [], orphans: [], unknown: [] }),
+    ).toBe(true);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  // 这条是整份改动的核心：读不懂的命令不是"干净"，是"没有结论"。
+  // 去掉它一次，门就在本该撞红的仓库上放行了。
+  it("refuses to pass on an unreadable command alone", () => {
+    const spy = quiet();
+    expect(
+      reportLaneFindings({
+        undecidable: ["lefthook.yml: executor comes from a variable"],
+        orphans: [],
+        unknown: [],
+      }),
+    ).toBe(false);
+    expect(spy.mock.calls[0][0]).toContain("cannot tell what this runs");
+    spy.mockRestore();
+  });
+
+  it("refuses to pass on an orphan or an unregistered subcommand", () => {
+    const spy = quiet();
+    expect(
+      reportLaneFindings({ undecidable: [], orphans: ["brand"], unknown: [] }),
+    ).toBe(false);
+    expect(
+      reportLaneFindings({ undecidable: [], orphans: [], unknown: ["typo"] }),
+    ).toBe(false);
+    spy.mockRestore();
   });
 });
