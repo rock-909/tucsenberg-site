@@ -121,6 +121,7 @@ describe("CI workflow contract", () => {
     for (const command of [
       "node scripts/starter-checks.js markdown-fences",
       "node scripts/starter-checks.js vitest-collection",
+      "node scripts/starter-checks.js subcommand-lanes",
     ]) {
       expect(qualityRuns).toContain(command);
     }

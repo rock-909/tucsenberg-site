@@ -5,6 +5,7 @@ const { runMarkdownFenceCheck } = require("./quality/checks/markdown-fences");
 const {
   runVitestCollectionCheck,
 } = require("./quality/checks/vitest-collection");
+const { runSubcommandLaneCheck } = require("./quality/checks/subcommand-lanes");
 const {
   collectComponentGovernanceFindings,
   runComponentGovernanceCli,
@@ -138,6 +139,7 @@ Commands:
   brand               Check old brand residue
   markdown-fences     Check every markdown code fence declares a language
   vitest-collection   Check vitest runs every test file on disk
+  subcommand-lanes    Check every subcommand here is reached by a lane that runs
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
@@ -166,6 +168,7 @@ const COMMAND_HANDLERS = {
   brand: () => runBrandCheck(),
   "markdown-fences": () => runMarkdownFenceCheck(),
   "vitest-collection": () => runVitestCollectionCheck(),
+  "subcommand-lanes": () => runSubcommandLaneCheck(STARTER_CHECK_COMMANDS),
   "content-slugs": (args) => runContentSlugCheck(args),
   "content-manifest": (args) =>
     runContentManifestGenerator(createContentManifestContext(), {
