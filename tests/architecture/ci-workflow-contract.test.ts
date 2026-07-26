@@ -110,6 +110,22 @@ describe("CI workflow contract", () => {
     });
   });
 
+  // 这两个检查器写好了很久，但一个入口都没有——只有人工敲 CLI 才会跑，等于
+  // 不存在。接进 CI 之后，除了这条断言没有别的东西拦着谁再把它们摘掉。守的是
+  // 命令本身在跑，不是步骤名怎么写。
+  it("keeps the standalone gate checks wired to a lane that actually runs", () => {
+    const qualityRuns = (readCiWorkflowConfig().jobs?.quality?.steps ?? [])
+      .map((step) => step.run?.trim())
+      .filter((run): run is string => Boolean(run));
+
+    for (const command of [
+      "node scripts/starter-checks.js markdown-fences",
+      "node scripts/starter-checks.js vitest-collection",
+    ]) {
+      expect(qualityRuns).toContain(command);
+    }
+  });
+
   it("keeps the full React Doctor reconciliation visible but non-blocking", () => {
     const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
 

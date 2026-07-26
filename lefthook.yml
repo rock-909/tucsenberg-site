@@ -74,16 +74,19 @@ pre-commit:
     # 打印 "No test files found" 然后 exit 0，钩子跟着报"相关测试检查通过"。也就是
     # 说"没测过"和"测过并通过"被合并成同一个结果——正是这个门声称要挡住的情况。
     #
-    # 两类文件不该要求 vitest 测试，它们的证明在别的车道，按文件角色排除而不是列
-    # 白名单：Storybook 故事由 CI 的 `storybook build` 证明；App Router 的路由外壳
-    # （page/layout/error/not-found）由 Playwright 冒烟逐页证明。
+    # 只排除 Storybook 故事：它们的证明在 CI 的 `storybook build`。
+    #
+    # 这里一度还按文件名排除了 App Router 的所有 page/layout/error/not-found，
+    # 理由是"Playwright 冒烟逐页证明"。独立审查把这条打掉了：冒烟对每页只断言
+    # HTTP 200 和一个 H1，而被排除的 `products/[market]/page.tsx` 有 495 行业务
+    # 逻辑和 31 个现成的单测——改坏询价链接生成器，钩子照样绿。真正没有单测的
+    # 只有 6 个文件，已经逐个补上，所以整条按角色排除都不需要了。
     test-related:
       run: |
         FILES=$(git diff --cached --name-only --diff-filter=ACM \
           | grep -E '^src/.+\.(ts|tsx)$' \
           | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' \
-          | grep -v '\.stories\.tsx$' \
-          | grep -vE '^src/app/.*/(page|layout|error|not-found)\.tsx$' || true)
+          | grep -v '\.stories\.tsx$' || true)
         if [ -z "$FILES" ]; then
           echo "✅ 相关测试检查跳过 (本次没有需要单测覆盖的源码变更)"; exit 0;
         fi
@@ -102,8 +105,8 @@ pre-commit:
           echo "❌ 改动的源文件里，有文件没有任何相关测试：";
           echo "$FILES" | sed 's/^/     /';
           echo "";
-          echo "💡 补一个测试，或者说明它的证明该由哪条车道承担（E2E / Storybook），";
-          echo "   并把该文件归入上面按角色排除的那两类。";
+          echo "💡 补一个测试。真的该由别的车道证明，就说清是哪条，并把排除规则写在";
+          echo "   上面那个过滤器里——附上理由，别默默放行。";
           exit 1;
         fi
         echo "✅ 相关测试通过"

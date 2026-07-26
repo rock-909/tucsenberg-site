@@ -3,6 +3,9 @@
 const { runBrandCheck } = require("./quality/checks/brand");
 const { runMarkdownFenceCheck } = require("./quality/checks/markdown-fences");
 const {
+  runVitestCollectionCheck,
+} = require("./quality/checks/vitest-collection");
+const {
   collectComponentGovernanceFindings,
   runComponentGovernanceCli,
 } = require("./quality/checks/component-governance");
@@ -134,6 +137,7 @@ Commands:
   truth-docs          Check current truth docs and release runbook order
   brand               Check old brand residue
   markdown-fences     Check every markdown code fence declares a language
+  vitest-collection   Check vitest runs every test file on disk
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
@@ -161,6 +165,7 @@ const COMMAND_HANDLERS = {
   "truth-docs": () => runTruthDocsCheck(),
   brand: () => runBrandCheck(),
   "markdown-fences": () => runMarkdownFenceCheck(),
+  "vitest-collection": () => runVitestCollectionCheck(),
   "content-slugs": (args) => runContentSlugCheck(args),
   "content-manifest": (args) =>
     runContentManifestGenerator(createContentManifestContext(), {

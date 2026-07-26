@@ -91,6 +91,9 @@ jobs:
       - name: Markdown 代码围栏语言标识检查
         run: node scripts/starter-checks.js markdown-fences
 
+      - name: Vitest 收集面对账
+        run: node scripts/starter-checks.js vitest-collection
+
   tests:
     name: 单元与集成测试
     runs-on: ubuntu-latest

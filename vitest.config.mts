@@ -36,11 +36,11 @@ export default defineConfig({
 
     // 测试文件匹配模式 - 优化分离策略
     include: [
-      "src/**/*.{test,spec}.{js,jsx,ts,tsx}",
+      "src/**/*.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
       "src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "tests/architecture/**/*.{test,spec}.{js,jsx,ts,tsx}",
-      "tests/unit/**/*.{test,spec}.{js,jsx,ts,tsx}",
-      "tests/integration/**/*.{test,spec}.{js,jsx,ts,tsx}",
+      "tests/architecture/**/*.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
+      "tests/unit/**/*.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
+      "tests/integration/**/*.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
     ],
 
     // 排除文件 - 严格分离浏览器测试
@@ -62,11 +62,11 @@ export default defineConfig({
       "**/__tests__/**/mocks/**/*.{js,jsx,ts,tsx}",
       "**/mocks/**/*.{js,jsx,ts,tsx}",
       // 严格排除浏览器测试文件
-      "**/*.browser.{test,spec}.{js,jsx,ts,tsx}",
+      "**/*.browser.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
       "tests/browser/**/*",
       "tests/e2e/**/*",
       // 排除性能测试文件
-      "**/*.performance.{test,spec}.{js,jsx,ts,tsx}",
+      "**/*.performance.{test,spec}.{js,jsx,ts,tsx,mts,cts}",
     ],
 
     // 覆盖率配置 - 最简配置
