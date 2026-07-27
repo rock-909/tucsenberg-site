@@ -1,32 +1,8 @@
 import { expect, test } from "@playwright/test";
-
-const pageCases = [
-  ["/", /Factory-Direct Flood Barriers from China/i],
-  ["/products", /Flood Barrier Product Lines/i],
-  ["/products/abs-flood-barriers", /ABS Interlocking Boxwall Flood Barriers/i],
-  [
-    "/products/aluminum-flood-gates",
-    /Aluminum Flood Gates & Demountable Barrier Systems/i,
-  ],
-  ["/products/absorbent-flood-bags", /Absorbent Flood Bags/i],
-  ["/products/flood-tube-dams", /Water & Air-Filled Flood Tube Dams/i],
-  ["/products/frp-flood-barriers", /FRP Composite Flood Barrier Planks/i],
-  ["/oem-wholesale", /OEM, Private Label & Wholesale Supply/i],
-  [
-    "/guides/flood-barrier-materials-guide",
-    /ABS vs Aluminum vs FRP vs Water-Filled Flood Barriers/i,
-  ],
-  ["/guides/flood-barrier-specifications", /Flood Barrier Specifications/i],
-  ["/about", /Who you're actually buying from/i],
-  ["/request-quote", /Get real numbers/i],
-  ["/contact", /Contact/i],
-  ["/warranty", /Warranty Policy/i],
-  ["/privacy", /Privacy Policy/i],
-  ["/terms", /Terms of Service/i],
-] as const;
+import { SITE_PAGE_CASES } from "./site-page-cases";
 
 test.describe("Tucsenberg site smoke", () => {
-  for (const [path, heading] of pageCases) {
+  for (const [path, heading] of SITE_PAGE_CASES) {
     test(`${path} renders current site content`, async ({ page }) => {
       const response = await page.goto(path, { waitUntil: "domcontentloaded" });
 
