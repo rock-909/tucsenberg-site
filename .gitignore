@@ -43,6 +43,7 @@ unified_inbox.json
 .factory/
 .kiro/
 .claude/settings.local.json
+.claude/launch.json
 # .claude/skills/ is tracked on purpose (owner 2026-07-26): the pre-merge
 # judgement and the workflow skills are repo assets, not per-machine config.
 # Backups and retired copies below stay ignored.
