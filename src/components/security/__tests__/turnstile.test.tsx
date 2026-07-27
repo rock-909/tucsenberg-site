@@ -270,6 +270,10 @@ describe("TurnstileWidget", () => {
 
       act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
       expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 这条是页面静止 15 秒后凭空出现的，屏幕阅读器必须能播报出来
+      expect(screen.getByRole("status")).toContainElement(
+        screen.getByRole("link", { name: /sales@/u }),
+      );
 
       vi.useRealTimers();
     });

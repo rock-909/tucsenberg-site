@@ -278,7 +278,12 @@ export function TurnstileWidget({
         }}
         id={id}
       />
-      {showRescue ? <TurnstileRescueLine {...rescue} /> : null}
+      {showRescue ? (
+        // 救援行是页面静止十几秒后凭空出现的，不播报等于对屏幕阅读器用户不存在。
+        <output className="turnstile-rescue" aria-live="polite">
+          <TurnstileRescueLine {...rescue} />
+        </output>
+      ) : null}
     </div>
   );
 }
