@@ -1,0 +1,48 @@
+# Static asset response headers: Cloudflare workerd (8787) vs Node (3100), same build
+
+## .open-next/assets/_headers (the only header source Cloudflare Static Assets honors)
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
+
+## next.config.ts declared rules (lines 167-207)
+      {
+        key: "X-Robots-Tag",
+        value: "noindex",
+      },
+    ];
+    const nonProductionNoindexHeaders = [
+      {
+        key: "X-Robots-Tag",
+        value: "noindex, nofollow",
+      },
+    ];
+    const shouldNoindexPublicPages = process.env.APP_ENV !== "production";
+
+    const headerConfigs = [
+      // 安全头部应用到所有路径
+      ...(securityHeaders.length > 0
+        ? [
+            {
+              source: "/:path*",
+              headers: securityHeaders,
+            },
+          ]
+        : []),
+      ...(shouldNoindexPublicPages
+        ? [
+            {
+              source: "/:path*",
+              headers: nonProductionNoindexHeaders,
+            },
+          ]
+        : []),
+      // PDF downloads are buyer aids, not SEO landing pages.
+      {
+        source: "/downloads/:path*.pdf",
+        headers: pdfNoindexHeaders,
+      },
+      // CDN 缓存策略应用到静态资源
+      {
+        source: "/:all*(svg|jpg|jpeg|png|webp|pdf|woff|woff2|ttf|otf)",
+        headers: cdnCacheHeaders,
+      },

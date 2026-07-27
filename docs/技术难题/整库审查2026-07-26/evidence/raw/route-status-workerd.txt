@@ -1,0 +1,25 @@
+=== sequential route matrix ===
+200 0.083306  /
+200 0.071495  /products
+200 0.079265  /products/abs-flood-barriers
+404 0.058244  /products/aluminum-flood-barriers
+200 0.057031  /products/absorbent-flood-bags
+404 0.044433  /products/boxwall-flood-barriers
+404 0.025487  /products/tube-dam-flood-barriers
+200 0.036018  /contact
+200 0.027421  /request-quote
+200 0.059019  /about
+200 0.053906  /oem-wholesale
+200 0.099761  /warranty
+200 0.044485  /privacy
+200 0.046921  /terms
+200 0.053249  /guides/flood-barrier-materials-guide
+200 0.043584  /guides/flood-barrier-specifications
+200 0.008619  /api/health
+200 0.045139  /sitemap.xml
+200 0.017674  /robots.txt
+200 0.008894  /icon.png
+200 0.015644  /downloads/product-catalog.pdf
+307 0.003262  /en
+404 0.002892  /zh
+404 0.037144  /nope

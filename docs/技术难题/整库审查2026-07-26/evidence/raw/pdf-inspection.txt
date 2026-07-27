@@ -1,0 +1,126 @@
+===== public/downloads/product-catalog.pdf =====
+bytes: 3314284
+Title:           Tucsenberg Flood Protection — Product Catalog 2026
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           9
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:     2325 --
+P R O D U C T C A TA L O G · 2 0 2 6 E D I T I O N
+
+Flood Protection,
+Factory-Direct from China
+Five product lines, one coordinated factory pool, one QC
+standard — from a single carton to mixed full containers.
+
+● ABS Interlocking Boxwall Barriers · TB-BW
+● Aluminum Flood Gates & Demountable Barriers · TB-AG
+● Absorbent Flood Bags (Sandless Sandbags) · TB-FB
+● Water & Air-Filled Tube Dams · TB-TD
+● FRP Composite Planks · TB-CP (in development)
+===== public/downloads/spec-sheet-tb-ag.pdf =====
+bytes: 46174
+Title:           TB-AG Aluminum Flood Gates & Demountable Barriers — Specification
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           1
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:      474 --
+P R O D U C T S P E C I F I C AT I O N
+
+Aluminum Flood Gates & Demountable Barriers
+
+Tucsenberg
+
+TB-AG series · stacked planks, EPDM seals, three post types · custom-cut to your opening
+2026.07
+schedule
+TB-AG-SPEC · v1
+
+180 mm
+===== public/downloads/spec-sheet-tb-bw.pdf =====
+bytes: 19601
+Title:           TB-BW ABS Interlocking Boxwall Flood Barriers — Specification
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           1
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:       45 --
+50–
+
+cm heights · 4 m
+
+P R O D U C T S P E C I F I C AT I O N
+
+ABS
+Interlocking
+Boxwall Flood
+Barriers
+TB-BW series · freestanding Lprofile · no fixing to the
+building · factory-direct from
+===== public/downloads/spec-sheet-tb-fb.pdf =====
+bytes: 53245
+Title:           TB-FB Absorbent Flood Bags (Sandless Sandbags) — Specification
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           1
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:      481 --
+P R O D U C T S P E C I F I C AT I O N
+
+Absorbent Flood Bags (Sandless Sandbags)
+TB-FB series · water-activated SAP core · ships flat, vacuum-packed · private label from
+the first order
+
+Tucsenberg
+2026.07
+TB-FB-SPEC · v1
+
+0.23→20 kg
+
+===== public/downloads/spec-sheet-tb-td.pdf =====
+bytes: 46728
+Title:           TB-TD Water & Air-Filled Flood Tube Dams — Specification
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           1
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:      485 --
+P R O D U C T S P E C I F I C AT I O N
+
+Water & Air-Filled Flood Tube Dams
+TB-TD series · 1 m protection height · deploys on grass, mud and broken ground where
+rigid barriers can't seal
+
+Tucsenberg
+2026.07
+TB-TD-SPEC · v1
+
+1m
+
+===== public/downloads/supplier-checklist.pdf =====
+bytes: 27172
+Title:           10 Questions to Ask Any Flood Barrier Supplier
+Producer:        cairo 1.18.4 (https://cairographics.org)
+Tagged:          no
+Pages:           1
+Encrypted:       no
+Page size:       595 x 841 pts (A4)
+-- words:      190 --
+Every quote looks similar until you read the spec sheet. These ten questions separate a serio
+
+1Plank profile height, alloy, temper, wall thickness, kg/m?
+
+Five numbers, one question. "Alumin
+
+2What seal material — and are replacements orderable separately?
+
+EPDM is the weathering standard; cheaper rubber
+
+3Which post types, the span limit at my height — and what stays visible off-season?
+
