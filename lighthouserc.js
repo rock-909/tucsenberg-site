@@ -41,6 +41,14 @@ const isDaily = process.env.CI_DAILY === "true";
 // otherwise exits — while lhci only prints a warning when its own server fails
 // to start and then measures whatever else answers (collect.js:171). Together
 // that silently measures a foreign server and reports it as this site.
+// A fixed port cannot be made collision-proof by binding tricks. `localhost`
+// resolves to both ::1 and 127.0.0.1, so a foreign IPv4 listener can coexist
+// with ours and answer some clients — verified by hand. Pinning the server to
+// `--hostname 127.0.0.1` would close that, but it breaks the site: middleware
+// rewrites still carry `localhost`, Next then treats the rewrite as
+// cross-origin, downgrades it to a redirect, and every route 307s to itself
+// forever. So the guard is a preflight check in `website:lighthouse` instead —
+// if anything already holds this port, the command refuses to run.
 const LIGHTHOUSE_PORT = 4173;
 const BASE_URL = `http://localhost:${LIGHTHOUSE_PORT}`;
 
@@ -123,11 +131,15 @@ module.exports = {
   ci: {
     collect: {
       url: isDaily ? allUrls : criticalUrls,
-      // APP_ENV=production is required, not cosmetic: without it the runtime
-      // emits `noindex` and every SEO assertion fails on measurement setup
-      // rather than on real page quality. Dynamic routes read it at request
-      // time, so it must be set on the server; static pages bake `robots` in
-      // at build time, so it must also be set on the build. Leaving that to
+      // APP_ENV=production is required, not cosmetic: without it every SEO
+      // assertion fails on measurement setup rather than on real page quality.
+      // It has to be set on BOTH the build and the server, and the build is the
+      // one that actually decides. src/app/robots.ts emits `Disallow: /` for
+      // any non-production build, and that file is generated at build time, so
+      // a production server cannot undo it — every route fails `is-crawlable`
+      // even though dynamic pages report `index, follow` in their own HTML.
+      // Static pages additionally bake `noindex` into their markup
+      // (src/lib/seo-metadata.ts:125). Leaving that to
       // whoever runs the command did not work — `pnpm website:check` ends in a
       // bare `pnpm build`, and measuring on top of that leftover scored 9
       // routes at 0.69 with `is-crawlable: Page is blocked from indexing`.
