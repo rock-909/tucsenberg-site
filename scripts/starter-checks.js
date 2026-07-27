@@ -5,6 +5,7 @@ const { runMarkdownFenceCheck } = require("./quality/checks/markdown-fences");
 const {
   runVitestCollectionCheck,
 } = require("./quality/checks/vitest-collection");
+const { runSubcommandLaneCheck } = require("./quality/checks/subcommand-lanes");
 const {
   collectComponentGovernanceFindings,
   runComponentGovernanceCli,
@@ -138,6 +139,7 @@ Commands:
   brand               Check old brand residue
   markdown-fences     Check every markdown code fence declares a language
   vitest-collection   Check vitest runs every test file on disk
+  subcommand-lanes    Check every subcommand here is wired into a lane
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
@@ -166,6 +168,7 @@ const COMMAND_HANDLERS = {
   brand: () => runBrandCheck(),
   "markdown-fences": () => runMarkdownFenceCheck(),
   "vitest-collection": () => runVitestCollectionCheck(),
+  "subcommand-lanes": () => runSubcommandLaneCheck(),
   "content-slugs": (args) => runContentSlugCheck(args),
   "content-manifest": (args) =>
     runContentManifestGenerator(createContentManifestContext(), {
@@ -217,13 +220,9 @@ async function main(argv = process.argv.slice(2)) {
   }
 }
 
-if (require.main === module) {
-  main().catch((error) => {
-    console.error("[starter-checks] Unexpected error:", error);
-    process.exit(1);
-  });
-}
-
+// Exports are assigned before the CLI bootstrap on purpose: `subcommand-lanes`
+// reads `STARTER_CHECK_COMMANDS` back from here while `main()` is running, and
+// a bootstrap placed above this line would leave it looking at empty exports.
 module.exports = {
   STARTER_CHECK_COMMANDS,
   REQUIRED_TRUTH_FILES,
@@ -297,3 +296,10 @@ module.exports = {
   validateProductionRuntimeContract,
   validatePublicLaunchTrustContent,
 };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error("[starter-checks] Unexpected error:", error);
+    process.exit(1);
+  });
+}
