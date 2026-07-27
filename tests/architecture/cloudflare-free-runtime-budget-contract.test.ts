@@ -2,18 +2,28 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
+// 这个文件 2026-07-27 从 155 行收窄到这里。删掉的是：五份文档拼成一个字符串再
+// toContain 十条整句（"source checkout"、"exact head SHA"、"Pull request CI does
+// not prove the Cloudflare Free gzip budget." …）、把 artifactBudget 整个对象连同
+// 一句英文散文一起 toEqual 冻住、以及按子串断言 ci.yml 里的步骤名。
+//
+// 那批断言守的是措辞：改一个说法就红，红了照着抄回去。它自己的 git 历史里有一次
+// 提交叫 `docs: make gate rule text tell the truth`——门逼着文档改字，这是判决书。
+//
+// 真正拦住超限的是 scripts/quality/checks/release-verify.js:61-90：它解析 wrangler
+// 输出里的实测 gzip 数值，跟 limitKiB 比大小然后失败。那条在，这里不必再抄一遍。
+//
+// 留下的三条，每条对应一个真实事故形状。
+
+const CLOUDFLARE_FREE_GZIP_CEILING_KIB = 3072; // 3 MiB，平台硬上限
+
 const requireModule = createRequire(`${process.cwd()}/package.json`);
 
 interface ReleaseProofStep {
   readonly id: string;
-  readonly command: string;
-  readonly args: readonly string[];
   readonly artifactBudget?: {
-    readonly metric: string;
     readonly limitKiB: number;
     readonly preferredKiB: number;
-    readonly measuredArtifact: string;
-    readonly source: string;
   };
 }
 
@@ -21,136 +31,53 @@ interface ReleaseProofManifestModule {
   readonly getReleaseProofSteps: () => ReleaseProofStep[];
 }
 
-function readRepoFile(relativePath: string): string {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo docs by relative path
-  return readFileSync(relativePath, "utf8");
-}
-
-function loadReleaseProofManifest(): ReleaseProofManifestModule {
-  return requireModule(
-    "./scripts/quality/release-proof-manifest.js",
-  ) as ReleaseProofManifestModule;
+function loadReleaseProofSteps(): ReleaseProofStep[] {
+  return (
+    requireModule(
+      "./scripts/quality/release-proof-manifest.js",
+    ) as ReleaseProofManifestModule
+  ).getReleaseProofSteps();
 }
 
 describe("Cloudflare Free runtime budget contract", () => {
-  it("keeps docs and release manifest aligned on the source-checkout Cloudflare budget", () => {
-    const docs = [
-      "docs/项目基础/派生配置.md",
-      "docs/项目基础/验证等级.md",
-      "docs/项目基础/上线验证.md",
-      "docs/项目基础/发布验证.md",
-      "docs/项目基础/派生干跑验证.md",
-    ]
-      .map(readRepoFile)
-      .join("\n");
-    const wranglerStep = loadReleaseProofManifest()
-      .getReleaseProofSteps()
-      .find((step) => step.id === "wrangler-preview-dry-run");
-
-    if (!wranglerStep) {
-      throw new Error("Missing Wrangler preview dry-run release proof step");
-    }
-
-    expect(wranglerStep.artifactBudget).toEqual({
-      metric: "gzip KiB",
-      limitKiB: 3000,
-      preferredKiB: 2700,
-      measuredArtifact: "source-checkout",
-      source:
-        "Project self-budget (3000 KiB), ~72 KiB margin below the Cloudflare Workers Free gzip upload limit of 3072 KiB (3 MiB)",
-    });
-    expect(wranglerStep.command).toBe("pnpm");
-    expect(wranglerStep.args.join(" ")).toBe(
-      "exec wrangler deploy --dry-run --env preview",
-    );
-
-    for (const expected of [
-      "company-site",
-      "source checkout",
-      "Cloudflare Workers Free",
-      "3000 KiB gzip",
-      "2700 KiB",
-      "pnpm exec wrangler deploy --dry-run --env preview",
-    ]) {
-      expect(docs).toContain(expected);
-    }
-  });
-
-  it("makes the PR CI budget-proof boundary explicit", () => {
-    const workflow = readRepoFile(".github/workflows/ci.yml");
-    const docs = [
-      "docs/项目基础/发布验证.md",
-      "docs/项目基础/上线验证.md",
-      "docs/项目基础/派生干跑验证.md",
-    ]
-      .map(readRepoFile)
-      .join("\n");
-
-    expect(workflow).toContain("Cloudflare/Wrangler dry-run");
-    expect(workflow).toContain("github.event_name != 'pull_request'");
-    expect(workflow).toContain("Cloudflare Free budget note");
-    expect(workflow).toContain(
-      "Pull request CI does not prove the Cloudflare Free gzip budget.",
-    );
-    expect(workflow).toContain("workflow_dispatch");
-    expect(workflow).toContain("pnpm release:verify");
-
-    for (const expected of [
-      "Pull request CI does not prove the Cloudflare Free gzip budget",
-      "workflow_dispatch",
-      "pnpm release:verify",
-      "exact head SHA",
-    ]) {
-      expect(docs).toContain(expected);
-    }
-  });
-
-  it("keeps Cloudflare static asset headers aligned with the Free runtime baseline", () => {
-    const headersPath = "public/_headers";
-    const wrangler = readRepoFile("wrangler.jsonc");
-    const docs = [
-      "docs/项目基础/发布验证.md",
-      "docs/项目基础/上线验证.md",
-      ".claude/rules/cloudflare.md",
-    ]
-      .map(readRepoFile)
-      .join("\n");
-    const releaseSteps = loadReleaseProofManifest().getReleaseProofSteps();
-    const cloudflareBuildIndex = releaseSteps.findIndex(
-      (step) => step.id === "cloudflare-build",
-    );
-    const headerStepIndex = releaseSteps.findIndex(
-      (step) => step.id === "cloudflare-static-asset-headers",
-    );
-    const wranglerStepIndex = releaseSteps.findIndex(
+  // 自定预算可以调，但调到平台上限之上就不叫预算了——release-verify 会放行一个
+  // Cloudflare 根本不收的产物。守的是"留在平台上限以内"这个意图，不是 3000 这个数。
+  it("keeps the self-imposed budget under the platform ceiling", () => {
+    const budget = loadReleaseProofSteps().find(
       (step) => step.id === "wrangler-preview-dry-run",
-    );
-    const headerStep = releaseSteps[headerStepIndex];
+    )?.artifactBudget;
 
-    expect(existsSync(headersPath)).toBe(true);
+    expect(budget).toBeDefined();
+    expect(budget!.limitKiB).toBeLessThan(CLOUDFLARE_FREE_GZIP_CEILING_KIB);
+    expect(budget!.preferredKiB).toBeLessThan(budget!.limitKiB);
+  });
 
-    const headers = readRepoFile(headersPath);
+  // 事故形状：体积门跑在构建之前，量到的是上一次的产物。发布链里这三步的先后
+  // 关系就是防这个的——头部检查必须在 Cloudflare 构建之后、dry-run 之前。
+  it("measures the artifact only after it has been rebuilt", () => {
+    const steps = loadReleaseProofSteps();
+    const indexOf = (id: string): number =>
+      steps.findIndex((step) => step.id === id);
+
+    const build = indexOf("cloudflare-build");
+    const headers = indexOf("cloudflare-static-asset-headers");
+    const dryRun = indexOf("wrangler-preview-dry-run");
+
+    expect(build).toBeGreaterThan(-1);
+    expect(headers).toBeGreaterThan(build);
+    expect(dryRun).toBeGreaterThan(headers);
+  });
+
+  // 静态资源缓存头丢了不会让任何构建失败，只会让每个买家每次访问都重新下载整个
+  // JS bundle。读最终产物旁边的 _headers，不读源码里的意图。
+  it("keeps immutable caching on the static asset route", () => {
+    expect(existsSync("public/_headers")).toBe(true);
+
+    const headers = readFileSync("public/_headers", "utf8");
 
     expect(headers).toContain("/_next/static/*");
     expect(headers).toContain(
       "Cache-Control: public,max-age=31536000,immutable",
-    );
-    expect(wrangler).toContain("Cloudflare Workers Free baseline");
-    expect(wrangler).not.toContain(
-      "Bundle size assumes the Cloudflare Workers paid plan.",
-    );
-    expect(headerStep).toEqual(
-      expect.objectContaining({
-        id: "cloudflare-static-asset-headers",
-        command: "node",
-        args: ["scripts/starter-checks.js", "cf-static-asset-headers"],
-      }),
-    );
-    expect(cloudflareBuildIndex).toBeGreaterThan(-1);
-    expect(headerStepIndex).toBeGreaterThan(cloudflareBuildIndex);
-    expect(headerStepIndex).toBeLessThan(wranglerStepIndex);
-    expect(docs).toContain(
-      "node scripts/starter-checks.js cf-static-asset-headers",
     );
   });
 });
