@@ -29,12 +29,14 @@ import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
  * 这个值管两层：传给 SDK 的 requestTimeout 管单次 HTTP 尝试，process-lead.ts
  * 的 withAirtableBudget 管整条链路的墙上时间。
  *
- * 8s 装不下一次限流重试，这是已知取舍。airtable 0.12.2 的退避是
+ * 限流重试怎么算：airtable 0.12.2 的退避是
  * `Math.random() * min(600000, 5000 * 2^已重试次数)`（见
  * node_modules/airtable/lib/internal_config.json 与
- * exponential_backoff_with_jitter.js）：首次退避就是 0-5 秒均匀分布，而且这段
- * 等待不计入 requestTimeout。撞上 429 多半直接耗尽预算，按超时降级成一条
- * 非阻塞错误日志。宁可丢 CRM 记录，也不让买家干等——业主邮件才是主通道。
+ * exponential_backoff_with_jitter.js），首次退避是 0-5 秒均匀分布，而且这段
+ * 等待不计入 requestTimeout。所以单次 429 的总耗时 = 首轮请求 + U(0,5s) +
+ * 重试请求，按上面的 p50 算中位约 3s，通常仍落在 8s 里；连续 429 才会耗尽预算。
+ * 预算到期按超时降级成一条非阻塞错误日志——宁可丢 CRM 记录，也不让买家干等，
+ * 业主邮件才是主通道。
  *
  * inquiry 路由串行执行：先发业主邮件，拿到结果再写 Airtable，好把「这封通知
  * 没发出去」一次性写进同一条记录。任一通道成功即视为用户成功。
