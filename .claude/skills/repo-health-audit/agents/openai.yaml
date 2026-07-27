@@ -1,0 +1,7 @@
+interface:
+  display_name: "Repo Health Audit"
+  short_description: "Evidence-first repo audit workflow"
+  default_prompt: "Use $repo-health-audit to run a full project health audit for this repo."
+
+policy:
+  allow_implicit_invocation: true
