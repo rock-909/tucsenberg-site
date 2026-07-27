@@ -4,11 +4,11 @@ import type { LocaleParam } from "@/app/[locale]/generate-static-params";
 import { LegalPageShell } from "@/components/content/legal-page-shell";
 import { TradeLandingShell } from "@/components/content/trade-landing-shell";
 import { getLocalizedPath, type PageType } from "@/config/paths";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
 import { loadLegalPage } from "@/lib/content/legal-page";
 import {
   createStaticPageMetadataConfig,
   generateMetadataForPath,
-  type Locale,
 } from "@/lib/seo-metadata";
 
 export interface StaticMdxPageConfig {
@@ -28,13 +28,13 @@ export async function generateStaticMdxPageMetadata(
   props: StaticMdxPageProps,
   config: StaticMdxPageConfig,
 ): Promise<Metadata> {
-  const { locale } = await props.params;
+  const locale = resolveLocaleParam(await props.params);
   const { metadata } = await loadLegalPage(config.slug, locale);
 
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale,
     pageType: config.pageType,
-    path: getLocalizedPath(config.pageType, locale as Locale),
+    path: getLocalizedPath(config.pageType, locale),
     config: createStaticPageMetadataConfig(metadata, {
       includeEmptyDescription: true,
       includeImage: true,
@@ -48,14 +48,14 @@ export async function StaticMdxPage({
 }: StaticMdxPageProps & {
   config: StaticMdxPageConfig;
 }) {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   setRequestLocale(locale);
 
   const { metadata, content, headings } = await loadLegalPage(
     config.slug,
     locale,
   );
-  const pagePath = getLocalizedPath(config.pageType, locale as Locale);
+  const pagePath = getLocalizedPath(config.pageType, locale);
 
   if (config.shell === "landing") {
     return (

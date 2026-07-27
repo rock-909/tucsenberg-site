@@ -32,7 +32,8 @@ import {
   type SingleSiteHomeFinalCtaTarget,
 } from "@/config/single-site-links";
 import { Link } from "@/i18n/routing";
-import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import {
   JsonLdGraphScript,
   JsonLdScript,
@@ -67,11 +68,11 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: HomePageProps): Promise<Metadata> {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale,
     pageType: "home",
-    path: getLocalizedPath("home", locale as Locale),
+    path: getLocalizedPath("home", locale),
   });
 }
 
@@ -400,7 +401,7 @@ function HomeFinalAction({
 }
 
 export default async function Home({ params }: HomePageProps) {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "home" });
   const content = getHomePageContent(t);
@@ -474,7 +475,7 @@ export default async function Home({ params }: HomePageProps) {
   return (
     <LightMotionProvider>
       <div className="min-h-dvh bg-background text-foreground">
-        <JsonLdGraphScript locale={locale as Locale} />
+        <JsonLdGraphScript locale={locale} />
         <div>
           {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (
             <Fragment key={sectionKey}>{homeSections[sectionKey]}</Fragment>

@@ -12,8 +12,9 @@ import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
 import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
-import { generateMetadataForPath, type Locale } from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { buildWebPageSchema } from "@/lib/structured-data-generators";
 
 interface RequestQuotePageParams {
@@ -31,16 +32,16 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: RequestQuotePageParams): Promise<Metadata> {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   const t = await getTranslations({
     locale,
     namespace: "requestQuote.metadata",
   });
 
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale,
     pageType: "requestQuote",
-    path: getLocalizedPath("requestQuote", locale as Locale),
+    path: getLocalizedPath("requestQuote", locale),
     config: {
       title: t("title"),
       description: t("description"),
@@ -87,7 +88,7 @@ export default async function RequestQuotePage({
   params,
   searchParams,
 }: RequestQuotePageProps) {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   setRequestLocale(locale);
   // searchParams already makes this route dynamic, so a Suspense boundary
   // around the form buys no prerendering — it only moved the form out of
@@ -107,14 +108,13 @@ export default async function RequestQuotePage({
     confidencePricing: tPage("confidencePricing"),
   };
   const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
-  const typedLocale = locale as Locale;
-  const pagePath = getLocalizedPath("requestQuote", typedLocale);
+  const pagePath = getLocalizedPath("requestQuote", locale);
   const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
 
   return (
     <>
       <JsonLdGraphScript
-        locale={typedLocale}
+        locale={locale}
         data={[
           buildWebPageSchema({
             locale,
