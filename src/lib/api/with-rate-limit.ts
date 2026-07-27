@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // Basic usage with default IP-based key
- * export const POST = withRateLimit('contact', async (req, { clientIP }) => {
+ * export const POST = withRateLimit('inquiry', async (req, { clientIP }) => {
  *   // Handler logic - clientIP already extracted
  *   return NextResponse.json({ success: true });
  * });
@@ -173,7 +173,7 @@ function createRateLimitResponse(
  * - Context injection with clientIP
  * - TypeScript-safe generics
  *
- * @param preset - Rate limit preset name (e.g., 'contact', 'inquiry')
+ * @param preset - Rate limit preset name (e.g., 'inquiry', 'csp')
  * @param handler - The actual request handler function
  * @param keyStrategy - Optional custom key generation strategy (defaults to IP-based)
  * @returns Wrapped handler function compatible with Next.js route exports
