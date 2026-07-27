@@ -684,6 +684,91 @@ describe("/api/inquiry route", () => {
       );
     });
 
+    it("keeps a non-string utm value from rejecting the whole submission", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({ ...validInquiryData, utmSource: 123 }),
+      );
+
+      const response = await POST(request);
+
+      // 归因字段先整组剔除、再放清洗结果，脏值到不了 schema。
+      // 买家不该因为一个营销参数格式不对被整单拒绝。
+      expect(response.status).toBe(200);
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect(callArgs).not.toHaveProperty("utmSource");
+    });
+
+    // FPH-2607-009 的防复发守卫。买家填了、路由的白名单没同步、字段被静默丢掉，
+    // 是这一轮整改要根除的失败模式。
+    //
+    // 每个字段的合法样值写在这里，但**字段名不是手抄的**：下面第一条断言拿
+    // schema 的 `.shape` 跟这张表对账。给 schema 加字段而不给样值，这条立刻红——
+    // 手抄的清单不会报错，只会随时间悄悄变短，正是这个 bug 的成因。
+    const SAMPLE_VALUE_PER_SCHEMA_FIELD: Record<string, unknown> = {
+      type: "product",
+      productInquiryKind: "catalog-product",
+      fullName: "Full Coverage Buyer",
+      email: "coverage@example.com",
+      catalogProductId: "abs-flood-barriers",
+      message: "Every declared field carries a value.",
+      buyerInterest: "Flood barriers",
+      utmSource: "google",
+      utmMedium: "cpc",
+      utmCampaign: "flood-2026",
+      utmTerm: "flood barrier",
+      utmContent: "hero-cta",
+      gclid: "gclid-sample",
+      fbclid: "fbclid-sample",
+      msclkid: "msclkid-sample",
+      landingPage: "/products",
+      capturedAt: "2026-07-27T00:00:00.000Z",
+    };
+
+    it("keeps a sample value for every field the schema declares", () => {
+      expect([...Object.keys(SAMPLE_VALUE_PER_SCHEMA_FIELD)].sort()).toEqual(
+        [...Object.keys(leadSchemaModule.productLeadObjectSchema.shape)].sort(),
+      );
+    });
+
+    it("forwards every field the schema declares to the lead pipeline", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          turnstileToken: "valid-token",
+          ...SAMPLE_VALUE_PER_SCHEMA_FIELD,
+        }),
+      );
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      // 路由要是改回逐字段枚举、漏掉其中任何一个，这里就少一个键。
+      const forwarded = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect([...Object.keys(forwarded)].sort()).toEqual(
+        [...Object.keys(SAMPLE_VALUE_PER_SCHEMA_FIELD)].sort(),
+      );
+    });
+
+    it("normalizes a blank optional field instead of rejecting it", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...generalRfqData,
+          catalogProductId: "",
+          buyerInterest: "   ",
+        }),
+      );
+
+      const response = await POST(request);
+
+      // 空串归一在 schema 里：浏览器把没填的字段发成 ""，那不是「填了一个非法值」。
+      expect(response.status).toBe(200);
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect(callArgs.catalogProductId).toBeUndefined();
+      expect(callArgs.buyerInterest).toBeUndefined();
+    });
+
     it("should exclude turnstileToken from lead data", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 

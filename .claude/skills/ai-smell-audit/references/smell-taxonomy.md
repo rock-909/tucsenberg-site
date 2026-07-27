@@ -791,7 +791,7 @@ Questions:
 **Why AI produces it**: AI puts values "where they look like they belong" by naming convention, not by ownership. Generic-looking locations attract business truth over time.
 
 **Detection**:
-- Identify the canonical site-definition layer(s) for this project (check `.claude/rules/conventions.md` or project conventions; for this starter it's `src/config/single-site*.ts`, `src/config/site-facts.ts`).
+- Identify the canonical site-definition layer(s) for this project (check `.claude/rules/conventions.md` or project conventions; for this starter it's `src/config/single-site*.ts`).
 - Enumerate every file under `shared*`, `common*`, `*-config.ts`, `constants/` that contains string literals looking like brand copy, addresses, SEO copy, marketing claims.
 - Flag any business-specific string living outside the canonical layer.
 

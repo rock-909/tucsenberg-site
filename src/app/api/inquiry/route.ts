@@ -21,7 +21,10 @@ import {
 } from "@/lib/lead-pipeline/process-lead";
 import { getSuccessfulLeadReferenceId } from "@/lib/lead-pipeline/success-reference";
 import { generateLeadReferenceId } from "@/lib/lead-pipeline/utils";
-import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
+import {
+  ATTRIBUTION_FIELD_NAMES,
+  pickAttributionFields,
+} from "@/lib/marketing/attribution-fields";
 import {
   PRODUCT_LEAD_TYPE,
   productLeadSchema,
@@ -66,25 +69,25 @@ async function validateProductInquiryTurnstile(
   return error ? createApiErrorResponse(error.errorCode, error.status) : null;
 }
 
-function normalizeOptionalString(value: unknown): unknown {
-  if (typeof value === "string" && value.trim().length === 0) {
-    return undefined;
-  }
-  return value;
-}
-
 function validateLeadData(
   data: Record<string, unknown>,
 ): ProductLeadValidationResult {
+  // 由 schema 决定哪些字段活下来，路由不再手写白名单：zod 的 object 默认剥离未知
+  // 键，turnstileToken / website / phone 本来就进不去。加新询盘字段时只改 schema，
+  // 不会再出现「买家填了、白名单没同步、字段被静默丢掉」。
+  // 归因字段必须先整组剔除、再放清洗结果：pickAttributionFields 碰到非字符串值是
+  // 「整个键不写入」而不是写 undefined，直接展开的话原始脏值会活下来，买家会因为
+  // 一个营销参数格式不对被整单拒绝。
+  // type 放最后：服务端写死，客户端伪造不了。
+  const rest = { ...data };
+  for (const fieldName of ATTRIBUTION_FIELD_NAMES) {
+    delete rest[fieldName];
+  }
+
   const schemaInput = {
-    type: PRODUCT_LEAD_TYPE,
-    productInquiryKind: data.productInquiryKind,
-    fullName: data.fullName,
-    email: data.email,
-    message: normalizeOptionalString(data.message),
-    catalogProductId: normalizeOptionalString(data.catalogProductId),
-    buyerInterest: normalizeOptionalString(data.buyerInterest),
+    ...rest,
     ...pickAttributionFields(data),
+    type: PRODUCT_LEAD_TYPE,
   };
   const parsed = productLeadSchema.safeParse(schemaInput);
 

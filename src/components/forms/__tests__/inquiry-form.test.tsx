@@ -15,67 +15,19 @@ import {
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { createInquiryPayload } from "@/components/forms/inquiry-payload";
-import {
-  resolveInquiryContext,
-  type ValidatedInquiryContext,
-} from "@/lib/lead-pipeline/inquiry-handoff";
+import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
-import { INQUIRY_TURNSTILE_ACTION } from "@/constants/turnstile-constants";
+import { lazyTurnstileLabelsSpy } from "@/test/inquiry-turnstile-mock";
+import {
+  GENERAL_CONTEXT,
+  getFormControls,
+  renderInquiryForm,
+} from "@/test/inquiry-form-harness";
 
-const lazyTurnstileLabelsSpy = vi.fn();
-
-vi.mock("@/components/forms/lazy-turnstile", () => ({
-  LazyTurnstile: ({
-    labels,
-    onError,
-    onExpire,
-    onSuccess,
-  }: {
-    labels: {
-      unavailable: string;
-      loadFailed: string;
-      slowToLoad: string;
-      devBypass: string;
-      testMode: string;
-      rescueBeforeEmail: string;
-      rescueAfterEmail: string;
-      rescueSubject: string;
-    };
-    onError?: () => void;
-    onExpire?: () => void;
-    onSuccess?: (token: string) => void;
-  }) => {
-    lazyTurnstileLabelsSpy(labels);
-    return (
-      <div
-        data-action={INQUIRY_TURNSTILE_ACTION}
-        data-testid="inquiry-turnstile"
-      >
-        <button
-          data-testid="inquiry-turnstile-success"
-          onClick={() => onSuccess?.("mock-inquiry-turnstile-token")}
-          type="button"
-        >
-          Complete verification
-        </button>
-        <button
-          data-testid="inquiry-turnstile-expire"
-          onClick={() => onExpire?.()}
-          type="button"
-        >
-          Expire verification
-        </button>
-        <button
-          data-testid="inquiry-turnstile-error"
-          onClick={() => onError?.()}
-          type="button"
-        >
-          Fail verification
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock(
+  "@/components/forms/lazy-turnstile",
+  async () => await import("@/test/inquiry-turnstile-mock"),
+);
 
 const FORBIDDEN_CONTROL_NAMES = [
   "phone",
@@ -87,35 +39,6 @@ const FORBIDDEN_CONTROL_NAMES = [
   "port",
   "budget",
 ] as const;
-
-const GENERAL_CONTEXT: ValidatedInquiryContext = { kind: "general-context" };
-
-function renderInquiryForm(
-  source: "contact" | "request-quote" = "contact",
-  context: ValidatedInquiryContext = GENERAL_CONTEXT,
-) {
-  const copy = createTestInquiryFormCopy();
-  const fallback = <InquiryFormStaticFallback copy={copy} />;
-  const utils = render(
-    <InquiryForm
-      context={context}
-      copy={copy}
-      fallback={fallback}
-      source={source}
-    />,
-  );
-  return { copy, ...utils };
-}
-
-function getFormControls(container: HTMLElement) {
-  const form = within(container).getByTestId("inquiry-form");
-  return {
-    form,
-    fullName: within(form).getByLabelText(/^Full name/i),
-    email: within(form).getByLabelText(/^Email address/i),
-    message: within(form).getByLabelText(/^Message/i),
-  };
-}
 
 function assertThreeFieldContract(
   container: HTMLElement,

@@ -5,7 +5,7 @@ import {
   getPublicContactEmail,
   getPublicContactPhone,
 } from "@/config/public-trust";
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { readRequiredMessagePath } from "@/lib/i18n/read-message-path";
 import type { FaqItem } from "@/types/content.types";
 import { createInquiryFormCopyFromMessages } from "@/components/forms/inquiry-form-copy";
@@ -73,8 +73,8 @@ export function ContactMethodsCard({
 }: {
   copy: ContactPageData["copy"]["panel"]["contact"];
 }) {
-  const publicEmail = getPublicContactEmail(siteFacts.contact.email);
-  const publicPhone = getPublicContactPhone(siteFacts.contact.phone);
+  const publicEmail = getPublicContactEmail(SINGLE_SITE_FACTS.contact.email);
+  const publicPhone = getPublicContactPhone(SINGLE_SITE_FACTS.contact.phone);
 
   return (
     <Card className="gap-0 p-0 shadow-[var(--shadow-xs)]">
@@ -176,13 +176,13 @@ export function ResponseExpectationsCard({
             <div className="flex min-w-0 justify-between gap-4">
               <span>{hoursCopy.weekdaysLabel}</span>
               <span className="text-muted-foreground">
-                {siteFacts.contact.businessHours?.weekdays}
+                {SINGLE_SITE_FACTS.contact.businessHours?.weekdays}
               </span>
             </div>
             <div className="flex min-w-0 justify-between gap-4">
               <span>{hoursCopy.saturdayLabel}</span>
               <span className="text-muted-foreground">
-                {siteFacts.contact.businessHours?.saturday}
+                {SINGLE_SITE_FACTS.contact.businessHours?.saturday}
               </span>
             </div>
             <div className="flex min-w-0 justify-between gap-4">

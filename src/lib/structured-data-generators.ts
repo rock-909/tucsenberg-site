@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import type {
   ArticleData,
   BreadcrumbData,
@@ -57,9 +57,9 @@ function getSocialProfileUrls(t: StructuredDataTranslator): string[] {
 function buildOrganizationPostalAddress() {
   return {
     "@type": "PostalAddress" as const,
-    streetAddress: siteFacts.company.location.address,
-    addressLocality: siteFacts.company.location.city,
-    addressCountry: siteFacts.company.location.country,
+    streetAddress: SINGLE_SITE_FACTS.company.location.address,
+    addressLocality: SINGLE_SITE_FACTS.company.location.city,
+    addressCountry: SINGLE_SITE_FACTS.company.location.country,
   };
 }
 
@@ -89,7 +89,7 @@ export function generateOrganizationData(
       SITE_CONFIG.description,
     url: baseUrl,
     ...(email ? { email } : {}),
-    foundingDate: String(siteFacts.company.established),
+    foundingDate: String(SINGLE_SITE_FACTS.company.established),
     address: buildOrganizationPostalAddress(),
     ...(logoPath ? { logo: new URL(logoPath, baseUrl).toString() } : {}),
     contactPoint: {

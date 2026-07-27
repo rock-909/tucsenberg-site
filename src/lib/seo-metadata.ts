@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SITE_CONFIG, type Locale, type PageType } from "@/config/paths";
 import { shouldIndexPublicPage } from "@/config/single-site-seo";
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { routing } from "@/i18n/routing-config";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 import { interpolate } from "@/lib/interpolate";
@@ -35,15 +35,15 @@ interface StaticPageMetadataConfigOptions {
 }
 
 const FALLBACK_LOCALE: Locale = "en";
-const DEFAULT_OG_IMAGE = siteFacts.brandAssets.ogImage;
+const DEFAULT_OG_IMAGE = SINGLE_SITE_FACTS.brandAssets.ogImage;
 
 function resolveLocale(locale: Locale): Locale {
   return locale === FALLBACK_LOCALE ? locale : FALLBACK_LOCALE;
 }
 
-/** Replace ICU-style {placeholders} with siteFacts values in SEO strings. */
+/** Replace ICU-style {placeholders} with SINGLE_SITE_FACTS values in SEO strings. */
 const SEO_INTERPOLATION_MAP: Record<string, string | number> = {
-  established: siteFacts.company.established,
+  established: SINGLE_SITE_FACTS.company.established,
 };
 
 function interpolateSeoString(text: string): string {

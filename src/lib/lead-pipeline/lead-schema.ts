@@ -42,6 +42,22 @@ const baseLeadFields = {
   ...leadAttributionFields,
 };
 
+/**
+ * 空串归一：浏览器把没填的字段发成 ""，不是发成缺省。归一属于 schema，不属于
+ * 路由——放在路由里就得为每个新字段补一行清洗，漏一行就是一个静默丢字段的 bug。
+ * 写法照抄 canonicalBuyerMessageSchema。
+ */
+function optionalBlankToUndefined<Output>(inner: z.ZodType<Output>) {
+  return z
+    .unknown()
+    .transform((value) =>
+      typeof value === "string" && value.trim().length === 0
+        ? undefined
+        : value,
+    )
+    .pipe(z.union([z.undefined(), inner]));
+}
+
 const catalogProductIdSchema = z
   .string()
   .trim()
@@ -50,23 +66,29 @@ const catalogProductIdSchema = z
     error: "catalogProductId must match a real catalog product",
   });
 
-export const productLeadSchema = z
-  .object({
-    type: z.literal(PRODUCT_LEAD_TYPE),
-    productInquiryKind: z.enum([
-      PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
-      PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
-    ]),
-    fullName: canonicalBuyerFullNameSchema,
-    email: canonicalBuyerEmailSchema,
-    message: canonicalBuyerMessageSchema.optional(),
-    catalogProductId: catalogProductIdSchema.optional(),
-    buyerInterest: sanitizedString()
-      .max(MAX_LEAD_PRODUCT_NAME_LENGTH)
-      .optional(),
-    ...baseLeadFields,
-  })
-  .superRefine((data, ctx) => {
+/**
+ * 单独导出对象层，是为了让测试能从 `.shape` 读出字段名，而不是再手抄一份清单。
+ * `productLeadSchema` 结尾的 `.superRefine` 返回的不是 `ZodObject`，读不到 `.shape`。
+ * 手抄的清单会随时间悄悄变短——这个仓库就是被这类清单坑过才有这一轮整改。
+ */
+export const productLeadObjectSchema = z.object({
+  type: z.literal(PRODUCT_LEAD_TYPE),
+  productInquiryKind: z.enum([
+    PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT,
+    PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
+  ]),
+  fullName: canonicalBuyerFullNameSchema,
+  email: canonicalBuyerEmailSchema,
+  message: canonicalBuyerMessageSchema.optional(),
+  catalogProductId: optionalBlankToUndefined(catalogProductIdSchema).optional(),
+  buyerInterest: optionalBlankToUndefined(
+    sanitizedString().max(MAX_LEAD_PRODUCT_NAME_LENGTH),
+  ).optional(),
+  ...baseLeadFields,
+});
+
+export const productLeadSchema = productLeadObjectSchema.superRefine(
+  (data, ctx) => {
     if (data.productInquiryKind === PRODUCT_INQUIRY_KINDS.CATALOG_PRODUCT) {
       if (!data.catalogProductId) {
         ctx.addIssue({
@@ -85,7 +107,8 @@ export const productLeadSchema = z
         message: "general RFQ must not carry a catalog product identity",
       });
     }
-  });
+  },
+);
 
 export type ProductLeadInput = z.infer<typeof productLeadSchema>;
 

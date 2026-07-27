@@ -17,8 +17,8 @@ vi.mock("@/config/paths", () => ({
   },
 }));
 
-vi.mock("@/config/site-facts", () => ({
-  siteFacts: {
+vi.mock("@/config/single-site", () => ({
+  SINGLE_SITE_FACTS: {
     company: {
       established: 2021,
     },
