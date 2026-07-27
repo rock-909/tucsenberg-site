@@ -22,7 +22,7 @@
     "website:check": "pnpm type-check && pnpm lint:check && pnpm test && pnpm build",
     "website:build:cf": "pnpm exec opennextjs-cloudflare build",
     "website:build:cf:debug": "pnpm exec opennextjs-cloudflare build --noMinify",
-    "website:lighthouse": "if lsof -ti:4173 >/dev/null 2>&1; then echo '✗ 端口 4173 已被占用。Lighthouse 会静默测量占用者的服务器并把结果当成本站的，先关掉再跑。'; exit 1; fi; NEXT_DIST_DIR=.next-lighthouse APP_ENV=production pnpm build && lhci autorun --config=./lighthouserc.js",
+    "website:lighthouse": "node scripts/lighthouse-preflight.js && NEXT_DIST_DIR=.next-lighthouse APP_ENV=production pnpm build && lhci autorun --config=./lighthouserc.js",
     "brand:check": "node scripts/starter-checks.js brand",
     "content:check": "node scripts/starter-checks.js content-manifest --check && node scripts/starter-checks.js content-slugs && node scripts/starter-checks.js translations && node scripts/starter-checks.js message-key-usage",
     "component:governance:test": "pnpm exec vitest run tests/architecture/component-governance.test.ts tests/architecture/ui-component-index.test.ts tests/unit/scripts/component-governance-check.test.ts tests/unit/scripts/component-governance-check-closure.test.ts",
