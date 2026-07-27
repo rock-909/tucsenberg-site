@@ -208,6 +208,39 @@ const eslintConfig = [
     },
   },
 
+  // CSS-First Responsive Design - Discourage useBreakpoint for layout
+  //
+  // 这块的作用域是 files + 它自己这份 ignores，跟后面的
+  // architecture-refactor-rules 不是同一个作用域（那块排除了 scripts、config、
+  // src/constants 等）。所以它在那些被排除的文件上仍然生效，不是重复声明。
+  {
+    name: "css-first-responsive-design",
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    ignores: [
+      // Allow useBreakpoint in its own file and tests
+      "**/hooks/use-breakpoint.ts",
+      "**/hooks/__tests__/use-breakpoint.test.ts",
+      // Legacy ResponsiveLayout tests during migration
+      "**/components/__tests__/responsive-layout.test.tsx",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "warn",
+        {
+          paths: [
+            {
+              name: "@/hooks/use-breakpoint",
+              message:
+                "⚠️ CSS-First Responsive: Prefer Tailwind responsive classes (sm:, md:, lg:) for layout. " +
+                "useBreakpoint is approved only for: (1) interaction logic requiring width detection, " +
+                "(2) analytics/tracking.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // 超严格质量保障配置 - 零妥协标准
   {
     name: "ultra-strict-quality-config",
@@ -318,9 +351,16 @@ const eslintConfig = [
       "no-octal-escape": "error",
       "no-param-reassign": "error",
       "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
-      // no-restricted-syntax 统一由 architecture-refactor-rules 设置。这里原本还
-      // 禁了 ForInStatement / LabeledStatement / WithStatement，三条分别由本块的
-      // guard-for-in、no-labels、no-with 覆盖，且在生产代码上早被后面的块整条替换掉。
+      // architecture-refactor-rules 也设 no-restricted-syntax，但那块排除了
+      // scripts、config、src/constants 等——在被它排除的文件上，这里这条是唯一
+      // 生效的一条，删掉就是真放宽。本块自己的 guard-for-in 也不等价：它只要求
+      // for-in 带原型守卫，不禁止 for-in 本身。
+      "no-restricted-syntax": [
+        "error",
+        "ForInStatement",
+        "LabeledStatement",
+        "WithStatement",
+      ],
       "no-shadow": "error",
       "no-ternary": "off", // 允许三元运算符，但要谨慎使用
       "no-underscore-dangle": "error",
