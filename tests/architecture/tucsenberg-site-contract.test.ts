@@ -622,14 +622,6 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
-  it("sets PDF downloads to noindex at the response-header layer", () => {
-    const nextConfig = readRepoFile("next.config.ts");
-
-    expect(nextConfig).toContain('source: "/downloads/:path*.pdf"');
-    expect(nextConfig).toContain('key: "X-Robots-Tag"');
-    expect(nextConfig).toContain('value: "noindex"');
-  });
-
   it("sets ordinary non-production pages to noindex at the response-header layer", () => {
     const nextConfig = readRepoFile("next.config.ts");
 

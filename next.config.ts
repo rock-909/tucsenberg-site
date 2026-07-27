@@ -177,6 +177,10 @@ const nextConfig: NextConfig = {
     ];
     const shouldNoindexPublicPages = process.env.APP_ENV !== "production";
 
+    // 这些规则只对 Next 服务器渲染的响应生效：本地/CI 的 Node 服务器，以及
+    // Worker 渲染的路由（含 src/app/icon.png 这类文件式 metadata）。
+    // public/ 下的文件由 Cloudflare Static Assets 直送，不经过这里——
+    // 要给它们加响应头，必须同时写进 public/_headers。改这里的人请一起改那边。
     const headerConfigs = [
       // 安全头部应用到所有路径
       ...(securityHeaders.length > 0
