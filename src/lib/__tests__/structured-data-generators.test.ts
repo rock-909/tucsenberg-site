@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SITE_CONFIG } from "@/config/paths";
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import {
   buildWebPageSchema,
   generateArticleData,
@@ -118,13 +118,13 @@ describe("structured-data generators", () => {
         "@type": "Organization",
         "@id": organizationStructuredDataId(SITE_CONFIG.baseUrl),
         email: SITE_CONFIG.contact.email,
-        foundingDate: String(siteFacts.company.established),
+        foundingDate: String(SINGLE_SITE_FACTS.company.established),
       });
       expect(schema.address).toMatchObject({
         "@type": "PostalAddress",
-        streetAddress: siteFacts.company.location.address,
-        addressLocality: siteFacts.company.location.city,
-        addressCountry: siteFacts.company.location.country,
+        streetAddress: SINGLE_SITE_FACTS.company.location.address,
+        addressLocality: SINGLE_SITE_FACTS.company.location.city,
+        addressCountry: SINGLE_SITE_FACTS.company.location.country,
       });
     });
 

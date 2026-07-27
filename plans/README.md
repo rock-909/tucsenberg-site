@@ -62,7 +62,7 @@ as a stale lead until current code and tests prove it still applies.
    DUP-05: the `createStaticPageSeoDefaults` switch (seo-metadata.ts:163-226)
    duplicates `pages.config.ts` seoKeys with a silent `default`. (M)
 4. **Config alias/forwarding layers (ARCH-01/02/03/04)** — 4-hop product
-   catalog re-export chain; identity modules `site-facts.ts`,
+   catalog re-export chain; identity modules
    `site-definition-builder.ts`, `homepage-section-links.ts`;
    `config/paths.ts` barrel used by 29 files while 40 bypass it; dead
    `getStaticSitemapPages`/`getStaticSitemapPageConfigByPath`/

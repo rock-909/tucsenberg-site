@@ -120,7 +120,6 @@
       {
         "files": [
           "src/components/seo/__tests__/json-ld-script.test.ts",
-          "src/config/__tests__/site-facts.test.ts",
           "src/config/__tests__/standards-consistency.test.ts",
           "tests/architecture/component-governance.test.ts",
           "tests/unit/content-page-placeholders.test.ts",

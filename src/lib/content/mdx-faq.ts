@@ -1,11 +1,11 @@
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { stripInlineMarkdown } from "@/lib/content/inline-markdown-text";
 import { interpolate } from "@/lib/interpolate";
 import type { FaqItem } from "@/types/content.types";
 
 export const LAYER1_FACTS: Record<string, string | number> = {
-  companyName: siteFacts.company.name,
-  established: siteFacts.company.established,
+  companyName: SINGLE_SITE_FACTS.company.name,
+  established: SINGLE_SITE_FACTS.company.established,
 };
 
 export function extractFaqFromMetadata(

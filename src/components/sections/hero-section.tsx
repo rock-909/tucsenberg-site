@@ -6,7 +6,7 @@ import {
 } from "@/components/sections/hero-section-view";
 import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import { SINGLE_SITE_HOME_HERO_PROOF_ITEMS } from "@/config/single-site-page-expression";
-import { siteFacts } from "@/config/site-facts";
+import { SINGLE_SITE_FACTS } from "@/config/single-site";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
 export async function HeroSection() {
@@ -23,7 +23,7 @@ export async function HeroSection() {
 
   const content = {
     eyebrow: t("hero.eyebrow", {
-      established: siteFacts.company.established,
+      established: SINGLE_SITE_FACTS.company.established,
     }),
     title: t("hero.title"),
     subtitle: t("hero.subtitle"),
