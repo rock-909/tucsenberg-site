@@ -34,6 +34,11 @@ export interface LeadResult {
 
 const LEAD_DELIVERY_POLICY = "email-first-storage-optional" as const;
 
+// 业主后台的数据，不是网站访客可见文案，不走 i18n 翻译键。
+const OWNER_EMAIL_FAILED_NOTICE =
+  "⚠️ NOTE: the notification email for this inquiry FAILED to send.\n" +
+  "You are seeing this lead only because it was saved here.\n\n";
+
 function normalizeErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
@@ -105,16 +110,23 @@ async function sendProductOwnerEmail(
 async function createProductLeadRecord(
   lead: ProductLeadInput,
   context: LeadProcessingContext,
+  emailSent: boolean,
 ): Promise<boolean> {
   const { firstName, lastName } = splitName(lead.fullName);
   const { referenceId } = context;
   const identity = resolveProductIdentity(lead);
   const buyerText = resolveProductBuyerText({ message: lead.message });
-  const message = generateProductInquiryMessage({
+  const baseMessage = generateProductInquiryMessage({
     productName: identity.productName,
     buyerInterest: lead.buyerInterest,
     requirements: buyerText,
   });
+  // 邮件没发出去时，业主唯一能看到这条线索的地方就是这条记录。
+  // 提示写进自由文本的 Message 字段：写什么都不会被 Airtable 拒收，
+  // 换成 Status 单选列的话，选项不存在会让整条记录被拒，反而丢线索。
+  const message = emailSent
+    ? baseMessage
+    : `${OWNER_EMAIL_FAILED_NOTICE}${baseMessage}`;
 
   try {
     await withAirtableBudget(
@@ -159,10 +171,16 @@ export async function processValidatedInquiry(
       referenceId,
     });
 
-    const [emailSent, recordCreated] = await Promise.all([
-      sendProductOwnerEmail(input, { referenceId }),
-      createProductLeadRecord(input, { referenceId }),
-    ]);
+    // 串行不是为了代码顺一点：邮件结果必须在记录创建之前拿到，才能把
+    // 「这封通知没发出去」一次写进记录。事后补一次更新做不到——Airtable
+    // 限流重试可能在预算过期后才落库，那时已经拿不到记录编号了。
+    // 代价：最坏耗时从 max(5s, 8s) 变成 5s + 8s。邮件有 5 秒硬超时，不会无限等。
+    const emailSent = await sendProductOwnerEmail(input, { referenceId });
+    const recordCreated = await createProductLeadRecord(
+      input,
+      { referenceId },
+      emailSent,
+    );
 
     if (!emailSent && !recordCreated) {
       return createProcessingFailureResult(referenceId);
