@@ -1,6 +1,6 @@
 # 整库审查 2026-07-26 修复轮设计
 
-- 日期：2026-07-27（v2，经三路独立盲审后重写）
+- 日期：2026-07-27（v3：v1 经三路独立盲审后重写为 v2；v2 的询盘交付方案经业主裁决再改为 v3）
 - 来源审查：`docs/技术难题/整库审查2026-07-26/`（run-id `2026-07-26`，审查对象 `f432da8`）
 - 施工顺序依据：同目录 `04-修复建议排序.md`
 - 工作区：`.claude/worktrees/audit-2026-07-26-repairs`，基线 `f432da8`（与 `origin/main` 同 SHA）
@@ -8,16 +8,17 @@
 
 ## 修订说明
 
-v1 经三个独立子代理盲审（事实核查 / 技术攻击 / 范围合规），去重后共二十余条问题，其中六条会导致施工失败或修出新缺陷。v2 据此重写，主要变更：
+v1 经三个独立子代理盲审（事实核查 / 技术攻击 / 范围合规），去重后共二十余条问题，其中六条会导致施工失败或修出新缺陷。v2 据此重写。业主随后否决 v2 在 §6.4 声明的「仍有一种情况会漏通知」这个边界，交付方案改为串行，是为 v3。累计变更：
 
 | v1 的说法 | v2 改成 | 为什么 |
 | --- | --- | --- |
 | 删掉 `next.config.ts` 的两条响应头规则 | **一条都不删**，只往 `public/_headers` 新增 | 那两条对 Node 服务器与 Worker 渲染的图标路由是生效的。删掉会让 `tests/e2e/tucsenberg-site-smoke.spec.ts:44` 变红，而红灯落在后续 PR 上 |
-| 在 Airtable 加 `Owner Emailed` 勾选列 | 复用现有 `Status` 列，写入 `New — Email Failed` | 勾选框的「否」与「从未写入」不可区分，业主分不出邮件失败和历史记录 |
+| 在 Airtable 加 `Owner Emailed` 勾选列 | 邮件失败时在 `Message` 字段开头加一段提示 | 勾选框的「否」与「从未写入」不可区分；而写 `Status` 单选列会在选项缺失时让 Airtable 拒收整条记录，用标记换掉整条线索 |
+| 邮件与 Airtable 并行，事后补一次更新 | **改为串行**：先邮件后记录，状态一次写进去（v3，业主 2026-07-27 裁决） | 补丁式更新在 Airtable 超时重试后落库的情形下拿不到记录编号，业主仍会漏通知。串行让状态与记录同时诞生，洞消失，代码还更少 |
 | 新建「源文件层 + 产物层」两层守卫 | 只扩展既有检查脚本与既有架构测试 | `.open-next/assets/_headers` 是 `public/_headers` 的逐字节 `cpSync` 副本，两层断言同一份内容；且两层今天都已存在 |
 | 在 `inquiry-form-status.tsx` 渲染救援行 | 救援行唯一 owner 是 `turnstile.tsx` | `lazy-turnstile.tsx:164-178` 已在脚本失败时渲染救援行，新增会出现两条重复提示 |
 | `schemaInput` 用 zod 内省 API 推导字段名 | 用 zod 自带的未知键剥离，一行 spread | 那张表还承担写死 `type`、空串归一、归因字段清洗三件事，纯推导会让买家因 UTM 格式被拒 |
-| `updateLead` 只包 `try/catch` | 必须包 `withAirtableBudget` | Airtable SDK 遇 429 自行退避重试（初始 5s，上限 600s），不受 `requestTimeout` 约束；询盘接口无总超时 |
+| `updateLead` 只包 `try/catch` | ~~必须包 `withAirtableBudget`~~ → **`updateLead` 整个不做了**（v3 改串行） | v2 曾要求给补丁更新加预算；v3 取消了补丁更新本身，这条随之作废 |
 
 另新增 PR 0（审查报告集尚未提交进 git），并修正十余处文件路径与行号错误。
 
@@ -309,42 +310,74 @@ src/components/forms/inquiry-form.tsx   onError/onExpire 除了清令牌，把�
 
 问题在下游：邮件失败、记录写成功时，业主收件箱里什么都没有，Airtable 里那条记录和正常的一模一样。
 
-**改法：写一个正向的、非默认值的信号。**
+**改法：把两个通道从并行改成串行，让标记与记录同时诞生。**
 
-v1 提议新增 `Owner Emailed` 勾选列并置为否。这是错的：Airtable 勾选框的默认状态就是未勾选，「邮件失败」与下面三种情况不可区分——加列之前的历史记录、业主还没建列时的记录、补丁更新自己失败的记录。这个标记唯一需要可靠的方向，恰好是它分不出的方向。
+先说两条被否决的方案，以及为什么。
 
-改成复用现有的 `Status` 列（`src/lib/airtable/service-internal/lead-records.ts:34-40` 已经每条记录写死 `Status: "New"`）：邮件失败时把它改成 `"New — Email Failed"`。默认态是 `New`，异常态必须由代码写入才会出现，写不进去时业主看到的是 `New`，不会被误导成「一切正常」。
+**否决一：新增 `Owner Emailed` 勾选列并置为否。** Airtable 勾选框的默认状态就是未勾选，「邮件失败」与三种情况不可区分——加列之前的历史记录、业主还没建列时的记录、补丁更新自己失败的记录。这个标记唯一需要可靠的方向，恰好是它分不出的方向。
+
+**否决二：并行照旧，事后补一次 `updateLead`。** 这是 v2 的设计，被业主 2026-07-27 明确否决。它有一个补不上的洞：
+
+- `withAirtableBudget`（`process-lead.ts:41-51`）是 `Promise.race`，超时时只是不再等待
+- Airtable SDK 单次尝试确实会在 8 秒后 abort（`node_modules/airtable/lib/run_action.js:71-73`），但遇 429 会另起一次 `runAction`（初始退避 5000ms，上限 600000ms，`internal_config.json`），新的一次带自己的 controller 和自己的超时
+- 所以一次重试完全可能在预算过期之后才落库。此时 `createProductLeadRecord` 早已返回「失败、没有记录编号」，补丁更新无从下手
+- 而超时正是 Airtable 最常见的失败形态，仓库专门为它写了测试（`process-lead.test.ts:182-194`）
+
+**否决三：把状态写进 `Status` 列。** 串行之后这条路反而更危险。`Status` 很可能是单选（single select）列，写入一个不存在的选项时 Airtable 返回 422，**整条记录被拒收**。原来的补丁式设计里这只会让标记写不上；串行之后它会让整条询盘丢失。用一个失败标记去换掉整条线索，方向反了。代码也无法自己判断该列是不是单选。
+
+**采用的方案：串行 + 把提示写进 `Message` 字段的开头。**
+
+先发邮件（已有 5 秒硬超时 + AbortController，`src/lib/email/resend-http-client.ts:28,87-90`），拿到结果后再建记录，把结果一次写进去。
 
 ```text
-src/lib/airtable/types.ts                 新增 updateLead 的 fields 参数类型
-src/lib/airtable/service.ts               新增 updateLead(recordId, fields) 方法
-src/lib/lead-pipeline/process-lead.ts     createProductLeadRecord 返回 { ok, recordId }；
-                                          结果汇合后按条件补一次更新
-docs/项目基础/行为合约.md                  BC-012A 补一句交付语义与证明路径
+src/lib/lead-pipeline/process-lead.ts     Promise.all → 先 await 邮件，再 await 记录；
+                                          createProductLeadRecord 接收 emailSent
+src/lib/airtable/service-internal/lead-records.ts  emailSent 为假时，在 Message 前面加一段提示
+docs/项目基础/行为合约.md                  BC-012A 从 parallel 改写为 sequential，
+                                          并补交付语义与证明路径
 ```
 
-**两个通道照旧并行。** 只在「邮件失败 且 记录写成功且拿到 recordId」这一种组合下追加一次更新。正常路径零额外请求。
+邮件失败时，`Message` 字段变成：
 
-**追加的更新必须包 `withAirtableBudget`，且用更短的预算（2 秒）。** 这不是可选项：
+```text
+⚠️ NOTE: the notification email for this inquiry FAILED to send.
+You are seeing this lead only because it was saved here.
 
-- `src/lib/airtable/service.ts:34` 的 `AIRTABLE_REQUEST_TIMEOUT_MS = 8000` 只管**单次尝试**
-- Airtable SDK 遇 429 会自行退避重试（`node_modules/airtable/lib/internal_config.json`：初始 5000ms，上限 600000ms），这段时间不受 `requestTimeout` 约束
-- `src/app/api/inquiry/route.ts` 没有 `maxDuration`、没有 `AbortController`、没有总超时。全链路上限约 18 秒（限流 5s + Turnstile 5s + 线索处理 8s）
-- `try/catch` 抓不到「一直不返回」
+<买家原文>
+```
 
-BC-012A 明文要求「The Airtable write is bounded by a request budget: a hung CRM cannot block the buyer response beyond the budget」。新方法不会自动继承 `createLead` 的 in-process race，必须显式包。加 2 秒预算后全链路上限约 20 秒。
+邮件成功时，`Message` 与今天完全一致，一个字不加。
 
-**这次更新失败了怎么办**：预算超时或抛错只记日志，接口仍返回成功。询盘已经存进 Airtable，不能因为写不上一个标记就把买家的提交判失败。
+**为什么选 `Message`**（`lead-records.ts:51`）：
 
-### 6.4 本条覆盖不到的情形（诚实边界）
+- 它是自由文本字段（走 `sanitizeAirtableTextField`），写什么都不会被 Airtable 拒收，**永远不会因为这个标记丢掉一条询盘**
+- 业主本来就要读它——那是询盘正文，不是一个要专门去看的角落
+- 不需要业主在 Airtable 里做任何操作，`§11` 的那项待办随之取消
+- `Status` 保持 `New` 不动，既有筛选、视图、自动化全部不受影响
 
-`withAirtableBudget` 用的是 `Promise.race`，**没有 AbortController**。超时时底层 HTTP 请求仍在跑，记录很可能几秒后照样落库，但 `createProductLeadRecord` 已经返回 `ok:false, recordId: undefined`。
+提示语用英文，与该表其余内容（`Product Name`、`Source` 等）一致。这是业主后台的数据，不是网站访客可见文案，不适用 i18n 翻译键约束。
 
-因此：**Airtable 超时 + 邮件失败**同时发生时，记录可能存在却拿不到 recordId，标记写不上。这种情形本轮仍然只有服务端日志，业主看不到。
+**为什么串行反而更简单**：不需要 `updateLead` 方法、不需要第二个预算、不需要 fields 参数类型、不需要按 recordId 回查。整条补丁式更新的设计消失了。
 
-而超时正是 Airtable 最常见的失败形态（仓库为它专门写了测试：`src/lib/lead-pipeline/__tests__/process-lead.test.ts:182-194`）。
+**为什么串行反而更可靠**：标记在记录被创建的那一刻就已经在里面了。即使 Airtable 超时之后记录晚几秒才落库（那个「幽灵记录」），它身上带的 `Status` 也已经是对的。业主看到的每一条记录都说真话，没有例外。
 
-**PR 描述里必须写明这一点**，不得宣称覆盖了没覆盖的情形。彻底解决需要给 `withAirtableBudget` 加 AbortController，那是一次独立改动，不在本轮。记入 §10.1。
+**代价，如实记账**：
+
+| | 现在 | 改后 |
+| --- | ---: | ---: |
+| 交付段最坏耗时 | `max(5s, 8s)` = 8s | `5s + 8s` = 13s |
+| 全链路最坏耗时 | 约 18s | 约 23s |
+| 典型耗时（邮件约 0.3s、Airtable 约 0.5s） | 约 0.5s | 约 0.8s |
+
+v1 曾以「买家多等一个网络往返」为由否决串行。业主 2026-07-27 裁决推翻该理由：换来的不是代码顺一点，是业主不会漏掉通知。典型情况只多等 0.3 秒。
+
+**BC-012A 的语义不变**：邮件成功 / 记录失败 → 成功（email-driven）；邮件失败 / 记录成功 → 成功；两者都失败 → 失败。Airtable 的请求预算仍然在岗，挂起的 CRM 仍然不能把买家拖过预算。只有「parallel」这个词要改成「sequential」，并写明新的最坏耗时。
+
+### 6.4 本条的边界
+
+改成串行之后，**「记录存在但状态不真实」这个情形被彻底消除**——状态在写入前就已决定。
+
+仍然存在、且本轮不解决的：邮件失败 **且** Airtable 也失败时，接口按 BC-012A 返回失败，买家看到错误提示。此时业主既没收到邮件也没有记录，只有服务端日志。这是既有行为，不是本次改动引入的，也不属于「静默」——买家被明确告知失败了。
 
 ### 6.5 测试策略
 
@@ -353,15 +386,19 @@ BC-012A 明文要求「The Airtable write is bounded by a request budget: a hung
 ```text
 新增单元：mock Resend 失败 + Airtable 成功
   断言 1：接口仍返回成功
-  断言 2：updateLead 被调用，Status 为 "New — Email Failed"
+  断言 2：传给 createLead 的 Message 以 "⚠️ NOTE:" 开头，且仍含买家原文
 新增单元：mock 两者都成功
-  断言：updateLead 一次都没被调用（证明正常路径零额外请求）
-新增单元：mock Airtable 更新挂起
-  断言：买家响应仍在预算内返回，接口仍成功
+  断言：Message 一个字不多（证明正常路径与今天完全一致）
+新增单元：mock Resend 挂起（超过 5 秒）
+  断言：邮件按 5 秒超时判失败，记录仍被创建且 Message 带提示
+新增单元：mock Airtable 挂起
+  断言：买家响应仍在预算内返回（证明串行没有绕过请求预算）
 新增单元：断言传给 Turnstile 组件的 props 含 onWidgetLoad（守 6.1 的错配）
 新增 e2e：拦截 challenges.cloudflare.com 使其失败
   断言：页面出现带 mailto 的救援行，且**只有一条**
 ```
+
+**必须有一条测试证明顺序**：断言 `createLead` 在 `sendProductInquiryEmail` 之后被调用。串行是这条修复的全部依据，顺序被人改回并行就等于修复失效，必须有守卫能变红。
 
 受影响的既有测试（改动面必须覆盖）：
 
@@ -381,9 +418,9 @@ pnpm build && pnpm website:build:cf
 pnpm exec playwright test
 ```
 
-### 6.7 业主待办（条件性）
+### 6.7 业主待办
 
-Airtable 的 `Status` 列若是单选（single select）类型，需要在表里加一个选项 `New — Email Failed`。若是纯文本列则无需任何操作。这一项不影响询盘落库：选项不存在时更新被拒，按 6.3 只记日志。
+**无。** 本 PR 不需要业主在 Airtable 里做任何操作——提示写进自由文本的 `Message` 字段，不新增列、不新增单选选项、不改 `Status`。
 
 ---
 
@@ -608,7 +645,8 @@ pnpm website:build:cf
 
 | 事项 | 为什么这轮不做 |
 | --- | --- |
-| `withAirtableBudget` 没有 AbortController | 导致 6.4 那个覆盖不到的情形。独立改动，影响面比本轮任何一条都大 |
+| `withAirtableBudget` 没有 AbortController | 串行方案已让这个洞不再影响业主可见性（状态在写入前就定了）。SDK 单次尝试本身会 abort，剩下的只是 429 重试链，独立改动 |
+| `/api/inquiry` 没有整体超时 | 全链路最坏 23 秒由各段自己的计时器叠出来，没有一道总闸。独立改动 |
 | `public/fonts/` 若放字体将没有缓存头 | 目录当前为空。放字体时需给 `_headers` 补一段 `/fonts/*` |
 | 53 个文件的中英混写注释 | 本轮只补规则，存量重写是另一件事 |
 | `next.config.ts` 的静态资源规则仍覆盖 `woff/ttf/otf` | 那些扩展名在 Worker 路由上没有实际文件，删它属于无收益改动 |
@@ -646,7 +684,7 @@ public/downloads/spec-sheet-tb-td.pdf  :55   "EN 13501 B1"（Fire rating 一格�
 | 给邮件服务加一层 `EmailService` 接口 / DTO / mapper | 一个供应商、一个调用方，调用方用的已是业务形状方法。加层是拿一个复查触发点换一个真实的多余抽象 |
 | 把 5 个产品页常量文件拆小 | 单一职责的数据文件，改动原因只有一个。行数不是判据 |
 | 拆开 893 行的 `tucsenberg-site-contract.test.ts` | 它的点名清单是与真实注册表 `toEqual` 对账的，拆开可能拆断对账 |
-| 把并行的邮件 + 表格改成串行 | 买家多等一个网络往返，只换来代码顺一点 |
+| ~~把并行的邮件 + 表格改成串行~~ | **已推翻。** 业主 2026-07-27 裁决改为串行，见 §6.3。原理由「只换来代码顺一点」不成立：换来的是业主不会漏掉通知 |
 | 给 PDF 改用 `robots.txt` 的 `Disallow` | `Disallow` 只阻止抓取，爬虫读不到响应头里的 `noindex`，URL 反而可能靠外链被收录成无摘要条目。`X-Robots-Tag` 是对的 |
 | 修 `--border` 的对比度 | 装饰性描边，WCAG 1.4.11 不要求。改了会让全站分隔线变重 |
 | 把开发依赖的 5 个 high 漏洞升到门禁 | 不发给访客，变红只会训练大家忽略红灯 |
@@ -658,7 +696,6 @@ public/downloads/spec-sheet-tb-td.pdf  :55   "EN 13501 B1"（Fire rating 一格�
 
 | 事项 | 影响 | 什么时候需要 |
 | --- | --- | --- |
-| Airtable 的 `Status` 列若为单选类型，加一个选项 `New — Email Failed` | 不加不会丢询盘，只是邮件失败的标记写不上 | PR 3 合并前 |
 | `FPH-2607-008` 的 i18n 口径选定 | 决定 `CLAUDE.md` / `AGENTS.md` 与 Content-as-code ADR 哪边让步。选定后**单向**修正文档，不做折中措辞 | 本轮之外，随时 |
 | 管坝 MOQ 的真实数字 | R'5 / R'12 挂起中。给出真值后，网页与 PDF 一并更新 | 本轮之外 |
 | 两份 PDF 的原始源文件 | 用于清掉 ASTM G154 / EN 13501 两处不实声明 | 本轮之外 |
@@ -673,6 +710,7 @@ public/downloads/spec-sheet-tb-td.pdf  :55   "EN 13501 B1"（Fire rating 一格�
 | PR 5 第二步重写 294 行测试 | 重写过程中漏掉现有覆盖 | 先写新行为测试并确认变红，再删旧测试；额外跑一轮浏览器实测 |
 | PR 5 第一步搬迁 `site-facts.test.ts` 的三段独有覆盖 | 静默丢失证书文件存在性与品牌资产状态断言 | 先搬进 `single-site.test.ts` 并确认通过，再删原文件 |
 | PR 3 的 15 秒计时器在正常提交后误报 | 每次成功提交都弹救援行 | 提交中与提交后重置窗口内不计时；e2e 断言「只有一条救援行」 |
-| PR 3 依赖 Airtable 的 `Status` 选项 | 选项没加时标记写不上 | 更新失败只记日志，询盘照常落库；PR 描述写明 |
+| 串行后邮件慢时买家多等 | 最坏 18s → 23s | 邮件已有 5 秒硬超时，不会无限等；典型只多约 0.3 秒。写进 BC-012A 的最坏耗时 |
+| 提示语混进买家原文，业主误以为是买家写的 | 误读 | 用 ⚠️ 前缀 + 空行分隔；e2e 断言买家原文完整保留 |
 | PR 1 的 `cf-preview-smoke` 实测依赖本地 wrangler 就绪 | 服务没起来就 curl，误判为失败 | 轮询 `/api/health` 直到就绪再跑断言，不用固定 sleep |
 | PR 5 与 PR 3 的文件冲突 | 合并冲突 | 顺序前置，PR 3 合入 main 后 PR 5 才开分支 |
