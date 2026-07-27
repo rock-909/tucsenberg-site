@@ -57,7 +57,13 @@ pre-commit:
     # 打印 "No test files found" 然后 exit 0，钩子跟着报"相关测试检查通过"。也就是
     # 说"没测过"和"测过并通过"被合并成同一个结果——正是这个门声称要挡住的情况。
     #
-    # 只排除 Storybook 故事：它们的证明在 CI 的 `storybook build`。
+    # 只排除两类：
+    # - Storybook 故事：它们的证明在 CI 的 `storybook build`。
+    # - `src/test/setup*`：`vitest.config.mts` 用 `setupFiles` 注入它们，不是被
+    #   测试 import 进来的，所以它们结构上永远不在 `vitest related` 走的那张模块
+    #   图里——这不是"没人证明"，是这个工具看不见。证明它们的车道是全量
+    #   `pnpm test`：把服务端翻译 mock 改回返回 key 名，hero-section 的 7 条断言
+    #   立刻红。改这类文件请跑全量，别只跑 related。
     #
     # 这里一度还按文件名排除了 App Router 的所有 page/layout/error/not-found，
     # 理由是"Playwright 冒烟逐页证明"。独立审查把这条打掉了：冒烟对每页只断言
@@ -69,7 +75,8 @@ pre-commit:
         FILES=$(git diff --cached --name-only --diff-filter=ACM \
           | grep -E '^src/.+\.(ts|tsx)$' \
           | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' \
-          | grep -v '\.stories\.tsx$' || true)
+          | grep -v '\.stories\.tsx$' \
+          | grep -v '^src/test/setup' || true)
         if [ -z "$FILES" ]; then
           echo "✅ 相关测试检查跳过 (本次没有需要单测覆盖的源码变更)"; exit 0;
         fi

@@ -112,18 +112,22 @@ describe("CI workflow contract", () => {
     });
   });
 
-  // vitest-collection 写好了很久，但一个入口都没有——只有人工敲 CLI 才会跑，等于
-  // 不存在。接进 CI 之后，除了这条断言没有别的东西拦着谁再把它摘掉。守的是命令
-  // 本身在跑，不是步骤名怎么写。
+  // subcommand-lanes 现在对每个子命令做同样的对账，但它有个引导问题：没有东西
+  // 跑它，它就没法举报自己没人跑。所以这条断言守的是那颗种子——subcommand-lanes
+  // 必须接在真会跑的车道上，其余子命令由它自己覆盖。vitest-collection 一并留着：
+  // 收集面对账是"全量测试真的收齐了吗"的唯一证明，多守一层不花钱。
   // （原本还守着 markdown-fences，那个检查 2026-07-26 退役了。）
   it("keeps the standalone gate checks wired to a lane that actually runs", () => {
     const qualityRuns = (readCiWorkflowConfig().jobs?.quality?.steps ?? [])
       .map((step) => step.run?.trim())
       .filter((run): run is string => Boolean(run));
 
-    expect(qualityRuns).toContain(
+    for (const command of [
       "node scripts/starter-checks.js vitest-collection",
-    );
+      "node scripts/starter-checks.js subcommand-lanes",
+    ]) {
+      expect(qualityRuns).toContain(command);
+    }
   });
 
   // 这条以前钉着 "React Doctor 全量对账（非阻塞）" 那一步，连

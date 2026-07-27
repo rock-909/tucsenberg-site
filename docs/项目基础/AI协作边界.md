@@ -10,6 +10,36 @@ Codex and Claude can collaborate, but durable truth must live in files.
 
 Both should point back to `docs/README.md`; do not maintain two competing encyclopedias.
 
+## Code review
+
+Branches are reviewed by an **independent Codex session before push**, not by a
+cloud PR bot. CodeRabbit is switched off, not removed: on this repo it reviewed
+after the PR already existed, and its findings arrived too late to be worth the
+round trip. `.coderabbit.yaml` stays in the repo with `auto_review.enabled` and
+`chat.auto_reply` set to `false`, because the tuning is real work.
+
+Re-enabling is not those two lines. Two problems were open when it was parked,
+and both are recorded at the top of `.coderabbit.yaml`: incremental review burns
+quota on every push to an open PR, and a quota-exhausted run still reports the
+check as passing. Switching it back on without settling those brings back a
+green tick that means nothing.
+
+Two properties make the current arrangement work, and both must be preserved:
+
+- **Independent context.** The reviewer does not share the authoring session. A
+  reviewer that already believes the change is correct proves nothing.
+- **Refutation, not confirmation.** The prompt asks it to prove the change wrong.
+  "Looks good" is not an outcome the prompt should make easy to reach.
+
+Findings are triaged against the code, not accepted on authority. A reviewer can
+be wrong; rejecting a finding is fine, but the reason belongs in the report.
+
+A review that did not run must never be reported as a review that passed.
+
+Mechanics live in `.claude/commands/pr.md` Phase 4. Do not restate them here.
+`/review-fix` is the path for handling cloud review threads; it is parked
+alongside `.coderabbit.yaml` and only applies if CodeRabbit is switched back on.
+
 ## Superpowers
 
 Upstream `obra/superpowers` currently writes specs and implementation plans to:
