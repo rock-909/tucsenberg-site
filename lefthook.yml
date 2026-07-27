@@ -22,28 +22,11 @@ pre-commit:
       run: pnpm lint:check
       fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
 
-    # 架构守卫 - 仅检查已暂存的 JS/TS 变更（排除测试文件和脚本目录）
-    architecture-guard:
-      run: |
-        FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '^tests/' | grep -v '__tests__' | grep -v '^scripts/' | grep -v '^src/test/' | grep -v '^docs/' || true)
-        if [ -z "$FILES" ]; then echo "✅ 架构守卫检查通过 (无 JS/TS 变更)"; exit 0; fi
-        for f in $FILES; do
-          if git diff --cached -- "$f" | grep -E '^\+' | grep -v '^\+.*\/\/' | grep -qE 'export \* from'; then
-            echo "❌ 发现新增export *重新导出: $f"; echo "🚫 架构重构期间禁止新增 export * 重新导出";
-            echo "请使用命名导出：export { specificExport } from './module'"; exit 1; fi
-        done
-        for f in $FILES; do
-          # 例外：配置/启动链路必须使用相对路径（TypeScript 路径别名在 Node.js/Next config 加载期不可用）
-          if [ "$f" = "src/config/security.ts" ] || [ "$f" = "next.config.ts" ] || [ "$f" = "src/middleware.ts" ] || [ "$f" = "src/lib/env.ts" ]; then continue; fi
-          # 例外：barrel files (index.ts) 从子模块导入必须使用相对路径
-          if [[ "$f" == *"/index.ts" ]]; then continue; fi
-          if git diff --cached -- "$f" | grep -qE "^\+.*from ['\"']\./|^\+.*from ['\"']\.\./"; then
-            echo "❌ 发现新增相对路径导入: $f"; echo "🚫 请使用 @/ 路径别名替代相对路径导入";
-            echo "例如：import { something } from '@/lib/module'"; exit 1; fi
-        done
-        echo "✅ 架构守卫检查通过"
-      fail_text: '架构守卫检查失败 - 发现违反架构重构规则的代码变更'
-      stage_fixed: false
+    # architecture-guard 于 2026-07-26 退役。它 grep diff 文本禁相对导入，而
+    # eslint 的 no-restricted-imports 已经用 AST 管着 `../*`（上面 quality-check
+    # 就在跑）。更糟的是它连 `./sibling` 一起禁，而 .claude/rules/coding-standards.md
+    # 明写同目录相对导入是允许的——一个跟已定规则打架的门。`export *` 那半条是
+    # "架构重构期间"的临时纪律，重构早结束了；真要守就加 eslint 规则，别 grep。
 
     # 多语言同步检查
     i18n-sync:

@@ -27,7 +27,7 @@
 
 **范围**：现有业务组件目录，例如 `src/components/forms/`、`src/components/products/`、`src/components/footer/`、`src/components/navigation/`。
 不要引用已删除的目录（例如旧 `trust/`）。
-不要引用已退役的 `src/components/contact/`。 <!-- truth-docs:allow-missing -->
+不要引用已退役的 `src/components/contact/`。
 
 状态：后续补齐，不是 Phase 1 blocker。
 

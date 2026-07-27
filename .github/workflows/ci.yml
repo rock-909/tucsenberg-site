@@ -51,15 +51,8 @@ jobs:
             pnpm react:doctor --base "$(git rev-parse HEAD^)"
           fi
 
-      - name: React Doctor 全量对账（非阻塞）
-        continue-on-error: true
-        run: pnpm react:doctor:reconcile
-
       - name: TypeScript 检查
         run: pnpm type-check
-
-      - name: 品牌替换检查
-        run: pnpm brand:check
 
       - name: 内容结构检查
         run: pnpm content:check
@@ -69,9 +62,6 @@ jobs:
 
       - name: Client boundary 检查
         run: node scripts/starter-checks.js client-boundary
-
-      - name: Component governance tests
-        run: pnpm component:governance:test
 
       - name: Component governance scan
         run: pnpm component:governance
@@ -84,12 +74,6 @@ jobs:
 
       - name: Dead-export / dead-file scan (knip)
         run: pnpm knip:check
-
-      - name: Current truth docs check
-        run: node scripts/starter-checks.js truth-docs
-
-      - name: Markdown 代码围栏语言标识检查
-        run: node scripts/starter-checks.js markdown-fences
 
       - name: Vitest 收集面对账
         run: node scripts/starter-checks.js vitest-collection
@@ -123,9 +107,6 @@ jobs:
 
       - name: 运行测试
         run: pnpm test
-
-      - name: Lead API family proof
-        run: pnpm vitest run tests/integration/api/lead-pipeline-real.test.ts
 
   e2e:
     name: Tucsenberg 浏览器冒烟

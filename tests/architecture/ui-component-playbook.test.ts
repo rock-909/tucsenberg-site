@@ -2,45 +2,25 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const DOCS_README_PATH = "docs/README.md";
-const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
-const COMPONENT_GOVERNANCE_REGISTRY_PATH =
-  "src/components/component-governance.registry.json";
-
-// The playbook has to cover these topics for an agent to pick a component
-// without reading the source. Sections are the contract; the prose inside them
-// is free to be rewritten. Asserting whole sentences instead froze the wording
-// and turned a comma into a CI failure.
-const REQUIRED_PLAYBOOK_SECTIONS = [
-  "Boundary",
-  "Choose components",
-  "Missing wrappers",
-  "Interaction rule",
-  "Dialog vs Sheet",
-  "Intentional native surfaces",
-  "Storybook rule",
-  "Card rule",
-  "Radix Themes retirement boundary",
-  "New primitive checklist",
+// 这个文件以前有五条断言，四条守的是文档长什么样：必须保留十个指定章节、
+// checklist 必须逐字列出 registry 的每个字段、必须被两份文档引用、backlog 不许
+// 列已发布的 wrapper（而那个 backlog 是空的）。2026-07-26 全部退役——它们守的是
+// 措辞和结构，不是组件行为，改文档时红，红了照着改回去。
+//
+// 留下的是唯一一条能独立变红且红得有意义的：文档里写的 .md 引用必须真的能解析。
+// 断链会把 agent 送到不存在的文件，而单纯 toContain("某某.md") 在死链上照样过。
+const LINK_CHECKED_DOCS = [
+  { name: "docs 入口", path: "docs/README.md", siblingDir: "docs" },
+  {
+    name: "组件使用手册",
+    path: "docs/design/组件使用手册.md",
+    siblingDir: "docs/design",
+  },
 ] as const;
 
 function readText(filePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo docs by relative path
   return readFileSync(filePath, "utf8");
-}
-
-function toKebabCase(componentName: string): string {
-  return componentName.replace(/(?<!^)([A-Z])/gu, "-$1").toLowerCase();
-}
-
-function getSectionTitles(markdown: string): string[] {
-  return [...markdown.matchAll(/^##\s+(.+)$/gmu)].map((match) =>
-    match[1]!.trim(),
-  );
-}
-
-function getSectionBody(markdown: string, title: string): string {
-  return markdown.split(`## ${title}`)[1]?.split("\n## ")[0] ?? "";
 }
 
 function collectDocFilenames(dir: string): string[] {
@@ -52,10 +32,8 @@ function collectDocFilenames(dir: string): string[] {
   );
 }
 
-// Asserting the strings appear would also pass on prose, a code sample, or a
-// dead path. Resolve the reference instead. Bare filenames are written relative
-// to whatever directory the surrounding row is talking about, so they resolve
-// against the doc tree by name.
+// Bare filenames are written relative to whatever directory the surrounding row
+// is talking about, so they resolve against the doc tree by name.
 function getUnresolvedMarkdownReferences(
   markdown: string,
   siblingDir: string,
@@ -77,72 +55,17 @@ function getUnresolvedMarkdownReferences(
 }
 
 describe("UI component playbook", () => {
-  it("is part of the website docs required reading path", () => {
-    const { referenced, missing } = getUnresolvedMarkdownReferences(
-      readText(DOCS_README_PATH),
-      "docs",
-    );
+  it.each(LINK_CHECKED_DOCS)(
+    "routes readers on to files that still exist ($name)",
+    ({ path, siblingDir }) => {
+      const { referenced, missing } = getUnresolvedMarkdownReferences(
+        readText(path),
+        siblingDir,
+      );
 
-    expect(referenced).toEqual(
-      expect.arrayContaining(["design/组件使用手册.md", "design/设计真相.md"]),
-    );
-    expect(missing).toEqual([]);
-  });
-
-  it("routes readers on to files that still exist", () => {
-    const { referenced, missing } = getUnresolvedMarkdownReferences(
-      readText(UI_COMPONENT_PLAYBOOK_PATH),
-      "docs/design",
-    );
-
-    expect(referenced).toEqual(
-      expect.arrayContaining([".claude/rules/ui.md", "组件索引.md"]),
-    );
-    expect(missing).toEqual([]);
-  });
-
-  it("covers every topic an agent needs before choosing a component", () => {
-    const titles = getSectionTitles(readText(UI_COMPONENT_PLAYBOOK_PATH));
-
-    expect(titles).toEqual(
-      expect.arrayContaining([...REQUIRED_PLAYBOOK_SECTIONS]),
-    );
-  });
-
-  it("keeps the new primitive checklist naming every governance registry field", () => {
-    const registry = JSON.parse(
-      readText(COMPONENT_GOVERNANCE_REGISTRY_PATH),
-    ) as { components: Record<string, Record<string, unknown>> };
-    const firstComponent = Object.values(registry.components)[0];
-    const checklist = getSectionBody(
-      readText(UI_COMPONENT_PLAYBOOK_PATH),
-      "New primitive checklist",
-    );
-
-    expect(firstComponent).toBeDefined();
-
-    // Adding a registry field without telling agents to fill it produces
-    // registry entries that fail governance on the next component.
-    const unlisted = Object.keys(firstComponent!).filter(
-      (field) => !checklist.includes(`\`${field}\``),
-    );
-
-    expect(unlisted).toEqual([]);
-  });
-
-  it("prevents agents from bypassing missing wrappers", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-
-    // Anything still listed as a backlog bullet must genuinely not exist yet,
-    // otherwise the section sends agents to build a wrapper that already ships.
-    const backlogged = [
-      ...getSectionBody(playbook, "Missing wrappers").matchAll(/^- `(\w+)`/gmu),
-    ].map((match) => match[1]!);
-    const alreadyShipped = backlogged.filter((name) =>
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- name comes from a `\w+` match in the repo-local playbook, resolved under a fixed directory
-      existsSync(join("src/components/ui", `${toKebabCase(name)}.tsx`)),
-    );
-
-    expect(alreadyShipped).toEqual([]);
-  });
+      // 没有引用就不是"全部有效"，是解析器坏了。
+      expect(referenced.length).toBeGreaterThan(0);
+      expect(missing).toEqual([]);
+    },
+  );
 });

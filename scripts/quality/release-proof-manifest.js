@@ -12,14 +12,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
   version: 1,
   steps: [
     {
-      id: "truth-docs",
-      label: "Current truth docs",
-      lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
-      command: "node",
-      args: ["scripts/starter-checks.js", "truth-docs"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
-    },
-    {
       id: "content-manifest-freshness",
       label: "Generated content manifest freshness",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,

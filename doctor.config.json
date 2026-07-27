@@ -124,7 +124,6 @@
           "src/config/__tests__/standards-consistency.test.ts",
           "tests/architecture/component-governance.test.ts",
           "tests/unit/content-page-placeholders.test.ts",
-          "tests/unit/scripts/current-truth-docs.test.ts",
           "tests/unit/scripts/proof-lane-contract.test.ts"
         ],
         "rules": ["react-doctor/js-combine-iterations"]

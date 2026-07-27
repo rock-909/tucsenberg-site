@@ -113,10 +113,9 @@ cannot prove.
 Every public file in `src/components/ui/*` must remain discoverable through:
 
 1. `src/components/component-governance.registry.json`;
-2. `docs/design/组件索引.md`;
-3. `docs/design/组件使用手册.md`;
-4. a Storybook story;
-5. focused behavior tests where behavior exists.
+2. `docs/design/组件使用手册.md`;
+3. a Storybook story;
+4. focused behavior tests where behavior exists.
 
 The Registry `radixLayer` field has only two live values:
 

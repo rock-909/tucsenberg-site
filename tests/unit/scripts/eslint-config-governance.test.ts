@@ -98,8 +98,6 @@ describe("eslint config governance", () => {
     expect(legacyBaseline.files).toEqual([
       "scripts/quality/checks/content-readiness.js",
       "scripts/quality/checks/content-slugs.js",
-      "scripts/quality/checks/current-truth-docs.js",
-      "scripts/quality/checks/eslint-disable.js",
       "scripts/quality/checks/release-verify.js",
     ]);
 

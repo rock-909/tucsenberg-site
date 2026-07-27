@@ -28,10 +28,8 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
   `.next`，是第三个写入方。`pnpm website:lighthouse` 不在此列：它单独构建到
   `.next-lighthouse`，用 4173 端口起服务，所以一次二十分钟的测量不会被并行构建、
   也不会被别的 worktree 占着 3000 端口的服务污染。
-- **往 `docs/` 加文件，必须同时登记进 `docs/项目基础/文档清单.md`。** 漏了 CI 会报
-  `tracked document is missing from inventory`，而这个报错看不出该去改哪儿。
 - **`docs/superpowers/**` 是历史方案，不是现行规则。** 除非有稳定文档把同一条规则
-  重新确立过，否则只当背景。往里加文档要带 `> Historical.` 横幅，同样要登记。
+  重新确立过，否则只当背景。
 - **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
   `node scripts/starter-checks.js content-manifest` 重新生成。
 - **commit 的 subject 必须小写、不超过 72 字符。** pre-push 会跑一遍完整构建；确实

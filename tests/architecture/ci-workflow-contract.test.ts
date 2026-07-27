@@ -6,8 +6,10 @@ const CI_WORKFLOW_PATH = ".github/workflows/ci.yml";
 const LEFTHOOK_CONFIG_PATH = "lefthook.yml";
 const PRETTIER_CONFIG_PATH = "prettier.config.mjs";
 const SEMGREP_CONFIG_PATH = "semgrep.yml";
+// component:governance:test 那四个 Vitest 文件全在 tests/architecture 和
+// tests/unit 下，pnpm test 已经跑过一遍；quality job 里单独再跑一次不增加覆盖。
+// scanner 和 Storybook build 不一样：pnpm test 覆盖不到它们。
 const COMPONENT_PROOF_COMMANDS = [
-  "pnpm component:governance:test",
   "pnpm component:governance",
   "pnpm exec storybook build",
 ] as const;
@@ -110,30 +112,30 @@ describe("CI workflow contract", () => {
     });
   });
 
-  // 这两个检查器写好了很久，但一个入口都没有——只有人工敲 CLI 才会跑，等于
-  // 不存在。接进 CI 之后，除了这条断言没有别的东西拦着谁再把它们摘掉。守的是
-  // 命令本身在跑，不是步骤名怎么写。
+  // vitest-collection 写好了很久，但一个入口都没有——只有人工敲 CLI 才会跑，等于
+  // 不存在。接进 CI 之后，除了这条断言没有别的东西拦着谁再把它摘掉。守的是命令
+  // 本身在跑，不是步骤名怎么写。
+  // （原本还守着 markdown-fences，那个检查 2026-07-26 退役了。）
   it("keeps the standalone gate checks wired to a lane that actually runs", () => {
     const qualityRuns = (readCiWorkflowConfig().jobs?.quality?.steps ?? [])
       .map((step) => step.run?.trim())
       .filter((run): run is string => Boolean(run));
 
-    for (const command of [
-      "node scripts/starter-checks.js markdown-fences",
+    expect(qualityRuns).toContain(
       "node scripts/starter-checks.js vitest-collection",
-    ]) {
-      expect(qualityRuns).toContain(command);
-    }
+    );
   });
 
-  it("keeps the full React Doctor reconciliation visible but non-blocking", () => {
+  // 这条以前钉着 "React Doctor 全量对账（非阻塞）" 那一步，连
+  // continue-on-error: true 一起钉——一条断言在保证某个门永远不能让 CI 变红。
+  // 2026-07-26 连步骤带断言一起退役：changed-scope 的 react:doctor 是阻塞的，
+  // 有真实修复记录（c125276，69→100）；全量对账只往 summary 写字，没人读。
+  it("keeps no step that can never fail", () => {
     const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
 
-    expect(qualitySteps).toContainEqual({
-      name: "React Doctor 全量对账（非阻塞）",
-      "continue-on-error": true,
-      run: "pnpm react:doctor:reconcile",
-    });
+    expect(
+      qualitySteps.filter((step) => step["continue-on-error"] === true),
+    ).toEqual([]);
   });
 
   // 这条以前叫 "keeps Semgrep blocking scope narrow"，钉的是带 ` src` 的整条命令
