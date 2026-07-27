@@ -91,7 +91,7 @@ vi.mock("@/components/cookie/lazy-cookie-consent-island", () => ({
   LazyCookieConsentIsland: () => <div data-testid="cookie-consent" />,
 }));
 
-vi.mock("@/components/footer/Footer", () => ({
+vi.mock("@/components/footer/footer", () => ({
   Footer: ({ themeToggleSlot }: { themeToggleSlot?: React.ReactNode }) => (
     <footer data-testid="footer">{themeToggleSlot}</footer>
   ),
