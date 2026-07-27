@@ -24,12 +24,20 @@ import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
  *
  * 取值 8000ms 的依据：
  * - Airtable 单条记录写入 p50 约 150-300ms、p99 一般在 2s 以内；
- * - SDK 对 HTTP 429 会做指数退避重试（含 jitter），一轮退避约 1-2s；
- * - 8s 可从容覆盖 p99 + 一次限流重试并留出余量；
  * - 8s 约为默认 300s 的 1/37，远低于“分钟级”，买家绝不会等到几分钟。
  *
- * inquiry 路由会并行启动业主邮件与 Airtable 写入；响应会等待两者 settle，
- * 或等到 Airtable 达到上述预算上限。任一通道成功即视为用户成功。
+ * 这个值管两层：传给 SDK 的 requestTimeout 管单次 HTTP 尝试，process-lead.ts
+ * 的 withAirtableBudget 管整条链路的墙上时间。
+ *
+ * 8s 装不下一次限流重试，这是已知取舍。airtable 0.12.2 的退避是
+ * `Math.random() * min(600000, 5000 * 2^已重试次数)`（见
+ * node_modules/airtable/lib/internal_config.json 与
+ * exponential_backoff_with_jitter.js）：首次退避就是 0-5 秒均匀分布，而且这段
+ * 等待不计入 requestTimeout。撞上 429 多半直接耗尽预算，按超时降级成一条
+ * 非阻塞错误日志。宁可丢 CRM 记录，也不让买家干等——业主邮件才是主通道。
+ *
+ * inquiry 路由串行执行：先发业主邮件，拿到结果再写 Airtable，好把「这封通知
+ * 没发出去」一次性写进同一条记录。任一通道成功即视为用户成功。
  */
 export const AIRTABLE_REQUEST_TIMEOUT_MS = 8000;
 
