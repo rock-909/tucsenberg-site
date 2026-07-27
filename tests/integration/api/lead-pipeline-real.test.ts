@@ -202,6 +202,8 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(fields["Reference ID"]).toBe(body.data.referenceId);
     expect(typeof fields["Message"]).toBe("string");
     expect(fields["Message"]).toContain(CATALOG_PRODUCT_LABEL);
+    // 邮件发出去了就不能挂失败提示，否则业主每条线索都在报警
+    expect(fields["Message"]).not.toContain("⚠️");
 
     const resendCalls = getResendCalls();
     expect(resendCalls).toHaveLength(1);
@@ -428,6 +430,42 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(getCapturedAirtableFields()["Requirements"]).toContain(
       "Need flood protection",
     );
+    expect(consoleError).toHaveBeenCalledTimes(2);
+  });
+
+  it("bakes the email-failure notice into the Airtable Message the owner reads", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "Failed to send product inquiry email",
+      "Product owner email failed",
+    );
+    fetchMock.mockImplementation(async (input: unknown) => {
+      const url = resolveFetchUrl(input);
+      if (url === TURNSTILE_SITEVERIFY_URL) {
+        return jsonResponse(turnstileResponse);
+      }
+      if (url === RESEND_EMAILS_URL) {
+        return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.includes("/messages/")) {
+        return jsonResponse({});
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    });
+
+    const response = await inquiryRoute.POST(
+      makeInquiryRequest(CANONICAL_MESSAGE_INQUIRY_BODY),
+    );
+
+    expect(response.status).toBe(200);
+    // 通知邮件没发出去时，业主唯一能看到这条线索的地方就是这一格。
+    // 单元测试只证到 process-lead 传给自己 mock 的参数；这里证的是
+    // 真正写进 Airtable 的那个字段名和那段文本。
+    const message = getCapturedAirtableFields()["Message"];
+    expect(typeof message).toBe("string");
+    expect(message as string).toMatch(/^⚠️ NOTE:/u);
+    expect(message as string).toContain("FAILED to send");
+    // 提示只是前缀，买家原文必须一字不少地跟在后面
+    expect(message as string).toContain(CANONICAL_BUYER_MESSAGE);
     expect(consoleError).toHaveBeenCalledTimes(2);
   });
 
