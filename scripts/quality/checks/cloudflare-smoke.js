@@ -27,6 +27,14 @@ const CF_PREVIEW_SMOKE_EXPECTATIONS = [
   { pathname: "/request-quote", status: 200 },
   { pathname: "/zh", status: 404 },
   { pathname: "/zh/contact", status: 404 },
+  // public/ 下的文件由 Cloudflare Static Assets 直送，不经过 Next 服务器，
+  // 所以 Node 侧的 e2e 证明不了它们的响应头。这里打的是本地 Worker，
+  // 是 public/_headers 唯一的行为层证明。
+  {
+    pathname: "/downloads/spec-sheet-tb-bw.pdf",
+    status: 200,
+    robotsTag: "noindex",
+  },
 ];
 const DEPLOYED_SMOKE_EXPECTATIONS = [
   { pathname: "/", status: 200 },
@@ -110,6 +118,7 @@ async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
     location: response.headers.get("location"),
     setCookie: response.headers.get("set-cookie"),
     leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),
+    robotsTag: response.headers.get("x-robots-tag"),
     body: await response.text(),
   };
 }
@@ -246,6 +255,13 @@ async function runCloudflarePreviewSmoke(args = []) {
   for (const [index, response] of responses.entries()) {
     const expectation = expectations[index % expectations.length];
     pushExpectedStatus(response, expectation.status, failures);
+    if (expectation.robotsTag) {
+      pushFailureUnless(
+        (response.robotsTag ?? "").includes(expectation.robotsTag),
+        `Expected ${response.pathname} to carry X-Robots-Tag: ${expectation.robotsTag}, got ${response.robotsTag ?? "none"}`,
+        failures,
+      );
+    }
     pushFailureUnless(
       !response.body.includes("Unexpected loadManifest"),
       `Unexpected manifest loader failure surfaced on ${response.pathname}`,

@@ -35,7 +35,9 @@ function getRequestPath(input: RequestInfo | URL): string {
   return new URL(url).pathname;
 }
 
-function createPreviewFetchMock() {
+function createPreviewFetchMock(
+  pdfHeaders: HeadersInit = { "x-robots-tag": "noindex" },
+) {
   return vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
     const pathname = getRequestPath(input);
 
@@ -49,6 +51,10 @@ function createPreviewFetchMock() {
 
     if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
       return response(404, "not found");
+    }
+
+    if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+      return response(200, "%PDF-1.7", pdfHeaders);
     }
 
     return response(404, "not found");
@@ -409,6 +415,7 @@ describe("cloudflare preview smoke", () => {
       "/request-quote",
       "/zh",
       "/zh/contact",
+      "/downloads/spec-sheet-tb-bw.pdf",
       "/api/health",
       "/",
       "/invalid/contact",
@@ -417,6 +424,7 @@ describe("cloudflare preview smoke", () => {
       "/request-quote",
       "/zh",
       "/zh/contact",
+      "/downloads/spec-sheet-tb-bw.pdf",
       "/api/health",
     ]);
   });
@@ -443,6 +451,7 @@ describe("cloudflare preview smoke", () => {
       "/request-quote",
       "/zh",
       "/zh/contact",
+      "/downloads/spec-sheet-tb-bw.pdf",
       "/api/health",
     ]);
   });
@@ -468,6 +477,27 @@ describe("cloudflare preview smoke", () => {
       runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
     ).resolves.toBe(false);
     expect(consoleError).toHaveBeenCalledTimes(2);
+  });
+
+  it("fails when the preview worker serves a pdf without the noindex header", async () => {
+    const consoleError = captureExpectedConsoleErrors(
+      "[cf-preview-smoke] Failures detected:",
+      "  - Expected /downloads/spec-sheet-tb-bw.pdf to carry X-Robots-Tag: noindex, got none",
+    );
+    vi.stubGlobal("fetch", createPreviewFetchMock({}));
+
+    await expect(
+      runCloudflarePreviewSmoke(["--base-url", "http://127.0.0.1:8787"]),
+    ).resolves.toBe(false);
+    expect(consoleError).toHaveBeenCalledTimes(2);
+  });
+
+  it("passes when the preview worker serves a pdf with the noindex header", async () => {
+    vi.stubGlobal("fetch", createPreviewFetchMock());
+
+    await expect(
+      runCloudflarePreviewSmoke(["--base-url", "http://127.0.0.1:8787"]),
+    ).resolves.toBe(true);
   });
 });
 
