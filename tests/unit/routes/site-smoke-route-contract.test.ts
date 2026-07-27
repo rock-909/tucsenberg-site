@@ -28,12 +28,26 @@ describe("site smoke route contract", () => {
     expect(new Set(smokePaths).size).toBe(smokePaths.length);
   });
 
-  // A heading pattern that matches anything proves the page returned 200 and
-  // nothing else. `/` would pass against the 404 page.
-  it("checks a heading specific enough to fail on the wrong page", () => {
+  // A heading that another page would also satisfy proves the page returned 200
+  // and nothing else — serve /about at `/` and the smoke run still goes green.
+  // The first version of this test used `source.length > 3` as the proxy for
+  // "specific"; length proves nothing, so it is the pattern's reach that gets
+  // checked here instead.
+  //
+  // Comparing against the other entries' `source` is only sound while every
+  // pattern is the literal heading, hence the first assertion. A pattern that
+  // needs regex syntax has to prove its own reach some other way.
+  it("checks a heading no other page in the list would satisfy", () => {
     for (const [path, heading] of SITE_PAGE_CASES) {
-      expect(heading.source.length, path).toBeGreaterThan(3);
+      expect(heading.source, path).not.toMatch(/[\\^$.*+?()[\]{}|]/u);
       expect(heading.test("Page not found"), path).toBe(false);
+
+      for (const [otherPath, other] of SITE_PAGE_CASES) {
+        if (otherPath === path) continue;
+        expect(heading.test(other.source), `${path} vs ${otherPath}`).toBe(
+          false,
+        );
+      }
     }
   });
 });
