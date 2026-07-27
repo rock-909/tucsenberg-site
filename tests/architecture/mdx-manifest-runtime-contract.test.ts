@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { CONTENT_MANIFEST } from "@/lib/content-manifest.generated";
 
@@ -26,6 +27,64 @@ const FORBIDDEN_RUNTIME_IMPORTS = [
 function readSource(relativePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo-local runtime files from the allowlist above
   return readFileSync(relativePath, "utf8");
+}
+
+/**
+ * Every module this source actually pulls in, whatever syntax it used.
+ *
+ * Parsed rather than grepped. The first version matched three regexes for
+ * `from "…mdx"`, `import("…mdx")` and `require("…mdx")`, which missed the one
+ * spelling that needs no `from` at all — `import "./page.mdx"` is a real edge
+ * in the module graph — while a `.mdx` path sitting in a comment or an ordinary
+ * string turned it red for nothing.
+ */
+function moduleSpecifiers(source: string): string[] {
+  const parsed = ts.createSourceFile(
+    "module-graph-probe.ts",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const specifiers: string[] = [];
+
+  const visit = (node: ts.Node): void => {
+    if (
+      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      specifiers.push(node.moduleSpecifier.text);
+    }
+
+    if (ts.isCallExpression(node)) {
+      const isDynamicImport =
+        node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const isRequire =
+        ts.isIdentifier(node.expression) && node.expression.text === "require";
+      const [first] = node.arguments;
+
+      if (
+        (isDynamicImport || isRequire) &&
+        first &&
+        ts.isStringLiteral(first)
+      ) {
+        specifiers.push(first.text);
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(parsed);
+
+  return specifiers;
+}
+
+/** True when `candidate` really lands inside `root` after normalisation. */
+function isInside(root: string, candidate: string): boolean {
+  const step = relative(root, candidate);
+
+  return step !== "" && !step.startsWith("..") && !step.startsWith(sep);
 }
 
 describe("MDX manifest-only runtime contract", () => {
@@ -70,19 +129,27 @@ describe("MDX manifest-only runtime contract", () => {
   // 和几个退役页的 `@content/...` 路径。那是负空间守卫:锁的是几个已经删掉的名字
   // 保持缺席,永远为真。换成下面两条——一条管导出的每一项,一条管这个文件往
   // 模块图里拉了什么,都不点名任何一个具体的退役页。
+  //
+  // 路径要归一化之后再判包含。只用 startsWith 的话
+  // `/content/../src/test/mdx-stub.ts` 两个前缀都过,归一化后却指到 content
+  // 之外一个真实存在的文件——所有条件全绿,清单已经逃出目录了。
   it("keeps the generated manifest catalog-only", () => {
     expect(CONTENT_MANIFEST.entries.length).toBeGreaterThan(0);
 
-    const offenders = CONTENT_MANIFEST.entries.filter(
-      (entry) =>
+    const contentRoot = join(process.cwd(), "content");
+    const offenders = CONTENT_MANIFEST.entries.filter((entry) => {
+      const fromFilePath = resolve(process.cwd(), `.${entry.filePath}`);
+      const fromRelative = resolve(process.cwd(), entry.relativePath);
+
+      return (
         entry.source !== "active-content" ||
-        !entry.filePath.startsWith("/content/") ||
-        !entry.relativePath.startsWith("content/") ||
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- path comes from the generated manifest and is already constrained to /content/ above
-        !existsSync(join(process.cwd(), entry.filePath)) ||
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- same, constrained to content/ above
-        !existsSync(join(process.cwd(), entry.relativePath)),
-    );
+        !isInside(contentRoot, fromFilePath) ||
+        !isInside(contentRoot, fromRelative) ||
+        fromFilePath !== fromRelative ||
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- resolved path is proven to sit inside content/ above
+        !existsSync(fromFilePath)
+      );
+    });
 
     expect(offenders.map((entry) => entry.filePath)).toEqual([]);
   });
@@ -92,10 +159,30 @@ describe("MDX manifest-only runtime contract", () => {
   // 的存在理由就是运行时不碰 MDX——所以这里守的是"这个文件不 import 任何 .mdx",
   // 而不是某几个退役文件名缺席。
   it("pulls no MDX into the module graph", () => {
-    const manifestSource = readSource("src/lib/content-manifest.generated.ts");
+    const specifiers = moduleSpecifiers(
+      readSource("src/lib/content-manifest.generated.ts"),
+    );
 
-    expect(manifestSource).not.toMatch(/from\s+["'][^"']*\.mdx["']/u);
-    expect(manifestSource).not.toMatch(/import\s*\(\s*["'][^"']*\.mdx["']/u);
-    expect(manifestSource).not.toMatch(/require\s*\(\s*["'][^"']*\.mdx["']/u);
+    expect(specifiers.filter((id) => id.endsWith(".mdx"))).toEqual([]);
+  });
+
+  // 上面那条只有在解析器真的看得见每种写法时才成立。这里钉住解析器本身:
+  // 副作用 import 没有 `from`,是文本扫描漏掉的那一种;注释和普通字符串里的
+  // `.mdx` 不是模块边,不该算。
+  it("sees every import spelling, and only imports", () => {
+    expect(moduleSpecifiers('import "./page.mdx";')).toEqual(["./page.mdx"]);
+    expect(moduleSpecifiers('import page from "./page.mdx";')).toEqual([
+      "./page.mdx",
+    ]);
+    expect(moduleSpecifiers('export * from "./page.mdx";')).toEqual([
+      "./page.mdx",
+    ]);
+    expect(moduleSpecifiers('void import("./page.mdx");')).toEqual([
+      "./page.mdx",
+    ]);
+    expect(moduleSpecifiers('require("./page.mdx");')).toEqual(["./page.mdx"]);
+
+    expect(moduleSpecifiers("// see ./page.mdx for the source")).toEqual([]);
+    expect(moduleSpecifiers('const origin = "./page.mdx";')).toEqual([]);
   });
 });

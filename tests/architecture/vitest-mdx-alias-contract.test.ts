@@ -20,6 +20,12 @@ import vitestConfig from "../../vitest.config.mts";
  * So the aliases are resolved here the way Vite resolves them: in order,
  * first match wins, once per import id. Asserting the config text instead
  * would freeze one spelling of the regex and prove neither.
+ *
+ * That re-implementation only models find/replacement. Vite also honours
+ * `customResolver` on an alias entry and takes its answer instead — a resolver
+ * returning null makes the real alias stop resolving while every assertion
+ * below stays green. So the entries are checked to carry nothing this file
+ * cannot model; the day one does, this goes red rather than quietly lying.
  */
 
 interface AliasEntry {
@@ -27,17 +33,41 @@ interface AliasEntry {
   replacement: string;
 }
 
+const MODELLED_ALIAS_KEYS = new Set(["find", "replacement"]);
+
 function getAliases(): AliasEntry[] {
+  // Vite accepts both an array of entries and an object map. Only the array
+  // form carries order, which the first-match-wins rule above depends on.
   const aliases = (
-    vitestConfig as unknown as { resolve?: { alias?: AliasEntry[] } }
+    vitestConfig as unknown as {
+      resolve?: { alias?: AliasEntry[] | Record<string, string> };
+    }
   ).resolve?.alias;
 
-  expect(
-    Array.isArray(aliases) && aliases.length > 0,
-    "vitest config must declare resolve.alias as a non-empty array",
-  ).toBe(true);
+  const entries = Array.isArray(aliases)
+    ? aliases
+    : Object.entries(aliases ?? {}).map(([find, replacement]) => ({
+        find,
+        replacement,
+      }));
 
-  return aliases as AliasEntry[];
+  expect(
+    entries.length,
+    "vitest config must declare at least one resolve.alias entry",
+  ).toBeGreaterThan(0);
+
+  for (const entry of entries) {
+    const unmodelled = Object.keys(entry).filter(
+      (key) => !MODELLED_ALIAS_KEYS.has(key),
+    );
+
+    expect(
+      unmodelled,
+      `alias ${String(entry.find)} carries ${unmodelled.join(", ")}, which this test does not model — resolve it through Vite instead of asserting against a simulation`,
+    ).toEqual([]);
+  }
+
+  return entries;
 }
 
 /** `matches()` from @rollup/plugin-alias, which Vite's alias resolution uses. */
