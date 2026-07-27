@@ -16,7 +16,7 @@ import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
 import { Link } from "@/i18n/routing";
-import type { Locale } from "@/types/content.types";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
 import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/market-jsonld";
 import { Button } from "@/components/ui/button";
 import {
@@ -354,7 +354,9 @@ function ProductFinalCta({
 export async function generateMetadata({
   params,
 }: MarketPageProps): Promise<Metadata> {
-  const { locale, market: marketSlug } = await params;
+  const resolvedParams = await params;
+  const { market: marketSlug } = resolvedParams;
+  const locale = resolveLocaleParam(resolvedParams);
   const market = getMarketBySlug(marketSlug);
   const productPage = getTucsenbergProductPage(marketSlug);
 
@@ -364,7 +366,7 @@ export async function generateMetadata({
   const description = productPage?.meta.description ?? market.description;
 
   return generateMetadataForPath({
-    locale: locale as Locale,
+    locale,
     pageType: "products",
     path: getProductMarketPath(market.slug),
     config: {
@@ -375,7 +377,9 @@ export async function generateMetadata({
 }
 
 export default async function MarketPage({ params }: MarketPageProps) {
-  const { locale, market: marketSlug } = await params;
+  const resolvedParams = await params;
+  const { market: marketSlug } = resolvedParams;
+  const locale = resolveLocaleParam(resolvedParams);
   setRequestLocale(locale);
 
   const market = getMarketBySlug(marketSlug);
@@ -421,10 +425,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
         renderJsonLd={false}
       />
 
-      <JsonLdGraphScript
-        locale={locale as Locale}
-        data={[...jsonLdData, faqSchema]}
-      />
+      <JsonLdGraphScript locale={locale} data={[...jsonLdData, faqSchema]} />
 
       <header className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
         <div className="min-w-0">

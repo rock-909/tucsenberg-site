@@ -36,6 +36,18 @@ explicit `undefined`.
 | Booleans | `is/has/can/should` |
 | Event handlers | `handleSomething` |
 
+### 文件名
+
+文件名一律 kebab-case，组件文件同理（`footer.tsx`，不是 `Footer.tsx`）。
+导出的组件标识符仍是 PascalCase——上面那张表管的是标识符，这一条管的是文件名。
+
+### 注释语言
+
+代码注释一律用中文（业主 2026-07-27 裁决）。
+
+存量的中英混写不做批量重写：那是因为此前没有规则可依，不是有人违规。
+这条规则只约束新写的注释。
+
 ## Imports
 
 What eslint actually enforces (`no-restricted-imports`, `no-duplicate-imports`):

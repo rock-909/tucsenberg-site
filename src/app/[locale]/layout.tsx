@@ -7,7 +7,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
 import { AttributionBootstrap } from "@/components/attribution-bootstrap";
 import { LazyCookieConsentIsland } from "@/components/cookie/lazy-cookie-consent-island";
-import { Footer } from "@/components/footer/Footer";
+import { Footer } from "@/components/footer/footer";
 import { Header } from "@/components/layout/header";
 import { NavigationProgressBar } from "@/components/navigation/navigation-progress-bar";
 import { PageTransition } from "@/components/motion/page-transition";

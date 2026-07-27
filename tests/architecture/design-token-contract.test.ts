@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 const GLOBALS_CSS = "src/app/globals.css";
 const FOOTER_LAYOUT_SOURCE = "src/app/[locale]/layout.tsx";
-const FOOTER_COMPONENT_SOURCE = "src/components/footer/Footer.tsx";
+const FOOTER_COMPONENT_SOURCE = "src/components/footer/footer.tsx";
 
 const RAW_COLOR_PRODUCTION_FILES = [
   "src/components/ui/button.tsx",

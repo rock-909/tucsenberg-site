@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing-config";
 
 export function isLocale(input: string): input is Locale {
@@ -6,4 +7,15 @@ export function isLocale(input: string): input is Locale {
 
 export function coerceLocale(input: string | null | undefined): Locale {
   return input && isLocale(input) ? input : (routing.defaultLocale as Locale);
+}
+
+/**
+ * 页面层解析路由 locale 参数的唯一入口。
+ * 拿到非配置内的值时直接 404——把静默的类型硬转换变成响亮的失败。
+ */
+export function resolveLocaleParam(params: { locale: string }): Locale {
+  if (!isLocale(params.locale)) {
+    notFound();
+  }
+  return params.locale;
 }

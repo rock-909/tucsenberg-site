@@ -6,6 +6,7 @@ import {
 } from "@/app/[locale]/generate-static-params";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { getLocalizedPath } from "@/config/paths";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
 import { createStaticMarkdownContent } from "@/lib/content/render-static-markdown-content";
 import {
   createStaticPageMetadataConfig,
@@ -35,14 +36,13 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ContactPageProps): Promise<Metadata> {
-  const { locale } = await params;
-  const typedLocale = locale as Locale;
-  const page = getStaticContactPage(typedLocale);
+  const locale = resolveLocaleParam(await params);
+  const page = getStaticContactPage(locale);
 
   return generateMetadataForPath({
-    locale: typedLocale,
+    locale,
     pageType: "contact",
-    path: getLocalizedPath("contact", typedLocale),
+    path: getLocalizedPath("contact", locale),
     config: createStaticPageMetadataConfig(page.metadata),
   });
 }
@@ -94,8 +94,8 @@ function ContactContentBody({ locale }: { locale: Locale }) {
 }
 
 export default async function ContactPage({ params }: ContactPageProps) {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   setRequestLocale(locale);
 
-  return <ContactContentBody locale={locale as Locale} />;
+  return <ContactContentBody locale={locale} />;
 }

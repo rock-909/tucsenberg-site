@@ -4,10 +4,8 @@ import {
   generateLocaleStaticParams,
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
-import {
-  generateMetadataForPath,
-  type Locale as SeoLocale,
-} from "@/lib/seo-metadata";
+import { generateMetadataForPath } from "@/lib/seo-metadata";
+import { resolveLocaleParam } from "@/i18n/locale-utils";
 import {
   ProductLaunchBoundary,
   ProductLineCards,
@@ -30,13 +28,13 @@ interface ProductsPageProps {
 export async function generateMetadata({
   params,
 }: ProductsPageProps): Promise<Metadata> {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   const t = await getTranslations({ locale, namespace: "catalog" });
 
   return generateMetadataForPath({
-    locale: locale as SeoLocale,
+    locale,
     pageType: "products",
-    path: getLocalizedPath("products", locale as SeoLocale),
+    path: getLocalizedPath("products", locale),
     config: {
       title: t("overview.title"),
       description: t("overview.description"),
@@ -45,7 +43,7 @@ export async function generateMetadata({
 }
 
 export default async function ProductsPage({ params }: ProductsPageProps) {
-  const { locale } = await params;
+  const locale = resolveLocaleParam(await params);
   setRequestLocale(locale);
   const [t, breadcrumbSchema] = await Promise.all([
     getTranslations({ locale, namespace: "catalog" }),
@@ -53,10 +51,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   ]);
   return (
     <div className="mx-auto max-w-[1080px] px-6 py-8 md:py-12">
-      <JsonLdGraphScript
-        locale={locale as SeoLocale}
-        data={[breadcrumbSchema]}
-      />
+      <JsonLdGraphScript locale={locale} data={[breadcrumbSchema]} />
       <CatalogBreadcrumb renderJsonLd={false} homePrefetch={false} />
 
       <header className="mb-12 md:mb-16">

@@ -6,7 +6,7 @@
  */
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Footer } from "@/components/footer/Footer";
+import { Footer } from "@/components/footer/footer";
 import { FOOTER_COLUMNS } from "@/config/footer-links";
 import { SINGLE_SITE_CONFIG, SINGLE_SITE_FACTS } from "@/config/single-site";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";

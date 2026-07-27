@@ -616,7 +616,7 @@ describe("public launch trust content guard", () => {
     );
   });
 
-  it("blocks starter identity, SEO defaults, and missing legal/contact owner review in client launch strict mode", () => {
+  it("blocks starter identity and SEO defaults in client launch strict mode", () => {
     const result = validateProductionConfig({
       APP_ENV: "preview",
       NODE_ENV: "production",
