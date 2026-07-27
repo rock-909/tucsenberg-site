@@ -197,35 +197,13 @@ describe("processValidatedInquiry", () => {
     expect(mockCreateLead).toHaveBeenCalledTimes(1);
   });
 
-  it("still records the lead when the owner email times out", async () => {
-    vi.useFakeTimers();
-    // Resend 客户端 5 秒硬超时（resend-http-client.ts:28）。串行之后这是
-    // 最坏路径的前半段，必须证明它超时后记录照样落地、且带上失败提示。
-    // 注：`sendProductInquiryEmail` 在这里整体被 mock 掉了，resend-http-client.ts
-    // 里真正的 AbortController 超时逻辑不会被执行到；要在假定时器下验证「超时后
-    // 仍然落地」，mock 必须自己用 setTimeout 到点才 reject，否则一个永远不
-    // settle 的 Promise 无计时器可推进，advanceTimersByTimeAsync 无从下手，
-    // 会导致测试真实挂起到 vitest 的 testTimeout（实测过，见任务报告）。
-    mockSendProductInquiryEmail.mockImplementationOnce(
-      () =>
-        new Promise((_resolve, reject) => {
-          setTimeout(() => {
-            reject(new Error("Resend API request timed out"));
-          }, 5_000);
-        }),
-    );
-    mockCreateLead.mockResolvedValueOnce({ id: "rec1" });
-
-    const pending = processValidatedInquiry(VALID_LEAD);
-    await vi.advanceTimersByTimeAsync(5_000);
-    const result = await pending;
-
-    expect(result.success).toBe(true);
-    expect(mockCreateLead.mock.calls[0]?.[0]?.message).toContain(
-      "FAILED to send",
-    );
-    vi.useRealTimers();
-  });
+  // 这里曾有一条 "still records the lead when the owner email times out"。
+  // 它的 mock 自己用 setTimeout 才 reject，resend-http-client.ts 真正的
+  // AbortController 一行都没跑到，把阈值改成 60 秒它照样全绿——名字里的
+  // "times out" 没有任何东西在守。它实际证的「邮件 reject 后记录仍带提示落地」
+  // 由上面 "marks the record when the owner email failed" 覆盖，串行等待由
+  // "waits for the owner email to settle before touching airtable" 覆盖，
+  // 所以直接删掉，不留一个名不副实的绿灯。
 
   it("does not hang when Airtable exceeds its request budget", async () => {
     vi.useFakeTimers();
