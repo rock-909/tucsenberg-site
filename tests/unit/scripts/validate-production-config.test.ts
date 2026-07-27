@@ -562,7 +562,6 @@ describe("public launch trust content guard", () => {
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
-      PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: "true",
       NEXT_PUBLIC_SITE_URL: "https://launch.tucsenberg.test",
       NEXT_PUBLIC_BASE_URL: "https://launch.tucsenberg.test",
       ...createValidProductionEnv(),
@@ -637,10 +636,6 @@ describe("public launch trust content guard", () => {
         expect.stringContaining("SITE_CONFIG.description"),
         expect.stringContaining("SITE_CONFIG.facts.company.name"),
         expect.stringContaining("SITE_CONFIG.facts.company.location"),
-        expect.stringContaining("PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED"),
-        expect.stringContaining(
-          "content/pages/{locale}/{about,contact,privacy,terms}.mdx",
-        ),
       ]),
     );
   });
@@ -663,24 +658,6 @@ describe("public launch trust content guard", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).not.toContain("SITE_CONFIG.social.twitter");
     expect(result.stderr).not.toContain("SITE_CONFIG.social.linkedin");
-  });
-
-  it("does not make legal/contact owner review a permanent client-launch failure", () => {
-    const result = validateProductionConfig({
-      APP_ENV: "preview",
-      NODE_ENV: "production",
-      PUBLIC_LAUNCH_STRICT: "true",
-      PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: "true",
-    });
-
-    expect(result.errors).toEqual(
-      expect.arrayContaining([expect.stringContaining("SITE_CONFIG.name")]),
-    );
-    expect(result.errors).not.toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED"),
-      ]),
-    );
   });
 
   it("treats workers.dev and example.invalid as non-launch public URLs", () => {
