@@ -684,6 +684,40 @@ describe("/api/inquiry route", () => {
       );
     });
 
+    it("keeps a non-string utm value from rejecting the whole submission", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({ ...validInquiryData, utmSource: 123 }),
+      );
+
+      const response = await POST(request);
+
+      // 归因字段先整组剔除、再放清洗结果，脏值到不了 schema。
+      // 买家不该因为一个营销参数格式不对被整单拒绝。
+      expect(response.status).toBe(200);
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect(callArgs).not.toHaveProperty("utmSource");
+    });
+
+    it("normalizes a blank optional field instead of rejecting it", async () => {
+      const request = createInquiryRequest(
+        JSON.stringify({
+          ...generalRfqData,
+          catalogProductId: "",
+          buyerInterest: "   ",
+        }),
+      );
+
+      const response = await POST(request);
+
+      // 空串归一在 schema 里：浏览器把没填的字段发成 ""，那不是「填了一个非法值」。
+      expect(response.status).toBe(200);
+      const callArgs = vi.mocked(processValidatedInquiry).mock
+        .calls[0]![0] as Record<string, unknown>;
+      expect(callArgs.catalogProductId).toBeUndefined();
+      expect(callArgs.buyerInterest).toBeUndefined();
+    });
+
     it("should exclude turnstileToken from lead data", async () => {
       const request = createInquiryRequest(JSON.stringify(validInquiryData));
 

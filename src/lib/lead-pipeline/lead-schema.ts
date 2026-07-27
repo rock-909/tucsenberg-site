@@ -42,6 +42,22 @@ const baseLeadFields = {
   ...leadAttributionFields,
 };
 
+/**
+ * 空串归一：浏览器把没填的字段发成 ""，不是发成缺省。归一属于 schema，不属于
+ * 路由——放在路由里就得为每个新字段补一行清洗，漏一行就是一个静默丢字段的 bug。
+ * 写法照抄 canonicalBuyerMessageSchema。
+ */
+function optionalBlankToUndefined<Output>(inner: z.ZodType<Output>) {
+  return z
+    .unknown()
+    .transform((value) =>
+      typeof value === "string" && value.trim().length === 0
+        ? undefined
+        : value,
+    )
+    .pipe(z.union([z.undefined(), inner]));
+}
+
 const catalogProductIdSchema = z
   .string()
   .trim()
@@ -60,10 +76,12 @@ export const productLeadSchema = z
     fullName: canonicalBuyerFullNameSchema,
     email: canonicalBuyerEmailSchema,
     message: canonicalBuyerMessageSchema.optional(),
-    catalogProductId: catalogProductIdSchema.optional(),
-    buyerInterest: sanitizedString()
-      .max(MAX_LEAD_PRODUCT_NAME_LENGTH)
-      .optional(),
+    catalogProductId: optionalBlankToUndefined(
+      catalogProductIdSchema,
+    ).optional(),
+    buyerInterest: optionalBlankToUndefined(
+      sanitizedString().max(MAX_LEAD_PRODUCT_NAME_LENGTH),
+    ).optional(),
     ...baseLeadFields,
   })
   .superRefine((data, ctx) => {
