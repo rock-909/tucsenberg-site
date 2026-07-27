@@ -3,6 +3,20 @@
 # CodeRabbit 审查配置 —— tucsenberg-site
 # 目标：用中文审查 PR，聚焦现有 pnpm 门禁盖不到的地方（逻辑/安全/可读性），
 # 不与项目自带的 lint / type-check / *:check 门禁重复刷屏。
+#
+# 当前状态：停用，配置保留。日常审查改成推送前由独立 Codex 会话做
+# （见 docs/项目基础/AI协作边界.md）。这份配置调好过一轮，扔了以后要再用
+# 就得从头调，所以留在原地。
+#
+# 重新启用不是把两个开关改回 true 就完事——停用之前有两件事没修完，别把它们
+# 当成"配置已经调好了"：
+#   1. 下面的 auto_incremental_review: true 每往开着的 PR 推一次就烧一次配额，
+#      当初额度就是这么爆的。恢复前先想清楚要不要关掉。
+#   2. 限额用光时 CodeRabbit 不审也把状态报成 pass，PR 上只留一条
+#      "Review limit reached"。恢复前必须先有一条能识别"跳过"的检查，否则
+#      那个绿勾是假的。跳过之后要重审必须用 `@coderabbitai full review`，
+#      增量命令会把被跳过的提交当成已处理。
+# 恢复＝重新验证一遍，不是改两行。
 
 language: zh-CN
 
@@ -13,7 +27,7 @@ reviews:
   poem: false
   review_status: true
   auto_review:
-    enabled: true
+    enabled: false                # 停用开关；其余配置保持可用状态
     drafts: false                 # 草稿 PR 不审查
     auto_incremental_review: true # 只审查新增提交，避免重复
 
@@ -79,4 +93,4 @@ reviews:
       enabled: false
 
 chat:
-  auto_reply: true
+  auto_reply: false               # 同上：停用开关
