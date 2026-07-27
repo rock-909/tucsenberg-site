@@ -22,12 +22,7 @@ const CONSUMER_ROOTS = ["src", "content", "messages"] as const;
  * Files served for reasons other than being referenced by a page: platform
  * headers, well-known endpoints, in-repo documentation, and directory keepers.
  */
-const NON_REFERENCED_SURFACES = [
-  "_headers",
-  "security-policy.txt",
-  ".well-known/",
-  "fonts/",
-] as const;
+const NON_REFERENCED_SURFACES = ["_headers", ".well-known/", "fonts/"] as const;
 
 const IGNORED_BASENAMES = new Set(["README.md", ".gitkeep", ".DS_Store"]);
 

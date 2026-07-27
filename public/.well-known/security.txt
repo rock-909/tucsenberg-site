@@ -3,5 +3,5 @@
 
 Contact: mailto:sales@tucsenberg.com
 Expires: 2027-03-17T00:00:00.000Z
-Preferred-Languages: en, zh
+Preferred-Languages: en
 Canonical: https://tucsenberg.com/.well-known/security.txt
