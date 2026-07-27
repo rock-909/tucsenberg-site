@@ -127,7 +127,7 @@ Optional by risk: `pnpm website:build:cf` (shares `.next` with `pnpm build` — 
 ### Prior audit assets
 
 - 2026-07-13 authoritative report: `docs/技术难题/整库审查2026-07/审查报告.md` (with file:line evidence); execution plan: same dir `执行计划.md`. Owner rulings live in these two files — hard rule 2 applies.
-- Run outputs respect the repo's doc governance (`docs/项目基础/文档清单.md`: `docs/audits/` is historical-proof only, and every new tracked doc must be registered): working evidence and lane files go to the untracked `.context/audits/<run-id>/`; only the final report set is committed, to `docs/技术难题/整库审查<run-id>/`, registered in `文档清单.md` in the same change. Evidence cited by the final report must be copied out of `.context` into the tracked report dir. Never overwrite an old run.
+- Working evidence and lane files go to the untracked `.context/audits/<run-id>/`; only the final report set is committed, to `docs/技术难题/整库审查<run-id>/`. Evidence cited by the final report must be copied out of `.context` into the tracked report dir. Never overwrite an old run. (The former "every new tracked doc must be registered in `文档清单.md`" requirement was retired 2026-07-26 along with the check that enforced it — do not reintroduce it here.)
 
 ## Reusable structure
 

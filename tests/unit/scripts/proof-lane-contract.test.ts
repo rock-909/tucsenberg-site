@@ -47,7 +47,9 @@ describe("release proof manifest contract", () => {
     for (const step of RELEASE_PROOF_MANIFEST.steps) {
       expect(step.id).toMatch(/^[a-z0-9-]+$/u);
       expect(VALID_RELEASE_LANES.has(step.lane), step.id).toBe(true);
-      expect(step.docs?.includeInReleaseSequence, step.id).toBe(true);
+      // 这里原本还有 expect(step.docs?.includeInReleaseSequence).toBe(true)。
+      // manifest 里那个字段只有一个共享常量、没有一处是 false，所以那条断言
+      // 永远不可能红——正是这个 PR 在清的那类东西。删于 2026-07-26。
       expect(step.command, step.id).toMatch(/^(node|pnpm)$/u);
       expect(step.args.length, step.id).toBeGreaterThan(0);
     }

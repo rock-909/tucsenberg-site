@@ -92,6 +92,13 @@ describe("Cloudflare deploy workflow contract", () => {
     expect(workflow).toContain(
       "PUBLIC_LAUNCH_STRICT=true APP_ENV=production node scripts/starter-checks.js validate-production-config",
     );
+
+    // 严格档要求 PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED=true，而这个 workflow 是
+    // 它唯一的传入路径。摘掉这一行，production 部署会在那一步撞红——门是
+    // fail-closed 的，代价只是一次白跑的部署，但没有东西会提前告诉你。
+    expect(workflow).toContain(
+      "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: ${{ vars.PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED }}",
+    );
     expect(workflow.indexOf("validate-production-config")).toBeLessThan(
       workflow.indexOf("部署到 Cloudflare Workers（production）"),
     );

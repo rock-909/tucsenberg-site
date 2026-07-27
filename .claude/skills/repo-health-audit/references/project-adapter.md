@@ -32,7 +32,7 @@ Required top-level fields:
 Validate with:
 
 ```bash
-python3 /Users/Data/.codex/skills/repo-health-audit/scripts/validate_audit_config.py docs/audits/<audit-name>/audit.config.json
+python3 .claude/skills/repo-health-audit/scripts/validate_audit_config.py docs/audits/<audit-name>/audit.config.json
 ```
 
 ## `project-profile.md`

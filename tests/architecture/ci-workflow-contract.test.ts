@@ -31,12 +31,13 @@ interface WorkflowStep {
   readonly run?: string;
 }
 
+interface CiJob {
+  readonly "continue-on-error"?: boolean;
+  readonly steps?: readonly WorkflowStep[];
+}
+
 interface CiWorkflow {
-  readonly jobs?: {
-    readonly quality?: {
-      readonly steps?: readonly WorkflowStep[];
-    };
-  };
+  readonly jobs?: Record<string, CiJob | undefined>;
 }
 
 interface SemgrepConfig {
@@ -134,12 +135,23 @@ describe("CI workflow contract", () => {
   // continue-on-error: true 一起钉——一条断言在保证某个门永远不能让 CI 变红。
   // 2026-07-26 连步骤带断言一起退役：changed-scope 的 react:doctor 是阻塞的，
   // 有真实修复记录（c125276，69→100）；全量对账只往 summary 写字，没人读。
-  it("keeps no step that can never fail", () => {
-    const qualitySteps = readCiWorkflowConfig().jobs?.quality?.steps ?? [];
+  // 标题承诺的是整个 ci.yml，实现原本只扫 jobs.quality.steps——名字比覆盖面宽，
+  // 下一个人照名字理解会以为别的作业也被守着。改成真的扫全部作业，作业级和步骤
+  // 级的 continue-on-error 都算。
+  //
+  // 只管 ci.yml。weekly-audit.yml:43 也有一条 continue-on-error: true，但那条
+  // 后面跟着显式 exit 1，工作流最终仍会红——那是正当用法，不该被这条拦下。
+  it("keeps no ci.yml step or job that can never fail", () => {
+    const jobs = Object.entries(readCiWorkflowConfig().jobs ?? {});
+    const escapes = jobs.flatMap(([jobName, job]) => [
+      ...(job?.["continue-on-error"] === true ? [`job:${jobName}`] : []),
+      ...(job?.steps ?? [])
+        .filter((step) => step["continue-on-error"] === true)
+        .map((step) => `${jobName}/${step.name ?? step.run ?? "?"}`),
+    ]);
 
-    expect(
-      qualitySteps.filter((step) => step["continue-on-error"] === true),
-    ).toEqual([]);
+    expect(jobs.length).toBeGreaterThan(0);
+    expect(escapes).toEqual([]);
   });
 
   // 这条以前叫 "keeps Semgrep blocking scope narrow"，钉的是带 ` src` 的整条命令

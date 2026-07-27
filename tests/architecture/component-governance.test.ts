@@ -543,7 +543,19 @@ describe("component governance", () => {
     }
 
     expect(governanceScript).toContain("component-governance");
-    expect(componentCheckScript).toContain("component:governance");
+
+    // `component:governance` 是 `component:governance:test` 的子串，所以单独
+    // toContain 它会在 component:check 被砍到只剩 test（scanner 和 storybook
+    // build 都丢了）时照样绿。按 && 拆开，逐段点名。
+    const checkStages = componentCheckScript.split("&&").map((s) => s.trim());
+
+    expect(checkStages).toEqual(
+      expect.arrayContaining([
+        "pnpm component:governance:test",
+        "pnpm component:governance",
+        "pnpm exec storybook build",
+      ]),
+    );
     expect(componentCheckScript).not.toContain("|| true");
     expect(componentCheckScript).not.toContain("; true");
     expect(componentCheckScript).not.toContain("--passWithNoTests");

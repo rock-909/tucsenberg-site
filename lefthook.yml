@@ -22,11 +22,16 @@ pre-commit:
       run: pnpm lint:check
       fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
 
-    # architecture-guard 于 2026-07-26 退役。它 grep diff 文本禁相对导入，而
-    # eslint 的 no-restricted-imports 已经用 AST 管着 `../*`（上面 quality-check
-    # 就在跑）。更糟的是它连 `./sibling` 一起禁，而 .claude/rules/coding-standards.md
-    # 明写同目录相对导入是允许的——一个跟已定规则打架的门。`export *` 那半条是
-    # "架构重构期间"的临时纪律，重构早结束了；真要守就加 eslint 规则，别 grep。
+    # architecture-guard 于 2026-07-26 退役。它两条禁令 eslint 都已经用 AST 管着，
+    # 而且管得更严（上面的 quality-check 就在跑）：
+    #   - 相对导入 → eslint.config.mjs 的 no-restricted-imports，group ["../*"]；
+    #     实测 ../x、../../x、../../../x 全命中，./sibling 不命中。退役的这个门反而
+    #     还连 ./sibling 一起禁，跟 .claude/rules/coding-standards.md 明写的允许打架，
+    #     而且给 next.config.ts、middleware.ts、*/index.ts 开了口子，eslint 不开。
+    #   - export * → eslint.config.mjs 的 no-restricted-syntax，
+    #     selector "ExportAllDeclaration"，error 级，全仓生效。
+    # 想恢复这个门之前先看那两条规则：它们已经在了，grep diff 文本只是更弱的重复
+    # 实现（能被 // 注释绕过，且只看 staged）。
 
     # 多语言同步检查
     i18n-sync:
