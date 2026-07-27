@@ -642,4 +642,9 @@ function collectDerivedKeyConsumerUsage({
 module.exports = {
   collectDerivedKeyConsumerUsage,
   collectObjectKeyConsumerUsage,
+  // 通用 TS AST 助手，`message-key-usage.js` 也要用。那边已经把
+  // unwrapExpression / getStaticString 注入进来了，这两条走反方向：定义在
+  // 下层、被上层引用，省得两边各留一份会各自漂移的拷贝。
+  getBindingIdentifier,
+  isConstVariableDeclaration,
 };
