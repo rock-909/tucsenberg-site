@@ -23,11 +23,22 @@ const FORBIDDEN_PLACEHOLDERS = [
   "[欧盟代表联系方式]",
 ] as const;
 
+// 点名清单会静默变短：删掉一个文件后清单少一条不会报错，只会少查。
+// public 下的 .txt 改成遍历，新增文件自动进入检查范围。
+function collectPublicTextFiles(dir: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- 测试扫描器锁定在仓库的 public 根目录
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) return collectPublicTextFiles(fullPath);
+    return entry.isFile() && entry.name.endsWith(".txt") ? [fullPath] : [];
+  });
+}
+
 const PUBLIC_LEGAL_AND_SECURITY_FILES = [
   join(process.cwd(), "content/pages/en/privacy.mdx"),
   join(process.cwd(), "content/pages/en/terms.mdx"),
-  join(process.cwd(), "public/security-policy.txt"),
-] as const;
+  ...collectPublicTextFiles(join(process.cwd(), "public")),
+];
 
 const CANONICAL_PLACEHOLDER_FILES = [
   join(process.cwd(), "src/config/single-site.ts"),
@@ -53,6 +64,8 @@ const FORBIDDEN_PUBLIC_LEGAL_AND_SECURITY_CLAIMS = [
   "每月1.5%",
   "15天",
   "10个工作日",
+  "Replace this line",
+  "before public launch",
 ] as const;
 
 const FORBIDDEN_CANONICAL_PLACEHOLDER_RESIDUE = [
@@ -89,8 +102,7 @@ describe("content page placeholder guard", () => {
 
   it("does not ship specific customer promises in public legal and security placeholders", () => {
     const failures = PUBLIC_LEGAL_AND_SECURITY_FILES.flatMap((filePath) => {
-      // Static test fixture list points only at public legal/security files.
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- File paths are fixed in PUBLIC_LEGAL_AND_SECURITY_FILES.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- 路径来自固定的两份 MDX 加上 public 目录扫描
       const content = readFileSync(filePath, "utf8");
       return FORBIDDEN_PUBLIC_LEGAL_AND_SECURITY_CLAIMS.filter((claim) =>
         content.includes(claim),
