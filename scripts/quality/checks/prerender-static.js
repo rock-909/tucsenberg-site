@@ -196,6 +196,11 @@ function collectPrerenderStaticFindings({
   ]);
 
   return [
+    // Template shells only exist with Cache Components on, which this runtime
+    // keeps off, so this collector currently sits out every real build. The
+    // routes it would cover are still checked through prerender-manifest by
+    // the two collectors below. runPrerenderStaticCheck reports the skip so
+    // "passed" cannot be read as "all three collectors ran".
     ...(hasTemplateShells
       ? collectTemplateFindings(buildRoot, localizedPageTemplates)
       : []),
@@ -208,10 +213,37 @@ function collectPrerenderStaticFindings({
   ];
 }
 
+function describePrerenderStaticCoverage(
+  rootDir = ROOT,
+  buildDir = DEFAULT_BUILD_DIR,
+) {
+  const buildRoot = path.join(rootDir, buildDir);
+  const appPathsPath = path.join(buildRoot, "server/app-paths-manifest.json");
+  if (!fs.existsSync(appPathsPath)) return "";
+
+  const templates = Object.keys(readJson(appPathsPath)).filter(
+    (route) => route.startsWith("/[locale]") && route.endsWith("/page"),
+  );
+  const shells = templates.filter((route) =>
+    fs.existsSync(
+      path.join(
+        buildRoot,
+        getMetaRelativePath(route.slice(0, -"/page".length)),
+      ),
+    ),
+  );
+
+  return ` (${templates.length} localized template(s); template shells ${
+    shells.length > 0
+      ? `checked: ${shells.length}`
+      : "not emitted, shell check skipped"
+  })`;
+}
+
 function runPrerenderStaticCheck() {
   const findings = collectPrerenderStaticFindings();
   if (findings.length === 0) {
-    console.log("prerender-static: passed");
+    console.log(`prerender-static: passed${describePrerenderStaticCoverage()}`);
     return true;
   }
 

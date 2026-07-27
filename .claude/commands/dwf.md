@@ -8,7 +8,7 @@ user-invocable: true
 
 用于展示型网站的设计工作流：从文案定稿到 HTML 原型确认，再生成开发交接文档。设计质量委托 Impeccable skills。
 
-```
+```text
 dwf = 设计编排器
 ├── Phase 0: 初始化 + 上下文读取
 ├── Phase 1: 生成 HTML 原型（设计系统约束）
@@ -114,7 +114,7 @@ Critical/High 问题自动修复后重新审计，不进入用户评审。
 
 ## Phase 5: 定稿 + 交接
 
-```
+```text
 1. 复制最终版本 → docs/superpowers/plans/workflows/dwf/{page}/prototype/final/
 2. 可选: token-lifecycle skill — 如设计系统需更新，提取新 Token
 3. 生成 HANDOFF.md（开发交接文档）
@@ -124,7 +124,7 @@ Critical/High 问题自动修复后重新审计，不进入用户评审。
 
 ## 完成提示
 
-```
+```text
 设计定稿完成
 
 产物:

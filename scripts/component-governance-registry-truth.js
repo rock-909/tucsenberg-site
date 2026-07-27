@@ -1,7 +1,6 @@
 const ts = require("typescript");
 const postcss = require("postcss");
 
-const USE_CLIENT_DIRECTIVE_PATTERN = /^\s*["']use client["'];?/m;
 const RADIX_PACKAGE_PATTERN = /^@radix-ui\/[^/]+(?:\/.*)?$/;
 const RADIX_THEMES_PATTERN = /^@radix-ui\/themes(?:\/.*)?$/;
 const RADIX_PRIMITIVE_PATTERN = /^@radix-ui\/react-[^/]+(?:\/.*)?$/;
@@ -149,8 +148,35 @@ function findRadixPrimitiveReference(source, filePath) {
   return getRadixModuleReferenceSummary(source, filePath).primitiveReference;
 }
 
+// Next.js只认文件顶部、任何 import 之前的指令。用 /m 正则扫全文会把模板字符串里
+// 的示例、import 之后的无效语句都算成 client boundary——那会逼 registry 声明一个
+// client-boundary 门禁并不认可的值，两个门禁互相打架。按 AST 的指令序言判定。
+function hasUseClientDirective(
+  source,
+  filePath = "component-governance-source.tsx",
+) {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isExpressionStatement(statement) ||
+      !ts.isStringLiteralLike(statement.expression)
+    ) {
+      return false;
+    }
+    if (statement.expression.text === "use client") return true;
+  }
+
+  return false;
+}
+
 function getExpectedClientBoundary(source) {
-  return USE_CLIENT_DIRECTIVE_PATTERN.test(source) ? "client" : "server-safe";
+  return hasUseClientDirective(source) ? "client" : "server-safe";
 }
 
 function getExpectedRadixLayer(source) {
@@ -168,5 +194,4 @@ module.exports = {
   findRadixPackageReference,
   findRadixPrimitiveReference,
   findRadixThemesReference,
-  USE_CLIENT_DIRECTIVE_PATTERN,
 };

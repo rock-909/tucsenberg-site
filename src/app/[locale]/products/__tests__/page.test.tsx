@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ProductsPage from "../page";
+import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import {
   assertNoHeavyCatalogOrDeveloperDemoCopy,
   createCatalogTranslator,
@@ -154,17 +155,19 @@ describe("Products Overview Page", () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"));
 
-    expect(hrefs).toContain("/request-quote");
-    expect(hrefs).toContain("/guides/flood-barrier-materials-guide");
-    expect(hrefs).toContain("/products/abs-flood-barriers");
-    expect(hrefs).toContain("/products/aluminum-flood-gates");
-    expect(hrefs).toContain("/products/absorbent-flood-bags");
-    expect(hrefs).toContain("/products/flood-tube-dams");
-    expect(hrefs).toContain("/products/frp-flood-barriers");
-    expect(hrefs).not.toContain("/resources");
-    expect(hrefs).not.toContain("/contact");
-    expect(hrefs).not.toContain("/blog");
-    expect(hrefs).not.toContain("/products/north-america");
+    // One exhaustive set instead of "these must appear, those must not": the
+    // forbid-list only covered routes someone remembered, and market slugs were
+    // pinned as literals so a new product line would fail this for no reason.
+    expect([...new Set(hrefs)].sort()).toEqual(
+      [
+        "/guides/flood-barrier-materials-guide",
+        "/guides/flood-barrier-specifications",
+        "/request-quote",
+        ...singleSiteProductCatalog.markets.map(
+          (market) => `/products/${market.slug}`,
+        ),
+      ].sort(),
+    );
 
     assertNoHeavyCatalogOrDeveloperDemoCopy();
   });

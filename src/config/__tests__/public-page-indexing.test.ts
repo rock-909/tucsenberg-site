@@ -40,8 +40,13 @@ describe("public page indexing by starter profile", () => {
     ).toBe(true);
   });
 
-  it("does not index retired blog or demo paths", () => {
+  // Fails closed: anything not on the public allow-list stays out of the index,
+  // whether it is a retired path or one that never existed.
+  it("does not index page types outside the public allow-list", () => {
     expect(shouldIndexPublicPage("blog", "/blog")).toBe(false);
     expect(shouldIndexPublicPage("capabilities", "/capabilities")).toBe(false);
+    expect(shouldIndexPublicPage("never-existed", "/never-existed")).toBe(
+      false,
+    );
   });
 });

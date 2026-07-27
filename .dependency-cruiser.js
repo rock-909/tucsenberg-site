@@ -60,11 +60,10 @@ module.exports = {
       name: "no-motion-wrapper-outside-home",
       severity: "error",
       comment:
-        "LCP 首屏边界：非首页不得进入本地 motion wrapper 图（历史证明：docs/技术难题/LCP首屏动效边界.md；motion/react 直接导入由 homepage-lcp-motion-boundary.test.ts 守护）",
+        "LCP 首屏边界：非首页不得进入本地 motion wrapper 图（历史证明：docs/技术难题/LCP首屏动效边界.md；motion/react 直接导入由 homepage-lcp-motion-boundary.test.ts 守护）。间接依赖靠中间模块自身那条直接边被拦住，所以豁免只给首页一个文件——把 components/motion/、lib/motion/ 整目录豁免会让「非首页 → 目录内新 facade → breathing-reveal」两跳全绿通过。",
       from: {
         path: "^src/",
-        pathNot:
-          "^src/(app/\\[locale\\]/page\\.tsx$|components/motion/|lib/motion/|test/)",
+        pathNot: "^src/app/\\[locale\\]/page\\.tsx$",
       },
       to: {
         path: "^src/components/motion/(breathing-reveal|light-motion-provider)",

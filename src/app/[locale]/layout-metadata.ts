@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/config/paths";
+import { isLocale } from "@/i18n/locale-utils";
 import { getRuntimeAppEnv, getRuntimeEnvString } from "@/lib/env";
 
 const INDEXABLE_ROBOTS = {
@@ -38,8 +40,17 @@ export async function generateLocaleMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  // await params 是 Next.js 16 的要求，但解析很快
-  await params;
+  // 元数据生成先于布局渲染执行。布局里那句 `if (!isLocale(locale)) notFound()`
+  // 因此永远来不及拦住非法 locale：带点的地址（`/random.txt`）被 middleware
+  // matcher 排除，原样落到 `[locale]` 上，某个页面的 generateMetadata 拿它去查
+  // 路径表，直接 `throw new Error("Unknown locale")`，返回 500。
+  // 同一句校验放在最早的入口这里，非法 locale 走正常的 404 兜底，而不是异常。
+  // 见 docs/技术难题/带扩展名地址返回500而非404.md
+  const { locale } = await params;
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
   const metadataBaseUrl = SITE_CONFIG.baseUrl || "http://localhost:3000";
 
   return {

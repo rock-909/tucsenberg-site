@@ -489,7 +489,10 @@ function collectConfigStringScanUnits(content) {
     });
     collectStringLiteralsFromNode(ast.program, units, content);
   } catch {
-    return [];
+    // Returning [] here would skip the whole file: syntax this parser version
+    // does not know yet would silently exempt a config from the residue scan.
+    // Fall back to the raw content, the same way JSON parse failures do.
+    return [{ value: content, line: 1 }];
   }
 
   return units;
@@ -589,10 +592,14 @@ function scanReadinessFile(rootDir, file, options = {}) {
   return findings;
 }
 
-function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
-  const files = READINESS_SCAN_TARGETS.flatMap((target) =>
+function collectReadinessScanFiles(rootDir = ROOT) {
+  return READINESS_SCAN_TARGETS.flatMap((target) =>
     collectReadinessFiles(rootDir, target),
   );
+}
+
+function collectContentReadinessFindings(rootDir = ROOT, options = {}) {
+  const files = collectReadinessScanFiles(rootDir);
   return files.flatMap((file) =>
     file.scanTextRules || file.scanPathRules
       ? scanReadinessFile(rootDir, file, options)
@@ -605,7 +612,22 @@ function runContentReadinessCheck(rootDir = ROOT, options = {}) {
   const errors = findings.filter((finding) => finding.severity === "error");
   const warnings = findings.filter((finding) => finding.severity === "warning");
 
+  // "No residue found" has to mean something was inspected. An empty scan set
+  // means the targets moved, not that the content is clean.
+  const scannedFileCount = collectReadinessScanFiles(rootDir).length;
+  if (scannedFileCount === 0) {
+    errors.push({
+      severity: "error",
+      file: "scripts/quality/checks/content-readiness.js",
+      line: 1,
+      ruleId: "empty-scan-set",
+      message: "content readiness scanned no files; scan targets are missing",
+    });
+    findings.push(errors[errors.length - 1]);
+  }
+
   return {
+    scannedFileCount,
     status: errors.length > 0 ? "failed" : "passed",
     findings,
     errors,
@@ -640,6 +662,7 @@ function runContentReadinessCli(args = []) {
 
 module.exports = {
   collectContentReadinessFindings,
+  collectReadinessScanFiles,
   runContentReadinessCheck,
   runContentReadinessCli,
 };

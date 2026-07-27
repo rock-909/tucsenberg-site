@@ -293,6 +293,16 @@ function analyzeFile(filePath, options = {}) {
 
 function runEslintDisableCheck() {
   const files = getRepoFiles().filter(isLintSourceFile);
+
+  // Zero violations across zero files is a broken scan, not a clean repo.
+  // Renaming src/, tests/, or scripts/ would otherwise leave this green.
+  if (files.length === 0) {
+    console.error(
+      "[eslint-disable-check] failed: found no lintable source files under src/, tests/, or scripts/",
+    );
+    return false;
+  }
+
   const registeredGuardrailExceptionIds = readRegisteredGuardrailExceptionIds();
   const allFindings = [];
 

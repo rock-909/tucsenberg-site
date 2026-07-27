@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
 import ProductsPage, { generateStaticParams } from "../page";
+import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
 import {
   assertNoHeavyCatalogOrDeveloperDemoCopy,
   createCatalogTranslator,
@@ -361,10 +362,20 @@ describe("Feature: Product Overview Page", () => {
         .getAllByRole("link")
         .map((link) => link.getAttribute("href"));
 
-      expect(hrefs).not.toContain("/blog");
-      expect(hrefs).not.toContain("/resources");
-      expect(hrefs).not.toContain("/contact");
-      expect(hrefs).not.toContain("/products/north-america");
+      // Asserting the whole link set instead of a list of forbidden paths: the
+      // old form only caught the three dead routes someone thought to name, and
+      // silently allowed any other stray link. Markets come from config so a new
+      // product line does not fail this for the wrong reason.
+      expect([...new Set(hrefs)].sort()).toEqual(
+        [
+          "/guides/flood-barrier-materials-guide",
+          "/guides/flood-barrier-specifications",
+          "/request-quote",
+          ...singleSiteProductCatalog.markets.map(
+            (market) => `/products/${market.slug}`,
+          ),
+        ].sort(),
+      );
     });
 
     it("keeps the same guide and RFQ CTAs across active profiles", async () => {

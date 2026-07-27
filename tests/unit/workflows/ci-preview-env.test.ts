@@ -57,14 +57,16 @@ function expectPreviewStepEnv(
 }
 
 describe("CI preview environment contract", () => {
-  it("runs the table keyboard accessibility contract in the required PR browser lane", () => {
+  // 原来这条只点名了一个 spec 文件。点名式断言只能证明那一个在跑，反而让另外
+  // 几个文件哪个 workflow 都没跑还一路绿灯。改成守"这一步不按文件过滤"。
+  it("runs the whole browser lane on PRs instead of a named subset", () => {
     const workflow = readCiWorkflow();
     const browserSteps = workflow.jobs?.e2e?.steps;
     const testStep = browserSteps?.find(
       (candidate) => candidate.name === "运行 Tucsenberg E2E",
     );
 
-    expect(testStep?.run).toContain("tests/e2e/table-keyboard-scroll.spec.ts");
+    expect(testStep?.run?.trim()).toBe("pnpm exec playwright test");
   });
 
   it("keeps the client-boundary proof immediately after the isolated analysis build", () => {

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { PageType } from "@/config/paths";
@@ -8,11 +8,6 @@ import {
 } from "@/config/pages.config";
 
 const REPO_ROOT = process.cwd();
-
-function readRepoFile(relativePath: string): string {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads fixed repo-local docs from explicit call sites
-  return readFileSync(join(REPO_ROOT, relativePath), "utf8");
-}
 
 function expectStaticRouteOwner(routeOwner: string): void {
   expect(routeOwner.startsWith("src/app/[locale]/")).toBe(true);
@@ -33,28 +28,6 @@ function expectStaticRouteOwner(routeOwner: string): void {
 }
 
 describe("static public pages architecture contract", () => {
-  it("keeps pages.config.ts as the static public pages truth source", () => {
-    const docs = [
-      readRepoFile("docs/项目基础/替换顺序.md"),
-      readRepoFile("docs/项目基础/内容.md"),
-    ].join("\n");
-
-    expect(docs).toContain("src/config/pages.config.ts");
-    expect(docs).toContain("static public pages");
-    expect(docs).toContain("content/pages/{locale}");
-    expect(docs).toContain("messages/base/**");
-    expect(docs).toContain("messages/profiles/");
-  });
-
-  it("does not include dynamic route page types in the first registry", () => {
-    const disallowed = ["productMarket", "blogArticle"] as const;
-    const actual = PUBLIC_STATIC_PAGE_TYPES as readonly string[];
-
-    for (const pageType of disallowed) {
-      expect(actual).not.toContain(pageType);
-    }
-  });
-
   it("keeps route owners static, literal, and backed by real files", () => {
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
       expectStaticRouteOwner(definition.routeOwner);

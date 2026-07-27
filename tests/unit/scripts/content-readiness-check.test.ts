@@ -6,6 +6,7 @@ import {
   collectContentReadinessFindings,
   runContentReadinessCheck,
 } from "../../../scripts/starter-checks.js";
+import { collectReadinessScanFiles } from "../../../scripts/quality/checks/content-readiness.js";
 
 interface FindingShape {
   file: string;
@@ -75,17 +76,26 @@ describe("content-readiness-check", () => {
     }
   });
 
-  it("scans current Tucsenberg product-page truth instead of retired specs", () => {
-    const source = fs.readFileSync(
-      "scripts/quality/checks/content-readiness.js",
-      "utf8",
+  // This used to grep the check's own source for wanted and unwanted path
+  // strings, which passes on a comment and guards names that were retired long
+  // ago. What matters is which files the scan actually reaches.
+  it("reaches the current Tucsenberg product-page files it claims to scan", () => {
+    const scanned = collectReadinessScanFiles().map(
+      (file: { repoPath: string }) => file.repoPath,
     );
 
-    expect(source).toContain("src/constants/tucsenberg-product-page-");
-    expect(source).toContain("src/constants/tucsenberg-product-pages.ts");
-    expect(source).not.toContain("src/constants/product-specs");
-    expect(source).not.toContain("profile-fixtures");
-    expect(source).not.toContain("--profile");
+    expect(scanned.length).toBeGreaterThan(0);
+    expect(scanned).toContain("src/constants/tucsenberg-product-pages.ts");
+    expect(
+      scanned.filter((repoPath) =>
+        repoPath.startsWith("src/constants/tucsenberg-product-page-"),
+      ).length,
+    ).toBeGreaterThan(0);
+
+    for (const repoPath of scanned) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- paths come from the check's own repo-local scan targets
+      expect(fs.existsSync(repoPath), repoPath).toBe(true);
+    }
   });
 
   it("fails on hard fake buyer-visible content", () => {

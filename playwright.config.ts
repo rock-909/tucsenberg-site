@@ -31,21 +31,6 @@ const defaultGrepInvertPatterns = [
   ...(isCI && !isDaily ? [/debug|diagnosis/i] : []),
   ...(profileLane === "default" ? [/@profile:/i] : []),
 ];
-const currentSiteTestMatch = [
-  "**/tucsenberg-site-smoke.spec.ts",
-  "**/contact-form-smoke.spec.ts",
-  "**/no-js-html-contract.spec.ts",
-  "**/layout-stability.spec.ts",
-  "**/not-found-status.spec.ts",
-  "**/smoke/**/*.spec.ts",
-] as const;
-const hasExplicitE2eFileSelection = process.argv.some(
-  (arg) =>
-    arg.startsWith("tests/e2e/") ||
-    arg.startsWith("./tests/e2e/") ||
-    arg.includes("/tests/e2e/"),
-);
-
 const resolvedBaseUrl =
   process.env.STAGING_URL ||
   process.env.PLAYWRIGHT_BASE_URL ||
@@ -87,8 +72,9 @@ const extendedProjects = [
 ];
 
 export default defineConfig({
+  // 不写 testMatch：testDir 下所有 *.spec.ts 一律跑。之前是一份 5 条的白名单，
+  // 结果 14 个用例文件里有 9 个从来没被执行过——新写的 e2e 不加进白名单就等于没写。
   testDir: "./tests/e2e",
-  ...(hasExplicitE2eFileSelection ? {} : { testMatch: currentSiteTestMatch }),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -173,6 +159,10 @@ export default defineConfig({
             SECURITY_HEADERS_ENABLED: "false",
             SKIP_ENV_VALIDATION: "true",
             APP_ENV: "preview",
+            // Turnstile 的测试模式读的是 NEXT_PUBLIC_APP_ENV。只设 APP_ENV 时，
+            // NODE_ENV=production 会让 isTestMode 判成 false，渲染真实控件而不是
+            // 测试占位——等待 turnstile-mock 的用例因此全部超时。
+            NEXT_PUBLIC_APP_ENV: "preview",
           },
         },
       }),

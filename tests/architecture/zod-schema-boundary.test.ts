@@ -1,9 +1,10 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const TEST_SCAN_ROOTS = ["src", "tests"] as const;
 const SOURCE_SCAN_ROOT = "src";
+const SETUP_SCAN_ROOT = "src/test";
 const V3_EMAIL_IDIOM = "z.string().email(";
 const SCHEMA_REJECTION_PATTERN =
   /\.safeParse\([^)]*\)\.success\)\.toBe\(false\)|expect\(\s*\w+\.success\s*\)\.toBe\(false\)|expect\(\s*\w+\.error\b/u;
@@ -37,11 +38,17 @@ function collectSourceFiles(root: string): string[] {
 }
 
 describe("Zod schema boundary", () => {
+  // Schema rejection tests are only proof if the schema library is real. The
+  // per-test scan below only walks `*.test.ts`, so a mock parked in a shared
+  // setup file would turn every rejection test green without tripping it.
   it("uses real Zod by default in the shared Vitest setup", () => {
-    const testingRuleSource = readFileSync(".claude/rules/testing.md", "utf8");
+    const mocked = collectSourceFiles(SETUP_SCAN_ROOT).filter((filePath) => {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- file paths come from collectSourceFiles under SETUP_SCAN_ROOT.
+      const source = readFileSync(filePath, "utf8");
+      return ZOD_MOCK_PATTERN.test(source);
+    });
 
-    expect(existsSync("src/test/setup.zod.ts")).toBe(false);
-    expect(testingRuleSource).toContain("Vitest uses real `zod` by default");
+    expect(mocked).toEqual([]);
   });
 
   it("does not reintroduce the Zod v3 z.string().email() idiom in src (use z.email())", () => {

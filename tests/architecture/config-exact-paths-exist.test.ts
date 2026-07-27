@@ -9,8 +9,14 @@ const REPO_PATH_PATTERN = /^(?:content|messages|public|scripts|src|tests)\//u;
 const QUOTED_REPO_PATH_PATTERN =
   /["']((?:content|messages|public|scripts|src|tests)\/[^"'\n]+)["']/gu;
 
-function isExactRepoPath(candidate: string): boolean {
-  return REPO_PATH_PATTERN.test(candidate) && !/[?*{}]/u.test(candidate);
+// A directory exclusion is written `src/app/api/whatsapp/**`. Rejecting every
+// candidate containing `*` skipped exactly those, so a deleted directory kept a
+// live exemption on the books — the next file created at that path would be
+// silently exempt. Resolve the `/**` suffix to its directory instead.
+function toExactRepoPath(candidate: string): string | null {
+  const resolved = candidate.replace(/\/\*\*$/u, "");
+  if (!REPO_PATH_PATTERN.test(resolved)) return null;
+  return /[?*{}]/u.test(resolved) ? null : resolved;
 }
 
 // A regex-anchored config path (dep-cruiser from.path/to.path) starts with the
@@ -193,7 +199,10 @@ function collectLighthouseRoutePathSegments(): string[][] {
 function getMissingPaths(paths: Iterable<string>): string[] {
   return (
     [...new Set(paths)]
-      .filter(isExactRepoPath)
+      .flatMap((candidate) => {
+        const resolved = toExactRepoPath(candidate);
+        return resolved === null ? [] : [resolved];
+      })
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test validates repo-local config paths
       .filter((repoPath) => !fs.existsSync(repoPath))
       .sort()

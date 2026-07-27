@@ -1,9 +1,28 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const DOCS_README_PATH = "docs/README.md";
 const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
+const COMPONENT_GOVERNANCE_REGISTRY_PATH =
+  "src/components/component-governance.registry.json";
+
+// The playbook has to cover these topics for an agent to pick a component
+// without reading the source. Sections are the contract; the prose inside them
+// is free to be rewritten. Asserting whole sentences instead froze the wording
+// and turned a comma into a CI failure.
+const REQUIRED_PLAYBOOK_SECTIONS = [
+  "Boundary",
+  "Choose components",
+  "Missing wrappers",
+  "Interaction rule",
+  "Dialog vs Sheet",
+  "Intentional native surfaces",
+  "Storybook rule",
+  "Card rule",
+  "Radix Themes retirement boundary",
+  "New primitive checklist",
+] as const;
 
 function readText(filePath: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test reads fixed repo docs by relative path
@@ -14,93 +33,110 @@ function toKebabCase(componentName: string): string {
   return componentName.replace(/(?<!^)([A-Z])/gu, "-$1").toLowerCase();
 }
 
+function getSectionTitles(markdown: string): string[] {
+  return [...markdown.matchAll(/^##\s+(.+)$/gmu)].map((match) =>
+    match[1]!.trim(),
+  );
+}
+
+function getSectionBody(markdown: string, title: string): string {
+  return markdown.split(`## ${title}`)[1]?.split("\n## ")[0] ?? "";
+}
+
+function collectDocFilenames(dir: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- walk is rooted at the fixed docs/ tree
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory()
+      ? collectDocFilenames(join(dir, entry.name))
+      : [entry.name],
+  );
+}
+
+// Asserting the strings appear would also pass on prose, a code sample, or a
+// dead path. Resolve the reference instead. Bare filenames are written relative
+// to whatever directory the surrounding row is talking about, so they resolve
+// against the doc tree by name.
+function getUnresolvedMarkdownReferences(
+  markdown: string,
+  siblingDir: string,
+): { referenced: string[]; missing: string[] } {
+  const docFilenames = new Set(collectDocFilenames("docs"));
+  const referenced = [...markdown.matchAll(/`([\w./一-鿿-]+\.md)`/gu)].map(
+    (match) => match[1]!,
+  );
+  const missing = referenced.filter(
+    (reference) =>
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- reference comes from a restricted character class in a repo-local doc
+      !existsSync(reference) &&
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- sibling lookup for bare filenames written relative to the doc
+      !existsSync(join(siblingDir, reference)) &&
+      !(!reference.includes("/") && docFilenames.has(reference)),
+  );
+
+  return { referenced, missing };
+}
+
 describe("UI component playbook", () => {
   it("is part of the website docs required reading path", () => {
-    const readme = readText(DOCS_README_PATH);
+    const { referenced, missing } = getUnresolvedMarkdownReferences(
+      readText(DOCS_README_PATH),
+      "docs",
+    );
 
-    expect(readme).toContain("design/组件使用手册.md");
-    expect(readme).toContain("design/设计真相.md");
+    expect(referenced).toEqual(
+      expect.arrayContaining(["design/组件使用手册.md", "design/设计真相.md"]),
+    );
+    expect(missing).toEqual([]);
   });
 
-  // Routing only works if the referenced files are still there. Asserting the
-  // strings appear would also pass on prose, a code sample, or a dead path.
   it("routes readers on to files that still exist", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-    const referenced = [...playbook.matchAll(/`([\w./一-鿿-]+\.md)`/gu)].map(
-      (match) => match[1]!,
+    const { referenced, missing } = getUnresolvedMarkdownReferences(
+      readText(UI_COMPONENT_PLAYBOOK_PATH),
+      "docs/design",
     );
 
     expect(referenced).toEqual(
       expect.arrayContaining([".claude/rules/ui.md", "组件索引.md"]),
     );
-
-    const missing = referenced.filter(
-      (reference) =>
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- reference comes from a restricted character class in the repo-local playbook
-        !existsSync(reference) &&
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- sibling lookup for bare filenames written relative to the playbook
-        !existsSync(join("docs/design", reference)),
-    );
-
     expect(missing).toEqual([]);
   });
 
-  it("records the Radix control boundary and Tailwind narrative boundary", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
+  it("covers every topic an agent needs before choosing a component", () => {
+    const titles = getSectionTitles(readText(UI_COMPONENT_PLAYBOOK_PATH));
 
-    expect(playbook).toContain(
-      "Radix Primitives own complex keyboard, focus, overlay, selection, and disclosure mechanics inside local wrappers.",
-    );
-    expect(playbook).toContain(
-      "Native HTML, Tailwind, and project tokens own ordinary controls, layout, brand expression, marketing narrative, and visual rhythm.",
+    expect(titles).toEqual(
+      expect.arrayContaining([...REQUIRED_PLAYBOOK_SECTIONS]),
     );
   });
 
-  it("keeps Card as the shared surface wrapper", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-
-    expect(playbook).toContain(
-      "`Card`: marketing, resources, product story, proof, structured data, and form shells.",
+  it("keeps the new primitive checklist naming every governance registry field", () => {
+    const registry = JSON.parse(
+      readText(COMPONENT_GOVERNANCE_REGISTRY_PATH),
+    ) as { components: Record<string, Record<string, unknown>> };
+    const firstComponent = Object.values(registry.components)[0];
+    const checklist = getSectionBody(
+      readText(UI_COMPONENT_PLAYBOOK_PATH),
+      "New primitive checklist",
     );
-  });
 
-  it("records the intentional non-Radix exceptions", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
+    expect(firstComponent).toBeDefined();
 
-    expect(playbook).toContain("FAQ disclosure");
-    expect(playbook).toContain("stays native `<details>/<summary>`");
-    expect(playbook).toContain("Cookie consent checkboxes");
-    expect(playbook).toContain("stay native until cookie preference state");
-    expect(playbook).toContain(
-      "Contact and Request Quote share the same `InquiryForm`",
+    // Adding a registry field without telling agents to fill it produces
+    // registry entries that fail governance on the next component.
+    const unlisted = Object.keys(firstComponent!).filter(
+      (field) => !checklist.includes(`\`${field}\``),
     );
-  });
 
-  it("records the shared inquiry form composition boundary", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-
-    expect(playbook).toContain(
-      "Contact and Request Quote share the same `InquiryForm`",
-    );
-    expect(playbook).toContain("`Input` and `Textarea`");
-    expect(playbook).toContain("`Card`");
+    expect(unlisted).toEqual([]);
   });
 
   it("prevents agents from bypassing missing wrappers", () => {
     const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
 
-    expect(playbook).toContain("Missing wrappers");
-    expect(playbook).toContain(
-      "No current primitive wrapper backlog is approved for ad hoc business-page implementation.",
-    );
-    expect(playbook).toContain("`Checkbox`");
-
     // Anything still listed as a backlog bullet must genuinely not exist yet,
     // otherwise the section sends agents to build a wrapper that already ships.
-    const missingWrappersSection =
-      playbook.split("## Missing wrappers")[1]?.split("## ")[0] ?? "";
     const backlogged = [
-      ...missingWrappersSection.matchAll(/^- `(\w+)`/gmu),
+      ...getSectionBody(playbook, "Missing wrappers").matchAll(/^- `(\w+)`/gmu),
     ].map((match) => match[1]!);
     const alreadyShipped = backlogged.filter((name) =>
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- name comes from a `\w+` match in the repo-local playbook, resolved under a fixed directory
@@ -108,32 +144,5 @@ describe("UI component playbook", () => {
     );
 
     expect(alreadyShipped).toEqual([]);
-  });
-
-  it("records the minimum requirements for new UI primitives", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-
-    expect(playbook).toContain("New primitive checklist");
-    expect(playbook).toContain("Storybook story");
-    expect(playbook).toContain("focused test");
-    expect(playbook).toContain("component governance registry entry");
-    expect(playbook).toContain("`story`");
-    expect(playbook).toContain("`radixLayer`");
-    expect(playbook).toContain("`surface`");
-    expect(playbook).toContain("`clientBoundary`");
-    expect(playbook).toContain("`useWhen`");
-    expect(playbook).toContain("`avoidWhen`");
-    expect(playbook).toContain("`组件索引.md` row");
-    expect(playbook).toContain("this doc update");
-    expect(playbook).toContain("pnpm component:governance:test");
-    expect(playbook).toContain("组件索引.md` mirror checks");
-  });
-
-  it("records the retired Radix Themes boundary", () => {
-    const playbook = readText(UI_COMPONENT_PLAYBOOK_PATH);
-
-    expect(playbook).toContain("`@radix-ui/themes` is retired");
-    expect(playbook).toContain("Radix Primitives remain available");
-    expect(playbook).toContain("Production code must not import");
   });
 });

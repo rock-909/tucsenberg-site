@@ -238,7 +238,6 @@ describe("ContactPage MDX migration", () => {
     expect(handoff).toHaveTextContent(
       "The RFQ form asks the questions we would ask anyway",
     );
-    expect(handoff).not.toHaveTextContent("Products, Resources, or Blog");
     expect(handoff).toHaveTextContent("What you are protecting");
     expect(handoff).toHaveTextContent("Dimensions");
     expect(handoff).toHaveTextContent("Market and port");

@@ -77,7 +77,7 @@ Run: `git diff --stat 338df844..HEAD -- scripts/quality/checks/current-truth-doc
 
 Expected output (pre-approved, do NOT stop for it):
 
-```
+```text
  tests/unit/scripts/proof-lane-contract.test.ts | 1 -
  1 file changed, 1 deletion(-)
 ```
@@ -114,7 +114,7 @@ Run: `git diff --stat 338df844..HEAD -- tests/architecture/ tests/unit/ scripts/
 Pre-approved drift existing at `63679528` (all from Plans 009/010 removing
 dead references; none of these four files is on the deletion list):
 
-```
+```text
  tests/architecture/cache-directive-policy.test.ts |  3 ---
  tests/architecture/contact-entry-boundary.test.ts | 12 ------------
  tests/architecture/contact-page-boundary.test.ts  |  9 ---------
