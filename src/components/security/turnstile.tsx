@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   INQUIRY_TURNSTILE_ACTION,
@@ -21,6 +21,9 @@ import {
 /**
  * 使用全局 logger（开发环境输出，生产环境静默）
  */
+
+// Turnstile 正常挑战通常 1-3 秒；15 秒足以排除慢网络的误触发。
+const TURNSTILE_RESCUE_TIMEOUT_MS = 15_000;
 
 interface TurnstileLabels {
   unavailable: string;
@@ -83,6 +86,36 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
   );
 }
 
+/**
+ * 挂载即启动救援计时器，拿到第一个令牌就清掉。不等 widget 的加载回调——
+ * 脚本加载失败时那些回调一个都不触发，等它等于永远不计时。
+ */
+function useTurnstileRescueState() {
+  const [hasFailed, setHasFailed] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const rescueTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    rescueTimerRef.current = setTimeout(
+      () => setHasTimedOut(true),
+      TURNSTILE_RESCUE_TIMEOUT_MS,
+    );
+    return () => clearTimeout(rescueTimerRef.current);
+  }, []);
+
+  const markSuccess = () => {
+    // 定时器只清这一次。之后过期或提交清令牌都不会重启它，
+    // 所以「正常提交后误弹救援行」这条路径从根上不存在。
+    clearTimeout(rescueTimerRef.current);
+    setHasTimedOut(false);
+    setHasFailed(false);
+  };
+
+  const markFailed = () => setHasFailed(true);
+
+  return { showRescue: hasFailed || hasTimedOut, markSuccess, markFailed };
+}
+
 function TurnstileUnavailableStatus({
   className,
   label,
@@ -123,6 +156,7 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const { showRescue, markSuccess, markFailed } = useTurnstileRescueState();
   const rescue = {
     beforeEmail: labels.rescueBeforeEmail,
     afterEmail: labels.rescueAfterEmail,
@@ -189,10 +223,14 @@ export function TurnstileWidget({
     );
   }
 
-  const handleSuccess = (token: string) => onSuccess?.(token);
+  const handleSuccess = (token: string) => {
+    markSuccess();
+    onSuccess?.(token);
+  };
 
   const handleError = (error: string) => {
     logger.error("Turnstile error:", error);
+    markFailed();
     if (onError) {
       onError(error);
     }
@@ -222,6 +260,7 @@ export function TurnstileWidget({
         }}
         id={id}
       />
+      {showRescue ? <TurnstileRescueLine {...rescue} /> : null}
     </div>
   );
 }

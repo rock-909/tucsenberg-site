@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TurnstileWidget } from "@/components/security/turnstile";
 import { captureExpectedConsoleErrors } from "@/test/console";
@@ -203,7 +203,7 @@ describe("TurnstileWidget", () => {
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
-      handleError?.("test-error");
+      act(() => handleError?.("test-error"));
 
       expect(onError).toHaveBeenCalledWith("test-error");
       expect(consoleError).toHaveBeenCalledWith(
@@ -230,7 +230,7 @@ describe("TurnstileWidget", () => {
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
 
-      expect(() => handleError?.("test-error")).not.toThrow();
+      expect(() => act(() => handleError?.("test-error"))).not.toThrow();
       expect(consoleError).toHaveBeenCalledWith(
         "Turnstile error:",
         "test-error",
@@ -256,6 +256,57 @@ describe("TurnstileWidget", () => {
           />,
         );
       }).not.toThrow();
+    });
+  });
+
+  describe("救援行：拿不到令牌时的邮件出路", () => {
+    const RESCUE_TIMEOUT_MS = 15_000;
+
+    it("shows the rescue line when the widget never produces a token", () => {
+      vi.useFakeTimers();
+      renderTurnstileWidget({});
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+
+      vi.useRealTimers();
+    });
+
+    it("does not show the rescue line after a normal submit clears the token", () => {
+      vi.useFakeTimers();
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
+      // 提交结束后表单会清令牌并重置 widget，这段空窗期不能误报
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onExpire?.());
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it("shows the rescue line as soon as the widget reports an error", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
+    });
+
+    it("renders exactly one email fallback when the widget errors", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
+
+      // 救援行只能有一个 owner。将来若有人在别处又加一条，这里会变成 2。
+      expect(screen.getAllByRole("link", { name: /sales@/u })).toHaveLength(1);
+      expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
     });
   });
 
