@@ -35,7 +35,6 @@ interface TurnstileProps {
   onSuccess?: (_token: string) => void;
   onError?: (_error: string) => void;
   onExpire?: () => void;
-  onLoad?: () => void;
   /**
    * Receives a widget `reset()` binder. May return an unregister/cleanup
    * function invoked when the widget unmounts or the binder changes.
@@ -104,7 +103,6 @@ export function TurnstileWidget({
   onSuccess,
   onError,
   onExpire,
-  onLoad,
   onReadyRef,
   className,
   theme = "auto",
@@ -207,12 +205,6 @@ export function TurnstileWidget({
     }
   };
 
-  const handleLoad = () => {
-    if (onLoad) {
-      onLoad();
-    }
-  };
-
   return (
     <div className={`turnstile-container ${className || ""}`}>
       <Turnstile
@@ -221,7 +213,6 @@ export function TurnstileWidget({
         onSuccess={handleSuccess}
         onError={handleError}
         onExpire={handleExpire}
-        onLoad={handleLoad}
         options={{
           theme,
           size,

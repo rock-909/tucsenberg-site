@@ -40,7 +40,6 @@ const {
       onSuccess,
       onError,
       onExpire,
-      onLoad,
     }: {
       size?: string;
       theme?: string;
@@ -53,7 +52,6 @@ const {
       onSuccess?: (token: string) => void;
       onError?: (reason?: string) => void;
       onExpire?: () => void;
-      onLoad?: () => void;
     }) => {
       if (mockTurnstileState.shouldThrow) {
         throw new Error("turnstile widget failed to load");
@@ -70,13 +68,6 @@ const {
           data-label-dev-bypass={labels?.devBypass}
           data-label-test-mode={labels?.testMode}
         >
-          <button
-            type="button"
-            data-testid="turnstile-load"
-            onClick={() => onLoad?.()}
-          >
-            Load
-          </button>
           <button
             type="button"
             data-testid="turnstile-success"
@@ -220,14 +211,12 @@ describe("LazyTurnstile", () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
     const onExpire = vi.fn();
-    const onLoad = vi.fn();
 
     render(
       <LazyTurnstile
         onSuccess={onSuccess}
         onError={onError}
         onExpire={onExpire}
-        onLoad={onLoad}
         size="compact"
         theme="auto"
         className="custom-turnstile"
@@ -246,12 +235,10 @@ describe("LazyTurnstile", () => {
     expect(widget).toHaveAttribute("data-theme", "auto");
     expect(widget).toHaveAttribute("data-classname", "custom-turnstile");
 
-    fireEvent.click(screen.getByTestId("turnstile-load"));
     fireEvent.click(screen.getByTestId("turnstile-success"));
     fireEvent.click(screen.getByTestId("turnstile-error"));
     fireEvent.click(screen.getByTestId("turnstile-expire"));
 
-    expect(onLoad).toHaveBeenCalledTimes(1);
     expect(onSuccess).toHaveBeenCalledWith("lazy-token");
     expect(onError).toHaveBeenCalledWith("lazy-error");
     expect(onExpire).toHaveBeenCalledTimes(1);

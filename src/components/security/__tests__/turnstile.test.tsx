@@ -223,17 +223,6 @@ describe("TurnstileWidget", () => {
       expect(onExpire).toHaveBeenCalled();
     });
 
-    it("应该在加载时调用onLoad回调", () => {
-      const onLoad = vi.fn();
-      renderTurnstileWidget({ onLoad });
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      const handleLoad = mockCall?.[0]?.onLoad;
-      handleLoad?.();
-
-      expect(onLoad).toHaveBeenCalled();
-    });
-
     it("应该处理没有onError回调的错误", () => {
       const consoleError = captureExpectedConsoleErrors("Turnstile error:");
       renderTurnstileWidget();
@@ -255,15 +244,6 @@ describe("TurnstileWidget", () => {
       const handleExpire = mockCall?.[0]?.onExpire;
 
       expect(() => handleExpire?.()).not.toThrow();
-    });
-
-    it("应该处理没有onLoad回调的加载", () => {
-      renderTurnstileWidget();
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      const handleLoad = mockCall?.[0]?.onLoad;
-
-      expect(() => handleLoad?.()).not.toThrow();
     });
   });
 
@@ -311,15 +291,8 @@ describe("TurnstileWidget", () => {
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
       vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
       const onSuccess = vi.fn();
-      const onLoad = vi.fn();
 
-      render(
-        <TurnstileWidget
-          labels={labels}
-          onSuccess={onSuccess}
-          onLoad={onLoad}
-        />,
-      );
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
 
       expect(screen.getByTestId("turnstile-mock")).toHaveTextContent(
         labels.testMode,
@@ -327,7 +300,6 @@ describe("TurnstileWidget", () => {
       await vi.waitFor(() => {
         expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
-      expect(onLoad).not.toHaveBeenCalled();
     });
 
     it("ignores public test mode in production and renders the real widget", async () => {
