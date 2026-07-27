@@ -204,14 +204,6 @@ function validateOptionalSocialProfile(target, markerPath, value) {
   );
 }
 
-function validateLaunchSignoff(target, env, key, surface, reason) {
-  if (!isTrue(env, key)) {
-    target.push(
-      `${key} must be true after owner review of ${surface} (${reason}).`,
-    );
-  }
-}
-
 function validateRequiredEnv(target, env, key, reason) {
   if (!readEnv(env, key)) {
     target.push(`${key} is required (${reason}).`);
@@ -432,13 +424,12 @@ function validatePublicLaunchTrustContent(env) {
     `${SINGLE_SITE_FACTS.company.location.city} ${SINGLE_SITE_FACTS.company.location.address ?? ""}`,
     "replace starter city/address before client launch",
   );
-  validateLaunchSignoff(
-    target,
-    env,
-    "PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED",
-    "content/pages/{locale}/{about,contact,privacy,terms}.mdx",
-    "confirm legal/contact page truth before client launch",
-  );
+  // 这里原本要求 PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED=true，声称证明业主复核过
+  // about/contact/privacy/terms 四个页面。它证明的只是有人设置了一个字符串——
+  // 跟那四个文件的内容没有任何耦合，设完之后内容随便改也不会再问。
+  // 业主 2026-07-27 裁决：这几页的内容由他自己判断，不用脚本约束。
+  // 这个文件里剩下的检查都是机器能自己判断的事实（域名还是不是占位符、电话是不是
+  // starter 留下的、logo 有没有给），那些留着。
   if (!getPublicContactPhone(SINGLE_SITE_FACTS.contact.phone)) {
     target.push(
       "SITE_CONFIG.contact.phone is not public-launch ready. Hide it from runtime now and replace it with the owner-confirmed public phone before launch.",
