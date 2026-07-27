@@ -141,6 +141,10 @@ jobs:
         env:
           CI: true
           NODE_ENV: production
+          # 上线签字：业主在 GitHub repo variables 里设成 true，就是那次人工复核
+          # 本身。没有这个入口，严格档永远走不通——validator 要它，而 workflow
+          # 以前一个地方都没传。
+          PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED: ${{ vars.PUBLIC_LAUNCH_LEGAL_CONTENT_REVIEWED }}
           RATE_LIMIT_PEPPER: ${{ secrets.RATE_LIMIT_PEPPER }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

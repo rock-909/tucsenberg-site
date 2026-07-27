@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-const { runBrandCheck } = require("./quality/checks/brand");
-const { runMarkdownFenceCheck } = require("./quality/checks/markdown-fences");
 const {
   runVitestCollectionCheck,
 } = require("./quality/checks/vitest-collection");
@@ -41,18 +39,6 @@ const {
   runInquiryFormBuildArtifactCheck,
 } = require("./quality/checks/client-boundary");
 const {
-  analyzeFile,
-  analyzeSource,
-  collectRegisteredGuardrailExceptionIds,
-  getActiveGuardrailExceptionSection,
-  isProductionFile,
-  isStructuralGuardrailExemptPath,
-  isTestFile,
-  parseGuardrailException,
-  runEslintDisableCheck,
-  STRUCTURAL_GUARDRAIL_RULES,
-} = require("./quality/checks/eslint-disable");
-const {
   collectLeafPaths,
   compareLocales,
   runTranslationCheck,
@@ -70,19 +56,6 @@ const {
   getReleaseProofDocsCommandBlock,
   runReleaseVerify,
 } = require("./quality/checks/release-verify");
-const {
-  REQUIRED_TRUTH_FILES,
-  HISTORICAL_BANNER,
-  HISTORICAL_DERIVATION_DOCS,
-  RETIRED_PUBLIC_TRUTH_PATTERNS,
-  collectBacktickedRepoPathFindings,
-  collectCurrentTruthDocFindings,
-  collectDocumentInventoryFindings,
-  collectGuardrailRegistryFindings,
-  findCommandLineIndex,
-  findOutOfOrderCommand,
-  runTruthDocsCheck,
-} = require("./quality/checks/current-truth-docs");
 const {
   collectCloudflareOfficialCompareFailures,
   runCloudflareOfficialCompareCli,
@@ -116,10 +89,6 @@ const {
 const ROOT = process.cwd();
 
 // ---------------------------------------------------------------------------
-// truth docs
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // Cloudflare official compare
 // ---------------------------------------------------------------------------
 
@@ -135,9 +104,6 @@ function printUsage() {
   console.error(`Usage: node scripts/starter-checks.js <command> [options]
 
 Commands:
-  truth-docs          Check current truth docs and release runbook order
-  brand               Check old brand residue
-  markdown-fences     Check every markdown code fence declares a language
   vitest-collection   Check vitest runs every test file on disk
   subcommand-lanes    Check every subcommand here is wired into a lane
   content-slugs       Check localized MDX slug pairs
@@ -145,7 +111,6 @@ Commands:
   translations        Check catalog message pack and compat translation shapes
   message-key-usage   Check message catalog leaves against real consumers
   validate-production-config Validate production and public-launch config gates
-  eslint-disable      Check eslint-disable exception hygiene
   component-governance Check component registry, Storybook, and UI wrapper drift
   content-readiness   Check buyer-visible catalog residue (--strict-client-launch promotes launch blockers to errors)
   client-boundary     Check top-level use client budget (--build-artifacts after pnpm build)
@@ -164,9 +129,6 @@ Commands:
 // prove a package script is wired to a real check need the command list, not a
 // frozen copy of the command string.
 const COMMAND_HANDLERS = {
-  "truth-docs": () => runTruthDocsCheck(),
-  brand: () => runBrandCheck(),
-  "markdown-fences": () => runMarkdownFenceCheck(),
   "vitest-collection": () => runVitestCollectionCheck(),
   "subcommand-lanes": () => runSubcommandLaneCheck(),
   "content-slugs": (args) => runContentSlugCheck(args),
@@ -177,7 +139,6 @@ const COMMAND_HANDLERS = {
   translations: () => runTranslationCheck(),
   "message-key-usage": () => runMessageKeyUsageCheck(),
   "validate-production-config": () => runValidateProductionConfigCli(),
-  "eslint-disable": () => runEslintDisableCheck(),
   "component-governance": () => runComponentGovernanceCli(),
   "content-readiness": (args) => runContentReadinessCli(args),
   "client-boundary": (args) => runClientBoundaryCli(args),
@@ -225,16 +186,10 @@ async function main(argv = process.argv.slice(2)) {
 // a bootstrap placed above this line would leave it looking at empty exports.
 module.exports = {
   STARTER_CHECK_COMMANDS,
-  REQUIRED_TRUTH_FILES,
-  HISTORICAL_BANNER,
-  HISTORICAL_DERIVATION_DOCS,
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
-  RETIRED_PUBLIC_TRUTH_PATTERNS,
   formatReleaseCommand,
-  analyzeFile,
-  analyzeSource,
   buildKey,
   collectClientBoundaryFiles,
   collectForbiddenBuildSources,
@@ -242,35 +197,22 @@ module.exports = {
   collectCloudflareOfficialCompareFailures,
   collectComponentGovernanceFindings,
   collectContentReadinessFindings,
-  collectBacktickedRepoPathFindings,
-  collectCurrentTruthDocFindings,
-  collectDocumentInventoryFindings,
-  collectGuardrailRegistryFindings,
   collectLeafPaths,
   collectMessageKeyUsageFindings,
   collectPairs,
   collectPrerenderStaticFindings,
-  collectRegisteredGuardrailExceptionIds,
   compareLocales,
   createContentManifestContext,
-  findCommandLineIndex,
-  findOutOfOrderCommand,
   assertContentManifestFrontmatterValid,
   generateContentManifest,
   writeFileAtomic,
-  getActiveGuardrailExceptionSection,
   getReleaseProofDocsCommandBlock,
   hasTopLevelUseClientDirective,
   INQUIRY_FORM_CHUNK_MARKER,
   INQUIRY_FORM_MAX_RAW_BYTES,
   INQUIRY_FORM_SOURCE,
-  isProductionFile,
-  isStructuralGuardrailExemptPath,
-  isTestFile,
   parseArgs: parseContentSlugArgs,
   parseFrontmatter,
-  parseGuardrailException,
-  runBrandCheck,
   runCloudflareOfficialCompareCli,
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
@@ -282,11 +224,9 @@ module.exports = {
   runContentReadinessCheck,
   runContentSlugCheck,
   runDeployedSmoke,
-  runEslintDisableCheck,
   runReleaseVerify,
   runTranslationCheck,
   runValidateProductionConfigCli,
-  STRUCTURAL_GUARDRAIL_RULES,
   shouldValidateProductionRuntimeContract,
   validateContentFrontmatterContract,
   validateCollectionPair,

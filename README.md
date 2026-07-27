@@ -33,7 +33,6 @@ pnpm dev
 
 ```bash
 pnpm dev
-pnpm brand:check
 pnpm content:check
 pnpm component:check
 pnpm website:check

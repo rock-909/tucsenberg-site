@@ -47,7 +47,9 @@ describe("release proof manifest contract", () => {
     for (const step of RELEASE_PROOF_MANIFEST.steps) {
       expect(step.id).toMatch(/^[a-z0-9-]+$/u);
       expect(VALID_RELEASE_LANES.has(step.lane), step.id).toBe(true);
-      expect(step.docs?.includeInReleaseSequence, step.id).toBe(true);
+      // 这里原本还有 expect(step.docs?.includeInReleaseSequence).toBe(true)。
+      // manifest 里那个字段只有一个共享常量、没有一处是 false，所以那条断言
+      // 永远不可能红——正是这个 PR 在清的那类东西。删于 2026-07-26。
       expect(step.command, step.id).toMatch(/^(node|pnpm)$/u);
       expect(step.args.length, step.id).toBeGreaterThan(0);
     }
@@ -62,24 +64,11 @@ describe("release proof manifest contract", () => {
     const releaseVerifyCommands =
       RELEASE_VERIFY_COMMANDS.map(formatReleaseCommand);
 
+    // 只断言两条派生路径（文档渲染 / verify 执行）从同一份 manifest 出来的结果
+    // 一致。这里以前还抄了一份完整命令序列的字面量：manifest 一改它就红，红了
+    // 就照抄更新，等于把 manifest 写了第二遍，不产生任何信息。2026-07-26 删。
     expect(RELEASE_PROOF_SEQUENCE).toEqual(releaseVerifyCommands);
-    expect(RELEASE_PROOF_SEQUENCE).toEqual([
-      "node scripts/starter-checks.js truth-docs",
-      "node scripts/starter-checks.js content-manifest --check",
-      "node scripts/starter-checks.js cf-official-compare --source-only",
-      "pnpm type-check",
-      "pnpm lint:check",
-      "pnpm exec vitest run tests/unit/middleware.test.ts src/__tests__/middleware-locale-cookie.test.ts src/i18n/__tests__/request.test.ts src/lib/__tests__/load-messages.fallback.test.ts",
-      "pnpm exec vitest run tests/integration/api/lead-family-contract.test.ts tests/integration/api/lead-family-protection.test.ts src/app/api/inquiry/__tests__/route.test.ts",
-      "pnpm exec vitest run tests/integration/api/health.test.ts src/__tests__/middleware-locale-cookie.test.ts",
-      "node scripts/starter-checks.js translations",
-      "node scripts/starter-checks.js content-readiness",
-      "pnpm build",
-      "pnpm website:build:cf",
-      "node scripts/starter-checks.js cf-static-asset-headers",
-      "pnpm exec wrangler deploy --dry-run --env preview",
-      "CI=1 PLAYWRIGHT_REBUILD_SERVER=true pnpm exec playwright test --project=chromium",
-    ]);
+    expect(RELEASE_PROOF_SEQUENCE.length).toBeGreaterThan(0);
   });
 });
 
@@ -92,7 +81,6 @@ describe("package proof command surface", () => {
   // the OpenNext binary, so it only has to exist.
   const COMPOSITE_RELEASE_SCRIPTS = [
     "release:verify",
-    "brand:check",
     "content:check",
     "component:check",
     "website:check",
@@ -174,6 +162,25 @@ describe("package proof command surface", () => {
     expect(nodeScripts.length).toBeGreaterThan(0);
     for (const scriptPath of nodeScripts) {
       expect(repoPathExists(scriptPath), scriptPath).toBe(true);
+    }
+  });
+
+  // 同一个洞的另一半：发布链里有三条 `vitest run <一串路径>`。vitest 把参数当过滤
+  // 器，指向不存在的文件时它安静地少跑一个而不报错——发布证明会在覆盖面缩水的
+  // 情况下照样全绿。2026-07-26 删 ui-component-index.test.ts 时，component 治理
+  // 那条命令就真的这么掉了一个文件。
+  it("keeps every release sequence vitest path pointing at a real file", () => {
+    const testPaths = RELEASE_PROOF_SEQUENCE.flatMap((command) =>
+      command.includes("vitest run")
+        ? command
+            .split(/\s+/u)
+            .filter((token) => /\.test\.[jt]sx?$/u.test(token))
+        : [],
+    );
+
+    expect(testPaths.length).toBeGreaterThan(0);
+    for (const testPath of testPaths) {
+      expect(repoPathExists(testPath), testPath).toBe(true);
     }
   });
 });

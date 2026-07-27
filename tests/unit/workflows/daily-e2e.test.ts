@@ -46,17 +46,7 @@ describe("daily E2E proof lane", () => {
     expect(existsSync("tests/e2e")).toBe(true);
   });
 
-  it("keeps the PR lead proof lane focused on the real pipeline test", () => {
-    const workflow = yaml.load(
-      readFileSync(".github/workflows/ci.yml", "utf8"),
-    ) as Workflow;
-    const steps = workflow.jobs?.tests?.steps ?? [];
-    const leadProof = steps.find(
-      (step) => step.name === "Lead API family proof",
-    );
-
-    expect(leadProof?.run).toBe(
-      "pnpm vitest run tests/integration/api/lead-pipeline-real.test.ts",
-    );
-  });
+  // 这里以前还钉着 ci.yml 里的 "Lead API family proof" 步骤。那一步在
+  // pnpm test 后面把同一个文件再跑一遍——tests/integration/** 本来就在 vitest
+  // include 里，没有多出任何覆盖。步骤和这条断言一起退役于 2026-07-26。
 });

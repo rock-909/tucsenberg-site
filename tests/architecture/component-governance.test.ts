@@ -13,10 +13,6 @@ const SOURCE_ROOT = "src";
 const ROOT_PRODUCTION_SOURCE_FILES = ["mdx-components.tsx"] as const;
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
-const UI_COMPONENT_PLAYBOOK_PATH = "docs/design/组件使用手册.md";
-const UI_COMPONENT_INDEX_PATH = "docs/design/组件索引.md";
-const COMPONENT_CHECK_SCRIPT =
-  "pnpm component:governance:test && pnpm component:governance && pnpm exec storybook build";
 const PACKAGE_MANIFEST_PATH = "package.json";
 const STORYBOOK_CONFIG_PATH = ".storybook/main.ts";
 const STORY_EXPLORATION_ROOT = "src/stories";
@@ -533,20 +529,33 @@ describe("component governance", () => {
     const governanceScript = manifest.scripts?.["component:governance"] ?? "";
     const componentCheckScript = manifest.scripts?.["component:check"] ?? "";
 
-    expect(governanceTestScript).toContain(
-      "tests/architecture/component-governance.test.ts",
-    );
-    expect(governanceTestScript).toContain(
-      "tests/architecture/ui-component-index.test.ts",
-    );
-    expect(governanceTestScript).toContain(
-      "tests/unit/scripts/component-governance-check.test.ts",
-    );
-    expect(governanceTestScript).toContain(
-      "tests/unit/scripts/component-governance-check-closure.test.ts",
-    );
+    // vitest 把参数当过滤器：路径指向一个不存在的文件时，它安静地少跑一个，
+    // 不报错。所以这里断言的不是"清单写了哪几个"，而是**写下的每一条都还在磁盘
+    // 上**——这才是漏跑真正的成因。
+    const filteredPaths = governanceTestScript
+      .split(/\s+/u)
+      .filter((token) => token.endsWith(".test.ts"));
+
+    expect(filteredPaths.length).toBeGreaterThan(0);
+    for (const filePath of filteredPaths) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- path comes from this repo's own package.json script
+      expect(existsSync(filePath), `${filePath} 在清单里但文件不在`).toBe(true);
+    }
+
     expect(governanceScript).toContain("component-governance");
-    expect(componentCheckScript).toBe(COMPONENT_CHECK_SCRIPT);
+
+    // `component:governance` 是 `component:governance:test` 的子串，所以单独
+    // toContain 它会在 component:check 被砍到只剩 test（scanner 和 storybook
+    // build 都丢了）时照样绿。按 && 拆开，逐段点名。
+    const checkStages = componentCheckScript.split("&&").map((s) => s.trim());
+
+    expect(checkStages).toEqual(
+      expect.arrayContaining([
+        "pnpm component:governance:test",
+        "pnpm component:governance",
+        "pnpm exec storybook build",
+      ]),
+    );
     expect(componentCheckScript).not.toContain("|| true");
     expect(componentCheckScript).not.toContain("; true");
     expect(componentCheckScript).not.toContain("--passWithNoTests");
@@ -600,9 +609,7 @@ describe("component governance", () => {
   // Playbook and index wording is asserted once, in ui-component-playbook.test.ts
   // and ui-component-index.test.ts. Duplicating it here made either copy able to
   // drift into a false gate.
-  it("keeps Registry and Playbook active in the materialized site docs", () => {
-    expect(existsSync(COMPONENT_GOVERNANCE_REGISTRY_PATH)).toBe(true);
-    expect(existsSync(UI_COMPONENT_PLAYBOOK_PATH)).toBe(true);
-    expect(existsSync(UI_COMPONENT_INDEX_PATH)).toBe(true);
-  });
+  // 这里原本还有一条 "keeps Registry and Playbook active"，断言三个文件存在。
+  // registry 缺了这个文件里每条断言都会先炸；文档缺了它也证明不了什么。
+  // 连同已退役的 组件索引.md 一起删于 2026-07-26。
 });

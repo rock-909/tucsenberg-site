@@ -1,0 +1,120 @@
+{
+  "audit_name": "full-project-health-v3",
+  "audit_root": ".context/audits/full-project-health-v3",
+  "target_base": "origin/main",
+  "run_posture": "read-only",
+  "business_code_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "public/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    ".github/workflows/**"
+  ],
+  "allowed_write_globs": [
+    ".context/audits/full-project-health-v3/runs/**"
+  ],
+  "forbidden_write_globs": [
+    "src/**",
+    "content/**",
+    "messages/**",
+    "public/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    ".github/workflows/**"
+  ],
+  "report_files": [
+    "00-final-report.md",
+    "01-quality-map.md",
+    "02-findings.json",
+    "03-evidence-log.md",
+    "04-process-retro.md"
+  ],
+  "lanes": [
+    {
+      "id": "00",
+      "name": "Baseline / runtime truth",
+      "output": "lanes/00-baseline-runtime.md",
+      "evidence": "evidence/00-baseline-runtime/"
+    },
+    {
+      "id": "01",
+      "name": "Business correctness / data integrity",
+      "output": "lanes/01-business-correctness.md",
+      "evidence": "evidence/01-business-correctness/"
+    },
+    {
+      "id": "02",
+      "name": "Security / trust boundary",
+      "output": "lanes/02-security-trust-boundary.md",
+      "evidence": "evidence/02-security-trust-boundary/"
+    },
+    {
+      "id": "03",
+      "name": "Robustness / observability",
+      "output": "lanes/03-robustness-observability.md",
+      "evidence": "evidence/03-robustness-observability/"
+    },
+    {
+      "id": "04",
+      "name": "Content / SEO / i18n / binary assets",
+      "output": "lanes/04-content-seo-i18n-assets.md",
+      "evidence": "evidence/04-content-seo-i18n-assets/"
+    },
+    {
+      "id": "05",
+      "name": "UI / performance / accessibility",
+      "output": "lanes/05-ui-performance-accessibility.md",
+      "evidence": "evidence/05-ui-performance-accessibility/"
+    },
+    {
+      "id": "06",
+      "name": "Gates / tests credibility",
+      "output": "lanes/06-gates-tests-credibility.md",
+      "evidence": "evidence/06-gates-tests-credibility/"
+    },
+    {
+      "id": "07",
+      "name": "Architecture / maintainability / dependencies",
+      "output": "lanes/07-architecture-maintainability-deps.md",
+      "evidence": "evidence/07-architecture-maintainability-deps/"
+    }
+  ],
+  "commands": {
+    "required": [
+      "git status --short --branch",
+      "git ls-remote origin refs/heads/main",
+      "git rev-parse HEAD origin/main",
+      "git merge-base HEAD origin/main",
+      "node -v",
+      "pnpm -v",
+      "pnpm type-check",
+      "pnpm lint:check",
+      "pnpm test",
+      "pnpm build"
+    ],
+    "optional": [
+      "pnpm website:build:cf",
+      "pnpm knip:check",
+      "pnpm release:verify",
+      "pnpm exec wrangler deploy --dry-run --env preview"
+    ],
+    "credential_blocked": []
+  },
+  "credential_blockers": [
+    "Cloudflare dashboard or deploy token",
+    "Google Search Console",
+    "PageSpeed or CrUX API access",
+    "Email or lead-delivery provider dashboard"
+  ],
+  "stop_lines": [
+    "base branch or commit unclear",
+    "audit scope or target changed mid-run",
+    "unexpected business-code diff in read-only audit",
+    "audit package or adapter incomplete",
+    "planned command references a missing script",
+    "planned command would destroy evidence",
+    "credential-dependent claim lacks credential access"
+  ]
+}
