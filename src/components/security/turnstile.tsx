@@ -27,6 +27,8 @@ const TURNSTILE_RESCUE_TIMEOUT_MS = 15_000;
 
 interface TurnstileLabels {
   unavailable: string;
+  loadFailed: string;
+  slowToLoad: string;
   devBypass: string;
   testMode: string;
   rescueBeforeEmail: string;
@@ -59,6 +61,21 @@ interface TurnstileStatusProps {
 
 interface TurnstileUnavailableStatusProps extends TurnstileStatusProps {
   rescue: TurnstileRescueLineProps;
+}
+
+interface TurnstileRescueStatusProps {
+  hasFailed: boolean;
+  failedLabel: string;
+  slowLabel: string;
+  rescue: TurnstileRescueLineProps;
+}
+
+function toRescueProps(labels: TurnstileLabels): TurnstileRescueLineProps {
+  return {
+    beforeEmail: labels.rescueBeforeEmail,
+    afterEmail: labels.rescueAfterEmail,
+    subject: labels.rescueSubject,
+  };
 }
 
 function TurnstileBypassStatus({ className, label }: TurnstileStatusProps) {
@@ -129,10 +146,41 @@ function useTurnstileRescueState() {
 
   return {
     showRescue: hasFailed || hasTimedOut,
+    hasFailed,
     markSuccess,
     markFailed,
     markWaiting,
   };
+}
+
+/**
+ * 救援行不能光秃秃一句「改发邮件」——买家不知道为什么。配一句状态标签，
+ * 与另外两条救援路径（缺 site key、懒加载失败）的「标签 + 救援行」形状一致。
+ *
+ * 超时不等于失败：managed 挑战常要买家手动点一次，先填三个字段再去点验证码
+ * 超过 15 秒是常态，那时控件完全健康。所以超时用较轻的措辞，别把人吓退。
+ */
+function TurnstileRescueStatus({
+  hasFailed,
+  failedLabel,
+  slowLabel,
+  rescue,
+}: TurnstileRescueStatusProps) {
+  return (
+    // 页面静止十几秒后凭空出现，不播报等于对屏幕阅读器用户不存在。
+    <output className="turnstile-rescue" aria-live="polite">
+      <div
+        className={
+          hasFailed
+            ? "text-sm text-[var(--error-foreground)]"
+            : "text-sm text-muted-foreground"
+        }
+      >
+        {hasFailed ? failedLabel : slowLabel}
+      </div>
+      <TurnstileRescueLine {...rescue} />
+    </output>
+  );
 }
 
 function TurnstileUnavailableStatus({
@@ -175,13 +223,9 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const { showRescue, markSuccess, markFailed, markWaiting } =
+  const { showRescue, hasFailed, markSuccess, markFailed, markWaiting } =
     useTurnstileRescueState();
-  const rescue = {
-    beforeEmail: labels.rescueBeforeEmail,
-    afterEmail: labels.rescueAfterEmail,
-    subject: labels.rescueSubject,
-  };
+  const rescue = toRescueProps(labels);
 
   // reset 意味着令牌已作废，重新进入等待期。
   const handleReset = useCallback(() => {
@@ -279,10 +323,12 @@ export function TurnstileWidget({
         id={id}
       />
       {showRescue ? (
-        // 救援行是页面静止十几秒后凭空出现的，不播报等于对屏幕阅读器用户不存在。
-        <output className="turnstile-rescue" aria-live="polite">
-          <TurnstileRescueLine {...rescue} />
-        </output>
+        <TurnstileRescueStatus
+          hasFailed={hasFailed}
+          failedLabel={labels.loadFailed}
+          slowLabel={labels.slowToLoad}
+          rescue={rescue}
+        />
       ) : null}
     </div>
   );

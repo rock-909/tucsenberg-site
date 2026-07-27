@@ -24,6 +24,7 @@ type TurnstilePlaceholderStyle = CSSProperties & {
 interface LazyTurnstileLabels {
   unavailable: string;
   loadFailed: string;
+  slowToLoad: string;
   devBypass: string;
   testMode: string;
   rescueBeforeEmail: string;
@@ -132,6 +133,8 @@ function buildLazyTurnstileWidgetProps(args: {
     size,
     labels: {
       unavailable: labelText.unavailable,
+      loadFailed: labelText.loadFailed,
+      slowToLoad: labelText.slowToLoad,
       devBypass: labelText.devBypass,
       testMode: labelText.testMode,
       rescueBeforeEmail: labelText.rescueBeforeEmail,

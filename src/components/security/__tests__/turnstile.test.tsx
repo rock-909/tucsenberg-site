@@ -9,6 +9,8 @@ const defaultTestLabels = createTestInquiryFormCopy().turnstile;
 
 const sentinelTurnstileLabels = {
   unavailable: "安全验证暂时不可用。",
+  loadFailed: "安全验证加载失败。",
+  slowToLoad: "安全验证加载得比平时慢。",
   devBypass: "开发模式：Turnstile 验证已跳过",
   testMode: "测试模式下已关闭机器人防护",
   rescueBeforeEmail: "请改发邮件 —",
@@ -21,6 +23,8 @@ function toTurnstileWidgetLabels(
 ): React.ComponentProps<typeof TurnstileWidget>["labels"] {
   return {
     unavailable: labels.unavailable,
+    loadFailed: labels.loadFailed,
+    slowToLoad: labels.slowToLoad,
     devBypass: labels.devBypass,
     testMode: labels.testMode,
     rescueBeforeEmail: labels.rescueBeforeEmail,
@@ -274,6 +278,13 @@ describe("TurnstileWidget", () => {
       expect(screen.getByRole("status")).toContainElement(
         screen.getByRole("link", { name: /sales@/u }),
       );
+      // 超时不等于失败：控件可能只是慢，措辞不能吓退还在正常填表的买家
+      expect(screen.getByRole("status")).toHaveTextContent(
+        defaultTestLabels.slowToLoad,
+      );
+      expect(screen.getByRole("status")).not.toHaveTextContent(
+        defaultTestLabels.loadFailed,
+      );
 
       vi.useRealTimers();
     });
@@ -322,6 +333,10 @@ describe("TurnstileWidget", () => {
       act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
 
       expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 报错了就说报错，不能拿「慢」搪塞
+      expect(screen.getByRole("status")).toHaveTextContent(
+        defaultTestLabels.loadFailed,
+      );
       expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
     });
 

@@ -12,6 +12,7 @@ import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 const sentinelTurnstileLabels = {
   unavailable: "安全验证暂时不可用。",
   loadFailed: "安全验证加载失败。",
+  slowToLoad: "安全验证加载得比平时慢。",
   devBypass: "开发模式：Turnstile 验证已跳过",
   testMode: "测试模式下已关闭机器人防护",
   rescueBeforeEmail: "请改发邮件 —",
