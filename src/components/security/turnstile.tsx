@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   INQUIRY_TURNSTILE_ACTION,
@@ -87,33 +87,52 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
 }
 
 /**
- * 挂载即启动救援计时器，拿到第一个令牌就清掉。不等 widget 的加载回调——
- * 脚本加载失败时那些回调一个都不触发，等它等于永远不计时。
+ * 不变量：手上没有有效令牌时，救援计时器必须在跑。
+ *
+ * 挂载即开始计时，不等 widget 的加载回调——脚本加载失败时那些回调一个都不触发，
+ * 等它等于永远不计时。拿到令牌就停表；提交落定后表单会 reset widget，那一刻
+ * 令牌又没了，必须重新起表，否则「提交失败 + 此时 Turnstile 挂掉」会让买家卡在
+ * 一个永远 disabled 的按钮前。
+ *
+ * `waitCycle` 为 null 表示握有令牌（不计时），数字表示第几轮等待；换一个数字就
+ * 让下面的 effect 重新起表。过期（onExpire）不算一轮：widget 会自己续新挑战。
  */
 function useTurnstileRescueState() {
   const [hasFailed, setHasFailed] = useState(false);
   const [hasTimedOut, setHasTimedOut] = useState(false);
-  const rescueTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [waitCycle, setWaitCycle] = useState<number | null>(0);
 
   useEffect(() => {
-    rescueTimerRef.current = setTimeout(
+    if (waitCycle === null) {
+      return undefined;
+    }
+    const timer = setTimeout(
       () => setHasTimedOut(true),
       TURNSTILE_RESCUE_TIMEOUT_MS,
     );
-    return () => clearTimeout(rescueTimerRef.current);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [waitCycle]);
 
   const markSuccess = () => {
-    // 定时器只清这一次。之后过期或提交清令牌都不会重启它，
-    // 所以「正常提交后误弹救援行」这条路径从根上不存在。
-    clearTimeout(rescueTimerRef.current);
+    setWaitCycle(null);
     setHasTimedOut(false);
     setHasFailed(false);
   };
 
   const markFailed = () => setHasFailed(true);
 
-  return { showRescue: hasFailed || hasTimedOut, markSuccess, markFailed };
+  // 已经显示的救援行不再收回：闪一下比一直挂着更让人困惑。
+  const markWaiting = useCallback(
+    () => setWaitCycle((cycle) => (cycle ?? 0) + 1),
+    [],
+  );
+
+  return {
+    showRescue: hasFailed || hasTimedOut,
+    markSuccess,
+    markFailed,
+    markWaiting,
+  };
 }
 
 function TurnstileUnavailableStatus({
@@ -156,21 +175,26 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const { showRescue, markSuccess, markFailed } = useTurnstileRescueState();
+  const { showRescue, markSuccess, markFailed, markWaiting } =
+    useTurnstileRescueState();
   const rescue = {
     beforeEmail: labels.rescueBeforeEmail,
     afterEmail: labels.rescueAfterEmail,
     subject: labels.rescueSubject,
   };
 
+  // reset 意味着令牌已作废，重新进入等待期。
+  const handleReset = useCallback(() => {
+    markWaiting();
+    turnstileRef.current?.reset();
+  }, [markWaiting]);
+
   useEffect(() => {
     if (!onReadyRef) {
       return undefined;
     }
-    return onReadyRef(() => {
-      turnstileRef.current?.reset();
-    });
-  }, [onReadyRef]);
+    return onReadyRef(handleReset);
+  }, [onReadyRef, handleReset]);
 
   // All hooks must be called before any conditional returns. Dev bypass and
   // test mode both replace the real widget, so they share one settle-once
@@ -223,24 +247,20 @@ export function TurnstileWidget({
     );
   }
 
-  const handleSuccess = (token: string) => {
-    markSuccess();
-    onSuccess?.(token);
-  };
-
-  const handleError = (error: string) => {
-    logger.error("Turnstile error:", error);
-    markFailed();
-    if (onError) {
-      onError(error);
-    }
-  };
-
-  const handleExpire = () => {
-    logger.warn("Turnstile token expired");
-    if (onExpire) {
-      onExpire();
-    }
+  const widgetHandlers = {
+    onSuccess: (token: string) => {
+      markSuccess();
+      onSuccess?.(token);
+    },
+    onError: (error: string) => {
+      logger.error("Turnstile error:", error);
+      markFailed();
+      onError?.(error);
+    },
+    onExpire: () => {
+      logger.warn("Turnstile token expired");
+      onExpire?.();
+    },
   };
 
   return (
@@ -248,9 +268,7 @@ export function TurnstileWidget({
       <Turnstile
         ref={turnstileRef}
         siteKey={siteKey}
-        onSuccess={handleSuccess}
-        onError={handleError}
-        onExpire={handleExpire}
+        {...widgetHandlers}
         options={{
           theme,
           size,

@@ -191,7 +191,7 @@ describe("TurnstileWidget", () => {
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleSuccess = mockCall?.[0]?.onSuccess;
-      handleSuccess?.("test-token-123");
+      act(() => handleSuccess?.("test-token-123"));
 
       expect(onSuccess).toHaveBeenCalledWith("test-token-123");
     });
@@ -274,16 +274,39 @@ describe("TurnstileWidget", () => {
       vi.useRealTimers();
     });
 
-    it("does not show the rescue line after a normal submit clears the token", () => {
+    it("does not restart the rescue timer when the token merely expires", () => {
       vi.useFakeTimers();
       renderTurnstileWidget({});
 
       act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
-      // 提交结束后表单会清令牌并重置 widget，这段空窗期不能误报
+      // 过期是正常生命周期：widget 会自己续新挑战，不该被当成救援信号
       act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onExpire?.());
       act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
 
       expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it("restarts the rescue timer when the form resets the widget after a submit", () => {
+      vi.useFakeTimers();
+      let resetWidget: (() => void) | undefined;
+      renderTurnstileWidget({
+        onReadyRef: (reset) => {
+          resetWidget = reset;
+        },
+      });
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      // 提交落定后表单清令牌并 reset widget。此刻若 Turnstile 挂了，新挑战
+      // 既不 onSuccess 也不 onError，只剩计时器能把买家从死路里捞出来。
+      act(() => resetWidget?.());
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
 
       vi.useRealTimers();
     });
