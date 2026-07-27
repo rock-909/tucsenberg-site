@@ -16,8 +16,13 @@ Branches are reviewed by an **independent Codex session before push**, not by a
 cloud PR bot. CodeRabbit is switched off, not removed: on this repo it reviewed
 after the PR already existed, and its findings arrived too late to be worth the
 round trip. `.coderabbit.yaml` stays in the repo with `auto_review.enabled` and
-`chat.auto_reply` set to `false` — the tuning is real work and re-enabling it is
-those two lines.
+`chat.auto_reply` set to `false`, because the tuning is real work.
+
+Re-enabling is not those two lines. Two problems were open when it was parked,
+and both are recorded at the top of `.coderabbit.yaml`: incremental review burns
+quota on every push to an open PR, and a quota-exhausted run still reports the
+check as passing. Switching it back on without settling those brings back a
+green tick that means nothing.
 
 Two properties make the current arrangement work, and both must be preserved:
 

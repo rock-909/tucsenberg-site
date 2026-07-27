@@ -13,7 +13,9 @@ Submission pipeline: preflight → self-heal → commit → adversarial review �
 2. **Check Changes**: Run `git status` to identify staged/unstaged changes.
    - If changes exist: proceed to step 3.
    - If no changes and no unpushed commits: abort with "Nothing to submit".
-   - If no changes but unpushed commits exist: skip to Phase 4 (Push).
+   - If no changes but unpushed commits exist: go to Phase 4 **step 8**. There is
+     nothing to commit, but the commits still have not been reviewed — going
+     straight to push is how unreviewed work reaches `origin`.
 
 3. **AI Slop Check**: Review the diff (`git diff` + `git diff --cached`) and remove AI-generated slop:
    - Extra comments inconsistent with file patterns
@@ -58,14 +60,44 @@ Submission pipeline: preflight → self-heal → commit → adversarial review �
    - Body: required, bullet points
    - Execute `git commit` with HEREDOC message.
 
-8. **Independent Codex review** (skip if `--no-review`): hand the branch diff to a
-   separate Codex session. It must not share this session's context — a reviewer
-   that already believes the change is correct proves nothing.
+8. **Independent Codex review** (skipped only by an explicit `--no-review` from
+   the user — see Options): hand the branch diff to a separate Codex session. It
+   must not share this session's context — a reviewer that already believes the
+   change is correct proves nothing.
+
+   **Refresh the base first, and stop if you cannot.** A review against a stale
+   base reads the wrong range: one commit behind turns a 6-file review into an
+   80-file one.
+
+   ```bash
+   git fetch origin || { echo "review base is stale; not reviewing, not pushing"; exit 1; }
+   ```
+
+   Review `origin/main...HEAD`, never `main...HEAD`.
+
+   **Run it through the companion, and wait for it.** `/codex:review` and
+   `/codex:adversarial-review` declare `disable-model-invocation: true`, so this
+   command cannot call them — reaching for them here silently skips the gate.
+   Use the `codex:codex-rescue` subagent, or the companion directly. Resolve the
+   path; do not pin the version directory:
+
+   ```bash
+   CODEX=$(ls -d "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs | sort -V | tail -1)
+   node "$CODEX" adversarial-review --wait --base origin/main --scope branch
+   ```
 
    The prompt states the goal as **refutation, not confirmation**: "try to prove
    this change is wrong". Give it the diff range, the intent of the change, and
    the claims made about what is proven. Ask for findings ranked by severity,
    each with a concrete failure scenario.
+
+   **A review has run only when you are holding its report.** The runtime
+   backgrounds long reviews and hands back a job id instead — that is not a
+   result. Poll `node "$CODEX" status <job-id>` until it leaves `running`, then
+   read `node "$CODEX" result <job-id>`. Treat all of these as *not reviewed*,
+   and stop before push: a non-zero exit, an empty report, a job that ended
+   cancelled or failed, and a job id you never collected. "No findings" is a
+   verdict; "no report" is not.
 
    Triage every finding against the code yourself before acting — the reviewer
    can be wrong or working from a stale read:
@@ -103,14 +135,23 @@ Submission pipeline: preflight → self-heal → commit → adversarial review �
 ## Options
 
 - `--no-auto`: Stop after PR creation (Phase 5). Skip CI monitoring and merge.
-- `--no-review`: Skip the Phase 4 Codex review. Docs-only or single-line changes.
+- `--no-review`: Skip the Phase 4 Codex review. **Only when the user passes it.**
+  Never decide on your own that a change is small enough — "docs-only" and
+  "single-line" describe the diff, not the blast radius, and a one-line change to
+  a gate condition or `next.config.ts` is exactly the kind that needs a second
+  reader. When it is used, say so where it will be seen: `review_status:
+  "skipped"` in the automation log, and a line in the PR body stating the branch
+  was not reviewed. An undisclosed skip reads as a passed review.
 
 ## Failure Behavior
 
 - **Preflight fails 3x**: Abort with diagnosis.
 - **Non-auto-fixable failure**: Abort immediately.
-- **Review session unavailable**: Report it and stop before push. Do not silently
-  push unreviewed — a review that did not run must not read as a review that passed.
+- **Review did not produce a report**: unavailable, errored, cancelled, timed
+  out, returned empty, or left running in the background. Report it and stop
+  before push. A review that did not run must not read as a review that passed.
+- **`git fetch origin` fails**: stop. Reviewing against a stale base is not
+  reviewing, and pushing on top of one is worse.
 - **CI fails**: Report, stop.
 
 ## Observability
@@ -119,8 +160,14 @@ Append JSON line to `reports/automation-loop.jsonl`:
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bool>,"self_heal_rounds":<0-3>,"review_findings":<count|null>,"review_fixed":<count|null>,"pr_number":<number|null>,"ci_pass":<bool|null>,"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"pr","branch":"<branch>","preflight_pass":<bool>,"self_heal_rounds":<0-3>,"review_status":"<passed|skipped|unavailable>","review_findings":<count|null>,"review_fixed":<count|null>,"pr_number":<number|null>,"ci_pass":<bool|null>,"outcome":"<merged|created|aborted|failed>"}' >> reports/automation-loop.jsonl
 ```
+
+`review_status` is separate from `review_findings` on purpose. A findings count
+of `0` and a review that never ran both used to log as "nothing to fix", which
+is the same collapse this whole phase exists to prevent. `passed` means a report
+came back; `skipped` means the user passed `--no-review`; `unavailable` means it
+was attempted and produced no report — and `unavailable` never reaches push.
 
 ## Notes
 

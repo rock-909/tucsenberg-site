@@ -58,8 +58,11 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
 5. **Fetch bot summary comments** (CodeRabbit / Gemini summaries in issue comments):
    ```bash
-   gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/<number>/comments" --jq '.[] | select(.user.login == "coderabbitai" or .user.login == "gemini-code-assist[bot]") | {author: .user.login, body: .body}'
+   gh api --paginate "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/<number>/comments" --jq '.[] | select(.user.login == "coderabbitai[bot]" or .user.login == "gemini-code-assist[bot]") | {author: .user.login, body: .body}'
    ```
+   REST reports the app login with the `[bot]` suffix; the bare name matches
+   nothing and returns an empty list, which reads exactly like "the PR is clean".
+   `--paginate` for the same reason — page one of a long thread is not the thread.
 
 6. **Report**: If no unresolved threads and no actionable bot comments → "No review feedback to address. PR is clean."
 
@@ -112,16 +115,27 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
     - Footer: `Review-Fix-Run: <N>` (increment from last review-fix commit, or `1` if first)
     - Execute `git commit` with HEREDOC message.
 
-12. **Push**:
+12. **Independent Codex review of the fix commit**: same gate as `/pr` step 8,
+    same rules. Fixes written in response to a review are still unreviewed code,
+    and they land on a branch that is already open — skipping the gate here would
+    make "review before push" true only for the first push.
+
+    Follow `/pr` step 8 exactly: `git fetch origin` must succeed, review
+    `origin/main...HEAD` through the companion with `--wait`, collect the report
+    (a background job id is not a report), and stop before push on anything that
+    did not produce one.
+
+13. **Push**:
     ```bash
     RUN_FAST_PUSH=1 git push
     ```
 
-13. **Report**:
+14. **Report**:
     - Number of threads addressed
     - Items fixed vs skipped (with reasons)
     - Items flagged as business decisions
-    - Next step: "CI will re-run. Cloud reviewers will re-review. Check back after CI passes."
+    - `review_status` for the fix commit
+    - Next step: "CI will re-run. Check back after CI passes."
 
 ## Example Usage
 
@@ -135,13 +149,14 @@ After completion (or abort), append a JSON line to `reports/automation-loop.json
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"review_status":"<passed|skipped|unavailable>","outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
 ```
 
 ## Notes
 
 - This command is for addressing review feedback on an existing PR
 - Does NOT create a new PR — it pushes fix commits to the existing PR branch
-- Reviewers (CodeRabbit, Gemini) will automatically re-review after new push
+- No cloud reviewer re-reviews on push; CodeRabbit is switched off. The fix
+  commit is reviewed by step 12 before it leaves the machine.
 - If review feedback requires architectural changes, abort and discuss with user
 - The `Review-Fix-Run: N` footer prevents infinite oscillation — if N ≥ 4, something is wrong
