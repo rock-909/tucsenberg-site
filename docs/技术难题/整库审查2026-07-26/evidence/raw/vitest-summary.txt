@@ -1,0 +1,12 @@
+ ✓ tests/unit/scripts/react-doctor-gate-contract.test.ts (1 test) 5ms
+ ✓ src/app/[locale]/contact/__tests__/page-i18n.test.tsx (1 test) 4ms
+ ✓ src/app/__tests__/skip-link-touch-target.test.ts (1 test) 4ms
+ ✓ src/app/[locale]/contact/__tests__/page-rendering-basic-core.test.tsx (1 test) 4ms
+ ✓ src/app/[locale]/contact/__tests__/page-i18n-basic.test.tsx (2 tests) 4ms
+
+ Test Files  288 passed (288)
+      Tests  2395 passed (2395)
+   Start at  23:49:23
+   Duration  50.09s (transform 6.45s, setup 41.93s, import 24.03s, tests 45.54s, environment 201.07s)
+
+EXIT=0
