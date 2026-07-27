@@ -291,22 +291,23 @@ function collectReachableSubcommands(roots, packageScripts) {
     }
 
     visitedScripts.add(result.packageScript);
-    // pnpm runs pre/post around the script itself; all three are the lane.
-    for (const name of [
-      `pre${result.packageScript}`,
-      result.packageScript,
-      `post${result.packageScript}`,
-    ]) {
-      if (!Object.hasOwn(packageScripts, name)) continue;
-      const scan = scanShellCommands(packageScripts[name]);
-      const scriptSource = `package script "${name}"`;
-      queue.push(
-        ...scan.commands.map((tokens) => ({ tokens, source: scriptSource })),
-      );
-      undecidable.push(
-        ...scan.undecidable.map((reason) => `${scriptSource}: ${reason}`),
-      );
-    }
+    // Only the script itself. pnpm does NOT run `pre`/`post` wrappers unless
+    // `enable-pre-post-scripts` is on, and this repo's `.npmrc` leaves it off
+    // (pnpm 11 defaults it to false), so counting them would invent lanes: a
+    // subcommand reachable only from `precheck` would read as covered while
+    // nothing ever runs it. If that setting is ever turned on, a subcommand
+    // living only in a pre/post script gets reported as an orphan — loudly
+    // wrong in the safe direction, which is where this belongs.
+    const name = result.packageScript;
+    const scan = scanShellCommands(packageScripts[name]);
+    const scriptSource = `package script "${name}"`;
+
+    queue.push(
+      ...scan.commands.map((tokens) => ({ tokens, source: scriptSource })),
+    );
+    undecidable.push(
+      ...scan.undecidable.map((reason) => `${scriptSource}: ${reason}`),
+    );
   }
 
   return { reached, undecidable };
@@ -416,6 +417,7 @@ function runSubcommandLaneCheck() {
 module.exports = {
   runSubcommandLaneCheck,
   reportLaneFindings,
+  collectReachableSubcommands,
   classifyCommand,
   collectLanes,
   collectWorkflowRunStrings,

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 const {
   classifyCommand,
   collectLefthookRunStrings,
+  collectReachableSubcommands,
   collectWorkflowRunStrings,
   reportLaneFindings,
 } = require("../../../scripts/quality/checks/subcommand-lanes.js");
@@ -443,5 +444,33 @@ describe("the verdict fails closed", () => {
       reportLaneFindings({ undecidable: [], orphans: [], unknown: ["typo"] }),
     ).toBe(false);
     spy.mockRestore();
+  });
+});
+
+// pnpm 只在 enable-pre-post-scripts 打开时才跑 pre/post 包裹脚本，pnpm 11 默认
+// 关闭，本仓库 .npmrc 也没开。把它们算成车道等于凭空发明覆盖：只写在
+// precheck 里的子命令会被判成"有人跑"，而实际上没人跑。
+describe("package script traversal", () => {
+  const reached = (roots: string[], scripts: Record<string, string>) => [
+    ...collectReachableSubcommands(
+      roots.map((tokens) => ({ tokens: tokens.split(" "), source: "test" })),
+      scripts,
+    ).reached,
+  ];
+
+  it("follows the script a lane names", () => {
+    expect(reached(["pnpm run check"], { check: `${CALL}` })).toEqual([
+      "brand",
+    ]);
+  });
+
+  it("does not treat a pre/post wrapper as a lane pnpm would run", () => {
+    expect(
+      reached(["pnpm run check"], {
+        precheck: `${CALL}`,
+        check: "echo real",
+        postcheck: "node scripts/starter-checks.js markdown-fences",
+      }),
+    ).toEqual([]);
   });
 });

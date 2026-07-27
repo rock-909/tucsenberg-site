@@ -139,7 +139,7 @@ Commands:
   brand               Check old brand residue
   markdown-fences     Check every markdown code fence declares a language
   vitest-collection   Check vitest runs every test file on disk
-  subcommand-lanes    Check every subcommand here is reached by a lane that runs
+  subcommand-lanes    Check every subcommand here is wired into a lane
   content-slugs       Check localized MDX slug pairs
   content-manifest    Generate content manifest only (--check verifies freshness)
   translations        Check catalog message pack and compat translation shapes
