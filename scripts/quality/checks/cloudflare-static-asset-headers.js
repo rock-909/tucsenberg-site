@@ -3,6 +3,8 @@ const path = require("node:path");
 
 const EXPECTED_STATIC_ASSET_HEADER_ROUTE = "/_next/static/*";
 const EXPECTED_STATIC_ASSET_CACHE_CONTROL = "public,max-age=31536000,immutable";
+const EXPECTED_DOWNLOADS_HEADER_ROUTE = "/downloads/*";
+const EXPECTED_DOWNLOADS_NOINDEX = "X-Robots-Tag: noindex";
 const SOURCE_HEADERS_PATH = "public/_headers";
 const OPENNEXT_ASSET_HEADERS_PATH = ".open-next/assets/_headers";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
@@ -38,6 +40,18 @@ function collectHeaderFileFailures(context, relativePath) {
     failures.push(
       `missing "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" in ${relativePath}`,
     );
+  }
+
+  // 只查 /downloads/* 与 noindex 这两条意图断言，不查缓存秒数——
+  // 缓存时长是业主可调参数，钉死数字会让业主一改就红而意图完全没坏。
+  if (!headers.includes(EXPECTED_DOWNLOADS_HEADER_ROUTE)) {
+    failures.push(
+      `missing "${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in ${relativePath}`,
+    );
+  }
+
+  if (!headers.includes(EXPECTED_DOWNLOADS_NOINDEX)) {
+    failures.push(`missing "${EXPECTED_DOWNLOADS_NOINDEX}" in ${relativePath}`);
   }
 
   return failures;
@@ -98,6 +112,8 @@ function runCloudflareStaticAssetHeaderCli(options = {}) {
 }
 
 module.exports = {
+  EXPECTED_DOWNLOADS_HEADER_ROUTE,
+  EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
   OPENNEXT_ASSET_HEADERS_PATH,
