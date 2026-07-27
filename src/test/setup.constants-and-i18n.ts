@@ -39,20 +39,34 @@ vi.mock("next-intl", async () => {
   };
 });
 
-// Mock next-intl/server
-vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(() => (key: string) => key),
-  getLocale: vi.fn(() => "en"),
-  getMessages: vi.fn(() => ({})),
-  getFormatter: vi.fn(() => ({
-    dateTime: vi.fn(),
-    number: vi.fn(),
-    relativeTime: vi.fn(),
-  })),
-  setRequestLocale: vi.fn(),
-  getRequestConfig: vi.fn(() => ({})),
-  unstable_setRequestLocale: vi.fn(),
-}));
+// Mock next-intl/server —— 和上面的客户端 mock 同源。服务端曾经返回 key 名，
+// 于是 Server Component 的断言写的是 key 而不是文案：改真实文案不会变红。
+vi.mock("next-intl/server", async () => {
+  const { getFlatMessages, lookupMessage } =
+    await import("@/test/i18n-messages");
+  const messages = getFlatMessages();
+
+  return {
+    // 生产签名是 getTranslations(namespace) 或 getTranslations({ locale, namespace })。
+    getTranslations: vi.fn((options?: string | { namespace?: string }) => {
+      const namespace =
+        typeof options === "string" ? options : options?.namespace;
+
+      return (key: string) =>
+        lookupMessage(messages, namespace ? `${namespace}.${key}` : key);
+    }),
+    getLocale: vi.fn(() => "en"),
+    getMessages: vi.fn(() => ({})),
+    getFormatter: vi.fn(() => ({
+      dateTime: vi.fn(),
+      number: vi.fn(),
+      relativeTime: vi.fn(),
+    })),
+    setRequestLocale: vi.fn(),
+    getRequestConfig: vi.fn(() => ({})),
+    unstable_setRequestLocale: vi.fn(),
+  };
+});
 
 // Mock @/i18n/routing - 提供完整的路由Mock配置
 vi.mock("@/i18n/routing", () => ({

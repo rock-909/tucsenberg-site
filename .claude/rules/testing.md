@@ -165,15 +165,23 @@ Use shared test utilities instead of duplicating mock systems:
 
 - `@/test/utils`
 
-Every test translation resolves through `@/test/i18n-messages`, which reads
-`getComposedMessages("en")` — the same composed message graph production loads.
-That module is the only place allowed to define what a test translation is; both
-`@/test/utils` and the global `next-intl` mock in `src/test/setup.constants-and-i18n.ts`
-go through it. Do not hand-write a message catalog for tests. Two of them used to
-exist here: one drifted to 153 of its 172 leaf keys naming nothing real, and the
-one in the global setup invented `navigation.services` and `navigation.contact`.
-Assertions written against either proved invented copy, and editing the shipped
-copy turned nothing red.
+`@/test/i18n-messages` reads `getComposedMessages("en")` — the same composed
+message graph production loads — and is the only place allowed to define what a
+test translation is. Three surfaces go through it: `@/test/utils`, and the
+global `next-intl` and `next-intl/server` mocks in
+`src/test/setup.constants-and-i18n.ts`. Do not hand-write a message catalog for
+tests. Three used to exist here: one drifted to 153 of its 172 leaf keys naming
+nothing real, the client-side one in the global setup invented
+`navigation.services` and `navigation.contact`, and the server-side one returned
+the key name for everything, so Server Component tests asserted `hero.title`
+rather than the shipped headline. Assertions written against any of them proved
+invented copy, and editing the shipped copy turned nothing red.
+
+Two component tests still build their own small table —
+`src/components/cookie/__tests__/cookie-banner.test.tsx` and
+`src/components/ui/__tests__/theme-switcher.test.tsx`, both of which mock
+`useTranslations` locally rather than using the global mock. They are the
+remaining exceptions, not the pattern; do not add a fourth.
 
 Two properties that must hold, and are pinned by
 `src/test/__tests__/mock-translations.test.ts`:

@@ -6,6 +6,10 @@ import catalogMessages from "../../../../messages/profiles/catalog/en/messages.j
 import { HeroSection } from "@/components/sections/hero-section";
 import { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
+// 渲染结果比对真实消息包，证明的是 key 接线正确。从前这里断言的是 key 名
+// 本身，那只在翻译没接上时才成立。
+const heroCopy = catalogMessages.home.hero;
+
 const heroMessageCases = [
   {
     locale: "en",
@@ -36,20 +40,20 @@ describe("HeroSection", () => {
     expect(screen.getByTestId("hero-section")).toBeInTheDocument();
   });
 
-  it("renders the h1 heading with translation key", async () => {
+  it("renders the h1 heading from the message pack", async () => {
     await renderAsyncComponent(HeroSection());
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("hero.title");
+    expect(heading).toHaveTextContent(heroCopy.title);
   });
 
   it("renders eyebrow text", async () => {
     await renderAsyncComponent(HeroSection());
-    expect(screen.getByText("hero.eyebrow")).toBeInTheDocument();
+    expect(screen.getByText(heroCopy.eyebrow)).toBeInTheDocument();
   });
 
   it("renders subtitle", async () => {
     await renderAsyncComponent(HeroSection());
-    expect(screen.getByText("hero.subtitle")).toBeInTheDocument();
+    expect(screen.getByText(heroCopy.subtitle)).toBeInTheDocument();
   });
 
   it("renders the working-principle diagram instead of a product-line index", async () => {
@@ -58,8 +62,8 @@ describe("HeroSection", () => {
     const heroDiagram = screen.getByTestId("hero-diagram");
     const panel = within(heroDiagram).getByTestId("product-diagram");
 
-    expect(within(panel).getByText("hero.diagram.panelLabel")).toBeVisible();
-    expect(within(panel).getByText("hero.diagram.caption")).toBeVisible();
+    expect(within(panel).getByText(heroCopy.diagram.panelLabel)).toBeVisible();
+    expect(within(panel).getByText(heroCopy.diagram.caption)).toBeVisible();
     // The five product cards below the hero own the line index; the hero
     // must not duplicate it (视觉翻译-自顶向下设计.md, home §1).
     expect(screen.queryByTestId("hero-preview-card")).not.toBeInTheDocument();
@@ -94,8 +98,8 @@ describe("HeroSection", () => {
 
   it("renders Tucsenberg homepage CTAs with RFQ primary", async () => {
     await renderAsyncComponent(HeroSection());
-    const primaryLink = screen.getByText("hero.cta.primary").closest("a");
-    const secondaryLink = screen.getByText("hero.cta.secondary").closest("a");
+    const primaryLink = screen.getByText(heroCopy.cta.primary).closest("a");
+    const secondaryLink = screen.getByText(heroCopy.cta.secondary).closest("a");
     expect(primaryLink).toHaveAttribute(
       "href",
       SINGLE_SITE_HOME_LINK_TARGETS.primaryCta,
@@ -112,32 +116,32 @@ describe("HeroSection", () => {
     await renderAsyncComponent(HeroSection());
 
     const proofList = screen.getByRole("list", {
-      name: "hero.proofAriaLabel",
+      name: heroCopy.proofAriaLabel,
     });
     const proofItems = within(proofList).getAllByRole("listitem");
 
     expect(proofItems).toHaveLength(4);
     expect(
-      within(proofList).getByText("hero.proof.quoteSla"),
+      within(proofList).getByText(heroCopy.proof.quoteSla),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.quoteSlaLabel"),
+      within(proofList).getByText(heroCopy.proof.quoteSlaLabel),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.warranty"),
+      within(proofList).getByText(heroCopy.proof.warranty),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.warrantyLabel"),
+      within(proofList).getByText(heroCopy.proof.warrantyLabel),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.factoryPool"),
+      within(proofList).getByText(heroCopy.proof.factoryPool),
     ).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.factoryPoolLabel"),
+      within(proofList).getByText(heroCopy.proof.factoryPoolLabel),
     ).toBeInTheDocument();
-    expect(within(proofList).getByText("hero.proof.oem")).toBeInTheDocument();
+    expect(within(proofList).getByText(heroCopy.proof.oem)).toBeInTheDocument();
     expect(
-      within(proofList).getByText("hero.proof.oemLabel"),
+      within(proofList).getByText(heroCopy.proof.oemLabel),
     ).toBeInTheDocument();
   });
 
@@ -145,14 +149,14 @@ describe("HeroSection", () => {
     await renderAsyncComponent(HeroSection());
 
     const proofList = screen.getByRole("list", {
-      name: "hero.proofAriaLabel",
+      name: heroCopy.proofAriaLabel,
     });
     const [firstProofItem] = within(proofList).getAllByRole("listitem");
     const firstProofValue = within(firstProofItem).getByText(
-      "hero.proof.quoteSla",
+      heroCopy.proof.quoteSla,
     );
     const firstProofLabel = within(firstProofItem).getByText(
-      "hero.proof.quoteSlaLabel",
+      heroCopy.proof.quoteSlaLabel,
     );
 
     expect(proofList).toHaveClass(

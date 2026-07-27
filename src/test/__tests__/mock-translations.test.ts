@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
-import { getFlatMessages } from "@/test/i18n-messages";
+import { getFlatMessages, lookupMessage } from "@/test/i18n-messages";
 import { createMockTranslations } from "@/test/utils";
 
 /**
@@ -18,18 +18,22 @@ describe("createMockTranslations 的取值语义", () => {
     expect(t("navigation.home")).not.toBe("navigation.home");
   });
 
-  // 消息包里确实有内容就是空字符串的条目（社交链接留空）。生产 next-intl
-  // 返回空串，mock 也必须返回空串，不能因为空串是 falsy 就翻成 key 名。
-  it("值是空字符串的真实 key 返回空字符串，不返回 key 名", () => {
-    const messages = getFlatMessages();
-    const emptyKeys = [...messages]
-      .filter(([, value]) => value === "")
-      .map(([key]) => key);
+  // 生产 next-intl 返回存下来的值，空串也照返；不能因为空串是 falsy 就翻成
+  // key 名。这里测的是取值语义本身，不依赖消息包当下恰好留空了哪几条——
+  // 之前那版断言"包里至少有一个空串"，等社交链接填上真实地址就会无辜变红。
+  it("值是空字符串的 key 返回空字符串，不返回 key 名", () => {
+    expect(
+      lookupMessage(new Map([["social.twitter", ""]]), "social.twitter"),
+    ).toBe("");
+  });
+
+  // 消息包当下确实留空了几条（社交链接），顺带扫一遍走完整条链路。包里一条
+  // 空串都没有时这个循环空转，不构成断言——上面那条才是证明。
+  it("消息包里现存的空串条目走完整链路也返回空字符串", () => {
     const t = createMockTranslations();
 
-    expect(emptyKeys.length).toBeGreaterThan(0);
-    for (const key of emptyKeys) {
-      expect(t(key)).toBe("");
+    for (const [key, value] of getFlatMessages()) {
+      if (value === "") expect(t(key)).toBe("");
     }
   });
 
