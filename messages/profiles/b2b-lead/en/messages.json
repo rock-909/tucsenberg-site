@@ -74,6 +74,7 @@
       "turnstile": {
         "unavailable": "Security verification is temporarily unavailable.",
         "loadFailed": "Security verification failed to load.",
+        "slowToLoad": "Security verification is taking longer than usual.",
         "devBypass": "Dev mode: Turnstile verification bypassed",
         "testMode": "Bot protection disabled in test mode",
         "rescueBeforeEmail": "Email us instead —",

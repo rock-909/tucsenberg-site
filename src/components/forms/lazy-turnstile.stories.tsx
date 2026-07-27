@@ -18,7 +18,6 @@ const meta = {
     onSuccess: storyTokenHandler,
     onError: storyStatusHandler,
     onExpire: storyStatusHandler,
-    onLoad: storyStatusHandler,
     labels: storyTurnstileLabels,
   },
 } satisfies Meta<typeof LazyTurnstile>;
@@ -51,7 +50,6 @@ export const StorybookFallback: Story = {
         onSuccess={storyTokenHandler}
         onError={storyStatusHandler}
         onExpire={storyStatusHandler}
-        onLoad={storyStatusHandler}
         labels={storyTurnstileLabels}
         id="storybook-turnstile-fallback"
       />

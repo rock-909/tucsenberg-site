@@ -107,30 +107,6 @@ describe("processValidatedInquiry", () => {
     );
   });
 
-  it("starts email and Airtable delivery in parallel", async () => {
-    let releaseEmail!: () => void;
-    let releaseAirtable!: () => void;
-    mockSendProductInquiryEmail.mockReturnValue(
-      new Promise<string>((resolve) => {
-        releaseEmail = () => resolve("email-123");
-      }),
-    );
-    mockCreateLead.mockReturnValue(
-      new Promise<{ id: string }>((resolve) => {
-        releaseAirtable = () => resolve({ id: "rec-123" });
-      }),
-    );
-
-    const resultPromise = processValidatedInquiry(VALID_LEAD);
-    await Promise.resolve();
-
-    expect(mockSendProductInquiryEmail).toHaveBeenCalledOnce();
-    expect(mockCreateLead).toHaveBeenCalledOnce();
-    releaseEmail();
-    releaseAirtable();
-    await expect(resultPromise).resolves.toMatchObject({ success: true });
-  });
-
   it("succeeds when either delivery channel succeeds", async () => {
     mockSendProductInquiryEmail.mockRejectedValueOnce(new Error("email down"));
     await expect(processValidatedInquiry(VALID_LEAD)).resolves.toMatchObject({
@@ -178,6 +154,56 @@ describe("processValidatedInquiry", () => {
       }),
     );
   });
+
+  it("marks the record when the owner email failed", async () => {
+    mockSendProductInquiryEmail.mockRejectedValueOnce(new Error("resend down"));
+    mockCreateLead.mockResolvedValueOnce({ id: "rec1" });
+
+    const result = await processValidatedInquiry(VALID_LEAD);
+
+    expect(result.success).toBe(true);
+    const fields = mockCreateLead.mock.calls[0]?.[0];
+    expect(fields.message).toContain("⚠️ NOTE:");
+    expect(fields.message).toContain("FAILED to send");
+    // 买家原文必须完整保留，提示只是前缀
+    expect(fields.message).toContain(VALID_LEAD.message);
+  });
+
+  it("leaves the message untouched when the owner email succeeded", async () => {
+    mockSendProductInquiryEmail.mockResolvedValueOnce(undefined);
+    mockCreateLead.mockResolvedValueOnce({ id: "rec1" });
+
+    await processValidatedInquiry(VALID_LEAD);
+
+    const fields = mockCreateLead.mock.calls[0]?.[0];
+    expect(fields.message).not.toContain("⚠️");
+  });
+
+  it("waits for the owner email to settle before touching airtable", async () => {
+    let releaseEmail: () => void = () => undefined;
+    mockSendProductInquiryEmail.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (releaseEmail = () => resolve())),
+    );
+    mockCreateLead.mockResolvedValueOnce({ id: "rec1" });
+
+    const pending = processValidatedInquiry(VALID_LEAD);
+    await Promise.resolve();
+
+    // 邮件还没落定，Airtable 一次都不能被碰。并行版本此刻已经调过了。
+    expect(mockCreateLead).not.toHaveBeenCalled();
+
+    releaseEmail();
+    await pending;
+    expect(mockCreateLead).toHaveBeenCalledTimes(1);
+  });
+
+  // 这里曾有一条 "still records the lead when the owner email times out"。
+  // 它的 mock 自己用 setTimeout 才 reject，resend-http-client.ts 真正的
+  // AbortController 一行都没跑到，把阈值改成 60 秒它照样全绿——名字里的
+  // "times out" 没有任何东西在守。它实际证的「邮件 reject 后记录仍带提示落地」
+  // 由上面 "marks the record when the owner email failed" 覆盖，串行等待由
+  // "waits for the owner email to settle before touching airtable" 覆盖，
+  // 所以直接删掉，不留一个名不副实的绿灯。
 
   it("does not hang when Airtable exceeds its request budget", async () => {
     vi.useFakeTimers();

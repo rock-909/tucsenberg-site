@@ -34,6 +34,7 @@ vi.mock("@/components/forms/lazy-turnstile", () => ({
     labels: {
       unavailable: string;
       loadFailed: string;
+      slowToLoad: string;
       devBypass: string;
       testMode: string;
       rescueBeforeEmail: string;

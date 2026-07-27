@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   INQUIRY_TURNSTILE_ACTION,
@@ -22,8 +22,13 @@ import {
  * 使用全局 logger（开发环境输出，生产环境静默）
  */
 
+// Turnstile 正常挑战通常 1-3 秒；15 秒足以排除慢网络的误触发。
+const TURNSTILE_RESCUE_TIMEOUT_MS = 15_000;
+
 interface TurnstileLabels {
   unavailable: string;
+  loadFailed: string;
+  slowToLoad: string;
   devBypass: string;
   testMode: string;
   rescueBeforeEmail: string;
@@ -35,7 +40,6 @@ interface TurnstileProps {
   onSuccess?: (_token: string) => void;
   onError?: (_error: string) => void;
   onExpire?: () => void;
-  onLoad?: () => void;
   /**
    * Receives a widget `reset()` binder. May return an unregister/cleanup
    * function invoked when the widget unmounts or the binder changes.
@@ -57,6 +61,21 @@ interface TurnstileStatusProps {
 
 interface TurnstileUnavailableStatusProps extends TurnstileStatusProps {
   rescue: TurnstileRescueLineProps;
+}
+
+interface TurnstileRescueStatusProps {
+  hasFailed: boolean;
+  failedLabel: string;
+  slowLabel: string;
+  rescue: TurnstileRescueLineProps;
+}
+
+function toRescueProps(labels: TurnstileLabels): TurnstileRescueLineProps {
+  return {
+    beforeEmail: labels.rescueBeforeEmail,
+    afterEmail: labels.rescueAfterEmail,
+    subject: labels.rescueSubject,
+  };
 }
 
 function TurnstileBypassStatus({ className, label }: TurnstileStatusProps) {
@@ -84,6 +103,86 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
   );
 }
 
+/**
+ * 不变量：手上没有有效令牌时，救援计时器必须在跑。
+ *
+ * 挂载即开始计时，不等 widget 的加载回调——脚本加载失败时那些回调一个都不触发，
+ * 等它等于永远不计时。拿到令牌就停表；提交落定后表单会 reset widget，那一刻
+ * 令牌又没了，必须重新起表，否则「提交失败 + 此时 Turnstile 挂掉」会让买家卡在
+ * 一个永远 disabled 的按钮前。
+ *
+ * `waitCycle` 为 null 表示握有令牌（不计时），数字表示第几轮等待；换一个数字就
+ * 让下面的 effect 重新起表。过期（onExpire）不算一轮：widget 会自己续新挑战。
+ */
+function useTurnstileRescueState() {
+  const [hasFailed, setHasFailed] = useState(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [waitCycle, setWaitCycle] = useState<number | null>(0);
+
+  useEffect(() => {
+    if (waitCycle === null) {
+      return undefined;
+    }
+    const timer = setTimeout(
+      () => setHasTimedOut(true),
+      TURNSTILE_RESCUE_TIMEOUT_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [waitCycle]);
+
+  const markSuccess = () => {
+    setWaitCycle(null);
+    setHasTimedOut(false);
+    setHasFailed(false);
+  };
+
+  const markFailed = () => setHasFailed(true);
+
+  // 已经显示的救援行不再收回：闪一下比一直挂着更让人困惑。
+  const markWaiting = useCallback(
+    () => setWaitCycle((cycle) => (cycle ?? 0) + 1),
+    [],
+  );
+
+  return {
+    showRescue: hasFailed || hasTimedOut,
+    hasFailed,
+    markSuccess,
+    markFailed,
+    markWaiting,
+  };
+}
+
+/**
+ * 救援行不能光秃秃一句「改发邮件」——买家不知道为什么。配一句状态标签，
+ * 与另外两条救援路径（缺 site key、懒加载失败）的「标签 + 救援行」形状一致。
+ *
+ * 超时不等于失败：managed 挑战常要买家手动点一次，先填三个字段再去点验证码
+ * 超过 15 秒是常态，那时控件完全健康。所以超时用较轻的措辞，别把人吓退。
+ */
+function TurnstileRescueStatus({
+  hasFailed,
+  failedLabel,
+  slowLabel,
+  rescue,
+}: TurnstileRescueStatusProps) {
+  return (
+    // 页面静止十几秒后凭空出现，不播报等于对屏幕阅读器用户不存在。
+    <output className="turnstile-rescue" aria-live="polite">
+      <div
+        className={
+          hasFailed
+            ? "text-sm text-[var(--error-foreground)]"
+            : "text-sm text-muted-foreground"
+        }
+      >
+        {hasFailed ? failedLabel : slowLabel}
+      </div>
+      <TurnstileRescueLine {...rescue} />
+    </output>
+  );
+}
+
 function TurnstileUnavailableStatus({
   className,
   label,
@@ -104,7 +203,6 @@ export function TurnstileWidget({
   onSuccess,
   onError,
   onExpire,
-  onLoad,
   onReadyRef,
   className,
   theme = "auto",
@@ -125,20 +223,22 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const rescue = {
-    beforeEmail: labels.rescueBeforeEmail,
-    afterEmail: labels.rescueAfterEmail,
-    subject: labels.rescueSubject,
-  };
+  const { showRescue, hasFailed, markSuccess, markFailed, markWaiting } =
+    useTurnstileRescueState();
+  const rescue = toRescueProps(labels);
+
+  // reset 意味着令牌已作废，重新进入等待期。
+  const handleReset = useCallback(() => {
+    markWaiting();
+    turnstileRef.current?.reset();
+  }, [markWaiting]);
 
   useEffect(() => {
     if (!onReadyRef) {
       return undefined;
     }
-    return onReadyRef(() => {
-      turnstileRef.current?.reset();
-    });
-  }, [onReadyRef]);
+    return onReadyRef(handleReset);
+  }, [onReadyRef, handleReset]);
 
   // All hooks must be called before any conditional returns. Dev bypass and
   // test mode both replace the real widget, so they share one settle-once
@@ -191,26 +291,20 @@ export function TurnstileWidget({
     );
   }
 
-  const handleSuccess = (token: string) => onSuccess?.(token);
-
-  const handleError = (error: string) => {
-    logger.error("Turnstile error:", error);
-    if (onError) {
-      onError(error);
-    }
-  };
-
-  const handleExpire = () => {
-    logger.warn("Turnstile token expired");
-    if (onExpire) {
-      onExpire();
-    }
-  };
-
-  const handleLoad = () => {
-    if (onLoad) {
-      onLoad();
-    }
+  const widgetHandlers = {
+    onSuccess: (token: string) => {
+      markSuccess();
+      onSuccess?.(token);
+    },
+    onError: (error: string) => {
+      logger.error("Turnstile error:", error);
+      markFailed();
+      onError?.(error);
+    },
+    onExpire: () => {
+      logger.warn("Turnstile token expired");
+      onExpire?.();
+    },
   };
 
   return (
@@ -218,10 +312,7 @@ export function TurnstileWidget({
       <Turnstile
         ref={turnstileRef}
         siteKey={siteKey}
-        onSuccess={handleSuccess}
-        onError={handleError}
-        onExpire={handleExpire}
-        onLoad={handleLoad}
+        {...widgetHandlers}
         options={{
           theme,
           size,
@@ -231,6 +322,14 @@ export function TurnstileWidget({
         }}
         id={id}
       />
+      {showRescue ? (
+        <TurnstileRescueStatus
+          hasFailed={hasFailed}
+          failedLabel={labels.loadFailed}
+          slowLabel={labels.slowToLoad}
+          rescue={rescue}
+        />
+      ) : null}
     </div>
   );
 }

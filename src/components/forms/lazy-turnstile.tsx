@@ -24,6 +24,7 @@ type TurnstilePlaceholderStyle = CSSProperties & {
 interface LazyTurnstileLabels {
   unavailable: string;
   loadFailed: string;
+  slowToLoad: string;
   devBypass: string;
   testMode: string;
   rescueBeforeEmail: string;
@@ -35,7 +36,6 @@ interface LazyTurnstileProps {
   onSuccess?: (token: string) => void;
   onError?: (reason?: string) => void;
   onExpire?: () => void;
-  onLoad?: () => void;
   onReadyRef?: (reset: () => void) => (() => void) | void;
   className?: string;
   theme?: "light" | "dark" | "auto";
@@ -133,6 +133,8 @@ function buildLazyTurnstileWidgetProps(args: {
     size,
     labels: {
       unavailable: labelText.unavailable,
+      loadFailed: labelText.loadFailed,
+      slowToLoad: labelText.slowToLoad,
       devBypass: labelText.devBypass,
       testMode: labelText.testMode,
       rescueBeforeEmail: labelText.rescueBeforeEmail,
@@ -142,7 +144,6 @@ function buildLazyTurnstileWidgetProps(args: {
     ...(props.onSuccess ? { onSuccess: props.onSuccess } : {}),
     ...(props.onError ? { onError: props.onError } : {}),
     ...(props.onExpire ? { onExpire: props.onExpire } : {}),
-    ...(props.onLoad ? { onLoad: props.onLoad } : {}),
     ...(props.onReadyRef ? { onReadyRef: props.onReadyRef } : {}),
     ...(props.tabIndex !== undefined ? { tabIndex: props.tabIndex } : {}),
     ...(props.id !== undefined ? { id: props.id } : {}),

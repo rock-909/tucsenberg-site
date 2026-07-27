@@ -67,7 +67,7 @@ describe("inquiry form copy", () => {
     ).toBeDefined();
   });
 
-  it("reads all seven turnstile leaves from inquiry.form.turnstile", () => {
+  it("reads all eight turnstile leaves from inquiry.form.turnstile", () => {
     const copy = createTestInquiryFormCopy();
 
     expect(copy.turnstile.unavailable).toBe(
@@ -75,6 +75,9 @@ describe("inquiry form copy", () => {
     );
     expect(copy.turnstile.loadFailed).toBe(
       "Security verification failed to load.",
+    );
+    expect(copy.turnstile.slowToLoad).toBe(
+      "Security verification is taking longer than usual.",
     );
     expect(copy.turnstile.devBypass).toBe(
       "Dev mode: Turnstile verification bypassed",

@@ -58,12 +58,17 @@ classification logic unless the route has a documented business reason.
 Canonical behavior for contact and inquiry (owner decision, 2026-07-07):
 
 ```text
-browser form -> route handler -> Zod -> Turnstile -> process lead -> parallel owner email + Airtable record
+browser form -> route handler -> Zod -> Turnstile -> process lead -> owner email, then Airtable record
 ```
 
-- Owner email and Airtable record creation start in parallel; either channel
-  succeeding is the user-facing success condition (email-best-effort policy:
-  a lead must never be rejected while at least one delivery channel works).
+- Owner email is sent first; the Airtable record is created afterwards with the
+  email outcome baked into its free-text `Message` field (owner decision,
+  2026-07-27). Sequential, not parallel: the record and the fact that its
+  notification failed have to be born together, or a saved lead sits in the CRM
+  looking identical to one the owner was actually told about.
+- Either channel succeeding is still the user-facing success condition
+  (email-best-effort policy: a lead must never be rejected while at least one
+  delivery channel works).
 - When Airtable fails but email succeeds, the route returns success and the
   failure is logged as an error for manual CRM backfill.
 - Both channels failing returns failure with a stable error code.

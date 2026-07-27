@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TurnstileWidget } from "@/components/security/turnstile";
 import { captureExpectedConsoleErrors } from "@/test/console";
@@ -9,6 +9,8 @@ const defaultTestLabels = createTestInquiryFormCopy().turnstile;
 
 const sentinelTurnstileLabels = {
   unavailable: "安全验证暂时不可用。",
+  loadFailed: "安全验证加载失败。",
+  slowToLoad: "安全验证加载得比平时慢。",
   devBypass: "开发模式：Turnstile 验证已跳过",
   testMode: "测试模式下已关闭机器人防护",
   rescueBeforeEmail: "请改发邮件 —",
@@ -21,6 +23,8 @@ function toTurnstileWidgetLabels(
 ): React.ComponentProps<typeof TurnstileWidget>["labels"] {
   return {
     unavailable: labels.unavailable,
+    loadFailed: labels.loadFailed,
+    slowToLoad: labels.slowToLoad,
     devBypass: labels.devBypass,
     testMode: labels.testMode,
     rescueBeforeEmail: labels.rescueBeforeEmail,
@@ -191,7 +195,7 @@ describe("TurnstileWidget", () => {
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleSuccess = mockCall?.[0]?.onSuccess;
-      handleSuccess?.("test-token-123");
+      act(() => handleSuccess?.("test-token-123"));
 
       expect(onSuccess).toHaveBeenCalledWith("test-token-123");
     });
@@ -203,7 +207,7 @@ describe("TurnstileWidget", () => {
 
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
-      handleError?.("test-error");
+      act(() => handleError?.("test-error"));
 
       expect(onError).toHaveBeenCalledWith("test-error");
       expect(consoleError).toHaveBeenCalledWith(
@@ -223,17 +227,6 @@ describe("TurnstileWidget", () => {
       expect(onExpire).toHaveBeenCalled();
     });
 
-    it("应该在加载时调用onLoad回调", () => {
-      const onLoad = vi.fn();
-      renderTurnstileWidget({ onLoad });
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      const handleLoad = mockCall?.[0]?.onLoad;
-      handleLoad?.();
-
-      expect(onLoad).toHaveBeenCalled();
-    });
-
     it("应该处理没有onError回调的错误", () => {
       const consoleError = captureExpectedConsoleErrors("Turnstile error:");
       renderTurnstileWidget();
@@ -241,7 +234,7 @@ describe("TurnstileWidget", () => {
       const mockCall = getMockTurnstile().mock.calls[0];
       const handleError = mockCall?.[0]?.onError;
 
-      expect(() => handleError?.("test-error")).not.toThrow();
+      expect(() => act(() => handleError?.("test-error"))).not.toThrow();
       expect(consoleError).toHaveBeenCalledWith(
         "Turnstile error:",
         "test-error",
@@ -256,15 +249,6 @@ describe("TurnstileWidget", () => {
 
       expect(() => handleExpire?.()).not.toThrow();
     });
-
-    it("应该处理没有onLoad回调的加载", () => {
-      renderTurnstileWidget();
-
-      const mockCall = getMockTurnstile().mock.calls[0];
-      const handleLoad = mockCall?.[0]?.onLoad;
-
-      expect(() => handleLoad?.()).not.toThrow();
-    });
   });
 
   describe("错误处理", () => {
@@ -276,6 +260,95 @@ describe("TurnstileWidget", () => {
           />,
         );
       }).not.toThrow();
+    });
+  });
+
+  describe("救援行：拿不到令牌时的邮件出路", () => {
+    const RESCUE_TIMEOUT_MS = 15_000;
+
+    it("shows the rescue line when the widget never produces a token", () => {
+      vi.useFakeTimers();
+      renderTurnstileWidget({});
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 这条是页面静止 15 秒后凭空出现的，屏幕阅读器必须能播报出来
+      expect(screen.getByRole("status")).toContainElement(
+        screen.getByRole("link", { name: /sales@/u }),
+      );
+      // 超时不等于失败：控件可能只是慢，措辞不能吓退还在正常填表的买家
+      expect(screen.getByRole("status")).toHaveTextContent(
+        defaultTestLabels.slowToLoad,
+      );
+      expect(screen.getByRole("status")).not.toHaveTextContent(
+        defaultTestLabels.loadFailed,
+      );
+
+      vi.useRealTimers();
+    });
+
+    it("does not restart the rescue timer when the token merely expires", () => {
+      vi.useFakeTimers();
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
+      // 过期是正常生命周期：widget 会自己续新挑战，不该被当成救援信号
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onExpire?.());
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it("restarts the rescue timer when the form resets the widget after a submit", () => {
+      vi.useFakeTimers();
+      let resetWidget: (() => void) | undefined;
+      renderTurnstileWidget({
+        onReadyRef: (reset) => {
+          resetWidget = reset;
+        },
+      });
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      // 提交落定后表单清令牌并 reset widget。此刻若 Turnstile 挂了，新挑战
+      // 既不 onSuccess 也不 onError，只剩计时器能把买家从死路里捞出来。
+      act(() => resetWidget?.());
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+
+      vi.useRealTimers();
+    });
+
+    it("shows the rescue line as soon as the widget reports an error", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 报错了就说报错，不能拿「慢」搪塞
+      expect(screen.getByRole("status")).toHaveTextContent(
+        defaultTestLabels.loadFailed,
+      );
+      expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
+    });
+
+    it("renders exactly one email fallback when the widget errors", () => {
+      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
+      renderTurnstileWidget({});
+
+      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
+
+      // 救援行只能有一个 owner。将来若有人在别处又加一条，这里会变成 2。
+      expect(screen.getAllByRole("link", { name: /sales@/u })).toHaveLength(1);
+      expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
     });
   });
 
@@ -311,15 +384,8 @@ describe("TurnstileWidget", () => {
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
       vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
       const onSuccess = vi.fn();
-      const onLoad = vi.fn();
 
-      render(
-        <TurnstileWidget
-          labels={labels}
-          onSuccess={onSuccess}
-          onLoad={onLoad}
-        />,
-      );
+      render(<TurnstileWidget labels={labels} onSuccess={onSuccess} />);
 
       expect(screen.getByTestId("turnstile-mock")).toHaveTextContent(
         labels.testMode,
@@ -327,7 +393,6 @@ describe("TurnstileWidget", () => {
       await vi.waitFor(() => {
         expect(onSuccess).toHaveBeenCalledWith("XXXX.DUMMY.TOKEN.XXXX");
       });
-      expect(onLoad).not.toHaveBeenCalled();
     });
 
     it("ignores public test mode in production and renders the real widget", async () => {
