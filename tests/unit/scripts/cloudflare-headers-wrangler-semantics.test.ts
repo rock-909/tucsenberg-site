@@ -611,6 +611,68 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
+  it("fails when a percent-encoded alias appends a cache-killing directive", () => {
+    // 别名规则「只能减分」不等于「只看 `! Header-Name`」。它**设**的头一样能推翻
+    // 期望：追加一条 no-store，线上那次响应同时挂着一年缓存和 no-store，缓存作废。
+    // 把别名规则的 set 整个忽略，这条就永远看不见。
+    const encodedBundle = BUNDLE_PATH.replace("/chunks/", "/%63hunks/");
+    const aliasNoStore = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      encodedBundle,
+      "  Cache-Control: no-store",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": aliasNoStore,
+        ".open-next/assets/_headers": aliasNoStore,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
+      ),
+    );
+  });
+
+  it("fails when a domain-scoped rule appends a shorter max-age", () => {
+    // 域名规则同理。它只在那个域名上生效，所以不能当正面证明；但它在那个域名上
+    // 确实把缓存打短了，不能因为「只能减分」就当没看见。
+    const domainShortens = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      `https://tucsenberg.com${BUNDLE_PATH}`,
+      "  Cache-Control: max-age=0",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": domainShortens,
+        ".open-next/assets/_headers": domainShortens,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
+      ),
+    );
+  });
+
   it("fails when the same route is declared twice through an equivalent path", () => {
     // wrangler 存规则前会用 `new URL()` 规范化，`/downloads/./*` 和 `/downloads/*`
     // 是同一个键，后写的整块盖掉先写的。只比原始字符串的话这条检测一绕就过。

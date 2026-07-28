@@ -338,7 +338,11 @@ function parseExpectedHeader(line) {
  * 但两类都**可以用来判定防护被撤掉**，fail closed：宁可多红一次，也不能放一个能被
  * 收录的 PDF 出去。
  *
- * 一句话：这两类规则只能减分，不能加分。
+ * 「撤掉」不只是 `! Header-Name`。这两类规则**设**的头一样能推翻期望：一条编码别名
+ * 规则给真实 bundle 追加 `Cache-Control: no-store`，线上那次响应就同时挂着一年缓存
+ * 和 no-store，缓存保证作废。所以每条头记两份：`proven` 只收规范路径上的非域名
+ * 规则，用来判断「要的指令在不在」；`present` 收所有命中规则，用来判断「有没有被
+ * 别的指令推翻」。撤销两份一起删。
  */
 function resolveEffectiveHeaders(rules, targetPath) {
   const effective = new Map();
@@ -358,13 +362,18 @@ function resolveEffectiveHeaders(rules, targetPath) {
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
     }
-    if (crossHost || matchesAlias) continue;
 
+    const provesTheHeader = !crossHost && !matchesAlias;
     for (const [name, value] of Object.entries(rule.headers)) {
-      const merged = effective.get(name) ?? new Set();
-      for (const directive of toDirectiveSet(name, value))
-        merged.add(directive);
-      effective.set(name, merged);
+      const entry = effective.get(name) ?? {
+        proven: new Set(),
+        present: new Set(),
+      };
+      for (const directive of toDirectiveSet(name, value)) {
+        entry.present.add(directive);
+        if (provesTheHeader) entry.proven.add(directive);
+      }
+      effective.set(name, entry);
     }
   }
 
@@ -498,14 +507,14 @@ function collectServedPathFailures(
   const wanted = parseExpectedHeader(expectedHeader);
   const actual = resolveEffectiveHeaders(rules, targetPath).get(wanted.name);
 
-  if (!actual) {
+  if (!actual || actual.proven.size === 0) {
     return [
       `${targetPath} in ${relativePath} is served without "${wanted.name}"`,
     ];
   }
 
   const missing = [...wanted.directives].filter(
-    (directive) => !actual.has(directive),
+    (directive) => !actual.proven.has(directive),
   );
   if (missing.length > 0) {
     return [
@@ -516,7 +525,7 @@ function collectServedPathFailures(
   const contradictions = findContradictingDirectives(
     wanted.name,
     wanted.directives,
-    actual,
+    actual.present,
   );
   if (contradictions.length > 0) {
     return [
