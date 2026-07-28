@@ -123,6 +123,10 @@ function collectDeployRunCommands(workflow) {
   return commands;
 }
 
+function stripLeadingEnvAssignments(script) {
+  return script.trim().replace(/^(?:[A-Z_][A-Z0-9_]*=[^\s]+\s+)*/u, "");
+}
+
 function checkWrangler(rootDir, failures) {
   const config = parseWranglerConfig(
     readCloudflareCompareFile(rootDir, "wrangler.jsonc"),
@@ -193,7 +197,10 @@ function checkPackageScripts(rootDir, failures) {
 
   for (const check of CLOUDFLARE_SCRIPT_SURFACE_CHECKS) {
     const script = scripts[check.name];
-    if (script !== check.expected) {
+    if (
+      typeof script !== "string" ||
+      stripLeadingEnvAssignments(script) !== check.expected
+    ) {
       failures.push({
         file: "package.json",
         label:

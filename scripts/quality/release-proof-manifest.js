@@ -109,6 +109,20 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
+      id: "local-playwright-smoke",
+      label: "Local Playwright E2E smoke",
+      lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
+      command: "pnpm",
+      // 不点名文件：testDir 下的用例全跑。上线前的本地证明没有理由比 PR 门禁窄。
+      args: ["exec", "playwright", "test", "--project=chromium"],
+      env: {
+        CI: "1",
+        PLAYWRIGHT_REBUILD_SERVER: "true",
+      },
+      requiresFreePort: 3000,
+      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
+    },
+    {
       id: "next-build",
       label: "Next.js build",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
@@ -122,6 +136,14 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["website:build:cf"],
+      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
+    },
+    {
+      id: "cloudflare-artifact-config",
+      label: "Cloudflare artifact config",
+      lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
+      command: "node",
+      args: ["scripts/quality/checks/cloudflare-artifact-config.js"],
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
@@ -146,20 +168,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         source:
           "Project self-budget (3000 KiB), ~72 KiB margin below the Cloudflare Workers Free gzip upload limit of 3072 KiB (3 MiB)",
       },
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
-    },
-    {
-      id: "local-playwright-smoke",
-      label: "Local Playwright E2E smoke",
-      lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
-      command: "pnpm",
-      // 不点名文件：testDir 下的用例全跑。上线前的本地证明没有理由比 PR 门禁窄。
-      args: ["exec", "playwright", "test", "--project=chromium"],
-      env: {
-        CI: "1",
-        PLAYWRIGHT_REBUILD_SERVER: "true",
-      },
-      requiresFreePort: 3000,
       docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
   ],

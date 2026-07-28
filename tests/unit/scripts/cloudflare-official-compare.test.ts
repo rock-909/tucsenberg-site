@@ -55,7 +55,10 @@ function writePassingSideFiles(rootDir: string): void {
     rootDir,
     "package.json",
     JSON.stringify({
-      scripts: { "website:build:cf": "pnpm exec opennextjs-cloudflare build" },
+      scripts: {
+        "website:build:cf":
+          "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+      },
     }),
   );
 }

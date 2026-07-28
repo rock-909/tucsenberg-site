@@ -135,6 +135,19 @@ describe("package proof command surface", () => {
     }
   });
 
+  it("keeps Cloudflare build scripts on the canonical platform mode", () => {
+    const scripts = readPackageScripts();
+
+    for (const scriptName of ["website:build:cf", "website:build:cf:debug"]) {
+      expect(scripts[scriptName], scriptName).toMatch(
+        /\bDEPLOYMENT_PLATFORM=cloudflare\b/u,
+      );
+      expect(scripts[scriptName], scriptName).toMatch(
+        /\bNEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare\b/u,
+      );
+    }
+  });
+
   // Pattern guards, not a list of names that were never here: `.claude/rules/
   // cloudflare.md` forbids phase-named commands and private topology wrappers,
   // and mutation lanes are opt-in only. These catch a new one being introduced.
