@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
+import { type ComponentProps, useEffect } from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
 import {
   INQUIRY_TURNSTILE_ACTION,
@@ -8,6 +9,8 @@ import {
 } from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
+
+const RESCUE_TIMEOUT_MS = 15_000;
 
 const sentinelTurnstileLabels = {
   unavailable: "安全验证暂时不可用。",
@@ -30,8 +33,10 @@ const {
   mockRequestIdleCallback,
   mockTurnstileState,
   mockTurnstileWidget,
+  widgetResetSpy,
 } = vi.hoisted(() => {
   const mockTurnstileState = { shouldThrow: false };
+  const widgetResetSpy = vi.fn();
   const MockTurnstileWidget = vi.fn(
     ({
       size,
@@ -41,22 +46,33 @@ const {
       onSuccess,
       onError,
       onExpire,
+      onDegraded,
+      onReadyRef,
     }: {
       size?: string;
       theme?: string;
       className?: string;
       labels?: {
-        unavailable: string;
         devBypass: string;
         testMode: string;
       };
       onSuccess?: (token: string) => void;
       onError?: (reason?: string) => void;
       onExpire?: () => void;
+      onDegraded?: (kind: "unavailable" | "failed") => void;
+      onReadyRef?: (reset: () => void) => (() => void) | void;
     }) => {
       if (mockTurnstileState.shouldThrow) {
         throw new Error("turnstile widget failed to load");
       }
+
+      // 真实控件挂载后把 reset 交给上层；替身照做，重置链路才能被断言。
+      useEffect(() => {
+        if (!onReadyRef) {
+          return undefined;
+        }
+        return onReadyRef(widgetResetSpy);
+      }, [onReadyRef]);
 
       return (
         <div
@@ -65,7 +81,6 @@ const {
           data-size={size}
           data-theme={theme}
           data-classname={className}
-          data-label-unavailable={labels?.unavailable}
           data-label-dev-bypass={labels?.devBypass}
           data-label-test-mode={labels?.testMode}
         >
@@ -79,9 +94,19 @@ const {
           <button
             type="button"
             data-testid="turnstile-error"
-            onClick={() => onError?.("lazy-error")}
+            onClick={() => {
+              onDegraded?.("failed");
+              onError?.("lazy-error");
+            }}
           >
             Error
+          </button>
+          <button
+            type="button"
+            data-testid="turnstile-unavailable"
+            onClick={() => onDegraded?.("unavailable")}
+          >
+            Unavailable
           </button>
           <button
             type="button"
@@ -104,6 +129,7 @@ const {
     }),
     mockTurnstileState,
     mockTurnstileWidget: MockTurnstileWidget,
+    widgetResetSpy,
   };
 });
 
@@ -136,6 +162,7 @@ describe("LazyTurnstile", () => {
     idleCallbacks.length = 0;
     intersectionCallbacks.length = 0;
     mockTurnstileState.shouldThrow = false;
+    widgetResetSpy.mockClear();
 
     class MockIntersectionObserver implements IntersectionObserver {
       readonly root = null;
@@ -277,7 +304,7 @@ describe("LazyTurnstile", () => {
     expect(screen.getByTestId("turnstile-widget")).toBeInTheDocument();
   });
 
-  it("shows a safe fallback and reports an error when the widget fails", async () => {
+  it("shows the single rescue prompt and reports an error when the widget fails", async () => {
     mockTurnstileState.shouldThrow = true;
     const onError = vi.fn();
     const onCaughtError = vi.fn();
@@ -311,7 +338,7 @@ describe("LazyTurnstile", () => {
     expect(onCaughtError).toHaveBeenCalledTimes(1);
   });
 
-  it("passes localized availability labels to the shared widget", async () => {
+  it("passes the widget's own localized labels to the shared widget", async () => {
     const labels = sentinelTurnstileLabels;
 
     render(<LazyTurnstile onSuccess={vi.fn()} labels={labels} />);
@@ -322,11 +349,114 @@ describe("LazyTurnstile", () => {
     });
 
     const widget = screen.getByTestId("turnstile-widget");
-    expect(widget).toHaveAttribute(
-      "data-label-unavailable",
-      labels.unavailable,
-    );
     expect(widget).toHaveAttribute("data-label-dev-bypass", labels.devBypass);
     expect(widget).toHaveAttribute("data-label-test-mode", labels.testMode);
+  });
+
+  describe("救援行：拿不到令牌时的邮件出路", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    async function renderAndLoad(
+      props: Partial<ComponentProps<typeof LazyTurnstile>> = {},
+    ) {
+      const labels = createDefaultTestLabels();
+      const utils = render(<LazyTurnstile labels={labels} {...props} />);
+      await act(async () => {
+        idleCallbacks[0]?.();
+        await vi.dynamicImportSettled();
+      });
+      return { labels, ...utils };
+    }
+
+    it("shows the rescue line when the widget never produces a token", async () => {
+      const { labels } = await renderAndLoad();
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 这条是页面静止 15 秒后凭空出现的，屏幕阅读器必须能播报出来
+      expect(screen.getByRole("status")).toContainElement(
+        screen.getByRole("link", { name: /sales@/u }),
+      );
+      // 超时不等于失败：控件可能只是慢，措辞不能吓退还在正常填表的买家
+      expect(screen.getByRole("status")).toHaveTextContent(labels.slowToLoad);
+      expect(screen.getByRole("status")).not.toHaveTextContent(
+        labels.loadFailed,
+      );
+    });
+
+    it("stops the rescue timer once a token arrives", async () => {
+      await renderAndLoad();
+
+      fireEvent.click(screen.getByTestId("turnstile-success"));
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+    });
+
+    it("does not restart the rescue timer when the token merely expires", async () => {
+      await renderAndLoad();
+
+      fireEvent.click(screen.getByTestId("turnstile-success"));
+      // 过期是正常生命周期：widget 会自己续新挑战，不该被当成救援信号
+      fireEvent.click(screen.getByTestId("turnstile-expire"));
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+    });
+
+    it("restarts the rescue timer when the form resets the widget after a submit", async () => {
+      let resetWidget: (() => void) | undefined;
+      await renderAndLoad({
+        onReadyRef: (reset) => {
+          resetWidget = reset;
+        },
+      });
+
+      fireEvent.click(screen.getByTestId("turnstile-success"));
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
+      // 提交落定后表单清令牌并 reset widget。此刻若 Turnstile 挂了，新挑战
+      // 既不 onSuccess 也不 onError，只剩计时器能把买家从死路里捞出来。
+      act(() => resetWidget?.());
+      expect(widgetResetSpy).toHaveBeenCalledTimes(1);
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+    });
+
+    it("shows the rescue line as soon as the widget reports an error", async () => {
+      const { labels } = await renderAndLoad();
+
+      fireEvent.click(screen.getByTestId("turnstile-error"));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
+      // 报错了就说报错，不能拿「慢」搪塞
+      expect(screen.getByRole("status")).toHaveTextContent(labels.loadFailed);
+      // 救援行只能有一个 owner。将来若有人在别处又加一条，这里会变成 2。
+      expect(screen.getAllByRole("link", { name: /sales@/u })).toHaveLength(1);
+    });
+
+    it("uses the unavailable label when the widget reports a missing site key", async () => {
+      const { labels } = await renderAndLoad();
+
+      fireEvent.click(screen.getByTestId("turnstile-unavailable"));
+
+      expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
+      expect(screen.getAllByRole("link", { name: /sales@/u })).toHaveLength(1);
+      expect(screen.getByRole("link", { name: /sales@/u })).toHaveAttribute(
+        "href",
+        `mailto:sales@tucsenberg.com?subject=${encodeURIComponent(labels.rescueSubject)}`,
+      );
+    });
   });
 });

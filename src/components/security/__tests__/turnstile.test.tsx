@@ -7,29 +7,22 @@ import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
 const defaultTestLabels = createTestInquiryFormCopy().turnstile;
 
+/**
+ * 降级文案（不可用、加载失败、加载慢）与那条邮件救援出路都归 `LazyTurnstile`
+ * 管，证明在 `src/components/forms/__tests__/lazy-turnstile*.test.tsx`。
+ * 这个控件只剩两条自己渲染的标签。
+ */
 const sentinelTurnstileLabels = {
-  unavailable: "安全验证暂时不可用。",
-  loadFailed: "安全验证加载失败。",
-  slowToLoad: "安全验证加载得比平时慢。",
   devBypass: "开发模式：Turnstile 验证已跳过",
   testMode: "测试模式下已关闭机器人防护",
-  rescueBeforeEmail: "请改发邮件 —",
-  rescueAfterEmail: "12 小时内回复。",
-  rescueSubject: "报价咨询",
 };
 
 function toTurnstileWidgetLabels(
   labels: typeof defaultTestLabels,
 ): React.ComponentProps<typeof TurnstileWidget>["labels"] {
   return {
-    unavailable: labels.unavailable,
-    loadFailed: labels.loadFailed,
-    slowToLoad: labels.slowToLoad,
     devBypass: labels.devBypass,
     testMode: labels.testMode,
-    rescueBeforeEmail: labels.rescueBeforeEmail,
-    rescueAfterEmail: labels.rescueAfterEmail,
-    rescueSubject: labels.rescueSubject,
   };
 }
 
@@ -263,122 +256,38 @@ describe("TurnstileWidget", () => {
     });
   });
 
-  describe("救援行：拿不到令牌时的邮件出路", () => {
-    const RESCUE_TIMEOUT_MS = 15_000;
-
-    it("shows the rescue line when the widget never produces a token", () => {
-      vi.useFakeTimers();
-      renderTurnstileWidget({});
-
-      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
-
-      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
-      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
-      // 这条是页面静止 15 秒后凭空出现的，屏幕阅读器必须能播报出来
-      expect(screen.getByRole("status")).toContainElement(
-        screen.getByRole("link", { name: /sales@/u }),
-      );
-      // 超时不等于失败：控件可能只是慢，措辞不能吓退还在正常填表的买家
-      expect(screen.getByRole("status")).toHaveTextContent(
-        defaultTestLabels.slowToLoad,
-      );
-      expect(screen.getByRole("status")).not.toHaveTextContent(
-        defaultTestLabels.loadFailed,
-      );
-
-      vi.useRealTimers();
-    });
-
-    it("does not restart the rescue timer when the token merely expires", () => {
-      vi.useFakeTimers();
-      renderTurnstileWidget({});
-
-      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
-      // 过期是正常生命周期：widget 会自己续新挑战，不该被当成救援信号
-      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onExpire?.());
-      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
-
-      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
-
-      vi.useRealTimers();
-    });
-
-    it("restarts the rescue timer when the form resets the widget after a submit", () => {
-      vi.useFakeTimers();
-      let resetWidget: (() => void) | undefined;
-      renderTurnstileWidget({
-        onReadyRef: (reset) => {
-          resetWidget = reset;
-        },
-      });
-
-      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onSuccess?.("token-1"));
-      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
-      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
-
-      // 提交落定后表单清令牌并 reset widget。此刻若 Turnstile 挂了，新挑战
-      // 既不 onSuccess 也不 onError，只剩计时器能把买家从死路里捞出来。
-      act(() => resetWidget?.());
-      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
-
-      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
-
-      vi.useRealTimers();
-    });
-
-    it("shows the rescue line as soon as the widget reports an error", () => {
+  describe("降级状态只上报、不自己渲染救援提示", () => {
+    it("reports the failed state and leaves the rescue prompt to the parent", () => {
       const consoleError = captureExpectedConsoleErrors("Turnstile error:");
-      renderTurnstileWidget({});
+      const onDegraded = vi.fn();
+      renderTurnstileWidget({ onDegraded });
 
       act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
 
-      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
-      // 报错了就说报错，不能拿「慢」搪塞
-      expect(screen.getByRole("status")).toHaveTextContent(
-        defaultTestLabels.loadFailed,
-      );
+      expect(onDegraded).toHaveBeenCalledWith("failed");
+      // 救援行只能有一个 owner，在 LazyTurnstile 那一层。这里多一条就是重复。
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
       expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
     });
 
-    it("renders exactly one email fallback when the widget errors", () => {
-      const consoleError = captureExpectedConsoleErrors("Turnstile error:");
-      renderTurnstileWidget({});
+    it("reports the unavailable state and renders nothing when the site key is missing", () => {
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
+      const onDegraded = vi.fn();
 
-      act(() => mockTurnstile.mock.calls.at(-1)?.[0]?.onError?.("network"));
+      const { container } = render(
+        <TurnstileWidget
+          labels={sentinelTurnstileLabels}
+          onDegraded={onDegraded}
+        />,
+      );
 
-      // 救援行只能有一个 owner。将来若有人在别处又加一条，这里会变成 2。
-      expect(screen.getAllByRole("link", { name: /sales@/u })).toHaveLength(1);
-      expect(consoleError).toHaveBeenCalledWith("Turnstile error:", "network");
+      expect(onDegraded).toHaveBeenCalledWith("unavailable");
+      expect(container).toBeEmptyDOMElement();
     });
   });
 
   describe("localized degraded-state labels", () => {
     const labels = sentinelTurnstileLabels;
-
-    it("uses the provided unavailable label when the site key is missing", () => {
-      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
-
-      render(<TurnstileWidget labels={labels} />);
-
-      expect(screen.getByRole("status")).toHaveTextContent(labels.unavailable);
-    });
-
-    it("uses passed rescue copy for the unavailable mailto subject", () => {
-      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
-
-      render(<TurnstileWidget labels={labels} />);
-
-      expect(screen.getByRole("link")).toHaveAttribute(
-        "href",
-        `mailto:sales@tucsenberg.com?subject=${encodeURIComponent(labels.rescueSubject)}`,
-      );
-      expect(screen.getByRole("status")).toHaveTextContent(
-        labels.rescueBeforeEmail,
-      );
-      expect(screen.getByRole("status")).toHaveTextContent(
-        labels.rescueAfterEmail,
-      );
-    });
 
     it("uses the provided test-mode label when the site key is missing", async () => {
       vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
