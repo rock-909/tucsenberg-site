@@ -51,6 +51,19 @@ RFQ 和 CTA 要降低“我该怎么问”的成本，不要把表单做成营�
 - 说明下一步是 Tucsenberg 按产品线、规格和项目背景判断报价或资料需求。
 - 不承诺未经验证的固定价格、固定交期、认证、客户数量、工程案例或国家覆盖。
 
+## Trust and Messaging Rules
+
+Buyer-visible claims must trace to current content, config, product constants, or
+owner source. Process expectations can explain what happens next, but not promise
+fixed timing. Specs, materials, structure, downloads, and FAQ should support the
+buyer's decision.
+
+- Use: factory supply, flood barrier products, OEM / wholesale, request quote,
+  product specifications, application fit, datasheet/PDF download, project
+  requirements.
+- Avoid: fake proof, unsupported certifications, exact price promises, guaranteed
+  timing, vague “best quality”, and decorative badges without a real source.
+
 ## Brand Personality
 
 **三个词：专业、当代、可靠。**
