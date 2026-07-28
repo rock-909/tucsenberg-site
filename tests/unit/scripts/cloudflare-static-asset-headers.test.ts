@@ -591,6 +591,22 @@ describe("Cloudflare static asset headers proof", () => {
     ]);
   });
 
+  it("reports instead of crashing when the wrangler config cannot be read", () => {
+    // 和 `_headers` 那条同一个道理，但少了它整套结论都没有落点：读不出
+    // `wrangler.jsonc` 就不知道哪个目录会被发布，一个文件都证明不了。这句话必须说
+    // 「这套检查没法知道」，不能说成线上出了问题——业主拿着一句「no way to tell」
+    // 会以为是站点坏了，实际要做的只是修一个本机权限。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(createValidFiles(), {
+        unreadable: new Map([["wrangler.jsonc", "EACCES"]]),
+      }),
+    );
+
+    expect(failures).toEqual([
+      "wrangler.jsonc could not be read (EACCES), so this check cannot tell which files get published",
+    ]);
+  });
+
   it("reports instead of crashing when a header file cannot be read", () => {
     // `existsSync` 说「在」和「读得出来」是两件事。直接 readFileSync 的话，权限不对
     // 时门禁变成崩溃：业主看到一段堆栈，一句失败都没有，而 CI 上这和「检查真的跑过

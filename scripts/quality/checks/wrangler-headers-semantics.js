@@ -1,22 +1,35 @@
 /* ------------------------------------------------------------------ *
  * wrangler 4.100.0 解析并套用 `_headers` 的那套语义，移植过来的一份。
  *
- * 单独一个文件，是因为它和这个仓库没有关系：它不认识 downloads、不认识
- * `_next/static`、不碰磁盘，只回答「wrangler 拿到这份 `_headers`，会怎么解析、
- * 哪条规则命中哪条路径、最终那个头是什么值」。仓库自己的政策（哪些文件必须带
- * noindex、哪些必须带一年缓存）全在 cloudflare-static-asset-headers.js 里。
+ * 单独一个文件，是因为它不认识 downloads、不认识 `_next/static`、不碰磁盘，只回答
+ * 「wrangler 拿到这份 `_headers`，会怎么解析、哪条规则命中哪条路径、最终那个头是
+ * 什么值」。哪些文件必须带 noindex、哪些必须带一年缓存，那是仓库自己的政策，全在
+ * cloudflare-static-asset-headers.js 里。
  *
  * 两边混在一个文件里过，结果是每次改政策都要在移植的代码里翻半天，而移植的代码
  * 一旦被顺手「改进」，对齐的就不是 wrangler 了。
  *
- * 这里的每一行都是抄来的，不是自己的设计，别按「这样写更好」改它。前三轮审查的
- * 每一个缺陷都是同一个根因：凭理解近似 wrangler 的语义，近似一次就漏一处。逐条
- * 打补丁只会一直漏下去——占位符正则、路径归一化、非法规则、行长上限、规则条数
- * 上限，每一条都能单独造出一个假绿。所以这里不再近似，直接照抄锁定版本的实现，
- * 来源标在每个常量后面（行号是 node_modules/wrangler/wrangler-dist/cli.js）。
+ * 文件里两类东西，改法完全不同：
+ *
+ * 一、**照抄的，别按「这样写更好」改**。判据是注释里有 cli.js 行号：`escapeRegex`、
+ * `extractPathname`、`validateRulePath`、`hasInvalidWildcards`、`isValidRule`、
+ * `parseWranglerHeaderRules`、`compileRulePattern`、`ruleToMatcher`、
+ * `toMatchTarget`、`listPlaceholderNames`、`replacePlaceholders`，以及它们用到的
+ * 常量。前三轮审查的每一个缺陷都是同一个根因：凭理解近似 wrangler 的语义，近似一
+ * 次就漏一处。逐条打补丁只会一直漏下去——占位符正则、路径归一化、非法规则、行长
+ * 上限、规则条数上限，每一条都能单独造出一个假绿。所以这里不再近似，直接照抄锁定
+ * 版本的实现，来源标在每个常量后面（行号是 node_modules/wrangler/wrangler-dist/cli.js）。
  *
  * wrangler 的 parser 不能直接 import：它被打进了 cli.js 这个 bundle，
  * `@cloudflare/workers-shared` 和 miniflare 都取不到这个模块。移植是唯一的路。
+ *
+ * 二、**这份门禁自己定的，可以改，但改了要自己重新论证**。wrangler 从不解析头值，
+ * 所以「怎么比一个头值算不算达到期望」没有原件可抄：`normalizeHeaderValue`、
+ * `toDirectiveSet`、`expandDirectives` 和 robots 那两张表（依据是 Google 的
+ * `X-Robots-Tag` 文档，不是 wrangler）、`hasUnbalancedQuotes` 和
+ * `splitOutsideQuotes`（HTTP quoted-string，通用语法）、`parseExpectedHeader`
+ * （解析门禁自己写的期望串）、`resolveEffectiveHeaders`（依据是实测，见它自己的
+ * 注释）、`listHeaderScopes` 和 `toHostname`（「按域名分场景」是这份门禁发明的模型）。
  * ------------------------------------------------------------------ */
 
 // constants.ts（cli.js:128966-128973）
@@ -38,7 +51,7 @@ const LINE_IS_PROBABLY_A_PATH = /^([^\s]+:\/\/|^\/)/u;
 const URL_REGEX = /^https:\/\/+(?<host>[^/]+)\/?(?<path>.*)/u;
 const HOST_WITH_PORT_REGEX = /.*:\d+$/u;
 
-// rules-engine.ts（cli.js:336433）。域名占位符那条作用在**已转义**的规则串上，所以
+// rules-engine.ts（cli.js:336433-336437）。域名占位符那条作用在**已转义**的规则串上，
 // 它找的是 `https:\/\/` 而不是 `https://`，后面跟着一个反斜杠（`\.` 那种转义）。
 //
 // 它今天改变不了任何一条结论：域名段带占位符或通配符的规则已经被
@@ -524,10 +537,8 @@ function toHostname(host) {
 }
 
 module.exports = {
-  MAX_HEADER_RULES,
   hasUnbalancedQuotes,
   listHeaderScopes,
-  listPlaceholderNames,
   parseExpectedHeader,
   parseWranglerHeaderRules,
   resolveEffectiveHeaders,

@@ -3,10 +3,8 @@ const path = require("node:path");
 const ts = require("typescript");
 
 const {
-  MAX_HEADER_RULES,
   hasUnbalancedQuotes,
   listHeaderScopes,
-  listPlaceholderNames,
   parseExpectedHeader,
   parseWranglerHeaderRules,
   resolveEffectiveHeaders,
@@ -90,8 +88,8 @@ function repoFileExists(context, relativePath) {
  * 但两者在可打印 ASCII 上有十几个字符不一致：`# $ % & + , : ; = ? @ [ \ ] |`，
  * `new URL()` 都原样留着或另作处理。空格**不在**这张表里，两边都转成 `%20`——它是
  * 上面那段「直接拼文件名会漏」的论据，不是这两种实现的差异。asset worker 只在
- * `encodePath(路径)` 上
- * 返 200，别的形式一律 307 跳过去（assets.worker.js:8271），所以这些字符里只要有一个
+ * `encodePath(路径)` 上返 200，别的形式一律 307 跳过去（assets.worker.js:8271），
+ * 所以这些字符里只要有一个
  * 出现在文件名里，门禁算出来的就不是那条真正会发文件的 URL，落在真 URL 上的撤销它
  * 完全看不见。
  *

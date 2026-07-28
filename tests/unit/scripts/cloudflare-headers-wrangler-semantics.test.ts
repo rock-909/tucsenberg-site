@@ -388,7 +388,7 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
-  it("fails when the same route is declared twice", () => {
+  it("fails when the same route is declared more than once", () => {
     // wrangler 4.100.0 用 `rules[rule.path] = configuredRule` 存规则，后一个整块
     // 盖掉前一个。把两块合并是门禁替线上做主：它说缓存一年 immutable 齐了，
     // 实际只剩后半条。
