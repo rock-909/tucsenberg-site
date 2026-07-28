@@ -11,7 +11,12 @@ import {
 
 const ROOT_DIR = "/repo";
 const DOWNLOADS_DIR = "public/downloads";
+const STATIC_DIR = ".open-next/assets/_next/static";
 const CATALOG_PATH = "/downloads/catalog.pdf";
+// 构建产物的文件名全带内容哈希，没有 main.js 这种固定名字。写死一条不存在的探针
+// 路径等于什么都没证明：撤销落在真实哈希文件上时它毫无反应。
+const BUNDLE_NAME = "2huo56-xai-ru.js";
+const BUNDLE_PATH = `/_next/static/chunks/${BUNDLE_NAME}`;
 
 function createVirtualRepo(
   files: Record<string, string>,
@@ -78,6 +83,9 @@ function createValidFiles(): Record<string, string> {
     // 两个文件而不是一个：证明的是"每个真实发布的 PDF"，不是"某一条写死的路径"。
     [`${DOWNLOADS_DIR}/catalog.pdf`]: "%PDF-1.7",
     [`${DOWNLOADS_DIR}/spec-sheet.pdf`]: "%PDF-1.7",
+    // 静态资源同理，逐个真实 bundle 求最终响应头。
+    [`${STATIC_DIR}/chunks/${BUNDLE_NAME}`]: "console.log(1)",
+    [`${STATIC_DIR}/media/logo.svg`]: "<svg />",
     "wrangler.jsonc": [
       "{",
       '  "assets": {',
@@ -126,7 +134,38 @@ describe("Cloudflare static asset headers proof", () => {
     );
 
     expect(failures).toContain(
-      `/_next/static/chunks/main.js in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
+      `${BUNDLE_PATH} in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
+    );
+  });
+
+  it("fails when a real bundle has its cache rule detached", () => {
+    // 撤销可以精确落在某个真实哈希文件上。以前探的是写死的
+    // `/_next/static/chunks/main.js`，那个文件在构建产物里根本不存在，于是这条
+    // 撤销线上生效、bundle 失去一年缓存，而门禁全绿。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      BUNDLE_PATH,
+      "  ! Cache-Control",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": detached,
+        ".open-next/assets/_headers": detached,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers is served without`,
+      ),
     );
   });
 
@@ -534,6 +573,96 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("drops the header lines under a route line wrangler rejects", () => {
+    // 被丢弃的路由行会把它底下的响应头一起吃掉，而不是让那些头挂到上一个块名下。
+    // 把这两行并进 downloads 块，门禁就会说 PDF 有 noindex，而线上 downloads 块
+    // 一条头都没有。
+    const swallowed = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "ftp://bad.example/downloads/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": swallowed,
+        ".open-next/assets/_headers": swallowed,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("ignores a route line longer than wrangler's limit", () => {
+    // wrangler 整行忽略超过 2000 字符的行。一条归一化后是 `/downloads/*`、但靠
+    // `/./` 填到 2000 以上的规则，线上根本不生效，门禁若认它就是假绿。
+    const padding = "/.".repeat(1010);
+    const overlong = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      `/downloads${padding}/*`,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    expect(`/downloads${padding}/*`.length).toBeGreaterThan(2000);
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": overlong,
+        ".open-next/assets/_headers": overlong,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("ignores rules past wrangler's hundred-rule limit", () => {
+    // 第 101 条规则以及之后的整段文件都不生效。把 noindex 写在那之后，线上没有，
+    // 门禁若认它就是假绿。
+    const filler = Array.from({ length: 100 }, (_, index) =>
+      [`/filler-${index}/*`, "  X-Filler: 1", ""].join("\n"),
+    ).join("\n");
+    const overflowing = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      filler,
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": overflowing,
+        ".open-next/assets/_headers": overflowing,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
   it("ignores a detach written on a non-https absolute URL", () => {
     // wrangler 的绝对 URL 只认 https，`http://` 那条整块跳过。算它撤掉了头
     // 就是误红，会拦住一次完全正当的发布。
@@ -554,6 +683,32 @@ describe("Cloudflare static asset headers proof", () => {
         ...createValidFiles(),
         "public/_headers": httpDetach,
         ".open-next/assets/_headers": httpDetach,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("ignores a detach written on a host that carries a port", () => {
+    // wrangler 明确拒绝带端口的绝对 URL（`validateUrl` 的 disallowPorts）。
+    // 算它撤掉了头同样是误红。
+    const portDetach = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "https://tucsenberg.com:8080/downloads/*",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": portDetach,
+        ".open-next/assets/_headers": portDetach,
       }),
     );
 
@@ -682,6 +837,21 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
+    );
+  });
+
+  it("fails when the static asset output holds nothing to prove", () => {
+    // 构建产物没跑或者被清空时，静态资源那一侧同样一条证明都不剩。
+    const files = createValidFiles();
+    delete files[`${STATIC_DIR}/chunks/${BUNDLE_NAME}`];
+    delete files[`${STATIC_DIR}/media/logo.svg`];
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(`${STATIC_DIR} holds no files`),
     );
   });
 });
