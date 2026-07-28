@@ -153,6 +153,21 @@ This calibration improves the starter's B2B clarity without adopting another
 brand identity. It is not a visual migration and it does not change runtime CSS
 by itself.
 
+### Design draft tooling boundary
+
+AI design tools such as Stitch may be used for visual drafts only. Treat their
+outputs as reference screenshots or rough HTML, not as production code.
+
+Give them only information safe for a public website: page purpose, audience,
+planned sections, visual direction, and already-public product facts. Do not
+send customer lists, pricing strategy, credentials, private supplier details,
+or unreleased business plans to external draft tools.
+
+When a draft is accepted, implement it through the project system:
+`docs/design/设计真相.md`, `docs/design/组件使用手册.md`, local
+`src/components/ui/*` wrappers, tokens in `src/app/globals.css`, and the
+component governance checks. Do not paste generated vendor HTML into the site.
+
 ### Reference source: Vercel discipline, not identity
 
 Vercel is a reference for hierarchy, state precision, restrained spacing,

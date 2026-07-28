@@ -53,9 +53,9 @@ upstream default, not the older path.
 Local `.superpowers/**` state is not a repo document path and must not be
 committed.
 
-This derived site still keeps some inherited execution material under `plans/`.
-Treat those files as run records, not product docs. They may contain stale
-starter/profile facts.
+The root execution-plan tree has been retired from the current checkout. Old
+plan and handoff records remain historical only in git history or local Trash;
+do not restore them as product docs.
 
 ## UI motion changes
 

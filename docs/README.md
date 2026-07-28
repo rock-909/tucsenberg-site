@@ -33,7 +33,7 @@ Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `d
 ## 不当作当前真相
 
 - `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`：Superpowers spec / plan 过程记录。
-- `plans/**`：旧执行计划和构建交接材料。
+- 根目录旧执行计划和构建交接材料：已退出现行 checkout，只能作为 git 历史或本机 Trash 里的历史证据。
 - 任何旧 `/zh` 路由、旧 starter 域名、旧 branch 名称：只能作为历史证据，不能覆盖当前 English-only 站点事实。
 
 当前版本和运行事实看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md`、当前配置和测试结果。

@@ -96,7 +96,8 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 - `docs/项目基础/项目基础.md`
 - `docs/项目基础/内容.md`
 - `docs/项目基础/部署.md`
-- `plans/handoff-report.md`
+- `docs/项目基础/上线验证.md`
+- `docs/项目基础/行为合约.md`
 
 设计与组件治理：
 
