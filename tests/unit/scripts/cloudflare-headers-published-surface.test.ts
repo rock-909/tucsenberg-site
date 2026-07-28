@@ -444,7 +444,7 @@ describe("Cloudflare published asset surface", () => {
       );
 
       expect(failures).toContainEqual(
-        `${real} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+        `${real} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
       );
     },
   );
@@ -478,9 +478,67 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toEqual([
-      `${DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
-      `${BUILT_DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+      `${BUILT_DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
     ]);
+  });
+
+  it("keeps proving files when a directory cannot be listed", () => {
+    // 列不出来（权限、EMFILE、EIO）不等于名字被折叠了。当成折叠处理的话，那个目录
+    // 一条路径都不列，而它底下那份被撤销了 noindex 的 PDF 一个字都不打印——红的是
+    // 一个不存在的问题，真问题反倒消音了。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/generated-only.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(
+        {
+          ...createValidFiles(),
+          [`${BUILT_DOWNLOADS_DIR}/generated-only.pdf`]: "%PDF-1.7",
+          "public/_headers": detached,
+          [`${ASSETS_DIR}/_headers`]: detached,
+        },
+        new Set(),
+        (value) => value,
+        // 资产根列不出来，它底下的 downloads 目录本身还是列得动的。
+        new Set([ASSETS_DIR]),
+      ),
+    );
+
+    expect(failures).toContainEqual(
+      `${BUILT_DOWNLOADS_DIR} could not be listed, so this check cannot confirm it is spelled the same on disk as in the URL`,
+    );
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '/downloads/generated-only.pdf in public/_headers is served without "x-robots-tag"',
+      ),
+    );
+  });
+
+  it("reports instead of crashing when a protected path is a plain file", () => {
+    // `public/downloads` 是个普通文件时 readdir 抛 ENOTDIR。不接住的话门禁变成
+    // 崩溃而不是判断，业主看到的是一段堆栈，不是「哪里出了问题」。
+    const files = createValidFiles();
+    delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
+    delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
+    files[DOWNLOADS_DIR] = "not a directory";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
+    );
   });
 
   it("still names the bare pdf when another directory cannot be resolved", () => {
@@ -512,7 +570,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toContainEqual(
-      `${DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
     );
     expect(failures).toContainEqual(
       expect.stringContaining(

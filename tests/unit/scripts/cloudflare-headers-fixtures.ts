@@ -40,6 +40,7 @@ export function createVirtualRepo(
   files: Record<string, string>,
   symlinks: Set<string> = new Set(),
   fold: (name: string) => string = (name) => name,
+  unlistable: Set<string> = new Set(),
 ) {
   // 目录也要能被折叠命中，所以每个 key 的每一层祖先都进表。
   const folded = new Map<string, string>();
@@ -83,6 +84,17 @@ export function createVirtualRepo(
     // 返回 Dirent 形状，和真实 readdirSync(dir, { withFileTypes: true }) 一致。
     // 替身只返回字符串的话，「目录不算文件」这条根本没法被测出来。
     readdirSync: (absolutePath: string) => {
+      const key = normalize(absolutePath);
+      // 真实 fs 列不出来时是抛异常，不是返回空数组。权限不足、EMFILE、EIO 都算；
+      // 路径本身是个普通文件时抛的是 ENOTDIR。替身只会返回空数组的话，「列不出来」
+      // 和「里面没东西」在测试里根本分不开。
+      if (unlistable.has(key)) {
+        const error = new Error(`EACCES: permission denied, scandir '${key}'`);
+        throw error;
+      }
+      if (files[key] !== undefined) {
+        throw new Error(`ENOTDIR: not a directory, scandir '${key}'`);
+      }
       const prefix = childPrefix(absolutePath);
       const names = new Set(
         Object.keys(files)

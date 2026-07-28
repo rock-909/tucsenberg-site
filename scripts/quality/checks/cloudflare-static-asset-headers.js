@@ -567,10 +567,12 @@ function toServedPath(urlPrefix, relativePath) {
  */
 function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
   const absolute = path.join(context.rootDir, sourceDir, relative);
-  if (!context.existsSync(absolute)) return [];
+  // 列不出来就没有可证明的路径。这里不能直接 readdirSync：`public/downloads` 要是
+  // 一个普通文件，它抛 ENOTDIR，门禁变成崩溃而不是判断。
+  const entries = readdirOrNull(context, absolute);
+  if (entries === null) return [];
 
-  return context
-    .readdirSync(absolute, { withFileTypes: true })
+  return entries
     .flatMap((entry) => {
       const next = relative ? `${relative}/${entry.name}` : entry.name;
       const resolved = statOrNull(context, path.join(absolute, entry.name));
@@ -602,9 +604,14 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
  * `"downloadſ".toLowerCase()` 还是它自己。
  *
  * 名字对不上时不去猜磁盘上那个真名是谁——猜错了后面每一条证明说的都是另一条 URL。
- * 直接返回「算不出来」，那个目录一条路径都不列，由调用方打印一句成立的话。上一版
- * 是判红之后照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不
- * 出来」，后几行接着拿那条算不出来的 URL 下结论，而那些结论两个方向都不成立。
+ * 直接返回 folded，那个目录一条路径都不列，由调用方打印一句成立的话。上一版是判红
+ * 之后照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不出来」，
+ * 后几行接着拿那条算不出来的 URL 下结论，而那些结论两个方向都不成立。
+ *
+ * 「列不出来」必须和「名字被折叠了」分开。上一版把 readdir 的任何失败（权限、
+ * EMFILE、EIO）都当成折叠，于是一个只是不可列的目录会被说成「名字不对」，而它底下
+ * 那份被撤销了 noindex 的 PDF 一个字都不打印——正好是这段代码要修的那个毛病换了个
+ * 触发条件。列不出来时名字本身没有可疑之处，逐文件证明照常跑。
  *
  * 只解析会进 URL 的那几段。`public`、`.open-next`、`assets` 被 wrangler 完全剥掉
  * （清单路径是相对资产根算的），它们叫什么都不改变任何一条 URL。
@@ -615,7 +622,8 @@ function resolveServedDir(context, baseDir, urlSubdir) {
   for (const segment of urlSubdir.split("/")) {
     const entries = readdirOrNull(context, parent);
     const next = path.join(parent, segment);
-    if (entries?.some((entry) => entry.name === segment) !== true) {
+    if (entries === null) return "unlistable";
+    if (!entries.some((entry) => entry.name === segment)) {
       // 一模一样的名字找不到、路径却又「存在」，说明是文件系统替我们折叠了名字。
       // 目录压根不在时返回 missing，由「目录里没东西」那条去报。
       return context.existsSync(next) ? "folded" : "missing";
@@ -627,10 +635,21 @@ function resolveServedDir(context, baseDir, urlSubdir) {
 }
 
 function collectUnresolvableDirectoryFailures(context, baseDir, urlSubdir) {
-  if (resolveServedDir(context, baseDir, urlSubdir) !== "folded") return [];
-  return [
-    `${baseDir}/${urlSubdir} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
-  ];
+  const sourceDir = `${baseDir}/${urlSubdir}`;
+  const resolution = resolveServedDir(context, baseDir, urlSubdir);
+  // 「算不出来」是这个检查的选择，不是世界的性质：真名在磁盘上，比对 inode 就能拿到。
+  // 所以话要说成「这个检查算不出来」，不能说成「没人算得出来」。
+  if (resolution === "folded") {
+    return [
+      `${sourceDir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+    ];
+  }
+  if (resolution === "unlistable") {
+    return [
+      `${sourceDir} could not be listed, so this check cannot confirm it is spelled the same on disk as in the URL`,
+    ];
+  }
+  return [];
 }
 
 function readdirOrNull(context, absolutePath) {
@@ -1028,10 +1047,11 @@ function collectPublishedDirectoryFailures(context, directory) {
   // 一条线上不存在的 URL。这三个目录各判各的，一个算不出来不影响另外两个照常证明。
   const listResolved = (baseDir, urlSubdir) => {
     const resolution = resolveServedDir(context, baseDir, urlSubdir);
-    // 目录不在是「一条都证明不了」，照常报空目录；名字算不出来才返回 null，那是
-    // 另一件事，由 collectUnresolvableDirectoryFailures 去说。
-    if (resolution === "missing") return [];
+    // 只有「名字被折叠了」才不列——那时按写死的前缀算出来的每一条 URL 都不存在。
+    // 目录不在是「一条都证明不了」，照常报空目录；上层列不出来时名字本身没问题，
+    // 逐文件证明照常跑，那份被撤销了 noindex 的 PDF 不能因此消音。
     if (resolution === "folded") return null;
+    if (resolution === "missing") return [];
     return listServedPaths(context, `${baseDir}/${urlSubdir}`, `/${urlSubdir}`);
   };
   const sourceDownloadPaths = listResolved(
