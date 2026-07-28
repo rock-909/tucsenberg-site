@@ -30,8 +30,9 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
   也不会被别的 worktree 占着 3000 端口的服务污染。
 - **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
   `node scripts/starter-checks.js content-manifest` 重新生成。
-- **commit 的 subject 必须小写、不超过 72 字符。** pre-push 会跑一遍完整构建；确实
-  急，可以 `RUN_FAST_PUSH=1` 跳过。
+- **pre-push 会跑一遍完整构建。** 确实急，可以 `RUN_FAST_PUSH=1` 跳过——它同时还会
+  跳过架构检查、依赖安全审计和死导出扫描，其中依赖安全审计 PR 的 CI 不跑，只有每周
+  的定时任务兜底。
 
 ## 验证
 
