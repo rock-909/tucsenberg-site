@@ -8,8 +8,12 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 export const ROOT_DIR = "/repo";
+export const ASSETS_DIR = ".open-next/assets";
 export const DOWNLOADS_DIR = "public/downloads";
-export const STATIC_DIR = ".open-next/assets/_next/static";
+// 真正被发布出去的是资产目录，源目录只是下次构建的输入。两个都要有夹具，否则
+// 「只存在于构建产物里的 PDF」这个场景根本测不出来。
+export const BUILT_DOWNLOADS_DIR = `${ASSETS_DIR}/downloads`;
+export const STATIC_DIR = `${ASSETS_DIR}/_next/static`;
 export const CATALOG_PATH = "/downloads/catalog.pdf";
 // 构建产物的文件名全带内容哈希，没有 main.js 这种固定名字。写死一条不存在的探针
 // 路径等于什么都没证明：撤销落在真实哈希文件上时它毫无反应。
@@ -60,9 +64,22 @@ export function createVirtualRepo(
         return {
           name,
           isDirectory: () => isDirectory,
+          // Dirent 看到的是链接本身，所以符号链接这里不是普通文件。跟随之后是
+          // 什么，由 statSync 回答——wrangler 也是这么分工的。
           isFile: () => !isDirectory && !symlinks.has(`${prefix}${name}`),
         };
       });
+    },
+    // statSync 跟随符号链接：指向真实文件的链接在这里就是普通文件。
+    statSync: (absolutePath: string) => {
+      const key = normalize(absolutePath);
+      const isDirectory = Object.keys(files).some((file) =>
+        file.startsWith(`${key}/`),
+      );
+      if (!isDirectory && files[key] === undefined) {
+        throw new Error(`Missing virtual path: ${key}`);
+      }
+      return { isFile: () => !isDirectory };
     },
   };
 }
@@ -84,6 +101,9 @@ export function createValidFiles(): Record<string, string> {
     // 两个文件而不是一个：证明的是"每个真实发布的 PDF"，不是"某一条写死的路径"。
     [`${DOWNLOADS_DIR}/catalog.pdf`]: "%PDF-1.7",
     [`${DOWNLOADS_DIR}/spec-sheet.pdf`]: "%PDF-1.7",
+    // 构建把它们复制进资产目录，那份才是真正被发布的。
+    [`${BUILT_DOWNLOADS_DIR}/catalog.pdf`]: "%PDF-1.7",
+    [`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`]: "%PDF-1.7",
     // 静态资源同理，逐个真实 bundle 求最终响应头。
     [`${STATIC_DIR}/chunks/${BUNDLE_NAME}`]: "console.log(1)",
     [`${STATIC_DIR}/media/logo.svg`]: "<svg />",

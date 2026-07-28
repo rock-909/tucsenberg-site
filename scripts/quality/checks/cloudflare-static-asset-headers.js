@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const ts = require("typescript");
 
 const EXPECTED_STATIC_ASSET_HEADER_ROUTE = "/_next/static/*";
 const EXPECTED_STATIC_ASSET_CACHE_CONTROL = "public,max-age=31536000,immutable";
@@ -10,12 +11,12 @@ const EXPECTED_DOWNLOADS_NOINDEX = "X-Robots-Tag: noindex";
 // 内容哈希；只要撤销精确落在某个真实哈希文件上，那条虚构探针毫无反应。
 const DOWNLOADS_SOURCE_DIR = "public/downloads";
 const DOWNLOADS_URL_PREFIX = "/downloads";
-const STATIC_ASSET_SOURCE_DIR = ".open-next/assets/_next/static";
+const DOWNLOADS_ASSET_SUBDIR = "downloads";
+const STATIC_ASSET_SUBDIR = "_next/static";
 const STATIC_ASSET_URL_PREFIX = "/_next/static";
 const SOURCE_HEADERS_PATH = "public/_headers";
-const OPENNEXT_ASSET_HEADERS_PATH = ".open-next/assets/_headers";
+const ASSET_HEADERS_FILENAME = "_headers";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
-const WRANGLER_ASSET_DIRECTORY = '".open-next/assets"';
 
 function readRepoFile(context, relativePath) {
   return context.readFileSync(path.join(context.rootDir, relativePath), "utf8");
@@ -224,6 +225,10 @@ function ruleToMatcher(rulePath) {
 
     return {
       host: hostPart,
+      // 域名段里的占位符名字。它们的值只有知道真实域名才能算出来，而这里不知道
+      // 线上会用哪个域名，所以拿它们拼出来的响应头是证明不了的（见
+      // collectUnprovableHostPlaceholderFailures）。
+      hostPlaceholders: hostPart === null ? [] : listPlaceholderNames(hostPart),
       // 命中与否只看路径段——某条规则属于哪个域名由调用方按域名分场景决定
       // （见 resolveEffectiveHeaders）。但能不能编译要看整条。
       pathPattern:
@@ -232,6 +237,28 @@ function ruleToMatcher(rulePath) {
   } catch {
     return null;
   }
+}
+
+function listPlaceholderNames(segment) {
+  return [...segment.matchAll(NAMED_PLACEHOLDER_PATTERN)].map(
+    (match) => match[1],
+  );
+}
+
+/**
+ * rules-engine.ts 的 `replacer`（cli.js:336439）：命中的捕获值会被替换进响应头的
+ * **值**里，不只是用来判断命中。
+ *
+ * 漏掉这一步就有假绿：`/_next/static/:directive` 底下写 `Cache-Control: :directive`，
+ * 构建产物里只要有一个文件叫 `no-store`，线上那条头就真的变成 `no-store`，一年缓存
+ * 当场作废；而只看字面量 `:directive` 的话，它不在任何冲突指令名单里，检查全绿。
+ */
+function replacePlaceholders(value, replacements) {
+  let result = value;
+  for (const [name, captured] of Object.entries(replacements)) {
+    result = result.replaceAll(`:${name}`, captured);
+  }
+  return result;
 }
 
 /**
@@ -327,7 +354,8 @@ function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
     if (matcher === null) continue;
     const { host, pathPattern } = matcher;
     if (host !== null && host !== scopeHost) continue;
-    if (!pathPattern.test(targetPath)) continue;
+    const match = pathPattern.exec(targetPath);
+    if (match === null) continue;
 
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
@@ -335,7 +363,8 @@ function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
 
     for (const [name, value] of Object.entries(rule.headers)) {
       const merged = effective.get(name) ?? new Set();
-      for (const directive of toDirectiveSet(name, value))
+      const resolved = replacePlaceholders(value, match.groups ?? {});
+      for (const directive of toDirectiveSet(name, resolved))
         merged.add(directive);
       effective.set(name, merged);
     }
@@ -392,6 +421,11 @@ function toServedPath(urlPrefix, relativePath) {
  * .secret-probe.pdf` 后 `wrangler dev --local` 起服务，请求
  * `/downloads/.secret-probe.pdf` 返回 200 和完整 PDF。过滤掉它们等于放过一份
  * 能被搜索引擎抓到、却没人证明带 noindex 的下载。
+ *
+ * 符号链接也要算。wrangler 建上传清单时用的是 `fs.stat(filepath)`
+ * （cli.js:137583），`stat` 会跟随链接，所以指向普通文件的链接在它眼里就是普通
+ * 文件，照传不误——那句 `filestat.isSymbolicLink()` 对 `stat` 来说永远为假。用
+ * `Dirent.isFile()` 判断会把它们全漏掉，一条精确撤销落在链接上就没人管。
  */
 function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
   const absolute = path.join(context.rootDir, sourceDir, relative);
@@ -406,12 +440,19 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
       if (entry.isDirectory()) {
         return listServedPaths(context, sourceDir, urlPrefix, next);
       }
-      // 只有普通文件算数。符号链接、FIFO 这些不是可证明的资源，把它们算进来
-      // 等于「目录里没有真实文件」也能凑够数，空证明照样全绿。
-      if (!entry.isFile()) return [];
+      if (!isPublishedFile(context, path.join(absolute, entry.name))) return [];
       return [toServedPath(urlPrefix, next)];
     })
     .sort();
+}
+
+/** 跟随符号链接之后还是普通文件才算数；目录、FIFO、断链都不算。 */
+function isPublishedFile(context, absolutePath) {
+  try {
+    return context.statSync(absolutePath).isFile();
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -539,6 +580,39 @@ function collectServedPathFailures(
   );
 }
 
+/**
+ * 域名段里的占位符没法解出来，拿它拼出来的响应头就没法证明。
+ *
+ * `https://:env.example.com/_next/static/*` 底下写 `Cache-Control: :env`，线上那条
+ * 头的值等于真实域名的第一段——可能是 `no-store`，也可能是别的。这里不知道线上会
+ * 用哪个域名（预览域名就是另一个），所以只能判红，而不是把字面量 `:env` 当成一条
+ * 无害的头放过去。
+ */
+function collectUnprovableHostPlaceholderFailures(rules, relativePath) {
+  const failures = [];
+
+  for (const rule of rules) {
+    const matcher = ruleToMatcher(rule.path);
+    if (matcher === null || matcher.hostPlaceholders.length === 0) continue;
+
+    for (const [name, value] of Object.entries(rule.headers)) {
+      const used = matcher.hostPlaceholders.filter((placeholder) =>
+        value.includes(`:${placeholder}`),
+      );
+      if (used.length === 0) continue;
+      failures.push(
+        `"${rule.path}" in ${relativePath} builds "${name}" out of the host placeholder ${used
+          .map((placeholder) => `:${placeholder}`)
+          .join(
+            ", ",
+          )}, so its served value cannot be proven; write the host out in full`,
+      );
+    }
+  }
+
+  return failures;
+}
+
 function collectHeaderFileFailures(
   context,
   relativePath,
@@ -557,6 +631,7 @@ function collectHeaderFileFailures(
   // ——那两个是业主可调参数，钉死数字会让他一改就红而意图完全没坏。
   return [
     ...collectDuplicateRouteFailures(rules, relativePath),
+    ...collectUnprovableHostPlaceholderFailures(rules, relativePath),
     ...staticAssetPaths.flatMap((assetPath) =>
       collectServedPathFailures(
         rules,
@@ -581,64 +656,114 @@ function createCloudflareStaticAssetHeaderContext({
   existsSync = fs.existsSync,
   readFileSync = fs.readFileSync,
   readdirSync = fs.readdirSync,
+  statSync = fs.statSync,
 } = {}) {
   return {
     rootDir,
     existsSync,
     readFileSync,
     readdirSync,
+    statSync,
   };
+}
+
+/**
+ * 读出 wrangler 真正会发布哪个目录。
+ *
+ * 以前这里查的是 `wrangler.jsonc` 里有没有出现 `".open-next/assets"` 这串字符。
+ * 那证明不了任何事：一条 `// old: ".open-next/assets"` 的注释就能让它过，而
+ * `"directory"` 早就改成了别的目录——门禁去证明一个根本不会被发布的目录，线上那份
+ * 真资产一个文件都没查。所以按 JSONC 解析取真实值，注释既满足不了它也绊不倒它。
+ */
+function readAssetsDirectory(context) {
+  if (!repoFileExists(context, WRANGLER_CONFIG_PATH)) {
+    return { error: `missing ${WRANGLER_CONFIG_PATH}` };
+  }
+
+  const { config, error } = ts.parseConfigFileTextToJson(
+    WRANGLER_CONFIG_PATH,
+    readRepoFile(context, WRANGLER_CONFIG_PATH),
+  );
+  if (error) {
+    return { error: `${WRANGLER_CONFIG_PATH} could not be parsed` };
+  }
+
+  const directory = config?.assets?.directory;
+  if (typeof directory !== "string" || directory === "") {
+    return {
+      error: `${WRANGLER_CONFIG_PATH} has no assets.directory, so there is no way to tell which files get published`,
+    };
+  }
+
+  return { directory };
+}
+
+function collectEmptyDirectoryFailure(paths, sourceDir, expectedHeader) {
+  if (paths.length > 0) return [];
+  return [
+    `${sourceDir} holds no files, so nothing proves "${expectedHeader}" reaches a real file`,
+  ];
 }
 
 function collectCloudflareStaticAssetHeaderFailures(options = {}) {
   const context = createCloudflareStaticAssetHeaderContext(options);
-  const failures = [];
+  const { directory, error } = readAssetsDirectory(context);
+  // 不知道发布哪个目录就什么都证明不了。这里直接停，不拿写死的目录顶上——那正是
+  // 上一版的假绿来源。
+  if (error !== undefined) return [error];
 
-  if (!repoFileExists(context, WRANGLER_CONFIG_PATH)) {
-    failures.push(`missing ${WRANGLER_CONFIG_PATH}`);
-  } else {
-    const wrangler = readRepoFile(context, WRANGLER_CONFIG_PATH);
-    if (!wrangler.includes(WRANGLER_ASSET_DIRECTORY)) {
-      failures.push(
-        `${WRANGLER_CONFIG_PATH} must keep assets.directory set to .open-next/assets`,
-      );
-    }
-  }
+  const assetHeadersPath = `${directory}/${ASSET_HEADERS_FILENAME}`;
+  const assetDownloadsDir = `${directory}/${DOWNLOADS_ASSET_SUBDIR}`;
+  const assetStaticDir = `${directory}/${STATIC_ASSET_SUBDIR}`;
 
-  // 目录空了或者被改了名，逐文件证明就一条都不剩，而门禁会安安静静地全绿。
-  // 这个仓库靠 PDF 接询盘，「没有可证明的东西」在这里就是失败。
-  const downloadPaths = listServedPaths(
+  // 源目录和发布目录都要枚举。只查 `public/downloads` 的话，构建时才生成、只存在
+  // 于发布目录里的 PDF 一份都没查过；只查发布目录的话，源码里新加的 PDF 要等下次
+  // 构建才有人管。两边并起来，谁多出一份都得有人证明它带着 noindex。
+  const sourceDownloadPaths = listServedPaths(
     context,
     DOWNLOADS_SOURCE_DIR,
     DOWNLOADS_URL_PREFIX,
   );
-  if (downloadPaths.length === 0) {
-    failures.push(
-      `${DOWNLOADS_SOURCE_DIR} holds no files, so nothing proves "${EXPECTED_DOWNLOADS_NOINDEX}" reaches a real download`,
-    );
-  }
-
+  const assetDownloadPaths = listServedPaths(
+    context,
+    assetDownloadsDir,
+    DOWNLOADS_URL_PREFIX,
+  );
   const staticAssetPaths = listServedPaths(
     context,
-    STATIC_ASSET_SOURCE_DIR,
+    assetStaticDir,
     STATIC_ASSET_URL_PREFIX,
   );
-  if (staticAssetPaths.length === 0) {
-    failures.push(
-      `${STATIC_ASSET_SOURCE_DIR} holds no files, so nothing proves "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" reaches a real bundle`,
-    );
-  }
 
-  const servedPaths = { downloadPaths, staticAssetPaths };
+  // 目录空了或者被改了名，逐文件证明就一条都不剩，而门禁会安安静静地全绿。
+  // 这个仓库靠 PDF 接询盘，「没有可证明的东西」在这里就是失败。
+  const failures = [
+    ...collectEmptyDirectoryFailure(
+      sourceDownloadPaths,
+      DOWNLOADS_SOURCE_DIR,
+      EXPECTED_DOWNLOADS_NOINDEX,
+    ),
+    ...collectEmptyDirectoryFailure(
+      assetDownloadPaths,
+      assetDownloadsDir,
+      EXPECTED_DOWNLOADS_NOINDEX,
+    ),
+    ...collectEmptyDirectoryFailure(
+      staticAssetPaths,
+      assetStaticDir,
+      `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+    ),
+  ];
+
+  const servedPaths = {
+    downloadPaths: [
+      ...new Set([...sourceDownloadPaths, ...assetDownloadPaths]),
+    ].sort(),
+    staticAssetPaths,
+  };
   failures.push(
     ...collectHeaderFileFailures(context, SOURCE_HEADERS_PATH, servedPaths),
-  );
-  failures.push(
-    ...collectHeaderFileFailures(
-      context,
-      OPENNEXT_ASSET_HEADERS_PATH,
-      servedPaths,
-    ),
+    ...collectHeaderFileFailures(context, assetHeadersPath, servedPaths),
   );
 
   return failures;
@@ -668,7 +793,6 @@ module.exports = {
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-  OPENNEXT_ASSET_HEADERS_PATH,
   SOURCE_HEADERS_PATH,
   collectCloudflareStaticAssetHeaderFailures,
   createCloudflareStaticAssetHeaderContext,

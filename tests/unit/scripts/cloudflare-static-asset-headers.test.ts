@@ -8,6 +8,8 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
+  ASSETS_DIR,
+  BUILT_DOWNLOADS_DIR,
   BUNDLE_NAME,
   BUNDLE_PATH,
   CATALOG_PATH,
@@ -410,16 +412,46 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
-  it("does not count a symlink as a provable download", () => {
-    // 只区分「目录」和「非目录」的话，符号链接会被当成真实 PDF，于是一个普通
-    // 文件都没有的目录也能凑够数，空证明照样全绿。
+  it("fails when a symlinked download loses its noindex", () => {
+    // wrangler 建上传清单用的是 stat，会跟随符号链接，所以指向真实文件的链接照样
+    // 被发布。按 Dirent 判「是不是普通文件」会把它整个漏掉，一条精确撤销落在链接
+    // 上就没人管。
+    const linkedDetach = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/linked.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+    const files = createValidFiles();
+    files[`${BUILT_DOWNLOADS_DIR}/linked.pdf`] = "%PDF-1.7";
+    files["public/_headers"] = linkedDetach;
+    files[`${ASSETS_DIR}/_headers`] = linkedDetach;
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, new Set([`${BUILT_DOWNLOADS_DIR}/linked.pdf`])),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/linked.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
+  it("fails when the downloads source directory holds nothing to prove", () => {
+    // 目录被改名或清空，逐文件证明就一条都不剩，门禁会安安静静地全绿。
+    // 「没有可证明的东西」在这里必须是失败。
     const files = createValidFiles();
     delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
     delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
-    files[`${DOWNLOADS_DIR}/linked.pdf`] = "";
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files, new Set([`${DOWNLOADS_DIR}/linked.pdf`])),
+      createVirtualRepo(files),
     );
 
     expect(failures).toContainEqual(
@@ -427,22 +459,87 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
-  it("fails when the downloads directory holds nothing to prove", () => {
-    // 目录被改名或清空，逐文件证明就一条都不剩，门禁会安安静静地全绿。
-    // 「没有可证明的东西」在这里必须是失败。
+  it("fails when the published downloads directory holds nothing to prove", () => {
+    // 源目录还在、构建产物那一份空了，发布出去的就是一个空目录。只查源目录的话
+    // 这里全绿。
     const files = createValidFiles();
-    delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
-    delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
-    // 子目录里也一个真实文件都没有：目录本身不能被算成「有东西可证明」。
-    files[`${DOWNLOADS_DIR}/nested/linked.pdf`] = "";
+    delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
+    delete files[`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`];
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files, new Set([`${DOWNLOADS_DIR}/nested/linked.pdf`])),
+      createVirtualRepo(files),
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
+      expect.stringContaining(`${BUILT_DOWNLOADS_DIR} holds no files`),
     );
+  });
+
+  it("fails when a download exists only in the published output", () => {
+    // 构建时才生成的 PDF 只存在于资产目录里。拿源目录的文件清单当发布清单，
+    // 它就完全没被证明过——一条精确撤销落在它头上，门禁毫无反应。
+    const generatedDetach = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/generated-only.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${BUILT_DOWNLOADS_DIR}/generated-only.pdf`]: "%PDF-1.7",
+        "public/_headers": generatedDetach,
+        [`${ASSETS_DIR}/_headers`]: generatedDetach,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/generated-only.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
+  it("reads the published directory out of wrangler config, not out of a comment", () => {
+    // 只查字符串的话，一句 `// old: ".open-next/assets"` 的注释就能让门禁通过，
+    // 而 wrangler 实际发布的是 dist——门禁去证明一个根本不会上线的目录。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "wrangler.jsonc": [
+          "{",
+          '  // old: ".open-next/assets"',
+          '  "assets": {',
+          '    "directory": "dist"',
+          "  }",
+          "}",
+          "",
+        ].join("\n"),
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("dist/downloads holds no files"),
+    );
+  });
+
+  it("stops when wrangler config declares no assets directory", () => {
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "wrangler.jsonc": '{ "name": "tucsenberg-site" }\n',
+      }),
+    );
+
+    expect(failures).toEqual([
+      "wrangler.jsonc has no assets.directory, so there is no way to tell which files get published",
+    ]);
   });
 
   it("fails when the static asset output holds nothing to prove", () => {

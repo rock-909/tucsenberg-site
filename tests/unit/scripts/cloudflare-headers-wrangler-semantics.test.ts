@@ -13,6 +13,7 @@ import {
   createValidFiles,
   createVirtualRepo,
   DOWNLOADS_DIR,
+  STATIC_DIR,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是从 wrangler 4.100.0 移植过来的解析与匹配语义：哪些规则会被它丢掉、
@@ -516,6 +517,68 @@ describe("wrangler _headers semantics the gate ports", () => {
     expect(failures).toContainEqual(
       expect.stringContaining(
         `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
+      ),
+    );
+  });
+
+  it("substitutes a captured placeholder into the header value", () => {
+    // wrangler 会把捕获到的值替换进响应头的值里。构建产物里只要有一个文件叫
+    // `no-store`，这条规则给它发的就是 `Cache-Control: no-store`，一年缓存当场
+    // 作废。只看字面量 `:directive` 的话，它不在任何冲突指令名单里，检查全绿。
+    const substituted = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/_next/static/:directive",
+      "  Cache-Control: :directive",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${STATIC_DIR}/no-store`]: "console.log(1)",
+        "public/_headers": substituted,
+        ".open-next/assets/_headers": substituted,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `/_next/static/no-store in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
+      ),
+    );
+  });
+
+  it("refuses to judge a header built out of a host placeholder", () => {
+    // 域名段的占位符要知道真实域名才能解出来，而这里不知道线上跑在哪个域名上。
+    // 把字面量 `:env` 当成一条无害的头放过去就是假绿：它的真实值可能是 no-store。
+    const hostPlaceholder = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "https://:env.example.com/_next/static/*",
+      "  Cache-Control: :env",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": hostPlaceholder,
+        ".open-next/assets/_headers": hostPlaceholder,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        'in public/_headers builds "cache-control" out of the host placeholder :env',
       ),
     );
   });
