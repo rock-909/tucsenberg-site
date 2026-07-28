@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   collectCloudflareStaticAssetHeaderFailures,
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
@@ -13,6 +11,8 @@ import {
   createValidFiles,
   createVirtualRepo,
   DOWNLOADS_DIR,
+  EXPECTED_DOWNLOADS_HEADER_ROUTE,
+  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是从 wrangler 4.100.0 移植过来的解析与匹配语义：哪些规则会被它丢掉、

@@ -1,11 +1,15 @@
 import path from "node:path";
 
 import {
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
+
+// 一份合法夹具会写的两条路由。门禁**不要求**它们存在：换成别的写法，只要每个真实
+// 文件最终都拿到期望的头，它一样绿。所以这两个常量属于夹具，不属于门禁——放在门禁
+// 里导出会让人以为那是它强制的路由。
+export const EXPECTED_STATIC_ASSET_HEADER_ROUTE = "/_next/static/*";
+export const EXPECTED_DOWNLOADS_HEADER_ROUTE = "/downloads/*";
 
 export const ROOT_DIR = "/repo";
 export const ASSETS_DIR = ".open-next/assets";
@@ -23,12 +27,34 @@ export const BUNDLE_PATH = `/_next/static/chunks/${BUNDLE_NAME}`;
 /**
  * 虚拟仓库。两份测试共用：一份守门禁要证明什么，一份守移植过来的 wrangler 语义。
  */
+/**
+ * 文件系统怎么把「查的名字」折叠成「磁盘上的名字」。默认不折叠（Linux）。
+ *
+ * macOS 默认的 APFS 会折叠，而且折叠表比 JS 的大小写表大：本机实测 `ſ`（U+017F）
+ * 在磁盘上等于 `s`，但 `"ſ".toLowerCase()` 还是 `"ſ"`。所以这里给的是一个函数而不是
+ * 一个开关——门禁不该依赖 JS 的大小写规则，测试要能证明这一点。
+ * 折叠只作用在按名字查（existsSync / readFileSync / statSync）上；readdirSync 永远
+ * 报磁盘上的真名，跟真实 fs 一致。
+ */
 export function createVirtualRepo(
   files: Record<string, string>,
   symlinks: Set<string> = new Set(),
+  fold: (name: string) => string = (name) => name,
 ) {
-  const normalize = (absolutePath: string) =>
-    path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
+  // 目录也要能被折叠命中，所以每个 key 的每一层祖先都进表。
+  const folded = new Map<string, string>();
+  for (const key of Object.keys(files)) {
+    const segments = key.split("/");
+    for (let depth = 1; depth <= segments.length; depth += 1) {
+      const ancestor = segments.slice(0, depth).join("/");
+      if (!folded.has(fold(ancestor))) folded.set(fold(ancestor), ancestor);
+    }
+  }
+  const normalize = (absolutePath: string) => {
+    const key = path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
+    if (files[key] !== undefined) return key;
+    return folded.get(fold(key)) ?? key;
+  };
   // 根目录归一化后是空串，拼前缀时不能再补 `/`——补了就成了 `/`，一个 key 都匹配
   // 不上，`readdirSync(rootDir)` 会返回空数组。真实 fs 在根目录上列得出东西。
   const childPrefix = (absolutePath: string) => {

@@ -1,10 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   collectCloudflareStaticAssetHeaderFailures,
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+  runCloudflareStaticAssetHeaderCli,
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
@@ -13,6 +12,8 @@ import {
   CATALOG_PATH,
   createValidFiles,
   createVirtualRepo,
+  EXPECTED_DOWNLOADS_HEADER_ROUTE,
+  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是门禁要证明什么：每个真实 PDF 拿到 noindex，每个真实 bundle 拿到一年
@@ -499,5 +500,52 @@ describe("Cloudflare static asset headers proof", () => {
         '"bad@name" under "/downloads/*" in public/_headers is not a header the runtime accepts',
       ),
     );
+  });
+
+  it("tells the owner to build only when building is what is missing", () => {
+    // 判红时唯一那句行动建议必须成立。十二类失败里只有两类跟「还没构建」有关；
+    // 一条写重了的路由重新构建一万次也是同一条红，把人指过去等于让他白干。
+    const errors: string[] = [];
+    const spy = vi
+      .spyOn(console, "error")
+      .mockImplementation((message: unknown) => {
+        errors.push(String(message));
+      });
+
+    try {
+      const duplicated = [
+        EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+        `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+        "",
+        EXPECTED_DOWNLOADS_HEADER_ROUTE,
+        `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+        "",
+        EXPECTED_DOWNLOADS_HEADER_ROUTE,
+        "  Cache-Control: public,max-age=86400",
+        "",
+      ].join("\n");
+
+      expect(
+        runCloudflareStaticAssetHeaderCli(
+          createVirtualRepo({
+            ...createValidFiles(),
+            "public/_headers": duplicated,
+            [`${ASSETS_DIR}/_headers`]: duplicated,
+          }),
+        ),
+      ).toBe(false);
+      expect(errors.join("\n")).not.toContain("pnpm website:build:cf");
+
+      errors.length = 0;
+      const unbuilt = createValidFiles();
+      delete unbuilt[`${ASSETS_DIR}/_headers`];
+
+      expect(
+        runCloudflareStaticAssetHeaderCli(createVirtualRepo(unbuilt)),
+      ).toBe(false);
+      expect(errors.join("\n")).toContain("pnpm website:build:cf");
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

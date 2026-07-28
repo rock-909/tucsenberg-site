@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   collectCloudflareStaticAssetHeaderFailures,
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
@@ -15,6 +13,8 @@ import {
   createVirtualRepo,
   DOWNLOADS_DIR,
   STATIC_DIR,
+  EXPECTED_DOWNLOADS_HEADER_ROUTE,
+  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是「哪些文件会被发布出去、它们线上被请求的 URL 是哪一条」：目录怎么枚举、
@@ -400,25 +400,85 @@ describe("Cloudflare published asset surface", () => {
     );
   });
 
-  it("stops when a protected directory is spelled differently on disk", () => {
-    // macOS 默认不区分大小写，`existsSync("public/downloads")` 在磁盘上是
-    // `Downloads/` 时照样为真。wrangler 建清单拿的是 readdir 给出的真名，线上那条
-    // URL 是 `/Downloads/x.pdf`，`/downloads/*` 的规则匹配不上（正则不带 `i`），
-    // 六份 PDF 全部裸奔，而门禁按自己编出来的 URL 求头，一片绿。
+  // 磁盘上叫别的名字、而文件系统又替我们折叠了的两种真实写法。第二种是关键：
+  // `ſ`（U+017F）在 macOS 的 APFS 上等于 `s`，但 `"ſ".toLowerCase()` 还是 `"ſ"`，
+  // 所以拿 JS 的大小写规则当判据的话，这一种会原样漏过去。
+  const foldedNames = [
+    { onDisk: "Downloads", fold: (name: string) => name.toLowerCase() },
+    { onDisk: "downloadſ", fold: (name: string) => name.replace("ſ", "s") },
+  ];
+
+  it.each(foldedNames)(
+    "fails when the downloads directory is on disk as $onDisk",
+    ({ onDisk, fold }) => {
+      // wrangler 建清单拿的是 readdir 给出的真名，线上那条 URL 是 `/Downloads/x.pdf`，
+      // `/downloads/*` 的规则匹配不上（正则不带 `i`），六份 PDF 全部裸奔，而门禁按
+      // 自己编出来的 URL 求头，一片绿。
+      const files = createValidFiles();
+      for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+        files[`public/${onDisk}/${name}`] =
+          files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+        delete files[`${DOWNLOADS_DIR}/${name}`];
+      }
+
+      const failures = collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo(files, new Set(), fold),
+      );
+
+      expect(failures).toContainEqual(
+        "public/downloads is not on disk under that exact name, so wrangler publishes those files on a URL this check cannot work out",
+      );
+    },
+  );
+
+  it("still names the bare pdf when a directory is spelled differently", () => {
+    // 目录名的判决不能把这个门禁存在的唯一理由静音：同一次运行里，那份被撤销了
+    // noindex 的 PDF 仍然要被点名。早退会让它一个字都不打印。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/catalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
     const files = createValidFiles();
-    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
-      files[`public/Downloads/${name}`] =
-        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
-      delete files[`${DOWNLOADS_DIR}/${name}`];
-    }
+    files["public/_headers"] = detached;
+    files[`${ASSETS_DIR}/_headers`] = detached;
+    files[`${ASSETS_DIR}/Downloads/catalog.pdf`] =
+      files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`] ?? "";
+    delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files),
+      createVirtualRepo(files, new Set(), (name) => name.toLowerCase()),
     );
 
-    expect(failures).toEqual([
-      'public/downloads is on disk as "Downloads", so wrangler publishes those files on a different URL than this check can prove',
-    ]);
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '/downloads/catalog.pdf in public/_headers is served without "x-robots-tag"',
+      ),
+    );
+  });
+
+  it("does not judge a directory name that never reaches a url", () => {
+    // 资产根目录自己的名字被 wrangler 完全剥掉（清单路径是相对它算的），叫什么都
+    // 不改变任何一条 URL。拿它判红就是打印一句能当场证伪的话。
+    const files = createValidFiles();
+    files["wrangler.jsonc"] = [
+      "{",
+      '  "assets": { "directory": ".open-next/Assets" }',
+      "}",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, new Set(), (name) => name.toLowerCase()),
+    );
+
+    expect(failures).toEqual([]);
   });
 
   it("stops when wrangler config cannot be parsed", () => {

@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   collectCloudflareStaticAssetHeaderFailures,
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
@@ -12,6 +10,8 @@ import {
   createValidFiles,
   createVirtualRepo,
   STATIC_DIR,
+  EXPECTED_DOWNLOADS_HEADER_ROUTE,
+  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是「一个路径最终拿到的那条响应头到底是什么」：多条规则怎么拼、撤销行怎么

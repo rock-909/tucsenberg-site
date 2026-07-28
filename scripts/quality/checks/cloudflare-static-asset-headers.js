@@ -2,9 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
-const EXPECTED_STATIC_ASSET_HEADER_ROUTE = "/_next/static/*";
 const EXPECTED_STATIC_ASSET_CACHE_CONTROL = "public,max-age=31536000,immutable";
-const EXPECTED_DOWNLOADS_HEADER_ROUTE = "/downloads/*";
 const EXPECTED_DOWNLOADS_NOINDEX = "X-Robots-Tag: noindex";
 // 两类被证明的资源：源目录 → 它们最终的 URL 前缀。写死一条探针路径证明不了什么，
 // 以前那条 `/_next/static/chunks/main.js` 在构建产物里根本不存在，真实文件名全带
@@ -20,6 +18,11 @@ const ASSET_HEADERS_FILENAME = "_headers";
 const ASSET_REDIRECTS_FILENAME = "_redirects";
 const ASSET_ASSETSIGNORE_FILENAME = ".assetsignore";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
+// 只有这两类失败是「还没构建」造成的。别的十类重新构建一万次也是同一条红，所以
+// 那句「先跑构建」的提示只能跟着这两类走——业主不懂技术，判红时唯一那句行动建议
+// 要是不成立，他就只能去做一件毫无效果的事。
+const MISSING_HEADER_FILE = "missing Cloudflare build output header file";
+const HOLDS_NO_FILES = "holds no files";
 
 function readRepoFile(context, relativePath) {
   return context.readFileSync(path.join(context.rootDir, relativePath), "utf8");
@@ -495,8 +498,9 @@ function listHeaderScopes(rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null || matcher.host === null) continue;
     const hostname = toHostname(matcher.host);
-    // 取不出域名的（占位符、通配符）不造场景。它们已经被
-    // collectUnprovableHostFailures 无条件判红，这里再猜一个场景只会多一句废话。
+    // 取不出域名的不造场景（`:host` 这类占位符会让 URL 解析直接抛异常）。它们
+    // 已经被 collectUnprovableHostFailures 无条件判红，这里再猜一个场景只会多一句
+    // 废话。通配符 `*.example.com` 是能解析的，照常造场景——反正也是无条件判红。
     if (hostname !== null) hosts.add(hostname);
   }
   return [null, ...hosts];
@@ -581,7 +585,7 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
 }
 
 /**
- * 目录名在磁盘上的真实拼写。跟 `existsSync` 问不出来。
+ * 会进 URL 的那几段目录名，在磁盘上是不是**一字不差**地叫这个名字。
  *
  * macOS 默认的 APFS 不区分大小写：磁盘上是 `Downloads/` 时，
  * `existsSync(".open-next/assets/downloads")` 照样返回 true，门禁于是按
@@ -591,31 +595,34 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
  * `/Downloads/secret.pdf` 返回 200 且没有 `x-robots-tag`，`/downloads/secret.pdf`
  * 是 404。六份询盘 PDF 会全部裸奔，而业主本机上门禁一片绿。
  *
- * 所以受保护目录的每一段都要问 readdir 要真名。返回磁盘上那个名字，或者 null
- * 表示「拼写没问题」以及「上层压根不存在」——后者由「目录里没东西」那条去报。
+ * 判据必须是「readdir 里有没有一模一样的名字」，不能是 `toLowerCase()` 比一比。
+ * 磁盘的折叠表比 JS 的大小写表大：本机实测 `ſ`（U+017F）在磁盘上就等于 `s`，而
+ * `"downloadſ".toLowerCase()` 还是 `"downloadſ"`。用 JS 比的话，`downloadſ/` 这种
+ * 真名会被判成「拼写没问题」，假绿原样复现。
+ *
+ * 只查会进 URL 的那几段。`public`、`.open-next`、`assets` 这些段被 wrangler 完全
+ * 剥掉（清单路径是相对资产根算的），它们叫什么都不改变任何一条 URL——拿它们判红
+ * 就是打印一句能当场证伪的话。
  */
-function findMiscasedSegment(context, relativeDir) {
-  let parent = context.rootDir;
-  for (const segment of relativeDir.split("/")) {
+function hasExactDirectory(context, baseDir, urlDir) {
+  let parent = path.join(context.rootDir, baseDir);
+  for (const segment of urlDir.split("/")) {
     const entries = readdirOrNull(context, parent);
-    if (entries === null) return null;
-    if (entries.some((entry) => entry.name === segment)) {
-      parent = path.join(parent, segment);
-      continue;
-    }
-    const onDisk = entries.find(
-      (entry) => entry.name.toLowerCase() === segment.toLowerCase(),
-    );
-    return onDisk ? onDisk.name : null;
+    if (entries === null) return false;
+    if (!entries.some((entry) => entry.name === segment)) return false;
+    parent = path.join(parent, segment);
   }
-  return null;
+  return true;
 }
 
-function collectMiscasedDirectoryFailures(context, sourceDir) {
-  const onDisk = findMiscasedSegment(context, sourceDir);
-  if (onDisk === null) return [];
+function collectMiscasedDirectoryFailures(context, baseDir, urlDir) {
+  if (hasExactDirectory(context, baseDir, urlDir)) return [];
+  const sourceDir = `${baseDir}/${urlDir}`;
+  // 一字不差的名字找不到、路径却又「存在」，说明是文件系统替我们折叠了。目录真的
+  // 不在时不归这里管，「目录里没东西」那条会去报。
+  if (!context.existsSync(path.join(context.rootDir, sourceDir))) return [];
   return [
-    `${sourceDir} is on disk as "${onDisk}", so wrangler publishes those files on a different URL than this check can prove`,
+    `${sourceDir} is not on disk under that exact name, so wrangler publishes those files on a URL this check cannot work out`,
   ];
 }
 
@@ -840,7 +847,7 @@ function collectHeaderFileFailures(
   { downloadPaths, staticAssetPaths },
 ) {
   if (!repoFileExists(context, relativePath)) {
-    return [`missing Cloudflare build output header file: ${relativePath}`];
+    return [`${MISSING_HEADER_FILE}: ${relativePath}`];
   }
 
   const rules = parseWranglerHeaderRules(readRepoFile(context, relativePath));
@@ -986,7 +993,7 @@ function collectUnmodelledAssetFileFailures(context, directory) {
 function collectEmptyDirectoryFailure(paths, sourceDir, expectedHeader) {
   if (paths.length > 0) return [];
   return [
-    `${sourceDir} holds no files, so nothing proves "${expectedHeader}" reaches a real file`,
+    `${sourceDir} ${HOLDS_NO_FILES}, so nothing proves "${expectedHeader}" reaches a real file`,
   ];
 }
 
@@ -994,15 +1001,6 @@ function collectPublishedDirectoryFailures(context, directory) {
   const assetHeadersPath = `${directory}/${ASSET_HEADERS_FILENAME}`;
   const assetDownloadsDir = `${directory}/${DOWNLOADS_ASSET_SUBDIR}`;
   const assetStaticDir = `${directory}/${STATIC_ASSET_SUBDIR}`;
-
-  // 目录名的拼写先定下来。拼错了的话，后面每一条证明说的都是另一条 URL，把它们
-  // 也打印出来只会掩盖真正的原因，所以在这里就停。
-  const miscased = [
-    ...collectMiscasedDirectoryFailures(context, DOWNLOADS_SOURCE_DIR),
-    ...collectMiscasedDirectoryFailures(context, assetDownloadsDir),
-    ...collectMiscasedDirectoryFailures(context, assetStaticDir),
-  ];
-  if (miscased.length > 0) return miscased;
 
   // 源目录和发布目录都要枚举。只查 `public/downloads` 的话，构建时才生成、只存在
   // 于发布目录里的 PDF 一份都没查过；只查发布目录的话，源码里新加的 PDF 要等下次
@@ -1040,6 +1038,23 @@ function collectPublishedDirectoryFailures(context, directory) {
       staticAssetPaths,
       assetStaticDir,
       `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+    ),
+    // 目录名一字不差才算数。不早退：拼写对不上的时候，PDF 到底带没带 noindex
+    // 仍然要照常打印出来——那是这个门禁存在的唯一理由，不能被一条目录名的判决静音。
+    ...collectMiscasedDirectoryFailures(
+      context,
+      PUBLIC_SOURCE_DIR,
+      DOWNLOADS_ASSET_SUBDIR,
+    ),
+    ...collectMiscasedDirectoryFailures(
+      context,
+      directory,
+      DOWNLOADS_ASSET_SUBDIR,
+    ),
+    ...collectMiscasedDirectoryFailures(
+      context,
+      directory,
+      STATIC_ASSET_SUBDIR,
     ),
     // 一个磁盘文件被发出去的 URL 不一定只有它自己那条。这两类别名会让被证明的
     // 路径和实际被请求的路径对不上，所以直接判红。
@@ -1092,9 +1107,16 @@ function runCloudflareStaticAssetHeaderCli(options = {}) {
     for (const failure of failures) {
       console.error(`Cloudflare static asset header check failed: ${failure}`);
     }
-    console.error(
-      "Run `pnpm build` then `pnpm website:build:cf` before this artifact check.",
+    const needsBuild = failures.some(
+      (failure) =>
+        failure.startsWith(MISSING_HEADER_FILE) ||
+        failure.includes(` ${HOLDS_NO_FILES},`),
     );
+    if (needsBuild) {
+      console.error(
+        "Run `pnpm build` then `pnpm website:build:cf` before this artifact check.",
+      );
+    }
     return false;
   }
 
@@ -1105,10 +1127,8 @@ function runCloudflareStaticAssetHeaderCli(options = {}) {
 }
 
 module.exports = {
-  EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,
-  EXPECTED_STATIC_ASSET_HEADER_ROUTE,
   SOURCE_HEADERS_PATH,
   collectCloudflareStaticAssetHeaderFailures,
   createCloudflareStaticAssetHeaderContext,
