@@ -41,6 +41,16 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 3. 规格、FAQ、下载件和 RFQ 字段能减少来回沟通。
 4. 询盘路径稳定，不能因为文档、旧 starter 内容或 profile 机制误导维护者。
 
+## RFQ Conversion
+
+RFQ 和 CTA 要降低“我该怎么问”的成本，不要把表单做成营销问卷。
+
+- 先确认产品兴趣：ABS flood barriers、Aluminum flood gates、Absorbent flood
+  bags、Flood tube dams、FRP flood barriers，或 general inquiry。
+- 鼓励买家补充项目国家/地区、应用场景、预计数量、规格要求、交期压力和附件准备情况。
+- 说明下一步是 Tucsenberg 按产品线、规格和项目背景判断报价或资料需求。
+- 不承诺未经验证的固定价格、固定交期、认证、客户数量、工程案例或国家覆盖。
+
 ## Brand Personality
 
 **三个词：专业、当代、可靠。**

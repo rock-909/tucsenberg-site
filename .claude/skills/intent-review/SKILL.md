@@ -40,8 +40,8 @@ is red, say so in one line and stop — a change that does not build is not read
 for a judgement about intent.
 
 For a whole-repo audit, launch-readiness audit, or audit-framework question, use
-the global `repo-health-audit` skill. This project keeps `intent-review` as the
-owner-facing pre-merge judgement, not as a second local audit framework.
+the project-local `repo-health-audit` skill. This project keeps `intent-review`
+as the owner-facing pre-merge judgement, not as a second audit framework.
 
 This skill is read-only. It never edits files and never applies fixes.
 
