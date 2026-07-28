@@ -36,9 +36,11 @@ be wrong; rejecting a finding is fine, but the reason belongs in the report.
 
 A review that did not run must never be reported as a review that passed.
 
-Mechanics live in `.claude/commands/pr.md` Phase 4. Do not restate them here.
-`/review-fix` is the path for handling cloud review threads; it is parked
-alongside `.coderabbit.yaml` and only applies if CodeRabbit is switched back on.
+The project-local `/pr` command is retired. The active rule is still the same:
+run an independent Codex review before push, and treat missing review output as
+a stop. `/review-fix` is the path for handling cloud review threads; it is
+parked alongside `.coderabbit.yaml` and only applies if CodeRabbit is switched
+back on.
 
 ## Superpowers
 
