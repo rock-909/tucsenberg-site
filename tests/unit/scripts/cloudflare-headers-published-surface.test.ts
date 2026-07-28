@@ -651,6 +651,103 @@ describe("Cloudflare published asset surface", () => {
     );
   });
 
+  it("still tells a real stray to move while another name is folded", () => {
+    // 「有没有发生折叠」是整棵树一个答案，「这份文件在哪」是一份文件一个答案。拿前者
+    // 抑制后者的话，只要磁盘上有一个目录名拼错了，同一次运行里所有真正放错地方的
+    // 文档都会一起丢掉那句唯一的行动建议。
+    const files = createValidFiles();
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`public/Downloads/${name}`] =
+        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${DOWNLOADS_DIR}/${name}`];
+    }
+    files["public/quotation.pdf"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
+    );
+
+    expect(failures).toContainEqual(
+      '/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
+    );
+  });
+
+  // 两侧各判各的。只问 `public/` 的话，构建产物里那个拼错的下载目录一份都对不上，
+  // 里面每一份 PDF 都会被劝「挪进 downloads/」——它们就在那个目录里。
+  const foldedSides = [
+    { side: "source", dir: DOWNLOADS_DIR },
+    { side: "built", dir: BUILT_DOWNLOADS_DIR },
+  ];
+
+  it.each(foldedSides)(
+    "does not tell a pdf to move out of the $side directory it is already in",
+    ({ dir }) => {
+      // 磁盘的折叠表比 JS 的大小写表大：`ſ`（U+017F）在 APFS 上等于 `s`，而
+      // `"downloadſ".toLowerCase()` 还是它自己。按大小写表判的话，这份 PDF 会拿到一句
+      // 「把它挪进 downloads/」——它就在那个目录里，上一句刚说过那个目录名拼错了。
+      const files = createValidFiles();
+      const onDisk = dir.replace(/downloads$/u, "downloadſ");
+      for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+        files[`${onDisk}/${name}`] = files[`${dir}/${name}`] ?? "";
+        delete files[`${dir}/${name}`];
+      }
+
+      const failures = collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo(files, {
+          fold: (value) => value.replace(/ſ/gu, "s"),
+        }),
+      );
+
+      // 整句相等：这条守的是那句「挪进 downloads/」不许接在后面。
+      expect(failures).toContainEqual(
+        '/download%C5%BF/catalog.pdf in public/_headers is served without "x-robots-tag"',
+      );
+      expect(failures.join("\n")).not.toContain(
+        "does not sit under downloads/",
+      );
+    },
+  );
+
+  it("still tells a stray to move when there is no downloads directory at all", () => {
+    // 「这一层没有名叫 downloads 的条目」有两种可能：文件系统把它折叠成了别的名字，
+    // 或者根本就没有这个目录。只看条目名分不开这两种，得再问一次这条路径存不存在。
+    // 分不开的话，业主删掉空目录之后，所有放错地方的文档就都不再被告知该挪去哪。
+    const files = createValidFiles();
+    for (const key of Object.keys(files)) {
+      if (key.startsWith(`${DOWNLOADS_DIR}/`)) delete files[key];
+    }
+    files["public/marketing/quotation.pdf"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      '/marketing/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
+    );
+  });
+
+  it("does not let one side's folded name silence a stray on the other", () => {
+    // 两侧的目录树不一样。拿 `public/` 那边发生过折叠去解释一个只存在于构建产物里的
+    // 目录，等于用甲的拼写错误替乙开脱：那份报价单真的在别处，「挪进 downloads/」
+    // 是它唯一能照着做的动作。
+    const files = createValidFiles();
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`public/Downloads/${name}`] =
+        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${DOWNLOADS_DIR}/${name}`];
+    }
+    files[`${ASSETS_DIR}/misc/quotation.pdf`] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
+    );
+
+    expect(failures).toContainEqual(
+      '/misc/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
+    );
+  });
+
   it("fails when a price list is published as a plain text file", () => {
     // 排除写成「所有 .txt」的话，一份 `quotation.txt` 的价目表整个滑过去。Google 收
     // 录纯文本文件，那份价目表和 PDF 一样是询盘物料。

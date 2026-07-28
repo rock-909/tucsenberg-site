@@ -517,10 +517,36 @@ function collectScopeFailures(
   return [];
 }
 
-/** URL 的第一段折叠后是不是 `downloads`。 */
-function startsWithDownloadsSegment(servedPath) {
-  const [, first] = servedPath.split("/");
-  return (first ?? "").toLowerCase() === DOWNLOADS_ASSET_SUBDIR;
+/**
+ * 这份文档所在的那个目录，是不是文件系统折叠成 `downloads` 的那一个。
+ *
+ * 判据全部来自磁盘，不带任何大小写表：readdir 里有这个真名、没有一模一样的
+ * `downloads`，而 `downloads` 这条路径又存在——那就只可能是文件系统把这个真名折叠成
+ * 了 `downloads`。这正是上面 `resolveServedDirName` 判 folded 的同一套问法。
+ *
+ * 不能改回「第一段 `toLowerCase()` 等于 downloads」。磁盘的折叠表比 JS 的大：本文件
+ * 250 行那段实测的 `ſ`（U+017F）在 APFS 上等于 `s`，`"downloadſ".toLowerCase()` 却
+ * 还是它自己。而且 URL 里那一段是转义过的（`download%C5%BF`），拿它跟明文比更是两回
+ * 事。判错的代价是一份自相矛盾的报告：上一句说「public/downloads 磁盘上不叫这个名
+ * 字」，下一句对着同一个目录里的 PDF 说「把它挪进 downloads/」。
+ */
+function servedFromFoldedDownloadsDir(context, baseDir, servedPath) {
+  // 站点根上的文件没有「所在目录」可谈。少了这一句，`/quotation.pdf` 的第一段是文件
+  // 名自己，只要同一层里有个折叠过的目录，这份真正放错地方的报价单就会被当成「已经
+  // 在 downloads 里」，唯一那句行动建议随之消失。
+  const [, first, ...rest] = servedPath.split("/");
+  if (first === undefined || rest.length === 0) return false;
+  const onDisk = decodeURIComponent(first);
+  if (onDisk === DOWNLOADS_ASSET_SUBDIR) return false;
+
+  const parent = path.join(context.rootDir, baseDir);
+  const { entries } = readdirOrError(context, parent);
+  if (entries === undefined) return false;
+  if (!entries.some((entry) => entry.name === onDisk)) return false;
+  if (entries.some((entry) => entry.name === DOWNLOADS_ASSET_SUBDIR)) {
+    return false;
+  }
+  return context.existsSync(path.join(parent, DOWNLOADS_ASSET_SUBDIR));
 }
 
 /**
@@ -1006,11 +1032,6 @@ function collectPublishedDirectoryFailures(context, directory) {
     ...collectUnmodelledAssetFileFailures(context, PUBLIC_SOURCE_DIR),
   ];
 
-  const downloadsNameIsFolded = [PUBLIC_SOURCE_DIR, directory].some(
-    (baseDir) =>
-      resolveServedDirName(context, baseDir, DOWNLOADS_ASSET_SUBDIR).state ===
-      "folded",
-  );
   const downloadPaths = [
     ...new Set([...(sourceDownloadPaths ?? []), ...(assetDownloadPaths ?? [])]),
   ].sort();
@@ -1019,14 +1040,13 @@ function collectPublishedDirectoryFailures(context, directory) {
   const servedPaths = {
     downloadPaths,
     staticAssetPaths: staticAssetPaths ?? [],
-    // 「把它挪进 downloads/」这句只在它成立时才说。目录名被文件系统折叠时，文件已经
-    // 在那个目录里了，只是名字大小写不对，真正的动作是改目录名——而那句话已经由
-    // `collectUnresolvedDirectoryFailures` 说了。
+    // 「把它挪进 downloads/」这句只在它成立时才说。这份文件所在的目录就是被文件系统
+    // 折叠成 `downloads` 的那一个时，它已经在里面了，只是名字拼错，真正的动作是改目录
+    // 名——而那句话已经由 `collectUnresolvedDirectoryFailures` 说了。
     //
-    // 判据必须是「这一轮真的判出了折叠」，不能是「URL 第一段看着像 downloads」。
-    // 区分大小写的卷（CI 跑的 ubuntu）上 `public/DOWNLOADS/` 和 `public/downloads/`
-    // 是两个真实存在的不同目录，折叠那句永远不出现，按「看着像」抑制的话，业主拿到
-    // 一句光秃秃的红字，而这里「挪进去」恰恰是对的动作。
+    // 判据要落在「这份文件自己在哪」上，逐条问磁盘。整棵树只判一次「有没有发生折叠」
+    // 是不够的：一次折叠会把同一次运行里所有其他杂散文档的建议一起抹掉，而那些文件
+    // 真的在别处，「挪进去」正是对的动作。
     strayDocumentPaths: [
       ...new Set([...sourceDocuments.paths, ...assetDocuments.paths]),
     ]
@@ -1034,8 +1054,8 @@ function collectPublishedDirectoryFailures(context, directory) {
       .sort()
       .map((documentPath) => ({
         path: documentPath,
-        advise: !(
-          downloadsNameIsFolded && startsWithDownloadsSegment(documentPath)
+        advise: ![PUBLIC_SOURCE_DIR, directory].some((baseDir) =>
+          servedFromFoldedDownloadsDir(context, baseDir, documentPath),
         ),
       })),
   };
