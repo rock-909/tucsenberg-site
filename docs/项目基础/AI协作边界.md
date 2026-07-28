@@ -93,13 +93,10 @@ node scripts/starter-checks.js content-manifest --check
 
 ## Workflow outputs
 
-CWF/DWF workflow capability can stay. If generated workflow outputs are added
-again, keep them out of current product docs and put them under the Superpowers
-plan output tree, for example:
-
-```text
-docs/superpowers/plans/workflows/cwf/
-```
+The project-local CWF/DWF and Ponytail slash commands are retired; the owner
+confirmed on 2026-07-28 that they are no longer used. If any generated workflow
+output is added again, keep it out of current product docs and put it under the
+Superpowers plan output tree.
 
 Do not treat old workflow outputs or old plans as Tucsenberg product truth.
 
