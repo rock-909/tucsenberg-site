@@ -263,9 +263,6 @@ describe("wrangler _headers semantics the gate ports", () => {
     // `^` 不在 URL 规范列出的 path percent-encode set 里，`encodeURIComponent`
     // 照样把它转成 `%5E`，asset worker 的 `encodePath` 用的正是它，所以线上那条
     // URL 里也是 `%5E`。手维护一张字符表就会漏掉这种。
-    //
-    // 这句以前写的是「所以转义要交给 `new URL()` 自己算」——那是更早一版的做法，
-    // 后来因为它和 `encodePath` 在十几个字符上不一致而被换掉了，注释没跟着改。
     const caretDetach = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -386,7 +383,7 @@ describe("wrangler _headers semantics the gate ports", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" is declared twice in public/_headers`,
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" is declared more than once in public/_headers`,
       ),
     );
   });
@@ -402,6 +399,9 @@ describe("wrangler _headers semantics the gate ports", () => {
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       "  Cache-Control: immutable",
       "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      "  X-Third: 1",
+      "",
       EXPECTED_DOWNLOADS_HEADER_ROUTE,
       `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
       "",
@@ -415,9 +415,11 @@ describe("wrangler _headers semantics the gate ports", () => {
       }),
     );
 
+    // 措辞不能写死次数。写三遍时说「declared twice」是假的，而且业主会照着那句话
+    // 去找两个块。
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" is declared twice in public/_headers`,
+        `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" is declared more than once in public/_headers`,
       ),
     );
   });

@@ -481,4 +481,30 @@ describe("Cloudflare header rules wrangler throws away", () => {
       ),
     );
   });
+
+  it("drops a header line that has no name before the colon", () => {
+    // 冒号前面什么都没有的行，wrangler 单独有一支把它丢掉（cli.js:129151，和「空值」
+    // 那一支是两个独立的 if）。收下它的话，门禁会拿一个空字符串去问运行时接不接受，
+    // 然后判红说「"" 不是运行时接受的头名，每个命中的资源都返回 500」。
+    // 实测：真服务上那份 PDF 返回 200 并带着 noindex，这句话两个方向都不成立。
+    const orphanValue = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "  : orphan-value",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": orphanValue,
+        [`${ASSETS_DIR}/_headers`]: orphanValue,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
 });

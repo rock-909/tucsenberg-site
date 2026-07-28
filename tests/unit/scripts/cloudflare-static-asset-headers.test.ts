@@ -566,6 +566,31 @@ describe("Cloudflare static asset headers proof", () => {
     ]);
   });
 
+  it("says a key wrangler ignores is being ignored, not that it cannot be modelled", () => {
+    // wrangler 4.100.0 只认 `assets` 底下那五个键（cli.js:40198-40204），别的原样丢进
+    // 警告里、当不存在。所以这一档和上一档是两件事：上一档那个键真的在改变发布行为，
+    // 这一档那个键**什么都没做**。合成一句「这套检查建模不了」是假的，业主会去查
+    // 门禁怎么不支持，而真相是他写的那行配置线上根本没生效。
+    const files = createValidFiles();
+    files["wrangler.jsonc"] = [
+      "{",
+      '  "assets": {',
+      '    "directory": ".open-next/assets",',
+      '    "serve_directly": false',
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([
+      "wrangler.jsonc sets assets.serve_directly, which wrangler does not recognise and ignores, so whatever it was meant to do is not happening",
+    ]);
+  });
+
   it("reports instead of crashing when a header file cannot be read", () => {
     // `existsSync` 说「在」和「读得出来」是两件事。直接 readFileSync 的话，权限不对
     // 时门禁变成崩溃：业主看到一段堆栈，一句失败都没有，而 CI 上这和「检查真的跑过
@@ -586,7 +611,7 @@ describe("Cloudflare static asset headers proof", () => {
   const buildHintCases = [
     {
       name: "a duplicated route",
-      wants: false,
+      hint: "does not tell",
       break: (files: Record<string, string>) => {
         const duplicated = [
           EXPECTED_STATIC_ASSET_HEADER_ROUTE,
@@ -605,12 +630,12 @@ describe("Cloudflare static asset headers proof", () => {
     },
     {
       name: "a deleted source _headers",
-      wants: false,
+      hint: "does not tell",
       break: (files: Record<string, string>) => delete files["public/_headers"],
     },
     {
       name: "an emptied source downloads directory",
-      wants: false,
+      hint: "does not tell",
       break: (files: Record<string, string>) => {
         delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
         delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
@@ -618,13 +643,13 @@ describe("Cloudflare static asset headers proof", () => {
     },
     {
       name: "a missing built _headers",
-      wants: true,
+      hint: "tells",
       break: (files: Record<string, string>) =>
         delete files[`${ASSETS_DIR}/_headers`],
     },
     {
       name: "an emptied built downloads directory",
-      wants: true,
+      hint: "tells",
       break: (files: Record<string, string>) => {
         delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
         delete files[`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`];
@@ -634,15 +659,15 @@ describe("Cloudflare static asset headers proof", () => {
       // 目录里满是文件，只是列不出来。这时候「先跑构建」是句废话：业主跑十遍也
       // 修不好一个权限问题，而真正该看的那行被埋在这句提示下面。
       name: "a built downloads directory that cannot be listed",
-      wants: false,
+      hint: "does not tell",
       break: () => {},
       unlistable: new Set([BUILT_DOWNLOADS_DIR]),
     },
   ];
 
   it.each(buildHintCases)(
-    "$wants: tells the owner to build when the red is $name",
-    ({ wants, break: breakFiles, unlistable }) => {
+    "$hint the owner to build when the red is $name",
+    ({ hint, break: breakFiles, unlistable }) => {
       const errors: string[] = [];
       const spy = vi
         .spyOn(console, "error")
@@ -659,7 +684,7 @@ describe("Cloudflare static asset headers proof", () => {
             createVirtualRepo(files, { unlistable: unlistable }),
           ),
         ).toBe(false);
-        if (wants) {
+        if (hint === "tells") {
           expect(errors.join("\n")).toContain("pnpm website:build:cf");
         } else {
           expect(errors.join("\n")).not.toContain("pnpm website:build:cf");

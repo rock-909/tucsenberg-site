@@ -365,7 +365,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toEqual([
-      "wrangler.jsonc has no assets.directory, so there is no way to tell which files get published",
+      "wrangler.jsonc has no assets.directory, so this check cannot tell which files get published",
     ]);
   });
 
@@ -380,7 +380,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toEqual([
-      "wrangler.jsonc has no assets.directory, so there is no way to tell which files get published",
+      "wrangler.jsonc has no assets.directory, so this check cannot tell which files get published",
     ]);
   });
 

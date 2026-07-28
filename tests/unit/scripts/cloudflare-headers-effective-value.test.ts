@@ -249,8 +249,12 @@ describe("effective header value semantics", () => {
   });
 
   it("applies a rule's own unset before its own set", () => {
-    // 一个块里先写撤销再写设置时，wrangler 是先撤后设（attachHeaders），最终这个头
-    // 是有的。顺序反过来的话，合法写法会被判成「没有 noindex」——假红。
+    // 一个块里先写撤销再写设置时，Workers Assets 是先撤后设，最终这个头是有的。
+    // 顺序反过来的话，合法写法会被判成「没有 noindex」——假红。
+    //
+    // 这条没有可引的源码行号：套响应头的代码在 cli.js 里被 tree-shake 掉了，bundle
+    // 里那个叫 `attachHeaders` 的函数属于 Cloudflare Pages，不是这个仓库用的子系统。
+    // 依据是 2026-07-28 用 `wrangler dev --local` 实测出来的，网关源码里记了全过程。
     const unsetThenSet = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
