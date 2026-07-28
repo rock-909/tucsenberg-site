@@ -192,18 +192,34 @@ function compileRuleSegment(segment, placeholderClass) {
     );
 }
 
+function decodeOrNull(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 编译不出来的规则返回 null——和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
  *
  * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
  * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接抛
  * 异常，把门禁变成崩溃而不是判断。
+ *
+ * 除了规则本身，还编译一个**解码后**的匹配器。响应头是按请求里的原始编码路径匹配
+ * 的，磁盘文件是按 `decodeURIComponent(pathname)` 找的（asset-worker，cli.js:336807），
+ * 两步用的不是同一个字符串。于是 `/downloads/%63atalog.pdf` 这条规则匹配不上正常
+ * 请求，却匹配得上一个仍然会返回真实 `catalog.pdf` 的请求——一条写成编码别名的撤销
+ * 规则能把真实 PDF 的 noindex 拿掉，而门禁只看规范路径，什么都没看见。
+ * 别名有 2^N 种写不完，所以反过来：拿解码后的规则去比解码后的文件路径。
  */
 function ruleToMatcher(rulePath) {
   const absolute = /^https:\/\/([^/]+)(\/.*)?$/u.exec(rulePath);
   const hostPart = absolute ? (absolute[1] ?? "") : null;
   const pathPart = absolute ? (absolute[2] ?? "") : rulePath;
   const pathSource = compileRuleSegment(pathPart, "[^/]+");
+  const decodedPathPart = decodeOrNull(pathPart);
 
   try {
     // 先按整条规则编译一次。重名捕获组可能跨域名段和路径段
@@ -220,6 +236,10 @@ function ruleToMatcher(rulePath) {
       // 但能不能编译要看整条。
       pathPattern:
         hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
+      decodedPathPattern:
+        decodedPathPart === null || decodedPathPart === pathPart
+          ? null
+          : new RegExp(`^${compileRuleSegment(decodedPathPart, "[^/]+")}$`),
     };
   } catch {
     return null;
@@ -298,28 +318,40 @@ function parseExpectedHeader(line) {
  * - 假红：同一条头被拆到两个块里（`Cache-Control: public, max-age=…` 一块、
  *   `Cache-Control: immutable` 另一块），线上会合并成完整的一条。
  *
- * 域名规则的处理是**故意不对称**的，因为两个方向的错代价不一样：
+ * 有两类规则的处理是**故意不对称**的，因为两个方向的错代价不一样：
  *
- * - 带域名的规则**不能用来证明**防护到位。它只对那一个域名生效，而这里不知道
- *   线上会用哪个域名（预览域名就是另一个）。当成生效就是假绿。
- * - 带域名的规则**可以用来判定防护被撤掉**，fail closed：宁可多红一次，也不能
- *   放一个能被收录的 PDF 出去。
+ * - 带域名的规则只对那一个域名生效，而这里不知道线上会用哪个域名（预览域名就是
+ *   另一个）。
+ * - 编码别名规则（`/downloads/%63atalog.pdf`）只匹配得上写成那个别名的请求，正常
+ *   请求走的是规范路径。
  *
- * 一句话：域名规则只能减分，不能加分。
+ * 两类都**不能用来证明**防护到位——当成生效就是假绿，PDF 在正常路径上照样被收录。
+ * 但两类都**可以用来判定防护被撤掉**，fail closed：宁可多红一次，也不能放一个能被
+ * 收录的 PDF 出去。
+ *
+ * 一句话：这两类规则只能减分，不能加分。
  */
 function resolveEffectiveHeaders(rules, targetPath) {
   const effective = new Map();
+  const decodedTargetPath = decodeOrNull(targetPath);
 
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null) continue;
-    const { crossHost, pathPattern } = matcher;
-    if (!pathPattern.test(targetPath)) continue;
+    const { crossHost, pathPattern, decodedPathPattern } = matcher;
+
+    const matchesRequestPath = pathPattern.test(targetPath);
+    const matchesDecodedAlias =
+      !matchesRequestPath &&
+      decodedPathPattern !== null &&
+      decodedTargetPath !== null &&
+      decodedPathPattern.test(decodedTargetPath);
+    if (!matchesRequestPath && !matchesDecodedAlias) continue;
 
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
     }
-    if (crossHost) continue;
+    if (crossHost || matchesDecodedAlias) continue;
 
     for (const [name, value] of Object.entries(rule.headers)) {
       const merged = effective.get(name) ?? new Set();

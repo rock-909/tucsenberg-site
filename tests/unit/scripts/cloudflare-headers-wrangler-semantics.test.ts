@@ -8,6 +8,7 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
+  BUNDLE_PATH,
   CATALOG_PATH,
   createValidFiles,
   createVirtualRepo,
@@ -485,6 +486,94 @@ describe("wrangler _headers semantics the gate ports", () => {
     expect(failures).toContainEqual(
       expect.stringContaining(
         "/downloads/a%2520b.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
+  it("fails when a percent-encoded alias detaches the noindex off a real pdf", () => {
+    // 响应头按请求里的原始编码路径匹配，磁盘文件按 decodeURIComponent 之后的路径
+    // 找。`/downloads/%63atalog.pdf` 匹配不上正常请求，却匹配得上一个仍然会返回
+    // 真实 catalog.pdf 的请求——那次响应没有 noindex，而门禁只看规范路径。
+    const aliasDetach = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/%63atalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": aliasDetach,
+        ".open-next/assets/_headers": aliasDetach,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("fails when a percent-encoded alias overrides a real bundle's cache rule", () => {
+    // 同一条路子也能拿走 bundle 的一年缓存。
+    const encodedBundle = BUNDLE_PATH.replace("/chunks/", "/%63hunks/");
+    const aliasOverride = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      encodedBundle,
+      "  ! Cache-Control",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": aliasOverride,
+        ".open-next/assets/_headers": aliasOverride,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("does not accept a percent-encoded alias as proof the noindex is there", () => {
+    // 反方向同样重要：别名规则只能减分。把 noindex 只写在编码别名底下，正常请求
+    // 走的是规范路径，那个 PDF 照样能被收录——认它就是假绿。
+    const aliasOnly = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/downloads/%63atalog.pdf",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": aliasOnly,
+        ".open-next/assets/_headers": aliasOnly,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
       ),
     );
   });
