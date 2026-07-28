@@ -91,7 +91,7 @@ describe("Cloudflare static asset headers proof", () => {
     );
 
     expect(failures).toContain(
-      `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
+      `/_next/static/chunks/main.js in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
     );
   });
 
@@ -105,7 +105,9 @@ describe("Cloudflare static asset headers proof", () => {
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining('missing "/downloads/*" in public/_headers'),
+      expect.stringContaining(
+        "/downloads/product-spec.pdf in public/_headers is served without",
+      ),
     );
   });
 
@@ -120,7 +122,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        '"/downloads/*" in .open-next/assets/_headers does not carry "X-Robots-Tag: noindex"',
+        "/downloads/product-spec.pdf in .open-next/assets/_headers is served without",
       ),
     );
   });
@@ -149,19 +151,19 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+        "/downloads/product-spec.pdf in public/_headers is served without",
       ),
     );
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+        "/downloads/product-spec.pdf in .open-next/assets/_headers is served without",
       ),
     );
   });
 
   it("fails when noindex only sits under an absolute-URL route line", () => {
-    // Cloudflare 允许路由行写成带域名的绝对 URL。不把它当路由行，noindex 就会被
-    // 算到上一个块名下——检查绿，而这条头到底生不生效取决于域名匹配。
+    // 带域名的规则只对那一个域名生效，而这里不知道线上会用哪个域名（预览域名
+    // 就是另一个）。拿它当证明就是假绿：PDF 在实际域名上照样能被收录。
     const domainScoped = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -184,7 +186,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+        "/downloads/product-spec.pdf in public/_headers is served without",
       ),
     );
   });
@@ -236,7 +238,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+        `/downloads/product-spec.pdf in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
       ),
     );
   });
@@ -273,6 +275,85 @@ describe("Cloudflare static asset headers proof", () => {
       "",
       EXPECTED_DOWNLOADS_HEADER_ROUTE,
       "  Cache-Control: public,max-age=86400",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": split,
+        ".open-next/assets/_headers": split,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("fails when a more specific downloads route detaches the noindex", () => {
+    // Cloudflare 允许 `! Header-Name` 把上层规则设的头撤掉。通配块写着 noindex、
+    // 更具体的那个 PDF 把它撤掉，被放出去的正是那一个文件，而通配块看起来完全正常。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/private.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": detached,
+        ".open-next/assets/_headers": detached,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '"/downloads/private.pdf" in public/_headers detaches',
+      ),
+    );
+  });
+
+  it("passes when the noindex rule is written as the equivalent none", () => {
+    // Google 定义 `none` 等于 `noindex, nofollow`，比只写 noindex 更严。
+    // 把它判红等于逼着业主改弱防护。
+    const none = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: none",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": none,
+        ".open-next/assets/_headers": none,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("passes when one header's directives are split across two blocks", () => {
+    // Cloudflare 对同名响应头按逗号合并，所以这两个块合起来就是完整的那一条。
+    // 逐行比对会说它不完整，那是门禁看不懂，不是配置错了。
+    const split = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      "  Cache-Control: public, max-age=31536000",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      "  Cache-Control: immutable",
       "",
       EXPECTED_DOWNLOADS_HEADER_ROUTE,
       `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
