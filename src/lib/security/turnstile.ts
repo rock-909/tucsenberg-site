@@ -41,11 +41,22 @@ function buildTurnstilePayload(
   return payload;
 }
 
+/**
+ * 向 Cloudflare 校验一次令牌的硬超时。
+ *
+ * 具名并导出，是为了让浏览器那侧的提交预算能跟它对账：预算必须盖住服务端
+ * 串行最坏耗时，而那个和是这个数加上邮件与 Airtable 的预算。
+ */
+export const TURNSTILE_VERIFY_TIMEOUT_MS = FIVE_SECONDS_MS;
+
 async function requestTurnstileVerification(
   payload: URLSearchParams,
 ): Promise<TurnstileVerificationResult> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FIVE_SECONDS_MS);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    TURNSTILE_VERIFY_TIMEOUT_MS,
+  );
 
   try {
     const response = await fetch(

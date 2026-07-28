@@ -27,7 +27,11 @@ export type TurnstileDegradedKind = "unavailable" | "failed";
 
 /**
  * 开发环境 bypass 模式的占位令牌：只为让提交按钮解锁，服务端不认这个值。
- * 想让整条链路走通要用 test 模式的 dummy 令牌。
+ *
+ * 客户端看 `NEXT_PUBLIC_TURNSTILE_BYPASS`，服务端看 `TURNSTILE_BYPASS`，是两个
+ * 独立开关，必须一起开。只开客户端那个，按钮会解锁但每次提交都被判
+ * `TURNSTILE_REJECTED`——换了个死法而已。想让整条链路走通要用 test 模式的
+ * dummy 令牌。
  */
 const TURNSTILE_BYPASS_TOKEN = "TURNSTILE_BYPASS_TOKEN";
 
@@ -86,19 +90,6 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
   );
 }
 
-/**
- * dev bypass 与 test/preview 模式都用替身令牌顶替真实控件；两者同时开时 bypass 赢。
- * 返回 null 表示走真实控件。
- */
-function resolveStubToken(
-  isBypassMode: boolean,
-  isTestMode: boolean,
-): string | null {
-  if (isBypassMode) return TURNSTILE_BYPASS_TOKEN;
-  if (isTestMode) return TURNSTILE_DUMMY_TEST_TOKEN;
-  return null;
-}
-
 export function TurnstileWidget({
   onSuccess,
   onError,
@@ -124,7 +115,6 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const stubToken = resolveStubToken(isBypassMode, isTestMode);
 
   /**
    * reset 意味着上一个令牌已作废，控件要重新出题。
@@ -135,12 +125,16 @@ export function TurnstileWidget({
    * reset 后会出新挑战对齐。本地 E2E 与预览部署都跑在这个模式下。
    */
   const handleReset = useCallback(() => {
-    if (stubToken) {
-      onSuccess?.(stubToken);
+    if (isBypassMode) {
+      onSuccess?.(TURNSTILE_BYPASS_TOKEN);
+      return;
+    }
+    if (isTestMode) {
+      onSuccess?.(TURNSTILE_DUMMY_TEST_TOKEN);
       return;
     }
     turnstileRef.current?.reset();
-  }, [stubToken, onSuccess]);
+  }, [isBypassMode, isTestMode, onSuccess]);
 
   useEffect(() => {
     if (!onReadyRef) {
@@ -153,14 +147,17 @@ export function TurnstileWidget({
   // test mode both replace the real widget, so they share one settle-once
   // effect instead of two near-identical ones. Bypass wins if both are on.
   useEffect(() => {
-    if (autoResolveTriggeredRef.current || !stubToken) return;
-    autoResolveTriggeredRef.current = true;
+    if (autoResolveTriggeredRef.current) return;
     if (isBypassMode) {
+      autoResolveTriggeredRef.current = true;
       logger.warn("[DEV] Turnstile bypass mode enabled");
+      onSuccess?.(TURNSTILE_BYPASS_TOKEN);
+    } else if (isTestMode) {
+      autoResolveTriggeredRef.current = true;
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
+      onSuccess?.(TURNSTILE_DUMMY_TEST_TOKEN);
     }
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
-    onSuccess?.(stubToken);
-  }, [isBypassMode, stubToken, onSuccess]);
+  }, [isBypassMode, isTestMode, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode && !isTestMode) {

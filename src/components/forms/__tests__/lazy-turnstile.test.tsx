@@ -402,15 +402,31 @@ describe("LazyTurnstile", () => {
       expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
     });
 
-    it("does not restart the rescue timer when the token merely expires", async () => {
+    it("stays quiet when an expired token is renewed in time", async () => {
       await renderAndLoad();
 
       fireEvent.click(screen.getByTestId("turnstile-success"));
-      // 过期是正常生命周期：widget 会自己续新挑战，不该被当成救援信号
       fireEvent.click(screen.getByTestId("turnstile-expire"));
+      // 过期是正常生命周期，widget 会自己续新挑战。续上了就什么都不该出现——
+      // 起表不等于显示，别为一次健康的过期吓退还在填表的买家。
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS / 2));
+      fireEvent.click(screen.getByTestId("turnstile-success"));
       act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
 
       expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+    });
+
+    it("restarts the rescue timer when the token expires and never renews", async () => {
+      await renderAndLoad();
+
+      fireEvent.click(screen.getByTestId("turnstile-success"));
+      fireEvent.click(screen.getByTestId("turnstile-expire"));
+      // 续期悄悄失败（iframe 被企业代理拦、脚本被中间盒换掉、那一秒断网）不触发
+      // onError。买家在询盘页停留超过令牌寿命是常态——不起表就是又一个永远
+      // 禁用的按钮，而且这次连救援行都没有。
+      act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));
+
+      expect(screen.getByRole("link", { name: /sales@/u })).toBeVisible();
     });
 
     it("restarts the rescue timer when the form resets the widget after a submit", async () => {

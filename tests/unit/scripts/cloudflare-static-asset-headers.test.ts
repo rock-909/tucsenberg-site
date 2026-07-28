@@ -158,4 +158,83 @@ describe("Cloudflare static asset headers proof", () => {
       ),
     );
   });
+
+  it("fails when noindex only sits under an absolute-URL route line", () => {
+    // Cloudflare 允许路由行写成带域名的绝对 URL。不把它当路由行，noindex 就会被
+    // 算到上一个块名下——检查绿，而这条头到底生不生效取决于域名匹配。
+    const domainScoped = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      "https://tucsenberg.com/downloads/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": domainScoped,
+        ".open-next/assets/_headers": domainScoped,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+  });
+
+  it("passes when the same headers use HTTP-standard spacing", () => {
+    // `public, max-age=86400` 和 `public,max-age=86400` 是同一条头。业主重排一次
+    // 格式就变红，是门禁在说谎，不是意图坏了。
+    const spaced = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "  Cache-Control: public, max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": spaced,
+        ".open-next/assets/_headers": spaced,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("passes when a route is split across two blocks", () => {
+    // 同一路由写两个块是合法的，Cloudflare 会合并。只看第一个块就会误红。
+    const split = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": split,
+        ".open-next/assets/_headers": split,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
 });

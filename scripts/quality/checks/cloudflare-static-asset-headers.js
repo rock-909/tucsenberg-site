@@ -33,7 +33,10 @@ function parseHeaderBlocks(headers) {
     const line = rawLine.trim();
     if (line.length === 0 || line.startsWith("#")) continue;
 
-    if (line.startsWith("/")) {
+    // 路由行也可以写成带域名的绝对 URL（Cloudflare 的「只给某个域名加头」写法）。
+    // 不认它，那种行会被当成上一个块的响应头，noindex 就会被算到不属于它的路由
+    // 名下——检查绿，而 PDF 已经能被收录。归属查错比不查更危险。
+    if (line.startsWith("/") || /^https?:\/\//u.test(line)) {
       current = { route: line, headerLines: [] };
       blocks.push(current);
     } else if (current) {
@@ -44,19 +47,35 @@ function parseHeaderBlocks(headers) {
   return blocks;
 }
 
+/**
+ * 比较响应头时把空格抹平。
+ *
+ * `public,max-age=86400` 和 `public, max-age=86400` 是同一条头，HTTP 规范两种都
+ * 合法。逐字符全等会在业主重排一次格式时变红，而意图完全没坏——这个文件自己就
+ * 写着「缓存时长是业主可调参数，钉死数字会让业主一改就红」，格式同理。
+ */
+function normalizeHeaderLine(line) {
+  return line.replace(/\s+/gu, "").toLowerCase();
+}
+
 function collectRouteBlockFailures(
   blocks,
   relativePath,
   route,
   expectedHeader,
 ) {
-  const block = blocks.find((candidate) => candidate.route === route);
+  // 同一个路由写两个块是合法的，Cloudflare 会合并；只看第一个会把写在第二个块里
+  // 的 noindex 判丢，误红。
+  const headerLines = blocks
+    .filter((candidate) => candidate.route === route)
+    .flatMap((candidate) => candidate.headerLines);
 
-  if (!block) {
+  if (headerLines.length === 0) {
     return [`missing "${route}" in ${relativePath}`];
   }
 
-  if (!block.headerLines.includes(expectedHeader)) {
+  const wanted = normalizeHeaderLine(expectedHeader);
+  if (!headerLines.some((line) => normalizeHeaderLine(line) === wanted)) {
     return [`"${route}" in ${relativePath} does not carry "${expectedHeader}"`];
   }
 

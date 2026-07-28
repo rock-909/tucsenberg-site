@@ -203,10 +203,7 @@
       },
       {
         "files": ["src/components/security/turnstile.tsx"],
-        "rules": [
-          "react-doctor/no-prop-callback-in-effect",
-          "react-doctor/no-pass-data-to-parent"
-        ]
+        "rules": ["react-doctor/no-prop-callback-in-effect"]
       },
       {
         "files": [

@@ -50,18 +50,39 @@ const JSON_HEADERS = { "Content-Type": "application/json" } as const;
 /**
  * 一次提交的请求预算。
  *
- * 服务端串行执行，已知最坏耗时加总为 18 秒：
- * Turnstile 校验 5 秒（`src/lib/security/turnstile.ts` 的 `FIVE_SECONDS_MS`）
+ * 服务端串行执行，已知最坏耗时加总为 23 秒：
+ * 限流查询 5 秒（`src/lib/security/stores/rate-limit-store.ts` 的
+ * `UPSTASH_OPERATION_TIMEOUT_MS`，串在整条链路最前面）
+ * + Turnstile 校验 5 秒（`src/lib/security/turnstile.ts` 的
+ * `TURNSTILE_VERIFY_TIMEOUT_MS`）
  * + 业主邮件 5 秒（`src/lib/email/resend-http-client.ts` 的
  * `DEFAULT_RESEND_TIMEOUT_MS`）
  * + Airtable 8 秒（`src/lib/airtable/service.ts` 的
  * `AIRTABLE_REQUEST_TIMEOUT_MS`）。
  *
- * 25 秒把这 18 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。低于这个数会
- * 把还在正常处理的慢请求判死，买家白填一次；不设上限则更糟——连接被中间盒吞掉
+ * 30 秒把这 23 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。低于这条线的
+ * 代价不只是「买家白填一次」：客户端一断开，Cloudflare 会取消 Worker，而中止点
+ * 很可能落在「业主邮件已发出、Airtable 记录还没写」之间——买家重发一次，业主就
+ * 收到两封邮件，其中一封没有对应的 CRM 记录。不设上限则更糟：连接被中间盒吞掉
  * 时 fetch 既不 resolve 也不 reject，表单会永远停在「提交中」。
+ *
+ * 这四个数散在四个模块里，加错一次没人会红，所以
+ * `__tests__/inquiry-form-submission.test.tsx` 直接 import 它们来对账。
  */
-const INQUIRY_REQUEST_TIMEOUT_MS = 25_000;
+const INQUIRY_REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * 支持范围内的浏览器都有 `AbortSignal.timeout`（Chrome 103 / Safari 16 /
+ * Firefox 100 起，都早于 `.browserslistrc` 声明的下限）。但范围外的旧设备上它
+ * 会同步抛 TypeError，而调用点在 try 里——异常会被吞成「服务器错误」，请求根本
+ * 没发出去，买家每次提交都失败且看不出原因。宁可让老浏览器退回没有预算的老行为，
+ * 也不能把它从「能提交」变成「永远失败」。
+ */
+function createRequestBudgetSignal(): AbortSignal | undefined {
+  return typeof AbortSignal.timeout === "function"
+    ? AbortSignal.timeout(INQUIRY_REQUEST_TIMEOUT_MS)
+    : undefined;
+}
 
 /**
  * 发一次询盘并解码结果。请求失败或超出预算时降级成服务器错误，而不是把异常抛给
@@ -72,6 +93,7 @@ async function postInquiry(
   turnstileToken: string,
   context: ValidatedInquiryContext,
 ): Promise<InquirySubmitState> {
+  const signal = createRequestBudgetSignal();
   try {
     const response = await fetch(INQUIRY_ENDPOINT, {
       method: "POST",
@@ -79,7 +101,7 @@ async function postInquiry(
       body: JSON.stringify(
         createInquiryPayload(formData, turnstileToken, context),
       ),
-      signal: AbortSignal.timeout(INQUIRY_REQUEST_TIMEOUT_MS),
+      ...(signal ? { signal } : {}),
     });
     return await decodeInquirySubmitState(response);
   } catch {

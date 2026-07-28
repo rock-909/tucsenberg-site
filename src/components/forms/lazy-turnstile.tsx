@@ -137,8 +137,14 @@ function useLazyRender(containerRef: React.RefObject<HTMLDivElement | null>) {
  * 起表，否则「提交失败 + 此时 Turnstile 挂掉」会让买家卡在一个永远 disabled
  * 的按钮前。
  *
+ * 令牌过期（onExpire）同样要重新起表。这一步容易被跳过，理由听起来也对：widget
+ * 会自己续新挑战，不该为一次正常过期吓买家。但「起表」不等于「显示」——续期在
+ * 15 秒内成功就什么都看不到。真正要防的是续期本身悄悄失败（iframe 被企业代理
+ * 拦掉、脚本被中间盒换掉、那一秒断网），这些都不触发 onError。B2B 买家在询盘页
+ * 停留超过令牌寿命是常态（要去翻规格、算数量），不起表就是又一个永远禁用的按钮。
+ *
  * `waitCycle` 为 null 表示握有令牌（不计时），数字表示第几轮等待；换一个数字就
- * 让下面的 effect 重新起表。过期（onExpire）不算一轮：widget 会自己续新挑战。
+ * 让下面的 effect 重新起表。
  */
 function useTurnstileRescueState(isLoading: boolean) {
   const [degradedKind, setDegradedKind] =
@@ -157,13 +163,14 @@ function useTurnstileRescueState(isLoading: boolean) {
     return () => clearTimeout(timer);
   }, [isLoading, waitCycle]);
 
+  // 拿到令牌就收回救援行。managed 挑战常要买家手动点一次，先填字段再去点验证码
+  // 超过 15 秒是常态；那时救援行已经出现，但控件完全健康，买家也已经能提交了。
   const markSuccess = useCallback(() => {
     setWaitCycle(null);
     setHasTimedOut(false);
     setDegradedKind(null);
   }, []);
 
-  // 已经显示的救援行不再收回：闪一下比一直挂着更让人困惑。
   const markWaiting = useCallback(
     () => setWaitCycle((cycle) => (cycle ?? 0) + 1),
     [],
@@ -232,7 +239,6 @@ function buildLazyTurnstileWidgetProps(args: {
       testMode: labelText.testMode,
     },
     ...(props.onError ? { onError: props.onError } : {}),
-    ...(props.onExpire ? { onExpire: props.onExpire } : {}),
     ...(props.tabIndex !== undefined ? { tabIndex: props.tabIndex } : {}),
     ...(props.id !== undefined ? { id: props.id } : {}),
     ...(props.cData !== undefined ? { cData: props.cData } : {}),
@@ -272,6 +278,13 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
     onError?.(labels.loadFailed);
   };
 
+  // 过期同样意味着手上没令牌了。透传给表单之外还要起表：续期若悄悄失败，
+  // 买家会对着一个永远禁用的按钮，而 onError 一声不吭。
+  const handleExpire = () => {
+    markWaiting();
+    props.onExpire?.();
+  };
+
   // reset 意味着令牌已作废，重新进入等待期——计时器住在这一层，所以在这里起表。
   const handleReadyRef = (reset: () => void) =>
     onReadyRef?.(() => {
@@ -295,6 +308,7 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
               {...turnstileProps}
               onSuccess={handleSuccess}
               onDegraded={markDegraded}
+              onExpire={handleExpire}
               onReadyRef={handleReadyRef}
             />
           </Suspense>

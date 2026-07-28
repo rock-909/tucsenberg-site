@@ -5,6 +5,10 @@ import {
   renderInquiryForm,
 } from "@/test/inquiry-form-harness";
 import { turnstileWidgetResetSpy } from "@/test/inquiry-turnstile-mock";
+import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
+import { DEFAULT_RESEND_TIMEOUT_MS } from "@/lib/email/resend-http-client";
+import { TURNSTILE_VERIFY_TIMEOUT_MS } from "@/lib/security/turnstile";
+import { UPSTASH_OPERATION_TIMEOUT_MS } from "@/lib/security/stores/rate-limit-store";
 
 vi.mock(
   "@/components/forms/lazy-turnstile",
@@ -153,9 +157,17 @@ describe("InquiryForm submission lifecycle", () => {
     const budgetMs = timeoutSpy.mock.calls[0]?.[0];
     // 没有预算就没有出路：这一行在加超时之前就会红。
     expect(budgetMs).toBeTypeOf("number");
-    // 服务端串行最坏耗时 18 秒（Turnstile 5 + 邮件 5 + Airtable 8）。预算掉到
-    // 这条线以下，就会把还在正常处理的慢请求判死，买家白填一次。
-    expect(Number(budgetMs)).toBeGreaterThan(18_000);
+    // 服务端串行最坏耗时由这三个常量相加得出，不能手抄一个 18000：任何一段调大，
+    // 手抄的数不会红，客户端预算会悄悄变得不够，买家看到假的「服务器错误」而请求
+    // 其实还在正常处理。
+    const serverWorstCaseMs =
+      UPSTASH_OPERATION_TIMEOUT_MS +
+      TURNSTILE_VERIFY_TIMEOUT_MS +
+      DEFAULT_RESEND_TIMEOUT_MS +
+      AIRTABLE_REQUEST_TIMEOUT_MS;
+    expect(Number(budgetMs)).toBeGreaterThan(serverWorstCaseMs);
+    // 也要有上界：预算调到五分钟同样是死路，买家只会看着按钮一直转。
+    expect(Number(budgetMs)).toBeLessThan(serverWorstCaseMs * 2);
 
     await act(async () => {
       vi.advanceTimersByTime(Number(budgetMs));
