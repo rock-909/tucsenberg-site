@@ -83,8 +83,11 @@ describe("Cloudflare protected directory resolution", () => {
       createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
     );
 
+    // 整句相等，不是 stringContaining：后半截才是这条要守的东西。它已经在
+    // `Downloads/` 里了，再劝他「挪进 downloads/」是假话，而真正的动作下一句已经
+    // 说了——把目录名改回小写。
     expect(failures).toContainEqual(
-      expect.stringContaining("/Downloads/catalog.pdf in public/_headers"),
+      '/Downloads/catalog.pdf in public/_headers is served without "x-robots-tag"',
     );
     expect(failures).toContainEqual(
       `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,

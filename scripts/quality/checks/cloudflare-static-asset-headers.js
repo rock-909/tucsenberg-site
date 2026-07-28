@@ -45,18 +45,24 @@ const INDEXABLE_DOCUMENT_EXTENSIONS = new Set([
   ".odt",
   ".ods",
   ".odp",
-  ".zip",
   ".txt",
 ]);
-// `.txt` 在表里，但按标准必须给爬虫读的那几条路径要放行。
+// `.txt` 在表里，但按标准必须给爬虫读的那几个文件要放行。
 //
 // 排除写成「所有 .txt」曾经是这里的做法，代价是一份 `quotation.txt` 的价目表整个
-// 滑过去——而真正需要保住的只有 `.well-known/` 下面那几个文件，和 robots/ads 这两
-// 个按规范就长在站点根上的。按路径排除，理由和实际守的范围才对得上。
+// 滑过去。而只按**路径**放行同样不行：`.well-known/` 是个「特殊用途」目录，很容易
+// 被当成杂物间，整个目录放开的话，一份 `public/.well-known/quotation.pdf` 就白白
+// 溜出去了。所以两个条件都要成立——路径是爬虫该读的那几条，**并且**文件是纯文本。
+// 依据：robots.txt 在站点根是 RFC 9309 §2.3 规定的，`.well-known/` 前缀是 RFC 8615，
+// ads.txt 在站点根是 IAB Tech Lab 的规范。
 const CRAWLER_FACING_PATH_PREFIX = "/.well-known/";
 const CRAWLER_FACING_ROOT_PATHS = new Set(["/robots.txt", "/ads.txt"]);
+const CRAWLER_FACING_EXTENSION = ".txt";
 
 function isCrawlerFacing(servedPath) {
+  if (path.extname(servedPath).toLowerCase() !== CRAWLER_FACING_EXTENSION) {
+    return false;
+  }
   return (
     servedPath.startsWith(CRAWLER_FACING_PATH_PREFIX) ||
     CRAWLER_FACING_ROOT_PATHS.has(servedPath)
@@ -79,10 +85,15 @@ const MODELLED_ASSET_CONFIG_KEYS = new Set(["directory", "binding"]);
 // 那条 URL 发出去，这套检查证明不了」。`run_worker_first` 更彻底：请求整个交给
 // Worker，`_headers` 一条都不参与，这份门禁的每一条结论都会作废。
 //
-// 记的是**默认值**，不是键名。写成默认值的那份配置和不写完全等价，线上一个字节都
-// 不会变，对它说「这套检查建模不了」是假的——而且业主为了写清楚把默认值显式写出来
-// 是很常见的做法，把他拦下来就是纯误红。默认值来自 asset worker 自己的兜底
-// （assets.worker.js:7962-7963），`run_worker_first` 不写就是 false。
+// 记的是**默认值**，不是键名。写成默认值的那份配置和不写，发布出去的行为一样，对它
+// 说「这套检查建模不了」是假的——而且业主为了写清楚把默认值显式写出来是很常见的做
+// 法，把他拦下来就是纯误红。
+//
+// 前两个的默认值来自 asset worker 自己的兜底（assets.worker.js:7962-7963，那是
+// Workers Assets 的 asset-worker，不是 Pages）。`run_worker_first` 不在那个函数里，
+// 它走的是另一套：不写的话 `invoke_user_worker_ahead_of_assets` 这个键根本不出现
+// （cli.js:163211），写 `false` 则以 false 出现。所以上传的 JSON 不是逐字节相同，
+// 只是发布行为相同——这里说的是后者。
 const UNMODELLED_SERVING_ASSET_CONFIG_DEFAULTS = new Map([
   ["html_handling", "auto-trailing-slash"],
   ["not_found_handling", "none"],
@@ -508,6 +519,18 @@ function collectScopeFailures(
 }
 
 /**
+ * URL 的第一段是不是「拼法不同的 downloads」。
+ *
+ * 磁盘上是 `Downloads/` 时，这份文件已经在那个目录里了，只是名字大小写不对。这时候
+ * 劝业主「把它挪进 downloads/」是假话，而且和同一份报告里那句「这个目录不是磁盘上
+ * 那个名字」自相矛盾——他会去做一件毫无效果的事。真正的动作那句话已经说了。
+ */
+function looksLikeDownloadsDir(servedPath) {
+  const [, first] = servedPath.split("/");
+  return (first ?? "").toLowerCase() === DOWNLOADS_ASSET_SUBDIR;
+}
+
+/**
  * 不在受保护目录里的那些文档，判红时要多说一句「该怎么办」。
  *
  * 沿用原来那句的话，业主看到的是「/quotation.pdf in public/_headers is served
@@ -516,12 +539,14 @@ function collectScopeFailures(
  * 要做的是把这份文件挪进 `public/downloads/`，而那句话一个字都没提。
  */
 function collectStrayDocumentFailures(rules, relativePath, targetPath) {
-  return collectServedPathFailures(
+  const failures = collectServedPathFailures(
     rules,
     relativePath,
     targetPath,
     EXPECTED_DOWNLOADS_NOINDEX,
-  ).map(
+  );
+  if (looksLikeDownloadsDir(targetPath)) return failures;
+  return failures.map(
     (failure) =>
       `${failure}; it does not sit under downloads/, so either move it there or write a rule that covers it`,
   );

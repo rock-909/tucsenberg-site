@@ -608,6 +608,24 @@ describe("Cloudflare published asset surface", () => {
     expect(failures).toEqual([]);
   });
 
+  it("fails when a document hides in the well-known directory", () => {
+    // `.well-known/` 是「特殊用途」目录，很容易被当成杂物间。整个目录放行的话，一份
+    // 报价单塞进去就白白溜出去了。放行的条件必须是「爬虫该读的那几条路径」**并且**
+    // 「文件是纯文本」，两个一起成立才算。
+    const files = createValidFiles();
+    files["public/.well-known/quotation.pdf"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '/.well-known/quotation.pdf in public/_headers is served without "x-robots-tag"',
+      ),
+    );
+  });
+
   it("fails when a price list is published as a plain text file", () => {
     // 排除写成「所有 .txt」的话，一份 `quotation.txt` 的价目表整个滑过去。Google 收
     // 录纯文本文件，那份价目表和 PDF 一样是询盘物料。
