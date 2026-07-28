@@ -553,11 +553,19 @@ describe("Cloudflare static asset headers proof", () => {
         delete files[`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`];
       },
     },
+    {
+      // 目录里满是文件，只是列不出来。这时候「先跑构建」是句废话：业主跑十遍也
+      // 修不好一个权限问题，而真正该看的那行被埋在这句提示下面。
+      name: "a built downloads directory that cannot be listed",
+      wants: false,
+      break: () => {},
+      unlistable: new Set([BUILT_DOWNLOADS_DIR]),
+    },
   ];
 
   it.each(buildHintCases)(
     "$wants: tells the owner to build when the red is $name",
-    ({ wants, break: breakFiles }) => {
+    ({ wants, break: breakFiles, unlistable }) => {
       const errors: string[] = [];
       const spy = vi
         .spyOn(console, "error")
@@ -570,7 +578,9 @@ describe("Cloudflare static asset headers proof", () => {
         breakFiles(files);
 
         expect(
-          runCloudflareStaticAssetHeaderCli(createVirtualRepo(files)),
+          runCloudflareStaticAssetHeaderCli(
+            createVirtualRepo(files, new Set(), (name) => name, unlistable),
+          ),
         ).toBe(false);
         if (wants) {
           expect(errors.join("\n")).toContain("pnpm website:build:cf");

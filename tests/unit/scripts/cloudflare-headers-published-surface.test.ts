@@ -12,6 +12,7 @@ import {
   createValidFiles,
   createVirtualRepo,
   DOWNLOADS_DIR,
+  ROOT_DIR,
   STATIC_DIR,
   EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
@@ -483,7 +484,7 @@ describe("Cloudflare published asset surface", () => {
     ]);
   });
 
-  it("keeps proving files when a directory cannot be listed", () => {
+  it("keeps proving files when an upper directory cannot be listed", () => {
     // 列不出来（权限、EMFILE、EIO）不等于名字被折叠了。当成折叠处理的话，那个目录
     // 一条路径都不列，而它底下那份被撤销了 noindex 的 PDF 一个字都不打印——红的是
     // 一个不存在的问题，真问题反倒消音了。
@@ -514,16 +515,17 @@ describe("Cloudflare published asset surface", () => {
       ),
     );
 
-    // 报错要指名真正列不出来的那个目录。说「下层列不出来」是假的——同一次运行里
-    // 它被列了个干净，下面那条逐文件结论就是从它来的。
-    expect(failures).toContainEqual(
-      `${ASSETS_DIR} could not be listed (EACCES), so this check cannot confirm ${BUILT_DOWNLOADS_DIR} is spelled the same on disk as in the URL`,
-    );
-    expect(failures).toContainEqual(
+    // 整份清单比对，不是挑一句。上层列不出来时最容易冒出来的假话是「下层列不出来」
+    // 或者「下层是空的」——同一次运行里下层被列了个干净，下面那两条逐文件结论就是
+    // 从它来的。真问题只有一个，输出里就只能有那一个。
+    expect(failures).toEqual([
       expect.stringContaining(
         '/downloads/generated-only.pdf in public/_headers is served without "x-robots-tag"',
       ),
-    );
+      expect.stringContaining(
+        `/downloads/generated-only.pdf in ${ASSETS_DIR}/_headers is served without "x-robots-tag"`,
+      ),
+    ]);
   });
 
   it("names the subtree it could not list instead of calling it empty", () => {
@@ -577,9 +579,71 @@ describe("Cloudflare published asset surface", () => {
       createVirtualRepo(files),
     );
 
-    expect(failures).toContainEqual(
-      expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
+    // 整份清单比对。挑一句的话，ENOTDIR 被当成「列不出来」时多冒出来的那句假话
+    // 照样溜过去——目录不在和「那根本不是目录」都属于没有可证明的东西。
+    expect(failures).toEqual([
+      `${DOWNLOADS_DIR} holds no files, so nothing proves "${EXPECTED_DOWNLOADS_NOINDEX}" reaches a real file`,
+    ]);
+  });
+
+  it("does not call a directory empty when it could not be listed", () => {
+    // 一条路径都没列出来，同时又有东西没看成：说它「里面没文件」是假的，它里面很
+    // 可能满是没被证明的 PDF。而这句假话还会顺带勾出「先跑构建」那句提示——业主跑
+    // 十遍构建也修不好一个权限问题，而真正该看的那行被埋在下面。
+    const files = createValidFiles();
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(
+        files,
+        new Set(),
+        (value) => value,
+        new Set([BUILT_DOWNLOADS_DIR]),
+      ),
     );
+
+    expect(failures).toEqual([
+      `${BUILT_DOWNLOADS_DIR} could not be listed (EACCES), so nothing under it is proven`,
+    ]);
+  });
+
+  it("names files it could not inspect instead of dropping them", () => {
+    // 目录权限 444 时 readdir 列得出名字，对每个孩子 stat 都抛 EACCES。把 stat
+    // 失败一律当成「既不是目录也不是文件」丢掉，整棵子树的 PDF 一个都没被证明，
+    // 而门禁报零条失败——它看起来在干活，实际上什么都没查。
+    const files = createValidFiles();
+    files[`${BUILT_DOWNLOADS_DIR}/nested/leak.pdf`] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(
+        files,
+        new Set(),
+        (value) => value,
+        new Set(),
+        new Map([[`${BUILT_DOWNLOADS_DIR}/nested`, "EACCES"]]),
+      ),
+    );
+
+    expect(failures).toEqual([
+      `${BUILT_DOWNLOADS_DIR}/nested could not be inspected (EACCES), so it is not proven`,
+    ]);
+  });
+
+  it("stays quiet about an entry whose target is gone", () => {
+    // 断链在 readdir 里列得出名字，stat 才发现目标不在了（ENOENT）。跟着它走本来
+    // 就走不到任何会被上传的文件，没有可证明的东西。把它和「看不了」混成一句，
+    // 每个带断链的仓库都会平白多出一行读不懂的红字。
+    const repo = createVirtualRepo(
+      createValidFiles(),
+      // 只在链接表里，不在文件表里：磁盘上列得出这个名字，跟过去什么都没有。
+      new Set([`${BUILT_DOWNLOADS_DIR}/dangling.pdf`]),
+    );
+
+    // 先证明这个场景真的摆出来了。少了这一句，夹具哪天不再列断链，下面那句
+    // 「没有失败」照样绿——它变成了在证明一个没发生过的情况。
+    expect(
+      repo.readdirSync(`${ROOT_DIR}/${BUILT_DOWNLOADS_DIR}`).map((e) => e.name),
+    ).toContain("dangling.pdf");
+    expect(collectCloudflareStaticAssetHeaderFailures(repo)).toEqual([]);
   });
 
   it("still names the bare pdf when another directory cannot be resolved", () => {

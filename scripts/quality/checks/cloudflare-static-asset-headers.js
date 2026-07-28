@@ -587,24 +587,37 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
   const failures = [];
   for (const entry of entries) {
     const next = relative ? `${relative}/${entry.name}` : entry.name;
-    const resolved = statOrNull(context, path.join(absolute, entry.name));
+    const { stats, code: statCode } = statOrError(
+      context,
+      path.join(absolute, entry.name),
+    );
+    if (stats === undefined) {
+      // 断链指向的东西不在了，跟着它走本来就走不到任何会被上传的文件。别的原因
+      // 看不了，这个条目是目录还是 PDF 都不知道，得说出来。
+      if (!isAbsentDirectory(statCode)) {
+        failures.push(
+          `${here}/${entry.name} could not be inspected (${statCode}), so it is not proven`,
+        );
+      }
+      continue;
+    }
     // 目录本身不是可证明的东西。不递归的话 `/downloads/nested` 会被当成一个
     // 文件去探，它底下真实的 PDF 一个都没查，而门禁看起来在干活。
-    if (resolved?.isDirectory()) {
+    if (stats.isDirectory()) {
       const nested = listServedPaths(context, sourceDir, urlPrefix, next);
       paths.push(...nested.paths);
       failures.push(...nested.failures);
       continue;
     }
     // 跟随之后还是普通文件才算数；FIFO、断链都不算。
-    if (resolved?.isFile()) paths.push(toServedPath(urlPrefix, next));
+    if (stats.isFile()) paths.push(toServedPath(urlPrefix, next));
   }
 
   return { paths: paths.sort(), failures };
 }
 
 /**
- * 受保护目录在磁盘上的真名，以及由真名算出来的 URL 前缀。
+ * 受保护目录在磁盘上叫的是不是 URL 里那个名字。
  *
  * 目录名不能用写死的字面量。macOS 默认的 APFS 不区分大小写：磁盘上是 `Downloads/`
  * 时，`existsSync(".open-next/assets/downloads")` 照样返回 true，门禁于是按
@@ -619,66 +632,42 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
  * `"downloadſ".toLowerCase()` 还是它自己。
  *
  * 名字对不上时不去猜磁盘上那个真名是谁——猜错了后面每一条证明说的都是另一条 URL。
- * 直接返回 folded，那个目录一条路径都不列，由调用方打印一句成立的话。上一版是判红
- * 之后照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不出来」，
+ * 直接判折叠，那个目录一条路径都不列，由调用方打印一句成立的话。上一版是判红之后
+ * 照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不出来」，
  * 后几行接着拿那条算不出来的 URL 下结论，而那些结论两个方向都不成立。
  *
- * 「列不出来」必须和「名字被折叠了」分开。曾经把 readdir 的任何失败（权限、EMFILE、
- * EIO）都当成折叠，于是一个只是不可列的目录会被说成「名字不对」，而它底下那份被撤销
- * 了 noindex 的 PDF 一个字都不打印。列不出来时名字本身没有可疑之处，逐文件证明照常跑。
- *
- * 「目录不在」也必须和「列不出来」分开：不存在的东西谈不上列不出来，那是业主没跑构建
- * 时最常撞上的那条路径，多说一句看不懂的假话没有意义。
- *
- * 报错要指名**真正列不出来的那个目录**，也就是上层。上层不可列、下层却列得动时，说
- * 「下层列不出来」是假的——同一次运行里它被列了个干净，还逐文件下了结论。
+ * 列不出来时什么都不说。这里只有一个问题要答：名字是不是被折叠了。列不出来的目录
+ * 给不出这个答案，那就别答——真正要紧的「有一批文件没被证明」由 listServedPaths
+ * 去报，那句话是有后果的，这里再补一句只会多一条读不懂的假话。
  *
  * 只解析会进 URL 的那几段。`public`、`.open-next`、`assets` 被 wrangler 完全剥掉
  * （清单路径是相对资产根算的），它们叫什么都不改变任何一条 URL。
  */
-function resolveServedDir(context, baseDir, urlSubdir) {
+function isFoldedDirectoryName(context, baseDir, urlSubdir) {
   let parent = path.join(context.rootDir, baseDir);
-  let parentDir = baseDir;
 
   for (const segment of urlSubdir.split("/")) {
-    const { entries, code } = readdirOrError(context, parent);
+    const { entries } = readdirOrError(context, parent);
+    if (entries === undefined) return false;
     const next = path.join(parent, segment);
-    if (entries === undefined) {
-      if (isAbsentDirectory(code)) return { state: "missing" };
-      return { state: "unlistable", parentDir, code };
-    }
     if (!entries.some((entry) => entry.name === segment)) {
       // 一模一样的名字找不到、路径却又「存在」，说明是文件系统替我们折叠了名字。
-      // 目录压根不在时返回 missing，由「目录里没东西」那条去报。
-      return { state: context.existsSync(next) ? "folded" : "missing" };
+      // 目录压根不在时不算折叠，由「目录里没东西」那条去报。
+      return context.existsSync(next);
     }
     parent = next;
-    parentDir = `${parentDir}/${segment}`;
   }
 
-  return { state: "exact" };
+  return false;
 }
 
-function collectUnresolvableDirectoryFailures(context, baseDir, urlSubdir) {
-  const sourceDir = `${baseDir}/${urlSubdir}`;
-  const { state, parentDir, code } = resolveServedDir(
-    context,
-    baseDir,
-    urlSubdir,
-  );
+function collectFoldedDirectoryFailures(context, baseDir, urlSubdir) {
+  if (!isFoldedDirectoryName(context, baseDir, urlSubdir)) return [];
   // 「算不出来」是这个检查的选择，不是世界的性质：真名在磁盘上，比对 inode 就能拿到。
   // 所以话要说成「这个检查算不出来」，不能说成「没人算得出来」。
-  if (state === "folded") {
-    return [
-      `${sourceDir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
-    ];
-  }
-  if (state === "unlistable") {
-    return [
-      `${parentDir} could not be listed (${code}), so this check cannot confirm ${sourceDir} is spelled the same on disk as in the URL`,
-    ];
-  }
-  return [];
+  return [
+    `${baseDir}/${urlSubdir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+  ];
 }
 
 /**
@@ -704,11 +693,19 @@ function isAbsentDirectory(code) {
   return code === "ENOENT" || code === "ENOTDIR";
 }
 
-function statOrNull(context, absolutePath) {
+/**
+ * 看一个条目到底是什么，失败时把**错误码**一起带回来。
+ *
+ * 和 readdirOrError 是同一个道理，而且这一层更容易漏：readdir 成功、stat 失败是
+ * 真实存在的一档。目录权限是 444 时 readdir 列得出名字，stat 每个孩子都抛 EACCES。
+ * 只返回 null 的话，这些孩子既不算目录也不算文件，被静默丢掉——一整棵子树的 PDF
+ * 一个都没被证明，而门禁报零条失败。
+ */
+function statOrError(context, absolutePath) {
   try {
-    return context.statSync(absolutePath);
-  } catch {
-    return null;
+    return { stats: context.statSync(absolutePath) };
+  } catch (error) {
+    return { code: error?.code ?? "UNKNOWN" };
   }
 }
 
@@ -1070,8 +1067,8 @@ function collectEmptyDirectoryFailure(
   expectedHeader,
   isBuildOutput = false,
 ) {
-  // null 表示目录名算不出来。那不是「空」，由 collectUnresolvableDirectoryFailures
-  // 去说清是什么问题——在这里再说一句「里面没文件」是不成立的。
+  // null 表示这个目录压根没被数清楚，不是「数清楚了，是零」。前者已经有一句成立的
+  // 话说明是什么问题了，在这里再补一句「里面没文件」是假的：它里面很可能满是文件。
   if (paths === null || paths.length > 0) return [];
   return [
     `${sourceDir} ${isBuildOutput ? HOLDS_NO_BUILT_FILES : HOLDS_NO_FILES}, so nothing proves "${expectedHeader}" reaches a real file`,
@@ -1090,13 +1087,23 @@ function collectPublishedDirectoryFailures(context, directory) {
   // 目录名算不出来时一条路径都不列：拿写死的前缀继续算，出来的每一条结论说的都是
   // 一条线上不存在的 URL。这三个目录各判各的，一个算不出来不影响另外两个照常证明。
   const listResolved = (baseDir, urlSubdir) => {
-    // 只有「名字被折叠了」才不列——那时按写死的前缀算出来的每一条 URL 都不存在。
-    // 目录不在、或者上层列不出来时名字本身没问题，逐文件证明照常跑，那份被撤销了
+    // 名字被折叠时一条都不列：按写死的前缀算出来的每一条 URL 线上都不存在。目录
+    // 不在、或者上层列不出来时名字本身没问题，逐文件证明照常跑，那份被撤销了
     // noindex 的 PDF 不能因此消音。
-    if (resolveServedDir(context, baseDir, urlSubdir).state === "folded") {
+    if (isFoldedDirectoryName(context, baseDir, urlSubdir)) {
       return { paths: null, failures: [] };
     }
-    return listServedPaths(context, `${baseDir}/${urlSubdir}`, `/${urlSubdir}`);
+    const listing = listServedPaths(
+      context,
+      `${baseDir}/${urlSubdir}`,
+      `/${urlSubdir}`,
+    );
+    // 一条路径都没列出来、同时又有东西没看成：这不是「空目录」。说它空是假的，
+    // 而且会顺带勾出那句「先跑构建」——业主跑十遍构建也修不好一个权限问题。
+    if (listing.paths.length === 0 && listing.failures.length > 0) {
+      return { paths: null, failures: listing.failures };
+    }
+    return listing;
   };
   const sourceDownloads = listResolved(
     PUBLIC_SOURCE_DIR,
@@ -1132,21 +1139,17 @@ function collectPublishedDirectoryFailures(context, directory) {
       `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
       true,
     ),
-    ...collectUnresolvableDirectoryFailures(
+    ...collectFoldedDirectoryFailures(
       context,
       PUBLIC_SOURCE_DIR,
       DOWNLOADS_ASSET_SUBDIR,
     ),
-    ...collectUnresolvableDirectoryFailures(
+    ...collectFoldedDirectoryFailures(
       context,
       directory,
       DOWNLOADS_ASSET_SUBDIR,
     ),
-    ...collectUnresolvableDirectoryFailures(
-      context,
-      directory,
-      STATIC_ASSET_SUBDIR,
-    ),
+    ...collectFoldedDirectoryFailures(context, directory, STATIC_ASSET_SUBDIR),
     // 一个磁盘文件被发出去的 URL 不一定只有它自己那条。这两类别名会让被证明的
     // 路径和实际被请求的路径对不上，所以直接判红。
     ...collectHtmlAliasFailures(

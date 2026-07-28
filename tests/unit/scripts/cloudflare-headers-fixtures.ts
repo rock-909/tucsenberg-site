@@ -41,6 +41,10 @@ export function createVirtualRepo(
   symlinks: Set<string> = new Set(),
   fold: (name: string) => string = (name) => name,
   unlistable: Set<string> = new Set(),
+  // 「列得出名字，但看不了这个名字是什么」是真实存在的一档：目录权限 444 时
+  // readdir 成功，对每个孩子 stat 都抛 EACCES；断链则是列得出、stat 抛 ENOENT。
+  // 给的是路径到错误码的表而不是一个集合——这两档的正确处置正好相反。
+  unstattable: Map<string, string> = new Map(),
 ) {
   // 目录也要能被折叠命中，所以每个 key 的每一层祖先都进表。
   const folded = new Map<string, string>();
@@ -103,11 +107,16 @@ export function createVirtualRepo(
       ) {
         fail("ENOENT");
       }
-      const names = new Set(
-        Object.keys(files)
+      const child = (name: string) =>
+        name.slice(prefix.length).split("/")[0] as string;
+      const names = new Set([
+        ...Object.keys(files)
           .filter((name) => name.startsWith(prefix))
-          .map((name) => name.slice(prefix.length).split("/")[0] as string),
-      );
+          .map(child),
+        // 断链：readdir 列得出名字，磁盘上却没有目标，statSync 才抛 ENOENT。
+        // 只从 files 推名字的话这一档根本造不出来。
+        ...[...symlinks].filter((link) => link.startsWith(prefix)).map(child),
+      ]);
       return [...names].map((name) => {
         const linked = symlinks.has(`${prefix}${name}`);
         const isDirectory = Object.keys(files).some((file) =>
@@ -126,12 +135,19 @@ export function createVirtualRepo(
     // 链接就是目录。门禁靠它决定要不要递归，所以两个判据都要有。
     statSync: (absolutePath: string) => {
       const key = normalize(absolutePath);
+      // readdirSync 一样，失败要带 `code`。「不在了」（ENOENT，断链，没什么可证明）
+      // 和「看不了」（EACCES，这个条目是目录还是 PDF 都不知道）处置完全相反。
+      const fail = (code: string) => {
+        const error: NodeJS.ErrnoException = new Error(`${code}: '${key}'`);
+        error.code = code;
+        throw error;
+      };
+      const forced = unstattable.get(key);
+      if (forced !== undefined) fail(forced);
       const isDirectory = Object.keys(files).some((file) =>
         file.startsWith(`${key}/`),
       );
-      if (!isDirectory && files[key] === undefined) {
-        throw new Error(`Missing virtual path: ${key}`);
-      }
+      if (!isDirectory && files[key] === undefined) fail("ENOENT");
       return { isFile: () => !isDirectory, isDirectory: () => isDirectory };
     },
   };
