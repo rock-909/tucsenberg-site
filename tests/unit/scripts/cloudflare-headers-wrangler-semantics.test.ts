@@ -6,7 +6,6 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 import {
-  BUNDLE_PATH,
   CATALOG_PATH,
   createValidFiles,
   createVirtualRepo,
@@ -15,10 +14,11 @@ import {
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
-// 这份守的是从 wrangler 4.100.0 移植过来的解析与匹配语义：哪些规则会被它丢掉、
-// 一条规则怎么编译成正则、重复路由怎么算、磁盘文件名怎么变成线上被请求的路径。
-// 每一条都对应一个曾经真实存在的假绿或误红。
-// 门禁要证明什么由 cloudflare-static-asset-headers 那份守。
+// 这份守的是「留下来的规则怎么编译成正则、怎么命中一个真实文件」：占位符语法、
+// 元字符转义、路径百分号编码、域名怎么分场景、重复路由怎么算。每一条都对应一个曾经
+// 真实存在的假绿或误红。
+// 哪些规则压根活不到这一步由 cloudflare-headers-rule-rejection 守；命中之后算什么值
+// 由 cloudflare-headers-effective-value 守。
 describe("wrangler _headers semantics the gate ports", () => {
   it("fails when a more specific downloads route detaches the noindex", () => {
     // Cloudflare 允许 `! Header-Name` 把上层规则设的头撤掉。通配块写着 noindex、
@@ -112,34 +112,6 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
-  it("ignores a rule whose duplicate placeholder names cannot compile", () => {
-    // wrangler 把占位符编译成命名捕获组，`/:x/:x` 会生成两个同名分组，`RegExp`
-    // 直接抛异常，`generateRulesMatcher` catch 之后把这条规则整个丢掉。换成匿名
-    // 分组它就成了一条正常规则，底下的 noindex 被算作生效，而线上根本没有。
-    const duplicateNames = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      "/:x/:x",
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": duplicateNames,
-        ".open-next/assets/_headers": duplicateNames,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
   it("stays quiet when a detach targets a route no real download sits under", () => {
     // `/downloads-archive/*` 以 "/downloads" 开头，但它下面一个真实文件都没有。
     // 按字符串前缀找撤销会在这里误红，拦住一次完全正当的发布。
@@ -196,132 +168,6 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
-  it("ignores rules wrangler itself throws away", () => {
-    // wrangler 一条规则最多一个 `*`，也不许 `*` 和 `:splat` 混用，非法的整条跳过。
-    // 门禁把这类规则算作生效，就是假绿：线上那个 noindex 根本没被采纳。
-    const invalid = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      "/download*/*",
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-      "/downloads/:splat*",
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": invalid,
-        ".open-next/assets/_headers": invalid,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
-  it("drops the header lines under a route line wrangler rejects", () => {
-    // 被丢弃的路由行会把它底下的响应头一起吃掉，而不是让那些头挂到上一个块名下。
-    // 把这两行并进 downloads 块，门禁就会说 PDF 有 noindex，而线上 downloads 块
-    // 一条头都没有。
-    const swallowed = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      "ftp://bad.example/downloads/*",
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": swallowed,
-        ".open-next/assets/_headers": swallowed,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
-  it("ignores a route line longer than wrangler's limit", () => {
-    // wrangler 整行忽略超过 2000 字符的行。一条归一化后是 `/downloads/*`、但靠
-    // `/./` 填到 2000 以上的规则，线上根本不生效，门禁若认它就是假绿。
-    const padding = "/.".repeat(1010);
-    const overlong = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      `/downloads${padding}/*`,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    expect(`/downloads${padding}/*`.length).toBeGreaterThan(2000);
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": overlong,
-        ".open-next/assets/_headers": overlong,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
-  it("puts wrangler's line limit at exactly two thousand characters", () => {
-    // 边界钉在两侧：2000 字符照收，2001 字符整行丢掉。只测「远超」的话，把判据写成
-    // `> 2000 + 1` 也全绿，而恰好 2001 字符的规则 wrangler 丢、门禁认，就是假绿。
-    const noindexAt = (route: string) =>
-      [
-        EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-        `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-        "",
-        route,
-        `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-        "",
-      ].join("\n");
-    const runWith = (route: string) => {
-      const headers = noindexAt(route);
-      return collectCloudflareStaticAssetHeaderFailures(
-        createVirtualRepo({
-          ...createValidFiles(),
-          "public/_headers": headers,
-          ".open-next/assets/_headers": headers,
-        }),
-      );
-    };
-
-    // 两条都靠 `/.` 和 `/a/..` 填长度，归一化后都是 `/downloads/*`。
-    const atLimit = `/downloads${"/.".repeat(994)}/*`;
-    const pastLimit = `/downloads${"/.".repeat(992)}/a/../*`;
-    expect(atLimit).toHaveLength(2000);
-    expect(pastLimit).toHaveLength(2001);
-
-    expect(runWith(atLimit)).toEqual([]);
-    expect(runWith(pastLimit)).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
   it("matches a route with regex characters literally", () => {
     // wrangler 先把路由里的正则元字符转义，再把 `*` 换成捕获组。少了这一步，
     // `/downloads/(catalog).pdf` 里的括号会被当成捕获组，凭空命中磁盘上那份
@@ -351,89 +197,6 @@ describe("wrangler _headers semantics the gate ports", () => {
         `${CATALOG_PATH} in public/_headers is served without`,
       ),
     );
-  });
-
-  it("ignores rules past wrangler's hundred-rule limit", () => {
-    // 第 101 条规则以及之后的整段文件都不生效。把 noindex 写在那之后，线上没有，
-    // 门禁若认它就是假绿。
-    const filler = Array.from({ length: 100 }, (_, index) =>
-      [`/filler-${index}/*`, "  X-Filler: 1", ""].join("\n"),
-    ).join("\n");
-    const overflowing = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      filler,
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": overflowing,
-        ".open-next/assets/_headers": overflowing,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${CATALOG_PATH} in public/_headers is served without`,
-      ),
-    );
-  });
-
-  it("ignores a detach written on a non-https absolute URL", () => {
-    // wrangler 的绝对 URL 只认 https，`http://` 那条整块跳过。算它撤掉了头
-    // 就是误红，会拦住一次完全正当的发布。
-    const httpDetach = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-      "http://tucsenberg.com/downloads/*",
-      "  ! X-Robots-Tag",
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": httpDetach,
-        ".open-next/assets/_headers": httpDetach,
-      }),
-    );
-
-    expect(failures).toEqual([]);
-  });
-
-  it("ignores a detach written on a host that carries a port", () => {
-    // wrangler 明确拒绝带端口的绝对 URL（`validateUrl` 的 disallowPorts）。
-    // 算它撤掉了头同样是误红。
-    const portDetach = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-      "https://tucsenberg.com:8080/downloads/*",
-      "  ! X-Robots-Tag",
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": portDetach,
-        ".open-next/assets/_headers": portDetach,
-      }),
-    );
-
-    expect(failures).toEqual([]);
   });
 
   it("allows the same path under two different https hosts", () => {
@@ -497,8 +260,12 @@ describe("wrangler _headers semantics the gate ports", () => {
   });
 
   it("fails when an encoded-path rule detaches the noindex off a caret filename", () => {
-    // `^` 不在 URL 规范列出的 path percent-encode set 里，但 Node 照样把它转成
-    // `%5E`。手维护一张字符表就会漏掉这种，所以转义要交给 `new URL()` 自己算。
+    // `^` 不在 URL 规范列出的 path percent-encode set 里，`encodeURIComponent`
+    // 照样把它转成 `%5E`，asset worker 的 `encodePath` 用的正是它，所以线上那条
+    // URL 里也是 `%5E`。手维护一张字符表就会漏掉这种。
+    //
+    // 这句以前写的是「所以转义要交给 `new URL()` 自己算」——那是更早一版的做法，
+    // 后来因为它和 `encodePath` 在十几个字符上不一致而被换掉了，注释没跟着改。
     const caretDetach = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -554,70 +321,6 @@ describe("wrangler _headers semantics the gate ports", () => {
     expect(failures).toContainEqual(
       expect.stringContaining(
         "/downloads/a%2520b.pdf in public/_headers is served without",
-      ),
-    );
-  });
-
-  it("ignores the header lines under a route line with two wildcards", () => {
-    // 两个通配符的规则 wrangler 在解析阶段就丢了，底下那些头跟着一起没了——它不会
-    // 进规则表，所以写两遍也不算重复路由。认下它就等于凭空多出一条线上没有的规则。
-    const twoWildcards = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-      "/downloads/*/*",
-      "  X-Custom: a",
-      "",
-      "/downloads/*/*",
-      "  X-Custom: b",
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": twoWildcards,
-        ".open-next/assets/_headers": twoWildcards,
-      }),
-    );
-
-    expect(failures).toEqual([]);
-  });
-
-  it("drops a rule whose placeholder names collide by prefix", () => {
-    // wrangler 逐个占位符做 split/join，而匹配列表是替换开始前算好的。处理 `:x`
-    // 时会把 `:xfoo` 的前缀一起换掉，生成两个同名捕获组，整条规则被丢掉。
-    // 各换各的就能编译成功，于是一条线上根本不存在的规则被当成「把缓存补回来了」。
-    const collided = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      "/_next/static/:dir/*",
-      "  Cache-Control: no-store",
-      "",
-      "/_next/static/:x/:xfoo",
-      "  ! Cache-Control",
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": collided,
-        ".open-next/assets/_headers": collided,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
       ),
     );
   });

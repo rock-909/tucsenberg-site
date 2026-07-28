@@ -16,6 +16,15 @@ const ASSET_HEADERS_FILENAME = "_headers";
 const ASSET_REDIRECTS_FILENAME = "_redirects";
 const ASSET_ASSETSIGNORE_FILENAME = ".assetsignore";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
+// `assets` 底下这套检查真正建模了的键。`binding` 只把资产绑定暴露给 Worker 代码，
+// 不改变任何一条 URL 或响应头，所以它在白名单里；别的键都会改。
+//
+// 尤其是 `html_handling`：整套 `.html` 别名的说法只在它取默认值时成立。2026-07-28
+// 实测，设成 `"none"` 之后 `/downloads/x.pdf.html` 返回 200、`/downloads/x.pdf` 是
+// 404——文件就在它自己那条 URL 上发出去，别名根本不存在，而门禁照旧说它「从去掉扩
+// 展名的那条 URL 发出去，这套检查证明不了」。`run_worker_first` 更彻底：请求整个交给
+// Worker，`_headers` 一条都不参与，这份门禁的每一条结论都会作废。
+const MODELLED_ASSET_CONFIG_KEYS = new Set(["directory", "binding"]);
 // 「先跑构建」这句提示只能跟着**构建产物**那一侧的失败走。判据是路径，不是措辞：
 // 同一句「里面没文件」既会说 `public/downloads`（git 跟踪的源目录，构建一万次也是
 // 同一条红），也会说 `.open-next/assets/downloads`。所以两侧各用各的措辞，提示认
@@ -26,8 +35,24 @@ const MISSING_BUILT_HEADER_FILE = "missing Cloudflare build output header file";
 const HOLDS_NO_FILES = "holds no files";
 const HOLDS_NO_BUILT_FILES = "holds no built files";
 
-function readRepoFile(context, relativePath) {
-  return context.readFileSync(path.join(context.rootDir, relativePath), "utf8");
+/**
+ * 读文件，失败时把**错误码**带回来，和 readdirOrError / statOrError 一个道理。
+ *
+ * `existsSync` 说「在」和「读得出来」是两件事。`_headers` 权限不对、或者那个路径其实
+ * 是个目录时，直接 `readFileSync` 会把门禁变成崩溃：业主看到的是一段堆栈，一句失败
+ * 都没有，而 CI 上这和「检查真的跑过并且通过了」长得完全不一样。
+ */
+function readRepoFileOrError(context, relativePath) {
+  try {
+    return {
+      text: context.readFileSync(
+        path.join(context.rootDir, relativePath),
+        "utf8",
+      ),
+    };
+  } catch (error) {
+    return { code: error?.code ?? "UNKNOWN" };
+  }
 }
 
 function repoFileExists(context, relativePath) {
@@ -46,23 +71,32 @@ function repoFileExists(context, relativePath) {
  * `@cloudflare/workers-shared` 和 miniflare 都取不到这个模块。移植是唯一的路。
  * ------------------------------------------------------------------ */
 
-// constants.ts（cli.js:128970 附近）
+// constants.ts（cli.js:128967-128973）
 const MAX_LINE_LENGTH = 2000;
 const MAX_HEADER_RULES = 100;
 const HEADER_SEPARATOR = ":";
 const UNSET_OPERATOR = "! ";
 const SPLAT_PATTERN = /\*/gu;
+// 这一条是 rules-engine.ts 的 `PLACEHOLDER_REGEX2`（cli.js:336438），**不是**
+// constants.ts 的 `PLACEHOLDER_REGEX`（cli.js:128973）。两者只差一个捕获组，而
+// `listPlaceholderNames` 和 `compileRulePattern` 都靠 `match[1]` 取名字：照
+// constants.ts 那个抄一遍，拿到的占位符名全是 undefined。
 const NAMED_PLACEHOLDER_PATTERN = /:([A-Za-z]\w*)/gu;
 
-// parseHeaders.ts（cli.js:129213）
+// parseHeaders.ts（cli.js:129214）
 const LINE_IS_PROBABLY_A_PATH = /^([^\s]+:\/\/|^\/)/u;
 
 // validateURL.ts（cli.js:128996）
 const URL_REGEX = /^https:\/\/+(?<host>[^/]+)\/?(?<path>.*)/u;
 const HOST_WITH_PORT_REGEX = /.*:\d+$/u;
 
-// rules-engine.ts（cli.js:336432）。域名占位符那条作用在**已转义**的规则串上，所以
+// rules-engine.ts（cli.js:336433）。域名占位符那条作用在**已转义**的规则串上，所以
 // 它找的是 `https:\/\/` 而不是 `https://`，后面跟着一个反斜杠（`\.` 那种转义）。
+//
+// 它今天改变不了任何一条结论：域名段带占位符或通配符的规则已经被
+// `collectUnprovableHostFailures` 无条件判红了，走不走这一支，那一轮都是红的。留着
+// 是为了跟 wrangler 逐行对齐——哪天那条无条件判红松了，这里的行为得已经是对的。
+// 别为它写「守住了什么」的测试：现在没有能让它单独变红的输入。
 const ESCAPE_REGEX_CHARACTERS = /[-/\\^$*+?.()|[\]{}]/gu;
 const HOST_PLACEHOLDER_PATTERN =
   /(?<=^https:\\\/\\\/[^/]*?):([A-Za-z]\w*)(?=\\)/gu;
@@ -202,9 +236,10 @@ function parseWranglerHeaderRules(input) {
  * 名字也必须照抄，不能图省事换成匿名分组：`/:x/:x` 会生成两个同名捕获组，同样被
  * 整条丢掉；换成匿名分组它就成了一条正常规则——假绿。
  *
- * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
- * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接抛
- * 异常，把门禁变成崩溃而不是判断。
+ * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了更危险：它转义出来的
+ * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则编译不出来，
+ * 被下面那个 `try/catch` 接住、**整条静默丢掉**。丢的是本该证明什么的规则，门禁于是
+ * 少证明了一批文件却一句话都不说。（这里不会崩：抛出来的异常走的就是那个 catch。）
  *
  * 编译不出来返回 null，和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
  */
@@ -424,8 +459,25 @@ function parseExpectedHeader(line) {
 }
 
 /**
- * 算出某个路径最终真正拿到的响应头，照 rules-engine.ts 的 `attachHeaders`：
- * 所有命中的规则按声明顺序依次作用，每条规则先撤销再设置，同名头的指令并起来。
+ * 算出某个路径最终真正拿到的响应头：所有命中的规则按声明顺序依次作用，每条规则
+ * 先撤销再设置，同名头的指令并起来。
+ *
+ * 这一段没有可引的源码行号。Workers Assets 那一侧套响应头的代码在
+ * `workers-shared/asset-worker/src/utils/headers.ts`，被 tree-shake 掉了，cli.js 里
+ * 只剩一个 init 桩。bundle 里唯一叫 `attachHeaders` 的函数在
+ * `pages-shared/asset-server/handler.ts`（cli.js:336860），那是 **Cloudflare Pages**
+ * 的子系统，这个仓库用的不是它——前面有两轮审查读错子系统、结论作废，注释里曾经
+ * 就指着那一行，等于把下一个审查者直接送进同一个坑。
+ *
+ * 所以这四条语义是 2026-07-28 用真服务实测出来的，wrangler 4.100.0 /
+ * `wrangler dev --local` / Workers Assets，`/downloads/*` 块设了 noindex 和
+ * `Cache-Control: public,max-age=86400`：
+ *
+ * - 后面的块再设同名头 → 两条并存（`x-robots-tag: noindex` 和 `nofollow` 各一行）。
+ * - 后面的块 `! X-Robots-Tag` → 前面块设的那条被撤掉。
+ * - 同一块里先 `! X-Robots-Tag` 再设 `X-Robots-Tag: none` → 结果是 `none`，
+ *   也就是每条规则内部先撤销后设置。
+ * - 后面的块设 `Cache-Control: no-store` → 值拼成 `public,max-age=86400, no-store`。
  *
  * 只比对「路由字符串完全相等」的块会同时错两个方向：
  *
@@ -525,10 +577,16 @@ function toHostname(host) {
  *
  * 转义规则照抄 asset worker 的 `encodePath`（assets.worker.js:8796）：按 `/` 切段，
  * 每段各自 `encodeURIComponent`。这不是 `new URL().pathname`——那一版曾经用过，
- * 但两者对 12 个字符不一致（`, ; : @ & = + $ [ ] |`）。asset worker 只在
- * `encodePath(路径)` 上返 200，别的形式一律 307 跳过去（assets.worker.js:8271），
- * 所以那 12 个字符里只要有一个出现在文件名里，门禁算出来的就不是那条真正会发文件的
- * URL，落在真 URL 上的撤销它完全看不见。2026-07-28 实测：文件名 `spec,rev2.pdf`，
+ * 但两者在可打印 ASCII 上有十几个字符不一致：`# $ % & + , : ; = ? @ [ \ ] |` 加上
+ * 空格，`new URL()` 都原样留着或另作处理。asset worker 只在 `encodePath(路径)` 上
+ * 返 200，别的形式一律 307 跳过去（assets.worker.js:8271），所以这些字符里只要有一个
+ * 出现在文件名里，门禁算出来的就不是那条真正会发文件的 URL，落在真 URL 上的撤销它
+ * 完全看不见。
+ *
+ * 这里不写具体数字，也不把那张表钉成断言：它是 Node 的 URL 实现和 `encodeURIComponent`
+ * 两边行为的差集，随版本会变，而这段代码要守的是「照抄 encodePath」，不是「差集恰好
+ * 是这几个字符」。`%` 尤其要留意，它在这张表里而且后果最重：文件名里一个字面的 `%`
+ * 和一个百分号转义序列，`new URL()` 那一版分不开。2026-07-28 实测：文件名 `spec,rev2.pdf`，
  * `/downloads/spec,rev2.pdf` 返 307，`/downloads/spec%2Crev2.pdf` 返 200 且没有
  * `x-robots-tag`，而门禁全绿。
  */
@@ -609,8 +667,11 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
       failures.push(...nested.failures);
       continue;
     }
-    // 跟随之后还是普通文件才算数；FIFO、断链都不算。
-    if (stats.isFile()) paths.push(toServedPath(urlPrefix, next));
+    // 判据抄 wrangler 的：它只排掉目录和符号链接（cli.js:137583），**没有**要求是
+    // 普通文件。而 `stat` 跟随链接之后 `isSymbolicLink()` 恒为假，所以实际效果是
+    // 「不是目录就上传」。改成只认 `isFile()` 是拿一个更严的近似替原样移植，FIFO、
+    // socket、设备节点会被这边跳过、被 wrangler 传上去，成为没人证明过的资源。
+    if (!stats.isDirectory()) paths.push(toServedPath(urlPrefix, next));
   }
 
   return { paths: paths.sort(), failures };
@@ -632,42 +693,69 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
  * `"downloadſ".toLowerCase()` 还是它自己。
  *
  * 名字对不上时不去猜磁盘上那个真名是谁——猜错了后面每一条证明说的都是另一条 URL。
- * 直接判折叠，那个目录一条路径都不列，由调用方打印一句成立的话。上一版是判红之后
- * 照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不出来」，
+ * 直接判 folded，那个目录一条路径都不列，由调用方打印一句成立的话。有一版是判红
+ * 之后照旧按写死的前缀逐文件证明，于是同一次运行里前两行说「这条 URL 我算不出来」，
  * 后几行接着拿那条算不出来的 URL 下结论，而那些结论两个方向都不成立。
  *
- * 列不出来时什么都不说。这里只有一个问题要答：名字是不是被折叠了。列不出来的目录
- * 给不出这个答案，那就别答——真正要紧的「有一批文件没被证明」由 listServedPaths
- * 去报，那句话是有后果的，这里再补一句只会多一条读不懂的假话。
+ * 「答不上来」必须和「答案是否」分开，而且答不上来时也要停。上一版把 readdir 失败
+ * 当成「不折叠」，理由是「列不出来的目录名字本身没有可疑之处」。这句话是错的：在
+ * 不区分大小写的卷上，上层列不出来、下层用折叠名照样列得动，于是三个环节全都不说话，
+ * 门禁按写死的前缀「证明」了一批线上根本不存在的 URL，输出零条失败。第 21 轮实测：
+ * `.open-next/assets` 权限 0111、里面是 `Downloads/catalog.pdf` 时门禁全绿，而
+ * `wrangler dev --local` 下 `/Downloads/catalog.pdf` 返回 200 且没有 `x-robots-tag`，
+ * `/downloads/catalog.pdf` 是 404。
+ *
+ * 上层目录不在则不算答不上来：不存在的东西没有名字可折叠，也没有文件要证明，那条
+ * 路径交给「目录里没东西」去报，那是业主没跑构建时最常撞上的一条。
  *
  * 只解析会进 URL 的那几段。`public`、`.open-next`、`assets` 被 wrangler 完全剥掉
  * （清单路径是相对资产根算的），它们叫什么都不改变任何一条 URL。
  */
-function isFoldedDirectoryName(context, baseDir, urlSubdir) {
+function resolveServedDirName(context, baseDir, urlSubdir) {
   let parent = path.join(context.rootDir, baseDir);
+  let parentDir = baseDir;
 
   for (const segment of urlSubdir.split("/")) {
-    const { entries } = readdirOrError(context, parent);
-    if (entries === undefined) return false;
+    const { entries, code } = readdirOrError(context, parent);
     const next = path.join(parent, segment);
+    if (entries === undefined) {
+      if (isAbsentDirectory(code)) return { state: "exact" };
+      return { state: "unknown", parentDir, code };
+    }
     if (!entries.some((entry) => entry.name === segment)) {
       // 一模一样的名字找不到、路径却又「存在」，说明是文件系统替我们折叠了名字。
       // 目录压根不在时不算折叠，由「目录里没东西」那条去报。
-      return context.existsSync(next);
+      return { state: context.existsSync(next) ? "folded" : "exact" };
     }
     parent = next;
+    parentDir = `${parentDir}/${segment}`;
   }
 
-  return false;
+  return { state: "exact" };
 }
 
-function collectFoldedDirectoryFailures(context, baseDir, urlSubdir) {
-  if (!isFoldedDirectoryName(context, baseDir, urlSubdir)) return [];
+function collectUnresolvedDirectoryFailures(context, baseDir, urlSubdir) {
+  const sourceDir = `${baseDir}/${urlSubdir}`;
+  const { state, parentDir, code } = resolveServedDirName(
+    context,
+    baseDir,
+    urlSubdir,
+  );
   // 「算不出来」是这个检查的选择，不是世界的性质：真名在磁盘上，比对 inode 就能拿到。
   // 所以话要说成「这个检查算不出来」，不能说成「没人算得出来」。
-  return [
-    `${baseDir}/${urlSubdir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
-  ];
+  if (state === "folded") {
+    return [
+      `${sourceDir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+    ];
+  }
+  // 指名**真正列不出来的那个目录**，也就是上层。说「下层列不出来」是假的——同一次
+  // 运行里它很可能被列了个干净。
+  if (state === "unknown") {
+    return [
+      `${parentDir} could not be listed (${code}), so this check cannot tell whether ${sourceDir} is spelled the same on disk as in the URL`,
+    ];
+  }
+  return [];
 }
 
 /**
@@ -753,26 +841,31 @@ const CACHE_CONTROL_CONTRADICTIONS = new Set([
 const CACHE_CONTROL_AGE_DIRECTIVES = ["max-age", "s-maxage"];
 
 function findContradictingDirectives(name, expected, actual) {
-  if (name !== "cache-control") return [];
+  if (name !== "cache-control") return { overriding: [], ambiguous: [] };
 
   // 比的是 `=` 前面那个名字。客户端按 name=value 取名字，`no-store=1` 的名字就是
   // no-store，真实浏览器照样不缓存；只比整词的话加个 `=1` 就绕过去了。
-  const contradictions = [...actual].filter((directive) =>
+  const overriding = [...actual].filter((directive) =>
     CACHE_CONTROL_CONTRADICTIONS.has(directive.split("=")[0] ?? directive),
   );
 
   // 期望里写了 max-age=31536000，实际却同时挂着另一个时长（或者 s-maxage=0），
   // 线上按哪个算是不确定的，同样不能算证明。
+  //
+  // 但这一档和上面那档不是一回事，两句话不能共用一个措辞。`no-store` 是确定压过
+  // 一年缓存的，说「覆盖」成立；两个时长并排时哪个赢**不确定**——一边在注释里说
+  // 不确定、一边对业主说 Y 覆盖了 X，是拿一个没做过的判断当结论讲。
+  const ambiguous = [];
   for (const ageDirective of CACHE_CONTROL_AGE_DIRECTIVES) {
     const prefix = `${ageDirective}=`;
     for (const directive of actual) {
       if (directive.startsWith(prefix) && !expected.has(directive)) {
-        contradictions.push(directive);
+        ambiguous.push(directive);
       }
     }
   }
 
-  return contradictions;
+  return { overriding, ambiguous };
 }
 
 function collectScopeFailures(
@@ -812,14 +905,19 @@ function collectScopeFailures(
     ];
   }
 
-  const contradictions = findContradictingDirectives(
+  const { overriding, ambiguous } = findContradictingDirectives(
     wanted.name,
     wanted.directives,
     actual,
   );
-  if (contradictions.length > 0) {
+  if (overriding.length > 0) {
     return [
-      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${contradictions.join(", ")} overrides it${where}`,
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${overriding.join(", ")} overrides it${where}`,
+    ];
+  }
+  if (ambiguous.length > 0) {
+    return [
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${ambiguous.join(", ")} sits beside it${where}, so which one applies cannot be proven`,
     ];
   }
 
@@ -878,19 +976,37 @@ function collectUnprovableHostFailures(rules, relativePath) {
  * `/downloads/*` 加一行 `Bad@Name: value` 之后，`wrangler dev --local` 上
  * `/downloads/spec-sheet-tb-bw.pdf` 返回 `500 Internal Server Error`。门禁却说这份
  * PDF 已经证明带着 noindex——它根本发不出来。撤销行同理，`headers.delete()` 也验名。
+ *
+ * 名和值要**分开探**。`Headers.set` 两样都验，一次探完只知道「这一行不行」，不知道
+ * 是哪一半不行。曾经两种情况都印头名：值里夹一个回车（`trim()` 去不掉行内的 CR）时，
+ * 门禁会说 `x-robots-tag` 不是运行时接受的头名——它当然是。业主拿着这句话只会去改
+ * 头名，而坏的是值。
  */
 function collectInvalidHeaderFailures(rules, relativePath) {
   const failures = [];
   const probe = new Headers();
+  // 探值时用一个已知合法的头名，探名时用一个已知合法的值，这样抛出来的异常只可能
+  // 来自被探的那一半。
+  const PROBE_NAME = "x-probe";
+  const PROBE_VALUE = "probe";
 
   for (const rule of rules) {
     for (const [name, value] of Object.entries(rule.headers)) {
       try {
-        probe.set(name, value);
+        probe.set(name, PROBE_VALUE);
         probe.delete(name);
       } catch {
         failures.push(
-          `"${name}" under "${rule.path}" in ${relativePath} is not a header the runtime accepts, so every matching asset answers 500`,
+          `"${name}" under "${rule.path}" in ${relativePath} is not a header name the runtime accepts, so every matching asset answers 500`,
+        );
+        continue;
+      }
+      try {
+        probe.set(PROBE_NAME, value);
+        probe.delete(PROBE_NAME);
+      } catch {
+        failures.push(
+          `the value set for "${name}" under "${rule.path}" in ${relativePath} is not one the runtime accepts, so every matching asset answers 500`,
         );
       }
     }
@@ -899,7 +1015,7 @@ function collectInvalidHeaderFailures(rules, relativePath) {
         probe.delete(unsetName);
       } catch {
         failures.push(
-          `"! ${unsetName}" under "${rule.path}" in ${relativePath} is not a header the runtime accepts, so every matching asset answers 500`,
+          `"! ${unsetName}" under "${rule.path}" in ${relativePath} is not a header name the runtime accepts, so every matching asset answers 500`,
         );
       }
     }
@@ -921,7 +1037,14 @@ function collectHeaderFileFailures(
     return [`${missing}: ${relativePath}`];
   }
 
-  const rules = parseWranglerHeaderRules(readRepoFile(context, relativePath));
+  const { text, code } = readRepoFileOrError(context, relativePath);
+  if (text === undefined) {
+    return [
+      `${relativePath} could not be read (${code}), so nothing it says is proven`,
+    ];
+  }
+
+  const rules = parseWranglerHeaderRules(text);
 
   // 查的是「一个真实路径最终被怎样服务」，不是「文件里有没有某一行」。
   //
@@ -980,9 +1103,16 @@ function readAssetsDirectories(context) {
     return { error: `missing ${WRANGLER_CONFIG_PATH}` };
   }
 
+  const { text, code } = readRepoFileOrError(context, WRANGLER_CONFIG_PATH);
+  if (text === undefined) {
+    return {
+      error: `${WRANGLER_CONFIG_PATH} could not be read (${code}), so there is no way to tell which files get published`,
+    };
+  }
+
   const { config, error } = ts.parseConfigFileTextToJson(
     WRANGLER_CONFIG_PATH,
-    readRepoFile(context, WRANGLER_CONFIG_PATH),
+    text,
   );
   if (error) {
     return { error: `${WRANGLER_CONFIG_PATH} could not be parsed` };
@@ -994,11 +1124,24 @@ function readAssetsDirectories(context) {
   // 只读顶层的话，只要有人给 env.production 换个目录，门禁就在证明一个不会上线的
   // 目录。所有会被发布的目录逐个证明，一个都不放过。
   const directories = new Set();
+  const unmodelled = new Set();
   for (const scope of [config, ...Object.values(config?.env ?? {})]) {
     const directory = scope?.assets?.directory;
     if (typeof directory === "string" && directory !== "") {
       directories.add(directory);
     }
+    for (const key of Object.keys(scope?.assets ?? {})) {
+      if (!MODELLED_ASSET_CONFIG_KEYS.has(key)) unmodelled.add(key);
+    }
+  }
+
+  // 白名单，不是黑名单。`assets` 底下每多一个键都可能改变「哪个文件从哪条 URL 发
+  // 出去」或者「`_headers` 还算不算数」，而这套检查只建模了 `directory`。列黑名单
+  // 的话，wrangler 下次加一个键就是一个静默的假绿；列白名单，多出来的键会自己撞上。
+  if (unmodelled.size > 0) {
+    return {
+      error: `${WRANGLER_CONFIG_PATH} sets assets.${[...unmodelled].sort().join(", assets.")}, which changes how assets are served, and this check cannot model it`,
+    };
   }
 
   if (directories.size === 0) {
@@ -1087,10 +1230,10 @@ function collectPublishedDirectoryFailures(context, directory) {
   // 目录名算不出来时一条路径都不列：拿写死的前缀继续算，出来的每一条结论说的都是
   // 一条线上不存在的 URL。这三个目录各判各的，一个算不出来不影响另外两个照常证明。
   const listResolved = (baseDir, urlSubdir) => {
-    // 名字被折叠时一条都不列：按写死的前缀算出来的每一条 URL 线上都不存在。目录
-    // 不在、或者上层列不出来时名字本身没问题，逐文件证明照常跑，那份被撤销了
-    // noindex 的 PDF 不能因此消音。
-    if (isFoldedDirectoryName(context, baseDir, urlSubdir)) {
+    // 名字算不准就一条都不列，两种情形一样：折叠时按写死前缀算出来的 URL 线上不
+    // 存在；上层列不出来时这个前缀对不对根本无从判断，而下层往往照样列得动，照算
+    // 下去就是拿一条可能不存在的 URL 逐条下结论。判红的话已经由上面那句说清了。
+    if (resolveServedDirName(context, baseDir, urlSubdir).state !== "exact") {
       return { paths: null, failures: [] };
     }
     const listing = listServedPaths(
@@ -1139,17 +1282,21 @@ function collectPublishedDirectoryFailures(context, directory) {
       `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
       true,
     ),
-    ...collectFoldedDirectoryFailures(
+    ...collectUnresolvedDirectoryFailures(
       context,
       PUBLIC_SOURCE_DIR,
       DOWNLOADS_ASSET_SUBDIR,
     ),
-    ...collectFoldedDirectoryFailures(
+    ...collectUnresolvedDirectoryFailures(
       context,
       directory,
       DOWNLOADS_ASSET_SUBDIR,
     ),
-    ...collectFoldedDirectoryFailures(context, directory, STATIC_ASSET_SUBDIR),
+    ...collectUnresolvedDirectoryFailures(
+      context,
+      directory,
+      STATIC_ASSET_SUBDIR,
+    ),
     // 一个磁盘文件被发出去的 URL 不一定只有它自己那条。这两类别名会让被证明的
     // 路径和实际被请求的路径对不上，所以直接判红。
     ...collectHtmlAliasFailures(

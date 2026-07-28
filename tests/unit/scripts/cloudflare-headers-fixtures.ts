@@ -36,15 +36,39 @@ export const BUNDLE_PATH = `/_next/static/chunks/${BUNDLE_NAME}`;
  * 折叠只作用在按名字查（existsSync / readFileSync / statSync）上；readdirSync 永远
  * 报磁盘上的真名，跟真实 fs 一致。
  */
+export interface VirtualRepoOptions {
+  /** 这些路径在 readdir 里是符号链接。只进这张表不进文件表就是断链。 */
+  symlinks?: Set<string>;
+  /** 文件系统怎么把「查的名字」折叠成「磁盘上的名字」，默认不折叠。 */
+  fold?: (name: string) => string;
+  /** readdir 抛 EACCES 的目录。 */
+  unlistable?: Set<string>;
+  /**
+   * statSync 抛指定错误码的路径。给的是路径到错误码的表而不是一个集合：目录权限
+   * 444 时 readdir 成功、对每个孩子 stat 抛 EACCES，断链则是抛 ENOENT，这两档的
+   * 正确处置正好相反。
+   */
+  unstattable?: Map<string, string>;
+  /**
+   * 既不是普通文件也不是目录：FIFO、socket、设备节点。wrangler 只排掉目录和符号
+   * 链接（cli.js:137583），这一档它照传，所以门禁必须证明它。只有 isFile/isDirectory
+   * 两个互补判据的替身永远造不出这一档，那个守卫就没人守得住。
+   */
+  irregular?: Set<string>;
+  /** readFileSync 抛指定错误码的路径。`existsSync` 说「在」不等于读得出来。 */
+  unreadable?: Map<string, string>;
+}
+
 export function createVirtualRepo(
   files: Record<string, string>,
-  symlinks: Set<string> = new Set(),
-  fold: (name: string) => string = (name) => name,
-  unlistable: Set<string> = new Set(),
-  // 「列得出名字，但看不了这个名字是什么」是真实存在的一档：目录权限 444 时
-  // readdir 成功，对每个孩子 stat 都抛 EACCES；断链则是列得出、stat 抛 ENOENT。
-  // 给的是路径到错误码的表而不是一个集合——这两档的正确处置正好相反。
-  unstattable: Map<string, string> = new Map(),
+  {
+    symlinks = new Set<string>(),
+    fold = (name: string) => name,
+    unlistable = new Set<string>(),
+    unstattable = new Map<string, string>(),
+    irregular = new Set<string>(),
+    unreadable = new Map<string, string>(),
+  }: VirtualRepoOptions = {},
 ) {
   // 目录也要能被折叠命中，所以每个 key 的每一层祖先都进表。
   const folded = new Map<string, string>();
@@ -79,9 +103,18 @@ export function createVirtualRepo(
       );
     },
     readFileSync: (absolutePath: string) => {
-      const content = files[normalize(absolutePath)];
+      const key = normalize(absolutePath);
+      // 真实 fs 读不出来时抛的是带 `code` 的异常。替身只会抛裸 Error 的话，
+      // 「读不出来要报成失败而不是崩溃」这条根本测不出来。
+      const forced = unreadable.get(key);
+      if (forced !== undefined) {
+        const error: NodeJS.ErrnoException = new Error(`${forced}: '${key}'`);
+        error.code = forced;
+        throw error;
+      }
+      const content = files[key];
       if (content === undefined) {
-        throw new Error(`Missing virtual file: ${normalize(absolutePath)}`);
+        throw new Error(`Missing virtual file: ${key}`);
       }
       return content;
     },
@@ -148,6 +181,9 @@ export function createVirtualRepo(
         file.startsWith(`${key}/`),
       );
       if (!isDirectory && files[key] === undefined) fail("ENOENT");
+      if (irregular.has(key)) {
+        return { isFile: () => false, isDirectory: () => false };
+      }
       return { isFile: () => !isDirectory, isDirectory: () => isDirectory };
     },
   };

@@ -19,9 +19,14 @@ import {
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是门禁要证明什么：每个真实 PDF 拿到 noindex，每个真实 bundle 拿到一年
-// immutable 缓存，以及哪些等价写法不该被判红。
-// 哪些文件会被发布、线上被请求的 URL 是哪一条，由 cloudflare-headers-published-surface
-// 守；移植过来的 wrangler 解析与匹配语义由 cloudflare-headers-wrangler-semantics 守。
+// immutable 缓存，哪些等价写法不该被判红，以及判红时那句行动建议成不成立。
+//
+// 这一套一共六份，各守一段：
+// - cloudflare-headers-published-surface：哪些文件会被发布出去
+// - cloudflare-headers-directory-resolution：受保护目录在磁盘上叫什么、看不看得了
+// - cloudflare-headers-rule-rejection：wrangler 会把哪些规则整条丢掉
+// - cloudflare-headers-wrangler-semantics：留下来的规则怎么编译、怎么命中
+// - cloudflare-headers-effective-value：命中之后一个文件最终拿到什么值
 describe("Cloudflare static asset headers proof", () => {
   it("keeps the cache and crawl policy it exists to enforce", () => {
     // 其余每一条断言的期望值都是从这两个常量拼出来的，所以它们只证明「实现和自己的
@@ -158,7 +163,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 sits beside it, so which one applies cannot be proven`,
       ),
     );
   });
@@ -471,7 +476,7 @@ describe("Cloudflare static asset headers proof", () => {
     // 等号两侧的空格也要抹平，否则换个写法就绕过冲突检测。
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but s-maxage=0 overrides it`,
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but s-maxage=0 sits beside it, so which one applies cannot be proven`,
       ),
     );
   });
@@ -499,9 +504,81 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        '"bad@name" under "/downloads/*" in public/_headers is not a header the runtime accepts',
+        '"bad@name" under "/downloads/*" in public/_headers is not a header name the runtime accepts',
       ),
     );
+  });
+
+  it("blames the value, not the name, when the value is what breaks", () => {
+    // `Headers.set` 名和值一起验。一次探完只知道这一行不行，不知道坏的是哪一半。
+    // 值里夹一个行内回车（`trim()` 去不掉）时，曾经印的是「x-robots-tag 不是运行时
+    // 接受的头名」——它当然是。业主拿着这句话只会去改头名，而坏的是值。
+    const badValue = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}\revil`,
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": badValue,
+        [`${ASSETS_DIR}/_headers`]: badValue,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        'the value set for "x-robots-tag" under "/downloads/*" in public/_headers is not one the runtime accepts',
+      ),
+    );
+    // 而且不能同时又说头名不行。同一行只有一个毛病。
+    expect(failures.join("\n")).not.toContain(
+      '"x-robots-tag" under "/downloads/*" in public/_headers is not a header name',
+    );
+  });
+
+  it("refuses to model an assets setting it does not understand", () => {
+    // `assets` 底下每多一个键都可能改变「哪个文件从哪条 URL 发出去」，或者
+    // `_headers` 还算不算数。`html_handling: "none"` 实测下 `/x.pdf.html` 返回 200、
+    // `/x.pdf` 是 404，整套 `.html` 别名的说法当场作废；`run_worker_first` 更彻底，
+    // 请求整个交给 Worker，这份门禁的每一条结论都不成立。
+    const files = createValidFiles();
+    files["wrangler.jsonc"] = [
+      "{",
+      '  "assets": {',
+      '    "directory": ".open-next/assets",',
+      '    "html_handling": "none"',
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([
+      "wrangler.jsonc sets assets.html_handling, which changes how assets are served, and this check cannot model it",
+    ]);
+  });
+
+  it("reports instead of crashing when a header file cannot be read", () => {
+    // `existsSync` 说「在」和「读得出来」是两件事。直接 readFileSync 的话，权限不对
+    // 时门禁变成崩溃：业主看到一段堆栈，一句失败都没有，而 CI 上这和「检查真的跑过
+    // 并且通过了」长得完全不一样。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(createValidFiles(), {
+        unreadable: new Map([["public/_headers", "EACCES"]]),
+      }),
+    );
+
+    expect(failures).toEqual([
+      "public/_headers could not be read (EACCES), so nothing it says is proven",
+    ]);
   });
 
   // 判红时唯一那句行动建议必须成立。只有构建产物那一侧的失败才该指向「先跑构建」；
@@ -579,7 +656,7 @@ describe("Cloudflare static asset headers proof", () => {
 
         expect(
           runCloudflareStaticAssetHeaderCli(
-            createVirtualRepo(files, new Set(), (name) => name, unlistable),
+            createVirtualRepo(files, { unlistable: unlistable }),
           ),
         ).toBe(false);
         if (wants) {

@@ -14,10 +14,11 @@ import {
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
 
-// 这份守的是「一个路径最终拿到的那条响应头到底是什么」：多条规则怎么拼、撤销行怎么
-// 记、引号里的逗号不算分隔符、占位符替换进值里、域名场景怎么隔离。
-// 规则本身怎么被解析和匹配由 cloudflare-headers-wrangler-semantics 守；门禁要证明
-// 什么由 cloudflare-static-asset-headers 守。
+// 这份守的是「命中之后，一个文件最终拿到的那个值是什么」：多条规则怎么叠加、撤销
+// 和设置的先后、引号里的指令、占位符替换进值里、大小写。
+// 规则本身怎么被解析和匹配由 cloudflare-headers-rule-rejection 和
+// cloudflare-headers-wrangler-semantics 守；门禁要证明什么由
+// cloudflare-static-asset-headers 守。
 describe("effective header value semantics", () => {
   it("keeps an unset name exactly as wrangler leaves it", () => {
     // wrangler 只吃掉第一个 `"! "`，多出来的空格留在头名里，运行时
@@ -42,7 +43,7 @@ describe("effective header value semantics", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        '"!  X-Cache-Status" under "/downloads/*" in public/_headers is not a header the runtime accepts',
+        '"!  X-Cache-Status" under "/downloads/*" in public/_headers is not a header name the runtime accepts',
       ),
     );
   });
@@ -72,7 +73,7 @@ describe("effective header value semantics", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 sits beside it on https://tucsenberg.com, so which one applies cannot be proven`,
       ),
     );
   });
