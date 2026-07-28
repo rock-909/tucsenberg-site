@@ -48,7 +48,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 3. `docs/项目基础/内容.md`
 4. `docs/项目基础/部署.md`
 5. `docs/项目基础/AI协作边界.md`
-6. `docs/技术难题/审查2026-07/交接文档.md`
+6. `docs/技术难题/整库审查2026-07/执行计划.md`
 
 历史 starter 派生说明已经退出当前文档入口；需要追溯时看 git 历史或本机 Trash，不要把它们当 Tucsenberg 当前站的业务入口。
 
