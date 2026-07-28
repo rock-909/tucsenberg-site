@@ -1,4 +1,4 @@
-# Repo Profile — Showcase Website Starter
+# Repo Profile — Tucsenberg Site
 
 Use this file as the repo-specific execution profile for `ai-smell-audit`.
 
@@ -10,17 +10,15 @@ These surfaces deserve first-pass attention because they are closest to business
 
 1. **Lead / inquiry / contact path**
    - `src/app/[locale]/contact/**`
-   - `src/app/api/contact/**`
    - `src/app/api/inquiry/route.ts`
-   - `src/app/api/subscribe/route.ts`
-   - `src/app/api/verify-turnstile/**`
    - `src/components/forms/**`
    - `src/lib/lead-pipeline/{lead-schema,process-lead,utils}.ts`
+   - `src/lib/security/lead-turnstile.ts`
 
 2. **Idempotency / anti-abuse / trust boundary**
    - `src/lib/security/**`
    - `src/lib/security/turnstile.ts`
-   - `src/lib/api/lead-route-response.ts`
+   - `src/lib/forms/lead-response.ts`
    - `tests/integration/api/lead-family-protection.test.ts`
    - `tests/integration/api/lead-family-contract.test.ts`
 
@@ -41,18 +39,23 @@ These surfaces deserve first-pass attention because they are closest to business
    - `tests/e2e/contact-form-smoke.spec.ts`
    - `tests/e2e/smoke/post-deploy-form.spec.ts`
    - `playwright.config.ts`
-   - `docs/proof/launch.md`
+   - `docs/项目基础/上线验证.md`
+   - `docs/项目基础/发布验证.md`
 
-6. **Starter / catalog launch truth**
-   - `docs/use/replace.md`
-   - `docs/proof/launch.md`
+6. **Tucsenberg launch truth**
+   - `docs/项目基础/配置.md`
+   - `docs/项目基础/内容.md`
+   - `docs/项目基础/生命周期.md`
+   - `docs/项目基础/上线验证.md`
+   - `docs/项目基础/发布验证.md`
    - `src/config/single-site.ts`
    - `src/config/single-site-seo.ts`
    - `src/config/single-site-navigation.ts`
    - `src/config/single-site-links.ts`
    - `src/config/single-site-page-expression.ts`
    - `src/config/single-site-product-catalog.ts`
-   - `src/constants/product-specs/**`
+   - `src/constants/tucsenberg-product-page-*.ts`
+   - `src/constants/tucsenberg-product-pages.ts`
    - `scripts/starter-checks.js`
 
 ## 2. Known noise (classify before judging repo health)
@@ -85,7 +88,9 @@ Prefer these truth sources before trusting comments, wrappers, or older docs:
 - `src/middleware.ts`
 - `src/i18n/**`
 - `src/lib/i18n/load-messages.ts`
-- `messages/{locale}/{critical,deferred}.json`
+- `messages/base/**`
+- `messages/profiles/b2b-lead/**`
+- `messages/profiles/catalog/**`
 
 ### Review / rule / quality truth
 - `AGENTS.md`
@@ -96,7 +101,7 @@ Prefer these truth sources before trusting comments, wrappers, or older docs:
 - `package.json`
 
 ### Behavioral contract truth
-- `docs/ref/contracts.md`
+- `docs/项目基础/行为合约.md`
 - critical tests under:
   - `tests/integration/**`
   - `tests/e2e/**`

@@ -108,7 +108,7 @@ AI 能很快写出页面，但如果没有组件治理、设计 token、内容�
 | Objection | Response |
 | --- | --- |
 | “这会不会太重？” | 对纯静态小页可能偏重；但如果目标是长期 AI 协作、组件复用、多语言和部署质量，这些基础设施能降低后续返工。 |
-| “示例内容是不是会污染新项目？” | 示例内容必须在派生项目中替换；`docs/项目基础/替换顺序.md` 给出替换顺序和最小证明。 |
+| “示例内容是不是会污染新项目？” | 示例内容必须在派生项目中替换；当前入口从 `docs/README.md` 进入，内容维护看 `docs/项目基础/内容.md`，配置替换看 `docs/项目基础/配置.md`，生命周期边界看 `docs/项目基础/生命周期.md`。 |
 | “Storybook 是否必须把所有组件都放进去？” | 不必一次性全放。优先放高复用、高视觉风险、容易被 AI 重复造的组件。 |
 
 ---
@@ -163,10 +163,12 @@ AI 能很快写出页面，但如果没有组件治理、设计 token、内容�
 
 ## Source of Truth
 
-- Starter 说明：`docs/README.md`
+- Docs 入口：`docs/README.md`
+- 内容入口：`docs/项目基础/内容.md`
+- 配置入口：`docs/项目基础/配置.md`
+- 生命周期边界：`docs/项目基础/生命周期.md`
 - Codex 入口：`AGENTS.md`
 - Claude 入口：`CLAUDE.md`
-- 本地偏好：`CLAUDE.local.md`
 - 产品上下文：`PRODUCT.md`
 - 设计上下文：`DESIGN.md`、`docs/design/设计真相.md`
 - 组件治理：`docs/design/组件治理.md`
