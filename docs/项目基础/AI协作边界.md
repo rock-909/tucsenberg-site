@@ -38,9 +38,8 @@ A review that did not run must never be reported as a review that passed.
 
 The project-local `/pr` command is retired. The active rule is still the same:
 run an independent Codex review before push, and treat missing review output as
-a stop. `/review-fix` is the path for handling cloud review threads; it is
-parked alongside `.coderabbit.yaml` and only applies if CodeRabbit is switched
-back on.
+a stop. `/review-fix` handles unresolved human review threads on an existing
+PR; if CodeRabbit is switched back on, it also handles CodeRabbit feedback.
 
 ## Superpowers
 
