@@ -8,10 +8,12 @@ import {
 
 import {
   ASSETS_DIR,
+  BUILT_DOWNLOADS_DIR,
   BUNDLE_PATH,
   CATALOG_PATH,
   createValidFiles,
   createVirtualRepo,
+  DOWNLOADS_DIR,
   EXPECTED_DOWNLOADS_HEADER_ROUTE,
   EXPECTED_STATIC_ASSET_HEADER_ROUTE,
 } from "./cloudflare-headers-fixtures";
@@ -502,50 +504,82 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
-  it("tells the owner to build only when building is what is missing", () => {
-    // 判红时唯一那句行动建议必须成立。十二类失败里只有两类跟「还没构建」有关；
-    // 一条写重了的路由重新构建一万次也是同一条红，把人指过去等于让他白干。
-    const errors: string[] = [];
-    const spy = vi
-      .spyOn(console, "error")
-      .mockImplementation((message: unknown) => {
-        errors.push(String(message));
-      });
+  // 判红时唯一那句行动建议必须成立。只有构建产物那一侧的失败才该指向「先跑构建」；
+  // git 跟踪的源文件坏了，构建一万次也是同一条红，把业主指过去等于让他白等 20 分钟。
+  const buildHintCases = [
+    {
+      name: "a duplicated route",
+      wants: false,
+      break: (files: Record<string, string>) => {
+        const duplicated = [
+          EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+          `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+          "",
+          EXPECTED_DOWNLOADS_HEADER_ROUTE,
+          `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+          "",
+          EXPECTED_DOWNLOADS_HEADER_ROUTE,
+          "  Cache-Control: public,max-age=86400",
+          "",
+        ].join("\n");
+        files["public/_headers"] = duplicated;
+        files[`${ASSETS_DIR}/_headers`] = duplicated;
+      },
+    },
+    {
+      name: "a deleted source _headers",
+      wants: false,
+      break: (files: Record<string, string>) => delete files["public/_headers"],
+    },
+    {
+      name: "an emptied source downloads directory",
+      wants: false,
+      break: (files: Record<string, string>) => {
+        delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
+        delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
+      },
+    },
+    {
+      name: "a missing built _headers",
+      wants: true,
+      break: (files: Record<string, string>) =>
+        delete files[`${ASSETS_DIR}/_headers`],
+    },
+    {
+      name: "an emptied built downloads directory",
+      wants: true,
+      break: (files: Record<string, string>) => {
+        delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
+        delete files[`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`];
+      },
+    },
+  ];
 
-    try {
-      const duplicated = [
-        EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-        `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-        "",
-        EXPECTED_DOWNLOADS_HEADER_ROUTE,
-        `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-        "",
-        EXPECTED_DOWNLOADS_HEADER_ROUTE,
-        "  Cache-Control: public,max-age=86400",
-        "",
-      ].join("\n");
+  it.each(buildHintCases)(
+    "$wants: tells the owner to build when the red is $name",
+    ({ wants, break: breakFiles }) => {
+      const errors: string[] = [];
+      const spy = vi
+        .spyOn(console, "error")
+        .mockImplementation((message: unknown) => {
+          errors.push(String(message));
+        });
 
-      expect(
-        runCloudflareStaticAssetHeaderCli(
-          createVirtualRepo({
-            ...createValidFiles(),
-            "public/_headers": duplicated,
-            [`${ASSETS_DIR}/_headers`]: duplicated,
-          }),
-        ),
-      ).toBe(false);
-      expect(errors.join("\n")).not.toContain("pnpm website:build:cf");
+      try {
+        const files = createValidFiles();
+        breakFiles(files);
 
-      errors.length = 0;
-      const unbuilt = createValidFiles();
-      delete unbuilt[`${ASSETS_DIR}/_headers`];
-
-      expect(
-        runCloudflareStaticAssetHeaderCli(createVirtualRepo(unbuilt)),
-      ).toBe(false);
-      expect(errors.join("\n")).toContain("pnpm website:build:cf");
-    } finally {
-      spy.mockRestore();
-    }
-  });
+        expect(
+          runCloudflareStaticAssetHeaderCli(createVirtualRepo(files)),
+        ).toBe(false);
+        if (wants) {
+          expect(errors.join("\n")).toContain("pnpm website:build:cf");
+        } else {
+          expect(errors.join("\n")).not.toContain("pnpm website:build:cf");
+        }
+      } finally {
+        spy.mockRestore();
+      }
+    },
+  );
 });

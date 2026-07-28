@@ -210,7 +210,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining(`${BUILT_DOWNLOADS_DIR} holds no files`),
+      expect.stringContaining(`${BUILT_DOWNLOADS_DIR} holds no built files`),
     );
   });
 
@@ -264,7 +264,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining("dist/downloads holds no files"),
+      expect.stringContaining("dist/downloads holds no built files"),
     );
   });
 
@@ -350,7 +350,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining("dist/downloads holds no files"),
+      expect.stringContaining("dist/downloads holds no built files"),
     );
   });
 
@@ -403,22 +403,40 @@ describe("Cloudflare published asset surface", () => {
   // 磁盘上叫别的名字、而文件系统又替我们折叠了的两种真实写法。第二种是关键：
   // `ſ`（U+017F）在 macOS 的 APFS 上等于 `s`，但 `"ſ".toLowerCase()` 还是 `"ſ"`，
   // 所以拿 JS 的大小写规则当判据的话，这一种会原样漏过去。
-  const foldedNames = [
-    { onDisk: "Downloads", fold: (name: string) => name.toLowerCase() },
-    { onDisk: "downloadſ", fold: (name: string) => name.replace("ſ", "s") },
+  // 三个受保护目录各判各的，两种折叠各测一遍。第二种是关键：`ſ`（U+017F）在 macOS
+  // 的 APFS 上等于 `s`，但 `"ſ".toLowerCase()` 还是 `"ſ"`，拿 JS 的大小写规则当判据
+  // 的话它原样漏过去。
+  const foldedDirs = [
+    { real: DOWNLOADS_DIR, onDisk: "public/Downloads" },
+    { real: BUILT_DOWNLOADS_DIR, onDisk: `${ASSETS_DIR}/Downloads` },
+    { real: STATIC_DIR, onDisk: `${ASSETS_DIR}/_next/Static` },
+  ];
+  const folds = [
+    { name: "case", fold: (value: string) => value.toLowerCase() },
+    { name: "long s", fold: (value: string) => value.replace(/ſ/gu, "s") },
   ];
 
-  it.each(foldedNames)(
-    "fails when the downloads directory is on disk as $onDisk",
-    ({ onDisk, fold }) => {
-      // wrangler 建清单拿的是 readdir 给出的真名，线上那条 URL 是 `/Downloads/x.pdf`，
-      // `/downloads/*` 的规则匹配不上（正则不带 `i`），六份 PDF 全部裸奔，而门禁按
-      // 自己编出来的 URL 求头，一片绿。
+  it.each(
+    foldedDirs.flatMap(({ real, onDisk }) =>
+      folds.map(({ name, fold }) => ({
+        real,
+        // 长 s 那一版把折叠后等于 `s` 的那个字母换掉，磁盘真名就带上了 U+017F。
+        onDisk: name === "case" ? onDisk : real.replace(/s([^/]*)$/u, "ſ$1"),
+        fold,
+        name,
+      })),
+    ),
+  )(
+    "refuses to guess the url when $real is on disk as $onDisk ($name)",
+    ({ real, onDisk, fold }) => {
+      // wrangler 建清单拿的是 readdir 给出的真名，线上那条 URL 跟着真名走，
+      // `/downloads/*` 那条规则匹配不上（正则不带 `i`），文件全部裸奔，而门禁按
+      // 自己编出来的 URL 求头，一片绿。真名猜不出来时不能接着算，只能说算不出来。
       const files = createValidFiles();
-      for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
-        files[`public/${onDisk}/${name}`] =
-          files[`${DOWNLOADS_DIR}/${name}`] ?? "";
-        delete files[`${DOWNLOADS_DIR}/${name}`];
+      for (const key of Object.keys(files)) {
+        if (!key.startsWith(`${real}/`)) continue;
+        files[key.replace(real, onDisk)] = files[key] ?? "";
+        delete files[key];
       }
 
       const failures = collectCloudflareStaticAssetHeaderFailures(
@@ -426,14 +444,48 @@ describe("Cloudflare published asset surface", () => {
       );
 
       expect(failures).toContainEqual(
-        "public/downloads is not on disk under that exact name, so wrangler publishes those files on a URL this check cannot work out",
+        `${real} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
       );
     },
   );
 
-  it("still names the bare pdf when a directory is spelled differently", () => {
-    // 目录名的判决不能把这个门禁存在的唯一理由静音：同一次运行里，那份被撤销了
-    // noindex 的 PDF 仍然要被点名。早退会让它一个字都不打印。
+  it("says nothing about a url it just said it cannot work out", () => {
+    // 目录名算不出来之后还按写死的前缀逐文件证明，出来的每一条结论说的都是一条线上
+    // 不存在的 URL：这里 `_headers` 写的是真名 `/Downloads/*`，PDF 线上带着 noindex，
+    // 而按 `/downloads/...` 算会说它们全是裸的。同一次运行里前一句说「算不出来」、
+    // 后几句拿那条算不出来的 URL 下结论，两个方向都不成立。
+    const realName = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/Downloads/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+    const files = createValidFiles();
+    files["public/_headers"] = realName;
+    files[`${ASSETS_DIR}/_headers`] = realName;
+    for (const dir of [DOWNLOADS_DIR, BUILT_DOWNLOADS_DIR]) {
+      for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+        files[`${dir.replace(/downloads$/u, "Downloads")}/${name}`] =
+          files[`${dir}/${name}`] ?? "";
+        delete files[`${dir}/${name}`];
+      }
+    }
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, new Set(), (value) => value.toLowerCase()),
+    );
+
+    expect(failures).toEqual([
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+      `${BUILT_DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+    ]);
+  });
+
+  it("still names the bare pdf when another directory cannot be resolved", () => {
+    // 一个目录算不出来，不能把别的目录的证明一起静音——那份被撤销了 noindex 的 PDF
+    // 仍然要被点名。这是这个门禁存在的唯一理由。
     const detached = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -448,17 +500,23 @@ describe("Cloudflare published asset surface", () => {
     const files = createValidFiles();
     files["public/_headers"] = detached;
     files[`${ASSETS_DIR}/_headers`] = detached;
-    files[`${ASSETS_DIR}/Downloads/catalog.pdf`] =
-      files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`] ?? "";
-    delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
+    // 源目录折叠成 `Downloads`，构建产物那一份原样留着。
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`public/Downloads/${name}`] =
+        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${DOWNLOADS_DIR}/${name}`];
+    }
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files, new Set(), (name) => name.toLowerCase()),
+      createVirtualRepo(files, new Set(), (value) => value.toLowerCase()),
     );
 
     expect(failures).toContainEqual(
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so which URL its files are served from cannot be worked out`,
+    );
+    expect(failures).toContainEqual(
       expect.stringContaining(
-        '/downloads/catalog.pdf in public/_headers is served without "x-robots-tag"',
+        `/downloads/catalog.pdf in ${ASSETS_DIR}/_headers is served without "x-robots-tag"`,
       ),
     );
   });
@@ -518,7 +576,7 @@ describe("Cloudflare published asset surface", () => {
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining(`${STATIC_DIR} holds no files`),
+      expect.stringContaining(`${STATIC_DIR} holds no built files`),
     );
   });
 });
