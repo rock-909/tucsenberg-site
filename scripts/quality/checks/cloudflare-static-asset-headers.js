@@ -25,13 +25,13 @@ const STATIC_ASSET_SUBDIR = "_next/static";
 //
 // 只按 `downloads/` 这个目录名判是不够的，而且漏的方式一点都不离奇：把新报价单
 // 放进 `public/` 而不是 `public/downloads/`，线上那条 `/quotation.pdf` 上没有任何
-// `X-Robots-Tag` 规则，六道检查一路绿灯。更隐蔽的一种是没人放错任何东西——
-// `import catalog from "./product-catalog.pdf"` 是 Next.js 的标准写法，构建会把它
-// 搬到 `/_next/static/media/product-catalog.<hash>.pdf`，那个目录门禁走进去了，但
-// 只问缓存不问 noindex。
+// `X-Robots-Tag` 规则，六道检查一路绿灯。放错一层目录就够了，不需要谁改坏什么。
 //
-// 这张表是这套检查**实际会拦**的类型，不是「Google 只收录这些」。`.txt` 故意不在
-// 表里：`public/.well-known/security.txt` 本来就是要给人抓的，把它拦下来是误红。
+// 判据是文件本身而不是它所在的目录，所以整棵发布出去的树都要扫，构建产物那一侧也
+// 一样——那边不是 `public/` 的镜像，落进资产目录的东西就会被发出去，而
+// `_next/static` 那棵子树此前只被问过缓存、从没被问过 noindex。
+//
+// 这张表是这套检查**实际会拦**的类型，不是「Google 只收录这些」。
 const INDEXABLE_DOCUMENT_EXTENSIONS = new Set([
   ".pdf",
   ".doc",
@@ -45,7 +45,23 @@ const INDEXABLE_DOCUMENT_EXTENSIONS = new Set([
   ".odt",
   ".ods",
   ".odp",
+  ".zip",
+  ".txt",
 ]);
+// `.txt` 在表里，但按标准必须给爬虫读的那几条路径要放行。
+//
+// 排除写成「所有 .txt」曾经是这里的做法，代价是一份 `quotation.txt` 的价目表整个
+// 滑过去——而真正需要保住的只有 `.well-known/` 下面那几个文件，和 robots/ads 这两
+// 个按规范就长在站点根上的。按路径排除，理由和实际守的范围才对得上。
+const CRAWLER_FACING_PATH_PREFIX = "/.well-known/";
+const CRAWLER_FACING_ROOT_PATHS = new Set(["/robots.txt", "/ads.txt"]);
+
+function isCrawlerFacing(servedPath) {
+  return (
+    servedPath.startsWith(CRAWLER_FACING_PATH_PREFIX) ||
+    CRAWLER_FACING_ROOT_PATHS.has(servedPath)
+  );
+}
 const SOURCE_HEADERS_PATH = "public/_headers";
 const ASSET_HEADERS_FILENAME = "_headers";
 const ASSET_REDIRECTS_FILENAME = "_redirects";
@@ -62,10 +78,15 @@ const MODELLED_ASSET_CONFIG_KEYS = new Set(["directory", "binding"]);
 // 文件就在它自己那条 URL 上发出去，别名根本不存在，而门禁照旧说它「从去掉扩展名的
 // 那条 URL 发出去，这套检查证明不了」。`run_worker_first` 更彻底：请求整个交给
 // Worker，`_headers` 一条都不参与，这份门禁的每一条结论都会作废。
-const UNMODELLED_SERVING_ASSET_CONFIG_KEYS = new Set([
-  "html_handling",
-  "not_found_handling",
-  "run_worker_first",
+//
+// 记的是**默认值**，不是键名。写成默认值的那份配置和不写完全等价，线上一个字节都
+// 不会变，对它说「这套检查建模不了」是假的——而且业主为了写清楚把默认值显式写出来
+// 是很常见的做法，把他拦下来就是纯误红。默认值来自 asset worker 自己的兜底
+// （assets.worker.js:7962-7963），`run_worker_first` 不写就是 false。
+const UNMODELLED_SERVING_ASSET_CONFIG_DEFAULTS = new Map([
+  ["html_handling", "auto-trailing-slash"],
+  ["not_found_handling", "none"],
+  ["run_worker_first", false],
 ]);
 // 「先跑构建」这句提示只能跟着**构建产物**那一侧的失败走。判据是路径，不是措辞：
 // 同一句「里面没文件」既会说 `public/downloads`（git 跟踪的源目录，构建一万次也是
@@ -278,9 +299,11 @@ function collectUnresolvedDirectoryFailures(context, baseDir, urlSubdir) {
   );
   // 「算不出来」是这个检查的选择，不是世界的性质：真名在磁盘上，比对 inode 就能拿到。
   // 所以话要说成「这个检查算不出来」，不能说成「没人算得出来」。
+  // 只说非文档文件。文档类的已经被整棵树的扫描按磁盘真名逐条证明过了，这里再说一句
+  // 「算不出它们的 URL」，就是同一份报告里两句话互相打架。
   if (state === "folded") {
     return [
-      `${sourceDir} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+      `${sourceDir} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
     ];
   }
   // 指名**真正列不出来的那个目录**，也就是上层。说「下层列不出来」是假的——同一次
@@ -429,15 +452,6 @@ function collectScopeFailures(
   // 一条红字却不知道该去改哪一块。
   const where = scopeHost === null ? "" : ` on https://${scopeHost}`;
 
-  // 缓存时长会被另一个头整条废掉，而 `Cache-Control` 自己一个字都没变。
-  // `Vary: *` 的意思是「这个响应不能被复用」（RFC 9110 §12.5.5），一年 immutable
-  // 写得再对也不会发生。只盯着同名头比对的话，这里是彻底的假绿。
-  if (wanted.name === "cache-control" && hasWildcardVary(effective)) {
-    return [
-      `${targetPath} in ${relativePath} carries "${expectedHeader}" but "Vary: *" beside it${where} means no cache may reuse the response, so the lifetime never applies`,
-    ];
-  }
-
   if (served === undefined) {
     return [
       `${targetPath} in ${relativePath} is served without "${wanted.name}"${where}`,
@@ -460,6 +474,20 @@ function collectScopeFailures(
     ];
   }
 
+  // 缓存时长会被另一个头整条废掉，而 `Cache-Control` 自己一个字都没变。
+  // `Vary: *` 的意思是「这个响应不能被复用」（RFC 9111 §4.1 说得最直接：带 `*` 的
+  // 存储响应永远匹配不上），一年 immutable 写得再对也不会发生。只盯着同名头比对的话，
+  // 这里是彻底的假绿。
+  //
+  // 位置必须排在「头在不在」「值对不对」之后。排在前面的话，一个根本没写
+  // `Cache-Control` 的配置也会被告知「你写的一年缓存被 Vary 废了」——业主删掉 Vary
+  // 重跑，才发现缓存头压根没写，两趟才走完一趟的事。
+  if (wanted.name === "cache-control" && hasWildcardVary(effective)) {
+    return [
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but "Vary: *" beside it${where} means no cache may reuse the response, so the lifetime never applies`,
+    ];
+  }
+
   const { overriding, ambiguous } = findContradictingDirectives(
     wanted.name,
     wanted.directives,
@@ -477,6 +505,26 @@ function collectScopeFailures(
   }
 
   return [];
+}
+
+/**
+ * 不在受保护目录里的那些文档，判红时要多说一句「该怎么办」。
+ *
+ * 沿用原来那句的话，业主看到的是「/quotation.pdf in public/_headers is served
+ * without ...」——`in public/_headers` 说的是被检查的那份规则文件，不是 PDF 在哪。
+ * 对 `downloads/` 里的文件这句够用（动作就是去改 `_headers`），对这一类不够：真正
+ * 要做的是把这份文件挪进 `public/downloads/`，而那句话一个字都没提。
+ */
+function collectStrayDocumentFailures(rules, relativePath, targetPath) {
+  return collectServedPathFailures(
+    rules,
+    relativePath,
+    targetPath,
+    EXPECTED_DOWNLOADS_NOINDEX,
+  ).map(
+    (failure) =>
+      `${failure}; it does not sit under downloads/, so either move it there or write a rule that covers it`,
+  );
 }
 
 function collectServedPathFailures(
@@ -582,7 +630,7 @@ function collectInvalidHeaderFailures(rules, relativePath) {
 function collectHeaderFileFailures(
   context,
   relativePath,
-  { downloadPaths, staticAssetPaths },
+  { downloadPaths, staticAssetPaths, strayDocumentPaths },
   isBuildOutput = false,
 ) {
   if (!repoFileExists(context, relativePath)) {
@@ -626,6 +674,9 @@ function collectHeaderFileFailures(
         EXPECTED_DOWNLOADS_NOINDEX,
       ),
     ),
+    ...strayDocumentPaths.flatMap((documentPath) =>
+      collectStrayDocumentFailures(rules, relativePath, documentPath),
+    ),
   ];
 }
 
@@ -660,10 +711,10 @@ function createCloudflareStaticAssetHeaderContext({
  */
 function describeUnmodelledAssetKeys(unmodelled) {
   const serving = [...unmodelled]
-    .filter((key) => UNMODELLED_SERVING_ASSET_CONFIG_KEYS.has(key))
+    .filter((key) => UNMODELLED_SERVING_ASSET_CONFIG_DEFAULTS.has(key))
     .sort();
   const ignored = [...unmodelled]
-    .filter((key) => !UNMODELLED_SERVING_ASSET_CONFIG_KEYS.has(key))
+    .filter((key) => !UNMODELLED_SERVING_ASSET_CONFIG_DEFAULTS.has(key))
     .sort();
 
   const errors = [];
@@ -722,8 +773,10 @@ function readAssetsDirectories(context) {
     if (typeof directory === "string" && directory !== "") {
       directories.add(directory);
     }
-    for (const key of Object.keys(scope?.assets ?? {})) {
-      if (!MODELLED_ASSET_CONFIG_KEYS.has(key)) unmodelled.add(key);
+    for (const [key, value] of Object.entries(scope?.assets ?? {})) {
+      if (MODELLED_ASSET_CONFIG_KEYS.has(key)) continue;
+      if (UNMODELLED_SERVING_ASSET_CONFIG_DEFAULTS.get(key) === value) continue;
+      unmodelled.add(key);
     }
   }
 
@@ -808,8 +861,11 @@ function collectUnmodelledAssetFileFailures(context, directory) {
 function listPublishedDocuments(context, baseDir) {
   const listing = listServedPaths(context, baseDir, "");
   return {
-    paths: listing.paths.filter((servedPath) =>
-      INDEXABLE_DOCUMENT_EXTENSIONS.has(path.extname(servedPath).toLowerCase()),
+    paths: listing.paths.filter(
+      (servedPath) =>
+        INDEXABLE_DOCUMENT_EXTENSIONS.has(
+          path.extname(servedPath).toLowerCase(),
+        ) && !isCrawlerFacing(servedPath),
     ),
     failures: listing.failures,
   };
@@ -885,12 +941,16 @@ function collectPublishedDirectoryFailures(context, directory) {
       DOWNLOADS_SOURCE_DIR,
       EXPECTED_DOWNLOADS_NOINDEX,
     ),
-    ...collectEmptyDirectoryFailure(
-      assetDownloadPaths,
-      assetDownloadsDir,
-      EXPECTED_DOWNLOADS_NOINDEX,
-      true,
-    ),
+    // 源目录本身就是空的时候，构建产物那边空是必然的，再说一遍只会多勾出一句
+    // 「先跑构建」——业主跑一百遍也变不绿，因为根因在源目录。源目录那句已经说清了。
+    ...(sourceDownloadPaths?.length === 0
+      ? []
+      : collectEmptyDirectoryFailure(
+          assetDownloadPaths,
+          assetDownloadsDir,
+          EXPECTED_DOWNLOADS_NOINDEX,
+          true,
+        )),
     ...collectEmptyDirectoryFailure(
       staticAssetPaths,
       assetStaticDir,
@@ -924,16 +984,19 @@ function collectPublishedDirectoryFailures(context, directory) {
     ...collectUnmodelledAssetFileFailures(context, PUBLIC_SOURCE_DIR),
   ];
 
+  const downloadPaths = [
+    ...new Set([...(sourceDownloadPaths ?? []), ...(assetDownloadPaths ?? [])]),
+  ].sort();
+  // 已经被受保护目录那两次枚举证明过的不重复算：同一个文件说两遍，第二遍还带着
+  // 「把它挪进 downloads/」，而它本来就在里面。
   const servedPaths = {
-    downloadPaths: [
-      ...new Set([
-        ...(sourceDownloadPaths ?? []),
-        ...(assetDownloadPaths ?? []),
-        ...sourceDocuments.paths,
-        ...assetDocuments.paths,
-      ]),
-    ].sort(),
+    downloadPaths,
     staticAssetPaths: staticAssetPaths ?? [],
+    strayDocumentPaths: [
+      ...new Set([...sourceDocuments.paths, ...assetDocuments.paths]),
+    ]
+      .filter((documentPath) => !downloadPaths.includes(documentPath))
+      .sort(),
   };
   failures.push(
     ...collectHeaderFileFailures(context, SOURCE_HEADERS_PATH, servedPaths),

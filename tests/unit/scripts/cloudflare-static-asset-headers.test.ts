@@ -566,6 +566,31 @@ describe("Cloudflare static asset headers proof", () => {
     ]);
   });
 
+  it("lets a serving key through when it is written at its default value", () => {
+    // `"html_handling": "auto-trailing-slash"` 就是 wrangler 的默认值
+    // （assets.worker.js:7962）。把默认值显式写出来是很常见的写法，线上一个字节都不
+    // 会变。对它判红并说「它改变了资产怎么被发出去」是假话，而误红会让业主学会绕过
+    // 整道门禁。
+    const files = createValidFiles();
+    files["wrangler.jsonc"] = [
+      "{",
+      '  "assets": {',
+      '    "directory": ".open-next/assets",',
+      '    "html_handling": "auto-trailing-slash",',
+      '    "not_found_handling": "none",',
+      '    "run_worker_first": false',
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
   it("says a key wrangler ignores is being ignored, not that it cannot be modelled", () => {
     // wrangler 4.100.0 只认 `assets` 底下那五个键（cli.js:40198-40204），别的原样丢进
     // 警告里、当不存在。所以这一档和上一档是两件事：上一档那个键真的在改变发布行为，
@@ -669,6 +694,18 @@ describe("Cloudflare static asset headers proof", () => {
       break: (files: Record<string, string>) => {
         delete files[`${BUILT_DOWNLOADS_DIR}/catalog.pdf`];
         delete files[`${BUILT_DOWNLOADS_DIR}/spec-sheet.pdf`];
+      },
+    },
+    {
+      // 源目录空了，构建产物那边空是必然的。这时候「先跑构建」同样是句废话：根因在
+      // 源目录，跑一百遍也变不绿。业主重命名了 downloads 目录时撞的就是这条。
+      name: "both downloads directories emptied at once",
+      hint: "does not tell",
+      break: (files: Record<string, string>) => {
+        for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+          delete files[`${DOWNLOADS_DIR}/${name}`];
+          delete files[`${BUILT_DOWNLOADS_DIR}/${name}`];
+        }
       },
     },
     {

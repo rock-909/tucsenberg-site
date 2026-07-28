@@ -63,10 +63,33 @@ describe("Cloudflare protected directory resolution", () => {
       );
 
       expect(failures).toContainEqual(
-        `${real} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+        `${real} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
       );
     },
   );
+
+  it("does not claim it cannot work out a url it just worked out", () => {
+    // 目录名折叠之后，整棵树的扫描按 readdir 真名照样算得出每一份文档的 URL，而且
+    // 会逐条判红。这时候还说「算不出这个目录里文件的 URL」，同一份报告就自己打自己
+    // 的脸——业主看到第一句会以为没人查过那几份 PDF，其实下面几行正是查的结果。
+    const files = createValidFiles();
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`public/Downloads/${name}`] =
+        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${DOWNLOADS_DIR}/${name}`];
+    }
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("/Downloads/catalog.pdf in public/_headers"),
+    );
+    expect(failures).toContainEqual(
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
+    );
+  });
 
   it("says nothing about a url it just said it cannot work out", () => {
     // 目录名算不出来之后还按写死的前缀逐文件证明，出来的每一条结论说的都是一条线上
@@ -97,8 +120,8 @@ describe("Cloudflare protected directory resolution", () => {
     );
 
     expect(failures).toEqual([
-      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
-      `${BUILT_DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
+      `${BUILT_DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
     ]);
   });
 
@@ -341,7 +364,7 @@ describe("Cloudflare protected directory resolution", () => {
     );
 
     expect(failures).toContainEqual(
-      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its files are served from`,
+      `${DOWNLOADS_DIR} is not on disk under that exact name, so this check cannot work out which URL its non-document files are served from`,
     );
     expect(failures).toContainEqual(
       expect.stringContaining(

@@ -227,6 +227,33 @@ describe("effective header value semantics", () => {
     );
   });
 
+  it("says the cache header is missing before it blames Vary", () => {
+    // `Vary: *` 那一支要是排在「头在不在」前面，一个根本没写 `Cache-Control` 的配置
+    // 也会被告知「你写的一年缓存被 Vary 废了」。业主删掉 Vary 重跑，才发现缓存头压根
+    // 没写——两趟才走完一趟的事，而这道门禁的每一句话都得当场成立。
+    const varyOnly = [
+      "/_next/static/*",
+      "  Vary: *",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": varyOnly,
+        ".open-next/assets/_headers": varyOnly,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      `${BUNDLE_PATH} in public/_headers is served without "cache-control"`,
+    );
+    expect(failures.join("\n")).not.toContain('"Vary: *" beside it');
+  });
+
   it("does not let Vary: * count against the noindex proof", () => {
     // `Vary: *` 废掉的是缓存复用，和「搜索引擎会不会收录这份 PDF」没有关系。把这
     // 一支扩大到所有期望头，会在一条完全正当的配置上判红。

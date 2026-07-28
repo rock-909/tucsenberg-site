@@ -502,15 +502,18 @@ describe("Cloudflare published asset surface", () => {
       createVirtualRepo(files),
     );
 
+    // 判红时唯一那句行动建议要成立。`in public/_headers` 说的是被检查的那份规则
+    // 文件，不是 PDF 在哪——业主照着它去改 `_headers` 也行，但真正省事的动作是把
+    // 文件挪进 downloads/，那句话必须说出来。
     expect(failures).toContainEqual(
-      expect.stringContaining("/quotation.pdf in public/_headers"),
+      '/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
     );
   });
 
   it("fails when a pdf rides along inside the static asset output", () => {
-    // `import catalog from "./product-catalog.pdf"` 是 Next.js 的标准写法，构建把
-    // 它搬到 `/_next/static/media/`。那个目录门禁走进去了，但只问缓存不问 noindex，
-    // 于是一份真实的询盘物料从一条谁都想不到的 URL 上裸奔。
+    // 构建产物那一侧不是 `public/` 的镜像：落进资产目录的东西就会被发出去，而
+    // `_next/static` 那棵子树此前只被问过缓存、从没被问过 noindex。这条守的是「资产
+    // 目录也要扫」，不依赖任何特定的文件是怎么进去的。
     const files = createValidFiles();
     files[`${STATIC_DIR}/media/product-catalog.9f3a1c.pdf`] = "%PDF-1.7";
 
@@ -540,6 +543,31 @@ describe("Cloudflare published asset surface", () => {
     );
   });
 
+  it("does not tell a file already under downloads to move into downloads", () => {
+    // 同一份 PDF 被两次枚举都看到过：受保护目录那次，和整棵树那次。不去重的话，业主
+    // 会收到一句「把它挪进 downloads/」，而它本来就在里面。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/catalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+    const files = createValidFiles();
+    files["public/_headers"] = detached;
+    files[`${ASSETS_DIR}/_headers`] = detached;
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures.join("\n")).not.toContain("does not sit under downloads/");
+  });
+
   it("stays quiet when a stray pdf is already covered by a rule", () => {
     // 判据是「这个文件最终拿到的头」，不是「它在不在 downloads 目录里」。业主换个
     // 写法把整站盖住，是完全正当的配置，不能因为目录名不对就拦住发布。
@@ -564,17 +592,36 @@ describe("Cloudflare published asset surface", () => {
     expect(failures).toEqual([]);
   });
 
-  it("does not demand noindex on a file type that is meant to be fetched", () => {
-    // `.well-known/security.txt` 就是要给人抓的。把它一起拦下来是误红，而误红会让
-    // 业主学会绕过这道门禁——那比漏掉一份 PDF 更贵。
+  it("does not demand noindex on the files crawlers are supposed to read", () => {
+    // `.well-known/` 下面那几个和站点根上的 robots/ads 就是要给爬虫读的。把它们一起
+    // 拦下来是误红，而误红会让业主学会绕过这道门禁——那比漏掉一份 PDF 更贵。
     const files = createValidFiles();
-    files["public/.well-known/security.txt"] = "Contact: mailto:a@b.c";
-    files[`${ASSETS_DIR}/.well-known/security.txt`] = "Contact: mailto:a@b.c";
+    for (const name of [".well-known/security.txt", "robots.txt", "ads.txt"]) {
+      files[`public/${name}`] = "Contact: mailto:a@b.c";
+      files[`${ASSETS_DIR}/${name}`] = "Contact: mailto:a@b.c";
+    }
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo(files),
     );
 
     expect(failures).toEqual([]);
+  });
+
+  it("fails when a price list is published as a plain text file", () => {
+    // 排除写成「所有 .txt」的话，一份 `quotation.txt` 的价目表整个滑过去。Google 收
+    // 录纯文本文件，那份价目表和 PDF 一样是询盘物料。
+    const files = createValidFiles();
+    files["public/price-list.txt"] = "TB-BW 1200x800 ...";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '/price-list.txt in public/_headers is served without "x-robots-tag"',
+      ),
+    );
   });
 });
