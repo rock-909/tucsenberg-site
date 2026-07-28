@@ -193,37 +193,19 @@ function compileRuleSegment(segment, placeholderClass) {
 }
 
 /**
- * asset-worker 找文件用的那一步（cli.js:336806）：
- *
- * ```js
- * try { pathname = globalThis.decodeURIComponent(pathname); } catch {}
- * ```
- *
- * 注意 catch 是空的——解码失败**不是**放弃，是保留原样继续找。所以磁盘上真名叫
- * `%ZZ.pdf` 的文件，请求 `/downloads/%ZZ.pdf` 照样能拿到它。把解码失败当成"这条
- * 规则够不着任何文件"就漏了这一路。
- */
-function toAssetLookupPath(value) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-/**
  * 编译不出来的规则返回 null——和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
  *
  * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
  * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接抛
  * 异常，把门禁变成崩溃而不是判断。
  *
- * 除了规则本身，还编译一个**解码后**的匹配器。响应头是按请求里的原始编码路径匹配
- * 的，磁盘文件是按 `decodeURIComponent(pathname)` 找的（asset-worker，cli.js:336807），
- * 两步用的不是同一个字符串。于是 `/downloads/%63atalog.pdf` 这条规则匹配不上正常
- * 请求，却匹配得上一个仍然会返回真实 `catalog.pdf` 的请求——一条写成编码别名的撤销
- * 规则能把真实 PDF 的 noindex 拿掉，而门禁只看规范路径，什么都没看见。
- * 别名有 2^N 种写不完，所以反过来：拿规则**查文件时用的那个路径**去比磁盘路径。
+ * 只按规范路径匹配，不再另外算一套「编码别名」。曾经加过：`_headers` 是按请求里的
+ * 原始编码路径匹配的，而 `cli.js` 里 Pages 的 asset-server 解码之后才去找文件，看
+ * 起来 `/downloads/%63atalog.pdf` 这类规则能撤掉真实 PDF 的头。那是读错了子系统
+ * ——这个仓库走的是 Workers Assets（`wrangler.jsonc` 的 `assets` 绑定），不是 Pages。
+ * 2026-07-28 用锁定的 wrangler 4.100.0 起本地服务实测：`/downloads%2Fproduct-catalog.pdf`
+ * 和 `/downloads/%70roduct-catalog.pdf` 都返回 307 跳到规范路径，文件根本不会在别名
+ * 路径上被发出去。别再照着那段 Pages 代码把这套加回来。
  */
 function ruleToMatcher(rulePath) {
   const absolute = /^https:\/\/([^/]+)(\/.*)?$/u.exec(rulePath);
@@ -246,9 +228,6 @@ function ruleToMatcher(rulePath) {
       // 但能不能编译要看整条。
       pathPattern:
         hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
-      assetLookupPattern: new RegExp(
-        `^${compileRuleSegment(toAssetLookupPath(pathPart), "[^/]+")}$`,
-      ),
     };
   } catch {
     return null;
@@ -327,43 +306,33 @@ function parseExpectedHeader(line) {
  * - 假红：同一条头被拆到两个块里（`Cache-Control: public, max-age=…` 一块、
  *   `Cache-Control: immutable` 另一块），线上会合并成完整的一条。
  *
- * 有两类规则的处理是**故意不对称**的，因为两个方向的错代价不一样：
+ * 带域名的规则处理是**故意不对称**的，因为两个方向的错代价不一样。它只对那一个
+ * 域名生效，而这里不知道线上会用哪个域名（预览域名就是另一个）：
  *
- * - 带域名的规则只对那一个域名生效，而这里不知道线上会用哪个域名（预览域名就是
- *   另一个）。
- * - 编码别名规则（`/downloads/%63atalog.pdf`）只匹配得上写成那个别名的请求，正常
- *   请求走的是规范路径。
+ * - **不能用来证明**防护到位——当成生效就是假绿，PDF 在实际域名上照样被收录。
+ * - **可以用来判定防护被推翻**，fail closed：宁可多红一次，也不能放一个能被收录的
+ *   PDF 出去。
  *
- * 两类都**不能用来证明**防护到位——当成生效就是假绿，PDF 在正常路径上照样被收录。
- * 但两类都**可以用来判定防护被撤掉**，fail closed：宁可多红一次，也不能放一个能被
- * 收录的 PDF 出去。
- *
- * 「撤掉」不只是 `! Header-Name`。这两类规则**设**的头一样能推翻期望：一条编码别名
- * 规则给真实 bundle 追加 `Cache-Control: no-store`，线上那次响应就同时挂着一年缓存
- * 和 no-store，缓存保证作废。所以每条头记两份：`proven` 只收规范路径上的非域名
- * 规则，用来判断「要的指令在不在」；`present` 收所有命中规则，用来判断「有没有被
- * 别的指令推翻」。撤销两份一起删。
+ * 「推翻」不只是 `! Header-Name`。域名规则**设**的头一样能推翻期望：给真实 bundle
+ * 追加 `Cache-Control: no-store`，那个域名上的响应就同时挂着一年缓存和 no-store，
+ * 缓存保证作废。所以每条头记两份：`proven` 只收非域名规则，用来判断「要的指令在
+ * 不在」；`present` 收所有命中规则，用来判断「有没有被别的指令推翻」。撤销两份
+ * 一起删。
  */
 function resolveEffectiveHeaders(rules, targetPath) {
   const effective = new Map();
-  // 目标路径解一次码就是磁盘上那个文件名——`toServedPath` 正是反着做出来的。
-  const assetPath = toAssetLookupPath(targetPath);
 
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null) continue;
-    const { crossHost, pathPattern, assetLookupPattern } = matcher;
-
-    const matchesRequestPath = pathPattern.test(targetPath);
-    const matchesAlias =
-      !matchesRequestPath && assetLookupPattern.test(assetPath);
-    if (!matchesRequestPath && !matchesAlias) continue;
+    const { crossHost, pathPattern } = matcher;
+    if (!pathPattern.test(targetPath)) continue;
 
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
     }
 
-    const provesTheHeader = !crossHost && !matchesAlias;
+    const provesTheHeader = !crossHost;
     for (const [name, value] of Object.entries(rule.headers)) {
       const entry = effective.get(name) ?? {
         proven: new Set(),
