@@ -241,6 +241,30 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("passes when the noindex rule is strengthened with more directives", () => {
+    // `noindex, nofollow` 比只写 noindex 更严。门禁不能拦着业主加强防护——
+    // 一个逼人不许改好的检查，该改的是检查。
+    const stronger = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: noindex, nofollow",
+      "  Cache-Control: public,max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": stronger,
+        ".open-next/assets/_headers": stronger,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
   it("passes when a route is split across two blocks", () => {
     // 同一路由写两个块是合法的，Cloudflare 会合并。只看第一个块就会误红。
     const split = [

@@ -61,6 +61,33 @@ function normalizeHeaderLine(line) {
   return line.replace(/\s*([:,])\s*/gu, "$1").toLowerCase();
 }
 
+/**
+ * 拆成「头名 + 指令集合」。
+ *
+ * 整行全等会把更强的写法判红：`X-Robots-Tag: noindex, nofollow` 比只写 noindex
+ * 更严，门禁却拦下来，还报「does not carry X-Robots-Tag: noindex」——它明明带了。
+ * 一个逼着业主不许加强防护的检查，该改的是检查。所以只要求「要的指令都在」，
+ * 多出来的不管。
+ */
+function parseHeaderLine(line) {
+  const [name, ...rest] = normalizeHeaderLine(line).split(":");
+  return {
+    name,
+    directives: new Set(rest.join(":").split(",").filter(Boolean)),
+  };
+}
+
+function carriesHeader(headerLines, expectedHeader) {
+  const wanted = parseHeaderLine(expectedHeader);
+  return headerLines.some((line) => {
+    const actual = parseHeaderLine(line);
+    if (actual.name !== wanted.name) return false;
+    return [...wanted.directives].every((directive) =>
+      actual.directives.has(directive),
+    );
+  });
+}
+
 function collectRouteBlockFailures(
   blocks,
   relativePath,
@@ -77,8 +104,7 @@ function collectRouteBlockFailures(
     return [`missing "${route}" in ${relativePath}`];
   }
 
-  const wanted = normalizeHeaderLine(expectedHeader);
-  if (!headerLines.some((line) => normalizeHeaderLine(line) === wanted)) {
+  if (!carriesHeader(headerLines, expectedHeader)) {
     return [`"${route}" in ${relativePath} does not carry "${expectedHeader}"`];
   }
 
