@@ -486,4 +486,95 @@ describe("Cloudflare published asset surface", () => {
       expect.stringContaining(`${STATIC_DIR} holds no built files`),
     );
   });
+
+  it("fails when a pdf is published from outside the downloads directory", () => {
+    // 只按 `downloads/` 这个目录名判，给出的保证是「那个目录里的文件带着 noindex」，
+    // 不是「我们的 PDF 带着 noindex」。把新报价单放进 `public/` 而不是
+    // `public/downloads/`，线上 `/quotation.pdf` 上没有任何 X-Robots-Tag 规则，
+    // Google 照收，而这一整套检查一路绿灯。放错一层目录就够了，不需要谁改坏什么。
+    //
+    // 只放在源目录里，还没构建。源目录那一侧不扫的话，这份 PDF 要等下一次构建才有
+    // 人管，而它已经被 commit 进仓库了。
+    const files = createValidFiles();
+    files["public/quotation.pdf"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("/quotation.pdf in public/_headers"),
+    );
+  });
+
+  it("fails when a pdf rides along inside the static asset output", () => {
+    // `import catalog from "./product-catalog.pdf"` 是 Next.js 的标准写法，构建把
+    // 它搬到 `/_next/static/media/`。那个目录门禁走进去了，但只问缓存不问 noindex，
+    // 于是一份真实的询盘物料从一条谁都想不到的 URL 上裸奔。
+    const files = createValidFiles();
+    files[`${STATIC_DIR}/media/product-catalog.9f3a1c.pdf`] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/_next/static/media/product-catalog.9f3a1c.pdf in public/_headers",
+      ),
+    );
+  });
+
+  it("judges an upper-case extension the same as a lower-case one", () => {
+    // Windows 上导出的文件常常叫 `QUOTATION.PDF`。扩展名不归一化的话，同一份报价单
+    // 换个大小写就绕过整道检查，而线上它照样是一份能被收录的 PDF。
+    const files = createValidFiles();
+    files["public/QUOTATION.PDF"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("/QUOTATION.PDF in public/_headers"),
+    );
+  });
+
+  it("stays quiet when a stray pdf is already covered by a rule", () => {
+    // 判据是「这个文件最终拿到的头」，不是「它在不在 downloads 目录里」。业主换个
+    // 写法把整站盖住，是完全正当的配置，不能因为目录名不对就拦住发布。
+    const covered = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+    const files = createValidFiles();
+    files["public/quotation.pdf"] = "%PDF-1.7";
+    files[`${ASSETS_DIR}/quotation.pdf`] = "%PDF-1.7";
+    files["public/_headers"] = covered;
+    files[`${ASSETS_DIR}/_headers`] = covered;
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("does not demand noindex on a file type that is meant to be fetched", () => {
+    // `.well-known/security.txt` 就是要给人抓的。把它一起拦下来是误红，而误红会让
+    // 业主学会绕过这道门禁——那比漏掉一份 PDF 更贵。
+    const files = createValidFiles();
+    files["public/.well-known/security.txt"] = "Contact: mailto:a@b.c";
+    files[`${ASSETS_DIR}/.well-known/security.txt`] = "Contact: mailto:a@b.c";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([]);
+  });
 });

@@ -21,6 +21,31 @@ const PUBLIC_SOURCE_DIR = "public";
 const DOWNLOADS_SOURCE_DIR = "public/downloads";
 const DOWNLOADS_ASSET_SUBDIR = "downloads";
 const STATIC_ASSET_SUBDIR = "_next/static";
+// 询盘物料的扩展名。这些文件不管放在哪个目录，被发布出去就必须带 noindex。
+//
+// 只按 `downloads/` 这个目录名判是不够的，而且漏的方式一点都不离奇：把新报价单
+// 放进 `public/` 而不是 `public/downloads/`，线上那条 `/quotation.pdf` 上没有任何
+// `X-Robots-Tag` 规则，六道检查一路绿灯。更隐蔽的一种是没人放错任何东西——
+// `import catalog from "./product-catalog.pdf"` 是 Next.js 的标准写法，构建会把它
+// 搬到 `/_next/static/media/product-catalog.<hash>.pdf`，那个目录门禁走进去了，但
+// 只问缓存不问 noindex。
+//
+// 这张表是这套检查**实际会拦**的类型，不是「Google 只收录这些」。`.txt` 故意不在
+// 表里：`public/.well-known/security.txt` 本来就是要给人抓的，把它拦下来是误红。
+const INDEXABLE_DOCUMENT_EXTENSIONS = new Set([
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".csv",
+  ".rtf",
+  ".odt",
+  ".ods",
+  ".odp",
+]);
 const SOURCE_HEADERS_PATH = "public/_headers";
 const ASSET_HEADERS_FILENAME = "_headers";
 const ASSET_REDIRECTS_FILENAME = "_redirects";
@@ -378,6 +403,18 @@ function findContradictingDirectives(name, expected, actual) {
   return { overriding, ambiguous };
 }
 
+/**
+ * `Vary: *` 在不在这条路径最终的响应头里。
+ *
+ * 逐个 token 比，不能用 `includes("*")`：`Vary: Accept-Encoding` 里没有星号，但
+ * `Vary: X-*-Probe` 这种自定义头名里有，按子串判会误红。
+ */
+function hasWildcardVary(effective) {
+  const vary = effective.get("vary");
+  if (vary === undefined) return false;
+  return vary.split(",").some((token) => token.trim() === "*");
+}
+
 function collectScopeFailures(
   rules,
   relativePath,
@@ -386,12 +423,20 @@ function collectScopeFailures(
   scopeHost,
 ) {
   const wanted = parseExpectedHeader(expectedHeader);
-  const served = resolveEffectiveHeaders(rules, targetPath, scopeHost).get(
-    wanted.name,
-  );
+  const effective = resolveEffectiveHeaders(rules, targetPath, scopeHost);
+  const served = effective.get(wanted.name);
   // 无域名场景不加后缀，报错信息保持原样；域名场景点出是哪个域名，否则业主看到
   // 一条红字却不知道该去改哪一块。
   const where = scopeHost === null ? "" : ` on https://${scopeHost}`;
+
+  // 缓存时长会被另一个头整条废掉，而 `Cache-Control` 自己一个字都没变。
+  // `Vary: *` 的意思是「这个响应不能被复用」（RFC 9110 §12.5.5），一年 immutable
+  // 写得再对也不会发生。只盯着同名头比对的话，这里是彻底的假绿。
+  if (wanted.name === "cache-control" && hasWildcardVary(effective)) {
+    return [
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but "Vary: *" beside it${where} means no cache may reuse the response, so the lifetime never applies`,
+    ];
+  }
 
   if (served === undefined) {
     return [
@@ -747,6 +792,29 @@ function collectUnmodelledAssetFileFailures(context, directory) {
     );
 }
 
+/**
+ * 整棵已发布的树里，所有询盘物料类型的文件。
+ *
+ * 受保护目录那三次枚举回答的是「这个目录里的文件带没带对头」；这一次回答的是
+ * 「有没有哪份文档根本不在受保护目录里」。少了它，门禁给出的保证是「downloads 这个
+ * 目录里的文件带着 noindex」，而业主以为买到的是「我们的 PDF 带着 noindex」。
+ *
+ * 从根开始走，URL 前缀是空串——每一段路径都取自 readdir 的真实条目名，所以目录名
+ * 大小写折叠在这里不成问题，算出来的就是线上那条 URL。
+ *
+ * 列不出来的目录照样要报。`public/foo` 打不开的时候，「它底下没有裸奔的 PDF」这句话
+ * 是没有证据的。这些报错和受保护目录那三次枚举报的是同一句话，重复的在上层被去掉。
+ */
+function listPublishedDocuments(context, baseDir) {
+  const listing = listServedPaths(context, baseDir, "");
+  return {
+    paths: listing.paths.filter((servedPath) =>
+      INDEXABLE_DOCUMENT_EXTENSIONS.has(path.extname(servedPath).toLowerCase()),
+    ),
+    failures: listing.failures,
+  };
+}
+
 function collectEmptyDirectoryFailure(
   paths,
   sourceDir,
@@ -800,6 +868,8 @@ function collectPublishedDirectoryFailures(context, directory) {
   const sourceDownloadPaths = sourceDownloads.paths;
   const assetDownloadPaths = assetDownloads.paths;
   const staticAssetPaths = staticAssets.paths;
+  const sourceDocuments = listPublishedDocuments(context, PUBLIC_SOURCE_DIR);
+  const assetDocuments = listPublishedDocuments(context, directory);
 
   // 目录空了或者被改了名，逐文件证明就一条都不剩，而门禁会安安静静地全绿。
   // 这个仓库靠 PDF 接询盘，「没有可证明的东西」在这里就是失败。
@@ -808,6 +878,8 @@ function collectPublishedDirectoryFailures(context, directory) {
     ...sourceDownloads.failures,
     ...assetDownloads.failures,
     ...staticAssets.failures,
+    ...sourceDocuments.failures,
+    ...assetDocuments.failures,
     ...collectEmptyDirectoryFailure(
       sourceDownloadPaths,
       DOWNLOADS_SOURCE_DIR,
@@ -857,6 +929,8 @@ function collectPublishedDirectoryFailures(context, directory) {
       ...new Set([
         ...(sourceDownloadPaths ?? []),
         ...(assetDownloadPaths ?? []),
+        ...sourceDocuments.paths,
+        ...assetDocuments.paths,
       ]),
     ].sort(),
     staticAssetPaths: staticAssetPaths ?? [],

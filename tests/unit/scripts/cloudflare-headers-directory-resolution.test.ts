@@ -142,7 +142,11 @@ describe("Cloudflare protected directory resolution", () => {
 
     // 整份清单比对。答不上来时最容易冒出来的假话有三种：说下层列不出来、说下层是
     // 空的、以及按写死前缀照常逐文件下结论。一条都不能有。
+    //
+    // 第一句是整棵树的扫描说的：资产根都打不开，「它底下没有裸奔的 PDF」这句话就
+    // 没有证据。它和后面两句说的是同一个成因，但覆盖的是不同的东西，不能省。
     expect(failures).toEqual([
+      `${ASSETS_DIR} could not be listed (EACCES), so nothing under it is proven`,
       `${ASSETS_DIR} could not be listed (EACCES), so this check cannot tell whether ${BUILT_DOWNLOADS_DIR} is spelled the same on disk as in the URL`,
       `${ASSETS_DIR} could not be listed (EACCES), so this check cannot tell whether ${STATIC_DIR} is spelled the same on disk as in the URL`,
     ]);
@@ -159,6 +163,7 @@ describe("Cloudflare protected directory resolution", () => {
     );
 
     expect(failures).toEqual([
+      `${ASSETS_DIR}/_next could not be listed (EACCES), so nothing under it is proven`,
       `${ASSETS_DIR}/_next could not be listed (EACCES), so this check cannot tell whether ${STATIC_DIR} is spelled the same on disk as in the URL`,
     ]);
   });

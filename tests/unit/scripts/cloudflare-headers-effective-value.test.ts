@@ -196,6 +196,88 @@ describe("effective header value semantics", () => {
     );
   });
 
+  it("fails when Vary: * makes the one-year cache unreachable", () => {
+    // `Cache-Control` 一个字都没被改，可 `Vary: *` 的意思是「这个响应不能被复用」
+    // （RFC 9110 §12.5.5）。只盯着同名头比对的话，这里是彻底的假绿：门禁说缓存一年
+    // 到位，而每一次请求都会重新下载整个 bundle。
+    const varied = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/_next/static/chunks/*",
+      "  Vary: *",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": varied,
+        ".open-next/assets/_headers": varied,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but "Vary: *" beside it means no cache may reuse the response`,
+      ),
+    );
+  });
+
+  it("does not let Vary: * count against the noindex proof", () => {
+    // `Vary: *` 废掉的是缓存复用，和「搜索引擎会不会收录这份 PDF」没有关系。把这
+    // 一支扩大到所有期望头，会在一条完全正当的配置上判红。
+    const variedDownloads = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "  Vary: *",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": variedDownloads,
+        ".open-next/assets/_headers": variedDownloads,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("does not read a wildcard inside a Vary header name as Vary: *", () => {
+    // `Vary: X-Probe-*` 里有星号，但它是一个头名的一部分，不是 RFC 说的那个通配。
+    // 用 `includes("*")` 判就会把一条完全正当的配置拦下来，而误红会让业主学会绕过
+    // 这道门禁。
+    const namedVary = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/_next/static/chunks/*",
+      "  Vary: Accept-Encoding, X-Probe-*",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": namedVary,
+        ".open-next/assets/_headers": namedVary,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
   it("judges directives written in upper case the same as lower case", () => {
     // HTTP 的 Cache-Control 指令大小写不敏感，`NO-STORE` 和 `no-store` 是同一件事。
     // 归一化里少了 `.toLowerCase()`，这条 bundle 线上一秒都不缓存，门禁却全绿。
