@@ -367,6 +367,86 @@ describe("Cloudflare published asset surface", () => {
     ]);
   });
 
+  it("fails when a source download is an html file", () => {
+    // 别名判定在源目录、资产下载目录、静态资源目录各调一次。只测资产目录那一次
+    // 的话，另外两次删掉照样全绿：源目录里新加一份 HTML 下载，线上是从去掉扩展名
+    // 的别名发出去的，落在别名上的撤销门禁看不见。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${DOWNLOADS_DIR}/guide.html`]: "<html></html>",
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/guide.html in public/downloads is served from its extensionless alias instead",
+      ),
+    );
+  });
+
+  it("fails when a built static asset is an html file", () => {
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${STATIC_DIR}/chunks/inlined.html`]: "<html></html>",
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `/_next/static/chunks/inlined.html in ${STATIC_DIR} is served from its extensionless alias instead`,
+      ),
+    );
+  });
+
+  it("stops when a protected directory is spelled differently on disk", () => {
+    // macOS 默认不区分大小写，`existsSync("public/downloads")` 在磁盘上是
+    // `Downloads/` 时照样为真。wrangler 建清单拿的是 readdir 给出的真名，线上那条
+    // URL 是 `/Downloads/x.pdf`，`/downloads/*` 的规则匹配不上（正则不带 `i`），
+    // 六份 PDF 全部裸奔，而门禁按自己编出来的 URL 求头，一片绿。
+    const files = createValidFiles();
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`public/Downloads/${name}`] =
+        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${DOWNLOADS_DIR}/${name}`];
+    }
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual([
+      'public/downloads is on disk as "Downloads", so wrangler publishes those files on a different URL than this check can prove',
+    ]);
+  });
+
+  it("stops when wrangler config cannot be parsed", () => {
+    // JSONC 解析器能从坏文本里「恢复」出半截配置。拿那半截当真，门禁就在证明一个
+    // 不知道是不是真会发布的目录，而真正的问题——配置文件本身是坏的——一声不吭。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "wrangler.jsonc": '{ "assets": { "directory": ".open-next/assets" }\n',
+      }),
+    );
+
+    expect(failures).toEqual(["wrangler.jsonc could not be parsed"]);
+  });
+
+  it("stops when wrangler config is missing", () => {
+    // 配置不在就没人知道发布哪个目录。这里必须是一条报错，不是抛异常，也不是
+    // 拿写死的目录顶上。
+    const files = createValidFiles();
+    delete files["wrangler.jsonc"];
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toEqual(["missing wrangler.jsonc"]);
+  });
+
   it("fails when the static asset output holds nothing to prove", () => {
     // 构建产物没跑或者被清空时，静态资源那一侧同样一条证明都不剩。
     const files = createValidFiles();

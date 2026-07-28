@@ -195,6 +195,141 @@ describe("effective header value semantics", () => {
     );
   });
 
+  it("judges directives written in upper case the same as lower case", () => {
+    // HTTP 的 Cache-Control 指令大小写不敏感，`NO-STORE` 和 `no-store` 是同一件事。
+    // 归一化里少了 `.toLowerCase()`，这条 bundle 线上一秒都不缓存，门禁却全绿。
+    const shouted = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/_next/static/chunks/*",
+      "  Cache-Control: NO-STORE",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": shouted,
+        ".open-next/assets/_headers": shouted,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
+      ),
+    );
+  });
+
+  it("accepts an upper-case noindex on the downloads route", () => {
+    // 反方向同样要成立：`NOINDEX` 是合法写法，判红就是假红。
+    const shouted = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: NOINDEX",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": shouted,
+        ".open-next/assets/_headers": shouted,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("applies a rule's own unset before its own set", () => {
+    // 一个块里先写撤销再写设置时，wrangler 是先撤后设（attachHeaders），最终这个头
+    // 是有的。顺序反过来的话，合法写法会被判成「没有 noindex」——假红。
+    const unsetThenSet = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  ! X-Robots-Tag",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": unsetThenSet,
+        ".open-next/assets/_headers": unsetThenSet,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("ignores a host rule whose spelling no request can ever match", () => {
+    // wrangler 比对的是 `new URL(request.url).hostname`：一定小写、IDN 已转 punycode。
+    // 规则那一侧原样保留，正则又不带 `i`，所以这两条写法线上永远命中不了任何请求，
+    // 里面的撤销一次都不会跑。拿字面量当场景的话，门禁会判红并说这份 PDF 是裸的
+    // ——而它在每一个真实域名上都带着 noindex，这句话不成立。
+    for (const deadHost of ["TUCSENBERG.example", "例え.example"]) {
+      const headers = [
+        EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+        `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+        "",
+        EXPECTED_DOWNLOADS_HEADER_ROUTE,
+        `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+        "",
+        `https://${deadHost}/downloads/*`,
+        "  ! X-Robots-Tag",
+        "",
+      ].join("\n");
+
+      const failures = collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo({
+          ...createValidFiles(),
+          "public/_headers": headers,
+          ".open-next/assets/_headers": headers,
+        }),
+      );
+
+      expect(failures, deadHost).toEqual([]);
+    }
+  });
+
+  it("still catches an unset on the host spelling requests really carry", () => {
+    // 归一化不能把真的撤销一起放过：同一条规则写成线上那个小写域名时必须判红。
+    const live = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "https://tucsenberg.example/downloads/*",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": live,
+        ".open-next/assets/_headers": live,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        'is served without "x-robots-tag" on https://tucsenberg.example',
+      ),
+    );
+  });
+
   it("does not let one host's unset erase another host's damage", () => {
     // 把所有域名的规则堆在一份状态里算，它们会互相抵消：a.example 加上的
     // `no-store` 被 b.example 的撤销抹掉，再被后面一条通用规则补回期望值，最后

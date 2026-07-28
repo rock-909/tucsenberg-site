@@ -20,6 +20,15 @@ import {
 // 哪些文件会被发布、线上被请求的 URL 是哪一条，由 cloudflare-headers-published-surface
 // 守；移植过来的 wrangler 解析与匹配语义由 cloudflare-headers-wrangler-semantics 守。
 describe("Cloudflare static asset headers proof", () => {
+  it("keeps the cache and crawl policy it exists to enforce", () => {
+    // 其余每一条断言的期望值都是从这两个常量拼出来的，所以它们只证明「实现和自己的
+    // 常量一致」。把常量削掉 `immutable`，真实 `_headers` 是超集、门禁照样全绿，
+    // 没有一条会红——策略本身必须单独钉住。
+    expect(EXPECTED_STATIC_ASSET_CACHE_CONTROL).toContain("max-age=31536000");
+    expect(EXPECTED_STATIC_ASSET_CACHE_CONTROL).toContain("immutable");
+    expect(EXPECTED_DOWNLOADS_NOINDEX.toLowerCase()).toContain("noindex");
+  });
+
   it("accepts matching source and OpenNext asset headers", () => {
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo(createValidFiles()),

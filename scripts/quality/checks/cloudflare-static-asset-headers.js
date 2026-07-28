@@ -477,14 +477,37 @@ function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
   return effective;
 }
 
-/** 文件里出现过的域名写法，加上「没有域名」那个场景（用 null 表示）。 */
+/**
+ * 文件里出现过的域名，加上「没有域名」那个场景（用 null 表示）。
+ *
+ * 域名要按 URL 的规矩归一化之后才能当场景用。wrangler 比对的是
+ * `new URL(request.url).hostname`（cli.js:336471）——那个值一定是小写的，IDN 也已经
+ * 转成 punycode；规则那一侧却原样保留（cli.js:129014），编译出来的正则又不带 `i`
+ * （cli.js:336456）。所以 `https://TUCSENBERG.example/downloads/*` 这条规则线上永远
+ * 命中不了任何请求。
+ *
+ * 拿字面量当场景的话，它在门禁眼里反倒是生效的：一条写在里面的 `! X-Robots-Tag`
+ * 会让门禁判红，并打印一句不成立的话——那份 PDF 在任何真实域名上都带着 noindex。
+ */
 function listHeaderScopes(rules) {
   const hosts = new Set();
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
-    if (matcher !== null && matcher.host !== null) hosts.add(matcher.host);
+    if (matcher === null || matcher.host === null) continue;
+    const hostname = toHostname(matcher.host);
+    // 取不出域名的（占位符、通配符）不造场景。它们已经被
+    // collectUnprovableHostFailures 无条件判红，这里再猜一个场景只会多一句废话。
+    if (hostname !== null) hosts.add(hostname);
   }
   return [null, ...hosts];
+}
+
+function toHostname(host) {
+  try {
+    return new URL(`https://${host}`).hostname;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -555,6 +578,53 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
       return [toServedPath(urlPrefix, next)];
     })
     .sort();
+}
+
+/**
+ * 目录名在磁盘上的真实拼写。跟 `existsSync` 问不出来。
+ *
+ * macOS 默认的 APFS 不区分大小写：磁盘上是 `Downloads/` 时，
+ * `existsSync(".open-next/assets/downloads")` 照样返回 true，门禁于是按
+ * `/downloads/x.pdf` 求响应头，全绿。而 wrangler 建上传清单拿的是 readdir 给出的
+ * 原始条目名（cli.js:137571），线上那条 URL 是 `/Downloads/x.pdf`，`/downloads/*`
+ * 那条规则匹配不上它（正则不带 `i`）。2026-07-28 实测：`wrangler dev --local` 下
+ * `/Downloads/secret.pdf` 返回 200 且没有 `x-robots-tag`，`/downloads/secret.pdf`
+ * 是 404。六份询盘 PDF 会全部裸奔，而业主本机上门禁一片绿。
+ *
+ * 所以受保护目录的每一段都要问 readdir 要真名。返回磁盘上那个名字，或者 null
+ * 表示「拼写没问题」以及「上层压根不存在」——后者由「目录里没东西」那条去报。
+ */
+function findMiscasedSegment(context, relativeDir) {
+  let parent = context.rootDir;
+  for (const segment of relativeDir.split("/")) {
+    const entries = readdirOrNull(context, parent);
+    if (entries === null) return null;
+    if (entries.some((entry) => entry.name === segment)) {
+      parent = path.join(parent, segment);
+      continue;
+    }
+    const onDisk = entries.find(
+      (entry) => entry.name.toLowerCase() === segment.toLowerCase(),
+    );
+    return onDisk ? onDisk.name : null;
+  }
+  return null;
+}
+
+function collectMiscasedDirectoryFailures(context, sourceDir) {
+  const onDisk = findMiscasedSegment(context, sourceDir);
+  if (onDisk === null) return [];
+  return [
+    `${sourceDir} is on disk as "${onDisk}", so wrangler publishes those files on a different URL than this check can prove`,
+  ];
+}
+
+function readdirOrNull(context, absolutePath) {
+  try {
+    return context.readdirSync(absolutePath, { withFileTypes: true });
+  } catch {
+    return null;
+  }
 }
 
 function statOrNull(context, absolutePath) {
@@ -924,6 +994,15 @@ function collectPublishedDirectoryFailures(context, directory) {
   const assetHeadersPath = `${directory}/${ASSET_HEADERS_FILENAME}`;
   const assetDownloadsDir = `${directory}/${DOWNLOADS_ASSET_SUBDIR}`;
   const assetStaticDir = `${directory}/${STATIC_ASSET_SUBDIR}`;
+
+  // 目录名的拼写先定下来。拼错了的话，后面每一条证明说的都是另一条 URL，把它们
+  // 也打印出来只会掩盖真正的原因，所以在这里就停。
+  const miscased = [
+    ...collectMiscasedDirectoryFailures(context, DOWNLOADS_SOURCE_DIR),
+    ...collectMiscasedDirectoryFailures(context, assetDownloadsDir),
+    ...collectMiscasedDirectoryFailures(context, assetStaticDir),
+  ];
+  if (miscased.length > 0) return miscased;
 
   // 源目录和发布目录都要枚举。只查 `public/downloads` 的话，构建时才生成、只存在
   // 于发布目录里的 PDF 一份都没查过；只查发布目录的话，源码里新加的 PDF 要等下次

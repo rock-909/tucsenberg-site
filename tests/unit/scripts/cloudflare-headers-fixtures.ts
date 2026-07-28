@@ -29,6 +29,12 @@ export function createVirtualRepo(
 ) {
   const normalize = (absolutePath: string) =>
     path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
+  // 根目录归一化后是空串，拼前缀时不能再补 `/`——补了就成了 `/`，一个 key 都匹配
+  // 不上，`readdirSync(rootDir)` 会返回空数组。真实 fs 在根目录上列得出东西。
+  const childPrefix = (absolutePath: string) => {
+    const key = normalize(absolutePath);
+    return key === "" ? "" : `${key}/`;
+  };
 
   return {
     rootDir: ROOT_DIR,
@@ -51,7 +57,7 @@ export function createVirtualRepo(
     // 返回 Dirent 形状，和真实 readdirSync(dir, { withFileTypes: true }) 一致。
     // 替身只返回字符串的话，「目录不算文件」这条根本没法被测出来。
     readdirSync: (absolutePath: string) => {
-      const prefix = `${normalize(absolutePath)}/`;
+      const prefix = childPrefix(absolutePath);
       const names = new Set(
         Object.keys(files)
           .filter((name) => name.startsWith(prefix))

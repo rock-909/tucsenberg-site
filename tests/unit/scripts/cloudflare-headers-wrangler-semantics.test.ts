@@ -285,6 +285,74 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
+  it("puts wrangler's line limit at exactly two thousand characters", () => {
+    // 边界钉在两侧：2000 字符照收，2001 字符整行丢掉。只测「远超」的话，把判据写成
+    // `> 2000 + 1` 也全绿，而恰好 2001 字符的规则 wrangler 丢、门禁认，就是假绿。
+    const noindexAt = (route: string) =>
+      [
+        EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+        `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+        "",
+        route,
+        `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+        "",
+      ].join("\n");
+    const runWith = (route: string) => {
+      const headers = noindexAt(route);
+      return collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo({
+          ...createValidFiles(),
+          "public/_headers": headers,
+          ".open-next/assets/_headers": headers,
+        }),
+      );
+    };
+
+    // 两条都靠 `/.` 和 `/a/..` 填长度，归一化后都是 `/downloads/*`。
+    const atLimit = `/downloads${"/.".repeat(994)}/*`;
+    const pastLimit = `/downloads${"/.".repeat(992)}/a/../*`;
+    expect(atLimit).toHaveLength(2000);
+    expect(pastLimit).toHaveLength(2001);
+
+    expect(runWith(atLimit)).toEqual([]);
+    expect(runWith(pastLimit)).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("matches a route with regex characters literally", () => {
+    // wrangler 先把路由里的正则元字符转义，再把 `*` 换成捕获组。少了这一步，
+    // `/downloads/(catalog).pdf` 里的括号会被当成捕获组，凭空命中磁盘上那份
+    // `catalog.pdf`——线上它是裸的，门禁却认为 noindex 已经盖住了。
+    const parenthesised = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/downloads/(catalog).pdf",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/(spec-sheet).pdf",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": parenthesised,
+        ".open-next/assets/_headers": parenthesised,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
   it("ignores rules past wrangler's hundred-rule limit", () => {
     // 第 101 条规则以及之后的整段文件都不生效。把 noindex 写在那之后，线上没有，
     // 门禁若认它就是假绿。
