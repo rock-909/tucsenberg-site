@@ -608,21 +608,46 @@ describe("Cloudflare published asset surface", () => {
     expect(failures).toEqual([]);
   });
 
-  it("fails when a document hides in the well-known directory", () => {
-    // `.well-known/` 是「特殊用途」目录，很容易被当成杂物间。整个目录放行的话，一份
-    // 报价单塞进去就白白溜出去了。放行的条件必须是「爬虫该读的那几条路径」**并且**
-    // 「文件是纯文本」，两个一起成立才算。
+  // `.well-known/` 是「特殊用途」目录，很容易被当成杂物间。放行的宽度只该正好等于
+  // 它的理由：三条完整路径，各有各的规范钉死了位置。放宽成目录前缀、或者「前缀 +
+  // 扩展名」，下面这两条各自会漏一个——两种写法这几轮里都真实出现过。
+  const wellKnownStrays = [
+    { name: "quotation.pdf", why: "整个目录放行时漏的" },
+    { name: "quotation.txt", why: "「前缀 + 纯文本」放行时漏的" },
+  ];
+
+  it.each(wellKnownStrays)(
+    "fails when $name hides in the well-known directory",
+    ({ name }) => {
+      const files = createValidFiles();
+      files[`public/.well-known/${name}`] = "price list";
+
+      const failures = collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo(files),
+      );
+
+      expect(failures).toContainEqual(
+        expect.stringContaining(
+          `/.well-known/${name} in public/_headers is served without "x-robots-tag"`,
+        ),
+      );
+    },
+  );
+
+  it("still tells a pdf in a differently named directory to move", () => {
+    // 区分大小写的卷（CI 跑的 ubuntu）上 `public/DOWNLOADS/` 和 `public/downloads/`
+    // 是两个真实存在的不同目录，`/downloads/*` 那条规则匹配不到前者。这时候「挪进
+    // downloads/」恰恰是对的动作，不能因为名字看着像就把它抹掉——业主会拿到一句光秃
+    // 秃的红字，无处下手。
     const files = createValidFiles();
-    files["public/.well-known/quotation.pdf"] = "%PDF-1.7";
+    files["public/DOWNLOADS/quotation.pdf"] = "%PDF-1.7";
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo(files),
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining(
-        '/.well-known/quotation.pdf in public/_headers is served without "x-robots-tag"',
-      ),
+      '/DOWNLOADS/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
     );
   });
 

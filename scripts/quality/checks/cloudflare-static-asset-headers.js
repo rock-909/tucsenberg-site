@@ -49,24 +49,23 @@ const INDEXABLE_DOCUMENT_EXTENSIONS = new Set([
 ]);
 // `.txt` 在表里，但按标准必须给爬虫读的那几个文件要放行。
 //
-// 排除写成「所有 .txt」曾经是这里的做法，代价是一份 `quotation.txt` 的价目表整个
-// 滑过去。而只按**路径**放行同样不行：`.well-known/` 是个「特殊用途」目录，很容易
-// 被当成杂物间，整个目录放开的话，一份 `public/.well-known/quotation.pdf` 就白白
-// 溜出去了。所以两个条件都要成立——路径是爬虫该读的那几条，**并且**文件是纯文本。
-// 依据：robots.txt 在站点根是 RFC 9309 §2.3 规定的，`.well-known/` 前缀是 RFC 8615，
-// ads.txt 在站点根是 IAB Tech Lab 的规范。
-const CRAWLER_FACING_PATH_PREFIX = "/.well-known/";
-const CRAWLER_FACING_ROOT_PATHS = new Set(["/robots.txt", "/ads.txt"]);
-const CRAWLER_FACING_EXTENSION = ".txt";
+// 放行只认这三条**完整路径**，不是目录前缀，也不是扩展名。两种更宽的写法各自漏过
+// 一批东西，而且都是这几轮里真实发生过的：排除写成「所有 .txt」，一份
+// `quotation.txt` 的价目表整个滑过去；放行写成「`.well-known/` 底下的一切」，一份
+// `public/.well-known/quotation.pdf` 白白溜出去；改成「`.well-known/` 底下的 .txt」，
+// 价目表换个目录又滑过去了。放行的宽度只该正好等于它的理由。
+//
+// 依据是这三条各自的规范都把位置钉死了：robots.txt 必须在站点根（RFC 9309 §2.3
+// "Access Method"），security.txt 在 `.well-known/` 下（RFC 9116），ads.txt 在站点根
+// （IAB Tech Lab ads.txt 规范）。多一条要放行时，照样得先拿出它的规范。
+const CRAWLER_FACING_PATHS = new Set([
+  "/robots.txt",
+  "/ads.txt",
+  "/.well-known/security.txt",
+]);
 
 function isCrawlerFacing(servedPath) {
-  if (path.extname(servedPath).toLowerCase() !== CRAWLER_FACING_EXTENSION) {
-    return false;
-  }
-  return (
-    servedPath.startsWith(CRAWLER_FACING_PATH_PREFIX) ||
-    CRAWLER_FACING_ROOT_PATHS.has(servedPath)
-  );
+  return CRAWLER_FACING_PATHS.has(servedPath);
 }
 const SOURCE_HEADERS_PATH = "public/_headers";
 const ASSET_HEADERS_FILENAME = "_headers";
@@ -518,14 +517,8 @@ function collectScopeFailures(
   return [];
 }
 
-/**
- * URL 的第一段是不是「拼法不同的 downloads」。
- *
- * 磁盘上是 `Downloads/` 时，这份文件已经在那个目录里了，只是名字大小写不对。这时候
- * 劝业主「把它挪进 downloads/」是假话，而且和同一份报告里那句「这个目录不是磁盘上
- * 那个名字」自相矛盾——他会去做一件毫无效果的事。真正的动作那句话已经说了。
- */
-function looksLikeDownloadsDir(servedPath) {
+/** URL 的第一段折叠后是不是 `downloads`。 */
+function startsWithDownloadsSegment(servedPath) {
   const [, first] = servedPath.split("/");
   return (first ?? "").toLowerCase() === DOWNLOADS_ASSET_SUBDIR;
 }
@@ -538,14 +531,18 @@ function looksLikeDownloadsDir(servedPath) {
  * 对 `downloads/` 里的文件这句够用（动作就是去改 `_headers`），对这一类不够：真正
  * 要做的是把这份文件挪进 `public/downloads/`，而那句话一个字都没提。
  */
-function collectStrayDocumentFailures(rules, relativePath, targetPath) {
+function collectStrayDocumentFailures(
+  rules,
+  relativePath,
+  { path: targetPath, advise },
+) {
   const failures = collectServedPathFailures(
     rules,
     relativePath,
     targetPath,
     EXPECTED_DOWNLOADS_NOINDEX,
   );
-  if (looksLikeDownloadsDir(targetPath)) return failures;
+  if (!advise) return failures;
   return failures.map(
     (failure) =>
       `${failure}; it does not sit under downloads/, so either move it there or write a rule that covers it`,
@@ -699,8 +696,8 @@ function collectHeaderFileFailures(
         EXPECTED_DOWNLOADS_NOINDEX,
       ),
     ),
-    ...strayDocumentPaths.flatMap((documentPath) =>
-      collectStrayDocumentFailures(rules, relativePath, documentPath),
+    ...strayDocumentPaths.flatMap((document) =>
+      collectStrayDocumentFailures(rules, relativePath, document),
     ),
   ];
 }
@@ -1009,6 +1006,11 @@ function collectPublishedDirectoryFailures(context, directory) {
     ...collectUnmodelledAssetFileFailures(context, PUBLIC_SOURCE_DIR),
   ];
 
+  const downloadsNameIsFolded = [PUBLIC_SOURCE_DIR, directory].some(
+    (baseDir) =>
+      resolveServedDirName(context, baseDir, DOWNLOADS_ASSET_SUBDIR).state ===
+      "folded",
+  );
   const downloadPaths = [
     ...new Set([...(sourceDownloadPaths ?? []), ...(assetDownloadPaths ?? [])]),
   ].sort();
@@ -1017,11 +1019,25 @@ function collectPublishedDirectoryFailures(context, directory) {
   const servedPaths = {
     downloadPaths,
     staticAssetPaths: staticAssetPaths ?? [],
+    // 「把它挪进 downloads/」这句只在它成立时才说。目录名被文件系统折叠时，文件已经
+    // 在那个目录里了，只是名字大小写不对，真正的动作是改目录名——而那句话已经由
+    // `collectUnresolvedDirectoryFailures` 说了。
+    //
+    // 判据必须是「这一轮真的判出了折叠」，不能是「URL 第一段看着像 downloads」。
+    // 区分大小写的卷（CI 跑的 ubuntu）上 `public/DOWNLOADS/` 和 `public/downloads/`
+    // 是两个真实存在的不同目录，折叠那句永远不出现，按「看着像」抑制的话，业主拿到
+    // 一句光秃秃的红字，而这里「挪进去」恰恰是对的动作。
     strayDocumentPaths: [
       ...new Set([...sourceDocuments.paths, ...assetDocuments.paths]),
     ]
       .filter((documentPath) => !downloadPaths.includes(documentPath))
-      .sort(),
+      .sort()
+      .map((documentPath) => ({
+        path: documentPath,
+        advise: !(
+          downloadsNameIsFolded && startsWithDownloadsSegment(documentPath)
+        ),
+      })),
   };
   failures.push(
     ...collectHeaderFileFailures(context, SOURCE_HEADERS_PATH, servedPaths),
