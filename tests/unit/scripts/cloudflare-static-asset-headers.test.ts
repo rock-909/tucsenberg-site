@@ -13,7 +13,10 @@ const ROOT_DIR = "/repo";
 const DOWNLOADS_DIR = "public/downloads";
 const CATALOG_PATH = "/downloads/catalog.pdf";
 
-function createVirtualRepo(files: Record<string, string>) {
+function createVirtualRepo(
+  files: Record<string, string>,
+  symlinks: Set<string> = new Set(),
+) {
   const normalize = (absolutePath: string) =>
     path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
 
@@ -44,13 +47,16 @@ function createVirtualRepo(files: Record<string, string>) {
           .filter((name) => name.startsWith(prefix))
           .map((name) => name.slice(prefix.length).split("/")[0] as string),
       );
-      return [...names].map((name) => ({
-        name,
-        isDirectory: () =>
-          Object.keys(files).some((file) =>
-            file.startsWith(`${prefix}${name}/`),
-          ),
-      }));
+      return [...names].map((name) => {
+        const isDirectory = Object.keys(files).some((file) =>
+          file.startsWith(`${prefix}${name}/`),
+        );
+        return {
+          name,
+          isDirectory: () => isDirectory,
+          isFile: () => !isDirectory && !symlinks.has(`${prefix}${name}`),
+        };
+      });
     },
   };
 }
@@ -495,6 +501,108 @@ describe("Cloudflare static asset headers proof", () => {
       expect.stringContaining(
         "/downloads/nested/regional.pdf in public/_headers is served without",
       ),
+    );
+  });
+
+  it("ignores rules wrangler itself throws away", () => {
+    // wrangler 一条规则最多一个 `*`，也不许 `*` 和 `:splat` 混用，非法的整条跳过。
+    // 门禁把这类规则算作生效，就是假绿：线上那个 noindex 根本没被采纳。
+    const invalid = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/download*/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/:splat*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": invalid,
+        ".open-next/assets/_headers": invalid,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("ignores a detach written on a non-https absolute URL", () => {
+    // wrangler 的绝对 URL 只认 https，`http://` 那条整块跳过。算它撤掉了头
+    // 就是误红，会拦住一次完全正当的发布。
+    const httpDetach = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "http://tucsenberg.com/downloads/*",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": httpDetach,
+        ".open-next/assets/_headers": httpDetach,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("allows the same path under two different https hosts", () => {
+    // `https://a.example/x` 和 `https://b.example/x` 在 wrangler 里是两个键，
+    // 可以并存。把域名抹掉再比就会把合法配置判成重复，无条件拦住发布。
+    const twoHosts = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "https://a.example/downloads/catalog.pdf",
+      "  X-Custom: a",
+      "",
+      "https://b.example/downloads/catalog.pdf",
+      "  X-Custom: b",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": twoHosts,
+        ".open-next/assets/_headers": twoHosts,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("does not count a symlink as a provable download", () => {
+    // 只区分「目录」和「非目录」的话，符号链接会被当成真实 PDF，于是一个普通
+    // 文件都没有的目录也能凑够数，空证明照样全绿。
+    const files = createValidFiles();
+    delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
+    delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
+    files[`${DOWNLOADS_DIR}/linked.pdf`] = "";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, new Set([`${DOWNLOADS_DIR}/linked.pdf`])),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
     );
   });
 

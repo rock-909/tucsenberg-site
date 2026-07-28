@@ -124,18 +124,44 @@ const PLACEHOLDER_PATTERN = /:[A-Za-z]\w*/gu;
  * 它们是同一个键、后写的整块盖掉先写的——重复检测和路径匹配会一起漏掉。
  */
 function canonicalizeRoute(route) {
-  const hostScoped = /^https?:\/\//u.test(route);
-  const rawPath = hostScoped ? route.replace(/^https?:\/\/[^/]*/u, "") : route;
+  const hostMatch = /^https?:\/\/([^/]*)/u.exec(route);
+  const host = hostMatch ? (hostMatch[1] ?? "") : null;
+  const rawPath = hostMatch ? route.slice(hostMatch[0].length) : route;
   const withLeadingSlash = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
 
   try {
     return {
-      hostScoped,
+      host,
+      hostScoped: host !== null,
       routePath: new URL(`//${withLeadingSlash}`, "relative://").pathname,
     };
   } catch {
-    return { hostScoped, routePath: withLeadingSlash };
+    return { host, hostScoped: host !== null, routePath: withLeadingSlash };
   }
+}
+
+/**
+ * wrangler 会直接丢掉一部分规则，被丢掉的规则连同它底下的响应头一起不生效。
+ * 门禁必须一起丢，否则两个方向都错：
+ *
+ * - 假绿：`/download*\/*` 或 `/downloads/:splat*` 底下写着 noindex，门禁算它生效，
+ *   而线上 wrangler 跳过这条规则，PDF 实际没有 noindex。
+ * - 假红：`http://…` 开头的撤销行，门禁算它撤掉了头，而线上这条规则压根没被采纳。
+ *
+ * 三条判据抄自锁定版本：绝对 URL 只认 https（`validateURL.ts` 的 `URL_REGEX`）、
+ * 一条规则最多一个 `*`、`*` 不能和 `:splat` 混用
+ * （`validateNoMultipleWildcards`，cli.js:129197）。
+ */
+function isRouteAcceptedByWrangler(route) {
+  if (/^[a-z][a-z0-9+.-]*:\/\//iu.test(route)) {
+    if (!/^https:\/\/+[^/]+/u.test(route)) return false;
+  } else if (!route.startsWith("/")) {
+    return false;
+  }
+
+  const wildcardCount = (route.match(/\*/gu) ?? []).length;
+  if (wildcardCount > 1) return false;
+  return !(wildcardCount > 0 && /:splat(?!\w)/u.test(route));
 }
 
 /**
@@ -228,9 +254,10 @@ function listDownloadPaths(context, relative = "") {
       const next = relative ? `${relative}/${entry.name}` : entry.name;
       // 目录本身不是可证明的东西。不递归的话 `/downloads/nested` 会被当成一个
       // 文件去探，它底下真实的 PDF 一个都没查，而门禁看起来在干活。
-      return entry.isDirectory()
-        ? listDownloadPaths(context, next)
-        : [`/downloads/${next}`];
+      if (entry.isDirectory()) return listDownloadPaths(context, next);
+      // 只有普通文件算数。符号链接、FIFO 这些不是可证明的下载，把它们算进来
+      // 等于「目录里没有真实 PDF」也能凑够数，空证明照样全绿。
+      return entry.isFile() ? [`/downloads/${next}`] : [];
     })
     .sort();
 }
@@ -252,8 +279,10 @@ function collectDuplicateRouteFailures(blocks, relativePath) {
   // 比的是规范化之后的键，不是原始字符串：`/downloads/*` 和 `/downloads/./*`
   // 在 wrangler 那里是同一个键，只比字面量的话这条检测一绕就过。
   for (const block of blocks) {
-    const { hostScoped, routePath } = canonicalizeRoute(block.route);
-    const canonical = `${hostScoped ? "host:" : ""}${routePath}`;
+    const { host, routePath } = canonicalizeRoute(block.route);
+    // 键要带上域名。`https://a.example/x` 和 `https://b.example/x` 在 wrangler
+    // 里是两个不同的键，可以并存；抹成同一个前缀会把合法配置判成重复。
+    const canonical = host === null ? routePath : `https://${host}${routePath}`;
     if (seen.has(canonical)) duplicated.add(canonical);
     seen.add(canonical);
   }
@@ -296,7 +325,9 @@ function collectHeaderFileFailures(context, relativePath, downloadPaths) {
     return [`missing Cloudflare build output header file: ${relativePath}`];
   }
 
-  const blocks = parseHeaderBlocks(readRepoFile(context, relativePath));
+  const blocks = parseHeaderBlocks(readRepoFile(context, relativePath)).filter(
+    (block) => isRouteAcceptedByWrangler(block.route),
+  );
 
   // 查的是「一个真实路径最终被怎样服务」，不是「文件里有没有某一行」。
   //
