@@ -25,6 +25,12 @@ import {
  */
 export type TurnstileDegradedKind = "unavailable" | "failed";
 
+/**
+ * 开发环境 bypass 模式的占位令牌：只为让提交按钮解锁，服务端不认这个值。
+ * 想让整条链路走通要用 test 模式的 dummy 令牌。
+ */
+const TURNSTILE_BYPASS_TOKEN = "TURNSTILE_BYPASS_TOKEN";
+
 interface TurnstileLabels {
   devBypass: string;
   testMode: string;
@@ -80,6 +86,19 @@ function TurnstileMockStatus({ className, label }: TurnstileStatusProps) {
   );
 }
 
+/**
+ * dev bypass 与 test/preview 模式都用替身令牌顶替真实控件；两者同时开时 bypass 赢。
+ * 返回 null 表示走真实控件。
+ */
+function resolveStubToken(
+  isBypassMode: boolean,
+  isTestMode: boolean,
+): string | null {
+  if (isBypassMode) return TURNSTILE_BYPASS_TOKEN;
+  if (isTestMode) return TURNSTILE_DUMMY_TEST_TOKEN;
+  return null;
+}
+
 export function TurnstileWidget({
   onSuccess,
   onError,
@@ -105,10 +124,23 @@ export function TurnstileWidget({
       getPublicRuntimeEnvBoolean("NEXT_PUBLIC_TEST_MODE") === true;
   const autoResolveTriggeredRef = useRef(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const stubToken = resolveStubToken(isBypassMode, isTestMode);
 
+  /**
+   * reset 意味着上一个令牌已作废，控件要重新出题。
+   *
+   * 测试/预览模式下压根没渲染 `<Turnstile>`，`turnstileRef` 永远是 null，只调
+   * 它等于什么也没做；自动发令牌的 effect 又已经发过一次不会再发。结果是第一次
+   * 提交之后再也拿不到令牌，按钮永久禁用。所以这里补发一次替身令牌，跟真实控件
+   * reset 后会出新挑战对齐。本地 E2E 与预览部署都跑在这个模式下。
+   */
   const handleReset = useCallback(() => {
+    if (stubToken) {
+      onSuccess?.(stubToken);
+      return;
+    }
     turnstileRef.current?.reset();
-  }, []);
+  }, [stubToken, onSuccess]);
 
   useEffect(() => {
     if (!onReadyRef) {
@@ -121,18 +153,14 @@ export function TurnstileWidget({
   // test mode both replace the real widget, so they share one settle-once
   // effect instead of two near-identical ones. Bypass wins if both are on.
   useEffect(() => {
-    if (autoResolveTriggeredRef.current) return;
-    // Bypass and test mode auto-resolve once via onSuccess; no separate load callback.
+    if (autoResolveTriggeredRef.current || !stubToken) return;
+    autoResolveTriggeredRef.current = true;
     if (isBypassMode) {
-      autoResolveTriggeredRef.current = true;
       logger.warn("[DEV] Turnstile bypass mode enabled");
-      onSuccess?.("TURNSTILE_BYPASS_TOKEN");
-    } else if (isTestMode) {
-      autoResolveTriggeredRef.current = true;
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
-      onSuccess?.(TURNSTILE_DUMMY_TEST_TOKEN);
     }
-  }, [isBypassMode, isTestMode, onSuccess]);
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- Preview test mode must settle the same parent token contract as the external widget callback.
+    onSuccess?.(stubToken);
+  }, [isBypassMode, stubToken, onSuccess]);
 
   useEffect(() => {
     if (!siteKey && !isBypassMode && !isTestMode) {

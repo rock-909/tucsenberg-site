@@ -286,6 +286,59 @@ describe("TurnstileWidget", () => {
     });
   });
 
+  describe("测试/预览模式：reset 之后还要能再出一个令牌", () => {
+    it("issues a fresh dummy token when the form resets the test-mode widget", async () => {
+      vi.stubEnv("NEXT_PUBLIC_TEST_MODE", "true");
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
+      const onSuccess = vi.fn();
+      let resetWidget: (() => void) | undefined;
+
+      render(
+        <TurnstileWidget
+          labels={sentinelTurnstileLabels}
+          onSuccess={onSuccess}
+          onReadyRef={(reset) => {
+            resetWidget = reset;
+          }}
+        />,
+      );
+
+      await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+
+      // 表单每次提交落定都会清令牌并 reset widget。测试/预览模式没有真实控件，
+      // 不补发的话第二次提交永远拿不到令牌，按钮永久禁用——本地 E2E 和预览部署
+      // 都跑在这个模式下。
+      act(() => resetWidget?.());
+
+      expect(onSuccess).toHaveBeenCalledTimes(2);
+      expect(onSuccess).toHaveBeenLastCalledWith("XXXX.DUMMY.TOKEN.XXXX");
+    });
+
+    it("issues a fresh bypass token when the form resets the dev-bypass widget", async () => {
+      vi.stubEnv("NODE_ENV", "development");
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_BYPASS", "true");
+      const onSuccess = vi.fn();
+      let resetWidget: (() => void) | undefined;
+
+      render(
+        <TurnstileWidget
+          labels={sentinelTurnstileLabels}
+          onSuccess={onSuccess}
+          onReadyRef={(reset) => {
+            resetWidget = reset;
+          }}
+        />,
+      );
+
+      await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+
+      act(() => resetWidget?.());
+
+      expect(onSuccess).toHaveBeenCalledTimes(2);
+      expect(onSuccess).toHaveBeenLastCalledWith("TURNSTILE_BYPASS_TOKEN");
+    });
+  });
+
   describe("localized degraded-state labels", () => {
     const labels = sentinelTurnstileLabels;
 
