@@ -106,9 +106,4 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 - `docs/design/组件治理.md`
 - `docs/design/色彩系统.md`
 
-继承 starter/profile 边界：
-
-- `docs/项目基础/派生起步.md`
-- `docs/项目基础/替换顺序.md`
-- `docs/项目基础/派生配置.md`
-- `docs/项目基础/替换边界.md`
+继承 starter/profile 边界已退出当前文档入口；当前维护从 `docs/README.md`、`docs/项目基础/项目基础.md`、`docs/项目基础/配置.md` 和 `docs/项目基础/生命周期.md` 进入。

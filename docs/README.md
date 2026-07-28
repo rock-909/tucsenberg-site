@@ -19,21 +19,19 @@ Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `d
 | 查 2026-07 全库审查修复和合并交接 | `技术难题/审查2026-07/交接文档.md`（历史） |
 | 查 2026-07 整库审查执行计划与现状 | `技术难题/整库审查2026-07/执行计划.md` → `会话交接-M1-SDD.md` |
 | 查已经确认的取舍 | `决策记录/UI基础方案.md` -> `决策记录/Content-as-code与CMS边界.md` |
-| 查 docs 为什么保留 | `项目基础/文档清单.md` |
 
 ## 当前目录
 
 - `项目基础/`：项目怎么维护、怎么部署、技术栈、配置、内容、品牌、CI/验证和继承边界。
 - `design/`：设计真相、设计系统、组件治理、Storybook 和视觉规则。
 - `技术难题/`：性能、Cloudflare、Next.js 16、路由模式、客户端边界预算等问题记录。
-- `audits/`：修复前审查和计划快照，全部是历史记录。
 - `决策记录/`：已经确认过的架构或产品技术决策。
 - `superpowers/`：Superpowers 上游当前默认输出根目录；只放 `specs/**` 和 `plans/**`，不是当前产品真相。
 
 ## 不当作当前真相
 
 - `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`：Superpowers spec / plan 过程记录。
-- 根目录旧执行计划和构建交接材料：已退出现行 checkout，只能作为 git 历史或本机 Trash 里的历史证据。
+- 根目录旧执行计划、构建交接材料、starter 派生说明和旧 audit 快照：已退出当前文档入口，只能作为 git 历史或本机 Trash 里的历史证据。
 - 任何旧 `/zh` 路由、旧 starter 域名、旧 branch 名称：只能作为历史证据，不能覆盖当前 English-only 站点事实。
 
 当前版本和运行事实看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md`、当前配置和测试结果。

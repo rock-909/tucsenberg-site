@@ -1,6 +1,6 @@
 ---
-name: Showcase Website Starter
-description: Twitter-blue Radix-style starter for OEM/ODM showcase websites. Flat surfaces, generously rounded, single-accent restraint.
+name: Tucsenberg Site Design
+description: Current Tucsenberg design entry for the English B2B catalog site. Flat surfaces, generously rounded, single-accent restraint.
 colors:
   primary: "oklch(0.6723 0.1606 244.9955)"
   primary-foreground: "oklch(1 0 0)"
@@ -123,7 +123,7 @@ components:
     padding: "x 12px, y 4px"
 ---
 
-# Design System: Showcase Website Starter
+# Design System: Tucsenberg Site
 
 ## 1. Overview
 
