@@ -1,10 +1,15 @@
 # Plan 005: Re-measure the homepage viewport-reveal motion scope (spike) and re-baseline or narrow
 
+> **Historical candidate**: This retained file is not an active work order.
+> It is an unverified performance-spike candidate from the retired advisor-plan
+> batch. Do not execute it unless a new task explicitly reopens the spike; if
+> reopened, track status in that task, branch, or PR, not in a retired
+> advisor-plan index.
+>
 > **Executor instructions**: This is a measure-first spike, not a blind
 > refactor. Follow it step by step; the code change in step 4 happens ONLY if
 > the measurements in step 3 justify it. If anything in the "STOP conditions"
-> section occurs, stop and report. When done, update the status row in
-> `advisor-plans/README.md`.
+> section occurs, stop and report.
 >
 > **Drift check (run first)**: `git diff --stat a35dee1..HEAD -- "src/app/[locale]/page.tsx" src/components/motion/breathing-reveal.tsx docs/技术难题/性能治理候选审计.md`
 > If the homepage `BreathingReveal` count is no longer 7, re-count and adjust
@@ -18,6 +23,7 @@
 - **Depends on**: none
 - **Category**: perf
 - **Planned at**: commit `a35dee1`, 2026-07-07
+- **Current status**: retained historical candidate; not an active work order
 
 ## Why this matters
 
@@ -83,7 +89,6 @@ spike: measure the current cost, then either re-baseline the governance docs
   `docs/技术难题/全量性能审计.md` (P3-2 numbers) — count + line references +
   new measurements
 - `src/app/[locale]/page.tsx` — ONLY if step 4 fires (narrowing)
-- `advisor-plans/README.md` (status row)
 
 **Out of scope** (do NOT touch):
 - `src/components/motion/**` (BreathingReveal implementation, LightMotionProvider),
@@ -159,7 +164,6 @@ does after drift, adjust assertions to the new wrapper set).
 - [ ] `docs/技术难题/性能治理候选审计.md` no longer claims "four static sections … page.tsx:246-265"
 - [ ] `pnpm test` and `pnpm build` exit 0
 - [ ] If narrowed: hero still unwrapped; reduced-motion behavior unchanged
-- [ ] `advisor-plans/README.md` status row updated
 
 ## STOP conditions
 
