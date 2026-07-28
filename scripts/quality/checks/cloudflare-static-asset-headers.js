@@ -192,11 +192,22 @@ function compileRuleSegment(segment, placeholderClass) {
     );
 }
 
-function decodeOrNull(value) {
+/**
+ * asset-worker 找文件用的那一步（cli.js:336806）：
+ *
+ * ```js
+ * try { pathname = globalThis.decodeURIComponent(pathname); } catch {}
+ * ```
+ *
+ * 注意 catch 是空的——解码失败**不是**放弃，是保留原样继续找。所以磁盘上真名叫
+ * `%ZZ.pdf` 的文件，请求 `/downloads/%ZZ.pdf` 照样能拿到它。把解码失败当成"这条
+ * 规则够不着任何文件"就漏了这一路。
+ */
+function toAssetLookupPath(value) {
   try {
     return decodeURIComponent(value);
   } catch {
-    return null;
+    return value;
   }
 }
 
@@ -212,14 +223,13 @@ function decodeOrNull(value) {
  * 两步用的不是同一个字符串。于是 `/downloads/%63atalog.pdf` 这条规则匹配不上正常
  * 请求，却匹配得上一个仍然会返回真实 `catalog.pdf` 的请求——一条写成编码别名的撤销
  * 规则能把真实 PDF 的 noindex 拿掉，而门禁只看规范路径，什么都没看见。
- * 别名有 2^N 种写不完，所以反过来：拿解码后的规则去比解码后的文件路径。
+ * 别名有 2^N 种写不完，所以反过来：拿规则**查文件时用的那个路径**去比磁盘路径。
  */
 function ruleToMatcher(rulePath) {
   const absolute = /^https:\/\/([^/]+)(\/.*)?$/u.exec(rulePath);
   const hostPart = absolute ? (absolute[1] ?? "") : null;
   const pathPart = absolute ? (absolute[2] ?? "") : rulePath;
   const pathSource = compileRuleSegment(pathPart, "[^/]+");
-  const decodedPathPart = decodeOrNull(pathPart);
 
   try {
     // 先按整条规则编译一次。重名捕获组可能跨域名段和路径段
@@ -236,10 +246,9 @@ function ruleToMatcher(rulePath) {
       // 但能不能编译要看整条。
       pathPattern:
         hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
-      decodedPathPattern:
-        decodedPathPart === null || decodedPathPart === pathPart
-          ? null
-          : new RegExp(`^${compileRuleSegment(decodedPathPart, "[^/]+")}$`),
+      assetLookupPattern: new RegExp(
+        `^${compileRuleSegment(toAssetLookupPath(pathPart), "[^/]+")}$`,
+      ),
     };
   } catch {
     return null;
@@ -333,25 +342,23 @@ function parseExpectedHeader(line) {
  */
 function resolveEffectiveHeaders(rules, targetPath) {
   const effective = new Map();
-  const decodedTargetPath = decodeOrNull(targetPath);
+  // 目标路径解一次码就是磁盘上那个文件名——`toServedPath` 正是反着做出来的。
+  const assetPath = toAssetLookupPath(targetPath);
 
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null) continue;
-    const { crossHost, pathPattern, decodedPathPattern } = matcher;
+    const { crossHost, pathPattern, assetLookupPattern } = matcher;
 
     const matchesRequestPath = pathPattern.test(targetPath);
-    const matchesDecodedAlias =
-      !matchesRequestPath &&
-      decodedPathPattern !== null &&
-      decodedTargetPath !== null &&
-      decodedPathPattern.test(decodedTargetPath);
-    if (!matchesRequestPath && !matchesDecodedAlias) continue;
+    const matchesAlias =
+      !matchesRequestPath && assetLookupPattern.test(assetPath);
+    if (!matchesRequestPath && !matchesAlias) continue;
 
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
     }
-    if (crossHost || matchesDecodedAlias) continue;
+    if (crossHost || matchesAlias) continue;
 
     for (const [name, value] of Object.entries(rule.headers)) {
       const merged = effective.get(name) ?? new Set();

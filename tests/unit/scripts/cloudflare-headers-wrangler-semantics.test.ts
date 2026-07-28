@@ -551,6 +551,39 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
+  it("fails when a malformed percent alias detaches the noindex off a real pdf", () => {
+    // asset-worker 那句 `try { pathname = decodeURIComponent(pathname) } catch {}`
+    // 的 catch 是空的：解码失败保留原样继续找文件。磁盘上真名叫 `%ZZ.pdf` 的文件，
+    // 请求 `/downloads/%ZZ.pdf` 照样能拿到它，而它的规范路径是 `/downloads/%25ZZ.pdf`。
+    // 把解码失败当成「这条规则够不着任何文件」就漏了这一路。
+    const malformedAlias = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/%ZZ.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${DOWNLOADS_DIR}/%ZZ.pdf`]: "%PDF-1.7",
+        "public/_headers": malformedAlias,
+        ".open-next/assets/_headers": malformedAlias,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/%25ZZ.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
   it("does not accept a percent-encoded alias as proof the noindex is there", () => {
     // 反方向同样重要：别名规则只能减分。把 noindex 只写在编码别名底下，正常请求
     // 走的是规范路径，那个 PDF 照样能被收录——认它就是假绿。
