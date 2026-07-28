@@ -106,7 +106,40 @@ function parseHeaderLine(line) {
 }
 
 /**
- * 把一条路由行变成路径匹配器。带域名的绝对 URL 返回 null。
+ * 占位符语法照抄 wrangler 4.100.0 的 `PLACEHOLDER_REGEX`
+ * （`node_modules/wrangler/wrangler-dist/cli.js` 第 128973 行）。
+ *
+ * 自己按感觉写成 `/:[a-z_]+/gi` 会漏：`\w` 含数字，`:section2` 在 wrangler 眼里
+ * 是一个完整占位符，会命中 `/downloads/catalog.pdf`；而那个正则只吃掉 `:section`，
+ * 剩一个字面量 `2` 挂在那儿，于是同一条撤销规则线上生效、门禁完全看不见。
+ */
+const PLACEHOLDER_PATTERN = /:[A-Za-z]\w*/gu;
+
+/**
+ * 把路由行拆成「是否绑定域名 + 规范化后的路径」。
+ *
+ * 规范化不能省。wrangler 存规则前先用 `new URL()` 走一遍（`validateURL.ts` 的
+ * `extractPathname`），`/downloads/./*` 和 `/downloads/a/../*` 都会变成
+ * `/downloads/*`。只比原始字符串的话，这几种写法在门禁眼里是不同路由，而在线上
+ * 它们是同一个键、后写的整块盖掉先写的——重复检测和路径匹配会一起漏掉。
+ */
+function canonicalizeRoute(route) {
+  const hostScoped = /^https?:\/\//u.test(route);
+  const rawPath = hostScoped ? route.replace(/^https?:\/\/[^/]*/u, "") : route;
+  const withLeadingSlash = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+
+  try {
+    return {
+      hostScoped,
+      routePath: new URL(`//${withLeadingSlash}`, "relative://").pathname,
+    };
+  } catch {
+    return { hostScoped, routePath: withLeadingSlash };
+  }
+}
+
+/**
+ * 把一条路由行变成路径匹配器。
  *
  * 不对称是故意的，两个方向的错代价不一样：
  *
@@ -124,13 +157,12 @@ function parseHeaderLine(line) {
  * 这种占位符写法明明会命中真实 PDF，却根本不在它的视野里。
  */
 function routeToMatcher(route) {
-  const hostScoped = /^https?:\/\//u.test(route);
-  const routePath = hostScoped
-    ? route.replace(/^https?:\/\/[^/]*/u, "")
-    : route;
+  const { hostScoped, routePath } = canonicalizeRoute(route);
 
   const escaped = routePath.replace(/[.+?^${}()|[\]\\]/gu, "\\$&");
-  const pattern = escaped.replace(/\*/gu, ".*").replace(/:[a-z_]+/giu, "[^/]+");
+  const pattern = escaped
+    .replace(/\*/gu, ".*")
+    .replace(PLACEHOLDER_PATTERN, "[^/]+");
   return { hostScoped, pattern: new RegExp(`^${pattern}$`, "u") };
 }
 
@@ -185,15 +217,22 @@ function resolveEffectiveHeaders(blocks, targetPath) {
  * 所以逐个真实文件算它最终拿到的头。规则会不会命中，交给同一套匹配逻辑判断，
  * 不再靠字符串前缀猜。
  */
-function listDownloadPaths(context) {
-  const absolute = path.join(context.rootDir, DOWNLOADS_SOURCE_DIR);
+function listDownloadPaths(context, relative = "") {
+  const absolute = path.join(context.rootDir, DOWNLOADS_SOURCE_DIR, relative);
   if (!context.existsSync(absolute)) return [];
 
   return context
-    .readdirSync(absolute)
-    .filter((name) => !name.startsWith("."))
-    .sort()
-    .map((name) => `/downloads/${name}`);
+    .readdirSync(absolute, { withFileTypes: true })
+    .filter((entry) => !entry.name.startsWith("."))
+    .flatMap((entry) => {
+      const next = relative ? `${relative}/${entry.name}` : entry.name;
+      // 目录本身不是可证明的东西。不递归的话 `/downloads/nested` 会被当成一个
+      // 文件去探，它底下真实的 PDF 一个都没查，而门禁看起来在干活。
+      return entry.isDirectory()
+        ? listDownloadPaths(context, next)
+        : [`/downloads/${next}`];
+    })
+    .sort();
 }
 
 /**
@@ -210,9 +249,13 @@ function collectDuplicateRouteFailures(blocks, relativePath) {
   const seen = new Set();
   const duplicated = new Set();
 
+  // 比的是规范化之后的键，不是原始字符串：`/downloads/*` 和 `/downloads/./*`
+  // 在 wrangler 那里是同一个键，只比字面量的话这条检测一绕就过。
   for (const block of blocks) {
-    if (seen.has(block.route)) duplicated.add(block.route);
-    seen.add(block.route);
+    const { hostScoped, routePath } = canonicalizeRoute(block.route);
+    const canonical = `${hostScoped ? "host:" : ""}${routePath}`;
+    if (seen.has(canonical)) duplicated.add(canonical);
+    seen.add(canonical);
   }
 
   return [...duplicated].map(

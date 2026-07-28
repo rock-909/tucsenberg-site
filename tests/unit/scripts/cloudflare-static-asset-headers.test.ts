@@ -35,12 +35,22 @@ function createVirtualRepo(files: Record<string, string>) {
       }
       return content;
     },
+    // 返回 Dirent 形状，和真实 readdirSync(dir, { withFileTypes: true }) 一致。
+    // 替身只返回字符串的话，「目录不算文件」这条根本没法被测出来。
     readdirSync: (absolutePath: string) => {
       const prefix = `${normalize(absolutePath)}/`;
-      return Object.keys(files)
-        .filter((name) => name.startsWith(prefix))
-        .map((name) => name.slice(prefix.length))
-        .filter((name) => !name.includes("/"));
+      const names = new Set(
+        Object.keys(files)
+          .filter((name) => name.startsWith(prefix))
+          .map((name) => name.slice(prefix.length).split("/")[0] as string),
+      );
+      return [...names].map((name) => ({
+        name,
+        isDirectory: () =>
+          Object.keys(files).some((file) =>
+            file.startsWith(`${prefix}${name}/`),
+          ),
+      }));
     },
   };
 }
@@ -426,6 +436,98 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("fails when a numeric placeholder detaches the noindex off a real pdf", () => {
+    // wrangler 的占位符是 `:[A-Za-z]\w*`，`\w` 含数字。按感觉写成 `[a-z_]+` 的话
+    // `:section2` 只被吃掉 `:section`，剩个字面量 `2`，于是这条撤销规则线上生效、
+    // 门禁完全看不见。
+    const numbered = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/:section2/catalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": numbered,
+        ".open-next/assets/_headers": numbered,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("fails when a nested download loses its noindex", () => {
+    // 只列第一层目录项时，`/downloads/nested` 会被当成一个文件去探，底下真实的
+    // PDF 一个都没查。按产品或语言分子目录之后，PDF 能被收录而门禁全绿。
+    const nested = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/nested/regional.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${DOWNLOADS_DIR}/nested/regional.pdf`]: "%PDF-1.7",
+        "public/_headers": nested,
+        ".open-next/assets/_headers": nested,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/nested/regional.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
+  it("fails when the same route is declared twice through an equivalent path", () => {
+    // wrangler 存规则前会用 `new URL()` 规范化，`/downloads/./*` 和 `/downloads/*`
+    // 是同一个键，后写的整块盖掉先写的。只比原始字符串的话这条检测一绕就过。
+    const equivalent = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/./*",
+      "  Cache-Control: public,max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": equivalent,
+        ".open-next/assets/_headers": equivalent,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" is declared twice in public/_headers`,
+      ),
+    );
+  });
+
   it("fails when the same route is declared twice", () => {
     // wrangler 4.100.0 用 `rules[rule.path] = configuredRule` 存规则，后一个整块
     // 盖掉前一个。把两块合并是门禁替线上做主：它说缓存一年 immutable 齐了，
@@ -463,6 +565,8 @@ describe("Cloudflare static asset headers proof", () => {
     const files = createValidFiles();
     delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
     delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
+    // 留一个只有空子目录的情况：目录不能被算成「有东西可证明」。
+    files[`${DOWNLOADS_DIR}/nested/.keep`] = "";
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo(files),
