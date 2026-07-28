@@ -12,7 +12,7 @@ fails on any image that no live page or config points at.
 | `tucsenberg-logo-square.png` | `src/config/single-site.ts` → `brandAssets.logo.square` | Square/avatar logo slot |
 | `tucsenberg-og.png` | `src/config/single-site.ts` → `brandAssets.ogImage` | Default Open Graph / social preview |
 
-`blog/` and `products/` hold `.gitkeep` placeholders only.
+No tracked `blog/` or `products/` image assets exist right now.
 
 ## Adding an image
 
