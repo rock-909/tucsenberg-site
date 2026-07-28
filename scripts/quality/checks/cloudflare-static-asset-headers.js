@@ -7,7 +7,8 @@ const EXPECTED_DOWNLOADS_HEADER_ROUTE = "/downloads/*";
 const EXPECTED_DOWNLOADS_NOINDEX = "X-Robots-Tag: noindex";
 // 拿真实路径去问「它最终被怎样服务」，而不是问「文件里有没有这一行」。
 const STATIC_ASSET_PROBE_PATH = "/_next/static/chunks/main.js";
-const DOWNLOADS_PROBE_PATH = "/downloads/product-spec.pdf";
+// 下载不探写死的路径，改成逐个枚举真实发布的文件——见 listDownloadPaths。
+const DOWNLOADS_SOURCE_DIR = "public/downloads";
 const SOURCE_HEADERS_PATH = "public/_headers";
 const OPENNEXT_ASSET_HEADERS_PATH = ".open-next/assets/_headers";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
@@ -112,17 +113,25 @@ function parseHeaderLine(line) {
  * - 带域名的规则**不能用来证明**防护到位。它只对那一个域名生效，而这里不知道
  *   线上会用哪个域名（预览域名就是另一个）。当成生效就是假绿：PDF 在实际域名上
  *   照样能被收录，门禁说没事。
- * - 带域名的规则**可以用来判定防护被撤掉**。撤销走 `collectDownloadsDetachFailures`，
- *   那里不看域名，任何一条下载路由撤掉这条头都算数。
+ * - 带域名的规则**可以用来判定防护被撤掉**，fail closed：宁可多红一次，也不能
+ *   放一个能被收录的 PDF 出去。
  *
  * 一句话：域名规则只能减分，不能加分。
+ *
+ * 是否命中一律走路径匹配。早先那版判撤销时用的是把域名删掉再
+ * `startsWith("/downloads")`，两个方向都错：`/downloads-archive/*` 会被误伤，
+ * `https://别的域名/downloads/x.pdf` 也会被误伤，而 `/:section/private.pdf`
+ * 这种占位符写法明明会命中真实 PDF，却根本不在它的视野里。
  */
-function routeToPattern(route) {
-  if (/^https?:\/\//u.test(route)) return null;
+function routeToMatcher(route) {
+  const hostScoped = /^https?:\/\//u.test(route);
+  const routePath = hostScoped
+    ? route.replace(/^https?:\/\/[^/]*/u, "")
+    : route;
 
-  const escaped = route.replace(/[.+?^${}()|[\]\\]/gu, "\\$&");
+  const escaped = routePath.replace(/[.+?^${}()|[\]\\]/gu, "\\$&");
   const pattern = escaped.replace(/\*/gu, ".*").replace(/:[a-z_]+/giu, "[^/]+");
-  return new RegExp(`^${pattern}$`, "u");
+  return { hostScoped, pattern: new RegExp(`^${pattern}$`, "u") };
 }
 
 /**
@@ -144,8 +153,8 @@ function resolveEffectiveHeaders(blocks, targetPath) {
   const effective = new Map();
 
   for (const block of blocks) {
-    const pattern = routeToPattern(block.route);
-    if (pattern === null || !pattern.test(targetPath)) continue;
+    const { hostScoped, pattern } = routeToMatcher(block.route);
+    if (!pattern.test(targetPath)) continue;
 
     for (const line of block.headerLines) {
       const detached = parseDetachedHeaderName(line);
@@ -153,6 +162,8 @@ function resolveEffectiveHeaders(blocks, targetPath) {
         effective.delete(detached);
         continue;
       }
+      // 域名规则只能减分：撤销算数（上面那段），设头不算。
+      if (hostScoped) continue;
       const { name, directives } = parseHeaderLine(line);
       const merged = effective.get(name) ?? new Set();
       for (const directive of directives) merged.add(directive);
@@ -164,26 +175,49 @@ function resolveEffectiveHeaders(blocks, targetPath) {
 }
 
 /**
- * 探一条路径只能证明那一条路径。撤销可以发生在别的具体文件上：
- * `/downloads/*` 底下写着 noindex，再来一个 `/downloads/private.pdf` 加一行
- * `! X-Robots-Tag`，被放出去的是那一个 PDF，而探测路径完全正常。
+ * 列出真实发布出去的下载文件。
  *
- * 逐个 PDF 探不现实，所以这里 fail closed：只要有任何一条下载路由撤掉这条头就红。
- * 这确实会拦住「业主故意想让某个 PDF 被收录」——那正好是该停下来问一句的事，
- * 不是应该静悄悄通过的事。
+ * 探一条写死的路径只能证明那一条路径，而那条路径以前写的是
+ * `/downloads/product-spec.pdf`——仓库里根本没有这个文件。撤销可以精确落在某个
+ * 真实 PDF 上（`/downloads/supplier-checklist.pdf` 加一行 `! X-Robots-Tag`），
+ * 也可以用占位符绕开（`/:section/private.pdf`），而那条虚构的探针毫无反应。
+ *
+ * 所以逐个真实文件算它最终拿到的头。规则会不会命中，交给同一套匹配逻辑判断，
+ * 不再靠字符串前缀猜。
  */
-function collectDownloadsDetachFailures(blocks, relativePath) {
-  const detached = blocks.filter(
-    (block) =>
-      block.route.replace(/^https?:\/\/[^/]*/u, "").startsWith("/downloads") &&
-      block.headerLines.some(
-        (line) => parseDetachedHeaderName(line) === "x-robots-tag",
-      ),
-  );
+function listDownloadPaths(context) {
+  const absolute = path.join(context.rootDir, DOWNLOADS_SOURCE_DIR);
+  if (!context.existsSync(absolute)) return [];
 
-  return detached.map(
-    (block) =>
-      `"${block.route}" in ${relativePath} detaches "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+  return context
+    .readdirSync(absolute)
+    .filter((name) => !name.startsWith("."))
+    .sort()
+    .map((name) => `/downloads/${name}`);
+}
+
+/**
+ * 同一条路由写两个块，不是「合并」，是「后一个整块盖掉前一个」。
+ *
+ * 锁定的 wrangler 4.100.0 在构造静态资源 header metadata 时写的是
+ * `rules[rule.path] = configuredRule`（`node_modules/wrangler/wrangler-dist/cli.js`
+ * 第 335300 行），后写的整块覆盖先写的，先写的那些头就此消失。把它们合起来是
+ * 门禁在替线上做主，结果是假绿：门禁说缓存一年 immutable 齐了，实际只剩后半条。
+ *
+ * 这里不替它猜哪个是本意，直接判红。
+ */
+function collectDuplicateRouteFailures(blocks, relativePath) {
+  const seen = new Set();
+  const duplicated = new Set();
+
+  for (const block of blocks) {
+    if (seen.has(block.route)) duplicated.add(block.route);
+    seen.add(block.route);
+  }
+
+  return [...duplicated].map(
+    (route) =>
+      `"${route}" is declared twice in ${relativePath}; wrangler keeps only the last block and silently drops the earlier headers`,
   );
 }
 
@@ -214,7 +248,7 @@ function collectServedPathFailures(
   return [];
 }
 
-function collectHeaderFileFailures(context, relativePath) {
+function collectHeaderFileFailures(context, relativePath, downloadPaths) {
   if (!repoFileExists(context, relativePath)) {
     return [`missing Cloudflare build output header file: ${relativePath}`];
   }
@@ -227,19 +261,21 @@ function collectHeaderFileFailures(context, relativePath) {
   // 换文件名，业主没有理由去调它。`/downloads/*` 和 `/images/*` 的缓存秒数不查
   // ——那两个是业主可调参数，钉死数字会让他一改就红而意图完全没坏。
   return [
+    ...collectDuplicateRouteFailures(blocks, relativePath),
     ...collectServedPathFailures(
       blocks,
       relativePath,
       STATIC_ASSET_PROBE_PATH,
       `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
     ),
-    ...collectServedPathFailures(
-      blocks,
-      relativePath,
-      DOWNLOADS_PROBE_PATH,
-      EXPECTED_DOWNLOADS_NOINDEX,
+    ...downloadPaths.flatMap((downloadPath) =>
+      collectServedPathFailures(
+        blocks,
+        relativePath,
+        downloadPath,
+        EXPECTED_DOWNLOADS_NOINDEX,
+      ),
     ),
-    ...collectDownloadsDetachFailures(blocks, relativePath),
   ];
 }
 
@@ -247,11 +283,13 @@ function createCloudflareStaticAssetHeaderContext({
   rootDir = process.cwd(),
   existsSync = fs.existsSync,
   readFileSync = fs.readFileSync,
+  readdirSync = fs.readdirSync,
 } = {}) {
   return {
     rootDir,
     existsSync,
     readFileSync,
+    readdirSync,
   };
 }
 
@@ -270,9 +308,24 @@ function collectCloudflareStaticAssetHeaderFailures(options = {}) {
     }
   }
 
-  failures.push(...collectHeaderFileFailures(context, SOURCE_HEADERS_PATH));
+  // 目录空了或者被改了名，逐文件证明就一条都不剩，而门禁会安安静静地全绿。
+  // 这个仓库靠 PDF 接询盘，「没有可证明的东西」在这里就是失败。
+  const downloadPaths = listDownloadPaths(context);
+  if (downloadPaths.length === 0) {
+    failures.push(
+      `${DOWNLOADS_SOURCE_DIR} holds no files, so nothing proves "${EXPECTED_DOWNLOADS_NOINDEX}" reaches a real download`,
+    );
+  }
+
   failures.push(
-    ...collectHeaderFileFailures(context, OPENNEXT_ASSET_HEADERS_PATH),
+    ...collectHeaderFileFailures(context, SOURCE_HEADERS_PATH, downloadPaths),
+  );
+  failures.push(
+    ...collectHeaderFileFailures(
+      context,
+      OPENNEXT_ASSET_HEADERS_PATH,
+      downloadPaths,
+    ),
   );
 
   return failures;

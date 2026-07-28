@@ -10,6 +10,8 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-static-asset-headers.js";
 
 const ROOT_DIR = "/repo";
+const DOWNLOADS_DIR = "public/downloads";
+const CATALOG_PATH = "/downloads/catalog.pdf";
 
 function createVirtualRepo(files: Record<string, string>) {
   const normalize = (absolutePath: string) =>
@@ -17,8 +19,15 @@ function createVirtualRepo(files: Record<string, string>) {
 
   return {
     rootDir: ROOT_DIR,
-    existsSync: (absolutePath: string) =>
-      files[normalize(absolutePath)] !== undefined,
+    // 目录也要认。门禁先问 public/downloads 在不在，再列它——只认文件的话
+    // 目录永远"不存在"，逐文件证明一条都跑不起来。
+    existsSync: (absolutePath: string) => {
+      const key = normalize(absolutePath);
+      return (
+        files[key] !== undefined ||
+        Object.keys(files).some((name) => name.startsWith(`${key}/`))
+      );
+    },
     readFileSync: (absolutePath: string) => {
       const content = files[normalize(absolutePath)];
       if (content === undefined) {
@@ -26,10 +35,17 @@ function createVirtualRepo(files: Record<string, string>) {
       }
       return content;
     },
+    readdirSync: (absolutePath: string) => {
+      const prefix = `${normalize(absolutePath)}/`;
+      return Object.keys(files)
+        .filter((name) => name.startsWith(prefix))
+        .map((name) => name.slice(prefix.length))
+        .filter((name) => !name.includes("/"));
+    },
   };
 }
 
-function createValidFiles() {
+function createValidFiles(): Record<string, string> {
   const headers = [
     EXPECTED_STATIC_ASSET_HEADER_ROUTE,
     `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -43,6 +59,9 @@ function createValidFiles() {
   return {
     "public/_headers": headers,
     ".open-next/assets/_headers": headers,
+    // 两个文件而不是一个：证明的是"每个真实发布的 PDF"，不是"某一条写死的路径"。
+    [`${DOWNLOADS_DIR}/catalog.pdf`]: "%PDF-1.7",
+    [`${DOWNLOADS_DIR}/spec-sheet.pdf`]: "%PDF-1.7",
     "wrangler.jsonc": [
       "{",
       '  "assets": {',
@@ -106,7 +125,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        "/downloads/product-spec.pdf in public/_headers is served without",
+        `${CATALOG_PATH} in public/_headers is served without`,
       ),
     );
   });
@@ -122,7 +141,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        "/downloads/product-spec.pdf in .open-next/assets/_headers is served without",
+        `${CATALOG_PATH} in .open-next/assets/_headers is served without`,
       ),
     );
   });
@@ -151,12 +170,12 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        "/downloads/product-spec.pdf in public/_headers is served without",
+        `${CATALOG_PATH} in public/_headers is served without`,
       ),
     );
     expect(failures).toContainEqual(
       expect.stringContaining(
-        "/downloads/product-spec.pdf in .open-next/assets/_headers is served without",
+        `${CATALOG_PATH} in .open-next/assets/_headers is served without`,
       ),
     );
   });
@@ -186,7 +205,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        "/downloads/product-spec.pdf in public/_headers is served without",
+        `${CATALOG_PATH} in public/_headers is served without`,
       ),
     );
   });
@@ -238,7 +257,7 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        `/downloads/product-spec.pdf in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+        `${CATALOG_PATH} in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
       ),
     );
   });
@@ -267,61 +286,6 @@ describe("Cloudflare static asset headers proof", () => {
     expect(failures).toEqual([]);
   });
 
-  it("passes when a route is split across two blocks", () => {
-    // 同一路由写两个块是合法的，Cloudflare 会合并。只看第一个块就会误红。
-    const split = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      "  Cache-Control: public,max-age=86400",
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": split,
-        ".open-next/assets/_headers": split,
-      }),
-    );
-
-    expect(failures).toEqual([]);
-  });
-
-  it("fails when a more specific downloads route detaches the noindex", () => {
-    // Cloudflare 允许 `! Header-Name` 把上层规则设的头撤掉。通配块写着 noindex、
-    // 更具体的那个 PDF 把它撤掉，被放出去的正是那一个文件，而通配块看起来完全正常。
-    const detached = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-      "/downloads/private.pdf",
-      "  ! X-Robots-Tag",
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": detached,
-        ".open-next/assets/_headers": detached,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        '"/downloads/private.pdf" in public/_headers detaches',
-      ),
-    );
-  });
-
   it("passes when the noindex rule is written as the equivalent none", () => {
     // Google 定义 `none` 等于 `noindex, nofollow`，比只写 noindex 更严。
     // 把它判红等于逼着业主改弱防护。
@@ -345,10 +309,128 @@ describe("Cloudflare static asset headers proof", () => {
     expect(failures).toEqual([]);
   });
 
-  it("passes when one header's directives are split across two blocks", () => {
-    // Cloudflare 对同名响应头按逗号合并，所以这两个块合起来就是完整的那一条。
-    // 逐行比对会说它不完整，那是门禁看不懂，不是配置错了。
-    const split = [
+  it("fails when a more specific downloads route detaches the noindex", () => {
+    // Cloudflare 允许 `! Header-Name` 把上层规则设的头撤掉。通配块写着 noindex、
+    // 更具体的那个 PDF 把它撤掉，被放出去的正是那一个文件，而通配块看起来完全正常。
+    const detached = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      CATALOG_PATH,
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": detached,
+        ".open-next/assets/_headers": detached,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("fails when a placeholder route detaches the noindex off a real pdf", () => {
+    // 占位符路由不以 /downloads 开头，按前缀找撤销的写法完全看不见它——而
+    // `/:section/catalog.pdf` 会命中 `/downloads/catalog.pdf`，那个 PDF 的
+    // noindex 就这么没了。命中与否必须走路径匹配，不能靠字符串前缀猜。
+    const placeholder = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/:section/catalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": placeholder,
+        ".open-next/assets/_headers": placeholder,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("stays quiet when a detach targets a route no real download sits under", () => {
+    // `/downloads-archive/*` 以 "/downloads" 开头，但它下面一个真实文件都没有。
+    // 按字符串前缀找撤销会在这里误红，拦住一次完全正当的发布。
+    const archive = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads-archive/*",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": archive,
+        ".open-next/assets/_headers": archive,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("still fails when a domain-scoped rule detaches the noindex off a real pdf", () => {
+    // 域名规则只能减分不能加分，撤销这一侧 fail closed：这里不知道线上跑在哪个
+    // 域名上，宁可多红一次，也不能放一个能被收录的 PDF 出去。
+    const domainDetach = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "https://tucsenberg.com/downloads/*",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": domainDetach,
+        ".open-next/assets/_headers": domainDetach,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
+  it("fails when the same route is declared twice", () => {
+    // wrangler 4.100.0 用 `rules[rule.path] = configuredRule` 存规则，后一个整块
+    // 盖掉前一个。把两块合并是门禁替线上做主：它说缓存一年 immutable 齐了，
+    // 实际只剩后半条。
+    const duplicated = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       "  Cache-Control: public, max-age=31536000",
       "",
@@ -363,11 +445,31 @@ describe("Cloudflare static asset headers proof", () => {
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo({
         ...createValidFiles(),
-        "public/_headers": split,
-        ".open-next/assets/_headers": split,
+        "public/_headers": duplicated,
+        ".open-next/assets/_headers": duplicated,
       }),
     );
 
-    expect(failures).toEqual([]);
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" is declared twice in public/_headers`,
+      ),
+    );
+  });
+
+  it("fails when the downloads directory holds nothing to prove", () => {
+    // 目录被改名或清空，逐文件证明就一条都不剩，门禁会安安静静地全绿。
+    // 「没有可证明的东西」在这里必须是失败。
+    const files = createValidFiles();
+    delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
+    delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(`${DOWNLOADS_DIR} holds no files`),
+    );
   });
 });
