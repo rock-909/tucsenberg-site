@@ -27,8 +27,8 @@ The rows below are historical execution records, not active work orders.
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (reason) | REJECTED (rationale)
 
-Notes: current Tucsenberg work is tracked by `goal-tucsenberg-site.md`,
-`implementation-tucsenberg-site.md`, and `handoff-report.md`.
+Notes: current Tucsenberg work is tracked by `goal-tucsenberg-site.md` and
+`handoff-report.md`.
 
 ## Dependency notes
 
