@@ -17,10 +17,8 @@ const STATIC_ASSET_URL_PREFIX = "/_next/static";
 const SOURCE_HEADERS_PATH = "public/_headers";
 const ASSET_HEADERS_FILENAME = "_headers";
 const ASSET_REDIRECTS_FILENAME = "_redirects";
+const ASSET_ASSETSIGNORE_FILENAME = ".assetsignore";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
-// 受保护的两个 URL 前缀。别名检查只关心「这条别名会不会把它们底下的文件发出去」。
-const PROTECTED_URL_PREFIXES = [DOWNLOADS_URL_PREFIX, STATIC_ASSET_URL_PREFIX];
-const REWRITE_STATUS = "200";
 
 function readRepoFile(context, relativePath) {
   return context.readFileSync(path.join(context.rootDir, relativePath), "utf8");
@@ -317,12 +315,48 @@ function expandDirectives(name, directives) {
  */
 function toDirectiveSet(name, value) {
   const directives = new Set(
-    normalizeHeaderValue(value)
-      .split(",")
+    splitOutsideQuotes(normalizeHeaderValue(value))
       .map((directive) => directive.trim())
       .filter(Boolean),
   );
   return expandDirectives(name, directives);
+}
+
+/**
+ * 按逗号拆，但引号里的逗号不算分隔符。
+ *
+ * HTTP 的字段值允许 quoted-string，里面的逗号是内容而不是分隔符。直接
+ * `split(",")` 会把 `foo="x,public,max-age=31536000,immutable,y"` 拆成一堆看起来
+ * 正好凑齐期望的 token，而线上那条头只有 `foo=...` 一个扩展指令，一年缓存根本
+ * 不存在——每个真实 bundle 都会假绿。反斜杠在引号内是转义，跳过它后面那个字符。
+ */
+function splitOutsideQuotes(value) {
+  const parts = [];
+  let current = "";
+  let quoted = false;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index];
+    if (quoted && character === "\\") {
+      current += character + (value[index + 1] ?? "");
+      index += 1;
+      continue;
+    }
+    if (character === '"') {
+      quoted = !quoted;
+      current += character;
+      continue;
+    }
+    if (character === "," && !quoted) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += character;
+  }
+
+  parts.push(current);
+  return parts;
 }
 
 /** 把 `X-Robots-Tag: noindex` 这种期望写法拆成「头名 + 指令集合」。 */
@@ -727,7 +761,7 @@ function createCloudflareStaticAssetHeaderContext({
  * `"directory"` 早就改成了别的目录——门禁去证明一个根本不会被发布的目录，线上那份
  * 真资产一个文件都没查。所以按 JSONC 解析取真实值，注释既满足不了它也绊不倒它。
  */
-function readAssetsDirectory(context) {
+function readAssetsDirectories(context) {
   if (!repoFileExists(context, WRANGLER_CONFIG_PATH)) {
     return { error: `missing ${WRANGLER_CONFIG_PATH}` };
   }
@@ -740,14 +774,26 @@ function readAssetsDirectory(context) {
     return { error: `${WRANGLER_CONFIG_PATH} could not be parsed` };
   }
 
-  const directory = config?.assets?.directory;
-  if (typeof directory !== "string" || directory === "") {
+  // 命名环境可以覆盖 assets，而线上就是 `--env production` 发的
+  // （.github/workflows/cloudflare-deploy.yml）。wrangler 的 `inheritable`
+  // 是 `rawEnv[field] ?? topLevelEnv[field]`（cli.js:29494），环境里写了就以它为准。
+  // 只读顶层的话，只要有人给 env.production 换个目录，门禁就在证明一个不会上线的
+  // 目录。所有会被发布的目录逐个证明，一个都不放过。
+  const directories = new Set();
+  for (const scope of [config, ...Object.values(config?.env ?? {})]) {
+    const directory = scope?.assets?.directory;
+    if (typeof directory === "string" && directory !== "") {
+      directories.add(directory);
+    }
+  }
+
+  if (directories.size === 0) {
     return {
       error: `${WRANGLER_CONFIG_PATH} has no assets.directory, so there is no way to tell which files get published`,
     };
   }
 
-  return { directory };
+  return { directories: [...directories] };
 }
 
 /**
@@ -777,31 +823,27 @@ function collectHtmlAliasFailures(servedPaths, sourceDir) {
 }
 
 /**
- * `_redirects` 里的 `200` 是重写，不是跳转：另一条 URL 直接把受保护的文件发出去，
- * 而响应头按那条 URL 匹配，`/downloads/*` 底下的 noindex 根本不参与。
+ * 两个会改变「哪些文件、在哪条 URL 上被发出去」的资产根文件。有就判红。
  *
- * 2026-07-28 实测：`/catalog-probe /downloads/spec-sheet-tb-bw.pdf 200` 之后，
- * `/catalog-probe` 返回 200 和真实 PDF，响应里没有 `x-robots-tag`。
+ * `_redirects` 里的 `200` 是重写不是跳转：另一条 URL 直接把受保护的文件发出去，
+ * 而响应头按那条 URL 匹配，`/downloads/*` 底下的 noindex 根本不参与。2026-07-28
+ * 实测：`/catalog-probe /downloads/spec-sheet-tb-bw.pdf 200` 之后，`/catalog-probe`
+ * 返回 200 和真实 PDF，响应里没有 `x-robots-tag`。
  *
- * 判据故意放宽——一行里既出现 `200` 又提到受保护前缀就判红。宁可多红一次，也不要
- * 自己写一个近似的 `_redirects` 解析器再漏一次。仓库当前没有这个文件。
+ * `.assetsignore` 决定哪些文件根本不上传（cli.js:124017）。整段 `/downloads/**`
+ * 忽略掉之后，磁盘上 PDF 一个不少、门禁全绿，线上却全部 404。
+ *
+ * 这里不去半懂不懂地解析它们——占位符目标、百分号编码的目标、gitignore 通配，
+ * 每一种都能绕开一个字符串扫描，上一版就是这么漏的。仓库当前两个文件都没有，
+ * 所以直接判红并说清原因：真要用，那时候再把对应的解析器老老实实移植进来。
  */
-function collectRedirectAliasFailures(context, redirectsPath) {
-  if (!repoFileExists(context, redirectsPath)) return [];
-
-  return readRepoFile(context, redirectsPath)
-    .split("\n")
-    .map((rawLine) => rawLine.trim())
-    .filter(
-      (line) =>
-        line !== "" &&
-        !line.startsWith("#") &&
-        line.includes(REWRITE_STATUS) &&
-        PROTECTED_URL_PREFIXES.some((prefix) => line.includes(prefix)),
-    )
+function collectUnmodelledAssetFileFailures(context, directory) {
+  return [ASSET_REDIRECTS_FILENAME, ASSET_ASSETSIGNORE_FILENAME]
+    .map((filename) => `${directory}/${filename}`)
+    .filter((relativePath) => repoFileExists(context, relativePath))
     .map(
-      (line) =>
-        `"${line}" in ${redirectsPath} rewrites a protected file onto another URL, where the ${DOWNLOADS_URL_PREFIX} and ${STATIC_ASSET_URL_PREFIX} rules never run`,
+      (relativePath) =>
+        `${relativePath} changes which files are published and on which URLs, and this check cannot model it`,
     );
 }
 
@@ -812,13 +854,7 @@ function collectEmptyDirectoryFailure(paths, sourceDir, expectedHeader) {
   ];
 }
 
-function collectCloudflareStaticAssetHeaderFailures(options = {}) {
-  const context = createCloudflareStaticAssetHeaderContext(options);
-  const { directory, error } = readAssetsDirectory(context);
-  // 不知道发布哪个目录就什么都证明不了。这里直接停，不拿写死的目录顶上——那正是
-  // 上一版的假绿来源。
-  if (error !== undefined) return [error];
-
+function collectPublishedDirectoryFailures(context, directory) {
   const assetHeadersPath = `${directory}/${ASSET_HEADERS_FILENAME}`;
   const assetDownloadsDir = `${directory}/${DOWNLOADS_ASSET_SUBDIR}`;
   const assetStaticDir = `${directory}/${STATIC_ASSET_SUBDIR}`;
@@ -865,10 +901,7 @@ function collectCloudflareStaticAssetHeaderFailures(options = {}) {
     ...collectHtmlAliasFailures(sourceDownloadPaths, DOWNLOADS_SOURCE_DIR),
     ...collectHtmlAliasFailures(assetDownloadPaths, assetDownloadsDir),
     ...collectHtmlAliasFailures(staticAssetPaths, assetStaticDir),
-    ...collectRedirectAliasFailures(
-      context,
-      `${directory}/${ASSET_REDIRECTS_FILENAME}`,
-    ),
+    ...collectUnmodelledAssetFileFailures(context, directory),
   ];
 
   const servedPaths = {
@@ -883,6 +916,27 @@ function collectCloudflareStaticAssetHeaderFailures(options = {}) {
   );
 
   return failures;
+}
+
+function collectCloudflareStaticAssetHeaderFailures(options = {}) {
+  const context = createCloudflareStaticAssetHeaderContext(options);
+  const { directories, error } = readAssetsDirectories(context);
+  // 不知道发布哪个目录就什么都证明不了。这里直接停，不拿写死的目录顶上——那正是
+  // 上一版的假绿来源。
+  if (error !== undefined) return [error];
+
+  // 同一个目录被多个环境用到时，重复的报错去掉，说的是同一件事。
+  const failures = new Set();
+  for (const directory of directories) {
+    for (const failure of collectPublishedDirectoryFailures(
+      context,
+      directory,
+    )) {
+      failures.add(failure);
+    }
+  }
+
+  return [...failures];
 }
 
 function runCloudflareStaticAssetHeaderCli(options = {}) {

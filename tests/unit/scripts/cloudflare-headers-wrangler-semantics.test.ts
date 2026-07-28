@@ -521,6 +521,34 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
+  it("does not count directives that only appear inside quotes", () => {
+    // HTTP 的字段值允许 quoted-string，里面的逗号是内容不是分隔符。直接按逗号拆，
+    // 这一条只有一个扩展指令的头会被拆出正好凑齐期望的 token，每个真实 bundle
+    // 都假绿，而线上根本没有一年缓存。
+    const quoted = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      '  Cache-Control: foo="x,public,max-age=31536000,immutable,y"',
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": quoted,
+        ".open-next/assets/_headers": quoted,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
+      ),
+    );
+  });
+
   it("drops a rule whose placeholder names collide by prefix", () => {
     // wrangler 逐个占位符做 split/join，而匹配列表是替换开始前算好的。处理 `:x`
     // 时会把 `:xfoo` 的前缀一起换掉，生成两个同名捕获组，整条规则被丢掉。

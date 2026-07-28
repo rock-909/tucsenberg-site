@@ -546,18 +546,57 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
-  it("fails when _redirects rewrites a protected file onto another url", () => {
+  it("fails when the assets root holds a _redirects file", () => {
     // `200` 是重写不是跳转：另一条 URL 直接把 PDF 发出去，而 `/downloads/*` 底下
-    // 的 noindex 根本不参与匹配。
+    // 的 noindex 根本不参与匹配。目标可以带占位符、可以百分号编码，字符串扫描
+    // 拦不住，所以见到这个文件就判红。
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo({
         ...createValidFiles(),
-        [`${ASSETS_DIR}/_redirects`]: "/catalog /downloads/catalog.pdf 200\n",
+        [`${ASSETS_DIR}/_redirects`]: "/:x-alias /:x/catalog.pdf 200\n",
       }),
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining("rewrites a protected file onto another URL"),
+      `${ASSETS_DIR}/_redirects changes which files are published and on which URLs, and this check cannot model it`,
+    );
+  });
+
+  it("fails when the assets root holds an .assetsignore file", () => {
+    // 它决定哪些文件根本不上传。整段忽略掉 downloads 之后，磁盘上 PDF 一个不少、
+    // 门禁全绿，线上却全部 404。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${ASSETS_DIR}/.assetsignore`]: "/downloads/**\n",
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      `${ASSETS_DIR}/.assetsignore changes which files are published and on which URLs, and this check cannot model it`,
+    );
+  });
+
+  it("proves every directory a named environment publishes", () => {
+    // 线上是 `--env production` 发的，而命名环境可以覆盖 assets.directory。
+    // 只读顶层的话，换个目录门禁照样全绿，证明的是一个不会上线的目录。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "wrangler.jsonc": [
+          "{",
+          '  "assets": { "directory": ".open-next/assets" },',
+          '  "env": {',
+          '    "production": { "assets": { "directory": "dist" } }',
+          "  }",
+          "}",
+          "",
+        ].join("\n"),
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("dist/downloads holds no files"),
     );
   });
 
