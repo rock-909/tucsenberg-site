@@ -48,8 +48,24 @@ const INQUIRY_ENDPOINT = "/api/inquiry";
 const JSON_HEADERS = { "Content-Type": "application/json" } as const;
 
 /**
- * 发一次询盘并解码结果。请求没能拿到可解码的响应（断网、CORS、超时）时降级成
- * 服务器错误，而不是把异常抛给调用方——买家要看到的是一句话，不是白屏。
+ * 一次提交的请求预算。
+ *
+ * 服务端串行执行，已知最坏耗时加总为 18 秒：
+ * Turnstile 校验 5 秒（`src/lib/security/turnstile.ts` 的 `FIVE_SECONDS_MS`）
+ * + 业主邮件 5 秒（`src/lib/email/resend-http-client.ts` 的
+ * `DEFAULT_RESEND_TIMEOUT_MS`）
+ * + Airtable 8 秒（`src/lib/airtable/service.ts` 的
+ * `AIRTABLE_REQUEST_TIMEOUT_MS`）。
+ *
+ * 25 秒把这 18 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。低于这个数会
+ * 把还在正常处理的慢请求判死，买家白填一次；不设上限则更糟——连接被中间盒吞掉
+ * 时 fetch 既不 resolve 也不 reject，表单会永远停在「提交中」。
+ */
+const INQUIRY_REQUEST_TIMEOUT_MS = 25_000;
+
+/**
+ * 发一次询盘并解码结果。请求失败或超出预算时降级成服务器错误，而不是把异常抛给
+ * 调用方——买家要看到的是一句话，不是白屏，更不是一个永远转圈的按钮。
  */
 async function postInquiry(
   formData: FormData,
@@ -63,6 +79,7 @@ async function postInquiry(
       body: JSON.stringify(
         createInquiryPayload(formData, turnstileToken, context),
       ),
+      signal: AbortSignal.timeout(INQUIRY_REQUEST_TIMEOUT_MS),
     });
     return await decodeInquirySubmitState(response);
   } catch {

@@ -114,6 +114,66 @@ describe("InquiryForm submission lifecycle", () => {
     expect(turnstileWidgetResetSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("recovers when the inquiry request never settles", async () => {
+    vi.useFakeTimers();
+    // jsdom 的 `AbortSignal.timeout` 走真实计时器，假时钟推不动它。换一个语义
+    // 相同、但用可控计时器的实现，才能在测试里把整个请求预算跑完。
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, "timeout")
+      .mockImplementation((ms) => {
+        const controller = new AbortController();
+        setTimeout(
+          () =>
+            controller.abort(
+              new DOMException("The operation timed out.", "TimeoutError"),
+            ),
+          ms,
+        );
+        return controller.signal;
+      });
+
+    // 永不 settle 的请求。连接或 Worker 被中间盒吞掉时就是这个形状：fetch 既不
+    // resolve 也不 reject，`mockRejectedValueOnce` 那条测试证明不了这一种。
+    vi.mocked(fetch).mockImplementationOnce(
+      (_input, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(init.signal?.reason),
+          );
+        }),
+    );
+
+    const { container, copy } = renderInquiryForm("contact");
+    const { form } = fillRequiredFields(container);
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    const budgetMs = timeoutSpy.mock.calls[0]?.[0];
+    // 没有预算就没有出路：这一行在加超时之前就会红。
+    expect(budgetMs).toBeTypeOf("number");
+    // 服务端串行最坏耗时 18 秒（Turnstile 5 + 邮件 5 + Airtable 8）。预算掉到
+    // 这条线以下，就会把还在正常处理的慢请求判死，买家白填一次。
+    expect(Number(budgetMs)).toBeGreaterThan(18_000);
+
+    await act(async () => {
+      vi.advanceTimersByTime(Number(budgetMs));
+    });
+
+    expect(screen.getByText(copy.errors.serverSummary)).toBeVisible();
+    // 令牌一次性，落定后必须让 widget 重新出题，否则按钮永远禁用。
+    expect(turnstileWidgetResetSpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId("inquiry-turnstile-success"));
+    expect(
+      within(form).getByRole("button", { name: copy.submit }),
+    ).toBeEnabled();
+
+    timeoutSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
   it("shows a server error when the network request throws", async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new TypeError("Failed to fetch"));
 
