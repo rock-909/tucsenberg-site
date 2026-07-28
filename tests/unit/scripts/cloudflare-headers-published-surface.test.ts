@@ -651,26 +651,31 @@ describe("Cloudflare published asset surface", () => {
     );
   });
 
-  it("still tells a real stray to move while another name is folded", () => {
-    // 「有没有发生折叠」是整棵树一个答案，「这份文件在哪」是一份文件一个答案。拿前者
-    // 抑制后者的话，只要磁盘上有一个目录名拼错了，同一次运行里所有真正放错地方的
-    // 文档都会一起丢掉那句唯一的行动建议。
-    const files = createValidFiles();
-    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
-      files[`public/Downloads/${name}`] =
-        files[`${DOWNLOADS_DIR}/${name}`] ?? "";
-      delete files[`${DOWNLOADS_DIR}/${name}`];
-    }
-    files["public/quotation.pdf"] = "%PDF-1.7";
+  // 放错地方的文档，它自己在哪是有区别的：站点根上一份，别的目录里一份。抑制判据
+  // 只要问的是「这一层有没有发生折叠」而不是「这份文件在不在下载目录里」，第二份就
+  // 会跟着一起闭嘴——同一层里随便哪个兄弟目录都行，跟 downloads 半点关系都没有。
+  const realStrays = ["public/quotation.pdf", "public/marketing/quotation.pdf"];
 
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
-    );
+  it.each(realStrays)(
+    "still tells %s to move while a name is folded",
+    (key) => {
+      const files = createValidFiles();
+      for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+        files[`public/Downloads/${name}`] =
+          files[`${DOWNLOADS_DIR}/${name}`] ?? "";
+        delete files[`${DOWNLOADS_DIR}/${name}`];
+      }
+      files[key] = "%PDF-1.7";
 
-    expect(failures).toContainEqual(
-      '/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
-    );
-  });
+      const failures = collectCloudflareStaticAssetHeaderFailures(
+        createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
+      );
+
+      expect(failures).toContainEqual(
+        `${key.replace("public", "")} in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it`,
+      );
+    },
+  );
 
   // 两侧各判各的。只问 `public/` 的话，构建产物里那个拼错的下载目录一份都对不上，
   // 里面每一份 PDF 都会被劝「挪进 downloads/」——它们就在那个目录里。
@@ -708,10 +713,10 @@ describe("Cloudflare published asset surface", () => {
     },
   );
 
-  it("still tells a stray to move when there is no downloads directory at all", () => {
-    // 「这一层没有名叫 downloads 的条目」有两种可能：文件系统把它折叠成了别的名字，
-    // 或者根本就没有这个目录。只看条目名分不开这两种，得再问一次这条路径存不存在。
-    // 分不开的话，业主删掉空目录之后，所有放错地方的文档就都不再被告知该挪去哪。
+  it("still tells a stray to move when the source has no downloads directory", () => {
+    // 源码那侧的下载目录整个不在了。这时候「这一层有没有 downloads」和「这份文件在
+    // 不在 downloads 里」两个问题的答案都是否，任何一版判据都不该把建议抹掉——业主
+    // 正是在这种时候最需要那句话。
     const files = createValidFiles();
     for (const key of Object.keys(files)) {
       if (key.startsWith(`${DOWNLOADS_DIR}/`)) delete files[key];
@@ -728,15 +733,16 @@ describe("Cloudflare published asset surface", () => {
   });
 
   it("does not let one side's folded name silence a stray on the other", () => {
-    // 两侧的目录树不一样。拿 `public/` 那边发生过折叠去解释一个只存在于构建产物里的
-    // 目录，等于用甲的拼写错误替乙开脱：那份报价单真的在别处，「挪进 downloads/」
-    // 是它唯一能照着做的动作。
+    // 两侧的目录树不一样。拿 `public/` 那边发生过折叠去解释一个构建产物里的目录，
+    // 等于用甲的拼写错误替乙开脱：那份报价单真的在别处，「挪进 downloads/」是它唯一
+    // 能照着做的动作。两侧都有一个同名的 `misc/`，光看名字分不开它们是不是同一个。
     const files = createValidFiles();
     for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
       files[`public/Downloads/${name}`] =
         files[`${DOWNLOADS_DIR}/${name}`] ?? "";
       delete files[`${DOWNLOADS_DIR}/${name}`];
     }
+    files["public/misc/brand.png"] = "png";
     files[`${ASSETS_DIR}/misc/quotation.pdf`] = "%PDF-1.7";
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
@@ -745,6 +751,47 @@ describe("Cloudflare published asset surface", () => {
 
     expect(failures).toContainEqual(
       '/misc/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
+    );
+  });
+
+  it("reads the built tree's own downloads directory, not the source tree's", () => {
+    // 下载全部由构建生成、源码里根本没有 `public/downloads/` 时，只问源码那侧会得到
+    // 「这里没有下载目录」，于是构建产物里那个拼错名字的下载目录中每一份 PDF 都被劝
+    // 「挪进 downloads/」——它们就在里面。两侧的目录树不一样，得各问各的。
+    const files = createValidFiles();
+    for (const key of Object.keys(files)) {
+      if (key.startsWith(`${DOWNLOADS_DIR}/`)) delete files[key];
+    }
+    for (const name of ["catalog.pdf", "spec-sheet.pdf"]) {
+      files[`${ASSETS_DIR}/Downloads/${name}`] =
+        files[`${BUILT_DOWNLOADS_DIR}/${name}`] ?? "";
+      delete files[`${BUILT_DOWNLOADS_DIR}/${name}`];
+    }
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, { fold: (value) => value.toLowerCase() }),
+    );
+
+    expect(failures).toContainEqual(
+      '/Downloads/catalog.pdf in public/_headers is served without "x-robots-tag"',
+    );
+    expect(failures.join("\n")).not.toContain("does not sit under downloads/");
+  });
+
+  it("keeps the advice when it cannot tell which directory a stray is in", () => {
+    // 问不出来的时候要按「不在下载目录里」处理。多说一句建议，最坏是业主看到一句用
+    // 不上的话；反过来吞掉，他拿到的是一句无处下手的红字，而这次恰恰是磁盘出了状况。
+    const files = createValidFiles();
+    files["public/marketing/quotation.pdf"] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, {
+        unstattable: new Map([[DOWNLOADS_DIR, "EACCES"]]),
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      '/marketing/quotation.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
     );
   });
 

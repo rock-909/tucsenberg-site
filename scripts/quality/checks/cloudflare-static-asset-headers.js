@@ -518,35 +518,49 @@ function collectScopeFailures(
 }
 
 /**
- * 这份文档所在的那个目录，是不是文件系统折叠成 `downloads` 的那一个。
+ * 这份文档所在的那一层目录，跟 `downloads` 是不是磁盘上的同一个目录。
  *
- * 判据全部来自磁盘，不带任何大小写表：readdir 里有这个真名、没有一模一样的
- * `downloads`，而 `downloads` 这条路径又存在——那就只可能是文件系统把这个真名折叠成
- * 了 `downloads`。这正是上面 `resolveServedDirName` 判 folded 的同一套问法。
+ * 问的是身份，不是名字：`dev` + `ino` 相等才算同一个对象。这两个数由文件系统自己给
+ * 出，是它认不认得同一个目录的唯一答案。本机 APFS 实测：磁盘上是 `Downloads/` 时，
+ * 按 `downloads` 查到的 `dev:ino` 与按真名查到的完全相同，而同一层的兄弟目录不同。
  *
- * 不能改回「第一段 `toLowerCase()` 等于 downloads」。磁盘的折叠表比 JS 的大：本文件
- * 250 行那段实测的 `ſ`（U+017F）在 APFS 上等于 `s`，`"downloadſ".toLowerCase()` 却
- * 还是它自己。而且 URL 里那一段是转义过的（`download%C5%BF`），拿它跟明文比更是两回
- * 事。判错的代价是一份自相矛盾的报告：上一句说「public/downloads 磁盘上不叫这个名
- * 字」，下一句对着同一个目录里的 PDF 说「把它挪进 downloads/」。
+ * 名字比不出来。磁盘的折叠表比 JS 的大：本文件 250 行那段实测的 `ſ`（U+017F）在 APFS
+ * 上等于 `s`，`"downloadſ".toLowerCase()` 却还是它自己；URL 里那一段还是转义过的
+ * （`download%C5%BF`）。
+ *
+ * 也不能退一步去问「这一层有没有发生折叠」。那是整个目录的性质，跟这份文件在哪毫无
+ * 关系。186883c 就是那么写的：`public/Downloads/` 拼错时，`public/marketing/` 底下
+ * 那份真正放错地方的报价单也被当成「已经在下载目录里」，唯一那句行动建议随之消失。
+ * 它比它要修的那一版抑制得更宽。
+ *
+ * 站点根上的文件不用另设守卫。`/quotation.pdf` 的第一段是文件名自己，而一个文件跟
+ * `downloads` 那个目录永远不是同一个对象，身份判据自己就答了否。
+ *
+ * `dev` 和 `ino` 要一起比：单看 `ino`，跨卷时两个不同的对象会撞号。替身只模一个卷，
+ * 所以测试钉住的是 `ino` 那一半，`dev` 这一半没有测试守着——它是这个问法本来就该带
+ * 的一半，不是为了过某条测试加的。
+ *
+ * 问不出来（stat 失败）时按「不在下载目录里」处理。多说一句建议，最坏是业主看到一句
+ * 用不上的话；反过来吞掉，业主拿到的是一句无处下手的红字。
  */
-function servedFromFoldedDownloadsDir(context, baseDir, servedPath) {
-  // 站点根上的文件没有「所在目录」可谈。少了这一句，`/quotation.pdf` 的第一段是文件
-  // 名自己，只要同一层里有个折叠过的目录，这份真正放错地方的报价单就会被当成「已经
-  // 在 downloads 里」，唯一那句行动建议随之消失。
-  const [, first, ...rest] = servedPath.split("/");
-  if (first === undefined || rest.length === 0) return false;
-  const onDisk = decodeURIComponent(first);
-  if (onDisk === DOWNLOADS_ASSET_SUBDIR) return false;
+function sitsInDownloadsDir(context, baseDir, servedPath) {
+  const [, first] = servedPath.split("/");
+  if (first === undefined) return false;
 
   const parent = path.join(context.rootDir, baseDir);
-  const { entries } = readdirOrError(context, parent);
-  if (entries === undefined) return false;
-  if (!entries.some((entry) => entry.name === onDisk)) return false;
-  if (entries.some((entry) => entry.name === DOWNLOADS_ASSET_SUBDIR)) {
-    return false;
-  }
-  return context.existsSync(path.join(parent, DOWNLOADS_ASSET_SUBDIR));
+  const here = statOrError(
+    context,
+    path.join(parent, decodeURIComponent(first)),
+  );
+  const downloads = statOrError(
+    context,
+    path.join(parent, DOWNLOADS_ASSET_SUBDIR),
+  );
+  if (here.stats === undefined || downloads.stats === undefined) return false;
+  return (
+    here.stats.dev === downloads.stats.dev &&
+    here.stats.ino === downloads.stats.ino
+  );
 }
 
 /**
@@ -1040,13 +1054,12 @@ function collectPublishedDirectoryFailures(context, directory) {
   const servedPaths = {
     downloadPaths,
     staticAssetPaths: staticAssetPaths ?? [],
-    // 「把它挪进 downloads/」这句只在它成立时才说。这份文件所在的目录就是被文件系统
-    // 折叠成 `downloads` 的那一个时，它已经在里面了，只是名字拼错，真正的动作是改目录
-    // 名——而那句话已经由 `collectUnresolvedDirectoryFailures` 说了。
+    // 「把它挪进 downloads/」这句只在它成立时才说。这份文件所在的目录就是下载目录、
+    // 只是名字被文件系统折叠了的时候，它已经在里面了，真正的动作是改目录名——而那句
+    // 话已经由 `collectUnresolvedDirectoryFailures` 说了。
     //
-    // 判据要落在「这份文件自己在哪」上，逐条问磁盘。整棵树只判一次「有没有发生折叠」
-    // 是不够的：一次折叠会把同一次运行里所有其他杂散文档的建议一起抹掉，而那些文件
-    // 真的在别处，「挪进去」正是对的动作。
+    // 判据是「这份文件所在的那一层，跟 downloads 是不是同一个目录」，逐份问磁盘。
+    // 两侧的目录树不一样，所以两侧各问一次。
     strayDocumentPaths: [
       ...new Set([...sourceDocuments.paths, ...assetDocuments.paths]),
     ]
@@ -1055,7 +1068,7 @@ function collectPublishedDirectoryFailures(context, directory) {
       .map((documentPath) => ({
         path: documentPath,
         advise: ![PUBLIC_SOURCE_DIR, directory].some((baseDir) =>
-          servedFromFoldedDownloadsDir(context, baseDir, documentPath),
+          sitsInDownloadsDir(context, baseDir, documentPath),
         ),
       })),
   };

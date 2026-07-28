@@ -12,6 +12,8 @@ export const EXPECTED_STATIC_ASSET_HEADER_ROUTE = "/_next/static/*";
 export const EXPECTED_DOWNLOADS_HEADER_ROUTE = "/downloads/*";
 
 export const ROOT_DIR = "/repo";
+/** 替身只有一个卷，所以 `statSync` 报的 `dev` 是个常数。 */
+const VIRTUAL_DEVICE_ID = 1;
 export const ASSETS_DIR = ".open-next/assets";
 export const DOWNLOADS_DIR = "public/downloads";
 // 真正被发布出去的是资产目录，源目录只是下次构建的输入。两个都要有夹具，否则
@@ -79,6 +81,15 @@ export function createVirtualRepo(
       if (!folded.has(fold(ancestor))) folded.set(fold(ancestor), ancestor);
     }
   }
+  // 同一个磁盘对象的编号。折叠之后两个不同的查名会归一到同一个 key，于是它们拿到
+  // 同一个 `ino`——真实文件系统就是这么回答「这两条路径是不是同一个目录」的，本机
+  // APFS 实测 `public/downloads` 和磁盘真名 `public/Downloads` 的 `dev:ino` 相同。
+  // 替身不模这一层的话，门禁靠身份而不是靠名字做的判断在测试里根本分不出对错。
+  const inodes = new Map<string, number>();
+  const inodeOf = (key: string) => {
+    if (!inodes.has(key)) inodes.set(key, inodes.size + 1);
+    return inodes.get(key) as number;
+  };
   const normalize = (absolutePath: string) => {
     const key = path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
     if (files[key] !== undefined) return key;
@@ -181,10 +192,17 @@ export function createVirtualRepo(
         file.startsWith(`${key}/`),
       );
       if (!isDirectory && files[key] === undefined) fail("ENOENT");
+      // 整个替身就是一个卷，`dev` 是常数。真实 fs 上跨卷时 `ino` 会撞，所以门禁两个
+      // 都比；这里给个固定值，让那份代码在替身上跑的是同一条路径。
+      const identity = { dev: VIRTUAL_DEVICE_ID, ino: inodeOf(key) };
       if (irregular.has(key)) {
-        return { isFile: () => false, isDirectory: () => false };
+        return { ...identity, isFile: () => false, isDirectory: () => false };
       }
-      return { isFile: () => !isDirectory, isDirectory: () => isDirectory };
+      return {
+        ...identity,
+        isFile: () => !isDirectory,
+        isDirectory: () => isDirectory,
+      };
     },
   };
 }
