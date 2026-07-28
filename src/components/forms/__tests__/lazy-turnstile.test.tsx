@@ -407,8 +407,10 @@ describe("LazyTurnstile", () => {
 
       fireEvent.click(screen.getByTestId("turnstile-success"));
       fireEvent.click(screen.getByTestId("turnstile-expire"));
-      // 过期是正常生命周期，widget 会自己续新挑战。续上了就什么都不该出现——
-      // 起表不等于显示，别为一次健康的过期吓退还在填表的买家。
+      // 过期是正常生命周期，widget 会自己续新挑战。起表不等于显示：这一刻
+      // 什么都不该出现，否则每个停留够久的买家都会被一条救援行吓退。
+      expect(screen.queryByRole("link", { name: /sales@/u })).toBeNull();
+
       act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS / 2));
       fireEvent.click(screen.getByTestId("turnstile-success"));
       act(() => vi.advanceTimersByTime(RESCUE_TIMEOUT_MS));

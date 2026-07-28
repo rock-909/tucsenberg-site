@@ -79,7 +79,11 @@ const INQUIRY_REQUEST_TIMEOUT_MS = 30_000;
  * 也不能把它从「能提交」变成「永远失败」。
  */
 function createRequestBudgetSignal(): AbortSignal | undefined {
-  return typeof AbortSignal.timeout === "function"
+  // 先探 `AbortSignal` 本身。更老的浏览器连这个全局都没有，直接写
+  // `typeof AbortSignal.timeout` 会抛 ReferenceError——那条异常逃出去之后
+  // 表单会永远停在「提交中」，比没有预算还糟。
+  return typeof AbortSignal !== "undefined" &&
+    typeof AbortSignal.timeout === "function"
     ? AbortSignal.timeout(INQUIRY_REQUEST_TIMEOUT_MS)
     : undefined;
 }
@@ -93,8 +97,8 @@ async function postInquiry(
   turnstileToken: string,
   context: ValidatedInquiryContext,
 ): Promise<InquirySubmitState> {
-  const signal = createRequestBudgetSignal();
   try {
+    const signal = createRequestBudgetSignal();
     const response = await fetch(INQUIRY_ENDPOINT, {
       method: "POST",
       headers: JSON_HEADERS,

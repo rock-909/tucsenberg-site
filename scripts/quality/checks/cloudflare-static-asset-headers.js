@@ -53,9 +53,12 @@ function parseHeaderBlocks(headers) {
  * `public,max-age=86400` 和 `public, max-age=86400` 是同一条头，HTTP 规范两种都
  * 合法。逐字符全等会在业主重排一次格式时变红，而意图完全没坏——这个文件自己就
  * 写着「缓存时长是业主可调参数，钉死数字会让业主一改就红」，格式同理。
+ *
+ * 只抹分隔符两侧的空格，不抹 token 内部的。全删会让 `X-Robots-Tag: no index`
+ * 判绿——Google 不认 `no index`，PDF 照样被收录，而门禁说没事。
  */
 function normalizeHeaderLine(line) {
-  return line.replace(/\s+/gu, "").toLowerCase();
+  return line.replace(/\s*([:,])\s*/gu, "$1").toLowerCase();
 }
 
 function collectRouteBlockFailures(

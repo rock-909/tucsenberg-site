@@ -157,7 +157,7 @@ describe("InquiryForm submission lifecycle", () => {
     const budgetMs = timeoutSpy.mock.calls[0]?.[0];
     // 没有预算就没有出路：这一行在加超时之前就会红。
     expect(budgetMs).toBeTypeOf("number");
-    // 服务端串行最坏耗时由这三个常量相加得出，不能手抄一个 18000：任何一段调大，
+    // 服务端串行最坏耗时由这四个常量相加得出，不能手抄一个总和：任何一段调大，
     // 手抄的数不会红，客户端预算会悄悄变得不够，买家看到假的「服务器错误」而请求
     // 其实还在正常处理。
     const serverWorstCaseMs =
@@ -184,6 +184,30 @@ describe("InquiryForm submission lifecycle", () => {
 
     timeoutSpy.mockRestore();
     vi.useRealTimers();
+  });
+
+  it("still submits on browsers without AbortSignal", async () => {
+    // 支持范围外的老浏览器连 `AbortSignal` 全局都没有。探测写成
+    // `typeof AbortSignal.timeout` 会抛 ReferenceError，异常逃出去之后表单永远
+    // 停在「提交中」——为了加预算反而造出一条更死的路。宁可退回没有预算的老行为。
+    const original = globalThis.AbortSignal;
+    Reflect.deleteProperty(globalThis, "AbortSignal");
+
+    try {
+      const { container, copy } = renderInquiryForm("contact");
+      const { form } = fillRequiredFields(container);
+
+      await act(async () => {
+        fireEvent.submit(form);
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      await screen.findByText(
+        `${copy.success} ${copy.referenceLabel}: inq-ref-1`,
+      );
+    } finally {
+      globalThis.AbortSignal = original;
+    }
   });
 
   it("shows a server error when the network request throws", async () => {

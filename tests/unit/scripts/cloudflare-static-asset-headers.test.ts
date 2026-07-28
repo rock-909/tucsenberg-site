@@ -213,6 +213,34 @@ describe("Cloudflare static asset headers proof", () => {
     expect(failures).toEqual([]);
   });
 
+  it("fails when the noindex value itself is misspelled with a space", () => {
+    // 抹平空格只该抹分隔符两侧的。`no index` 不是 `noindex`，Google 不认，
+    // PDF 照样被收录——这条必须红。
+    const misspelled = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: no index",
+      "  Cache-Control: public,max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": misspelled,
+        ".open-next/assets/_headers": misspelled,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+  });
+
   it("passes when a route is split across two blocks", () => {
     // 同一路由写两个块是合法的，Cloudflare 会合并。只看第一个块就会误红。
     const split = [
