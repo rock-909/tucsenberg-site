@@ -337,28 +337,23 @@ function resolveEffectiveHeaders(rules, targetPath) {
  *
  * 直接拼文件名会漏：`catalog copy.pdf` 在线上是 `/downloads/catalog%20copy.pdf`，
  * 一条写成 `%20` 的撤销规则会命中它，而门禁拿着带空格的原名去比，什么都没匹配上，
- * 于是 PDF 能被收录而门禁全绿。空格、`#`、`?`、中文名都是同一类。
+ * 于是 PDF 能被收录而门禁全绿。空格、`^`、中文名都是同一类。
  *
- * 不能对整条路径用 `encodeURIComponent`，它会把 `/` 也转义掉；也不能整段用，
- * 它会连 `$&+,:;=@` 一起转义，而 URL pathname 保留这些字符，转多了同样匹配不上。
- * 所以只转义 URL 规范里 path 段真正会转义的那一组。
+ * 转义交给 `new URL()` 自己算，和 rules-engine 读 `new URL(request.url).pathname`
+ * 是同一套实现。手写一张「该转义哪些字符」的表就是又一次近似：上一版照 URL 规范
+ * 的 path percent-encode set 抄，仍然漏了 `^`——Node 会把它转成 `%5E`。
+ *
+ * 只有三个字符必须先手工转义，因为它们会改变 URL 的**结构**而不只是编码：`%`
+ * 不先转成 `%25`，磁盘上真名叫 `a%20b.pdf` 的文件会和 `a b.pdf` 撞成同一条路径；
+ * `#` 和 `?` 会被当成 fragment 和 query，整个后缀从 pathname 里消失。
  */
-const PATH_ENCODE_SET = new Set([" ", '"', "#", "<", ">", "?", "`", "{", "}"]);
-const ASCII_PRINTABLE_MAX = 0x7e;
-const ASCII_CONTROL_MAX = 0x1f;
+const STRUCTURAL_PATH_CHARS = /[%#?]/gu;
 
-function encodePathSegment(segment) {
-  let encoded = "";
-  for (const character of segment) {
-    const codePoint = character.codePointAt(0) ?? 0;
-    encoded +=
-      codePoint <= ASCII_CONTROL_MAX ||
-      codePoint > ASCII_PRINTABLE_MAX ||
-      PATH_ENCODE_SET.has(character)
-        ? encodeURIComponent(character)
-        : character;
-  }
-  return encoded;
+function toServedPath(urlPrefix, relativePath) {
+  const escaped = relativePath.replace(STRUCTURAL_PATH_CHARS, (character) =>
+    encodeURIComponent(character),
+  );
+  return extractPathname(`${urlPrefix}/${escaped}`);
 }
 
 /**
@@ -386,8 +381,7 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
       // 只有普通文件算数。符号链接、FIFO 这些不是可证明的资源，把它们算进来
       // 等于「目录里没有真实文件」也能凑够数，空证明照样全绿。
       if (!entry.isFile()) return [];
-      const served = next.split("/").map(encodePathSegment).join("/");
-      return [`${urlPrefix}/${served}`];
+      return [toServedPath(urlPrefix, next)];
     })
     .sort();
 }
@@ -417,6 +411,45 @@ function collectDuplicateRouteFailures(rules, relativePath) {
   );
 }
 
+/**
+ * 「要的指令都在」对 Cache-Control 不够，它还得没被别的指令推翻。
+ *
+ * 多条规则命中同一条头时 wrangler 用 `Headers.append` 拼接，指令是并起来而不是
+ * 覆盖。通配块给了一年 immutable，再给某个真实 bundle 追加一行
+ * `Cache-Control: no-store`，三个期望 token 一个不少，而那个文件线上一秒都不会被
+ * 缓存——门禁却说缓存到位。
+ *
+ * X-Robots-Tag 不需要这一层：多一条 nofollow 只会更严，Google 也取最严的那条。
+ * Cache-Control 相反，最严的那条会把期望整个作废。
+ */
+const CACHE_CONTROL_CONTRADICTIONS = new Set([
+  "no-store",
+  "no-cache",
+  "private",
+]);
+const CACHE_CONTROL_AGE_DIRECTIVES = ["max-age", "s-maxage"];
+
+function findContradictingDirectives(name, expected, actual) {
+  if (name !== "cache-control") return [];
+
+  const contradictions = [...actual].filter((directive) =>
+    CACHE_CONTROL_CONTRADICTIONS.has(directive),
+  );
+
+  // 期望里写了 max-age=31536000，实际却同时挂着另一个时长（或者 s-maxage=0），
+  // 线上按哪个算是不确定的，同样不能算证明。
+  for (const ageDirective of CACHE_CONTROL_AGE_DIRECTIVES) {
+    const prefix = `${ageDirective}=`;
+    for (const directive of actual) {
+      if (directive.startsWith(prefix) && !expected.has(directive)) {
+        contradictions.push(directive);
+      }
+    }
+  }
+
+  return contradictions;
+}
+
 function collectServedPathFailures(
   rules,
   relativePath,
@@ -438,6 +471,17 @@ function collectServedPathFailures(
   if (missing.length > 0) {
     return [
       `${targetPath} in ${relativePath} does not carry "${expectedHeader}"`,
+    ];
+  }
+
+  const contradictions = findContradictingDirectives(
+    wanted.name,
+    wanted.directives,
+    actual,
+  );
+  if (contradictions.length > 0) {
+    return [
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${contradictions.join(", ")} overrides it`,
     ];
   }
 
