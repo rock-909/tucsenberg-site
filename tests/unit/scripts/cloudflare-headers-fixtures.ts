@@ -85,17 +85,24 @@ export function createVirtualRepo(
     // 替身只返回字符串的话，「目录不算文件」这条根本没法被测出来。
     readdirSync: (absolutePath: string) => {
       const key = normalize(absolutePath);
-      // 真实 fs 列不出来时是抛异常，不是返回空数组。权限不足、EMFILE、EIO 都算；
-      // 路径本身是个普通文件时抛的是 ENOTDIR。替身只会返回空数组的话，「列不出来」
-      // 和「里面没东西」在测试里根本分不开。
-      if (unlistable.has(key)) {
-        const error = new Error(`EACCES: permission denied, scandir '${key}'`);
+      // 真实 fs 列不出来时是抛带 `code` 的异常，不是返回空数组。门禁靠 `code` 区分
+      // 「目录不在」（ENOENT/ENOTDIR，没有可证明的东西）和「列不出来」（EACCES 等，
+      // 有一批文件没被证明过）——替身只会返回空数组的话，这两件相反的事在测试里
+      // 根本分不开，而它们的正确处置也正好相反。
+      const fail = (code: string) => {
+        const error: NodeJS.ErrnoException = new Error(`${code}: '${key}'`);
+        error.code = code;
         throw error;
-      }
-      if (files[key] !== undefined) {
-        throw new Error(`ENOTDIR: not a directory, scandir '${key}'`);
-      }
+      };
+      if (unlistable.has(key)) fail("EACCES");
+      if (files[key] !== undefined) fail("ENOTDIR");
       const prefix = childPrefix(absolutePath);
+      if (
+        key !== "" &&
+        !Object.keys(files).some((name) => name.startsWith(prefix))
+      ) {
+        fail("ENOENT");
+      }
       const names = new Set(
         Object.keys(files)
           .filter((name) => name.startsWith(prefix))

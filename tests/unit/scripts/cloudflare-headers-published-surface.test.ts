@@ -514,13 +514,54 @@ describe("Cloudflare published asset surface", () => {
       ),
     );
 
+    // 报错要指名真正列不出来的那个目录。说「下层列不出来」是假的——同一次运行里
+    // 它被列了个干净，下面那条逐文件结论就是从它来的。
     expect(failures).toContainEqual(
-      `${BUILT_DOWNLOADS_DIR} could not be listed, so this check cannot confirm it is spelled the same on disk as in the URL`,
+      `${ASSETS_DIR} could not be listed (EACCES), so this check cannot confirm ${BUILT_DOWNLOADS_DIR} is spelled the same on disk as in the URL`,
     );
     expect(failures).toContainEqual(
       expect.stringContaining(
         '/downloads/generated-only.pdf in public/_headers is served without "x-robots-tag"',
       ),
+    );
+  });
+
+  it("names the subtree it could not list instead of calling it empty", () => {
+    // 递归到某一层列不出来时返回空数组，等于说「里面没东西」：那一整棵子树的文件
+    // 一条都没被证明，而门禁一句话都不说。权限只是成因之一——并发构建把子目录删掉
+    // 造成的 ENOENT 走的是同一条路，而这个仓库的构建本来就有三方在并发写产物目录。
+    const files = createValidFiles();
+    files[`${BUILT_DOWNLOADS_DIR}/nested/leak.pdf`] = "%PDF-1.7";
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(
+        files,
+        new Set(),
+        (value) => value,
+        new Set([`${BUILT_DOWNLOADS_DIR}/nested`]),
+      ),
+    );
+
+    expect(failures).toContainEqual(
+      `${BUILT_DOWNLOADS_DIR}/nested could not be listed (EACCES), so nothing under it is proven`,
+    );
+  });
+
+  it("does not call a directory that is simply absent unlistable", () => {
+    // 业主没跑构建时撞上的就是这条路径。不存在的东西谈不上「列不出来」，也谈不上
+    // 「拼写确认不了」，多说两句看不懂的假话没有意义。
+    const files = createValidFiles();
+    for (const key of Object.keys(files)) {
+      if (key.startsWith(`${ASSETS_DIR}/`)) delete files[key];
+    }
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files),
+    );
+
+    expect(failures.join("\n")).not.toContain("could not be listed");
+    expect(failures).toContainEqual(
+      expect.stringContaining(`${BUILT_DOWNLOADS_DIR} holds no built files`),
     );
   });
 
