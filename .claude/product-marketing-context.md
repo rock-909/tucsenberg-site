@@ -1,174 +1,95 @@
 # Product Marketing Context
 
-*Last updated: 2026-04-30*
+*Last updated: 2026-07-28*
 
 ## Product Overview
 
 **One-liner:**  
-Showcase Website Starter 是一套可复制的展示型网站基础盘，用来快速启动企业、产品、服务或品牌展示网站。
+Tucsenberg 英文官网服务海外防洪屏障采购、批发/OEM 询盘、技术评估和资料下载转化。
 
 **What it does:**  
-它提供可运行的网站结构、多语言内容、询盘表单、组件治理、Storybook 预览、设计 token、基础 SEO、安全边界和 Cloudflare/OpenNext 部署链路。新项目从这里开始替换品牌、内容、图片、产品或服务信息、表单接收方式和部署配置。
+它让买家快速理解 Tucsenberg 的五条防洪产品线，判断适用场景和规格边界，并通过 Request Quote、Contact、PDF 下载或产品详情页进入 RFQ 路径。
 
 **Product category:**
 
-- 展示型网站 starter
-- 多语言询盘网站基础盘
-- AI-assisted frontend governance starter
-- Cloudflare/OpenNext deployment starter
+- 英文 B2B 防洪产品官网
+- OEM / wholesale inquiry website
+- Product-led industrial B2B catalog
+- RFQ and technical evaluation surface
 
-**Product type:**  
-Reusable website starter, not a finished client website.
-
-**Business model:**  
-作为后续项目开发基础使用。每个派生项目都应该替换示例业务内容和部署配置。
+**Phase 1 job:**
+让访问者在 10 秒内知道 Tucsenberg 做防洪屏障工厂供应，并能继续查看产品、规格、FAQ、下载件或提交询盘。
 
 ---
 
-## Target Audience
+## Target Buyers
 
-**Target users:**
+| Buyer | Intent | Page or form must answer |
+| --- | --- | --- |
+| 采购 / 供应链经理 | 找稳定供应商、要清楚报价路径 | 产品线、规格范围、打样/报价路径、资料下载 |
+| 分销商 / 批发买家 | 判断是否适合渠道销售或项目备货 | OEM/批发范围、包装/资料、MOQ 与询盘信息要求 |
+| 技术评估方 | 判断结构、规格和适用边界 | HTML 规格表、产品详情、FAQ、PDF specs |
+| 业主 / 操作方 | 确认询盘会被接住 | Request Quote、Contact、提交后预期、邮件/CRM 路径 |
 
-- 想快速启动展示型网站的项目 owner
-- 用 AI 协作开发前端项目的非技术 owner
-- 需要企业展示、产品展示、服务展示或询盘转化的网站项目
-- 需要保留组件治理、设计规则和部署门禁的项目团队
+## Buyer Intent for Form CRO
 
-**Decision-makers:**
+RFQ 表单和相关 CTA 要降低“我该怎么问”的成本：
 
-- 项目 owner
-- 独立开发者
-- AI-assisted builder
-- 小团队负责人
+1. 先确认产品兴趣：ABS flood barriers、Aluminum flood gates、Absorbent flood bags、Flood tube dams、FRP flood barriers，或 general inquiry。
+2. 鼓励买家补充项目国家/地区、应用场景、预计数量、规格要求、交期压力和附件准备情况。
+3. 告诉买家下一步会发生什么：Tucsenberg 会按产品线、规格和项目背景判断报价/资料需求。
+4. 不把表单做成营销问卷；只问能帮助报价或技术判断的信息。
 
-**Primary use case:**  
-复制本 starter，替换真实业务内容，然后在保留工程质量和组件治理的前提下继续开发。
+## Trust and Evidence
 
-**Jobs to be done:**
+可信度来自具体事实，不靠夸张形容词：
 
-1. 快速得到一个能跑、能预览、能部署的网站基础盘。
-2. 让 AI 明白组件复用、设计 token、内容归属和验证门禁。
-3. 避免每次新项目都从空白脚手架重新搭。
-4. 保留 Storybook、rules、skills 等 AI 协作能力。
+- 产品族和适用场景要靠近主张。
+- 规格、材料、结构、下载件和 FAQ 要支持买家判断。
+- Response expectation 可以说明流程，但不要承诺未经验证的固定时效。
+- 不写无法证明的客户数量、认证、工程案例、国家覆盖、最低价或最快交期。
+- 任何 buyer-visible claim 都应能追到当前内容、配置、产品常量或 owner source。
 
----
+## Messaging Rules
 
-## Personas
+Use:
 
-| Persona | Cares about | Challenge | Value we promise |
-| --- | --- | --- | --- |
-| 非技术 owner | 能不能看懂、能不能让 AI 接着做 | 不会代码，怕 AI 乱改 | 文档、rules、组件治理和验证命令都给清楚 |
-| AI coding agent | 真相源、边界、复用规则 | 容易重复造组件或误读旧上下文 | AGENTS/CLAUDE/rules/docs 给明确入口 |
-| 前端开发者 | 结构是否健康、能否扩展 | 不想接手混乱模板 | 保留类型、测试、lint、Storybook 和部署链路 |
-| 新项目团队 | 是否能快速换品牌上线 | 内容和配置散落难替换 | `docs/项目基础/`、`src/config/single-site*.ts`、`content/` 和 `messages/` 提供替换面 |
+- factory supply
+- flood barrier products
+- OEM / wholesale
+- request quote
+- product specifications
+- application fit
+- datasheet / PDF download
+- project requirements
 
----
+Avoid:
 
-## Problems & Pain Points
-
-**Core problem:**  
-AI 能很快写出页面，但如果没有组件治理、设计 token、内容边界和验证流程，项目会很快变成重复组件、硬编码颜色、文案散落和测试缺失。
-
-**Why alternatives fall short:**
-
-- 空白脚手架：太干净，但缺少真实页面和业务路径。
-- 普通模板：看起来完整，但不一定适合 AI 长期维护。
-- 一次性 AI 生成页面：初始很快，后续容易漂移。
-
-**What it costs users:**
-
-- 新项目重复搭基础设施。
-- 设计风格难统一。
-- AI 新增重复组件。
-- 品牌替换要到处找。
-- 部署和验证没有固定口径。
-
----
-
-## Differentiation
-
-**Key differentiators:**
-
-1. **不是空白模板**：保留可运行页面、表单、内容、组件和部署链路。
-2. **AI governance first**：AGENTS、CLAUDE、rules、skills、docs 都面向 AI 协作。
-3. **Component Governance**：通过 Storybook、组件规则和设计 token 降低重复造轮子。
-4. **Replaceable business surface**：品牌和内容替换面集中在 `docs/项目基础/`、`src/config/single-site*.ts`、`content/`、`messages/`。
-5. **Production-aware**：保留类型检查、lint、测试、构建和 Cloudflare/OpenNext 能力。
-
-**How we solve it differently:**  
-先保留一个真实可运行的网站，再把旧项目身份抽离成中性示例，同时保留对未来 AI 协作最有价值的 workflow、rules、skills、Storybook 和验证链。
-
-**Why that's better:**  
-新项目不是从零开始，也不是复制一个带旧品牌历史包袱的生产站。它是“可运行结构 + 可替换内容 + 可治理组件 + 可验证工程”的基础盘。
-
----
-
-## Objections
-
-| Objection | Response |
-| --- | --- |
-| “这会不会太重？” | 对纯静态小页可能偏重；但如果目标是长期 AI 协作、组件复用、多语言和部署质量，这些基础设施能降低后续返工。 |
-| “示例内容是不是会污染新项目？” | 示例内容必须在派生项目中替换；当前入口从 `docs/README.md` 进入，内容维护看 `docs/项目基础/内容.md`，配置替换看 `docs/项目基础/配置.md`，生命周期边界看 `docs/项目基础/生命周期.md`。 |
-| “Storybook 是否必须把所有组件都放进去？” | 不必一次性全放。优先放高复用、高视觉风险、容易被 AI 重复造的组件。 |
-
----
-
-## Customer Language
-
-**How users describe the problem:**
-
-- “我不懂代码，主要靠 AI，但怕 AI 乱改。”
-- “组件到底该复用还是新建，我判断不了。”
-- “我想要一个之后新项目可以复用的网站基础盘。”
-- “不是空白模板，要能看、能跑、能继续改。”
-
-**Words to use:**
-
-- starter
-- showcase website
-- website baseline
-- component governance
-- reusable components
-- design tokens
-- AI workflow
-- replacement surface
-- validation gate
-
-**Words to avoid:**
-
-- final client website
-- one-off template
 - fake proof
-- old production context
-- hard-coded brand truth
-
----
+- unsupported certifications
+- exact price promises
+- guaranteed delivery timing
+- vague “best quality” claims
+- decorative trust badges without real source
 
 ## Brand Voice
 
 **Tone:**  
-清晰、务实、直接、面向执行。
+专业、当代、可靠。
 
 **Style:**
 
-- 先讲结论，再讲影响和下一步。
-- 用普通话解释技术决策。
-- 少讲抽象最佳实践，多讲项目里具体怎么做。
-- 不把示例内容包装成真实客户承诺。
-
-**Personality:**  
-像一个懂工程质量的项目基础盘，而不是一次性营销模板。
-
----
+- 直接、具体、克制。
+- 用规格、适用边界、交付路径说话，不堆形容词。
+- 像熟悉工厂和外贸询盘的人跟客户讲话：不夸大，不装高端，不承诺未经证明的结果。
+- 英文要自然，不像翻译稿。
 
 ## Source of Truth
 
+- 产品上下文：`PRODUCT.md`
 - Docs 入口：`docs/README.md`
 - 内容入口：`docs/项目基础/内容.md`
 - 配置入口：`docs/项目基础/配置.md`
 - 生命周期边界：`docs/项目基础/生命周期.md`
-- Codex 入口：`AGENTS.md`
-- Claude 入口：`CLAUDE.md`
-- 产品上下文：`PRODUCT.md`
+- 行为合同：`docs/项目基础/行为合约.md`
 - 设计上下文：`DESIGN.md`、`docs/design/设计真相.md`
-- 组件治理：`docs/design/组件治理.md`
