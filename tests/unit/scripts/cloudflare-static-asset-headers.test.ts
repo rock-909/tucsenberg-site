@@ -529,6 +529,66 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("fails when a published download is an html file", () => {
+    // Workers Assets 默认从去掉扩展名的那条 URL 发 `.html`，响应头按请求里的原始
+    // 路径匹配。按磁盘文件名枚举出来的是另一条路径，落在别名上的撤销看不见。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${BUILT_DOWNLOADS_DIR}/alias.pdf.html`]: "<html></html>",
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/alias.pdf.html in .open-next/assets/downloads is served from its extensionless alias instead",
+      ),
+    );
+  });
+
+  it("fails when _redirects rewrites a protected file onto another url", () => {
+    // `200` 是重写不是跳转：另一条 URL 直接把 PDF 发出去，而 `/downloads/*` 底下
+    // 的 noindex 根本不参与匹配。
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${ASSETS_DIR}/_redirects`]: "/catalog /downloads/catalog.pdf 200\n",
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining("rewrites a protected file onto another URL"),
+    );
+  });
+
+  it("fails when a header name the runtime rejects would break the response", () => {
+    // wrangler 的文本解析器只拦带空格的头名。`Bad@Name` 进得去，发资产时
+    // `headers.set()` 抛异常，整个响应 500——那份 PDF 根本发不出来。
+    const invalid = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "  Bad@Name: value",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": invalid,
+        [`${ASSETS_DIR}/_headers`]: invalid,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        '"bad@name" under "/downloads/*" in public/_headers is not a header the runtime accepts',
+      ),
+    );
+  });
+
   it("stops when wrangler config declares no assets directory", () => {
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo({

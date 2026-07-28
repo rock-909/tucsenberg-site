@@ -521,6 +521,41 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
+  it("drops a rule whose placeholder names collide by prefix", () => {
+    // wrangler 逐个占位符做 split/join，而匹配列表是替换开始前算好的。处理 `:x`
+    // 时会把 `:xfoo` 的前缀一起换掉，生成两个同名捕获组，整条规则被丢掉。
+    // 各换各的就能编译成功，于是一条线上根本不存在的规则被当成「把缓存补回来了」。
+    const collided = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/_next/static/:dir/*",
+      "  Cache-Control: no-store",
+      "",
+      "/_next/static/:x/:xfoo",
+      "  ! Cache-Control",
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": collided,
+        ".open-next/assets/_headers": collided,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
+      ),
+    );
+  });
+
   it("substitutes a captured placeholder into the header value", () => {
     // wrangler 会把捕获到的值替换进响应头的值里。构建产物里只要有一个文件叫
     // `no-store`，这条规则给它发的就是 `Cache-Control: no-store`，一年缓存当场

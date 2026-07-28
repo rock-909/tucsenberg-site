@@ -16,7 +16,11 @@ const STATIC_ASSET_SUBDIR = "_next/static";
 const STATIC_ASSET_URL_PREFIX = "/_next/static";
 const SOURCE_HEADERS_PATH = "public/_headers";
 const ASSET_HEADERS_FILENAME = "_headers";
+const ASSET_REDIRECTS_FILENAME = "_redirects";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
+// 受保护的两个 URL 前缀。别名检查只关心「这条别名会不会把它们底下的文件发出去」。
+const PROTECTED_URL_PREFIXES = [DOWNLOADS_URL_PREFIX, STATIC_ASSET_URL_PREFIX];
+const REWRITE_STATUS = "200";
 
 function readRepoFile(context, relativePath) {
   return context.readFileSync(path.join(context.rootDir, relativePath), "utf8");
@@ -53,8 +57,11 @@ const LINE_IS_PROBABLY_A_PATH = /^([^\s]+:\/\/|^\/)/u;
 const URL_REGEX = /^https:\/\/+(?<host>[^/]+)\/?(?<path>.*)/u;
 const HOST_WITH_PORT_REGEX = /.*:\d+$/u;
 
-// rules-engine.ts（cli.js:336432）
+// rules-engine.ts（cli.js:336432）。域名占位符那条作用在**已转义**的规则串上，所以
+// 它找的是 `https:\/\/` 而不是 `https://`，后面跟着一个反斜杠（`\.` 那种转义）。
 const ESCAPE_REGEX_CHARACTERS = /[-/\\^$*+?.()|[\]{}]/gu;
+const HOST_PLACEHOLDER_PATTERN =
+  /(?<=^https:\\\/\\\/[^/]*?):([A-Za-z]\w*)(?=\\)/gu;
 
 function escapeRegex(value) {
   return value.replace(ESCAPE_REGEX_CHARACTERS, "\\$&");
@@ -171,34 +178,48 @@ function parseWranglerHeaderRules(input) {
 }
 
 /**
- * rules-engine.ts 的 `generateRuleRegExp`。域名占位符是 `[^/.]+`，路径占位符是
- * `[^/]+`，通配符先切后转义，两者都编译成**命名**捕获组。
+ * rules-engine.ts 的 `generateRuleRegExp`（cli.js:336445）。逐行照抄，包括那两个
+ * `matchAll` + `split/join` 的写法——它不是「把每个占位符各自换掉」的等价写法。
+ *
+ * `matchAll` 拿到的是**替换开始之前**那份字符串的匹配列表，而每一轮 `split/join`
+ * 会改写整条规则。名字互为前缀时这两件事会撞上：`/:x/:xfoo` 的匹配列表是
+ * `[":x", ":xfoo"]`，处理 `:x` 时连 `:xfoo` 的前缀一起换掉，得到两个同名捕获组，
+ * `RegExp` 抛 `SyntaxError`，`generateRulesMatcher` 的 catch 把整条规则丢掉。
+ * 用一次 `.replace()` 各换各的就编译成功了——于是一条线上根本不存在的规则被算作
+ * 生效，它「补回」的 noindex 或缓存全是假的。
  *
  * 占位符语法必须照抄：自己按感觉写成 `/:[a-z_]+/gi` 会漏，`\w` 含数字，
  * `:section2` 在 wrangler 眼里是一个完整占位符，会命中 `/downloads/catalog.pdf`。
  *
- * 名字也必须照抄，不能图省事换成匿名分组：`/:x/:x` 会生成两个同名捕获组，
- * `RegExp` 直接抛 `SyntaxError`，`generateRulesMatcher` catch 之后把这条规则整个
- * 丢掉。换成匿名分组它就成了一条正常规则，底下的 noindex 被算作生效，而线上
- * 根本没有——假绿。
- */
-function compileRuleSegment(segment, placeholderClass) {
-  return segment
-    .split("*")
-    .map(escapeRegex)
-    .join("(?<splat>.*)")
-    .replace(
-      NAMED_PLACEHOLDER_PATTERN,
-      (_match, name) => `(?<${name}>${placeholderClass})`,
-    );
-}
-
-/**
- * 编译不出来的规则返回 null——和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
+ * 名字也必须照抄，不能图省事换成匿名分组：`/:x/:x` 会生成两个同名捕获组，同样被
+ * 整条丢掉；换成匿名分组它就成了一条正常规则——假绿。
  *
  * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
  * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接抛
  * 异常，把门禁变成崩溃而不是判断。
+ *
+ * 编译不出来返回 null，和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
+ */
+function compileRulePattern(rulePath) {
+  let source = rulePath.split("*").map(escapeRegex).join("(?<splat>.*)");
+
+  for (const hostMatch of source.matchAll(HOST_PLACEHOLDER_PATTERN)) {
+    source = source.split(hostMatch[0]).join(`(?<${hostMatch[1]}>[^/.]+)`);
+  }
+  for (const pathMatch of source.matchAll(NAMED_PLACEHOLDER_PATTERN)) {
+    source = source.split(pathMatch[0]).join(`(?<${pathMatch[1]}>[^/]+)`);
+  }
+
+  try {
+    return new RegExp(`^${source}$`);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 一条规则怎么被拿去比对，照 `generateRulesMatcher`：`https://` 开头的规则比的是
+ * `https://<域名><路径>`，其余规则只比路径。
  *
  * 只按规范路径匹配，不再另外算一套「编码别名」。曾经加过：`_headers` 是按请求里的
  * 原始编码路径匹配的，而 `cli.js` 里 Pages 的 asset-server 解码之后才去找文件，看
@@ -209,34 +230,26 @@ function compileRuleSegment(segment, placeholderClass) {
  * 路径上被发出去。别再照着那段 Pages 代码把这套加回来。
  */
 function ruleToMatcher(rulePath) {
+  const pattern = compileRulePattern(rulePath);
+  if (pattern === null) return null;
+
   const absolute = /^https:\/\/([^/]+)(\/.*)?$/u.exec(rulePath);
   const hostPart = absolute ? (absolute[1] ?? "") : null;
-  const pathPart = absolute ? (absolute[2] ?? "") : rulePath;
-  const pathSource = compileRuleSegment(pathPart, "[^/]+");
 
-  try {
-    // 先按整条规则编译一次。重名捕获组可能跨域名段和路径段
-    // （`https://:x.example/:x`），只编译路径段是看不出来的。
-    const hostSource =
-      hostPart === null
-        ? ""
-        : `https:\\/\\/${compileRuleSegment(hostPart, "[^/.]+")}`;
-    const wholeRulePattern = new RegExp(`^${hostSource}${pathSource}$`);
+  return {
+    host: hostPart,
+    // 域名段里的占位符名字。它们的值只有知道真实域名才能算出来，而这里不知道
+    // 线上会用哪个域名，所以拿它们拼出来的响应头是证明不了的（见
+    // collectUnprovableHostPlaceholderFailures）。
+    hostPlaceholders: hostPart === null ? [] : listPlaceholderNames(hostPart),
+    pattern,
+  };
+}
 
-    return {
-      host: hostPart,
-      // 域名段里的占位符名字。它们的值只有知道真实域名才能算出来，而这里不知道
-      // 线上会用哪个域名，所以拿它们拼出来的响应头是证明不了的（见
-      // collectUnprovableHostPlaceholderFailures）。
-      hostPlaceholders: hostPart === null ? [] : listPlaceholderNames(hostPart),
-      // 命中与否只看路径段——某条规则属于哪个域名由调用方按域名分场景决定
-      // （见 resolveEffectiveHeaders）。但能不能编译要看整条。
-      pathPattern:
-        hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
-    };
-  } catch {
-    return null;
-  }
+/** `generateRulesMatcher` 里的 `test` 串：带域名的规则连域名一起比。 */
+function toMatchTarget(host, targetPath, scopeHost) {
+  if (host === null) return targetPath;
+  return `https://${scopeHost}${targetPath}`;
 }
 
 function listPlaceholderNames(segment) {
@@ -352,9 +365,9 @@ function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null) continue;
-    const { host, pathPattern } = matcher;
-    if (host !== null && host !== scopeHost) continue;
-    const match = pathPattern.exec(targetPath);
+    const { host, pattern } = matcher;
+    if (host !== null && scopeHost === null) continue;
+    const match = pattern.exec(toMatchTarget(host, targetPath, scopeHost));
     if (match === null) continue;
 
     for (const unsetName of rule.unsetHeaders) {
@@ -613,6 +626,44 @@ function collectUnprovableHostPlaceholderFailures(rules, relativePath) {
   return failures;
 }
 
+/**
+ * wrangler 的文本解析器接受的头名，运行时的 `Headers` 不一定接受。
+ *
+ * 它只拦下带空格的头名，`Bad@Name` 照样进 metadata；真正发资产时那句
+ * `response.headers.set()` 抛异常，整个响应变成 500。2026-07-28 实测：给
+ * `/downloads/*` 加一行 `Bad@Name: value` 之后，`wrangler dev --local` 上
+ * `/downloads/spec-sheet-tb-bw.pdf` 返回 `500 Internal Server Error`。门禁却说这份
+ * PDF 已经证明带着 noindex——它根本发不出来。撤销行同理，`headers.delete()` 也验名。
+ */
+function collectInvalidHeaderFailures(rules, relativePath) {
+  const failures = [];
+  const probe = new Headers();
+
+  for (const rule of rules) {
+    for (const [name, value] of Object.entries(rule.headers)) {
+      try {
+        probe.set(name, value);
+        probe.delete(name);
+      } catch {
+        failures.push(
+          `"${name}" under "${rule.path}" in ${relativePath} is not a header the runtime accepts, so every matching asset answers 500`,
+        );
+      }
+    }
+    for (const unsetName of rule.unsetHeaders) {
+      try {
+        probe.delete(unsetName);
+      } catch {
+        failures.push(
+          `"! ${unsetName}" under "${rule.path}" in ${relativePath} is not a header the runtime accepts, so every matching asset answers 500`,
+        );
+      }
+    }
+  }
+
+  return failures;
+}
+
 function collectHeaderFileFailures(
   context,
   relativePath,
@@ -632,6 +683,7 @@ function collectHeaderFileFailures(
   return [
     ...collectDuplicateRouteFailures(rules, relativePath),
     ...collectUnprovableHostPlaceholderFailures(rules, relativePath),
+    ...collectInvalidHeaderFailures(rules, relativePath),
     ...staticAssetPaths.flatMap((assetPath) =>
       collectServedPathFailures(
         rules,
@@ -698,6 +750,61 @@ function readAssetsDirectory(context) {
   return { directory };
 }
 
+/**
+ * `.html` 文件在 Workers Assets 上是从**去掉扩展名**的那条 URL 发出去的。
+ *
+ * 默认 `html_handling` 是 `auto-trailing-slash`：请求 `/downloads/x` 会直接返回
+ * `/downloads/x.html` 的内容，而请求真实文件名 `/downloads/x.html` 反倒 307 跳到
+ * `/downloads/x`。响应头按**请求里的原始路径**匹配，所以真正需要被证明的是
+ * `/downloads/x`，而按磁盘文件名枚举出来的是 `/downloads/x.html`——两条不同的路径，
+ * 一条落在别名上的撤销规则门禁完全看不见。
+ *
+ * 2026-07-28 实测：`.open-next/assets/downloads/alias-probe.pdf.html` 加上
+ * `/downloads/alias-probe.pdf` + `! X-Robots-Tag` 之后，`/downloads/alias-probe.pdf`
+ * 返回 200 和文件内容，响应里没有 `x-robots-tag`。
+ *
+ * 这里不去移植整套 `html_handling`（还有 `index.html`、结尾斜杠等好几种情形，而且
+ * 它在 `wrangler.jsonc` 里可配）。受保护目录里今天一个 `.html` 都没有，所以直接判红
+ * 并说清原因：真要发 HTML 下载，那时候再把这套别名规则老老实实移植进来。
+ */
+function collectHtmlAliasFailures(servedPaths, sourceDir) {
+  return servedPaths
+    .filter((servedPath) => servedPath.endsWith(".html"))
+    .map(
+      (servedPath) =>
+        `${servedPath} in ${sourceDir} is served from its extensionless alias instead, and this check cannot prove that alias`,
+    );
+}
+
+/**
+ * `_redirects` 里的 `200` 是重写，不是跳转：另一条 URL 直接把受保护的文件发出去，
+ * 而响应头按那条 URL 匹配，`/downloads/*` 底下的 noindex 根本不参与。
+ *
+ * 2026-07-28 实测：`/catalog-probe /downloads/spec-sheet-tb-bw.pdf 200` 之后，
+ * `/catalog-probe` 返回 200 和真实 PDF，响应里没有 `x-robots-tag`。
+ *
+ * 判据故意放宽——一行里既出现 `200` 又提到受保护前缀就判红。宁可多红一次，也不要
+ * 自己写一个近似的 `_redirects` 解析器再漏一次。仓库当前没有这个文件。
+ */
+function collectRedirectAliasFailures(context, redirectsPath) {
+  if (!repoFileExists(context, redirectsPath)) return [];
+
+  return readRepoFile(context, redirectsPath)
+    .split("\n")
+    .map((rawLine) => rawLine.trim())
+    .filter(
+      (line) =>
+        line !== "" &&
+        !line.startsWith("#") &&
+        line.includes(REWRITE_STATUS) &&
+        PROTECTED_URL_PREFIXES.some((prefix) => line.includes(prefix)),
+    )
+    .map(
+      (line) =>
+        `"${line}" in ${redirectsPath} rewrites a protected file onto another URL, where the ${DOWNLOADS_URL_PREFIX} and ${STATIC_ASSET_URL_PREFIX} rules never run`,
+    );
+}
+
 function collectEmptyDirectoryFailure(paths, sourceDir, expectedHeader) {
   if (paths.length > 0) return [];
   return [
@@ -752,6 +859,15 @@ function collectCloudflareStaticAssetHeaderFailures(options = {}) {
       staticAssetPaths,
       assetStaticDir,
       `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+    ),
+    // 一个磁盘文件被发出去的 URL 不一定只有它自己那条。这两类别名会让被证明的
+    // 路径和实际被请求的路径对不上，所以直接判红。
+    ...collectHtmlAliasFailures(sourceDownloadPaths, DOWNLOADS_SOURCE_DIR),
+    ...collectHtmlAliasFailures(assetDownloadPaths, assetDownloadsDir),
+    ...collectHtmlAliasFailures(staticAssetPaths, assetStaticDir),
+    ...collectRedirectAliasFailures(
+      context,
+      `${directory}/${ASSET_REDIRECTS_FILENAME}`,
     ),
   ];
 
