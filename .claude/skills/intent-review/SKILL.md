@@ -39,6 +39,10 @@ judgement under output nobody reads twice. **Read** the CI result instead. If CI
 is red, say so in one line and stop — a change that does not build is not ready
 for a judgement about intent.
 
+For a whole-repo audit, launch-readiness audit, or audit-framework question, use
+the global `repo-health-audit` skill. This project keeps `intent-review` as the
+owner-facing pre-merge judgement, not as a second local audit framework.
+
 This skill is read-only. It never edits files and never applies fixes.
 
 ## Step 1: Reconstruct the Requirement
@@ -52,7 +56,8 @@ Gather, in this order of authority:
 2. The design spec and implementation plan, if this work went through
    `superpowers:brainstorming` and `superpowers:writing-plans` — the owner already
    approved that spec, so it is the requirement of record and needs no
-   reconstruction, only reading
+   reconstruction, only reading. If it has an "Acceptance Scenarios" section,
+   use those scenarios as the checkable behavior source.
 3. The PR description and linked issue (`gh pr view`, `gh issue view`)
 4. Commit messages on the branch
 5. The diff itself — weakest source, since it shows what was built, not what was asked

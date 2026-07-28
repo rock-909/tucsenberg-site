@@ -54,7 +54,7 @@ Use this order:
 
 1. Rules decide the project boundary.
 2. Storybook stories show approved wrapper usage and owner-visible states.
-3. shadcn skill / MCP may be used as an external reference source.
+3. External shadcn docs, CLI, or MCP may be used as reference sources.
 
 Storybook MCP, if enabled by a later approved branch, is an internal component
 knowledge source. It is not a project rule source and is not a default CI hard
