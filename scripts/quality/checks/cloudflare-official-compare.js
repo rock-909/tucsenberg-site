@@ -48,7 +48,13 @@ const DEPLOY_WORKFLOW_REQUIRED_COMMANDS = [
 const CLOUDFLARE_SCRIPT_SURFACE_CHECKS = [
   {
     name: "website:build:cf",
-    expected: "pnpm exec opennextjs-cloudflare build",
+    expected:
+      "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+  },
+  {
+    name: "website:build:cf:debug",
+    expected:
+      "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build --noMinify",
   },
 ];
 const DESTRUCTIVE_DEPLOY_SCRIPT_SNIPPETS = [
@@ -123,10 +129,6 @@ function collectDeployRunCommands(workflow) {
   return commands;
 }
 
-function stripLeadingEnvAssignments(script) {
-  return script.trim().replace(/^(?:[A-Z_][A-Z0-9_]*=[^\s]+\s+)*/u, "");
-}
-
 function checkWrangler(rootDir, failures) {
   const config = parseWranglerConfig(
     readCloudflareCompareFile(rootDir, "wrangler.jsonc"),
@@ -197,10 +199,7 @@ function checkPackageScripts(rootDir, failures) {
 
   for (const check of CLOUDFLARE_SCRIPT_SURFACE_CHECKS) {
     const script = scripts[check.name];
-    if (
-      typeof script !== "string" ||
-      stripLeadingEnvAssignments(script) !== check.expected
-    ) {
+    if (script !== check.expected) {
       failures.push({
         file: "package.json",
         label:
