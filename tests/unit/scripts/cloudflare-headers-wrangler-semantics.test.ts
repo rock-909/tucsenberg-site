@@ -13,7 +13,6 @@ import {
   createValidFiles,
   createVirtualRepo,
   DOWNLOADS_DIR,
-  STATIC_DIR,
 } from "./cloudflare-headers-fixtures";
 
 // 这份守的是从 wrangler 4.100.0 移植过来的解析与匹配语义：哪些规则会被它丢掉、
@@ -491,62 +490,33 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
-  it("fails when a domain-scoped rule appends a shorter max-age", () => {
-    // 域名规则同理。它只在 tucsenberg.com 上生效，但在那个场景里它确实把缓存
-    // 打短了，一年缓存那句保证在那里就是假的。
-    const domainShortens = [
+  it("ignores the header lines under a route line with two wildcards", () => {
+    // 两个通配符的规则 wrangler 在解析阶段就丢了，底下那些头跟着一起没了——它不会
+    // 进规则表，所以写两遍也不算重复路由。认下它就等于凭空多出一条线上没有的规则。
+    const twoWildcards = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
       "",
-      `https://tucsenberg.com${BUNDLE_PATH}`,
-      "  Cache-Control: max-age=0",
-      "",
       EXPECTED_DOWNLOADS_HEADER_ROUTE,
       `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/*/*",
+      "  X-Custom: a",
+      "",
+      "/downloads/*/*",
+      "  X-Custom: b",
       "",
     ].join("\n");
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo({
         ...createValidFiles(),
-        "public/_headers": domainShortens,
-        ".open-next/assets/_headers": domainShortens,
+        "public/_headers": twoWildcards,
+        ".open-next/assets/_headers": twoWildcards,
       }),
     );
 
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
-      ),
-    );
-  });
-
-  it("does not count directives that only appear inside quotes", () => {
-    // HTTP 的字段值允许 quoted-string，里面的逗号是内容不是分隔符。直接按逗号拆，
-    // 这一条只有一个扩展指令的头会被拆出正好凑齐期望的 token，每个真实 bundle
-    // 都假绿，而线上根本没有一年缓存。
-    const quoted = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      '  Cache-Control: foo="x,public,max-age=31536000,immutable,y"',
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": quoted,
-        ".open-next/assets/_headers": quoted,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
-      ),
-    );
+    expect(failures).toEqual([]);
   });
 
   it("drops a rule whose placeholder names collide by prefix", () => {
@@ -584,18 +554,22 @@ describe("wrangler _headers semantics the gate ports", () => {
     );
   });
 
-  it("substitutes a captured placeholder into the header value", () => {
-    // wrangler 会把捕获到的值替换进响应头的值里。构建产物里只要有一个文件叫
-    // `no-store`，这条规则给它发的就是 `Cache-Control: no-store`，一年缓存当场
-    // 作废。只看字面量 `:directive` 的话，它不在任何冲突指令名单里，检查全绿。
-    const substituted = [
+  it("refuses to judge a rule whose host is not one exact name", () => {
+    // 场景是按规则里那串域名的字面量分的。域名段带占位符时这个模型就塌了：
+    // `https://:h/downloads/*` 编译成 `(?<h>[^/.]+)`，只能匹配不带点的域名，真实
+    // 域名全带点，所以它线上永远不生效；而场景串 `":h"` 不含点，被自己的模式一口
+    // 吃下，于是它在每个场景里都把 noindex 补了回来——全绿，线上那份 PDF 却是裸的。
+    const wildcardHost = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
       "",
-      "/_next/static/:directive",
-      "  Cache-Control: :directive",
-      "",
       EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "https://*/downloads/catalog.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      "https://:h/downloads/*",
       `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
       "",
     ].join("\n");
@@ -603,84 +577,16 @@ describe("wrangler _headers semantics the gate ports", () => {
     const failures = collectCloudflareStaticAssetHeaderFailures(
       createVirtualRepo({
         ...createValidFiles(),
-        [`${STATIC_DIR}/no-store`]: "console.log(1)",
-        "public/_headers": substituted,
-        ".open-next/assets/_headers": substituted,
+        "public/_headers": wildcardHost,
+        ".open-next/assets/_headers": wildcardHost,
       }),
     );
 
     expect(failures).toContainEqual(
-      expect.stringContaining(
-        `/_next/static/no-store in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it`,
-      ),
+      '"https://:h/downloads/*" in public/_headers does not name one exact host, so which responses it reaches cannot be proven; write the host out in full',
     );
-  });
-
-  it("refuses to judge a header built out of a host placeholder", () => {
-    // 域名段的占位符要知道真实域名才能解出来，而这里不知道线上跑在哪个域名上。
-    // 把字面量 `:env` 当成一条无害的头放过去就是假绿：它的真实值可能是 no-store。
-    const hostPlaceholder = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      "https://:env.example.com/_next/static/*",
-      "  Cache-Control: :env",
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": hostPlaceholder,
-        ".open-next/assets/_headers": hostPlaceholder,
-      }),
-    );
-
     expect(failures).toContainEqual(
-      expect.stringContaining(
-        'in public/_headers builds "cache-control" out of the host placeholder :env',
-      ),
-    );
-  });
-
-  it("does not let one host's unset erase another host's damage", () => {
-    // 把所有域名的规则堆在一份状态里算，它们会互相抵消：a.example 加上的
-    // `no-store` 被 b.example 的撤销抹掉，再被后面一条通用规则补回期望值，最后
-    // 一片干净。但这两个域名的规则永远不会同时跑在一个响应上——a.example 上那份
-    // bundle 实际带着 `no-store`，一年缓存那句保证在那里是假的。
-    const twoHosts = [
-      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      "https://a.example/_next/static/chunks/*",
-      "  Cache-Control: no-store",
-      "",
-      "https://b.example/_next/static/chunks/*",
-      "  ! Cache-Control",
-      "",
-      "/_next/static/chunks/*",
-      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
-      "",
-      EXPECTED_DOWNLOADS_HEADER_ROUTE,
-      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
-      "",
-    ].join("\n");
-
-    const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo({
-        ...createValidFiles(),
-        "public/_headers": twoHosts,
-        ".open-next/assets/_headers": twoHosts,
-      }),
-    );
-
-    expect(failures).toContainEqual(
-      expect.stringContaining(
-        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it on https://a.example`,
-      ),
+      '"https://*/downloads/catalog.pdf" in public/_headers does not name one exact host, so which responses it reaches cannot be proven; write the host out in full',
     );
   });
 

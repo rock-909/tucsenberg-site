@@ -58,19 +58,21 @@ export function createVirtualRepo(
           .map((name) => name.slice(prefix.length).split("/")[0] as string),
       );
       return [...names].map((name) => {
+        const linked = symlinks.has(`${prefix}${name}`);
         const isDirectory = Object.keys(files).some((file) =>
           file.startsWith(`${prefix}${name}/`),
         );
         return {
           name,
-          isDirectory: () => isDirectory,
-          // Dirent 看到的是链接本身，所以符号链接这里不是普通文件。跟随之后是
-          // 什么，由 statSync 回答——wrangler 也是这么分工的。
-          isFile: () => !isDirectory && !symlinks.has(`${prefix}${name}`),
+          // Dirent 看到的是链接本身，所以符号链接既不是目录也不是普通文件。
+          // 跟随之后是什么，由 statSync 回答——wrangler 也是这么分工的。
+          isDirectory: () => isDirectory && !linked,
+          isFile: () => !isDirectory && !linked,
         };
       });
     },
-    // statSync 跟随符号链接：指向真实文件的链接在这里就是普通文件。
+    // statSync 跟随符号链接：指向真实文件的链接在这里就是普通文件，指向目录的
+    // 链接就是目录。门禁靠它决定要不要递归，所以两个判据都要有。
     statSync: (absolutePath: string) => {
       const key = normalize(absolutePath);
       const isDirectory = Object.keys(files).some((file) =>
@@ -79,7 +81,7 @@ export function createVirtualRepo(
       if (!isDirectory && files[key] === undefined) {
         throw new Error(`Missing virtual path: ${key}`);
       }
-      return { isFile: () => !isDirectory };
+      return { isFile: () => !isDirectory, isDirectory: () => isDirectory };
     },
   };
 }

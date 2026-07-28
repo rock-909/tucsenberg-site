@@ -9,6 +9,7 @@ const EXPECTED_DOWNLOADS_NOINDEX = "X-Robots-Tag: noindex";
 // 两类被证明的资源：源目录 → 它们最终的 URL 前缀。写死一条探针路径证明不了什么，
 // 以前那条 `/_next/static/chunks/main.js` 在构建产物里根本不存在，真实文件名全带
 // 内容哈希；只要撤销精确落在某个真实哈希文件上，那条虚构探针毫无反应。
+const PUBLIC_SOURCE_DIR = "public";
 const DOWNLOADS_SOURCE_DIR = "public/downloads";
 const DOWNLOADS_URL_PREFIX = "/downloads";
 const DOWNLOADS_ASSET_SUBDIR = "downloads";
@@ -155,7 +156,11 @@ function parseWranglerHeaderRules(input) {
       // 撤销行必须是 `! ` 带空格开头，且整行不含冒号——`!X-Robots-Tag` 和
       // `! X-Robots-Tag:` 在 wrangler 眼里都不是撤销。
       if (rule && line.startsWith(UNSET_OPERATOR)) {
-        rule.unsetHeaders.push(line.slice(UNSET_OPERATOR.length).trim());
+        // 不 trim。wrangler 写的是 `line.trim().replace("! ", "")`，只吃掉第一个
+        // `"! "`，多出来的空格原样留在头名里。`!  X-Cache` 在它那里撤销的是
+        // `" X-Cache"`——一个非法头名，运行时 `headers.delete()` 抛异常，整个响应
+        // 500。这里替它 trim 掉就成了假绿：门禁拿干净名字去探，什么都探不出来。
+        rule.unsetHeaders.push(line.replace(UNSET_OPERATOR, ""));
       }
       continue;
     }
@@ -238,7 +243,7 @@ function ruleToMatcher(rulePath) {
     host: hostPart,
     // 域名段里的占位符名字。它们的值只有知道真实域名才能算出来，而这里不知道
     // 线上会用哪个域名，所以拿它们拼出来的响应头是证明不了的（见
-    // collectUnprovableHostPlaceholderFailures）。
+    // collectUnprovableHostFailures）。
     hostPlaceholders: hostPart === null ? [] : listPlaceholderNames(hostPart),
     pattern,
   };
@@ -280,9 +285,13 @@ function replacePlaceholders(value, replacements) {
  *
  * 只抹分隔符两侧的空格，不抹 token 内部的。全删会让 `X-Robots-Tag: no index`
  * 判绿——Google 不认 `no index`，PDF 照样被收录，而门禁说没事。
+ *
+ * `=` 也算分隔符。真实客户端解析 Cache-Control 时按 name=value 取名字并 trim 掉
+ * 两侧空白，`max-age = 0` 就是 `max-age=0`。不抹的话它变成一个前缀对不上的 token，
+ * 「同时挂着第二个更短时长」那条冲突检测直接失明——换个写法就绿了。
  */
 function normalizeHeaderValue(value) {
-  return value.replace(/\s*([:,])\s*/gu, "$1").toLowerCase();
+  return value.replace(/\s*([:,=])\s*/gu, "$1").toLowerCase();
 }
 
 /**
@@ -314,12 +323,52 @@ function expandDirectives(name, directives) {
  * 多出来的不管。
  */
 function toDirectiveSet(name, value) {
-  const directives = new Set(
-    splitOutsideQuotes(normalizeHeaderValue(value))
-      .map((directive) => directive.trim())
-      .filter(Boolean),
-  );
-  return expandDirectives(name, directives);
+  const tokens = splitOutsideQuotes(normalizeHeaderValue(value))
+    .map((directive) => directive.trim())
+    .filter(Boolean);
+  return expandDirectives(name, new Set(takeGlobalDirectives(name, tokens)));
+}
+
+// `unavailable_after` 的值里就带冒号（日期时间），它是指令不是爬虫名。
+const ROBOTS_DIRECTIVE_WITH_VALUE = "unavailable_after";
+
+/**
+ * `X-Robots-Tag` 可以按爬虫分别下指令，写法是 `<爬虫名>: <指令>[, <指令>…]`。
+ * 关键在于：**爬虫名后面那一整串逗号分隔的指令都只属于那个爬虫**（Google 文档里
+ * 的例子就是 `X-Robots-Tag: otherbot: noindex, nofollow`）。
+ *
+ * 只按逗号拆 token 会把 `bingbot: nosnippet, noindex` 里的 `noindex` 当成全局指令，
+ * 门禁于是认为这份 PDF 带着 noindex；而 Googlebot 收到的那一行里没有一条对它生效，
+ * PDF 照样被收录。所以碰到第一个带爬虫前缀的 token 就停，它和它后面的都不算数。
+ */
+function takeGlobalDirectives(name, tokens) {
+  if (name !== "x-robots-tag") return tokens;
+
+  const scopedIndex = tokens.findIndex((token) => {
+    const separator = token.indexOf(HEADER_SEPARATOR);
+    return (
+      separator > 0 && token.slice(0, separator) !== ROBOTS_DIRECTIVE_WITH_VALUE
+    );
+  });
+  return scopedIndex === -1 ? tokens : tokens.slice(0, scopedIndex);
+}
+
+/**
+ * 引号没配对的头值没法可靠地拆，直接判「算不出来」。
+ *
+ * 拆分器碰到不闭合的引号会把后面所有内容吞进一个 token，`no-store` 就查不出来了，
+ * 而线上那条头是真的带着它。畸形头各家客户端行为未定义，这里不猜，判红。
+ */
+function hasUnbalancedQuotes(value) {
+  let quoted = false;
+  for (let index = 0; index < value.length; index += 1) {
+    if (quoted && value[index] === "\\") {
+      index += 1;
+      continue;
+    }
+    if (value[index] === '"') quoted = !quoted;
+  }
+  return quoted;
 }
 
 /**
@@ -390,8 +439,15 @@ function parseExpectedHeader(line) {
  * 每个场景独立算一遍，任何一个场景没达到期望，整体就算失败。「没有域名」那个场景
  * 顺带把「只在某个域名下写了 noindex」挡掉：那个场景里它根本不存在。
  *
- * 场景按域名写法的字面量分。两种不同写法万一能匹配同一个真实域名，这里会当成两个
- * 场景算，方向是多红一次，不是放过去。
+ * 场景只按**纯字面量**的域名分。带占位符或通配符的域名段在别处被整条判红（见
+ * `collectUnprovableHostFailures`），不会走到这里——它们的字面量本身能被别的规则
+ * 的域名模式吃掉（`":h"` 不含点，`(?<h>[^/.]+)` 一口吞下），那样算出来的场景在
+ * 线上根本不存在。
+ *
+ * 攒的是**拼接后的原始头值**，不是各自拆好的指令集合。wrangler 用
+ * `Headers.append` 把多条命中规则的同名头拼成一条 `A, B`，客户端只解析一次；
+ * 逐条各拆各的会和它对不上——比如前一条留一个不闭合的引号、后一条把它关掉，拼起来
+ * `no-store` 在引号外是真指令，分开看却被吞进 token 里。
  */
 function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
   const effective = new Map();
@@ -409,11 +465,12 @@ function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
     }
 
     for (const [name, value] of Object.entries(rule.headers)) {
-      const merged = effective.get(name) ?? new Set();
       const resolved = replacePlaceholders(value, match.groups ?? {});
-      for (const directive of toDirectiveSet(name, resolved))
-        merged.add(directive);
-      effective.set(name, merged);
+      const existing = effective.get(name);
+      effective.set(
+        name,
+        existing === undefined ? resolved : `${existing}, ${resolved}`,
+      );
     }
   }
 
@@ -431,27 +488,27 @@ function listHeaderScopes(rules) {
 }
 
 /**
- * 磁盘文件名要按 URL pathname 的规则转义之后，才是线上真正被请求的路径。
+ * 磁盘文件名要转义之后，才是线上真正被请求的路径。
  *
  * 直接拼文件名会漏：`catalog copy.pdf` 在线上是 `/downloads/catalog%20copy.pdf`，
  * 一条写成 `%20` 的撤销规则会命中它，而门禁拿着带空格的原名去比，什么都没匹配上，
- * 于是 PDF 能被收录而门禁全绿。空格、`^`、中文名都是同一类。
+ * 于是 PDF 能被收录而门禁全绿。
  *
- * 转义交给 `new URL()` 自己算，和 rules-engine 读 `new URL(request.url).pathname`
- * 是同一套实现。手写一张「该转义哪些字符」的表就是又一次近似：上一版照 URL 规范
- * 的 path percent-encode set 抄，仍然漏了 `^`——Node 会把它转成 `%5E`。
- *
- * 只有三个字符必须先手工转义，因为它们会改变 URL 的**结构**而不只是编码：`%`
- * 不先转成 `%25`，磁盘上真名叫 `a%20b.pdf` 的文件会和 `a b.pdf` 撞成同一条路径；
- * `#` 和 `?` 会被当成 fragment 和 query，整个后缀从 pathname 里消失。
+ * 转义规则照抄 asset worker 的 `encodePath`（assets.worker.js:8796）：按 `/` 切段，
+ * 每段各自 `encodeURIComponent`。这不是 `new URL().pathname`——那一版曾经用过，
+ * 但两者对 12 个字符不一致（`, ; : @ & = + $ [ ] |`）。asset worker 只在
+ * `encodePath(路径)` 上返 200，别的形式一律 307 跳过去（assets.worker.js:8271），
+ * 所以那 12 个字符里只要有一个出现在文件名里，门禁算出来的就不是那条真正会发文件的
+ * URL，落在真 URL 上的撤销它完全看不见。2026-07-28 实测：文件名 `spec,rev2.pdf`，
+ * `/downloads/spec,rev2.pdf` 返 307，`/downloads/spec%2Crev2.pdf` 返 200 且没有
+ * `x-robots-tag`，而门禁全绿。
  */
-const STRUCTURAL_PATH_CHARS = /[%#?]/gu;
-
 function toServedPath(urlPrefix, relativePath) {
-  const escaped = relativePath.replace(STRUCTURAL_PATH_CHARS, (character) =>
-    encodeURIComponent(character),
-  );
-  return extractPathname(`${urlPrefix}/${escaped}`);
+  return [urlPrefix, ...relativePath.split("/")]
+    .map((segment, index) =>
+      index === 0 ? segment : encodeURIComponent(segment),
+    )
+    .join("/");
 }
 
 /**
@@ -469,10 +526,15 @@ function toServedPath(urlPrefix, relativePath) {
  * `/downloads/.secret-probe.pdf` 返回 200 和完整 PDF。过滤掉它们等于放过一份
  * 能被搜索引擎抓到、却没人证明带 noindex 的下载。
  *
- * 符号链接也要算。wrangler 建上传清单时用的是 `fs.stat(filepath)`
- * （cli.js:137583），`stat` 会跟随链接，所以指向普通文件的链接在它眼里就是普通
- * 文件，照传不误——那句 `filestat.isSymbolicLink()` 对 `stat` 来说永远为假。用
- * `Dirent.isFile()` 判断会把它们全漏掉，一条精确撤销落在链接上就没人管。
+ * 符号链接也要算，**文件和目录都算**。wrangler 建上传清单时是
+ * `fs.readdir(dir, { recursive: true })` 加 `fs.stat(filepath)`（cli.js:137571）：
+ * 递归枚举会走进符号链接目录，`stat` 又会跟随链接，所以链接背后是普通文件就照传，
+ * 那句 `filestat.isSymbolicLink()` 对 `stat` 来说永远为假。
+ *
+ * 所以「是不是目录」必须问 `statSync`，不能问 `Dirent`：`Dirent.isDirectory()` 对
+ * 「指向目录的符号链接」是 false，整棵子树会被静默跳过。2026-07-28 实测：
+ * `.open-next/assets/downloads/linked` 链到另一个目录，里面的 PDF 从
+ * `/downloads/linked/inside.pdf` 返回 200 且没有 `x-robots-tag`，门禁全绿。
  */
 function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
   const absolute = path.join(context.rootDir, sourceDir, relative);
@@ -482,23 +544,24 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
     .readdirSync(absolute, { withFileTypes: true })
     .flatMap((entry) => {
       const next = relative ? `${relative}/${entry.name}` : entry.name;
+      const resolved = statOrNull(context, path.join(absolute, entry.name));
       // 目录本身不是可证明的东西。不递归的话 `/downloads/nested` 会被当成一个
       // 文件去探，它底下真实的 PDF 一个都没查，而门禁看起来在干活。
-      if (entry.isDirectory()) {
+      if (resolved?.isDirectory()) {
         return listServedPaths(context, sourceDir, urlPrefix, next);
       }
-      if (!isPublishedFile(context, path.join(absolute, entry.name))) return [];
+      // 跟随之后还是普通文件才算数；FIFO、断链都不算。
+      if (!resolved?.isFile()) return [];
       return [toServedPath(urlPrefix, next)];
     })
     .sort();
 }
 
-/** 跟随符号链接之后还是普通文件才算数；目录、FIFO、断链都不算。 */
-function isPublishedFile(context, absolutePath) {
+function statOrNull(context, absolutePath) {
   try {
-    return context.statSync(absolutePath).isFile();
+    return context.statSync(absolutePath);
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -548,8 +611,10 @@ const CACHE_CONTROL_AGE_DIRECTIVES = ["max-age", "s-maxage"];
 function findContradictingDirectives(name, expected, actual) {
   if (name !== "cache-control") return [];
 
+  // 比的是 `=` 前面那个名字。客户端按 name=value 取名字，`no-store=1` 的名字就是
+  // no-store，真实浏览器照样不缓存；只比整词的话加个 `=1` 就绕过去了。
   const contradictions = [...actual].filter((directive) =>
-    CACHE_CONTROL_CONTRADICTIONS.has(directive),
+    CACHE_CONTROL_CONTRADICTIONS.has(directive.split("=")[0] ?? directive),
   );
 
   // 期望里写了 max-age=31536000，实际却同时挂着另一个时长（或者 s-maxage=0），
@@ -574,19 +639,26 @@ function collectScopeFailures(
   scopeHost,
 ) {
   const wanted = parseExpectedHeader(expectedHeader);
-  const actual = resolveEffectiveHeaders(rules, targetPath, scopeHost).get(
+  const served = resolveEffectiveHeaders(rules, targetPath, scopeHost).get(
     wanted.name,
   );
   // 无域名场景不加后缀，报错信息保持原样；域名场景点出是哪个域名，否则业主看到
   // 一条红字却不知道该去改哪一块。
   const where = scopeHost === null ? "" : ` on https://${scopeHost}`;
 
-  if (!actual) {
+  if (served === undefined) {
     return [
       `${targetPath} in ${relativePath} is served without "${wanted.name}"${where}`,
     ];
   }
 
+  if (hasUnbalancedQuotes(served)) {
+    return [
+      `${targetPath} in ${relativePath} is served "${wanted.name}: ${served}"${where}, whose quotes do not close, so what it actually means cannot be proven`,
+    ];
+  }
+
+  const actual = toDirectiveSet(wanted.name, served);
   const missing = [...wanted.directives].filter(
     (directive) => !actual.has(directive),
   );
@@ -628,36 +700,30 @@ function collectServedPathFailures(
 }
 
 /**
- * 域名段里的占位符没法解出来，拿它拼出来的响应头就没法证明。
+ * 域名段不是纯字面量的规则一律判红。
  *
- * `https://:env.example.com/_next/static/*` 底下写 `Cache-Control: :env`，线上那条
- * 头的值等于真实域名的第一段——可能是 `no-store`，也可能是别的。这里不知道线上会
- * 用哪个域名（预览域名就是另一个），所以只能判红，而不是把字面量 `:env` 当成一条
- * 无害的头放过去。
+ * 这里按域名分场景算，而场景就是规则里那串域名的**字面量**。域名段一旦含占位符或
+ * 通配符，这个模型就塌了：`https://:h/downloads/*` 编译成 `(?<h>[^/.]+)`，只能匹配
+ * 不带点的域名，真实域名全带点，所以它线上永远不生效；可场景串本身就是 `":h"`，
+ * 不含点，被自己的模式一口吃下，于是它在每个场景里都把 noindex「补」了回来——三个
+ * 场景全绿，而线上那份 PDF 一条 `X-Robots-Tag` 都没有。域名段带通配符的同理。
+ *
+ * 拿它拼响应头的值更是无从算起：`Cache-Control: :env` 的真实值等于真实域名的第一
+ * 段，可能就是 `no-store`。
+ *
+ * 所以不猜，判红。当前 `public/_headers` 一条带域名的规则都没有，代价为零。
  */
-function collectUnprovableHostPlaceholderFailures(rules, relativePath) {
-  const failures = [];
-
-  for (const rule of rules) {
-    const matcher = ruleToMatcher(rule.path);
-    if (matcher === null || matcher.hostPlaceholders.length === 0) continue;
-
-    for (const [name, value] of Object.entries(rule.headers)) {
-      const used = matcher.hostPlaceholders.filter((placeholder) =>
-        value.includes(`:${placeholder}`),
-      );
-      if (used.length === 0) continue;
-      failures.push(
-        `"${rule.path}" in ${relativePath} builds "${name}" out of the host placeholder ${used
-          .map((placeholder) => `:${placeholder}`)
-          .join(
-            ", ",
-          )}, so its served value cannot be proven; write the host out in full`,
-      );
-    }
-  }
-
-  return failures;
+function collectUnprovableHostFailures(rules, relativePath) {
+  return rules
+    .filter((rule) => {
+      const matcher = ruleToMatcher(rule.path);
+      if (matcher === null || matcher.host === null) return false;
+      return matcher.hostPlaceholders.length > 0 || matcher.host.includes("*");
+    })
+    .map(
+      (rule) =>
+        `"${rule.path}" in ${relativePath} does not name one exact host, so which responses it reaches cannot be proven; write the host out in full`,
+    );
 }
 
 /**
@@ -716,7 +782,7 @@ function collectHeaderFileFailures(
   // ——那两个是业主可调参数，钉死数字会让他一改就红而意图完全没坏。
   return [
     ...collectDuplicateRouteFailures(rules, relativePath),
-    ...collectUnprovableHostPlaceholderFailures(rules, relativePath),
+    ...collectUnprovableHostFailures(rules, relativePath),
     ...collectInvalidHeaderFailures(rules, relativePath),
     ...staticAssetPaths.flatMap((assetPath) =>
       collectServedPathFailures(
@@ -902,6 +968,7 @@ function collectPublishedDirectoryFailures(context, directory) {
     ...collectHtmlAliasFailures(assetDownloadPaths, assetDownloadsDir),
     ...collectHtmlAliasFailures(staticAssetPaths, assetStaticDir),
     ...collectUnmodelledAssetFileFailures(context, directory),
+    ...collectUnmodelledAssetFileFailures(context, PUBLIC_SOURCE_DIR),
   ];
 
   const servedPaths = {
