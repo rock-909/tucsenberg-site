@@ -25,7 +25,8 @@ export interface ResendHttpEmailClientOptions {
 type JsonObject = Record<string, unknown>;
 
 const RESEND_EMAILS_ENDPOINT = "https://api.resend.com/emails";
-const DEFAULT_RESEND_TIMEOUT_MS = 5000;
+/** 导出是为了让客户端提交预算的测试能跟它对账，而不是手抄一个数。 */
+export const DEFAULT_RESEND_TIMEOUT_MS = 5000;
 const RESEND_TIMEOUT_ERROR_MESSAGE = "Resend API request timed out";
 
 function isJsonObject(value: unknown): value is JsonObject {

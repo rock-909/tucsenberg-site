@@ -73,8 +73,11 @@ function validateLeadData(
   data: Record<string, unknown>,
 ): ProductLeadValidationResult {
   // 由 schema 决定哪些字段活下来，路由不再手写白名单：zod 的 object 默认剥离未知
-  // 键，turnstileToken / website / phone 本来就进不去。加新询盘字段时只改 schema，
-  // 不会再出现「买家填了、白名单没同步、字段被静默丢掉」。
+  // 键，turnstileToken / website / phone 本来就进不去。这一段管的只是
+  // 「路由 → processValidatedInquiry」这一跳，加字段时这里不用改。
+  // 整条链路不止这一跳：浏览器发不发（createInquiryPayload）、邮件收不收
+  // （createProductEmailData）、Airtable 收不收（createProductLeadRecord）
+  // 各有各的字段清单，加买家字段时那三处仍要一起看。
   // 归因字段必须先整组剔除、再放清洗结果：pickAttributionFields 碰到非字符串值是
   // 「整个键不写入」而不是写 undefined，直接展开的话原始脏值会活下来，买家会因为
   // 一个营销参数格式不对被整单拒绝。

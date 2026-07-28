@@ -48,8 +48,49 @@ const INQUIRY_ENDPOINT = "/api/inquiry";
 const JSON_HEADERS = { "Content-Type": "application/json" } as const;
 
 /**
- * 发一次询盘并解码结果。请求没能拿到可解码的响应（断网、CORS、超时）时降级成
- * 服务器错误，而不是把异常抛给调用方——买家要看到的是一句话，不是白屏。
+ * 一次提交的请求预算。
+ *
+ * 服务端串行执行，已知最坏耗时加总为 23 秒：
+ * 限流查询 5 秒（`src/lib/security/stores/rate-limit-store.ts` 的
+ * `UPSTASH_OPERATION_TIMEOUT_MS`，串在整条链路最前面）
+ * + Turnstile 校验 5 秒（`src/lib/security/turnstile.ts` 的
+ * `TURNSTILE_VERIFY_TIMEOUT_MS`）
+ * + 业主邮件 5 秒（`src/lib/email/resend-http-client.ts` 的
+ * `DEFAULT_RESEND_TIMEOUT_MS`）
+ * + Airtable 8 秒（`src/lib/airtable/service.ts` 的
+ * `AIRTABLE_REQUEST_TIMEOUT_MS`）。
+ *
+ * 30 秒把这 23 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。低于这条线的
+ * 代价不只是「买家白填一次」：客户端一断开，Cloudflare 会取消 Worker，而中止点
+ * 很可能落在「业主邮件已发出、Airtable 记录还没写」之间——买家重发一次，业主就
+ * 收到两封邮件，其中一封没有对应的 CRM 记录。不设上限则更糟：连接被中间盒吞掉
+ * 时 fetch 既不 resolve 也不 reject，表单会永远停在「提交中」。
+ *
+ * 这四个数散在四个模块里，加错一次没人会红，所以
+ * `__tests__/inquiry-form-submission.test.tsx` 直接 import 它们来对账。
+ */
+const INQUIRY_REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * 支持范围内的浏览器都有 `AbortSignal.timeout`（Chrome 103 / Safari 16 /
+ * Firefox 100 起，都早于 `.browserslistrc` 声明的下限）。但范围外的旧设备上它
+ * 会同步抛 TypeError，而调用点在 try 里——异常会被吞成「服务器错误」，请求根本
+ * 没发出去，买家每次提交都失败且看不出原因。宁可让老浏览器退回没有预算的老行为，
+ * 也不能把它从「能提交」变成「永远失败」。
+ */
+function createRequestBudgetSignal(): AbortSignal | undefined {
+  // 先探 `AbortSignal` 本身。更老的浏览器连这个全局都没有，直接写
+  // `typeof AbortSignal.timeout` 会抛 ReferenceError——那条异常逃出去之后
+  // 表单会永远停在「提交中」，比没有预算还糟。
+  return typeof AbortSignal !== "undefined" &&
+    typeof AbortSignal.timeout === "function"
+    ? AbortSignal.timeout(INQUIRY_REQUEST_TIMEOUT_MS)
+    : undefined;
+}
+
+/**
+ * 发一次询盘并解码结果。请求失败或超出预算时降级成服务器错误，而不是把异常抛给
+ * 调用方——买家要看到的是一句话，不是白屏，更不是一个永远转圈的按钮。
  */
 async function postInquiry(
   formData: FormData,
@@ -57,12 +98,14 @@ async function postInquiry(
   context: ValidatedInquiryContext,
 ): Promise<InquirySubmitState> {
   try {
+    const signal = createRequestBudgetSignal();
     const response = await fetch(INQUIRY_ENDPOINT, {
       method: "POST",
       headers: JSON_HEADERS,
       body: JSON.stringify(
         createInquiryPayload(formData, turnstileToken, context),
       ),
+      ...(signal ? { signal } : {}),
     });
     return await decodeInquirySubmitState(response);
   } catch {

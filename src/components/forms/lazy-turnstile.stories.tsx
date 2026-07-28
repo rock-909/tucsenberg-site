@@ -54,8 +54,9 @@ export const StorybookFallback: Story = {
         id="storybook-turnstile-fallback"
       />
       <p className="mt-3 text-sm text-muted-foreground">
-        If a site key is not configured, the production widget renders its safe
-        unavailable state.
+        If a site key is not configured, or the widget stays silent for 15
+        seconds, this wrapper renders the single rescue prompt with an email
+        fallback.
       </p>
     </div>
   ),

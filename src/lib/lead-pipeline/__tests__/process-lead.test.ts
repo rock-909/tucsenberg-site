@@ -170,7 +170,9 @@ describe("processValidatedInquiry", () => {
   });
 
   it("leaves the message untouched when the owner email succeeded", async () => {
-    mockSendProductInquiryEmail.mockResolvedValueOnce(undefined);
+    // 真实签名是 Promise<string>，成功必定返回 Resend 的 message id；
+    // resolve undefined 是生产里造不出来的状态，别拿它当「成功」。
+    mockSendProductInquiryEmail.mockResolvedValueOnce("resend-message-id");
     mockCreateLead.mockResolvedValueOnce({ id: "rec1" });
 
     await processValidatedInquiry(VALID_LEAD);

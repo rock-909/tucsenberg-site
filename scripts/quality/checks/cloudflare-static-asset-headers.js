@@ -18,43 +18,122 @@ function repoFileExists(context, relativePath) {
   return context.existsSync(path.join(context.rootDir, relativePath));
 }
 
+/**
+ * 把 `_headers` 拆成「路由行 + 它底下的响应头行」。
+ *
+ * 全文件查字符串是不够的：noindex 写在 `/images/*` 底下、`/downloads/*` 底下一条
+ * 都没有时，两个子串都还在文件里，检查照样绿，而 PDF 已经能被收录。
+ * 归属必须查，所以要按块解析。
+ */
+function parseHeaderBlocks(headers) {
+  const blocks = [];
+  let current = null;
+
+  for (const rawLine of headers.split("\n")) {
+    const line = rawLine.trim();
+    if (line.length === 0 || line.startsWith("#")) continue;
+
+    // 路由行也可以写成带域名的绝对 URL（Cloudflare 的「只给某个域名加头」写法）。
+    // 不认它，那种行会被当成上一个块的响应头，noindex 就会被算到不属于它的路由
+    // 名下——检查绿，而 PDF 已经能被收录。归属查错比不查更危险。
+    if (line.startsWith("/") || /^https?:\/\//u.test(line)) {
+      current = { route: line, headerLines: [] };
+      blocks.push(current);
+    } else if (current) {
+      current.headerLines.push(line);
+    }
+  }
+
+  return blocks;
+}
+
+/**
+ * 比较响应头时把空格抹平。
+ *
+ * `public,max-age=86400` 和 `public, max-age=86400` 是同一条头，HTTP 规范两种都
+ * 合法。逐字符全等会在业主重排一次格式时变红，而意图完全没坏——这个文件自己就
+ * 写着「缓存时长是业主可调参数，钉死数字会让业主一改就红」，格式同理。
+ *
+ * 只抹分隔符两侧的空格，不抹 token 内部的。全删会让 `X-Robots-Tag: no index`
+ * 判绿——Google 不认 `no index`，PDF 照样被收录，而门禁说没事。
+ */
+function normalizeHeaderLine(line) {
+  return line.replace(/\s*([:,])\s*/gu, "$1").toLowerCase();
+}
+
+/**
+ * 拆成「头名 + 指令集合」。
+ *
+ * 整行全等会把更强的写法判红：`X-Robots-Tag: noindex, nofollow` 比只写 noindex
+ * 更严，门禁却拦下来，还报「does not carry X-Robots-Tag: noindex」——它明明带了。
+ * 一个逼着业主不许加强防护的检查，该改的是检查。所以只要求「要的指令都在」，
+ * 多出来的不管。
+ */
+function parseHeaderLine(line) {
+  const [name, ...rest] = normalizeHeaderLine(line).split(":");
+  return {
+    name,
+    directives: new Set(rest.join(":").split(",").filter(Boolean)),
+  };
+}
+
+function carriesHeader(headerLines, expectedHeader) {
+  const wanted = parseHeaderLine(expectedHeader);
+  return headerLines.some((line) => {
+    const actual = parseHeaderLine(line);
+    if (actual.name !== wanted.name) return false;
+    return [...wanted.directives].every((directive) =>
+      actual.directives.has(directive),
+    );
+  });
+}
+
+function collectRouteBlockFailures(
+  blocks,
+  relativePath,
+  route,
+  expectedHeader,
+) {
+  // 同一个路由写两个块是合法的，Cloudflare 会合并；只看第一个会把写在第二个块里
+  // 的 noindex 判丢，误红。
+  const headerLines = blocks
+    .filter((candidate) => candidate.route === route)
+    .flatMap((candidate) => candidate.headerLines);
+
+  if (headerLines.length === 0) {
+    return [`missing "${route}" in ${relativePath}`];
+  }
+
+  if (!carriesHeader(headerLines, expectedHeader)) {
+    return [`"${route}" in ${relativePath} does not carry "${expectedHeader}"`];
+  }
+
+  return [];
+}
+
 function collectHeaderFileFailures(context, relativePath) {
-  const failures = [];
-
   if (!repoFileExists(context, relativePath)) {
-    failures.push(
-      `missing Cloudflare build output header file: ${relativePath}`,
-    );
-    return failures;
+    return [`missing Cloudflare build output header file: ${relativePath}`];
   }
 
-  const headers = readRepoFile(context, relativePath);
+  const blocks = parseHeaderBlocks(readRepoFile(context, relativePath));
 
-  if (!headers.includes(EXPECTED_STATIC_ASSET_HEADER_ROUTE)) {
-    failures.push(
-      `missing "${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" in ${relativePath}`,
-    );
-  }
-
-  if (!headers.includes(EXPECTED_STATIC_ASSET_CACHE_CONTROL)) {
-    failures.push(
-      `missing "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" in ${relativePath}`,
-    );
-  }
-
-  // 只查 /downloads/* 与 noindex 这两条意图断言，不查缓存秒数——
-  // 缓存时长是业主可调参数，钉死数字会让业主一改就红而意图完全没坏。
-  if (!headers.includes(EXPECTED_DOWNLOADS_HEADER_ROUTE)) {
-    failures.push(
-      `missing "${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in ${relativePath}`,
-    );
-  }
-
-  if (!headers.includes(EXPECTED_DOWNLOADS_NOINDEX)) {
-    failures.push(`missing "${EXPECTED_DOWNLOADS_NOINDEX}" in ${relativePath}`);
-  }
-
-  return failures;
+  // 只查路由与它自己那条意图断言，不查缓存秒数——缓存时长是业主可调参数，
+  // 钉死数字会让业主一改就红而意图完全没坏。
+  return [
+    ...collectRouteBlockFailures(
+      blocks,
+      relativePath,
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+    ),
+    ...collectRouteBlockFailures(
+      blocks,
+      relativePath,
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      EXPECTED_DOWNLOADS_NOINDEX,
+    ),
+  ];
 }
 
 function createCloudflareStaticAssetHeaderContext({

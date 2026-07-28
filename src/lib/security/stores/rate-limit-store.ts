@@ -1,7 +1,8 @@
 import { getRuntimeEnvString } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
-const UPSTASH_OPERATION_TIMEOUT_MS = 5_000;
+/** 导出是为了让客户端提交预算的测试能跟它对账，而不是手抄一个数。 */
+export const UPSTASH_OPERATION_TIMEOUT_MS = 5_000;
 
 /**
  * Key-value pair interface representing rate limit data

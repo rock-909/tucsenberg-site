@@ -91,7 +91,7 @@ describe("Cloudflare static asset headers proof", () => {
     );
 
     expect(failures).toContain(
-      `missing "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" in .open-next/assets/_headers`,
+      `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
     );
   });
 
@@ -120,8 +120,173 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        'missing "X-Robots-Tag: noindex" in .open-next/assets/_headers',
+        '"/downloads/*" in .open-next/assets/_headers does not carry "X-Robots-Tag: noindex"',
       ),
     );
+  });
+
+  it("fails when noindex sits in another route block instead of downloads", () => {
+    // 全文件查字符串会在这里假绿：两个子串都还在文件里，但 PDF 已经能被收录。
+    const misplaced = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      "/images/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": misplaced,
+        ".open-next/assets/_headers": misplaced,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+  });
+
+  it("fails when noindex only sits under an absolute-URL route line", () => {
+    // Cloudflare 允许路由行写成带域名的绝对 URL。不把它当路由行，noindex 就会被
+    // 算到上一个块名下——检查绿，而这条头到底生不生效取决于域名匹配。
+    const domainScoped = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      "https://tucsenberg.com/downloads/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": domainScoped,
+        ".open-next/assets/_headers": domainScoped,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+  });
+
+  it("passes when the same headers use HTTP-standard spacing", () => {
+    // `public, max-age=86400` 和 `public,max-age=86400` 是同一条头。业主重排一次
+    // 格式就变红，是门禁在说谎，不是意图坏了。
+    const spaced = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "  Cache-Control: public, max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": spaced,
+        ".open-next/assets/_headers": spaced,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("fails when the noindex value itself is misspelled with a space", () => {
+    // 抹平空格只该抹分隔符两侧的。`no index` 不是 `noindex`，Google 不认，
+    // PDF 照样被收录——这条必须红。
+    const misspelled = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: no index",
+      "  Cache-Control: public,max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": misspelled,
+        ".open-next/assets/_headers": misspelled,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+  });
+
+  it("passes when the noindex rule is strengthened with more directives", () => {
+    // `noindex, nofollow` 比只写 noindex 更严。门禁不能拦着业主加强防护——
+    // 一个逼人不许改好的检查，该改的是检查。
+    const stronger = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  X-Robots-Tag: noindex, nofollow",
+      "  Cache-Control: public,max-age=86400",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": stronger,
+        ".open-next/assets/_headers": stronger,
+      }),
+    );
+
+    expect(failures).toEqual([]);
+  });
+
+  it("passes when a route is split across two blocks", () => {
+    // 同一路由写两个块是合法的，Cloudflare 会合并。只看第一个块就会误红。
+    const split = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": split,
+        ".open-next/assets/_headers": split,
+      }),
+    );
+
+    expect(failures).toEqual([]);
   });
 });
