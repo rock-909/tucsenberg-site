@@ -223,9 +223,9 @@ function ruleToMatcher(rulePath) {
     const wholeRulePattern = new RegExp(`^${hostSource}${pathSource}$`);
 
     return {
-      crossHost: hostPart !== null,
-      // 域名规则只拿路径段去匹配（fail closed 的理由见 resolveEffectiveHeaders），
-      // 但能不能编译要看整条。
+      host: hostPart,
+      // 命中与否只看路径段——某条规则属于哪个域名由调用方按域名分场景决定
+      // （见 resolveEffectiveHeaders）。但能不能编译要看整条。
       pathPattern:
         hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
     };
@@ -306,47 +306,52 @@ function parseExpectedHeader(line) {
  * - 假红：同一条头被拆到两个块里（`Cache-Control: public, max-age=…` 一块、
  *   `Cache-Control: immutable` 另一块），线上会合并成完整的一条。
  *
- * 带域名的规则处理是**故意不对称**的，因为两个方向的错代价不一样。它只对那一个
- * 域名生效，而这里不知道线上会用哪个域名（预览域名就是另一个）：
+ * 带域名的规则要**按域名分场景算**，不能和无域名规则拌在一锅里。一次请求只落在
+ * 一个域名上，`https://a.example/...` 和 `https://b.example/...` 的规则在线上永远
+ * 不会同时生效。拌在一起就会互相抵消：a 那条追加 `no-store`、b 那条把
+ * `Cache-Control` 整个撤掉、后面再有一条无域名规则补回期望值，合起来看毫无问题，
+ * 而 a.example 上那次响应实际带着 no-store，一年缓存的保证是假的。
  *
- * - **不能用来证明**防护到位——当成生效就是假绿，PDF 在实际域名上照样被收录。
- * - **可以用来判定防护被推翻**，fail closed：宁可多红一次，也不能放一个能被收录的
- *   PDF 出去。
+ * 所以场景 = 一个「没有域名」的场景，加上文件里出现过的每一个域名各一个场景。
+ * 每个场景独立算一遍，任何一个场景没达到期望，整体就算失败。「没有域名」那个场景
+ * 顺带把「只在某个域名下写了 noindex」挡掉：那个场景里它根本不存在。
  *
- * 「推翻」不只是 `! Header-Name`。域名规则**设**的头一样能推翻期望：给真实 bundle
- * 追加 `Cache-Control: no-store`，那个域名上的响应就同时挂着一年缓存和 no-store，
- * 缓存保证作废。所以每条头记两份：`proven` 只收非域名规则，用来判断「要的指令在
- * 不在」；`present` 收所有命中规则，用来判断「有没有被别的指令推翻」。撤销两份
- * 一起删。
+ * 场景按域名写法的字面量分。两种不同写法万一能匹配同一个真实域名，这里会当成两个
+ * 场景算，方向是多红一次，不是放过去。
  */
-function resolveEffectiveHeaders(rules, targetPath) {
+function resolveEffectiveHeaders(rules, targetPath, scopeHost) {
   const effective = new Map();
 
   for (const rule of rules) {
     const matcher = ruleToMatcher(rule.path);
     if (matcher === null) continue;
-    const { crossHost, pathPattern } = matcher;
+    const { host, pathPattern } = matcher;
+    if (host !== null && host !== scopeHost) continue;
     if (!pathPattern.test(targetPath)) continue;
 
     for (const unsetName of rule.unsetHeaders) {
       effective.delete(unsetName.toLowerCase());
     }
 
-    const provesTheHeader = !crossHost;
     for (const [name, value] of Object.entries(rule.headers)) {
-      const entry = effective.get(name) ?? {
-        proven: new Set(),
-        present: new Set(),
-      };
-      for (const directive of toDirectiveSet(name, value)) {
-        entry.present.add(directive);
-        if (provesTheHeader) entry.proven.add(directive);
-      }
-      effective.set(name, entry);
+      const merged = effective.get(name) ?? new Set();
+      for (const directive of toDirectiveSet(name, value))
+        merged.add(directive);
+      effective.set(name, merged);
     }
   }
 
   return effective;
+}
+
+/** 文件里出现过的域名写法，加上「没有域名」那个场景（用 null 表示）。 */
+function listHeaderScopes(rules) {
+  const hosts = new Set();
+  for (const rule of rules) {
+    const matcher = ruleToMatcher(rule.path);
+    if (matcher !== null && matcher.host !== null) hosts.add(matcher.host);
+  }
+  return [null, ...hosts];
 }
 
 /**
@@ -380,6 +385,13 @@ function toServedPath(urlPrefix, relativePath) {
  * （`/downloads/supplier-checklist.pdf` 加一行 `! X-Robots-Tag`），也可以用占位符
  * 绕开（`/:section/private.pdf`）。所以逐个真实文件算它最终拿到的头，规则会不会
  * 命中交给同一套匹配逻辑判断，不靠字符串前缀猜。
+ *
+ * 点号开头的文件也要算。Workers Assets 只在资产根目录排除 `.assetsignore`、
+ * `_redirects`、`_headers` 三个（wrangler 4.100.0 cli.js:124017），别的点号文件照
+ * 常上传。2026-07-28 实测：把一份 PDF 复制成 `.open-next/assets/downloads/
+ * .secret-probe.pdf` 后 `wrangler dev --local` 起服务，请求
+ * `/downloads/.secret-probe.pdf` 返回 200 和完整 PDF。过滤掉它们等于放过一份
+ * 能被搜索引擎抓到、却没人证明带 noindex 的下载。
  */
 function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
   const absolute = path.join(context.rootDir, sourceDir, relative);
@@ -387,7 +399,6 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
 
   return context
     .readdirSync(absolute, { withFileTypes: true })
-    .filter((entry) => !entry.name.startsWith("."))
     .flatMap((entry) => {
       const next = relative ? `${relative}/${entry.name}` : entry.name;
       // 目录本身不是可证明的东西。不递归的话 `/downloads/nested` 会被当成一个
@@ -467,42 +478,65 @@ function findContradictingDirectives(name, expected, actual) {
   return contradictions;
 }
 
-function collectServedPathFailures(
+function collectScopeFailures(
   rules,
   relativePath,
   targetPath,
   expectedHeader,
+  scopeHost,
 ) {
   const wanted = parseExpectedHeader(expectedHeader);
-  const actual = resolveEffectiveHeaders(rules, targetPath).get(wanted.name);
+  const actual = resolveEffectiveHeaders(rules, targetPath, scopeHost).get(
+    wanted.name,
+  );
+  // 无域名场景不加后缀，报错信息保持原样；域名场景点出是哪个域名，否则业主看到
+  // 一条红字却不知道该去改哪一块。
+  const where = scopeHost === null ? "" : ` on https://${scopeHost}`;
 
-  if (!actual || actual.proven.size === 0) {
+  if (!actual) {
     return [
-      `${targetPath} in ${relativePath} is served without "${wanted.name}"`,
+      `${targetPath} in ${relativePath} is served without "${wanted.name}"${where}`,
     ];
   }
 
   const missing = [...wanted.directives].filter(
-    (directive) => !actual.proven.has(directive),
+    (directive) => !actual.has(directive),
   );
   if (missing.length > 0) {
     return [
-      `${targetPath} in ${relativePath} does not carry "${expectedHeader}"`,
+      `${targetPath} in ${relativePath} does not carry "${expectedHeader}"${where}`,
     ];
   }
 
   const contradictions = findContradictingDirectives(
     wanted.name,
     wanted.directives,
-    actual.present,
+    actual,
   );
   if (contradictions.length > 0) {
     return [
-      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${contradictions.join(", ")} overrides it`,
+      `${targetPath} in ${relativePath} carries "${expectedHeader}" but ${contradictions.join(", ")} overrides it${where}`,
     ];
   }
 
   return [];
+}
+
+function collectServedPathFailures(
+  rules,
+  relativePath,
+  targetPath,
+  expectedHeader,
+) {
+  return listHeaderScopes(rules).flatMap((scopeHost) =>
+    collectScopeFailures(
+      rules,
+      relativePath,
+      targetPath,
+      expectedHeader,
+      scopeHost,
+    ),
+  );
 }
 
 function collectHeaderFileFailures(

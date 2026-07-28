@@ -167,8 +167,8 @@ describe("wrangler _headers semantics the gate ports", () => {
   });
 
   it("still fails when a domain-scoped rule detaches the noindex off a real pdf", () => {
-    // 域名规则只能减分不能加分，撤销这一侧 fail closed：这里不知道线上跑在哪个
-    // 域名上，宁可多红一次，也不能放一个能被收录的 PDF 出去。
+    // 每个域名各算一遍。在 tucsenberg.com 这个场景里这条撤销真的会跑，PDF 就是
+    // 裸的——哪怕别的域名上它带着 noindex，也不能放行。
     const domainDetach = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -491,8 +491,8 @@ describe("wrangler _headers semantics the gate ports", () => {
   });
 
   it("fails when a domain-scoped rule appends a shorter max-age", () => {
-    // 域名规则同理。它只在那个域名上生效，所以不能当正面证明；但它在那个域名上
-    // 确实把缓存打短了，不能因为「只能减分」就当没看见。
+    // 域名规则同理。它只在 tucsenberg.com 上生效，但在那个场景里它确实把缓存
+    // 打短了，一年缓存那句保证在那里就是假的。
     const domainShortens = [
       EXPECTED_STATIC_ASSET_HEADER_ROUTE,
       `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
@@ -516,6 +516,44 @@ describe("wrangler _headers semantics the gate ports", () => {
     expect(failures).toContainEqual(
       expect.stringContaining(
         `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but max-age=0 overrides it`,
+      ),
+    );
+  });
+
+  it("does not let one host's unset erase another host's damage", () => {
+    // 把所有域名的规则堆在一份状态里算，它们会互相抵消：a.example 加上的
+    // `no-store` 被 b.example 的撤销抹掉，再被后面一条通用规则补回期望值，最后
+    // 一片干净。但这两个域名的规则永远不会同时跑在一个响应上——a.example 上那份
+    // bundle 实际带着 `no-store`，一年缓存那句保证在那里是假的。
+    const twoHosts = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "https://a.example/_next/static/chunks/*",
+      "  Cache-Control: no-store",
+      "",
+      "https://b.example/_next/static/chunks/*",
+      "  ! Cache-Control",
+      "",
+      "/_next/static/chunks/*",
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": twoHosts,
+        ".open-next/assets/_headers": twoHosts,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${BUNDLE_PATH} in public/_headers carries "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" but no-store overrides it on https://a.example`,
       ),
     );
   });

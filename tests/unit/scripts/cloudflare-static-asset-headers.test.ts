@@ -378,6 +378,38 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("fails when a dot-prefixed download loses its noindex", () => {
+    // 点号开头不等于不发布。Workers Assets 只在资产根目录排掉 `.assetsignore`、
+    // `_redirects`、`_headers`，别的照传。跳过它们，一份能被搜索引擎抓到的 PDF
+    // 就完全没人证明过。
+    const hidden = [
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/.secret.pdf",
+      "  ! X-Robots-Tag",
+      "",
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${DOWNLOADS_DIR}/.secret.pdf`]: "%PDF-1.7",
+        "public/_headers": hidden,
+        ".open-next/assets/_headers": hidden,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/.secret.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
   it("does not count a symlink as a provable download", () => {
     // 只区分「目录」和「非目录」的话，符号链接会被当成真实 PDF，于是一个普通
     // 文件都没有的目录也能凑够数，空证明照样全绿。
@@ -401,11 +433,11 @@ describe("Cloudflare static asset headers proof", () => {
     const files = createValidFiles();
     delete files[`${DOWNLOADS_DIR}/catalog.pdf`];
     delete files[`${DOWNLOADS_DIR}/spec-sheet.pdf`];
-    // 留一个只有空子目录的情况：目录不能被算成「有东西可证明」。
-    files[`${DOWNLOADS_DIR}/nested/.keep`] = "";
+    // 子目录里也一个真实文件都没有：目录本身不能被算成「有东西可证明」。
+    files[`${DOWNLOADS_DIR}/nested/linked.pdf`] = "";
 
     const failures = collectCloudflareStaticAssetHeaderFailures(
-      createVirtualRepo(files),
+      createVirtualRepo(files, new Set([`${DOWNLOADS_DIR}/nested/linked.pdf`])),
     );
 
     expect(failures).toContainEqual(
