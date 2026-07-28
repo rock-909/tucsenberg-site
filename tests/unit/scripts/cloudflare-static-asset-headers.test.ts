@@ -91,7 +91,7 @@ describe("Cloudflare static asset headers proof", () => {
     );
 
     expect(failures).toContain(
-      `missing "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" in .open-next/assets/_headers`,
+      `"${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}"`,
     );
   });
 
@@ -120,7 +120,41 @@ describe("Cloudflare static asset headers proof", () => {
 
     expect(failures).toContainEqual(
       expect.stringContaining(
-        'missing "X-Robots-Tag: noindex" in .open-next/assets/_headers',
+        '"/downloads/*" in .open-next/assets/_headers does not carry "X-Robots-Tag: noindex"',
+      ),
+    );
+  });
+
+  it("fails when noindex sits in another route block instead of downloads", () => {
+    // 全文件查字符串会在这里假绿：两个子串都还在文件里，但 PDF 已经能被收录。
+    const misplaced = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      "  Cache-Control: public,max-age=86400",
+      "",
+      "/images/*",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": misplaced,
+        ".open-next/assets/_headers": misplaced,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in public/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
+      ),
+    );
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `"${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in .open-next/assets/_headers does not carry "${EXPECTED_DOWNLOADS_NOINDEX}"`,
       ),
     );
   });

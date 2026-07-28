@@ -18,43 +18,74 @@ function repoFileExists(context, relativePath) {
   return context.existsSync(path.join(context.rootDir, relativePath));
 }
 
+/**
+ * 把 `_headers` 拆成「路由行 + 它底下的响应头行」。
+ *
+ * 全文件查字符串是不够的：noindex 写在 `/images/*` 底下、`/downloads/*` 底下一条
+ * 都没有时，两个子串都还在文件里，检查照样绿，而 PDF 已经能被收录。
+ * 归属必须查，所以要按块解析。
+ */
+function parseHeaderBlocks(headers) {
+  const blocks = [];
+  let current = null;
+
+  for (const rawLine of headers.split("\n")) {
+    const line = rawLine.trim();
+    if (line.length === 0 || line.startsWith("#")) continue;
+
+    if (line.startsWith("/")) {
+      current = { route: line, headerLines: [] };
+      blocks.push(current);
+    } else if (current) {
+      current.headerLines.push(line);
+    }
+  }
+
+  return blocks;
+}
+
+function collectRouteBlockFailures(
+  blocks,
+  relativePath,
+  route,
+  expectedHeader,
+) {
+  const block = blocks.find((candidate) => candidate.route === route);
+
+  if (!block) {
+    return [`missing "${route}" in ${relativePath}`];
+  }
+
+  if (!block.headerLines.includes(expectedHeader)) {
+    return [`"${route}" in ${relativePath} does not carry "${expectedHeader}"`];
+  }
+
+  return [];
+}
+
 function collectHeaderFileFailures(context, relativePath) {
-  const failures = [];
-
   if (!repoFileExists(context, relativePath)) {
-    failures.push(
-      `missing Cloudflare build output header file: ${relativePath}`,
-    );
-    return failures;
+    return [`missing Cloudflare build output header file: ${relativePath}`];
   }
 
-  const headers = readRepoFile(context, relativePath);
+  const blocks = parseHeaderBlocks(readRepoFile(context, relativePath));
 
-  if (!headers.includes(EXPECTED_STATIC_ASSET_HEADER_ROUTE)) {
-    failures.push(
-      `missing "${EXPECTED_STATIC_ASSET_HEADER_ROUTE}" in ${relativePath}`,
-    );
-  }
-
-  if (!headers.includes(EXPECTED_STATIC_ASSET_CACHE_CONTROL)) {
-    failures.push(
-      `missing "${EXPECTED_STATIC_ASSET_CACHE_CONTROL}" in ${relativePath}`,
-    );
-  }
-
-  // 只查 /downloads/* 与 noindex 这两条意图断言，不查缓存秒数——
-  // 缓存时长是业主可调参数，钉死数字会让业主一改就红而意图完全没坏。
-  if (!headers.includes(EXPECTED_DOWNLOADS_HEADER_ROUTE)) {
-    failures.push(
-      `missing "${EXPECTED_DOWNLOADS_HEADER_ROUTE}" in ${relativePath}`,
-    );
-  }
-
-  if (!headers.includes(EXPECTED_DOWNLOADS_NOINDEX)) {
-    failures.push(`missing "${EXPECTED_DOWNLOADS_NOINDEX}" in ${relativePath}`);
-  }
-
-  return failures;
+  // 只查路由与它自己那条意图断言，不查缓存秒数——缓存时长是业主可调参数，
+  // 钉死数字会让业主一改就红而意图完全没坏。
+  return [
+    ...collectRouteBlockFailures(
+      blocks,
+      relativePath,
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+    ),
+    ...collectRouteBlockFailures(
+      blocks,
+      relativePath,
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      EXPECTED_DOWNLOADS_NOINDEX,
+    ),
+  ];
 }
 
 function createCloudflareStaticAssetHeaderContext({
