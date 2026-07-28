@@ -43,7 +43,7 @@ const MAX_HEADER_RULES = 100;
 const HEADER_SEPARATOR = ":";
 const UNSET_OPERATOR = "! ";
 const SPLAT_PATTERN = /\*/gu;
-const PLACEHOLDER_PATTERN = /:[A-Za-z]\w*/gu;
+const NAMED_PLACEHOLDER_PATTERN = /:([A-Za-z]\w*)/gu;
 
 // parseHeaders.ts（cli.js:129213）
 const LINE_IS_PROBABLY_A_PATH = /^([^\s]+:\/\/|^\/)/u;
@@ -171,31 +171,59 @@ function parseWranglerHeaderRules(input) {
 
 /**
  * rules-engine.ts 的 `generateRuleRegExp`。域名占位符是 `[^/.]+`，路径占位符是
- * `[^/]+`，通配符先切后转义。
+ * `[^/]+`，通配符先切后转义，两者都编译成**命名**捕获组。
  *
  * 占位符语法必须照抄：自己按感觉写成 `/:[a-z_]+/gi` 会漏，`\w` 含数字，
  * `:section2` 在 wrangler 眼里是一个完整占位符，会命中 `/downloads/catalog.pdf`。
+ *
+ * 名字也必须照抄，不能图省事换成匿名分组：`/:x/:x` 会生成两个同名捕获组，
+ * `RegExp` 直接抛 `SyntaxError`，`generateRulesMatcher` catch 之后把这条规则整个
+ * 丢掉。换成匿名分组它就成了一条正常规则，底下的 noindex 被算作生效，而线上
+ * 根本没有——假绿。
  */
 function compileRuleSegment(segment, placeholderClass) {
   return segment
     .split("*")
     .map(escapeRegex)
-    .join("(.*)")
-    .replace(PLACEHOLDER_PATTERN, placeholderClass);
+    .join("(?<splat>.*)")
+    .replace(
+      NAMED_PLACEHOLDER_PATTERN,
+      (_match, name) => `(?<${name}>${placeholderClass})`,
+    );
 }
 
+/**
+ * 编译不出来的规则返回 null——和 `generateRulesMatcher` 的 try/catch 一致，整条丢弃。
+ *
+ * 正则不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
+ * `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接抛
+ * 异常，把门禁变成崩溃而不是判断。
+ */
 function ruleToMatcher(rulePath) {
   const absolute = /^https:\/\/([^/]+)(\/.*)?$/u.exec(rulePath);
+  const hostPart = absolute ? (absolute[1] ?? "") : null;
   const pathPart = absolute ? (absolute[2] ?? "") : rulePath;
   const pathSource = compileRuleSegment(pathPart, "[^/]+");
 
-  return {
-    crossHost: absolute !== null,
-    // 不加 `u` 标志，wrangler 也没加（`RegExp(rule)`）。加了反而更严：它转义出来的
-    // `\-` 在 unicode 模式下是非法转义，`/downloads-archive/*` 这种正当规则会直接
-    // 抛异常，把门禁变成崩溃而不是判断。
-    pathPattern: new RegExp(`^${pathSource}$`),
-  };
+  try {
+    // 先按整条规则编译一次。重名捕获组可能跨域名段和路径段
+    // （`https://:x.example/:x`），只编译路径段是看不出来的。
+    const hostSource =
+      hostPart === null
+        ? ""
+        : `https:\\/\\/${compileRuleSegment(hostPart, "[^/.]+")}`;
+    const wholeRulePattern = new RegExp(`^${hostSource}${pathSource}$`);
+
+    return {
+      crossHost: hostPart !== null,
+      // 域名规则只拿路径段去匹配（fail closed 的理由见 resolveEffectiveHeaders），
+      // 但能不能编译要看整条。
+      pathPattern:
+        hostPart === null ? wholeRulePattern : new RegExp(`^${pathSource}$`),
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -283,7 +311,9 @@ function resolveEffectiveHeaders(rules, targetPath) {
   const effective = new Map();
 
   for (const rule of rules) {
-    const { crossHost, pathPattern } = ruleToMatcher(rule.path);
+    const matcher = ruleToMatcher(rule.path);
+    if (matcher === null) continue;
+    const { crossHost, pathPattern } = matcher;
     if (!pathPattern.test(targetPath)) continue;
 
     for (const unsetName of rule.unsetHeaders) {
@@ -300,6 +330,35 @@ function resolveEffectiveHeaders(rules, targetPath) {
   }
 
   return effective;
+}
+
+/**
+ * 磁盘文件名要按 URL pathname 的规则转义之后，才是线上真正被请求的路径。
+ *
+ * 直接拼文件名会漏：`catalog copy.pdf` 在线上是 `/downloads/catalog%20copy.pdf`，
+ * 一条写成 `%20` 的撤销规则会命中它，而门禁拿着带空格的原名去比，什么都没匹配上，
+ * 于是 PDF 能被收录而门禁全绿。空格、`#`、`?`、中文名都是同一类。
+ *
+ * 不能对整条路径用 `encodeURIComponent`，它会把 `/` 也转义掉；也不能整段用，
+ * 它会连 `$&+,:;=@` 一起转义，而 URL pathname 保留这些字符，转多了同样匹配不上。
+ * 所以只转义 URL 规范里 path 段真正会转义的那一组。
+ */
+const PATH_ENCODE_SET = new Set([" ", '"', "#", "<", ">", "?", "`", "{", "}"]);
+const ASCII_PRINTABLE_MAX = 0x7e;
+const ASCII_CONTROL_MAX = 0x1f;
+
+function encodePathSegment(segment) {
+  let encoded = "";
+  for (const character of segment) {
+    const codePoint = character.codePointAt(0) ?? 0;
+    encoded +=
+      codePoint <= ASCII_CONTROL_MAX ||
+      codePoint > ASCII_PRINTABLE_MAX ||
+      PATH_ENCODE_SET.has(character)
+        ? encodeURIComponent(character)
+        : character;
+  }
+  return encoded;
 }
 
 /**
@@ -326,7 +385,9 @@ function listServedPaths(context, sourceDir, urlPrefix, relative = "") {
       }
       // 只有普通文件算数。符号链接、FIFO 这些不是可证明的资源，把它们算进来
       // 等于「目录里没有真实文件」也能凑够数，空证明照样全绿。
-      return entry.isFile() ? [`${urlPrefix}/${next}`] : [];
+      if (!entry.isFile()) return [];
+      const served = next.split("/").map(encodePathSegment).join("/");
+      return [`${urlPrefix}/${served}`];
     })
     .sort();
 }

@@ -840,6 +840,65 @@ describe("Cloudflare static asset headers proof", () => {
     );
   });
 
+  it("fails when an encoded-path rule detaches the noindex off a spaced filename", () => {
+    // 磁盘上叫 `catalog copy.pdf`，线上被请求的路径是 `/downloads/catalog%20copy.pdf`。
+    // 拿带空格的原名去比就什么都匹配不上，这条撤销线上生效而门禁全绿。
+    const encodedDetach = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      EXPECTED_DOWNLOADS_HEADER_ROUTE,
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+      "/downloads/catalog%20copy.pdf",
+      "  ! X-Robots-Tag",
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        [`${DOWNLOADS_DIR}/catalog copy.pdf`]: "%PDF-1.7",
+        "public/_headers": encodedDetach,
+        ".open-next/assets/_headers": encodedDetach,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        "/downloads/catalog%20copy.pdf in public/_headers is served without",
+      ),
+    );
+  });
+
+  it("ignores a rule whose duplicate placeholder names cannot compile", () => {
+    // wrangler 把占位符编译成命名捕获组，`/:x/:x` 会生成两个同名分组，`RegExp`
+    // 直接抛异常，`generateRulesMatcher` catch 之后把这条规则整个丢掉。换成匿名
+    // 分组它就成了一条正常规则，底下的 noindex 被算作生效，而线上根本没有。
+    const duplicateNames = [
+      EXPECTED_STATIC_ASSET_HEADER_ROUTE,
+      `  Cache-Control: ${EXPECTED_STATIC_ASSET_CACHE_CONTROL}`,
+      "",
+      "/:x/:x",
+      `  ${EXPECTED_DOWNLOADS_NOINDEX}`,
+      "",
+    ].join("\n");
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo({
+        ...createValidFiles(),
+        "public/_headers": duplicateNames,
+        ".open-next/assets/_headers": duplicateNames,
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      expect.stringContaining(
+        `${CATALOG_PATH} in public/_headers is served without`,
+      ),
+    );
+  });
+
   it("fails when the static asset output holds nothing to prove", () => {
     // 构建产物没跑或者被清空时，静态资源那一侧同样一条证明都不剩。
     const files = createValidFiles();
