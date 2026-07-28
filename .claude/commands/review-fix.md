@@ -121,9 +121,19 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
     already open — skipping the gate here would make "review before push" true
     only for the first push.
 
-    `git fetch origin` must succeed. Review `origin/main...HEAD` through the
-    companion with `--wait`, collect the report (a background job id is not a
-    report), and stop before push on anything that did not produce one.
+    `git fetch origin` must succeed. Then run:
+
+    ```bash
+    CODEX=$(ls -d "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs | sort -V | tail -1)
+    test -n "$CODEX" && test -f "$CODEX"
+    node "$CODEX" adversarial-review --wait --base origin/main --scope branch
+    ```
+
+    If that returns a job id or still-running status, poll with
+    `node "$CODEX" status <job-id>` and collect the report with
+    `node "$CODEX" result <job-id>`. Non-zero exit, missing companion, empty
+    report, errored, cancelled, or timed-out review means
+    `review_status="unavailable"` and stop before push.
 
 13. **Push**:
     ```bash
