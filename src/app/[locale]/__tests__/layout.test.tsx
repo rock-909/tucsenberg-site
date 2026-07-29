@@ -152,6 +152,21 @@ describe("LocaleLayout", () => {
     });
   });
 
+  // 用 "fr" 而不是 "zh"：这里守的是 layout 自己的非法 locale 边界，跟 middleware 的
+  // 退役 locale 规则是两件事。没有这条，把 layout 里的 `if (!isLocale(locale))`
+  // 整段删掉，这个文件的其他用例照样全绿——它们只传 "en"。
+  it("rejects an invalid locale before rendering the shell", async () => {
+    await expect(
+      LocaleLayout({
+        children: <div>Child</div>,
+        params: Promise.resolve({ locale: "fr" }),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(mockNotFound).toHaveBeenCalledTimes(1);
+    expect(mockSetRequestLocale).not.toHaveBeenCalled();
+  });
+
   describe("font class wiring", () => {
     it("uses the layout font class helper for the html element", async () => {
       mockGetFontClassNames.mockReturnValue("font-contract-sentinel");

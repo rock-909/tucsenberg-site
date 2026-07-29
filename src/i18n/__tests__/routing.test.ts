@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
+import {
+  DYNAMIC_PATHS_CONFIG,
+  PATHS_CONFIG,
+} from "@/config/paths/paths-config";
 import { PATHNAMES } from "@/config/paths/utils";
 
 /**
@@ -34,6 +38,11 @@ vi.mock("next-intl/routing", () => ({
   defineRouting: mockDefineRouting,
 }));
 
+// 全局 setup（src/test/setup.constants-and-i18n.ts）把 `@/i18n/routing` 整个 mock
+// 掉了，那份 mock 还手抄了一整张 pathnames 表。这个文件要测的就是真实模块本身，
+// 不解掉的话下面两条断言比的是那份 mock，跟生产代码没有任何连接。
+vi.unmock("@/i18n/routing");
+
 describe("i18n Routing Configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -58,7 +67,9 @@ describe("i18n Routing Configuration", () => {
     return config;
   }
 
-  it("takes locale truth from LOCALES_CONFIG rather than its own literals", async () => {
+  // 名字只承诺「值一致」。要证明它确实读的是 `LOCALES_CONFIG`，靠的是
+  // `tests/architecture/locale-source-boundary.test.ts` 那道来源约束，不是这里。
+  it("matches the canonical locale configuration", async () => {
     const config = await getRoutingDefinition();
 
     expect(config.locales).toEqual(LOCALES_CONFIG.locales);
@@ -66,12 +77,24 @@ describe("i18n Routing Configuration", () => {
     expect(config.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
   });
 
-  // 从 `PATHNAMES` 全量派生，而不是钉死一份路径清单：加一个页面忘了登记路由，
-  // 这条会红；退役一个页面不该让这里变红。
+  // 从配置全量派生，而不是钉死一份路径清单：加一个页面忘了登记路由，这条会红；
+  // 退役一个页面不该让这里变红。
+  //
+  // 两条断言方向不同，缺一不可。第一条盯 routing-config 有没有在传给 next-intl 之前
+  // 做手脚（过滤、改写、换成手写清单）——正常情况下它就是 `PATHNAMES` 本身，所以
+  // 这条比的是引用。第二条从 `PATHS_CONFIG` 和 `DYNAMIC_PATHS_CONFIG` 独立算一遍
+  // 期望值，这样即使 `createPathnames()` 自己漏了某一类路径也会红。
   it("hands next-intl every registered pathname", async () => {
     const config = await getRoutingDefinition();
 
     expect(config.pathnames).toEqual(PATHNAMES);
+
+    const expectedPaths = [
+      ...Object.values(PATHS_CONFIG).map((paths) => paths.en),
+      ...Object.values(DYNAMIC_PATHS_CONFIG).map((route) => route.pattern),
+    ].sort();
+
+    expect(Object.keys(config.pathnames).sort()).toEqual(expectedPaths);
   });
 
   // Shared pathnames：key 和 value 相同意味着所有语言共用同一个 URL。写成对象形式
@@ -103,18 +126,21 @@ describe("i18n Routing Configuration", () => {
     });
   });
 
-  it("re-exports the same routing object app code imports", async () => {
+  // 用 `toBe` 比对象身份，不是比值：`routing.ts` 造一个字段相同的新对象也会让值相等
+  // 的断言全绿，但那样 app 代码和 middleware 就各拿一份配置了。
+  it("re-exports the very object routing-config built", async () => {
+    const routingConfigModule = await import("@/i18n/routing-config");
     const routingModule = await import("../routing");
 
-    expect(routingModule.routing.locales).toEqual(LOCALES_CONFIG.locales);
-    expect(routingModule.routing.defaultLocale).toBe(
-      LOCALES_CONFIG.defaultLocale,
-    );
+    expect(routingModule.routing).toBe(routingConfigModule.routing);
   });
 
-  it("exposes the locale-aware navigation helpers", async () => {
+  // 光断言四个 helper 存在证明不了什么：它们是 mock 返回的。真正会出错的是
+  // `createNavigation()` 收到的配置——传错一份，Link 就会生成带 /en 前缀的 URL。
+  it("builds the navigation helpers from that same routing object", async () => {
     const routingModule = await import("../routing");
 
+    expect(mockCreateNavigation).toHaveBeenCalledWith(routingModule.routing);
     expect(routingModule.Link).toBeDefined();
     expect(routingModule.redirect).toBeDefined();
     expect(routingModule.usePathname).toBeDefined();
