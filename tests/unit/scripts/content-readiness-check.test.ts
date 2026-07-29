@@ -397,7 +397,7 @@ describe("content-readiness-check", () => {
       }),
       "content/pages/en/about.test.mdx": "placeholder",
       "content/pages/en/about.spec.mdx": "TODO",
-      "public/images/README.md": "placeholder TODO Sample Product",
+      "public/images/ignored.md": "placeholder TODO Sample Product",
       "content/pages/en/about.mdx": "Real company content.",
     });
     fixtureRoots.push(rootDir);

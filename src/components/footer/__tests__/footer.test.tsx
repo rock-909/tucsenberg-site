@@ -2,7 +2,7 @@
  * Footer Component Tests
  *
  * Covers the hairline three-column footer with legal identity bar
- * (spec: docs/design/可迁移设计资产-剖面动画与页脚.md, asset 2).
+ * (docs/design/设计真相.md).
  */
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";

@@ -6,9 +6,6 @@ import { describe, expect, it } from "vitest";
 const ENV_SOURCE_PATH = "src/lib/env.ts";
 const ENV_EXAMPLE_PATH = ".env.example";
 const DEV_VARS_EXAMPLE_PATH = ".dev.vars.example";
-const ENV_DOC_PATH = "docs/项目基础/部署.md";
-const DEPLOY_DOC_PATH = "docs/项目基础/部署.md";
-const QUALITY_PROOF_DOC_PATH = "docs/项目基础/上线验证.md";
 const SENSITIVE_ENV_KEY_PATTERN =
   /(?:_API_KEY|_TOKEN|_SECRET(?:_KEY)?|_ACCESS_KEY|_ENCRYPTION_KEY|_PEPPER(?:_PREVIOUS)?)$/u;
 const SENSITIVE_ENV_KEYS = [
@@ -224,16 +221,6 @@ function sortedStrings(values: Iterable<string>) {
   return Array.from(values).sort();
 }
 
-function collectEnvKeyTokens(source: string) {
-  const tokens = new Set<string>();
-
-  for (const match of source.matchAll(/[A-Z][A-Z0-9_]+/gu)) {
-    tokens.add(match[0]);
-  }
-
-  return tokens;
-}
-
 describe(".env.example parity", () => {
   it("keeps env example aligned with the central runtime env contract", () => {
     const envSource = readRepoFile(ENV_SOURCE_PATH);
@@ -275,26 +262,11 @@ describe(".env.example parity", () => {
     expect(schemaKeys.has("CLOUDFLARE_API_TOKEN")).toBe(false);
   });
 
-  it("documents tooling and proof env keys used outside the runtime schema", () => {
+  it("keeps tooling and proof env keys used outside the runtime schema in the env example", () => {
     const envSource = readRepoFile(ENV_SOURCE_PATH);
     const schemaKeys = getSchemaKeys(envSource);
     const envExample = parseEnvExample(readRepoFile(ENV_EXAMPLE_PATH));
-    const envGuide = readRepoFile(ENV_DOC_PATH);
-    const qualityProofGuide = readRepoFile(QUALITY_PROOF_DOC_PATH);
-    const envGuideKeys = collectEnvKeyTokens(envGuide);
-    const qualityProofGuideKeys = collectEnvKeyTokens(qualityProofGuide);
-    const documentedToolingKeys = new Set<string>();
     const discoveredToolingKeys = new Set<string>();
-
-    for (const key of TOOLING_PROOF_ENV_KEYS) {
-      if (
-        envExample.has(key) ||
-        envGuideKeys.has(key) ||
-        qualityProofGuideKeys.has(key)
-      ) {
-        documentedToolingKeys.add(key);
-      }
-    }
 
     for (const root of TOOLING_ENV_USAGE_ROOTS) {
       for (const filePath of collectFiles(root)) {
@@ -311,10 +283,9 @@ describe(".env.example parity", () => {
     );
 
     for (const key of TOOLING_PROOF_ENV_KEYS) {
-      expect(
-        documentedToolingKeys.has(key),
-        `${key} should be documented in .env.example, ${ENV_DOC_PATH}, or ${QUALITY_PROOF_DOC_PATH}`,
-      ).toBe(true);
+      expect(envExample.has(key), `${key} should remain in .env.example`).toBe(
+        true,
+      );
     }
   });
 
@@ -381,15 +352,8 @@ describe(".env.example parity", () => {
     }
   });
 
-  it("points local dev vars readers at the current deploy docs", () => {
-    const devVarsExample = readRepoFile(DEV_VARS_EXAMPLE_PATH);
-
-    expect(devVarsExample).toContain("docs/项目基础/部署.md");
-  });
-
-  it("documents all sensitive example keys in the env guide", () => {
+  it("keeps all sensitive keys in the env example and server-only", () => {
     const envExample = parseEnvExample(readRepoFile(ENV_EXAMPLE_PATH));
-    const envGuide = readRepoFile(ENV_DOC_PATH);
     const sensitiveEnvKeys = sortedStrings(
       new Set([
         ...SENSITIVE_ENV_KEYS,
@@ -408,38 +372,19 @@ describe(".env.example parity", () => {
         true,
       );
       expect(
-        envGuide,
-        `${key} should be mentioned in ${ENV_DOC_PATH}`,
-      ).toContain(key);
-      expect(
         key.startsWith("NEXT_PUBLIC_"),
         `${key} must stay server-only and must not be public`,
       ).toBe(false);
     }
   });
 
-  it("documents the complete Upstash rate-limit pair in the deployment guide", () => {
-    const deployGuide = readRepoFile(DEPLOY_DOC_PATH);
-
-    expect(deployGuide).toContain("UPSTASH_REDIS_REST_URL");
-    expect(deployGuide).toContain("UPSTASH_REDIS_REST_TOKEN");
-    expect(deployGuide).toContain(
-      "`ALLOW_MEMORY_RATE_LIMIT=true` 是 release/proof blocker",
-    );
-  });
-
-  it("documents deployment-critical keys in the deployment guide", () => {
+  it("keeps deployment-critical keys in the env example", () => {
     const envExample = parseEnvExample(readRepoFile(ENV_EXAMPLE_PATH));
-    const deployGuide = readRepoFile(DEPLOY_DOC_PATH);
 
     for (const key of DEPLOYMENT_CRITICAL_ENV_KEYS) {
       expect(envExample.has(key), `${key} should remain in .env.example`).toBe(
         true,
       );
-      expect(
-        deployGuide,
-        `${key} should be mentioned in ${DEPLOY_DOC_PATH}`,
-      ).toContain(key);
     }
   });
 });

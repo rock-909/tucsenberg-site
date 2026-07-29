@@ -72,7 +72,7 @@ Cloudflare/OpenNext support is not acceptable for a blind migration.
 Next.js warns that `middleware` is deprecated, but this repo treats that as a known
 platform-transition warning, not as a reason to risk the locale-routing entrypoint.
 Current decision record:
-`docs/项目基础/技术栈.md` (`official-doc-only check`).
+`docs/技术栈.md` (`official-doc-only check`).
 No runtime migration test was run for that decision.
 
 For reference only (the migration itself stays shelved): next-intl 4.x official

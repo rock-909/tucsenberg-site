@@ -1,1 +1,0 @@
-OK: .context/audits/full-audit-2026-07-20/audit.config.json is a valid audit config

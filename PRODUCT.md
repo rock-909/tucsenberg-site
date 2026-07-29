@@ -41,6 +41,29 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 3. 规格、FAQ、下载件和 RFQ 字段能减少来回沟通。
 4. 询盘路径稳定，不能因为文档、旧 starter 内容或 profile 机制误导维护者。
 
+## RFQ Conversion
+
+RFQ 和 CTA 要降低“我该怎么问”的成本，不要把表单做成营销问卷。
+
+- 先确认产品兴趣：ABS flood barriers、Aluminum flood gates、Absorbent flood
+  bags、Flood tube dams、FRP flood barriers，或 general inquiry。
+- 鼓励买家补充项目国家/地区、应用场景、预计数量、规格要求、交期压力和附件准备情况。
+- 说明下一步是 Tucsenberg 按产品线、规格和项目背景判断报价或资料需求。
+- 不承诺未经验证的固定价格、固定交期、认证、客户数量、工程案例或国家覆盖。
+
+## Trust and Messaging Rules
+
+Buyer-visible claims must trace to current content, config, product constants, or
+owner source. Process expectations can explain what happens next, but not promise
+fixed timing. Specs, materials, structure, downloads, and FAQ should support the
+buyer's decision.
+
+- Use: factory supply, flood barrier products, OEM / wholesale, request quote,
+  product specifications, application fit, datasheet/PDF download, project
+  requirements.
+- Avoid: fake proof, unsupported certifications, exact price promises, guaranteed
+  timing, vague “best quality”, and decorative badges without a real source.
+
 ## Brand Personality
 
 **三个词：专业、当代、可靠。**
@@ -93,21 +116,17 @@ Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品
 
 - `README.md`
 - `docs/README.md`
-- `docs/项目基础/项目基础.md`
-- `docs/项目基础/内容.md`
-- `docs/项目基础/部署.md`
-- `plans/handoff-report.md`
+- `docs/项目.md`
+- `docs/技术栈.md`
+- `docs/架构与行为.md`
+- `docs/开发与维护.md`
+- `docs/正式上线标准.md`
+- `docs/技术问题与决策.md`
 
 设计与组件治理：
 
 - `DESIGN.md`
 - `docs/design/设计真相.md`
 - `docs/design/组件治理.md`
-- `docs/design/色彩系统.md`
 
-继承 starter/profile 边界：
-
-- `docs/项目基础/派生起步.md`
-- `docs/项目基础/替换顺序.md`
-- `docs/项目基础/派生配置.md`
-- `docs/项目基础/替换边界.md`
+继承 starter/profile 边界已退出当前文档入口；当前维护从 `docs/README.md`、`docs/项目.md`、`docs/开发与维护.md` 和 `docs/正式上线标准.md` 进入。

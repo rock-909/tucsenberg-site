@@ -18,9 +18,8 @@
  *
  * Budget governance:
  * - 继续保留全局 total-byte-weight warning，作为当前黄债信号。
- * - Route-class budget target 记录在
- *   docs/技术难题/Lighthouse预算治理.md.
- * - route-class 目标升成硬断言前，必须先用多次 16 页 full sweep 证明不会制造
+ * - 旧 route-class target 已退役；需要时按 docs/技术问题与决策.md 重建。
+ * - route-class 目标升成硬断言前，必须先用多次 16 页 fresh sweep 证明不会制造
  *   false red。
  *
  * 更新时间：2026-05-24 (Wave 3 budget governance)
@@ -108,8 +107,8 @@ const sharedLighthouseAssertions = {
 
   // ==================== Bundle 大小监控（替代 size-limit）====================
   // Phase 3：总传输大小收紧至 490KB。
-  // 这条继续作为全局 yellow-debt 信号；route-class 目标先记录在
-  // docs/技术难题/Lighthouse预算治理.md，暂不升成硬失败。
+  // 这条继续作为全局 yellow-debt 信号；旧 route-class target 已退役，
+  // 需要时按性能记录重建，暂不升成硬失败。
   "total-byte-weight": ["warn", { maxNumericValue: 490000 }],
 
   // JavaScript 启动时间：4s 阈值（解析、编译、执行时间）

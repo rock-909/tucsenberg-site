@@ -39,6 +39,7 @@ interface ReleaseProofManifestModule {
   readonly getReleaseProofSequence: () => string[];
   readonly getReleaseProofSteps: () => ReleaseProofStep[];
   readonly getReleaseVerifyCommands: () => Array<{
+    readonly id: string;
     readonly command: string;
     readonly args: readonly string[];
     readonly env?: Record<string, string>;
@@ -114,6 +115,35 @@ describe("release proof manifest", () => {
 
     expect(manifest.getReleaseProofDocsCommandBlock()).toBe(
       manifest.getReleaseProofSequence().join("\n"),
+    );
+  });
+
+  it("runs the Cloudflare artifact config proof after the OpenNext build", () => {
+    const manifest = loadReleaseProofManifest();
+    const releaseCommands = manifest.getReleaseVerifyCommands();
+    const cloudflareBuildIndex = releaseCommands.findIndex(
+      (step) => step.id === "cloudflare-build",
+    );
+    const artifactConfigIndex = releaseCommands.findIndex(
+      (step) =>
+        step.command === "node" &&
+        step.args.join(" ") ===
+          "scripts/quality/checks/cloudflare-artifact-config.js",
+    );
+    const playwrightIndex = releaseCommands.findIndex((step) =>
+      step.args.includes("playwright"),
+    );
+    const staticAssetHeadersIndex = releaseCommands.findIndex(
+      (step) => step.id === "cloudflare-static-asset-headers",
+    );
+
+    expect(playwrightIndex).toBeGreaterThanOrEqual(0);
+    expect(playwrightIndex).toBeLessThan(cloudflareBuildIndex);
+    expect(cloudflareBuildIndex).toBeGreaterThanOrEqual(0);
+    expect(artifactConfigIndex).toBe(cloudflareBuildIndex + 1);
+    expect(artifactConfigIndex).toBeLessThan(staticAssetHeadersIndex);
+    expect(manifest.getReleaseProofSequence()[artifactConfigIndex]).toBe(
+      "node scripts/quality/checks/cloudflare-artifact-config.js",
     );
   });
 

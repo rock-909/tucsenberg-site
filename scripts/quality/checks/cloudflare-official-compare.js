@@ -48,7 +48,13 @@ const DEPLOY_WORKFLOW_REQUIRED_COMMANDS = [
 const CLOUDFLARE_SCRIPT_SURFACE_CHECKS = [
   {
     name: "website:build:cf",
-    expected: "pnpm exec opennextjs-cloudflare build",
+    expected:
+      "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+  },
+  {
+    name: "website:build:cf:debug",
+    expected:
+      "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build --noMinify",
   },
 ];
 const DESTRUCTIVE_DEPLOY_SCRIPT_SNIPPETS = [

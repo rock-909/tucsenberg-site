@@ -54,7 +54,7 @@ Use this order:
 
 1. Rules decide the project boundary.
 2. Storybook stories show approved wrapper usage and owner-visible states.
-3. shadcn skill / MCP may be used as an external reference source.
+3. External shadcn docs, CLI, or MCP may be used as reference sources.
 
 Storybook MCP, if enabled by a later approved branch, is an internal component
 knowledge source. It is not a project rule source and is not a default CI hard
@@ -67,7 +67,7 @@ into `src/components/ui/*` with local stories, tests, docs, and governance.
 ## Radix UI foundation
 
 The project uses local UI wrappers plus Radix Primitives. Read
-`docs/决策记录/UI基础方案.md` before changing the UI foundation.
+`docs/技术问题与决策.md` before changing the UI foundation.
 
 - Radix Primitives are approved for complex interactions.
 - Radix-style 1-12 color roles are approved as the color reasoning model.

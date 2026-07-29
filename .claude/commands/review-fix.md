@@ -1,9 +1,9 @@
 # Fix Review Feedback
 
-> **Parked.** CodeRabbit is switched off (`.coderabbit.yaml`), so there are no bot
-> review threads to fetch and this command will report "no review feedback" on
-> every PR. Day-to-day review runs before push — `/pr` Phase 4. This command stays
-> for human review threads and for the case where CodeRabbit is switched back on.
+> **Parked.** Automatic CodeRabbit review is switched off (`.coderabbit.yaml`).
+> Historical bot threads, human reviews, and existing unresolved threads still
+> need to be fetched and addressed. Day-to-day review runs as an independent
+> Codex review before push.
 
 Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
@@ -106,7 +106,7 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
    - If `Review-Fix-Run: 3` or higher found in recent commits → warn user: "This is review-fix round 4+. Consider whether fixes are converging or oscillating."
 
 10. **Run preflight**: `pnpm type-check + pnpm lint:check + pnpm test + pnpm build`
-    - If fails: self-heal (same logic as `/pr` Phase 3, max 3 attempts).
+    - If fails: self-heal inside this command, max 3 attempts.
     - If still fails: abort with diagnosis.
 
 11. **Commit**: Stage all changes and commit:
@@ -115,15 +115,32 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
     - Footer: `Review-Fix-Run: <N>` (increment from last review-fix commit, or `1` if first)
     - Execute `git commit` with HEREDOC message.
 
-12. **Independent Codex review of the fix commit**: same gate as `/pr` step 8,
-    same rules. Fixes written in response to a review are still unreviewed code,
-    and they land on a branch that is already open — skipping the gate here would
-    make "review before push" true only for the first push.
+12. **Independent Codex review of the fix commit**: fixes written in response to
+    a review are still unreviewed code, and they land on a branch that is
+    already open — skipping the gate here would make "review before push" true
+    only for the first push.
 
-    Follow `/pr` step 8 exactly: `git fetch origin` must succeed, review
-    `origin/main...HEAD` through the companion with `--wait`, collect the report
-    (a background job id is not a report), and stop before push on anything that
-    did not produce one.
+    `git fetch origin` must succeed. Then run:
+
+    ```bash
+    CODEX=$(ls -d "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs | sort -V | tail -1)
+    test -n "$CODEX" && test -f "$CODEX"
+    node "$CODEX" adversarial-review --wait --base origin/main --scope branch
+    ```
+
+    If that returns a job id or still-running status, poll with
+    `node "$CODEX" status <job-id>` and collect the report with
+    `node "$CODEX" result <job-id>`. Set exactly one terminal status:
+
+    - `review_status="passed"`: the completed report explicitly contains no
+      actionable findings; continue to push.
+    - `review_status="failed"`: the completed report contains unresolved
+      actionable findings; return to the fix phase and do not push.
+    - `review_status="unavailable"`: the companion is missing, execution exits
+      non-zero, the report is empty, or the review errors, is cancelled, or
+      times out; stop before push.
+
+    A successful tool exit alone does not mean the review passed.
 
 13. **Push**:
     ```bash
@@ -149,7 +166,7 @@ After completion (or abort), append a JSON line to `reports/automation-loop.json
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"review_status":"<passed|skipped|unavailable>","outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"review_status":"<passed|failed|unavailable>","outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
 ```
 
 ## Notes

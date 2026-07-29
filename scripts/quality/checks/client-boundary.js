@@ -5,7 +5,7 @@ const { parse } = require("@babel/parser");
 
 const ROOT = process.cwd();
 
-const BUDGET_PATH = "docs/技术难题/客户端边界预算.json";
+const BUDGET_PATH = "scripts/quality/config/client-boundary-budget.json";
 const CLIENT_BOUNDARY_REPORT_PATH =
   "reports/quality/client-boundary-budget.json";
 const SOURCE_ROOT = "src";

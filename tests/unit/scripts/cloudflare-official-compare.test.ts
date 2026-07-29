@@ -16,6 +16,12 @@ const TEST_TRASH_DIR = path.join(
 );
 const requireModule = createRequire(path.join(REPO_ROOT, "package.json"));
 const tempDirs: string[] = [];
+const CANONICAL_CLOUDFLARE_BUILD_SCRIPTS = {
+  "website:build:cf":
+    "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+  "website:build:cf:debug":
+    "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build --noMinify",
+};
 
 interface Failure {
   readonly file: string;
@@ -55,7 +61,7 @@ function writePassingSideFiles(rootDir: string): void {
     rootDir,
     "package.json",
     JSON.stringify({
-      scripts: { "website:build:cf": "pnpm exec opennextjs-cloudflare build" },
+      scripts: CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
     }),
   );
 }
@@ -70,6 +76,20 @@ function writePassingDeployWorkflow(rootDir: string): void {
       "    steps:",
       '      - run: node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
       "      - run: pnpm exec opennextjs-cloudflare deploy --env production",
+    ].join("\n"),
+  );
+}
+
+function writePassingWranglerConfig(rootDir: string): void {
+  writeFixtureFile(
+    rootDir,
+    "wrangler.jsonc",
+    [
+      "{",
+      '  "main": ".open-next/worker.js",',
+      '  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],',
+      '  "assets": { "binding": "ASSETS" }',
+      "}",
     ].join("\n"),
   );
 }
@@ -160,6 +180,68 @@ describe("Cloudflare official-compare source contract", () => {
       loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
 
     expect(failures).toEqual([]);
+  });
+
+  it("accepts the canonical Cloudflare build script surface", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingDeployWorkflow(rootDir);
+    writePassingWranglerConfig(rootDir);
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([]);
+  });
+
+  it("rejects a Cloudflare build script with the wrong platform value", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingDeployWorkflow(rootDir);
+    writePassingWranglerConfig(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "package.json",
+      JSON.stringify({
+        scripts: {
+          ...CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
+          "website:build:cf":
+            "DEPLOYMENT_PLATFORM=vercel NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+        },
+      }),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({ file: "package.json" }),
+    ]);
+  });
+
+  it("rejects a Cloudflare build script with extra env prefixes", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingDeployWorkflow(rootDir);
+    writePassingWranglerConfig(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "package.json",
+      JSON.stringify({
+        scripts: {
+          ...CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
+          "website:build:cf":
+            "NODE_OPTIONS=--inspect DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+        },
+      }),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({ file: "package.json" }),
+    ]);
   });
 
   it("passes against the real repository configuration", () => {

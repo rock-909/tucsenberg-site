@@ -28,7 +28,7 @@ export interface HeroSectionContent {
   proofItems: HeroSectionProofItem[];
   /**
    * Working-principle drawing (Q1.5 "does this actually work?" —
-   * 视觉翻译-自顶向下设计.md). The product-line index lives in the five cards
+   * docs/design/设计真相.md). The product-line index lives in the five cards
    * below the hero; the hero must not pre-answer it.
    */
   diagram: TucsenbergProductDiagram;

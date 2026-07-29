@@ -4,15 +4,9 @@ node_modules/
 
 # Build outputs
 .next/
-# Isolated build output for `pnpm website:lighthouse` (see lighthouserc.js).
 .next-lighthouse/
 next-env.d.ts
-out/
-dist/
-build/
 storybook-static/
-public/messages/
-.trash-next-artifacts/
 
 # Cache
 .eslintcache
@@ -24,9 +18,9 @@ __pycache__/
 # Environment
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.test
+.env.*.local
+.dev.vars
 
 # IDE
 .idea/
@@ -34,77 +28,33 @@ __pycache__/
 *.swp
 *.swo
 
-# x-reader runtime
-unified_inbox.json
-
-# AI Tools (personal config)
-.agent/
-.continue/
-.factory/
-.kiro/
-.claude/settings.local.json
-.claude/launch.json
-# .claude/skills/ is tracked on purpose (owner 2026-07-26): the pre-merge
-# judgement and the workflow skills are repo assets, not per-machine config.
-# Backups and retired copies below stay ignored.
-.claude/skills-backup-*/
-.claude/skills-reference-*/
-.claude/worktrees/
-.claude-plugin/
-.agents/
-.antigravitycli/
-.impeccable/
-/skills/
-skills-lock.json
-sessions/
-config.json
-views.json
-labels/
-statuses/
-squirrel.toml
-scripts/ralph/
-.firecrawl/
-
 # OS
 .DS_Store
 Thumbs.db
 
 # Test & Reports
-coverage/
 reports/
-playwright-report/
 test-results/
-.playwright-cli/
 
 # Logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
 
-# Vercel
-.vercel/
-
 # Cloudflare
 .open-next/
 .wrangler/
-.dev.vars
-wrangler.toml
 
 # Local MCP config (may contain secrets)
 .mcp.json
 .lighthouseci/
-# next-agents-md
-.next-docs/
 
-# Stryker mutation testing
-.stryker-tmp/
-
-# Codex review loop (runtime state & output)
-.context/
-.claude/review-loop.local.md
-.claude/review-loop.log
-reviews/
-
+# Claude/Codex local state
+.claude/settings.local.json
+.claude/launch.json
+.claude/skills-backup-*/
+.claude/skills-reference-*/
+.claude/worktrees/
 .codex/auth.json
 .codex/history.jsonl
 .codex/log/
@@ -112,9 +62,6 @@ reviews/
 .codex/agents/
 .codex/shell_snapshots/
 
-# Superpowers local state only; committed records use docs/superpowers/specs/ or docs/superpowers/plans/.
+# Superpowers local state only; process records use the tracked root plans/ directory.
 .superpowers/
-.omx/
-.grok/
-.eslintcache-audit
 .worktrees/

@@ -1,6 +1,6 @@
 ---
-name: Showcase Website Starter
-description: Twitter-blue Radix-style starter for OEM/ODM showcase websites. Flat surfaces, generously rounded, single-accent restraint.
+name: Tucsenberg Site Design
+description: Current Tucsenberg design entry for the English B2B catalog site. Flat surfaces, generously rounded, single-accent restraint.
 colors:
   primary: "oklch(0.6723 0.1606 244.9955)"
   primary-foreground: "oklch(1 0 0)"
@@ -123,7 +123,7 @@ components:
     padding: "x 12px, y 4px"
 ---
 
-# Design System: Showcase Website Starter
+# Design System: Tucsenberg Site
 
 ## 1. Overview
 
@@ -152,6 +152,21 @@ also usable as Product-led Industrial B2B.
 This calibration improves the starter's B2B clarity without adopting another
 brand identity. It is not a visual migration and it does not change runtime CSS
 by itself.
+
+### Design draft tooling boundary
+
+AI design tools such as Stitch may be used for visual drafts only. Treat their
+outputs as reference screenshots or rough HTML, not as production code.
+
+Give them only information safe for a public website: page purpose, audience,
+planned sections, visual direction, and already-public product facts. Do not
+send customer lists, pricing strategy, credentials, private supplier details,
+or unreleased business plans to external draft tools.
+
+When a draft is accepted, implement it through the project system:
+`docs/design/设计真相.md`, `docs/design/组件治理.md`, local
+`src/components/ui/*` wrappers, tokens in `src/app/globals.css`, and the
+component governance checks. Do not paste generated vendor HTML into the site.
 
 ### Reference source: Vercel discipline, not identity
 
@@ -215,7 +230,7 @@ motion needs separate visual proof.
 Use CSS and existing state attributes before JavaScript orchestration. Do not
 gate content visibility on animation. Always preserve reduced-motion behavior.
 
-The canonical motion governance rulebook lives in `docs/design/动效治理.md`. This
+The canonical motion governance rulebook lives in `docs/design/设计真相.md`. This
 starter treats motion as a state, hierarchy, and path clarification tool, not as
 decoration. Do not add full-site reveal, page choreography, long durations, or
 new animation dependencies without separate proof.
@@ -268,7 +283,7 @@ new animation dependencies without separate proof.
 ### Hierarchy
 
 - **Display**（600，36px，line-height 1.2）：页面 H1、hero 主标。
-- **Section**（600，24px mobile / 28px desktop，leading-tight）：**普通 section H2**（`.text-section` / `SectionHead`）。这是全站 section 标题权威；详见 `docs/design/页面模式.md`。
+- **Section**（600，24px mobile / 28px desktop，leading-tight）：**普通 section H2**（`.text-section` / `SectionHead`）。这是全站 section 标题权威；详见 `docs/design/设计真相.md`。
 - **Heading**（600，32px mobile / 36px desktop，leading-tight）：较强展示标题（`.text-heading`），**不是**普通 section H2。
 - **Title**（600–700，20–24px，leading-tight）：卡片标题、子区块标题。
 - **Body**（400，16px，leading-relaxed ≈1.625）：正文（`.text-body`）。最大行宽 65–75ch。
@@ -300,7 +315,7 @@ new animation dependencies without separate proof.
 ### Buttons
 
 - **Shape：** 圆角 `--radius-md`（≈18.8px）——"圆润但有边"，不是 pill。
-- **Sizing：** 默认 `h-10`（40px / `--button-height-default`）`px-5 py-2.5`；sm = `h-8`（32px）；lg = `h-12`（48px / `--button-height-lg`）`px-6`。与 `src/app/globals.css` 和 `docs/design/页面模式.md` 一致。
+- **Sizing：** 默认 `h-10`（40px / `--button-height-default`）`px-5 py-2.5`；sm = `h-8`（32px）；lg = `h-12`（48px / `--button-height-lg`）`px-6`。与 `src/app/globals.css` 和 `docs/design/设计真相.md` 一致。
 - **Primary (default)：** 底色 `brand-11`（深蓝），白字，hover 到 `brand-12`。**注意：实际主按钮用的是 `brand-11` 不是 `brand-9`**——为了 4.5:1+ 对比度，比"Twitter 蓝亮色"更深一档。
 - **Secondary：** 底色 `neutral-12`（墨黑），白字，1px border，hover 边框收紧。
 - **Outline：** 透明底，`brand-11` 字 + 2px `brand-11` 边，hover 加 10% wash。
@@ -381,9 +396,9 @@ new animation dependencies without separate proof.
 starter 的"运行时真相"在代码里，不在文档里。修改任何颜色 / 字体 / 圆角前，先读：
 
 - **颜色 / token 运行时**：`src/app/globals.css`（包括 light / dark 两套）
-- **颜色合同**：`docs/design/设计真相.md` 与 `docs/design/色彩系统.md`
+- **颜色合同**：`docs/design/设计真相.md`
 - **组件治理**：`docs/design/组件治理.md`
-- **网站替换面**：`docs/website/`（业主换皮第一站）
+- **网站设计入口**：`docs/design/设计真相.md`（先确认当前方向和边界）
 - **产品上下文**：`PRODUCT.md`
 
 如果代码和本文档不一致，**代码是真相，本文档要追上**——再次运行 `/impeccable document` 重新提取即可。
