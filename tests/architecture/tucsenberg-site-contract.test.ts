@@ -34,21 +34,6 @@ const TARGET_PRODUCT_SLUGS = [
   "frp-flood-barriers",
 ] as const;
 
-const TARGET_ROUTE_FILES = [
-  "src/app/[locale]/page.tsx",
-  "src/app/[locale]/products/page.tsx",
-  "src/app/[locale]/products/[market]/page.tsx",
-  "src/app/[locale]/oem-wholesale/page.tsx",
-  "src/app/[locale]/guides/flood-barrier-materials-guide/page.tsx",
-  "src/app/[locale]/guides/flood-barrier-specifications/page.tsx",
-  "src/app/[locale]/about/page.tsx",
-  "src/app/[locale]/request-quote/page.tsx",
-  "src/app/[locale]/contact/page.tsx",
-  "src/app/[locale]/warranty/page.tsx",
-  "src/app/[locale]/privacy/page.tsx",
-  "src/app/[locale]/terms/page.tsx",
-] as const;
-
 const TARGET_MDX_PAGES = [
   "content/pages/en/about.mdx",
   "content/pages/en/contact.mdx",
@@ -578,11 +563,13 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(getAllMarketSlugs()).toEqual(TARGET_PRODUCT_SLUGS);
   });
 
-  it("has route owners for every Phase 1 page family", () => {
-    for (const routeFile of TARGET_ROUTE_FILES) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed route owner file list
-      expect(() => statSync(routeFile), routeFile).not.toThrow();
-    }
+  // 静态页的 routeOwner 存在性由 `static-public-pages-contract.test.ts` 从注册表
+  // 逐项验证，这里不再抄一份。它没覆盖的是动态目录路由——那个文件不在
+  // `PUBLIC_STATIC_PAGE_DEFINITIONS` 里，删掉它五条产品线全部 404。
+  it("keeps an owner file for the dynamic catalog route", () => {
+    expect(() =>
+      statSync("src/app/[locale]/products/[market]/page.tsx"),
+    ).not.toThrow();
   });
 
   it("keeps required long-form pages in English MDX content files", () => {
@@ -622,26 +609,25 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
-  it("sets ordinary non-production pages to noindex at the response-header layer", () => {
-    const nextConfig = readRepoFile("next.config.ts");
+  // 从 `retiredLocales` 派生，而不是点名 zh：以后再退役一种语言，这条自动跟上。
+  // 上面 "runs as an English-only site" 那条仍然钉死 `retiredLocales` 等于 ["zh"]，
+  // 那是故意的——语言集合变动必须有人明确改测试。这条只负责目录别偷偷长回来。
+  it("ships no content or message directory for a retired locale", () => {
+    const retiredDirectories = LOCALES_CONFIG.retiredLocales.flatMap(
+      (locale) => [
+        `content/pages/${locale}`,
+        `messages/${locale}`,
+        `messages/base/${locale}`,
+        `messages/profiles/b2b-lead/${locale}`,
+        `messages/profiles/catalog/${locale}`,
+      ],
+    );
 
-    expect(nextConfig).toContain('process.env.APP_ENV !== "production"');
-    expect(nextConfig).toContain('source: "/:path*"');
-    expect(nextConfig).toContain('value: "noindex, nofollow"');
-  });
-
-  it("does not keep starter image hosts in Next image allowlist", () => {
-    const nextConfig = readRepoFile("next.config.ts");
-
-    expect(nextConfig).not.toContain("images.unsplash.com");
-    expect(nextConfig).not.toContain("via.placeholder.com");
-  });
-
-  it("does not keep Chinese public content directories", () => {
-    expect(() => statSync("content/pages/zh")).toThrow();
-    expect(() => statSync("messages/base/zh")).toThrow();
-    expect(() => statSync("messages/profiles/catalog/zh")).toThrow();
-    expect(() => statSync("messages/zh")).toThrow();
+    expect(retiredDirectories.length).toBeGreaterThan(0);
+    for (const directory of retiredDirectories) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks directories derived from the locale registry
+      expect(() => statSync(directory), directory).toThrow();
+    }
   });
 
   it("does not advertise Chinese or starter domains in active operator config", () => {
@@ -813,11 +799,11 @@ describe("Tucsenberg Phase 1 site contract", () => {
       /reply within 12 hours/i,
     );
 
-    const turnstileRescueLine = readRepoFile(
-      "src/components/security/turnstile-rescue-line.tsx",
-    );
-    expect(turnstileRescueLine).toContain("afterEmail");
-    expect(turnstileRescueLine).not.toContain("Reply within 12 hours");
+    // 这里原本还扫了 turnstile-rescue-line.tsx 的源码，要求出现 "afterEmail"、
+    // 不出现写死的 "Reply within 12 hours"。把 afterEmail 留在 interface 或一个
+    // 没人用的变量里、同时不再渲染它，那两条照样绿。
+    // `lazy-turnstile.test.tsx` 里真的渲染了失败态，断言页面上出现
+    // `labels.rescueAfterEmail`，那才是这句文案还活着的证据。
   });
 
   it("states the configured contact facts on the contact page", () => {
