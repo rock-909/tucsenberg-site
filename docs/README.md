@@ -1,37 +1,20 @@
 # Tucsenberg Site Docs
 
-这里是 Tucsenberg 当前英文官网的项目知识库。读者是 owner 和 agent。
+docs/ 只保留当前项目真相、维护操作、正式上线标准、仍有效的技术问题与决策。过程材料、审查证据和可由 Git 恢复的历史计划不在这里长期保留。
 
-`docs/` 只保留长期有用的项目基础、技术难题、设计约束和决策记录。Superpowers 只使用当前上游默认的 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**` 两个输出口。
+## 从哪里开始
 
-Superpowers 上游当前默认输出路径是 `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`。早期上游历史曾使用 `docs/plans/**`；本项目不恢复这个旧路径，也不把本地 `.superpowers/**` 当作可提交文档路径。
-
-## 先看哪里
-
-| 你要做什么 | 读这些 |
+| 目标 | 入口 |
 | --- | --- |
-| 了解当前项目 | `项目基础/项目基础.md` -> `项目基础/技术栈.md` |
-| 维护内容、品牌、配置 | `项目基础/内容.md` -> `项目基础/品牌.md` -> `项目基础/配置.md` |
-| 配 Cloudflare / 预览 / 发布 | `项目基础/部署.md` -> `项目基础/上线验证.md` -> `项目基础/发布验证.md` |
-| 看 CI 和质量门 | `项目基础/发布验证.md` -> `项目基础/验证等级.md` -> `项目基础/ReactDoctor政策.md` |
-| 做 UI / 设计调整 | `design/设计真相.md` -> `design/组件治理.md` -> `design/组件使用手册.md` |
-| 查性能、路由、Cloudflare 等难题 | `技术难题/性能记录.md` -> `技术难题/性能实验优化方法论.md` |
-| 查 2026-07 全库审查修复和合并交接 | `技术难题/整库审查2026-07/执行计划.md` |
-| 查 2026-07 整库审查执行计划与现状 | `技术难题/整库审查2026-07/执行计划.md` → `会话交接-M1-SDD.md` |
-| 查已经确认的取舍 | `决策记录/UI基础方案.md` -> `决策记录/Content-as-code与CMS边界.md` |
+| 了解项目 | 项目.md -> 技术栈.md |
+| 理解链路 | 架构与行为.md |
+| 修改内容 | 内容与品牌.md |
+| 开发和 CI | 开发与维护.md |
+| 判断正式上线 | 正式上线标准.md |
+| 查当前技术问题/迁移 | 技术问题与演进.md |
+| 查长期取舍 | 技术决策.md |
+| 改 UI | design/设计真相.md -> design/组件治理.md |
 
-## 当前目录
+## 规则
 
-- `项目基础/`：项目怎么维护、怎么部署、技术栈、配置、内容、品牌、CI/验证和继承边界。
-- `design/`：设计真相、设计系统、组件治理、Storybook 和视觉规则。
-- `技术难题/`：性能、Cloudflare、Next.js 16、路由模式、客户端边界预算等问题记录。
-- `决策记录/`：已经确认过的架构或产品技术决策。
-- `superpowers/`：Superpowers 上游当前默认输出根目录；只放 `specs/**` 和 `plans/**`，不是当前产品真相。
-
-## 不当作当前真相
-
-- `docs/superpowers/specs/**` 和 `docs/superpowers/plans/**`：Superpowers spec / plan 过程记录。
-- 根目录旧执行计划、构建交接材料、starter 派生说明和旧 audit 快照：已退出当前文档入口，只能作为 git 历史或本机 Trash 里的历史证据。
-- 任何旧 `/zh` 路由、旧 starter 域名、旧 branch 名称：只能作为历史证据，不能覆盖当前 English-only 站点事实。
-
-当前版本和运行事实看 `package.json`、lockfile、`AGENTS.md` / `CLAUDE.md`、当前配置和测试结果。
+代码、配置和运行态优先于文档。文档不得维护固定版本表、提交快照、完成计数或历史材料索引。Superpowers 当前未完成过程文件放在根 plans/，不把它们当产品真相。
