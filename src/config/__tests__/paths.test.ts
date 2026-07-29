@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Locale } from "@/config/paths";
+import { isPlaceholder } from "@/config/paths/site-config";
 import {
   DYNAMIC_PATHS_CONFIG,
   getCanonicalPath,
@@ -12,7 +13,6 @@ import {
   LOCALES_CONFIG,
   PATHS_CONFIG,
   SITE_CONFIG,
-  validatePathsConfig,
   type PageType,
 } from "../paths";
 
@@ -21,20 +21,36 @@ import {
  *
  * 1. TypeScript 已经保证的：`const enLocale: Locale = "en"` 然后断言它等于 "en"、
  *    对字面量数组逐项 `typeof === "string"`、`toHaveProperty` 一串编译期就固定的
- *    字段、`Object.freeze` 会不会抛。
+ *    字段。注意「运行时冻结」不在此列：`LocalizedPath.en` 在类型层不是 readonly，
+ *    真正拦住写入的是 `Object.freeze`，所以那两条留下来了，只是改成直接断言冻结
+ *    合同，不再靠给全局配置赋值来试。
  * 2. 自认无效的：三条测试的注释自己写着「would require mocking」「might not work
  *    as expected」，函数体只剩 `typeof` 和 `isArray`；还有两条的断言包在
  *    `if (!validation.isValid)` 里，而当前配置恒 valid，函数体一条都不跑。
- * 3. 文件内重复：`en: "UTC"` 被断言了三次，社交链接和联系方式各两次，
- *    `getRoutingConfig()` 逐字段等于 `LOCALES_CONFIG`（那个函数就是原样透传）。
+ * 3. 文件内重复：`en: "UTC"` 被断言了三次，社交链接和联系方式各两次。
+ *
+ * 另有两个函数连同它们的测试一起退役：`getRoutingConfig()` 和
+ * `validatePathsConfig()` 在生产代码里一个调用者都没有，只被两处再导出。给没人调
+ * 的函数留测试，等于把「实现可以被掏空成一句 return」这件事写进绿灯里。
  *
  * 留下的是有业务语义的：canonical 路径、locale 合约、SEO 可索引性、公开 URL 安全、
  * 原型污染，以及 PageType 穷尽性——新增页面漏配路径会被它抓到。
  */
 
-const PLACEHOLDER_PATTERN = /\[[A-Z0-9_]+\]/;
-const isPlaceholder = (value: string) => PLACEHOLDER_PATTERN.test(value);
-const isHttpUrl = (value: string) => /^https?:\/\/.+/.test(value);
+// 占位符判断复用生产实现（`^\[.+\]$`，首尾锚定）。这个文件原来自己写了一份不带锚的
+// 正则，`"https:// [TWITTER_URL]"`、`"sales[TODO]@bad"` 这种半成品值整串都能通过。
+// URL 也改成真解析：`/^https?:\/\/.+/` 会放行 `"https:// "`。
+const isHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.hostname.length > 0
+    );
+  } catch {
+    return false;
+  }
+};
 const isOptionalUrl = (value: string) => value === "" || isHttpUrl(value);
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isPhone = (value: string) =>
@@ -92,6 +108,17 @@ describe("paths configuration", () => {
         expect(Object.keys(paths)).toEqual(["en"]);
       });
     });
+
+    // `PATHNAMES` 在模块加载时就把路径表缓存下来了，而 `getLocalizedPath()` 每次
+    // 都现读 `PATHS_CONFIG`。少一个 Object.freeze，运行时改掉一条路径就会让路由表、
+    // canonical 和导航链接各说各的。类型层拦不住这件事：`LocalizedPath.en` 不是
+    // readonly。
+    it("freezes every path entry against runtime mutation", () => {
+      expect(Object.isFrozen(PATHS_CONFIG)).toBe(true);
+      Object.values(PATHS_CONFIG).forEach((paths) => {
+        expect(Object.isFrozen(paths)).toBe(true);
+      });
+    });
   });
 
   describe("LOCALES_CONFIG", () => {
@@ -123,6 +150,13 @@ describe("paths configuration", () => {
       expect(getLocaleTimeZone("en")).toBe("UTC");
       expect(getLocaleCurrency("en")).toBe("USD");
     });
+
+    it("freezes the locale registry against runtime mutation", () => {
+      expect(Object.isFrozen(LOCALES_CONFIG)).toBe(true);
+      expect(Object.isFrozen(LOCALES_CONFIG.locales)).toBe(true);
+      expect(Object.isFrozen(LOCALES_CONFIG.timeZones)).toBe(true);
+      expect(Object.isFrozen(LOCALES_CONFIG.currencies)).toBe(true);
+    });
   });
 
   describe("SITE_CONFIG", () => {
@@ -131,15 +165,18 @@ describe("paths configuration", () => {
       expect(SITE_CONFIG.description).toMatch(/flood barrier/iu);
     });
 
-    it("keeps a usable SEO title template", () => {
-      expect(SITE_CONFIG.seo.titleTemplate).toContain("%s");
+    // `toContain("%s")` 放行 `"%ss | Tucsenberg"`：每个页面标题都会多一个字母。
+    // 直接断言渲染结果。
+    it("renders a page title through the SEO template", () => {
+      expect(SITE_CONFIG.seo.titleTemplate.replace("%s", "Contact")).toBe(
+        "Contact | Tucsenberg",
+      );
       expect(SITE_CONFIG.seo.defaultTitle).toBeTruthy();
       expect(SITE_CONFIG.seo.defaultDescription).toBeTruthy();
-      expect(Array.isArray(SITE_CONFIG.seo.defaultDescription)).toBe(false);
-      expect(SITE_CONFIG.seo.defaultDescription.length).toBeGreaterThan(0);
     });
 
-    // 占位符是允许的，半成品 URL 不是：footer 会把这些值直接渲染成链接。
+    // 占位符是允许的，半成品 URL 不是：footer 会把这些值直接渲染成链接，
+    // `structured-data-generators.ts` 还会把它们塞进 JSON-LD 的 `sameAs`。
     it("only ships social links that are placeholders or real URLs", () => {
       Object.values(SITE_CONFIG.social).forEach((link) => {
         expect(isPlaceholder(link) || isOptionalUrl(link)).toBe(true);
@@ -155,6 +192,20 @@ describe("paths configuration", () => {
           isOptionalPhone(contact.phone),
       ).toBe(true);
       expect(isPlaceholder(contact.email) || isEmail(contact.email)).toBe(true);
+    });
+
+    // 上面两条只在当前值合法时是绿的，看不出校验器自己是不是恒真。这条喂已知的
+    // 坏值，证明它们会红。四个都是真见过的半成品形态。
+    it.each([
+      ["https:// [TWITTER_URL]", "占位符没替换完就拼进了 URL"],
+      ["https:// ", "只有协议，没有主机名"],
+      ["sales[TODO]@bad", "占位符嵌在邮箱里"],
+      ["call[TODO]now", "占位符嵌在电话里"],
+    ])("rejects %s as a publishable public value", (value) => {
+      expect(isPlaceholder(value)).toBe(false);
+      expect(isOptionalUrl(value)).toBe(false);
+      expect(isEmail(value)).toBe(false);
+      expect(isOptionalPhone(value)).toBe(false);
     });
   });
 
@@ -317,15 +368,6 @@ describe("paths configuration", () => {
     });
   });
 
-  describe("validatePathsConfig", () => {
-    it("reports the shipped configuration as valid", () => {
-      const result = validatePathsConfig();
-
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toEqual([]);
-    });
-  });
-
   describe("configuration integrity", () => {
     it("round-trips every page type through path and back", () => {
       const pageTypes: PageType[] = [...EXPECTED_STATIC_PAGE_TYPES];
@@ -350,13 +392,6 @@ describe("paths configuration", () => {
       });
 
       expect(configKeys.length).toBe(expectedTypes.length);
-    });
-
-    it("gives every supported locale runtime registry coverage", () => {
-      LOCALES_CONFIG.locales.forEach((locale) => {
-        expect(LOCALES_CONFIG.timeZones).toHaveProperty(locale);
-        expect(LOCALES_CONFIG.currencies).toHaveProperty(locale);
-      });
     });
   });
 });

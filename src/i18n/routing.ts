@@ -10,6 +10,3 @@ export { routing, type Locale } from "@/i18n/routing-config";
 // For middleware/runtime entrypoints, import routing from '@/i18n/routing-config' instead.
 export const { Link, redirect, usePathname, useRouter } =
   createNavigation(routing);
-
-// 导出配置验证函数，供其他模块使用
-export { validatePathsConfig } from "@/config/paths/utils";
