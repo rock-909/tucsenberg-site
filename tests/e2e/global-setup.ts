@@ -1,10 +1,5 @@
 import { chromium, type FullConfig } from "@playwright/test";
-import {
-  installInterferenceGuard,
-  removeInterferingElements,
-  setupTestEnvironment,
-  waitForStablePage,
-} from "./test-environment-setup";
+import { setupTestEnvironment } from "./test-environment-setup";
 
 async function globalSetup(config: FullConfig) {
   console.log("🚀 Starting global setup for Playwright tests...");
@@ -16,7 +11,6 @@ async function globalSetup(config: FullConfig) {
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
-  await installInterferenceGuard(page);
 
   try {
     // 如果设置了 STAGING_URL，使用它；否则使用 baseURL
@@ -35,13 +29,7 @@ async function globalSetup(config: FullConfig) {
     } else {
       await page.goto(baseURL, { waitUntil: "networkidle" });
 
-      // 移除可能的干扰元素
-      await removeInterferingElements(page);
-
-      // 等待页面稳定
-      await waitForStablePage(page);
-
-      console.log("✅ Server is ready and page is stable");
+      console.log("✅ Server is ready");
     }
 
     // Perform any global setup tasks here

@@ -210,6 +210,11 @@ describe("InquiryForm contract", () => {
     fireEvent.change(fullName, { target: { value: "No Token" } });
     fireEvent.change(email, { target: { value: "token@example.com" } });
 
+    // 按钮在拿到令牌前必须是禁用的。把 `disabled={isSubmitting || !turnstileReady}`
+    // 里的 `!turnstileReady` 去掉，下面两条依然全绿——买家点得动，然后收到一次
+    // 假的「安全校验失败」。禁用是第一道，不发请求是第二道，两道都要守。
+    expect(screen.getByRole("button", { name: copy.submit })).toBeDisabled();
+
     await act(async () => {
       fireEvent.submit(form);
     });

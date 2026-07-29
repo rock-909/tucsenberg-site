@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { getHeaderMobileMenuButton } from "./helpers/navigation";
-import {
-  removeInterferingElements,
-  waitForStablePage,
-} from "./test-environment-setup";
 
 test.describe("Preserved navigation state", () => {
   test.describe("mobile menu", () => {
@@ -11,8 +7,6 @@ test.describe("Preserved navigation state", () => {
 
     test.beforeEach(async ({ page }) => {
       await page.goto("/", { waitUntil: "domcontentloaded" });
-      await removeInterferingElements(page);
-      await waitForStablePage(page);
     });
 
     test("returns focus to the trigger after Escape", async ({ page }) => {

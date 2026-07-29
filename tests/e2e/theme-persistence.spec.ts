@@ -1,8 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  acceptCookieBannerIfVisible,
-  waitForStablePage,
-} from "./test-environment-setup";
+import { acceptCookieBannerIfVisible } from "./test-environment-setup";
 
 test("dark theme preference survives a page reload", async ({ page }) => {
   const response = await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -23,7 +20,6 @@ test("dark theme preference survives a page reload", async ({ page }) => {
   await expect(page.locator("html")).toHaveClass(/dark/u);
 
   await page.reload({ waitUntil: "domcontentloaded" });
-  await waitForStablePage(page);
   await expect(page.locator("html")).toHaveClass(/dark/u);
 });
 
@@ -33,7 +29,6 @@ test("theme switcher changes the page theme via keyboard without losing focus", 
   const response = await page.goto("/", { waitUntil: "domcontentloaded" });
   expect(response?.status()).toBe(200);
   await acceptCookieBannerIfVisible(page);
-  await waitForStablePage(page);
 
   const themeGroup = page.getByRole("group", { name: /theme selector/i });
   const lightButton = themeGroup.getByRole("button", {
