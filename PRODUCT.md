@@ -117,10 +117,11 @@ buyer's decision.
 - `README.md`
 - `docs/README.md`
 - `docs/项目.md`
+- `docs/技术栈.md`
 - `docs/架构与行为.md`
 - `docs/开发与维护.md`
 - `docs/正式上线标准.md`
-- `docs/架构与行为.md`
+- `docs/技术问题与决策.md`
 
 设计与组件治理：
 
