@@ -60,11 +60,17 @@ const JSON_HEADERS = { "Content-Type": "application/json" } as const;
  * + Airtable 8 秒（`src/lib/airtable/service.ts` 的
  * `AIRTABLE_REQUEST_TIMEOUT_MS`）。
  *
- * 30 秒把这 23 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。低于这条线的
- * 代价不只是「买家白填一次」：客户端一断开，Cloudflare 会取消 Worker，而中止点
- * 很可能落在「业主邮件已发出、Airtable 记录还没写」之间——买家重发一次，业主就
- * 收到两封邮件，其中一封没有对应的 CRM 记录。不设上限则更糟：连接被中间盒吞掉
- * 时 fetch 既不 resolve 也不 reject，表单会永远停在「提交中」。
+ * 30 秒把这 23 秒整个包住，另留 7 秒给 Worker 冷启动和网络往返。不设上限则更糟：
+ * 连接被中间盒吞掉时 fetch 既不 resolve 也不 reject，表单会永远停在「提交中」。
+ *
+ * 超时只意味着「浏览器不再等了」，不意味着服务端停下了。这里不传幂等键，邮件和
+ * Airtable 也没有绑定这条 abort 信号（Cloudflare 要靠 request-signal 兼容标志才会
+ * 把取消传下去，`wrangler.jsonc` 没开）。所以超时之后结果是未知的：服务端可能仍然
+ * 发出了邮件、写下了记录，买家再提交一次就成了重复询盘。低于这条线只会让这个窗口
+ * 更常撞上。
+ *
+ * 重复本身是业主已经接受的（`docs/项目基础/行为合约.md` BC-024：重复的询盘可以接受，
+ * 丢掉的不行）。哪天不再接受了，要做的是稳定的提交 ID 加供应商幂等，而不是继续调秒数。
  *
  * 这四个数散在四个模块里，加错一次没人会红，所以
  * `__tests__/inquiry-form-submission.test.tsx` 直接 import 它们来对账。
