@@ -27,7 +27,7 @@ cp .dev.vars.example .dev.vars    # Cloudflare 本地预览环境变量
 pnpm dev
 ```
 
-询盘、联系表单和 RFQ 页面需要在 `.env.local` 里填入真实服务密钥，例如 `AIRTABLE_API_KEY`、`AIRTABLE_BASE_ID`、`RESEND_API_KEY`、`TURNSTILE_SECRET_KEY`、`NEXT_PUBLIC_TURNSTILE_SITE_KEY`。完整键位以 `.env.example` 为准；获取与配置方式见 `docs/开发与维护.md`。
+询盘、联系表单和 RFQ 页面需要在 `.env.local` 里填入真实服务配置。服务端密钥包括 `AIRTABLE_API_KEY`、`RESEND_API_KEY` 和 `TURNSTILE_SECRET_KEY`；`NEXT_PUBLIC_TURNSTILE_SITE_KEY` 是浏览器侧公开站点 key。`AIRTABLE_BASE_ID` 等完整键位以 `.env.example` 为准；获取与配置方式见 `docs/开发与维护.md`。
 
 ## 常用命令
 

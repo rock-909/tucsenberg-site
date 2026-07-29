@@ -1,10 +1,9 @@
 # Fix Review Feedback
 
-> **Parked.** CodeRabbit is switched off (`.coderabbit.yaml`), so there are no bot
-> review threads to fetch and this command will report "no review feedback" on
-> every PR. Day-to-day review runs as an independent Codex review before push.
-> This command stays for human review threads and for the case where CodeRabbit
-> is switched back on.
+> **Parked.** Automatic CodeRabbit review is switched off (`.coderabbit.yaml`).
+> Historical bot threads, human reviews, and existing unresolved threads still
+> need to be fetched and addressed. Day-to-day review runs as an independent
+> Codex review before push.
 
 Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
@@ -131,9 +130,17 @@ Fetch unresolved PR review comments, categorize, fix, validate, and push.
 
     If that returns a job id or still-running status, poll with
     `node "$CODEX" status <job-id>` and collect the report with
-    `node "$CODEX" result <job-id>`. Non-zero exit, missing companion, empty
-    report, errored, cancelled, or timed-out review means
-    `review_status="unavailable"` and stop before push.
+    `node "$CODEX" result <job-id>`. Set exactly one terminal status:
+
+    - `review_status="passed"`: the completed report explicitly contains no
+      actionable findings; continue to push.
+    - `review_status="failed"`: the completed report contains unresolved
+      actionable findings; return to the fix phase and do not push.
+    - `review_status="unavailable"`: the companion is missing, execution exits
+      non-zero, the report is empty, or the review errors, is cancelled, or
+      times out; stop before push.
+
+    A successful tool exit alone does not mean the review passed.
 
 13. **Push**:
     ```bash
@@ -159,7 +166,7 @@ After completion (or abort), append a JSON line to `reports/automation-loop.json
 
 ```bash
 mkdir -p reports
-echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"review_status":"<passed|skipped|unavailable>","outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
+echo '{"ts":"<ISO-8601>","command":"review-fix","branch":"<branch>","pr_number":<number>,"run_number":<N>,"threads_total":<count>,"threads_fixed":<count>,"threads_skipped":<count>,"threads_business":<count>,"preflight_pass":<true|false>,"self_heal_rounds":<0-3>,"review_status":"<passed|failed|unavailable>","outcome":"<pushed|aborted|no-action>"}' >> reports/automation-loop.jsonl
 ```
 
 ## Notes
