@@ -165,7 +165,7 @@ errors or markers in the public JSON.
 - A nonce CSP lane needs a proxy-generated nonce plus Cloudflare/OpenNext proof;
   do not mix that into ordinary security cleanup.
 - Current nonce CSP feasibility decision lives in
-  `docs/项目基础/技术栈.md`.
+  `docs/技术栈.md`.
 - CSP reports go to `/api/csp-report`.
 - Each accepted CSP violation is logged once: routine reports use `logger.warn`;
   suspicious patterns use a single `logger.error`.

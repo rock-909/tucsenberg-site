@@ -26,10 +26,9 @@ Use this as the repo-specific audit adapter. It overrides any global
   - `messages/profiles/catalog/**`
   - `.claude/rules/i18n.md`
 - Launch/release proof:
-  - `docs/项目基础/上线验证.md`
-  - `docs/项目基础/发布验证.md`
-  - `docs/项目基础/验证等级.md`
-  - `docs/项目基础/行为合约.md`
+  - `docs/正式上线标准.md`
+  - `docs/开发与维护.md`
+  - `docs/架构与行为.md`
 - Canonical product and route truth:
   - `src/config/pages.config.ts`
   - `src/config/single-site*.ts`

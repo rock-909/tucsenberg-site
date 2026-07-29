@@ -116,17 +116,17 @@ buyer's decision.
 
 - `README.md`
 - `docs/README.md`
-- `docs/项目基础/项目基础.md`
-- `docs/项目基础/内容.md`
-- `docs/项目基础/部署.md`
-- `docs/项目基础/上线验证.md`
-- `docs/项目基础/行为合约.md`
+- `docs/项目.md`
+- `docs/内容与品牌.md`
+- `docs/开发与维护.md`
+- `docs/正式上线标准.md`
+- `docs/架构与行为.md`
 
 设计与组件治理：
 
 - `DESIGN.md`
 - `docs/design/设计真相.md`
 - `docs/design/组件治理.md`
-- `docs/design/色彩系统.md`
+- `docs/design/设计系统.md`
 
-继承 starter/profile 边界已退出当前文档入口；当前维护从 `docs/README.md`、`docs/项目基础/项目基础.md`、`docs/项目基础/配置.md` 和 `docs/项目基础/生命周期.md` 进入。
+继承 starter/profile 边界已退出当前文档入口；当前维护从 `docs/README.md`、`docs/项目.md`、`docs/开发与维护.md` 和 `docs/正式上线标准.md` 进入。

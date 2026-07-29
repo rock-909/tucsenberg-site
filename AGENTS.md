@@ -69,7 +69,7 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 
 - 改 Cloudflare / OpenNext：先 `pnpm build`，再 `pnpm website:build:cf`。
 - 要大范围本地检查：`pnpm website:check`。
-- 涉及上线：按 `docs/项目基础/上线验证.md` 走，然后 `pnpm release:verify`。
+- 涉及上线：按 `docs/正式上线标准.md` 走，然后 `pnpm release:verify`。
 
 ## 参考资料
 

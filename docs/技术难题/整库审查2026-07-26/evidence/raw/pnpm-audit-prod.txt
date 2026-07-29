@@ -1,3 +1,0 @@
-=== pnpm audit prod ===
-No known vulnerabilities found
-EXIT=0

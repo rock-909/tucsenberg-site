@@ -27,7 +27,7 @@ cp .dev.vars.example .dev.vars    # Cloudflare 本地预览环境变量
 pnpm dev
 ```
 
-询盘、联系表单和 RFQ 页面需要在 `.env.local` 里填入真实服务密钥，例如 `AIRTABLE_API_KEY`、`AIRTABLE_BASE_ID`、`RESEND_API_KEY`、`TURNSTILE_SECRET_KEY`、`NEXT_PUBLIC_TURNSTILE_SITE_KEY`。完整键位以 `.env.example` 为准；获取与配置方式见 `docs/项目基础/配置.md` 和 `docs/项目基础/部署.md`。
+询盘、联系表单和 RFQ 页面需要在 `.env.local` 里填入真实服务密钥，例如 `AIRTABLE_API_KEY`、`AIRTABLE_BASE_ID`、`RESEND_API_KEY`、`TURNSTILE_SECRET_KEY`、`NEXT_PUBLIC_TURNSTILE_SITE_KEY`。完整键位以 `.env.example` 为准；获取与配置方式见 `docs/开发与维护.md`。
 
 ## 常用命令
 
@@ -44,11 +44,11 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 ## 主要维护入口
 
 1. `docs/README.md`
-2. `docs/项目基础/项目基础.md`
-3. `docs/项目基础/内容.md`
-4. `docs/项目基础/部署.md`
-5. `docs/项目基础/AI协作边界.md`
-6. `docs/技术难题/整库审查2026-07/执行计划.md`
+2. `docs/项目.md`
+3. `docs/内容与品牌.md`
+4. `docs/开发与维护.md`
+5. `docs/正式上线标准.md`
+6. `docs/技术问题与演进.md`
 
 历史 starter 派生说明已经退出当前文档入口；需要追溯时看 git 历史或本机 Trash，不要把它们当 Tucsenberg 当前站的业务入口。
 
@@ -65,7 +65,7 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 - Vitest / Playwright
 - Cloudflare / OpenNext 1.20.1 / Wrangler 4.100.0
 
-完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/项目基础/技术栈.md`。
+完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/技术栈.md`。
 
 ## 当前内容和配置真相
 

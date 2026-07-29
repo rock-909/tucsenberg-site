@@ -67,7 +67,7 @@ into `src/components/ui/*` with local stories, tests, docs, and governance.
 ## Radix UI foundation
 
 The project uses local UI wrappers plus Radix Primitives. Read
-`docs/决策记录/UI基础方案.md` before changing the UI foundation.
+`docs/技术决策.md` before changing the UI foundation.
 
 - Radix Primitives are approved for complex interactions.
 - Radix-style 1-12 color roles are approved as the color reasoning model.
