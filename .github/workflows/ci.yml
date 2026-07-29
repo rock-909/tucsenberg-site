@@ -236,6 +236,12 @@ jobs:
       - name: 验证 Cloudflare artifact config
         run: node scripts/quality/checks/cloudflare-artifact-config.js
 
+      # 这一步之前只在手动触发的 production 部署里跑过（release:verify）。也就是说
+      # 改坏 public/_headers 的 PR 能一路合进 main，躺到有人手动点一次部署才被拦下。
+      # 上面两次构建已经把它要的 .open-next/assets 建好了，这里跑一次是 0.2 秒。
+      - name: Cloudflare 静态资源响应头
+        run: node scripts/starter-checks.js cf-static-asset-headers
+
       - name: Cloudflare/Wrangler dry-run
         if: ${{ github.event_name != 'pull_request' }}
         run: pnpm exec wrangler deploy --dry-run --env preview
