@@ -20,10 +20,6 @@
         "rules": ["react-doctor/only-export-components"]
       },
       {
-        "files": ["src/components/ui/dropdown-menu.tsx"],
-        "rules": ["deslop/unused-export"]
-      },
-      {
         "files": [".claude/skills/**", ".codex/skills/**"],
         "rules": ["knip/duplicates", "knip/exports", "knip/files", "knip/types"]
       },
@@ -114,10 +110,6 @@
         "rules": ["react-doctor/design-no-space-on-flex-children"]
       },
       {
-        "files": ["src/components/ui/__tests__/label.test.tsx"],
-        "rules": ["react-doctor/design-no-vague-button-label"]
-      },
-      {
         "files": [
           "src/components/seo/__tests__/json-ld-script.test.ts",
           "src/config/__tests__/standards-consistency.test.ts",
@@ -194,22 +186,13 @@
         "rules": ["react-doctor/prefer-html-dialog"]
       },
       {
-        "files": [
-          "src/components/ui/__tests__/input.test.tsx",
-          "src/components/ui/__tests__/label-integration.test.tsx",
-          "src/components/ui/__tests__/label.test.tsx"
-        ],
-        "rules": ["react-doctor/no-generic-handler-names"]
-      },
-      {
         "files": ["src/components/security/turnstile.tsx"],
         "rules": ["react-doctor/no-prop-callback-in-effect"]
       },
       {
         "files": [
           "src/components/ui/badge.tsx",
-          "src/components/ui/separator.tsx",
-          "src/components/ui/textarea.tsx"
+          "src/components/ui/separator.tsx"
         ],
         "rules": ["react-doctor/no-react19-deprecated-apis"]
       },

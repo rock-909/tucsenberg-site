@@ -22,9 +22,6 @@ const STORY_OR_TEST_FILE_PATTERN =
 const SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?)$/;
 const STORY_FILE_PATTERN = /\.(?:stories)\.(?:ts|tsx|js|jsx|mdx)$/;
 const TSX_FILE_PATTERN = /\.tsx$/;
-const UI_CHECKBOX_WRAPPER_IMPORT_PATTERN =
-  /from\s+["'](?:@\/components\/ui\/checkbox|\.\.[^"']*\/ui\/checkbox)["']/;
-const PROTECTED_NATIVE_CHECKBOX_SURFACES = ["src/components/cookie"] as const;
 const REQUIRED_STORY_VALUE = "required";
 const RADIX_LAYER_VALUES = ["primitive", "local"] as const;
 const SURFACE_VALUES = [
@@ -125,65 +122,6 @@ function getUiPrimitiveNames(): string[] {
 function getUiPrimitiveSource(componentName: string): string {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- component paths are built from fixed governance inventory
   return readFileSync(`${UI_WRAPPER_ROOT}/${componentName}.tsx`, "utf8");
-}
-
-function getUiPrimitiveSourceFile(componentName: string): ts.SourceFile {
-  const filePath = `${UI_WRAPPER_ROOT}/${componentName}.tsx`;
-  const source = getUiPrimitiveSource(componentName);
-
-  return ts.createSourceFile(
-    filePath,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX,
-  );
-}
-
-function collectExportedBindingNames(sourceFile: ts.SourceFile): string[] {
-  const names: string[] = [];
-
-  for (const statement of sourceFile.statements) {
-    if (ts.isExportDeclaration(statement) && statement.exportClause) {
-      if (ts.isNamedExports(statement.exportClause)) {
-        for (const element of statement.exportClause.elements) {
-          names.push(element.name.text);
-        }
-      }
-    }
-
-    const isExported =
-      ts.canHaveModifiers(statement) &&
-      ts
-        .getModifiers(statement)
-        ?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
-
-    if (!isExported) {
-      continue;
-    }
-
-    if (ts.isFunctionDeclaration(statement) && statement.name) {
-      names.push(statement.name.text);
-    }
-
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (ts.isIdentifier(declaration.name)) {
-          names.push(declaration.name.text);
-        }
-      }
-    }
-
-    if (ts.isClassDeclaration(statement) && statement.name) {
-      names.push(statement.name.text);
-    }
-  }
-
-  return names;
-}
-
-function getUiPrimitiveExportedNames(componentName: string): string[] {
-  return collectExportedBindingNames(getUiPrimitiveSourceFile(componentName));
 }
 
 function getPackageDependencies(
@@ -317,23 +255,10 @@ describe("component governance", () => {
         surface: "narrative",
       }),
     );
-    expect(registry.components.input).toEqual(
-      expect.objectContaining({
-        radixLayer: "local",
-        surface: "form",
-      }),
-    );
     expect(registry.components["status-callout"]).toEqual(
       expect.objectContaining({
         radixLayer: "local",
         surface: "feedback",
-      }),
-    );
-    expect(registry.components.dialog).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "control",
-        useWhen: expect.stringContaining("modal"),
       }),
     );
     expect(registry.components.sheet).toEqual(
@@ -345,112 +270,32 @@ describe("component governance", () => {
     );
   });
 
-  it("keeps governed primitive metadata and dependency boundaries explicit", () => {
+  it("keeps every governed Radix wrapper backed by a declared dependency", () => {
     const registry = readComponentGovernanceRegistry();
-    const manifest = readPackageManifest();
-    const dependencies = getPackageDependencies(manifest);
+    const dependencies = getPackageDependencies(readPackageManifest());
 
-    expect(registry.components.checkbox).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "form",
-        clientBoundary: "client",
-      }),
-    );
-    expect(registry.components.select).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "form",
-        clientBoundary: "client",
-      }),
-    );
-    expect(registry.components["radio-group"]).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "form",
-        clientBoundary: "client",
-      }),
-    );
+    // 从注册表实际内容派生，而不是钉死一份组件名单：退役一个 wrapper 不该让这里变红，
+    // 但留下一个 import 不到包的 wrapper 必须变红。
+    const undeclared = Object.keys(registry.components)
+      .filter(
+        (componentName) =>
+          registry.components[componentName]?.radixLayer === "primitive",
+      )
+      .map((componentName) => ({
+        componentName,
+        reference: findRadixPackageReference(
+          getUiPrimitiveSource(componentName),
+          `${UI_WRAPPER_ROOT}/${componentName}.tsx`,
+        ),
+      }))
+      .filter(
+        ({ reference }) =>
+          reference !== null && !(reference.specifier in dependencies),
+      )
+      .map(({ componentName }) => componentName);
 
-    expect(registry.components.tabs).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "navigation",
-        clientBoundary: "client",
-      }),
-    );
-    expect(registry.components.tooltip).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "feedback",
-        clientBoundary: "client",
-      }),
-    );
-    expect(registry.components.popover).toEqual(
-      expect.objectContaining({
-        radixLayer: "primitive",
-        surface: "control",
-        clientBoundary: "client",
-      }),
-    );
-
-    expect(dependencies).toHaveProperty("@radix-ui/react-tabs");
-    expect(dependencies).toHaveProperty("@radix-ui/react-tooltip");
-    expect(dependencies).toHaveProperty("@radix-ui/react-popover");
-    expect(dependencies).toHaveProperty("@radix-ui/react-checkbox");
-    expect(dependencies).toHaveProperty("@radix-ui/react-select");
-    expect(dependencies).toHaveProperty("@radix-ui/react-radio-group");
+    expect(undeclared).toEqual([]);
     expect(dependencies).not.toHaveProperty("@radix-ui/themes");
-  });
-
-  it("keeps the completed AIFS primitive wrapper baseline explicit", () => {
-    const registry = readComponentGovernanceRegistry();
-    const requiredPrimitiveWrappers = [
-      "tabs",
-      "tooltip",
-      "popover",
-      "select",
-      "radio-group",
-      "checkbox",
-    ];
-
-    for (const componentName of requiredPrimitiveWrappers) {
-      expect(
-        registry.components,
-        `${componentName} must remain in the governed wrapper baseline`,
-      ).toHaveProperty(componentName);
-      expect(registry.components[componentName]?.radixLayer).toBe("primitive");
-      expect(registry.components[componentName]?.story).toBe(
-        REQUIRED_STORY_VALUE,
-      );
-    }
-  });
-
-  it("detects portal export shapes through AST export names", () => {
-    const fixtureSource = [
-      "export function TooltipPortal() { return null; }",
-      "export const PopoverPortal = PopoverPrimitive.Portal;",
-      "export { Portal as TooltipPortal } from '@radix-ui/react-tooltip';",
-    ].join("\n");
-    const fixtureFile = ts.createSourceFile(
-      "fixture.tsx",
-      fixtureSource,
-      ts.ScriptTarget.Latest,
-      true,
-      ts.ScriptKind.TSX,
-    );
-
-    expect(collectExportedBindingNames(fixtureFile)).toEqual(
-      expect.arrayContaining(["TooltipPortal", "PopoverPortal"]),
-    );
-  });
-
-  it("keeps tooltip and popover portal wrappers internal", () => {
-    const tooltipExports = getUiPrimitiveExportedNames("tooltip");
-    const popoverExports = getUiPrimitiveExportedNames("popover");
-
-    expect(tooltipExports).not.toContain("TooltipPortal");
-    expect(popoverExports).not.toContain("PopoverPortal");
   });
 
   it("keeps required Storybook coverage for registered UI primitives", () => {
@@ -481,25 +326,6 @@ describe("component governance", () => {
         // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
         const source = readFileSync(filePath, "utf8");
         return findRadixPackageReference(source, filePath) !== null;
-      });
-
-    expect(violations).toEqual([]);
-  });
-
-  it("keeps cookie surfaces from importing the Checkbox wrapper before migration proof", () => {
-    const violations = walkFiles(SOURCE_ROOT)
-      .map(normalizePath)
-      .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
-      .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))
-      .filter((filePath) =>
-        PROTECTED_NATIVE_CHECKBOX_SURFACES.some((surfaceRoot) =>
-          filePath.startsWith(`${surfaceRoot}/`),
-        ),
-      )
-      .filter((filePath) => {
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test reads source files
-        const source = readFileSync(filePath, "utf8");
-        return UI_CHECKBOX_WRAPPER_IMPORT_PATTERN.test(source);
       });
 
     expect(violations).toEqual([]);

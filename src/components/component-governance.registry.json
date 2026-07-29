@@ -33,46 +33,6 @@
       "useWhen": "Use for marketing, resources, product story, proof, structured data, and form shells.",
       "avoidWhen": "Do not use where a plain section or control is enough."
     },
-    "checkbox": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "form",
-      "clientBoundary": "client",
-      "useWhen": "Use for optional boolean choices or governed checkbox UI after form semantics are proven for the target flow.",
-      "avoidWhen": "Do not use for cookie consent or other no-JS critical consent flows until migration proof exists."
-    },
-    "dropdown-menu": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "navigation",
-      "clientBoundary": "client",
-      "useWhen": "Use for keyboard-accessible menus such as language or action menus.",
-      "avoidWhen": "Do not handwrite hover-only menus."
-    },
-    "dialog": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "control",
-      "clientBoundary": "client",
-      "useWhen": "Use for modal decisions, confirmations, and focused blocking interactions.",
-      "avoidWhen": "Do not use for drawer-style navigation, non-modal panels, or ordinary page layout."
-    },
-    "input": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "form",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for text, email, search, number, tel, and URL fields.",
-      "avoidWhen": "Do not use for file or hidden inputs that must stay native."
-    },
-    "label": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "form",
-      "clientBoundary": "client",
-      "useWhen": "Use for accessible field labels.",
-      "avoidWhen": "Do not handwrite label behavior in form components."
-    },
     "lazy-island-error-boundary": {
       "story": "required",
       "radixLayer": "local",
@@ -89,22 +49,6 @@
       "useWhen": "Use when the theme switcher should load as a lazy client island.",
       "avoidWhen": "Do not add a second theme switcher path."
     },
-    "popover": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "control",
-      "clientBoundary": "client",
-      "useWhen": "Use for small non-modal panels opened from a trigger for extra context or compact actions.",
-      "avoidWhen": "Do not use for modal decisions, drawer navigation, hover-only menus, or large layout panels."
-    },
-    "radio-group": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "form",
-      "clientBoundary": "client",
-      "useWhen": "Use for mutually exclusive visible choices where all options should be scanned before selection.",
-      "avoidWhen": "Do not use for dropdown selection, multi-select, checkbox consent, or primary navigation."
-    },
     "section-head": {
       "story": "required",
       "radixLayer": "local",
@@ -112,14 +56,6 @@
       "clientBoundary": "server-safe",
       "useWhen": "Use for reusable section title, subtitle, and optional action layout.",
       "avoidWhen": "Do not use as a data card or form control."
-    },
-    "select": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "form",
-      "clientBoundary": "client",
-      "useWhen": "Use for single-choice form selection where native select styling or keyboard behavior needs a governed wrapper.",
-      "avoidWhen": "Do not use for multi-select, checkbox groups, radio choices, or primary navigation."
     },
     "separator": {
       "story": "required",
@@ -137,14 +73,6 @@
       "useWhen": "Use for drawer-style interactions such as mobile navigation.",
       "avoidWhen": "Do not use for ordinary layout panels or Dialog semantics."
     },
-    "social-icons": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "navigation",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for social icon rendering and linked social destinations.",
-      "avoidWhen": "Do not duplicate icon/link mapping in pages."
-    },
     "status-callout": {
       "story": "required",
       "radixLayer": "local",
@@ -152,22 +80,6 @@
       "clientBoundary": "server-safe",
       "useWhen": "Use for info, success, warning, error, unavailable, or form status messages.",
       "avoidWhen": "Do not build ad hoc alert panels in business components."
-    },
-    "tabs": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "navigation",
-      "clientBoundary": "client",
-      "useWhen": "Use for keyboard-accessible content panels with a small set of related sections.",
-      "avoidWhen": "Do not use for primary navigation, FAQ disclosure, or mobile drawer menus."
-    },
-    "textarea": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "form",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for multiline text entry.",
-      "avoidWhen": "Do not handwrite textarea styles in business components."
     },
     "theme-switcher": {
       "story": "required",
@@ -184,14 +96,6 @@
       "clientBoundary": "client",
       "useWhen": "Use only inside the theme switcher visual track.",
       "avoidWhen": "Do not use as a general highlight or badge."
-    },
-    "tooltip": {
-      "story": "required",
-      "radixLayer": "primitive",
-      "surface": "feedback",
-      "clientBoundary": "client",
-      "useWhen": "Use for brief supplemental hints on interactive controls or compact labels.",
-      "avoidWhen": "Do not use for required content, validation errors, or long explanations."
     }
   }
 }
