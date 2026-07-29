@@ -60,7 +60,7 @@ module.exports = {
       name: "no-motion-wrapper-outside-home",
       severity: "error",
       comment:
-        "LCP 首屏边界：非首页不得进入本地 motion wrapper 图（现行动效正本：docs/design/动效治理.md；本 graph 规则 no-motion-wrapper-outside-home 与 tests/architecture/homepage-lcp-motion-boundary.test.ts 共同守护）。间接依赖靠中间模块自身那条直接边被拦住，所以豁免只给首页一个文件——把 components/motion/、lib/motion/ 整目录豁免会让「非首页 → 目录内新 facade → breathing-reveal」两跳全绿通过。",
+        "LCP 首屏边界：非首页不得进入本地 motion wrapper 图（现行动效正本：docs/design/设计真相.md；本 graph 规则 no-motion-wrapper-outside-home 与 tests/architecture/homepage-lcp-motion-boundary.test.ts 共同守护）。间接依赖靠中间模块自身那条直接边被拦住，所以豁免只给首页一个文件——把 components/motion/、lib/motion/ 整目录豁免会让「非首页 → 目录内新 facade → breathing-reveal」两跳全绿通过。",
       from: {
         path: "^src/",
         pathNot: "^src/app/\\[locale\\]/page\\.tsx$",

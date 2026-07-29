@@ -226,7 +226,7 @@ function ProductProofStrip({ items }: { items: readonly string[] }) {
 
 /**
  * "Can I use it on my site?" answered by showing: real photos when delivered,
- * honest schematic bases until then (docs/design/页面模式.md).
+ * honest schematic bases until then (docs/design/设计真相.md).
  */
 function ProductSceneWall({
   scenes,

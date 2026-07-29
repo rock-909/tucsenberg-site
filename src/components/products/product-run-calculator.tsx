@@ -9,7 +9,7 @@ import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
 /**
  * Straight-run unit estimator wired as a quote funnel: it outputs quantities
  * only (never prices) and its CTA carries the configuration into the RFQ
- * message. Design rule: docs/design/页面模式.md.
+ * message. Design rule: docs/design/设计真相.md.
  *
  * Without JS the inputs stay inert but the honest note and the plain
  * request-a-quote CTA below remain a working static entry.

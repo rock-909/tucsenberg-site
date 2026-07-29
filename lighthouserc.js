@@ -18,7 +18,7 @@
  *
  * Budget governance:
  * - 继续保留全局 total-byte-weight warning，作为当前黄债信号。
- * - 旧 route-class target 已退役；需要时按 docs/技术问题与演进.md 重建。
+ * - 旧 route-class target 已退役；需要时按 docs/技术问题与决策.md 重建。
  * - route-class 目标升成硬断言前，必须先用多次 16 页 fresh sweep 证明不会制造
  *   false red。
  *

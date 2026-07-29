@@ -42,7 +42,7 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 
 1. `docs/README.md`
 2. `docs/项目.md`
-3. `docs/内容与品牌.md`
+3. `docs/架构与行为.md`
 4. `docs/开发与维护.md`
 
 ## 规则路由

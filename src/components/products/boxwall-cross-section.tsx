@@ -7,7 +7,7 @@ import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
  * TB-BW self-anchoring principle, drawn live on Canvas 2D: only the water
  * surface moves (two slow sine waves, "light breathing" tier); the barrier,
  * arrows, scale and labels stay still. Spec:
- * docs/design/页面模式.md.
+ * docs/design/设计真相.md.
  *
  * The canvas is a visual enhancement only (aria-hidden); the physical story
  * lives in the panel's caption text. Before hydration — and whenever JS does

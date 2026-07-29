@@ -45,10 +45,10 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 
 1. `docs/README.md`
 2. `docs/项目.md`
-3. `docs/内容与品牌.md`
+3. `docs/架构与行为.md`
 4. `docs/开发与维护.md`
 5. `docs/正式上线标准.md`
-6. `docs/技术问题与演进.md`
+6. `docs/技术问题与决策.md`
 
 历史 starter 派生说明已经退出当前文档入口；需要追溯时看 git 历史或本机 Trash，不要把它们当 Tucsenberg 当前站的业务入口。
 
