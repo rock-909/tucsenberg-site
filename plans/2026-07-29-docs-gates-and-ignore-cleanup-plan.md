@@ -16,11 +16,11 @@
 - Retire: `tests/architecture/ui-component-playbook.test.ts`
 - Modify: `tests/architecture/env-example-parity.test.ts`
 
-- [ ] Move the docs-only link test to Trash.
-- [ ] Remove constants, file reads, and assertions that require `docs/` paths or text from the env parity test.
-- [ ] Preserve `.env.example`, schema, sensitive-key, Turnstile, provider, and safe-default behavior checks.
-- [ ] Run the remaining env parity test and confirm it passes.
-- [ ] Search `tests/`, `scripts/`, and CI configuration to confirm no active check reads real `docs/` files.
+- [x] Move the docs-only link test to Trash.
+- [x] Remove constants, file reads, and assertions that require `docs/` paths or text from the env parity test.
+- [x] Preserve `.env.example`, schema, sensitive-key, Turnstile, provider, and safe-default behavior checks.
+- [x] Run the remaining env parity test and confirm it passes.
+- [x] Search `tests/`, `scripts/`, and CI configuration to confirm no active check reads real `docs/` files.
 
 ### Task 2: Consolidate current documentation
 
@@ -36,24 +36,24 @@
 - Retire: `docs/design/动效治理.md`
 - Modify: current source comments, root guides, and `.claude/rules/**` references that point to retired files
 
-- [ ] Merge content and brand truth into `docs/项目.md`.
-- [ ] Merge durable decisions into `docs/技术问题与演进.md` and rename it to `docs/技术问题与决策.md`.
-- [ ] Merge design system, page pattern, and motion rules into `docs/design/设计真相.md`.
-- [ ] Keep `docs/design/组件治理.md` separate.
-- [ ] Move the five retired Markdown files to Trash.
-- [ ] Update all ordinary references to the nine-file structure.
-- [ ] Confirm no retired path remains and all current local Markdown links resolve.
+- [x] Merge content and brand truth into `docs/项目.md`.
+- [x] Merge durable decisions into `docs/技术问题与演进.md` and rename it to `docs/技术问题与决策.md`.
+- [x] Merge design system, page pattern, and motion rules into `docs/design/设计真相.md`.
+- [x] Keep `docs/design/组件治理.md` separate.
+- [x] Move the five retired Markdown files to Trash.
+- [x] Update all ordinary references to the nine-file structure.
+- [x] Confirm no retired path remains and all current local Markdown links resolve.
 
 ### Task 3: Reduce `.gitignore` to current needs
 
 **Files:**
 - Modify: `.gitignore`
 
-- [ ] Keep active dependency, Next/OpenNext, Lighthouse, Storybook, test-report, environment, IDE, OS, log, Cloudflare, Claude, Codex, Superpowers, and worktree rules.
-- [ ] Remove stale starter build paths, unused AI-tool paths, Vercel/Stryker/review-loop residue, duplicate report paths, `wrangler.toml`, and overly broad root names.
-- [ ] Do not add `plans/` to `.gitignore`.
-- [ ] Confirm current generated and sensitive files remain ignored.
-- [ ] Confirm representative retired paths are no longer ignored.
+- [x] Keep active dependency, Next/OpenNext, Lighthouse, Storybook, test-report, environment, IDE, OS, log, Cloudflare, Claude, Codex, Superpowers, and worktree rules.
+- [x] Remove stale starter build paths, unused AI-tool paths, Vercel/Stryker/review-loop residue, duplicate report paths, `wrangler.toml`, and overly broad root names.
+- [x] Do not add `plans/` to `.gitignore`.
+- [x] Confirm current generated and sensitive files remain ignored.
+- [x] Confirm representative retired paths are no longer ignored.
 
 ### Task 4: Verify and retire the process plan
 
