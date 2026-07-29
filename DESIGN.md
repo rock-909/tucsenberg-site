@@ -398,7 +398,7 @@ starter 的"运行时真相"在代码里，不在文档里。修改任何颜色 
 - **颜色 / token 运行时**：`src/app/globals.css`（包括 light / dark 两套）
 - **颜色合同**：`docs/design/设计真相.md` 与 `docs/design/设计系统.md`
 - **组件治理**：`docs/design/组件治理.md`
-- **网站替换面**：`docs/website/`（业主换皮第一站）
+- **网站设计入口**：`docs/design/设计真相.md`（先确认当前方向和边界）
 - **产品上下文**：`PRODUCT.md`
 
 如果代码和本文档不一致，**代码是真相，本文档要追上**——再次运行 `/impeccable document` 重新提取即可。
