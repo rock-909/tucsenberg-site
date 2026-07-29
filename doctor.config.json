@@ -69,7 +69,6 @@
         "files": [
           "scripts/starter-checks.js",
           "src/app/api/csp-report/__tests__/route-post.test.ts",
-          "src/app/api/csp-report/__tests__/route.test.ts",
           "src/app/api/inquiry/__tests__/route.test.ts",
           "src/lib/__tests__/structured-data.test.ts",
           "src/lib/api/safe-parse-json.ts",
