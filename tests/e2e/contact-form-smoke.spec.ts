@@ -13,9 +13,10 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
  *
  * 1. 跨文件重复：中文入口缺席和 `/zh/contact` 404 在
  *    `tucsenberg-site-smoke.spec.ts` 里已经逐条守着（那边还多守 `/zh` 本身）。
- * 2. 被更强的检查覆盖：两条响应式用例只断言「表单可见」，而
- *    `core-page-visual-calibration.spec.ts` 对 `/contact` 在 390px 和桌面两种视口
- *    下都断言无横向溢出——可见不等于没被挤出屏幕。
+ * 2. 被更强的检查覆盖：移动端那条只断言「表单可见」，而
+ *    `layout-stability.spec.ts` 在 360/412/640/768px 四档验证真实表单可见且不抖，
+ *    `core-page-visual-calibration.spec.ts` 还在 390px 断言无横向溢出。
+ *    大屏那条留下了，理由见下面的用例注释。
  * 3. 挡不住任何东西的门：「加载时间 < 5 秒」是墙钟阈值，慢的时候红的是 CI 不是站点；
  *    「失败请求少于 3 个」等于明说可以挂掉两个 JS/CSS。
  * 4. 文件内重复：字段渲染、必填属性、标签、输入类型原来散在五条里，合并成一条
@@ -84,17 +85,19 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     const fullNameInput = page.getByLabel(/^full name/i);
     await expect(fullNameInput).toHaveAttribute("name", "fullName");
     await expect(fullNameInput).toHaveAttribute("type", "text");
-    await expect(fullNameInput).toHaveAttribute("required", "");
+    // 用单参形式断言「属性在不在」。带值的 `toHaveAttribute("required", "")` 比的是
+    // 属性值，`required="required"` 这种合法写法会让否定断言假绿。
+    await expect(fullNameInput).toHaveAttribute("required");
 
     const emailInput = page.getByLabel(/^email address/i);
     await expect(emailInput).toHaveAttribute("name", "email");
     await expect(emailInput).toHaveAttribute("type", "email");
-    await expect(emailInput).toHaveAttribute("required", "");
+    await expect(emailInput).toHaveAttribute("required");
 
     // message 是选填的：把它变成必填会拦掉只想留联系方式的买家。
     const messageInput = page.getByLabel(/message/i);
     await expect(messageInput).toHaveAttribute("name", "message");
-    await expect(messageInput).not.toHaveAttribute("required", "");
+    await expect(messageInput).not.toHaveAttribute("required");
 
     // 隐私是提交按钮旁的声明式文案，不是复选框；company 字段已退役。
     const privacyNotice = page.getByTestId("form-privacy-notice");
@@ -119,6 +122,22 @@ test.describe("Contact Form - Test-Mode Smoke", () => {
     await expect(
       page.getByRole("button", { name: /send inquiry|submit/i }),
     ).toBeEnabled({ timeout: 15_000 });
+  });
+
+  // 1920px 这条不能并进别的文件：`layout-stability.spec.ts` 最宽只到 768px，
+  // `core-page-visual-calibration.spec.ts` 的桌面档是 1440px，都没到 Tailwind `2xl`
+  // 的 1536px。给表单容器加一个 `2xl:hidden`，上面所有检查都还是绿的，而 1536px 以上
+  // 的买家看不到询盘表单。
+  test("keeps the inquiry form visible past the 2xl breakpoint", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await gotoContactPage(page, test.info());
+
+    await expect(page.getByTestId("inquiry-form")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /send inquiry|submit/i }),
+    ).toBeVisible();
   });
 
   // 联系页有两套表单：JS 到位时的 InquiryForm，和无 JS 时的静态备用壳子
