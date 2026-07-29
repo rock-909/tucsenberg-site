@@ -38,6 +38,25 @@ describe("static public pages architecture contract", () => {
     }
   });
 
+  // 上一条把 `routeOwner` 同时当成「被检查的配置」和「要检查的路径」，所以只要
+  // 改成另一个真实存在的 page.tsx 就照样绿，`/products` 指到首页也发现不了。
+  //
+  // 这条只管一件事：URL 和 owner 目录必须对得上。它自己不是独立真值，两个字段
+  // 一起改错它也是绿的。真值在 `tucsenberg-site-contract.test.ts` 的
+  // `TARGET_STATIC_PATHS`——那份 URL 清单是手写的，注册表改了 URL 它会红。两条
+  // 合起来才封住：一条钉 URL，一条钉 URL 到文件的映射。
+  it("puts each route owner where the page's own URL says it should be", () => {
+    for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
+      const englishPath = definition.localizedPaths.en;
+      const routeDirectory =
+        englishPath === "/" ? "" : `${englishPath.slice(1)}/`;
+
+      expect(definition.routeOwner, englishPath).toBe(
+        `src/app/[locale]/${routeDirectory}page.tsx`,
+      );
+    }
+  });
+
   it("keeps the current PageType set represented by the registry", () => {
     const expected = [
       "home",
