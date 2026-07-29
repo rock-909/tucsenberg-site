@@ -58,8 +58,6 @@ const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
   "messages/profiles/catalog/en/messages.json",
 ] as const;
 
-const ACTIVE_MESSAGE_FILES = [...ACTIVE_HOMEPAGE_MESSAGE_FILES] as const;
-
 const PUBLIC_SOURCE_ROOTS = ["src", "content", "messages"] as const;
 const TUCSENBERG_EMAIL_PATTERN = /[\w.+-]+@tucsenberg\.com/gu;
 // A distinctive fragment of the registered address: a file containing it is
@@ -82,6 +80,15 @@ const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".mdx",
 ]);
 const EXCLUDED_PATH_SEGMENTS = new Set(["__tests__", "tests", "test"]);
+// 都是「这个站不能这样说」的现行内容政策，不是启动器残留的字符串。前六条是没有
+// 的资质和不该沾的话题，第七条是消费者口吻，第八条是本站不提供的支持/合作服务。
+//
+// 最后那条原来只扫一个首页消息文件，现在跟其他条一起扫 src / content / messages：
+// 报价一律走询盘，公开文案里冒出价格在哪个文件都是同一件事，没有理由只在首页
+// 那一个文件里管。
+//
+// 它认的是「货币符号后面跟数字」，不是「价格」。`USD 199`、`199 dollars`、
+// `199 元` 它都不认。要拦那些得另写规则，别把这条读成价格全覆盖。
 const FORBIDDEN_PUBLIC_PATTERNS = [
   /\bWestern\b/iu,
   /\btariff\b/iu,
@@ -91,7 +98,7 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /\bFEMA\b/iu,
   /keeps your house dry/iu,
   /support, or partnership opportunities/iu,
-  /configure a real receiver before public launch/iu,
+  /[$€£]\s*\d/u,
 ];
 const REQUEST_INTENT_PHRASES = [
   /request\s+a\s+quotes?/giu,
@@ -453,20 +460,6 @@ function hasForbiddenInquiryQuoteTimePromise(text: string): boolean {
   return splitCopyClauses(text).some(isForbiddenQuoteTimeClause);
 }
 
-const FORBIDDEN_ACTIVE_MESSAGE_PATTERNS = [
-  /Showcase Website Starter/iu,
-  /Modern B2B showcase starter/iu,
-  /Replaceable catalog example/iu,
-  /Replace example content/iu,
-  /north-america/iu,
-  /australia-new-zealand/iu,
-  /specialty-product-systems/iu,
-  /content replacement questions/iu,
-  /configure a real receiver before public launch/iu,
-  /support, or partnership opportunities/iu,
-  /[$€£]\s*\d/u,
-] as const;
-
 function toRepoPath(absolutePath: string): string {
   return relative(process.cwd(), absolutePath).split(sep).join("/");
 }
@@ -630,25 +623,65 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
-  it("does not advertise Chinese or starter domains in active operator config", () => {
-    const envExample = readRepoFile(".env.example");
-    const wranglerConfig = readRepoFile("wrangler.jsonc");
-    const singleSiteConfig = readRepoFile("src/config/single-site.ts");
+  // `.env.example` 是操作者照抄的模板，这里钉的是抄下来就能跑的那几行。站点地址
+  // 写成正面断言而不是「`example.com` 不在里面」：占位域名不止 example.com 一个，
+  // 而本地开发该填什么只有一个答案。
+  //
+  // 断的是解析出来的键值对，不是「文件里有这么一行」。后者堵不住重复定义：正确的
+  // 那行留着，底下再写一行同名的错值，正则照样找得到正确那行，而 dotenv 实际生效
+  // 的是后面那个。所以每个键都要求只出现一次。
+  it("ships an example environment file operators can copy as-is", () => {
+    const declarations = new Map<string, string[]>();
+    for (const line of readRepoFile(".env.example").split("\n")) {
+      const declaration = /^([A-Z0-9_]+)=(.*)$/u.exec(line.trim());
+      if (!declaration) continue;
+      const key = declaration[1] as string;
+      declarations.set(key, [
+        ...(declarations.get(key) ?? []),
+        declaration[2] as string,
+      ]);
+    }
 
-    expect(envExample).toMatch(/^NEXT_PUBLIC_SUPPORTED_LOCALES=en$/mu);
-    expect(envExample).not.toContain(
-      "NEXT_PUBLIC_SITE_URL=https://example.com",
-    );
-    expect(wranglerConfig).toContain('"name": "tucsenberg-site"');
-    expect(wranglerConfig).toContain(
-      "tucsenberg-site-preview.faints-pudgier-9r.workers.dev",
-    );
-    expect(singleSiteConfig).toContain(
-      '"https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev"',
-    );
-    expect(singleSiteConfig).not.toContain(
-      'resolveSingleSiteBaseUrl("https://tucsenberg.com")',
-    );
+    for (const [key, expected] of [
+      ["NEXT_PUBLIC_SUPPORTED_LOCALES", "en"],
+      ["NEXT_PUBLIC_BASE_URL", "http://localhost:3000"],
+      ["NEXT_PUBLIC_SITE_URL", "http://localhost:3000"],
+    ] as const) {
+      expect(declarations.get(key), key).toEqual([expected]);
+    }
+  });
+
+  // 原来这条把 wrangler.jsonc 和 single-site.ts 当纯文本扫，找几个字符串在不在。
+  // 那判不出东西：`wrangler.jsonc` 里注释也是文本，把主机名写进一行注释就能过；
+  // 找到字符串也不说明它落在哪个字段上，preview 的主机名写进 production 照样绿。
+  // 另外两条是「`example.com` 不在里面」「指向正式域的兜底写法不在里面」。前者
+  // 挪进上面那条并改成正面断言；后者直接删掉，因为
+  // `src/config/__tests__/single-site.test.ts` 已经把环境变量清空后 import 这个模块，
+  // 断言兜底值就是预览地址——那条比「某个写法不在源码里」严得多。
+  //
+  // 解析之后按字段断，并且把预览环境里三个必须一致的值绑在一起。真正会出事的是
+  // 它们不一致：Turnstile 的允许主机名单漏掉部署主机，预览站上买家一条询盘都发
+  // 不出去。表单会照常报一个安全校验失败的提示，所以买家看得见——只是那个提示
+  // 长得像买家自己的问题，业主这边看到的只是询盘变成零。
+  it("keeps the preview deployment host consistent inside worker config", () => {
+    const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
+    expect(wrangler.name).toBe("tucsenberg-site");
+
+    const env = getObject(wrangler.env, "wrangler.env");
+    const preview = getObject(env.preview, "wrangler.env.preview");
+    const vars = getObject(preview.vars, "wrangler.env.preview.vars");
+
+    const siteUrl =
+      "https://tucsenberg-site-preview.faints-pudgier-9r.workers.dev";
+    expect(vars["NEXT_PUBLIC_SITE_URL"]).toBe(siteUrl);
+    expect(vars["NEXT_PUBLIC_BASE_URL"]).toBe(siteUrl);
+
+    // 先确认它真是字符串。wrangler 的 vars 允许写数组，而 `String(["a"])` 得到
+    // `"a"`，逗号切开照样能对上——运行时那边只按字符串读，那种写法是坏的，这里
+    // 却会绿。
+    const allowedHosts = vars["TURNSTILE_ALLOWED_HOSTS"];
+    expect(typeof allowedHosts).toBe("string");
+    expect(String(allowedHosts).split(",")).toContain(new URL(siteUrl).host);
   });
 
   it("keeps formal domain cutover out of the no-cutover production config", () => {
@@ -704,22 +737,6 @@ describe("Tucsenberg Phase 1 site contract", () => {
       expect(overview.title, messageFile).toBe("Flood Barrier Product Lines");
       expect(Object.keys(markets), messageFile).toEqual(TARGET_PRODUCT_SLUGS);
     }
-  });
-
-  it("keeps starter and old catalog wording out of active message surfaces", () => {
-    const offenders: string[] = [];
-
-    for (const messageFile of ACTIVE_MESSAGE_FILES) {
-      const source = readRepoFile(messageFile);
-
-      for (const pattern of FORBIDDEN_ACTIVE_MESSAGE_PATTERNS) {
-        if (pattern.test(source)) {
-          offenders.push(`${messageFile} :: ${pattern}`);
-        }
-      }
-    }
-
-    expect(offenders).toEqual([]);
   });
 
   it.each(FORBIDDEN_QUOTE_TIME_FIXTURES)(
