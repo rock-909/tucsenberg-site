@@ -53,7 +53,6 @@ const {
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
   formatReleaseCommand,
-  getReleaseProofDocsCommandBlock,
   runReleaseVerify,
 } = require("./quality/checks/release-verify");
 const {
@@ -206,7 +205,6 @@ module.exports = {
   assertContentManifestFrontmatterValid,
   generateContentManifest,
   writeFileAtomic,
-  getReleaseProofDocsCommandBlock,
   hasTopLevelUseClientDirective,
   INQUIRY_FORM_CHUNK_MARKER,
   INQUIRY_FORM_MAX_RAW_BYTES,

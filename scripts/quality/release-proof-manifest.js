@@ -262,10 +262,6 @@ function getReleaseVerifyCommands() {
   return RELEASE_PROOF_MANIFEST.steps.map(cloneReleaseVerifyCommand);
 }
 
-function getReleaseProofDocsCommandBlock() {
-  return getReleaseProofSequence().join("\n");
-}
-
 function getManualProofLaneSummaryLines() {
   return RELEASE_PROOF_MANIFEST.manualProofLanes.map(
     (entry) => `  - [${entry.lane}] ${entry.label}: ${entry.command}`,
@@ -277,7 +273,6 @@ module.exports = {
   RELEASE_PROOF_MANIFEST,
   formatReleaseProofCommand,
   getManualProofLaneSummaryLines,
-  getReleaseProofDocsCommandBlock,
   getReleaseProofSequence,
   getReleaseProofSteps,
   getReleaseVerifyCommands,
