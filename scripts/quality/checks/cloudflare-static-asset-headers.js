@@ -518,23 +518,32 @@ function collectScopeFailures(
 }
 
 /**
- * 这份文档所在的那一层目录，跟 `downloads` 是不是磁盘上的同一个目录。
+ * 这份文档是不是就在下载目录里，只是那个目录的名字被文件系统折叠了。
  *
- * 问的是身份，不是名字：`dev` + `ino` 相等才算同一个对象。这两个数由文件系统自己给
- * 出，是它认不认得同一个目录的唯一答案。本机 APFS 实测：磁盘上是 `Downloads/` 时，
- * 按 `downloads` 查到的 `dev:ino` 与按真名查到的完全相同，而同一层的兄弟目录不同。
+ * 两个条件都要成立，缺一个都会吞掉一句业主能照着做的话。
+ *
+ * 一、这一侧的 `downloads` 确实是折叠来的。抑制这句建议的全部正当性，是「该做什么
+ * 另一句红字已经说了」，而那句话只在判 folded 时才出现。别名（符号链接、硬链接）也
+ * 能让两条路径指向同一个对象，但那时 readdir 里躺着一模一样的 `downloads`，判的是
+ * exact，那句话不出现。真机实测：`public/dl` 链到 `downloads` 时，`/dl/catalog.pdf`
+ * 判红，而 `/downloads/*` 那条规则匹配不到这条 URL——「写条规则盖住它」正是他要做的
+ * 事，把整句吞掉，他拿到的是一句无处下手的红字。
+ *
+ * 二、这条 URL 的顶层那一段，跟 `downloads` 是磁盘上的同一个对象。问的是身份，不是
+ * 名字：`dev` + `ino` 相等才算数，这是文件系统自己对「这两条路径是不是同一个东西」的
+ * 回答。本机 APFS 实测：磁盘上是 `Downloads/` 时，按 `downloads` 查到的 `dev:ino` 与
+ * 按真名查到的完全相同，同一层的兄弟目录不同。
  *
  * 名字比不出来。磁盘的折叠表比 JS 的大：本文件 250 行那段实测的 `ſ`（U+017F）在 APFS
  * 上等于 `s`，`"downloadſ".toLowerCase()` 却还是它自己；URL 里那一段还是转义过的
  * （`download%C5%BF`）。
  *
- * 也不能退一步去问「这一层有没有发生折叠」。那是整个目录的性质，跟这份文件在哪毫无
- * 关系。186883c 就是那么写的：`public/Downloads/` 拼错时，`public/marketing/` 底下
- * 那份真正放错地方的报价单也被当成「已经在下载目录里」，唯一那句行动建议随之消失。
- * 它比它要修的那一版抑制得更宽。
+ * 只看第一条也不行。折叠是整个目录的性质，跟这份文件在哪毫无关系：`public/Downloads/`
+ * 拼错时，`public/marketing/` 底下那份真正放错地方的报价单会被一起判成「已经在下载
+ * 目录里」。
  *
- * 站点根上的文件不用另设守卫。`/quotation.pdf` 的第一段是文件名自己，而一个文件跟
- * `downloads` 那个目录永远不是同一个对象，身份判据自己就答了否。
+ * 比的是顶层那一段，不是文件所在的那一层。要答的问题是「这条 URL 在不在 `/downloads/*`
+ * 底下」，`/downloads/2026/quotation.pdf` 归不归 `/downloads/*` 管，只由第一段决定。
  *
  * `dev` 和 `ino` 要一起比：单看 `ino`，跨卷时两个不同的对象会撞号。替身只模一个卷，
  * 所以测试钉住的是 `ino` 那一半，`dev` 这一半没有测试守着——它是这个问法本来就该带
@@ -543,11 +552,16 @@ function collectScopeFailures(
  * 问不出来（stat 失败）时按「不在下载目录里」处理。多说一句建议，最坏是业主看到一句
  * 用不上的话；反过来吞掉，业主拿到的是一句无处下手的红字。
  */
-function sitsInDownloadsDir(context, baseDir, servedPath) {
-  const [, first] = servedPath.split("/");
-  if (first === undefined) return false;
+function sitsInFoldedDownloadsDir(context, baseDir, servedPath) {
+  const folded =
+    resolveServedDirName(context, baseDir, DOWNLOADS_ASSET_SUBDIR).state ===
+    "folded";
+  if (!folded) return false;
 
   const parent = path.join(context.rootDir, baseDir);
+  // 站点根上的文件不用另设守卫：`/quotation.pdf` 的第一段是文件名自己，而一个文件跟
+  // 一个目录永远不是同一个对象，身份判据自己就答了否。
+  const [, first = ""] = servedPath.split("/");
   const here = statOrError(
     context,
     path.join(parent, decodeURIComponent(first)),
@@ -1058,7 +1072,7 @@ function collectPublishedDirectoryFailures(context, directory) {
     // 只是名字被文件系统折叠了的时候，它已经在里面了，真正的动作是改目录名——而那句
     // 话已经由 `collectUnresolvedDirectoryFailures` 说了。
     //
-    // 判据是「这份文件所在的那一层，跟 downloads 是不是同一个目录」，逐份问磁盘。
+    // 判据是「这条 URL 的顶层那一段，是不是那个名字被折叠了的下载目录」，逐份问磁盘。
     // 两侧的目录树不一样，所以两侧各问一次。
     strayDocumentPaths: [
       ...new Set([...sourceDocuments.paths, ...assetDocuments.paths]),
@@ -1068,7 +1082,7 @@ function collectPublishedDirectoryFailures(context, directory) {
       .map((documentPath) => ({
         path: documentPath,
         advise: ![PUBLIC_SOURCE_DIR, directory].some((baseDir) =>
-          sitsInDownloadsDir(context, baseDir, documentPath),
+          sitsInFoldedDownloadsDir(context, baseDir, documentPath),
         ),
       })),
   };

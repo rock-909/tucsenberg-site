@@ -754,6 +754,24 @@ describe("Cloudflare published asset surface", () => {
     );
   });
 
+  it("still tells a pdf reachable through an alias to get a rule", () => {
+    // 快捷方式（符号链接）让两条路径指向磁盘上的同一个目录，但线上是两条不同的 URL，
+    // `/downloads/*` 那条规则只盖得住其中一条。这时候「已经在下载目录里」这个说法对
+    // 磁盘成立、对 URL 不成立：目录名拼写没问题，那句「把目录名改回来」的红字不会
+    // 出现，业主唯一能照做的就是「写条规则盖住它」。整句吞掉，他就无处下手。
+    const files = createValidFiles();
+
+    const failures = collectCloudflareStaticAssetHeaderFailures(
+      createVirtualRepo(files, {
+        symlinkTargets: new Map([["public/dl", DOWNLOADS_DIR]]),
+      }),
+    );
+
+    expect(failures).toContainEqual(
+      '/dl/catalog.pdf in public/_headers is served without "x-robots-tag"; it does not sit under downloads/, so either move it there or write a rule that covers it',
+    );
+  });
+
   it("reads the built tree's own downloads directory, not the source tree's", () => {
     // 下载全部由构建生成、源码里根本没有 `public/downloads/` 时，只问源码那侧会得到
     // 「这里没有下载目录」，于是构建产物里那个拼错名字的下载目录中每一份 PDF 都被劝

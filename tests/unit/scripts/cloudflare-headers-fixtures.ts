@@ -41,6 +41,13 @@ export const BUNDLE_PATH = `/_next/static/chunks/${BUNDLE_NAME}`;
 export interface VirtualRepoOptions {
   /** 这些路径在 readdir 里是符号链接。只进这张表不进文件表就是断链。 */
   symlinks?: Set<string>;
+  /**
+   * 能走通的符号链接：路径到它指向的路径。`statSync` 跟随链接，所以链接和目标是磁盘
+   * 上的同一个对象，`ino` 相同——真实 fs 就是这样，而门禁靠这个数判「这两条路径是不是
+   * 同一个目录」。只有 `symlinks` 那张表的话，替身里的链接永远是断链，「别名」这一整
+   * 类场景在测试里根本摆不出来。只解析一层，够用就好。
+   */
+  symlinkTargets?: Map<string, string>;
   /** 文件系统怎么把「查的名字」折叠成「磁盘上的名字」，默认不折叠。 */
   fold?: (name: string) => string;
   /** readdir 抛 EACCES 的目录。 */
@@ -65,6 +72,7 @@ export function createVirtualRepo(
   files: Record<string, string>,
   {
     symlinks = new Set<string>(),
+    symlinkTargets = new Map<string, string>(),
     fold = (name: string) => name,
     unlistable = new Set<string>(),
     unstattable = new Map<string, string>(),
@@ -90,8 +98,17 @@ export function createVirtualRepo(
     if (!inodes.has(key)) inodes.set(key, inodes.size + 1);
     return inodes.get(key) as number;
   };
+  const follow = (key: string) => {
+    for (const [link, target] of symlinkTargets) {
+      if (key === link) return target;
+      if (key.startsWith(`${link}/`))
+        return `${target}${key.slice(link.length)}`;
+    }
+    return key;
+  };
   const normalize = (absolutePath: string) => {
-    const key = path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
+    const raw = path.relative(ROOT_DIR, absolutePath).split(path.sep).join("/");
+    const key = follow(raw);
     if (files[key] !== undefined) return key;
     return folded.get(fold(key)) ?? key;
   };
@@ -160,9 +177,15 @@ export function createVirtualRepo(
         // 断链：readdir 列得出名字，磁盘上却没有目标，statSync 才抛 ENOENT。
         // 只从 files 推名字的话这一档根本造不出来。
         ...[...symlinks].filter((link) => link.startsWith(prefix)).map(child),
+        // 能走通的链接同理：目标底下的文件不带这个名字，只能从这张表里来。
+        ...[...symlinkTargets.keys()]
+          .filter((link) => link.startsWith(prefix))
+          .map(child),
       ]);
       return [...names].map((name) => {
-        const linked = symlinks.has(`${prefix}${name}`);
+        const linked =
+          symlinks.has(`${prefix}${name}`) ||
+          symlinkTargets.has(`${prefix}${name}`);
         const isDirectory = Object.keys(files).some((file) =>
           file.startsWith(`${prefix}${name}/`),
         );
