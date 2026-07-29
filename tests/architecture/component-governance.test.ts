@@ -3,6 +3,7 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import {
+  collectRadixPackageSpecifiers,
   findRadixPackageReference,
   findRadixThemesReference,
   getExpectedClientBoundary,
@@ -281,18 +282,16 @@ describe("component governance", () => {
         (componentName) =>
           registry.components[componentName]?.radixLayer === "primitive",
       )
-      .map((componentName) => ({
-        componentName,
-        reference: findRadixPackageReference(
+      .flatMap((componentName) =>
+        collectRadixPackageSpecifiers(
           getUiPrimitiveSource(componentName),
           `${UI_WRAPPER_ROOT}/${componentName}.tsx`,
-        ),
-      }))
-      .filter(
-        ({ reference }) =>
-          reference !== null && !(reference.specifier in dependencies),
+        ).map((specifier) => ({ componentName, specifier })),
       )
-      .map(({ componentName }) => componentName);
+      .filter(({ specifier }) => !(specifier in dependencies))
+      .map(
+        ({ componentName, specifier }) => `${componentName} -> ${specifier}`,
+      );
 
     expect(undeclared).toEqual([]);
     expect(dependencies).not.toHaveProperty("@radix-ui/themes");

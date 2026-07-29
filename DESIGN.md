@@ -343,7 +343,7 @@ new animation dependencies without separate proof.
 - **Padding：** `px-4 py-1`。
 - **Border：** 1px `border-input`，hover 不变，focus-visible 时变 `border-ring` + 3px `ring/50` 外晕。
 - **Error：** `aria-invalid` 时 border 切到 `destructive`、ring 切到 `destructive/20`。
-- **文本输入控件：** 统一走本地 `Input` / `Textarea`，使用原生元素、Tailwind 和项目 token；Radix Themes 已退役。
+- **文本输入控件：** 统一走原生 `<input>` / `<textarea>`，配 Tailwind 和项目 token；Radix Themes 已退役。
 
 ### Badges
 

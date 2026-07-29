@@ -105,6 +105,20 @@ function getRadixModuleReferenceSummary(
   };
 }
 
+// 只取第一个匹配会漏掉同一个 wrapper 里的第二个 Radix import，架构测试要的是全部。
+function collectRadixPackageSpecifiers(
+  source,
+  filePath = "component-governance-source.tsx",
+) {
+  return [
+    ...new Set(
+      collectModuleReferences(source, filePath)
+        .map(({ specifier }) => specifier)
+        .filter((specifier) => RADIX_PACKAGE_PATTERN.test(specifier)),
+    ),
+  ];
+}
+
 function collectCssImportReferences(source) {
   const references = [];
   const root = postcss.parse(source, { from: undefined });
@@ -194,4 +208,5 @@ module.exports = {
   findRadixPackageReference,
   findRadixPrimitiveReference,
   findRadixThemesReference,
+  collectRadixPackageSpecifiers,
 };

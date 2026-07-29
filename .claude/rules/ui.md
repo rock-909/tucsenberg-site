@@ -100,22 +100,18 @@ Use this judgment split:
   section composition.
 - `Card`: marketing, resources, product story, proof, structured data, form
   shells, and fallback panels.
-- `Dialog`: blocking decisions, confirmations, and focused modal interaction.
 - `Sheet`: drawer-style interactions such as mobile navigation.
-- `Popover`: small non-modal panels, compact actions, or extra context.
-- `Tooltip`: brief optional hints only. Do not put required content,
-  validation errors, or long explanations only in a tooltip.
-- `Tabs`: same-page related content panels. Do not use tabs for primary
-  navigation, FAQ disclosure, or mobile drawers.
 - FAQ disclosure stays native `<details>/<summary>`.
-- Use the governed `Checkbox` wrapper for new non-critical checkbox UI.
-- Cookie consent and other no-JS critical consent checkboxes remain
-  migration-proof-first: do not migrate them until wrapper-specific FormData,
-  no-JS fallback, label click, consent state, and stable E2E locator behavior
-  are proven.
-- Contact and Request Quote share the same `InquiryForm`, `Input`, `Textarea`,
-  `Card`, and static fallback; there is no privacy consent checkbox on either
-  page.
+- Form controls are native `<input>`, `<textarea>`, `<label>`, and `<checkbox>`
+  with project tokens. The Radix wrappers for these were retired on 2026-07-29
+  because nothing rendered them — `src/components/ui` now holds only what a page
+  actually imports.
+- Reintroducing a governed wrapper for a control that already ships natively is
+  a migration, not a swap. Prove FormData behavior, the no-JS fallback, label
+  click, control state, and a stable E2E locator before replacing a live one —
+  cookie consent and the inquiry fields are the surfaces this protects.
+- Contact and Request Quote share the same `InquiryForm`, `Card`, and static
+  fallback; there is no privacy consent checkbox on either page.
 
 ## Mobile navigation boundaries
 
