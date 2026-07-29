@@ -65,7 +65,7 @@ describe("HeroSection", () => {
     expect(within(panel).getByText(heroCopy.diagram.panelLabel)).toBeVisible();
     expect(within(panel).getByText(heroCopy.diagram.caption)).toBeVisible();
     // The five product cards below the hero own the line index; the hero
-    // must not duplicate it (视觉翻译-自顶向下设计.md, home §1).
+    // must not duplicate it (docs/design/页面模式.md, home hierarchy).
     expect(screen.queryByTestId("hero-preview-card")).not.toBeInTheDocument();
   });
 

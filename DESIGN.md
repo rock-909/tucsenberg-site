@@ -164,7 +164,7 @@ send customer lists, pricing strategy, credentials, private supplier details,
 or unreleased business plans to external draft tools.
 
 When a draft is accepted, implement it through the project system:
-`docs/design/设计真相.md`, `docs/design/组件使用手册.md`, local
+`docs/design/设计真相.md`, `docs/design/组件治理.md`, local
 `src/components/ui/*` wrappers, tokens in `src/app/globals.css`, and the
 component governance checks. Do not paste generated vendor HTML into the site.
 
@@ -396,7 +396,7 @@ new animation dependencies without separate proof.
 starter 的"运行时真相"在代码里，不在文档里。修改任何颜色 / 字体 / 圆角前，先读：
 
 - **颜色 / token 运行时**：`src/app/globals.css`（包括 light / dark 两套）
-- **颜色合同**：`docs/design/设计真相.md` 与 `docs/design/色彩系统.md`
+- **颜色合同**：`docs/design/设计真相.md` 与 `docs/design/设计系统.md`
 - **组件治理**：`docs/design/组件治理.md`
 - **网站替换面**：`docs/website/`（业主换皮第一站）
 - **产品上下文**：`PRODUCT.md`

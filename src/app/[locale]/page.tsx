@@ -318,7 +318,7 @@ function HomeBuyingProcessSection({
 
 /**
  * Q5 summary — "can this company be verified?" answered on the page flow,
- * before the buyer has to hunt for About (视觉翻译-自顶向下设计.md, home §5).
+ * before the buyer has to hunt for About (docs/design/页面模式.md, home hierarchy).
  */
 function HomeVerifySection({ t }: { t: HomeTranslator }) {
   return (

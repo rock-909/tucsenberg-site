@@ -12,8 +12,8 @@ import { describe, expect, it } from "vitest";
 const LINK_CHECKED_DOCS = [
   { name: "docs 入口", path: "docs/README.md", siblingDir: "docs" },
   {
-    name: "组件使用手册",
-    path: "docs/design/组件使用手册.md",
+    name: "组件治理",
+    path: "docs/design/组件治理.md",
     siblingDir: "docs/design",
   },
 ] as const;

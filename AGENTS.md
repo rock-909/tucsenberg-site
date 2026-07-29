@@ -104,6 +104,6 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 ## AI 前端体系
 
-治理正本：`docs/design/组件使用手册.md`、`docs/design/设计真相.md`、
+治理正本：`docs/design/组件治理.md`、`docs/design/设计真相.md`、
 `.claude/rules/ui.md`，加上组件治理测试。`src/components/ui/*` 是正式的 UI 入口，
 测试和 `pnpm component:check` 是硬门槛。

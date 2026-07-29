@@ -8,7 +8,7 @@ import { Link } from "@/i18n/routing";
 /**
  * Hairline B2B footer: wide brand column + two link columns over a legal
  * identity bar. Flat surface, no colour blocks — the only accent is the
- * wordmark's "=" mark. Spec: docs/design/可迁移设计资产-剖面动画与页脚.md.
+ * wordmark's "=" mark. Design rule: docs/design/设计真相.md.
  */
 
 type FooterColumnConfig = (typeof FOOTER_COLUMNS)[number];
