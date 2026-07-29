@@ -117,7 +117,8 @@ vi.mock("@/config/footer-links", () => ({
 
 vi.mock("@/i18n/locale-utils", () => ({
   coerceLocale: (locale: string) => locale,
-  isLocale: (locale: string) => locale === "en" || locale === "zh",
+  // 跟着生产走：zh 是退役 locale，middleware 对 /zh 直接 404，layout 收不到它。
+  isLocale: (locale: string) => locale === "en",
 }));
 
 vi.mock("@/lib/navigation", () => ({
@@ -126,7 +127,7 @@ vi.mock("@/lib/navigation", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -151,15 +152,19 @@ describe("LocaleLayout", () => {
     });
   });
 
-  describe("locale validation", () => {
-    it("should have valid locale configuration", async () => {
-      // Import routing config to verify locale setup
-      const { routing } = await import("@/i18n/routing");
+  // 用 "fr" 而不是 "zh"：这里守的是 layout 自己的非法 locale 边界，跟 middleware 的
+  // 退役 locale 规则是两件事。没有这条，把 layout 里的 `if (!isLocale(locale))`
+  // 整段删掉，这个文件的其他用例照样全绿——它们只传 "en"。
+  it("rejects an invalid locale before rendering the shell", async () => {
+    await expect(
+      LocaleLayout({
+        children: <div>Child</div>,
+        params: Promise.resolve({ locale: "fr" }),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
 
-      expect(routing.locales).toContain("en");
-      expect(routing.locales).toContain("zh");
-      expect(routing.defaultLocale).toBe("en");
-    });
+    expect(mockNotFound).toHaveBeenCalledTimes(1);
+    expect(mockSetRequestLocale).not.toHaveBeenCalled();
   });
 
   describe("font class wiring", () => {
@@ -188,17 +193,6 @@ describe("LocaleLayout", () => {
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
       expect(document.querySelectorAll("script")).toHaveLength(0);
       expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
-    });
-
-    it("renders the skip link from the accessibility namespace", async () => {
-      const page = await LocaleLayout({
-        children: <div>Child</div>,
-        params: Promise.resolve({ locale: "zh" }),
-      });
-
-      await renderAsyncPage(page);
-
-      expect(screen.getByText("Skip to main content")).toBeInTheDocument();
     });
   });
 });
