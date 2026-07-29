@@ -626,6 +626,8 @@ describe("/api/inquiry route", () => {
         expect.any(String),
         "inquiry",
       );
+      // 一次提交只能扣一次额度。多查一次不会报错，只会让买家的配额悄悄减半。
+      expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
     });
 
     it("returns a success-shaped reference for a filled website honeypot", async () => {
