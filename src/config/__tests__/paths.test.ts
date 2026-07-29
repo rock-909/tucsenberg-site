@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { Locale } from "@/config/paths";
 import {
   DYNAMIC_PATHS_CONFIG,
@@ -9,14 +9,28 @@ import {
   getPageTypeFromPath,
   getPathnames,
   getProductMarketPath,
-  getRoutingConfig,
   LOCALES_CONFIG,
   PATHS_CONFIG,
   SITE_CONFIG,
   validatePathsConfig,
-  type LocalizedPath,
   type PageType,
 } from "../paths";
+
+/**
+ * 这个文件 2026-07-29 从 57 条收到 30 条。删掉的分三类：
+ *
+ * 1. TypeScript 已经保证的：`const enLocale: Locale = "en"` 然后断言它等于 "en"、
+ *    对字面量数组逐项 `typeof === "string"`、`toHaveProperty` 一串编译期就固定的
+ *    字段、`Object.freeze` 会不会抛。
+ * 2. 自认无效的：三条测试的注释自己写着「would require mocking」「might not work
+ *    as expected」，函数体只剩 `typeof` 和 `isArray`；还有两条的断言包在
+ *    `if (!validation.isValid)` 里，而当前配置恒 valid，函数体一条都不跑。
+ * 3. 文件内重复：`en: "UTC"` 被断言了三次，社交链接和联系方式各两次，
+ *    `getRoutingConfig()` 逐字段等于 `LOCALES_CONFIG`（那个函数就是原样透传）。
+ *
+ * 留下的是有业务语义的：canonical 路径、locale 合约、SEO 可索引性、公开 URL 安全、
+ * 原型污染，以及 PageType 穷尽性——新增页面漏配路径会被它抓到。
+ */
 
 const PLACEHOLDER_PATTERN = /\[[A-Z0-9_]+\]/;
 const isPlaceholder = (value: string) => PLACEHOLDER_PATTERN.test(value);
@@ -61,48 +75,11 @@ const EXPECTED_STATIC_PAGE_TYPES = [
 ] as const satisfies readonly PageType[];
 
 describe("paths configuration", () => {
-  describe("type definitions", () => {
-    it("should have valid Locale type", () => {
-      const enLocale: Locale = "en";
-
-      expect(enLocale).toBe("en");
-    });
-
-    it("should have valid PageType", () => {
-      const pageTypes: PageType[] = [...EXPECTED_STATIC_PAGE_TYPES];
-
-      pageTypes.forEach((type) => {
-        expect(typeof type).toBe("string");
-      });
-    });
-
-    it("should have valid LocalizedPath structure", () => {
-      const path: LocalizedPath = {
-        en: "/test",
-      };
-
-      expect(path.en).toBe("/test");
-    });
-  });
-
   describe("PATHS_CONFIG", () => {
-    it("should have all required page types", () => {
-      EXPECTED_STATIC_PAGE_TYPES.forEach((pageType) => {
-        expect(PATHS_CONFIG).toHaveProperty(pageType);
-      });
-    });
-
-    it("should have the configured en locale for each page type", () => {
-      Object.entries(PATHS_CONFIG).forEach(([_pageType, paths]) => {
-        expect(paths).toHaveProperty("en");
-        expect(typeof paths.en).toBe("string");
-      });
-    });
-
-    it("should have consistent path format", () => {
+    // 大小写和连字符不是风格问题：混进大写或下划线的 URL 会被搜索引擎当成另一个页面。
+    it("keeps every path lowercase and hyphenated", () => {
       Object.entries(PATHS_CONFIG).forEach(([pageType, paths]) => {
         if (pageType !== "home") {
-          // Paths should start with "/" and contain only lowercase letters, hyphens, and forward slashes
           expect(paths.en).toMatch(/^\/[a-z/-]+$/);
         } else {
           expect(paths.en).toBe("/");
@@ -110,22 +87,15 @@ describe("paths configuration", () => {
       });
     });
 
-    it("should expose only configured locale paths", () => {
+    it("exposes only the configured locale", () => {
       Object.entries(PATHS_CONFIG).forEach(([_pageType, paths]) => {
         expect(Object.keys(paths)).toEqual(["en"]);
       });
     });
-
-    it("should be readonly", () => {
-      expect(() => {
-        // @ts-expect-error - Testing readonly property
-        PATHS_CONFIG.home.en = "/changed";
-      }).toThrow();
-    });
   });
 
   describe("LOCALES_CONFIG", () => {
-    it("should match the current production locale contract", () => {
+    it("matches the current production locale contract", () => {
       expect(LOCALES_CONFIG.locales).toEqual(
         CURRENT_PRODUCTION_LOCALE_CONTRACT.locales,
       );
@@ -143,60 +113,25 @@ describe("paths configuration", () => {
       );
     });
 
-    it("should have correct locale configuration", () => {
-      expect(LOCALES_CONFIG.locales).toContain(LOCALES_CONFIG.defaultLocale);
-      expect(LOCALES_CONFIG.locales.length).toBeGreaterThan(0);
+    // zh 是退役 locale，middleware 对 /zh 直接 404。它留在这里是为了让退役这件事
+    // 有单一真源，不是为了将来还能开回来。
+    it("keeps zh recorded as retired rather than absent", () => {
       expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);
     });
 
-    it("should expose locale time zones and currencies from the registry", () => {
-      expect(LOCALES_CONFIG.timeZones).toEqual({
-        en: "UTC",
-      });
-      expect(LOCALES_CONFIG.currencies).toEqual({
-        en: "USD",
-      });
-    });
-
-    it("should resolve locale metadata through helpers", () => {
+    it("resolves locale metadata through helpers", () => {
       expect(getLocaleTimeZone("en")).toBe("UTC");
       expect(getLocaleCurrency("en")).toBe("USD");
-    });
-
-    it("should have time zones", () => {
-      expect(LOCALES_CONFIG.timeZones.en).toBe("UTC");
-    });
-
-    it("should be readonly", () => {
-      expect(() => {
-        // @ts-expect-error - Testing readonly property
-        LOCALES_CONFIG.defaultLocale = "zh";
-      }).toThrow();
     });
   });
 
   describe("SITE_CONFIG", () => {
-    beforeEach(() => {
-      vi.stubEnv("SITE_URL", "https://test.example.com");
-    });
-
-    afterEach(() => {
-      vi.unstubAllEnvs();
-    });
-
-    it("should have basic site information", () => {
+    it("carries the brand facts pages render", () => {
       expect(SITE_CONFIG.name).toBe("Tucsenberg");
       expect(SITE_CONFIG.description).toMatch(/flood barrier/iu);
     });
 
-    it("should use environment variable for baseUrl", () => {
-      // Note: This test might not work as expected due to how the module is loaded
-      // The baseUrl is set when the module is first imported
-      expect(typeof SITE_CONFIG.baseUrl).toBe("string");
-      expect(SITE_CONFIG.baseUrl).toMatch(/^https?:\/\/.+/);
-    });
-
-    it("should have SEO configuration", () => {
+    it("keeps a usable SEO title template", () => {
       expect(SITE_CONFIG.seo.titleTemplate).toContain("%s");
       expect(SITE_CONFIG.seo.defaultTitle).toBeTruthy();
       expect(SITE_CONFIG.seo.defaultDescription).toBeTruthy();
@@ -204,18 +139,14 @@ describe("paths configuration", () => {
       expect(SITE_CONFIG.seo.defaultDescription.length).toBeGreaterThan(0);
     });
 
-    it("should have social media links", () => {
-      const { social } = SITE_CONFIG;
-
-      expect(
-        isPlaceholder(social.twitter) || isOptionalUrl(social.twitter),
-      ).toBe(true);
-      expect(
-        isPlaceholder(social.linkedin) || isOptionalUrl(social.linkedin),
-      ).toBe(true);
+    // 占位符是允许的，半成品 URL 不是：footer 会把这些值直接渲染成链接。
+    it("only ships social links that are placeholders or real URLs", () => {
+      Object.values(SITE_CONFIG.social).forEach((link) => {
+        expect(isPlaceholder(link) || isOptionalUrl(link)).toBe(true);
+      });
     });
 
-    it("should have contact information", () => {
+    it("only ships contact details that are placeholders or well-formed", () => {
       const { contact } = SITE_CONFIG;
 
       expect(
@@ -228,7 +159,7 @@ describe("paths configuration", () => {
   });
 
   describe("getLocalizedPath", () => {
-    it("should return correct path for valid page type and locale", () => {
+    it("returns the canonical path for each page type", () => {
       expect(getLocalizedPath("home", "en")).toBe("/");
       expect(getLocalizedPath("products", "en")).toBe("/products");
       expect(getLocalizedPath("oemWholesale", "en")).toBe("/oem-wholesale");
@@ -242,282 +173,22 @@ describe("paths configuration", () => {
       expect(getLocalizedPath("about", "en")).toBe("/about");
     });
 
-    it("should throw error for invalid page type", () => {
+    it("throws a named error for an unknown page type", () => {
       expect(() => {
         // @ts-expect-error - Testing invalid input
         getLocalizedPath("invalid", "en");
       }).toThrow("Unknown page type: invalid");
     });
 
-    it("should throw error for invalid locale", () => {
+    it("throws a named error for an unknown locale", () => {
       expect(() => {
         // @ts-expect-error - Testing invalid input
         getLocalizedPath("home", "fr");
       }).toThrow("Unknown locale: fr");
     });
-  });
 
-  describe("getPathnames", () => {
-    it("should derive static pathnames from PATHS_CONFIG", () => {
-      const pathnames = getPathnames();
-      const expectedStaticPaths = Object.values(PATHS_CONFIG).map((paths) =>
-        paths.en === "/" ? "/" : paths.en,
-      );
-
-      for (const path of expectedStaticPaths) {
-        expect(pathnames[path]).toBe(path);
-      }
-    });
-
-    it("should derive dynamic route patterns from DYNAMIC_PATHS_CONFIG", () => {
-      const pathnames = getPathnames();
-
-      for (const config of Object.values(DYNAMIC_PATHS_CONFIG)) {
-        expect(pathnames[config.pattern]).toBe(config.pattern);
-      }
-    });
-
-    it("should not advertise product family pages without a real route", () => {
-      const pathnames = getPathnames();
-      const removedFamilyRoute = `/products/${"[market]"}/${"[family]"}`;
-
-      expect(pathnames).not.toHaveProperty(removedFamilyRoute);
-    });
-
-    it("should have consistent paths", () => {
-      const pathnames = getPathnames();
-
-      Object.entries(pathnames).forEach(([key, value]) => {
-        expect(key).toBe(value);
-      });
-    });
-  });
-
-  describe("getCanonicalPath", () => {
-    it("should resolve route IDs to canonical non-localized paths", () => {
-      expect(getCanonicalPath("home")).toBe("/");
-      expect(getCanonicalPath("contact")).toBe("/contact");
-      expect(getCanonicalPath("products")).toBe("/products");
-      expect(getCanonicalPath("oemWholesale")).toBe("/oem-wholesale");
-      expect(getCanonicalPath("requestQuote")).toBe("/request-quote");
-    });
-
-    it("should derive product market paths from the products route", () => {
-      expect(getProductMarketPath("abs-flood-barriers")).toBe(
-        `${getCanonicalPath("products")}/abs-flood-barriers`,
-      );
-    });
-  });
-
-  describe("getPageTypeFromPath", () => {
-    it("should return correct page type for valid paths", () => {
-      expect(getPageTypeFromPath("/", "en")).toBe("home");
-      expect(getPageTypeFromPath("", "en")).toBe("home");
-      expect(getPageTypeFromPath("/about", "en")).toBe("about");
-      expect(getPageTypeFromPath("/contact", "en")).toBe("contact");
-      expect(getPageTypeFromPath("/request-quote", "en")).toBe("requestQuote");
-    });
-
-    it("should return null for invalid paths", () => {
-      expect(getPageTypeFromPath("/invalid", "en")).toBeNull();
-      expect(getPageTypeFromPath("/nonexistent", "en")).toBeNull();
-    });
-
-    it("should work with the configured locale", () => {
-      expect(getPageTypeFromPath("/products", "en")).toBe("products");
-      expect(getPageTypeFromPath("/warranty", "en")).toBe("warranty");
-    });
-  });
-
-  describe("validatePathsConfig", () => {
-    it("should validate current configuration as valid", () => {
-      const result = validatePathsConfig();
-
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toEqual([]);
-    });
-
-    it("should detect missing locale paths", () => {
-      // This test would require mocking the PATHS_CONFIG
-      // For now, we just ensure the function works
-      const result = validatePathsConfig();
-      expect(typeof result.isValid).toBe("boolean");
-      expect(Array.isArray(result.errors)).toBe(true);
-    });
-  });
-
-  describe("getRoutingConfig", () => {
-    it("should return valid routing configuration", () => {
-      const config = getRoutingConfig();
-
-      expect(config.locales).toEqual(LOCALES_CONFIG.locales);
-      expect(config.defaultLocale).toBe(LOCALES_CONFIG.defaultLocale);
-      expect(config.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
-      expect(typeof config.pathnames).toBe("object");
-    });
-
-    it("should have pathnames matching getPathnames", () => {
-      const config = getRoutingConfig();
-      const pathnames = getPathnames();
-
-      expect(config.pathnames).toEqual(pathnames);
-    });
-  });
-
-  describe("integration tests", () => {
-    it("should have consistent configuration across all functions", () => {
-      const pathnames = getPathnames();
-      const routingConfig = getRoutingConfig();
-
-      // Check that all configurations use the same locales
-      // Check that pathnames are consistent
-      expect(routingConfig.pathnames).toEqual(pathnames);
-    });
-
-    it("should work with all page types and locales", () => {
-      const pageTypes: PageType[] = [...EXPECTED_STATIC_PAGE_TYPES];
-      const locales: Locale[] = [...LOCALES_CONFIG.locales];
-
-      pageTypes.forEach((pageType) => {
-        locales.forEach((locale) => {
-          const path = getLocalizedPath(pageType, locale);
-          const foundPageType = getPageTypeFromPath(path, locale);
-          expect(foundPageType).toBe(pageType);
-        });
-      });
-    });
-  });
-
-  describe("边缘情况和错误处理", () => {
-    it("should handle empty string paths", () => {
-      expect(getPageTypeFromPath("", "en")).toBe("home");
-      expect(getPageTypeFromPath("", "en")).toBe("home");
-    });
-
-    it("should handle paths with trailing slashes", () => {
-      expect(getPageTypeFromPath("/about/", "en")).toBeNull();
-      expect(getPageTypeFromPath("/contact/", "en")).toBeNull();
-    });
-
-    it("should handle paths with query parameters", () => {
-      expect(getPageTypeFromPath("/about?param=value", "en")).toBeNull();
-      expect(getPageTypeFromPath("/contact#section", "en")).toBeNull();
-    });
-
-    it("should handle case sensitivity", () => {
-      expect(getPageTypeFromPath("/About", "en")).toBeNull();
-      expect(getPageTypeFromPath("/CONTACT", "en")).toBeNull();
-    });
-
-    it("should handle null and undefined inputs gracefully", () => {
-      expect(() => {
-        // @ts-expect-error - Testing invalid input
-        getPageTypeFromPath(null, "en");
-      }).toThrow();
-
-      expect(() => {
-        // @ts-expect-error - Testing invalid input
-        getPageTypeFromPath("/about", null);
-      }).toThrow();
-    });
-
-    it("should handle extremely long paths", () => {
-      const longPath = `/${"a".repeat(1000)}`;
-      expect(getPageTypeFromPath(longPath, "en")).toBeNull();
-    });
-
-    it("should handle special characters in paths", () => {
-      const specialPaths = [
-        "/about%20us",
-        "/contact@email",
-        "/products&services",
-        "/pricing#basic",
-      ];
-
-      specialPaths.forEach((path) => {
-        expect(getPageTypeFromPath(path, "en")).toBeNull();
-      });
-    });
-  });
-
-  describe("配置完整性验证", () => {
-    it("should have all required properties in SITE_CONFIG", () => {
-      const requiredProperties = [
-        "name",
-        "description",
-        "baseUrl",
-        "seo",
-        "social",
-        "contact",
-      ];
-
-      requiredProperties.forEach((prop) => {
-        expect(SITE_CONFIG).toHaveProperty(prop);
-      });
-    });
-
-    it("should have valid URL formats in social links", () => {
-      const socialLinks = Object.values(SITE_CONFIG.social);
-
-      socialLinks.forEach((link) => {
-        expect(isPlaceholder(link) || isOptionalUrl(link)).toBe(true);
-      });
-    });
-
-    it("should have consistent locale configuration", () => {
-      const { locales } = LOCALES_CONFIG;
-
-      locales.forEach((locale) => {
-        expect(LOCALES_CONFIG.timeZones).toHaveProperty(locale);
-        expect(LOCALES_CONFIG.currencies).toHaveProperty(locale);
-      });
-    });
-
-    it("should have valid email format in contact", () => {
-      expect(
-        isPlaceholder(SITE_CONFIG.contact.email) ||
-          isEmail(SITE_CONFIG.contact.email),
-      ).toBe(true);
-    });
-
-    it("should have valid phone format in contact", () => {
-      expect(
-        isPlaceholder(SITE_CONFIG.contact.phone) ||
-          isOwnerTodo(SITE_CONFIG.contact.phone) ||
-          isOptionalPhone(SITE_CONFIG.contact.phone),
-      ).toBe(true);
-    });
-  });
-
-  describe("错误处理强化测试", () => {
-    it("should throw specific error messages for invalid inputs", () => {
-      // Test getLocalizedPath with invalid page type
-      expect(() => {
-        getLocalizedPath("nonexistent" as PageType, "en");
-      }).toThrow("Unknown page type: nonexistent");
-
-      // Test getLocalizedPath with invalid locale
-      expect(() => {
-        getLocalizedPath("home", "fr" as Locale);
-      }).toThrow("Unknown locale: fr");
-    });
-
-    it("should handle prototype pollution attempts", () => {
-      // Test that the function doesn't use hasOwnProperty unsafely
-      const maliciousPageType = "__proto__" as PageType;
-      const maliciousLocale = "constructor" as Locale;
-
-      expect(() => {
-        getLocalizedPath(maliciousPageType, "en");
-      }).toThrow();
-
-      expect(() => {
-        getLocalizedPath("home", maliciousLocale);
-      }).toThrow();
-    });
-
-    it("should handle object property access edge cases", () => {
-      // Test with properties that might exist on Object.prototype
+    // 用 Object.prototype 上的名字当 key，必须走 throw 分支而不是取到继承来的值。
+    it("refuses prototype keys instead of resolving them", () => {
       const edgeCaseInputs = [
         "toString",
         "valueOf",
@@ -538,74 +209,151 @@ describe("paths configuration", () => {
     });
   });
 
-  describe("配置验证深度测试", () => {
-    it("should validate path uniqueness within locales", () => {
-      const validation = validatePathsConfig();
+  describe("getPathnames", () => {
+    it("derives static pathnames from PATHS_CONFIG", () => {
+      const pathnames = getPathnames();
+      const expectedStaticPaths = Object.values(PATHS_CONFIG).map((paths) =>
+        paths.en === "/" ? "/" : paths.en,
+      );
 
-      // If validation fails, check specific error types
-      if (!validation.isValid) {
-        const duplicateErrors = validation.errors.filter((error) =>
-          error.includes("Duplicate path"),
-        );
-
-        // Should not have duplicate paths within the same locale
-        expect(duplicateErrors.length).toBe(0);
+      for (const path of expectedStaticPaths) {
+        expect(pathnames[path]).toBe(path);
       }
     });
 
-    it("should validate complete locale coverage", () => {
-      const validation = validatePathsConfig();
+    it("derives dynamic route patterns from DYNAMIC_PATHS_CONFIG", () => {
+      const pathnames = getPathnames();
 
-      if (!validation.isValid) {
-        const missingPathErrors = validation.errors.filter(
-          (error) =>
-            error.includes("Missing") && error.includes("path for page type"),
-        );
-
-        // Should not have missing paths for any page type
-        expect(missingPathErrors.length).toBe(0);
+      for (const config of Object.values(DYNAMIC_PATHS_CONFIG)) {
+        expect(pathnames[config.pattern]).toBe(config.pattern);
       }
     });
 
-    it("should handle validation with edge case configurations", () => {
-      // Test that validation function is robust
-      const validation = validatePathsConfig();
+    it("does not advertise product family pages without a real route", () => {
+      const pathnames = getPathnames();
+      const removedFamilyRoute = `/products/${"[market]"}/${"[family]"}`;
 
-      expect(typeof validation.isValid).toBe("boolean");
-      expect(Array.isArray(validation.errors)).toBe(true);
-
-      // Errors should be strings
-      validation.errors.forEach((error) => {
-        expect(typeof error).toBe("string");
-        expect(error.length).toBeGreaterThan(0);
-      });
+      expect(pathnames).not.toHaveProperty(removedFamilyRoute);
     });
   });
 
-  describe("类型系统完整性测试", () => {
-    it("should ensure all PageType values are covered in PATHS_CONFIG", () => {
+  describe("getCanonicalPath", () => {
+    it("resolves route IDs to canonical non-localized paths", () => {
+      expect(getCanonicalPath("home")).toBe("/");
+      expect(getCanonicalPath("contact")).toBe("/contact");
+      expect(getCanonicalPath("products")).toBe("/products");
+      expect(getCanonicalPath("oemWholesale")).toBe("/oem-wholesale");
+      expect(getCanonicalPath("requestQuote")).toBe("/request-quote");
+    });
+
+    it("derives product market paths from the products route", () => {
+      expect(getProductMarketPath("abs-flood-barriers")).toBe(
+        `${getCanonicalPath("products")}/abs-flood-barriers`,
+      );
+    });
+  });
+
+  describe("getPageTypeFromPath", () => {
+    it("maps every live path back to its page type", () => {
+      expect(getPageTypeFromPath("/", "en")).toBe("home");
+      expect(getPageTypeFromPath("", "en")).toBe("home");
+      expect(getPageTypeFromPath("/about", "en")).toBe("about");
+      expect(getPageTypeFromPath("/contact", "en")).toBe("contact");
+      expect(getPageTypeFromPath("/request-quote", "en")).toBe("requestQuote");
+      expect(getPageTypeFromPath("/products", "en")).toBe("products");
+      expect(getPageTypeFromPath("/warranty", "en")).toBe("warranty");
+    });
+
+    it("returns null for paths that do not exist", () => {
+      expect(getPageTypeFromPath("/invalid", "en")).toBeNull();
+      expect(getPageTypeFromPath("/nonexistent", "en")).toBeNull();
+    });
+
+    // 下面四条都是同一个意图：只有精确匹配算数。近似形式解析成真页面会让
+    // canonical 标签和 sitemap 指向一个并不存在的 URL。
+    it("treats a trailing slash as a different path", () => {
+      expect(getPageTypeFromPath("/about/", "en")).toBeNull();
+      expect(getPageTypeFromPath("/contact/", "en")).toBeNull();
+    });
+
+    it("treats query strings and hashes as part of the path", () => {
+      expect(getPageTypeFromPath("/about?param=value", "en")).toBeNull();
+      expect(getPageTypeFromPath("/contact#section", "en")).toBeNull();
+    });
+
+    it("stays case sensitive", () => {
+      expect(getPageTypeFromPath("/About", "en")).toBeNull();
+      expect(getPageTypeFromPath("/CONTACT", "en")).toBeNull();
+    });
+
+    it("rejects percent-encoded and punctuation-bearing lookalikes", () => {
+      const specialPaths = [
+        "/about%20us",
+        "/contact@email",
+        "/products&services",
+        "/pricing#basic",
+      ];
+
+      specialPaths.forEach((path) => {
+        expect(getPageTypeFromPath(path, "en")).toBeNull();
+      });
+    });
+
+    it("throws rather than guessing on null input", () => {
+      expect(() => {
+        // @ts-expect-error - Testing invalid input
+        getPageTypeFromPath(null, "en");
+      }).toThrow();
+
+      expect(() => {
+        // @ts-expect-error - Testing invalid input
+        getPageTypeFromPath("/about", null);
+      }).toThrow();
+    });
+
+    it("does not choke on an extremely long path", () => {
+      const longPath = `/${"a".repeat(1000)}`;
+      expect(getPageTypeFromPath(longPath, "en")).toBeNull();
+    });
+  });
+
+  describe("validatePathsConfig", () => {
+    it("reports the shipped configuration as valid", () => {
+      const result = validatePathsConfig();
+
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+  });
+
+  describe("configuration integrity", () => {
+    it("round-trips every page type through path and back", () => {
+      const pageTypes: PageType[] = [...EXPECTED_STATIC_PAGE_TYPES];
+      const locales: Locale[] = [...LOCALES_CONFIG.locales];
+
+      pageTypes.forEach((pageType) => {
+        locales.forEach((locale) => {
+          const path = getLocalizedPath(pageType, locale);
+          const foundPageType = getPageTypeFromPath(path, locale);
+          expect(foundPageType).toBe(pageType);
+        });
+      });
+    });
+
+    // 穷尽性：加了新页面却忘了配路径，或者配了路径却没登记页面类型，都在这里红。
+    it("covers every PageType and nothing more", () => {
       const configKeys = Object.keys(PATHS_CONFIG) as PageType[];
       const expectedTypes: PageType[] = [...EXPECTED_STATIC_PAGE_TYPES];
 
-      // All expected types should be present
       expectedTypes.forEach((type) => {
         expect(configKeys).toContain(type);
       });
 
-      // No extra types should be present
       expect(configKeys.length).toBe(expectedTypes.length);
     });
 
-    it("should ensure all Locale values are supported", () => {
-      const supportedLocales = LOCALES_CONFIG.locales;
-      const expectedLocales: Locale[] = [
-        ...CURRENT_PRODUCTION_LOCALE_CONTRACT.locales,
-      ];
-
-      expect(supportedLocales).toEqual(expectedLocales);
-
-      // Each locale should have runtime registry coverage
-      supportedLocales.forEach((locale) => {
+    it("gives every supported locale runtime registry coverage", () => {
+      LOCALES_CONFIG.locales.forEach((locale) => {
         expect(LOCALES_CONFIG.timeZones).toHaveProperty(locale);
         expect(LOCALES_CONFIG.currencies).toHaveProperty(locale);
       });
