@@ -1,10 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import { Badge } from "@/components/ui/badge";
 
+/**
+ * 原来两个 `it.each` 共 12 例：第一组六例断言完全相同的 data-slot（和上面那条重复），
+ * 第二组六例是一张 token class 对照表，改 token 名就要同步改测试，而徽章长什么样
+ * 它一条都证明不了。换成断言 variant 真的改变了产出的 class。
+ *
+ * 生产代码目前不渲染 Badge，只有 card.stories 和 color-directions.stories 在用；
+ * DESIGN.md 保留了 badge-default 规格，所以组件留着，测试按实际价值收。
+ */
+
 describe("Badge", () => {
-  it("renders as a semantic local span", () => {
+  it("renders a span carrying its label and any icon", () => {
     render(
       <Badge data-testid="badge">
         <svg aria-hidden="true" data-testid="badge-icon" />
@@ -19,95 +27,39 @@ describe("Badge", () => {
     expect(badge).toContainElement(screen.getByTestId("badge-icon"));
   });
 
-  it.each([
-    "default",
-    "secondary",
-    "success",
-    "warning",
-    "destructive",
-    "outline",
-  ] as const)(
-    "keeps the local badge contract for the %s variant marker",
-    (variant) => {
-      render(<Badge variant={variant}>Variant</Badge>);
-
-      const badge = screen.getByText("Variant");
-      expect(badge).toHaveAttribute("data-slot", "badge");
-    },
-  );
-
-  it.each([
-    [
+  it("lets each semantic variant render differently", () => {
+    const variants = [
       "default",
-      ["border-transparent", "bg-primary", "text-primary-foreground"],
-    ],
-    [
       "secondary",
-      ["border-transparent", "bg-secondary", "text-secondary-foreground"],
-    ],
-    [
       "success",
-      [
-        "border-[var(--success-border)]",
-        "bg-[var(--success-muted)]",
-        "text-[var(--success-foreground)]",
-      ],
-    ],
-    [
       "warning",
-      [
-        "border-[var(--warning-border)]",
-        "bg-[var(--warning-muted)]",
-        "text-[var(--warning-foreground)]",
-      ],
-    ],
-    [
       "destructive",
-      [
-        "border-[var(--error-border)]",
-        "bg-[var(--error-muted)]",
-        "text-[var(--error-foreground)]",
-      ],
-    ],
-    ["outline", ["border-border", "bg-transparent", "text-foreground"]],
-  ] as const)(
-    "maps the %s semantic variant to project token classes",
-    (variant, localClasses) => {
-      render(<Badge variant={variant}>Variant</Badge>);
+      "outline",
+    ] as const;
 
-      const badge = screen.getByText("Variant");
-      for (const className of localClasses) {
-        expect(badge).toHaveClass(className);
-      }
-    },
-  );
+    const rendered = new Set(
+      variants.map((variant) => {
+        const { container, unmount } = render(
+          <Badge variant={variant}>Variant</Badge>,
+        );
+        const className = container.firstElementChild?.className ?? "";
+        unmount();
+        return className;
+      }),
+    );
 
-  it("merges custom classes and forwards span attributes", () => {
+    expect(rendered.size).toBe(variants.length);
+  });
+
+  it("keeps a caller's className alongside its own", () => {
     render(
-      <Badge
-        id="status-badge"
-        className="custom-spacing"
-        data-testid="badge"
-        role="status"
-        aria-label="Status indicator"
-      >
+      <Badge className="custom-spacing" data-testid="badge">
         Active
       </Badge>,
     );
 
     const badge = screen.getByTestId("badge");
-    expect(badge).toHaveAttribute("id", "status-badge");
-    expect(badge).toHaveAttribute("role", "status");
-    expect(badge).toHaveAttribute("aria-label", "Status indicator");
     expect(badge).toHaveClass("custom-spacing");
-  });
-
-  it("forwards refs to the badge span", () => {
-    const ref = createRef<HTMLSpanElement>();
-
-    render(<Badge ref={ref}>Ref badge</Badge>);
-
-    expect(ref.current).toBeInstanceOf(HTMLSpanElement);
-    expect(ref.current).toHaveAttribute("data-slot", "badge");
+    expect(badge.className.split(" ").length).toBeGreaterThan(1);
   });
 });

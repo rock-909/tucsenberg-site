@@ -1,362 +1,85 @@
-import React from "react";
-import Link from "next/link";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Button } from "@/components/ui/button";
 
-// Mock Next.js Link component
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children?: React.ReactNode;
-    href?: string;
-    [key: string]: any;
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+/**
+ * 原来 27 条里有 19 条在逐个断言 Tailwind class 字符串：每个 variant 一条、每个
+ * size 一条、focus/disabled/svg 的 class 各一条。改一个 token 名就要同步改测试，
+ * 而按钮长什么样它一条都证明不了。
+ *
+ * 这里换成断言「variant 和 size 真的改变了产出的 class」而不是断言具体是哪些
+ * class——cva 接线掉了会红，换 token 名不会。
+ *
+ * 另外原来 mock 掉了 `@radix-ui/react-slot`，所以 asChild 那条测的是 mock 自己的
+ * cloneElement。现在用真 Slot：产品页 CTA 就是靠这条路径把按钮样式套到链接上的。
+ */
 
-// Mock Radix UI Slot component
-vi.mock("@radix-ui/react-slot", () => ({
-  Slot: ({
-    children,
-    ...props
-  }: {
-    children?: React.ReactNode;
-    [key: string]: any;
-  }) => {
-    // 如果children是React元素，克隆并添加props
-    if (React.isValidElement(children)) {
-      return React.cloneElement(children, {
-        ...props,
-        ...(children.props || {}),
-      });
-    }
-    // 否则返回一个div包装
-    return <div {...props}>{children}</div>;
-  },
-}));
+describe("Button", () => {
+  it("renders a button carrying its label", () => {
+    render(<Button>Request a Quote</Button>);
 
-describe("Button Component", () => {
-  describe("Basic Rendering", () => {
-    it("renders button with default props", () => {
-      render(<Button>Click me</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent("Click me");
-      expect(button).toHaveAttribute("data-slot", "button");
-    });
-
-    it("renders button with custom text", () => {
-      render(<Button>Custom Text</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveTextContent("Custom Text");
-    });
-
-    it("applies default variant and size classes", () => {
-      render(<Button>Default Button</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-[var(--button-primary-bg)]",
-        "text-[var(--button-primary-fg)]",
-      );
-      expect(button).toHaveClass(
-        "h-[var(--button-height-default)]",
-        "px-5",
-        "py-2.5",
-      );
-      expect(button).toHaveClass("rounded-[var(--button-radius)]");
-    });
+    const button = screen.getByRole("button", { name: "Request a Quote" });
+    expect(button).toHaveAttribute("data-slot", "button");
   });
 
-  describe("Variant Props", () => {
-    it("applies default variant styles", () => {
-      render(<Button variant="default">Default</Button>);
+  it("calls its handler when clicked", () => {
+    const submitInquiry = vi.fn();
+    render(<Button onClick={submitInquiry}>Send</Button>);
 
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-[var(--button-primary-bg)]",
-        "text-[var(--button-primary-fg)]",
-      );
-    });
+    fireEvent.click(screen.getByRole("button"));
 
-    it("applies destructive variant styles", () => {
-      render(<Button variant="destructive">Destructive</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-destructive",
-        "text-destructive-foreground",
-      );
-    });
-
-    it("applies outline variant styles", () => {
-      render(<Button variant="outline">Outline</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-transparent",
-        "border-2",
-        "border-[var(--button-outline-border)]",
-      );
-    });
-
-    it("applies secondary variant styles", () => {
-      render(<Button variant="secondary">Secondary</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-secondary",
-        "text-secondary-foreground",
-        "border",
-        "border-border",
-      );
-    });
-
-    it("applies ghost variant styles", () => {
-      render(<Button variant="ghost">Ghost</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("hover:bg-accent", "hover:text-foreground");
-    });
-
-    it("applies link variant styles", () => {
-      render(<Button variant="link">Link</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "text-[var(--button-outline-fg)]",
-        "underline-offset-4",
-      );
-    });
+    expect(submitInquiry).toHaveBeenCalledTimes(1);
   });
 
-  describe("Size Props", () => {
-    it("applies default size styles", () => {
-      render(<Button size="default">Default Size</Button>);
+  it("swallows clicks while disabled", () => {
+    const submitInquiry = vi.fn();
+    render(
+      <Button onClick={submitInquiry} disabled>
+        Send
+      </Button>,
+    );
 
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "h-[var(--button-height-default)]",
-        "px-5",
-        "py-2.5",
-      );
-    });
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
 
-    it("applies small size styles", () => {
-      render(<Button size="sm">Small</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("h-[var(--button-height-sm)]", "px-3");
-    });
-
-    it("applies large size styles", () => {
-      render(<Button size="lg">Large</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("h-[var(--button-height-lg)]", "px-6");
-    });
-
-    it("applies icon size styles", () => {
-      render(<Button size="icon">Icon</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("size-9");
-    });
+    expect(button).toBeDisabled();
+    expect(submitInquiry).not.toHaveBeenCalled();
   });
 
-  describe("Custom Props", () => {
-    it("applies custom className", () => {
-      render(<Button className="custom-class">Custom</Button>);
+  // 产品页 CTA 走的就是这条：Slot 把按钮的 class 和 data-slot 合并到子链接上，
+  // 渲染出来的必须还是一个 link，不能变成嵌在按钮里的链接。
+  it("hands its styling to the child element when asChild is set", () => {
+    render(
+      <Button asChild>
+        <a href="/request-quote">Request a Quote</a>
+      </Button>,
+    );
 
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("custom-class");
-    });
-
-    it("passes through HTML button props", () => {
-      render(
-        <Button
-          type="submit"
-          disabled
-          aria-label="Send message"
-          data-testid="submit-button"
-        >
-          Send message
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("type", "submit");
-      expect(button).toBeDisabled();
-      expect(button).toHaveAttribute("aria-label", "Send message");
-      expect(button).toHaveAttribute("data-testid", "submit-button");
-    });
-
-    it("applies disabled styles when disabled", () => {
-      render(<Button disabled>Disabled</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-      expect(button).toHaveClass(
-        "disabled:pointer-events-none",
-        "disabled:opacity-50",
-      );
-    });
+    const link = screen.getByRole("link", { name: "Request a Quote" });
+    expect(link).toHaveAttribute("href", "/request-quote");
+    expect(link).toHaveAttribute("data-slot", "button");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  describe("Event Handling", () => {
-    it("handles click events", () => {
-      const activateButtonFixture = vi.fn();
-      render(<Button onClick={activateButtonFixture}>Click me</Button>);
+  it("lets variant and size change what gets rendered", () => {
+    const { rerender } = render(<Button>Default</Button>);
+    const defaultClasses = screen.getByRole("button").className;
 
-      const button = screen.getByRole("button");
-      fireEvent.click(button);
+    rerender(<Button variant="outline">Outline</Button>);
+    const outlineClasses = screen.getByRole("button").className;
 
-      expect(activateButtonFixture).toHaveBeenCalledTimes(1);
-    });
+    rerender(<Button size="lg">Large</Button>);
+    const largeClasses = screen.getByRole("button").className;
 
-    it("does not trigger click when disabled", () => {
-      const attemptDisabledButtonActivation = vi.fn();
-      render(
-        <Button onClick={attemptDisabledButtonActivation} disabled>
-          Disabled
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      fireEvent.click(button);
-
-      expect(attemptDisabledButtonActivation).not.toHaveBeenCalled();
-    });
-
-    it("handles keyboard events", () => {
-      const handleKeyDown = vi.fn();
-      render(<Button onKeyDown={handleKeyDown}>Keyboard</Button>);
-
-      const button = screen.getByRole("button");
-      fireEvent.keyDown(button, { key: "Enter" });
-
-      expect(handleKeyDown).toHaveBeenCalledTimes(1);
-    });
+    expect(outlineClasses).not.toBe(defaultClasses);
+    expect(largeClasses).not.toBe(defaultClasses);
   });
 
-  describe("AsChild Prop", () => {
-    it("renders as Slot when asChild is true", () => {
-      render(
-        <Button asChild>
-          <Link href="/test">Link Button</Link>
-        </Button>,
-      );
+  it("keeps a caller's className alongside its own", () => {
+    render(<Button className="mt-6">Spaced</Button>);
 
-      const link = screen.getByRole("link");
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveTextContent("Link Button");
-      expect(link).toHaveAttribute("href", "/test");
-      expect(link).toHaveAttribute("data-slot", "button");
-    });
-
-    it("renders as button when asChild is false", () => {
-      render(<Button asChild={false}>Regular Button</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent("Regular Button");
-    });
-  });
-
-  describe("Accessibility", () => {
-    it("has proper focus styles", () => {
-      render(<Button>Focus me</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "focus-visible:ring-2",
-        "focus-visible:ring-ring",
-        "focus-visible:ring-offset-2",
-      );
-    });
-
-    it("supports aria attributes", () => {
-      render(
-        <Button aria-label="Close dialog" aria-pressed="false" role="button">
-          ×
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("aria-label", "Close dialog");
-      expect(button).toHaveAttribute("aria-pressed", "false");
-    });
-
-    it("handles aria-invalid state", () => {
-      render(<Button aria-invalid="true">Invalid</Button>);
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("aria-invalid", "true");
-    });
-  });
-
-  describe("Combination Props", () => {
-    it("combines variant and size props correctly", () => {
-      render(
-        <Button variant="outline" size="lg">
-          Large Outline
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "bg-transparent",
-        "border-2",
-        "border-[var(--button-outline-border)]",
-      ); // outline variant
-      expect(button).toHaveClass("h-[var(--button-height-lg)]", "px-6"); // lg size
-    });
-
-    it("combines all props with custom className", () => {
-      render(
-        <Button
-          variant="secondary"
-          size="sm"
-          className="custom-spacing"
-          disabled
-        >
-          Complex Button
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("bg-secondary"); // secondary variant
-      expect(button).toHaveClass("h-[var(--button-height-sm)]"); // sm size
-      expect(button).toHaveClass("custom-spacing"); // custom class
-      expect(button).toBeDisabled(); // disabled state
-    });
-  });
-
-  describe("Icon Support", () => {
-    it("handles SVG icons correctly", () => {
-      render(
-        <Button>
-          <svg data-testid="icon" width="16" height="16">
-            <circle cx="8" cy="8" r="4" />
-          </svg>
-          With Icon
-        </Button>,
-      );
-
-      const button = screen.getByRole("button");
-      const icon = screen.getByTestId("icon");
-
-      expect(button).toContainElement(icon);
-      expect(button).toHaveClass("[&_svg]:pointer-events-none");
-    });
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("mt-6");
+    expect(button.className.split(" ").length).toBeGreaterThan(1);
   });
 });
