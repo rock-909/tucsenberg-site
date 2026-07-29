@@ -12,12 +12,13 @@ import {
 
 /**
  * 原来分三个文件十条：card.test 用 `it.each` 逐个子组件断言 base class，
- * card-accessibility 两条断的是调用方自己传进去的 role / aria-*（React 原生保证），
- * card-integration 末尾断言 `has-data-[slot=card-action]:grid-cols-[1fr_auto]`
- * ——那条 class 恒在，jsdom 里证明不了布局真的会切换，视觉回归归
- * `core-page-visual-calibration.spec.ts` 管。
+ * card-accessibility 两条断的是调用方自己传进去的 role / aria-*（React 原生保证）。
  *
- * 真正要守的是 data-slot：CSS 靠它选中各部分。生产用法在联系页和询盘静态兜底。
+ * 保留两件事：data-slot 契约（CSS 靠它选中各部分），以及 header 的条件布局
+ * ——`has-data-[slot=card-action]:` 是「有 action 时换成两列」这条规则的唯一
+ * 落点，jsdom 验不了渲染结果，仓库也没有像素基线比较，所以这里钉住它的编码方式。
+ *
+ * 生产代码目前只用根 `<Card>`（联系页和询盘静态兜底），子组件只服务 Storybook。
  */
 
 describe("Card", () => {
@@ -60,6 +61,25 @@ describe("Card", () => {
     );
     expect(card).toContainElement(
       screen.getByRole("button", { name: "Footer Button" }),
+    );
+  });
+
+  // 两端各钉一半：header 声明「出现 action 时改成两列」，action 声明自己占第二列。
+  // 只留一半，另一半悄悄没了也不会红。
+  it("keeps the two-column switch that an action triggers", () => {
+    render(
+      <>
+        <CardHeader data-testid="card-header" />
+        <CardAction data-testid="card-action" />
+      </>,
+    );
+
+    expect(screen.getByTestId("card-header")).toHaveClass(
+      "has-data-[slot=card-action]:grid-cols-[1fr_auto]",
+    );
+    expect(screen.getByTestId("card-action")).toHaveClass(
+      "col-start-2",
+      "justify-self-end",
     );
   });
 
