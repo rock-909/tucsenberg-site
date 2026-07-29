@@ -10,12 +10,17 @@ import {
   mockCatalogTranslationsEn,
 } from "./mocks/products-test-fixtures";
 
-const { mockBuildCatalogBreadcrumbJsonLd, mockGetTranslations } = vi.hoisted(
-  () => ({
-    mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
-    mockGetTranslations: vi.fn(),
-  }),
-);
+const {
+  mockBuildCatalogBreadcrumbJsonLd,
+  mockCatalogBreadcrumb,
+  mockGetTranslations,
+} = vi.hoisted(() => ({
+  mockBuildCatalogBreadcrumbJsonLd: vi.fn(),
+  mockCatalogBreadcrumb: vi.fn(() => (
+    <nav data-testid="breadcrumb">Products</nav>
+  )),
+  mockGetTranslations: vi.fn(),
+}));
 
 vi.mock("@/config/single-site-seo", () => ({
   hasSingleSiteDynamicSurface: vi.fn(() => false),
@@ -46,7 +51,7 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
-  CatalogBreadcrumb: () => <nav data-testid="breadcrumb">Products</nav>,
+  CatalogBreadcrumb: mockCatalogBreadcrumb,
 }));
 
 vi.mock("@/components/products/catalog-breadcrumb-jsonld", () => ({
@@ -306,6 +311,21 @@ describe("Feature: Product Overview Page", () => {
       expect(breadcrumb).toBeInTheDocument();
       expect(breadcrumb).toHaveTextContent("Products");
     });
+
+    // 从 page.test.tsx 并过来的唯一独有断言，那个文件其余四条都是这里的子集。
+    it("opts only the products listing breadcrumb home link out of prefetch", async () => {
+      await renderAsyncComponent(
+        ProductsPage({ params: Promise.resolve(mockParams) }),
+      );
+
+      expect(mockCatalogBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          homePrefetch: false,
+          renderJsonLd: false,
+        }),
+        undefined,
+      );
+    });
   });
 
   describe("Scenario 2.4: Page header and CTAs", () => {
@@ -376,23 +396,6 @@ describe("Feature: Product Overview Page", () => {
           ),
         ].sort(),
       );
-    });
-
-    it("keeps the same guide and RFQ CTAs across active profiles", async () => {
-      await renderAsyncComponent(
-        ProductsPage({ params: Promise.resolve(mockParams) }),
-      );
-
-      expect(screen.getByRole("link", { name: "View guides" })).toHaveAttribute(
-        "href",
-        "/guides/flood-barrier-materials-guide",
-      );
-      expect(
-        screen.getByRole("link", { name: "View specifications guide" }),
-      ).toHaveAttribute("href", "/guides/flood-barrier-specifications");
-      expect(
-        screen.getByRole("link", { name: "Request a Quote" }),
-      ).toHaveAttribute("href", "/request-quote");
     });
   });
 

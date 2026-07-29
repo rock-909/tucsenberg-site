@@ -4,7 +4,6 @@ const {
   RELEASE_PROOF_MANIFEST,
   formatReleaseProofCommand,
   getManualProofLaneSummaryLines,
-  getReleaseProofDocsCommandBlock,
   getReleaseProofSequence,
   getReleaseVerifyCommands,
 } = require("../release-proof-manifest");
@@ -190,7 +189,6 @@ module.exports = {
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
   formatReleaseCommand,
-  getReleaseProofDocsCommandBlock,
   isLocalPortInUse,
   isPlaywrightReleaseStep,
   isReleaseVerifyBlockedEnv,

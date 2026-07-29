@@ -20,6 +20,7 @@ interface ReleaseProofStep {
   readonly env?: Record<string, string>;
   readonly requiresFreePort?: number;
   readonly artifactBudget?: ReleaseProofArtifactBudget;
+  readonly docs: { readonly includeInReleaseSequence: boolean };
 }
 
 interface ReleaseProofArtifactBudget {
@@ -35,7 +36,6 @@ interface ReleaseProofManifestModule {
     readonly steps: readonly ReleaseProofStep[];
   };
   readonly formatReleaseProofCommand: (step: ReleaseProofStep) => string;
-  readonly getReleaseProofDocsCommandBlock: () => string;
   readonly getReleaseProofSequence: () => string[];
   readonly getReleaseProofSteps: () => ReleaseProofStep[];
   readonly getReleaseVerifyCommands: () => Array<{
@@ -57,17 +57,14 @@ describe("release proof manifest", () => {
     const steps = manifest.getReleaseProofSteps();
 
     expect(steps).toHaveLength(manifest.RELEASE_PROOF_MANIFEST.steps.length);
+    // 只有这条有判别力：sequence 带 `docs.includeInReleaseSequence` 过滤，
+    // verify 列表不带，所以任一步的 docs 标记变化会让两者分叉。
+    // 原来还有一条把 getReleaseVerifyCommands() 跟 cloneReleaseVerifyCommand 的
+    // 实现逐字复述一遍——那是恒真，删了。
     expect(manifest.getReleaseProofSequence()).toEqual(
-      steps.map((step) => manifest.formatReleaseProofCommand(step)),
-    );
-    expect(manifest.getReleaseVerifyCommands()).toEqual(
-      steps.map(({ id, command, args, env, artifactBudget }) => ({
-        id,
-        command,
-        args,
-        ...(env ? { env } : {}),
-        ...(artifactBudget ? { artifactBudget } : {}),
-      })),
+      steps
+        .filter((step) => step.docs.includeInReleaseSequence)
+        .map((step) => manifest.formatReleaseProofCommand(step)),
     );
   });
 
@@ -108,14 +105,6 @@ describe("release proof manifest", () => {
       }),
     );
     expect(playwrightStep.requiresFreePort).toBe(3000);
-  });
-
-  it("generates the release docs command block from the manifest", () => {
-    const manifest = loadReleaseProofManifest();
-
-    expect(manifest.getReleaseProofDocsCommandBlock()).toBe(
-      manifest.getReleaseProofSequence().join("\n"),
-    );
   });
 
   it("runs the Cloudflare artifact config proof after the OpenNext build", () => {
@@ -166,13 +155,15 @@ describe("release proof manifest", () => {
       "--env",
       "preview",
     ]);
-    expect(wranglerStep.artifactBudget).toEqual({
-      metric: "gzip KiB",
-      limitKiB: 3000,
-      preferredKiB: 2700,
-      measuredArtifact: "source-checkout",
-      source:
-        "Project self-budget (3000 KiB), ~72 KiB margin below the Cloudflare Workers Free gzip upload limit of 3072 KiB (3 MiB)",
-    });
+    // 这里只证明 dry-run 这步确实挂着一份 gzip 预算——具体数字守在
+    // `cloudflare-free-runtime-budget-contract.test.ts`（留在平台上限以内）。
+    // 原来把整个对象连同一句英文散文 `source` 一起 toEqual 冻住；那个形状那份
+    // 契约测试 2026-07-27 已经从自己身上删掉了，理由是门逼着文档改字。
+    expect(wranglerStep.artifactBudget).toEqual(
+      expect.objectContaining({
+        metric: "gzip KiB",
+        measuredArtifact: "source-checkout",
+      }),
+    );
   });
 });

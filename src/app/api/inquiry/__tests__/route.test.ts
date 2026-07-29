@@ -289,6 +289,9 @@ describe("/api/inquiry route", () => {
       expect(response.status).toBe(429);
       expect(data.success).toBe(false);
       expect(data.errorCode).toBe(API_ERROR_CODES.RATE_LIMIT_EXCEEDED);
+      // 限流是第一道闸：被挡住的请求不该消耗一次 Turnstile token，也不该产生投递。
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should return 400 for invalid JSON", async () => {
@@ -299,6 +302,9 @@ describe("/api/inquiry route", () => {
 
       expect(response.status).toBe(400);
       expect(data.success).toBe(false);
+      expect(data.errorCode).toBe(API_ERROR_CODES.INVALID_JSON_BODY);
+      expect(verifyTurnstileDetailed).not.toHaveBeenCalled();
+      expect(processValidatedInquiry).not.toHaveBeenCalled();
     });
 
     it("should process valid inquiry without a replay key", async () => {
@@ -620,6 +626,8 @@ describe("/api/inquiry route", () => {
         expect.any(String),
         "inquiry",
       );
+      // 一次提交只能扣一次额度。多查一次不会报错，只会让买家的配额悄悄减半。
+      expect(checkDistributedRateLimit).toHaveBeenCalledTimes(1);
     });
 
     it("returns a success-shaped reference for a filled website honeypot", async () => {
