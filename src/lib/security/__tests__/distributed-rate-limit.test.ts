@@ -42,6 +42,33 @@ function setEnv(key: string, value: string | undefined): void {
   }
 }
 
+/**
+ * 让 store 的 increment 拒绝：网络挂了、Redis 拒连接这一类。
+ *
+ * 错误对象由调用方给。实现现在的 catch 块不看错误是什么，但「不看」正是要守的
+ * 东西：有人给超时加一条特判、让它跟普通错误走不同的路，得有测试红。
+ */
+async function breakIncrement(error: unknown): Promise<void> {
+  const mod = await import("@/lib/security/stores/rate-limit-store");
+  vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
+    increment: vi.fn().mockRejectedValue(error),
+  } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+}
+
+/**
+ * 让 store 根本建不起来：生产环境缺 Upstash 配置时，构造函数就抛。
+ *
+ * store 是第一次请求时才惰性建的，而 `getRateLimitStore()` 写在 try 里面，所以
+ * 这个抛出跟 increment 失败落在同一个 catch，一样按 preset 的 failureMode 处理，
+ * 不是一条独立的启动期 fail-closed 通道。
+ */
+async function breakFactory(error: unknown): Promise<void> {
+  const mod = await import("@/lib/security/stores/rate-limit-store");
+  vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
+    throw error;
+  });
+}
+
 describe("distributed-rate-limit", () => {
   const originalEnv = process.env;
 
@@ -67,61 +94,71 @@ describe("distributed-rate-limit", () => {
   // 1. MemoryRateLimitStore Tests (via checkDistributedRateLimit)
   // =========================================================================
   describe("MemoryRateLimitStore (default)", () => {
-    it("should create new entry on first request", async () => {
-      const result = await checkDistributedRateLimit("test-user-1", "inquiry");
+    // 原来是三条：第一次请求 remaining 是 max-1、第二次是 max-2、窗口过期后回到
+    // max-1。三条各断一个数，合起来才是「每次减一，过期归零」这一件事。写成一串
+    // 计数，中间断了哪一步都看得出来是哪一步。
+    //
+    // 过期这一步先把额度耗光再等。内存 store 里两种情况走的是同一个分支（只看
+    // `entry.expiresAt > now`），所以这不是多覆盖了一条代码路径；它守的是买家侧
+    // 那个后果：发满十次询盘之后，一分钟到了必须能再发，不能被永久挡住。
+    it("counts each request down and starts over after the window", async () => {
+      const identifier = "counting-user";
+      const max = RATE_LIMIT_PRESETS.inquiry.maxRequests;
 
-      expect(result.allowed).toBe(true);
-      // First request: count=1, remaining=maxRequests-1=5-1=4
-      expect(result.remaining).toBe(10 - 1);
-    });
+      // 成功路径的每个字段都要钉：额度内的请求不该带 retryAfter，resetTime 要落在
+      // 一个窗口之后。原来这两条各自有独立测试，删的时候以为被拦截那条包住了，
+      // 其实没有——那条钉的是被拦时的值。把 `retryAfter` 改成 `allowed ? 1 : …`，
+      // 只看被拦路径是发现不了的。
+      vi.setSystemTime(1_700_000_000_000);
+      const first = await checkDistributedRateLimit(identifier, "inquiry");
+      expect(first).toEqual({
+        allowed: true,
+        remaining: max - 1,
+        resetTime: 1_700_000_000_000 + MINUTE_MS,
+        retryAfter: null,
+      });
 
-    it("should increment count on subsequent requests", async () => {
-      // First request
-      await checkDistributedRateLimit("test-user-2", "inquiry");
-      // Second request
-      const result = await checkDistributedRateLimit("test-user-2", "inquiry");
-
-      expect(result.allowed).toBe(true);
-      // Second request: count=2, remaining=5-2=3
-      expect(result.remaining).toBe(10 - 1 - 1);
-    });
-
-    it("should reset count after window expires", async () => {
-      // Make requests to reach limit
-      for (let i = 0; i < 10; i++) {
-        await checkDistributedRateLimit("test-user-3", "inquiry");
+      // 额度内的每一次都要钉，不能只看头几次再跳到被拦那次。中间某一次多记一笔
+      // （`entry.count += entry.count === 3 ? 2 : 1`），前几次照样对、到限照样拦，
+      // 只有把整串数列出来才看得见那个跳号。
+      //
+      // 期望值写死不写 `max - i`：后者是 `Math.max(0, maxRequests - count)` 的抄写，
+      // 实现算错它会跟着错。写死就得先钉住上限确实是 10，不然改了配置这串数会
+      // 变成对不上的红，而不是提醒人来改。
+      expect(max).toBe(10);
+      const allowedResults = [first];
+      for (let i = 1; i < max; i++) {
+        allowedResults.push(
+          await checkDistributedRateLimit(identifier, "inquiry"),
+        );
       }
+      expect(allowedResults.map((result) => result.remaining)).toEqual([
+        9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+      ]);
+      expect(allowedResults.map((result) => result.allowed)).toEqual(
+        Array.from({ length: max }, () => true),
+      );
 
-      // Verify at limit
-      const atLimit = await checkDistributedRateLimit("test-user-3", "inquiry");
-      expect(atLimit.allowed).toBe(false);
+      const blocked = await checkDistributedRateLimit(identifier, "inquiry");
+      expect(blocked.allowed).toBe(false);
 
-      // Advance time past the window
       vi.advanceTimersByTime(MINUTE_MS + 1);
 
-      // Should be allowed again
-      const afterReset = await checkDistributedRateLimit(
-        "test-user-3",
+      const afterWindow = await checkDistributedRateLimit(
+        identifier,
         "inquiry",
       );
-      expect(afterReset.allowed).toBe(true);
-      expect(afterReset.remaining).toBe(10 - 1);
+      expect(afterWindow.allowed).toBe(true);
+      expect(afterWindow.remaining).toBe(max - 1);
     });
 
-    it("should warn about in-memory store on first use", async () => {
-      await checkDistributedRateLimit("test-user-4", "inquiry");
-
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("Using in-memory store"),
-      );
-    });
-
-    it("should only warn once about in-memory store", async () => {
+    // 「第一次用会 warn」和「只 warn 一次」是同一条断言的两半：三次请求后正好
+    // 一条，两件事一起证完。分开写的话，前一条在 warn 变成每次都发时还是绿的。
+    it("warns exactly once that the in-memory store is in use", async () => {
       await checkDistributedRateLimit("user-a", "inquiry");
       await checkDistributedRateLimit("user-b", "inquiry");
       await checkDistributedRateLimit("user-c", "inquiry");
 
-      // Warning should only be logged once (on store creation)
       const warnCalls = mockLoggerWarn.mock.calls.filter((call) =>
         String(call[0]).includes("Using in-memory store"),
       );
@@ -146,174 +183,95 @@ describe("distributed-rate-limit", () => {
       expect(result.remaining).toBe(maxRequests - 1);
     });
 
-    it("falls back safely when the store throws", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn().mockRejectedValue(new Error("boom")),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+    // 原来这里是五条测试，外加下面两个 describe 里的两条，一共七条，排列组合
+    // 抄出来的：{increment 抛普通错 / increment 超时 / 工厂函数抛错} ×
+    // {inquiry 关门 / csp 开门}，每格抄一遍同样的断言，其中有两条是同一组合
+    // （普通错 × csp）写了两遍，隔着五百多行。六个组合写成七条，这张表把它压回
+    // 六行，断言只写一处。
+    //
+    // 超时那一维保留。实现现在的 catch 块确实不看 error 是什么，两类错误走同一行，
+    // 但那是当下的实现，不是要守的契约：给 AbortError 加一条特判、让超时改走
+    // 放行，是完全可能有人写的改动，删掉这一维就没人拦得住。
+    //
+    // 期望值是从 `RATE_LIMIT_PRESETS[preset].failureMode` 推出来的，所以这张表
+    // 单独看是循环的：把 inquiry 改成 fail-open，它会跟着变绿。真值在下面
+    // 「pins the $preset preset」那条，那里 closed 和 open 是手写死的。两条合起来
+    // 才封住：一条钉住配置该是什么，一条钉住代码有没有照配置办事。
+    const failureModeMatrix = [
+      {
+        label: "store increment rejects",
+        breakStore: breakIncrement,
+        error: new Error("boom"),
+      },
+      {
+        label: "store increment times out",
+        breakStore: breakIncrement,
+        error: new DOMException("The operation was aborted", "AbortError"),
+      },
+      {
+        label: "store factory throws",
+        breakStore: breakFactory,
+        error: new Error("factory boom"),
+      },
+    ].flatMap(({ label, breakStore, error }) =>
+      (["inquiry", "csp"] as const).map((preset) => ({
+        name: `${label}, ${preset} preset`,
+        breakStore,
+        error,
+        preset,
+      })),
+    );
 
-      const result = await checkDistributedRateLimit("fallback-user", "csp");
-
-      expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - 1);
-      expect(mockLoggerError).toHaveBeenCalled();
-    });
-
-    it.each(["inquiry"] as const)(
-      "fails closed for the %s preset when the store operation times out",
-      async (preset) => {
-        const mod = await import("@/lib/security/stores/rate-limit-store");
-        vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-          increment: vi
-            .fn()
-            .mockRejectedValue(
-              new DOMException("The operation was aborted", "AbortError"),
-            ),
-        } as unknown as ReturnType<typeof mod.createRateLimitStore>);
+    it.each(failureModeMatrix)(
+      "degrades per the preset failure mode: $name",
+      async ({ breakStore, error, preset }) => {
+        await breakStore(error);
+        const config = RATE_LIMIT_PRESETS[preset];
+        const failClosed = config.failureMode === "closed";
 
         const result = await checkDistributedRateLimit(
-          `timeout-fail-closed-${preset}`,
+          `failure-${preset}`,
           preset,
         );
 
         expect(result).toMatchObject({
-          allowed: false,
-          remaining: 0,
+          allowed: !failClosed,
+          remaining: failClosed ? 0 : config.maxRequests - 1,
           degraded: true,
-          deniedReason: "storage_failure",
         });
         expect(result.retryAfter).toBe(
-          Math.ceil(RATE_LIMIT_PRESETS[preset].windowMs / 1000),
+          failClosed ? Math.ceil(config.windowMs / 1000) : null,
+        );
+        expect("deniedReason" in result).toBe(failClosed);
+        if (failClosed) {
+          expect(result.deniedReason).toBe("storage_failure");
+        }
+
+        // 降级是要留痕的：业主看日志才知道限流当时没在工作。warn 说的是这次
+        // 放行还是拦下，error 带上原始错误供排查，两条都得在。
+        //
+        // 断的是「就是刚才扔进去那个对象」，不是 `expect.any(Error)`。实现原样
+        // 转发 `{ error }`，所以身份可以对上；写成 any(Error) 反而会误伤——
+        // 超时那两行扔的 DOMException 在这套测试环境里就不算 Error 的实例。
+        expect(mockLoggerWarn).toHaveBeenCalledWith(
+          expect.stringContaining(failClosed ? "fail-closed" : "fail-open"),
+        );
+        expect(mockLoggerError).toHaveBeenCalledWith(
+          "[Rate Limit] Storage backend error details",
+          { error },
         );
       },
     );
-
-    it("fails open for the csp preset when the store operation times out", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi
-          .fn()
-          .mockRejectedValue(
-            new DOMException("The operation was aborted", "AbortError"),
-          ),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const result = await checkDistributedRateLimit(
-        "timeout-fail-open-csp",
-        "csp",
-      );
-
-      expect(result).toMatchObject({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
-        degraded: true,
-      });
-      expect(result.retryAfter).toBeNull();
-      expect("deniedReason" in result).toBe(false);
-    });
-
-    it("fails closed when the store factory throws for a closed preset", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
-        throw new Error("factory boom");
-      });
-
-      const result = await checkDistributedRateLimit(
-        "factory-fail-closed",
-        "inquiry",
-      );
-
-      expect(result).toMatchObject({
-        allowed: false,
-        remaining: 0,
-        degraded: true,
-        deniedReason: "storage_failure",
-      });
-      expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("fail-closed"),
-      );
-    });
-
-    it("fails open when the store factory throws for an open preset", async () => {
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockImplementation(() => {
-        throw new Error("factory boom");
-      });
-
-      const result = await checkDistributedRateLimit(
-        "factory-fail-open",
-        "csp",
-      );
-
-      expect(result).toMatchObject({
-        allowed: true,
-        remaining: RATE_LIMIT_PRESETS.csp.maxRequests - 1,
-        degraded: true,
-      });
-      expect(result.retryAfter).toBeNull();
-      expect("deniedReason" in result).toBe(false);
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("fail-open"),
-      );
-    });
   });
 
   describe("checkDistributedRateLimit", () => {
-    it("should allow requests under limit", async () => {
-      // inquiry preset has maxRequests=10
-      const result = await checkDistributedRateLimit(
-        "under-limit-user",
-        "inquiry",
-      );
-
-      expect(result.allowed).toBe(true);
-      expect(result.retryAfter).toBeNull();
-    });
-
-    it("should calculate remaining correctly", async () => {
-      const identifier = "remaining-calc-user";
-
-      // Make 3 requests
-      await checkDistributedRateLimit(identifier, "inquiry");
-      await checkDistributedRateLimit(identifier, "inquiry");
-      const result = await checkDistributedRateLimit(identifier, "inquiry");
-
-      // After 3 requests: remaining = 10 - 3 = 7
-      expect(result.remaining).toBe(10 - 3);
-    });
-
-    it("should block requests at limit", async () => {
-      const identifier = "at-limit-user";
-
-      // Make exactly maxRequests (10) requests
-      for (let i = 0; i < 10; i++) {
-        await checkDistributedRateLimit(identifier, "inquiry");
-      }
-
-      // 11th request should be blocked
-      const result = await checkDistributedRateLimit(identifier, "inquiry");
-
-      expect(result.allowed).toBe(false);
-      expect(result.remaining).toBe(0);
-    });
-
-    it("should set retryAfter when blocked", async () => {
-      const identifier = "retry-after-user";
-
-      // Exhaust the limit
-      for (let i = 0; i < 10; i++) {
-        await checkDistributedRateLimit(identifier, "inquiry");
-      }
-
-      // Next request should have retryAfter
-      const result = await checkDistributedRateLimit(identifier, "inquiry");
-
-      expect(result.allowed).toBe(false);
-      expect(result.retryAfter).not.toBeNull();
-      expect(result.retryAfter).toBeGreaterThan(0);
-    });
-
+    // 原来这里四条：额度内放行、remaining 算得对、到限拦下、拦下时有
+    // retryAfter。前两条被上面的计数测试和 preset 表各证过一遍。后两条并进下面
+    // 这条：它把被拦那次的五个字段全钉死，包括 retryAfter 的确切秒数，比
+    // 「不是 null 且大于 0」严。
+    //
+    // 它只管被拦那一次。「前十次都得放行」不在这条的射程里，那是上面计数测试
+    // 的事；成功响应的 resetTime 也一样，这里钉的是被拦响应的。
     it("returns exact blocked metadata when the limit is exceeded", async () => {
       vi.setSystemTime(1_700_000_000_000);
       const identifier = "blocked-metadata-user";
@@ -333,29 +291,8 @@ describe("distributed-rate-limit", () => {
       });
     });
 
-    it("should allow requests again after window reset", async () => {
-      const identifier = "window-reset-user";
-
-      // Exhaust limit
-      for (let i = 0; i < 10; i++) {
-        await checkDistributedRateLimit(identifier, "inquiry");
-      }
-
-      // Verify blocked
-      const blocked = await checkDistributedRateLimit(identifier, "inquiry");
-      expect(blocked.allowed).toBe(false);
-
-      // Advance time past the window
-      vi.advanceTimersByTime(MINUTE_MS + 1);
-
-      // Should be allowed again
-      const afterWindow = await checkDistributedRateLimit(
-        identifier,
-        "inquiry",
-      );
-      expect(afterWindow.allowed).toBe(true);
-    });
-
+    // 「窗口过期后重新放行」上面那条计数测试已经走过，而且还断了过期后
+    // remaining 回到 max-1，比这里只看 allowed 更细。
     it("should keep non-degraded responses clean during normal operation", async () => {
       const normalResult = await checkDistributedRateLimit(
         "normal-user",
@@ -393,6 +330,9 @@ describe("distributed-rate-limit", () => {
 
       expect(blockedInquiry.allowed).toBe(false);
       expect(allowedCsp.allowed).toBe(true);
+      // 只看 allowed 是空转的：csp 上限 100，就算两个预设共用一个计数器，累计
+      // 十二次也远没到，照样放行。要钉准确的 remaining——共用计数时这里是 88。
+      expect(allowedCsp.remaining).toBe(RATE_LIMIT_PRESETS.csp.maxRequests - 1);
     });
   });
 
@@ -400,71 +340,47 @@ describe("distributed-rate-limit", () => {
   // 4. createRateLimitHeaders Tests
   // =========================================================================
   describe("createRateLimitHeaders", () => {
-    it("should set X-RateLimit-Remaining header", () => {
-      const result = {
-        allowed: true,
-        remaining: 3,
-        resetTime: Date.now() + MINUTE_MS,
-        retryAfter: null,
-      };
+    // 原来五条，每条只看一个 header，用的是五份几乎一样的 result，三个 header
+    // 的值原来都有人断到。合成两行是去重，不是补覆盖：五份输入其实只有放行和
+    // 拦下两种形状，同一形状下三个 header 一起断完，比拆成五条好读，也不会再有
+    // 人加一条只看一个字段的新用例。
+    const RESET_TIME = 1_700_000_000_000 + MINUTE_MS;
 
+    it.each([
+      {
+        name: "allowed request keeps Retry-After off",
+        result: {
+          allowed: true,
+          remaining: 3,
+          resetTime: RESET_TIME,
+          retryAfter: null,
+        },
+        expected: {
+          "X-RateLimit-Remaining": "3",
+          "X-RateLimit-Reset": String(RESET_TIME),
+          "Retry-After": null,
+        },
+      },
+      {
+        name: "blocked request carries Retry-After and zero remaining",
+        result: {
+          allowed: false,
+          remaining: 0,
+          resetTime: RESET_TIME,
+          retryAfter: 30,
+        },
+        expected: {
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(RESET_TIME),
+          "Retry-After": "30",
+        },
+      },
+    ])("$name", ({ result, expected }) => {
       const headers = createRateLimitHeaders(result);
 
-      expect(headers.get("X-RateLimit-Remaining")).toBe(String(3));
-    });
-
-    it("should set X-RateLimit-Reset header", () => {
-      const resetTime = Date.now() + MINUTE_MS;
-      const result = {
-        allowed: true,
-        remaining: 5,
-        resetTime,
-        retryAfter: null,
-      };
-
-      const headers = createRateLimitHeaders(result);
-
-      expect(headers.get("X-RateLimit-Reset")).toBe(String(resetTime));
-    });
-
-    it("should set Retry-After header when present", () => {
-      const retryAfterSeconds = 60;
-      const result = {
-        allowed: false,
-        remaining: 0,
-        resetTime: Date.now() + MINUTE_MS,
-        retryAfter: retryAfterSeconds,
-      };
-
-      const headers = createRateLimitHeaders(result);
-
-      expect(headers.get("Retry-After")).toBe(String(retryAfterSeconds));
-    });
-
-    it("should not set Retry-After header when null", () => {
-      const result = {
-        allowed: true,
-        remaining: 5,
-        resetTime: Date.now() + MINUTE_MS,
-        retryAfter: null,
-      };
-
-      const headers = createRateLimitHeaders(result);
-
-      expect(headers.get("Retry-After")).toBeNull();
-    });
-
-    it("should handle zero remaining correctly", () => {
-      const result = {
-        allowed: false,
-        remaining: 0,
-        resetTime: Date.now() + MINUTE_MS,
-        retryAfter: 30,
-      };
-
-      const headers = createRateLimitHeaders(result);
-
-      expect(headers.get("X-RateLimit-Remaining")).toBe("0");
+      for (const [key, value] of Object.entries(expected)) {
+        expect(headers.get(key), key).toBe(value);
+      }
     });
   });
 
@@ -487,22 +403,23 @@ describe("distributed-rate-limit", () => {
       }
     });
 
-    it("should have expected values for inquiry preset", () => {
-      expect(RATE_LIMIT_PRESETS.inquiry.maxRequests).toBe(10);
-      expect(RATE_LIMIT_PRESETS.inquiry.windowMs).toBe(MINUTE_MS);
-      expect(RATE_LIMIT_PRESETS.inquiry.failureMode).toBe("closed");
-    });
-
-    it("should have expected values for csp preset", () => {
-      expect(RATE_LIMIT_PRESETS.csp.maxRequests).toBe(100);
-      expect(RATE_LIMIT_PRESETS.csp.windowMs).toBe(MINUTE_MS);
-      expect(RATE_LIMIT_PRESETS.csp.failureMode).toBe("open");
-    });
+    // 两条预设各一条测试，断的是同一组字段。表格化以后，加第三个预设时补一行
+    // 就行，不用再抄一遍断言。
+    it.each([
+      { preset: "inquiry", maxRequests: 10, failureMode: "closed" },
+      { preset: "csp", maxRequests: 100, failureMode: "open" },
+    ] as const)(
+      "pins the $preset preset at $maxRequests per window, failing $failureMode",
+      ({ preset, maxRequests, failureMode }) => {
+        expect(RATE_LIMIT_PRESETS[preset]).toEqual({
+          maxRequests,
+          windowMs: MINUTE_MS,
+          failureMode,
+        });
+      },
+    );
   });
 
-  // =========================================================================
-  // 7. resetRateLimitStore Tests
-  // =========================================================================
   describe("resetRateLimitStore", () => {
     it("should clear all rate limit state", async () => {
       // Create some entries
@@ -541,183 +458,125 @@ describe("distributed-rate-limit", () => {
   // 8. Edge Cases and Boundary Tests
   // =========================================================================
   describe("edge cases and boundaries", () => {
-    it("should handle exactly maxRequests boundary", async () => {
-      const identifier = "boundary-user";
-
-      // Make exactly maxRequests requests (10 for inquiry)
-      for (let i = 0; i < 10; i++) {
-        const result = await checkDistributedRateLimit(identifier, "inquiry");
-        expect(result.allowed).toBe(true);
-      }
-
-      // The 11th request should be blocked
-      const result = await checkDistributedRateLimit(identifier, "inquiry");
-      expect(result.allowed).toBe(false);
-      expect(result.remaining).toBe(0);
-    });
-
-    it("should never return negative remaining", async () => {
+    // 原来五条。「正好到 maxRequests 的边界」和「响应里带 resetTime」两条拆开
+    // 归了两处：额度内那 10 次全部放行、成功响应带正确的 resetTime，由上面的
+    // counting test 逐次钉死；第 11 次被拦时的每个字段，由
+    // 「returns exact blocked metadata」钉死。那条只看被拦那一次，不管前十次。
+    //
+    // 「remaining 不会是负数」原来只发到额度上限就停了，根本没越过限额，也就没
+    // 走到 remaining 可能变负的那段。改成发到两倍额度，才是它名字说的那件事。
+    it("never reports negative remaining past the limit", async () => {
       const identifier = "negative-remaining-user";
+      const max = RATE_LIMIT_PRESETS.inquiry.maxRequests;
 
-      // Make more requests than the limit
-      for (let i = 0; i < 10; i++) {
-        const result = await checkDistributedRateLimit(identifier, "inquiry");
-        // Remaining should never be negative
-        expect(result.remaining).toBeGreaterThanOrEqual(0);
+      const remaining: number[] = [];
+      for (let i = 0; i < max * 2; i++) {
+        remaining.push(
+          (await checkDistributedRateLimit(identifier, "inquiry")).remaining,
+        );
       }
+
+      expect(Math.min(...remaining)).toBe(0);
+      expect(remaining.slice(max)).toEqual(
+        Array.from({ length: max }, () => 0),
+      );
     });
 
-    it("should handle empty identifier", async () => {
-      const result = await checkDistributedRateLimit("", "inquiry");
+    // 空串和带符号的标识符原来是两条，断的是同一句话：标识符不做任何解析，
+    // 拿来当 key 就是了。
+    it.each([
+      { name: "empty identifier", identifier: "" },
+      {
+        name: "identifier with email and ip punctuation",
+        identifier: "user@example.com:192.168.1.1",
+      },
+    ])("takes any shape of identifier: $name", async ({ identifier }) => {
+      const result = await checkDistributedRateLimit(identifier, "inquiry");
+
       expect(result.allowed).toBe(true);
-    });
-
-    it("should handle special characters in identifier", async () => {
-      const result = await checkDistributedRateLimit(
-        "user@example.com:192.168.1.1",
-        "inquiry",
-      );
-      expect(result.allowed).toBe(true);
-    });
-
-    it("should include resetTime in response", async () => {
-      const beforeRequest = Date.now();
-      const result = await checkDistributedRateLimit(
-        "reset-time-user",
-        "inquiry",
-      );
-
-      expect(result.resetTime).toBeGreaterThanOrEqual(beforeRequest);
-      expect(result.resetTime).toBeLessThanOrEqual(
-        beforeRequest + MINUTE_MS + 1,
-      );
+      expect(result.remaining).toBe(RATE_LIMIT_PRESETS.inquiry.maxRequests - 1);
     });
   });
 
-  // =========================================================================
-  // 9. Atomicity & Concurrency Tests (Red — non-atomic read-modify-write)
-  // =========================================================================
   describe("atomicity and concurrency", () => {
-    it("should use atomic increment to prevent over-admission under concurrent access", async () => {
-      // The Redis/KV store implementations use non-atomic read-modify-write:
-      //   1. GET key -> count=N
-      //   2. count + 1 = N+1
-      //   3. SET key count=N+1
-      // Two concurrent requests can both read count=N and both write N+1,
-      // effectively admitting 2 requests but only incrementing by 1.
-      //
-      // This test verifies the implementation uses atomic operations (e.g., INCR).
+    // 这条原来是空转的。它 mock 的 fetch 只认 GET 和 SET，可实际实现发的是
+    // `/multi-exec` 加 `["INCR", key]`，一条都对不上，于是每个请求都走进
+    // storage_failure，inquiry 又是 fail-closed，十一个请求全被拦下。
+    // allowedCount 恒为 0，`0 <= 10` 永远成立。换句话说，把实现改成不原子的
+    // 读-改-写，它照样绿。
+    //
+    // 现在的 mock 按真实协议应答：INCR 在服务端一步加一，两个并发请求各自拿到
+    // 不同的数。断言也改成「正好放行 max 个」——不是「不超过 max」。后者在全部
+    // 被拒时同样成立，正是它当初失灵的原因。
+    it("admits exactly the limit when requests arrive together", async () => {
       vi.useRealTimers();
       resetRateLimitStore();
 
-      // Set up Upstash Redis store to trigger the non-atomic code path
       setEnv("UPSTASH_REDIS_REST_URL", "http://fake-redis:8080");
       setEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
 
-      // Simulate a Redis-like store with async delay on reads
-      // to guarantee the race window is open
-      let storedValue: string | null = null;
+      const max = RATE_LIMIT_PRESETS.inquiry.maxRequests;
+      const counters = new Map<string, number>();
+      const unknownCommands: string[] = [];
       const fetchSpy = vi.spyOn(globalThis, "fetch");
 
       fetchSpy.mockImplementation(async (_url, options) => {
-        const body = JSON.parse(String((options as RequestInit).body));
-        const command = body[0] as string;
+        const commands = JSON.parse(
+          String((options as RequestInit).body),
+        ) as string[][];
 
-        if (command === "GET") {
-          // Capture current value BEFORE any delay
-          const snapshot = storedValue;
-          // Async delay opens the race window: all concurrent reads
-          // see the same snapshot before any write lands
-          await new Promise<void>((resolve) => {
-            setTimeout(resolve, 1);
-          });
-          return new Response(JSON.stringify({ result: snapshot }), {
-            status: 200,
-          });
-        }
+        const results = commands.map((command) => {
+          const [name, key] = command;
 
-        if (command === "SET") {
-          storedValue = body[2] as string;
-          return new Response(JSON.stringify({ result: "OK" }), {
-            status: 200,
-          });
-        }
+          // INCR 的意义就在于取值和加一在服务端是一步完成的。这里先读后写没有
+          // await 隔开，等价于同一件事。真实实现要是退回读-改-写，请求之间就会
+          // 隔着网络往返，下面的并发数立刻对不上。
+          if (name === "INCR") {
+            const next = (counters.get(key!) ?? 0) + 1;
+            counters.set(key!, next);
+            return { result: next };
+          }
+          if (name === "PTTL") {
+            return { result: MINUTE_MS };
+          }
+          if (name === "GET") {
+            return { result: String(counters.get(key!) ?? 0) };
+          }
+          if (name === "PEXPIRE" || name === "SET") {
+            return { result: 1 };
+          }
 
-        return new Response(JSON.stringify({ result: null }), { status: 200 });
+          // 认不出的命令记下来，别默默回一个 `{ result: 1 }`。这条测试钉的是
+          // INCR；哪天实现换成同样原子的 Lua EVAL，默默糊弄会让计数对不上，
+          // 报错说的是「放行了 11 个」，把人往「原子性坏了」的方向带。
+          //
+          // 也不能在这儿直接 throw：store 有 catch，抛出去会被吞成
+          // storage_failure，最后还是变成计数对不上。记下来，下面第一条就断它。
+          unknownCommands.push(String(name));
+          return { result: 1 };
+        });
+
+        // 上面那段 map 是同步跑完的，取值和加一之间没有 await——INCR 在服务端
+        // 就是这个语义。这里 yield 一次只是让响应异步返回，像真的网络往返，
+        // 并不制造竞态窗口：窗口是被测实现自己开的，实现要是把读和写拆成两次
+        // 请求，中间那次 await 就会让别的请求插进来，计数立刻对不上。
+        await Promise.resolve();
+        return new Response(JSON.stringify(results), { status: 200 });
       });
 
-      const identifier = "concurrent-redis-user";
-      const concurrentRequests = 10 + 1;
-
-      // Fire 11 concurrent requests against a window of 10 (inquiry preset)
       const results = await Promise.all(
-        Array.from({ length: concurrentRequests }, () =>
-          checkDistributedRateLimit(identifier, "inquiry"),
+        Array.from({ length: max + 1 }, () =>
+          checkDistributedRateLimit("concurrent-redis-user", "inquiry"),
         ),
       );
 
-      const allowedCount = results.filter((r) => r.allowed).length;
-
       fetchSpy.mockRestore();
 
-      // With atomic INCR, at most 10 should be allowed.
-      expect(allowedCount).toBeLessThanOrEqual(10);
-    });
-  });
-
-  // =========================================================================
-  // 10. Storage Failure Behavior Tests (Red — silent null instead of throw)
-  // =========================================================================
-  describe("storage failure behavior", () => {
-    it("should set degraded flag and log full failure details when storage backend throws", async () => {
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn().mockRejectedValue(new Error("boom")),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const result = await checkDistributedRateLimit(
-        "storage-failure-user",
-        "inquiry",
-      );
-
-      expect(result).toMatchObject({
-        allowed: false,
-        degraded: true,
-        deniedReason: "storage_failure",
-      });
-      expect(result.retryAfter).toBe(Math.ceil(MINUTE_MS / 1000));
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.stringContaining("degraded"),
-      );
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Storage backend error details",
-        expect.objectContaining({ error: expect.any(Error) }),
-      );
-    });
-  });
-
-  // =========================================================================
-  // 11. Failure Mode Configuration Tests (Red — no failureMode config)
-  // =========================================================================
-  describe("failure mode configuration", () => {
-    it("should use fail-open for csp preset on storage failure", async () => {
-      resetRateLimitStore();
-      const mod = await import("@/lib/security/stores/rate-limit-store");
-      vi.spyOn(mod, "createRateLimitStore").mockReturnValue({
-        increment: vi.fn().mockRejectedValue(new Error("csp boom")),
-      } as unknown as ReturnType<typeof mod.createRateLimitStore>);
-
-      const result = await checkDistributedRateLimit("fail-open-user", "csp");
-
-      expect(result.allowed).toBe(true);
-      expect(result.degraded).toBe(true);
-      expect(result.retryAfter).toBeNull();
-      expect("deniedReason" in result).toBe(false);
-      expect(mockLoggerError).toHaveBeenCalledWith(
-        "[Rate Limit] Storage backend error details",
-        expect.objectContaining({ error: expect.any(Error) }),
-      );
+      // 顺序有讲究：先说清桩本身还认得实现发的命令，再说结果对不对。反过来的话，
+      // 桩过期了报出来的是一串计数，看的人会先去查限流逻辑。
+      expect(unknownCommands).toEqual([]);
+      expect(results.filter((result) => result.degraded)).toEqual([]);
+      expect(results.filter((result) => result.allowed)).toHaveLength(max);
     });
   });
 });
