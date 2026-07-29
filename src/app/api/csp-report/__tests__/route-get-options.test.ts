@@ -52,7 +52,8 @@ describe("GET and OPTIONS /api/csp-report", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("application/json");
     expect(data.status).toBe("CSP report endpoint active");
-    expect(data.timestamp).toBeDefined();
+    // toBeDefined() 放行 `Date.now()` 这种数字：健康探针的时间戳合同是 ISO 字符串。
+    expect(data.timestamp).toEqual(expect.any(String));
   });
 
   it("answers a preflight from an allowed origin with the full CORS set", async () => {

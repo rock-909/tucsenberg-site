@@ -29,6 +29,24 @@ import { suppressExpectedCspWarnings } from "./test-utils";
  * `logger.warn` / `logger.error`，直接断言它们才数得清「恰好一次」。
  */
 
+// 限流链路（store 和 key 派生）在首次使用时会打若干条与本路由无关的启动 warn。
+// 把 `withRateLimit` 换成直通，这个文件里的 `logger.warn` 就只剩路由自己写的那些，
+// 可以直接断总量——只数目标消息的话，路由多写一条
+// `logger.warn("Raw CSP report", cspReport)` 把未清洗的原始载荷打进日志也是绿的。
+// 限流本身的集成由 `route-rate-limit.test.ts` 负责。
+vi.mock("@/lib/api/with-rate-limit", () => ({
+  withRateLimit:
+    (
+      _preset: string,
+      handler: (
+        request: NextRequest,
+        context: { clientIP: string },
+      ) => Promise<Response>,
+    ) =>
+    (request: NextRequest) =>
+      handler(request, { clientIP: "127.0.0.1" }),
+}));
+
 vi.mock("@/lib/logger", () => ({
   logger: {
     warn: vi.fn(),
@@ -59,7 +77,7 @@ const VALID_REPORT_BODY = {
 const validCSPReport = { "csp-report": VALID_REPORT_BODY };
 
 function postRequest(
-  body: string,
+  body: string | null,
   headers: Record<string, string> = {
     "content-type": "application/csp-report",
   },
@@ -82,14 +100,8 @@ function reportWith(overrides: Record<string, unknown>) {
   return { "csp-report": { ...VALID_REPORT_BODY, ...overrides } };
 }
 
-// 限流 store 首次使用会打两条启动 warn（缺 pepper、用内存 store）。它们跟违规报告
-// 无关，所以计数只数目标那条消息，不数 `logger.warn` 的总调用次数。
-function countLogs(
-  mocked: typeof logger.warn | typeof logger.error,
-  message: string,
-): number {
-  return vi.mocked(mocked).mock.calls.filter(([first]) => first === message)
-    .length;
+function logMessages(mocked: typeof logger.warn | typeof logger.error) {
+  return vi.mocked(mocked).mock.calls.map(([first]) => first);
 }
 
 function getViolationLog(): Record<string, string> {
@@ -132,10 +144,11 @@ describe("POST /api/csp-report", () => {
 
     expect(response.status).toBe(200);
     expect(data.status).toBe("received");
-    expect(data.timestamp).toBeDefined();
+    expect(data.timestamp).toEqual(expect.any(String));
 
     // 查询串和 fragment 会把买家会话 token 带进日志，必须在记录前剥掉。
-    expect(countLogs(logger.warn, "CSP Violation Report")).toBe(1);
+    expect(logMessages(logger.warn)).toEqual(["CSP Violation Report"]);
+    expect(console.warn).not.toHaveBeenCalled();
     expect(getViolationLog()).toEqual(
       expect.objectContaining({
         documentUri: "https://example.com/page",
@@ -242,8 +255,17 @@ describe("POST /api/csp-report", () => {
       "INVALID_JSON_BODY",
     ],
     [
-      "请求体为空",
+      "请求体为空字符串",
       "",
+      { "content-type": "application/csp-report" },
+      400,
+      "INVALID_REQUEST",
+    ],
+    // 空字符串和 null 在 fetch 里不是同一种 body 初始化，分开各占一行，免得
+    // 「两者其实走同一个分支」这个假设哪天悄悄不成立。
+    [
+      "请求体是 null",
+      null,
       { "content-type": "application/csp-report" },
       400,
       "INVALID_REQUEST",
@@ -356,8 +378,10 @@ describe("POST /api/csp-report", () => {
       { "script-sample": 'eval("dangerous code")' },
     ],
     [
-      "data: URL 里带内联脚本",
-      { "blocked-uri": 'data:text/html,<script>eval("x")</script>' },
+      // 载荷里不能出现 eval，否则这一行就算 data:text/html 从判定里被删掉也还是红的，
+      // 名字声称守的东西其实没守住。
+      "data:text/html 的内联文档",
+      { "blocked-uri": "data:text/html,<p>blocked</p>" },
     ],
     ["vbscript: 协议", { "blocked-uri": "vbscript:msgbox(1)" }],
     ["onload 事件处理器", { "script-sample": "some content with onload" }],
@@ -369,10 +393,21 @@ describe("POST /api/csp-report", () => {
       const response = await postReport(reportWith(overrides));
 
       expect(response.status).toBe(200);
-      expect(countLogs(logger.error, "SUSPICIOUS CSP VIOLATION DETECTED")).toBe(
-        1,
+      expect(logMessages(logger.error)).toEqual([
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+      ]);
+      expect(logMessages(logger.warn)).toEqual([]);
+      // 只数「记了一次」的话，`logger.error("SUSPICIOUS...", {})` 也是绿的，
+      // 而那条告警没有任何定位信息，运维看到也查不下去。
+      expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
+        "SUSPICIOUS CSP VIOLATION DETECTED",
+        expect.objectContaining({
+          timestamp: expect.any(String),
+          blockedUri: expect.any(String),
+          scriptSample: expect.any(String),
+          ip: "[REDACTED_IP]",
+        }),
       );
-      expect(countLogs(logger.warn, "CSP Violation Report")).toBe(0);
     },
   );
 
@@ -425,11 +460,54 @@ describe("POST /api/csp-report", () => {
       { "violated-directives": ["script-src", "style-src"] },
       200,
     ],
+    // 250 和 50000 之间要留一个点：只有两端的话，把 sample 上限收成 800 字符
+    // 这种改动两头都不会红。
+    [
+      "刚好在上限内的 1000 字符 sample",
+      { "script-sample": "x".repeat(1000) },
+      200,
+    ],
     ["超过体积上限的巨大载荷", { "script-sample": "x".repeat(50_000) }, 413],
   ])("survives a hostile payload with %s", async (_case, overrides, status) => {
     const response = await postReport(reportWith(overrides));
 
     expect(response.status).toBe(status);
+  });
+
+  // 生产环境 + 配好 CSP_REPORT_URI 是真正会上线的那条路径，必须单独走一遍：只在
+  // 默认测试环境验证可疑告警的话，一句 `if (isRuntimeProduction()) return ignored`
+  // 或者把生产的 error 降级成 warn，其余用例全都不会红，而线上告警已经没了。
+  it("still escalates suspicious reports in production", async () => {
+    vi.doMock("@/lib/env", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/lib/env")>();
+      const env = {
+        ...actual.env,
+        NODE_ENV: "production",
+        CSP_REPORT_URI: "https://example.com/csp-report",
+      };
+
+      return { ...actual, env, runtimeEnv: env };
+    });
+    vi.resetModules();
+
+    const { POST: prodPost } = await import("../route");
+    const response = await prodPost(
+      postRequest(
+        JSON.stringify(
+          reportWith({ "script-sample": 'eval("production sample")' }),
+        ),
+      ),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.status).not.toBe("ignored");
+    expect(logMessages(logger.error)).toEqual([
+      "SUSPICIOUS CSP VIOLATION DETECTED",
+    ]);
+
+    vi.doUnmock("@/lib/env");
+    vi.resetModules();
   });
 
   // 开发环境没配 CSP_REPORT_URI 时，路由该明说自己丢弃了报告，而不是假装收下。
