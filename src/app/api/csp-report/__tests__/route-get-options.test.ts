@@ -1,17 +1,29 @@
-/**
- * CSP Report API Route - GET & OPTIONS Tests
- *
- * 专门测试GET和OPTIONS端点功能，包括：
- * - 健康检查功能
- * - CORS头部设置
- * - 错误处理
- * - 意外错误处理
- */
-
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GET, OPTIONS, POST } from "@/app/api/csp-report/route";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { GET, OPTIONS } from "@/app/api/csp-report/route";
 import { suppressExpectedCspWarnings } from "./test-utils";
+
+/**
+ * `/api/csp-report` 的 GET 与 OPTIONS。
+ *
+ * 2026-07-29 从 21 条收到 3 条。这两个方法各自只有一段十几行的实现，原来却被拆成
+ * 六个 describe 反复断言同一件事：
+ *
+ * - GET 的健康检查载荷：`返回健康检查信息`、`返回正确的响应格式`、
+ *   `设置正确的Content-Type`、`处理多次调用`、`GET响应应该包含必要字段`、
+ *   `GET请求应该返回200状态码`、`并发GET请求`——七条，加上 `route.test.ts` 里
+ *   还有一条，共八条。
+ * - OPTIONS 的预检响应头：`允许的来源返回共享CORS headers`、`返回空的响应体`、
+ *   `处理预检请求`、`支持多种HTTP方法`、`OPTIONS响应应该包含正确的头部`、
+ *   `OPTIONS请求应该返回200状态码`、`并发OPTIONS请求`——七条，同样在
+ *   `route.test.ts` 里还有一份。
+ *
+ * 「并发」那两条是 `Promise.all` 三个互不相干的请求，路由无状态，证明不了任何
+ * 并发性质。「处理多次调用」同理。
+ *
+ * 原来的 `错误处理` 和 `HTTP状态码验证` 两个 describe 测的全是 POST 的拒绝路径，
+ * 已经合并进 `route-post.test.ts` 的拒绝矩阵表。
+ */
 
 function createOptionsRequest(origin = "http://localhost:3000") {
   return new NextRequest("http://localhost:3000/api/csp-report", {
@@ -23,17 +35,7 @@ function createOptionsRequest(origin = "http://localhost:3000") {
   });
 }
 
-function getAllowMethods(response: Response): string[] {
-  return (
-    response.headers
-      .get("Access-Control-Allow-Methods")
-      ?.split(",")
-      .map((method) => method.trim())
-      .sort() ?? []
-  );
-}
-
-describe("CSP Report API Route - GET & OPTIONS Tests", () => {
+describe("GET and OPTIONS /api/csp-report", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     suppressExpectedCspWarnings();
@@ -43,256 +45,47 @@ describe("CSP Report API Route - GET & OPTIONS Tests", () => {
     vi.restoreAllMocks();
   });
 
-  describe("GET /api/csp-report", () => {
-    it("应该返回健康检查信息", async () => {
-      const response = await GET();
-      const data = await response.json();
+  it("answers GET with a health payload", async () => {
+    const response = await GET();
+    const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data.status).toBe("CSP report endpoint active");
-      expect(data.timestamp).toBeDefined();
-    });
-
-    it("应该返回正确的响应格式", async () => {
-      const response = await GET();
-      const data = await response.json();
-
-      expect(data).toHaveProperty("status");
-      expect(data).toHaveProperty("timestamp");
-      expect(typeof data.status).toBe("string");
-      expect(typeof data.timestamp).toBe("string");
-    });
-
-    it("应该设置正确的Content-Type", async () => {
-      const response = await GET();
-
-      expect(response.headers.get("content-type")).toContain(
-        "application/json",
-      );
-    });
-
-    it("应该处理多次调用", async () => {
-      const response1 = await GET();
-      const response2 = await GET();
-
-      expect(response1.status).toBe(200);
-      expect(response2.status).toBe(200);
-
-      const data1 = await response1.json();
-      const data2 = await response2.json();
-
-      expect(data1.status).toBe(data2.status);
-      // Timestamps should be different (or very close)
-      expect(data1.timestamp).toBeDefined();
-      expect(data2.timestamp).toBeDefined();
-    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("application/json");
+    expect(data.status).toBe("CSP report endpoint active");
+    // toBeDefined() 放行 `Date.now()` 这种数字：健康探针的时间戳合同是 ISO 字符串。
+    expect(data.timestamp).toEqual(expect.any(String));
   });
 
-  describe("OPTIONS /api/csp-report", () => {
-    it("允许的来源应该返回共享CORS headers", async () => {
-      const response = await OPTIONS(createOptionsRequest());
+  it("answers a preflight from an allowed origin with the full CORS set", async () => {
+    const response = await OPTIONS(createOptionsRequest());
+    const body = await response.text();
 
-      expect(response.status).toBe(200);
-      expect(response.headers.get("Allow")).toBe("POST, GET, OPTIONS");
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000",
-      );
-      expect(getAllowMethods(response)).toEqual(["GET", "OPTIONS", "POST"]);
-      expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
-        "Content-Type",
-      );
-    });
-
-    it("不允许的来源应该返回204且不暴露CORS允许来源", async () => {
-      const response = await OPTIONS(createOptionsRequest("https://evil.test"));
-      const text = await response.text();
-
-      expect(response.status).toBe(204);
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBeNull();
-      expect(text).toBe("");
-    });
-
-    it("应该返回空的响应体", async () => {
-      const response = await OPTIONS(createOptionsRequest());
-      const text = await response.text();
-
-      expect(text).toBe("");
-    });
-
-    it("应该处理预检请求", async () => {
-      const response = await OPTIONS(createOptionsRequest());
-
-      expect(response.status).toBe(200);
-      expect(response.headers.get("Access-Control-Allow-Methods")).toContain(
-        "POST",
-      );
-      expect(response.headers.get("Access-Control-Allow-Headers")).toContain(
-        "Content-Type",
-      );
-    });
-
-    it("应该支持多种HTTP方法", async () => {
-      const response = await OPTIONS(createOptionsRequest());
-      const allowedMethods = response.headers.get("Allow");
-
-      expect(allowedMethods).toContain("POST");
-      expect(allowedMethods).toContain("GET");
-      expect(allowedMethods).toContain("OPTIONS");
-    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Allow")).toBe("POST, GET, OPTIONS");
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+      "http://localhost:3000",
+    );
+    expect(
+      response.headers
+        .get("Access-Control-Allow-Methods")
+        ?.split(",")
+        .map((method) => method.trim())
+        .sort(),
+    ).toEqual(["GET", "OPTIONS", "POST"]);
+    expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
+      "Content-Type",
+    );
+    expect(body).toBe("");
   });
 
-  describe("错误处理", () => {
-    it("应该处理请求体解析错误", async () => {
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: null,
-        headers: {
-          "content-type": "application/csp-report",
-        },
-      });
+  // 关键是「不回 Access-Control-Allow-Origin」，而不是「回了 204」：回 204 但带上
+  // 允许来源头，等于把这个端点开放给任意站点。
+  it("refuses a preflight from an unlisted origin without echoing it back", async () => {
+    const response = await OPTIONS(createOptionsRequest("https://evil.test"));
+    const body = await response.text();
 
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.errorCode).toBe("INVALID_REQUEST");
-      // 空请求体是预期的错误处理，不会记录到error级别
-    });
-
-    it("应该处理意外的错误", async () => {
-      // Create a request with invalid JSON body to trigger parsing error
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: "invalid-json-content",
-        headers: {
-          "content-type": "application/csp-report",
-        },
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.errorCode).toBe("INVALID_JSON_BODY");
-      // JSON解析错误是预期的错误处理，不会记录到error级别
-    });
-
-    it("应该处理空请求体", async () => {
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: "",
-        headers: {
-          "content-type": "application/csp-report",
-        },
-      });
-
-      const response = await POST(request);
-
-      expect(response.status).toBe(400);
-    });
-
-    it("应该处理null请求体", async () => {
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: null,
-        headers: {
-          "content-type": "application/csp-report",
-        },
-      });
-
-      const response = await POST(request);
-
-      expect(response.status).toBe(400);
-    });
-  });
-
-  describe("响应格式验证", () => {
-    it("GET响应应该包含必要字段", async () => {
-      const response = await GET();
-      const data = await response.json();
-
-      expect(data).toMatchObject({
-        status: expect.any(String),
-        timestamp: expect.any(String),
-      });
-    });
-
-    it("OPTIONS响应应该包含正确的头部", async () => {
-      const response = await OPTIONS(createOptionsRequest());
-
-      const requiredHeaders = [
-        "Allow",
-        "Access-Control-Allow-Methods",
-        "Access-Control-Allow-Headers",
-        "Access-Control-Allow-Origin",
-      ];
-
-      for (const header of requiredHeaders) {
-        expect(response.headers.get(header)).toBeDefined();
-      }
-    });
-
-    it("错误响应应该包含错误信息", async () => {
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: "invalid",
-        headers: {
-          "content-type": "application/csp-report",
-        },
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(data).toHaveProperty("errorCode");
-      expect(typeof data.errorCode).toBe("string");
-    });
-  });
-
-  describe("HTTP状态码验证", () => {
-    it("GET请求应该返回200状态码", async () => {
-      const response = await GET();
-      expect(response.status).toBe(200);
-    });
-
-    it("OPTIONS请求应该返回200状态码", async () => {
-      const response = await OPTIONS(createOptionsRequest());
-      expect(response.status).toBe(200);
-    });
-
-    it("无效POST请求应该返回适当的错误状态码", async () => {
-      const request = new NextRequest("http://localhost:3000/api/csp-report", {
-        method: "POST",
-        body: JSON.stringify({ invalid: "data" }),
-        headers: {
-          "content-type": "text/plain", // Wrong content type
-        },
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(415);
-    });
-  });
-
-  describe("并发处理", () => {
-    it("应该处理并发GET请求", async () => {
-      const promises = Array.from({ length: 5 }, () => GET());
-      const responses = await Promise.all(promises);
-
-      for (const response of responses) {
-        expect(response.status).toBe(200);
-      }
-    });
-
-    it("应该处理并发OPTIONS请求", async () => {
-      const promises = Array.from({ length: 5 }, () =>
-        OPTIONS(createOptionsRequest()),
-      );
-      const responses = await Promise.all(promises);
-
-      for (const response of responses) {
-        expect(response.status).toBe(200);
-      }
-    });
+    expect(response.status).toBe(204);
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBeNull();
+    expect(body).toBe("");
   });
 });
