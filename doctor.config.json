@@ -75,18 +75,12 @@
           "src/lib/api/safe-parse-json.ts",
           "src/lib/security/__tests__/distributed-rate-limit.test.ts",
           "src/lib/security/__tests__/rate-limit-key-strategies.test.ts",
-          "tests/e2e/contact-form-smoke.spec.ts",
-          "tests/e2e/no-js-html-contract.spec.ts",
-          "tests/e2e/test-environment-setup.ts"
+          "tests/e2e/no-js-html-contract.spec.ts"
         ],
         "rules": ["react-doctor/async-await-in-loop"]
       },
       {
-        "files": [
-          "scripts/starter-checks.js",
-          "tests/e2e/global-setup.ts",
-          "tests/e2e/test-environment-setup.ts"
-        ],
+        "files": ["scripts/starter-checks.js", "tests/e2e/global-setup.ts"],
         "rules": ["react-doctor/async-parallel"]
       },
       {
@@ -120,10 +114,7 @@
         "rules": ["react-doctor/js-combine-iterations"]
       },
       {
-        "files": [
-          "tests/e2e/contact-form-smoke.spec.ts",
-          "tests/e2e/global-setup.ts"
-        ],
+        "files": ["tests/e2e/global-setup.ts"],
         "rules": ["react-doctor/js-flatmap-filter"]
       },
       {

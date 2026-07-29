@@ -1,10 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { checkA11y } from "./helpers/axe";
-import {
-  removeInterferingElements,
-  waitForLoadWithFallback,
-  waitForStablePage,
-} from "./test-environment-setup";
+import { waitForLoadWithFallback } from "./test-environment-setup";
 
 // English-only site: `resources` and `blog` are retired routes (they 404), and
 // `/zh/*` 404s as well. A 404 page still renders main#main-content + an h1 with
@@ -20,8 +16,6 @@ async function preparePage(page: Page, path: string) {
     loadTimeout: 10_000,
     fallbackDelay: 500,
   });
-  await removeInterferingElements(page);
-  await waitForStablePage(page);
 }
 
 async function expectNoHorizontalOverflow(page: Page) {
