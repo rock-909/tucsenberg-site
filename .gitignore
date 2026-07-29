@@ -112,7 +112,7 @@ reviews/
 .codex/agents/
 .codex/shell_snapshots/
 
-# Superpowers local state only; committed records use docs/superpowers/specs/ or docs/superpowers/plans/.
+# Superpowers local state only; unfinished process records use the root plans/ directory.
 .superpowers/
 .omx/
 .grok/

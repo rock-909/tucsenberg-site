@@ -55,7 +55,10 @@ function writeBudget(
   allowedClientBoundaries: string[],
   maxClientBoundaries = allowedClientBoundaries.length,
 ): void {
-  const budgetPath = path.join(rootDir, "docs/技术难题/客户端边界预算.json");
+  const budgetPath = path.join(
+    rootDir,
+    "scripts/quality/config/client-boundary-budget.json",
+  );
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
   fs.mkdirSync(path.dirname(budgetPath), { recursive: true });
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
@@ -75,7 +78,10 @@ function writeBudget(
 }
 
 function writeRawBudget(rootDir: string, content: string): void {
-  const budgetPath = path.join(rootDir, "docs/技术难题/客户端边界预算.json");
+  const budgetPath = path.join(
+    rootDir,
+    "scripts/quality/config/client-boundary-budget.json",
+  );
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
   fs.mkdirSync(path.dirname(budgetPath), { recursive: true });
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test fixture path is inside a test-owned temporary directory
@@ -269,7 +275,7 @@ describe("client-boundary-budget", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "budget-missing",
-          file: "docs/技术难题/客户端边界预算.json",
+          file: "scripts/quality/config/client-boundary-budget.json",
         }),
       ]),
     );
@@ -289,7 +295,7 @@ describe("client-boundary-budget", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "budget-invalid",
-          file: "docs/技术难题/客户端边界预算.json",
+          file: "scripts/quality/config/client-boundary-budget.json",
         }),
       ]),
     );
@@ -309,7 +315,7 @@ describe("client-boundary-budget", () => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "budget-invalid-json",
-          file: "docs/技术难题/客户端边界预算.json",
+          file: "scripts/quality/config/client-boundary-budget.json",
         }),
       ]),
     );

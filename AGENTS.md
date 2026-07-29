@@ -28,8 +28,8 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
   `.next`，是第三个写入方。`pnpm website:lighthouse` 不在此列：它单独构建到
   `.next-lighthouse`，用 4173 端口起服务，所以一次二十分钟的测量不会被并行构建、
   也不会被别的 worktree 占着 3000 端口的服务污染。
-- **`docs/superpowers/**` 是历史方案，不是现行规则。** 除非有稳定文档把同一条规则
-  重新确立过，否则只当背景。
+- **根 `plans/` 只放当前未完成的 Superpowers 过程文件。** 设计与实施文件使用
+  `*-design.md` / `*-plan.md`；不要把它们当产品真相。
 - **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
   `node scripts/starter-checks.js content-manifest` 重新生成。
 - **pre-push 会跑一遍完整构建。** 确实急，可以 `RUN_FAST_PUSH=1` 跳过——它同时还会
@@ -41,9 +41,9 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 改动涉及面比较大的时候：
 
 1. `docs/README.md`
-2. `docs/项目基础/项目基础.md`
-3. `docs/项目基础/内容.md`
-4. `docs/项目基础/AI协作边界.md`
+2. `docs/项目.md`
+3. `docs/内容与品牌.md`
+4. `docs/开发与维护.md`
 
 ## 规则路由
 
