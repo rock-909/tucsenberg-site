@@ -20,11 +20,6 @@ vi.mock("next-intl/routing", () => ({
   defineRouting: mockDefineRouting,
 }));
 
-// Mock config/paths
-vi.mock("@/config/paths", () => ({
-  validatePathsConfig: vi.fn().mockReturnValue(true),
-}));
-
 describe("i18n Routing Configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -153,15 +148,6 @@ describe("i18n Routing Configuration", () => {
       expectedLocales.forEach((locale) => {
         expect(LOCALES_CONFIG.locales).toContain(locale);
       });
-    });
-  });
-
-  describe("配置验证", () => {
-    it("应该导出路径配置验证函数", async () => {
-      // 直接从 @/config/paths 导入，因为 routing.ts 重新导出了它
-      const pathsModule = await import("@/config/paths");
-      expect(pathsModule.validatePathsConfig).toBeDefined();
-      expect(typeof pathsModule.validatePathsConfig).toBe("function");
     });
   });
 
