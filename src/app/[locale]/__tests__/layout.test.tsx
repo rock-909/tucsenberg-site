@@ -117,7 +117,8 @@ vi.mock("@/config/footer-links", () => ({
 
 vi.mock("@/i18n/locale-utils", () => ({
   coerceLocale: (locale: string) => locale,
-  isLocale: (locale: string) => locale === "en" || locale === "zh",
+  // 跟着生产走：zh 是退役 locale，middleware 对 /zh 直接 404，layout 收不到它。
+  isLocale: (locale: string) => locale === "en",
 }));
 
 vi.mock("@/lib/navigation", () => ({
@@ -126,7 +127,7 @@ vi.mock("@/lib/navigation", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: {
-    locales: ["en", "zh"],
+    locales: ["en"],
     defaultLocale: "en",
   },
 }));
@@ -148,17 +149,6 @@ describe("LocaleLayout", () => {
   describe("generateMetadata", () => {
     it("should export generateMetadata from layout-metadata", () => {
       expect(generateMetadata).toBe(mockGenerateLocaleMetadata);
-    });
-  });
-
-  describe("locale validation", () => {
-    it("should have valid locale configuration", async () => {
-      // Import routing config to verify locale setup
-      const { routing } = await import("@/i18n/routing");
-
-      expect(routing.locales).toContain("en");
-      expect(routing.locales).toContain("zh");
-      expect(routing.defaultLocale).toBe("en");
     });
   });
 
@@ -188,17 +178,6 @@ describe("LocaleLayout", () => {
       expect(screen.getByText("Skip to main content")).toBeInTheDocument();
       expect(document.querySelectorAll("script")).toHaveLength(0);
       expect(mockSetRequestLocale).toHaveBeenCalledWith("en");
-    });
-
-    it("renders the skip link from the accessibility namespace", async () => {
-      const page = await LocaleLayout({
-        children: <div>Child</div>,
-        params: Promise.resolve({ locale: "zh" }),
-      });
-
-      await renderAsyncPage(page);
-
-      expect(screen.getByText("Skip to main content")).toBeInTheDocument();
     });
   });
 });

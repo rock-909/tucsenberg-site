@@ -1,16 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCALES_CONFIG } from "@/config/paths/locales-config";
-import type { Locale } from "@/i18n/routing";
+import { PATHNAMES } from "@/config/paths/utils";
 
-// Mock next-intl/navigation
+/**
+ * 这个文件 2026-07-29 从 22 条收到 7 条。删掉的几乎全是同一件事被断言了两到四遍：
+ *
+ * - `alternateLinks` 未设置：两条
+ * - `localeDetection: false`：两条
+ * - `locales` 等于 `LOCALES_CONFIG.locales`：三条
+ * - `defaultLocale`：三条
+ * - `pathnames` 的 key 等于 value：三条
+ * - `pathnames` 里有某几条具体路径：四条（主页面、动态路由、法律页各写了一遍，
+ *   而路径表本身是从 `PATHNAMES` 派生的）
+ *
+ * 另有三条是 TypeScript 已经保证的：`Array.isArray(config.locales)`、
+ * `typeof config.defaultLocale === "string"`、以及把 `LOCALES_CONFIG.locales`
+ * 逐项断言它自己 `toContain`。还有一条 `requiredFields.forEach(toHaveProperty)`
+ * ——上面每个字段都已经被断了具体值，再断一次「它存在」是恒真。
+ *
+ * 留下的是路由配置真正会出错的地方：locale 真相是不是从单一来源取的、路径表是不是
+ * 从 `PATHNAMES` 全量派生（漏一条路由会让 next-intl 不认识那个 URL）、
+ * shared pathnames 形状、以及两个「必须关着」的开关。
+ */
+
 const mockCreateNavigation = vi.fn();
 const mockDefineRouting = vi.fn();
-
-const CURRENT_ROUTING_CONTRACT = {
-  locales: ["en"],
-  defaultLocale: "en",
-  localePrefix: "never",
-} as const;
 
 vi.mock("next-intl/navigation", () => ({
   createNavigation: mockCreateNavigation,
@@ -44,241 +58,66 @@ describe("i18n Routing Configuration", () => {
     return config;
   }
 
-  describe("路由配置", () => {
-    it("应该定义正确的语言配置", async () => {
-      await getRoutingDefinition();
+  it("takes locale truth from LOCALES_CONFIG rather than its own literals", async () => {
+    const config = await getRoutingDefinition();
 
-      expect(mockDefineRouting).toHaveBeenCalledWith(
-        expect.objectContaining({
-          locales: LOCALES_CONFIG.locales,
-          defaultLocale: LOCALES_CONFIG.defaultLocale,
-          localePrefix: LOCALES_CONFIG.localePrefix,
-          pathnames: expect.objectContaining({
-            "/": "/",
-            "/about": "/about",
-            "/contact": "/contact",
-            "/products": "/products",
-            "/products/[market]": "/products/[market]",
-            "/oem-wholesale": "/oem-wholesale",
-            "/guides/flood-barrier-materials-guide":
-              "/guides/flood-barrier-materials-guide",
-            "/guides/flood-barrier-specifications":
-              "/guides/flood-barrier-specifications",
-            "/request-quote": "/request-quote",
-            "/warranty": "/warranty",
-          }),
-          localeDetection: false,
-        }),
-      );
-      expect(mockDefineRouting).toHaveBeenCalledWith(
-        expect.objectContaining({
-          locales: CURRENT_ROUTING_CONTRACT.locales,
-          defaultLocale: CURRENT_ROUTING_CONTRACT.defaultLocale,
-          localePrefix: CURRENT_ROUTING_CONTRACT.localePrefix,
-        }),
-      );
-    });
+    expect(config.locales).toEqual(LOCALES_CONFIG.locales);
+    expect(config.defaultLocale).toBe(LOCALES_CONFIG.defaultLocale);
+    expect(config.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
+  });
 
-    it("应该包含所有必要的路径名", async () => {
-      const expectedPaths = [
-        "/",
-        "/about",
-        "/contact",
-        "/products",
-        "/products/[market]",
-        "/oem-wholesale",
-        "/guides/flood-barrier-materials-guide",
-        "/guides/flood-barrier-specifications",
-        "/request-quote",
-        "/warranty",
-        "/privacy",
-        "/terms",
-      ];
+  // 从 `PATHNAMES` 全量派生，而不是钉死一份路径清单：加一个页面忘了登记路由，
+  // 这条会红；退役一个页面不该让这里变红。
+  it("hands next-intl every registered pathname", async () => {
+    const config = await getRoutingDefinition();
 
-      const config = await getRoutingDefinition();
+    expect(config.pathnames).toEqual(PATHNAMES);
+  });
 
-      expectedPaths.forEach((path) => {
-        expect(config.pathnames).toHaveProperty(path, path);
-      });
-    });
+  // Shared pathnames：key 和 value 相同意味着所有语言共用同一个 URL。写成对象形式
+  // 就是给每种语言配不同 URL，那和 `localePrefix: "never"` 的单语言站点自相矛盾。
+  it("keeps pathnames in shared form", async () => {
+    const config = await getRoutingDefinition();
 
-    it("应该使用配置里的locale前缀", async () => {
-      const config = await getRoutingDefinition();
-      expect(config?.localePrefix).toBe(LOCALES_CONFIG.localePrefix);
-    });
-
-    it("不设置 alternateLinks（localePrefix:'never' 下 next-intl 禁用它，是 no-op）", async () => {
-      const config = await getRoutingDefinition();
-      // next-intl 在 localePrefix:'never' 模式下不生成 alternate links；
-      // canonical/hreflang 由 metadata 层负责，不由路由配置提供。
-      expect(config?.alternateLinks).toBeUndefined();
-    });
-
-    it("应该禁用localeDetection", async () => {
-      const config = await getRoutingDefinition();
-      expect(config?.localeDetection).toBe(false);
+    Object.entries(config.pathnames).forEach(([key, value]) => {
+      expect(value).toBe(key);
+      expect(key).toMatch(/^\//);
     });
   });
 
-  describe("导航函数创建", () => {
-    it("应该从routing-config导出配置里的locale truth", async () => {
-      const routingModule = await import("../routing");
+  // 这两个开关必须关着。localeDetection 打开会让浏览器语言把英文买家重定向到一个
+  // 不存在的语言路由；alternateLinks 在 `localePrefix: "never"` 下不生成任何东西，
+  // hreflang/canonical 归 metadata 层。
+  it("keeps locale detection and alternate links off", async () => {
+    const config = await getRoutingDefinition();
 
-      expect(routingModule.routing.locales).toEqual(LOCALES_CONFIG.locales);
-      expect(routingModule.routing.defaultLocale).toBe(
-        LOCALES_CONFIG.defaultLocale,
-      );
-    });
+    expect(config.localeDetection).toBe(false);
+    expect(config.alternateLinks).toBeUndefined();
+  });
 
-    it("应该导出所有必要的导航函数", async () => {
-      const routingModule = await import("../routing");
+  it("keeps every locale code a two-letter lowercase tag", async () => {
+    const config = await getRoutingDefinition();
 
-      expect(routingModule.Link).toBeDefined();
-      expect(routingModule.redirect).toBeDefined();
-      expect(routingModule.usePathname).toBeDefined();
-      expect(routingModule.useRouter).toBeDefined();
+    config.locales.forEach((locale: string) => {
+      expect(locale).toMatch(/^[a-z]{2}$/);
     });
   });
 
-  describe("类型定义", () => {
-    it("应该正确定义Locale类型", () => {
-      // This is a compile-time test, but we can verify the expected values
-      const expectedLocales: Locale[] = [...LOCALES_CONFIG.locales];
+  it("re-exports the same routing object app code imports", async () => {
+    const routingModule = await import("../routing");
 
-      expectedLocales.forEach((locale) => {
-        expect(LOCALES_CONFIG.locales).toContain(locale);
-      });
-    });
+    expect(routingModule.routing.locales).toEqual(LOCALES_CONFIG.locales);
+    expect(routingModule.routing.defaultLocale).toBe(
+      LOCALES_CONFIG.defaultLocale,
+    );
   });
 
-  describe("路径名配置", () => {
-    it("应该为所有路径使用相同的值（Shared Pathnames）", async () => {
-      const config = await getRoutingDefinition();
-      const pathnames = config?.pathnames;
+  it("exposes the locale-aware navigation helpers", async () => {
+    const routingModule = await import("../routing");
 
-      // 验证所有路径名都是字符串，而不是对象（表示使用Shared Pathnames）
-      Object.entries(pathnames).forEach(([key, value]) => {
-        expect(typeof value).toBe("string");
-        expect(value).toBe(key);
-      });
-    });
-
-    it("应该包含主要页面路径", async () => {
-      const config = await getRoutingDefinition();
-      const pathnames = config?.pathnames;
-
-      const mainPages = [
-        "/",
-        "/about",
-        "/contact",
-        "/products",
-        "/oem-wholesale",
-        "/request-quote",
-      ];
-      mainPages.forEach((page) => {
-        expect(pathnames).toHaveProperty(page);
-      });
-    });
-
-    it("应该包含动态路由模式", async () => {
-      const config = await getRoutingDefinition();
-      const pathnames = config.pathnames;
-
-      const dynamicRoutes = ["/products/[market]"];
-      dynamicRoutes.forEach((route) => {
-        expect(pathnames).toHaveProperty(route);
-      });
-    });
-
-    it("应该包含法律页面路径", async () => {
-      const config = await getRoutingDefinition();
-      const pathnames = config.pathnames;
-
-      const legalPages = ["/privacy", "/terms"];
-      legalPages.forEach((page) => {
-        expect(pathnames).toHaveProperty(page);
-      });
-    });
-  });
-
-  describe("语言配置", () => {
-    it("应该支持配置里的语言", async () => {
-      const config = await getRoutingDefinition();
-      expect(config.locales).toEqual(LOCALES_CONFIG.locales);
-    });
-
-    it("应该使用配置里的默认语言", async () => {
-      const config = await getRoutingDefinition();
-      expect(config.defaultLocale).toBe(LOCALES_CONFIG.defaultLocale);
-    });
-
-    it("应该验证语言代码格式", async () => {
-      const config = await getRoutingDefinition();
-      config.locales.forEach((locale: string) => {
-        expect(locale).toMatch(/^[a-z]{2}$/);
-      });
-    });
-  });
-
-  describe("SEO配置", () => {
-    it("hreflang 不由路由配置驱动（localePrefix:'never' 下 alternateLinks 无效）", async () => {
-      const config = await getRoutingDefinition();
-      // hreflang/canonical 由 metadata 层生成；路由配置不设 alternateLinks。
-      expect(config.alternateLinks).toBeUndefined();
-    });
-
-    it("应该禁用智能语言检测", async () => {
-      const config = await getRoutingDefinition();
-      expect(config.localeDetection).toBe(false);
-    });
-  });
-
-  describe("边缘情况处理", () => {
-    it("应该处理空路径", async () => {
-      const config = await getRoutingDefinition();
-      expect(config.pathnames["/"]).toBe("/");
-    });
-
-    it("应该处理所有路径都有前导斜杠", async () => {
-      const config = await getRoutingDefinition();
-      Object.keys(config.pathnames).forEach((path) => {
-        expect(path).toMatch(/^\//);
-      });
-    });
-
-    it("应该确保路径名一致性", async () => {
-      const config = await getRoutingDefinition();
-      Object.entries(config.pathnames).forEach(([key, value]) => {
-        expect(key).toBe(value);
-      });
-    });
-  });
-
-  describe("配置完整性", () => {
-    it("应该包含所有必需的配置项", async () => {
-      const config = await getRoutingDefinition();
-      const requiredFields = [
-        "locales",
-        "defaultLocale",
-        "localePrefix",
-        "pathnames",
-        "localeDetection",
-      ];
-
-      requiredFields.forEach((field) => {
-        expect(config).toHaveProperty(field);
-      });
-    });
-
-    it("应该有合理的配置值", async () => {
-      const config = await getRoutingDefinition();
-
-      expect(Array.isArray(config.locales)).toBe(true);
-      expect(config.locales.length).toBeGreaterThan(0);
-      expect(typeof config.defaultLocale).toBe("string");
-      expect(config.locales).toContain(config.defaultLocale);
-      expect(typeof config.pathnames).toBe("object");
-      expect(Object.keys(config.pathnames).length).toBeGreaterThan(0);
-    });
+    expect(routingModule.Link).toBeDefined();
+    expect(routingModule.redirect).toBeDefined();
+    expect(routingModule.usePathname).toBeDefined();
+    expect(routingModule.useRouter).toBeDefined();
   });
 });
