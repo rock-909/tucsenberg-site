@@ -34,11 +34,7 @@ describe("content-query manifest runtime", () => {
 
     const page = await getPageBySlug("about", "en");
 
-    expect(mockResolveOptionalContentEntry).toHaveBeenCalledWith(
-      "pages",
-      "en",
-      "about",
-    );
+    expect(mockResolveOptionalContentEntry).toHaveBeenCalledWith("en", "about");
     expect(page).toEqual({
       slug: "about",
       metadata: {

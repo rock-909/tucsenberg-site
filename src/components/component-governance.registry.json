@@ -33,14 +33,6 @@
       "useWhen": "Use to isolate lazy client island failures.",
       "avoidWhen": "Do not use for ordinary route-level error handling."
     },
-    "lazy-theme-switcher": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "theme",
-      "clientBoundary": "client",
-      "useWhen": "Use when the theme switcher should load as a lazy client island.",
-      "avoidWhen": "Do not add a second theme switcher path."
-    },
     "section-head": {
       "story": "required",
       "radixLayer": "local",

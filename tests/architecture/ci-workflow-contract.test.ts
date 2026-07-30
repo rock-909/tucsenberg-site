@@ -6,9 +6,7 @@ const CI_WORKFLOW_PATH = ".github/workflows/ci.yml";
 const LEFTHOOK_CONFIG_PATH = "lefthook.yml";
 const PRETTIER_CONFIG_PATH = "prettier.config.mjs";
 const SEMGREP_CONFIG_PATH = "semgrep.yml";
-// component:governance:test 那四个 Vitest 文件全在 tests/architecture 和
-// tests/unit 下，pnpm test 已经跑过一遍；quality job 里单独再跑一次不增加覆盖。
-// scanner 和 Storybook build 不一样：pnpm test 覆盖不到它们。
+// Vitest 已覆盖治理测试；CI 只需额外运行 scanner 和 Storybook build。
 const COMPONENT_PROOF_COMMANDS = [
   "pnpm component:governance",
   "pnpm exec storybook build",
@@ -113,11 +111,7 @@ describe("CI workflow contract", () => {
     });
   });
 
-  // subcommand-lanes 现在对每个子命令做同样的对账，但它有个引导问题：没有东西
-  // 跑它，它就没法举报自己没人跑。所以这条断言守的是那颗种子——subcommand-lanes
-  // 必须接在真会跑的车道上，其余子命令由它自己覆盖。vitest-collection 一并留着：
-  // 收集面对账是"全量测试真的收齐了吗"的唯一证明，多守一层不花钱。
-  // （原本还守着 markdown-fences，那个检查 2026-07-26 退役了。）
+  // 这两个对账门必须接入真实 CI 车道，才能证明自身和测试收集面。
   it("keeps the standalone gate checks wired to a lane that actually runs", () => {
     const qualityRuns = (readCiWorkflowConfig().jobs?.quality?.steps ?? [])
       .map((step) => step.run?.trim())
@@ -131,16 +125,7 @@ describe("CI workflow contract", () => {
     }
   });
 
-  // 这条以前钉着 "React Doctor 全量对账（非阻塞）" 那一步，连
-  // continue-on-error: true 一起钉——一条断言在保证某个门永远不能让 CI 变红。
-  // 2026-07-26 连步骤带断言一起退役：changed-scope 的 react:doctor 是阻塞的，
-  // 有真实修复记录（c125276，69→100）；全量对账只往 summary 写字，没人读。
-  // 标题承诺的是整个 ci.yml，实现原本只扫 jobs.quality.steps——名字比覆盖面宽，
-  // 下一个人照名字理解会以为别的作业也被守着。改成真的扫全部作业，作业级和步骤
-  // 级的 continue-on-error 都算。
-  //
-  // 只管 ci.yml。weekly-audit.yml:43 也有一条 continue-on-error: true，但那条
-  // 后面跟着显式 exit 1，工作流最终仍会红——那是正当用法，不该被这条拦下。
+  // CI 作业和步骤都必须传播失败；其他工作流有自己的契约。
   it("keeps no ci.yml step or job that can never fail", () => {
     const jobs = Object.entries(readCiWorkflowConfig().jobs ?? {});
     const escapes = jobs.flatMap(([jobName, job]) => [
@@ -154,10 +139,7 @@ describe("CI workflow contract", () => {
     expect(escapes).toEqual([]);
   });
 
-  // 这条以前叫 "keeps Semgrep blocking scope narrow"，钉的是带 ` src` 的整条命令
-  // 字符串。它守住的正是那个洞：扫描只覆盖 src，scripts/ 下的门禁脚本和执行中的
-  // 根配置全在安全扫描之外，而这条断言让谁想扩大范围都会先把它撞红。改成守扫描
-  // 目标本身——必须是整个仓库，不是点名的子集。
+  // 安全扫描必须覆盖整个仓库，包括执行中的脚本和根配置。
   it("scans the whole repository, not a hand-picked subset", () => {
     const command = readCiWorkflow()
       .split("\n")

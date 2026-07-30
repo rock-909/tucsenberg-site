@@ -112,16 +112,10 @@ export const SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES =
 
 export const SINGLE_SITE_PUBLIC_STATIC_PAGES = getSingleSitePublicStaticPages();
 
-export const SINGLE_SITE_SITEMAP_PAGE_CONFIG =
-  getSingleSiteSitemapPageConfigByPath();
-
 export const SINGLE_SITE_SITEMAP_DEFAULT_CONFIG = {
   changeFrequency: "weekly",
   priority: 0.5,
 } as const satisfies SingleSiteSitemapPageConfig;
-
-export const SINGLE_SITE_STATIC_PAGE_LASTMOD =
-  getSingleSiteStaticPageLastmod() satisfies Record<string, string>;
 
 export const SINGLE_SITE_ROBOTS_DISALLOW_PATHS = ["/api/", "/_next/"] as const;
 

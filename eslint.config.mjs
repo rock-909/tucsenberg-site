@@ -112,7 +112,6 @@ const eslintConfig = [
     files: [
       "**/locale-storage-hooks.ts",
       "**/use-breakpoint.ts",
-      "**/use-reduced-motion.ts",
       "**/use-scroll-shadow.ts",
       "**/use-web-vitals-diagnostics.ts",
     ],

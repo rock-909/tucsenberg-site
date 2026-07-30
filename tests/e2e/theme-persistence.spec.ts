@@ -38,6 +38,8 @@ test("theme switcher changes the page theme via keyboard without losing focus", 
     name: "Switch to dark theme",
   });
 
+  await expect(darkButton).toBeEnabled();
+  await expect(lightButton).toBeEnabled();
   await darkButton.focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveClass(/dark/u);

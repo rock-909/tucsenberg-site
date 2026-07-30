@@ -156,7 +156,6 @@ vi.mock("@/lib/env", () => {
       readProcessEnvValue("NEXT_PHASE") === "phase-production-build",
     isRuntimeCloudflare: () =>
       readProcessEnvValue("DEPLOYMENT_PLATFORM") === "cloudflare" ||
-      readProcessEnvValue("DEPLOY_TARGET") === "cloudflare" ||
       readProcessEnvValue("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare",
     requireEnvVar: (key: string) => {
       const value = mockEnv[key];

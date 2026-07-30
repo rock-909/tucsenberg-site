@@ -1,11 +1,11 @@
 /**
  * Content Manifest Loader
  *
- * Provides utilities to query the content manifest for MDX RSC rendering.
+ * Provides utilities to query the content manifest for static Markdown rendering.
  * Uses static import from generated TypeScript file - no runtime fs dependency.
  */
 
-import type { ContentType, Locale } from "@/types/content.types";
+import type { Locale } from "@/types/content.types";
 import {
   CONTENT_MANIFEST,
   type ContentEntry,
@@ -13,22 +13,9 @@ import {
 
 export type { ContentEntry };
 
-function buildKey(type: ContentType, locale: Locale, slug: string): string {
-  return `${type}/${locale}/${slug}`;
-}
-
-function lookupContentEntry(
-  type: ContentType,
-  locale: Locale,
-  slug: string,
-): ContentEntry | undefined {
-  return CONTENT_MANIFEST.byKey[buildKey(type, locale, slug)];
-}
-
 export function resolveOptionalContentEntry(
-  type: ContentType,
   locale: Locale,
   slug: string,
 ): ContentEntry | undefined {
-  return lookupContentEntry(type, locale, slug);
+  return CONTENT_MANIFEST.byKey[`pages/${locale}/${slug}`];
 }

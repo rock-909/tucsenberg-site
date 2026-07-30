@@ -274,24 +274,15 @@ function collectCloudflareOfficialCompareFailures(rootDir = ROOT) {
 }
 
 function runCloudflareOfficialCompareCli(args = []) {
+  const unknownArgs = args.filter((arg) => arg !== "--source-only");
+  if (unknownArgs.length > 0) {
+    console.error(
+      `cf-official-compare: unknown argument: ${unknownArgs.join(", ")}`,
+    );
+    return false;
+  }
+
   const sourceOnly = args.includes("--source-only");
-
-  if (args.includes("--generated-only")) {
-    console.error(
-      "cf-official-compare: --generated-only is retired and runs no checks. " +
-        "Use `--source-only` for the source baseline, and " +
-        "`pnpm exec wrangler deploy --dry-run --env preview` (after `pnpm website:build:cf`) " +
-        "for native deploy-artifact proof.",
-    );
-    return false;
-  }
-
-  if (sourceOnly && args.includes("--require-generated")) {
-    console.error(
-      "cf-official-compare: generated phase configs are retired; --require-generated is no longer supported.",
-    );
-    return false;
-  }
 
   const failures = collectCloudflareOfficialCompareFailures();
 

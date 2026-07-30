@@ -335,8 +335,6 @@ describe("component-governance-check", () => {
           'const themes = require("@radix-ui/themes");\nexport { themes };',
         "src/i18n/slot-export.ts":
           'export { Slot } from "@radix-ui/react-slot";',
-        "mdx-components.tsx":
-          'import { Slot } from "@radix-ui/react-slot";\nexport function useMDXComponents() { return { Slot }; }',
       }),
     );
     fixtureRoots.push(rootDir);
@@ -366,11 +364,6 @@ describe("component-governance-check", () => {
       result.errors,
       "radix-import-outside-ui",
       "src/i18n/slot-export.ts",
-    );
-    expectFinding(
-      result.errors,
-      "radix-import-outside-ui",
-      "mdx-components.tsx",
     );
   });
 

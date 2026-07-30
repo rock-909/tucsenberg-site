@@ -15,14 +15,12 @@ const SENSITIVE_ENV_KEYS = [
   "CLOUDFLARE_API_TOKEN",
   "RATE_LIMIT_PEPPER",
   "UPSTASH_REDIS_REST_TOKEN",
-  "KV_REST_API_TOKEN",
 ] as const;
 // This is the adopter-facing deployment surface, not inferred from secret-like names.
 const DEPLOYMENT_CRITICAL_ENV_KEYS = [
   "CLOUDFLARE_ACCOUNT_ID",
   "CLOUDFLARE_API_TOKEN",
   "DEPLOYMENT_PLATFORM",
-  "DEPLOY_TARGET",
 ] as const;
 const TOOLING_PROOF_ENV_KEYS = [
   "CI_DAILY",

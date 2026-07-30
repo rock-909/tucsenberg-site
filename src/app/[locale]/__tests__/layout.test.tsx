@@ -46,13 +46,6 @@ vi.mock("next-intl", () => ({
 
 vi.mock("next/navigation", () => ({
   notFound: mockNotFound,
-  usePathname: () => "/en",
-}));
-
-vi.mock("@/components/motion/page-transition", () => ({
-  PageTransition: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
 }));
 
 vi.mock("@/components/navigation/navigation-progress-bar", () => ({
@@ -107,8 +100,8 @@ vi.mock("@/components/theme-provider", () => ({
   ),
 }));
 
-vi.mock("@/components/ui/lazy-theme-switcher", () => ({
-  LazyThemeSwitcher: () => <button data-testid="footer-theme-toggle" />,
+vi.mock("@/components/ui/theme-switcher", () => ({
+  ThemeSwitcher: () => <button data-testid="footer-theme-toggle" />,
 }));
 
 vi.mock("@/config/footer-links", () => ({

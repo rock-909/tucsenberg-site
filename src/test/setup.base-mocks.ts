@@ -27,12 +27,3 @@ vi.mock("next/font/local", () => ({
     style: { fontFamily: "Open Sans" },
   })),
 }));
-
-vi.mock("motion/react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("motion/react")>();
-
-  return {
-    ...actual,
-    useReducedMotion: () => false,
-  };
-});

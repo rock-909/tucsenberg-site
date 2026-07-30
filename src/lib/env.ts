@@ -31,14 +31,7 @@ export const serverEnvSchema = {
 
   // Runtime and platform configuration
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).optional(),
-  CONTENT_ENABLE_DRAFTS: z
-    .string()
-    .optional()
-    .transform((val) => val === "true"),
   DEPLOYMENT_PLATFORM: z
-    .enum(["cloudflare", "development", "self-hosted"])
-    .optional(),
-  DEPLOY_TARGET: z
     .enum(["cloudflare", "development", "self-hosted"])
     .optional(),
   CF_PAGES: z.string().optional(),
@@ -49,8 +42,6 @@ export const serverEnvSchema = {
   RATE_LIMIT_PEPPER: z.string().min(1).optional(),
   UPSTASH_REDIS_REST_URL: z.url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
-  KV_REST_API_URL: z.url().optional(),
-  KV_REST_API_TOKEN: z.string().min(1).optional(),
   ALLOW_MEMORY_RATE_LIMIT: z
     .string()
     .optional()
@@ -67,7 +58,6 @@ export const serverEnvSchema = {
 
   // CI/CD
   CI: z.string().optional(),
-  GITHUB_TOKEN: z.string().optional(),
   PLAYWRIGHT_TEST: z
     .string()
     .optional()
@@ -90,8 +80,6 @@ export const clientEnvSchema = {
   // Base Configuration
   NEXT_PUBLIC_BASE_URL: z.url().default("http://localhost:3000"),
   NEXT_PUBLIC_SITE_URL: z.url().optional(),
-  NEXT_PUBLIC_WEBSITE_BASE_URL: z.url().optional(),
-  NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL: z.url().optional(),
   // 默认值必须是这个站自己的名字。`.env.example` 已经写了 Tucsenberg，但部署
   // 配置（wrangler.jsonc、CI workflow）都没设这个变量，所以线上取到的就是这里的
   // 默认值。留一个启动器时代的公司名在这儿，等于给未来任何一个读它的地方埋了
@@ -102,30 +90,12 @@ export const clientEnvSchema = {
 
   // Analytics & Monitoring
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
-  NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT: z
-    .string()
-    .optional()
-    .transform((val) => val === "true"),
 
   // Bot Protection (Cloudflare Turnstile Public Key)
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
   NEXT_PUBLIC_TURNSTILE_BYPASS: z
     .string()
     .default("false")
-    .transform((val) => val === "true"),
-
-  // Feature Flags
-  NEXT_PUBLIC_ENABLE_ANALYTICS: z
-    .string()
-    .default("true")
-    .transform((val) => val === "true"),
-  NEXT_PUBLIC_ENABLE_ERROR_REPORTING: z
-    .string()
-    .default("true")
-    .transform((val) => val === "true"),
-  NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING: z
-    .string()
-    .default("true")
     .transform((val) => val === "true"),
 
   // Development Tools
@@ -137,10 +107,6 @@ export const clientEnvSchema = {
   // Internationalization
   NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default("en"),
   NEXT_PUBLIC_SUPPORTED_LOCALES: z.string().default("en"),
-  NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET: z
-    .string()
-    .optional()
-    .transform((val) => val === "true"),
 
   // Security
   NEXT_PUBLIC_SECURITY_MODE: z.enum(["strict", "relaxed"]).default("strict"),
@@ -164,23 +130,18 @@ export const runtimeEnv = {
   TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
   LOG_LEVEL: process.env.LOG_LEVEL,
-  CONTENT_ENABLE_DRAFTS: process.env.CONTENT_ENABLE_DRAFTS,
   DEPLOYMENT_PLATFORM: process.env.DEPLOYMENT_PLATFORM,
-  DEPLOY_TARGET: process.env.DEPLOY_TARGET,
   CF_PAGES: process.env.CF_PAGES,
   GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
   YANDEX_VERIFICATION: process.env.YANDEX_VERIFICATION,
   RATE_LIMIT_PEPPER: process.env.RATE_LIMIT_PEPPER,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-  KV_REST_API_URL: process.env.KV_REST_API_URL,
-  KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   ALLOW_MEMORY_RATE_LIMIT: process.env.ALLOW_MEMORY_RATE_LIMIT,
   NODE_ENV: process.env.NODE_ENV,
   APP_ENV: process.env.APP_ENV,
   NEXT_PHASE: process.env.NEXT_PHASE,
   CI: process.env.CI,
-  GITHUB_TOKEN: process.env.GITHUB_TOKEN,
   PLAYWRIGHT_TEST: process.env.PLAYWRIGHT_TEST,
   SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
   SECURITY_HEADERS_ENABLED: process.env.SECURITY_HEADERS_ENABLED,
@@ -190,27 +151,15 @@ export const runtimeEnv = {
   // Client
   NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-  NEXT_PUBLIC_WEBSITE_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_BASE_URL,
-  NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL:
-    process.env.NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL,
   NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
   NEXT_PUBLIC_SITE_KEY: process.env.NEXT_PUBLIC_SITE_KEY,
   NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
-  NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT:
-    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_PRECONNECT,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
   NEXT_PUBLIC_TURNSTILE_BYPASS: process.env.NEXT_PUBLIC_TURNSTILE_BYPASS,
-  NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
-  NEXT_PUBLIC_ENABLE_ERROR_REPORTING:
-    process.env.NEXT_PUBLIC_ENABLE_ERROR_REPORTING,
-  NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING:
-    process.env.NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING,
   NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
   NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
   NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
-  NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET:
-    process.env.NEXT_PUBLIC_ENABLE_CN_FONT_SUBSET,
   NEXT_PUBLIC_SECURITY_MODE: process.env.NEXT_PUBLIC_SECURITY_MODE,
   NEXT_PUBLIC_DEPLOYMENT_PLATFORM: process.env.NEXT_PUBLIC_DEPLOYMENT_PLATFORM,
 };
@@ -374,7 +323,6 @@ export function isRuntimeProductionBuildPhase(): boolean {
 export function isRuntimeCloudflare(): boolean {
   return (
     getRuntimeEnvString("DEPLOYMENT_PLATFORM") === "cloudflare" ||
-    getRuntimeEnvString("DEPLOY_TARGET") === "cloudflare" ||
     getRuntimeEnvString("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare"
   );
 }

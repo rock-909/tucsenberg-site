@@ -26,7 +26,6 @@ src/components/footer
 src/components/contact
 src/components/content
 src/components/grid
-src/components/motion
 src/components/errors
 src/components/cookie
 src/components/security
@@ -211,8 +210,8 @@ Use `cn()` from `@/lib/utils` for conditional classes.
   without measurable value.
 - Prefer CSS transitions or server-rendered static structure for decorative
   reveal effects when the content is otherwise static.
-- Use `motion/react` for purposeful interaction, viewport reveal, or branded
-  motion only when the client cost is justified by before/after evidence.
+- Do not add a motion dependency for decorative reveal; require before/after
+  evidence and a current buyer-facing need before adding branded motion.
 - Always preserve `prefers-reduced-motion` behavior when changing animation.
 
 ## Images, fonts, metadata

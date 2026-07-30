@@ -101,8 +101,6 @@ export interface Product extends ParsedContent<ProductMetadata> {
   metadata: ProductMetadata;
 }
 
-// Content collection types
-export type ContentType = "posts" | "pages" | "products";
 export type { Locale };
 
 /**

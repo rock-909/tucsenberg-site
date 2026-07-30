@@ -393,18 +393,10 @@ describe("validate-production-config runtime contract", () => {
     );
   });
 
-  it("fails fast on partial or forbidden store configuration", () => {
+  it("fails fast on partial store configuration", () => {
     const partialUpstash = validateProductionRuntimeContract({
       ...createValidProductionEnv(),
       UPSTASH_REDIS_REST_TOKEN: undefined,
-    });
-    const kvOnly = validateProductionRuntimeContract({
-      ...createValidProductionEnv(),
-      UPSTASH_REDIS_REST_URL: undefined,
-      UPSTASH_REDIS_REST_TOKEN: undefined,
-      KV_REST_API_URL: "https://kv.example.com",
-      KV_REST_API_TOKEN: "kv-token",
-      ALLOW_MEMORY_RATE_LIMIT: "true",
     });
 
     expect(partialUpstash.errors).toEqual(
@@ -412,11 +404,6 @@ describe("validate-production-config runtime contract", () => {
         expect.stringContaining(
           "Production rate limiting requires Upstash Redis",
         ),
-      ]),
-    );
-    expect(kvOnly.errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("KV-only rate limiting is not allowed"),
       ]),
     );
   });

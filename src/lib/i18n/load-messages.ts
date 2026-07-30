@@ -7,7 +7,7 @@
 
 import { type Locale } from "@/i18n/routing-config";
 import { coerceLocale } from "@/i18n/locale-utils";
-import { loadComposedRawMessages } from "@/lib/i18n/message-pack-loader";
+import { getComposedMessages } from "@/lib/i18n/composed-messages";
 import {
   getSiteMessageValues,
   type SiteMessageValues,
@@ -55,14 +55,14 @@ function interpolateSiteMessageValues(
   return value;
 }
 
-async function loadMessageSource(locale: Locale): Promise<Messages> {
+function loadMessageSource(locale: Locale): Messages {
   const safeLocale = coerceLocale(locale);
-  const loadedMessages = await loadComposedRawMessages(safeLocale);
+  const loadedMessages = getComposedMessages(safeLocale);
   const siteValues = getSiteMessageValues();
 
   return interpolateSiteMessageValues(loadedMessages, siteValues) as Messages;
 }
 
 export function loadCompleteMessages(locale: string): Promise<Messages> {
-  return loadMessageSource(coerceLocale(locale));
+  return Promise.resolve(loadMessageSource(coerceLocale(locale)));
 }

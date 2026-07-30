@@ -1,12 +1,8 @@
-# Git Hooks管理配置
-# 自动化质量门禁系统 - 确保代码质量和安全性
-# 质量阈值通过保留的 starter proof / direct scripts 管理
+# 本地 Git 质量门禁。
 pre-commit:
   parallel: true
   commands:
-    # 代码格式检查 (Prettier)
-    # 用 lefthook 官方 {staged_files} 模板 + glob 过滤，替代手写 git diff 管道
-    # （$FILES 未加引号会在含空格文件名时碎裂）。纯 --check 不写文件，无 stage_fixed。
+    # 只检查暂存文件，不修改工作区。
     format-check:
       glob: "*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss,html}"
       run: pnpm exec prettier --check {staged_files}
@@ -22,17 +18,6 @@ pre-commit:
       run: pnpm lint:check
       fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
 
-    # architecture-guard 于 2026-07-26 退役。它两条禁令 eslint 都已经用 AST 管着，
-    # 而且管得更严（上面的 quality-check 就在跑）：
-    #   - 相对导入 → eslint.config.mjs 的 no-restricted-imports，group ["../*"]；
-    #     实测 ../x、../../x、../../../x 全命中，./sibling 不命中。退役的这个门反而
-    #     还连 ./sibling 一起禁，跟 .claude/rules/coding-standards.md 明写的允许打架，
-    #     而且给 next.config.ts、middleware.ts、*/index.ts 开了口子，eslint 不开。
-    #   - export * → eslint.config.mjs 的 no-restricted-syntax，
-    #     selector "ExportAllDeclaration"，error 级，全仓生效。
-    # 想恢复这个门之前先看那两条规则：它们已经在了，grep diff 文本只是更弱的重复
-    # 实现（能被 // 注释绕过，且只看 staged）。
-
     # 多语言同步检查
     i18n-sync:
       run: |
@@ -44,43 +29,10 @@ pre-commit:
       fail_text: '翻译验证失败 - 请同步 messages 物理包与内容文件'
       stage_fixed: false
 
-    # 相关测试检查 - 确保组件/库变更后测试同步更新
-    # 使用 Vitest 4 的 `vitest related` 子命令
-    #
-    # `--passWithNoTests` 曾经决定这个门的成败：一个文件根本没有相关测试时，vitest
-    # 打印 "No test files found" 然后 exit 0，钩子跟着报"相关测试检查通过"。也就是
-    # 说"没测过"和"测过并通过"被合并成同一个结果——正是这个门声称要挡住的情况。
-    #
-    # 只排除两类：
-    # - Storybook 故事：它们的证明在 CI 的 `storybook build`。
-    # - `src/test/setup*`：`vitest.config.mts` 用 `setupFiles` 注入它们，不是被
-    #   测试 import 进来的，所以它们结构上永远不在 `vitest related` 走的那张模块
-    #   图里——这不是"没人证明"，是这个工具看不见。证明它们的车道是全量
-    #   `pnpm test`：把服务端翻译 mock 改回返回 key 名，hero-section 的 7 条断言
-    #   立刻红。改这类文件请跑全量，别只跑 related。
-    #
-    # 这里一度还按文件名排除了 App Router 的所有 page/layout/error/not-found，
-    # 理由是"Playwright 冒烟逐页证明"。独立审查把这条打掉了：冒烟对每页只断言
-    # HTTP 200 和一个 H1，而被排除的 `products/[market]/page.tsx` 有 495 行业务
-    # 逻辑和 31 个现成的单测——改坏询价链接生成器，钩子照样绿。真正没有单测的
-    # 只有 6 个文件，已经逐个补上，所以整条按角色排除都不需要了。
+    # 改动运行时代码时，要求每个文件都有相关测试并执行这些测试。
     test-related:
       run: |
-        # `.fixtures.ts` 排除的理由：它们是 Storybook story 的输入，跟已经排除的
-        # `.stories.tsx` 是同一类东西，没有 Vitest 测试导入过它们。证明它们的车道
-        # 是 CI 里的 `pnpm exec storybook build`（被 story 引用的 fixture 必须编译
-        # 通过）加 TypeScript 的 `satisfies` 类型检查。要求给 story 输入补单测，
-        # 只会逼出一个断言 fixture 等于自己的空转测试。
-        #
-        # 这两条都不管「fixture 有没有被任何 story 引用」：story 里的 import 删掉
-        # 之后，孤儿 fixture 照样能过 storybook build。那是死导出扫描的活。
-        #
-        # 纯类型声明文件（`src/types/**`、`*-types.ts`、`*.types.ts`）也排除：全仓
-        # 这八个文件里一个运行时导出都没有，全是 interface 和 type。它们的证明车道
-        # 是 `tsc --noEmit`（硬门禁，零错误），编译期就是全部行为。给一个 interface
-        # 写 Vitest 只能断言它自己，运行时什么都没发生。
-        # 这条排除不覆盖带运行时代码的文件：新写的类型文件里只要出现 `export const`
-        # 或 `export function`，就该改名或者补测试，别靠文件名混过去。
+        # Stories/fixtures 由 Storybook + 类型检查证明；纯类型和 setup 文件由全量车道证明。
         FILES=$(git diff --cached --name-only --diff-filter=ACM \
           | grep -E '^src/.+\.(ts|tsx)$' \
           | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' \
@@ -91,10 +43,7 @@ pre-commit:
         if [ -z "$FILES" ]; then
           echo "✅ 相关测试检查跳过 (本次没有需要单测覆盖的源码变更)"; exit 0;
         fi
-        # 覆盖率必须逐个文件问。`vitest related A B` 取的是两者相关测试的并集：
-        # 只要 A 有测试，输出就不是 "No test files found"，B 一条测试都没有也照样
-        # 通过。这个钩子以前就是那样，失败文案写着"有文件没有任何相关测试"，实际
-        # 只能发现"全部暂存源文件合起来一条都没有"——是 fail-open。
+        # 逐个检查，避免一个有测试的文件掩盖同批次中没有测试的文件。
         UNCOVERED=""
         for FILE in $FILES; do
           if pnpm vitest related "$FILE" --run --passWithNoTests --reporter=dot 2>&1 \

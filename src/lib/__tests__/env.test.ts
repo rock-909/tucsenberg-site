@@ -35,7 +35,6 @@ afterEach(() => {
   vi.stubEnv("PLAYWRIGHT_TEST", "false");
   vi.stubEnv("NEXT_PHASE", "");
   vi.stubEnv("DEPLOYMENT_PLATFORM", "");
-  vi.stubEnv("DEPLOY_TARGET", "");
   vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "self-hosted");
   vi.stubEnv("TURNSTILE_BYPASS", "false");
 });
@@ -147,14 +146,6 @@ describe("runtime env helpers", () => {
 
     vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "self-hosted");
     expect(isRuntimeCloudflare()).toBe(false);
-  });
-
-  it("detects Cloudflare runtime from the legacy deployment target alias", () => {
-    vi.stubEnv("DEPLOYMENT_PLATFORM", "");
-    vi.stubEnv("NEXT_PUBLIC_DEPLOYMENT_PLATFORM", "self-hosted");
-    vi.stubEnv("DEPLOY_TARGET", "cloudflare");
-
-    expect(isRuntimeCloudflare()).toBe(true);
   });
 
   it("returns undefined for unknown runtime app env", () => {

@@ -1,21 +1,14 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const REPO_ROOT = path.resolve(__dirname, "../..");
 
-const fixtureImportPatterns = [
-  /\bfrom\s*["'][^"']*homepage-section\.fixtures["']/u,
-  /\bfrom\s*["'][^"']*section-story-fixtures["']/u,
-  /import\(["'][^"']*homepage-section\.fixtures["']\)/u,
-  /import\(["'][^"']*section-story-fixtures["']\)/u,
-] as const;
-
 const allowedImportPathPatterns = [
   /\.test\.[cm]?[jt]sx?$/u,
   /\.stories\.[cm]?[jt]sx?$/u,
-  /src\/components\/sections\/homepage-section\.fixtures\.ts$/u,
-  /src\/components\/sections\/section-story-fixtures\.ts$/u,
+  /\.fixtures\.[cm]?[jt]sx?$/u,
 ] as const;
 
 const storyImportPattern = /(?:from|import\()\s*["'][^"']*\.stories["']/u;
@@ -59,6 +52,58 @@ function readSource(relativePath: string): string {
   return readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
 }
 
+function isFixtureModuleSpecifier(specifier: string): boolean {
+  const fileName = specifier.split("/").at(-1) ?? "";
+  const marker = ".fixtures";
+  const markerIndex = fileName.lastIndexOf(marker);
+  if (markerIndex < 0) return false;
+
+  const extension = fileName.slice(markerIndex + marker.length);
+  return (
+    extension === "" ||
+    [".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts", ".cjs", ".cts"].includes(
+      extension,
+    )
+  );
+}
+
+function importsFixtureModule(source: string): boolean {
+  const sourceFile = ts.createSourceFile(
+    "fixture-boundary.tsx",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  let found = false;
+
+  const visit = (node: ts.Node): void => {
+    let specifier: ts.Expression | undefined;
+    if (ts.isImportDeclaration(node)) {
+      specifier = node.moduleSpecifier;
+    } else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword
+    ) {
+      specifier = node.arguments[0];
+    }
+
+    if (
+      specifier &&
+      ts.isStringLiteralLike(specifier) &&
+      isFixtureModuleSpecifier(specifier.text)
+    ) {
+      found = true;
+      return;
+    }
+
+    if (!found) ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return found;
+}
+
 function filesMatching(
   roots: readonly string[],
   pattern: RegExp,
@@ -69,15 +114,32 @@ function filesMatching(
 }
 
 describe("Storybook fixture runtime boundary", () => {
-  it("keeps section fixture modules out of runtime page and component imports", () => {
-    const offenders = fixtureImportPatterns.flatMap((pattern) =>
-      filesMatching(["src", "tests"], pattern).filter(
+  it.each([
+    ["static", 'import { hero } from "./hero.fixtures";'],
+    ["dynamic", 'const hero = import("./hero.fixtures.ts");'],
+    ["side-effect", 'import "./hero.fixtures";'],
+  ])("recognizes %s fixture imports", (_kind, source) => {
+    expect(importsFixtureModule(source)).toBe(true);
+  });
+
+  it("ignores fixture names in ordinary strings and comments", () => {
+    expect(
+      importsFixtureModule(`
+        const note = "./hero.fixtures";
+        // import "./comment-only.fixtures";
+      `),
+    ).toBe(false);
+  });
+
+  it("keeps fixture modules out of runtime imports", () => {
+    const offenders = listSourceFiles(["src"])
+      .filter((filePath) => importsFixtureModule(readSource(filePath)))
+      .filter(
         (filePath) =>
           !allowedImportPathPatterns.some((allowedPattern) =>
             allowedPattern.test(filePath),
           ),
-      ),
-    );
+      );
 
     expect(offenders).toStrictEqual([]);
   });
