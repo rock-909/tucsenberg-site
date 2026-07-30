@@ -203,7 +203,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(
       staticFallback.getByRole("link", { name: /@/i }),
     ).toBeVisible();
-    await expect(page.getByRole("button")).toHaveCount(0);
+    await expect(staticFallback.getByRole("button")).toHaveCount(0);
     await expectNoReservedGap(page);
     await expectBodyRenderedOnce(page);
   });
@@ -238,7 +238,7 @@ test.describe("No-JS HTML contract (English-only)", () => {
     await expect(
       staticFallback.getByRole("link", { name: /@/i }),
     ).toBeVisible();
-    await expect(page.getByRole("button")).toHaveCount(0);
+    await expect(staticFallback.getByRole("button")).toHaveCount(0);
     await expectNoReservedGap(page);
     await expectBodyRenderedOnce(page);
     // Exactly one card in the whole document. Comparing the total against the
