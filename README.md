@@ -18,7 +18,7 @@ Tucsenberg 英文官网项目，面向海外防洪屏障采购、OEM/批发询�
 
 ## 快速开始
 
-环境要求：Node 24（`>=24 <25`）、pnpm 11（仓库固定 `pnpm@11.1.0`，建议先执行 `corepack enable`）。
+环境要求：Node 24（版本见 `.node-version`）、pnpm 11（版本见 `package.json`，建议先执行 `corepack enable`）。
 
 ```bash
 pnpm install
