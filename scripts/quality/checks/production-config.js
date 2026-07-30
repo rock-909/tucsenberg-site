@@ -253,15 +253,10 @@ function validateProductionRuntimeContract(env) {
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
   );
-  const hasKv = hasPair(env, "KV_REST_API_URL", "KV_REST_API_TOKEN");
 
-  if (!hasUpstash && !hasKv) {
+  if (!hasUpstash) {
     errors.push(
       "Production rate limiting requires Upstash Redis. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
-    );
-  } else if (!hasUpstash && hasKv) {
-    errors.push(
-      "KV-only rate limiting is not allowed in production. Configure Upstash Redis for the shared security stores or remove the KV-only setup.",
     );
   }
 

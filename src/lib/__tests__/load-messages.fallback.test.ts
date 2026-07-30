@@ -15,7 +15,14 @@ describe("load-messages canonical runtime source", () => {
     expect(messages).toHaveProperty("apiErrors");
     expect(messages).toHaveProperty("catalog");
     expect(messages).toHaveProperty("contact");
+    expect(messages).toHaveProperty("emailTemplates");
+    expect(messages).toHaveProperty("home");
+    expect(messages).toHaveProperty("requestQuote");
     expect(messages).not.toHaveProperty("common");
+    expect(messages).not.toHaveProperty("blog");
+    expect(messages).not.toHaveProperty("customProject");
+    expect(messages).not.toHaveProperty("language");
+    expect(messages).not.toHaveProperty("products");
   });
 
   it("uses the shared composed packs without site-specific overlay drift", async () => {

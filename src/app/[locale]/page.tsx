@@ -6,8 +6,6 @@ import {
   type LocaleParam,
 } from "@/app/[locale]/generate-static-params";
 import { Button } from "@/components/ui/button";
-import { BreathingReveal } from "@/components/motion/breathing-reveal";
-import { LightMotionProvider } from "@/components/motion/light-motion-provider";
 import { HeroSection } from "@/components/sections/hero-section";
 import { getLocalizedPath } from "@/config/paths";
 import {
@@ -415,35 +413,25 @@ export default async function Home({ params }: HomePageProps) {
   const homeSections = {
     hero: <HeroSection />,
     productLines: (
-      <BreathingReveal>
-        <HomeProductLinesSection
-          title={t("productLines.title")}
-          description={t("productLines.description")}
-          items={content.productLines}
-        />
-      </BreathingReveal>
+      <HomeProductLinesSection
+        title={t("productLines.title")}
+        description={t("productLines.description")}
+        items={content.productLines}
+      />
     ),
-    howToChoose: (
-      <BreathingReveal>
-        <HomeHowToChooseSection t={t} />
-      </BreathingReveal>
-    ),
+    howToChoose: <HomeHowToChooseSection t={t} />,
     buyingProcess: (
-      <BreathingReveal>
-        <HomeBuyingProcessSection t={t} items={content.buyingProcess} />
-      </BreathingReveal>
+      <HomeBuyingProcessSection t={t} items={content.buyingProcess} />
     ),
     buyerSegments: (
-      <BreathingReveal>
-        <HomeBuyerSegmentsSection
-          title={t("buyerSegments.title")}
-          description={t("buyerSegments.description")}
-          items={content.buyerSegments}
-        />
-      </BreathingReveal>
+      <HomeBuyerSegmentsSection
+        title={t("buyerSegments.title")}
+        description={t("buyerSegments.description")}
+        items={content.buyerSegments}
+      />
     ),
     faq: (
-      <BreathingReveal>
+      <>
         <JsonLdScript data={generateFaqSchemaFromItems(homeFaqItems, locale)} />
         <div data-testid="home-faq-section">
           <FaqSectionView
@@ -455,33 +443,20 @@ export default async function Home({ params }: HomePageProps) {
             }))}
           />
         </div>
-      </BreathingReveal>
+      </>
     ),
-    verify: (
-      <BreathingReveal>
-        <HomeVerifySection t={t} />
-      </BreathingReveal>
-    ),
-    finalCta: (
-      <BreathingReveal>
-        <HomeFinalAction t={t} ctaTargets={finalCtaTargets} />
-      </BreathingReveal>
-    ),
+    verify: <HomeVerifySection t={t} />,
+    finalCta: <HomeFinalAction t={t} ctaTargets={finalCtaTargets} />,
   } satisfies Record<SingleSiteHomeSectionKey, ReactNode>;
 
-  // The homepage is the only route that animates content (BreathingReveal
-  // viewport reveals). The LazyMotion runtime therefore lives here instead of in
-  // the root layout, so non-home routes no longer ship the motion runtime.
   return (
-    <LightMotionProvider>
-      <div className="min-h-dvh bg-background text-foreground">
-        <JsonLdGraphScript locale={locale} />
-        <div>
-          {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (
-            <Fragment key={sectionKey}>{homeSections[sectionKey]}</Fragment>
-          ))}
-        </div>
+    <div className="min-h-dvh bg-background text-foreground">
+      <JsonLdGraphScript locale={locale} />
+      <div>
+        {SINGLE_SITE_HOME_SECTION_ORDER.map((sectionKey) => (
+          <Fragment key={sectionKey}>{homeSections[sectionKey]}</Fragment>
+        ))}
       </div>
-    </LightMotionProvider>
+    </div>
   );
 }

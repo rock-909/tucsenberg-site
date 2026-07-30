@@ -19,12 +19,10 @@ function getServerSnapshot(): boolean {
 }
 
 /**
- * Reduced-motion signal for client components, mirroring the behavior we
- * previously read from `motion/react`'s `useReducedMotion`. It is a plain hook
- * (no `"use client"` directive) so importing it does not pull the motion
- * runtime into the site-wide navigation shell; only client components may call
- * it. Backed by `useSyncExternalStore`, so it is SSR-safe (server snapshot is
- * `false`) and stays in sync when the OS preference changes.
+ * Reduced-motion signal for client components. It is a plain hook (no
+ * `"use client"` directive), so only client components may call it. Backed by
+ * `useSyncExternalStore`, so it is SSR-safe (server snapshot is `false`) and
+ * stays in sync when the OS preference changes.
  */
 export function usePrefersReducedMotion(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

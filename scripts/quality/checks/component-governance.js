@@ -13,7 +13,6 @@ const COMPONENT_GOVERNANCE_COMPONENTS_ROOT = "src/components";
 const COMPONENT_GOVERNANCE_APP_ROOT = "src/app";
 const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
 const COMPONENT_GOVERNANCE_PRODUCTION_CONTENT_ROOTS = ["content/pages"];
-const COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES = ["mdx-components.tsx"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
 const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
 const COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS = [
@@ -110,10 +109,6 @@ function getScannedSourceFiles(rootDir) {
         !COMPONENT_GOVERNANCE_EXCLUDED_FILE_PATTERN.test(file),
     ),
   );
-
-  for (const file of COMPONENT_GOVERNANCE_ROOT_SOURCE_FILES) {
-    if (exists(rootDir, file)) files.push(file);
-  }
 
   return files.sort();
 }

@@ -31,7 +31,6 @@ beforeEach(() => {
   vi.stubEnv("EMAIL_FROM", "sales@example.test");
   vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
   vi.stubEnv("TURNSTILE_BYPASS", "false");
-  vi.stubEnv("CONTENT_ENABLE_DRAFTS", "false");
   vi.stubEnv("PLAYWRIGHT_TEST", "false");
   vi.stubEnv("SECURITY_HEADERS_ENABLED", "true");
 });
@@ -52,7 +51,6 @@ describe("real env contract", () => {
 
   it("parses real string, boolean, and numeric values", async () => {
     vi.stubEnv("TURNSTILE_BYPASS", "true");
-    vi.stubEnv("CONTENT_ENABLE_DRAFTS", "false");
     vi.stubEnv("PLAYWRIGHT_TEST", "true");
     vi.stubEnv("SECURITY_HEADERS_ENABLED", "false");
 
@@ -60,7 +58,6 @@ describe("real env contract", () => {
 
     expect(env.NEXT_PUBLIC_BASE_URL).toBe("https://example.test");
     expect(env.TURNSTILE_BYPASS).toBe(true);
-    expect(env.CONTENT_ENABLE_DRAFTS).toBe(false);
     expect(env.PLAYWRIGHT_TEST).toBe(true);
     expect(env.SECURITY_HEADERS_ENABLED).toBe(false);
   });

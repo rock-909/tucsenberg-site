@@ -16,7 +16,7 @@ export const getPageBySlug = cache(
         throw new Error(`Content not found: ${slug}`);
       }
 
-      const entry = resolveOptionalContentEntry("pages", locale, slug);
+      const entry = resolveOptionalContentEntry(locale, slug);
 
       if (entry === undefined) {
         throw new Error(`Content not found: ${slug}`);

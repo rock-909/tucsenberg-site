@@ -31,8 +31,7 @@
         "files": [
           "lighthouserc.js",
           "open-next.config.ts",
-          "src/test/css-stub.ts",
-          "src/test/mdx-stub.ts"
+          "src/test/css-stub.ts"
         ],
         "rules": ["knip/files"]
       },
@@ -196,15 +195,13 @@
       {
         "files": [
           "src/components/cookie/lazy-cookie-consent-island.tsx",
-          "src/components/layout/header-client.tsx",
-          "src/components/ui/lazy-theme-switcher.tsx"
+          "src/components/layout/header-client.tsx"
         ],
         "rules": ["react-doctor/rerender-state-only-in-handlers"]
       },
       {
         "files": [
           "scripts/starter-checks.js",
-          "src/app/[locale]/contact/__tests__/page-i18n-basic.test.tsx",
           "src/app/[locale]/contact/__tests__/page.test.tsx",
           "src/app/api/csp-report/__tests__/route-get-options.test.ts",
           "src/app/api/inquiry/__tests__/route.test.ts",
@@ -215,8 +212,7 @@
           "src/lib/security/__tests__/distributed-rate-limit.test.ts",
           "src/lib/security/__tests__/rate-limit-key-strategies.test.ts",
           "tests/integration/api/lead-family-protection.test.ts",
-          "tests/unit/middleware.test.ts",
-          "tests/unit/scripts/content-slug-sync.test.ts"
+          "tests/unit/middleware.test.ts"
         ],
         "rules": ["react-doctor/server-sequential-independent-await"]
       },

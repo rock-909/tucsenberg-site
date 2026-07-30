@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 const SCRIPT_PATH = path.join(
@@ -32,6 +32,7 @@ interface CloudflareOfficialCompareModule {
   readonly collectCloudflareOfficialCompareFailures: (
     rootDir?: string,
   ) => Failure[];
+  readonly runCloudflareOfficialCompareCli: (args?: string[]) => boolean;
 }
 
 function loadChecker(): CloudflareOfficialCompareModule {
@@ -110,6 +111,7 @@ function moveFixtureToTrash(rootDir: string): void {
 }
 
 afterEach(() => {
+  vi.restoreAllMocks();
   for (const tempDir of tempDirs.splice(0)) {
     moveFixtureToTrash(tempDir);
   }
@@ -249,4 +251,18 @@ describe("Cloudflare official-compare source contract", () => {
       [],
     );
   });
+
+  it.each(["--generated-only", "--require-generated", "--unknown"])(
+    "rejects unsupported argument %s",
+    (argument) => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      expect(loadChecker().runCloudflareOfficialCompareCli([argument])).toBe(
+        false,
+      );
+      expect(error).toHaveBeenCalledWith(
+        `cf-official-compare: unknown argument: ${argument}`,
+      );
+    },
+  );
 });

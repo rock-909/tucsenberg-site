@@ -6,15 +6,11 @@ const i18nLocalesConfig = require("../../../i18n-locales.config.js");
 const { validateContentFrontmatterContract } = require("./content-slugs");
 
 const ROOT = process.cwd();
-const CONTENT_TYPES = ["posts", "pages", "products"];
+const CONTENT_ROOT = "content";
+const CONTENT_TYPE = "pages";
+const CONTENT_SOURCE = "active-content";
 const CONTENT_MANIFEST_LOCALES = i18nLocalesConfig.locales;
-const CONTENT_MANIFEST_SOURCES = [
-  {
-    source: "active-content",
-    root: "content",
-  },
-];
-const VALID_CONTENT_EXTENSIONS = new Set([".mdx", ".md"]);
+const CONTENT_EXTENSION = ".mdx";
 
 function createContentManifestContext(rootDir = ROOT) {
   return {
@@ -29,16 +25,11 @@ function createContentManifestContext(rootDir = ROOT) {
   };
 }
 
-function scanContentManifestDirectory(
-  context,
-  sourceConfig,
-  contentType,
-  locale,
-) {
+function scanContentManifestDirectory(context, locale) {
   const dirPath = path.join(
     context.rootDir,
-    sourceConfig.root,
-    contentType,
+    CONTENT_ROOT,
+    CONTENT_TYPE,
     locale,
   );
   const entries = [];
@@ -51,7 +42,7 @@ function scanContentManifestDirectory(
 
   for (const file of files) {
     const ext = path.extname(file);
-    if (!VALID_CONTENT_EXTENSIONS.has(ext)) {
+    if (ext !== CONTENT_EXTENSION) {
       continue;
     }
 
@@ -70,13 +61,13 @@ function scanContentManifestDirectory(
     const stableFilePath = `/${relativePath}`;
 
     entries.push({
-      type: contentType,
+      type: CONTENT_TYPE,
       locale,
       slug,
       extension: ext,
       filePath: stableFilePath,
       relativePath,
-      source: sourceConfig.source,
+      source: CONTENT_SOURCE,
       metadata,
       content,
     });
@@ -92,12 +83,8 @@ function buildContentManifestKey(type, locale, slug) {
 function assertContentManifestFrontmatterValid(context) {
   const result = validateContentFrontmatterContract({
     rootDir: context.rootDir,
-    collections: CONTENT_TYPES,
     locales: CONTENT_MANIFEST_LOCALES,
     strictFrontmatter: false,
-    contentRoots: CONTENT_MANIFEST_SOURCES.map(
-      (sourceConfig) => sourceConfig.root,
-    ),
   });
 
   if (result.ok) {
@@ -117,19 +104,8 @@ function generateContentManifest(context = createContentManifestContext()) {
 
   const entries = [];
 
-  for (const sourceConfig of CONTENT_MANIFEST_SOURCES) {
-    for (const contentType of CONTENT_TYPES) {
-      for (const locale of CONTENT_MANIFEST_LOCALES) {
-        entries.push(
-          ...scanContentManifestDirectory(
-            context,
-            sourceConfig,
-            contentType,
-            locale,
-          ),
-        );
-      }
-    }
+  for (const locale of CONTENT_MANIFEST_LOCALES) {
+    entries.push(...scanContentManifestDirectory(context, locale));
   }
 
   const byKey = {};
@@ -188,10 +164,10 @@ function generateManifestTsCode(manifest) {
  * No runtime fs dependency - works in dev and production builds.
  */
 
-import type { ContentType, Locale } from '@/types/content.types';
+import type { Locale } from '@/types/content.types';
 
 export interface ContentEntry {
-  type: ContentType;
+  type: "pages";
   locale: Locale;
   slug: string;
   extension: string;

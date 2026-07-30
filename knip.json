@@ -11,7 +11,7 @@
   ],
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{js,mjs,ts}"],
   "ignoreExportsUsedInFile": true,
-  "ignore": ["src/test/css-stub.ts", "src/test/mdx-stub.ts"],
+  "ignore": ["src/test/css-stub.ts"],
   "ignoreDependencies": ["@tailwindcss/typography"],
   "rules": {
     "files": "error",

@@ -131,7 +131,7 @@ describe("MDX manifest-only runtime contract", () => {
   // 模块图里拉了什么,都不点名任何一个具体的退役页。
   //
   // 路径要归一化之后再判包含。只用 startsWith 的话
-  // `/content/../src/test/mdx-stub.ts` 两个前缀都过,归一化后却指到 content
+  // `/content/../src/test/example.ts` 两个前缀都过，归一化后却指到 content
   // 之外一个真实存在的文件——所有条件全绿,清单已经逃出目录了。
   it("keeps the generated manifest catalog-only", () => {
     expect(CONTENT_MANIFEST.entries.length).toBeGreaterThan(0);

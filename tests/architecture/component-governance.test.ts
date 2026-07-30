@@ -11,7 +11,6 @@ import {
 } from "../../scripts/component-governance-registry-truth.js";
 
 const SOURCE_ROOT = "src";
-const ROOT_PRODUCTION_SOURCE_FILES = ["mdx-components.tsx"] as const;
 const COMPONENT_GOVERNANCE_REGISTRY_PATH =
   "src/components/component-governance.registry.json";
 const PACKAGE_MANIFEST_PATH = "package.json";
@@ -313,10 +312,7 @@ describe("component governance", () => {
   });
 
   it("keeps direct Radix imports inside the UI wrapper layer", () => {
-    const violations = [
-      ...walkFiles(SOURCE_ROOT),
-      ...ROOT_PRODUCTION_SOURCE_FILES,
-    ]
+    const violations = walkFiles(SOURCE_ROOT)
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
       .filter((filePath) => !filePath.startsWith(`${UI_WRAPPER_ROOT}/`))
@@ -331,10 +327,7 @@ describe("component governance", () => {
   });
 
   it("keeps the retired Radix Themes package out of production source", () => {
-    const violations = [
-      ...walkFiles(SOURCE_ROOT),
-      ...ROOT_PRODUCTION_SOURCE_FILES,
-    ]
+    const violations = walkFiles(SOURCE_ROOT)
       .map(normalizePath)
       .filter((filePath) => SOURCE_FILE_PATTERN.test(filePath))
       .filter((filePath) => !STORY_OR_TEST_FILE_PATTERN.test(filePath))

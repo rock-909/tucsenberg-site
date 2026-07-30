@@ -1,7 +1,6 @@
 import path from "path";
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
-import createMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { getSecurityHeaders } from "./src/config/security";
 
@@ -11,17 +10,7 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env["ANALYZE"] === "true",
 });
 
-const withMDX = createMDX({
-  // Add markdown plugins here, as desired
-  options: {
-    remarkPlugins: ["remark-frontmatter"],
-    rehypePlugins: [],
-  },
-});
-
-const isCloudflare =
-  process.env.DEPLOYMENT_PLATFORM === "cloudflare" ||
-  process.env.DEPLOY_TARGET === "cloudflare";
+const isCloudflare = process.env.DEPLOYMENT_PLATFORM === "cloudflare";
 const nextConfig: NextConfig = {
   // Everything writes `.next` by default. `next start` reads this same config,
   // so setting NEXT_DIST_DIR on both build and start gives a command its own
@@ -86,9 +75,6 @@ const nextConfig: NextConfig = {
       "@content": path.resolve(__dirname, "content"),
     },
   },
-
-  // Configure pageExtensions to include markdown and MDX files
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 
   // Cloudflare deploy artifacts prioritize bundle size; disable browser source maps there.
   productionBrowserSourceMaps: !isCloudflare,
@@ -216,4 +202,4 @@ const nextConfig: NextConfig = {
 };
 
 // Export final config with all plugins applied
-export default withBundleAnalyzer(withNextIntl(withMDX(nextConfig)));
+export default withBundleAnalyzer(withNextIntl(nextConfig));

@@ -48,16 +48,6 @@ function getDeploymentPlatform(): DeploymentPlatform | null {
     return null;
   }
 
-  const legacyPlatform = getRuntimeEnvString("DEPLOY_TARGET");
-  if (legacyPlatform) {
-    const normalizedPlatform = legacyPlatform.toLowerCase();
-    if (normalizedPlatform === PLATFORM_CLOUDFLARE) return PLATFORM_CLOUDFLARE;
-    if (normalizedPlatform === PLATFORM_DEVELOPMENT) {
-      return PLATFORM_DEVELOPMENT;
-    }
-    return null;
-  }
-
   if (getRuntimeEnvString("CF_PAGES")) {
     return PLATFORM_CLOUDFLARE;
   }

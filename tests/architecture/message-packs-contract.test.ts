@@ -54,10 +54,7 @@ describe("physical message packs", () => {
   });
 
   it("keeps runtime and static helpers on physical packs", () => {
-    const packLoader = fs.readFileSync(
-      "src/lib/i18n/message-pack-loader.ts",
-      "utf8",
-    );
+    const loader = fs.readFileSync("src/lib/i18n/load-messages.ts", "utf8");
     const composed = fs.readFileSync(
       "src/lib/i18n/composed-messages.ts",
       "utf8",
@@ -68,12 +65,10 @@ describe("physical message packs", () => {
       "utf8",
     );
 
-    expect(packLoader).toContain("@messages/base/en/messages.json");
-    expect(packLoader).toContain(
-      "@messages/profiles/b2b-lead/en/messages.json",
-    );
-    expect(packLoader).toContain("@messages/profiles/catalog/en/messages.json");
+    expect(loader).toContain("@/lib/i18n/composed-messages");
     expect(composed).toContain("@messages/base/en/messages.json");
+    expect(composed).toContain("@messages/profiles/b2b-lead/en/messages.json");
+    expect(composed).toContain("@messages/profiles/catalog/en/messages.json");
     expect(nextIntlTypes).toContain("@messages/base/en/messages.json");
     expect(storybook).toContain("@/lib/i18n/composed-messages");
   });

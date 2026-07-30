@@ -24,7 +24,7 @@ const TUCSENBERG_PRODUCT_PAGES_PATH =
 const READINESS_SCAN_TARGETS = [
   {
     root: "content/pages",
-    extensions: new Set([".md", ".mdx"]),
+    extensions: new Set([".mdx"]),
     scanTextRules: true,
   },
   {
@@ -516,9 +516,7 @@ function collectScanUnits(content, filePath) {
   }
 
   const scanContent =
-    extension === ".md" || extension === ".mdx"
-      ? stripMdxComments(content)
-      : content;
+    extension === ".mdx" ? stripMdxComments(content) : content;
 
   return scanContent.split("\n").map((line, index) => ({
     value: line,

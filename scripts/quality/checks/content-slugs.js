@@ -3,10 +3,10 @@ const path = require("node:path");
 const matter = require("gray-matter");
 const yaml = require("js-yaml");
 
-const DEFAULT_COLLECTIONS = ["pages"];
 const FALLBACK_LOCALES = ["en"];
-const DEFAULT_CONTENT_EXTENSIONS = ["md", "mdx"];
-const CONTENT_SLUG_SYNC_ROOTS = ["content"];
+const CONTENT_ROOT = "content";
+const CONTENT_COLLECTION = "pages";
+const CONTENT_EXTENSION = "mdx";
 const REPORT_DIR = "reports";
 const CONTENT_SLUG_REPORT_FILENAME = "content-slug-sync-report.json";
 const REQUIRED_FRONTMATTER_STRING_FIELDS = [
@@ -53,10 +53,15 @@ function loadDefaultLocales(rootDir = process.cwd()) {
 
 const DEFAULT_LOCALES = loadDefaultLocales();
 
-function buildKey(rootDir, filePath, contentRoot, collection, locale) {
-  const localeRoot = path.join(rootDir, contentRoot, collection, locale);
+function buildKey(rootDir, filePath, locale) {
+  const localeRoot = path.join(
+    rootDir,
+    CONTENT_ROOT,
+    CONTENT_COLLECTION,
+    locale,
+  );
   const relative = path.relative(localeRoot, filePath);
-  return `${contentRoot}/${collection}/${relative.replace(/\\/g, "/")}`;
+  return `${CONTENT_ROOT}/${CONTENT_COLLECTION}/${relative.replace(/\\/g, "/")}`;
 }
 
 function parseFrontmatter(filePath) {
@@ -77,50 +82,32 @@ function parseFrontmatter(filePath) {
   }
 }
 
-function collectPairs(
-  rootDir,
-  contentRoot,
-  collection,
-  baseLocale,
-  targetLocale,
-) {
+function collectPairs(rootDir, baseLocale, targetLocale) {
   const basePattern = path.join(
     rootDir,
-    contentRoot,
-    collection,
+    CONTENT_ROOT,
+    CONTENT_COLLECTION,
     baseLocale,
-    "**/*.mdx",
+    `**/*.${CONTENT_EXTENSION}`,
   );
   const targetPattern = path.join(
     rootDir,
-    contentRoot,
-    collection,
+    CONTENT_ROOT,
+    CONTENT_COLLECTION,
     targetLocale,
-    "**/*.mdx",
+    `**/*.${CONTENT_EXTENSION}`,
   );
   const pairMap = new Map();
 
   for (const filePath of fs.globSync(basePattern).sort()) {
-    const key = buildKey(
-      rootDir,
-      filePath,
-      contentRoot,
-      collection,
-      baseLocale,
-    );
+    const key = buildKey(rootDir, filePath, baseLocale);
     const entry = pairMap.get(key) || {};
     entry.basePath = filePath;
     pairMap.set(key, entry);
   }
 
   for (const filePath of fs.globSync(targetPattern).sort()) {
-    const key = buildKey(
-      rootDir,
-      filePath,
-      contentRoot,
-      collection,
-      targetLocale,
-    );
+    const key = buildKey(rootDir, filePath, targetLocale);
     const entry = pairMap.get(key) || {};
     entry.targetPath = filePath;
     pairMap.set(key, entry);
@@ -129,21 +116,9 @@ function collectPairs(
   return pairMap;
 }
 
-function validateCollectionPair(
-  rootDir,
-  contentRoot,
-  collection,
-  baseLocale,
-  targetLocale,
-) {
+function validateLocalePair(rootDir, baseLocale, targetLocale) {
   const issues = [];
-  const pairMap = collectPairs(
-    rootDir,
-    contentRoot,
-    collection,
-    baseLocale,
-    targetLocale,
-  );
+  const pairMap = collectPairs(rootDir, baseLocale, targetLocale);
   let fileCount = 0;
 
   const orderedPairs = Array.from(pairMap.entries()).sort(([keyA], [keyB]) =>
@@ -158,7 +133,7 @@ function validateCollectionPair(
       const existingPath = basePath || targetPath;
       issues.push({
         type: "missing_pair",
-        collection,
+        collection: CONTENT_COLLECTION,
         baseLocale,
         targetLocale,
         basePath,
@@ -174,7 +149,7 @@ function validateCollectionPair(
     if (baseResult.error || targetResult.error) {
       issues.push({
         type: "parse_error",
-        collection,
+        collection: CONTENT_COLLECTION,
         baseLocale,
         targetLocale,
         basePath,
@@ -188,7 +163,7 @@ function validateCollectionPair(
     if (baseResult.slug !== targetResult.slug) {
       issues.push({
         type: "slug_mismatch",
-        collection,
+        collection: CONTENT_COLLECTION,
         baseLocale,
         targetLocale,
         basePath,
@@ -210,36 +185,24 @@ function validateCollectionPair(
 function validateMdxSlugSync(options) {
   const {
     rootDir,
-    collections = DEFAULT_COLLECTIONS,
     locales = DEFAULT_LOCALES,
     baseLocale = locales[0],
-    contentRoots = CONTENT_SLUG_SYNC_ROOTS,
   } = options;
   const issues = [];
   const targetLocales = locales.filter((locale) => locale !== baseLocale);
   let totalFiles = 0;
   let totalPairs = 0;
 
-  for (const contentRoot of contentRoots) {
-    for (const collection of collections) {
-      for (const targetLocale of targetLocales) {
-        const result = validateCollectionPair(
-          rootDir,
-          contentRoot,
-          collection,
-          baseLocale,
-          targetLocale,
-        );
-        issues.push(...result.issues);
-        totalFiles += result.fileCount;
-        totalPairs += result.pairCount;
-      }
-    }
+  for (const targetLocale of targetLocales) {
+    const result = validateLocalePair(rootDir, baseLocale, targetLocale);
+    issues.push(...result.issues);
+    totalFiles += result.fileCount;
+    totalPairs += result.pairCount;
   }
 
   return {
     ok: issues.length === 0,
-    checkedCollections: collections,
+    checkedCollections: [CONTENT_COLLECTION],
     checkedLocales: locales,
     issues,
     stats: {
@@ -421,43 +384,31 @@ function validateFrontmatterFile({
 function validateContentFrontmatterContract(options) {
   const {
     rootDir,
-    collections = DEFAULT_COLLECTIONS,
     locales = DEFAULT_LOCALES,
-    extensions = DEFAULT_CONTENT_EXTENSIONS,
     strictFrontmatter = false,
-    contentRoots = ["content"],
   } = options;
   const issues = [];
   let totalFiles = 0;
 
-  for (const contentRoot of contentRoots) {
-    for (const collection of collections) {
-      for (const locale of locales) {
-        const patterns = extensions.map((extension) =>
-          path.join(
-            rootDir,
-            contentRoot,
-            collection,
-            locale,
-            `**/*.${extension}`,
-          ),
-        );
-        const filePaths = Array.from(
-          new Set(patterns.flatMap((pattern) => fs.globSync(pattern))),
-        ).sort();
-        for (const filePath of filePaths) {
-          totalFiles += 1;
-          issues.push(
-            ...validateFrontmatterFile({
-              collection,
-              expectedLocale: locale,
-              filePath,
-              rootDir,
-              strictFrontmatter,
-            }),
-          );
-        }
-      }
+  for (const locale of locales) {
+    const pattern = path.join(
+      rootDir,
+      CONTENT_ROOT,
+      CONTENT_COLLECTION,
+      locale,
+      `**/*.${CONTENT_EXTENSION}`,
+    );
+    for (const filePath of fs.globSync(pattern).sort()) {
+      totalFiles += 1;
+      issues.push(
+        ...validateFrontmatterFile({
+          collection: CONTENT_COLLECTION,
+          expectedLocale: locale,
+          filePath,
+          rootDir,
+          strictFrontmatter,
+        }),
+      );
     }
   }
 
@@ -466,17 +417,17 @@ function validateContentFrontmatterContract(options) {
   if (totalFiles === 0) {
     pushFrontmatterIssue(issues, {
       type: "invalid_field",
-      collection: collections.join(","),
+      collection: CONTENT_COLLECTION,
       locale: locales.join(","),
-      filePath: contentRoots.join(","),
+      filePath: `${CONTENT_ROOT}/${CONTENT_COLLECTION}`,
       field: "scan",
-      message: `frontmatter contract scanned no files under ${contentRoots.join(", ")}`,
+      message: `frontmatter contract scanned no .${CONTENT_EXTENSION} files under ${CONTENT_ROOT}/${CONTENT_COLLECTION}`,
     });
   }
 
   return {
     ok: issues.length === 0,
-    checkedCollections: collections,
+    checkedCollections: [CONTENT_COLLECTION],
     checkedLocales: locales,
     issues,
     stats: {
@@ -501,9 +452,7 @@ function parseContentSlugArgs(args) {
     quiet: false,
     help: false,
     strictFrontmatter: false,
-    collections: DEFAULT_COLLECTIONS,
-    locales: DEFAULT_LOCALES,
-    localesExplicit: false,
+    unknown: [],
   };
 
   for (const arg of args) {
@@ -515,23 +464,8 @@ function parseContentSlugArgs(args) {
       options.strictFrontmatter = true;
     } else if (arg === "--help" || arg === "-h") {
       options.help = true;
-    } else if (arg.startsWith("--collections=")) {
-      options.collections = arg
-        .split("=")[1]
-        .split(",")
-        .flatMap((item) => {
-          const trimmed = item.trim();
-          return trimmed ? [trimmed] : [];
-        });
-    } else if (arg.startsWith("--locales=")) {
-      options.localesExplicit = true;
-      options.locales = arg
-        .split("=")[1]
-        .split(",")
-        .flatMap((item) => {
-          const trimmed = item.trim();
-          return trimmed ? [trimmed] : [];
-        });
+    } else {
+      options.unknown.push(arg);
     }
   }
 
@@ -547,8 +481,6 @@ Usage:
 
 Options:
   --json              Output JSON report to reports/content-slug-sync-report.json
-  --collections=x,y   Collections to check (default: pages)
-  --locales=x,y       Locales to check (default: ${DEFAULT_LOCALES.join(",")})
   --strict-frontmatter Run opt-in frontmatter/SEO contract checks
   --quiet             Only output errors
   --help, -h          Show this help
@@ -557,7 +489,6 @@ Examples:
   node scripts/starter-checks.js content-slugs
   node scripts/starter-checks.js content-slugs --json
   node scripts/starter-checks.js content-slugs --strict-frontmatter
-  node scripts/starter-checks.js content-slugs --collections=products --locales=en,ja
 `);
 }
 
@@ -703,31 +634,20 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
     printContentSlugHelp();
     return true;
   }
-  if (options.collections.length === 0) {
-    console.error("Error: No collections specified");
+  if (options.unknown.length > 0) {
+    console.error(`Error: Unknown option: ${options.unknown[0]}`);
     return false;
-  }
-  const isImplicitSingleLocale =
-    options.locales.length < 2 && !options.localesExplicit;
-
-  if (options.locales.length < 2) {
-    if (options.localesExplicit) {
-      console.error("Error: At least 2 locales are required for comparison");
-      return false;
-    }
   }
 
   const result = validateMdxSlugSync({
     rootDir,
-    collections: options.collections,
-    locales: options.locales,
-    contentRoots: CONTENT_SLUG_SYNC_ROOTS,
+    locales: DEFAULT_LOCALES,
   });
-  if (isImplicitSingleLocale) {
+  if (DEFAULT_LOCALES.length < 2) {
     console.log("\nMDX Slug Sync Validation");
     console.log("========================\n");
-    console.log(`Collections: ${options.collections.join(", ")}`);
-    console.log(`Locales: ${options.locales.join(", ")}`);
+    console.log(`Collection: ${CONTENT_COLLECTION}`);
+    console.log(`Locales: ${DEFAULT_LOCALES.join(", ")}`);
     console.log("Single locale site: localized slug pair comparison skipped.");
   } else {
     printContentSlugSummary(result, options);
@@ -737,10 +657,8 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
   if (options.strictFrontmatter) {
     const frontmatterResult = validateContentFrontmatterContract({
       rootDir,
-      collections: options.collections,
-      locales: options.locales,
+      locales: DEFAULT_LOCALES,
       strictFrontmatter: true,
-      contentRoots: CONTENT_SLUG_SYNC_ROOTS,
     });
     printFrontmatterContractSummary(frontmatterResult, options);
 
@@ -758,13 +676,8 @@ function runContentSlugCheck(args = [], rootDir = process.cwd()) {
 }
 
 module.exports = {
-  buildKey,
-  collectPairs,
-  parseContentSlugArgs,
-  parseFrontmatter,
   runContentSlugCheck,
   validateContentFrontmatterContract,
-  validateCollectionPair,
   validateMdxSlugSync,
   writeContentSlugJsonReport,
 };

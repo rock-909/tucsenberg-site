@@ -19,7 +19,7 @@ export function getMdxPageLastModified(path: string): Promise<Date> {
 
     const results = routing.locales.map((locale) => {
       try {
-        const entry = resolveOptionalContentEntry("pages", locale as Locale, slug);
+        const entry = resolveOptionalContentEntry(locale as Locale, slug);
         if (entry === undefined) {
           throw new Error(`Content not found: ${slug}`);
         }

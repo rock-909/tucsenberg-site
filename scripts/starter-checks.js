@@ -15,16 +15,7 @@ const {
   runContentManifestGenerator,
   writeFileAtomic,
 } = require("./quality/checks/content-manifest");
-const {
-  buildKey,
-  collectPairs,
-  parseContentSlugArgs,
-  parseFrontmatter,
-  runContentSlugCheck,
-  validateContentFrontmatterContract,
-  validateCollectionPair,
-  validateMdxSlugSync,
-} = require("./quality/checks/content-slugs");
+const { runContentSlugCheck } = require("./quality/checks/content-slugs");
 const {
   collectClientBoundaryFiles,
   collectForbiddenBuildSources,
@@ -189,7 +180,6 @@ module.exports = {
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
   formatReleaseCommand,
-  buildKey,
   collectClientBoundaryFiles,
   collectForbiddenBuildSources,
   collectInquiryFormBuildArtifactFindings,
@@ -198,7 +188,6 @@ module.exports = {
   collectContentReadinessFindings,
   collectLeafPaths,
   collectMessageKeyUsageFindings,
-  collectPairs,
   collectPrerenderStaticFindings,
   compareLocales,
   createContentManifestContext,
@@ -209,8 +198,6 @@ module.exports = {
   INQUIRY_FORM_CHUNK_MARKER,
   INQUIRY_FORM_MAX_RAW_BYTES,
   INQUIRY_FORM_SOURCE,
-  parseArgs: parseContentSlugArgs,
-  parseFrontmatter,
   runCloudflareOfficialCompareCli,
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
@@ -226,10 +213,7 @@ module.exports = {
   runTranslationCheck,
   runValidateProductionConfigCli,
   shouldValidateProductionRuntimeContract,
-  validateContentFrontmatterContract,
-  validateCollectionPair,
   validateLocale,
-  validateMdxSlugSync,
   validateProductionConfig,
   validateProductionRuntimeContract,
   validatePublicLaunchTrustContent,

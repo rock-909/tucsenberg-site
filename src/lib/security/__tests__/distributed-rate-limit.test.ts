@@ -80,8 +80,6 @@ describe("distributed-rate-limit", () => {
     process.env = { ...originalEnv };
     setEnv("UPSTASH_REDIS_REST_URL", undefined);
     setEnv("UPSTASH_REDIS_REST_TOKEN", undefined);
-    setEnv("KV_REST_API_URL", undefined);
-    setEnv("KV_REST_API_TOKEN", undefined);
   });
 
   afterEach(() => {

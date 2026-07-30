@@ -76,8 +76,8 @@ describe("page-dates", () => {
 
   it("loads MDX updatedAt from the en-only route-derived content", async () => {
     mockGetContentEntry.mockImplementation(
-      (type: string, locale: string, slug: string) => ({
-        type,
+      (locale: string, slug: string) => ({
+        type: "pages",
         locale,
         slug,
         extension: ".mdx",
@@ -96,12 +96,8 @@ describe("page-dates", () => {
     );
 
     expect(lastModified).toEqual(new Date("2026-04-01T00:00:00Z"));
-    expect(mockGetContentEntry).toHaveBeenCalledWith("pages", "en", "about");
-    expect(mockGetContentEntry).not.toHaveBeenCalledWith(
-      "pages",
-      "zh",
-      "about",
-    );
+    expect(mockGetContentEntry).toHaveBeenCalledWith("en", "about");
+    expect(mockGetContentEntry).not.toHaveBeenCalledWith("zh", "about");
   });
 
   it("rejects paths that are not mapped from a static route id", async () => {

@@ -7,10 +7,10 @@
  * No runtime fs dependency - works in dev and production builds.
  */
 
-import type { ContentType, Locale } from '@/types/content.types';
+import type { Locale } from '@/types/content.types';
 
 export interface ContentEntry {
-  type: ContentType;
+  type: "pages";
   locale: Locale;
   slug: string;
   extension: string;

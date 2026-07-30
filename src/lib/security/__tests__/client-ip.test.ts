@@ -23,7 +23,6 @@ describe("client-ip", () => {
     // Reset environment
     process.env = { ...originalEnv };
     setEnv("DEPLOYMENT_PLATFORM", undefined);
-    setEnv("DEPLOY_TARGET", undefined);
     setEnv("CF_PAGES", undefined);
     setEnv("NODE_ENV", undefined);
   });
@@ -192,34 +191,6 @@ describe("client-ip", () => {
 
         const request = createMockRequest({
           headers: { "x-forwarded-for": "198.51.100.10" },
-        });
-
-        expect(getClientIP(request)).toBe("0.0.0.0");
-      });
-    });
-
-    describe("legacy DEPLOY_TARGET", () => {
-      it("uses legacy Cloudflare target for trusted client IP extraction", () => {
-        setEnv("DEPLOY_TARGET", "cloudflare");
-
-        const request = createMockRequest({
-          headers: {
-            "cf-connecting-ip": "192.0.2.100",
-            "x-real-ip": "198.51.100.10",
-          },
-        });
-
-        expect(getClientIP(request)).toBe("192.0.2.100");
-      });
-
-      it("does not let legacy target override an explicit unknown platform", () => {
-        setEnv("DEPLOYMENT_PLATFORM", "custom-edge");
-        setEnv("DEPLOY_TARGET", "cloudflare");
-
-        const request = createMockRequest({
-          headers: {
-            "cf-connecting-ip": "192.0.2.100",
-          },
         });
 
         expect(getClientIP(request)).toBe("0.0.0.0");

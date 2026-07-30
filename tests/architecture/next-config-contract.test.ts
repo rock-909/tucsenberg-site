@@ -8,7 +8,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it, vi } from "vitest";
 
@@ -170,6 +170,8 @@ describe("next.config contract", () => {
     })
       .split("\n")
       .filter((filePath) => /\.(?:tsx?|mdx|json|css)$/u.test(filePath))
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test filters git-listed repo files that may be deleted in the current worktree
+      .filter((filePath) => existsSync(filePath))
       // 测试夹具里本来就有假的远程图片地址（结构化数据、CSP 上报的样本），
       // 它们不进产物。留下的是会打包进站点的源码，不等于买家最终加载的资源。
       .filter((filePath) => !/(?:^|\/)__tests__\/|\.test\./u.test(filePath));

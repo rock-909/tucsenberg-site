@@ -158,7 +158,7 @@ describe("pages.config static public page registry", () => {
 
       const slug = definition.mdxCollection.slug;
       expect(mdxSlugsByPath[staticPath]).toBe(slug);
-      const enEntry = resolveOptionalContentEntry("pages", "en", slug);
+      const enEntry = resolveOptionalContentEntry("en", slug);
 
       expect(enEntry, `missing en manifest entry for ${slug}`).toBeDefined();
       expect(enEntry?.relativePath).toBe(`content/pages/en/${slug}.mdx`);

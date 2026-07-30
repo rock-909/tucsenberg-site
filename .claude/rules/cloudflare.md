@@ -61,7 +61,6 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 - Wrangler-level minification in `wrangler.jsonc` may stay enabled; do not
   treat it as proof that OpenNext split-function minification is safe.
 - Use `DEPLOYMENT_PLATFORM=cloudflare` as the canonical Cloudflare signal.
-  `DEPLOY_TARGET=cloudflare` is legacy compatibility only.
 
 ## Runtime entry
 
@@ -133,7 +132,8 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
   re-enabled later.
 - `wrangler.jsonc` must not add `kv_namespaces`, `r2_buckets`, `d1_databases`,
   or `durable_objects` for this starter by default. Older OpenNext setups wired
-  KV as the incremental cache store; this repo intentionally omits it.
+  KV as the incremental cache store; this repo intentionally omits it and does
+  not expose KV rate-limit env keys.
 - `open-next.config.ts` must not add custom incremental cache, tag cache, or
   queue overrides by default.
 
