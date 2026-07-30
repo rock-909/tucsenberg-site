@@ -36,9 +36,9 @@ interface LegalPageData {
 
 export async function loadLegalPage(
   slug: string,
-  locale: string,
+  locale: Locale,
 ): Promise<LegalPageData> {
-  const page = await getPageBySlug(slug, locale as Locale);
+  const page = await getPageBySlug(slug, locale);
 
   const metadata: LegalPageMetadata = {
     ...page.metadata,

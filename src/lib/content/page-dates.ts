@@ -1,5 +1,4 @@
 import { getMdxPageSlugByStaticPath } from "@/config/pages.config";
-import type { Locale } from "@/types/content.types";
 import { routing } from "@/i18n/routing";
 import { resolveOptionalContentEntry } from "@/lib/content-manifest";
 import { logger } from "@/lib/logger";
@@ -19,7 +18,7 @@ export function getMdxPageLastModified(path: string): Promise<Date> {
 
     const results = routing.locales.map((locale) => {
       try {
-        const entry = resolveOptionalContentEntry(locale as Locale, slug);
+        const entry = resolveOptionalContentEntry(locale, slug);
         if (entry === undefined) {
           throw new Error(`Content not found: ${slug}`);
         }
