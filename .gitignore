@@ -50,6 +50,9 @@ pnpm-debug.log*
 .lighthouseci/
 
 # Claude/Codex local state
+.grok/
+.impeccable/
+skills-lock.json
 .claude/settings.local.json
 .claude/launch.json
 .claude/skills-backup-*/
