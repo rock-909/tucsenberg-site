@@ -3,6 +3,8 @@ paths:
   - "content/**/*"
   - "messages/**/*.json"
   - "src/config/single-site*.ts"
+  - "src/constants/tucsenberg-product-page-*.ts"
+  - "src/constants/tucsenberg-product-pages.ts"
   - "src/lib/content/**"
   - "src/lib/content-query/**"
   - "src/app/**/page.tsx"
@@ -24,6 +26,7 @@ Every content field has one authoring source.
 | Page structure switches | `src/config/single-site-page-expression.ts` | MDX body copy |
 | Crawl/indexing policy | `src/config/single-site-seo.ts` | Page components |
 | Shared labels/nav/buttons/form chrome | `messages/base/**`, `messages/profiles/b2b-lead/**`, `messages/profiles/catalog/**` | MDX frontmatter |
+| Product specifications and reviewed product-page copy | `src/constants/tucsenberg-product-page-*.ts` | Component literals or translation JSON |
 | Reusable catalog/card data | typed config + i18n namespace | page prose only |
 
 ## Page content

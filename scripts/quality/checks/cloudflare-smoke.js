@@ -45,6 +45,8 @@ const DEPLOYED_SMOKE_EXPECTATIONS = [
   { pathname: "/api/health", status: 200 },
   { pathname: "/zh", status: 404 },
   { pathname: "/zh/contact", status: 404 },
+  { pathname: "/.well-known/security.txt", status: 200 },
+  { pathname: "/security-policy.txt", status: 404 },
   {
     pathname: "/downloads/spec-sheet-tb-bw.pdf",
     status: 200,

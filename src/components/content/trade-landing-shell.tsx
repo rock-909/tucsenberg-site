@@ -18,7 +18,7 @@ import type { LegalPageMetadata, Locale } from "@/types/content.types";
 interface TradeLandingShellProps {
   metadata: LegalPageMetadata;
   content: string;
-  locale: string;
+  locale: Locale;
   /** Site-relative path (e.g. "/oem-wholesale"); enables BreadcrumbList output. */
   pagePath: string;
 }
@@ -75,7 +75,7 @@ export async function TradeLandingShell({
 
   return (
     <>
-      <JsonLdGraphScript locale={locale as Locale} data={schemas} />
+      <JsonLdGraphScript locale={locale} data={schemas} />
 
       <div className="mx-auto max-w-[1080px] px-6 py-14 md:py-[72px]">
         <header className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">

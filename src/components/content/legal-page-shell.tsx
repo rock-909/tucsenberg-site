@@ -15,7 +15,7 @@ interface LegalPageShellProps {
   metadata: LegalPageMetadata;
   content: string;
   headings: HeadingItem[];
-  locale: string;
+  locale: Locale;
   schemaType: "WebPage" | "Article";
   /** Site-relative path (e.g. "/oem-wholesale"); enables BreadcrumbList output. */
   pagePath: string;
@@ -23,7 +23,7 @@ interface LegalPageShellProps {
 
 export interface ShellSchemaInput {
   metadata: LegalPageMetadata;
-  locale: string;
+  locale: Locale;
   schemaType: LegalPageShellProps["schemaType"];
   pageUrl: string;
 }
@@ -38,7 +38,7 @@ async function buildShellArticleSchema(
   });
   const modifiedAt = metadata.updatedAt ?? metadata.lastReviewed;
 
-  return generateArticleData(tSchema, locale as Locale, {
+  return generateArticleData(tSchema, locale, {
     title: metadata.seo?.title ?? metadata.title,
     description: metadata.seo?.description ?? metadata.description ?? "",
     ...(metadata.author ? { author: metadata.author } : {}),
@@ -103,7 +103,7 @@ export async function LegalPageShell({
 
   return (
     <>
-      <JsonLdGraphScript locale={locale as Locale} data={schemas} />
+      <JsonLdGraphScript locale={locale} data={schemas} />
 
       <div
         className={

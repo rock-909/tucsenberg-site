@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { routing, type Locale } from "@/i18n/routing-config";
 
 export function isLocale(input: string): input is Locale {
@@ -6,7 +7,7 @@ export function isLocale(input: string): input is Locale {
 }
 
 export function coerceLocale(input: string | null | undefined): Locale {
-  return input && isLocale(input) ? input : (routing.defaultLocale as Locale);
+  return input && isLocale(input) ? input : LOCALES_CONFIG.defaultLocale;
 }
 
 /**

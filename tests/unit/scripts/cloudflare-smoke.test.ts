@@ -96,12 +96,20 @@ function createDeployedFetchMock(
           "/contact",
           "/request-quote",
           "/api/health",
+          "/.well-known/security.txt",
         ].includes(pathname)
       ) {
         return response(200, "healthy deployed page");
       }
 
-      if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
+      if (
+        [
+          "/zh",
+          "/zh/contact",
+          "/invalid/contact",
+          "/security-policy.txt",
+        ].includes(pathname)
+      ) {
         return response(404, "not found");
       }
 
@@ -175,6 +183,7 @@ function listenForDeployedSmoke(): Promise<{
           "/contact",
           "/request-quote",
           "/api/health",
+          "/.well-known/security.txt",
         ].includes(pathname)
       ) {
         serverResponse.writeHead(200, { "content-type": "text/plain" });
@@ -182,7 +191,14 @@ function listenForDeployedSmoke(): Promise<{
         return;
       }
 
-      if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
+      if (
+        [
+          "/zh",
+          "/zh/contact",
+          "/invalid/contact",
+          "/security-policy.txt",
+        ].includes(pathname)
+      ) {
         serverResponse.writeHead(404, { "content-type": "text/plain" });
         serverResponse.end("not found");
         return;
@@ -543,6 +559,8 @@ describe("deployed smoke", () => {
       "/api/health",
       "/zh",
       "/zh/contact",
+      "/.well-known/security.txt",
+      "/security-policy.txt",
       "/downloads/spec-sheet-tb-bw.pdf",
     ]);
     expect(
@@ -615,6 +633,8 @@ describe("deployed smoke", () => {
         "/api/health",
         "/zh",
         "/zh/contact",
+        "/.well-known/security.txt",
+        "/security-policy.txt",
         "/downloads/spec-sheet-tb-bw.pdf",
       ].sort(),
     );
