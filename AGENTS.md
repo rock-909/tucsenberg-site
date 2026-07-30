@@ -1,30 +1,16 @@
 # AGENTS.md
 
-## 项目
-
-- Tucsenberg 防洪挡板英文 B2B 官网，用于产品展示、规格比较、PDF 下载和 OEM / 批发询盘。
-- Next.js App Router，部署到 Cloudflare，使用 OpenNext。
-- 当前只发布英文，但必须保留多语言能力；用户可见文案使用翻译 key。
-
-## 沟通
-
-- 默认使用简体中文。
-- 面向业主说明业务影响，避免不必要的技术术语。
+Tucsenberg 防洪挡板英文 B2B 官网，使用 Next.js App Router 和
+Cloudflare/OpenNext，服务产品发现、PDF 下载和 OEM / 批发询盘。
 
 ## 已知约束
 
-- `pnpm build`、`pnpm website:build:cf` 和 Playwright webServer 都会写
+- `pnpm build`、`pnpm website:build:cf` 和 Playwright webServer 共用
   `.next`，不得并行运行。
-- `pnpm website:lighthouse` 使用独立的 `.next-lighthouse` 和 4173 端口。
-- `src/lib/content-manifest.generated.ts` 是生成文件；使用
-  `node scripts/starter-checks.js content-manifest` 更新。
-- `RUN_FAST_PUSH=1` 会跳过完整构建、架构检查、依赖安全审计和死导出扫描。
-  PR CI 不运行依赖安全审计，只有每周任务兜底。
-- 根 `plans/` 只存放当前未完成的 Superpowers 过程文件，不是项目事实来源。
 
 ## Rules
 
-Claude Code 按 `paths:` 自动加载；其他编码 agent 按下表读取对应 Rule。
+`.claude/rules/*.md` 的 `paths:` 是适用范围的权威；下表供其他编码工具查找。
 
 | 范围 | Rule |
 | --- | --- |
@@ -40,12 +26,8 @@ Claude Code 按 `paths:` 自动加载；其他编码 agent 按下表读取对应
 
 ## 验证
 
-- 使用能证明改动的最小验证；可用脚本以 `pnpm run` 为准。
-- Cloudflare / OpenNext 改动：依次运行 `pnpm build`、
-  `pnpm website:build:cf`。
-- 大范围本地检查：`pnpm website:check`。
-- 上线相关改动：按 `docs/正式上线标准.md` 验证，再运行
-  `pnpm release:verify`。
+- 上线工作按 `docs/正式上线标准.md` 分层验证；`pnpm release:verify`
+  只证明 release lane，不等于正式部署或业务上线。
 
 ## 依赖文档
 
@@ -56,5 +38,3 @@ Claude Code 按 `paths:` 自动加载；其他编码 agent 按下表读取对应
 Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 
 <!-- END:nextjs-agent-rules -->
-
-其他依赖优先读取当前锁定版本的本地文档，其次查官方文档。

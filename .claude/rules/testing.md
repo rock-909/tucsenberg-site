@@ -28,6 +28,10 @@ that behavior breaks.
 - Exercise the real subject rather than a mock that recreates its behavior.
 - Use expected values independent from the value under test.
 - Parse structured input as structured data instead of matching substrings.
+- Assert complete sequences when order or count matters; do not inspect only the
+  first and last state.
+- Validate input types before coercion; normalization must not hide malformed
+  configuration.
 - Cover no-JS, responsive, locale, or failure branches only when they carry
   distinct required behavior.
 - Do not protect exact prose, file layout, counts, deleted names, or historical
