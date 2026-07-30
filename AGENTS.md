@@ -5,7 +5,6 @@
 - Tucsenberg 防洪挡板英文 B2B 官网，用于产品展示、规格比较、PDF 下载和 OEM / 批发询盘。
 - Next.js App Router，部署到 Cloudflare，使用 OpenNext。
 - 当前只发布英文，但必须保留多语言能力；用户可见文案使用翻译 key。
-- 通用 starter 的 profile、旧 blog 和物料化流程已经退役，不得恢复。
 
 ## 沟通
 
@@ -25,7 +24,7 @@
 
 ## Rules
 
-修改文件前读取匹配的 `.claude/rules/*.md`；其 `paths:` 是适用范围的权威。
+Claude Code 按 `paths:` 自动加载；其他编码 agent 按下表读取对应 Rule。
 
 | 范围 | Rule |
 | --- | --- |
@@ -58,13 +57,4 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 <!-- END:nextjs-agent-rules -->
 
-其他依赖使用当前锁定版本的本地文档或官方文档确认 API。
-
-## 硬性约束
-
-- GitHub Flow；`main` 是唯一长期分支，改动通过 pull request 合并。
-- 优先修复缺陷成立的根因，不用局部补丁掩盖同类问题。
-- 测试和 gate 保护真实行为，不保护固定文案、文件结构、历史名称、数量或其他时间点快照。
-- 不给 `AGENTS.md` 或 `CLAUDE.md` 添加内容断言；在行为发生处验证对应约束。
-- UI 优先复用 `src/components/ui/*`；涉及组件治理时运行
-  `pnpm component:check`。
+其他依赖优先读取当前锁定版本的本地文档，其次查官方文档。
