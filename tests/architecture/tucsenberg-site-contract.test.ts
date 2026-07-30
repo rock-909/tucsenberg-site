@@ -72,12 +72,17 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /demo starter/iu,
   /\byour-\w+@/iu,
 ] as const;
+// 加 `.css` 的理由：`globals.css` 的注释里挂过启动器的名字，撑了整轮退役没被
+// 任何门禁看见——公开文案的扫描只读上面这五种扩展名，`.css` 在射程外。样式表
+// 不写买家文案，但它写注释，而"这个站不叫这个名字"是对整棵源码树成立的，不是
+// 只对能渲染出文字的文件成立。
 const PUBLIC_SOURCE_EXTENSIONS = new Set([
   ".ts",
   ".tsx",
   ".json",
   ".md",
   ".mdx",
+  ".css",
 ]);
 const EXCLUDED_PATH_SEGMENTS = new Set(["__tests__", "tests", "test"]);
 // 都是「这个站不能这样说」的现行内容政策，不是启动器残留的字符串。前六条是没有
@@ -87,8 +92,21 @@ const EXCLUDED_PATH_SEGMENTS = new Set(["__tests__", "tests", "test"]);
 // 报价一律走询盘，公开文案里冒出价格在哪个文件都是同一件事，没有理由只在首页
 // 那一个文件里管。
 //
-// 它认的是「货币符号后面跟数字」，不是「价格」。`USD 199`、`199 dollars`、
-// `199 元` 它都不认。要拦那些得另写规则，别把这条读成价格全覆盖。
+// 价格拦两种写法。符号式（`$199`）原来就有；文字式（`USD 199`、`199 dollars`、
+// `199 元`）是后补的，因为绕开符号规则只要不打符号就行，而买家看到的是同一件事。
+//
+// 刻意不收 `pounds`：它同时是重量单位。这个站现在通篇用 kg，但真要写 "50 pounds"
+// 是一句正当的产品参数，规则不该逼人改写真话。英镑价格由 `£` 和 `GBP` 两条接住。
+//
+// 这三条也不是「价格」的完整定义。已知抓不到的：全角数字（`１９９ 元`）、拼写出
+// 来的金额（`one ninety-nine`）、`199/unit` 这种没有货币词的、以及 `dollars` 前面
+// 挂了别的限定词（`199 Canadian dollars`；`US dollars` 已经收了）。别把这几条读成
+// 价格全覆盖——真要全覆盖得改成审查人工判断，不是再叠正则。
+//
+// 启动器身份串（最后四条）本来只有 `content-readiness.js` 的 `starter-identity`
+// 规则在管，那条默认 warning，只有 `--strict-client-launch` 才升 error，而那个
+// 开关只在生产部署 workflow 里出现。也就是说：这些字符串留在源码里不会让任何
+// 一个 pull request 变红，一路撑到上线前才有人拦。搬到这里以后每个 PR 都硬失败。
 const FORBIDDEN_PUBLIC_PATTERNS = [
   /\bWestern\b/iu,
   /\btariff\b/iu,
@@ -98,7 +116,24 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /\bFEMA\b/iu,
   /keeps your house dry/iu,
   /support, or partnership opportunities/iu,
-  /[$€£]\s*\d/u,
+  /[$€£¥￥＄]\s*\d/u,
+  /\b(?:USD|EUR|GBP|RMB|CNY)\s*\d/iu,
+  /\d\s*dollars?\b/iu,
+  // 拆成独立一条、而且用 `\s+` 不用 `\s*`：写成
+  // `\d\s*(?:US\s*)?dollars?` 会被 eslint 的 security/detect-unsafe-regex
+  // 判成有回溯风险，而 `US` 只在中间出现，上一条的 `\d\s*dollars` 抓不到
+  // `199 US dollars`。
+  /\d\s+US\s+dollars?\b/iu,
+  /\d\s*(?:euros?|yuan|USD|EUR|GBP|RMB|CNY)\b/iu,
+  /\d\s*元/u,
+  // 分隔符收 `[\s_-]{0,3}`（有界，不会被判回溯风险）：`Showcase-Website-Starter`
+  // 和 `Showcase _ Website _ Starter` 跟带空格的是同一个名字，拦一种放一种没有
+  // 意义。抓不到的是拆成两个字符串拼接、或者塞 HTML 实体的写法——那已经不是
+  // 「没注意留下了」，是有人在绕，文本扫描解决不了，交给审查。
+  /showcase[\s_-]{0,3}website[\s_-]{0,3}starter/iu,
+  /showcase[\s_-]{0,3}starter/iu,
+  /example[\s_-]{0,3}showcase[\s_-]{0,3}company/iu,
+  /public[\s_-]{0,3}demo[\s_-]{0,3}starter/iu,
 ];
 const REQUEST_INTENT_PHRASES = [
   /request\s+a\s+quotes?/giu,
@@ -478,6 +513,21 @@ function getPublicSourceFiles(): string[] {
   return PUBLIC_SOURCE_ROOTS.flatMap((root) => walkPublicSourceFiles(root));
 }
 
+/**
+ * 买家文案面：公开源码文件里去掉样式表。
+ *
+ * `.css` 是为了扫「这个站不叫这个名字」这类品牌串才进枚举的，样式表本身不向买家
+ * 输出文案。下面三条一致性断言（邮箱、注册地址、回复时效）读的是原始文件文本，
+ * 让 CSS 进去有两个后果：注释里写个地址或时数就能造成假红，更糟的是回复时效那条
+ * 断的是「全站只有一个时数」——真实文案里的时数全被删掉、只剩一条 CSS 注释里的
+ * 话，集合大小仍是 1，测试照绿。所以这三条只看真正写文案的文件。
+ */
+function getBuyerCopyFiles(): string[] {
+  return getPublicSourceFiles().filter(
+    (filePath) => extname(filePath) !== ".css",
+  );
+}
+
 function walkPublicSourceFiles(dir: string, results: string[] = []): string[] {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test scans fixed repo-local public source roots
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -828,12 +878,26 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
 
     expect(scannedFiles).toContain("src/lib/contact/getContactCopy.ts");
+
+    // 射程本身要钉住，否则缩小它不会让任何断言变红：下面那些禁用文案的循环只会
+    // 少读几个文件，一条都不会失败。`globals.css` 的启动器注释就是这么撑过整轮
+    // 退役的。
+    //
+    // 钉的是「至少有一个 .css 进了枚举」，不是某个具体路径：全局样式表将来搬到
+    // `src/styles/globals.css` 是一次正当迁移，不该因此变红。
+    expect(
+      scannedFiles.filter((filePath) => filePath.endsWith(".css")),
+      "no .css reached the scan",
+    ).not.toEqual([]);
+    // 根收窄同样是静默缩小：把 `src` 换成 `src/app` 后每个根仍有文件、上面几条
+    // 也仍然通过，但 `src/components` 和 `src/config` 已经悄悄退出扫描。
+    expect(PUBLIC_SOURCE_ROOTS).toEqual(["src", "content", "messages"]);
   });
 
   it("keeps misleading inquiry quote-time promises out of live owner copy", () => {
     const offenders: string[] = [];
 
-    for (const filePath of getPublicSourceFiles()) {
+    for (const filePath of getBuyerCopyFiles()) {
       const source = readRepoFile(filePath);
 
       for (const copyUnit of collectOwnerCopyUnits(source, filePath)) {
@@ -896,7 +960,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
     const configured = getPublicContactEmail();
     const offenders: string[] = [];
 
-    for (const filePath of getPublicSourceFiles()) {
+    for (const filePath of getBuyerCopyFiles()) {
       for (const found of readRepoFile(filePath).matchAll(
         TUCSENBERG_EMAIL_PATTERN,
       )) {
@@ -911,7 +975,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("states one registered address across every buyer-visible surface", () => {
     const offenders: string[] = [];
 
-    for (const filePath of getPublicSourceFiles()) {
+    for (const filePath of getBuyerCopyFiles()) {
       const source = readRepoFile(filePath);
 
       if (
@@ -928,7 +992,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("states one reply window across every buyer-visible surface", () => {
     const windows = new Map<string, string[]>();
 
-    for (const filePath of getPublicSourceFiles()) {
+    for (const filePath of getBuyerCopyFiles()) {
       for (const found of readRepoFile(filePath).matchAll(
         REPLY_WINDOW_PATTERN,
       )) {
@@ -938,5 +1002,11 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
 
     expect(windows.size, `reply windows found: ${[...windows.keys()]}`).toBe(1);
+    // 「只有一个时数」自己不够：真实文案里的时数全被删掉、只剩某个边角文件里
+    // 写着一处，集合大小仍然是 1，这条照绿。所以还要求它出现在买家一定会读到
+    // 的两个面上——联系页和在用的消息包。
+    const [carriers] = [...windows.values()];
+    expect(carriers).toContain("content/pages/en/contact.mdx");
+    expect(carriers).toContain("messages/profiles/catalog/en/messages.json");
   });
 });
