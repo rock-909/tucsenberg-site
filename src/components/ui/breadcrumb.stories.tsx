@@ -76,7 +76,7 @@ export const LongChineseContent: Story = {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="#">可替换内容中心</BreadcrumbLink>
+            <BreadcrumbLink href="#">产品资料中心</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

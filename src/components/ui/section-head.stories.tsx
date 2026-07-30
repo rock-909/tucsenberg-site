@@ -12,7 +12,7 @@ const meta = {
   args: {
     title: "Featured resources",
     subtitle:
-      "Use this section to introduce a replaceable group of cards, links, or proof points.",
+      "Use this section to introduce a group of cards, links, or proof points.",
   },
 } satisfies Meta<typeof SectionHead>;
 
@@ -44,7 +44,7 @@ export const LongChineseContent: Story = {
   render: () => (
     <div className="w-[520px]">
       <SectionHead
-        title="可替换页面模块标题"
+        title="页面模块标题"
         subtitle="这里用于检查较长中文说明在 section 标题区域中的换行、间距和按钮对齐表现。"
         action={<Button size="sm">查看说明</Button>}
       />

@@ -34,8 +34,7 @@ export const Default: Story = {
         <SheetHeader>
           <SheetTitle>Project details</SheetTitle>
           <SheetDescription>
-            Review the starter content and replace it with the real project
-            scope before publishing.
+            Review the product lines and send the openings you need to cover.
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 text-sm text-muted-foreground">

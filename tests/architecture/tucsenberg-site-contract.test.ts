@@ -736,6 +736,60 @@ describe("Tucsenberg Phase 1 site contract", () => {
       );
       expect(overview.title, messageFile).toBe("Flood Barrier Product Lines");
       expect(Object.keys(markets), messageFile).toEqual(TARGET_PRODUCT_SLUGS);
+
+      // 产品线和买家类别的标题手写钉在这里。首页测试渲染时是从消息包取值比对
+      // 的，那只证明 key 接线正确，改文案它跟着改；逐字真值必须有一处手写，
+      // 就是这里。
+      //
+      // 下面钉的是消息文件里的书写顺序，不是页面上卡片的先后。决定卡片先后的是
+      // 生产配置 `SINGLE_SITE_HOME_PRODUCT_LINES`，它的顺序在
+      // `src/config/__tests__/single-site-page-expression.test.ts` 的
+      // "keeps homepage semantic tuples aligned with the live page runtime"
+      // 里手写钉着（把配置里两项对调会让那条变红，已验证）。两处各钉一件事。
+      const productLines = getObject(
+        home.productLines,
+        `${messageFile} home.productLines`,
+      );
+      const productLineItems = getObject(
+        productLines.items,
+        `${messageFile} home.productLines.items`,
+      );
+      const buyerSegments = getObject(
+        home.buyerSegments,
+        `${messageFile} home.buyerSegments`,
+      );
+      const buyerSegmentItems = getObject(
+        buyerSegments.items,
+        `${messageFile} home.buyerSegments.items`,
+      );
+
+      expect(
+        Object.entries(productLineItems).map(([key, item]) => [
+          key,
+          getObject(item, `${messageFile} home.productLines.items.${key}`)
+            .title,
+        ]),
+        messageFile,
+      ).toEqual([
+        ["absFloodBarriers", "ABS Interlocking Boxwall — TB-BW series"],
+        ["aluminumFloodGates", "Aluminum Flood Gates — TB-AG series"],
+        ["absorbentFloodBags", "Absorbent Flood Bags — TB-FB series"],
+        ["floodTubeDams", "Water & Air-Filled Tube Dams — TB-TD series"],
+        ["frpFloodBarriers", "FRP Composite Planks — TB-CP series"],
+      ]);
+      expect(
+        Object.entries(buyerSegmentItems).map(([key, item]) => [
+          key,
+          getObject(item, `${messageFile} home.buyerSegments.items.${key}`)
+            .title,
+        ]),
+        messageFile,
+      ).toEqual([
+        ["dealersDistributors", "Dealers & Distributors"],
+        ["importersBrands", "Importers & Brands (OEM)"],
+        ["contractorsProjects", "Contractors & Projects"],
+        ["smallBusinessBuyers", "Small Business Buyers"],
+      ]);
     }
   });
 

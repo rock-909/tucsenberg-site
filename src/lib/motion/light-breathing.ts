@@ -1,7 +1,8 @@
 /**
- * Shared motion tokens for the showcase starter "light breathing" tier.
+ * 「轻呼吸」这一档的共享动效 token。
  *
- * Calm, short, non-bouncy — aligned with tweakcn Twitter flat presentation.
+ * 安静、短、不弹跳，配合 tweakcn Twitter 那套扁平表现。弹簧缓动是明令禁止的，
+ * 见 `DESIGN.md` 的 Don't 清单。
  */
 
 const LIGHT_BREATHING_EASE_X1 = 0.25;

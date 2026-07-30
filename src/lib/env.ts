@@ -92,7 +92,11 @@ export const clientEnvSchema = {
   NEXT_PUBLIC_SITE_URL: z.url().optional(),
   NEXT_PUBLIC_WEBSITE_BASE_URL: z.url().optional(),
   NEXT_PUBLIC_WEBSITE_SECONDARY_BASE_URL: z.url().optional(),
-  NEXT_PUBLIC_APP_NAME: z.string().default("Example Showcase Company"),
+  // 默认值必须是这个站自己的名字。`.env.example` 已经写了 Tucsenberg，但部署
+  // 配置（wrangler.jsonc、CI workflow）都没设这个变量，所以线上取到的就是这里的
+  // 默认值。留一个启动器时代的公司名在这儿，等于给未来任何一个读它的地方埋了
+  // 别人的品牌。
+  NEXT_PUBLIC_APP_NAME: z.string().default("Tucsenberg"),
   NEXT_PUBLIC_APP_VERSION: z.string().default("1.0.0"),
   NEXT_PUBLIC_SITE_KEY: z.string().default("tucsenberg"),
 

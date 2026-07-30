@@ -75,7 +75,6 @@ export interface BusinessStats {
   exportCountries: number;
   annualCapacity?: string;
   clientsServed?: number;
-  exampleFootprint?: number;
   onTimeDeliveryRate?: number;
 }
 

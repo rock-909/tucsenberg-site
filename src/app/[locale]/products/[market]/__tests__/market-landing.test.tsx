@@ -8,7 +8,7 @@ const mockCatalogBreadcrumb = vi.hoisted(() => vi.fn());
 const mockJsonLdGraphScript = vi.hoisted(() => vi.fn());
 const mockPathsConfig = vi.hoisted(() => ({
   SITE_CONFIG: {
-    name: "Example Showcase Company",
+    name: "Tucsenberg",
     baseUrl: "https://www.example.com",
     brandAssets: {
       productPhotos: {
@@ -16,8 +16,8 @@ const mockPathsConfig = vi.hoisted(() => ({
       },
     },
     seo: {
-      defaultTitle: "Example Showcase Company",
-      defaultDescription: "Replaceable showcase catalog example",
+      defaultTitle: "Tucsenberg",
+      defaultDescription: "Tucsenberg flood barrier catalog",
     },
   },
   LOCALES_CONFIG: {

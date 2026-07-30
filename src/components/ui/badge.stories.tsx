@@ -37,7 +37,7 @@ export const Variants: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <Badge>ISO 9001</Badge>
-      <Badge variant="secondary">Starter ready</Badge>
+      <Badge variant="secondary">In stock</Badge>
       <Badge variant="success">Certified</Badge>
       <Badge variant="warning">Applying</Badge>
       <Badge variant="outline">UL listed</Badge>

@@ -11,9 +11,9 @@ const manyItems = [
   ...sectionStoryFaqItems,
   {
     key: "workflow",
-    question: "Who owns the replacement workflow?",
+    question: "Who confirms the spec before production starts?",
     answer:
-      "The project owner confirms content, proof, routes, and launch fit.",
+      "You approve the paid sample and the spec sheet; both are written into the quotation.",
   },
   {
     key: "storybook",
