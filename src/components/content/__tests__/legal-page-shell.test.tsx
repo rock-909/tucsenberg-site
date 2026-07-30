@@ -34,11 +34,18 @@ vi.mock("next-intl/server", () => ({
   }),
 }));
 
+const REQUIRED_LEGAL_METADATA = {
+  layout: "legal",
+  showToc: true,
+  lastReviewed: "2024-01-01",
+} as const;
+
 describe("LegalPageShell structured data", () => {
   it("Given privacy legal metadata, When the shell renders, Then WebPage JSON-LD uses the page URL graph", async () => {
     const pageUrl = "https://www.example.com/privacy";
     const schema = await buildShellPageSchema({
       metadata: {
+        ...REQUIRED_LEGAL_METADATA,
         title: "Privacy Policy",
         slug: "privacy",
         publishedAt: "2024-01-01",
@@ -68,6 +75,7 @@ describe("LegalPageShell structured data", () => {
     const pageUrl = "https://www.example.com/terms";
     const schema = await buildShellPageSchema({
       metadata: {
+        ...REQUIRED_LEGAL_METADATA,
         title: "Terms of Service",
         slug: "terms",
         publishedAt: "2024-01-01",
@@ -92,6 +100,7 @@ describe("LegalPageShell structured data", () => {
   it("Given article metadata, When the shell renders, Then author is Organization", async () => {
     const schema = await buildShellPageSchema({
       metadata: {
+        ...REQUIRED_LEGAL_METADATA,
         title: "Materials Guide",
         slug: "materials-guide",
         publishedAt: "2026-01-01",

@@ -29,7 +29,13 @@ const IMPORT_STATEMENT = /import[^;]*?from\s*["']([^"']+)["']/g;
 
 function importsLocaleFromRetiringModule(source: string): boolean {
   for (const match of source.matchAll(IMPORT_STATEMENT)) {
-    const [statement, sourcePath] = match;
+    const statement = match[0];
+    const sourcePath = match[1];
+
+    if (!sourcePath) {
+      continue;
+    }
+
     if (
       RETIRING_LOCALE_SOURCES.has(sourcePath) &&
       /\bLocale\b/.test(statement)

@@ -36,7 +36,9 @@ function extractDirectPnpmScript(command: string): string | null {
 
 describe("release proof manifest contract", () => {
   it("keeps manifest steps uniquely identified and on known proof lanes", () => {
-    const stepIds = RELEASE_PROOF_MANIFEST.steps.map((step) => step.id);
+    const stepIds = RELEASE_PROOF_MANIFEST.steps.map(
+      (step: { id: string }) => step.id,
+    );
 
     expect(RELEASE_PROOF_MANIFEST.version).toBe(1);
     expect(RELEASE_PROOF_MANIFEST.steps.length).toBeGreaterThan(0);
@@ -147,7 +149,7 @@ describe("package proof command surface", () => {
   // 发布序列引用的 Node 脚本必须真实存在。
   it("keeps every release sequence node script pointing at a real file", () => {
     const nodeScripts = RELEASE_PROOF_SEQUENCE.flatMap(
-      (command) => command.match(/\bnode\s+([\w./-]+)/u)?.[1] ?? [],
+      (command: string) => command.match(/\bnode\s+([\w./-]+)/u)?.[1] ?? [],
     );
 
     expect(nodeScripts.length).toBeGreaterThan(0);
@@ -158,11 +160,11 @@ describe("package proof command surface", () => {
 
   // Vitest 会把不存在的路径当过滤器，因此显式确认发布序列中的测试仍存在。
   it("keeps every release sequence vitest path pointing at a real file", () => {
-    const testPaths = RELEASE_PROOF_SEQUENCE.flatMap((command) =>
+    const testPaths = RELEASE_PROOF_SEQUENCE.flatMap((command: string) =>
       command.includes("vitest run")
         ? command
             .split(/\s+/u)
-            .filter((token) => /\.test\.[jt]sx?$/u.test(token))
+            .filter((token: string) => /\.test\.[jt]sx?$/u.test(token))
         : [],
     );
 

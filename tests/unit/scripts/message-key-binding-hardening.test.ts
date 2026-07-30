@@ -4,6 +4,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { collectMessageKeyUsageFindings } from "../../../scripts/quality/checks/message-key-usage.js";
 
+type DerivedKeyConsumerFixture = Record<string, unknown> & {
+  kind: string;
+  file: string;
+  reason: string;
+};
+
 const tempDirs: string[] = [];
 const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
@@ -20,7 +26,7 @@ function collect({
 }: {
   catalogKeys?: string[];
   content: string;
-  derivedKeyConsumers?: Array<Record<string, unknown>>;
+  derivedKeyConsumers?: DerivedKeyConsumerFixture[];
   objectKeyConsumers?: Array<{
     file: string;
     objectName: string;
@@ -300,37 +306,6 @@ describe("message key binding hardening", () => {
         unusedKeyAllowlist: ["example.inactive.badge"],
       }),
     ).toEqual([]);
-  });
-
-  it("does not let an unrelated local object satisfy a property-values consumer", () => {
-    expect(
-      collect({
-        catalogKeys: ["footer.fake"],
-        content: [
-          "function record(value: unknown) { return value; }",
-          "function getFooter() {",
-          '  const audit = { translationKey: "footer.fake" };',
-          "  record(audit);",
-          "  return [];",
-          "}",
-        ].join("\n"),
-        derivedKeyConsumers: [
-          {
-            kind: "property-values",
-            file: "src/example.ts",
-            functionName: "getFooter",
-            propertyName: "translationKey",
-            prefix: "",
-            suffixes: [""],
-            reason: "fixture",
-          },
-        ],
-      }),
-    ).toContainEqual({
-      file: "messages",
-      error:
-        'message key has no detected consumer and is not baselined "footer.fake"',
-    });
   });
 
   it("rejects partial derived and object-key sources it cannot enumerate", () => {

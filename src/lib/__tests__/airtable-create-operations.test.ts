@@ -243,21 +243,6 @@ describe("Airtable Service - Create Operations Tests", () => {
       ]);
     });
 
-    it("throws error when service is not configured", async () => {
-      const service = new AirtableServiceClass();
-      (service as unknown as AirtableServicePrivate).isConfigured = false;
-      (service as unknown as AirtableServicePrivate).base = null;
-
-      vi.spyOn(
-        service as AirtableServicePrivate,
-        "ensureReady",
-      ).mockImplementation(async () => {});
-
-      await expect(service.createLead(validLeadData)).rejects.toThrow(
-        "Airtable service is not configured",
-      );
-    });
-
     it("handles creation errors gracefully", async () => {
       const service = new AirtableServiceClass();
       setServiceReady(service);

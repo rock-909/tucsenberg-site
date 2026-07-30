@@ -18,10 +18,7 @@ const { mockGenerateMetadataForPath, mockJsonLdGraphScript, capturedInquiry } =
 vi.mock("next-intl/server", async () => {
   const { getComposedMessages } = await import("@/lib/i18n/composed-messages");
   const enMessages = getComposedMessages("en") as Record<string, unknown>;
-  const requestQuote = enMessages.requestQuote as Record<
-    Record<string, unknown>,
-    unknown
-  >;
+  const requestQuote = enMessages.requestQuote as Record<string, unknown>;
   const inquiryForm = enMessages.inquiry as { form: Record<string, unknown> };
 
   function getNestedString(
@@ -204,7 +201,6 @@ describe("RequestQuotePage", () => {
       kind: "general-context",
     });
 
-    capturedInquiry.latest = null;
     await renderPageWith({
       catalogProductId: ["abs-flood-barriers", "frp-flood-barriers"],
     });

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocaleParam } from "@/app/[locale]/generate-static-params";
-import TermsPage, { generateMetadata, generateStaticParams } from "../page";
+import TermsPage, { generateMetadata } from "../page";
 
 const { mockLoadLegalPage, mockGenerateMetadataForPath } = vi.hoisted(() => ({
   mockLoadLegalPage: vi.fn(),
@@ -36,10 +36,6 @@ vi.mock("@/components/content/legal-page-shell", () => ({
   ),
 }));
 
-vi.mock("@/app/[locale]/generate-static-params", () => ({
-  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
-}));
-
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
@@ -72,14 +68,6 @@ describe("TermsPage", () => {
     mockGenerateMetadataForPath.mockReturnValue({
       title: "Terms SEO",
       description: "Terms SEO description",
-    });
-  });
-
-  describe("generateStaticParams", () => {
-    it("should return params for all locales", () => {
-      const params = generateStaticParams();
-
-      expect(params).toEqual([{ locale: "en" }, { locale: "zh" }]);
     });
   });
 

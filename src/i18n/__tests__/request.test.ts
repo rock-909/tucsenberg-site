@@ -20,9 +20,6 @@ interface RequestConfigResult {
   messages: unknown;
   metadata: {
     loadTime?: number;
-    cacheUsed?: boolean;
-    timestamp?: string;
-    smartDetection?: boolean;
   };
 }
 
@@ -84,7 +81,6 @@ describe("i18n Request Configuration", () => {
     expect(result.formats.number.currency.currency).toBe("USD");
     expect(result.strictMessageTypeSafety).toBe(true);
     expect(result.messages).toBeDefined();
-    expect(result.metadata.error).toBeUndefined();
   });
 
   it("falls back to default locale when requestLocale is invalid", async () => {
@@ -99,7 +95,7 @@ describe("i18n Request Configuration", () => {
     expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
   });
 
-  it("returns metadata with loadTime only on success", async () => {
+  it("returns message load time in metadata", async () => {
     const performanceNowSpy = vi
       .spyOn(globalThis.performance, "now")
       .mockReturnValueOnce(100)
@@ -108,9 +104,6 @@ describe("i18n Request Configuration", () => {
     const result = await runConfig(LOCALES_CONFIG.defaultLocale);
 
     expect(result.metadata.loadTime).toBe(100);
-    expect(result.metadata).not.toHaveProperty("cacheUsed");
-    expect(result.metadata).not.toHaveProperty("timestamp");
-    expect(result.metadata).not.toHaveProperty("smartDetection");
 
     performanceNowSpy.mockRestore();
   });

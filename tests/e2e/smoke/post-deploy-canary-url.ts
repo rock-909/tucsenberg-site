@@ -13,6 +13,7 @@ function isPrivateIpv4(hostname: string): boolean {
   }
 
   const [first, second] = parts;
+  if (first === undefined || second === undefined) return false;
 
   return (
     first === 10 ||

@@ -93,7 +93,7 @@ function postReport(
   report: unknown,
   headers?: Record<string, string>,
 ): Promise<Response> {
-  return POST(postRequest(JSON.stringify(report), headers));
+  return Promise.resolve(POST(postRequest(JSON.stringify(report), headers)));
 }
 
 function reportWith(overrides: Record<string, unknown>) {

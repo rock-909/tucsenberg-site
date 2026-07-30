@@ -45,10 +45,6 @@ vi.mock("@/components/content/legal-page-shell", () => ({
   ),
 }));
 
-vi.mock("@/app/[locale]/generate-static-params", () => ({
-  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
-}));
-
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));

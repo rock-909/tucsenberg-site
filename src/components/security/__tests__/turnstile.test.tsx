@@ -27,7 +27,9 @@ function toTurnstileWidgetLabels(
 }
 
 function renderTurnstileWidget(
-  props: React.ComponentProps<typeof TurnstileWidget> = {},
+  props: Omit<React.ComponentProps<typeof TurnstileWidget>, "labels"> & {
+    labels?: React.ComponentProps<typeof TurnstileWidget>["labels"];
+  } = {},
 ) {
   const { labels = toTurnstileWidgetLabels(defaultTestLabels), ...rest } =
     props;

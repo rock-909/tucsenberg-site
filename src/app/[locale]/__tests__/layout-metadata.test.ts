@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 
-const { mockSiteConfig, mockRouting } = vi.hoisted(() => ({
+const { mockSiteConfig } = vi.hoisted(() => ({
   mockSiteConfig: {
     name: "Test Site",
     seo: {
@@ -10,18 +10,10 @@ const { mockSiteConfig, mockRouting } = vi.hoisted(() => ({
       defaultDescription: "Default Description",
     },
   },
-  mockRouting: {
-    locales: ["en", "zh"],
-    defaultLocale: "en",
-  },
 }));
 
 vi.mock("@/config/paths", () => ({
   SITE_CONFIG: mockSiteConfig,
-}));
-
-vi.mock("@/i18n/routing-config", () => ({
-  routing: mockRouting,
 }));
 
 describe("Locale layout metadata", () => {

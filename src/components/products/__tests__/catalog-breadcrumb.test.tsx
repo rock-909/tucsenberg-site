@@ -20,10 +20,6 @@ vi.mock("next-intl/server", () => ({
 
 // Mock next-intl routing
 vi.mock("@/i18n/routing", () => ({
-  routing: {
-    locales: ["en", "zh"],
-    defaultLocale: "en",
-  },
   Link: ({
     href,
     children,
@@ -54,10 +50,6 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("@/config/paths", () => ({
-  LOCALES_CONFIG: {
-    locales: ["en", "zh"],
-    defaultLocale: "en",
-  },
   SITE_CONFIG: {
     baseUrl: "https://www.example.com",
   },
@@ -174,7 +166,20 @@ describe("CatalogBreadcrumb", () => {
     };
 
     const jsonLd = await buildCatalogBreadcrumbJsonLd({ market });
-    const urls = jsonLd.itemListElement.map((element) => String(element.item));
+    if (!Array.isArray(jsonLd.itemListElement)) {
+      throw new Error("Expected breadcrumb JSON-LD itemListElement array");
+    }
+    const urls = jsonLd.itemListElement.map((element) => {
+      if (
+        typeof element !== "object" ||
+        element === null ||
+        !("item" in element)
+      ) {
+        throw new Error("Expected breadcrumb JSON-LD ListItem with item URL");
+      }
+
+      return String(element.item);
+    });
 
     expect(urls).toEqual([
       "https://www.example.com/",

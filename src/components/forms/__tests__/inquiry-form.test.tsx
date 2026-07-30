@@ -105,13 +105,13 @@ describe("InquiryForm contract", () => {
     vi.unstubAllGlobals();
   });
 
-  it.each([
-    ["contact", "contact"] as const,
-    ["request-quote", "request-quote"] as const,
-  ])("renders the same three-field contract in %s mode", (source) => {
-    const { container, copy } = renderInquiryForm(source);
-    assertThreeFieldContract(container, copy);
-  });
+  it.each(["contact", "request-quote"] as const)(
+    "renders the same three-field contract in %s mode",
+    (source) => {
+      const { container, copy } = renderInquiryForm(source);
+      assertThreeFieldContract(container, copy);
+    },
+  );
 
   it("passes inquiry turnstile copy to LazyTurnstile", () => {
     const { copy } = renderInquiryForm("contact");

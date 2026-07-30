@@ -144,12 +144,24 @@ describe("Footer Component", () => {
 
   it("throws with the full message path when a footer config translation key is missing", () => {
     const incompleteMessages = structuredClone(composedMessages);
+    const footerMessages = incompleteMessages.footer;
+    if (
+      typeof footerMessages !== "object" ||
+      footerMessages === null ||
+      Array.isArray(footerMessages)
+    ) {
+      throw new Error("Expected footer messages to be an object");
+    }
+
     const sections = (
-      incompleteMessages.footer as Record<
-        string,
-        Record<string, Record<string, unknown>>
-      >
+      footerMessages as {
+        sections?: { navigation?: { title?: unknown } };
+      }
     ).sections;
+    if (!sections?.navigation) {
+      throw new Error("Expected footer.sections.navigation messages");
+    }
+
     delete sections.navigation.title;
 
     mockUseTranslations.mockImplementation(() =>

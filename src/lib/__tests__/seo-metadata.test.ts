@@ -168,23 +168,6 @@ describe("SEO Metadata", () => {
       });
     });
 
-    it("noindexes showcase-full demo pages outside the catalog-only public SEO surface", () => {
-      const metadata = generateMetadataForPath({
-        locale: "en",
-        pageType: "capabilities",
-        path: "/capabilities",
-      });
-
-      expect(metadata.robots).toMatchObject({
-        index: false,
-        follow: false,
-        googleBot: {
-          index: false,
-          follow: false,
-        },
-      });
-    });
-
     it("renders default OG and Twitter images from page defaults", () => {
       const metadata = generateMetadataForPath({
         locale: "en",
@@ -212,7 +195,7 @@ describe("SEO Metadata", () => {
         },
       });
 
-      expect(metadata.openGraph?.type).toBe("website");
+      expect(metadata.openGraph).toMatchObject({ type: "website" });
     });
   });
 

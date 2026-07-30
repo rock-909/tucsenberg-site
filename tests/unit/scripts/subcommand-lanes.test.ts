@@ -431,7 +431,7 @@ describe("the verdict fails closed", () => {
         unknown: [],
       }),
     ).toBe(false);
-    expect(spy.mock.calls[0][0]).toContain("cannot tell what this runs");
+    expect(spy.mock.calls[0]?.[0]).toContain("cannot tell what this runs");
     spy.mockRestore();
   });
 

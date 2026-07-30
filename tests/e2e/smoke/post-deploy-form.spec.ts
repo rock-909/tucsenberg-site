@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import {
   expect,
   test,
@@ -169,6 +170,8 @@ test.describe("Post-Deploy: Airtable Write Canary", () => {
       !baseId || !apiKey,
       "Missing AIRTABLE_BASE_ID or AIRTABLE_API_KEY",
     );
+    assert(baseId);
+    assert(apiKey);
 
     await waitForEditableInquiryForm(page);
     const { inquiryRequest, selectors } = await submitInquiryForm(

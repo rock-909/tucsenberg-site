@@ -273,6 +273,7 @@ const MESSAGE_DERIVED_KEY_CONSUMERS = [
   },
 ];
 
+/** @type {string[]} */
 const UNUSED_MESSAGE_KEYS = [];
 
 module.exports = {

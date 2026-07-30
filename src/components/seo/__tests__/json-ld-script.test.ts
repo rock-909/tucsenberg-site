@@ -146,12 +146,12 @@ describe("createJsonLdGraphData", () => {
       'script[type="application/ld+json"]',
     );
 
-    expect(script).not.toBeNull();
+    if (!script) throw new Error("Expected a JSON-LD script element");
     expect(script.tagName).toBe("SCRIPT");
     expect(script).toHaveAttribute("type", "application/ld+json");
-    expect(script?.innerHTML).toContain("\\u003c/script\\u003e");
-    expect(script?.innerHTML).not.toContain("</script>");
-    expect(script?.innerHTML).not.toContain("<script>");
+    expect(script.innerHTML).toContain("\\u003c/script\\u003e");
+    expect(script.innerHTML).not.toContain("</script>");
+    expect(script.innerHTML).not.toContain("<script>");
   });
 
   it("treats identity schema failures as a non-critical enhancement", async () => {

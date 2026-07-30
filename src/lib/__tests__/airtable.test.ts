@@ -38,9 +38,6 @@ const tableFactory: AirtableBaseLike["table"] = (_name) => {
 const mockBase = vi.fn(() => createMockBase(tableFactory));
 const mockConfigure = vi.fn();
 
-const _setServiceReady = (service: unknown) =>
-  configureServiceForTesting(service, createMockBase(tableFactory));
-
 interface MockAirtableEnv {
   AIRTABLE_API_KEY?: string;
   AIRTABLE_BASE_ID?: string;

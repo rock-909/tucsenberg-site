@@ -151,7 +151,12 @@ describe("HeroSection", () => {
     const proofList = screen.getByRole("list", {
       name: heroCopy.proofAriaLabel,
     });
-    const [firstProofItem] = within(proofList).getAllByRole("listitem");
+    const firstProofItem = within(proofList).getAllByRole("listitem")[0];
+    expect(firstProofItem).toBeDefined();
+    if (!firstProofItem) {
+      throw new Error("Expected hero proof panel to render at least one item");
+    }
+
     const firstProofValue = within(firstProofItem).getByText(
       heroCopy.proof.quoteSla,
     );

@@ -23,10 +23,6 @@ vi.mock("@/lib/seo-metadata", () => ({
   })),
 }));
 
-vi.mock("@/app/[locale]/generate-static-params", () => ({
-  generateLocaleStaticParams: () => [{ locale: "en" }, { locale: "zh" }],
-}));
-
 // next-intl/server (incl. setRequestLocale) is mocked globally in
 // src/test/setup.constants-and-i18n.ts; no local override needed here.
 
