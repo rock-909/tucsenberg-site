@@ -113,6 +113,36 @@ enabling the global flag.
 - Dependency removals must include the smallest proof that the current catalog
   site and related tooling still work.
 
+## Deleting something is not one edit
+
+Type-check and lint catch a deleted import. They do not catch the places that
+name the deleted thing as a string. The examples below were all found in review,
+not by any local command.
+
+Retiring twelve UI wrappers left the nine that were Client Components listed in
+`scripts/quality/config/client-boundary-budget.json`. `client-boundary.js` reports
+those as `stale-client-boundary` and CI runs it on every pull request, so the
+branch was carrying a guaranteed red. The same change left `.claude/rules/ui.md`
+and `DESIGN.md` telling the next agent to use components that no longer existed;
+`ui.md` was cleaned on that branch, and two further `DESIGN.md` mentions
+(`Input`/`Select` in a sizing note, `Dialog` in a modal guideline) survived until
+a later pass caught them. Stale prose outlives the obvious fix.
+
+After deleting a file, export, component, or config key, grep the repo for its
+name and check each hit's class:
+
+- JSON budgets, manifests, and allowlists under `scripts/quality/config/`
+- test path lists and Vitest include/exclude filters, which shrink silently
+  rather than failing
+- `.claude/rules/*.md`, `AGENTS.md`, `DESIGN.md`, and other docs an agent is
+  routed to read before touching that area
+- generated files that need regenerating rather than editing
+
+Then ask the separate question of whether a deleted guard was guarding something
+still true. A gate can be unreachable today (the wrapper it forbids no longer
+exists) while the constraint behind it is live, which means removing it disarms a
+future reintroduction. Keep the constraint; move it if its current home is wrong.
+
 ## Hard gates
 
 - TypeScript: zero errors. This gate covers production code only. `tsconfig.json`

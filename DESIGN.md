@@ -198,8 +198,8 @@ Use these as review references before changing runtime wrappers:
 - 40px for default controls;
 - 48px for large controls.
 
-These are review examples, not permission to silently change Button, Input,
-Select, Card, or global control sizing.
+These are review examples, not permission to silently change Button, Card, the
+native form controls, or global control sizing.
 
 ### Radius calibration
 
@@ -387,7 +387,7 @@ new animation dependencies without separate proof.
 - **Don't** 模板感千篇一律的卡片网格：同尺寸 + 同图标位置 + 同标题 + 同三行文字 × N。（毒点 #4。）
 - **Don't** **假冒高端**：黑金配色 + stock 商务握手图 + 空洞标语。Starter 的克制蓝灰路线和这种风格不兼容。
 - **Don't** 文案里用 **em-dash 或 `--`**。用逗号、冒号、分号、句号、括号。
-- **Don't** Modal 当第一直觉。先尝试 inline 展开 / 渐进式 / 抽屉。Sheet 适合移动端导航；Dialog 留给真的"阻塞性决策"。
+- **Don't** Modal 当第一直觉。先尝试 inline 展开 / 渐进式 / 抽屉。Sheet 适合移动端导航；站里现在没有 Dialog 组件，真需要"阻塞性决策"要专门建一个并说明为什么 inline 不行。
 - **Don't** 把业务文案（公司名、产品规格）写进 `src/components/ui/*` 低层原语。这些内容属于 config 或 MDX。
 - **Don't** 使用弹跳/橡皮筋缓动。原 `--ease-spring`（1.56 overshoot）已于 2026-07-07 重调为 `--ease-out-quint`（平滑指数缓出）——全站从未有组件使用该弹簧值，而 shared design law 明确禁止弹跳，休眠例外已移除。
 
