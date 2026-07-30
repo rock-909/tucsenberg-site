@@ -76,8 +76,11 @@ function runVitestCollectionCheck() {
     return true;
   }
 
-  console.error("vitest-collection failed: vitest does not run every test file");
-  for (const file of missing) console.error(`- on disk, not collected: ${file}`);
+  console.error(
+    "vitest-collection failed: vitest does not run every test file",
+  );
+  for (const file of missing)
+    console.error(`- on disk, not collected: ${file}`);
   for (const file of unexpected) {
     console.error(`- collected, not on disk: ${file}`);
   }

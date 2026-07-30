@@ -26,8 +26,7 @@ import { MobileNavigationInteractive as MobileNavigation } from "@/components/la
 import { createMockUseTranslations } from "@/test/utils";
 
 type MockLinkHref =
-  | string
-  | { pathname: string; query?: Record<string, string> };
+  string | { pathname: string; query?: Record<string, string> };
 
 function stringifyMockHref(href: MockLinkHref): string {
   if (typeof href === "string") {

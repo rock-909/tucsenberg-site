@@ -44,9 +44,7 @@ import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
 export const AIRTABLE_REQUEST_TIMEOUT_MS = 8000;
 
 type AirtableEnvKey =
-  | "AIRTABLE_API_KEY"
-  | "AIRTABLE_BASE_ID"
-  | "AIRTABLE_TABLE_NAME";
+  "AIRTABLE_API_KEY" | "AIRTABLE_BASE_ID" | "AIRTABLE_TABLE_NAME";
 
 function readAirtableEnv(key: AirtableEnvKey): string | undefined {
   return getRuntimeEnvString(key) ?? env[key];

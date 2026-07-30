@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 const CI_WORKFLOW_PATH = ".github/workflows/ci.yml";
@@ -52,11 +52,11 @@ function readRepoFile(relativePath: string): string {
 }
 
 function readSemgrepConfig(): SemgrepConfig {
-  return yaml.load(readRepoFile(SEMGREP_CONFIG_PATH)) as SemgrepConfig;
+  return load(readRepoFile(SEMGREP_CONFIG_PATH)) as SemgrepConfig;
 }
 
 function readCiWorkflowConfig(): CiWorkflow {
-  return yaml.load(readCiWorkflow()) as CiWorkflow;
+  return load(readCiWorkflow()) as CiWorkflow;
 }
 
 /** Every `run:` command a parsed workflow/hook config would actually execute. */
@@ -191,8 +191,8 @@ describe("CI workflow contract", () => {
 
   it("keeps Lighthouse as a manual performance proof", () => {
     const automated = [
-      ...collectRunCommands(yaml.load(readCiWorkflow())),
-      ...collectRunCommands(yaml.load(readRepoFile(LEFTHOOK_CONFIG_PATH))),
+      ...collectRunCommands(load(readCiWorkflow())),
+      ...collectRunCommands(load(readRepoFile(LEFTHOOK_CONFIG_PATH))),
     ];
 
     expect(automated.length).toBeGreaterThan(0);

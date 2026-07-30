@@ -41,8 +41,7 @@ export interface TucsenbergProductTableSection {
 }
 
 export type TucsenbergProductSection =
-  | TucsenbergProductProseSection
-  | TucsenbergProductTableSection;
+  TucsenbergProductProseSection | TucsenbergProductTableSection;
 
 export interface TucsenbergProductFaq {
   question: string;
@@ -50,15 +49,10 @@ export interface TucsenbergProductFaq {
 }
 
 export type TucsenbergProductImage =
-  | { status: "real"; src: string }
-  | { status: "pending" | "omitted" };
+  { status: "real"; src: string } | { status: "pending" | "omitted" };
 
 export type TucsenbergProductDiagramKind =
-  | "boxwall"
-  | "gate"
-  | "bag"
-  | "tube"
-  | "frp";
+  "boxwall" | "gate" | "bag" | "tube" | "frp";
 
 export interface BoxwallDiagramLabels {
   waterSide: string;

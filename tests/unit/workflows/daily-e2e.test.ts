@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 interface WorkflowStep {
@@ -19,7 +19,7 @@ interface Workflow {
 
 describe("daily E2E proof lane", () => {
   it("runs the coverage-mapped browser specs every day", () => {
-    const workflow = yaml.load(
+    const workflow = load(
       readFileSync(".github/workflows/daily-e2e.yml", "utf8"),
     ) as Workflow;
     const steps = workflow.jobs?.e2e?.steps ?? [];

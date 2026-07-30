@@ -116,11 +116,6 @@ vi.mock("@/lib/env", () => {
       const value = mockEnv[key];
       return typeof value === "boolean" ? value : undefined;
     },
-    getPublicRuntimeEnvString: (key: string) => readProcessEnvValue(key),
-    getPublicRuntimeEnvBoolean: (key: string) => {
-      const value = readProcessEnvValue(key);
-      return value === undefined ? undefined : value === "true";
-    },
     getRuntimeNodeEnv: () => {
       const value = readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV;
       return value === "development" ||
@@ -145,10 +140,6 @@ vi.mock("@/lib/env", () => {
       (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "production",
     isRuntimeTest: () =>
       (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "test",
-    isPublicRuntimeDevelopment: () =>
-      readProcessEnvValue("NODE_ENV") === "development",
-    isPublicRuntimeProduction: () =>
-      readProcessEnvValue("NODE_ENV") === "production",
     isRuntimeCi: () => readProcessEnvValue("CI") === "true",
     isRuntimePlaywright: () =>
       readProcessEnvValue("PLAYWRIGHT_TEST") === "true",

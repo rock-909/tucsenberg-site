@@ -83,20 +83,6 @@ export function getPathnames(): typeof PATHNAMES {
 }
 
 /**
- * 获取动态路由模式配置
- *
- * @public Routing contract for consumers that need dynamic pathname maps.
- */
-export function getDynamicPathnames(): Record<string, string> {
-  return Object.fromEntries(
-    Object.values(DYNAMIC_PATHS_CONFIG).map((config) => [
-      config.pattern,
-      config.pattern,
-    ]),
-  );
-}
-
-/**
  * 获取页面类型（根据路径反向查找）
  */
 export function getPageTypeFromPath(

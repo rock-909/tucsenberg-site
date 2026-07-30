@@ -15,8 +15,7 @@ export interface AirtableLike {
 
 export function resolveAirtableModule(mod: unknown): AirtableLike | null {
   const maybe = mod as
-    | { default?: Partial<AirtableLike> }
-    | Partial<AirtableLike>;
+    { default?: Partial<AirtableLike> } | Partial<AirtableLike>;
   const candidate =
     (maybe as { default?: Partial<AirtableLike> }).default ?? maybe;
 

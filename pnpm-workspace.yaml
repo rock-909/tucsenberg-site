@@ -9,6 +9,7 @@ allowBuilds:
   unrs-resolver: true
   workerd: true
 engineStrict: true
+minimumReleaseAge: 0
 overrides:
   esbuild@>=0.17.0 <0.28.1: '>=0.28.1'
   playwright@<1.55.1: '>=1.57.0'
@@ -16,7 +17,6 @@ overrides:
   eslint-config-next>eslint-import-resolver-node: 0.3.9
   eslint-config-next>eslint-import-resolver-typescript: '>=4.4.4'
   tmp: 0.2.6
-  js-yaml: '>=4.3.0 <5'
   mdast-util-to-hast: '>=13.2.1'
   express: '>=4.22.0'
   qs: '>=6.15.2'

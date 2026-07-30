@@ -234,5 +234,3 @@ export const SINGLE_SITE_DEFINITION = {
 export const SINGLE_SITE_CONFIG: SiteConfig = SINGLE_SITE_DEFINITION.config;
 export const SINGLE_SITE_FACTS: SiteFacts = SINGLE_SITE_DEFINITION.facts;
 export const SINGLE_SITE_FOOTER_COLUMNS = getSingleSiteFooterColumns();
-
-export { SINGLE_SITE_NAVIGATION } from "@/config/single-site-navigation";
