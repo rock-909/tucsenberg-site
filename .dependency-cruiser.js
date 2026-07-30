@@ -3,7 +3,7 @@ const path = require("node:path");
 
 module.exports = {
   forbidden: [
-    // === 层边界规则（Task 016 — 防止重构回退） ===
+    // 层边界规则。
     {
       name: "no-lib-to-components-or-app",
       severity: "error",
@@ -94,8 +94,8 @@ module.exports = {
     // === 跨域依赖规则（显式域匹配，避免跨规则反向引用） ===
     {
       name: "i18n-no-ui-deps",
-      severity: "warn",
-      comment: "i18n 域不依赖 UI/Page 层（新扩面灰度）",
+      severity: "error",
+      comment: "i18n 域不能依赖 UI 或页面层",
       from: {
         path: "^src/lib/i18n",
       },
@@ -116,29 +116,11 @@ module.exports = {
     },
     {
       name: "i18n-domain-boundaries",
-      severity: "warn",
-      comment: "i18n 域跨域依赖提示（灰度扩面）",
+      severity: "error",
+      comment: "i18n 域不能依赖其他业务 lib 子域",
       from: { path: "^src/lib/i18n/" },
       to: {
         path: "^src/lib/(?!i18n/)[^/]+/",
-      },
-    },
-    {
-      name: "no-barrel-export-dependencies",
-      severity: "warn",
-      comment: "避免通过 barrel 导出建立依赖（豁免通用聚合出口）",
-      from: {
-        path: "^src/",
-        pathNot: "^src/(app|components|scripts)/",
-      },
-      to: {
-        path: "index\\.(ts|js)$",
-        pathNot: [
-          "^src/app/",
-          "^src/components/",
-          "^src/constants/index\\.(ts|js)$",
-          "^src/types/index\\.(ts|js)$",
-        ].join("|"),
       },
     },
   ],

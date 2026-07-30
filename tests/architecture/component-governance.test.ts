@@ -347,9 +347,7 @@ describe("component governance", () => {
     const governanceScript = manifest.scripts?.["component:governance"] ?? "";
     const componentCheckScript = manifest.scripts?.["component:check"] ?? "";
 
-    // vitest 把参数当过滤器：路径指向一个不存在的文件时，它安静地少跑一个，
-    // 不报错。所以这里断言的不是"清单写了哪几个"，而是**写下的每一条都还在磁盘
-    // 上**——这才是漏跑真正的成因。
+    // Vitest 会把不存在的路径当过滤器，因此要显式确认清单中的测试仍存在。
     const filteredPaths = governanceTestScript
       .split(/\s+/u)
       .filter((token) => token.endsWith(".test.ts"));
@@ -362,9 +360,7 @@ describe("component governance", () => {
 
     expect(governanceScript).toContain("component-governance");
 
-    // `component:governance` 是 `component:governance:test` 的子串，所以单独
-    // toContain 它会在 component:check 被砍到只剩 test（scanner 和 storybook
-    // build 都丢了）时照样绿。按 && 拆开，逐段点名。
+    // 按阶段拆分，避免子串匹配掩盖 scanner 或 Storybook build 缺失。
     const checkStages = componentCheckScript.split("&&").map((s) => s.trim());
 
     expect(checkStages).toEqual(
@@ -423,11 +419,4 @@ describe("component governance", () => {
     );
     expect(hasStoryImport("export { Example };", importerPath)).toBe(false);
   });
-
-  // Playbook and index wording is asserted once, in ui-component-playbook.test.ts
-  // and ui-component-index.test.ts. Duplicating it here made either copy able to
-  // drift into a false gate.
-  // 这里原本还有一条 "keeps Registry and Playbook active"，断言三个文件存在。
-  // registry 缺了这个文件里每条断言都会先炸；文档缺了它也证明不了什么。
-  // 连同已退役的 组件索引.md 一起删于 2026-07-26。
 });

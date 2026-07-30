@@ -15,7 +15,7 @@ Run the project error gate:
 pnpm react:doctor
 ```
 
-This is blocking. React Doctor errors must be fixed before completion.
+This is blocking. React Doctor errors and warnings must be fixed before completion.
 
 ## Warning review
 
@@ -32,8 +32,8 @@ retained, add the narrowest file/rule exception and document the proof.
 
 ## Project rules
 
-- Errors are CI blockers.
-- Warnings must be fixed, excluded as generated/tool code, or documented as a narrow exception.
+- Errors and warnings are CI blockers.
+- Findings must be fixed, excluded as generated/tool code, or documented as a narrow exception.
 - Do not mechanically fix warnings that could change buyer-facing behavior, i18n, deployment/runtime behavior, or design tokens.
 - For dead-code findings, verify real production, script, build, and runtime references before removing anything.
 - Prefer small, behavior-preserving fixes over score-chasing.
@@ -43,5 +43,4 @@ retained, add the narrowest file/rule exception and document the proof.
 
 The external React Doctor playbook may be used as non-blocking triage help only
 after the project gate above is understood. It never overrides `AGENTS.md`,
-Trash-first deletion rules, zero-warning policy, profile boundaries, tests,
-or the project proof docs.
+the zero-warning policy, tests, or executable project gates.

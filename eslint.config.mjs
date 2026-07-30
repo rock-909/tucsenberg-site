@@ -142,7 +142,7 @@ const eslintConfig = [
 
   // React hooks call-ordering correctness. exhaustive-deps is upgraded to error
   // in the progressive block; require-await / no-unused-vars / prefer-const /
-  // no-duplicate-imports are set once in the ultra-strict block below.
+  // no-duplicate-imports are set once in the production-quality block below.
   {
     name: "react-hooks-correctness",
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -210,7 +210,7 @@ const eslintConfig = [
   // CSS-First Responsive Design - Discourage useBreakpoint for layout
   //
   // 这块的作用域是 files + 它自己这份 ignores，跟后面的
-  // architecture-refactor-rules 不是同一个作用域（那块排除了 scripts、config、
+  // architecture-boundaries 不是同一个作用域（那块排除了 scripts、config、
   // src/constants 等）。所以它在那些被排除的文件上仍然生效，不是重复声明。
   {
     name: "css-first-responsive-design",
@@ -240,28 +240,28 @@ const eslintConfig = [
     },
   },
 
-  // 超严格质量保障配置 - 零妥协标准
+  // 生产代码质量基线。
   {
-    name: "ultra-strict-quality-config",
+    name: "production-quality",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // 🔒 复杂度控制：企业级标准
-      complexity: ["error", 15], // 企业级标准：复杂度限制15
-      "max-depth": ["error", 3], // 降低到3层，强制扁平化
+      // 复杂度控制。
+      complexity: ["error", 15],
+      "max-depth": ["error", 3],
       "max-lines-per-function": [
         "error",
         { max: 120, skipBlankLines: true, skipComments: true },
-      ], // 企业级标准：函数长度限制120行（跳过空行与注释）
-      "max-params": ["error", 3], // 降低到3个参数，强制对象传参
-      "max-nested-callbacks": ["error", 2], // 降低到2层，强制Promise/async
+      ],
+      "max-params": ["error", 3],
+      "max-nested-callbacks": ["error", 2],
       "max-lines": [
         "error",
         { max: 500, skipBlankLines: true, skipComments: true },
-      ], // 调整到500行并跳过空行与注释
-      "max-statements": ["error", 20], // 降低到20个语句，强制逻辑简化
+      ],
+      "max-statements": ["error", 20],
 
-      // 🔒 代码质量规则：零容忍标准
-      "no-console": "error", // 完全禁止console，强制使用logger
+      // 基础代码质量。
+      "no-console": "error",
       "no-debugger": "error",
       "no-alert": "error",
       "no-var": "error",
@@ -276,10 +276,9 @@ const eslintConfig = [
       "no-unreachable": "error",
       "no-unreachable-loop": "error",
 
-      // 🔒 新增严格规则：强制代码质量
-      "no-empty": "error", // 禁止空代码块
-      "no-empty-function": "error", // 禁止空函数
-      "no-implicit-coercion": "error", // 禁止隐式类型转换
+      "no-empty": "error",
+      "no-empty-function": "error",
+      "no-implicit-coercion": "error",
       "no-magic-numbers": [
         "error",
         {
@@ -295,7 +294,7 @@ const eslintConfig = [
         },
       ],
 
-      // Best practices (最严格)
+      // 通用正确性规则。
       eqeqeq: ["error", "always"],
       "no-eval": "error",
       "no-implied-eval": "error",
@@ -312,7 +311,7 @@ const eslintConfig = [
       radix: "error",
       yoda: "error",
 
-      // 安全相关 (最严格)
+      // 安全相关。
       "no-new-wrappers": "error",
       "no-proto": "error",
       "no-return-assign": "error",
@@ -320,7 +319,7 @@ const eslintConfig = [
       "no-with": "error",
       "require-await": "error",
 
-      // 代码风格 (最严格)
+      // 代码形状。
       "array-callback-return": "error",
       "block-scoped-var": "error",
       "consistent-return": "error",
@@ -350,7 +349,7 @@ const eslintConfig = [
       "no-octal-escape": "error",
       "no-param-reassign": "error",
       "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
-      // architecture-refactor-rules 也设 no-restricted-syntax，但那块排除了
+      // architecture-boundaries 也设 no-restricted-syntax，但那块排除了
       // scripts、config、src/constants 等——在被它排除的文件上，这里这条是唯一
       // 生效的一条，删掉就是真放宽。本块自己的 guard-for-in 也不等价：它只要求
       // for-in 带原型守卫，不禁止 for-in 本身。
@@ -446,9 +445,9 @@ const eslintConfig = [
     },
   },
 
-  // CODEX分层治理 - 测试文件全面豁免魔法数字
+  // 测试文件规则。
   {
-    name: "codex-test-files-config",
+    name: "test-files",
     files: [
       "**/*.test.{js,jsx,ts,tsx}",
       "**/__tests__/**/*.{js,jsx,ts,tsx}",
@@ -477,19 +476,19 @@ const eslintConfig = [
       },
     },
     rules: {
-      // 🎯 渐进式标准：测试文件保持合理限制
+      // 测试结构仍受宽松阈值约束。
       "max-lines-per-function": [
         "warn",
         { max: 700, skipBlankLines: true, skipComments: true },
-      ], // 调整为700行并跳过空行与注释，适应大型测试describe块
-      complexity: ["warn", 20], // 从25降到20，保持测试逻辑清晰
-      "max-nested-callbacks": ["warn", 6], // 从8降到6，控制嵌套深度
+      ],
+      complexity: ["warn", 20],
+      "max-nested-callbacks": ["warn", 6],
       "max-lines": [
         "warn",
         { max: 800, skipBlankLines: true, skipComments: true },
-      ], // 从1200降到800，并跳过空行与注释
-      "max-statements": ["warn", 50], // 从80降到50，鼓励测试分解
-      "max-params": ["warn", 8], // 从10降到8，合理参数数量
+      ],
+      "max-statements": ["warn", 50],
+      "max-params": ["warn", 8],
 
       // 测试文件必要的特殊模式（保持不变）
       "no-magic-numbers": "off", // 测试数据需要具体数值
@@ -505,8 +504,7 @@ const eslintConfig = [
       // no-restricted-imports 与 @typescript-eslint/no-unused-vars 都由
       // test-files-final-override 设置（作用域与本块逐字相同），这里不重复。
 
-      // 🎯 行业标准：测试文件允许any类型（Mock对象复杂性）
-      "@typescript-eslint/no-explicit-any": "off", // 测试文件允许any类型 - 符合行业标准
+      "@typescript-eslint/no-explicit-any": "off",
       "no-unused-vars": [
         "error", // 保持严格标准，与TypeScript规则一致
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -523,15 +521,13 @@ const eslintConfig = [
       "no-shadow": "off", // 测试文件中Mock变量重复声明是正常模式
       "no-console": ["warn", { allow: ["warn", "error", "info", "log"] }], // 允许测试调试输出
 
-      // React Hooks规则保持启用 - 确保测试代码质量与生产环境一致
-      // 'react-hooks/rules-of-hooks': 'error', // 保持默认，遵循coding-standards.md规范
       "@next/next/no-img-element": "off", // 测试中允许使用原生 img 元素
     },
   },
 
-  // CODEX分层治理 - 脚本和开发工具豁免
+  // 脚本和开发工具规则。
   {
-    name: "codex-scripts-and-dev-tools-config",
+    name: "scripts-and-dev-tools",
     files: [
       // 构建脚本和配置文件（完全豁免魔法数字）
       "scripts/**/*.{js,ts}",
@@ -542,7 +538,7 @@ const eslintConfig = [
       "playwright.config.ts",
       "*.config.{js,ts,mjs}",
 
-      // 开发者工具（应用渐进式标准）
+      // 开发者工具。
       "src/app/**/diagnostics/**/*.{ts,tsx}",
       "src/components/examples/ui-showcase/**/*.{ts,tsx}",
     ],
@@ -551,24 +547,24 @@ const eslintConfig = [
       "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
     },
     rules: {
-      // 🎯 渐进式改进：开发工具保持基本质量标准
+      // 脚本使用更宽松的结构阈值。
       "max-lines-per-function": [
         "warn",
         { max: 250, skipBlankLines: true, skipComments: true },
-      ], // 调整为250行并跳过空行与注释，适应开发工具复杂性
-      complexity: ["warn", 18], // 从无限制改为18复杂度警告
+      ],
+      complexity: ["warn", 18],
       "max-lines": [
         "warn",
         { max: 800, skipBlankLines: true, skipComments: true },
-      ], // 调整到800行并跳过空行与注释，适应开发工具复杂性
-      "max-params": ["warn", 5], // scripts允许少量CLI参数，但仍保留治理信号
+      ],
+      "max-params": ["warn", 5],
 
-      // 构建脚本必要豁免（保持不变）
+      // 构建脚本必要豁免。
       "no-console": "off", // 构建脚本需要console输出
       "no-magic-numbers": "off", // 配置文件需要具体数值
       "no-implicit-coercion": "off", // 配置文件类型转换
 
-      // 🔄 渐进改进：开发工具TypeScript规则收紧
+      // TypeScript 规则。
       "@typescript-eslint/no-explicit-any": "warn", // 开发工具允许适度使用any（全局对象访问）
       "@typescript-eslint/ban-ts-comment": "warn", // 开发工具允许@ts-nocheck（仅开发环境）
       "@typescript-eslint/no-unused-vars": [
@@ -592,7 +588,7 @@ const eslintConfig = [
       "no-undef": ["error", { typeof: true }], // 未定义变量检查
       "no-unused-vars": "warn", // 清理未使用变量
 
-      // 🚀 ESLint修复专用：scripts目录特殊规则
+      // Node.js 脚本规则。
       "@typescript-eslint/no-require-imports": "off", // scripts中允许require导入
       "no-restricted-imports": "off", // scripts中禁用相对路径限制（Node.js环境）
       "security/detect-non-literal-fs-filename": "warn", // 文件系统操作降级为警告
@@ -610,10 +606,9 @@ const eslintConfig = [
     },
   },
 
-  // Legacy script structural baselines - keep guardrails on, but avoid turning
-  // existing script debt into anonymous lint noise under --max-warnings 0.
+  // 对当前较大的质量脚本使用文件级结构阈值。
   {
-    name: "legacy-script-structural-baselines",
+    name: "script-structural-baselines",
     files: [
       "scripts/quality/checks/content-readiness.js",
       "scripts/quality/checks/content-slugs.js",
@@ -629,9 +624,9 @@ const eslintConfig = [
     },
   },
 
-  // 🎯 架构重构专用规则 - 禁止新增export *
+  // 架构边界。
   {
-    name: "architecture-refactor-rules",
+    name: "architecture-boundaries",
     files: ["**/*.{js,jsx,ts,tsx}"],
     ignores: [
       "scripts/**/*.{js,ts}",
@@ -648,13 +643,13 @@ const eslintConfig = [
       "e2e/**/*.{js,jsx,ts,tsx}",
     ],
     rules: {
-      // 禁止新增 export * 重新导出 - 命名导出边界的长期约束（非临时规则）
+      // 使用命名导出，避免新增不透明的 barrel 边界。
       "no-restricted-syntax": [
         "error",
         {
           selector: "ExportAllDeclaration",
           message:
-            '🚫 架构重构期间禁止新增 export * 重新导出。请使用命名导出：export { specificExport } from "./module"',
+            '🚫 禁止新增 export * 重新导出。请使用命名导出：export { specificExport } from "./module"',
         },
       ],
 
@@ -681,21 +676,20 @@ const eslintConfig = [
     },
   },
 
-  // 🎯 渐进式统一严格标准 - 核心配置增强
+  // 项目级覆盖。
   {
-    name: "progressive-unified-enhancements",
+    name: "project-overrides",
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      // React特化规则（针对AI编码）: exhaustive-deps 升级为 error（Next 默认 warn）。
-      // prefer-const / no-var / no-duplicate-imports 统一由 ultra-strict 块设置。
-      "react-hooks/exhaustive-deps": "error", // AI容易遗漏依赖，升级为错误
+      // React Hooks 依赖缺失会产生真实运行问题，因此升级为 error。
+      "react-hooks/exhaustive-deps": "error",
 
       // 函数命名和结构
       "func-names": ["warn", "as-needed"], // 鼓励命名函数，便于调试
       "no-anonymous-default-export": "off", // 允许匿名默认导出（React组件）
 
       // 安全增强（eval / implied-eval / Function 构造函数的禁令在
-      // ultra-strict-quality-config，作用域与本块完全相同，不在这里重复设置）
+      // production-quality，作用域与本块完全相同，不在这里重复设置）
 
       // 类型安全增强（仅适用于TypeScript文件）
       "@typescript-eslint/no-unused-expressions": "error", // 禁止未使用的表达式
@@ -717,12 +711,12 @@ const eslintConfig = [
     },
   },
 
-  // TypeScript files: disable base rules that duplicate TS-aware checks
-  // 目的：避免在TS文件上同时触发基础 no-unused-vars/no-undef 与 TS 规则的重复报错
+  // TypeScript files: disable base rules that duplicate TS-aware checks.
   {
     name: "ts-core-overrides",
     files: ["**/*.{ts,tsx}"],
     rules: {
+      "no-unused-expressions": "off",
       "no-unused-vars": "off",
       "no-undef": "off",
     },

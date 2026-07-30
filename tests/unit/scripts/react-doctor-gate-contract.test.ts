@@ -9,16 +9,16 @@ function readRepoFile(relativePath: string) {
   return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
 }
 
-// 只保护当前意图：React Doctor 必须在错误级结果上阻断。
+// 只保护当前意图：React Doctor 的 error 和 warning 都必须阻断。
 describe("React Doctor gate contract", () => {
-  it("keeps React Doctor blocking on errors instead of only reporting", () => {
+  it("keeps React Doctor blocking on warnings instead of only reporting", () => {
     const packageJson = JSON.parse(readRepoFile("package.json")) as {
       scripts: Record<string, string>;
     };
     const doctorScript = packageJson.scripts["react:doctor"] ?? "";
 
     expect(doctorScript).toContain("react-doctor@latest");
-    expect(doctorScript).toContain("--blocking error");
+    expect(doctorScript).toContain("--blocking warning");
     expect(doctorScript).not.toContain("--blocking none");
   });
 });

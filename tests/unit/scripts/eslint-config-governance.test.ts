@@ -74,6 +74,13 @@ function expectWarningLevel(ruleName: string, value: unknown): void {
 }
 
 describe("eslint config governance", () => {
+  it("uses the TypeScript-aware unused-expression rule without duplicate reports", async () => {
+    const config = await loadEslintConfig();
+    const overrides = findNamedBlock(config, "ts-core-overrides");
+
+    expect(overrides.rules?.["no-unused-expressions"]).toBe("off");
+  });
+
   it("uses one shared magic-number ignore list in the strict quality block", () => {
     const source = fs.readFileSync(ESLINT_CONFIG_PATH, "utf8");
 
@@ -86,10 +93,7 @@ describe("eslint config governance", () => {
 
   it("keeps structural script rules at warning level before final overrides", async () => {
     const config = await loadEslintConfig();
-    const scriptsBlock = findNamedBlock(
-      config,
-      "codex-scripts-and-dev-tools-config",
-    );
+    const scriptsBlock = findNamedBlock(config, "scripts-and-dev-tools");
     const rules = scriptsBlock.rules ?? {};
 
     for (const ruleName of STRUCTURAL_SCRIPT_RULES) {
@@ -113,23 +117,8 @@ describe("eslint config governance", () => {
     }
   });
 
-  // 两个作用域逐字相同的块设置同一条规则时，前面那条永远不会生效——它读起来
-  // 像一道防线，实际什么都不拦。这个仓库里出现过三次：测试文件的
-  // detect-object-injection error、重复声明的 no-eval 三件套、以及测试块里
-  // 重复的 no-restricted-imports / no-unused-vars。守的是"配置里写着的规则
-  // 真的生效"。
-  //
-  // 作用域 = files 和 ignores 一起。只看 files 会把
-  // `architecture-refactor-rules`（files 相同、但排除了 scripts/config/
-  // src/constants）判成 `ultra-strict-quality-config` 的同作用域覆盖块，
-  // 于是逼人删掉在那些被排除文件上仍然生效的规则——这个洞真发生过一次，
-  // 删掉了 useBreakpoint 导入禁令和 ForIn/Labeled/With 语法禁令。
-  //
-  // glob 排序后再比：同一批 glob 换个书写顺序是同一个作用域，不该因为
-  // JSON.stringify 的字面差异而漏掉。
-  //
-  // 只认作用域逐字相同的情况：一个块用更宽的 glob 盖住另一个（`**/*.ts`
-  // 盖 `src/lib/**/*.ts`）它抓不到，那要靠逐文件对账，成本不在一个量级。
+  // 同一作用域重复设置规则会让前一个配置块失效。作用域包含 files 和 ignores，
+  // glob 顺序不影响等价性；不同宽度的 glob 不在这条检查的判断范围内。
   it("never lets one block silently replace another at the identical files scope", async () => {
     const config = await loadEslintConfig();
     const seen = new Map<string, string>();
@@ -153,8 +142,7 @@ describe("eslint config governance", () => {
     expect(shadowed).toEqual([]);
   });
 
-  // 上面那条检查自己的反例。没有它，把 scopeKey 退回只看 files 时上面那条
-  // 仍然全绿（配置里已经没有同 files 的重复了），假绿照旧。
+  // ignores 不同代表规则适用范围不同。
   it("does not call two blocks the same scope when only their ignores differ", () => {
     const wide = {
       name: "wide",
@@ -177,20 +165,20 @@ describe("eslint config governance", () => {
     );
   });
 
-  it("keeps legacy script baselines file-specific instead of directory-wide", async () => {
+  it("keeps script baselines file-specific instead of directory-wide", async () => {
     const config = await loadEslintConfig();
-    const legacyBaseline = findNamedBlock(
+    const scriptBaseline = findNamedBlock(
       config,
-      "legacy-script-structural-baselines",
+      "script-structural-baselines",
     );
 
-    expect(legacyBaseline.files).toEqual([
+    expect(scriptBaseline.files).toEqual([
       "scripts/quality/checks/content-readiness.js",
       "scripts/quality/checks/content-slugs.js",
       "scripts/quality/checks/release-verify.js",
     ]);
 
-    for (const value of Object.values(legacyBaseline.rules ?? {})) {
+    for (const value of Object.values(scriptBaseline.rules ?? {})) {
       expect(Array.isArray(value) ? value[0] : value).toBe("warn");
     }
   });
