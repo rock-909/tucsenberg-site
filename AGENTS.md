@@ -1,76 +1,54 @@
 # AGENTS.md
 
-写给直接读这个文件的编码 agent。Claude Code 有自己的 `CLAUDE.md`，而且会按路径
-自动加载 `.claude/rules/*.md`；这份多一张规则路由表，因为别的工具不会自动加载。
+## 项目
 
-## 这个项目
-
-**tucsenberg-site** —— Tucsenberg 防洪挡板的英文 B2B 官网，靠它接 OEM / 批发询盘：
-看产品、比规格、下载 PDF、发 RFQ。部署在 Cloudflare，走 OpenNext。
-
-它是从一个通用 starter 改出来的，但那部分已经拆干净了：runtime profile 选择、
-profile fixtures、旧 blog、物料化工具，全部退役。看到 starter 时代的命名，只可能
-出现在检查脚本、兼容用的文件名、或者标注过的历史记录里，不代表那套东西还活着。
-
-站点目前只出英文。i18n 框架是留着的，以后要加语言，别为了省事把翻译 key 拆成写死
-的英文。
+- Tucsenberg 防洪挡板英文 B2B 官网，用于产品展示、规格比较、PDF 下载和 OEM / 批发询盘。
+- Next.js App Router，部署到 Cloudflare，使用 OpenNext。
+- 当前只发布英文，但必须保留多语言能力；用户可见文案使用翻译 key。
+- 通用 starter 的 profile、旧 blog 和物料化流程已经退役，不得恢复。
 
 ## 沟通
 
-业主不懂技术。讲生意，别讲技术。
+- 默认使用简体中文。
+- 面向业主说明业务影响，避免不必要的技术术语。
 
-## 这个仓库的坑
+## 已知约束
 
-都是踩过的，跟直觉相反或者从代码里看不出来：
+- `pnpm build`、`pnpm website:build:cf` 和 Playwright webServer 都会写
+  `.next`，不得并行运行。
+- `pnpm website:lighthouse` 使用独立的 `.next-lighthouse` 和 4173 端口。
+- `src/lib/content-manifest.generated.ts` 是生成文件；使用
+  `node scripts/starter-checks.js content-manifest` 更新。
+- `RUN_FAST_PUSH=1` 会跳过完整构建、架构检查、依赖安全审计和死导出扫描。
+  PR CI 不运行依赖安全审计，只有每周任务兜底。
+- 根 `plans/` 只存放当前未完成的 Superpowers 过程文件，不是项目事实来源。
 
-- **`pnpm build` 和 `pnpm website:build:cf` 写同一个 `.next` 目录。** 并行跑会互相
-  覆盖，拿到的是假的构建结果。本地跑 E2E 时 Playwright 的 webServer 也会重建
-  `.next`，是第三个写入方。`pnpm website:lighthouse` 不在此列：它单独构建到
-  `.next-lighthouse`，用 4173 端口起服务，所以一次二十分钟的测量不会被并行构建、
-  也不会被别的 worktree 占着 3000 端口的服务污染。
-- **根 `plans/` 只放当前未完成的 Superpowers 过程文件。** 设计与实施文件使用
-  `*-design.md` / `*-plan.md`；不要把它们当产品真相。
-- **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
-  `node scripts/starter-checks.js content-manifest` 重新生成。
-- **pre-push 会跑一遍完整构建。** 确实急，可以 `RUN_FAST_PUSH=1` 跳过——它同时还会
-  跳过架构检查、依赖安全审计和死导出扫描，其中依赖安全审计 PR 的 CI 不跑，只有每周
-  的定时任务兜底。
+## Rules
 
-## 动手前先读
+修改文件前读取匹配的 `.claude/rules/*.md`；其 `paths:` 是适用范围的权威。
 
-改动涉及面比较大的时候：
-
-1. `docs/README.md`
-2. `docs/项目.md`
-3. `docs/架构与行为.md`
-4. `docs/开发与维护.md`
-
-## 规则路由
-
-详细规则在 `.claude/rules/*.md`。每份文件的 `paths:` 前言才是"它管哪些文件"的权威；
-下表只是给不会自动加载 Rules 的 agent 查入口。
-
-| 你在改什么 | 读哪份 |
+| 范围 | Rule |
 | --- | --- |
-| 组件、页面区块、stories、design token、Tailwind | `ui.md` |
+| TypeScript、命名、import、复杂度、lint | `coding-standards.md` |
 | 路由、layout、metadata、缓存、client 边界 | `conventions.md` |
-| 任何 TypeScript：类型、import、命名、复杂度、lint 例外、依赖清理 | `coding-standards.md` |
-| 测试、fixtures、mock、行为证明 | `testing.md` |
-| API route、安全配置、lead schema、`next.config.ts` | `security.md` |
-| middleware、`open-next.config.ts`、`wrangler.jsonc`、部署 | `cloudflare.md` |
-| `content/`、`messages/`、站点配置、内容查询 | `content.md` |
+| 组件、页面 UI、Tailwind、设计 token | `ui.md` |
+| 测试、fixture、mock、行为证明 | `testing.md` |
+| API、安全配置、lead schema、Next 配置 | `security.md` |
+| middleware、OpenNext、Wrangler、部署 | `cloudflare.md` |
+| 内容、messages、站点配置、内容查询 | `content.md` |
 | 翻译 key、locale 路由、i18n 管道 | `i18n.md` |
 | JSON-LD、FAQ schema、SEO 组件 | `structured-data.md` |
 
 ## 验证
 
-用能证明这次改动的最小验证，`pnpm run` 列出所有脚本。三条从脚本名看不出来的：
+- 使用能证明改动的最小验证；可用脚本以 `pnpm run` 为准。
+- Cloudflare / OpenNext 改动：依次运行 `pnpm build`、
+  `pnpm website:build:cf`。
+- 大范围本地检查：`pnpm website:check`。
+- 上线相关改动：按 `docs/正式上线标准.md` 验证，再运行
+  `pnpm release:verify`。
 
-- 改 Cloudflare / OpenNext：先 `pnpm build`，再 `pnpm website:build:cf`。
-- 要大范围本地检查：`pnpm website:check`。
-- 涉及上线：按 `docs/正式上线标准.md` 走，然后 `pnpm release:verify`。
-
-## 参考资料
+## 依赖文档
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -80,28 +58,13 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 <!-- END:nextjs-agent-rules -->
 
-（这段带 BEGIN/END 标记，保持英文原样。）
-
-其他依赖同理：动手前先看官方文档或本地锁版本的文档，确认 API 现在长什么样。
+其他依赖使用当前锁定版本的本地文档或官方文档确认 API。
 
 ## 硬性约束
 
-- **i18n**：用户能看到的文案一律走翻译 key。
-- **Git**：GitHub Flow。`main` 是唯一长期分支，功能分支走 pull request。
-
-## 判断准则
-
-**缺陷。** 确认过的缺陷就是缺陷，投入产出比和"这是边缘情况"都不构成关掉它的理由；
-范围和排期决定它什么时候修，不决定它算不算数。推迟就说清真实原因，以及留在原地
-没动的根因是什么。动手前先问这个 bug 是怎么能存在的——优先拆掉让它成立的条件，
-而不是把症状盖住。
-
-**把关机制。** gate 和测试是为某个意图服务的手段，不是法律。一个检查逼着文档或代码
-写下不属实的内容，该改的是检查。别把时间点快照（commit hash、条数、推送状态）钉成
-必过断言，也别给 `AGENTS.md` / `CLAUDE.md` 加内容断言——要守就守那句话描述的行为，
-守在行为发生的地方。
-
-## AI 前端体系
-
-`src/components/ui/*` 是正式的 UI 入口，`.claude/rules/ui.md` 只写修改边界，
-`pnpm component:check` 是门禁。`docs/design/` 提供设计背景，但不能覆盖当前代码和测试事实。
+- GitHub Flow；`main` 是唯一长期分支，改动通过 pull request 合并。
+- 优先修复缺陷成立的根因，不用局部补丁掩盖同类问题。
+- 测试和 gate 保护真实行为，不保护固定文案、文件结构、历史名称、数量或其他时间点快照。
+- 不给 `AGENTS.md` 或 `CLAUDE.md` 添加内容断言；在行为发生处验证对应约束。
+- UI 优先复用 `src/components/ui/*`；涉及组件治理时运行
+  `pnpm component:check`。
