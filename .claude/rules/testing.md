@@ -39,6 +39,74 @@ Shapes that keep recurring in review here:
   the behavior.
 - Asserting a deleted name stays absent. That guards a past refactor, not live
   behavior.
+- Asserting that outputs differ instead of what each one is. `Set(classNames)`
+  having six entries, or three variants producing three different strings, holds
+  when every variant is mapped to the wrong style. So does checking only
+  `allowed` on a limiter whose ceiling is a hundred. The expected value has to be
+  written out.
+- Pinning the first few steps of a sequence and then the end state. Ten requests
+  where only the first three returns are read, or a `.env` key matched as "this
+  line exists" while a second declaration of the same key sits below it, leave
+  the middle unwatched. Collect the whole sequence and compare it in one go, and
+  parse key-value files into pairs instead of matching lines.
+- Coercing before pinning the type. `String(["host"]).split(",")` yields the same
+  one-element list a real string would, so a config value written as an array
+  passes a check the runtime would fail. Assert the type, then read the value.
+- Deriving the expected value from the thing under test. `toEqual(PATHNAMES)`
+  where both sides come from the same `createPathnames()` call, or a failure
+  matrix whose expected mode is read out of the preset's own `failureMode`,
+  follows the config instead of checking it — flip the config and the test flips
+  with it. Either hand-write the expected value, or pair the derived check with a
+  hand-written pin somewhere else and say in a comment which one is the truth.
+- Not proving the test reaches the real subject. Three tests here asserted
+  against something other than the code they named: an "i18n integration" test
+  called a mock it defined itself, a routing test imported the global mock rather
+  than the routing module, and a rate-limit atomicity stub answered `GET`/`SET`
+  while the store sent `INCR`, so every request became a storage failure and the
+  count stayed at zero. Before trusting a green, break the real subject and watch
+  the test go red; when a test speaks a wire protocol, read what the
+  implementation actually sends instead of the branch names in the stub.
+
+## "Another test covers it" has to be proved, not asserted
+
+This is the single most frequent way a real regression got through review in this
+repo. Four separate rounds deleted an assertion on the belief that a neighbour
+covered it, and in each case the neighbour did not:
+
+- a layout contract was handed to an E2E spec that only saves screenshots and
+  never compares them;
+- `checkDistributedRateLimit` called exactly once was handed to a test that only
+  checks the call arguments, so double-charging a buyer's quota passed;
+- success-path `retryAfter` and `resetTime` were handed to a blocked-path test
+  that only ever inspects the blocked response;
+- a starter-string blacklist was handed to a gate that runs on production deploy
+  only, at warning severity, so what used to fail a pull request now fails
+  nothing until launch.
+
+Before writing "X covers this" in a comment, commit message, or review reply:
+open X, break the source so only X could catch it, run X alone, and see it red.
+If X is a script or CI gate rather than a test, also check its severity and which
+pipeline runs it — coverage that moves from every pull request to a release-only
+gate is a narrowing and has to be described as one.
+
+## Claims about coverage have to be re-measured
+
+Case counts, line counts, "this used to be N tests", and "nothing that could
+catch a regression was removed" are all checkable, and they are where review
+found the most errors in this repo. Three branches in the trim round each needed
+their commit message rewritten more than once because a checkable statement in it
+was false. Rules that follow from that:
+
+- Measure after the last edit, not before. Adding two comment lines invalidates
+  a line count already written into the commit message.
+- To measure a baseline, `git checkout main -- <file>` then restore with
+  `git checkout HEAD -- <file>`. `git stash` is a no-op when everything is
+  committed and will silently measure the branch twice.
+- Do not write an absolute claim about mutations unless each one was applied and
+  re-run. If they were, say how many and what they were; if they were not, say
+  that the assertion path exists rather than that it was verified.
+- A blacklist entry, gate, or assertion is only "dead" after grepping for it.
+  Pipe to `head` and the occurrence that disproves you gets truncated away.
 
 Gates here have failed open more often than they have failed wrong. A check that
 hangs, retries until green, or has no assertion at all is not a check. Shapes
