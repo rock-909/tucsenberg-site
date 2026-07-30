@@ -205,7 +205,6 @@ export const SINGLE_SITE_DEFINITION = {
       annualCapacity:
         "ABS boxwall, aluminum gates, flood bags, tube dams, and FRP planks",
       clientsServed: 0,
-      exampleFootprint: 0,
       onTimeDeliveryRate: 0,
     },
     social,

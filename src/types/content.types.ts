@@ -95,7 +95,7 @@ export interface ProductMetadata extends ContentMetadata {
 
 // Product content
 /**
- * @public Starter content contract for MDX product pages.
+ * @public Content contract for MDX product pages.
  */
 export interface Product extends ParsedContent<ProductMetadata> {
   metadata: ProductMetadata;

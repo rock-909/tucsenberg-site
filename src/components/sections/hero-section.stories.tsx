@@ -3,7 +3,6 @@ import { MINIMAL_VIEWPORTS } from "storybook/viewport";
 import {
   homepageStoryHero,
   homepageStoryHeroLongCopy,
-  homepageStoryHeroZh,
 } from "@/components/sections/hero-section-view.fixtures";
 import { HeroSectionView } from "@/components/sections/hero-section-view";
 
@@ -28,15 +27,6 @@ export const Default: Story = {};
 export const LongCopy: Story = {
   args: {
     content: homepageStoryHeroLongCopy,
-  },
-};
-
-export const ChineseCopy: Story = {
-  args: {
-    content: homepageStoryHeroZh,
-  },
-  globals: {
-    locale: "en",
   },
 };
 

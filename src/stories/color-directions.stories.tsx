@@ -273,13 +273,13 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
             <PaletteRow label="Brand" prefix="brand" />
             <div className="rounded-lg border border-border p-5">
               <span className="text-[12px] font-semibold tracking-[0.04em] text-primary uppercase">
-                Showcase Website - Custom Project - Starter
+                Tucsenberg - Flood Barriers - Factory Direct
               </span>
               <h2 className="mt-2 text-xl leading-tight font-extrabold tracking-tight">
-                Clear presentation for a replaceable offer
+                Clear presentation for a five-line product range
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Brand, content, and inquiry paths stay easy to adapt.
+                Specs, proof, and the RFQ path stay one click apart.
               </p>
               <div className="mt-4 flex gap-2">
                 <Button size="sm">Get quote</Button>

@@ -3,8 +3,8 @@ import { MINIMAL_VIEWPORTS } from "storybook/viewport";
 
 import {
   homepageStoryHero,
+  homepageStoryHeroCjkTypography,
   homepageStoryHeroLongCopy,
-  homepageStoryHeroZh,
 } from "@/components/sections/hero-section-view.fixtures";
 import { HeroSectionView } from "@/components/sections/hero-section-view";
 
@@ -32,12 +32,11 @@ export const LongCopy: Story = {
   },
 };
 
-export const ChineseCopy: Story = {
+// 中日韩字形是等宽全角、几乎没有词间空格，折行点跟英文完全不同。这条守的是
+// 排版，不是语言支持；站点只出英文。
+export const LongChineseContent: Story = {
   args: {
-    content: homepageStoryHeroZh,
-  },
-  globals: {
-    locale: "en",
+    content: homepageStoryHeroCjkTypography,
   },
 };
 

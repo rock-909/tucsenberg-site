@@ -25,14 +25,14 @@ export const ProductsRoot: Story = {};
 
 export const MarketDetail: Story = {
   args: {
-    marketLabel: "Starter market example",
+    marketLabel: "Doorway openings",
   },
 };
 
 export const LongMarketLabel: Story = {
   args: {
     marketLabel:
-      "Long starter market label for product, service, and project replacement review",
+      "Long market label for underground car park ramps and loading-bay doorway openings",
   },
 };
 

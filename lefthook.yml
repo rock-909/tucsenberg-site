@@ -77,13 +77,50 @@ pre-commit:
     # 只有 6 个文件，已经逐个补上，所以整条按角色排除都不需要了。
     test-related:
       run: |
+        # `.fixtures.ts` 排除的理由：它们是 Storybook story 的输入，跟已经排除的
+        # `.stories.tsx` 是同一类东西，没有 Vitest 测试导入过它们。证明它们的车道
+        # 是 CI 里的 `pnpm exec storybook build`（被 story 引用的 fixture 必须编译
+        # 通过）加 TypeScript 的 `satisfies` 类型检查。要求给 story 输入补单测，
+        # 只会逼出一个断言 fixture 等于自己的空转测试。
+        #
+        # 这两条都不管「fixture 有没有被任何 story 引用」：story 里的 import 删掉
+        # 之后，孤儿 fixture 照样能过 storybook build。那是死导出扫描的活。
+        #
+        # 纯类型声明文件（`src/types/**`、`*-types.ts`、`*.types.ts`）也排除：全仓
+        # 这八个文件里一个运行时导出都没有，全是 interface 和 type。它们的证明车道
+        # 是 `tsc --noEmit`（硬门禁，零错误），编译期就是全部行为。给一个 interface
+        # 写 Vitest 只能断言它自己，运行时什么都没发生。
+        # 这条排除不覆盖带运行时代码的文件：新写的类型文件里只要出现 `export const`
+        # 或 `export function`，就该改名或者补测试，别靠文件名混过去。
         FILES=$(git diff --cached --name-only --diff-filter=ACM \
           | grep -E '^src/.+\.(ts|tsx)$' \
           | grep -v '\.test\.' | grep -v '\.spec\.' | grep -v '__tests__' \
           | grep -v '\.stories\.tsx$' \
+          | grep -v '\.fixtures\.ts$' \
+          | grep -vE '^src/types/|-types\.ts$|\.types\.ts$' \
           | grep -v '^src/test/setup' || true)
         if [ -z "$FILES" ]; then
           echo "✅ 相关测试检查跳过 (本次没有需要单测覆盖的源码变更)"; exit 0;
+        fi
+        # 覆盖率必须逐个文件问。`vitest related A B` 取的是两者相关测试的并集：
+        # 只要 A 有测试，输出就不是 "No test files found"，B 一条测试都没有也照样
+        # 通过。这个钩子以前就是那样，失败文案写着"有文件没有任何相关测试"，实际
+        # 只能发现"全部暂存源文件合起来一条都没有"——是 fail-open。
+        UNCOVERED=""
+        for FILE in $FILES; do
+          if pnpm vitest related "$FILE" --run --passWithNoTests --reporter=dot 2>&1 \
+            | grep -q "No test files found"; then
+            UNCOVERED="$UNCOVERED $FILE"
+          fi
+        done
+        if [ -n "$UNCOVERED" ]; then
+          echo "";
+          echo "❌ 改动的源文件里，有文件没有任何相关测试：";
+          for FILE in $UNCOVERED; do echo "     $FILE"; done
+          echo "";
+          echo "💡 补一个测试。真的该由别的车道证明，就说清是哪条，并把排除规则写在";
+          echo "   上面那个过滤器里——附上理由，别默默放行。";
+          exit 1;
         fi
         echo "🧪 运行相关测试..."
         OUTPUT=$(pnpm vitest related $FILES --run --passWithNoTests --reporter=dot 2>&1) || {
@@ -95,15 +132,6 @@ pre-commit:
           echo ""; echo "💡 请检查并同步更新对应的测试文件";
           exit 1;
         }
-        if echo "$OUTPUT" | grep -q "No test files found"; then
-          echo "";
-          echo "❌ 改动的源文件里，有文件没有任何相关测试：";
-          echo "$FILES" | sed 's/^/     /';
-          echo "";
-          echo "💡 补一个测试。真的该由别的车道证明，就说清是哪条，并把排除规则写在";
-          echo "   上面那个过滤器里——附上理由，别默默放行。";
-          exit 1;
-        fi
         echo "✅ 相关测试通过"
       fail_text: '相关测试失败 - 请确保源码变更后测试同步更新（参见 .claude/rules/testing.md Twin File Principle）'
       stage_fixed: false

@@ -6,14 +6,12 @@ import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
 import {
   SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
-  SINGLE_SITE_ABOUT_STATS_ITEMS,
   SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
   SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS,
   SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
   SINGLE_SITE_HOME_LINK_TARGETS,
   SINGLE_SITE_HOME_PRODUCT_LINES,
-  SINGLE_SITE_HOME_SCENARIO_ITEMS,
   SINGLE_SITE_HOME_SECTION_ORDER,
   SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
   SINGLE_SITE_RESOURCES_PAGE_EXPRESSION,
@@ -122,37 +120,6 @@ describe("single-site-page-expression", () => {
       "innovation",
       "service",
       "integrity",
-    ]);
-    expect(SINGLE_SITE_ABOUT_STATS_ITEMS).toEqual([
-      {
-        key: "years",
-        valueSource: "yearsInBusiness",
-        labelKey: "yearsExperience",
-        suffix: "+",
-      },
-      {
-        key: "countries",
-        valueSource: "exportCountries",
-        labelKey: "countriesServed",
-        suffix: "+",
-      },
-      {
-        key: "team",
-        valueSource: "employees",
-        labelKey: "happyClients",
-        suffix: "+",
-      },
-      {
-        key: "footprint",
-        valueSource: "exampleFootprint",
-        labelKey: "productsDelivered",
-        suffix: "",
-      },
-    ]);
-    expect(SINGLE_SITE_HOME_SCENARIO_ITEMS).toEqual([
-      "item1",
-      "item2",
-      "item3",
     ]);
   });
 

@@ -15,8 +15,9 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
-    title: "Frequently asked starter questions",
-    subtitle: "Use this section to answer replacement and launch questions.",
+    title: "Frequently asked questions",
+    subtitle:
+      "Minimums, samples, OEM scope, and lead time — the questions buyers send first.",
     items: sectionStoryFaqItems,
   },
 } satisfies Meta<typeof FaqSectionView>;
@@ -30,7 +31,7 @@ export const Default: Story = {};
 export const LongAnswers: Story = {
   args: {
     title:
-      "Frequently asked questions about starter replacement, proof review, and launch readiness",
+      "Frequently asked questions about minimum order quantities, paid samples, OEM and private label scope, factory audits, and production lead time",
     items: sectionStoryFaqLongItems,
   },
 };
@@ -38,7 +39,7 @@ export const LongAnswers: Story = {
 export const ChineseCopy: Story = {
   args: {
     title: "常见问题",
-    subtitle: "回答模板替换、证明材料和上线准备相关问题。",
+    subtitle: "起订量、样品、贴牌范围和交期，买家最先问的几件事。",
     items: sectionStoryFaqChineseItems,
   },
 };

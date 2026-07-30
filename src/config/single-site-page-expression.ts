@@ -118,44 +118,11 @@ export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
   "oem",
 ] as const;
 
-export const SINGLE_SITE_HOME_SCENARIO_ITEMS = [
-  "item1",
-  "item2",
-  "item3",
-] as const;
-
 export const SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS = [
   "quality",
   "innovation",
   "service",
   "integrity",
-] as const;
-
-export const SINGLE_SITE_ABOUT_STATS_ITEMS = [
-  {
-    key: "years",
-    valueSource: "yearsInBusiness",
-    labelKey: "yearsExperience",
-    suffix: "+",
-  },
-  {
-    key: "countries",
-    valueSource: "exportCountries",
-    labelKey: "countriesServed",
-    suffix: "+",
-  },
-  {
-    key: "team",
-    valueSource: "employees",
-    labelKey: "happyClients",
-    suffix: "+",
-  },
-  {
-    key: "footprint",
-    valueSource: "exampleFootprint",
-    labelKey: "productsDelivered",
-    suffix: "",
-  },
 ] as const;
 
 export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {

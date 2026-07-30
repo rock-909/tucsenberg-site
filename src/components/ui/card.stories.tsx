@@ -72,7 +72,7 @@ export const LongChineseContent: Story = {
   render: () => (
     <Card className="w-[360px]">
       <CardHeader>
-        <CardTitle>可替换展示卡片</CardTitle>
+        <CardTitle>产品线展示卡片</CardTitle>
         <CardDescription>
           用于检查中文标题、描述和按钮组合在卡片中的换行表现。
         </CardDescription>

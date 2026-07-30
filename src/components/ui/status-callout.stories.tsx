@@ -16,7 +16,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: "Replace this with a short status message for the current step.",
+    children: "A short status message for the current step.",
     title: "Status update",
     tone: "info",
   },
