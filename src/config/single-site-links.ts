@@ -111,19 +111,3 @@ export function getSingleSiteHomeFinalCtaTargets(): SingleSiteHomeFinalCtaTarget
     getSingleSiteHomeLinkTargets(),
   );
 }
-
-export function getSingleSiteContactFallbackHref(): string {
-  const targets = getSingleSiteHomeLinkTargets();
-
-  return targets.contact ?? targets.primaryCta;
-}
-
-export function getSingleSiteAboutPageCtaHref(): string {
-  const targets = getSingleSiteHomeLinkTargets();
-
-  if (targets.products !== undefined) {
-    return targets.products;
-  }
-
-  return targets.contact ?? targets.primaryCta;
-}
