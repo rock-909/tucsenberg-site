@@ -229,11 +229,7 @@ function readValidatedEnvValue(key: keyof typeof env) {
 
 type RuntimeNodeEnv = "development" | "test" | "production";
 type RuntimeAppEnv =
-  | "local"
-  | "development"
-  | "test"
-  | "preview"
-  | "production";
+  "local" | "development" | "test" | "preview" | "production";
 
 function coerceRuntimeNodeEnv(
   value: string | undefined,
@@ -280,13 +276,6 @@ export function getRuntimeEnvBoolean(
   const value = readValidatedEnvValue(key);
   return typeof value === "boolean" ? value : undefined;
 }
-
-export {
-  getPublicRuntimeEnvBoolean,
-  getPublicRuntimeEnvString,
-  isPublicRuntimeDevelopment,
-  isPublicRuntimeProduction,
-} from "./public-runtime-env";
 
 export function getRuntimeNodeEnv(): RuntimeNodeEnv | undefined {
   return coerceRuntimeNodeEnv(getRuntimeEnvString("NODE_ENV"));

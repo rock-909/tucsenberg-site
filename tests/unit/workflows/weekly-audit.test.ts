@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
 
 interface WorkflowStep {
@@ -30,7 +30,7 @@ interface WeeklyAuditWorkflow {
   };
 }
 
-const workflow = yaml.load(
+const workflow = load(
   readFileSync(".github/workflows/weekly-audit.yml", "utf8"),
 ) as WeeklyAuditWorkflow;
 const steps = workflow.jobs?.audit?.steps ?? [];

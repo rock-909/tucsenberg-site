@@ -331,9 +331,7 @@ describe("Header Integration Tests", () => {
         Header({
           locale: "en",
           variant: "invalid" as unknown as
-            | "default"
-            | "minimal"
-            | "transparent",
+            "default" | "minimal" | "transparent",
         }),
       );
 

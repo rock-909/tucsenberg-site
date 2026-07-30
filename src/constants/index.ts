@@ -17,16 +17,13 @@
 // ============================================================================
 export {
   // Lead pipeline
-  MAX_LEAD_EMAIL_LENGTH,
-  MAX_LEAD_NAME_LENGTH,
   MAX_LEAD_PRODUCT_NAME_LENGTH,
-  MAX_LEAD_MESSAGE_LENGTH,
 } from "./validation-limits";
 
 // ============================================================================
 // 时间相关常量
 // ============================================================================
-export { FIVE_SECONDS_MS, MINUTE_MS } from "./time";
+export { MINUTE_MS } from "./time";
 
 // ============================================================================
 // 计数与数值常量

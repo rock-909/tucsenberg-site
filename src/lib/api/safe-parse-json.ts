@@ -14,8 +14,7 @@ type SafeJsonParseFailure = {
   statusCode: typeof HTTP_BAD_REQUEST | typeof HTTP_PAYLOAD_TOO_LARGE;
 };
 export type SafeJsonParseResult<T> =
-  | SafeJsonParseSuccess<T>
-  | SafeJsonParseFailure;
+  SafeJsonParseSuccess<T> | SafeJsonParseFailure;
 
 const DEFAULT_MAX_JSON_BODY_BYTES = 64 * 1024;
 

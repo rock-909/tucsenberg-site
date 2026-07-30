@@ -44,8 +44,7 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
   );
   const activeTheme = theme ?? resolvedTheme;
   const dataTestId = (rest as Record<string, unknown>)["data-testid"] as
-    | string
-    | undefined;
+    string | undefined;
 
   const handleThemeClick = useCallback(
     (themeKey: "light" | "dark" | "system") => {

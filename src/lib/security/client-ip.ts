@@ -13,8 +13,7 @@ const PLATFORM_CLOUDFLARE = "cloudflare";
 const PLATFORM_DEVELOPMENT = "development";
 
 type DeploymentPlatform =
-  | typeof PLATFORM_CLOUDFLARE
-  | typeof PLATFORM_DEVELOPMENT;
+  typeof PLATFORM_CLOUDFLARE | typeof PLATFORM_DEVELOPMENT;
 
 type HeadersLike = Pick<Headers, "get">;
 type TrustedHeaderName = "x-real-ip" | "x-forwarded-for" | "cf-connecting-ip";

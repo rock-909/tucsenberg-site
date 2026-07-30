@@ -13,11 +13,7 @@ export interface SiteSeoConfig {
 }
 
 export type TucsenbergProductStandardId =
-  | "tb_bw"
-  | "tb_ag"
-  | "tb_fb"
-  | "tb_td"
-  | "tb_cp";
+  "tb_bw" | "tb_ag" | "tb_fb" | "tb_td" | "tb_cp";
 
 export interface SiteSocialConfig {
   twitter: string;

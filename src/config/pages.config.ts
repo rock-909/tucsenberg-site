@@ -31,13 +31,7 @@ export function toNavigationNamespaceKey(
 const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 
 export type PublicStaticPageChangeFrequency =
-  | "always"
-  | "hourly"
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "yearly"
-  | "never";
+  "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
 type PublicStaticPageSeoKey =
   | "home"

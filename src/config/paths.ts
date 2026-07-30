@@ -27,7 +27,6 @@ export { SITE_CONFIG } from "@/config/paths/site-config";
 // 重新导出工具函数
 export {
   getCanonicalPath,
-  getDynamicPathnames,
   getLocalizedPath,
   getPageTypeFromPath,
   getPathnames,

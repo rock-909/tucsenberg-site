@@ -142,15 +142,21 @@ export default defineConfig({
       // Stub CSS imports to avoid PostCSS processing in tests (must come before @ alias)
       {
         find: "@/app/globals.css",
-        replacement: resolve(__dirname, "./src/test/css-stub.ts"),
+        replacement: resolve(import.meta.dirname, "./src/test/css-stub.ts"),
       },
       // Fix directory import resolution in Vitest for packages that import "next/font/local"
       { find: "next/font/local", replacement: "next/font/local/index.js" },
       // Content path alias (must match tsconfig.json paths for consistency)
-      { find: "@content", replacement: resolve(__dirname, "./content") },
+      {
+        find: "@content",
+        replacement: resolve(import.meta.dirname, "./content"),
+      },
       // Main path aliases
-      { find: "@messages", replacement: resolve(__dirname, "./messages") },
-      { find: "@", replacement: resolve(__dirname, "./src") },
+      {
+        find: "@messages",
+        replacement: resolve(import.meta.dirname, "./messages"),
+      },
+      { find: "@", replacement: resolve(import.meta.dirname, "./src") },
     ],
   },
 

@@ -51,9 +51,7 @@ vi.mock("next-intl/server", async () => {
       }: {
         locale?: string;
         namespace:
-          | "requestQuote.metadata"
-          | "requestQuote.page"
-          | "inquiry.form";
+          "requestQuote.metadata" | "requestQuote.page" | "inquiry.form";
       }) => {
         if (namespace === "requestQuote.metadata") {
           return (key: string) =>

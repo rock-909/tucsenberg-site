@@ -44,8 +44,7 @@ type MockHref =
       query?: Record<string, string>;
     };
 type TestProductImage =
-  | { status: "real"; src: string }
-  | { status: "pending" | "omitted" };
+  { status: "real"; src: string } | { status: "pending" | "omitted" };
 
 function stringifyMockHref(href: MockHref) {
   if (typeof href === "string") {
@@ -394,8 +393,7 @@ describe("Market Landing Page", () => {
       await renderPage("abs-flood-barriers");
 
       const graphCall = mockJsonLdGraphScript.mock.calls.at(-1)?.[0] as
-        | { readonly data: readonly unknown[] }
-        | undefined;
+        { readonly data: readonly unknown[] } | undefined;
       const productNode = findProductSchemaNode(graphCall?.data ?? []);
 
       expect(metadata.alternates?.canonical).toBe(expectedUrl);

@@ -45,8 +45,7 @@ import { vi } from "vitest";
       };
 
   const OriginalFetch = (globalThis as any).fetch as
-    | ((input: any, init?: any) => Promise<any>)
-    | undefined;
+    ((input: any, init?: any) => Promise<any>) | undefined;
 
   const mockFetch = vi.fn(async (input: any, init?: any) => {
     const url = (() => {

@@ -1,7 +1,5 @@
 import type { ProductMarketSlug } from "@/constants/product-catalog";
 
-export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
-
 /**
  * Canonical single-site page-expression inputs.
  *

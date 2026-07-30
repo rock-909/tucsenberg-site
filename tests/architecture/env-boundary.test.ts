@@ -180,17 +180,6 @@ describe("env module boundaries", () => {
     expect(source).toContain("export function requireEnvVar");
   });
 
-  it("re-exports public runtime helpers for starter compatibility", () => {
-    const source = read(ENV_FACADE);
-
-    expect(source).toContain("export type { PublicRuntimeEnvKey }");
-    expect(source).toContain("getPublicRuntimeEnvString");
-    expect(source).toContain("getPublicRuntimeEnvBoolean");
-    expect(source).toContain("isPublicRuntimeDevelopment");
-    expect(source).toContain("isPublicRuntimeProduction");
-    expect(source).toContain('from "./public-runtime-env"');
-  });
-
   it("keeps zod-free public runtime env in a dedicated client-safe module", () => {
     expect(existsSync(PUBLIC_RUNTIME_ENV), PUBLIC_RUNTIME_ENV).toBe(true);
 

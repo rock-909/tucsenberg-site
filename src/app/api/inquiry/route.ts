@@ -48,8 +48,7 @@ interface ProductLeadValidationFailure {
 }
 
 type ProductLeadValidationResult =
-  | ProductLeadValidationSuccess
-  | ProductLeadValidationFailure;
+  ProductLeadValidationSuccess | ProductLeadValidationFailure;
 
 function isInquiryHoneypotTriggered(data: Record<string, unknown>): boolean {
   const { website } = data;

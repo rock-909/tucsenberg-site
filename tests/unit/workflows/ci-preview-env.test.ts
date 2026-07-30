@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 
 interface WorkflowStep {
   readonly name?: string;
@@ -19,9 +19,7 @@ interface Workflow {
 }
 
 function readCiWorkflow(): Workflow {
-  return yaml.load(
-    readFileSync(".github/workflows/ci.yml", "utf8"),
-  ) as Workflow;
+  return load(readFileSync(".github/workflows/ci.yml", "utf8")) as Workflow;
 }
 
 function expectPreviewStepEnv(
