@@ -23,105 +23,38 @@ commands, or behavior proof.
 
 ## Assertions must be able to fail
 
-The most common test defect in this repo is an assertion that passes without
-proving anything. Before keeping a new or changed assertion, break the thing it
-claims to protect and confirm the assertion goes red. An assertion that cannot
-be made to fail is not proof — replace it or delete it.
+An assertion must protect observable behavior or a live risk. Prefer the
+smallest assertion whose failure explains what broke.
 
-Shapes that keep recurring in review here:
+- Exercise the real subject rather than a mock that recreates its behavior.
+- Use an expected value independent from the value under test. It may come from
+  a stable contract or fixture; it does not always need to be copied inline.
+- Parse structured input as structured data instead of relying on substring
+  matches.
+- Cover no-JS, responsive, or failure branches only when they carry distinct
+  required behavior.
+- Do not preserve assertions whose only purpose is keeping a deleted name,
+  exact prose, file layout, or historical refactor absent.
 
-- `toContain("some/path.md")` also passes on prose, a code sample, or a dead
-  link. Assert that the reference resolves, not that the string appears.
-- A positive assertion whose expected value is a substring of the wrong value:
-  `=en` matches `=en,zh` too. Anchor the match or assert the exact line.
-- Asserting a heading exists without asserting what has to be under it.
-- Covering only the JavaScript path when a no-JS or responsive branch carries
-  the behavior.
-- Asserting a deleted name stays absent. That guards a past refactor, not live
-  behavior.
-- Asserting that outputs differ instead of what each one is. `Set(classNames)`
-  having six entries, or three variants producing three different strings, holds
-  when every variant is mapped to the wrong style. So does checking only
-  `allowed` on a limiter whose ceiling is a hundred. The expected value has to be
-  written out.
-- Pinning the first few steps of a sequence and then the end state. Ten requests
-  where only the first three returns are read, or a `.env` key matched as "this
-  line exists" while a second declaration of the same key sits below it, leave
-  the middle unwatched. Collect the whole sequence and compare it in one go, and
-  parse key-value files into pairs instead of matching lines.
-- Coercing before pinning the type. `String(["host"]).split(",")` yields the same
-  one-element list a real string would, so a config value written as an array
-  passes a check the runtime would fail. Assert the type, then read the value.
-- Deriving the expected value from the thing under test. `toEqual(PATHNAMES)`
-  where both sides come from the same `createPathnames()` call, or a failure
-  matrix whose expected mode is read out of the preset's own `failureMode`,
-  follows the config instead of checking it — flip the config and the test flips
-  with it. Either hand-write the expected value, or pair the derived check with a
-  hand-written pin somewhere else and say in a comment which one is the truth.
-- Not proving the test reaches the real subject. Three tests here asserted
-  against something other than the code they named: an "i18n integration" test
-  called a mock it defined itself, a routing test imported the global mock rather
-  than the routing module, and a rate-limit atomicity stub answered `GET`/`SET`
-  while the store sent `INCR`, so every request became a storage failure and the
-  count stayed at zero. Before trusting a green, break the real subject and watch
-  the test go red; when a test speaks a wire protocol, read what the
-  implementation actually sends instead of the branch names in the stub.
+Use a deliberate negative check when an assertion is new, surprising, or
+replacing another protection. Full mutation testing is optional, not the
+default requirement for ordinary test changes.
 
-## "Another test covers it" has to be proved, not asserted
+## Replacing or removing proof
 
-This is the single most frequent way a real regression got through review in this
-repo. Four separate rounds deleted an assertion on the belief that a neighbour
-covered it, and in each case the neighbour did not:
+Before saying another test or gate covers a removed check, confirm that it:
 
-- a layout contract was handed to an E2E spec that only saves screenshots and
-  never compares them;
-- `checkDistributedRateLimit` called exactly once was handed to a test that only
-  checks the call arguments, so double-charging a buyer's quota passed;
-- success-path `retryAfter` and `resetTime` were handed to a blocked-path test
-  that only ever inspects the blocked response;
-- a starter-string blacklist was handed to a gate that runs on production deploy
-  only, at warning severity, so what used to fail a pull request now fails
-  nothing until launch.
+- reaches the same behavior and failure mode;
+- runs in the intended pipeline;
+- fails that pipeline with blocking severity.
 
-Before writing "X covers this" in a comment, commit message, or review reply:
-open X, break the source so only X could catch it, run X alone, and see it red.
-If X is a script or CI gate rather than a test, also check its severity and which
-pipeline runs it — coverage that moves from every pull request to a release-only
-gate is a narrowing and has to be described as one.
+Use `git show <ref>:<path>` or a temporary worktree to inspect a baseline. Do
+not rewrite the active worktree to measure it. Report counts and mutation
+results only when they were freshly measured; do not turn snapshots into
+permanent rules.
 
-## Claims about coverage have to be re-measured
-
-Case counts, line counts, "this used to be N tests", and "nothing that could
-catch a regression was removed" are all checkable, and they are where review
-found the most errors in this repo. Three branches in the trim round each needed
-their commit message rewritten more than once because a checkable statement in it
-was false. Rules that follow from that:
-
-- Measure after the last edit, not before. Adding two comment lines invalidates
-  a line count already written into the commit message.
-- To measure a baseline, `git checkout main -- <file>` then restore with
-  `git checkout HEAD -- <file>`. `git stash` is a no-op when everything is
-  committed and will silently measure the branch twice.
-- Do not write an absolute claim about mutations unless each one was applied and
-  re-run. If they were, say how many and what they were; if they were not, say
-  that the assertion path exists rather than that it was verified.
-- A blacklist entry, gate, or assertion is only "dead" after grepping for it.
-  Pipe to `head` and the occurrence that disproves you gets truncated away.
-
-Gates here have failed open more often than they have failed wrong. A check that
-hangs, retries until green, or has no assertion at all is not a check. Shapes
-already fixed in this repo:
-
-- A smoke request with no timeout hangs instead of failing.
-- Playwright retries turn a real first-attempt failure green.
-- An unsafe production switch with nothing asserting against it passes by
-  default.
-- A size gate that runs before a fresh build measures a stale artifact.
-- A byte budget read as JS string `.length` undercounts UTF-8 multibyte content.
-
-Prefer the failing default: set timeouts, disable retries in runs that exist to
-detect flakiness, assert the unsafe value is absent rather than assuming it is,
-and confirm what you measure is freshly built.
+Checks that can hang or silently pass are not gates. Give network checks a
+timeout, measure fresh artifacts, and make unsafe production defaults fail.
 
 ## Default commands
 
@@ -134,7 +67,7 @@ Use narrower Vitest/Playwright commands while developing, then run the command
 that proves the changed behavior.
 
 Heavy mutation or broad review lanes are opt-in only. Do not treat them as
-default proof for ordinary starter work.
+default proof for ordinary changes.
 
 ## React quality gates
 
@@ -154,7 +87,8 @@ React Doctor is part of the React quality signal, not a replacement for tests.
 - Performance changes need before/after evidence. Do not keep a performance
   patch only because it seems faster.
 - For Lighthouse or payload work, run a fresh production build before measuring.
-  `pnpm website:lighthouse` must measure the current `.next`, not a stale build.
+  `pnpm website:lighthouse` builds and measures its isolated `.next-lighthouse`
+  output; do not replace it with the shared `.next` directory.
 - Use the smallest proof that matches the risk: route bundle or transfer size
   for payload changes, Lighthouse for page experience, and React Doctor or
   Profiler for Client Component render behavior.
@@ -233,23 +167,10 @@ Use shared test utilities instead of duplicating mock systems:
 
 - `@/test/utils`
 
-`@/test/i18n-messages` reads `getComposedMessages("en")` — the same composed
-message graph production loads — and is the only place allowed to define what a
-test translation is. Three surfaces go through it: `@/test/utils`, and the
-global `next-intl` and `next-intl/server` mocks in
-`src/test/setup.constants-and-i18n.ts`. Do not hand-write a message catalog for
-tests. Three used to exist here: one drifted to 153 of its 172 leaf keys naming
-nothing real, the client-side one in the global setup invented
-`navigation.services` and `navigation.contact`, and the server-side one returned
-the key name for everything, so Server Component tests asserted `hero.title`
-rather than the shipped headline. Assertions written against any of them proved
-invented copy, and editing the shipped copy turned nothing red.
-
-Two component tests still build their own small table —
-`src/components/cookie/__tests__/cookie-banner.test.tsx` and
-`src/components/ui/__tests__/theme-switcher.test.tsx`, both of which mock
-`useTranslations` locally rather than using the global mock. They are the
-remaining exceptions, not the pattern; do not add a fourth.
+`@/test/i18n-messages` reads the same composed messages as production and is the
+shared translation source for tests. Do not maintain a second hand-written
+message catalog. A focused component test may mock only the keys it consumes
+when message loading itself is not under test.
 
 Two properties that must hold, and are pinned by
 `src/test/__tests__/mock-translations.test.ts`:

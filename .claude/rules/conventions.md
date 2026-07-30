@@ -15,7 +15,7 @@ middleware/proxy behavior, or Next config.
 
 ## App Router
 
-- This repo uses Next.js 16 App Router.
+- This repo uses the installed Next.js App Router.
 - Page/layout `params` and `searchParams` use the installed async request API
   shape.
 - Locale routes live under `/[locale]`; the current configured public locale is
@@ -78,23 +78,8 @@ external fetches, user actions, or dynamic route params.
   `cloudflare.md`.
 - Reserve `*Cached` suffix for exported helpers that actually define a cache
   boundary.
-- Do not add new `unstable_cache` usage. If Cache Components are proved safe and
-  re-enabled later, the installed docs
-  (`node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_cache.md`)
-  state: "This API has been replaced by `use cache` in Next.js 16." Prefer a
-  narrow `"use cache"` boundary in that future lane.
-- If Cache Components are re-enabled, do not place an empty or near-empty
-  `<Suspense>` fallback at the body level of `[locale]/layout.tsx`. It can
-  silently drop the whole site's static shell with no build error.
-
-## Known dependency debt
-
-- `eslint-plugin-import` 2.32.0 is a direct pinned devDependency and is also
-  consumed by `eslint-config-next`. Its `peerDependencies` cap at ESLint `^9`,
-  and it runs through the `@eslint/compat` bridge via `fixupConfigRules` (the
-  official method for using older-style plugins under flat config). Do not treat
-  it as transitive-only or forbid pinning without confirming the bridge still
-  holds and that `eslint-config-next` has not moved to a different import plugin.
+- Do not add new `unstable_cache` usage or Cache Components without separate
+  Cloudflare/OpenNext proof and the installed Next.js documentation.
 
 ## Route deletion checklist
 

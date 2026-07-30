@@ -20,7 +20,6 @@ interface ReleaseProofStep {
   readonly env?: Record<string, string>;
   readonly requiresFreePort?: number;
   readonly artifactBudget?: ReleaseProofArtifactBudget;
-  readonly docs: { readonly includeInReleaseSequence: boolean };
 }
 
 interface ReleaseProofArtifactBudget {
@@ -35,7 +34,6 @@ interface ReleaseProofManifestModule {
   readonly RELEASE_PROOF_MANIFEST: {
     readonly steps: readonly ReleaseProofStep[];
   };
-  readonly formatReleaseProofCommand: (step: ReleaseProofStep) => string;
   readonly getReleaseProofSequence: () => string[];
   readonly getReleaseProofSteps: () => ReleaseProofStep[];
   readonly getReleaseVerifyCommands: () => Array<{
@@ -52,22 +50,6 @@ function loadReleaseProofManifest(): ReleaseProofManifestModule {
 }
 
 describe("release proof manifest", () => {
-  it("is the canonical source for release proof command order", () => {
-    const manifest = loadReleaseProofManifest();
-    const steps = manifest.getReleaseProofSteps();
-
-    expect(steps).toHaveLength(manifest.RELEASE_PROOF_MANIFEST.steps.length);
-    // 只有这条有判别力：sequence 带 `docs.includeInReleaseSequence` 过滤，
-    // verify 列表不带，所以任一步的 docs 标记变化会让两者分叉。
-    // 原来还有一条把 getReleaseVerifyCommands() 跟 cloneReleaseVerifyCommand 的
-    // 实现逐字复述一遍——那是恒真，删了。
-    expect(manifest.getReleaseProofSequence()).toEqual(
-      steps
-        .filter((step) => step.docs.includeInReleaseSequence)
-        .map((step) => manifest.formatReleaseProofCommand(step)),
-    );
-  });
-
   it("keeps release proof local and catalog-only", () => {
     const manifest = loadReleaseProofManifest();
     const releaseProofFlow = manifest.getReleaseProofSequence().join("\n");

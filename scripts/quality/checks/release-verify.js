@@ -171,13 +171,13 @@ async function runReleaseVerify({
     console.log(line);
   }
   console.log(
-    "  - The lead canary requires deployed Airtable/Resend/Turnstile credentials and must be recorded before broad public launch.",
+    "  - The Airtable write canary requires deployed Airtable and Turnstile credentials; it does not prove Resend delivery or owner receipt.",
   );
   console.log(
     "Local release proof completed. This is NOT public launch proof.",
   );
   console.log(
-    "Public launch still requires strict config, deployed smoke, real lead canary, and owner signoff.",
+    "Public launch still requires strict config, deployed smoke, the Airtable write canary, separate owner receipt, and owner signoff.",
   );
   return 0;
 }

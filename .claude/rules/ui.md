@@ -56,10 +56,6 @@ Use this order:
 2. Storybook stories show approved wrapper usage and owner-visible states.
 3. External shadcn docs, CLI, or MCP may be used as reference sources.
 
-Storybook MCP, if enabled by a later approved branch, is an internal component
-knowledge source. It is not a project rule source and is not a default CI hard
-dependency.
-
 shadcn is a reference for mature component patterns. Do not treat shadcn output,
 registry items, or copied code as project-approved until it has been adapted
 into `src/components/ui/*` with local stories, tests, docs, and governance.
@@ -103,9 +99,8 @@ Use this judgment split:
 - `Sheet`: drawer-style interactions such as mobile navigation.
 - FAQ disclosure stays native `<details>/<summary>`.
 - Form controls are native `<input>`, `<textarea>`, `<label>`, and `<checkbox>`
-  with project tokens. The Radix wrappers for these were retired on 2026-07-29
-  because nothing rendered them — `src/components/ui` now holds only what a page
-  actually imports.
+  with project tokens. Add a governed wrapper only when a live surface needs
+  shared behavior that native controls and existing styles do not provide.
 - Reintroducing a governed wrapper for a control that already ships natively is
   a migration, not a swap. Prove FormData behavior, the no-JS fallback, label
   click, control state, and a stable E2E locator before replacing a live one —
@@ -198,8 +193,7 @@ footer, and hero grid patterns are design decisions, not code decisions. Read
 visual ruling in force, and links the rest of the design docs. Treat no single
 design doc as a final brand spec.
 
-Ordinary section H2 uses `.text-section` (24px / md:28px) via `SectionHead`.
-Do not treat `DESIGN.md` `.text-heading` (32/36) as the default section title.
+Ordinary section H2 uses `.text-section` via `SectionHead`.
 
 ## Tailwind CSS v4
 
@@ -233,7 +227,7 @@ Use `cn()` from `@/lib/utils` for conditional classes.
 - Do not remove the Cloudflare `images.unoptimized` baseline or add a custom
   image loader without a separate deployed Cloudflare image proof.
 - Do not add Cloudflare Images, Transformations, remote image domain expansion,
-  or custom loaders as starter defaults without separate deployed proof.
+  or custom loaders as project defaults without separate deployed proof.
 - `next/font/local` is the safe default for branded fonts. Avoid adding runtime
   font network dependencies for buyer-visible pages.
 - For `next/image`, `next/font`, and metadata APIs, check the installed Next.js

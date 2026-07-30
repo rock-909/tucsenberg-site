@@ -1,14 +1,6 @@
 {
   "version": 1,
   "components": {
-    "badge": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "feedback",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for small status chips or labels with semantic variants.",
-      "avoidWhen": "Do not use for long narrative text or raw Radix palette names."
-    },
     "breadcrumb": {
       "story": "required",
       "radixLayer": "primitive",
@@ -88,14 +80,6 @@
       "clientBoundary": "client",
       "useWhen": "Use as the single shared theme switching control.",
       "avoidWhen": "Do not create a second theme switching implementation."
-    },
-    "theme-switcher-highlight": {
-      "story": "required",
-      "radixLayer": "local",
-      "surface": "theme",
-      "clientBoundary": "client",
-      "useWhen": "Use only inside the theme switcher visual track.",
-      "avoidWhen": "Do not use as a general highlight or badge."
     }
   }
 }

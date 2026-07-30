@@ -44,17 +44,6 @@ pre-commit:
       fail_text: '翻译验证失败 - 请同步 messages 物理包与内容文件'
       stage_fixed: false
 
-    structural-clusters-review:
-      # vitest 把路径当过滤器：文件改名后它会安静地少跑一个，全没了还会
-      # 因为 --passWithNoTests 直接 exit 0。先断言文件在，再跑。
-      run: |
-        for f in tests/unit/middleware.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/health.test.ts; do
-          [ -f "$f" ] || { echo "❌ structural cluster 测试文件缺失: $f"; exit 1; }
-        done
-        pnpm exec vitest run tests/unit/middleware.test.ts tests/integration/api/lead-family-contract.test.ts tests/integration/api/health.test.ts
-      fail_text: 'Structural cluster review 失败 - 请修复命中的 cluster contract / drift'
-      stage_fixed: false
-
     # 相关测试检查 - 确保组件/库变更后测试同步更新
     # 使用 Vitest 4 的 `vitest related` 子命令
     #

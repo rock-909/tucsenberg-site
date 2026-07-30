@@ -59,10 +59,6 @@ describe("Storybook preview i18n contract", () => {
     const { getStorybookMessages } =
       await import("@/lib/i18n/storybook-messages");
     const preview = readFileSync(".storybook/preview.ts", "utf8");
-    const heroViewStories = readFileSync(
-      "src/components/sections/hero-section-view.stories.tsx",
-      "utf8",
-    );
     const heroStories = readFileSync(
       "src/components/sections/hero-section.stories.tsx",
       "utf8",
@@ -78,7 +74,6 @@ describe("Storybook preview i18n contract", () => {
     expect(englishMessages["structured-data"]?.article?.defaultAuthor).toBe(
       "{companyName}",
     );
-    expect(heroViewStories).not.toContain('locale: "zh"');
     expect(heroStories).not.toContain('locale: "zh"');
   });
 });

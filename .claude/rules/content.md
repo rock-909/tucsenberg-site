@@ -23,7 +23,6 @@ Every content field has one authoring source.
 | If changing | Edit | Do not edit |
 | --- | --- | --- |
 | Company-wide facts | `src/config/single-site.ts` | MDX prose |
-| Content behavior and validation options | `content/config/content.json` | Page components |
 | Page prose, FAQ, page SEO | `content/pages/{locale}/*.mdx` | Translation JSON |
 | Page structure switches | `src/config/single-site-page-expression.ts` | MDX body copy |
 | Crawl/indexing policy | `src/config/single-site-seo.ts` | Page components |
@@ -37,10 +36,9 @@ For derived projects, replace in this order:
 1. `src/config/single-site.ts`
 2. `src/config/single-site-page-expression.ts`
 3. `src/config/single-site-seo.ts`
-4. `content/config/content.json`
-5. `content/pages/{locale}/*.mdx`
-6. physical message packs under `messages/base/**` and `messages/profiles/**`
-7. product/catalog/spec config and public images
+4. `content/pages/{locale}/*.mdx`
+5. physical message packs under `messages/base/**` and `messages/profiles/**`
+6. product/catalog/spec config and public images
 
 Do not treat starter examples as client-ready facts.
 

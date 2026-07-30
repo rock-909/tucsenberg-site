@@ -77,7 +77,9 @@ function createPublicPreviewFetchMock() {
   });
 }
 
-function createDeployedFetchMock() {
+function createDeployedFetchMock(
+  pdfHeaders: HeadersInit = { "x-robots-tag": "noindex" },
+) {
   return vi.fn(
     async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const pathname = getRequestPath(input);
@@ -101,6 +103,10 @@ function createDeployedFetchMock() {
 
       if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
         return response(404, "not found");
+      }
+
+      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+        return response(200, "%PDF-1.7", pdfHeaders);
       }
 
       return response(404, "not found");
@@ -179,6 +185,15 @@ function listenForDeployedSmoke(): Promise<{
       if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
         serverResponse.writeHead(404, { "content-type": "text/plain" });
         serverResponse.end("not found");
+        return;
+      }
+
+      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+        serverResponse.writeHead(200, {
+          "content-type": "application/pdf",
+          "x-robots-tag": "noindex",
+        });
+        serverResponse.end("%PDF-1.7");
         return;
       }
 
@@ -528,6 +543,7 @@ describe("deployed smoke", () => {
       "/api/health",
       "/zh",
       "/zh/contact",
+      "/downloads/spec-sheet-tb-bw.pdf",
     ]);
     expect(
       fetchMock.mock.calls.every(
@@ -599,6 +615,7 @@ describe("deployed smoke", () => {
         "/api/health",
         "/zh",
         "/zh/contact",
+        "/downloads/spec-sheet-tb-bw.pdf",
       ].sort(),
     );
     expect(result.stdout).toContain("[post-deploy-smoke] All checks passed");
@@ -615,6 +632,25 @@ describe("deployed smoke", () => {
     ).rejects.toThrow(
       "Both --header-name and --header-value must be provided together",
     );
+  });
+
+  it("fails when the deployed PDF loses its noindex header", async () => {
+    captureExpectedConsoleErrors(
+      "[post-deploy-smoke] Failures detected:",
+      "  - Expected /downloads/spec-sheet-tb-bw.pdf to carry X-Robots-Tag: noindex, got none",
+    );
+    vi.stubGlobal("fetch", createDeployedFetchMock({}));
+
+    await expect(
+      runDeployedSmoke([
+        "--base-url",
+        "https://deployed.example",
+        "--header-name",
+        "x-smoke-secret",
+        "--header-value",
+        "proof",
+      ]),
+    ).resolves.toBe(false);
   });
 
   it("probes the mandatory deployed routes concurrently", async () => {
@@ -671,9 +707,11 @@ describe("deployed smoke", () => {
       ): Promise<Response> => {
         // Correct status per route, but middleware cookie leaks through.
         const base = await deployedFetchMock(input, init);
+        const headers = new Headers(base.headers);
+        headers.set("x-middleware-set-cookie", "locale=en");
         return new Response(await base.text(), {
           status: base.status,
-          headers: { "x-middleware-set-cookie": "locale=en" },
+          headers,
         });
       },
     );

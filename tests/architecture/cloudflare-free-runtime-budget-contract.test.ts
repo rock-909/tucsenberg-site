@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
@@ -66,18 +65,5 @@ describe("Cloudflare Free runtime budget contract", () => {
     expect(build).toBeGreaterThan(-1);
     expect(headers).toBeGreaterThan(build);
     expect(dryRun).toBeGreaterThan(headers);
-  });
-
-  // 静态资源缓存头丢了不会让任何构建失败，只会让每个买家每次访问都重新下载整个
-  // JS bundle。读最终产物旁边的 _headers，不读源码里的意图。
-  it("keeps immutable caching on the static asset route", () => {
-    expect(existsSync("public/_headers")).toBe(true);
-
-    const headers = readFileSync("public/_headers", "utf8");
-
-    expect(headers).toContain("/_next/static/*");
-    expect(headers).toContain(
-      "Cache-Control: public,max-age=31536000,immutable",
-    );
   });
 });

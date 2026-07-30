@@ -4,16 +4,14 @@ import { describe, expect, it } from "vitest";
 import {
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
-  RELEASE_VERIFY_COMMANDS,
   STARTER_CHECK_COMMANDS,
-  formatReleaseCommand,
 } from "../../../scripts/starter-checks.js";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 const VALID_RELEASE_LANES = new Set([
   "local/test-mode",
   "deployed-smoke",
-  "real-service-canary",
+  "airtable-write-canary",
 ]);
 
 function readPackageScripts(): Record<string, string> {
@@ -47,9 +45,6 @@ describe("release proof manifest contract", () => {
     for (const step of RELEASE_PROOF_MANIFEST.steps) {
       expect(step.id).toMatch(/^[a-z0-9-]+$/u);
       expect(VALID_RELEASE_LANES.has(step.lane), step.id).toBe(true);
-      // 这里原本还有 expect(step.docs?.includeInReleaseSequence).toBe(true)。
-      // manifest 里那个字段只有一个共享常量、没有一处是 false，所以那条断言
-      // 永远不可能红——正是这个 PR 在清的那类东西。删于 2026-07-26。
       expect(step.command, step.id).toMatch(/^(node|pnpm)$/u);
       expect(step.args.length, step.id).toBeGreaterThan(0);
     }
@@ -58,17 +53,6 @@ describe("release proof manifest contract", () => {
       expect(VALID_RELEASE_LANES.has(lane.lane), lane.label).toBe(true);
       expect(lane.command.length, lane.label).toBeGreaterThan(0);
     }
-  });
-
-  it("keeps release verify commands and docs sequence generated from the same manifest", () => {
-    const releaseVerifyCommands =
-      RELEASE_VERIFY_COMMANDS.map(formatReleaseCommand);
-
-    // 只断言两条派生路径（文档渲染 / verify 执行）从同一份 manifest 出来的结果
-    // 一致。这里以前还抄了一份完整命令序列的字面量：manifest 一改它就红，红了
-    // 就照抄更新，等于把 manifest 写了第二遍，不产生任何信息。2026-07-26 删。
-    expect(RELEASE_PROOF_SEQUENCE).toEqual(releaseVerifyCommands);
-    expect(RELEASE_PROOF_SEQUENCE.length).toBeGreaterThan(0);
   });
 });
 

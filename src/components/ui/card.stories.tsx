@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const meta = {
   title: "UI/Card",
@@ -51,7 +50,7 @@ export const WithAction: Story = {
           Shows header action, body content, and footer together.
         </CardDescription>
         <CardAction>
-          <Badge variant="secondary">Status</Badge>
+          <span className="text-xs text-muted-foreground">Status</span>
         </CardAction>
       </CardHeader>
       <CardContent>

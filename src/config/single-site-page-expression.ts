@@ -1,12 +1,4 @@
-import {
-  getSingleSiteActiveRouteTargets,
-  getSingleSiteContactFallbackHref,
-  getSingleSiteAboutPageCtaHref,
-} from "@/config/single-site-links";
-import {
-  PRODUCT_CATALOG,
-  type ProductMarketSlug,
-} from "@/constants/product-catalog";
+import type { ProductMarketSlug } from "@/constants/product-catalog";
 
 export { SINGLE_SITE_HOME_LINK_TARGETS } from "@/config/single-site-links";
 
@@ -117,47 +109,3 @@ export const SINGLE_SITE_HOME_HERO_PROOF_ITEMS = [
   "factoryPool",
   "oem",
 ] as const;
-
-export const SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS = [
-  "quality",
-  "innovation",
-  "service",
-  "integrity",
-] as const;
-
-export const SINGLE_SITE_ABOUT_PAGE_EXPRESSION = {
-  ctaHref: getSingleSiteAboutPageCtaHref(),
-} as const;
-
-const singleSiteContactFallbackHref = getSingleSiteContactFallbackHref();
-const singleSiteActiveRouteTargets = getSingleSiteActiveRouteTargets();
-
-const standardMarketSlugs = PRODUCT_CATALOG.markets.map(
-  (market) => market.slug,
-);
-
-export const SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION = {
-  standardMarketSlugs,
-  marketLanding: {
-    ctaHref: singleSiteContactFallbackHref,
-  },
-} as const;
-
-const SINGLE_SITE_RESOURCES_CARD_KEYS = [
-  "brochure",
-  "productSheet",
-  "buyerGuide",
-] as const;
-
-export const SINGLE_SITE_RESOURCES_PAGE_EXPRESSION = {
-  cardKeys: SINGLE_SITE_RESOURCES_CARD_KEYS,
-  pathwayStepKeys: ["learn", "compare", "ask"],
-  replacementItemKeys: ["files", "proof", "owner"],
-  cardHrefs: {
-    brochure: singleSiteContactFallbackHref,
-    productSheet:
-      singleSiteActiveRouteTargets.products ?? singleSiteContactFallbackHref,
-    buyerGuide: singleSiteContactFallbackHref,
-  } satisfies Record<(typeof SINGLE_SITE_RESOURCES_CARD_KEYS)[number], string>,
-  ctaHref: singleSiteContactFallbackHref,
-} as const;

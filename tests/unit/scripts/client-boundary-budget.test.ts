@@ -50,11 +50,7 @@ function moveFixtureToTrash(rootDir: string): void {
   fs.renameSync(rootDir, targetDir);
 }
 
-function writeBudget(
-  rootDir: string,
-  allowedClientBoundaries: string[],
-  maxClientBoundaries = allowedClientBoundaries.length,
-): void {
+function writeBudget(rootDir: string, allowedClientBoundaries: string[]): void {
   const budgetPath = path.join(
     rootDir,
     "scripts/quality/config/client-boundary-budget.json",
@@ -67,7 +63,6 @@ function writeBudget(
     `${JSON.stringify(
       {
         version: 1,
-        maxClientBoundaries,
         allowedClientBoundaries,
       },
       null,
@@ -193,7 +188,7 @@ describe("client-boundary-budget", () => {
         '"use client";\nexport const Widget = 1;',
     });
     fixtureRoots.push(rootDir);
-    writeBudget(rootDir, ["src/components/live.tsx"], 2);
+    writeBudget(rootDir, ["src/components/live.tsx"]);
 
     const result = runClientBoundaryBudgetCheck(rootDir);
 
@@ -206,30 +201,6 @@ describe("client-boundary-budget", () => {
         expect.objectContaining({
           kind: "unexpected-client-boundary",
           file: "src/components/new-widget.tsx",
-        }),
-      ]),
-    );
-  });
-
-  it("fails when the detected count exceeds the budget", () => {
-    const rootDir = createFixture({
-      "src/components/one.tsx": '"use client";\nexport const One = 1;',
-      "src/components/two.tsx": '"use client";\nexport const Two = 1;',
-    });
-    fixtureRoots.push(rootDir);
-    writeBudget(
-      rootDir,
-      ["src/components/one.tsx", "src/components/two.tsx"],
-      1,
-    );
-
-    const result = runClientBoundaryBudgetCheck(rootDir);
-
-    expect(result.status).toBe("failed");
-    expect(result.errors).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "budget-exceeded",
         }),
       ]),
     );
