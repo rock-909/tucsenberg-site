@@ -2,7 +2,7 @@
 
 Tucsenberg 英文官网项目，面向海外防洪屏障采购、OEM/批发询盘和资料下载转化。
 
-这个仓库已经从 `showcase-website-starter` 派生成具体站点。当前业务真相以 Tucsenberg 页面、内容、配置和上线证明为准。多 profile runtime 和 materialize 工具已经退役；旧说明只作为标明日期的历史记录保留。
+这个仓库已经从 `showcase-website-starter` 派生成具体站点。当前业务真相以 Tucsenberg 页面、内容、配置和上线证明为准。多 profile runtime 和 materialize 工具已经退役；旧说明需要追溯时看 Git 历史。
 
 ## 当前站点范围
 
@@ -50,22 +50,11 @@ CI 当前保留 React Doctor、Tucsenberg Playwright smoke、Component governanc
 5. `docs/正式上线标准.md`
 6. `docs/技术问题与决策.md`
 
-历史 starter 派生说明已经退出当前文档入口；需要追溯时看 git 历史或本机 Trash，不要把它们当 Tucsenberg 当前站的业务入口。
+历史 starter 派生说明已经退出当前文档入口；需要追溯时看 Git 历史，不要把它们当 Tucsenberg 当前站的业务入口。
 
 ## 技术基础
 
-- Next.js 16.2.10 App Router
-- React 19.2.7
-- TypeScript 6.0.3
-- Tailwind CSS 4.3.0
-- next-intl 4.13.0
-- MDX 内容页
-- Radix / shadcn-style UI
-- Storybook
-- Vitest / Playwright
-- Cloudflare / OpenNext 1.20.1 / Wrangler 4.100.0
-
-完整技术栈、Cloudflare、cache、CSP 和升级边界见 `docs/技术栈.md`。
+当前技术栈、精确版本、Cloudflare、cache、CSP 和升级边界见 `docs/技术栈.md` 与 `package.json`。
 
 ## 当前内容和配置真相
 
@@ -83,6 +72,5 @@ message graph 固定为 `base -> b2b-lead -> catalog`。修改 physical packs �
 
 - Codex：`AGENTS.md`
 - Claude：`CLAUDE.md`
-- 本地协作偏好：`CLAUDE.local.md`
 
 长期规则写入 docs 或规则文件；不要只留在聊天、handoff 或旧 plan。

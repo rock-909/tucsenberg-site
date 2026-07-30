@@ -1,23 +1,16 @@
----
-name: Tucsenberg Site
-register: brand
-status: derived-site-phase-1
-last_updated: 2026-07-03
----
-
 # Product Context
+
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web
 
 ## Status
 
-这是 Tucsenberg 英文 B2B 官网项目的产品上下文文件，给设计、内容、实现类 AI agent 读，作为本仓当前业务真相。
+这是 Tucsenberg 英文 B2B 官网项目的产品意图入口，供设计、内容和实现类 AI agent 使用；它不参与网站运行、构建或 CI。与当前代码、配置或运行行为冲突时，以实际行为为准并更新本文。
 
 本仓已经从 `showcase-website-starter` 派生成具体站点。保留的 starter/profile 代码、测试和文档属于继承工具或历史说明；当前页面、内容、询盘路径和上线证明都应按 Tucsenberg 站点判断。
-
-## Register
-
-brand
-
-> Tucsenberg 网站属于品牌/营销面：hero、产品故事、信任证据、转化路径——设计本身就是产品，不是辅助某个内部工具。所以 impeccable 的 brand 分册规则适用。
 
 ## Users
 
@@ -32,7 +25,7 @@ brand
 
 ## Product Purpose
 
-Phase 1 目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品，并自然进入报价、资料下载或联系路径。
+当前目标：让访问者快速理解 Tucsenberg 做哪些防洪屏障产品，并自然进入报价、资料下载或联系路径。
 
 成功的样子：
 
