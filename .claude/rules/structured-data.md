@@ -4,7 +4,9 @@ paths:
   - "src/lib/page-structured-data.ts"
   - "src/lib/content/mdx-faq.ts"
   - "src/components/seo/**"
-  - "src/app/**/*.tsx"
+  - "src/app/**/page.tsx"
+  - "src/app/**/*jsonld.ts"
+  - "src/app/**/*page-data.ts"
   - "content/pages/**/*.mdx"
 ---
 

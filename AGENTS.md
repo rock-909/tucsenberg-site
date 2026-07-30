@@ -48,14 +48,13 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 ## 规则路由
 
 详细规则在 `.claude/rules/*.md`。每份文件的 `paths:` 前言才是"它管哪些文件"的权威；
-下表只是查找捷径。改之前读对应那份，并顺着它给的指针继续读设计文档和决策记录。
+下表只是给不会自动加载 Rules 的 agent 查入口。
 
 | 你在改什么 | 读哪份 |
 | --- | --- |
 | 组件、页面区块、stories、design token、Tailwind | `ui.md` |
 | 路由、layout、metadata、缓存、client 边界 | `conventions.md` |
-| 任何 TypeScript：类型、import、命名、日志 | `coding-standards.md` |
-| 复杂度、lint 例外、magic number、依赖清理 | `code-quality.md` |
+| 任何 TypeScript：类型、import、命名、复杂度、lint 例外、依赖清理 | `coding-standards.md` |
 | 测试、fixtures、mock、行为证明 | `testing.md` |
 | API route、安全配置、lead schema、`next.config.ts` | `security.md` |
 | middleware、`open-next.config.ts`、`wrangler.jsonc`、部署 | `cloudflare.md` |
@@ -104,6 +103,5 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 ## AI 前端体系
 
-治理正本：`docs/design/组件治理.md`、`docs/design/设计真相.md`、
-`.claude/rules/ui.md`，加上组件治理测试。`src/components/ui/*` 是正式的 UI 入口，
-测试和 `pnpm component:check` 是硬门槛。
+`src/components/ui/*` 是正式的 UI 入口，`.claude/rules/ui.md` 只写修改边界，
+`pnpm component:check` 是门禁。`docs/design/` 提供设计背景，但不能覆盖当前代码和测试事实。

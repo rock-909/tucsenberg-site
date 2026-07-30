@@ -71,7 +71,7 @@ pre-commit:
           exit 1;
         }
         echo "✅ 相关测试通过"
-      fail_text: '相关测试失败 - 请确保源码变更后测试同步更新（参见 .claude/rules/testing.md Twin File Principle）'
+      fail_text: '相关测试失败 - 请确认改动行为有对应测试覆盖'
       stage_fixed: false
 
 commit-msg:

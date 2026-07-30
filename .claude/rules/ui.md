@@ -2,14 +2,14 @@
 paths:
   - "src/components/**/*.tsx"
   - "src/app/**/page.tsx"
-  - "src/components/sections/**"
+  - "src/app/**/layout.tsx"
   - "src/**/*.stories.tsx"
 ---
 
 # UI Rules
 
-Use this file when creating or changing components, sections, form UI,
-Storybook states, design tokens, Tailwind classes, images, or fonts.
+Use this file when creating or changing components, sections, form UI, design
+tokens, Tailwind classes, images, or fonts.
 
 ## Reuse first
 
@@ -39,33 +39,20 @@ Decision order:
 2. Add a variant when the concept is the same.
 3. Compose a business component only when there is real business meaning.
 4. Keep one-off page UI local.
-5. Add a new `src/components/ui/` primitive only with a clear reason,
-   Storybook coverage, registry coverage, and tests when behavior exists.
+5. Add a new `src/components/ui/` primitive only with a clear current need and
+   tests when behavior exists.
 
 Use project wrappers in `src/components/ui/` instead of importing Radix
 primitives directly from page sections or business components.
 
-## AI-assisted frontend decision layer
-
-For owner-request-to-agent-coding work, classify the request before changing UI.
-
-Use this order:
-
-1. Rules decide the project boundary.
-2. Storybook stories show approved wrapper usage and owner-visible states.
-3. External shadcn docs, CLI, or MCP may be used as reference sources.
-
-shadcn is a reference for mature component patterns. Do not treat shadcn output,
-registry items, or copied code as project-approved until it has been adapted
-into `src/components/ui/*` with local stories, tests, docs, and governance.
+External UI references such as shadcn are references only; project-approved UI
+lives in adapted local wrappers under `src/components/ui/*`.
 
 ## Radix UI foundation
 
-The project uses local UI wrappers plus Radix Primitives. Read
-`docs/技术问题与决策.md` before changing the UI foundation.
+The project uses local UI wrappers plus Radix Primitives.
 
 - Radix Primitives are approved for complex interactions.
-- Radix-style 1-12 color roles are approved as the color reasoning model.
 - Tailwind and project tokens own controls, page layout, responsive structure,
   and brand expression.
 - Runtime color truth remains in `src/app/globals.css`.
@@ -93,19 +80,10 @@ Use this judgment split:
 - Straightforward native form and semantic HTML behavior: prefer local wrappers.
 - Marketing/storytelling surfaces: prefer Tailwind, project tokens, and local
   section composition.
-- `Card`: marketing, resources, product story, proof, structured data, form
-  shells, and fallback panels.
-- `Sheet`: drawer-style interactions such as mobile navigation.
-- FAQ disclosure stays native `<details>/<summary>`.
-- Form controls are native `<input>`, `<textarea>`, `<label>`, and `<checkbox>`
-  with project tokens. Add a governed wrapper only when a live surface needs
-  shared behavior that native controls and existing styles do not provide.
-- Reintroducing a governed wrapper for a control that already ships natively is
-  a migration, not a swap. Prove FormData behavior, the no-JS fallback, label
-  click, control state, and a stable E2E locator before replacing a live one —
-  cookie consent and the inquiry fields are the surfaces this protects.
-- Contact and Request Quote share the same `InquiryForm`, `Card`, and static
-  fallback; there is no privacy consent checkbox on either page.
+- Form controls are native HTML with project tokens. The current
+  `src/components/ui` surface should contain only wrappers that a page imports.
+- Replacing live native form controls with wrappers must preserve FormData,
+  labels, no-JS fallback, state, and stable user-facing locators.
 
 ## Mobile navigation boundaries
 
@@ -113,12 +91,8 @@ Keep mobile navigation interaction state inside the smallest client island. Do
 not turn the whole header, navigation shell, or static fallback into a Client
 Component only to support drawer state.
 
-When changing header or mobile navigation behavior:
-
-- preserve the server-rendered/no-JS navigation fallback when practical;
-- keep accessible labels and stable navigation links;
-- run or update the client-boundary proof when adding a new `"use client"` file;
-- keep focused tests for SSR/no-JS fallback behavior when that surface changes.
+When changing header or mobile navigation, preserve the server-rendered/no-JS
+fallback, accessible labels, stable links, and the smallest client boundary.
 
 ## Header and shared island state
 
@@ -140,39 +114,6 @@ For lazy-loaded stateful UI:
 Do not move the whole header or layout to a Client Component just to reset
 dropdown, drawer, or progress state.
 
-## Storybook
-
-Storybook is the visual contract for governed UI wrappers, not a second copy of
-the website.
-
-Add stories by default for:
-
-- reusable `src/components/ui/*` wrappers;
-- important visual or interaction states;
-- long Chinese or long-content cases when layout risk exists.
-
-Do not add stories by default for:
-
-- full pages;
-- hero sections;
-- footer composition;
-- marketing narrative sections;
-- one-off layout blocks.
-
-Existing business/page-level stories may remain. Add new business/page-level
-stories only when the component is a reusable template or an isolated bug needs
-reproduction.
-
-Keep wrapper stories small:
-
-- `Default` for canonical usage;
-- `Variants` only when public variants exist;
-- `LongChineseContent` when text overflow or wrapping is a real risk;
-- `Interaction` or a named scenario only for important behavior.
-
-Storybook uses the Vite builder. Do not add webpack-only Storybook assumptions
-or addons unless the change includes a current Storybook build proof.
-
 ## Design tokens
 
 Design values live in `src/app/globals.css`.
@@ -186,13 +127,8 @@ Design values live in `src/app/globals.css`.
 - `src/config/static-theme-colors.ts` is only for email and other non-CSS
   surfaces.
 
-Brand color, theme, token structure, section titles, page skeleton, cards,
-footer, and hero grid patterns are design decisions, not code decisions. Read
-`docs/design/设计真相.md` first: it states the current design phase, names the
-visual ruling in force, and links the rest of the design docs. Treat no single
-design doc as a final brand spec.
-
-Ordinary section H2 uses `.text-section` via `SectionHead`.
+Brand color, theme, token structure, and page-level visual patterns are design
+decisions. Ordinary section H2 uses `.text-section` via `SectionHead`.
 
 ## Tailwind CSS v4
 
@@ -229,5 +165,3 @@ Use `cn()` from `@/lib/utils` for conditional classes.
   or custom loaders as project defaults without separate deployed proof.
 - `next/font/local` is the safe default for branded fonts. Avoid adding runtime
   font network dependencies for buyer-visible pages.
-- For `next/image`, `next/font`, and metadata APIs, check the installed Next.js
-  docs before editing.

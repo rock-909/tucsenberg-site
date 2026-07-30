@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-写给 Claude Code。`AGENTS.md` 讲同样的事，是给不会自动加载 `.claude/rules/*.md`
-的其他工具看的。
+写给 Claude Code。其他编码 agent 使用 `AGENTS.md`；那里另有 Rules 路由表，
+因为它们不会自动按路径加载 `.claude/rules/*.md`。
 
 ## 这个项目
 

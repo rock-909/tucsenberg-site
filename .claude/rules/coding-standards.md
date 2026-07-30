@@ -4,6 +4,8 @@ paths:
   - "tests/**/*.{ts,tsx}"
   - "scripts/**/*.{js,mjs,ts}"
   - "*config.{js,ts,mjs,mts}"
+  - "package.json"
+  - "pnpm-lock.yaml"
   - "eslint.config.mjs"
 ---
 
@@ -11,39 +13,17 @@ paths:
 
 ## TypeScript
 
-- Keep `strict: true` and `noImplicitAny: true`.
-- No `any` in production code.
-- Default to `interface` for object shapes.
-- Use `type` for unions, tuples, mapped types, and utility-heavy compositions.
-- Prefer `const` objects plus union types over `enum`. `erasableSyntaxOnly` is
-  on in `tsconfig.json`, so the compiler rejects non-erasable syntax (`enum`,
-  `namespace`, constructor parameter properties) — this is enforced, not just a
-  preference.
-- Use `satisfies` for typed object literals.
-
-With `exactOptionalPropertyTypes`, omit optional properties instead of passing
-explicit `undefined`.
+Keep production code within the current `tsconfig.json` and lint boundaries;
+do not weaken them incidentally.
 
 ## Naming
 
-| Type | Convention |
-| --- | --- |
-| Components | `PascalCase` |
-| Hooks | `useSomething` |
-| Utilities | `camelCase` |
-| Constants | `SCREAMING_SNAKE` |
-| Directories | `kebab-case` |
-| Booleans | `is/has/can/should` |
-| Event handlers | `handleSomething` |
-
-### 文件名
-
 文件名一律 kebab-case，组件文件同理（`footer.tsx`，不是 `Footer.tsx`）。
-导出的组件标识符仍是 PascalCase——上面那张表管的是标识符，这一条管的是文件名。
+标识符遵循 TypeScript/React 的常规命名，不在 Rules 中重复通用约定。
 
 ### 注释语言
 
-代码注释一律用中文（业主 2026-07-27 裁决）。
+代码注释一律用中文。
 
 存量的中英混写不做批量重写：那是因为此前没有规则可依，不是有人违规。
 这条规则只约束新写的注释。
@@ -59,15 +39,35 @@ What eslint actually enforces (`no-restricted-imports`, `no-duplicate-imports`):
   `next/link` (lint error).
 - No duplicate import statements from the same module.
 
-Not machine-enforced (convention only):
+Treat boundary-safe modules as part of the import contract. Middleware,
+route handlers, and server-only modules must not import browser-only helpers
+through convenience barrels.
 
-- Import ordering/grouping is NOT lint-enforced — there is no `import/order` or
-  `sort-imports` rule, so the linter will not reorder imports for you and no
-  fixed React→Next→third-party→`@/`→relative sequence is required. Group imports
-  however reads clearest for the file; do not assume tooling normalizes order.
-- Treat boundary-safe modules as part of the import contract. Middleware,
-  route handlers, and server-only modules must not import browser-only helpers
-  through convenience barrels.
+## Complexity and lint exceptions
+
+- Treat lint and complexity reports as review signals, not mechanical rewrite
+  targets. Split only at a real behavior, data, platform, or security boundary.
+- Keep ESLint disables narrow and name the exact rule and current reason.
+- Name numeric values that carry domain meaning; keep incidental language,
+  layout, and configuration literals inline when that is clearer.
+- Do not add broad `memo`, `useMemo`, or `useCallback` without measured need.
+
+## Dependency and deletion hygiene
+
+- Treat unused dependency/export reports as leads, not deletion proof.
+- Before removal, distinguish runtime, generated/tooling, governed, and truly
+  unused entrypoints.
+- After deleting a named surface, search configuration, tests, generated files,
+  and rule routing for string references that type-checking cannot see.
+- Keep a guard only while it protects live behavior or a real reintroduction
+  risk.
+
+## Quality boundaries
+
+- Do not weaken current TypeScript, ESLint, or build gates incidentally.
+- Production code must not import `src/test/**`, `src/testing/**`, or
+  `src/constants/test-*`.
+- Prefer deleting stale compatibility code over wrapping obsolete behavior.
 
 ## Logging
 

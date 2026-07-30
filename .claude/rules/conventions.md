@@ -1,7 +1,6 @@
 ---
 paths:
   - "src/app/**/*.{ts,tsx}"
-  - "src/components/**/*.{ts,tsx}"
   - "src/lib/content/**"
   - "src/middleware.ts"
   - "next.config.ts"
@@ -9,18 +8,16 @@ paths:
 
 # Next.js Runtime Rules
 
-Read the installed Next.js docs under `node_modules/next/dist/docs/` before
-changing routes, layouts, metadata, images, fonts, caching, Server Components,
-middleware/proxy behavior, or Next config.
+This file contains project-specific Next.js choices, not generic framework API
+guidance.
 
 ## App Router
 
 - This repo uses the installed Next.js App Router.
-- Page/layout `params` and `searchParams` use the installed async request API
-  shape.
-- Locale routes live under `/[locale]`; the current configured public locale is
-  `en` only. Add future languages through `LOCALES_CONFIG`, not scattered
-  route/header literals.
+- Use the installed async request API shape for page/layout request props.
+- Locale routes live under `/[locale]`; configured locales and the default are
+  defined by `LOCALES_CONFIG`. Add languages there and provide their message
+  packs; do not scatter locale literals through routes or headers.
 - Keep layouts and non-interactive sections as Server Components.
 - Push `"use client"` down to interactive leaf components.
 
@@ -30,13 +27,10 @@ middleware/proxy behavior, or Next config.
   and footers as Server Components by default.
 - Push `"use client"` to the smallest interactive leaf. Do not make a whole
   section a Client Component only for minor animation or convenience.
-- Use lazy loading for Client Components or browser-only libraries only when the
-  delayed code is heavy, non-critical for first render, and not needed to
-  understand the page.
+- Use lazy loading only for heavy, non-critical client code that is not needed
+  to understand the first render.
 - Do not add broad `next/dynamic` or `React.lazy()` wrappers as a default
   performance tactic.
-- Before changing lazy-loading behavior, read the installed Next.js docs for the
-  relevant API under `node_modules/next/dist/docs/`.
 
 ## Preserved route state
 
@@ -71,15 +65,12 @@ external fetches, user actions, or dynamic route params.
 ## Cache
 
 - Use `React.cache()` for request-level dedupe only.
-- The runtime uses `cacheComponents: false`, so do not add production
-  `"use cache"` or `cacheLife()` boundaries without the Cloudflare/OpenNext
-  concurrency proof required by `cloudflare.md`.
-- Do not add runtime tag invalidation in production code; see
-  `cloudflare.md`.
+- Production cache boundaries and tag invalidation require Cloudflare/OpenNext
+  runtime proof.
 - Reserve `*Cached` suffix for exported helpers that actually define a cache
   boundary.
 - Do not add new `unstable_cache` usage or Cache Components without separate
-  Cloudflare/OpenNext proof and the installed Next.js documentation.
+  Cloudflare/OpenNext proof.
 
 ## Route deletion checklist
 

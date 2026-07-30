@@ -3,8 +3,8 @@ paths:
   - "src/middleware.ts"
   - "open-next.config.ts"
   - "wrangler.jsonc"
+  - "next.config.ts"
   - "scripts/starter-checks.js"
-  - "src/lib/security/**"
 ---
 
 # Cloudflare / OpenNext Rules
@@ -12,26 +12,13 @@ paths:
 Use this file when changing Cloudflare/OpenNext build, preview, deploy,
 middleware, worker config, or Cloudflare-only runtime behavior.
 
-For generic Next.js APIs, read the installed docs under
-`node_modules/next/dist/docs/`.
+This file contains the repository's Cloudflare/OpenNext choices and proof
+requirements, not generic Next.js API guidance.
 
 ## Public command surface
 
-The public story is Cloudflare/OpenNext through stable commands:
-
-```bash
-pnpm build
-pnpm website:build:cf
-pnpm website:build:cf && pnpm exec opennextjs-cloudflare preview --env preview
-node scripts/starter-checks.js cf-preview-smoke
-pnpm exec wrangler deploy --dry-run --env preview
-pnpm exec opennextjs-cloudflare deploy --env production
-node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
-```
-
-Do not introduce phase-named Cloudflare commands or private topology wrappers.
-This starter uses the native OpenNext Cloudflare CLI plus Wrangler dry-run for
-local deploy-artifact proof.
+Use the existing package scripts and native OpenNext/Wrangler commands listed in
+the proof table; do not add phase-named wrappers without a real repeated workflow.
 
 ## Proof table
 
@@ -50,52 +37,27 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 ## Build ownership
 
 - `pnpm website:build:cf` is the public Cloudflare build command. It minifies
-  the production worker by default (owner 2026-07-12 decision): `--noMinify` is
+  the production worker by default: `--noMinify` is
   an OpenNext CPU-profiling debug aid, not a production default, and shipping it
-  bloated the worker toward the free-tier limit.
+  increases the deployed worker size without a production benefit.
 - `pnpm website:build:cf:debug` retains the `--noMinify` unminified variant for
   CPU profiling only. Do not point the deploy chain at it.
-- The `open-next.config.ts` aws-layer `default.minify` flag is a separate,
-  build-and-preview-gated setting. The shipped Cloudflare worker minification is
-  driven by the build command above, not by that lower-layer flag.
-- Wrangler-level minification in `wrangler.jsonc` may stay enabled; do not
-  treat it as proof that OpenNext split-function minification is safe.
+- Do not use lower-layer or Wrangler minification settings as proof that the
+  public OpenNext worker build is safe.
 - Use `DEPLOYMENT_PLATFORM=cloudflare` as the canonical Cloudflare signal.
 
 ## Runtime entry
 
 Keep `src/middleware.ts` as the runtime entrypoint.
 
-Do not introduce `src/proxy.ts` in this starter.
-Cloudflare/OpenNext support is not acceptable for a blind migration.
-Next.js warns that `middleware` is deprecated, but this repo treats that as a known
-platform-transition warning, not as a reason to risk the locale-routing entrypoint.
-Current decision record:
-`docs/技术栈.md` (`official-doc-only check`).
-No runtime migration test was run for that decision.
-
-For reference only (the migration itself stays shelved): next-intl 4.x official
-docs already use `proxy.ts` with the same API surface, and Next.js ships a
-codemod `npx @next/codemod@canary middleware-to-proxy .` for the rename. The
-natural trigger to revisit this proof lane is the next `@opennextjs/cloudflare`
-upgrade — evaluate the migration then, not as ad-hoc cleanup.
+Do not introduce `src/proxy.ts` as cleanup. The current next-intl/OpenNext
+integration still uses `src/middleware.ts`; revisit only as a dedicated runtime
+migration with build and preview proof.
 
 The matcher must remain static string literals.
 
-If a future branch revisits the migration, it must be a dedicated proof lane
-with at least:
-
-```bash
-pnpm build
-pnpm website:build:cf
-node scripts/starter-checks.js cf-preview-smoke
-```
-
-If a deployed preview URL exists, also run:
-
-```bash
-node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"
-```
+Any migration branch must use the corresponding build, preview, and deployed
+proof rows above.
 
 ## Public submission identity
 
@@ -111,7 +73,7 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
 - Do not add `cacheTag()`, `revalidateTag()`, `revalidatePath()`, or
   `updateTag()` to production code without a new Cloudflare proof plan.
 - Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
-  cache storage as a starter default.
+  cache storage as a project default.
 - `unstable_cache` on the Cloudflare/OpenNext runtime behaves as no-cache: the
   runtime's dummy cache throws an `IgnorableError`, so nothing is stored. Any
   new `unstable_cache` use must either carry an explicit bypass rationale or
@@ -120,16 +82,10 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
   disabled because the bound OpenNext/Workerd path hung under concurrent
   requests. Do not add production `"use cache"` boundaries until that runtime
   path has fresh concurrency proof.
-- Content updates flow through rebuild/redeploy unless a future CMS integration
-  proves a different path.
-- On incremental cache choice: OpenNext's official SSG recommendation is
-  `staticAssetsIncrementalCache` (served from Workers Static Assets, zero extra
-  cost on the free tier). This site deliberately uses the `dummy` incremental
-  cache instead, accepting rebuild-to-update as the content-refresh path so that
-  no KV/R2/D1 binding is required. Revisit only if content must update without a
-  redeploy. OpenNext's `enableCacheInterception` is incompatible with PPR;
-  neither feature is enabled now. Reassess them together if Cache Components are
-  re-enabled later.
+- Content updates flow through rebuild/redeploy.
+- This site deliberately uses the `dummy` incremental cache and rebuild/redeploy
+  for content updates, so no KV/R2/D1 binding is required. Revisit only if
+  content must update without a redeploy.
 - `wrangler.jsonc` must not add `kv_namespaces`, `r2_buckets`, `d1_databases`,
   or `durable_objects` for this starter by default. Older OpenNext setups wired
   KV as the incremental cache store; this repo intentionally omits it and does
@@ -137,5 +93,5 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
 - `open-next.config.ts` must not add custom incremental cache, tag cache, or
   queue overrides by default.
 
-If those platform pieces become real requirements later, update this file,
-the related proof docs, and the matching tests in the same branch.
+Add platform bindings only for a real requirement, with proof of the deployed
+Cloudflare/OpenNext runtime path.

@@ -132,11 +132,7 @@ describe("package proof command surface", () => {
     }
   });
 
-  // Pattern guards, not a list of names that were never here: `.claude/rules/
-  // cloudflare.md` forbids phase-named commands and private topology wrappers,
-  // and mutation lanes are opt-in only. These catch a new one being introduced.
-  // The named `toBeUndefined()` assertions this replaced named five scripts
-  // that never appear anywhere in this repo's history, so they could not fail.
+  // 保护当前公开命令面，不冻结已经退役的脚本名清单。
   it("keeps phase and mutation lanes out of public package scripts and release proof", () => {
     const scriptNames = Object.keys(readPackageScripts());
     const releaseProofFlow = RELEASE_PROOF_SEQUENCE.join("\n");
