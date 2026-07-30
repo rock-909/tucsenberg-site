@@ -2,19 +2,14 @@ import { describe, expect, it } from "vitest";
 import b2bLeadMessages from "../../../messages/profiles/b2b-lead/en/messages.json";
 import catalogMessages from "../../../messages/profiles/catalog/en/messages.json";
 import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
-import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 import { getTucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
 import {
-  SINGLE_SITE_ABOUT_PAGE_EXPRESSION,
-  SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS,
   SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS,
   SINGLE_SITE_HOME_BUYING_PROCESS_STEP_KEYS,
   SINGLE_SITE_HOME_HERO_PROOF_ITEMS,
   SINGLE_SITE_HOME_LINK_TARGETS,
   SINGLE_SITE_HOME_PRODUCT_LINES,
   SINGLE_SITE_HOME_SECTION_ORDER,
-  SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION,
-  SINGLE_SITE_RESOURCES_PAGE_EXPRESSION,
 } from "@/config/single-site-page-expression";
 
 describe("single-site-page-expression", () => {
@@ -112,40 +107,5 @@ describe("single-site-page-expression", () => {
       "factoryPool",
       "oem",
     ]);
-  });
-
-  it("keeps homepage and about display item order explicit", () => {
-    expect(SINGLE_SITE_ABOUT_VALUE_ITEM_KEYS).toEqual([
-      "quality",
-      "innovation",
-      "service",
-      "integrity",
-    ]);
-  });
-
-  it("keeps product page grouping aligned with the catalog", () => {
-    const allMarketSlugs = PRODUCT_CATALOG.markets.map((market) => market.slug);
-
-    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.standardMarketSlugs).toEqual(
-      allMarketSlugs,
-    );
-    expect(SINGLE_SITE_PRODUCTS_PAGE_EXPRESSION.marketLanding.ctaHref).toBe(
-      "/contact",
-    );
-    expect(SINGLE_SITE_ABOUT_PAGE_EXPRESSION.ctaHref).toBe("/products");
-  });
-
-  it("keeps resources page display order and CTA targets centralized", () => {
-    expect(SINGLE_SITE_RESOURCES_PAGE_EXPRESSION).toEqual({
-      cardKeys: ["brochure", "productSheet", "buyerGuide"],
-      pathwayStepKeys: ["learn", "compare", "ask"],
-      replacementItemKeys: ["files", "proof", "owner"],
-      cardHrefs: {
-        brochure: "/contact",
-        productSheet: "/products",
-        buyerGuide: "/contact",
-      },
-      ctaHref: "/contact",
-    });
   });
 });

@@ -1,11 +1,7 @@
 const RELEASE_PROOF_LANES = Object.freeze({
   LOCAL_TEST_MODE: "local/test-mode",
   DEPLOYED_SMOKE: "deployed-smoke",
-  REAL_SERVICE_CANARY: "real-service-canary",
-});
-
-const INCLUDE_IN_RELEASE_SEQUENCE_DOCS = Object.freeze({
-  includeInReleaseSequence: true,
+  AIRTABLE_WRITE_CANARY: "airtable-write-canary",
 });
 
 const RELEASE_PROOF_MANIFEST = deepFreeze({
@@ -17,7 +13,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: ["scripts/starter-checks.js", "content-manifest", "--check"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "cloudflare-official-source-compare",
@@ -29,7 +24,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "cf-official-compare",
         "--source-only",
       ],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "type-check",
@@ -37,7 +31,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["type-check"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "lint-check",
@@ -45,7 +38,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["lint:check"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "middleware-i18n-unit-tests",
@@ -61,7 +53,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "src/i18n/__tests__/request.test.ts",
         "src/lib/__tests__/load-messages.fallback.test.ts",
       ],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "lead-family-api-tests",
@@ -76,7 +67,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "tests/integration/api/lead-family-protection.test.ts",
         "src/app/api/inquiry/__tests__/route.test.ts",
       ],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "health-api-tests",
@@ -90,7 +80,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "tests/integration/api/health.test.ts",
         "src/__tests__/middleware-locale-cookie.test.ts",
       ],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "translations",
@@ -98,7 +87,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: ["scripts/starter-checks.js", "translations"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "content-readiness-catalog",
@@ -106,7 +94,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: ["scripts/starter-checks.js", "content-readiness"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "local-playwright-smoke",
@@ -120,7 +107,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         PLAYWRIGHT_REBUILD_SERVER: "true",
       },
       requiresFreePort: 3000,
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "next-build",
@@ -128,7 +114,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["build"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "cloudflare-build",
@@ -136,7 +121,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["website:build:cf"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "cloudflare-artifact-config",
@@ -144,7 +128,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: ["scripts/quality/checks/cloudflare-artifact-config.js"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "cloudflare-static-asset-headers",
@@ -152,7 +135,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: ["scripts/starter-checks.js", "cf-static-asset-headers"],
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
     {
       id: "wrangler-preview-dry-run",
@@ -168,7 +150,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         source:
           "Project self-budget (3000 KiB), ~72 KiB margin below the Cloudflare Workers Free gzip upload limit of 3072 KiB (3 MiB)",
       },
-      docs: INCLUDE_IN_RELEASE_SEQUENCE_DOCS,
     },
   ],
   manualProofLanes: [
@@ -176,11 +157,6 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       label: "Local stock preview",
       command: "node scripts/starter-checks.js cf-preview-smoke",
-    },
-    {
-      lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
-      label: "Local Cloudflare deploy-artifact dry run",
-      command: "pnpm exec wrangler deploy --dry-run --env preview",
     },
     {
       lane: RELEASE_PROOF_LANES.DEPLOYED_SMOKE,
@@ -194,8 +170,8 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         'node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"',
     },
     {
-      lane: RELEASE_PROOF_LANES.REAL_SERVICE_CANARY,
-      label: "Real deployed lead canary manual launch gate",
+      lane: RELEASE_PROOF_LANES.AIRTABLE_WRITE_CANARY,
+      label: "Deployed Airtable write canary manual launch gate",
       command:
         'POST_DEPLOY_TEST=1 PLAYWRIGHT_BASE_URL="$DEPLOYED_BASE_URL" pnpm exec playwright test tests/e2e/smoke/',
     },
@@ -219,7 +195,6 @@ function cloneStep(step) {
     ...step,
     args: [...step.args],
     ...(step.env ? { env: { ...step.env } } : {}),
-    ...(step.docs ? { docs: { ...step.docs } } : {}),
     ...(step.artifactBudget
       ? { artifactBudget: { ...step.artifactBudget } }
       : {}),
@@ -253,9 +228,7 @@ function getReleaseProofSteps() {
 }
 
 function getReleaseProofSequence() {
-  return getReleaseProofSteps()
-    .filter((step) => step.docs.includeInReleaseSequence)
-    .map(formatReleaseProofCommand);
+  return getReleaseProofSteps().map(formatReleaseProofCommand);
 }
 
 function getReleaseVerifyCommands() {

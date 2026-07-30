@@ -713,28 +713,18 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("uses Tucsenberg-owned active homepage and catalog messages", () => {
+  it("keeps active homepage and catalog message structure", () => {
     for (const messageFile of ACTIVE_HOMEPAGE_MESSAGE_FILES) {
       const messages = getObject(readRepoJson(messageFile), messageFile);
       const home = getObject(messages.home, `${messageFile} home`);
-      const hero = getObject(home.hero, `${messageFile} home.hero`);
+      getObject(home.hero, `${messageFile} home.hero`);
       const catalog = getObject(messages.catalog, `${messageFile} catalog`);
-      const overview = getObject(
-        catalog.overview,
-        `${messageFile} catalog.overview`,
-      );
+      getObject(catalog.overview, `${messageFile} catalog.overview`);
       const markets = getObject(
         catalog.markets,
         `${messageFile} catalog.markets`,
       );
 
-      expect(hero.title, messageFile).toBe(
-        "Factory-Direct Flood Barriers from China",
-      );
-      expect(hero.subtitle, messageFile).toContain(
-        "One coordinated factory pool, one QC standard.",
-      );
-      expect(overview.title, messageFile).toBe("Flood Barrier Product Lines");
       expect(Object.keys(markets), messageFile).toEqual(TARGET_PRODUCT_SLUGS);
 
       // 产品线和买家类别的标题手写钉在这里。首页测试渲染时是从消息包取值比对

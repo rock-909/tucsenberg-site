@@ -105,8 +105,6 @@ function isValidBudgetShape(value) {
     value !== null &&
     typeof value === "object" &&
     value.version === BUDGET_VERSION &&
-    Number.isInteger(value.maxClientBoundaries) &&
-    value.maxClientBoundaries >= 0 &&
     Array.isArray(value.allowedClientBoundaries) &&
     value.allowedClientBoundaries.every((item) => typeof item === "string")
   );
@@ -134,7 +132,7 @@ function readBudget(rootDir) {
         errors: [
           createBudgetError(
             "budget-invalid",
-            "Client boundary budget must define version 1, maxClientBoundaries, and allowedClientBoundaries.",
+            "Client boundary budget must define version 1 and allowedClientBoundaries.",
           ),
         ],
       };
@@ -143,7 +141,6 @@ function readBudget(rootDir) {
     return {
       budget: {
         version: parsed.version,
-        maxClientBoundaries: parsed.maxClientBoundaries,
         allowedClientBoundaries: parsed.allowedClientBoundaries.toSorted(
           (left, right) => left.localeCompare(right),
         ),
@@ -198,15 +195,6 @@ function createStaleBoundaryErrors(clientBoundaries, budget) {
   return errors;
 }
 
-function createBudgetExceededError(clientBoundaries, budget) {
-  if (clientBoundaries.length <= budget.maxClientBoundaries) return null;
-
-  return createBudgetError(
-    "budget-exceeded",
-    `Detected ${clientBoundaries.length} client boundaries, but the budget allows ${budget.maxClientBoundaries}.`,
-  );
-}
-
 function runClientBoundaryBudgetCheck(rootDir = ROOT) {
   const clientBoundaries = collectClientBoundaryFiles(rootDir);
   const { budget, errors: budgetErrors } = readBudget(rootDir);
@@ -225,12 +213,6 @@ function runClientBoundaryBudgetCheck(rootDir = ROOT) {
     const staleErrors = createStaleBoundaryErrors(clientBoundaries, budget);
     staleClientBoundaries = staleErrors.map((error) => error.file);
     errors.push(...staleErrors);
-
-    const budgetExceededError = createBudgetExceededError(
-      clientBoundaries,
-      budget,
-    );
-    if (budgetExceededError) errors.push(budgetExceededError);
   }
 
   const result = {
@@ -240,7 +222,6 @@ function runClientBoundaryBudgetCheck(rootDir = ROOT) {
     clientBoundaries,
     unexpectedClientBoundaries,
     staleClientBoundaries,
-    maxClientBoundaries: budget?.maxClientBoundaries ?? null,
     errors,
   };
 

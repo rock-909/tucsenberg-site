@@ -97,4 +97,13 @@ describe("Button", () => {
     expect(button).toHaveClass("mt-6");
     expect(button.className.split(" ").length).toBeGreaterThan(1);
   });
+
+  it("keeps the shared keyboard, disabled, and nested-icon affordances", () => {
+    const classes = buttonVariants();
+
+    expect(classes).toContain("focus-visible:ring-2");
+    expect(classes).toContain("disabled:pointer-events-none");
+    expect(classes).toContain("disabled:opacity-50");
+    expect(classes).toContain("[&_svg]:pointer-events-none");
+  });
 });

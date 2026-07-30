@@ -8,12 +8,11 @@ import { buildCanarySelectors } from "./canary-selectors";
 import { isDeployedCanaryUrl } from "./post-deploy-canary-url";
 
 /**
- * Post-Deploy Contact Chain Verification
- * Proof lane: real-service-canary
+ * Post-Deploy Airtable Write Verification
+ * Proof lane: airtable-write-canary
  *
- * This is the production-like proof for the contact flow.
- * It must hit a deployed URL and verify the real submission chain instead of
- * relying on the local Playwright test-mode path.
+ * This proof submits through the deployed form and verifies the resulting
+ * Airtable record. Resend delivery and owner receipt remain separate proofs.
  *
  * Environment variables required:
  * - POST_DEPLOY_TEST=1: explicit opt-in for the real deployed canary
@@ -24,7 +23,7 @@ import { isDeployedCanaryUrl } from "./post-deploy-canary-url";
  *
  * Skip policy:
  * - Owner: release proof / launch owner.
- * - Tracking: docs/正式上线标准.md real-service-canary lane.
+ * - Tracking: docs/正式上线标准.md airtable-write-canary lane.
  * - Expiry: none. This is a permanent manual launch gate, not a temporary skip.
  */
 
@@ -149,7 +148,7 @@ async function fetchAirtableRecord(
   return body.records?.[0];
 }
 
-test.describe("Post-Deploy: Production-Like Contact Form Chain", () => {
+test.describe("Post-Deploy: Airtable Write Canary", () => {
   test.skip(
     !isPostDeploy,
     "Only runs in post-deploy mode (set POST_DEPLOY_TEST=1)",

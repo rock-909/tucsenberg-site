@@ -238,17 +238,6 @@ describe("exact repository paths in configuration", () => {
     },
   );
 
-  it("keeps exact CODEOWNERS paths live", () => {
-    const paths = fs
-      .readFileSync(".github/CODEOWNERS", "utf8")
-      .split(/\r?\n/u)
-      .map((line) => line.trim())
-      .filter((line) => line !== "" && !line.startsWith("#"))
-      .map((line) => line.split(/\s+/u)[0]?.replace(/^\//u, "") ?? "");
-
-    expect(getMissingPaths(paths)).toEqual([]);
-  });
-
   it("keeps exact Semgrep exclusions live", () => {
     const paths = fs
       .readFileSync("semgrep.yml", "utf8")

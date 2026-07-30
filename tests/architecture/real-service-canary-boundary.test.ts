@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { isDeployedCanaryUrl } from "../e2e/smoke/post-deploy-canary-url";
 
-describe("real service canary boundary", () => {
-  it("does not treat local URLs as real-service canary targets", () => {
+describe("Airtable write canary boundary", () => {
+  it("does not treat local URLs as deployed canary targets", () => {
     expect(isDeployedCanaryUrl(undefined)).toBe(false);
     expect(isDeployedCanaryUrl("not a url")).toBe(false);
     expect(isDeployedCanaryUrl("http://localhost:3000")).toBe(false);

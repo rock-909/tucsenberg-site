@@ -47,7 +47,6 @@
           "src/i18n/routing.ts",
           "src/lib/env.ts",
           "src/components/ui/button.tsx",
-          "src/components/ui/badge.tsx",
           "src/lib/structured-data.ts",
           "src/lib/cookie-consent/index.ts"
         ],
@@ -88,7 +87,6 @@
           "src/app/[locale]/contact/contact-page-sections.tsx",
           "src/components/layout/header.tsx",
           "src/components/layout/mobile-navigation-interactive.tsx",
-          "src/components/ui/theme-switcher-highlight.stories.tsx",
           "src/components/ui/theme-switcher.tsx",
           "src/stories/color-directions.stories.tsx"
         ],
@@ -180,10 +178,7 @@
         "rules": ["react-doctor/no-prop-callback-in-effect"]
       },
       {
-        "files": [
-          "src/components/ui/badge.tsx",
-          "src/components/ui/separator.tsx"
-        ],
+        "files": ["src/components/ui/separator.tsx"],
         "rules": ["react-doctor/no-react19-deprecated-apis"]
       },
       {

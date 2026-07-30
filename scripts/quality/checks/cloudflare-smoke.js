@@ -45,6 +45,11 @@ const DEPLOYED_SMOKE_EXPECTATIONS = [
   { pathname: "/api/health", status: 200 },
   { pathname: "/zh", status: 404 },
   { pathname: "/zh/contact", status: 404 },
+  {
+    pathname: "/downloads/spec-sheet-tb-bw.pdf",
+    status: 200,
+    robotsTag: "noindex",
+  },
 ];
 const CF_PREVIEW_PROOF_OUTPUT_PATH = path.join(
   ROOT,
@@ -413,6 +418,7 @@ async function requestDeployedSmoke(baseUrl, pathname, headers, retryEvents) {
         status: response.status,
         location: response.headers.get("location"),
         leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),
+        robotsTag: response.headers.get("x-robots-tag"),
         body,
         retries,
       };
@@ -457,11 +463,15 @@ async function runDeployedSmoke(args = []) {
   );
 
   for (const [index, response] of responses.entries()) {
-    pushExpectedStatus(
-      response,
-      DEPLOYED_SMOKE_EXPECTATIONS[index].status,
-      failures,
-    );
+    const expectation = DEPLOYED_SMOKE_EXPECTATIONS[index];
+    pushExpectedStatus(response, expectation.status, failures);
+    if (expectation.robotsTag) {
+      pushFailureUnless(
+        (response.robotsTag ?? "").includes(expectation.robotsTag),
+        `Expected ${response.pathname} to carry X-Robots-Tag: ${expectation.robotsTag}, got ${response.robotsTag ?? "none"}`,
+        failures,
+      );
+    }
     pushFailureUnless(
       response.leakedMiddlewareCookie === null,
       `Unexpected x-middleware-set-cookie leak on ${response.pathname}`,

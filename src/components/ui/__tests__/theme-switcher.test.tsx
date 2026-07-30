@@ -6,10 +6,6 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../theme-switcher-highlight", () => ({
-  ThemeSwitcherHighlight: () => <div data-testid="theme-switcher-highlight" />,
-}));
-
 const themeLabels: Record<string, string> = {
   switchToLight: "Switch to light theme",
   switchToDark: "Switch to dark theme",

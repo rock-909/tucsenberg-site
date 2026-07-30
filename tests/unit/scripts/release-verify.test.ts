@@ -8,6 +8,7 @@ import {
   runReleaseVerify,
   validateArtifactBudget,
 } from "../../../scripts/quality/checks/release-verify.js";
+import { getReleaseVerifyCommands } from "../../../scripts/quality/release-proof-manifest.js";
 import { captureExpectedConsoleErrors } from "@/test/console";
 
 const openServers: net.Server[] = [];
@@ -44,6 +45,10 @@ afterEach(async () => {
 });
 
 describe("release verify runner", () => {
+  it("takes its command list directly from the release manifest", () => {
+    expect(RELEASE_VERIFY_COMMANDS).toEqual(getReleaseVerifyCommands());
+  });
+
   it("detects an occupied local port", async () => {
     const { port } = await listenOnLoopback();
 

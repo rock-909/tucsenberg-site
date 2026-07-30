@@ -5,7 +5,6 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-import { ThemeSwitcherHighlight } from "@/components/ui/theme-switcher-highlight";
 
 const themes = [
   {
@@ -105,7 +104,15 @@ export const ThemeSwitcher = ({ className, ...rest }: ThemeSwitcherProps) => {
             onClick={() => handleThemeClick(key as "light" | "dark" | "system")}
             type="button"
           >
-            {isActive ? <ThemeSwitcherHighlight /> : null}
+            {isActive ? (
+              <div
+                className="absolute inset-0 rounded-full bg-muted transition-all duration-150"
+                data-testid="theme-switcher-highlight"
+                style={{
+                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              />
+            ) : null}
             <Icon
               className={cn(
                 "relative z-10 m-auto size-4",

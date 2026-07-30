@@ -65,33 +65,9 @@ Direct literals are fine for language and UI idioms such as array index `0`,
 Do not introduce `ZERO`, `ONE`, or similar aliases unless the name carries real
 domain meaning.
 
-### Known hole: `no-magic-numbers` `detectObjects: false`
-
-`eslint.config.mjs` runs `no-magic-numbers` with `detectObjects: false`, so
-numeric literals in object-property position are not flagged. This is a
-deliberate, measured choice, not an oversight.
-
-Measured on 2026-07-12 by flipping the flag to `true`: 38 new violations across
-8 files. About 36 of them are exactly the literals this section already permits
-as direct — animation durations and opacity (`src/lib/motion/light-breathing.ts`),
-layout dimensions
-(`src/config/pages.config.ts`), SEO/site config (`src/config/single-site*.ts`),
-and Lighthouse score/budget thresholds (`lighthouserc.js`). Turning the flag on
-would force naming that config/motion idiom class, fighting this section's own
-policy, so it stays `false`.
-
-Two literals it surfaced carried real domain meaning and were handled directly
-instead of via the noisy global flag (the narrower guard):
-
-- `src/middleware.ts` bare `404` → replaced with `HTTP_NOT_FOUND` from
-  `src/constants/core.ts` (same class as the other HTTP status constants).
-- `src/config/cors.ts` `maxAge: 3600` is a preflight-cache TTL, but the property
-  name `maxAge` plus its inline `(1 hour)` comment already name it; a separate
-  constant would add no clarity, so it is left as documented config.
-
-If a future change adds object-position numeric literals with real domain
-meaning (new HTTP codes, TTLs, rate limits), name them at the source rather than
-enabling the global flag.
+`no-magic-numbers` intentionally ignores object-property values. Name values
+with real domain meaning at their source; do not enable a noisy global rule that
+forces aliases for ordinary configuration and layout literals.
 
 ## React performance patterns
 
@@ -115,41 +91,23 @@ enabling the global flag.
 
 ## Deleting something is not one edit
 
-Type-check and lint catch a deleted import. They do not catch the places that
-name the deleted thing as a string. The examples below were all found in review,
-not by any local command.
-
-Retiring twelve UI wrappers left the nine that were Client Components listed in
-`scripts/quality/config/client-boundary-budget.json`. `client-boundary.js` reports
-those as `stale-client-boundary` and CI runs it on every pull request, so the
-branch was carrying a guaranteed red. The same change left `.claude/rules/ui.md`
-and `DESIGN.md` telling the next agent to use components that no longer existed;
-`ui.md` was cleaned on that branch, and two further `DESIGN.md` mentions
-(`Input`/`Select` in a sizing note, `Dialog` in a modal guideline) survived until
-a later pass caught them. Stale prose outlives the obvious fix.
-
-After deleting a file, export, component, or config key, grep the repo for its
-name and check each hit's class:
+Type-check and lint do not catch string references. After deleting a file,
+export, component, route, or config key, search the repo and classify remaining
+references, especially:
 
 - JSON budgets, manifests, and allowlists under `scripts/quality/config/`
 - test path lists and Vitest include/exclude filters, which shrink silently
   rather than failing
-- `.claude/rules/*.md`, `AGENTS.md`, `DESIGN.md`, and other docs an agent is
-  routed to read before touching that area
+- `.claude/rules/*.md`, `AGENTS.md`, and other docs routed to that area
 - generated files that need regenerating rather than editing
 
-Then ask the separate question of whether a deleted guard was guarding something
-still true. A gate can be unreachable today (the wrapper it forbids no longer
-exists) while the constraint behind it is live, which means removing it disarms a
-future reintroduction. Keep the constraint; move it if its current home is wrong.
+Keep or move a guard only when it still protects a current risk. Do not preserve
+an unreachable constraint for a speculative future reintroduction.
 
 ## Hard gates
 
-- TypeScript: zero errors. This gate covers production code only. `tsconfig.json`
-  excludes `tests/**`, `**/*.test.*`, and `src/test/**`; test code is transpiled
-  and executed by Vitest and is not independently type-checked. This is an
-  owner-decided quality exemption (production code is the strict standard), not
-  an oversight — do not wire test code into `tsc`.
+- TypeScript: zero production-code errors. Test code is executed by Vitest and
+  is not independently included in the production `tsc` gate.
 - ESLint: zero warnings
 - Build: no errors
 

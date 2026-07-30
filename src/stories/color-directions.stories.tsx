@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 const SCALE_STEPS = [
@@ -141,8 +140,6 @@ function buildThemeCss(brand: TokenScale, neutral: TokenScale): string {
     --info-muted: ${b["2"]};
     --info-border: ${b["5"]};
     --info-foreground: ${b["11"]};
-    --chart-1: ${b["9"]};
-    --color-chart-1: ${b["9"]};
     --footer-bg: ${n["11"]};
     --footer-text: ${n["5"]};
     --footer-heading: ${n["6"]};
@@ -262,9 +259,9 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold">{direction.name}</h3>
-                <Badge variant="secondary" className="text-[10px]">
+                <span className="text-[10px] text-muted-foreground">
                   {direction.tag}
-                </Badge>
+                </span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {direction.description}
@@ -287,11 +284,6 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
                   Products
                 </Button>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge>ISO 9001</Badge>
-              <Badge variant="secondary">Basic Option</Badge>
-              <Badge variant="outline">Example Standard A</Badge>
             </div>
             <div className="rounded-lg bg-primary p-5 text-center">
               <h3 className="text-lg font-bold text-primary-foreground">
