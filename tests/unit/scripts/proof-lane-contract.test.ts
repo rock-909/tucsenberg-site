@@ -132,11 +132,7 @@ describe("package proof command surface", () => {
     }
   });
 
-  // Pattern guards, not a list of names that were never here: `.claude/rules/
-  // cloudflare.md` forbids phase-named commands and private topology wrappers,
-  // and mutation lanes are opt-in only. These catch a new one being introduced.
-  // The named `toBeUndefined()` assertions this replaced named five scripts
-  // that never appear anywhere in this repo's history, so they could not fail.
+  // 保护当前公开命令面，不维护历史脚本名清单。
   it("keeps phase and mutation lanes out of public package scripts and release proof", () => {
     const scriptNames = Object.keys(readPackageScripts());
     const releaseProofFlow = RELEASE_PROOF_SEQUENCE.join("\n");
@@ -148,9 +144,7 @@ describe("package proof command surface", () => {
     expect(releaseProofFlow).not.toMatch(/:?phase\d/u);
   });
 
-  // Every command the release sequence runs must be a real file or a real
-  // script. A retired-path allowlist only proved that names nobody uses stay
-  // unused; this proves the sequence that actually gates a release still works.
+  // 发布序列引用的 Node 脚本必须真实存在。
   it("keeps every release sequence node script pointing at a real file", () => {
     const nodeScripts = RELEASE_PROOF_SEQUENCE.flatMap(
       (command) => command.match(/\bnode\s+([\w./-]+)/u)?.[1] ?? [],
@@ -162,10 +156,7 @@ describe("package proof command surface", () => {
     }
   });
 
-  // 同一个洞的另一半：发布链里有三条 `vitest run <一串路径>`。vitest 把参数当过滤
-  // 器，指向不存在的文件时它安静地少跑一个而不报错——发布证明会在覆盖面缩水的
-  // 情况下照样全绿。2026-07-26 删 ui-component-index.test.ts 时，component 治理
-  // 那条命令就真的这么掉了一个文件。
+  // Vitest 会把不存在的路径当过滤器，因此显式确认发布序列中的测试仍存在。
   it("keeps every release sequence vitest path pointing at a real file", () => {
     const testPaths = RELEASE_PROOF_SEQUENCE.flatMap((command) =>
       command.includes("vitest run")

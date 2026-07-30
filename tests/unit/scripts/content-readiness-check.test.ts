@@ -76,9 +76,7 @@ describe("content-readiness-check", () => {
     }
   });
 
-  // This used to grep the check's own source for wanted and unwanted path
-  // strings, which passes on a comment and guards names that were retired long
-  // ago. What matters is which files the scan actually reaches.
+  // 验证扫描实际触达的文件，不检查脚本源码中的路径文案。
   it("reaches the current Tucsenberg product-page files it claims to scan", () => {
     const scanned = collectReadinessScanFiles().map(
       (file: { repoPath: string }) => file.repoPath,

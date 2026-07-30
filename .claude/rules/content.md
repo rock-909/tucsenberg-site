@@ -5,16 +5,13 @@ paths:
   - "src/config/single-site*.ts"
   - "src/lib/content/**"
   - "src/lib/content-query/**"
-  - "src/app/**/*.tsx"
+  - "src/app/**/page.tsx"
 ---
 
 # Content Rules
 
 Use this file when editing MDX content, page frontmatter, SEO metadata, FAQ
 content, shared UI text, or single-site identity/config.
-
-For translation runtime details, use `i18n.md`. For JSON-LD, use
-`structured-data.md`.
 
 ## Authoring sources
 
@@ -29,26 +26,12 @@ Every content field has one authoring source.
 | Shared labels/nav/buttons/form chrome | `messages/base/**`, `messages/profiles/b2b-lead/**`, `messages/profiles/catalog/**` | MDX frontmatter |
 | Reusable catalog/card data | typed config + i18n namespace | page prose only |
 
-## Starter replacement order
-
-For derived projects, replace in this order:
-
-1. `src/config/single-site.ts`
-2. `src/config/single-site-page-expression.ts`
-3. `src/config/single-site-seo.ts`
-4. `content/pages/{locale}/*.mdx`
-5. physical message packs under `messages/base/**` and `messages/profiles/**`
-6. product/catalog/spec config and public images
-
-Do not treat starter examples as client-ready facts.
-
 ## Page content
 
 - Page titles, descriptions, FAQ items, and legal/About prose live in MDX
   frontmatter/body.
 - FAQ belongs to the page that renders it. Do not create a shared FAQ pool.
 - Home is a structured campaign landing exception: current section order and
-  reusable section copy can stay in config/i18n as an implementation detail
-  until a conversion-copy rewrite moves it.
+  reusable section copy can stay in config/i18n.
 - Generated workflow/plan context under root `plans/**` can explain work,
   but it is not a content authoring source.

@@ -4,6 +4,7 @@ paths:
   - "src/lib/security/**/*"
   - "src/lib/api/**"
   - "src/lib/lead-pipeline/lead-schema.ts"
+  - "src/components/forms/**"
   - "src/config/security.ts"
   - "next.config.ts"
 ---
@@ -12,8 +13,6 @@ paths:
 
 Use this file when changing API routes, public write endpoints, Server Actions,
 validation, rate limits, CSP, sensitive server code, or env exposure.
-
-For Cloudflare build/runtime topology, use `cloudflare.md`.
 
 ## Public write endpoints
 
@@ -25,21 +24,9 @@ Browser-exposed write endpoints need:
 - small route-local or shared rate limit when currently wired;
 - stable machine-readable error codes.
 
-The existing distributed rate limiter (`src/lib/security/distributed-rate-limit.ts`,
-Upstash-backed) is already wired to the public write routes and is the allowed
-established state — do not tear it out. The in-memory store is a
-development-only fallback: in production, a missing Upstash configuration makes
-store construction throw (fail-closed at startup) rather than silently degrading
-to per-instance memory. Once the store is live, a per-limit `failureMode`
-(`"open"` or `"closed"`) decides whether a runtime storage failure allows or
-denies the request. What is forbidden is adding new abuse-control complexity on
-top of this (body hashing, duplicate-submission replay detection, per-field
-fingerprinting, etc.) as a starter default; add those later only when a real
-incident justifies them.
-
-If Upstash becomes a problem, the official Workers-native alternative is the
-`ratelimits` binding (wrangler >= 4.36, free, per-colo). Treat it as the
-established migration direction rather than inventing a new custom store.
+The existing distributed rate limiter is wired to public write routes; do not
+replace it or add body hashing, replay detection, fingerprinting, or similar
+abuse-control layers without a real incident.
 
 ## Turnstile failure classification
 
@@ -55,15 +42,15 @@ classification logic unless the route has a documented business reason.
 
 ## Lead-family behavior
 
-Canonical behavior for contact and inquiry (owner decision, 2026-07-07):
+Canonical behavior for contact and inquiry:
 
 ```text
 browser form -> route handler -> Zod -> Turnstile -> process lead -> owner email, then Airtable record
 ```
 
 - Owner email is sent first; the Airtable record is created afterwards with the
-  email outcome baked into its free-text `Message` field (owner decision,
-  2026-07-27). Sequential, not parallel: the record and the fact that its
+  email outcome baked into its free-text `Message` field. Sequential, not
+  parallel: the record and the fact that its
   notification failed have to be born together, or a saved lead sits in the CRM
   looking identical to one the owner was actually told about.
 - Either channel succeeding is still the user-facing success condition
@@ -107,35 +94,15 @@ would consume the token before the real submission.
 
 ### CSP report endpoint
 
-`/api/csp-report` is intentionally minimal and never trusts payload content, but
-it already carries more than a bare body-size gate:
-
-- Body is capped at 16 KB (`MAX_CSP_REPORT_BODY_BYTES`) — CSP reports are tiny,
-  so a small cap blocks body-based DoS.
-- A content-type allowlist accepts only `application/csp-report`,
-  `application/reports+json`, and `application/json`; anything else is rejected
-  before parsing.
-- Both the legacy single-report shape and the modern Reporting API top-level
-  array (batched reports) are accepted. Array batching is only allowed here
-  because the parser is called with `allowTopLevelArray: true`; an empty batch
-  returns `204 No Content`.
-- `GET /api/csp-report` is a lightweight health probe that returns
-  `{ status: "CSP report endpoint active" }`; it never accepts report data.
+`/api/csp-report` accepts only bounded report payloads in the supported report
+shapes, never trusts payload content, and keeps its health probe read-only.
 
 ### JSON body parsing contract
 
 Public write routes parse request bodies through `safeParseJson`
-(`src/lib/api/safe-parse-json.ts`). It takes an options contract:
-
-- `maxBytes` — hard body-size ceiling; oversize bodies are rejected without
-  parsing.
-- `emptyBodyErrorCode` — the stable error code returned for an empty body.
-- `allowTopLevelArray` — defaults to `false`, so a top-level JSON array is
-  rejected. Only endpoints that genuinely accept batched arrays (the CSP report
-  route) opt in by passing `true`.
-
-Keep new routes on this shared parser instead of hand-rolling body reads, so the
-size ceiling, empty-body handling, and array policy stay consistent.
+(`src/lib/api/safe-parse-json.ts`) instead of hand-rolling body reads, so size,
+empty-body, and top-level-array policy stay consistent. Only an endpoint that
+actually accepts batches may opt into arrays.
 
 ### Inquiry anti-abuse (active public writer)
 
@@ -162,10 +129,8 @@ errors or markers in the public JSON.
 - CSP stays static-compatible for the current site deployment. Do not add
   dynamic nonce handling unless a dedicated dynamic rendering proof plan
   justifies the trade-off.
-- A nonce CSP lane needs a proxy-generated nonce plus Cloudflare/OpenNext proof;
-  do not mix that into ordinary security cleanup.
-- Current nonce CSP feasibility decision lives in
-  `docs/技术栈.md`.
+- Do not mix nonce-based CSP into ordinary security cleanup; it needs a separate
+  dynamic-rendering and Cloudflare/OpenNext proof.
 - CSP reports go to `/api/csp-report`.
 - Each accepted CSP violation is logged once: routine reports use `logger.warn`;
   suspicious patterns use a single `logger.error`.
@@ -180,6 +145,3 @@ errors or markers in the public JSON.
 - Sensitive keys include `AIRTABLE_API_KEY`, `RESEND_API_KEY`,
   `TURNSTILE_SECRET_KEY`, Cloudflare API tokens, and owner dashboard access
   keys.
-
-For future auth/session cookies, default to `httpOnly`, `secure`, and
-`sameSite: "strict"` unless a specific flow proves otherwise.

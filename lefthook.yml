@@ -8,12 +8,12 @@ pre-commit:
       run: pnpm exec prettier --check {staged_files}
       fail_text: '代码格式检查失败 - 请运行 pnpm exec prettier --write <files> 修复格式问题'
 
-    # TypeScript类型检查（纯检查，不写文件——不挂 stage_fixed）
+    # TypeScript 类型检查。
     type-check:
       run: pnpm type-check
       fail_text: 'TypeScript类型检查失败 - 请修复类型错误后重新提交'
 
-    # 代码质量检查 (ESLint，纯检查不写文件——不挂 stage_fixed)
+    # ESLint 检查。
     quality-check:
       run: pnpm lint:check
       fail_text: '代码质量检查失败 - 发现新的质量问题，请修复后重新提交'
@@ -71,7 +71,7 @@ pre-commit:
           exit 1;
         }
         echo "✅ 相关测试通过"
-      fail_text: '相关测试失败 - 请确保源码变更后测试同步更新（参见 .claude/rules/testing.md Twin File Principle）'
+      fail_text: '相关测试失败 - 请确认改动行为有对应测试覆盖'
       stage_fixed: false
 
 commit-msg:
@@ -84,7 +84,7 @@ commit-msg:
 pre-push:
   parallel: false  # 串行执行，确保构建先完成
   commands:
-    # 构建成功验证（A+：默认执行；紧急场景可用 RUN_FAST_PUSH=1 跳过）
+    # 构建验证；紧急场景可用 RUN_FAST_PUSH=1 跳过。
     build-check:
       run: |
         if [ "$RUN_FAST_PUSH" = "1" ]; then
@@ -94,12 +94,12 @@ pre-push:
         fi
       fail_text: '构建验证失败 - 请修复构建错误后再推送'
 
-    # 翻译验证（保持执行，速度快）
+    # 翻译验证始终执行。
     translation-check:
       run: node scripts/starter-checks.js translations
       fail_text: '翻译验证失败 - 请确保所有翻译文件同步'
 
-    # 架构检查（A+：全量巡航 + 循环依赖；使用 err 报告减少噪音；可用 RUN_FAST_PUSH=1 跳过应急推送）
+    # 架构和循环依赖检查；紧急场景可跳过。
     arch-check:
       run: |
         if [ "$RUN_FAST_PUSH" = "1" ]; then
@@ -109,7 +109,7 @@ pre-push:
         fi
       fail_text: '架构检查失败 - 发现循环依赖或架构违规'
 
-    # 安全检查（A+：本地执行；可用 RUN_FAST_PUSH=1 跳过应急推送）
+    # 生产依赖安全审计；紧急场景可跳过。
     security-check:
       run: |
         if [ "$RUN_FAST_PUSH" = "1" ]; then
@@ -119,9 +119,7 @@ pre-push:
         fi
       fail_text: '安全检查失败 - 发现安全漏洞，请修复后推送'
 
-    # 死导出防复发门：全仓 knip 扫描，阻止零引用导出（尤其常量货架）无成本增长。
-    # react-doctor 的 knip 规则只覆盖改动文件；此门补上全仓基线。忽略清单见 knip.json，
-    # 治理面用 @public JSDoc 具名放行（参照 eslint-disable GSE 登记制）。
+    # 全仓扫描未使用文件、导出和依赖；有意的公共面用 @public JSDoc 放行。
     dead-export-check:
       run: |
         if [ "$RUN_FAST_PUSH" = "1" ]; then

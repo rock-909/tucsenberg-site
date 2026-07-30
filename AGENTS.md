@@ -1,77 +1,35 @@
 # AGENTS.md
 
-写给直接读这个文件的编码 agent。Claude Code 有自己的 `CLAUDE.md`，而且会按路径
-自动加载 `.claude/rules/*.md`；这份多一张规则路由表，因为别的工具不会自动加载。
+Tucsenberg 防洪挡板英文 B2B 官网，使用 Next.js App Router 和
+Cloudflare/OpenNext，服务产品发现、PDF 下载和 OEM / 批发询盘。
 
-## 这个项目
+## 已知约束
 
-**tucsenberg-site** —— Tucsenberg 防洪挡板的英文 B2B 官网，靠它接 OEM / 批发询盘：
-看产品、比规格、下载 PDF、发 RFQ。部署在 Cloudflare，走 OpenNext。
+- `pnpm build`、`pnpm website:build:cf` 和 Playwright webServer 共用
+  `.next`，不得并行运行。
 
-它是从一个通用 starter 改出来的，但那部分已经拆干净了：runtime profile 选择、
-profile fixtures、旧 blog、物料化工具，全部退役。看到 starter 时代的命名，只可能
-出现在检查脚本、兼容用的文件名、或者标注过的历史记录里，不代表那套东西还活着。
+## Rules
 
-站点目前只出英文。i18n 框架是留着的，以后要加语言，别为了省事把翻译 key 拆成写死
-的英文。
+`.claude/rules/*.md` 的 `paths:` 是适用范围的权威；下表供其他编码工具查找。
 
-## 沟通
-
-业主不懂技术。讲生意，别讲技术。
-
-## 这个仓库的坑
-
-都是踩过的，跟直觉相反或者从代码里看不出来：
-
-- **`pnpm build` 和 `pnpm website:build:cf` 写同一个 `.next` 目录。** 并行跑会互相
-  覆盖，拿到的是假的构建结果。本地跑 E2E 时 Playwright 的 webServer 也会重建
-  `.next`，是第三个写入方。`pnpm website:lighthouse` 不在此列：它单独构建到
-  `.next-lighthouse`，用 4173 端口起服务，所以一次二十分钟的测量不会被并行构建、
-  也不会被别的 worktree 占着 3000 端口的服务污染。
-- **根 `plans/` 只放当前未完成的 Superpowers 过程文件。** 设计与实施文件使用
-  `*-design.md` / `*-plan.md`；不要把它们当产品真相。
-- **`src/lib/content-manifest.generated.ts` 是生成的，别手改。** 用
-  `node scripts/starter-checks.js content-manifest` 重新生成。
-- **pre-push 会跑一遍完整构建。** 确实急，可以 `RUN_FAST_PUSH=1` 跳过——它同时还会
-  跳过架构检查、依赖安全审计和死导出扫描，其中依赖安全审计 PR 的 CI 不跑，只有每周
-  的定时任务兜底。
-
-## 动手前先读
-
-改动涉及面比较大的时候：
-
-1. `docs/README.md`
-2. `docs/项目.md`
-3. `docs/架构与行为.md`
-4. `docs/开发与维护.md`
-
-## 规则路由
-
-详细规则在 `.claude/rules/*.md`。每份文件的 `paths:` 前言才是"它管哪些文件"的权威；
-下表只是查找捷径。改之前读对应那份，并顺着它给的指针继续读设计文档和决策记录。
-
-| 你在改什么 | 读哪份 |
+| 范围 | Rule |
 | --- | --- |
-| 组件、页面区块、stories、design token、Tailwind | `ui.md` |
+| TypeScript、命名、import、复杂度、lint | `coding-standards.md` |
 | 路由、layout、metadata、缓存、client 边界 | `conventions.md` |
-| 任何 TypeScript：类型、import、命名、日志 | `coding-standards.md` |
-| 复杂度、lint 例外、magic number、依赖清理 | `code-quality.md` |
-| 测试、fixtures、mock、行为证明 | `testing.md` |
-| API route、安全配置、lead schema、`next.config.ts` | `security.md` |
-| middleware、`open-next.config.ts`、`wrangler.jsonc`、部署 | `cloudflare.md` |
-| `content/`、`messages/`、站点配置、内容查询 | `content.md` |
+| 组件、页面 UI、Tailwind、设计 token | `ui.md` |
+| 测试、fixture、mock、行为证明 | `testing.md` |
+| API、安全配置、lead schema、Next 配置 | `security.md` |
+| middleware、OpenNext、Wrangler、部署 | `cloudflare.md` |
+| 内容、messages、站点配置、内容查询 | `content.md` |
 | 翻译 key、locale 路由、i18n 管道 | `i18n.md` |
 | JSON-LD、FAQ schema、SEO 组件 | `structured-data.md` |
 
 ## 验证
 
-用能证明这次改动的最小验证，`pnpm run` 列出所有脚本。三条从脚本名看不出来的：
+- 上线工作按 `docs/正式上线标准.md` 分层验证；`pnpm release:verify`
+  只证明 release lane，不等于正式部署或业务上线。
 
-- 改 Cloudflare / OpenNext：先 `pnpm build`，再 `pnpm website:build:cf`。
-- 要大范围本地检查：`pnpm website:check`。
-- 涉及上线：按 `docs/正式上线标准.md` 走，然后 `pnpm release:verify`。
-
-## 参考资料
+## 依赖文档
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -80,30 +38,3 @@ profile fixtures、旧 blog、物料化工具，全部退役。看到 starter �
 Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 
 <!-- END:nextjs-agent-rules -->
-
-（这段带 BEGIN/END 标记，保持英文原样。）
-
-其他依赖同理：动手前先看官方文档或本地锁版本的文档，确认 API 现在长什么样。
-
-## 硬性约束
-
-- **i18n**：用户能看到的文案一律走翻译 key。
-- **Git**：GitHub Flow。`main` 是唯一长期分支，功能分支走 pull request。
-
-## 判断准则
-
-**缺陷。** 确认过的缺陷就是缺陷，投入产出比和"这是边缘情况"都不构成关掉它的理由；
-范围和排期决定它什么时候修，不决定它算不算数。推迟就说清真实原因，以及留在原地
-没动的根因是什么。动手前先问这个 bug 是怎么能存在的——优先拆掉让它成立的条件，
-而不是把症状盖住。
-
-**把关机制。** gate 和测试是为某个意图服务的手段，不是法律。一个检查逼着文档或代码
-写下不属实的内容，该改的是检查。别把时间点快照（commit hash、条数、推送状态）钉成
-必过断言，也别给 `AGENTS.md` / `CLAUDE.md` 加内容断言——要守就守那句话描述的行为，
-守在行为发生的地方。
-
-## AI 前端体系
-
-治理正本：`docs/design/组件治理.md`、`docs/design/设计真相.md`、
-`.claude/rules/ui.md`，加上组件治理测试。`src/components/ui/*` 是正式的 UI 入口，
-测试和 `pnpm component:check` 是硬门槛。

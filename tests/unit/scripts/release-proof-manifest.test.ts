@@ -137,10 +137,7 @@ describe("release proof manifest", () => {
       "--env",
       "preview",
     ]);
-    // 这里只证明 dry-run 这步确实挂着一份 gzip 预算——具体数字守在
-    // `cloudflare-free-runtime-budget-contract.test.ts`（留在平台上限以内）。
-    // 原来把整个对象连同一句英文散文 `source` 一起 toEqual 冻住；那个形状那份
-    // 契约测试 2026-07-27 已经从自己身上删掉了，理由是门逼着文档改字。
+    // 这里只证明 dry-run 挂有 gzip 预算；具体上限由预算契约测试负责。
     expect(wranglerStep.artifactBudget).toEqual(
       expect.objectContaining({
         metric: "gzip KiB",
