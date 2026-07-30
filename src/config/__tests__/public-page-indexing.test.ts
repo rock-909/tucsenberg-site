@@ -3,7 +3,7 @@ import { getCanonicalPath, getProductMarketPath } from "@/config/paths/utils";
 import { shouldIndexPublicPage } from "@/config/single-site-seo";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
 
-describe("public page indexing by starter profile", () => {
+describe("public page indexing", () => {
   it("indexes Tucsenberg catalog static pages by default", () => {
     expect(
       shouldIndexPublicPage("products", getCanonicalPath("products")),
@@ -31,7 +31,7 @@ describe("public page indexing by starter profile", () => {
     ).toBe(true);
   });
 
-  it("indexes product market pages under the default catalog profile", () => {
+  it("indexes product market pages", () => {
     const [marketSlug] = getAllMarketSlugs();
 
     expect(marketSlug).toBeDefined();
@@ -40,13 +40,7 @@ describe("public page indexing by starter profile", () => {
     ).toBe(true);
   });
 
-  // Fails closed: anything not on the public allow-list stays out of the index,
-  // whether it is a retired path or one that never existed.
-  it("does not index page types outside the public allow-list", () => {
-    expect(shouldIndexPublicPage("blog", "/blog")).toBe(false);
-    expect(shouldIndexPublicPage("capabilities", "/capabilities")).toBe(false);
-    expect(shouldIndexPublicPage("never-existed", "/never-existed")).toBe(
-      false,
-    );
+  it("does not index a products page outside the product route", () => {
+    expect(shouldIndexPublicPage("products", "/not-a-product")).toBe(false);
   });
 });

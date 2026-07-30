@@ -112,7 +112,7 @@ describe("createStaticMarkdownContent", () => {
     );
 
     expect(
-      screen.getByRole("region", { name: "Standard", exact: true }),
+      screen.getByRole("region", { name: /^Standard$/u }),
     ).toHaveAttribute("tabindex", "0");
   });
 

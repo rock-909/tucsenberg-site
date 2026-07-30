@@ -94,11 +94,17 @@ function collectImportSpecifiers(filePath: string, source: string): string[] {
 
     if (
       ts.isCallExpression(node) &&
-      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteral(node.arguments[0])
+      node.expression.kind === ts.SyntaxKind.ImportKeyword
     ) {
-      specifiers.push(node.arguments[0].text);
+      const [argument] = node.arguments;
+
+      if (
+        node.arguments.length === 1 &&
+        argument !== undefined &&
+        ts.isStringLiteral(argument)
+      ) {
+        specifiers.push(argument.text);
+      }
     }
 
     ts.forEachChild(node, visit);

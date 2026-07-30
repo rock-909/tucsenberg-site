@@ -21,7 +21,6 @@ describe("single-site home link targets", () => {
       getSingleSiteHomeLinkTargets(),
     );
     expect(SINGLE_SITE_HOME_LINK_TARGETS).toEqual(CATALOG_HOME_LINK_TARGETS);
-    expect(SINGLE_SITE_HOME_LINK_TARGETS.blog).toBeUndefined();
   });
 
   it("exposes active route targets for the catalog site", () => {

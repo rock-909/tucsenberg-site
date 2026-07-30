@@ -14,7 +14,7 @@ const isDaily = process.env.CI_DAILY === "true";
 const shouldRebuildServer = process.env.PLAYWRIGHT_REBUILD_SERVER === "true";
 const PLAYWRIGHT_PROFILE_LANE_IDS = new Set(["default", "optional", "all"]);
 
-function normalizePlaywrightProfileLane(rawValue) {
+function normalizePlaywrightProfileLane(rawValue: string | undefined) {
   const normalized = rawValue?.trim() || "default";
   if (!PLAYWRIGHT_PROFILE_LANE_IDS.has(normalized)) {
     throw new Error(

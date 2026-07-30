@@ -6,7 +6,22 @@
  */
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Header } from "@/components/layout/header";
+import { Header as ProductionHeader } from "@/components/layout/header";
+
+const DEFAULT_HEADER_LABELS = {
+  contactSalesLabel: "Contact Sales",
+  openMenuLabel: "Open menu",
+  closeMenuLabel: "Close menu",
+  mainNavigationLabel: "Main navigation",
+} as const;
+
+type HeaderProps = React.ComponentProps<typeof ProductionHeader>;
+type TestHeaderProps = Omit<HeaderProps, keyof typeof DEFAULT_HEADER_LABELS> &
+  Partial<typeof DEFAULT_HEADER_LABELS>;
+
+function Header(props: TestHeaderProps = {}) {
+  return ProductionHeader({ ...DEFAULT_HEADER_LABELS, ...props });
+}
 
 vi.mock("next/dynamic", async () => {
   const React = await import("react");

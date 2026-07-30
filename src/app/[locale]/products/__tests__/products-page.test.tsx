@@ -187,8 +187,13 @@ describe("Feature: Product Overview Page", () => {
       );
 
       for (let index = 0; index < lineHeadings.length - 1; index += 1) {
+        const current = lineHeadings[index];
+        const next = lineHeadings[index + 1];
+        if (!current || !next) {
+          throw new Error("Expected adjacent product line headings");
+        }
         expect(
-          lineHeadings[index].compareDocumentPosition(lineHeadings[index + 1]) &
+          current.compareDocumentPosition(next) &
             Node.DOCUMENT_POSITION_FOLLOWING,
         ).toBeTruthy();
       }

@@ -325,7 +325,8 @@ describe("load-messages runtime loading", () => {
   it("keeps factual brand values as placeholders in source JSON", async () => {
     const { getComposedMessages } =
       await import("@/lib/i18n/composed-messages");
-    const enMessages = getComposedMessages("en") as FactualSourceMessages;
+    const enMessages = getComposedMessages("en");
+    assertFactualCompleteMessages(enMessages);
 
     expect(enMessages.navigation.siteName).toBe("{siteName}");
     expect(enMessages.footer.copyright).toBe(

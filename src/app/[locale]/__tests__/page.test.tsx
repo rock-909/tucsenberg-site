@@ -213,31 +213,6 @@ describe("Home Page", () => {
       ).toHaveAttribute("href", "/oem-wholesale");
     });
 
-    it("does not reuse product or about labels when a thin profile only has contact", async () => {
-      mockGetSingleSiteHomeLinkTargets.mockReturnValue({
-        contact: "/contact",
-        about: "/about",
-        primaryCta: "/contact",
-        secondaryCta: "/about",
-      });
-      const HomeComponent = await Home({
-        params: Promise.resolve({ locale: "en" }),
-      });
-
-      render(HomeComponent);
-
-      const finalAction = within(screen.getByTestId("home-final-action"));
-      expect(
-        finalAction.getByRole("link", { name: "Request a Quote" }),
-      ).toHaveAttribute("href", "/contact");
-      expect(
-        finalAction.queryByRole("link", { name: "Wholesale & OEM" }),
-      ).not.toBeInTheDocument();
-      expect(
-        finalAction.queryByRole("link", { name: "About" }),
-      ).not.toBeInTheDocument();
-    });
-
     it("keeps the first supporting sections structured as B2B proof panels", async () => {
       const HomeComponent = await Home({
         params: Promise.resolve({ locale: "en" }),

@@ -97,7 +97,10 @@ function getPropertyName(name: ts.PropertyName): string | null {
   return null;
 }
 
-function findObjectLiteral(source: string, variableName: string) {
+function findObjectLiteral(
+  source: string,
+  variableName: string,
+): ts.ObjectLiteralExpression {
   const sourceFile = createSourceFile(source);
   let objectLiteral: ts.ObjectLiteralExpression | null = null;
 
@@ -118,9 +121,9 @@ function findObjectLiteral(source: string, variableName: string) {
 
   visit(sourceFile);
 
-  expect(objectLiteral, `${variableName} should be an object literal`).not.toBe(
-    null,
-  );
+  if (!objectLiteral) {
+    throw new Error(`${variableName} should be an object literal`);
+  }
 
   return objectLiteral;
 }
@@ -201,8 +204,9 @@ function parseEnvExample(source: string) {
     }
 
     const match = /^([A-Z0-9_]+)=(.*)$/u.exec(trimmed);
-    if (match) {
-      values.set(match[1], match[2] ?? "");
+    const key = match?.[1];
+    if (key) {
+      values.set(key, match[2] ?? "");
     }
   }
 
@@ -224,11 +228,11 @@ describe(".env.example parity", () => {
     const envSource = readRepoFile(ENV_SOURCE_PATH);
     const envExample = parseEnvExample(readRepoFile(ENV_EXAMPLE_PATH));
     const schemaKeys = getSchemaKeys(envSource);
-    const runtimeKeys = new Set(extractRuntimeEnvKeys(envSource));
+    const runtimeKeys = new Set<string>(extractRuntimeEnvKeys(envSource));
 
     expect(sortedStrings(schemaKeys)).toEqual(sortedStrings(runtimeKeys));
 
-    const documentedRuntimeKeys = new Set(
+    const documentedRuntimeKeys = new Set<string>(
       [...envExample.keys()].filter(
         (key) => !NON_RUNTIME_EXAMPLE_ENV_KEYS.has(key),
       ),

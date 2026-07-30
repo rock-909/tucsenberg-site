@@ -17,6 +17,26 @@ const {
   UNUSED_MESSAGE_KEYS,
 } = require("../message-key-usage-baseline");
 
+/**
+ * @typedef {Object} DerivedKeyConsumer
+ * @property {string} kind
+ * @property {string} file
+ * @property {string} reason
+ * @property {string=} sourceName
+ * @property {string=} valueProperty
+ * @property {string=} rootName
+ * @property {string=} ownerFunction
+ * @property {string=} callee
+ * @property {{
+ *   sourceName: string,
+ *   filters: {property: string, equals: string | number | boolean}[],
+ * }=} entryKeySource
+ * @property {string=} prefix
+ * @property {string[]=} prefixes
+ * @property {string[]=} suffixes
+ * @property {{property: string, equals: string | number | boolean}[]=} entryFilters
+ */
+
 const ROOT = process.cwd();
 const DEFAULT_LOCALE = require("../../../i18n-locales.config").defaultLocale;
 const SOURCE_EXTENSIONS = new Set([
@@ -718,7 +738,9 @@ function collectMessageKeyUsageFindings({
   catalogKeys = getCatalogKeys(),
   sourceFiles = collectUsageSourceFiles(rootDir),
   dynamicPrefixAllowlist = DYNAMIC_MESSAGE_KEY_PREFIXES,
-  derivedKeyConsumers = MESSAGE_DERIVED_KEY_CONSUMERS,
+  derivedKeyConsumers = /** @type {DerivedKeyConsumer[]} */ (
+    MESSAGE_DERIVED_KEY_CONSUMERS
+  ),
   objectKeyConsumers = MESSAGE_OBJECT_KEY_CONSUMERS,
   translatorParameterOverrides = TRANSLATOR_PARAMETER_OVERRIDES,
   unusedKeyAllowlist = UNUSED_MESSAGE_KEYS,

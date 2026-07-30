@@ -49,7 +49,7 @@ describe("Layout Structured Data Generation", () => {
   });
 
   it("passes the translation function and empty config objects to both generators", async () => {
-    await generatePageStructuredData("zh");
+    await generatePageStructuredData("en");
 
     expect(mockGenerateOrganizationData).toHaveBeenCalledWith(
       expect.any(Function),

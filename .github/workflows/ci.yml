@@ -54,6 +54,9 @@ jobs:
       - name: TypeScript 检查
         run: pnpm type-check
 
+      - name: 测试 TypeScript 检查
+        run: pnpm type-check:tests
+
       - name: 内容结构检查
         run: pnpm content:check
 

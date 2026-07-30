@@ -119,6 +119,16 @@ async function isLocalPortInUse(
   return results.some(Boolean);
 }
 
+/**
+ * @param {{
+ *   rootDir?: string,
+ *   runCommand?: (
+ *     step: (typeof RELEASE_VERIFY_COMMANDS)[number],
+ *     rootDir: string,
+ *   ) => number | {status?: number, stdout?: string, stderr?: string},
+ *   portInUse?: (port?: number, hosts?: string[]) => Promise<boolean>,
+ * }=} options
+ */
 async function runReleaseVerify({
   rootDir = process.cwd(),
   runCommand = runReleaseVerifyCommand,

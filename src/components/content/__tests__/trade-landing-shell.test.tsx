@@ -77,6 +77,9 @@ describe("TradeLandingShell", () => {
         title: "OEM, Private Label & Wholesale Supply",
         slug: "oem-wholesale",
         publishedAt: "2026-07-02",
+        layout: "legal",
+        showToc: true,
+        lastReviewed: "2026-07-02",
         faq: [
           {
             id: "oem-faq-1",

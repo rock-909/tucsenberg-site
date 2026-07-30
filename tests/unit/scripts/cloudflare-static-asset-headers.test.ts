@@ -734,7 +734,10 @@ describe("Cloudflare static asset headers proof", () => {
 
         expect(
           runCloudflareStaticAssetHeaderCli(
-            createVirtualRepo(files, { unlistable: unlistable }),
+            createVirtualRepo(
+              files,
+              unlistable === undefined ? {} : { unlistable },
+            ),
           ),
         ).toBe(false);
         if (hint === "tells") {

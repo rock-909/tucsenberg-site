@@ -226,17 +226,17 @@ describe("inquiry validation detail mapping", () => {
 
   it("keeps detail output stable when only the English Zod message changes", () => {
     const structuredIssue = {
-      code: "invalid_type",
+      code: "invalid_type" as const,
       path: ["email"],
       message: "Totally different prose",
-      received: "undefined",
-    } as const;
+      expected: "string" as const,
+    };
     const legacyIssue = {
-      code: "invalid_type",
+      code: "invalid_type" as const,
       path: ["email"],
       message: "Invalid input: expected string, received undefined",
-      received: "undefined",
-    } as const;
+      expected: "string" as const,
+    };
 
     expect(
       mapInquiryValidationDetails([structuredIssue], { email: undefined }),
@@ -247,17 +247,17 @@ describe("inquiry validation detail mapping", () => {
 describe("shared zod validation detail mapping", () => {
   it("only treats invalid_type as required when undefined was received", () => {
     const requiredIssue = {
-      code: "invalid_type",
+      code: "invalid_type" as const,
       path: ["company"],
       message: "Different required copy",
-      expected: "string",
-    } as const;
+      expected: "string" as const,
+    };
     const wrongTypeIssue = {
-      code: "invalid_type",
+      code: "invalid_type" as const,
       path: ["company"],
       message: "Different wrong-type copy",
-      expected: "string",
-    } as const;
+      expected: "string" as const,
+    };
 
     expect(
       mapZodIssuesToValidationDetails(

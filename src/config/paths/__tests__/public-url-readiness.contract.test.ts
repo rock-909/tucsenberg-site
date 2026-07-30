@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { isBaseUrlConfigured } from "@/config/paths/site-config";
 
 const require = createRequire(import.meta.url);
@@ -15,6 +15,10 @@ const {
 } = require("../../../../scripts/quality/public-url-readiness.js");
 
 describe("public URL readiness shared contract", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("keeps the pure helper and isBaseUrlConfigured aligned on fixtures", () => {
     for (const url of PUBLIC_BASE_URL_FIXTURES.rejected) {
       expect(isPublicBaseUrlReady(url), url).toBe(false);
@@ -24,7 +28,7 @@ describe("public URL readiness shared contract", () => {
     }
 
     // isBaseUrlConfigured only enforces in production (and with gates off)
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     delete process.env.PLAYWRIGHT_TEST;
     delete process.env.SKIP_ENV_VALIDATION;
 

@@ -5,6 +5,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { collectMessageKeyUsageFindings } from "../../../scripts/quality/checks/message-key-usage.js";
 import { UNUSED_MESSAGE_KEYS } from "../../../scripts/quality/message-key-usage-baseline.js";
 
+type DerivedKeyConsumerFixture = Record<string, unknown> & {
+  kind: string;
+  file: string;
+  reason: string;
+};
+
 const tempDirs: string[] = [];
 const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
@@ -67,7 +73,7 @@ function collect({
   catalogKeys: string[];
   content?: string;
   dynamicPrefixAllowlist?: Array<{ prefix: string; reason: string }>;
-  derivedKeyConsumers?: Array<Record<string, unknown>>;
+  derivedKeyConsumers?: DerivedKeyConsumerFixture[];
   objectKeyConsumers?: Array<{
     file: string;
     objectName: string;
@@ -96,7 +102,9 @@ function collect({
   });
 }
 
-function derivedConsumer(config: Record<string, unknown>) {
+function derivedConsumer(
+  config: Record<string, unknown> & { kind: string },
+): DerivedKeyConsumerFixture {
   return { file: "src/example.ts", reason: "fixture", ...config };
 }
 

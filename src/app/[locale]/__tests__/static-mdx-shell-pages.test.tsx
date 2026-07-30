@@ -26,7 +26,9 @@ vi.mock("@/app/[locale]/generate-static-params", () => ({
 }));
 
 interface ShellPageModule {
-  default: (props: { params: Promise<{ locale: Locale }> }) => JSX.Element;
+  default: (props: {
+    params: Promise<{ locale: Locale }>;
+  }) => React.ReactElement;
   generateMetadata: (props: { params: Promise<{ locale: Locale }> }) => unknown;
   generateStaticParams: () => unknown;
 }

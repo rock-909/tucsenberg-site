@@ -144,6 +144,14 @@ function collectStaleExemptionFindings(dynamicRouteExemptions, usedExemptions) {
     }));
 }
 
+/**
+ * @param {{
+ *   rootDir?: string,
+ *   buildDir?: string,
+ *   configuredLocales?: string[],
+ *   dynamicRouteExemptions?: Map<string, string>,
+ * }=} options
+ */
 function collectPrerenderStaticFindings({
   rootDir = ROOT,
   buildDir = DEFAULT_BUILD_DIR,

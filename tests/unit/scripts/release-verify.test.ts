@@ -79,8 +79,8 @@ describe("release verify runner", () => {
       portInUse: async () => true,
     });
 
-    const playwrightCommand = RELEASE_VERIFY_COMMANDS.find((step) =>
-      step.args.includes("playwright"),
+    const playwrightCommand = RELEASE_VERIFY_COMMANDS.find(
+      (step: { args: string[] }) => step.args.includes("playwright"),
     );
 
     expect(status).toBe(1);

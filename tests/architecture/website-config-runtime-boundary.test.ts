@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, type Dirent } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import { SITE_CONFIG } from "@/config/paths";
@@ -22,7 +22,7 @@ function read(repoPath: string) {
 }
 
 function walkSourceFiles(dir: string, results: string[] = []) {
-  let entries: ReturnType<typeof readdirSync>;
+  let entries: Dirent<string>[];
 
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test recursively scans fixed repo-local runtime roots
@@ -57,6 +57,10 @@ function findWebsiteConfigImports(source: string) {
   for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {
     const specifier = match[1];
 
+    if (!specifier) {
+      continue;
+    }
+
     if (
       specifier === WEBSITE_CONFIG_PREFIX ||
       specifier.startsWith(`${WEBSITE_CONFIG_PREFIX}/`)
@@ -87,9 +91,7 @@ describe("website config runtime boundary", () => {
   });
 
   it("keeps brand asset facts out of the SITE_CONFIG runtime facade", () => {
-    const runtimeConfig = SITE_CONFIG as Record<string, unknown>;
-
-    expect(Object.hasOwn(runtimeConfig, "brandAssets")).toBe(false);
+    expect(Object.hasOwn(SITE_CONFIG, "brandAssets")).toBe(false);
   });
 
   it("keeps runtime source from reading brand assets through SITE_CONFIG", () => {

@@ -9,6 +9,7 @@
  */
 
 import { getComposedMessages } from "@/lib/i18n/composed-messages";
+import type { Locale } from "@/types/content.types";
 
 function flatten(
   source: Record<string, unknown>,
@@ -35,7 +36,7 @@ function flatten(
 }
 
 /** 真实消息包合成后的全部叶子，扁平成点号 key。 */
-export function getFlatMessages(locale = "en"): Map<string, string> {
+export function getFlatMessages(locale: Locale = "en"): Map<string, string> {
   return flatten(getComposedMessages(locale) as Record<string, unknown>);
 }
 

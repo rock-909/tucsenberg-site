@@ -18,12 +18,15 @@ import {
   validateProductionRuntimeContract,
 } from "../../../scripts/starter-checks.js";
 
-function createChildEnv(overrides: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+function createChildEnv(
+  overrides: Record<string, string | undefined>,
+): NodeJS.ProcessEnv {
   const env = Object.fromEntries(
     Object.entries(process.env).filter(([key]) => !key.startsWith("VITEST")),
   );
 
   return {
+    NODE_ENV: process.env.NODE_ENV ?? "test",
     ...env,
     ...overrides,
   };
@@ -274,7 +277,7 @@ describe("validate-production-config runtime contract", () => {
       NEXT_PUBLIC_SECURITY_MODE: "strict",
     });
     expect(getExecutableRequiredKeys(exportScript)).toEqual(
-      expect.arrayContaining(SAFE_PRODUCTION_PUBLIC_KEYS),
+      expect.arrayContaining([...SAFE_PRODUCTION_PUBLIC_KEYS]),
     );
 
     const execution = executeProductionExport(exportScript);
@@ -546,12 +549,12 @@ describe("validateProductionConfig CI vs deploy gate", () => {
 describe("public launch trust content guard", () => {
   it("checks the actual wrangler production public URLs in strict mode", () => {
     const result = validateProductionConfig({
+      ...createValidProductionEnv(),
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
       NEXT_PUBLIC_SITE_URL: "https://launch.tucsenberg.test",
       NEXT_PUBLIC_BASE_URL: "https://launch.tucsenberg.test",
-      ...createValidProductionEnv(),
     });
 
     expect(result.errors).toEqual(
@@ -649,20 +652,20 @@ describe("public launch trust content guard", () => {
 
   it("treats workers.dev and example.invalid as non-launch public URLs", () => {
     const workersDev = validateProductionConfig({
+      ...createValidProductionEnv(),
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
       NEXT_PUBLIC_SITE_URL:
         "https://tucsenberg-site-preview.example.workers.dev",
-      ...createValidProductionEnv(),
     });
     const exampleInvalid = validateProductionConfig({
+      ...createValidProductionEnv(),
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
       NEXT_PUBLIC_SITE_URL:
         "https://tucsenberg-site-production.example.invalid",
-      ...createValidProductionEnv(),
     });
 
     expect(workersDev.errors).toEqual(
@@ -675,20 +678,20 @@ describe("public launch trust content guard", () => {
 
   it("treats workers.dev and example.invalid base URLs as non-launch public URLs", () => {
     const workersDev = validateProductionConfig({
+      ...createValidProductionEnv(),
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
       NEXT_PUBLIC_BASE_URL:
         "https://tucsenberg-site-preview.example.workers.dev",
-      ...createValidProductionEnv(),
     });
     const exampleInvalid = validateProductionConfig({
+      ...createValidProductionEnv(),
       APP_ENV: "production",
       NODE_ENV: "production",
       PUBLIC_LAUNCH_STRICT: "true",
       NEXT_PUBLIC_BASE_URL:
         "https://tucsenberg-site-production.example.invalid",
-      ...createValidProductionEnv(),
     });
 
     expect(workersDev.errors).toEqual(
