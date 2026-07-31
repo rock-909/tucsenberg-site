@@ -117,7 +117,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     {
       title: "For trade buyers",
       bullets: [
-        "MOQ from 10 metres — a single section qualifies the product.",
         "OEM: printed sleeve marking, custom section lengths, your carton and manual.",
         "Consumables & spares: repair patches, pumps, nails and sleeves reorderable — the accessory kit is also a reorder stream.",
         "Consolidates with gates, boxwall and bag cartons in one container.",

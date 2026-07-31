@@ -734,7 +734,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(String(allowedHosts).split(",")).toContain(new URL(siteUrl).host);
   });
 
-  it("keeps formal domain cutover out of the no-cutover production config", () => {
+  it("uses the approved apex domain for production metadata", () => {
     const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
     const env = getObject(wrangler.env, "wrangler.env");
     const production = getObject(env.production, "wrangler.env.production");
@@ -743,8 +743,8 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(production).not.toHaveProperty("routes");
     expect(production).not.toHaveProperty("custom_domain");
     expect(production).not.toHaveProperty("workers_dev");
-    expect(vars.NEXT_PUBLIC_SITE_URL).not.toBe("https://tucsenberg.com");
-    expect(vars.NEXT_PUBLIC_BASE_URL).not.toBe("https://tucsenberg.com");
+    expect(vars.NEXT_PUBLIC_SITE_URL).toBe("https://tucsenberg.com");
+    expect(vars.NEXT_PUBLIC_BASE_URL).toBe("https://tucsenberg.com");
   });
 
   it("keeps forbidden claims out of public-rendered source surfaces", () => {

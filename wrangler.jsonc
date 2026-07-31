@@ -37,9 +37,8 @@
       "vars": {
         "APP_ENV": "production",
         "DEPLOYMENT_PLATFORM": "cloudflare",
-        // Placeholder until the production domain is explicitly signed off.
-        "NEXT_PUBLIC_BASE_URL": "https://tucsenberg-site-production.example.invalid",
-        "NEXT_PUBLIC_SITE_URL": "https://tucsenberg-site-production.example.invalid",
+        "NEXT_PUBLIC_BASE_URL": "https://tucsenberg.com",
+        "NEXT_PUBLIC_SITE_URL": "https://tucsenberg.com",
         "NEXT_PUBLIC_DEPLOYMENT_PLATFORM": "cloudflare",
         "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADvC8KDbJ54402pb",
         "NEXT_PUBLIC_TEST_MODE": "false",
