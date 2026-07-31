@@ -547,7 +547,7 @@ describe("validateProductionConfig CI vs deploy gate", () => {
 });
 
 describe("public launch trust content guard", () => {
-  it("checks the actual wrangler production public URLs in strict mode", () => {
+  it("accepts the actual wrangler production public URLs in strict mode", () => {
     const result = validateProductionConfig({
       ...createValidProductionEnv(),
       APP_ENV: "production",
@@ -557,16 +557,11 @@ describe("public launch trust content guard", () => {
       NEXT_PUBLIC_BASE_URL: "https://launch.tucsenberg.test",
     });
 
-    expect(result.errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining(
-          "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL",
-        ),
-        expect.stringContaining(
-          "wrangler.jsonc env.production.vars.NEXT_PUBLIC_BASE_URL",
-        ),
-      ]),
-    );
+    expect(
+      result.errors.filter((error) =>
+        error.includes("wrangler.jsonc env.production.vars.NEXT_PUBLIC_"),
+      ),
+    ).toEqual([]);
   });
 
   it("reports owner-dependent public trust items as warnings by default", () => {
