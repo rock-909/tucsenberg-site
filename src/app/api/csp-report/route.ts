@@ -16,10 +16,12 @@ import {
   HTTP_INTERNAL_ERROR,
   HTTP_NO_CONTENT,
   HTTP_OK,
+  HTTP_PAYLOAD_TOO_LARGE,
   HTTP_UNSUPPORTED_MEDIA_TYPE,
 } from "@/constants";
 
 const MAX_CSP_REPORT_BODY_BYTES = 16 * 1024; // 16 KB — CSP reports should be tiny; prevents body-based DoS
+const MAX_CSP_REPORTS_PER_BATCH = 20;
 const MAX_SCRIPT_SAMPLE_LENGTH = 200;
 const MAX_CSP_LOG_FIELD_LENGTH = 200;
 const MAX_CSP_POLICY_LOG_LENGTH = 500;
@@ -237,6 +239,16 @@ async function parseAndValidateCSPReports(
   });
   if (!parsedBody.ok) {
     return createApiErrorResponse(parsedBody.errorCode, parsedBody.statusCode);
+  }
+
+  if (
+    Array.isArray(parsedBody.data) &&
+    parsedBody.data.length > MAX_CSP_REPORTS_PER_BATCH
+  ) {
+    return createApiErrorResponse(
+      API_ERROR_CODES.PAYLOAD_TOO_LARGE,
+      HTTP_PAYLOAD_TOO_LARGE,
+    );
   }
 
   const reports = extractCspReports(parsedBody.data);
