@@ -10,7 +10,13 @@ import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 import { ResendHttpEmailClient } from "@/lib/email/resend-http-client";
 import { buildProductInquiryEmailContent } from "@/lib/email/runtime-email-content";
 import { logger, sanitizeEmail } from "@/lib/logger";
-import { EMAIL_CONFIG, ResendUtils } from "@/lib/resend-utils";
+import {
+  EMAIL_CONFIG,
+  generateProductInquirySubject,
+  getProductInquiryTags,
+  sanitizeProductInquiryData,
+  validateProductInquiryData,
+} from "@/lib/resend-utils";
 
 export class ResendService {
   private resend: ResendHttpEmailClient | null = null;
@@ -84,11 +90,10 @@ export class ResendService {
     }
 
     try {
-      const validatedData = ResendUtils.validateProductInquiryData(data);
-      const sanitizedData =
-        ResendUtils.sanitizeProductInquiryData(validatedData);
+      const validatedData = validateProductInquiryData(data);
+      const sanitizedData = sanitizeProductInquiryData(validatedData);
 
-      const subject = ResendUtils.generateProductInquirySubject(sanitizedData);
+      const subject = generateProductInquirySubject(sanitizedData);
       const emailContent = buildProductInquiryEmailContent(sanitizedData);
 
       const result = await this.resend!.send({
@@ -98,7 +103,7 @@ export class ResendService {
         subject,
         html: emailContent.html,
         text: emailContent.text,
-        tags: ResendUtils.getProductInquiryTags(sanitizedData.referenceId),
+        tags: getProductInquiryTags(sanitizedData.referenceId),
       });
 
       if (result.error || !result.data) {
