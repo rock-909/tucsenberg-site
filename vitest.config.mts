@@ -19,18 +19,6 @@ export default defineConfig({
     // 全局设置
     globals: true,
 
-    // SSR 配置 - 修复 Sentry 依赖解析问题
-    server: {
-      deps: {
-        inline: [
-          "@sentry/nextjs",
-          "@sentry/core",
-          "@sentry/utils",
-          "@sentry/node",
-        ],
-      },
-    },
-
     // 设置文件
     setupFiles: ["./src/test/setup.ts"],
 

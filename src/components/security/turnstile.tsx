@@ -219,6 +219,3 @@ export function TurnstileWidget({
     </div>
   );
 }
-
-// Re-export for convenience
-export { Turnstile } from "@marsidev/react-turnstile";
