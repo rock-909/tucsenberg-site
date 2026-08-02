@@ -41,7 +41,7 @@ const OPEN_NEXT_FORBIDDEN_TOKENS = [
 ];
 
 const DEPLOY_WORKFLOW_REQUIRED_COMMANDS = [
-  'node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
+  'node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
   "pnpm exec opennextjs-cloudflare deploy --env production",
 ];
 

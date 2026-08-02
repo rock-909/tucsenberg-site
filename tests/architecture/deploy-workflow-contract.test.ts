@@ -16,6 +16,7 @@ interface DeployWorkflow {
         readonly if?: string;
         readonly name?: string;
         readonly run?: string;
+        readonly env?: Record<string, string>;
         readonly "continue-on-error"?: boolean;
       }[];
     }
@@ -73,6 +74,51 @@ describe("Cloudflare deploy workflow contract", () => {
     expect(smokeStep?.run).toContain(
       "needs.build-and-deploy.outputs.deployment_url",
     );
+  });
+
+  it("treats preview input as external smoke data, not deploy proof shell", () => {
+    const steps = workflowSteps(loadDeployWorkflow(), "build-and-deploy");
+    const smoke = steps.find((step) =>
+      step.run?.includes("external-url-smoke"),
+    );
+    const providerSecretNames = [
+      "RATE_LIMIT_PEPPER",
+      "TURNSTILE_SECRET_KEY",
+      "RESEND_API_KEY",
+      "AIRTABLE_API_KEY",
+      "AIRTABLE_BASE_ID",
+      "UPSTASH_REDIS_REST_URL",
+      "UPSTASH_REDIS_REST_TOKEN",
+    ];
+
+    expect(smoke?.name).toBe("外部 URL smoke（preview 输入）");
+    expect(smoke?.if).toContain("inputs.environment == 'preview'");
+    expect(smoke?.run).toContain(
+      'node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
+    );
+    expect(smoke?.run).not.toContain("inputs.preview_url");
+    expect(smoke?.env?.PREVIEW_URL).toBe("${{ inputs.preview_url }}");
+
+    for (const step of steps) {
+      expect(step.run ?? "").not.toContain("inputs.preview_url");
+      expect(step.run ?? "").not.toMatch(/deployment-url=.*PREVIEW_URL/u);
+
+      if (step.if?.includes("inputs.environment == 'preview'")) {
+        for (const secretName of providerSecretNames) {
+          expect(step.env?.[secretName], secretName).toBeUndefined();
+        }
+      }
+    }
+  });
+
+  it("does not export a deployment URL for preview-only external smoke", () => {
+    const steps = workflowSteps(loadDeployWorkflow(), "build-and-deploy");
+    const resolver = steps.find((step) => step.name === "汇总 URL");
+
+    expect(resolver?.run).not.toContain("deployment-url=${PREVIEW_URL}");
+    expect(resolver?.run).not.toContain("external-smoke-url=${PREVIEW_URL}");
+    expect(resolver?.run).not.toContain("inputs.preview_url");
+    expect(resolver?.env?.PREVIEW_URL).toBe("${{ inputs.preview_url }}");
   });
 
   it("does not cancel an in-flight production deployment", () => {

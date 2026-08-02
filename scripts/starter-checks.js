@@ -73,7 +73,7 @@ const {
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
   runDeployedSmoke,
-  runPublicPreviewSmoke,
+  runExternalUrlSmoke,
 } = require("./quality/checks/cloudflare-smoke");
 
 const ROOT = process.cwd();
@@ -106,7 +106,7 @@ Commands:
   client-boundary     Check top-level use client budget (--build-artifacts after pnpm build)
   prerender-static    Check localized Next.js build output stays prerendered
   cf-preview-smoke    Probe local Cloudflare preview behavior
-  public-preview-smoke Probe public preview page route health
+  external-url-smoke Probe an externally supplied URL surface; does not prove current SHA deployment
   deployed-smoke      Probe deployed URL route health
   cf-preview-deployed Deploy preview workers and run deployed smoke
   cf-official-compare Check Cloudflare source/generated deploy config contract
@@ -134,7 +134,7 @@ const COMMAND_HANDLERS = {
   "client-boundary": (args) => runClientBoundaryCli(args),
   "prerender-static": () => runPrerenderStaticCheck(),
   "cf-preview-smoke": (args) => runCloudflarePreviewSmoke(args),
-  "public-preview-smoke": (args) => runPublicPreviewSmoke(args),
+  "external-url-smoke": (args) => runExternalUrlSmoke(args),
   "deployed-smoke": (args) => runDeployedSmoke(args),
   "cf-preview-deployed": () => runCloudflarePreviewDeployedProof(),
   "cf-official-compare": (args) => runCloudflareOfficialCompareCli(args),

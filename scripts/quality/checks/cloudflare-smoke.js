@@ -7,11 +7,11 @@ const ROOT = process.cwd();
 const DEFAULT_CF_PREVIEW_BASE_URL =
   process.env.CLOUDFLARE_PREVIEW_BASE_URL || "http://127.0.0.1:8787";
 const DEFAULT_DEPLOY_SMOKE_BASE_URL = process.env.DEPLOY_SMOKE_BASE_URL || "";
-const DEFAULT_PUBLIC_PREVIEW_SMOKE_BASE_URL = DEFAULT_DEPLOY_SMOKE_BASE_URL;
+const DEFAULT_EXTERNAL_URL_SMOKE_BASE_URL = DEFAULT_DEPLOY_SMOKE_BASE_URL;
 const DEPLOY_SMOKE_REQUEST_TIMEOUT_MS = 30000;
 const DEPLOY_SMOKE_REQUEST_RETRIES = 2;
 const DEPLOY_SMOKE_RETRY_DELAY_MS = 1000;
-const PUBLIC_PREVIEW_SMOKE_EXPECTATIONS = [
+const EXTERNAL_URL_SMOKE_EXPECTATIONS = [
   { pathname: "/", status: 200 },
   { pathname: "/products", status: 200 },
   { pathname: "/contact", status: 200 },
@@ -146,9 +146,9 @@ function pushExpectedStatus(response, expectedStatus, failures) {
   );
 }
 
-function parsePublicPreviewSmokeArgs(args) {
+function parseExternalUrlSmokeArgs(args) {
   const parsed = {
-    baseUrl: DEFAULT_PUBLIC_PREVIEW_SMOKE_BASE_URL,
+    baseUrl: DEFAULT_EXTERNAL_URL_SMOKE_BASE_URL,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -171,12 +171,12 @@ function parsePublicPreviewSmokeArgs(args) {
   return parsed;
 }
 
-async function requestPublicPreviewSmoke(baseUrl, pathname) {
+async function requestExternalUrlSmoke(baseUrl, pathname) {
   const url = new URL(pathname, baseUrl);
   const response = await fetch(url, {
     redirect: "manual",
     headers: {
-      "user-agent": "public-preview-smoke",
+      "user-agent": "external-url-smoke",
     },
     signal: AbortSignal.timeout(DEPLOY_SMOKE_REQUEST_TIMEOUT_MS),
   });
@@ -188,21 +188,24 @@ async function requestPublicPreviewSmoke(baseUrl, pathname) {
   };
 }
 
-async function runPublicPreviewSmoke(args = []) {
-  const { baseUrl } = parsePublicPreviewSmokeArgs(args);
+async function runExternalUrlSmoke(args = []) {
+  const { baseUrl } = parseExternalUrlSmokeArgs(args);
   const failures = [];
 
-  console.log(`[public-preview-smoke] Probing ${baseUrl}`);
+  console.log(`[external-url-smoke] Probing external URL surface ${baseUrl}`);
+  console.log(
+    "[external-url-smoke] Policy: this checks the supplied URL only; it does not prove the current SHA, artifact, or deploy.",
+  );
 
   const responses = [];
-  for (const { pathname } of PUBLIC_PREVIEW_SMOKE_EXPECTATIONS) {
-    responses.push(await requestPublicPreviewSmoke(baseUrl, pathname));
+  for (const { pathname } of EXTERNAL_URL_SMOKE_EXPECTATIONS) {
+    responses.push(await requestExternalUrlSmoke(baseUrl, pathname));
   }
 
   for (const [index, response] of responses.entries()) {
     pushExpectedStatus(
       response,
-      PUBLIC_PREVIEW_SMOKE_EXPECTATIONS[index].status,
+      EXTERNAL_URL_SMOKE_EXPECTATIONS[index].status,
       failures,
     );
     pushFailureUnless(
@@ -218,14 +221,14 @@ async function runPublicPreviewSmoke(args = []) {
   }
 
   if (failures.length > 0) {
-    console.error("[public-preview-smoke] Failures detected:");
+    console.error("[external-url-smoke] Failures detected:");
     for (const failure of failures) {
       console.error(`  - ${failure}`);
     }
     return false;
   }
 
-  console.log("[public-preview-smoke] All checks passed");
+  console.log("[external-url-smoke] All checks passed");
   return true;
 }
 
@@ -630,5 +633,5 @@ module.exports = {
   runCloudflarePreviewDeployedProof,
   runCloudflarePreviewSmoke,
   runDeployedSmoke,
-  runPublicPreviewSmoke,
+  runExternalUrlSmoke,
 };
