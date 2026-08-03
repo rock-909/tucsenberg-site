@@ -353,6 +353,53 @@ describe("POST /api/csp-report", () => {
     );
   });
 
+  it("accepts the 20-report batch limit and logs each violation once", async () => {
+    const report = {
+      type: "csp-violation",
+      body: {
+        documentURL: "https://example.com/page",
+        blockedURL: "https://malicious.com/script.js",
+        effectiveDirective: "script-src",
+      },
+    };
+
+    const response = await postReport(
+      Array.from({ length: 20 }, () => report),
+      {
+        "content-type": "application/reports+json",
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(logMessages(logger.warn)).toEqual(
+      Array.from({ length: 20 }, () => "CSP Violation Report"),
+    );
+  });
+
+  it("rejects an oversized Reporting API batch before per-report logging", async () => {
+    const report = {
+      type: "csp-violation",
+      body: {
+        documentURL: "https://example.com/page",
+        blockedURL: "https://malicious.com/script.js",
+        effectiveDirective: "script-src",
+      },
+    };
+
+    const response = await postReport(
+      Array.from({ length: 21 }, () => report),
+      {
+        "content-type": "application/reports+json",
+      },
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(data.errorCode).toBe("PAYLOAD_TOO_LARGE");
+    expect(vi.mocked(logger.warn)).not.toHaveBeenCalled();
+    expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
+  });
+
   // 尽力而为的遥测：认不出的报告类型要静默忽略，不能给浏览器回 4xx。
   it("ignores non-csp-violation entries in a Reporting API batch", async () => {
     const response = await postReport(

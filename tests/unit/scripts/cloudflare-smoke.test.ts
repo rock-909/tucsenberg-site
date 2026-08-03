@@ -5,7 +5,7 @@ import { captureExpectedConsoleErrors } from "@/test/console";
 import {
   runCloudflarePreviewSmoke,
   runDeployedSmoke,
-  runPublicPreviewSmoke,
+  runExternalUrlSmoke,
 } from "../../../scripts/quality/checks/cloudflare-smoke.js";
 
 const openServers: http.Server[] = [];
@@ -61,12 +61,12 @@ function createPreviewFetchMock(
   });
 }
 
-function createPublicPreviewFetchMock() {
+function createExternalUrlFetchMock() {
   return vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
     const pathname = getRequestPath(input);
 
     if (["/", "/products", "/contact", "/request-quote"].includes(pathname)) {
-      return response(200, "healthy public preview page");
+      return response(200, "healthy external page");
     }
 
     if (["/zh", "/zh/contact"].includes(pathname)) {
@@ -122,7 +122,7 @@ function createDeployedFetchMock(
   );
 }
 
-function listenForPublicPreviewSmoke(): Promise<{
+function listenForExternalUrlSmoke(): Promise<{
   baseUrl: string;
   paths: string[];
 }> {
@@ -277,13 +277,13 @@ afterEach(async () => {
   );
 });
 
-describe("public preview smoke", () => {
-  it("proves public preview page routes without requiring Workers runtime probes", async () => {
-    const fetchMock = createPublicPreviewFetchMock();
+describe("external URL smoke", () => {
+  it("checks an externally supplied URL surface without claiming deploy identity", async () => {
+    const fetchMock = createExternalUrlFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      runPublicPreviewSmoke(["--base-url", "https://public-preview.example"]),
+      runExternalUrlSmoke(["--base-url", "https://external.example"]),
     ).resolves.toBe(true);
 
     expect(
@@ -298,12 +298,12 @@ describe("public preview smoke", () => {
     ]);
   });
 
-  it("keeps the starter-checks facade wired to the public-preview-smoke CLI", async () => {
-    const { baseUrl, paths } = await listenForPublicPreviewSmoke();
+  it("keeps the starter-checks facade wired to the external-url-smoke CLI", async () => {
+    const { baseUrl, paths } = await listenForExternalUrlSmoke();
 
     const result = await runNodeCommand([
       "scripts/starter-checks.js",
-      "public-preview-smoke",
+      "external-url-smoke",
       "--base-url",
       baseUrl,
     ]);
@@ -317,7 +317,7 @@ describe("public preview smoke", () => {
       "/zh",
       "/zh/contact",
     ]);
-    expect(result.stdout).toContain("[public-preview-smoke] All checks passed");
+    expect(result.stdout).toContain("[external-url-smoke] All checks passed");
   });
 });
 

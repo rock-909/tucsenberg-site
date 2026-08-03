@@ -75,7 +75,8 @@ function writePassingDeployWorkflow(rootDir: string): void {
       "jobs:",
       "  deploy:",
       "    steps:",
-      '      - run: node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
+      "      - name: 外部 URL smoke（preview 输入）",
+      '        run: node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
       "      - run: pnpm exec opennextjs-cloudflare deploy --env production",
     ].join("\n"),
   );
@@ -139,7 +140,7 @@ describe("Cloudflare official-compare source contract", () => {
       rootDir,
       ".github/workflows/cloudflare-deploy.yml",
       [
-        '# node scripts/starter-checks.js public-preview-smoke --base-url "${PREVIEW_URL}"',
+        '# node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
         "# pnpm exec opennextjs-cloudflare deploy --env production",
         "jobs:",
         "  deploy:",

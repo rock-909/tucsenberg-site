@@ -25,37 +25,37 @@ export const EMAIL_CONFIG = {
   supportEmail: SITE_CONFIG.contact.email,
 } as const;
 
-export class ResendUtils {
-  static validateProductInquiryData(
-    data: ProductInquiryEmailData,
-  ): ProductInquiryEmailData {
-    return productInquiryEmailDataSchema.parse(data);
-  }
+export function validateProductInquiryData(
+  data: ProductInquiryEmailData,
+): ProductInquiryEmailData {
+  return productInquiryEmailDataSchema.parse(data);
+}
 
-  static sanitizeProductInquiryData(
-    data: ProductInquiryEmailData,
-  ): ProductInquiryEmailData {
-    return {
-      referenceId: data.referenceId,
-      firstName: sanitizePlainText(data.firstName),
-      lastName: sanitizePlainText(data.lastName),
-      email: data.email.toLowerCase().trim(),
-      productName: sanitizePlainText(data.productName),
-      requirements: data.requirements
-        ? sanitizeMultilineText(data.requirements)
-        : undefined,
-    };
-  }
+export function sanitizeProductInquiryData(
+  data: ProductInquiryEmailData,
+): ProductInquiryEmailData {
+  return {
+    referenceId: data.referenceId,
+    firstName: sanitizePlainText(data.firstName),
+    lastName: sanitizePlainText(data.lastName),
+    email: data.email.toLowerCase().trim(),
+    productName: sanitizePlainText(data.productName),
+    requirements: data.requirements
+      ? sanitizeMultilineText(data.requirements)
+      : undefined,
+  };
+}
 
-  static generateProductInquirySubject(data: ProductInquiryEmailData): string {
-    return EMAIL_COPY.productInquiry.subject(data);
-  }
+export function generateProductInquirySubject(
+  data: ProductInquiryEmailData,
+): string {
+  return EMAIL_COPY.productInquiry.subject(data);
+}
 
-  static getProductInquiryTags(referenceId: string): ResendTag[] {
-    return [
-      { name: "type", value: "product-inquiry" },
-      { name: "source", value: "website" },
-      { name: "reference-id", value: referenceId },
-    ];
-  }
+export function getProductInquiryTags(referenceId: string): ResendTag[] {
+  return [
+    { name: "type", value: "product-inquiry" },
+    { name: "source", value: "website" },
+    { name: "reference-id", value: referenceId },
+  ];
 }
