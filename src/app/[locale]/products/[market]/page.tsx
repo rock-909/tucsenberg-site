@@ -361,11 +361,13 @@ export async function generateMetadata({
 
   if (!market || !productPage) return {};
 
+  const { updatedAt, ...meta } = productPage.meta;
+
   return generateMetadataForPath({
     locale,
     pageType: "products",
     path: getProductMarketPath(market.slug),
-    config: productPage.meta,
+    config: { ...meta, modifiedTime: updatedAt },
   });
 }
 

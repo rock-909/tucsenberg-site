@@ -86,18 +86,19 @@ describe("Cloudflare deploy workflow contract", () => {
   it("keeps preview smoke free of production-only dependency installation", () => {
     const workflow = loadDeployWorkflow();
     const buildSteps = workflowSteps(workflow, "build-and-deploy");
-    const dependencyInstall = buildSteps.find((step) =>
+    const dependencyInstalls = buildSteps.filter((step) =>
       step.run?.includes("pnpm install --frozen-lockfile"),
     );
-    const browserInstall = buildSteps.find((step) =>
+    const browserInstalls = buildSteps.filter((step) =>
       step.run?.includes("playwright install"),
     );
     const postDeploySteps = workflowSteps(workflow, "post-deploy-verification");
 
-    expect(dependencyInstall?.if).toContain(
-      "inputs.environment == 'production'",
-    );
-    expect(browserInstall?.if).toContain("inputs.environment == 'production'");
+    expect(dependencyInstalls.length).toBeGreaterThan(0);
+    expect(browserInstalls.length).toBeGreaterThan(0);
+    for (const step of [...dependencyInstalls, ...browserInstalls]) {
+      expect(step.if).toContain("inputs.environment == 'production'");
+    }
     expect(
       postDeploySteps.some((step) => step.run?.includes("pnpm install")),
     ).toBe(false);
