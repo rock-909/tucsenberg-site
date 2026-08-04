@@ -2,6 +2,7 @@ import { generateLocaleMetadata } from "@/app/[locale]/layout-metadata";
 import "@/app/globals.css";
 import { type ReactNode, Suspense } from "react";
 import { notFound } from "next/navigation";
+import { locale as getRootLocale } from "next/root-params";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getFontClassNames } from "@/app/[locale]/layout-fonts";
@@ -15,7 +16,6 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { coerceLocale, isLocale } from "@/i18n/locale-utils";
 import { loadClientMessages } from "@/lib/i18n/client-messages";
 import { mainNavigation } from "@/lib/navigation";
-import type { Locale } from "@/i18n/routing-config";
 
 // Client analytics are rendered as an island to avoid impacting LCP
 
@@ -27,14 +27,13 @@ interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 interface AsyncLocaleLayoutContentProps {
-  locale: Locale;
   children: ReactNode;
 }
 
 async function AsyncLocaleLayoutContent({
-  locale,
   children,
 }: AsyncLocaleLayoutContentProps) {
+  const locale = coerceLocale(await getRootLocale());
   // Do not read runtime headers here; keep the layout prerenderable. Static CSP
   // is emitted from next.config.ts.
 
@@ -103,11 +102,8 @@ async function AsyncLocaleLayoutContent({
   );
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: LocaleLayoutProps) {
-  const { locale } = await params;
+export default async function LocaleLayout({ children }: LocaleLayoutProps) {
+  const locale = await getRootLocale();
 
   // Ensure that the incoming `locale` is valid
   if (!isLocale(locale)) {
@@ -124,9 +120,7 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col antialiased">
-        <AsyncLocaleLayoutContent locale={typedLocale}>
-          {children}
-        </AsyncLocaleLayoutContent>
+        <AsyncLocaleLayoutContent>{children}</AsyncLocaleLayoutContent>
       </body>
     </html>
   );

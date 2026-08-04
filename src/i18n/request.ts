@@ -1,4 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
+import { locale as getRootLocale } from "next/root-params";
 import { loadCompleteMessages } from "@/lib/i18n/load-messages";
 import {
   getLocaleCurrency,
@@ -45,9 +46,8 @@ function getFormats(locale: Locale) {
   };
 }
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const startTime = performance.now();
-  const locale = coerceLocale(await requestLocale);
+export default getRequestConfig(async () => {
+  const locale = coerceLocale(await getRootLocale());
   const messages = await loadCompleteMessages(locale);
 
   return {
@@ -56,8 +56,5 @@ export default getRequestConfig(async ({ requestLocale }) => {
     timeZone: getLocaleTimeZone(locale),
     formats: getFormats(locale),
     strictMessageTypeSafety: true,
-    metadata: {
-      loadTime: performance.now() - startTime,
-    },
   };
 });

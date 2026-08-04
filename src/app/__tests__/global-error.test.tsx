@@ -3,8 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GlobalError from "../global-error";
 
 // Mock logger using vi.hoisted
-const { mockLoggerError } = vi.hoisted(() => ({
+const { mockLoggerError, mockRouterPush } = vi.hoisted(() => ({
   mockLoggerError: vi.fn(),
+  mockRouterPush: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -19,8 +24,6 @@ describe("GlobalError", () => {
   const mockReset = vi.fn();
   const mockError = new Error("Test error message");
 
-  const originalLocation = window.location;
-
   function renderGlobalError(error = mockError) {
     return render(<GlobalError error={error} reset={mockReset} />, {
       container: document,
@@ -29,20 +32,9 @@ describe("GlobalError", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock window.location
-    Object.defineProperty(window, "location", {
-      writable: true,
-      value: { href: "" },
-    });
   });
 
   afterEach(() => {
-    // Restore original values
-    Object.defineProperty(window, "location", {
-      writable: true,
-      value: originalLocation,
-    });
     vi.unstubAllEnvs();
   });
 
@@ -132,12 +124,12 @@ describe("GlobalError", () => {
       expect(mockReset).toHaveBeenCalledTimes(1);
     });
 
-    it("should navigate to homepage when Go to homepage button is clicked", () => {
+    it("should navigate to the homepage", () => {
       renderGlobalError();
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
-      expect(window.location.href).toBe("/");
+      expect(mockRouterPush).toHaveBeenCalledWith("/");
     });
   });
 
@@ -269,7 +261,7 @@ describe("GlobalError", () => {
 
       fireEvent.click(screen.getByTestId("go-home-button"));
 
-      expect(window.location.href).toBe("/");
+      expect(mockRouterPush).toHaveBeenCalledWith("/");
     });
 
     it("should default to English for non-Chinese languages", () => {

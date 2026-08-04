@@ -59,11 +59,10 @@ const nextConfig: NextConfig = {
 
   /* config options here */
 
-  // Production code has no required "use cache" boundary. Keep Cache Components
-  // disabled because the bound OpenNext/Workerd path hung under concurrent requests.
-  // Content updates continue to flow through redeploys.
-  // See open-next.config.ts and wrangler.jsonc: no R2/D1/DO cache stack.
-  cacheComponents: false,
+  // Lab-only: OpenNext PR #1318 plus preview R2 must keep passing runtime proof
+  // before either flag can move to the production dependency lane.
+  cacheComponents: true,
+  partialPrefetching: true,
 
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
   compress: true,
@@ -100,6 +99,10 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    // The TS7 CLI is exposed by a side-by-side package alias. Next only looks
+    // for `typescript/bin/tsc`, so its internal checker must keep using TS6.
+    // Project type-check scripts still run the TS7 `tsc` binary explicitly.
+    useTypeScriptCli: false,
     // Next.js 16 已移除 testProxy 配置 - 使用 next/experimental/testing/server 替代
     // 旧配置: testProxy: process.env.CI === 'true',
     // 新方式: 在测试文件中使用 unstable_doesProxyMatch() 和相关 API

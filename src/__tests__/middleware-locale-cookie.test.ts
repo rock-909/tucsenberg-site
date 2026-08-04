@@ -11,6 +11,9 @@ vi.mock("next-intl/middleware", () => ({
 
 vi.mock("@/config/paths/locales-config", () => ({
   LOCALES_CONFIG: {
+    locales: ["en"],
+    defaultLocale: "en",
+    localePrefix: "never",
     retiredLocales: ["zh"],
   },
 }));

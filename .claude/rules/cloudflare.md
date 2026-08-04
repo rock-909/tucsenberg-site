@@ -72,26 +72,17 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
 
 - Do not add `cacheTag()`, `revalidateTag()`, `revalidatePath()`, or
   `updateTag()` to production code without a new Cloudflare proof plan.
-- Do not add `cacheHandlers`, `cacheHandler`, R2-backed cache, or external
-  cache storage as a project default.
-- `unstable_cache` on the Cloudflare/OpenNext runtime behaves as no-cache: the
-  runtime's dummy cache throws an `IgnorableError`, so nothing is stored. Any
-  new `unstable_cache` use must either carry an explicit bypass rationale or
-  come with Cloudflare proof that it actually caches.
-- The runtime uses `cacheComponents: false`, so PPR is inactive. The flag was
-  disabled because the bound OpenNext/Workerd path hung under concurrent
-  requests. Do not add production `"use cache"` boundaries until that runtime
-  path has fresh concurrency proof.
+- The runtime uses Cache Components and Partial Prefetching with OpenNext's R2
+  incremental cache. Keep Preview and Production on separate buckets using the
+  `NEXT_INC_CACHE_R2_BUCKET` binding.
+- The temporary OpenNext dependency must stay pinned to the reviewed commit,
+  never the moving PR number. Follow `docs/OpenNext Draft适配器.md` for upstream
+  monitoring, upgrades, proof, and rollback.
+- Do not add new production `"use cache"` boundaries without route-level cache
+  behavior and deployed Cloudflare proof.
 - Content updates flow through rebuild/redeploy.
-- This site deliberately uses the `dummy` incremental cache and rebuild/redeploy
-  for content updates, so no KV/R2/D1 binding is required. Revisit only if
-  content must update without a redeploy.
-- `wrangler.jsonc` must not add `kv_namespaces`, `r2_buckets`, `d1_databases`,
-  or `durable_objects` for this starter by default. Older OpenNext setups wired
-  KV as the incremental cache store; this repo intentionally omits it and does
-  not expose KV rate-limit env keys.
-- `open-next.config.ts` must not add custom incremental cache, tag cache, or
-  queue overrides by default.
+- Do not add KV, D1, Durable Objects, tag cache, queue overrides, or split
+  functions without a separate production requirement and proof plan.
 
 Add platform bindings only for a real requirement, with proof of the deployed
 Cloudflare/OpenNext runtime path.

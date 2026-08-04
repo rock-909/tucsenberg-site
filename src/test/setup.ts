@@ -4,19 +4,8 @@
  */
 
 import "@testing-library/jest-dom/vitest";
-import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 
 import "./setup.console";
-
-declare module "vitest" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- vitest module augmentation requires empty interface extending matcher type
-  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- vitest module augmentation requires empty interface extending matcher type
-  interface AsymmetricMatchersContaining extends TestingLibraryMatchers<
-    any,
-    void
-  > {}
-}
 
 import "./setup.base-mocks";
 import "./setup.fetch";

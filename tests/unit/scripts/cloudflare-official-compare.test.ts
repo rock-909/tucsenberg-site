@@ -22,6 +22,8 @@ const CANONICAL_CLOUDFLARE_BUILD_SCRIPTS = {
   "website:build:cf:debug":
     "DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build --noMinify",
 };
+const PINNED_OPEN_NEXT_DEPENDENCY =
+  "https://pkg.pr.new/@opennextjs/cloudflare@69807b1";
 
 interface Failure {
   readonly file: string;
@@ -56,13 +58,21 @@ function writePassingSideFiles(rootDir: string): void {
   writeFixtureFile(
     rootDir,
     "open-next.config.ts",
-    'import { defineCloudflareConfig } from "@opennextjs/cloudflare";\nexport default defineCloudflareConfig({});\n',
+    [
+      'import { defineCloudflareConfig } from "@opennextjs/cloudflare";',
+      'import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";',
+      "export default defineCloudflareConfig({ incrementalCache: r2IncrementalCache });",
+      "",
+    ].join("\n"),
   );
   writeFixtureFile(
     rootDir,
     "package.json",
     JSON.stringify({
       scripts: CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
+      devDependencies: {
+        "@opennextjs/cloudflare": PINNED_OPEN_NEXT_DEPENDENCY,
+      },
     }),
   );
 }
@@ -75,7 +85,11 @@ function writePassingWranglerConfig(rootDir: string): void {
       "{",
       '  "main": ".open-next/worker.js",',
       '  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],',
-      '  "assets": { "binding": "ASSETS" }',
+      '  "assets": { "binding": "ASSETS" },',
+      '  "env": {',
+      '    "preview": { "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tucsenberg-site-cache-preview" }] },',
+      '    "production": { "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tucsenberg-site-cache-production" }] }',
+      "  }",
       "}",
     ].join("\n"),
   );
@@ -140,7 +154,11 @@ describe("Cloudflare official-compare source contract", () => {
         '  "main": ".open-next/worker.js",',
         '  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],',
         "  // historical note: r2_buckets and d1_databases were never added",
-        '  "assets": { "binding": "ASSETS" }',
+        '  "assets": { "binding": "ASSETS" },',
+        '  "env": {',
+        '    "preview": { "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tucsenberg-site-cache-preview" }] },',
+        '    "production": { "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tucsenberg-site-cache-production" }] }',
+        "  }",
         "}",
       ].join("\n"),
     );
@@ -162,6 +180,64 @@ describe("Cloudflare official-compare source contract", () => {
     expect(failures).toEqual([]);
   });
 
+  it("rejects a production environment without its dedicated R2 binding", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "wrangler.jsonc",
+      [
+        "{",
+        '  "main": ".open-next/worker.js",',
+        '  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],',
+        '  "assets": { "binding": "ASSETS" },',
+        '  "env": {',
+        '    "preview": { "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tucsenberg-site-cache-preview" }] }',
+        "  }",
+        "}",
+      ].join("\n"),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({
+        file: "wrangler.jsonc",
+        missing: expect.arrayContaining([
+          expect.stringContaining("env.production.r2_buckets"),
+        ]),
+      }),
+    ]);
+  });
+
+  it("rejects the moving PR package reference", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingWranglerConfig(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "package.json",
+      JSON.stringify({
+        scripts: CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
+        devDependencies: {
+          "@opennextjs/cloudflare":
+            "https://pkg.pr.new/@opennextjs/cloudflare@1318",
+        },
+      }),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({
+        file: "package.json",
+        missing: [`@opennextjs/cloudflare: ${PINNED_OPEN_NEXT_DEPENDENCY}`],
+      }),
+    ]);
+  });
+
   it("rejects a Cloudflare build script with the wrong platform value", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
@@ -174,6 +250,9 @@ describe("Cloudflare official-compare source contract", () => {
           ...CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
           "website:build:cf":
             "DEPLOYMENT_PLATFORM=vercel NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+        },
+        devDependencies: {
+          "@opennextjs/cloudflare": PINNED_OPEN_NEXT_DEPENDENCY,
         },
       }),
     );
@@ -198,6 +277,9 @@ describe("Cloudflare official-compare source contract", () => {
           ...CANONICAL_CLOUDFLARE_BUILD_SCRIPTS,
           "website:build:cf":
             "NODE_OPTIONS=--inspect DEPLOYMENT_PLATFORM=cloudflare NEXT_PUBLIC_DEPLOYMENT_PLATFORM=cloudflare pnpm exec opennextjs-cloudflare build",
+        },
+        devDependencies: {
+          "@opennextjs/cloudflare": PINNED_OPEN_NEXT_DEPENDENCY,
         },
       }),
     );

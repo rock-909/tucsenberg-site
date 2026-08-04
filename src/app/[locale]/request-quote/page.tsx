@@ -25,6 +25,8 @@ interface RequestQuotePageProps extends RequestQuotePageParams {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+export const instant = false;
+
 export function generateStaticParams() {
   return generateLocaleStaticParams();
 }

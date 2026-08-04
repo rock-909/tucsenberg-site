@@ -741,11 +741,11 @@ const eslintConfig = [
         {
           // 匹配所有不在白名单内的命名导出：
           // 允许函数：generateMetadata | generateStaticParams | generateViewport | generateImageMetadata
-          // 允许配置常量：revalidate | dynamic | dynamicParams | fetchCache | runtime | preferredRegion | maxDuration
+          // 允许配置常量：Next.js route segment config，包括 16.3 的 instant/prefetch
           selector:
-            "ExportNamedDeclaration:not(:has(FunctionDeclaration[id.name=/^(generateMetadata|generateStaticParams|generateViewport|generateImageMetadata)$/])):not(:has(VariableDeclaration > VariableDeclarator[id.name=/^(revalidate|dynamic|dynamicParams|fetchCache|runtime|preferredRegion|maxDuration)$/])):not(:has(ExportSpecifier[exported.name=/^(revalidate|dynamic|dynamicParams|fetchCache|runtime|preferredRegion|maxDuration)$/]))",
+            "ExportNamedDeclaration:not(:has(FunctionDeclaration[id.name=/^(generateMetadata|generateStaticParams|generateViewport|generateImageMetadata)$/])):not(:has(VariableDeclaration > VariableDeclarator[id.name=/^(revalidate|dynamic|dynamicParams|fetchCache|runtime|preferredRegion|maxDuration|instant|prefetch)$/])):not(:has(ExportSpecifier[exported.name=/^(revalidate|dynamic|dynamicParams|fetchCache|runtime|preferredRegion|maxDuration|instant|prefetch)$/]))",
           message:
-            "🚫 app/**/page.tsx 仅允许导出 generateMetadata/generateStaticParams/generateViewport/generateImageMetadata 以及配置常量（revalidate、dynamic、dynamicParams、fetchCache、runtime、preferredRegion、maxDuration）。请将组件或其他导出移到单独文件。",
+            "🚫 app/**/page.tsx 仅允许导出 generateMetadata/generateStaticParams/generateViewport/generateImageMetadata 以及 Next.js 配置常量（revalidate、dynamic、dynamicParams、fetchCache、runtime、preferredRegion、maxDuration、instant、prefetch）。请将组件或其他导出移到单独文件。",
         },
       ],
     },

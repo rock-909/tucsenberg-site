@@ -11,6 +11,8 @@ const DEFAULT_EXTERNAL_URL_SMOKE_BASE_URL = DEFAULT_DEPLOY_SMOKE_BASE_URL;
 const DEPLOY_SMOKE_REQUEST_TIMEOUT_MS = 30000;
 const DEPLOY_SMOKE_REQUEST_RETRIES = 2;
 const DEPLOY_SMOKE_RETRY_DELAY_MS = 1000;
+const MIN_HTML_BODY_LENGTH = 1024;
+const PRODUCTS_PAGE_SEGMENT = "/$d$locale/products/__PAGE__";
 const EXTERNAL_URL_SMOKE_EXPECTATIONS = [
   { pathname: "/", status: 200 },
   { pathname: "/products", status: 200 },
@@ -20,11 +22,11 @@ const EXTERNAL_URL_SMOKE_EXPECTATIONS = [
   { pathname: "/zh/contact", status: 404 },
 ];
 const CF_PREVIEW_SMOKE_EXPECTATIONS = [
-  { pathname: "/", status: 200 },
-  { pathname: "/invalid/contact", status: 404 },
-  { pathname: "/products", status: 200 },
-  { pathname: "/contact", status: 200 },
-  { pathname: "/request-quote", status: 200 },
+  { pathname: "/", status: 200, html: true },
+  { pathname: "/invalid/contact", status: 404, html: true },
+  { pathname: "/products", status: 200, html: true },
+  { pathname: "/contact", status: 200, html: true },
+  { pathname: "/request-quote", status: 200, html: true },
   { pathname: "/zh", status: 404 },
   { pathname: "/zh/contact", status: 404 },
   // public/ 下的文件由 Cloudflare Static Assets 直送，不经过 Next 服务器，
@@ -109,12 +111,18 @@ function parseCloudflarePreviewSmokeArgs(args) {
   return parsed;
 }
 
-async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
+async function requestCloudflarePreviewSmoke(
+  baseUrl,
+  pathname,
+  headers = {},
+  redirect = "manual",
+) {
   const url = new URL(pathname, baseUrl);
   const response = await fetch(url, {
-    redirect: "manual",
+    redirect,
     headers: {
       "user-agent": "cloudflare-preview-smoke",
+      ...headers,
     },
     signal: AbortSignal.timeout(DEPLOY_SMOKE_REQUEST_TIMEOUT_MS),
   });
@@ -126,6 +134,9 @@ async function requestCloudflarePreviewSmoke(baseUrl, pathname) {
     setCookie: response.headers.get("set-cookie"),
     leakedMiddlewareCookie: response.headers.get("x-middleware-set-cookie"),
     robotsTag: response.headers.get("x-robots-tag"),
+    contentType: response.headers.get("content-type"),
+    nextCache: response.headers.get("x-nextjs-cache"),
+    nextPostponed: response.headers.get("x-nextjs-postponed"),
     body: await response.text(),
   };
 }
@@ -135,13 +146,57 @@ async function requestSmokeRound(expectations, request) {
 }
 
 function pushFailureUnless(condition, message, failures) {
-  if (!condition) failures.push(message);
+  if (!condition && !failures.includes(message)) failures.push(message);
 }
 
 function pushExpectedStatus(response, expectedStatus, failures) {
   pushFailureUnless(
     response.status === expectedStatus,
     `Expected ${response.pathname} to return ${expectedStatus}, got ${response.status}`,
+    failures,
+  );
+}
+
+function pushHealthyHtmlResponse(response, failures) {
+  pushFailureUnless(
+    response.contentType?.startsWith("text/html"),
+    `Expected ${response.pathname} to return HTML, got ${response.contentType ?? "no content-type"}`,
+    failures,
+  );
+  pushFailureUnless(
+    response.body.length >= MIN_HTML_BODY_LENGTH,
+    `Expected ${response.pathname} HTML body to be at least ${MIN_HTML_BODY_LENGTH} bytes, got ${response.body.length}`,
+    failures,
+  );
+  pushFailureUnless(
+    /<\/html>\s*$/iu.test(response.body),
+    `Expected ${response.pathname} to return a complete HTML document`,
+    failures,
+  );
+  pushFailureUnless(
+    !response.body.includes("Unexpected loadManifest"),
+    `Unexpected manifest loader failure surfaced on ${response.pathname}`,
+    failures,
+  );
+  pushFailureUnless(
+    !response.body.includes("Application error"),
+    `Unexpected application error surfaced on ${response.pathname}`,
+    failures,
+  );
+}
+
+function pushHealthyRscResponse(response, label, marker, failures) {
+  pushExpectedStatus(response, 200, failures);
+  pushFailureUnless(
+    response.contentType?.startsWith("text/x-component"),
+    `Expected /products ${label} to return text/x-component, got ${response.contentType ?? "no content-type"}`,
+    failures,
+  );
+  pushFailureUnless(
+    response.body.length >= 24 &&
+      response.body.includes(marker) &&
+      !/<(?:!doctype|html)/iu.test(response.body),
+    `Expected /products ${label} to return a non-truncated Flight payload, not HTML`,
     failures,
   );
 }
@@ -232,6 +287,7 @@ async function runExternalUrlSmoke(args = []) {
   return true;
 }
 
+// eslint-disable-next-line max-statements -- one ordered runtime proof; splitting it would hide request order.
 async function runCloudflarePreviewSmoke(args = []) {
   const { baseUrl, includeApiHealth, rounds } =
     parseCloudflarePreviewSmokeArgs(args);
@@ -254,7 +310,51 @@ async function runCloudflarePreviewSmoke(args = []) {
     );
   }
 
-  for (const response of responses) {
+  // Re-check sequentially after the concurrent rounds so a damaged isolate or
+  // incremental cache cannot hide behind successful in-flight responses.
+  const productsWarmResponse = await requestCloudflarePreviewSmoke(
+    baseUrl,
+    "/products",
+  );
+  const productsCachedResponse = await requestCloudflarePreviewSmoke(
+    baseUrl,
+    "/products",
+  );
+  const productsRscResponse = await requestCloudflarePreviewSmoke(
+    baseUrl,
+    "/products",
+    { rsc: "1", "next-router-prefetch": "1" },
+    "follow",
+  );
+  const productsRouteTreeResponse = await requestCloudflarePreviewSmoke(
+    baseUrl,
+    "/products",
+    {
+      rsc: "1",
+      "next-router-prefetch": "1",
+      "next-router-segment-prefetch": "/_tree",
+    },
+    "follow",
+  );
+  const productsPageSegmentResponse = await requestCloudflarePreviewSmoke(
+    baseUrl,
+    "/products",
+    {
+      rsc: "1",
+      "next-router-prefetch": "1",
+      "next-router-segment-prefetch": PRODUCTS_PAGE_SEGMENT,
+    },
+    "follow",
+  );
+
+  for (const response of [
+    ...responses,
+    productsWarmResponse,
+    productsCachedResponse,
+    productsRscResponse,
+    productsRouteTreeResponse,
+    productsPageSegmentResponse,
+  ]) {
     pushFailureUnless(
       response.leakedMiddlewareCookie === null,
       `Unexpected x-middleware-set-cookie leak on ${response.pathname}`,
@@ -272,18 +372,50 @@ async function runCloudflarePreviewSmoke(args = []) {
         failures,
       );
     }
+    if (expectation.html) {
+      pushHealthyHtmlResponse(response, failures);
+    }
+  }
+
+  pushHealthyHtmlResponse(productsWarmResponse, failures);
+  pushHealthyHtmlResponse(productsCachedResponse, failures);
+  pushFailureUnless(
+    productsCachedResponse.nextCache === "HIT",
+    `Expected warmed /products to return X-Nextjs-Cache: HIT, got ${productsCachedResponse.nextCache ?? "none"}`,
+    failures,
+  );
+  pushHealthyRscResponse(
+    productsRscResponse,
+    "RSC probe",
+    '"$Sreact.fragment"',
+    failures,
+  );
+  pushHealthyRscResponse(
+    productsRouteTreeResponse,
+    "route-tree prefetch",
+    '"tree"',
+    failures,
+  );
+  pushHealthyRscResponse(
+    productsPageSegmentResponse,
+    "page-segment prefetch",
+    '"$Sreact.fragment"',
+    failures,
+  );
+  for (const [label, response] of [
+    ["route-tree prefetch", productsRouteTreeResponse],
+    ["page-segment prefetch", productsPageSegmentResponse],
+  ]) {
     pushFailureUnless(
-      !response.body.includes("Unexpected loadManifest"),
-      `Unexpected manifest loader failure surfaced on ${response.pathname}`,
+      response.nextPostponed === "2",
+      `Expected /products ${label} to return X-Nextjs-Postponed: 2, got ${response.nextPostponed ?? "none"}`,
       failures,
     );
-    if (response.pathname !== "/api/health") {
-      pushFailureUnless(
-        !response.body.includes("Application error"),
-        `Unexpected application error surfaced on ${response.pathname}`,
-        failures,
-      );
-    }
+    pushFailureUnless(
+      response.nextCache === "HIT",
+      `Expected /products ${label} to return X-Nextjs-Cache: HIT, got ${response.nextCache ?? "none"}`,
+      failures,
+    );
   }
 
   if (!includeApiHealth) {

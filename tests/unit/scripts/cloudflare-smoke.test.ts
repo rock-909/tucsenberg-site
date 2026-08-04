@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Smoke modes share lifecycle fixtures; split when another mode is added. */
 import { spawn } from "node:child_process";
 import {
   copyFileSync,
@@ -23,6 +24,9 @@ const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),
   "tucsenberg-cloudflare-smoke-test-trash",
 );
+const HEALTHY_HTML = `<!doctype html><html><body>${"healthy page".repeat(100)}</body></html>`;
+const HEALTHY_RSC = '#1:"$Sreact.fragment"\n2:I[1,[],"default"]';
+const HEALTHY_ROUTE_TREE_RSC = '0:{"tree":{"name":"products"}}';
 
 interface ChildProcessResult {
   status: number | null;
@@ -52,27 +56,60 @@ function getRequestPath(input: RequestInfo | URL): string {
 function createPreviewFetchMock(
   pdfHeaders: HeadersInit = { "x-robots-tag": "noindex" },
 ) {
-  return vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
-    const pathname = getRequestPath(input);
+  return vi.fn(
+    async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const pathname = getRequestPath(input);
+      const requestHeaders = new Headers(init?.headers);
 
-    if (
-      ["/", "/products", "/contact", "/request-quote", "/api/health"].includes(
-        pathname,
-      )
-    ) {
-      return response(200, "healthy page");
-    }
+      if (pathname === "/products" && requestHeaders.get("rsc") === "1") {
+        const segment = requestHeaders.get("next-router-segment-prefetch");
+        const headers = {
+          "content-type": "text/x-component",
+          "x-nextjs-cache": "HIT",
+          ...(segment ? { "x-nextjs-postponed": "2" } : {}),
+        };
+        return response(
+          200,
+          segment === "/_tree" ? HEALTHY_ROUTE_TREE_RSC : HEALTHY_RSC,
+          headers,
+        );
+      }
 
-    if (["/zh", "/zh/contact", "/invalid/contact"].includes(pathname)) {
-      return response(404, "not found");
-    }
+      if (["/", "/products", "/contact", "/request-quote"].includes(pathname)) {
+        const headers = new Headers({
+          "content-type": "text/html; charset=utf-8",
+        });
+        if (pathname === "/products") headers.set("x-nextjs-cache", "HIT");
+        return response(200, HEALTHY_HTML, headers);
+      }
 
-    if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
-      return response(200, "%PDF-1.7", pdfHeaders);
-    }
+      if (pathname === "/api/health") {
+        return response(200, '{"status":"ok"}', {
+          "content-type": "application/json",
+        });
+      }
 
-    return response(404, "not found");
-  });
+      if (pathname === "/invalid/contact") {
+        return response(404, HEALTHY_HTML, {
+          "content-type": "text/html; charset=utf-8",
+        });
+      }
+
+      if (["/zh", "/zh/contact"].includes(pathname)) {
+        return response(404, "Not Found", { "content-type": "text/plain" });
+      }
+
+      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+        const headers = new Headers(pdfHeaders);
+        headers.set("content-type", "application/pdf");
+        return response(200, "%PDF-1.7", headers);
+      }
+
+      return response(404, HEALTHY_HTML, {
+        "content-type": "text/html; charset=utf-8",
+      });
+    },
+  );
 }
 
 function createExternalUrlFetchMock() {
@@ -421,25 +458,31 @@ describe("cloudflare preview smoke", () => {
       "--rounds",
       "1",
     ]);
-    const expectedPaths = discoveryFetchMock.mock.calls.map(([input]) =>
-      getRequestPath(input),
-    );
+    const expectedPaths = discoveryFetchMock.mock.calls
+      .map(([input]) => getRequestPath(input))
+      .slice(0, -5);
     let releaseRoot!: () => void;
     const started: string[] = [];
+    const previewFetchMock = createPreviewFetchMock();
 
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (input: RequestInfo | URL) => {
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const pathname = getRequestPath(input);
         started.push(pathname);
 
         if (pathname === "/") {
           return new Promise<Response>((resolve) => {
-            releaseRoot = () => resolve(response(200, "root"));
+            releaseRoot = () =>
+              resolve(
+                response(200, HEALTHY_HTML, {
+                  "content-type": "text/html; charset=utf-8",
+                }),
+              );
           });
         }
 
-        return createPreviewFetchMock()(input);
+        return previewFetchMock(input, init);
       }),
     );
 
@@ -505,7 +548,17 @@ describe("cloudflare preview smoke", () => {
       "/zh/contact",
       "/downloads/spec-sheet-tb-bw.pdf",
       "/api/health",
+      "/products",
+      "/products",
+      "/products",
+      "/products",
+      "/products",
     ]);
+    expect(
+      fetchMock.mock.calls
+        .slice(-3)
+        .every(([, init]) => init?.redirect === "follow"),
+    ).toBe(true);
   });
 
   it("proves preview pages, removed locale routes, and optional api-health probes", async () => {
@@ -532,7 +585,138 @@ describe("cloudflare preview smoke", () => {
       "/zh/contact",
       "/downloads/spec-sheet-tb-bw.pdf",
       "/api/health",
+      "/products",
+      "/products",
+      "/products",
+      "/products",
+      "/products",
     ]);
+  });
+
+  it.each([
+    [
+      "wrong content type",
+      HEALTHY_HTML,
+      { "content-type": "text/plain" },
+      ["  - Expected /contact to return HTML, got text/plain"],
+    ],
+    [
+      "truncated body",
+      "<!doctype html><html><body>cut off",
+      { "content-type": "text/html" },
+      [
+        "  - Expected /contact HTML body to be at least 1024 bytes, got 34",
+        "  - Expected /contact to return a complete HTML document",
+      ],
+    ],
+  ])(
+    "fails when an HTML route has a %s",
+    async (_case, body, headers, expectedErrors) => {
+      captureExpectedConsoleErrors(
+        "[cf-preview-smoke] Failures detected:",
+        ...expectedErrors,
+      );
+      const previewFetchMock = createPreviewFetchMock();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          if (getRequestPath(input) === "/contact") {
+            return response(200, body, headers);
+          }
+
+          return previewFetchMock(input, init);
+        }),
+      );
+
+      await expect(
+        runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
+      ).resolves.toBe(false);
+    },
+  );
+
+  it("fails when the products RSC probe returns HTML", async () => {
+    captureExpectedConsoleErrors(
+      "[cf-preview-smoke] Failures detected:",
+      "  - Expected /products RSC probe to return text/x-component, got text/html; charset=utf-8",
+      "  - Expected /products RSC probe to return a non-truncated Flight payload, not HTML",
+    );
+    const previewFetchMock = createPreviewFetchMock();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const headers = new Headers(init?.headers);
+        if (
+          getRequestPath(input) === "/products" &&
+          headers.get("rsc") === "1" &&
+          headers.get("next-router-segment-prefetch") === null
+        ) {
+          return response(200, HEALTHY_HTML, {
+            "content-type": "text/html; charset=utf-8",
+          });
+        }
+
+        return previewFetchMock(input, init);
+      }),
+    );
+
+    await expect(
+      runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
+    ).resolves.toBe(false);
+  });
+
+  it("fails when the products route-tree prefetch misses the segment cache", async () => {
+    captureExpectedConsoleErrors(
+      "[cf-preview-smoke] Failures detected:",
+      "  - Expected /products route-tree prefetch to return X-Nextjs-Postponed: 2, got none",
+    );
+    const previewFetchMock = createPreviewFetchMock();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const headers = new Headers(init?.headers);
+        const result = await previewFetchMock(input, init);
+        if (headers.get("next-router-segment-prefetch") === "/_tree") {
+          result.headers.delete("x-nextjs-postponed");
+        }
+        return result;
+      }),
+    );
+
+    await expect(
+      runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
+    ).resolves.toBe(false);
+  });
+
+  it("fails when the warmed products response is not a cache hit", async () => {
+    captureExpectedConsoleErrors(
+      "[cf-preview-smoke] Failures detected:",
+      "  - Expected warmed /products to return X-Nextjs-Cache: HIT, got MISS",
+    );
+    const previewFetchMock = createPreviewFetchMock();
+    let productsHtmlRequests = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const headers = new Headers(init?.headers);
+        if (
+          getRequestPath(input) === "/products" &&
+          headers.get("rsc") !== "1"
+        ) {
+          productsHtmlRequests += 1;
+          const result = await previewFetchMock(input, init);
+          if (productsHtmlRequests >= 3) {
+            result.headers.set("x-nextjs-cache", "MISS");
+          }
+          return result;
+        }
+
+        return previewFetchMock(input, init);
+      }),
+    );
+
+    await expect(
+      runCloudflarePreviewSmoke(["--base-url", "https://preview.example"]),
+    ).resolves.toBe(false);
   });
 
   it("fails when the removed Chinese route becomes live again", async () => {
@@ -542,12 +726,17 @@ describe("cloudflare preview smoke", () => {
     );
     const previewFetchMock = createPreviewFetchMock();
     const fetchMock = vi.fn(
-      async (input: RequestInfo | URL): Promise<Response> => {
+      async (
+        input: RequestInfo | URL,
+        init?: RequestInit,
+      ): Promise<Response> => {
         if (getRequestPath(input) === "/zh") {
-          return response(200, "wrong status");
+          return response(200, HEALTHY_HTML, {
+            "content-type": "text/html; charset=utf-8",
+          });
         }
 
-        return previewFetchMock(input);
+        return previewFetchMock(input, init);
       },
     );
     vi.stubGlobal("fetch", fetchMock);
