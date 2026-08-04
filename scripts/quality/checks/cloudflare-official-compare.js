@@ -14,23 +14,35 @@ const WRANGLER_REQUIRED_COMPAT_FLAGS = [
   "nodejs_compat",
   "global_fetch_strictly_public",
 ];
-// Cache/queue bindings and split-topology surfaces that a passing build +
-// wrangler dry-run would NOT catch (adding an R2/D1/DO binding still builds).
-// This is architecture policy that only a config check can express.
+const REQUIRED_R2_BINDINGS = [
+  {
+    environment: "preview",
+    bucketName: "tucsenberg-site-cache-preview",
+  },
+  {
+    environment: "production",
+    bucketName: "tucsenberg-site-cache-production",
+  },
+];
+const OPEN_NEXT_DRAFT_DEPENDENCY =
+  "https://pkg.pr.new/@opennextjs/cloudflare@69807b1";
+
+// Split-topology surfaces that a passing build + wrangler dry-run would not
+// catch. R2 is intentional; D1/DO/queue expansion still needs a new proof lane.
 const WRANGLER_FORBIDDEN_TOKENS = [
   "WORKER_SELF_REFERENCE",
-  "NEXT_INC_CACHE_R2_BUCKET",
   "NEXT_TAG_CACHE_D1",
   "NEXT_CACHE_DO_QUEUE",
   "durable_objects",
-  "r2_buckets",
   "d1_databases",
   "migrations",
 ];
 
-const OPEN_NEXT_REQUIRED_TOKENS = ["defineCloudflareConfig"];
-const OPEN_NEXT_FORBIDDEN_TOKENS = [
+const OPEN_NEXT_REQUIRED_TOKENS = [
+  "defineCloudflareConfig",
   "r2IncrementalCache",
+];
+const OPEN_NEXT_FORBIDDEN_TOKENS = [
   "doQueue",
   "d1NextTagCache",
   "functions",
@@ -129,6 +141,25 @@ function checkWrangler(rootDir, failures) {
       missing.push(`compatibility_flags: ${flag}`);
     }
   }
+  for (const binding of REQUIRED_R2_BINDINGS) {
+    const buckets = getConfigValue(config, [
+      "env",
+      binding.environment,
+      "r2_buckets",
+    ]);
+    const hasBinding =
+      Array.isArray(buckets) &&
+      buckets.some(
+        (bucket) =>
+          bucket?.binding === "NEXT_INC_CACHE_R2_BUCKET" &&
+          bucket?.bucket_name === binding.bucketName,
+      );
+    if (!hasBinding) {
+      missing.push(
+        `env.${binding.environment}.r2_buckets: NEXT_INC_CACHE_R2_BUCKET -> ${binding.bucketName}`,
+      );
+    }
+  }
 
   // Comments are already gone from the parsed object; searching its canonical
   // JSON only matches real configuration values.
@@ -142,7 +173,8 @@ function checkWrangler(rootDir, failures) {
   if (missing.length > 0 || forbidden.length > 0) {
     failures.push({
       file: "wrangler.jsonc",
-      label: "Wrangler config keeps the static-generation Cloudflare baseline",
+      label:
+        "Wrangler config keeps the approved preview/production R2 topology",
       missing,
       forbidden,
     });
@@ -165,7 +197,7 @@ function checkOpenNextConfig(rootDir, failures) {
     failures.push({
       file: "open-next.config.ts",
       label:
-        "OpenNext config stays anchored to the Cloudflare adapter without custom cache or split topology",
+        "OpenNext config keeps the approved R2 incremental cache without split topology",
       missing,
       forbidden,
     });
@@ -177,6 +209,18 @@ function checkPackageScripts(rootDir, failures) {
     readCloudflareCompareFile(rootDir, "package.json"),
   );
   const scripts = packageJson.scripts ?? {};
+  if (
+    packageJson.devDependencies?.["@opennextjs/cloudflare"] !==
+    OPEN_NEXT_DRAFT_DEPENDENCY
+  ) {
+    failures.push({
+      file: "package.json",
+      label:
+        "OpenNext Cache Components adapter stays pinned to the reviewed commit",
+      missing: [`@opennextjs/cloudflare: ${OPEN_NEXT_DRAFT_DEPENDENCY}`],
+      forbidden: [],
+    });
+  }
 
   for (const check of CLOUDFLARE_SCRIPT_SURFACE_CHECKS) {
     const script = scripts[check.name];
@@ -261,11 +305,11 @@ function runCloudflareOfficialCompareCli(args = []) {
   console.log("cf-official-compare: passed");
   if (sourceOnly) {
     console.log(
-      "Verified static-generation Cloudflare source baseline against open-next.config.ts, wrangler.jsonc, and package deploy aliases.",
+      "Verified the pinned OpenNext adapter, R2 source topology, and package deploy aliases.",
     );
   } else {
     console.log(
-      "Verified static-generation Cloudflare source baseline. Native deploy-artifact proof is covered by wrangler deploy --dry-run.",
+      "Verified the pinned OpenNext adapter and R2 source topology. Native deploy-artifact proof is covered by wrangler deploy --dry-run.",
     );
   }
 

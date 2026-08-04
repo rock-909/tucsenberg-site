@@ -23,6 +23,12 @@
 
   "env": {
     "preview": {
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "tucsenberg-site-cache-preview",
+        },
+      ],
       "vars": {
         "APP_ENV": "preview",
         "DEPLOYMENT_PLATFORM": "cloudflare",
@@ -34,6 +40,12 @@
       },
     },
     "production": {
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "tucsenberg-site-cache-production",
+        },
+      ],
       "vars": {
         "APP_ENV": "production",
         "DEPLOYMENT_PLATFORM": "cloudflare",

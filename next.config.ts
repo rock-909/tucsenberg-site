@@ -59,9 +59,10 @@ const nextConfig: NextConfig = {
 
   /* config options here */
 
-  // Cache Components requires a real OpenNext incremental/tag cache stack.
-  // Keep it off until the R2/DO lane has isolated runtime and concurrency proof.
-  cacheComponents: false,
+  // Lab-only: OpenNext PR #1318 plus preview R2 must keep passing runtime proof
+  // before either flag can move to the production dependency lane.
+  cacheComponents: true,
+  partialPrefetching: true,
 
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
   compress: true,

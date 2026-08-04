@@ -12,6 +12,7 @@ docs/ 只保留当前项目真相、维护操作、正式上线标准、仍有�
 | 开发和 CI | `开发与维护.md` |
 | 判断正式上线 | `正式上线标准.md` |
 | 查技术问题、迁移或长期取舍 | `技术问题与决策.md` |
+| 跟踪 Cache Components 的 OpenNext 临时适配器 | `OpenNext Draft适配器.md` |
 | 改 UI | `design/设计真相.md` -> `design/组件治理.md` |
 
 ## 规则
