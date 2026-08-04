@@ -17,6 +17,15 @@ const { toDirectiveSet } = createRequire(import.meta.url)(
 ) as { toDirectiveSet: (name: string, value: string) => Set<string> };
 
 describe("next.config contract", () => {
+  it("uses the native Rust React Compiler for Turbopack builds", async () => {
+    const nextConfigModule = await import("../../next.config");
+
+    expect(nextConfigModule.default.reactCompiler).toBe(true);
+    expect(
+      nextConfigModule.default.experimental?.turbopackRustReactCompiler,
+    ).toBe(true);
+  });
+
   // 原来是在源码里找三个字符串：APP_ENV 判断、source: "/:path*"、
   // value: "noindex, nofollow"。三个字符串各自存在，不等于它们拼成了一条规则，
   // 分处三个不相干的对象、甚至躺在注释里，照样全部找得到。这里真的调一次
