@@ -734,6 +734,25 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(String(allowedHosts).split(",")).toContain(new URL(siteUrl).host);
   });
 
+  it("keeps the local build fallback aligned with the preview Turnstile site key", () => {
+    const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
+    const env = getObject(wrangler.env, "wrangler.env");
+    const preview = getObject(env.preview, "wrangler.env.preview");
+    const vars = getObject(preview.vars, "wrangler.env.preview.vars");
+    const declarations = readRepoFile(".env.production")
+      .split("\n")
+      .flatMap((line) => {
+        const match = /^([A-Z0-9_]+)=(.*)$/u.exec(line.trim());
+        return match ? [[match[1], match[2]] as const] : [];
+      });
+
+    expect(
+      declarations.filter(([key]) => key === "NEXT_PUBLIC_TURNSTILE_SITE_KEY"),
+    ).toEqual([
+      ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY],
+    ]);
+  });
+
   it("keeps formal domain cutover out of the no-cutover production config", () => {
     const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
     const env = getObject(wrangler.env, "wrangler.env");
