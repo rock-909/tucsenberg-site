@@ -734,7 +734,7 @@ describe("Tucsenberg Phase 1 site contract", () => {
     expect(String(allowedHosts).split(",")).toContain(new URL(siteUrl).host);
   });
 
-  it("provides the preview Turnstile site key to local production builds", () => {
+  it("keeps the local build fallback aligned with the preview Turnstile site key", () => {
     const wrangler = getObject(readRepoJsonc("wrangler.jsonc"), "wrangler");
     const env = getObject(wrangler.env, "wrangler.env");
     const preview = getObject(env.preview, "wrangler.env.preview");
