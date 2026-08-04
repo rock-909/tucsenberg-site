@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { captureExpectedConsoleErrors } from "@/test/console";
 
 const contentChecks = require("../../../scripts/quality/checks/content-slugs.js");
-const starterChecks = require("../../../scripts/starter-checks.js");
+const contentManifest = require("../../../scripts/quality/checks/content-manifest.js");
 
 const {
   validateContentFrontmatterContract,
@@ -19,7 +19,7 @@ const {
   generateContentManifest,
   runContentManifestGenerator,
   writeFileAtomic,
-} = starterChecks;
+} = contentManifest;
 
 describe("page content checks", () => {
   let tmpDir: string;

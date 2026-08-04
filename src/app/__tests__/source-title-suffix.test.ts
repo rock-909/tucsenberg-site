@@ -3,14 +3,14 @@
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
+import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 const BRAND_SUFFIX = /\|\s*Tucsenberg\s*$/u;
 
 describe("source titles never carry the brand suffix (template owns it)", () => {
   it("product meta titles", () => {
-    for (const meta of Object.values(TUCSENBERG_PRODUCT_META)) {
-      expect(meta.title).not.toMatch(BRAND_SUFFIX);
+    for (const productPage of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
+      expect(productPage.meta.title).not.toMatch(BRAND_SUFFIX);
     }
   });
   it("mdx seo.title frontmatter", () => {

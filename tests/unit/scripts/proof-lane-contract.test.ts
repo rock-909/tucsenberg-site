@@ -1,13 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { STARTER_CHECK_COMMANDS } from "../../../scripts/starter-checks.js";
 import {
   RELEASE_PROOF_MANIFEST,
-  RELEASE_PROOF_SEQUENCE,
-  STARTER_CHECK_COMMANDS,
-} from "../../../scripts/starter-checks.js";
+  getReleaseProofSequence,
+} from "../../../scripts/quality/release-proof-manifest.js";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
+const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
 const VALID_RELEASE_LANES = new Set([
   "local/test-mode",
   "deployed-smoke",

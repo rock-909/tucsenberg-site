@@ -1,9 +1,13 @@
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 
 export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
   slug: "aluminum-flood-gates",
-  meta: TUCSENBERG_PRODUCT_META["aluminum-flood-gates"],
+  meta: {
+    title: "Aluminum Flood Gates for Doors & Garages — Custom-Cut",
+    description:
+      "Demountable aluminum flood gates (flood boards): 6063-T6 planks, EPDM seals, custom-cut to your openings — doors, garages, loading docks. Reply within 12 hours.",
+    updatedAt: "2026-07-05T00:00:00Z",
+  },
   image: { status: "pending" },
   diagram: {
     kind: "gate",

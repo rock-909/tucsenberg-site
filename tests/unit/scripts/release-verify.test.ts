@@ -65,8 +65,9 @@ describe("release verify runner", () => {
 
   it("checks the local E2E port before launching Playwright", async () => {
     const executedCommands: string[] = [];
+    const checkedPorts: number[] = [];
     const errorSpy = captureExpectedConsoleErrors(
-      "release-proof cannot start local E2E",
+      "release-proof cannot start local-playwright-smoke",
       "Stop the existing local server",
     );
 
@@ -76,7 +77,10 @@ describe("release verify runner", () => {
         executedCommands.push(formatReleaseCommand(step));
         return 0;
       },
-      portInUse: async () => true,
+      portInUse: async (port) => {
+        if (port !== undefined) checkedPorts.push(port);
+        return true;
+      },
     });
 
     const playwrightCommand = RELEASE_VERIFY_COMMANDS.find(
@@ -85,11 +89,13 @@ describe("release verify runner", () => {
 
     expect(status).toBe(1);
     expect(playwrightCommand).toBeDefined();
+    expect(playwrightCommand?.requiresFreePort).toBe(3000);
+    expect(checkedPorts).toEqual([playwrightCommand?.requiresFreePort]);
     expect(executedCommands).not.toContain(
       playwrightCommand ? formatReleaseCommand(playwrightCommand) : "",
     );
     expect(errorSpy).toHaveBeenCalledWith(
-      "release-proof cannot start local E2E because localhost:3000 is already in use.",
+      "release-proof cannot start local-playwright-smoke because localhost:3000 is already in use.",
     );
     expect(errorSpy).toHaveBeenCalledWith(
       "Stop the existing local server and rerun pnpm release:verify.",

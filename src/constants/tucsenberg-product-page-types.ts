@@ -1,5 +1,3 @@
-import type { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
-
 import type { ProductMarketSlug } from "@/config/single-site-product-catalog";
 
 export interface TucsenbergProductCta {
@@ -46,6 +44,12 @@ export type TucsenbergProductSection =
 export interface TucsenbergProductFaq {
   question: string;
   answer: string;
+}
+
+export interface TucsenbergProductMeta {
+  title: string;
+  description: string;
+  updatedAt: string;
 }
 
 export type TucsenbergProductImage =
@@ -167,12 +171,6 @@ export interface TucsenbergProductScenes {
   title: string;
   intro?: string;
   /**
-   * Optional anchor: render after this section title. Unset = the Q2 default
-   * slot, before all content sections ("does it fit my site?" comes before
-   * "how does it work" — buyer question order, 视觉翻译-自顶向下设计.md).
-   */
-  afterSection?: string;
-  /**
    * Honest-boundary block rendered after the scene grid (Q2's full answer is
    * "fits X, wrong for Y"); supports inline markdown links.
    */
@@ -182,7 +180,7 @@ export interface TucsenbergProductScenes {
 
 export interface TucsenbergProductPage {
   slug: ProductMarketSlug;
-  meta: (typeof TUCSENBERG_PRODUCT_META)[keyof typeof TUCSENBERG_PRODUCT_META];
+  meta: TucsenbergProductMeta;
   image: TucsenbergProductImage;
   diagram?: TucsenbergProductDiagram;
   eyebrow: string;
@@ -197,7 +195,6 @@ export interface TucsenbergProductPage {
   rfqNote?: string;
   /** Scannable proof strip under the hero; verifiable facts only, never invented. */
   proofStrip?: readonly string[];
-  /** Scene wall rendered after `scenes.afterSection`. */
   scenes?: TucsenbergProductScenes;
   /** Optional straight-run estimator rendered after the content sections. */
   calculator?: TucsenbergProductCalculator;

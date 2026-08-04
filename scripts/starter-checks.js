@@ -1,94 +1,6 @@
 #!/usr/bin/env node
 
-const {
-  runVitestCollectionCheck,
-} = require("./quality/checks/vitest-collection");
-const { runSubcommandLaneCheck } = require("./quality/checks/subcommand-lanes");
-const {
-  collectComponentGovernanceFindings,
-  runComponentGovernanceCli,
-} = require("./quality/checks/component-governance");
-const {
-  assertContentManifestFrontmatterValid,
-  createContentManifestContext,
-  generateContentManifest,
-  runContentManifestGenerator,
-  writeFileAtomic,
-} = require("./quality/checks/content-manifest");
-const { runContentSlugCheck } = require("./quality/checks/content-slugs");
-const {
-  collectClientBoundaryFiles,
-  collectForbiddenBuildSources,
-  collectInquiryFormBuildArtifactFindings,
-  hasTopLevelUseClientDirective,
-  INQUIRY_FORM_CHUNK_MARKER,
-  INQUIRY_FORM_MAX_RAW_BYTES,
-  INQUIRY_FORM_SOURCE,
-  runClientBoundaryBudgetCheck,
-  runClientBoundaryBuildArtifactsCli,
-  runClientBoundaryCli,
-  runInquiryFormBuildArtifactCheck,
-} = require("./quality/checks/client-boundary");
-const {
-  collectLeafPaths,
-  compareLocales,
-  runTranslationCheck,
-  validateLocale,
-} = require("./quality/checks/translations");
-const {
-  collectMessageKeyUsageFindings,
-  runMessageKeyUsageCheck,
-} = require("./quality/checks/message-key-usage");
-const {
-  RELEASE_PROOF_MANIFEST,
-  RELEASE_PROOF_SEQUENCE,
-  RELEASE_VERIFY_COMMANDS,
-  formatReleaseCommand,
-  runReleaseVerify,
-} = require("./quality/checks/release-verify");
-const {
-  collectCloudflareOfficialCompareFailures,
-  runCloudflareOfficialCompareCli,
-} = require("./quality/checks/cloudflare-official-compare");
-const {
-  runCloudflareStaticAssetHeaderCli,
-} = require("./quality/checks/cloudflare-static-asset-headers");
-const {
-  collectPrerenderStaticFindings,
-  runPrerenderStaticCheck,
-} = require("./quality/checks/prerender-static");
-const {
-  runValidateProductionConfigCli,
-  shouldValidateProductionRuntimeContract,
-  validateProductionConfig,
-  validateProductionRuntimeContract,
-  validatePublicLaunchTrustContent,
-} = require("./quality/checks/production-config");
-const {
-  collectContentReadinessFindings,
-  runContentReadinessCheck,
-  runContentReadinessCli,
-} = require("./quality/checks/content-readiness");
-const {
-  runCloudflarePreviewDeployedProof,
-  runCloudflarePreviewSmoke,
-  runDeployedSmoke,
-  runExternalUrlSmoke,
-} = require("./quality/checks/cloudflare-smoke");
-
 const ROOT = process.cwd();
-
-// ---------------------------------------------------------------------------
-// Cloudflare official compare
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Cloudflare preview and deployed smoke
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// CLI routing
-// ---------------------------------------------------------------------------
 
 function printUsage() {
   console.error(`Usage: node scripts/starter-checks.js <command> [options]
@@ -119,28 +31,57 @@ Commands:
 // prove a package script is wired to a real check need the command list, not a
 // frozen copy of the command string.
 const COMMAND_HANDLERS = {
-  "vitest-collection": () => runVitestCollectionCheck(),
-  "subcommand-lanes": () => runSubcommandLaneCheck(),
-  "content-slugs": (args) => runContentSlugCheck(args),
-  "content-manifest": (args) =>
-    runContentManifestGenerator(createContentManifestContext(), {
-      check: args.includes("--check"),
-    }),
-  translations: () => runTranslationCheck(),
-  "message-key-usage": () => runMessageKeyUsageCheck(),
-  "validate-production-config": () => runValidateProductionConfigCli(),
-  "component-governance": () => runComponentGovernanceCli(),
-  "content-readiness": (args) => runContentReadinessCli(args),
-  "client-boundary": (args) => runClientBoundaryCli(args),
-  "prerender-static": () => runPrerenderStaticCheck(),
-  "cf-preview-smoke": (args) => runCloudflarePreviewSmoke(args),
-  "external-url-smoke": (args) => runExternalUrlSmoke(args),
-  "deployed-smoke": (args) => runDeployedSmoke(args),
-  "cf-preview-deployed": () => runCloudflarePreviewDeployedProof(),
-  "cf-official-compare": (args) => runCloudflareOfficialCompareCli(args),
+  "vitest-collection": () =>
+    require("./quality/checks/vitest-collection").runVitestCollectionCheck(),
+  "subcommand-lanes": () =>
+    require("./quality/checks/subcommand-lanes").runSubcommandLaneCheck(
+      STARTER_CHECK_COMMANDS,
+    ),
+  "content-slugs": (args) =>
+    require("./quality/checks/content-slugs").runContentSlugCheck(args),
+  "content-manifest": (args) => {
+    const checks = require("./quality/checks/content-manifest");
+    return checks.runContentManifestGenerator(
+      checks.createContentManifestContext(),
+      { check: args.includes("--check") },
+    );
+  },
+  translations: () =>
+    require("./quality/checks/translations").runTranslationCheck(),
+  "message-key-usage": () =>
+    require("./quality/checks/message-key-usage").runMessageKeyUsageCheck(),
+  "validate-production-config": () =>
+    require("./quality/checks/production-config").runValidateProductionConfigCli(),
+  "component-governance": () =>
+    require("./quality/checks/component-governance").runComponentGovernanceCli(),
+  "content-readiness": (args) =>
+    require("./quality/checks/content-readiness").runContentReadinessCli(args),
+  "client-boundary": (args) =>
+    require("./quality/checks/client-boundary").runClientBoundaryCli(args),
+  "prerender-static": () =>
+    require("./quality/checks/prerender-static").runPrerenderStaticCheck(),
+  "cf-preview-smoke": (args) =>
+    require("./quality/checks/cloudflare-smoke").runCloudflarePreviewSmoke(
+      args,
+    ),
+  "external-url-smoke": (args) =>
+    require("./quality/checks/cloudflare-smoke").runExternalUrlSmoke(args),
+  "deployed-smoke": (args) =>
+    require("./quality/checks/cloudflare-smoke").runDeployedSmoke(args),
+  "cf-preview-deployed": () =>
+    require("./quality/checks/cloudflare-smoke").runCloudflarePreviewDeployedProof(),
+  "cf-official-compare": (args) =>
+    require("./quality/checks/cloudflare-official-compare").runCloudflareOfficialCompareCli(
+      args,
+    ),
   "cf-static-asset-headers": () =>
-    runCloudflareStaticAssetHeaderCli({ rootDir: ROOT }),
-  "release-verify": () => runReleaseVerify({ rootDir: ROOT }),
+    require("./quality/checks/cloudflare-static-asset-headers").runCloudflareStaticAssetHeaderCli(
+      { rootDir: ROOT },
+    ),
+  "release-verify": () =>
+    require("./quality/checks/release-verify").runReleaseVerify({
+      rootDir: ROOT,
+    }),
   "--help": () => {
     printUsage();
     return true;
@@ -171,53 +112,7 @@ async function main(argv = process.argv.slice(2)) {
   }
 }
 
-// Exports are assigned before the CLI bootstrap on purpose: `subcommand-lanes`
-// reads `STARTER_CHECK_COMMANDS` back from here while `main()` is running, and
-// a bootstrap placed above this line would leave it looking at empty exports.
-module.exports = {
-  STARTER_CHECK_COMMANDS,
-  RELEASE_PROOF_MANIFEST,
-  RELEASE_PROOF_SEQUENCE,
-  RELEASE_VERIFY_COMMANDS,
-  formatReleaseCommand,
-  collectClientBoundaryFiles,
-  collectForbiddenBuildSources,
-  collectInquiryFormBuildArtifactFindings,
-  collectCloudflareOfficialCompareFailures,
-  collectComponentGovernanceFindings,
-  collectContentReadinessFindings,
-  collectLeafPaths,
-  collectMessageKeyUsageFindings,
-  collectPrerenderStaticFindings,
-  compareLocales,
-  createContentManifestContext,
-  assertContentManifestFrontmatterValid,
-  generateContentManifest,
-  writeFileAtomic,
-  hasTopLevelUseClientDirective,
-  INQUIRY_FORM_CHUNK_MARKER,
-  INQUIRY_FORM_MAX_RAW_BYTES,
-  INQUIRY_FORM_SOURCE,
-  runCloudflareOfficialCompareCli,
-  runCloudflarePreviewDeployedProof,
-  runCloudflarePreviewSmoke,
-  runClientBoundaryBudgetCheck,
-  runClientBoundaryBuildArtifactsCli,
-  runInquiryFormBuildArtifactCheck,
-  runComponentGovernanceCli,
-  runContentManifestGenerator,
-  runContentReadinessCheck,
-  runContentSlugCheck,
-  runDeployedSmoke,
-  runReleaseVerify,
-  runTranslationCheck,
-  runValidateProductionConfigCli,
-  shouldValidateProductionRuntimeContract,
-  validateLocale,
-  validateProductionConfig,
-  validateProductionRuntimeContract,
-  validatePublicLaunchTrustContent,
-};
+module.exports = { STARTER_CHECK_COMMANDS };
 
 if (require.main === module) {
   main().catch((error) => {

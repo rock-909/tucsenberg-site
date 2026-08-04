@@ -12,7 +12,7 @@ import {
   hasTopLevelUseClientDirective,
   runClientBoundaryBudgetCheck,
   runInquiryFormBuildArtifactCheck,
-} from "../../../scripts/starter-checks.js";
+} from "../../../scripts/quality/checks/client-boundary.js";
 
 const TEMP_TRASH_ROOT = path.join(
   os.tmpdir(),

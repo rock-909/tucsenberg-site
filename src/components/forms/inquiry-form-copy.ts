@@ -40,54 +40,7 @@ type InquiryFormMessageKey =
 
 type InquiryTranslate = (key: InquiryFormMessageKey) => string;
 
-export interface InquiryFormCopy {
-  readonly optional: string;
-  readonly fullName: string;
-  readonly email: string;
-  readonly message: string;
-  readonly messageHint: string;
-  readonly contextLabel: string;
-  readonly submit: string;
-  readonly submitting: string;
-  readonly success: string;
-  readonly referenceLabel: string;
-  readonly privacyNotice: string;
-  readonly noJsExplanation: string;
-  readonly noJsEmailPrefix: string;
-  readonly contactAriaLabel: string;
-  readonly requestQuoteAriaLabel: string;
-  readonly turnstile: {
-    readonly unavailable: string;
-    readonly loadFailed: string;
-    readonly slowToLoad: string;
-    readonly devBypass: string;
-    readonly testMode: string;
-    readonly rescueBeforeEmail: string;
-    readonly rescueAfterEmail: string;
-    readonly rescueSubject: string;
-  };
-  readonly errors: {
-    readonly fieldSummary: string;
-    readonly securitySummary: string;
-    readonly serverSummary: string;
-    readonly fullName: {
-      readonly required: string;
-      readonly invalid: string;
-      readonly tooLong: string;
-    };
-    readonly email: {
-      readonly required: string;
-      readonly invalid: string;
-      readonly tooLong: string;
-    };
-    readonly message: {
-      readonly invalid: string;
-      readonly tooLong: string;
-    };
-  };
-}
-
-export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
+export function createInquiryFormCopy(t: InquiryTranslate) {
   return {
     optional: t("optional"),
     fullName: t("fullName"),
@@ -133,8 +86,10 @@ export function createInquiryFormCopy(t: InquiryTranslate): InquiryFormCopy {
         tooLong: t("errors.message.tooLong"),
       },
     },
-  };
+  } as const;
 }
+
+export type InquiryFormCopy = ReturnType<typeof createInquiryFormCopy>;
 
 export function createInquiryFormCopyFromMessages(
   messages: Record<string, unknown>,

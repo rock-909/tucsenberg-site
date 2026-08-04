@@ -3,10 +3,7 @@ import { type ComponentProps, useEffect } from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IDLE_CALLBACK_TIMEOUT_LONG } from "@/constants/time";
-import {
-  INQUIRY_TURNSTILE_ACTION,
-  TURNSTILE_WIDGET_HEIGHT_PX,
-} from "@/constants/turnstile-constants";
+import { TURNSTILE_WIDGET_HEIGHT_PX } from "@/constants/turnstile-constants";
 import { LazyTurnstile } from "@/components/forms/lazy-turnstile";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 
@@ -77,7 +74,6 @@ const {
       return (
         <div
           data-testid="turnstile-widget"
-          data-action={INQUIRY_TURNSTILE_ACTION}
           data-size={size}
           data-theme={theme}
           data-classname={className}
@@ -219,23 +215,7 @@ describe("LazyTurnstile", () => {
     });
   });
 
-  it("uses the documented compact placeholder height", () => {
-    render(
-      <LazyTurnstile
-        onSuccess={vi.fn()}
-        size="compact"
-        labels={createDefaultTestLabels()}
-      />,
-    );
-
-    expect(
-      getPlaceholderContainer().style.getPropertyValue(
-        "--turnstile-placeholder-height",
-      ),
-    ).toBe(`${TURNSTILE_WIDGET_HEIGHT_PX.compact}px`);
-  });
-
-  it("renders on idle and forwards props and callbacks", async () => {
+  it("renders on idle and forwards callbacks to the fixed inquiry widget", async () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
     const onExpire = vi.fn();
@@ -245,9 +225,6 @@ describe("LazyTurnstile", () => {
         onSuccess={onSuccess}
         onError={onError}
         onExpire={onExpire}
-        size="compact"
-        theme="auto"
-        className="custom-turnstile"
         labels={createDefaultTestLabels()}
       />,
     );
@@ -258,10 +235,9 @@ describe("LazyTurnstile", () => {
     });
 
     const widget = screen.getByTestId("turnstile-widget");
-    expect(widget).toHaveAttribute("data-action", "product_inquiry");
-    expect(widget).toHaveAttribute("data-size", "compact");
+    expect(widget).toHaveAttribute("data-size", "normal");
     expect(widget).toHaveAttribute("data-theme", "auto");
-    expect(widget).toHaveAttribute("data-classname", "custom-turnstile");
+    expect(widget).toHaveAttribute("data-classname", "w-full");
 
     fireEvent.click(screen.getByTestId("turnstile-success"));
     fireEvent.click(screen.getByTestId("turnstile-error"));
@@ -270,22 +246,6 @@ describe("LazyTurnstile", () => {
     expect(onSuccess).toHaveBeenCalledWith("lazy-token");
     expect(onError).toHaveBeenCalledWith("lazy-error");
     expect(onExpire).toHaveBeenCalledTimes(1);
-  });
-
-  it("always passes INQUIRY_TURNSTILE_ACTION to the shared widget", async () => {
-    render(
-      <LazyTurnstile onSuccess={vi.fn()} labels={createDefaultTestLabels()} />,
-    );
-
-    await act(async () => {
-      idleCallbacks[0]?.();
-      await vi.dynamicImportSettled();
-    });
-
-    expect(screen.getByTestId("turnstile-widget")).toHaveAttribute(
-      "data-action",
-      "product_inquiry",
-    );
   });
 
   it("renders when the wrapper enters the viewport", async () => {

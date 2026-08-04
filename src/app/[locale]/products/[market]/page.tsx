@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Fragment } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -360,19 +359,15 @@ export async function generateMetadata({
   const market = getMarketBySlug(marketSlug);
   const productPage = getTucsenbergProductPage(marketSlug);
 
-  if (!market) return {};
+  if (!market || !productPage) return {};
 
-  const title = productPage?.meta.title ?? market.label;
-  const description = productPage?.meta.description ?? market.description;
+  const { updatedAt, ...meta } = productPage.meta;
 
   return generateMetadataForPath({
     locale,
     pageType: "products",
     path: getProductMarketPath(market.slug),
-    config: {
-      title,
-      description,
-    },
+    config: { ...meta, modifiedTime: updatedAt },
   });
 }
 
@@ -468,22 +463,14 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
       <div className="space-y-12 md:space-y-16">
         {/* Q2 before Q3: "does it fit my site?" precedes "how does it work". */}
-        {productPage.scenes && !productPage.scenes.afterSection ? (
+        {productPage.scenes ? (
           <ProductSceneWall
             scenes={productPage.scenes}
             glyphKind={productPage.diagram?.kind}
           />
         ) : null}
         {productPage.sections.map((section) => (
-          <Fragment key={section.title}>
-            <ProductContentSection section={section} />
-            {productPage.scenes?.afterSection === section.title ? (
-              <ProductSceneWall
-                scenes={productPage.scenes}
-                glyphKind={productPage.diagram?.kind}
-              />
-            ) : null}
-          </Fragment>
+          <ProductContentSection key={section.title} section={section} />
         ))}
         {productPage.calculator ? (
           <ProductRunCalculator calculator={productPage.calculator} />

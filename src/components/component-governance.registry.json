@@ -4,74 +4,47 @@
     "breadcrumb": {
       "story": "required",
       "radixLayer": "primitive",
-      "surface": "navigation",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for page hierarchy navigation.",
-      "avoidWhen": "Do not use for tag lists, filters, or marketing metadata."
+      "clientBoundary": "server-safe"
     },
     "button": {
       "story": "required",
       "radixLayer": "primitive",
-      "surface": "control",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for CTAs and clickable actions, including hero CTAs.",
-      "avoidWhen": "Do not handwrite button styling in pages or sections."
+      "clientBoundary": "server-safe"
     },
     "card": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "narrative",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for marketing, resources, product story, proof, structured data, and form shells.",
-      "avoidWhen": "Do not use where a plain section or control is enough."
+      "clientBoundary": "server-safe"
     },
     "lazy-island-error-boundary": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "utility",
-      "clientBoundary": "client",
-      "useWhen": "Use to isolate lazy client island failures.",
-      "avoidWhen": "Do not use for ordinary route-level error handling."
+      "clientBoundary": "client"
     },
     "section-head": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "layout",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for reusable section title, subtitle, and optional action layout.",
-      "avoidWhen": "Do not use as a data card or form control."
+      "clientBoundary": "server-safe"
     },
     "separator": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "layout",
-      "clientBoundary": "client",
-      "useWhen": "Use for visual separation that needs a shared wrapper.",
-      "avoidWhen": "Do not use as a substitute for page grid or spacing design."
+      "clientBoundary": "client"
     },
     "sheet": {
       "story": "required",
       "radixLayer": "primitive",
-      "surface": "control",
-      "clientBoundary": "client",
-      "useWhen": "Use for drawer-style interactions such as mobile navigation.",
-      "avoidWhen": "Do not use for ordinary layout panels or Dialog semantics."
+      "clientBoundary": "client"
     },
     "status-callout": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "feedback",
-      "clientBoundary": "server-safe",
-      "useWhen": "Use for info, success, warning, error, unavailable, or form status messages.",
-      "avoidWhen": "Do not build ad hoc alert panels in business components."
+      "clientBoundary": "server-safe"
     },
     "theme-switcher": {
       "story": "required",
       "radixLayer": "local",
-      "surface": "theme",
-      "clientBoundary": "client",
-      "useWhen": "Use as the single shared theme switching control.",
-      "avoidWhen": "Do not create a second theme switching implementation."
+      "clientBoundary": "client"
     }
   }
 }

@@ -24,26 +24,8 @@ const STORY_FILE_PATTERN = /\.(?:stories)\.(?:ts|tsx|js|jsx|mdx)$/;
 const TSX_FILE_PATTERN = /\.tsx$/;
 const REQUIRED_STORY_VALUE = "required";
 const RADIX_LAYER_VALUES = ["primitive", "local"] as const;
-const SURFACE_VALUES = [
-  "control",
-  "navigation",
-  "feedback",
-  "form",
-  "form-internal",
-  "data",
-  "narrative",
-  "layout",
-  "utility",
-  "theme",
-] as const;
 const CLIENT_BOUNDARY_VALUES = ["server-safe", "client"] as const;
-const REQUIRED_AGENT_INDEX_FIELDS = [
-  "radixLayer",
-  "surface",
-  "clientBoundary",
-  "useWhen",
-  "avoidWhen",
-] as const;
+const REQUIRED_SOURCE_TRUTH_FIELDS = ["radixLayer", "clientBoundary"] as const;
 const STORYBOOK_MCP_ADDON = "@storybook/addon-mcp";
 
 interface PackageManifest {
@@ -58,26 +40,12 @@ interface ComponentGovernanceRegistry {
 }
 
 type ComponentRadixLayer = "primitive" | "local";
-type ComponentSurface =
-  | "control"
-  | "navigation"
-  | "feedback"
-  | "form"
-  | "form-internal"
-  | "data"
-  | "narrative"
-  | "layout"
-  | "utility"
-  | "theme";
 type ComponentClientBoundary = "server-safe" | "client";
 
 interface ComponentGovernanceRegistryItem {
-  avoidWhen?: string;
   clientBoundary?: ComponentClientBoundary;
   radixLayer?: ComponentRadixLayer;
   story?: string;
-  surface?: ComponentSurface;
-  useWhen?: string;
 }
 
 function walkFiles(root: string): string[] {
@@ -203,10 +171,10 @@ describe("component governance", () => {
         `${componentName} story governance should be strictly required`,
       ).toBe(REQUIRED_STORY_VALUE);
 
-      for (const field of REQUIRED_AGENT_INDEX_FIELDS) {
+      for (const field of REQUIRED_SOURCE_TRUTH_FIELDS) {
         expect(
           component,
-          `${componentName} should define ${field} for agent component selection`,
+          `${componentName} should define source-truth field ${field}`,
         ).toHaveProperty(field);
       }
 
@@ -215,23 +183,9 @@ describe("component governance", () => {
         `${componentName} should use an approved radixLayer`,
       ).toContain(component.radixLayer);
       expect(
-        SURFACE_VALUES,
-        `${componentName} should use an approved surface`,
-      ).toContain(component.surface);
-      expect(
         CLIENT_BOUNDARY_VALUES,
         `${componentName} should use an approved clientBoundary`,
       ).toContain(component.clientBoundary);
-      expect(
-        component.useWhen,
-        `${componentName} useWhen should be a short agent-facing sentence`,
-      ).toEqual(expect.any(String));
-      expect(component.useWhen?.trim().length).toBeGreaterThanOrEqual(12);
-      expect(
-        component.avoidWhen,
-        `${componentName} avoidWhen should be a short agent-facing sentence`,
-      ).toEqual(expect.any(String));
-      expect(component.avoidWhen?.trim().length).toBeGreaterThanOrEqual(12);
 
       const source = getUiPrimitiveSource(componentName);
 
@@ -246,26 +200,25 @@ describe("component governance", () => {
     }
   });
 
-  it("keeps high-risk component selection metadata explicit", () => {
+  it("keeps high-risk wrapper source truth explicit", () => {
     const registry = readComponentGovernanceRegistry();
 
     expect(registry.components.card).toEqual(
       expect.objectContaining({
         radixLayer: "local",
-        surface: "narrative",
+        clientBoundary: "server-safe",
       }),
     );
     expect(registry.components["status-callout"]).toEqual(
       expect.objectContaining({
         radixLayer: "local",
-        surface: "feedback",
+        clientBoundary: "server-safe",
       }),
     );
     expect(registry.components.sheet).toEqual(
       expect.objectContaining({
         radixLayer: "primitive",
-        surface: "control",
-        useWhen: expect.stringContaining("drawer"),
+        clientBoundary: "client",
       }),
     );
   });

@@ -1,9 +1,13 @@
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 
 export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
   slug: "absorbent-flood-bags",
-  meta: TUCSENBERG_PRODUCT_META["absorbent-flood-bags"],
+  meta: {
+    title: "Sandless Sandbags & Water-Activated Flood Bags — Wholesale",
+    description:
+      "Water-activated absorbent flood bags factory-direct: 0.23 kg flat, 20 kg in 3–4 minutes, 3-year shelf life. Carton to pallet, private label. Fresh water only.",
+    updatedAt: "2026-07-05T00:00:00Z",
+  },
   image: { status: "pending" },
   diagram: {
     kind: "bag",

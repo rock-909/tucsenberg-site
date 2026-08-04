@@ -6,8 +6,9 @@ import {
   moveFixtureToTrash,
 } from "./component-governance-check.helpers";
 
-const starterChecksFacade = require("../../../scripts/starter-checks.js");
-const { collectComponentGovernanceFindings } = starterChecksFacade;
+const {
+  collectComponentGovernanceFindings,
+} = require("../../../scripts/quality/checks/component-governance.js");
 const {
   getRadixModuleReferenceSummary,
 } = require("../../../scripts/component-governance-registry-truth.js");

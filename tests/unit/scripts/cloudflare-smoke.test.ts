@@ -1,5 +1,14 @@
 import { spawn } from "node:child_process";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  renameSync,
+} from "node:fs";
 import http from "node:http";
+import os from "node:os";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { captureExpectedConsoleErrors } from "@/test/console";
 import {
@@ -9,6 +18,11 @@ import {
 } from "../../../scripts/quality/checks/cloudflare-smoke.js";
 
 const openServers: http.Server[] = [];
+const tempDirs: string[] = [];
+const TEMP_TRASH_ROOT = path.join(
+  os.tmpdir(),
+  "tucsenberg-cloudflare-smoke-test-trash",
+);
 
 interface ChildProcessResult {
   status: number | null;
@@ -235,10 +249,32 @@ function listenForDeployedSmoke(): Promise<{
   });
 }
 
-function runNodeCommand(args: string[]): Promise<ChildProcessResult> {
+function createMinimalStarterChecksFixture(): string {
+  const rootDir = mkdtempSync(
+    path.join(os.tmpdir(), "tucsenberg-minimal-starter-checks-"),
+  );
+  const focusedChecksDir = path.join(rootDir, "scripts", "quality", "checks");
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-owned temp path created above
+  mkdirSync(focusedChecksDir, { recursive: true });
+  copyFileSync(
+    path.resolve("scripts/starter-checks.js"),
+    path.join(rootDir, "scripts", "starter-checks.js"),
+  );
+  copyFileSync(
+    path.resolve("scripts/quality/checks/cloudflare-smoke.js"),
+    path.join(focusedChecksDir, "cloudflare-smoke.js"),
+  );
+  tempDirs.push(rootDir);
+  return rootDir;
+}
+
+function runNodeCommand(
+  args: string[],
+  cwd = process.cwd(),
+): Promise<ChildProcessResult> {
   return new Promise((resolve, reject) => {
     const child = spawn("node", args, {
-      cwd: process.cwd(),
+      cwd,
       stdio: ["ignore", "pipe", "pipe"],
     });
     const stdoutChunks: Buffer[] = [];
@@ -275,6 +311,18 @@ afterEach(async () => {
         }),
     ),
   );
+
+  for (const tempDir of tempDirs.splice(0)) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- tracked test-owned temp path
+    if (!existsSync(tempDir)) continue;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed test Trash root under os.tmpdir()
+    mkdirSync(TEMP_TRASH_ROOT, { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- moves only tracked test-owned temp paths
+    renameSync(
+      tempDir,
+      path.join(TEMP_TRASH_ROOT, `${path.basename(tempDir)}-${Date.now()}`),
+    );
+  }
 });
 
 describe("external URL smoke", () => {
@@ -611,17 +659,20 @@ describe("deployed smoke", () => {
     expect(productsAttempts).toBe(2);
   });
 
-  it("keeps the starter-checks facade wired to the deployed-smoke CLI", async () => {
+  it("runs deployed smoke from a minimal fixture without node_modules", async () => {
     const { baseUrl, paths } = await listenForDeployedSmoke();
+    const fixtureRoot = createMinimalStarterChecksFixture();
 
-    const result = await runNodeCommand([
-      "scripts/starter-checks.js",
-      "deployed-smoke",
-      "--base-url",
-      baseUrl,
-    ]);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed child path under a test-owned fixture root
+    expect(existsSync(path.join(fixtureRoot, "node_modules"))).toBe(false);
+
+    const result = await runNodeCommand(
+      ["scripts/starter-checks.js", "deployed-smoke", "--base-url", baseUrl],
+      fixtureRoot,
+    );
 
     expect(result.status).toBe(0);
+    expect(result.stderr).not.toContain("Cannot find module");
     // Concurrent probing makes arrival order non-deterministic; assert the set.
     expect([...paths].sort()).toEqual(
       [

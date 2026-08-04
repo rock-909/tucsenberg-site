@@ -1,9 +1,13 @@
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 
 export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "frp-flood-barriers",
-  meta: TUCSENBERG_PRODUCT_META["frp-flood-barriers"],
+  meta: {
+    title: "FRP Composite Flood Barrier Planks — Corrosion-Free",
+    description:
+      "Pultruded FRP composite flood planks: corrosion-free, non-conductive, built for coastal and industrial sites. Order-driven production — register interest.",
+    updatedAt: "2026-07-06T00:00:00Z",
+  },
   image: { status: "pending" },
   diagram: {
     kind: "frp",

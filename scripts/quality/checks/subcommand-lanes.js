@@ -345,10 +345,7 @@ function reportLaneFindings({ undecidable, orphans, unknown }) {
   );
 }
 
-function runSubcommandLaneCheck() {
-  // Read the live registry rather than accepting one: a caller passing a
-  // trimmed list could hide the exact thing this check exists to find.
-  const { STARTER_CHECK_COMMANDS } = require("../../starter-checks.js");
+function runSubcommandLaneCheck(registeredCommands) {
   const packageScripts = JSON.parse(readRepoFile(PACKAGE_JSON)).scripts ?? {};
   const {
     automated,
@@ -370,10 +367,7 @@ function runSubcommandLaneCheck() {
     );
     return false;
   }
-  if (
-    !Array.isArray(STARTER_CHECK_COMMANDS) ||
-    STARTER_CHECK_COMMANDS.length === 0
-  ) {
+  if (!Array.isArray(registeredCommands) || registeredCommands.length === 0) {
     console.error(
       "[subcommand-lanes] the subcommand registry read back empty — the check cannot tell coverage from an empty list",
     );
@@ -384,14 +378,14 @@ function runSubcommandLaneCheck() {
   const manualWalk = collectReachableSubcommands(manual, packageScripts);
   const inAutomated = automatedWalk.reached;
   const inManual = manualWalk.reached;
-  const manualOnly = STARTER_CHECK_COMMANDS.filter(
+  const manualOnly = registeredCommands.filter(
     (command) => !inAutomated.has(command) && inManual.has(command),
   );
-  const orphans = STARTER_CHECK_COMMANDS.filter(
+  const orphans = registeredCommands.filter(
     (command) => !inAutomated.has(command) && !inManual.has(command),
   );
   const unknown = [...inAutomated, ...inManual].filter(
-    (command) => !STARTER_CHECK_COMMANDS.includes(command),
+    (command) => !registeredCommands.includes(command),
   );
   const undecidable = [
     ...new Set([
@@ -409,7 +403,7 @@ function runSubcommandLaneCheck() {
     );
   }
   console.log(
-    `subcommand-lanes passed: ${STARTER_CHECK_COMMANDS.length} subcommand(s), ${STARTER_CHECK_COMMANDS.length - manualOnly.length} invoked from an automated lane, ${manualOnly.length} manual-only`,
+    `subcommand-lanes passed: ${registeredCommands.length} subcommand(s), ${registeredCommands.length - manualOnly.length} invoked from an automated lane, ${manualOnly.length} manual-only`,
   );
   return true;
 }

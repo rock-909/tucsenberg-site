@@ -42,12 +42,6 @@ interface LazyTurnstileProps {
   onError?: (reason?: string) => void;
   onExpire?: () => void;
   onReadyRef?: (reset: () => void) => (() => void) | void;
-  className?: string;
-  theme?: "light" | "dark" | "auto";
-  size?: "normal" | "compact";
-  tabIndex?: number;
-  id?: string;
-  cData?: string;
   labels: LazyTurnstileLabels;
 }
 
@@ -57,18 +51,9 @@ const TurnstileWidget = lazy(() =>
   })),
 );
 
-function createTurnstilePlaceholderStyle(
-  size: NonNullable<LazyTurnstileProps["size"]>,
-): TurnstilePlaceholderStyle {
-  const placeholderHeight =
-    size === "compact"
-      ? TURNSTILE_WIDGET_HEIGHT_PX.compact
-      : TURNSTILE_WIDGET_HEIGHT_PX.normal;
-
-  return {
-    "--turnstile-placeholder-height": `${placeholderHeight}px`,
-  };
-}
+const TURNSTILE_PLACEHOLDER_STYLE: TurnstilePlaceholderStyle = {
+  "--turnstile-placeholder-height": `${TURNSTILE_WIDGET_HEIGHT_PX.normal}px`,
+};
 
 /**
  * 延迟渲染逻辑
@@ -223,46 +208,16 @@ function TurnstileRescueStatus({
   );
 }
 
-function buildLazyTurnstileWidgetProps(args: {
-  props: LazyTurnstileProps;
-  labelText: LazyTurnstileLabels;
-  theme: NonNullable<LazyTurnstileProps["theme"]>;
-  size: NonNullable<LazyTurnstileProps["size"]>;
-}) {
-  const { props, labelText, theme, size } = args;
-  return {
-    className: props.className ?? "w-full",
-    theme,
-    size,
-    labels: {
-      devBypass: labelText.devBypass,
-      testMode: labelText.testMode,
-    },
-    ...(props.onError ? { onError: props.onError } : {}),
-    ...(props.tabIndex !== undefined ? { tabIndex: props.tabIndex } : {}),
-    ...(props.id !== undefined ? { id: props.id } : {}),
-    ...(props.cData !== undefined ? { cData: props.cData } : {}),
-  };
-}
-
 /**
  * 延迟加载 Turnstile CAPTCHA 组件
  * 优先在进入视口时加载，退化为空闲时加载
  */
 export function LazyTurnstile(props: LazyTurnstileProps) {
-  const {
-    onError,
-    onSuccess,
-    onReadyRef,
-    theme = "auto",
-    size = "normal",
-    labels,
-  } = props;
+  const { onError, onSuccess, onReadyRef, labels } = props;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldRender = useLazyRender(containerRef);
   const { showRescue, degradedKind, markSuccess, markDegraded, markWaiting } =
     useTurnstileRescueState(shouldRender);
-  const placeholderStyle = createTurnstilePlaceholderStyle(size);
   const placeholder = (
     <div className={TURNSTILE_PLACEHOLDER_CLASS_NAME} aria-hidden="true" />
   );
@@ -292,20 +247,24 @@ export function LazyTurnstile(props: LazyTurnstileProps) {
       reset();
     });
 
-  const turnstileProps = buildLazyTurnstileWidgetProps({
-    props,
-    labelText: labels,
-    theme,
-    size,
-  });
-
   return (
-    <div className="space-y-2" ref={containerRef} style={placeholderStyle}>
+    <div
+      className="space-y-2"
+      ref={containerRef}
+      style={TURNSTILE_PLACEHOLDER_STYLE}
+    >
       {shouldRender ? (
         <LazyIslandErrorBoundary onError={handleLazyError}>
           <Suspense fallback={placeholder}>
             <TurnstileWidget
-              {...turnstileProps}
+              className="w-full"
+              theme="auto"
+              size="normal"
+              labels={{
+                devBypass: labels.devBypass,
+                testMode: labels.testMode,
+              }}
+              {...(onError ? { onError } : {})}
               onSuccess={handleSuccess}
               onDegraded={markDegraded}
               onExpire={handleExpire}

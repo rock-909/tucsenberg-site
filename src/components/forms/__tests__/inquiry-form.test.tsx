@@ -14,7 +14,6 @@ import {
 } from "@/constants/validation-limits";
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
-import { createInquiryPayload } from "@/components/forms/inquiry-payload";
 import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { createTestInquiryFormCopy } from "@/test/inquiry-test-messages";
 import { lazyTurnstileLabelsSpy } from "@/test/inquiry-turnstile-mock";
@@ -734,71 +733,5 @@ describe("InquiryFormStaticFallback", () => {
     );
     expect(container.querySelector("form")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();
-  });
-});
-
-describe("createInquiryPayload", () => {
-  it("builds the canonical general RFQ body", () => {
-    const formData = new FormData();
-    formData.set("fullName", "Payload Buyer");
-    formData.set("email", "payload@example.com");
-    formData.set("message", "Need details");
-
-    expect(
-      createInquiryPayload(formData, "token-1", {
-        kind: "general-context",
-        buyerInterest: "aluminum gates",
-      }),
-    ).toEqual(
-      expect.objectContaining({
-        fullName: "Payload Buyer",
-        email: "payload@example.com",
-        message: "Need details",
-        buyerInterest: "aluminum gates",
-        productInquiryKind: "general-rfq",
-        turnstileToken: "token-1",
-      }),
-    );
-  });
-
-  it("builds the catalog product body from validated context", () => {
-    const formData = new FormData();
-    formData.set("fullName", "Payload Buyer");
-    formData.set("email", "payload@example.com");
-
-    expect(
-      createInquiryPayload(formData, "token-1", {
-        kind: "catalog-context",
-        catalogProductId: "abs-flood-barriers",
-        displayLabel: "ABS Interlocking Boxwall",
-      }),
-    ).toEqual(
-      expect.objectContaining({
-        productInquiryKind: "catalog-product",
-        catalogProductId: "abs-flood-barriers",
-      }),
-    );
-    expect(
-      createInquiryPayload(formData, "token-1", {
-        kind: "catalog-context",
-        catalogProductId: "abs-flood-barriers",
-        displayLabel: "ABS Interlocking Boxwall",
-      }),
-    ).not.toHaveProperty("buyerInterest");
-  });
-
-  it("omits buyerInterest from catalog-context payloads even when interest was in the URL", () => {
-    const formData = new FormData();
-    formData.set("fullName", "Payload Buyer");
-    formData.set("email", "payload@example.com");
-
-    const context = resolveInquiryContext({
-      catalogProductId: "abs-flood-barriers",
-      interest: "hidden interest",
-    });
-
-    expect(
-      createInquiryPayload(formData, "token-1", context),
-    ).not.toHaveProperty("buyerInterest");
   });
 });

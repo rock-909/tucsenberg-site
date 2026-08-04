@@ -123,15 +123,11 @@ export async function createLeadRecord(params: {
     const now = new Date().toISOString();
     const fields = buildLeadFields(data, now);
 
-    const recordsResult = await base.table(tableName).create([
+    const [createdRecord] = await base.table(tableName).create([
       {
         fields,
       },
     ]);
-
-    const createdRecord = Array.isArray(recordsResult)
-      ? recordsResult[0]
-      : recordsResult;
 
     if (!createdRecord) {
       throw new Error("Failed to create lead record");

@@ -40,14 +40,15 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       args: ["lint:check"],
     },
     {
-      id: "middleware-i18n-unit-tests",
-      label: "Middleware and i18n unit tests",
+      id: "focused-release-contract-tests",
+      label: "Middleware, i18n, and deploy workflow contracts",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: [
         "exec",
         "vitest",
         "run",
+        "tests/architecture/deploy-workflow-contract.test.ts",
         "tests/unit/middleware.test.ts",
         "src/__tests__/middleware-locale-cookie.test.ts",
         "src/i18n/__tests__/request.test.ts",
@@ -207,6 +208,9 @@ function cloneReleaseVerifyCommand(step) {
     command: step.command,
     args: [...step.args],
     ...(step.env ? { env: { ...step.env } } : {}),
+    ...(step.requiresFreePort
+      ? { requiresFreePort: step.requiresFreePort }
+      : {}),
     ...(step.artifactBudget
       ? { artifactBudget: { ...step.artifactBudget } }
       : {}),

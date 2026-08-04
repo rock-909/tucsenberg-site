@@ -32,7 +32,7 @@ describe("createLeadRecord", () => {
   it.each([undefined, null, "", "   "])(
     "rejects an Airtable create result with invalid id %j",
     async (id) => {
-      const mockCreate = vi.fn().mockResolvedValue({ id });
+      const mockCreate = vi.fn().mockResolvedValue([{ id }]);
       const base = createMockBase(mockCreate);
 
       await expect(
@@ -45,17 +45,90 @@ describe("createLeadRecord", () => {
     },
   );
 
-  it("normalizes a valid Airtable record id", async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: " rec-123 " });
+  it("maps a product inquiry and accepts the Airtable SDK array response", async () => {
+    const mockCreate = vi.fn().mockResolvedValue([{ id: " rec-123 " }]);
     const base = createMockBase(mockCreate);
+    const data = {
+      firstName: "Jane",
+      lastName: "Buyer",
+      email: "Buyer+RFQ@Example.com",
+      message: "Need details",
+      productName: "ABS Flood Barriers",
+      catalogProductId: "abs-flood-barriers",
+      requirements: "Custom packaging",
+      referenceId: "PRO-test-123",
+      utmSource: "google",
+      utmMedium: "cpc",
+      utmCampaign: '=IMPORTXML("https://example.test")',
+      gclid: "gclid-123",
+      landingPage: "/en/contact",
+      capturedAt: "2026-08-03T00:00:00.000Z",
+    };
 
     await expect(
       createLeadRecord({
         base: base as never,
-        tableName: "Leads",
-        data: validProductLeadData,
+        tableName: "Contacts",
+        data,
       }),
     ).resolves.toEqual({ id: "rec-123" });
+
+    expect(base.table).toHaveBeenCalledWith("Contacts");
+    expect(mockCreate).toHaveBeenCalledWith([
+      {
+        fields: {
+          Email: "buyer+rfq@example.com",
+          "Submitted At": expect.any(String),
+          Status: "New",
+          Source: "Product Inquiry",
+          "Reference ID": "PRO-test-123",
+          "First Name": "Jane",
+          "Last Name": "Buyer",
+          Message: "Need details",
+          "Product Name": "ABS Flood Barriers",
+          "Product Slug": "abs-flood-barriers",
+          Requirements: "Custom packaging",
+          "UTM Source": "google",
+          "UTM Medium": "cpc",
+          "UTM Campaign": `'${data.utmCampaign}`,
+          GCLID: "gclid-123",
+          "Landing Page": "/en/contact",
+          "Captured At": "2026-08-03T00:00:00.000Z",
+        },
+      },
+    ]);
+  });
+
+  it("neutralizes formulas in product fields without changing ordinary Unicode", async () => {
+    const mockCreate = vi.fn().mockResolvedValue([{ id: "rec-formula" }]);
+    const base = createMockBase(mockCreate);
+
+    await createLeadRecord({
+      base: base as never,
+      tableName: "Contacts",
+      data: {
+        firstName: "=Buyer",
+        lastName: "García-López",
+        email: "buyer@example.com",
+        message: "=message",
+        productName: "+Product",
+        catalogProductId: "-product-slug",
+        requirements: "@requirements",
+      },
+    });
+
+    expect(mockCreate).toHaveBeenCalledWith([
+      {
+        fields: expect.objectContaining({
+          "First Name": "'=Buyer",
+          "Last Name": "García-López",
+          Message: "'=message",
+          "Product Name": "'+Product",
+          "Product Slug": "'-product-slug",
+          Requirements: "'@requirements",
+        }),
+      },
+    ]);
   });
 
   it("logs errorType and statusCode for Airtable SDK-style plain errors", async () => {

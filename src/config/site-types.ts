@@ -138,7 +138,6 @@ export interface MarketDefinition {
   slug: string;
   label: string;
   standardLabel: string;
-  description: string;
   sizeSystem: "inch" | "mm";
   standardIds: readonly TucsenbergProductStandardId[];
 }

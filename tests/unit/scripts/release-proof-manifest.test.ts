@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 const MANIFEST_PATH = path.join(
@@ -41,6 +41,7 @@ interface ReleaseProofManifestModule {
     readonly command: string;
     readonly args: readonly string[];
     readonly env?: Record<string, string>;
+    readonly requiresFreePort?: number;
   }>;
 }
 
@@ -50,6 +51,10 @@ function loadReleaseProofManifest(): ReleaseProofManifestModule {
 }
 
 describe("release proof manifest", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("keeps release proof local and catalog-only", () => {
     const manifest = loadReleaseProofManifest();
     const releaseProofFlow = manifest.getReleaseProofSequence().join("\n");
@@ -87,6 +92,45 @@ describe("release proof manifest", () => {
       }),
     );
     expect(playwrightStep.requiresFreePort).toBe(3000);
+    expect(
+      manifest
+        .getReleaseVerifyCommands()
+        .find((step) => step.id === playwrightStep.id)?.requiresFreePort,
+    ).toBe(3000);
+  });
+
+  it("includes the deploy workflow contract in the focused Vitest release step", () => {
+    const manifest = loadReleaseProofManifest();
+    const focusedVitestStep = manifest
+      .getReleaseVerifyCommands()
+      .find((step) => step.id === "focused-release-contract-tests");
+
+    expect(focusedVitestStep?.args).toContain(
+      "tests/architecture/deploy-workflow-contract.test.ts",
+    );
+  });
+
+  it("checks the same port that Playwright starts", async () => {
+    vi.stubEnv("STAGING_URL", "");
+    vi.resetModules();
+
+    const manifest = loadReleaseProofManifest();
+    const playwrightStep = manifest
+      .getReleaseVerifyCommands()
+      .find((step) => step.id === "local-playwright-smoke");
+    const { default: playwrightConfig } =
+      await import("../../../playwright.config");
+    const webServer = Array.isArray(playwrightConfig.webServer)
+      ? playwrightConfig.webServer[0]
+      : playwrightConfig.webServer;
+
+    if (!playwrightStep?.requiresFreePort || !webServer?.url) {
+      throw new Error("Missing local Playwright port contract");
+    }
+
+    expect(Number(new URL(webServer.url).port)).toBe(
+      playwrightStep.requiresFreePort,
+    );
   });
 
   it("runs the Cloudflare artifact config proof after the OpenNext build", () => {

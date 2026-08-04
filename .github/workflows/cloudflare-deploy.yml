@@ -66,9 +66,11 @@ jobs:
           cache: "pnpm"
 
       - name: 安装依赖
+        if: ${{ inputs.environment == 'production' }}
         run: pnpm install --frozen-lockfile
 
       - name: 安装 Playwright Chromium
+        if: ${{ inputs.environment == 'production' }}
         run: pnpm exec playwright install --with-deps chromium
 
       - name: 阻断：production 只能从 main 部署

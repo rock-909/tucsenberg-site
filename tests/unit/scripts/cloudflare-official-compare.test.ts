@@ -67,21 +67,6 @@ function writePassingSideFiles(rootDir: string): void {
   );
 }
 
-function writePassingDeployWorkflow(rootDir: string): void {
-  writeFixtureFile(
-    rootDir,
-    ".github/workflows/cloudflare-deploy.yml",
-    [
-      "jobs:",
-      "  deploy:",
-      "    steps:",
-      "      - name: 外部 URL smoke（preview 输入）",
-      '        run: node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
-      "      - run: pnpm exec opennextjs-cloudflare deploy --env production",
-    ].join("\n"),
-  );
-}
-
 function writePassingWranglerConfig(rootDir: string): void {
   writeFixtureFile(
     rootDir,
@@ -122,7 +107,6 @@ describe("Cloudflare official-compare source contract", () => {
   it("rejects required config that appears only in comments", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
-    writePassingDeployWorkflow(rootDir);
     // Required wrangler values present only in a comment must NOT satisfy.
     writeFixtureFile(
       rootDir,
@@ -135,29 +119,12 @@ describe("Cloudflare official-compare source contract", () => {
         "}",
       ].join("\n"),
     );
-    // Required deploy commands present only in comments must NOT satisfy.
-    writeFixtureFile(
-      rootDir,
-      ".github/workflows/cloudflare-deploy.yml",
-      [
-        '# node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
-        "# pnpm exec opennextjs-cloudflare deploy --env production",
-        "jobs:",
-        "  deploy:",
-        "    steps:",
-        "      - run: echo noop",
-      ].join("\n"),
-    );
-
     const failures =
       loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
 
     expect(failures).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ file: "wrangler.jsonc" }),
-        expect.objectContaining({
-          file: ".github/workflows/cloudflare-deploy.yml",
-        }),
       ]),
     );
   });
@@ -165,7 +132,6 @@ describe("Cloudflare official-compare source contract", () => {
   it("does not trip on a forbidden token that appears only in a comment", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
-    writePassingDeployWorkflow(rootDir);
     writeFixtureFile(
       rootDir,
       "wrangler.jsonc",
@@ -188,7 +154,6 @@ describe("Cloudflare official-compare source contract", () => {
   it("accepts the canonical Cloudflare build script surface", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
-    writePassingDeployWorkflow(rootDir);
     writePassingWranglerConfig(rootDir);
 
     const failures =
@@ -200,7 +165,6 @@ describe("Cloudflare official-compare source contract", () => {
   it("rejects a Cloudflare build script with the wrong platform value", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
-    writePassingDeployWorkflow(rootDir);
     writePassingWranglerConfig(rootDir);
     writeFixtureFile(
       rootDir,
@@ -225,7 +189,6 @@ describe("Cloudflare official-compare source contract", () => {
   it("rejects a Cloudflare build script with extra env prefixes", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
-    writePassingDeployWorkflow(rootDir);
     writePassingWranglerConfig(rootDir);
     writeFixtureFile(
       rootDir,
