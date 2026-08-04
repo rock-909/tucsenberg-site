@@ -9,12 +9,14 @@ const {
   mockGetFontClassNames,
   mockSetRequestLocale,
   mockNotFound,
+  mockRootLocale,
   mockGenerateLocaleMetadata,
   mockGeneratePageStructuredData,
 } = vi.hoisted(() => ({
   mockGetFontClassNames: vi.fn(() => ""),
   mockSetRequestLocale: vi.fn(),
   mockNotFound: vi.fn(),
+  mockRootLocale: vi.fn(async () => "en"),
   mockGenerateLocaleMetadata: vi.fn(),
   mockGeneratePageStructuredData: vi.fn(),
 }));
@@ -46,6 +48,10 @@ vi.mock("next-intl", () => ({
 
 vi.mock("next/navigation", () => ({
   notFound: mockNotFound,
+}));
+
+vi.mock("next/root-params", () => ({
+  locale: mockRootLocale,
 }));
 
 vi.mock("@/components/navigation/navigation-progress-bar", () => ({
@@ -130,6 +136,7 @@ describe("LocaleLayout", () => {
     cleanup();
     vi.clearAllMocks();
     mockGetFontClassNames.mockReturnValue("");
+    mockRootLocale.mockResolvedValue("en");
     mockGeneratePageStructuredData.mockResolvedValue({
       organizationData: { "@type": "Organization" },
       websiteData: { "@type": "WebSite" },
@@ -149,6 +156,8 @@ describe("LocaleLayout", () => {
   // 退役 locale 规则是两件事。没有这条，把 layout 里的 `if (!isLocale(locale))`
   // 整段删掉，这个文件的其他用例照样全绿——它们只传 "en"。
   it("rejects an invalid locale before rendering the shell", async () => {
+    mockRootLocale.mockResolvedValue("fr");
+
     await expect(
       LocaleLayout({
         children: <div>Child</div>,

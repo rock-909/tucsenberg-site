@@ -18,18 +18,21 @@ interface RequestConfigResult {
   };
   strictMessageTypeSafety: boolean;
   messages: unknown;
-  metadata: {
-    loadTime?: number;
-  };
 }
 
-const { mockGetRequestConfig, mockLoadCompleteMessages } = vi.hoisted(() => ({
-  mockGetRequestConfig: vi.fn(),
-  mockLoadCompleteMessages: vi.fn(),
-}));
+const { mockGetRequestConfig, mockLoadCompleteMessages, mockRootLocale } =
+  vi.hoisted(() => ({
+    mockGetRequestConfig: vi.fn(),
+    mockLoadCompleteMessages: vi.fn(),
+    mockRootLocale: vi.fn(),
+  }));
 
 vi.mock("next-intl/server", () => ({
   getRequestConfig: mockGetRequestConfig,
+}));
+
+vi.mock("next/root-params", () => ({
+  locale: mockRootLocale,
 }));
 
 vi.mock("@/lib/i18n/load-messages", () => ({
@@ -43,14 +46,13 @@ describe("i18n Request Configuration", () => {
     mockLoadCompleteMessages.mockResolvedValue({
       common: { loading: "Loading..." },
     });
+    mockRootLocale.mockResolvedValue(EN_LOCALE);
   });
 
   async function runConfig(
     requestLocale: string | null,
   ): Promise<RequestConfigResult> {
-    let captured:
-      | ((args: { requestLocale: Promise<string | null> }) => Promise<unknown>)
-      | undefined;
+    let captured: (() => Promise<unknown>) | undefined;
 
     mockGetRequestConfig.mockImplementation((fn) => {
       captured = fn;
@@ -63,9 +65,8 @@ describe("i18n Request Configuration", () => {
       throw new Error("getRequestConfig callback was not captured");
     }
 
-    return (await captured({
-      requestLocale: Promise.resolve(requestLocale),
-    })) as RequestConfigResult;
+    mockRootLocale.mockResolvedValue(requestLocale);
+    return (await captured()) as RequestConfigResult;
   }
 
   it("registers a getRequestConfig callback", async () => {
@@ -93,19 +94,6 @@ describe("i18n Request Configuration", () => {
     const result = await runConfig(null);
 
     expect(result.locale).toBe(LOCALES_CONFIG.defaultLocale);
-  });
-
-  it("returns message load time in metadata", async () => {
-    const performanceNowSpy = vi
-      .spyOn(globalThis.performance, "now")
-      .mockReturnValueOnce(100)
-      .mockReturnValueOnce(200);
-
-    const result = await runConfig(LOCALES_CONFIG.defaultLocale);
-
-    expect(result.metadata.loadTime).toBe(100);
-
-    performanceNowSpy.mockRestore();
   });
 
   it("surfaces deterministic message load failures without retrying", async () => {

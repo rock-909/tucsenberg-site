@@ -59,10 +59,8 @@ const nextConfig: NextConfig = {
 
   /* config options here */
 
-  // Production code has no required "use cache" boundary. Keep Cache Components
-  // disabled because the bound OpenNext/Workerd path hung under concurrent requests.
-  // Content updates continue to flow through redeploys.
-  // See open-next.config.ts and wrangler.jsonc: no R2/D1/DO cache stack.
+  // Cache Components requires a real OpenNext incremental/tag cache stack.
+  // Keep it off until the R2/DO lane has isolated runtime and concurrency proof.
   cacheComponents: false,
 
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
