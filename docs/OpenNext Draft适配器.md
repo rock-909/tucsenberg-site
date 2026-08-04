@@ -4,6 +4,11 @@
 Components 适配器，以及后续如何跟踪、升级和回滚。代码、lockfile、Cloudflare
 binding 和实时 PR 状态优先于本文档中的时间点快照。
 
+本文档是 `docs/README.md` 中“不得长期维护提交快照”规则的受控例外。日期快照只说明
+当时为什么批准固定 commit，不自动批准后续部署或升级。每次触发下文的重新检查条件
+时，都要查询实时来源并同步更新本节；无法确认时继续使用最后一个已验证 commit，不
+根据旧快照推断上游现状。
+
 ## 当前决定
 
 生产环境接受 OpenNext PR #1318 的受控风险，并启用：
@@ -70,6 +75,29 @@ Cache Components 会先发送动态路由的静态 shell。如果路由开始流
 `200`。当前产品目录是有限 slug 集合，因此 `src/middleware.ts` 会在流式输出前拦截
 不存在的产品 slug，直接返回真实 `404`。以后新增有限集合的动态公开路由时，也要
 明确验证第一次请求的状态码，不能只看页面内容或依赖 Playwright retry。
+
+## R2 预填充辅助 Worker
+
+`opennextjs-cloudflare deploy` 发布 Worker 前，会启动一个临时远程 Worker，把构建期
+生成的增量缓存写入 R2。这个上传辅助链路不等于线上应用 Worker：它失败时，先分别
+检查 R2 bucket、Wrangler 直接对象写入和已经部署的 Worker，不要直接判断整站缓存
+实现失效。
+
+2026-08-04 的 Preview 验收中，临时辅助 Worker 持续返回 HTTP 500，但同一账号通过
+`wrangler r2 object put --remote` 能正常写入同一 bucket。最终按 OpenNext 计算出的
+正式 cache key 写入全部 40 个构建缓存，再用 `OPEN_NEXT_DEPLOY=true wrangler deploy`
+发布同一构建产物，远端 smoke、R2/预取检查和未知产品 404 均通过。这证明当次故障在
+辅助上传路径，而不是 R2 binding 或应用运行时。
+
+再次遇到时按以下顺序处理：
+
+1. 确认目标环境指向正确 bucket，并用 Wrangler 直接写入一个本次构建的真实 cache
+   object；不要用无关临时 key 污染 bucket。
+2. 如果直接写入也失败，先处理网络、代理、凭据或 R2 服务问题，不发布。
+3. 如果只有辅助 Worker 失败，优先检查 OpenNext 后续版本或 PR 是否修复；生产部署可
+   使用 CLI 官方 `--rclone` 路径，前提是已配置并验证所需 R2 凭据。
+4. 手工写 cache key 再调用 Wrangler 只作为已验证构建的应急恢复，不做默认发布链；
+   必须记录固定 commit、Worker Version ID、写入数量和完整远端 smoke 结果。
 
 ## 为什么可以接受当前风险
 
