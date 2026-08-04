@@ -64,6 +64,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
 
+  // Compile all eligible components and hooks; Turbopack runs the native Rust
+  // transform selected below instead of the Babel/Node.js implementation.
+  reactCompiler: true,
+
   // Keep HTTP compression enabled for `next start` and self-hosted previews.
   compress: true,
 
@@ -99,6 +103,7 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    turbopackRustReactCompiler: true,
     // The TS7 CLI is exposed by a side-by-side package alias. Next only looks
     // for `typescript/bin/tsc`, so its internal checker must keep using TS6.
     // Project type-check scripts still run the TS7 `tsc` binary explicitly.
