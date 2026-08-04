@@ -1,8 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DynamicImportModule } from "@/test/test-types";
+import { SITE_CONFIG } from "@/config/paths/site-config";
 import type { ResendService as ResendServiceInstance } from "../resend-core";
 
 type ResendServiceConstructor = new () => ResendServiceInstance;
+
+const { mockRuntimeEnv } = vi.hoisted(() => ({
+  mockRuntimeEnv: {
+    RESEND_API_KEY: "test-resend-key",
+    EMAIL_FROM: "test@example.com",
+    EMAIL_REPLY_TO: "reply@example.com",
+    NODE_ENV: "test",
+  } as Record<string, string | undefined>,
+}));
 
 const mockResendSend = vi.fn();
 const mockResendCtorCalls = vi.fn();
@@ -20,24 +29,11 @@ vi.mock("@/lib/email/resend-http-client", () => ({
 }));
 
 vi.mock("@/lib/env", () => {
-  const env = {
-    RESEND_API_KEY: "test-resend-key",
-    EMAIL_FROM: "test@example.com",
-    EMAIL_REPLY_TO: "reply@example.com",
-    NODE_ENV: "test",
-  };
-
   return {
-    env,
-    runtimeEnv: env,
+    env: mockRuntimeEnv,
+    runtimeEnv: mockRuntimeEnv,
     getRuntimeEnvString: (key: string) => {
-      const runtimeEnv = {
-        RESEND_API_KEY: "test-resend-key",
-        EMAIL_FROM: "test@example.com",
-        EMAIL_REPLY_TO: "reply@example.com",
-        NODE_ENV: "test",
-      } as const;
-      return runtimeEnv[key as keyof typeof runtimeEnv] ?? "";
+      return mockRuntimeEnv[key] ?? "";
     },
     getRuntimeEnvBoolean: () => false,
     getRuntimeNodeEnv: () => "test",
@@ -51,17 +47,21 @@ vi.mock("@/lib/logger", async () => {
   return mockLogger;
 });
 
-const setupResendTest = async (): Promise<ResendServiceConstructor> => {
+const setupResendTest = async (
+  envOverrides: Partial<Record<string, string | undefined>> = {},
+): Promise<ResendServiceConstructor> => {
   mockResendSend.mockReset();
   mockResendCtorCalls.mockClear();
+  Object.assign(mockRuntimeEnv, {
+    RESEND_API_KEY: "test-resend-key",
+    EMAIL_FROM: "test@example.com",
+    EMAIL_REPLY_TO: "reply@example.com",
+    NODE_ENV: "test",
+  });
+  Object.assign(mockRuntimeEnv, envOverrides);
 
-  const module = await import("../resend-core");
-  const typedModule = module as DynamicImportModule;
-  const ResendService = typedModule.ResendService ?? typedModule.default;
-  if (typeof ResendService !== "function") {
-    throw new Error("ResendService class 未找到，无法执行测试");
-  }
-  return ResendService as unknown as ResendServiceConstructor;
+  const { ResendService } = await import("../resend-core");
+  return ResendService;
 };
 
 describe("resend - Service Initialization", () => {
@@ -80,6 +80,36 @@ describe("resend - Service Initialization", () => {
     expect(service.isReady()).toBe(true);
     expect(mockResendCtorCalls).toHaveBeenCalledWith("test-resend-key");
     expect(typeof service.sendProductInquiryEmail).toBe("function");
+  });
+
+  it("falls back to the site contact email when email env is absent", async () => {
+    ResendServiceClass = await setupResendTest({
+      EMAIL_FROM: undefined,
+      EMAIL_REPLY_TO: undefined,
+    });
+
+    const service = new ResendServiceClass();
+    mockResendSend.mockResolvedValue({
+      data: { id: "product-inquiry-id" },
+      error: null,
+    });
+
+    await service.sendProductInquiryEmail({
+      referenceId: "PRO-abc123-deadbeef",
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane.smith@example.com",
+      productName: "Enterprise Widget",
+      requirements: "Need bulk pricing",
+    });
+
+    const payload = mockResendSend.mock.calls[0]?.[0];
+    expect(payload).toEqual(
+      expect.objectContaining({
+        from: SITE_CONFIG.contact.email,
+        to: [SITE_CONFIG.contact.email],
+      }),
+    );
   });
 });
 

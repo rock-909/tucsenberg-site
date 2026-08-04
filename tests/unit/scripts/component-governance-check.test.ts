@@ -8,9 +8,9 @@ import {
   registry,
 } from "./component-governance-check.helpers";
 
-const focusedComponentGovernance = require("../../../scripts/quality/checks/component-governance.js");
-const starterChecksFacade = require("../../../scripts/starter-checks.js");
-const { collectComponentGovernanceFindings } = starterChecksFacade;
+const {
+  collectComponentGovernanceFindings,
+} = require("../../../scripts/quality/checks/component-governance.js");
 
 describe("component-governance-check", () => {
   const fixtureRoots: string[] = [];
@@ -19,15 +19,6 @@ describe("component-governance-check", () => {
     for (const rootDir of fixtureRoots.splice(0)) {
       moveFixtureToTrash(rootDir);
     }
-  });
-
-  it("keeps starter-checks component governance exports wired to the focused module", () => {
-    expect(starterChecksFacade.collectComponentGovernanceFindings).toBe(
-      focusedComponentGovernance.collectComponentGovernanceFindings,
-    );
-    expect(starterChecksFacade.runComponentGovernanceCli).toBe(
-      focusedComponentGovernance.runComponentGovernanceCli,
-    );
   });
 
   it("passes valid primitive registry without warning on business components that lack stories", () => {
@@ -148,16 +139,13 @@ describe("component-governance-check", () => {
     expectFinding(result.errors, "registry-story-invalid");
   });
 
-  it("fails when a registry item is missing agent selection metadata", () => {
+  it("fails when a registry item is missing source-truth metadata", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/component-governance.registry.json": registry({
           button: {
             story: "required",
             radixLayer: "primitive",
-            surface: "control",
-            clientBoundary: "server-safe",
-            useWhen: "Use for CTAs and clickable actions.",
           },
         }),
       }),
@@ -167,20 +155,17 @@ describe("component-governance-check", () => {
     const result = collectComponentGovernanceFindings(rootDir);
 
     expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-field-missing");
+    expectFinding(result.errors, "registry-source-field-missing");
   });
 
-  it("fails when a registry item uses invalid agent selection metadata", () => {
+  it("fails when a registry item uses invalid source-truth metadata", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/component-governance.registry.json": registry({
           button: {
             story: "required",
             radixLayer: "vendor",
-            surface: "control",
             clientBoundary: "server-safe",
-            useWhen: "Use for CTAs and clickable actions.",
-            avoidWhen: "Do not handwrite button styling in pages.",
           },
         }),
       }),
@@ -190,10 +175,10 @@ describe("component-governance-check", () => {
     const result = collectComponentGovernanceFindings(rootDir);
 
     expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-field-invalid");
+    expectFinding(result.errors, "registry-source-field-invalid");
   });
 
-  it("passes when a registry item includes valid agent selection metadata", () => {
+  it("passes when a registry item includes valid source-truth metadata", () => {
     const rootDir = createFixture(
       baseFiles({
         "src/components/component-governance.registry.json": registry({
@@ -227,7 +212,7 @@ describe("component-governance-check", () => {
     const result = collectComponentGovernanceFindings(rootDir);
 
     expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-source-mismatch");
+    expectFinding(result.errors, "registry-source-mismatch");
   });
 
   it("fails when registry radixLayer drifts from wrapper source", () => {
@@ -248,7 +233,7 @@ describe("component-governance-check", () => {
     const result = collectComponentGovernanceFindings(rootDir);
 
     expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-source-mismatch");
+    expectFinding(result.errors, "registry-source-mismatch");
   });
 
   it("fails when a required primitive story file is missing", () => {
@@ -310,7 +295,7 @@ describe("component-governance-check", () => {
     const result = collectComponentGovernanceFindings(rootDir);
 
     expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-agent-source-mismatch");
+    expectFinding(result.errors, "registry-source-mismatch");
     expectFinding(
       result.errors,
       "radix-import-outside-ui",
@@ -566,10 +551,7 @@ describe("component-governance-check", () => {
         dialog: {
           story: "required",
           radixLayer: "primitive",
-          surface: "control",
           clientBoundary: "server-safe",
-          useWhen: "Use for governed modal interactions.",
-          avoidWhen: "Do not use for ordinary page layout.",
         },
       }),
       "src/components/ui/dialog.tsx":
@@ -597,10 +579,7 @@ describe("component-governance-check", () => {
           input: {
             story: "required",
             radixLayer: "local",
-            surface: "form",
             clientBoundary: "server-safe",
-            useWhen: "Use for ordinary text entry controls.",
-            avoidWhen: "Do not use for multiline text entry.",
           },
         }),
       }),

@@ -10,13 +10,7 @@
  * - Responsive design (bottom bar on mobile, floating on desktop)
  * - CSS variable coordination with floating elements (--cookie-banner-height)
  */
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -136,33 +130,25 @@ export function CookieBanner({ className }: CookieBannerProps) {
   const manageButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const preferencesPanelRef = useRef<HTMLFieldSetElement>(null);
-  const closePreferencesPanel = useCallback(() => {
+  const closePreferencesPanel = () => {
     setShowPreferences(false);
     requestAnimationFrame(() => manageButtonRef.current?.focus());
-  }, []);
+  };
   const closePreferencesPanelFromEffect = useEffectEvent(closePreferencesPanel);
-  const openPreferencesPanel = useCallback(() => {
+  const openPreferencesPanel = () => {
     setShowPreferences(true);
     requestAnimationFrame(() => closeButtonRef.current?.focus());
-  }, []);
+  };
 
   useCookieBannerHeightSync(bannerRef, hasConsented);
 
   // Cookie preference panel state: keep category toggles and save/cancel
   // behavior together so derived projects can replace the panel without
   // touching storage.
-  const handleSavePreferences = useCallback(() => {
+  const handleSavePreferences = () => {
     savePreferences({ analytics, marketing });
     closePreferencesPanel();
-  }, [analytics, marketing, closePreferencesPanel, savePreferences]);
-
-  const handleAcceptAll = useCallback(() => {
-    acceptAll();
-  }, [acceptAll]);
-
-  const handleRejectAll = useCallback(() => {
-    rejectAll();
-  }, [rejectAll]);
+  };
 
   // Cookie banner keyboard behavior: keep focus trapping and Escape handling in
   // this block until the banner is split into smaller tested units.
@@ -204,7 +190,7 @@ export function CookieBanner({ className }: CookieBannerProps) {
       aria-modal="false"
       aria-label={t("title")}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-[100] duration-300 animate-in slide-in-from-bottom",
+        "fixed inset-x-0 bottom-0 z-[100] transition-[opacity,transform] duration-300 animate-in slide-in-from-bottom",
         "border-t bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80",
         "shadow-lg",
         className,
@@ -213,12 +199,11 @@ export function CookieBanner({ className }: CookieBannerProps) {
       <div className="mx-auto max-w-[1080px] px-6 py-4">
         <MainBanner
           t={t}
-          onAcceptAll={handleAcceptAll}
-          onRejectAll={handleRejectAll}
+          onAcceptAll={acceptAll}
+          onRejectAll={rejectAll}
           onManage={openPreferencesPanel}
           manageButtonRef={manageButtonRef}
           showPreferences={showPreferences}
-          hidden={showPreferences}
         />
         {showPreferences ? (
           <PreferencesPanel
@@ -245,7 +230,6 @@ interface MainBannerProps {
   onManage: () => void;
   manageButtonRef: React.RefObject<HTMLButtonElement | null>;
   showPreferences: boolean;
-  hidden: boolean;
 }
 
 function MainBanner({
@@ -255,13 +239,12 @@ function MainBanner({
   onManage,
   manageButtonRef,
   showPreferences,
-  hidden,
 }: MainBannerProps) {
   return (
     <div
       className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      hidden={hidden}
-      inert={hidden}
+      hidden={showPreferences}
+      inert={showPreferences}
     >
       <div className="flex-1 space-y-2">
         <p className="text-sm font-medium text-foreground">{t("title")}</p>
@@ -338,7 +321,7 @@ function PreferencesPanel({
   return (
     <fieldset
       ref={panelRef}
-      className="space-y-4 border-0 p-0 duration-200 ease-out animate-in fade-in-0 slide-in-from-bottom-2"
+      className="space-y-4 border-0 p-0 transition-[opacity,transform] duration-200 ease-out animate-in fade-in-0 slide-in-from-bottom-2"
       id={COOKIE_PREFERENCES_PANEL_ID}
       aria-label={t("preferences.title")}
       data-panel-reveal="cookie-preferences"

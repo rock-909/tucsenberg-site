@@ -8,7 +8,6 @@ const {
   getReleaseVerifyCommands,
 } = require("../release-proof-manifest");
 
-const RELEASE_E2E_PORT = 3000;
 const LOCAL_E2E_HOSTS = ["127.0.0.1", "::1"];
 
 const RELEASE_PROOF_SEQUENCE = getReleaseProofSequence();
@@ -48,14 +47,6 @@ function runReleaseVerifyCommand(step, rootDir) {
   return result.status ?? 1;
 }
 
-function isPlaywrightReleaseStep(step) {
-  return (
-    step.command === "pnpm" &&
-    step.args.includes("playwright") &&
-    step.args.includes("test")
-  );
-}
-
 function parseWranglerDryRunGzipKiB(output) {
   const match = output.match(/gzip:\s*(\d+(?:\.\d+)?)\s*KiB/iu);
   if (!match?.[1]) return null;
@@ -89,10 +80,7 @@ function validateArtifactBudget(artifactBudget, output) {
   return 0;
 }
 
-async function isLocalPortInUse(
-  port = RELEASE_E2E_PORT,
-  hosts = LOCAL_E2E_HOSTS,
-) {
+async function isLocalPortInUse(port, hosts = LOCAL_E2E_HOSTS) {
   const results = await Promise.all(
     hosts.map(
       (host) =>
@@ -150,11 +138,11 @@ async function runReleaseVerify({
 
   console.log("== Release verification flow ==");
   for (const step of RELEASE_VERIFY_COMMANDS) {
-    if (isPlaywrightReleaseStep(step)) {
-      const blocked = await portInUse(RELEASE_E2E_PORT);
+    if (step.requiresFreePort) {
+      const blocked = await portInUse(step.requiresFreePort);
       if (blocked) {
         console.error(
-          "release-proof cannot start local E2E because localhost:3000 is already in use.",
+          `release-proof cannot start ${step.id} because localhost:${step.requiresFreePort} is already in use.`,
         );
         console.error(
           "Stop the existing local server and rerun pnpm release:verify.",
@@ -194,13 +182,11 @@ async function runReleaseVerify({
 
 module.exports = {
   LOCAL_E2E_HOSTS,
-  RELEASE_E2E_PORT,
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
   formatReleaseCommand,
   isLocalPortInUse,
-  isPlaywrightReleaseStep,
   isReleaseVerifyBlockedEnv,
   parseWranglerDryRunGzipKiB,
   runReleaseVerify,

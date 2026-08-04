@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { getAllMarketSlugs } from "@/constants/product-catalog";
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 import {
   getTucsenbergProductPage,
@@ -97,12 +96,11 @@ describe("Tucsenberg catalog copy is not bound to the current line count", () =>
 describe("TB-BW height range has one owner", () => {
   it("feeds the product page, its metadata, and its diagram from the same value", () => {
     const page = TUCSENBERG_PRODUCT_PAGES["abs-flood-barriers"];
-    const meta = TUCSENBERG_PRODUCT_META["abs-flood-barriers"];
     const { label, minimumCm, maximumCm } = TB_BW_HEIGHT_RANGE;
 
     expect(page.proofStrip).toContain(`${label} heights`);
     expect(page.lead).toContain(`Heights from ${minimumCm} to ${maximumCm} cm`);
-    expect(meta.description).toContain(`${label} heights`);
+    expect(page.meta.description).toContain(`${label} heights`);
     expect(page.diagram.kind).toBe("boxwall");
     expect(
       page.diagram.kind === "boxwall" ? page.diagram.labels.heightRange : null,

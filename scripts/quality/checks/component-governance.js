@@ -15,27 +15,12 @@ const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
 const COMPONENT_GOVERNANCE_PRODUCTION_CONTENT_ROOTS = ["content/pages"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
 const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
-const COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS = [
+const COMPONENT_GOVERNANCE_SOURCE_TRUTH_FIELDS = [
   "radixLayer",
-  "surface",
   "clientBoundary",
-  "useWhen",
-  "avoidWhen",
 ];
-const COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES = {
+const COMPONENT_GOVERNANCE_SOURCE_TRUTH_ALLOWED_VALUES = {
   radixLayer: new Set(["primitive", "local"]),
-  surface: new Set([
-    "control",
-    "navigation",
-    "feedback",
-    "form",
-    "form-internal",
-    "data",
-    "narrative",
-    "layout",
-    "utility",
-    "theme",
-  ]),
   clientBoundary: new Set(["server-safe", "client"]),
 };
 const COMPONENT_GOVERNANCE_SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|css|mdx)$/;
@@ -173,53 +158,40 @@ function readRegistry(rootDir, errors) {
   }
 }
 
-function collectRegistryAgentMetadataFindings(
+function collectRegistrySourceTruthFieldFindings(
   componentName,
   component,
   errors,
 ) {
-  for (const field of COMPONENT_GOVERNANCE_AGENT_INDEX_FIELDS) {
+  for (const field of COMPONENT_GOVERNANCE_SOURCE_TRUTH_FIELDS) {
     if (!Object.prototype.hasOwnProperty.call(component, field)) {
       errors.push(
         createFinding(
           COMPONENT_GOVERNANCE_REGISTRY_PATH,
-          "registry-agent-field-missing",
-          `Registry item "${componentName}" must define "${field}" for agent component selection.`,
+          "registry-source-field-missing",
+          `Registry item "${componentName}" must define source-truth field "${field}".`,
         ),
       );
       continue;
     }
 
     const value = component[field];
-    const allowedValues =
-      COMPONENT_GOVERNANCE_AGENT_INDEX_ALLOWED_VALUES[field];
-
-    if (allowedValues) {
-      if (typeof value !== "string" || !allowedValues.has(value)) {
-        errors.push(
-          createFinding(
-            COMPONENT_GOVERNANCE_REGISTRY_PATH,
-            "registry-agent-field-invalid",
-            `Registry item "${componentName}" has invalid "${field}" value.`,
-          ),
-        );
-      }
-      continue;
-    }
-
-    if (typeof value !== "string" || value.trim().length < 12) {
+    if (
+      typeof value !== "string" ||
+      !COMPONENT_GOVERNANCE_SOURCE_TRUTH_ALLOWED_VALUES[field].has(value)
+    ) {
       errors.push(
         createFinding(
           COMPONENT_GOVERNANCE_REGISTRY_PATH,
-          "registry-agent-field-invalid",
-          `Registry item "${componentName}" must define a useful "${field}" sentence.`,
+          "registry-source-field-invalid",
+          `Registry item "${componentName}" has invalid "${field}" value.`,
         ),
       );
     }
   }
 }
 
-function collectRegistryAgentSourceTruthFindings(
+function collectRegistrySourceTruthMismatchFindings(
   rootDir,
   componentName,
   component,
@@ -252,7 +224,7 @@ function collectRegistryAgentSourceTruthFindings(
       errors.push(
         createFinding(
           COMPONENT_GOVERNANCE_REGISTRY_PATH,
-          "registry-agent-source-mismatch",
+          "registry-source-mismatch",
           `Registry item "${componentName}" has ${check.field} "${component[check.field]}", but wrapper source expects "${check.expected}". ${check.detail}`,
         ),
       );
@@ -331,8 +303,8 @@ function collectRegistryFindings(rootDir, registry, errors) {
       continue;
     }
 
-    collectRegistryAgentMetadataFindings(componentName, component, errors);
-    collectRegistryAgentSourceTruthFindings(
+    collectRegistrySourceTruthFieldFindings(componentName, component, errors);
+    collectRegistrySourceTruthMismatchFindings(
       rootDir,
       componentName,
       component,

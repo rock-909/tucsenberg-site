@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   collectContentReadinessFindings,
+  collectReadinessScanFiles,
   runContentReadinessCheck,
-} from "../../../scripts/starter-checks.js";
-import { collectReadinessScanFiles } from "../../../scripts/quality/checks/content-readiness.js";
+} from "../../../scripts/quality/checks/content-readiness.js";
 
 interface FindingShape {
   file: string;

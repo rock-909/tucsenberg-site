@@ -28,21 +28,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Placeholder: Story = {};
 
-export const Compact: Story = {
-  args: {
-    size: "compact",
-  },
-};
-
-export const DarkTheme: Story = {
-  args: {
-    theme: "dark",
-  },
-  parameters: {
-    backgrounds: { default: "Dark" },
-  },
-};
-
 export const StorybookFallback: Story = {
   render: () => (
     <div className="w-[320px] rounded-md border border-border p-4">
@@ -51,7 +36,6 @@ export const StorybookFallback: Story = {
         onError={storyStatusHandler}
         onExpire={storyStatusHandler}
         labels={storyTurnstileLabels}
-        id="storybook-turnstile-fallback"
       />
       <p className="mt-3 text-sm text-muted-foreground">
         If a site key is not configured, or the widget stays silent for 15

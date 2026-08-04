@@ -16,7 +16,7 @@ import {
   shouldValidateProductionRuntimeContract,
   validateProductionConfig,
   validateProductionRuntimeContract,
-} from "../../../scripts/starter-checks.js";
+} from "../../../scripts/quality/checks/production-config.js";
 
 function createChildEnv(
   overrides: Record<string, string | undefined>,

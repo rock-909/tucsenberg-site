@@ -58,7 +58,6 @@
           "src/config/site-types.ts",
           "src/lib/cookie-consent/types.ts",
           "src/lib/cookie-consent/index.ts",
-          "src/test/test-types.ts",
           "src/types/content.types.ts"
         ],
         "rules": ["knip/types"]

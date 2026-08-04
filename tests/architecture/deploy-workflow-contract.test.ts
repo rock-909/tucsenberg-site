@@ -13,6 +13,7 @@ interface DeployWorkflow {
       readonly needs?: string | readonly string[];
       readonly "continue-on-error"?: boolean;
       readonly steps?: readonly {
+        readonly id?: string;
         readonly if?: string;
         readonly name?: string;
         readonly run?: string;
@@ -55,11 +56,17 @@ describe("Cloudflare deploy workflow contract", () => {
       steps,
       "content-readiness --strict-client-launch",
     );
-    const deploy = findStepIndex(steps, "opennextjs-cloudflare deploy");
+    const deploy = steps.findIndex((step) => step.id === "deploy_production");
+    const deployStep = steps[deploy];
 
     expect(configGate).toBeGreaterThanOrEqual(0);
     expect(contentGate).toBeGreaterThan(configGate);
     expect(deploy).toBeGreaterThan(contentGate);
+    expect(deployStep?.if).toContain("inputs.environment == 'production'");
+    expect(deployStep?.run).toContain(
+      "pnpm exec opennextjs-cloudflare deploy --env production",
+    );
+    expect(deployStep?.run).not.toContain("--env preview");
   });
 
   it("keeps post-deploy verification serialized after the deploy job", () => {
@@ -74,6 +81,26 @@ describe("Cloudflare deploy workflow contract", () => {
     expect(smokeStep?.run).toContain(
       "needs.build-and-deploy.outputs.deployment_url",
     );
+  });
+
+  it("keeps preview smoke free of production-only dependency installation", () => {
+    const workflow = loadDeployWorkflow();
+    const buildSteps = workflowSteps(workflow, "build-and-deploy");
+    const dependencyInstall = buildSteps.find((step) =>
+      step.run?.includes("pnpm install --frozen-lockfile"),
+    );
+    const browserInstall = buildSteps.find((step) =>
+      step.run?.includes("playwright install"),
+    );
+    const postDeploySteps = workflowSteps(workflow, "post-deploy-verification");
+
+    expect(dependencyInstall?.if).toContain(
+      "inputs.environment == 'production'",
+    );
+    expect(browserInstall?.if).toContain("inputs.environment == 'production'");
+    expect(
+      postDeploySteps.some((step) => step.run?.includes("pnpm install")),
+    ).toBe(false);
   });
 
   it("treats preview input as external smoke data, not deploy proof shell", () => {

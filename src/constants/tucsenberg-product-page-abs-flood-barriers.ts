@@ -1,10 +1,13 @@
-import { TUCSENBERG_PRODUCT_META } from "@/constants/tucsenberg-product-meta";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-types";
 import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 
 export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "abs-flood-barriers",
-  meta: TUCSENBERG_PRODUCT_META["abs-flood-barriers"],
+  meta: {
+    title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
+    description: `Freestanding ABS interlocking flood barriers, factory-direct from China. ${TB_BW_HEIGHT_RANGE.label} heights; straight, curve and gable-end units. Reply within 12 hours.`,
+    updatedAt: "2026-07-05T00:00:00Z",
+  },
   image: { status: "pending" },
   diagram: {
     kind: "boxwall",

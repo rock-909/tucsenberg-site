@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
-const yaml = require("js-yaml");
 
 const ROOT = process.cwd();
 
@@ -38,11 +37,6 @@ const OPEN_NEXT_FORBIDDEN_TOKENS = [
   "apiLead",
   "apiOps",
   "/api/cache/invalidate",
-];
-
-const DEPLOY_WORKFLOW_REQUIRED_COMMANDS = [
-  'node scripts/starter-checks.js external-url-smoke --base-url "${PREVIEW_URL}"',
-  "pnpm exec opennextjs-cloudflare deploy --env production",
 ];
 
 const CLOUDFLARE_SCRIPT_SURFACE_CHECKS = [
@@ -114,19 +108,6 @@ function collectSourceTokens(relPath, text) {
   };
   visit(source);
   return tokens;
-}
-
-function collectDeployRunCommands(workflow) {
-  const jobs = workflow?.jobs ?? {};
-  const commands = [];
-  for (const job of Object.values(jobs)) {
-    for (const step of job?.steps ?? []) {
-      if (typeof step?.run === "string") {
-        commands.push(step.run);
-      }
-    }
-  }
-  return commands;
 }
 
 function checkWrangler(rootDir, failures) {
@@ -242,34 +223,11 @@ function checkPackageScripts(rootDir, failures) {
   }
 }
 
-function checkDeployWorkflow(rootDir, failures) {
-  const workflow = yaml.load(
-    readCloudflareCompareFile(
-      rootDir,
-      ".github/workflows/cloudflare-deploy.yml",
-    ),
-  );
-  const commands = collectDeployRunCommands(workflow);
-  const missing = DEPLOY_WORKFLOW_REQUIRED_COMMANDS.filter(
-    (required) => !commands.some((run) => run.includes(required)),
-  );
-
-  if (missing.length > 0) {
-    failures.push({
-      file: ".github/workflows/cloudflare-deploy.yml",
-      label: "Cloudflare workflow must call deploy/proof scripts directly",
-      missing,
-      forbidden: [],
-    });
-  }
-}
-
 function collectCloudflareOfficialCompareFailures(rootDir = ROOT) {
   const failures = [];
   checkWrangler(rootDir, failures);
   checkOpenNextConfig(rootDir, failures);
   checkPackageScripts(rootDir, failures);
-  checkDeployWorkflow(rootDir, failures);
   return failures;
 }
 

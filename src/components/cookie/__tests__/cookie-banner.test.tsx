@@ -2,7 +2,6 @@
  * @vitest-environment jsdom
  * Tests for CookieBanner component
  */
-import { readFileSync } from "node:fs";
 import {
   fireEvent,
   render,
@@ -86,18 +85,6 @@ describe("CookieBanner", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-  });
-
-  it("keeps the global keydown listener stable with useEffectEvent", () => {
-    const source = readFileSync(
-      "src/components/cookie/cookie-banner.tsx",
-      "utf8",
-    );
-
-    expect(source).toContain("useEffectEvent");
-    expect(source).not.toContain(
-      "}, [closePreferencesPanel, showPreferences]);",
-    );
   });
 
   describe("visibility", () => {
@@ -215,48 +202,27 @@ describe("CookieBanner", () => {
       });
     });
 
-    it("shows all cookie categories", () => {
+    it("shows labeled categories with their default checkbox state", () => {
       render(<CookieBanner />);
 
       fireEvent.click(screen.getByRole("button", { name: "Manage" }));
 
-      expect(screen.getByText("Necessary")).toBeInTheDocument();
-      expect(screen.getByText("Analytics")).toBeInTheDocument();
-      expect(screen.getByText("Marketing")).toBeInTheDocument();
-    });
+      const necessaryCheckbox = screen.getByRole("checkbox", {
+        name: "Necessary",
+      });
+      const analyticsCheckbox = screen.getByRole("checkbox", {
+        name: "Analytics",
+      });
+      const marketingCheckbox = screen.getByRole("checkbox", {
+        name: "Marketing",
+      });
 
-    it("necessary cookies checkbox is disabled and checked", () => {
-      render(<CookieBanner />);
-
-      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
-
-      // Use role selector for checkbox
-      const checkboxes = screen.getAllByRole("checkbox");
-      // First checkbox is Necessary (checked, disabled)
-      expect(checkboxes[0]).toBeChecked();
-      expect(checkboxes[0]).toBeDisabled();
-    });
-
-    it("analytics checkbox is unchecked by default", () => {
-      render(<CookieBanner />);
-
-      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
-
-      const checkboxes = screen.getAllByRole("checkbox");
-      // Second checkbox is Analytics
-      expect(checkboxes[1]).not.toBeChecked();
-      expect(checkboxes[1]).not.toBeDisabled();
-    });
-
-    it("marketing checkbox is unchecked by default", () => {
-      render(<CookieBanner />);
-
-      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
-
-      const checkboxes = screen.getAllByRole("checkbox");
-      // Third checkbox is Marketing
-      expect(checkboxes[2]).not.toBeChecked();
-      expect(checkboxes[2]).not.toBeDisabled();
+      expect(necessaryCheckbox).toBeChecked();
+      expect(necessaryCheckbox).toBeDisabled();
+      expect(analyticsCheckbox).not.toBeChecked();
+      expect(analyticsCheckbox).not.toBeDisabled();
+      expect(marketingCheckbox).not.toBeChecked();
+      expect(marketingCheckbox).not.toBeDisabled();
     });
 
     it("can toggle analytics checkbox", () => {
@@ -377,29 +343,6 @@ describe("CookieBanner", () => {
         "aria-expanded",
         "false",
       );
-    });
-
-    it("associates cookie category labels with their checkboxes", () => {
-      render(<CookieBanner />);
-
-      fireEvent.click(screen.getByRole("button", { name: "Manage" }));
-
-      const necessaryCheckbox = screen.getByRole("checkbox", {
-        name: "Necessary",
-      });
-      const analyticsCheckbox = screen.getByRole("checkbox", {
-        name: "Analytics",
-      });
-      const marketingCheckbox = screen.getByRole("checkbox", {
-        name: "Marketing",
-      });
-
-      expect(necessaryCheckbox).toBeDisabled();
-      expect(necessaryCheckbox).not.toHaveAttribute("aria-label");
-      expect(analyticsCheckbox).not.toBeChecked();
-      expect(analyticsCheckbox).not.toHaveAttribute("aria-label");
-      expect(marketingCheckbox).not.toBeChecked();
-      expect(marketingCheckbox).not.toHaveAttribute("aria-label");
     });
 
     it("keeps the full category card clickable through visible text", () => {

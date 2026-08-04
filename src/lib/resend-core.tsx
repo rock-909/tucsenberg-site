@@ -5,18 +5,43 @@
 
 import "server-only";
 
+import { SITE_CONFIG } from "@/config/paths/site-config";
+import { EMAIL_COPY } from "@/emails/email-copy";
 import { env, getRuntimeEnvString } from "@/lib/env";
-import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
+import {
+  productInquiryEmailDataSchema,
+  type ProductInquiryEmailData,
+} from "@/lib/email/email-data-schema";
 import { ResendHttpEmailClient } from "@/lib/email/resend-http-client";
 import { buildProductInquiryEmailContent } from "@/lib/email/runtime-email-content";
 import { logger, sanitizeEmail } from "@/lib/logger";
 import {
-  EMAIL_CONFIG,
-  generateProductInquirySubject,
-  getProductInquiryTags,
-  sanitizeProductInquiryData,
-  validateProductInquiryData,
-} from "@/lib/resend-utils";
+  sanitizeMultilineText,
+  sanitizePlainText,
+} from "@/lib/security/validation";
+
+function sanitizeProductInquiryData(
+  data: ProductInquiryEmailData,
+): ProductInquiryEmailData {
+  return {
+    referenceId: data.referenceId,
+    firstName: sanitizePlainText(data.firstName),
+    lastName: sanitizePlainText(data.lastName),
+    email: data.email.toLowerCase().trim(),
+    productName: sanitizePlainText(data.productName),
+    requirements: data.requirements
+      ? sanitizeMultilineText(data.requirements)
+      : undefined,
+  };
+}
+
+function getProductInquiryTags(referenceId: string) {
+  return [
+    { name: "type", value: "product-inquiry" },
+    { name: "source", value: "website" },
+    { name: "reference-id", value: referenceId },
+  ];
+}
 
 export class ResendService {
   private resend: ResendHttpEmailClient | null = null;
@@ -24,7 +49,6 @@ export class ResendService {
   private emailConfig: {
     from: string;
     replyTo: string;
-    supportEmail: string;
   };
 
   constructor() {
@@ -40,9 +64,8 @@ export class ResendService {
   private readEmailConfig(): typeof this.emailConfig {
     const replyTo = this.readEmailEnv("EMAIL_REPLY_TO");
     return {
-      from: this.readEmailEnv("EMAIL_FROM") || EMAIL_CONFIG.from,
-      replyTo: replyTo || EMAIL_CONFIG.replyTo,
-      supportEmail: replyTo || EMAIL_CONFIG.supportEmail,
+      from: this.readEmailEnv("EMAIL_FROM") || SITE_CONFIG.contact.email,
+      replyTo: replyTo || SITE_CONFIG.contact.email,
     };
   }
 
@@ -90,17 +113,16 @@ export class ResendService {
     }
 
     try {
-      const validatedData = validateProductInquiryData(data);
+      const validatedData = productInquiryEmailDataSchema.parse(data);
       const sanitizedData = sanitizeProductInquiryData(validatedData);
 
-      const subject = generateProductInquirySubject(sanitizedData);
       const emailContent = buildProductInquiryEmailContent(sanitizedData);
 
       const result = await this.resend!.send({
         from: this.emailConfig.from,
         to: [this.emailConfig.replyTo],
         replyTo: sanitizedData.email,
-        subject,
+        subject: EMAIL_COPY.productInquiry.subject(sanitizedData),
         html: emailContent.html,
         text: emailContent.text,
         tags: getProductInquiryTags(sanitizedData.referenceId),

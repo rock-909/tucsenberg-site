@@ -49,10 +49,7 @@ export function moveFixtureToTrash(rootDir: string): void {
 export const VALID_BUTTON_REGISTRY_ITEM = {
   story: "required",
   radixLayer: "primitive",
-  surface: "control",
   clientBoundary: "server-safe",
-  useWhen: "Use for CTAs and clickable actions.",
-  avoidWhen: "Do not handwrite button styling in pages.",
 };
 
 export function registry(components: Record<string, unknown>): string {
