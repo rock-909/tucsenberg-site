@@ -76,8 +76,7 @@ is unavailable rather than relying on middleware-provided trusted IP headers.
   incremental cache. Keep Preview and Production on separate buckets using the
   `NEXT_INC_CACHE_R2_BUCKET` binding.
 - The temporary OpenNext dependency must stay pinned to the reviewed commit,
-  never the moving PR number. Follow `docs/OpenNext Draft适配器.md` for upstream
-  monitoring, upgrades, proof, and rollback.
+  never the moving PR number.
 - Do not add new production `"use cache"` boundaries without route-level cache
   behavior and deployed Cloudflare proof.
 - Content updates flow through rebuild/redeploy.
