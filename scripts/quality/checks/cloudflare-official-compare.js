@@ -38,10 +38,6 @@ const WRANGLER_FORBIDDEN_TOKENS = [
   "migrations",
 ];
 
-const OPEN_NEXT_REQUIRED_TOKENS = [
-  "defineCloudflareConfig",
-  "r2IncrementalCache",
-];
 const OPEN_NEXT_FORBIDDEN_TOKENS = [
   "doQueue",
   "d1NextTagCache",
@@ -122,6 +118,93 @@ function collectSourceTokens(relPath, text) {
   return tokens;
 }
 
+function hasOpenNextIncrementalCacheWiring(text) {
+  const source = ts.createSourceFile(
+    "open-next.config.ts",
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const configInitializers = new Map();
+  const defineCloudflareConfigImports = new Set();
+  const r2IncrementalCacheImports = new Set();
+
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier)
+    ) {
+      continue;
+    }
+    const moduleName = statement.moduleSpecifier.text;
+    const importClause = statement.importClause;
+    const namedBindings = importClause?.namedBindings;
+    if (
+      moduleName === "@opennextjs/cloudflare" &&
+      namedBindings &&
+      ts.isNamedImports(namedBindings)
+    ) {
+      const imported = namedBindings.elements.find(
+        (element) =>
+          (element.propertyName ?? element.name).text ===
+          "defineCloudflareConfig",
+      );
+      if (imported) {
+        defineCloudflareConfigImports.add(imported.name.text);
+      }
+    }
+    if (
+      moduleName ===
+        "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache" &&
+      importClause?.name
+    ) {
+      r2IncrementalCacheImports.add(importClause.name.text);
+    }
+  }
+
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+        configInitializers.set(declaration.name.text, declaration.initializer);
+      }
+    }
+  }
+
+  const isConfiguredCall = (node) => {
+    if (
+      !node ||
+      !ts.isCallExpression(node) ||
+      !ts.isIdentifier(node.expression) ||
+      !defineCloudflareConfigImports.has(node.expression.text)
+    ) {
+      return false;
+    }
+    const config = node.arguments[0];
+    if (!config || !ts.isObjectLiteralExpression(config)) return false;
+
+    return config.properties.some(
+      (property) =>
+        ts.isPropertyAssignment(property) &&
+        (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+        property.name.text === "incrementalCache" &&
+        ts.isIdentifier(property.initializer) &&
+        r2IncrementalCacheImports.has(property.initializer.text),
+    );
+  };
+
+  return source.statements.some((statement) => {
+    if (!ts.isExportAssignment(statement) || statement.isExportEquals) {
+      return false;
+    }
+    if (isConfiguredCall(statement.expression)) return true;
+    return (
+      ts.isIdentifier(statement.expression) &&
+      isConfiguredCall(configInitializers.get(statement.expression.text))
+    );
+  });
+}
+
 function checkWrangler(rootDir, failures) {
   const config = parseWranglerConfig(
     readCloudflareCompareFile(rootDir, "wrangler.jsonc"),
@@ -182,13 +265,11 @@ function checkWrangler(rootDir, failures) {
 }
 
 function checkOpenNextConfig(rootDir, failures) {
-  const tokens = collectSourceTokens(
-    "open-next.config.ts",
-    readCloudflareCompareFile(rootDir, "open-next.config.ts"),
-  );
-  const missing = OPEN_NEXT_REQUIRED_TOKENS.filter(
-    (token) => !tokens.has(token),
-  );
+  const text = readCloudflareCompareFile(rootDir, "open-next.config.ts");
+  const tokens = collectSourceTokens("open-next.config.ts", text);
+  const missing = hasOpenNextIncrementalCacheWiring(text)
+    ? []
+    : ["incrementalCache: r2IncrementalCache"];
   const forbidden = OPEN_NEXT_FORBIDDEN_TOKENS.filter((token) =>
     tokens.has(token),
   );
