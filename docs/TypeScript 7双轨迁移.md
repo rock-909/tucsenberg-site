@@ -99,30 +99,60 @@ pnpm view @typescript-eslint/parser@latest version peerDependencies --json
 
 在独立小 PR 中执行，不与 Next.js、OpenNext、ESLint 或 Storybook 大版本升级混在一起：
 
-1. 删除 `@typescript/native`；
-2. 把根 `typescript` 改为已批准的 TS7 正式版本；
-3. 删除 `experimental.useTypeScriptCli: false`，先使用 Next.js 默认 CLI checker；
+1. 保留当前双轨状态作为可随时恢复的基线；
+2. 在同一个迁移 PR 中，把根 `typescript` 切换为已批准的 TS7 正式版本，
+   同时删除只用于双轨的 `@typescript/native`；
+3. 将 `experimental.useTypeScriptCli` 显式改为 `true`，迁移验证阶段不依赖
+   Next.js 的默认值；
 4. 更新 lockfile，确认没有 peer dependency 强制或 unsupported warning；
 5. 把双轨架构合同改成单轨合同；
-6. 顺序执行完整验证。
+6. 顺序执行完整验证；
+7. 验证成功后，再单独决定是否删除显式的 `useTypeScriptCli: true`。
 
-验证命令：
+根 `typescript`、`@typescript/native`、`useTypeScriptCli` 和架构合同必须在一个迁移
+PR 中一起切换，不要把任意一项先合并成半完成状态。如果验证失败，整个
+迁移 PR 不合并，主分支继续使用已验证的双轨基线。
+
+### 本地迁移验证
+
+在 lockfile 更新后，从干净安装开始顺序执行：
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm type-check
-pnpm type-check:tests
-pnpm lint:check
+pnpm exec prettier --check package.json next.config.ts tests/architecture/next-config-contract.test.ts
+git diff --check
+pnpm website:check
+node scripts/starter-checks.js client-boundary --build-artifacts
 pnpm component:check
-pnpm exec vitest run
-pnpm build
-pnpm website:build:cf
 pnpm react:doctor
+pnpm website:build:cf
 pnpm release:verify
 ```
 
+`pnpm website:check` 已包含生产与测试 TypeScript、ESLint、Vitest 和普通
+Next build。`client-boundary --build-artifacts` 必须紧跟这次普通 build，在
+Cloudflare build 改写 `.next` 之前执行。`component:check` 覆盖组件治理和
+Storybook build；`release:verify` 是仓库统一的 release proof 入口。
+
+如果迁移 PR 同时修改文档，还要用 Prettier 检查对应 Markdown 文件，并逐项
+确认新增的内部引用指向已跟踪文件。仓库当前没有独立的 Markdown 链接检查
+脚本，不要把人工核对写成自动门禁。
+
 `pnpm build`、`pnpm website:build:cf` 和 Playwright webServer 共用 `.next`，不得并行。
-本地验证通过后仍要等待 PR CI，并在合并后确认 `main` CI。
+
+### PR CI 必须确认
+
+本地验证通过后，还要确认 PR CI 中的以下结果：
+
+- 基础质量：TypeScript、ESLint、内容与翻译、client-boundary、Storybook、
+  dependency-cruiser 和 Knip；
+- 单元与集成测试；
+- Semgrep 安全扫描；
+- Cloudflare 构建证明：普通 build、构建产物 client-boundary、OpenNext build 和
+  Cloudflare artifact 检查；
+- 浏览器冒烟和 CI 汇总。
+
+所有 PR 检查通过后才能合并，合并后还要确认 exact `main` SHA 的 CI。
 
 ## 不通过时怎么处理
 
