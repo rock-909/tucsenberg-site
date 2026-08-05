@@ -180,6 +180,35 @@ describe("Cloudflare official-compare source contract", () => {
     expect(failures).toEqual([]);
   });
 
+  it("rejects an imported R2 adapter that is not wired into the config", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingWranglerConfig(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "open-next.config.ts",
+      [
+        'import { defineCloudflareConfig } from "@opennextjs/cloudflare";',
+        'import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";',
+        "void r2IncrementalCache;",
+        "export default defineCloudflareConfig({});",
+        "",
+      ].join("\n"),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({
+        file: "open-next.config.ts",
+        missing: expect.arrayContaining([
+          "incrementalCache: r2IncrementalCache",
+        ]),
+      }),
+    ]);
+  });
+
   it("rejects a production environment without its dedicated R2 binding", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);
