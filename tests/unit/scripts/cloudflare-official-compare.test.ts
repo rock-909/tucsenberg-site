@@ -209,6 +209,34 @@ describe("Cloudflare official-compare source contract", () => {
     ]);
   });
 
+  it("rejects same-named local symbols instead of the OpenNext imports", () => {
+    const rootDir = createFixture();
+    writePassingSideFiles(rootDir);
+    writePassingWranglerConfig(rootDir);
+    writeFixtureFile(
+      rootDir,
+      "open-next.config.ts",
+      [
+        "const defineCloudflareConfig = (config: unknown) => config;",
+        "const r2IncrementalCache = {};",
+        "export default defineCloudflareConfig({ incrementalCache: r2IncrementalCache });",
+        "",
+      ].join("\n"),
+    );
+
+    const failures =
+      loadChecker().collectCloudflareOfficialCompareFailures(rootDir);
+
+    expect(failures).toEqual([
+      expect.objectContaining({
+        file: "open-next.config.ts",
+        missing: expect.arrayContaining([
+          "incrementalCache: r2IncrementalCache",
+        ]),
+      }),
+    ]);
+  });
+
   it("rejects a production environment without its dedicated R2 binding", () => {
     const rootDir = createFixture();
     writePassingSideFiles(rootDir);

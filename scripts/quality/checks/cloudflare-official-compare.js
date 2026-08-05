@@ -126,6 +126,41 @@ function hasOpenNextIncrementalCacheWiring(text) {
     true,
   );
   const configInitializers = new Map();
+  const defineCloudflareConfigImports = new Set();
+  const r2IncrementalCacheImports = new Set();
+
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier)
+    ) {
+      continue;
+    }
+    const moduleName = statement.moduleSpecifier.text;
+    const importClause = statement.importClause;
+    const namedBindings = importClause?.namedBindings;
+    if (
+      moduleName === "@opennextjs/cloudflare" &&
+      namedBindings &&
+      ts.isNamedImports(namedBindings)
+    ) {
+      const imported = namedBindings.elements.find(
+        (element) =>
+          (element.propertyName ?? element.name).text ===
+          "defineCloudflareConfig",
+      );
+      if (imported) {
+        defineCloudflareConfigImports.add(imported.name.text);
+      }
+    }
+    if (
+      moduleName ===
+        "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache" &&
+      importClause?.name
+    ) {
+      r2IncrementalCacheImports.add(importClause.name.text);
+    }
+  }
 
   for (const statement of source.statements) {
     if (!ts.isVariableStatement(statement)) continue;
@@ -141,7 +176,7 @@ function hasOpenNextIncrementalCacheWiring(text) {
       !node ||
       !ts.isCallExpression(node) ||
       !ts.isIdentifier(node.expression) ||
-      node.expression.text !== "defineCloudflareConfig"
+      !defineCloudflareConfigImports.has(node.expression.text)
     ) {
       return false;
     }
@@ -154,7 +189,7 @@ function hasOpenNextIncrementalCacheWiring(text) {
         (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
         property.name.text === "incrementalCache" &&
         ts.isIdentifier(property.initializer) &&
-        property.initializer.text === "r2IncrementalCache",
+        r2IncrementalCacheImports.has(property.initializer.text),
     );
   };
 
