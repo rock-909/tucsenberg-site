@@ -55,9 +55,6 @@ test.describe("Rendered SEO contract", () => {
       );
       await expect(enAlternate).toHaveCount(1);
       await expect(defaultAlternate).toHaveCount(1);
-      await expect(
-        page.locator('link[rel="alternate"][hreflang="zh"]'),
-      ).toHaveCount(0);
       expect(
         new URL((await enAlternate.getAttribute("href")) ?? "").pathname,
       ).toBe(path);

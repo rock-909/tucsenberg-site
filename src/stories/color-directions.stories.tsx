@@ -290,10 +290,8 @@ function SideBySide({ directions }: { directions: readonly ColorDirection[] }) {
                 Ready to start?
               </h3>
               <div className="mt-3 flex justify-center gap-2">
-                <Button variant="on-dark" size="sm">
-                  Get quote
-                </Button>
-                <Button variant="ghost-dark" size="sm">
+                <Button size="sm">Get quote</Button>
+                <Button variant="outline" size="sm">
                   Send drawing
                 </Button>
               </div>

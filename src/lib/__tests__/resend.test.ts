@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SITE_CONFIG } from "@/config/paths/site-config";
+import { SINGLE_SITE_CONFIG as SITE_CONFIG } from "@/config/single-site";
 import type { ResendService as ResendServiceInstance } from "../resend-core";
 
 type ResendServiceConstructor = new () => ResendServiceInstance;

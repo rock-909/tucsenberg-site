@@ -23,17 +23,18 @@ function formatReleaseCommand(step) {
 }
 
 function runReleaseVerifyCommand(step, rootDir) {
+  const captureOutput = Boolean(step.artifactBudget || step.forbiddenOutput);
   const result = spawnSync(step.command, step.args, {
     cwd: rootDir,
-    stdio: step.artifactBudget ? "pipe" : "inherit",
-    encoding: step.artifactBudget ? "utf8" : undefined,
+    stdio: captureOutput ? "pipe" : "inherit",
+    encoding: captureOutput ? "utf8" : undefined,
     env: {
       ...process.env,
       ...(step.env ?? {}),
     },
   });
 
-  if (step.artifactBudget) {
+  if (captureOutput) {
     const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
     process.stdout.write(result.stdout ?? "");
     process.stderr.write(result.stderr ?? "");
@@ -41,10 +42,26 @@ function runReleaseVerifyCommand(step, rootDir) {
     const status = result.status ?? 1;
     if (status !== 0) return status;
 
-    return validateArtifactBudget(step.artifactBudget, output);
+    return validateReleaseStepOutput(step, output);
   }
 
   return result.status ?? 1;
+}
+
+function validateReleaseStepOutput(step, output) {
+  if (
+    step.forbiddenOutput &&
+    output.toLowerCase().includes(step.forbiddenOutput.toLowerCase())
+  ) {
+    console.error(
+      `Release verification rejected ${step.id} output: found ${step.forbiddenOutput}.`,
+    );
+    return 1;
+  }
+
+  return step.artifactBudget
+    ? validateArtifactBudget(step.artifactBudget, output)
+    : 0;
 }
 
 function parseWranglerDryRunGzipKiB(output) {
@@ -152,15 +169,15 @@ async function runReleaseVerify({
     }
 
     const result = runCommand(step, rootDir);
+    const resultStatus =
+      typeof result === "number" ? result : (result.status ?? 1);
     const status =
-      typeof result === "number"
-        ? result
-        : (result.status ?? 1) === 0 && step.artifactBudget
-          ? validateArtifactBudget(
-              step.artifactBudget,
-              `${result.stdout ?? ""}\n${result.stderr ?? ""}`,
-            )
-          : (result.status ?? 1);
+      typeof result === "number" || resultStatus !== 0
+        ? resultStatus
+        : validateReleaseStepOutput(
+            step,
+            `${result.stdout ?? ""}\n${result.stderr ?? ""}`,
+          );
     if (status !== 0) return status;
   }
 
@@ -178,6 +195,18 @@ async function runReleaseVerify({
     "Public launch still requires strict config, deployed smoke, the Airtable write canary, separate owner receipt, and owner signoff.",
   );
   return 0;
+}
+
+if (require.main === module) {
+  runReleaseVerify().then(
+    (status) => {
+      process.exitCode = status;
+    },
+    (error) => {
+      console.error("[release-verify] Unexpected error:", error);
+      process.exitCode = 1;
+    },
+  );
 }
 
 module.exports = {

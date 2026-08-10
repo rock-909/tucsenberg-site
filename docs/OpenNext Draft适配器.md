@@ -1,8 +1,8 @@
-# OpenNext Cache Components Draft 适配器
+# OpenNext Cache Components 与 Node Proxy 临时适配器
 
-本文档记录当前生产环境为什么使用尚未正式发布的 OpenNext Cache
-Components 适配器，以及后续如何跟踪、升级和回滚。代码、lockfile、Cloudflare
-binding 和实时 PR 状态优先于本文档中的时间点快照。
+本文档记录当前生产环境为什么同时使用尚未正式发布的 OpenNext Cache
+Components 修复和 Node Proxy 修复，以及后续如何跟踪、升级和回滚。代码、lockfile、
+`patches/`、Cloudflare binding 和实时 PR 状态优先于本文档中的时间点快照。
 
 本文档是 `docs/README.md` 中“不得长期维护提交快照”规则的受控例外。日期快照只说明
 当时为什么批准固定 commit，不自动批准后续部署或升级。每次触发下文的重新检查条件
@@ -11,16 +11,19 @@ binding 和实时 PR 状态优先于本文档中的时间点快照。
 
 ## 当前决定
 
-生产环境接受 OpenNext PR #1318 的受控风险，并启用：
+生产环境接受 OpenNext PR #1318 和 PR #1309 的受控风险，并启用：
 
 - Next.js `cacheComponents`；
 - Partial Prefetching / Instant Navigations；
 - R2 Incremental Cache；
+- Next.js 16.3 `proxy.ts` Node runtime；
 - 独立的 Preview 和 Production R2 bucket。
 
-这不是无条件跟随 PR 最新代码。`package.json` 固定到已经验证过的 commit
+这不是无条件跟随 PR 最新代码。`package.json` 固定到 PR #1318 已经验证过的 commit
 `69807b1bd7acfafc87080656742f64a3e7470d62`，不使用会随 PR 更新的 `@1318`
-引用。任何新 commit 或正式版本都必须重新验证后才能采用。
+引用；`patches/@opennextjs__cloudflare@1.20.2.patch` 叠加 PR #1309 已发布预览包
+`f3bdab8740019d32c8ad09444eb607ec867fb64a` 的 Node Proxy bundler。任何新
+commit 或正式版本都必须重新验证后才能采用。
 
 ## 2026-08-04 状态快照
 
@@ -34,6 +37,26 @@ binding 和实时 PR 状态优先于本文档中的时间点快照。
 
 因此当前风险等级是 **中低、可管理**，不是生产 blocker。主要剩余风险是
 “尚未完成官方 review 和正式发布”，不是“当前实现没有通过验证”。
+
+## 2026-08-09 Node Proxy 状态快照
+
+- Next.js 16.3 的 `proxy.ts` 固定使用 Node.js runtime，不能配置成 Edge；
+- OpenNext 正式版 `1.20.2` 会检测 Node middleware 并中止构建；
+- PR #1309 标题为 `feat: support Node.js middleware (proxy.ts)`，状态为 Open，
+  当前仍需要 maintainer review；
+- PR #1309 当前 head 为 `0762b49cd20da05d4ca830f76bafce28a10a864e`；
+- `pkg.pr.new` 当前可下载的 `@1309` 预览包对应较早的已构建 commit
+  `f3bdab8740019d32c8ad09444eb607ec867fb64a`；后续 commit 只接受重新构建验证，
+  不根据 PR 编号自动跟随；
+- PR #1309 和 PR #1318 尚未进入同一个上游发布包，因此项目使用 pnpm patch
+  保留两个修复，而不是替换其中一个；
+- 本项目首次本地 Worker smoke 发现 Node middleware bundle 仍保留
+  `instrumentation.js` 动态 require，导致所有页面 500。项目补丁复用 OpenNext 已有的
+  `patchInstrumentation` 后，3 轮本地 Cloudflare smoke、RSC/PPR 和 404 全部通过。
+
+这条组合仍是临时 adapter fork。它比退回 deprecated `middleware.ts` 更符合当前
+Next.js 目标，但维护成本高于单一上游 commit；一旦正式包同时覆盖两个修复，应优先
+删除本地 patch。
 
 ## 这个适配器解决什么问题
 
@@ -51,6 +74,22 @@ Cache Components 在 Node.js 和 Cloudflare workerd 上的计时器、请求隔�
 这些补丁只在应用开启 Cache Components 时注册。如果未来 Next.js 输出结构变化、
 补丁无法匹配，OpenNext 会让构建直接失败，而不是悄悄发布一个未修补的 Worker。
 这是重要的 fail-closed 保护。
+
+## Node Proxy 补丁解决什么问题
+
+Next.js 16.3 把 `proxy.ts` 编译为外置 Node middleware。OpenNext `1.20.2` 原本按
+Node server 模型在运行时读取文件和动态 import middleware，但 workerd 没有相同的
+文件系统和动态模块加载能力。PR #1309 在构建期把 middleware、Turbopack chunks、
+manifest 和 Node builtin 兼容层打进自包含的 `middleware/handler.mjs`。
+
+项目补丁只做两件事：
+
+1. 把 PR #1309 的已发布 bundler 叠加到固定的 PR #1318 包；
+2. 在 Node middleware bundler 中复用 OpenNext 已有的 `patchInstrumentation`，消除
+   当前项目实测触发的动态 `instrumentation.js` require。
+
+不要在应用代码里绕过这个错误，也不要只删除 OpenNext 的 Node middleware guard。
+只有 build、Wrangler dry-run 和真实 workerd smoke 同时通过，才算兼容路径成立。
 
 ## 当前项目配置
 
@@ -72,7 +111,7 @@ HTML、无 JavaScript fallback 和布局稳定性优先于 Instant Navigation。
 
 Cache Components 会先发送动态路由的静态 shell。如果路由开始流式输出后才调用
 `notFound()`，页面会显示 not-found UI 和 `noindex`，但 HTTP 状态可能已经固定为
-`200`。当前产品目录是有限 slug 集合，因此 `src/middleware.ts` 会在流式输出前拦截
+`200`。当前产品目录是有限 slug 集合，因此 `src/proxy.ts` 会在流式输出前拦截
 不存在的产品 slug，直接返回真实 `404`。以后新增有限集合的动态公开路由时，也要
 明确验证第一次请求的状态码，不能只看页面内容或依赖 Playwright retry。
 
@@ -115,11 +154,15 @@ Cache Components 会先发送动态路由的静态 shell。如果路由开始流
 - PR 尚未正式合并，maintainer review 可能要求修改；
 - 临时包由 `pkg.pr.new` 分发，不具备正式 npm release 的长期承诺；
 - 补丁依赖 Next.js 构建产物的内部结构，因此升级 Next.js 时必须重新构建验证；
+- Node Proxy 支持仍是 PR #1309 的实验实现，本项目还维护一份 pnpm patch；
+- PR #1309 预览包没有覆盖本项目触发的 instrumentation 动态加载路径；
 - 原始并发故障依赖 timing，测试能大幅降低风险，但不能数学上证明永不发生。
 
 ## 必须关注的上游入口
 
 - PR #1318：`https://github.com/opennextjs/opennextjs-cloudflare/pull/1318`
+- PR #1309：`https://github.com/opennextjs/opennextjs-cloudflare/pull/1309`
+- adapters-api Node middleware PR #38：`https://github.com/opennextjs/adapters-api/pull/38`
 - OpenNext releases：`https://github.com/opennextjs/opennextjs-cloudflare/releases`
 - OpenNext changelog：`https://opennext.js.org/cloudflare/changelog`
 - Next.js 16.3 release：`https://nextjs.org/blog/next-16-3`
@@ -129,6 +172,7 @@ Cache Components 会先发送动态路由的静态 shell。如果路由开始流
 在以下任一事件发生时重新检查：
 
 - PR #1318 head commit 改变；
+- PR #1309 head commit 改变；
 - PR 被合并或关闭；
 - OpenNext 发布新 patch/minor；
 - Next.js 升级；
@@ -144,6 +188,9 @@ Cache Components 会先发送动态路由的静态 shell。如果路由开始流
 gh pr view 1318 --repo opennextjs/opennextjs-cloudflare \
   --json isDraft,state,mergeStateStatus,reviewDecision,headRefOid,updatedAt
 gh pr checks 1318 --repo opennextjs/opennextjs-cloudflare
+gh pr view 1309 --repo opennextjs/opennextjs-cloudflare \
+  --json isDraft,state,mergeStateStatus,reviewDecision,headRefOid,updatedAt
+gh pr checks 1309 --repo opennextjs/opennextjs-cloudflare
 ```
 
 查看正式版本：
@@ -156,7 +203,8 @@ gh api repos/opennextjs/opennextjs-cloudflare/releases/latest \
 检查项目仍然固定在已批准 commit，且两个环境都有独立 R2：
 
 ```bash
-node scripts/starter-checks.js cf-official-compare
+node scripts/quality/checks/cloudflare-official-compare.js
+pnpm install --frozen-lockfile
 pnpm exec wrangler r2 bucket list
 ```
 
@@ -176,6 +224,10 @@ lockfile，并执行本文档的完整验证。
 
 把临时 URL 替换为正式 semver，更新 lockfile，并重新执行完整验证。确认正式包通过
 后，更新本文档状态快照和 `cf-official-compare` 中的依赖合同。
+
+只有正式 release 同时支持 Cache Components 和 Node Proxy，才能删除
+`patches/@opennextjs__cloudflare@1.20.2.patch`。如果只包含其中一个修复，继续保留
+另一个已验证层，不要为了换成 semver 丢失运行时保护。
 
 ### PR 被关闭且没有合并
 
@@ -201,7 +253,7 @@ pnpm exec vitest run
 pnpm build
 pnpm website:build:cf
 pnpm react:doctor
-node scripts/starter-checks.js cf-official-compare
+node scripts/quality/checks/cloudflare-official-compare.js
 pnpm exec wrangler deploy --dry-run --env production
 ```
 
@@ -216,8 +268,10 @@ R2 bucket。缓存数据可以保留，回滚不依赖清空 R2。
 
 如果必须从代码回滚：
 
-1. 恢复正式 OpenNext 版本；
-2. 移除 `r2IncrementalCache`；
-3. 关闭 `partialPrefetching` 和 `cacheComponents`；
-4. 顺序重跑 Next/OpenNext build 和 deployed smoke；
-5. R2 binding 可以暂时保留，不需要为回滚删除 bucket。
+1. 如果只是 Node Proxy 补丁故障，恢复上一个 Worker version；代码侧只有在临时退回
+   `middleware.ts` 或正式 OpenNext 已支持 Node Proxy 后，才能移除 pnpm patch；
+2. 如果 Cache Components 补丁也必须撤回，恢复正式 OpenNext 版本；
+3. 移除 `r2IncrementalCache`；
+4. 关闭 `partialPrefetching` 和 `cacheComponents`；
+5. 顺序重跑 Next/OpenNext build 和 deployed smoke；
+6. R2 binding 可以暂时保留，不需要为回滚删除 bucket。

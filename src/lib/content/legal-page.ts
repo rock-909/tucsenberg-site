@@ -1,27 +1,23 @@
 import { getPageBySlug } from "@/lib/content-query/queries";
-import { parseHeadingId } from "@/lib/content/render-static-markdown-content";
+import { slugifyHeading } from "@/lib/content/render-static-markdown-content";
 import type { LegalPageMetadata, Locale } from "@/types/content.types";
 
 export interface HeadingItem {
-  level: 2 | 3;
+  level: 2;
   text: string;
   id: string;
 }
 
 const H2_PREFIX = "## ";
-const H3_PREFIX = "### ";
 
 export function extractHeadingsFromContent(content: string): HeadingItem[] {
   const headings: HeadingItem[] = [];
 
   for (const line of content.split("\n")) {
     const trimmed = line.trim();
-    if (trimmed.startsWith(H3_PREFIX)) {
-      const { displayText: text, id } = parseHeadingId(trimmed.slice(H3_PREFIX.length).trim());
-      headings.push({ level: 3, text, id });
-    } else if (trimmed.startsWith(H2_PREFIX)) {
-      const { displayText: text, id } = parseHeadingId(trimmed.slice(H2_PREFIX.length).trim());
-      headings.push({ level: 2, text, id });
+    if (trimmed.startsWith(H2_PREFIX)) {
+      const text = trimmed.slice(H2_PREFIX.length).trim();
+      headings.push({ level: 2, text, id: slugifyHeading(text) });
     }
   }
 

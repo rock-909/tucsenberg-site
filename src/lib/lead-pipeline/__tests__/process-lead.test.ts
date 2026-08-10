@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
 import { logger } from "@/lib/logger";
 import {
   PRODUCT_INQUIRY_KINDS,
@@ -206,18 +205,4 @@ describe("processValidatedInquiry", () => {
   // 由上面 "marks the record when the owner email failed" 覆盖，串行等待由
   // "waits for the owner email to settle before touching airtable" 覆盖，
   // 所以直接删掉，不留一个名不副实的绿灯。
-
-  it("does not hang when Airtable exceeds its request budget", async () => {
-    vi.useFakeTimers();
-    mockCreateLead.mockReturnValue(new Promise(() => {}));
-
-    const resultPromise = processValidatedInquiry(VALID_LEAD);
-    await vi.advanceTimersByTimeAsync(AIRTABLE_REQUEST_TIMEOUT_MS);
-
-    await expect(resultPromise).resolves.toMatchObject({
-      success: true,
-      emailSent: true,
-      recordCreated: false,
-    });
-  });
 });

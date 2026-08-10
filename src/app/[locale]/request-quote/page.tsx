@@ -11,7 +11,8 @@ import {
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { InquiryFormStaticFallback } from "@/components/forms/inquiry-form-static-fallback";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
-import { getLocalizedPath, SITE_CONFIG } from "@/config/paths";
+import { getLocalizedPath } from "@/config/paths";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import { resolveLocaleParam } from "@/i18n/locale-utils";
 import { resolveInquiryContext } from "@/lib/lead-pipeline/inquiry-handoff";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
@@ -111,7 +112,7 @@ export default async function RequestQuotePage({
   };
   const inquiryFallback = <InquiryFormStaticFallback copy={inquiryCopy} />;
   const pagePath = getLocalizedPath("requestQuote", locale);
-  const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
+  const pageUrl = new URL(pagePath, SINGLE_SITE_CONFIG.baseUrl).toString();
 
   return (
     <>

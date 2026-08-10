@@ -1,16 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildShellPageSchema } from "@/components/content/legal-page-shell";
 
-vi.mock("@/config/paths", () => ({
-  SITE_CONFIG: {
-    baseUrl: "https://www.example.com",
-  },
-}));
-
-vi.mock("@/config/paths/site-config", () => ({
-  SITE_CONFIG: {
-    baseUrl: "https://www.example.com",
-  },
+vi.mock("@/config/single-site", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/config/single-site")>()),
+  SINGLE_SITE_CONFIG: { baseUrl: "https://www.example.com" },
 }));
 
 vi.mock("next-intl/server", () => ({

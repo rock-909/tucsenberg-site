@@ -2,24 +2,31 @@
  * Static Markdown Content Renderer
  *
  * Renders lightweight static markdown content into React elements.
- * Supports headings, lists, tables, and inline bold text.
+ * Supports headings, lists, tables, inline bold text, and links.
  */
 
 import type { ReactNode } from "react";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 
-const BOLD_WRAPPER_LENGTH = 2;
 const H2_PREFIX_LENGTH = 3;
 const H3_PREFIX_LENGTH = 4;
-const LIST_ITEM_PREFIX_LENGTH = 2;
-const EXPLICIT_ID_PATTERN = /\s*\\?\{#([a-z0-9-]+)\\?\}\s*$/;
 
-interface StaticListItem {
-  readonly key: string;
-  readonly content: ReactNode;
+function isTableRow(line: string): boolean {
+  return line.startsWith("|") && line.endsWith("|");
 }
 
-function slugifyHeading(text: string): string {
+function parseTableRow(line: string): string[] {
+  return line
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isTableSeparator(line: string): boolean {
+  return parseTableRow(line).every((cell) => /^:?-+:?$/.test(cell));
+}
+
+export function slugifyHeading(text: string): string {
   const trimmed = text.trim();
   if (trimmed === "") {
     return "";
@@ -31,142 +38,7 @@ function slugifyHeading(text: string): string {
     .replace(/\s+/g, "-");
 }
 
-export function parseHeadingId(text: string): {
-  displayText: string;
-  id: string;
-} {
-  const match = EXPLICIT_ID_PATTERN.exec(text);
-  if (match) {
-    return {
-      displayText: text.slice(0, match.index).trim(),
-      id: match[1] ?? "",
-    };
-  }
-  return { displayText: text, id: slugifyHeading(text) };
-}
-
-interface RenderState {
-  elements: ReactNode[];
-  listItems: StaticListItem[];
-  listItemIndex: number;
-  listType: "ordered" | "unordered" | null;
-  tableRows: string[][];
-  tableHeaders: string[];
-  inTable: boolean;
-  index: number;
-}
-
-function createListElement(state: RenderState): ReactNode | null {
-  if (state.listItems.length === 0) return null;
-
-  const className =
-    "mt-3 max-w-[72ch] list-inside space-y-1 text-base leading-7 text-muted-foreground";
-  if (state.listType === "ordered") {
-    return (
-      <ol key={`ol-${state.index}`} className={`${className} list-decimal`}>
-        {state.listItems.map((item) => (
-          <li key={item.key}>{item.content}</li>
-        ))}
-      </ol>
-    );
-  }
-
-  return (
-    <ul key={`ul-${state.index}`} className={`${className} list-disc`}>
-      {state.listItems.map((item) => (
-        <li key={item.key}>{item.content}</li>
-      ))}
-    </ul>
-  );
-}
-
-function createTableElement(state: RenderState): ReactNode | null {
-  if (state.tableRows.length === 0 || state.tableHeaders.length === 0) {
-    return null;
-  }
-
-  return (
-    <div key={`table-${state.index}`} className="relative mt-4">
-      {/* Mobile cue that wide tables scroll instead of silently clipping. */}
-      <div
-        aria-hidden
-        className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l to-transparent md:hidden"
-      />
-      <div
-        aria-label={state.tableHeaders.filter(Boolean).join(", ")}
-        className="overflow-x-auto [scrollbar-width:thin] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        data-scrollable-table="true"
-        role="region"
-        tabIndex={0}
-      >
-        <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b">
-            {state.tableHeaders.map((header, headerIndex) => (
-              <th
-                key={`header-${headerIndex}`}
-                className="px-3 py-2 text-left font-medium text-foreground"
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {state.tableRows.map((row, rowIndex) => (
-            <tr key={`row-${rowIndex}`} className="border-b last:border-0">
-              {state.tableHeaders.map((_header, cellIndex) => {
-                const cell = row[cellIndex] ?? "";
-                return (
-                  <td
-                    key={`cell-${rowIndex}-${cellIndex}`}
-                    className="px-3 py-2 text-muted-foreground"
-                  >
-                    <InlineMarkdown text={cell} />
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function flushList(state: RenderState): void {
-  const el = createListElement(state);
-  if (el) {
-    state.elements.push(el);
-    state.listItems = [];
-    state.listItemIndex = 0;
-    state.listType = null;
-  }
-}
-
-function flushTable(state: RenderState): void {
-  const el = createTableElement(state);
-  if (el) {
-    state.elements.push(el);
-    state.tableHeaders = [];
-    state.tableRows = [];
-  }
-  state.inTable = false;
-}
-
-function parseTableRow(line: string): string[] {
-  return line
-    .slice(1, -1)
-    .split("|")
-    .map((cell) => cell.trim());
-}
-
-function isTableSeparator(cells: string[]): boolean {
-  return cells.every((cell) => /^-+$/.test(cell));
-}
-
-function createInlineBoldParagraph(text: string, key: string): ReactNode {
+function createParagraph(text: string, key: string): ReactNode {
   return (
     <p
       key={key}
@@ -177,166 +49,164 @@ function createInlineBoldParagraph(text: string, key: string): ReactNode {
   );
 }
 
-function handleTableLine(state: RenderState, trimmed: string): boolean {
-  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) {
-    return false;
-  }
+function createList(lines: string[], ordered: boolean, key: string): ReactNode {
+  const className =
+    "mt-3 max-w-[72ch] list-inside space-y-1 text-base leading-7 text-muted-foreground";
+  const items = lines.map((line) => (
+    <li key={`${key}-${line}`}>
+      <InlineMarkdown text={line.replace(ordered ? /^\d+\.\s/ : /^-\s/, "")} />
+    </li>
+  ));
 
-  flushList(state);
-  const cells = parseTableRow(trimmed);
-
-  if (isTableSeparator(cells)) {
-    state.inTable = true;
-    return true;
-  }
-
-  if (!state.inTable && state.tableHeaders.length === 0) {
-    state.tableHeaders = cells;
-  } else {
-    state.tableRows.push(cells);
-  }
-  return true;
+  return ordered ? (
+    <ol key={key} className={`${className} list-decimal`}>
+      {items}
+    </ol>
+  ) : (
+    <ul key={key} className={`${className} list-disc`}>
+      {items}
+    </ul>
+  );
 }
 
-function handleListLine(state: RenderState, trimmed: string): boolean {
-  if (/^\d+\.\s/.test(trimmed)) {
-    if (state.listType === "unordered") {
-      flushList(state);
-    }
-    const text = trimmed.replace(/^\d+\.\s/, "");
-    state.listType = "ordered";
-    state.listItems.push({
-      key: `ordered-${state.index}-${state.listItemIndex}`,
-      content: <InlineMarkdown text={text} />,
-    });
-    state.listItemIndex += 1;
-    return true;
-  }
+function createTable(lines: string[], key: string): ReactNode {
+  const headers = parseTableRow(lines[0] ?? "");
+  const rows = lines.slice(2).map(parseTableRow);
 
-  if (trimmed.startsWith("- ")) {
-    if (state.listType === "ordered") {
-      flushList(state);
-    }
-    const text = trimmed.slice(LIST_ITEM_PREFIX_LENGTH);
-    state.listType = "unordered";
-    state.listItems.push({
-      key: `unordered-${state.index}-${state.listItemIndex}`,
-      content: <InlineMarkdown text={text} />,
-    });
-    state.listItemIndex += 1;
-    return true;
-  }
-
-  return false;
+  return (
+    <div key={key} className="relative mt-4">
+      <div
+        aria-hidden
+        className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l to-transparent md:hidden"
+      />
+      <div
+        aria-label={headers.filter(Boolean).join(", ")}
+        className="overflow-x-auto [scrollbar-width:thin] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        data-scrollable-table="true"
+        role="region"
+        tabIndex={0}
+      >
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              {headers.map((header) => (
+                <th
+                  key={`header-${header || "row-heading"}`}
+                  className="px-3 py-2 text-left font-medium text-foreground"
+                >
+                  <InlineMarkdown text={header} />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={`row-${rowIndex}`} className="border-b last:border-0">
+                {headers.map((_header, cellIndex) => (
+                  <td
+                    key={`cell-${rowIndex}-${cellIndex}`}
+                    className="px-3 py-2 text-muted-foreground"
+                  >
+                    <InlineMarkdown text={row[cellIndex] ?? ""} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
-function renderH2(state: RenderState, trimmed: string): void {
-  const raw = trimmed.slice(H2_PREFIX_LENGTH).trim();
-  const { displayText, id } = parseHeadingId(raw);
-  state.elements.push(
+interface MarkdownBlock {
+  readonly consumedLines: number;
+  readonly element: ReactNode;
+}
+
+function collectLines(
+  lines: string[],
+  startIndex: number,
+  matches: (line: string) => boolean,
+): string[] {
+  const collected: string[] = [];
+  for (let index = startIndex; matches(lines[index] ?? ""); index += 1) {
+    collected.push(lines[index] ?? "");
+  }
+  return collected;
+}
+
+function createHeading(line: string, index: number): ReactNode | null {
+  if (line.startsWith("### ")) {
+    const text = line.slice(H3_PREFIX_LENGTH).trim();
+    const id = slugifyHeading(text);
+    return (
+      <h3
+        key={`h3-${id || index}`}
+        id={id || undefined}
+        className="mt-6 scroll-mt-24 text-lg font-semibold text-foreground"
+      >
+        {text}
+      </h3>
+    );
+  }
+
+  if (!line.startsWith("## ")) return null;
+
+  const text = line.slice(H2_PREFIX_LENGTH).trim();
+  const id = slugifyHeading(text);
+  return (
     <h2
-      key={`h2-${id || state.index}`}
+      key={`h2-${id || index}`}
       id={id || undefined}
       className="text-section mt-10 scroll-mt-24 text-foreground first:mt-0"
     >
-      {displayText}
-    </h2>,
+      {text}
+    </h2>
   );
-  state.index += 1;
 }
 
-function renderH3(state: RenderState, trimmed: string): void {
-  const raw = trimmed.slice(H3_PREFIX_LENGTH).trim();
-  const { displayText, id } = parseHeadingId(raw);
-  state.elements.push(
-    <h3
-      key={`h3-${id || state.index}`}
-      id={id || undefined}
-      className="mt-6 scroll-mt-24 text-lg font-semibold text-foreground"
-    >
-      {displayText}
-    </h3>,
-  );
-  state.index += 1;
-}
+function parseBlock(lines: string[], index: number): MarkdownBlock | null {
+  const line = lines[index] ?? "";
+  if (!line) return null;
 
-function renderBoldParagraph(state: RenderState, trimmed: string): void {
-  const text = trimmed.slice(BOLD_WRAPPER_LENGTH, -BOLD_WRAPPER_LENGTH);
-  state.elements.push(
-    <p
-      key={`em-${state.index}`}
-      className="mt-3 max-w-[72ch] text-base leading-7 font-medium text-foreground"
-    >
-      <InlineMarkdown text={text} />
-    </p>,
-  );
-  state.index += 1;
-}
-
-function handleTextLine(state: RenderState, trimmed: string): void {
-  flushList(state);
-  flushTable(state);
-
-  if (trimmed.startsWith("## ")) {
-    renderH2(state, trimmed);
-    return;
+  const nextLine = lines[index + 1] ?? "";
+  if (isTableRow(line) && isTableSeparator(nextLine)) {
+    const rows = collectLines(lines, index + 2, isTableRow);
+    return {
+      consumedLines: rows.length + 2,
+      element: createTable([line, nextLine, ...rows], `table-${index}`),
+    };
   }
 
-  if (trimmed.startsWith("### ")) {
-    renderH3(state, trimmed);
-    return;
+  const ordered = /^\d+\.\s/.test(line);
+  if (ordered || line.startsWith("- ")) {
+    const pattern = ordered ? /^\d+\.\s/ : /^-\s/;
+    const listLines = collectLines(lines, index, (candidate) =>
+      pattern.test(candidate),
+    );
+    return {
+      consumedLines: listLines.length,
+      element: createList(listLines, ordered, `list-${index}`),
+    };
   }
 
-  if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
-    renderBoldParagraph(state, trimmed);
-    return;
-  }
-
-  state.elements.push(createInlineBoldParagraph(trimmed, `p-${state.index}`));
-  state.index += 1;
+  return {
+    consumedLines: 1,
+    element: createHeading(line, index) ?? createParagraph(line, `p-${index}`),
+  };
 }
 
 export function createStaticMarkdownContent(content: string): ReactNode {
-  const lines = content.split("\n");
-  const state: RenderState = {
-    elements: [],
-    listItems: [],
-    listItemIndex: 0,
-    listType: null,
-    tableRows: [],
-    tableHeaders: [],
-    inTable: false,
-    index: 0,
-  };
+  const lines = content.split("\n").map((line) => line.trim());
+  const elements: ReactNode[] = [];
+  let index = 0;
 
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (trimmed === "") {
-      flushList(state);
-      if (!state.inTable) {
-        flushTable(state);
-      }
-      continue;
-    }
-
-    if (handleTableLine(state, trimmed)) {
-      continue;
-    }
-
-    if (state.inTable) {
-      flushTable(state);
-    }
-
-    if (handleListLine(state, trimmed)) {
-      continue;
-    }
-
-    handleTextLine(state, trimmed);
+  while (index < lines.length) {
+    const block = parseBlock(lines, index);
+    if (block) elements.push(block.element);
+    index += block?.consumedLines ?? 1;
   }
 
-  flushList(state);
-  flushTable(state);
-
-  return <>{state.elements}</>;
+  return <>{elements}</>;
 }

@@ -33,7 +33,6 @@ vi.stubEnv("AIRTABLE_BASE_ID", "test-base-id");
 vi.stubEnv("AIRTABLE_TABLE_NAME", "test-table");
 vi.stubEnv("EMAIL_FROM", "test@example.com");
 vi.stubEnv("EMAIL_REPLY_TO", "reply@example.com");
-vi.stubEnv("CSP_REPORT_URI", "https://example.com/csp-report");
 vi.stubEnv("ADMIN_API_TOKEN", "test-admin-token");
 vi.stubEnv("TURNSTILE_BYPASS", "false");
 vi.stubEnv("CLOUDFLARE_ACCOUNT_ID", "test-account-id");
@@ -50,7 +49,6 @@ vi.mock("@t3-oss/env-nextjs", () => ({
     AIRTABLE_TABLE_NAME: "test-table",
     EMAIL_FROM: "test@example.com",
     EMAIL_REPLY_TO: "reply@example.com",
-    CSP_REPORT_URI: "https://example.com/csp-report",
     ADMIN_API_TOKEN: "test-admin-token",
     TURNSTILE_BYPASS: false,
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",
@@ -70,7 +68,6 @@ vi.mock("@/lib/env", () => {
     AIRTABLE_TABLE_NAME: "test-table",
     EMAIL_FROM: "test@example.com",
     EMAIL_REPLY_TO: "reply@example.com",
-    CSP_REPORT_URI: "https://example.com/csp-report",
     ADMIN_API_TOKEN: "test-admin-token",
     ALLOW_MEMORY_RATE_LIMIT: false,
     CLOUDFLARE_ACCOUNT_ID: "test-account-id",

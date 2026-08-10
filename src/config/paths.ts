@@ -22,7 +22,6 @@ export {
   getLocaleTimeZone,
   LOCALES_CONFIG,
 } from "@/config/paths/locales-config";
-export { SITE_CONFIG } from "@/config/paths/site-config";
 
 // 重新导出工具函数
 export {
@@ -43,4 +42,4 @@ export type {
   ConfiguredLocale,
   LocalesConfig,
 } from "@/config/paths/locales-config";
-export type { SiteConfig } from "@/config/paths/site-config";
+export type { SiteConfig } from "@/config/single-site";

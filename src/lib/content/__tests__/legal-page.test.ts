@@ -25,7 +25,7 @@ describe("loadLegalPage", () => {
         },
       },
       content:
-        "## Introduction\n\nWe care about your privacy.\n\n## Information We Collect\n\nWe collect the following.\n\n### Personal Data\n\nName, email.",
+        "## Introduction\n\nWe care about your privacy.\n\n## Information We Collect\n\nWe collect the following.",
       slug: "privacy",
       filePath: "content/pages/en/privacy.mdx",
     });
@@ -72,9 +72,9 @@ describe("loadLegalPage", () => {
 });
 
 describe("extractHeadingsFromContent", () => {
-  it("extracts H2 and H3 headings with slugified IDs", () => {
+  it("extracts H2 headings with slugified IDs", () => {
     const content =
-      "## Introduction\n\nText.\n\n## Information We Collect\n\n### Personal Data\n\nMore text.";
+      "## Introduction\n\nText.\n\n## Information We Collect\n\nMore text.";
     const headings = extractHeadingsFromContent(content);
 
     expect(headings).toEqual([
@@ -84,35 +84,7 @@ describe("extractHeadingsFromContent", () => {
         text: "Information We Collect",
         id: "information-we-collect",
       },
-      { level: 3, text: "Personal Data", id: "personal-data" },
     ]);
-  });
-
-  it("uses explicit anchor ID when present via {#id} syntax", () => {
-    const content =
-      "## Introduction {#intro}\n\n## How We Use Your Data {#data-use}\n\n### Cookies {#cookies-policy}";
-    const headings = extractHeadingsFromContent(content);
-
-    expect(headings).toEqual([
-      { level: 2, text: "Introduction", id: "intro" },
-      { level: 2, text: "How We Use Your Data", id: "data-use" },
-      { level: 3, text: "Cookies", id: "cookies-policy" },
-    ]);
-  });
-
-  it("explicit ID remains stable when heading text changes", () => {
-    const v1 = extractHeadingsFromContent(
-      "## Information Collection {#info-collect}",
-    );
-    const v2 = extractHeadingsFromContent(
-      "## What Information We Collect {#info-collect}",
-    );
-
-    expect(v1).toHaveLength(1);
-    expect(v2).toHaveLength(1);
-    expect(v1[0]?.id).toBe("info-collect");
-    expect(v2[0]?.id).toBe("info-collect");
-    expect(v1[0]?.id).toBe(v2[0]?.id);
   });
 
   it("returns empty array for content with no headings", () => {

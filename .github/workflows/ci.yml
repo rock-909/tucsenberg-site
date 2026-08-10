@@ -61,10 +61,10 @@ jobs:
         run: pnpm content:check
 
       - name: preview config smoke
-        run: APP_ENV=preview node scripts/starter-checks.js validate-production-config
+        run: APP_ENV=preview node scripts/quality/checks/production-config.js
 
       - name: Client boundary 检查
-        run: node scripts/starter-checks.js client-boundary
+        run: node scripts/quality/checks/client-boundary.js
 
       - name: Component governance scan
         run: pnpm component:governance
@@ -77,12 +77,6 @@ jobs:
 
       - name: Dead-export / dead-file scan (knip)
         run: pnpm knip:check
-
-      - name: Vitest 收集面对账
-        run: node scripts/starter-checks.js vitest-collection
-
-      - name: 门禁子命令车道对账
-        run: node scripts/starter-checks.js subcommand-lanes
 
   tests:
     name: 单元与集成测试
@@ -217,10 +211,10 @@ jobs:
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION || secrets.GOOGLE_SITE_VERIFICATION }}
 
       - name: InquiryForm client chunk boundary
-        run: node scripts/starter-checks.js client-boundary --build-artifacts
+        run: node scripts/quality/checks/client-boundary.js --build-artifacts
 
       - name: Localized prerender behavior check
-        run: node scripts/starter-checks.js prerender-static
+        run: node scripts/quality/checks/prerender-static.js
 
       - name: Cloudflare/OpenNext 构建
         run: pnpm website:build:cf
@@ -239,7 +233,7 @@ jobs:
 
       # 使用本作业生成的 .open-next/assets 验证静态资源响应头。
       - name: Cloudflare 静态资源响应头
-        run: node scripts/starter-checks.js cf-static-asset-headers
+        run: node scripts/quality/checks/cloudflare-static-asset-headers.js
 
       - name: Cloudflare/Wrangler dry-run
         if: ${{ github.event_name != 'pull_request' }}

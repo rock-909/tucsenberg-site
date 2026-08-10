@@ -1,16 +1,16 @@
 ---
 paths:
-  - "src/middleware.ts"
+  - "src/proxy.ts"
   - "open-next.config.ts"
   - "wrangler.jsonc"
   - "next.config.ts"
-  - "scripts/starter-checks.js"
+  - "scripts/quality/checks/cloudflare-smoke.js"
 ---
 
 # Cloudflare / OpenNext Rules
 
 Use this file when changing Cloudflare/OpenNext build, preview, deploy,
-middleware, worker config, or Cloudflare-only runtime behavior.
+proxy, worker config, or Cloudflare-only runtime behavior.
 
 This file contains the repository's Cloudflare/OpenNext choices and proof
 requirements, not generic Next.js API guidance.
@@ -26,9 +26,9 @@ the proof table; do not add phase-named wrappers without a real repeated workflo
 | --- | --- |
 | Standard Next.js runtime behavior | `pnpm build` |
 | Cloudflare/OpenNext build path | `pnpm build` then `pnpm website:build:cf` |
-| Local Cloudflare preview behavior | `pnpm exec opennextjs-cloudflare preview --env preview` + `node scripts/starter-checks.js cf-preview-smoke` |
+| Local Cloudflare preview behavior | `pnpm exec opennextjs-cloudflare preview --env preview` + `node scripts/quality/checks/cloudflare-smoke.js cf-preview-smoke` |
 | Cloudflare deploy-artifact proof | `pnpm exec wrangler deploy --dry-run --env preview` after `pnpm website:build:cf` |
-| Deployed Cloudflare behavior | `node scripts/starter-checks.js deployed-smoke --base-url <url>` |
+| Deployed Cloudflare behavior | `node scripts/quality/checks/cloudflare-smoke.js deployed-smoke --base-url <url>` |
 | Public submission routes or compatibility actions | related route/action/IP tests + `pnpm build` + `pnpm website:build:cf` |
 
 Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write to
@@ -48,16 +48,12 @@ Never run `pnpm build` and `pnpm website:build:cf` in parallel. They both write 
 
 ## Runtime entry
 
-Keep `src/middleware.ts` as the runtime entrypoint.
-
-Do not introduce `src/proxy.ts` as cleanup. The current next-intl/OpenNext
-integration still uses `src/middleware.ts`; revisit only as a dedicated runtime
-migration with build and preview proof.
+Keep `src/proxy.ts` as the Next.js runtime entrypoint.
 
 The matcher must remain static string literals.
 
-Any migration branch must use the corresponding build, preview, and deployed
-proof rows above.
+Any runtime-entry migration must use the corresponding build, preview, and
+deployed proof rows above.
 
 ## Public submission identity
 

@@ -397,6 +397,12 @@ function runCloudflareOfficialCompareCli(args = []) {
   return true;
 }
 
+if (require.main === module) {
+  if (!runCloudflareOfficialCompareCli(process.argv.slice(2))) {
+    process.exitCode = 1;
+  }
+}
+
 module.exports = {
   collectCloudflareOfficialCompareFailures,
   runCloudflareOfficialCompareCli,

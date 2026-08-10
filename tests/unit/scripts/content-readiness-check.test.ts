@@ -524,7 +524,7 @@ describe("content-readiness-check", () => {
 
   it("scans canonical locale message pack files", () => {
     const rootDir = createFixture({
-      "messages/base/zh/messages.json": JSON.stringify({
+      "messages/base/fr/messages.json": JSON.stringify({
         headline: "lorem ipsum",
       }),
     });
@@ -536,7 +536,7 @@ describe("content-readiness-check", () => {
     expectFinding(
       result.errors,
       "lorem-ipsum",
-      "messages/base/zh/messages.json",
+      "messages/base/fr/messages.json",
     );
   });
 

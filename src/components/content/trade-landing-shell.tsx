@@ -10,7 +10,7 @@ import {
 } from "@/lib/content/mdx-faq";
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import { buildBreadcrumbListSchema } from "@/lib/structured-data-generators";
-import { SITE_CONFIG } from "@/config/paths";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import { FactoryPoolDiagram } from "@/components/products/factory-pool-diagram";
 import { Link } from "@/i18n/routing";
 import type { LegalPageMetadata, Locale } from "@/types/content.types";
@@ -48,7 +48,7 @@ export async function TradeLandingShell({
     mixedContainer: t("diagramLabels.mixedContainer"),
   };
 
-  const pageUrl = new URL(pagePath, SITE_CONFIG.baseUrl).toString();
+  const pageUrl = new URL(pagePath, SINGLE_SITE_CONFIG.baseUrl).toString();
   const schema = await buildShellPageSchema({
     metadata,
     locale,
@@ -68,7 +68,7 @@ export async function TradeLandingShell({
   }
   schemas.push(
     buildBreadcrumbListSchema([
-      { name: tNav("home"), url: new URL("/", SITE_CONFIG.baseUrl).toString() },
+      { name: tNav("home"), url: new URL("/", SINGLE_SITE_CONFIG.baseUrl).toString() },
       { name: metadata.title, url: pageUrl },
     ]),
   );

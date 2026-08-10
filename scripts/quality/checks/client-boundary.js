@@ -483,6 +483,10 @@ function runClientBoundaryCli(argv = []) {
   return result.status !== "failed";
 }
 
+if (require.main === module) {
+  if (!runClientBoundaryCli(process.argv.slice(2))) process.exitCode = 1;
+}
+
 module.exports = {
   BUILD_CHUNKS_DIR,
   INQUIRY_FORM_CHUNK_MARKER,

@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { logger } from "@/lib/logger";
-
 import { createLeadRecord } from "@/lib/airtable/service-internal/lead-records";
+import type { ProductLeadData } from "@/lib/airtable/types";
+import { logger } from "@/lib/logger";
 
 vi.mock("@/lib/logger", async () => {
   const mockLogger = await import("@/lib/__tests__/mocks/logger");
   return mockLogger;
 });
 
-const validProductLeadData = {
+const validProductLeadData: ProductLeadData = {
   firstName: "John",
   lastName: "Doe",
   email: "john.doe@example.com",
@@ -18,9 +17,13 @@ const validProductLeadData = {
   catalogProductId: "abs-flood-barriers",
 };
 
-function createMockBase(create: ReturnType<typeof vi.fn>) {
+function params(data: ProductLeadData = validProductLeadData) {
   return {
-    table: vi.fn().mockReturnValue({ create }),
+    apiKey: "key-secret",
+    baseId: "app/base",
+    tableName: "Sales Leads",
+    data,
+    signal: new AbortController().signal,
   };
 }
 
@@ -29,180 +32,147 @@ describe("createLeadRecord", () => {
     vi.clearAllMocks();
   });
 
-  it.each([undefined, null, "", "   "])(
-    "rejects an Airtable create result with invalid id %j",
-    async (id) => {
-      const mockCreate = vi.fn().mockResolvedValue([{ id }]);
-      const base = createMockBase(mockCreate);
-
-      await expect(
-        createLeadRecord({
-          base: base as never,
-          tableName: "Leads",
-          data: validProductLeadData,
-        }),
-      ).rejects.toThrow("Failed to create lead record");
-    },
-  );
-
-  it("maps a product inquiry and accepts the Airtable SDK array response", async () => {
-    const mockCreate = vi.fn().mockResolvedValue([{ id: " rec-123 " }]);
-    const base = createMockBase(mockCreate);
-    const data = {
+  it("maps the lead into one Airtable REST request", async () => {
+    const request = params({
+      ...validProductLeadData,
       firstName: "Jane",
-      lastName: "Buyer",
+      lastName: "García-López",
       email: "Buyer+RFQ@Example.com",
       message: "Need details",
-      productName: "ABS Flood Barriers",
-      catalogProductId: "abs-flood-barriers",
       requirements: "Custom packaging",
       referenceId: "PRO-test-123",
       utmSource: "google",
-      utmMedium: "cpc",
       utmCampaign: '=IMPORTXML("https://example.test")',
-      gclid: "gclid-123",
-      landingPage: "/en/contact",
-      capturedAt: "2026-08-03T00:00:00.000Z",
-    };
-
-    await expect(
-      createLeadRecord({
-        base: base as never,
-        tableName: "Contacts",
-        data,
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ records: [{ id: " rec-123 " }] }), {
+        status: 200,
       }),
-    ).resolves.toEqual({ id: "rec-123" });
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
-    expect(base.table).toHaveBeenCalledWith("Contacts");
-    expect(mockCreate).toHaveBeenCalledWith([
-      {
-        fields: {
-          Email: "buyer+rfq@example.com",
-          "Submitted At": expect.any(String),
-          Status: "New",
-          Source: "Product Inquiry",
-          "Reference ID": "PRO-test-123",
-          "First Name": "Jane",
-          "Last Name": "Buyer",
-          Message: "Need details",
-          "Product Name": "ABS Flood Barriers",
-          "Product Slug": "abs-flood-barriers",
-          Requirements: "Custom packaging",
-          "UTM Source": "google",
-          "UTM Medium": "cpc",
-          "UTM Campaign": `'${data.utmCampaign}`,
-          GCLID: "gclid-123",
-          "Landing Page": "/en/contact",
-          "Captured At": "2026-08-03T00:00:00.000Z",
+    await expect(createLeadRecord(request)).resolves.toEqual({ id: "rec-123" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.airtable.com/v0/app%2Fbase/Sales%20Leads");
+    expect(init.signal).toBe(request.signal);
+    expect(init.headers).toEqual({
+      authorization: "Bearer key-secret",
+      "content-type": "application/json",
+    });
+    expect(JSON.parse(String(init.body))).toEqual({
+      records: [
+        {
+          fields: expect.objectContaining({
+            Email: "buyer+rfq@example.com",
+            "Reference ID": "PRO-test-123",
+            "First Name": "Jane",
+            "Last Name": "García-López",
+            Message: "Need details",
+            Requirements: "Custom packaging",
+            "UTM Source": "google",
+            "UTM Campaign": `'${request.data.utmCampaign}`,
+          }),
         },
-      },
-    ]);
+      ],
+    });
   });
 
-  it("neutralizes formulas in product fields without changing ordinary Unicode", async () => {
-    const mockCreate = vi.fn().mockResolvedValue([{ id: "rec-formula" }]);
-    const base = createMockBase(mockCreate);
+  it.each([undefined, null, "", "   "])(
+    "rejects a success response with invalid id %j",
+    async (id) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response(JSON.stringify({ records: [{ id }] }), {
+            status: 200,
+          }),
+        ),
+      );
 
-    await createLeadRecord({
-      base: base as never,
-      tableName: "Contacts",
-      data: {
+      await expect(createLeadRecord(params())).rejects.toThrow(
+        "Failed to create lead record",
+      );
+    },
+  );
+
+  it("neutralizes formulas without changing ordinary Unicode", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ records: [{ id: "rec-formula" }] }), {
+        status: 200,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await createLeadRecord(
+      params({
+        ...validProductLeadData,
         firstName: "=Buyer",
         lastName: "García-López",
-        email: "buyer@example.com",
         message: "=message",
         productName: "+Product",
         catalogProductId: "-product-slug",
         requirements: "@requirements",
-      },
+      }),
+    );
+
+    const body = JSON.parse(
+      String((fetchMock.mock.calls[0]?.[1] as RequestInit).body),
+    ) as { records: Array<{ fields: Record<string, unknown> }> };
+    expect(body.records[0]?.fields).toMatchObject({
+      "First Name": "'=Buyer",
+      "Last Name": "García-López",
+      Message: "'=message",
+      "Product Name": "'+Product",
+      "Product Slug": "'-product-slug",
+      Requirements: "'@requirements",
     });
+  });
 
-    expect(mockCreate).toHaveBeenCalledWith([
-      {
-        fields: expect.objectContaining({
-          "First Name": "'=Buyer",
-          "Last Name": "García-López",
-          Message: "'=message",
-          "Product Name": "'+Product",
-          "Product Slug": "'-product-slug",
-          Requirements: "'@requirements",
+  it("logs provider error type and status without response PII", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: {
+            type: "INVALID_VALUE_FOR_COLUMN",
+            message: "john.doe@example.com should not reach logs",
+          },
         }),
-      },
-    ]);
-  });
+        { status: 422 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
-  it("logs errorType and statusCode for Airtable SDK-style plain errors", async () => {
-    const airtableError = {
-      error: "INVALID_VALUE_FOR_COLUMN",
-      message: 'Field "Product Name" cannot accept the provided value',
+    await expect(createLeadRecord(params())).rejects.toThrow(
+      "Failed to create lead record",
+    );
+
+    expect(logger.error).toHaveBeenCalledWith("Failed to create lead record", {
+      errorType: "INVALID_VALUE_FOR_COLUMN",
       statusCode: 422,
-    };
-
-    const mockCreate = vi.fn().mockRejectedValue(airtableError);
-    const base = createMockBase(mockCreate);
-
-    await expect(
-      createLeadRecord({
-        base: base as never,
-        tableName: "Leads",
-        data: validProductLeadData,
-      }),
-    ).rejects.toThrow("Failed to create lead record");
-
-    expect(logger.error).toHaveBeenCalledWith(
-      "Failed to create lead record",
-      expect.objectContaining({
-        errorType: "INVALID_VALUE_FOR_COLUMN",
-        statusCode: 422,
-      }),
-    );
-
-    const logContext = vi.mocked(logger.error).mock.calls[0]?.[1] as Record<
-      string,
-      unknown
-    >;
-    expect(logContext).not.toHaveProperty("message");
-    expect(JSON.stringify(logContext)).not.toContain("john.doe@example.com");
-    expect(logContext.error).not.toBe("Unknown error");
-  });
-
-  it("logs Error message for standard Error instances", async () => {
-    const mockCreate = vi.fn().mockRejectedValue(new Error("Network timeout"));
-    const base = createMockBase(mockCreate);
-
-    await expect(
-      createLeadRecord({
-        base: base as never,
-        tableName: "Leads",
-        data: validProductLeadData,
-      }),
-    ).rejects.toThrow("Failed to create lead record");
-
-    expect(logger.error).toHaveBeenCalledWith(
-      "Failed to create lead record",
-      expect.objectContaining({
-        error: "Network timeout",
-      }),
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(vi.mocked(logger.error).mock.calls)).not.toContain(
+      "john.doe@example.com",
     );
   });
 
-  it("logs Unknown error for unrecognized thrown values", async () => {
-    const mockCreate = vi.fn().mockRejectedValue("unexpected string failure");
-    const base = createMockBase(mockCreate);
+  it("logs fetch errors without secrets", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("Network timeout")),
+    );
 
-    await expect(
-      createLeadRecord({
-        base: base as never,
-        tableName: "Leads",
-        data: validProductLeadData,
-      }),
-    ).rejects.toThrow("Failed to create lead record");
-
-    expect(logger.error).toHaveBeenCalledWith(
+    await expect(createLeadRecord(params())).rejects.toThrow(
       "Failed to create lead record",
-      expect.objectContaining({
-        error: "Unknown error",
-      }),
+    );
+
+    expect(logger.error).toHaveBeenCalledWith("Failed to create lead record", {
+      error: "Network timeout",
+    });
+    expect(JSON.stringify(vi.mocked(logger.error).mock.calls)).not.toContain(
+      "key-secret",
     );
   });
 });

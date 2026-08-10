@@ -85,17 +85,11 @@ happy-path proof to prove CRM persistence.
 | Endpoint | Expected protection |
 | --- | --- |
 | `/api/inquiry` | Turnstile + validation + body size gate + inquiry rate limit + honeypot while wired |
-| `/api/csp-report` | body size gate + rate limit; never trust payload content |
 | `/api/health` | public health only; no credentials, config dumps, or env details |
 
 Turnstile verification is internal to the protected write routes. Do not add a
 public token preflight endpoint: Turnstile tokens are single-use, so a preflight
 would consume the token before the real submission.
-
-### CSP report endpoint
-
-`/api/csp-report` accepts only bounded report payloads in the supported report
-shapes, never trusts payload content, and keeps its health probe read-only.
 
 ### JSON body parsing contract
 
@@ -118,9 +112,9 @@ errors or markers in the public JSON.
 
 - Security header behavior lives in `src/config/security.ts` and Next.js
   native `headers()` in `next.config.ts`.
-- Middleware owns retired-locale fast-404 plus next-intl routing delegation. It
-  does not own CSP, generic security headers, locale-cookie setup, or leaked
-  cookie cleanup.
+- Proxy owns next-intl routing delegation plus finite product-route 404s. Unknown
+  prefixes use the ordinary route-level 404. Proxy does not own CSP, generic
+  security headers, locale-cookie setup, or leaked cookie cleanup.
 - Do not use `NextResponse.next({ headers })` to push broad response headers
   from middleware/proxy. It can break framework-owned responses such as Server
   Actions and streaming.
@@ -131,9 +125,6 @@ errors or markers in the public JSON.
   justifies the trade-off.
 - Do not mix nonce-based CSP into ordinary security cleanup; it needs a separate
   dynamic-rendering and Cloudflare/OpenNext proof.
-- CSP reports go to `/api/csp-report`.
-- Each accepted CSP violation is logged once: routine reports use `logger.warn`;
-  suspicious patterns use a single `logger.error`.
 - Do not use unfiltered `dangerouslySetInnerHTML`.
 - URL values must allow only `https://`, `http://`, or site-relative `/`.
 

@@ -20,6 +20,7 @@ interface ReleaseProofStep {
   readonly env?: Record<string, string>;
   readonly requiresFreePort?: number;
   readonly artifactBudget?: ReleaseProofArtifactBudget;
+  readonly forbiddenOutput?: string;
 }
 
 interface ReleaseProofArtifactBudget {
@@ -42,6 +43,7 @@ interface ReleaseProofManifestModule {
     readonly args: readonly string[];
     readonly env?: Record<string, string>;
     readonly requiresFreePort?: number;
+    readonly forbiddenOutput?: string;
   }>;
 }
 
@@ -67,7 +69,7 @@ describe("release proof manifest", () => {
     // other two named starter-era flags that no longer exist anywhere.
     expect([...lanes]).toEqual(["local/test-mode"]);
     expect(releaseProofFlow).toContain(
-      "node scripts/starter-checks.js content-readiness",
+      "node scripts/quality/checks/content-readiness.js",
     );
   });
 
@@ -159,6 +161,9 @@ describe("release proof manifest", () => {
     expect(artifactConfigIndex).toBeLessThan(staticAssetHeadersIndex);
     expect(manifest.getReleaseProofSequence()[artifactConfigIndex]).toBe(
       "node scripts/quality/checks/cloudflare-artifact-config.js",
+    );
+    expect(releaseCommands[cloudflareBuildIndex]?.forbiddenOutput).toBe(
+      "MISSING_MESSAGE",
     );
   });
 

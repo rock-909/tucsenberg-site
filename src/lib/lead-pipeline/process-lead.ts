@@ -1,7 +1,6 @@
 import "server-only";
 
 import { airtableService } from "@/lib/airtable/instance";
-import { AIRTABLE_REQUEST_TIMEOUT_MS } from "@/lib/airtable/service";
 import type { ProductInquiryEmailData } from "@/lib/email/email-data-schema";
 import {
   PRODUCT_LEAD_TYPE,
@@ -41,18 +40,6 @@ const OWNER_EMAIL_FAILED_NOTICE =
 
 function normalizeErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
-}
-
-function withAirtableBudget<T>(operation: Promise<T>): Promise<T> {
-  let budgetTimer: ReturnType<typeof setTimeout> | undefined;
-  const budget = new Promise<never>((_resolve, reject) => {
-    budgetTimer = setTimeout(() => {
-      reject(new Error("AIRTABLE_REQUEST_TIMEOUT"));
-    }, AIRTABLE_REQUEST_TIMEOUT_MS);
-  });
-  return Promise.race([operation, budget]).finally(() => {
-    clearTimeout(budgetTimer);
-  });
 }
 
 function createProcessingFailureResult(referenceId?: string): LeadResult {
@@ -129,21 +116,19 @@ async function createProductLeadRecord(
     : `${OWNER_EMAIL_FAILED_NOTICE}${baseMessage}`;
 
   try {
-    await withAirtableBudget(
-      airtableService.createLead({
-        firstName,
-        lastName,
-        email: lead.email,
-        message,
-        productName: identity.productName,
-        ...(identity.catalogProductId
-          ? { catalogProductId: identity.catalogProductId }
-          : {}),
-        ...(buyerText ? { requirements: buyerText } : {}),
-        referenceId,
-        ...pickAttributionFields(lead),
-      }),
-    );
+    await airtableService.createLead({
+      firstName,
+      lastName,
+      email: lead.email,
+      message,
+      productName: identity.productName,
+      ...(identity.catalogProductId
+        ? { catalogProductId: identity.catalogProductId }
+        : {}),
+      ...(buyerText ? { requirements: buyerText } : {}),
+      referenceId,
+      ...pickAttributionFields(lead),
+    });
     return true;
   } catch (error) {
     logger.error("Product Airtable createLead failed (non-blocking)", {

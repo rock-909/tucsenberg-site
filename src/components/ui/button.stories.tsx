@@ -12,17 +12,7 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: [
-        "default",
-        "secondary",
-        "outline",
-        "ghost",
-        "link",
-        "accent",
-        "destructive",
-        "on-dark",
-        "ghost-dark",
-      ],
+      options: ["default", "secondary", "outline", "ghost"],
     },
     size: {
       control: "select",
@@ -48,8 +38,6 @@ export const Variants: Story = {
       <Button>Request a quote</Button>
       <Button variant="secondary">View products</Button>
       <Button variant="outline">Download catalog</Button>
-      <Button variant="accent">Project support</Button>
-      <Button variant="destructive">Remove draft</Button>
     </div>
   ),
 };
@@ -78,18 +66,6 @@ export const LongChineseContent: Story = {
   render: () => (
     <div className="max-w-xs">
       <Button className="w-full">提交项目需求并预约下一步沟通</Button>
-    </div>
-  ),
-};
-
-export const OnDarkBackground: Story = {
-  parameters: {
-    backgrounds: { default: "Dark" },
-  },
-  render: () => (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[var(--neutral-11)] p-6">
-      <Button variant="on-dark">Start project</Button>
-      <Button variant="ghost-dark">Book consultation</Button>
     </div>
   ),
 };

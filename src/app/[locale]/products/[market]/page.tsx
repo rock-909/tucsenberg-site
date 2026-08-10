@@ -6,11 +6,8 @@ import {
   getAllMarketSlugs,
   getMarketBySlug,
 } from "@/constants/product-catalog";
-import {
-  getProductMarketPath,
-  LOCALES_CONFIG,
-  SITE_CONFIG,
-} from "@/config/paths";
+import { getProductMarketPath, LOCALES_CONFIG } from "@/config/paths";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
 import { JsonLdGraphScript } from "@/components/seo/json-ld-script";
 import { CatalogBreadcrumb } from "@/components/products/catalog-breadcrumb";
@@ -337,9 +334,11 @@ function ProductFinalCta({
         <Button asChild size="lg">
           <Link href={getProductQuoteHref(page)}>{page.cta.label}</Link>
         </Button>
-        <Button asChild size="lg" variant="outline">
-          <a href={page.downloadHref}>{labels.downloadSpec}</a>
-        </Button>
+        {page.downloadHref ? (
+          <Button asChild size="lg" variant="outline">
+            <a href={page.downloadHref}>{labels.downloadSpec}</a>
+          </Button>
+        ) : null}
       </div>
       {page.cta.note ? (
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -398,7 +397,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
 
   const marketUrl = new URL(
     getProductMarketPath(market.slug),
-    SITE_CONFIG.baseUrl,
+    SINGLE_SITE_CONFIG.baseUrl,
   ).toString();
   const faqSchema = buildTucsenbergProductFaqSchema(productPage, locale);
   const jsonLdData = await buildMarketPageJsonLdData({

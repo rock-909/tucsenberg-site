@@ -7,11 +7,8 @@ import {
   getStaticPageLastModified,
   type StaticPageLastModConfig,
 } from "@/lib/sitemap-utils";
-import {
-  LOCALES_CONFIG,
-  getProductMarketPath,
-  SITE_CONFIG,
-} from "@/config/paths";
+import { LOCALES_CONFIG, getProductMarketPath } from "@/config/paths";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import {
   getSingleSitePublicStaticPages,
   getSingleSiteSitemapPageConfig,
@@ -23,7 +20,7 @@ import { routing } from "@/i18n/routing";
 import { PRODUCT_CATALOG } from "@/constants/product-catalog";
 
 // Base URL for the site - uses centralized SITE_CONFIG for consistency
-const BASE_URL = SITE_CONFIG.baseUrl;
+const BASE_URL = SINGLE_SITE_CONFIG.baseUrl;
 
 type PageConfig = SingleSiteSitemapPageConfig;
 

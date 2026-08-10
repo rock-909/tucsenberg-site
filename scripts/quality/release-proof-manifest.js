@@ -12,7 +12,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       label: "Generated content manifest freshness",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
-      args: ["scripts/starter-checks.js", "content-manifest", "--check"],
+      args: ["scripts/quality/checks/content-manifest.js", "--check"],
     },
     {
       id: "cloudflare-official-source-compare",
@@ -20,8 +20,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
       args: [
-        "scripts/starter-checks.js",
-        "cf-official-compare",
+        "scripts/quality/checks/cloudflare-official-compare.js",
         "--source-only",
       ],
     },
@@ -49,8 +48,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
         "vitest",
         "run",
         "tests/architecture/deploy-workflow-contract.test.ts",
-        "tests/unit/middleware.test.ts",
-        "src/__tests__/middleware-locale-cookie.test.ts",
+        "tests/unit/proxy.test.ts",
         "src/i18n/__tests__/request.test.ts",
         "src/lib/__tests__/load-messages.fallback.test.ts",
       ],
@@ -74,27 +72,21 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       label: "Health API tests",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
-      args: [
-        "exec",
-        "vitest",
-        "run",
-        "tests/integration/api/health.test.ts",
-        "src/__tests__/middleware-locale-cookie.test.ts",
-      ],
+      args: ["exec", "vitest", "run", "tests/integration/api/health.test.ts"],
     },
     {
       id: "translations",
       label: "Translation packs",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
-      args: ["scripts/starter-checks.js", "translations"],
+      args: ["scripts/quality/checks/translations.js"],
     },
     {
       id: "content-readiness-catalog",
       label: "Catalog content readiness",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
-      args: ["scripts/starter-checks.js", "content-readiness"],
+      args: ["scripts/quality/checks/content-readiness.js"],
     },
     {
       id: "local-playwright-smoke",
@@ -122,6 +114,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "pnpm",
       args: ["website:build:cf"],
+      forbiddenOutput: "MISSING_MESSAGE",
     },
     {
       id: "cloudflare-artifact-config",
@@ -135,7 +128,7 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
       label: "Cloudflare Static Assets headers",
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       command: "node",
-      args: ["scripts/starter-checks.js", "cf-static-asset-headers"],
+      args: ["scripts/quality/checks/cloudflare-static-asset-headers.js"],
     },
     {
       id: "wrangler-preview-dry-run",
@@ -157,18 +150,20 @@ const RELEASE_PROOF_MANIFEST = deepFreeze({
     {
       lane: RELEASE_PROOF_LANES.LOCAL_TEST_MODE,
       label: "Local stock preview",
-      command: "node scripts/starter-checks.js cf-preview-smoke",
+      command:
+        "node scripts/quality/checks/cloudflare-smoke.js cf-preview-smoke",
     },
     {
       lane: RELEASE_PROOF_LANES.DEPLOYED_SMOKE,
       label: "Real preview publish path",
-      command: "node scripts/starter-checks.js cf-preview-deployed",
+      command:
+        "node scripts/quality/checks/cloudflare-smoke.js cf-preview-deployed",
     },
     {
       lane: RELEASE_PROOF_LANES.DEPLOYED_SMOKE,
       label: "Deployed GET smoke",
       command:
-        'node scripts/starter-checks.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"',
+        'node scripts/quality/checks/cloudflare-smoke.js deployed-smoke --base-url "$DEPLOYED_BASE_URL"',
     },
     {
       lane: RELEASE_PROOF_LANES.AIRTABLE_WRITE_CANARY,
@@ -211,6 +206,7 @@ function cloneReleaseVerifyCommand(step) {
     ...(step.requiresFreePort
       ? { requiresFreePort: step.requiresFreePort }
       : {}),
+    ...(step.forbiddenOutput ? { forbiddenOutput: step.forbiddenOutput } : {}),
     ...(step.artifactBudget
       ? { artifactBudget: { ...step.artifactBudget } }
       : {}),

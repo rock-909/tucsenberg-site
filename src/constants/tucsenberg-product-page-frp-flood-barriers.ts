@@ -30,7 +30,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
     label: "Register interest",
     note: "We'll share span/deflection test data as it completes.",
   },
-  downloadHref: "/downloads/product-catalog.pdf",
   proofStrip: [
     "Pultruded fiberglass",
     "180 mm plank class",

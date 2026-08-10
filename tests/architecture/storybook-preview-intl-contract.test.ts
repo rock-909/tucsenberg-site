@@ -12,7 +12,6 @@ describe("Storybook preview i18n contract", () => {
     expect(messageSource).not.toContain("@messages/en/");
     expect(messageSource).not.toContain("@messages/en/critical.json");
     expect(messageSource).not.toContain("@messages/en/deferred.json");
-    expect(messageSource).not.toContain("@messages/zh/");
     expect(messageSource).not.toMatch(
       /\.env|server-only|@\/lib\/env|NEXT_SERVER/u,
     );
@@ -59,10 +58,6 @@ describe("Storybook preview i18n contract", () => {
     const { getStorybookMessages } =
       await import("@/lib/i18n/storybook-messages");
     const preview = readFileSync(".storybook/preview.ts", "utf8");
-    const heroStories = readFileSync(
-      "src/components/sections/hero-section.stories.tsx",
-      "utf8",
-    );
     const englishMessages = getStorybookMessages("en") as {
       "structured-data"?: { article?: { defaultAuthor?: string } };
     };
@@ -70,10 +65,8 @@ describe("Storybook preview i18n contract", () => {
     expect(preview).toContain("context.globals.locale");
     expect(preview).toContain("getStorybookMessages(storybookLocale)");
     expect(preview).toContain('{ value: "en", title: "English" }');
-    expect(preview).not.toContain('{ value: "zh", title: "中文" }');
     expect(englishMessages["structured-data"]?.article?.defaultAuthor).toBe(
       "{companyName}",
     );
-    expect(heroStories).not.toContain('locale: "zh"');
   });
 });

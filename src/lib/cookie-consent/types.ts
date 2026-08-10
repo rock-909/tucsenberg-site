@@ -23,8 +23,6 @@ export interface StoredConsent {
   consent: CookieConsent;
   /** ISO 8601 timestamp of last consent update */
   updatedAt: string;
-  /** Consent schema version for future migrations */
-  version: number;
 }
 
 /** Context state for cookie consent */
@@ -43,17 +41,10 @@ export interface CookieConsentActions {
   acceptAll: () => void;
   /** Reject all optional cookies (keep necessary) */
   rejectAll: () => void;
-  /** Update specific category consent */
-  updateConsent: (
-    category: Exclude<CookieCategory, "necessary">,
-    value: boolean,
-  ) => void;
   /** Save custom consent preferences */
   savePreferences: (
     preferences: Partial<Omit<CookieConsent, "necessary">>,
   ) => void;
-  /** Reset consent to show banner again */
-  resetConsent: () => void;
 }
 
 /** Combined context value */
@@ -66,9 +57,6 @@ export const DEFAULT_CONSENT: CookieConsent = {
   analytics: false,
   marketing: false,
 } as const;
-
-/** Current storage schema version */
-export const CONSENT_VERSION = 1;
 
 /** localStorage key for consent data */
 export const CONSENT_STORAGE_KEY = "cookie-consent";

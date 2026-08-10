@@ -61,20 +61,16 @@ describe("Cloudflare runtime env timing", () => {
     expect(constructorCalls).toHaveBeenCalledWith("runtime-resend-key");
   });
 
-  it("lets Airtable initialize from Worker secrets after service construction", async () => {
+  it("lets Airtable read Worker secrets after service construction", async () => {
     vi.resetModules();
 
     const runtimeValues: Record<string, string | undefined> = {};
-    const configure = vi.fn();
-    const create = vi.fn().mockResolvedValue([
-      {
-        id: "rec-runtime",
-        fields: {},
-        get: vi.fn().mockReturnValue("2026-07-03T00:00:00.000Z"),
-      },
-    ]);
-    const table = vi.fn().mockReturnValue({ create });
-    const base = vi.fn().mockReturnValue({ table });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ records: [{ id: "rec-runtime" }] }), {
+        status: 200,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
     vi.doMock("@/lib/env", () => ({
       ...createEnvMock(runtimeValues),
@@ -84,12 +80,6 @@ describe("Cloudflare runtime env timing", () => {
         AIRTABLE_BASE_ID: undefined,
         AIRTABLE_TABLE_NAME: undefined,
       },
-    }));
-
-    vi.doMock("airtable", () => ({
-      default: { configure, base },
-      configure,
-      base,
     }));
 
     vi.doMock("@/lib/logger", () => ({
@@ -113,11 +103,14 @@ describe("Cloudflare runtime env timing", () => {
       productName: "General RFQ",
     });
 
-    expect(configure).toHaveBeenCalledWith(
-      expect.objectContaining({ apiKey: "runtime-airtable-key" }),
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "https://api.airtable.com/v0/appRuntime/Contacts",
     );
-    expect(base).toHaveBeenCalledWith("appRuntime");
-    expect(table).toHaveBeenCalledWith("Contacts");
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      headers: {
+        authorization: "Bearer runtime-airtable-key",
+      },
+    });
   });
 
   it("lets Turnstile verification read Worker secrets at request time", async () => {
@@ -144,8 +137,8 @@ describe("Cloudflare runtime env timing", () => {
         TURNSTILE_ALLOWED_HOSTS: undefined,
       },
     }));
-    vi.doMock("@/config/paths/site-config", () => ({
-      SITE_CONFIG: { baseUrl: "https://example.com" },
+    vi.doMock("@/config/single-site", () => ({
+      SINGLE_SITE_CONFIG: { baseUrl: "https://example.com" },
     }));
     vi.doMock("@/lib/logger", () => ({
       logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -198,8 +191,8 @@ describe("Cloudflare runtime env timing", () => {
       },
       getRuntimeEnvBoolean: () => undefined,
     }));
-    vi.doMock("@/config/paths/site-config", () => ({
-      SITE_CONFIG: { baseUrl: "https://example.com" },
+    vi.doMock("@/config/single-site", () => ({
+      SINGLE_SITE_CONFIG: { baseUrl: "https://example.com" },
     }));
     vi.doMock("@/lib/logger", () => ({
       logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() },

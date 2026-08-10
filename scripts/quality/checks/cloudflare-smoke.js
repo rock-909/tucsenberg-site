@@ -18,8 +18,8 @@ const EXTERNAL_URL_SMOKE_EXPECTATIONS = [
   { pathname: "/products", status: 200 },
   { pathname: "/contact", status: 200 },
   { pathname: "/request-quote", status: 200 },
-  { pathname: "/zh", status: 404 },
-  { pathname: "/zh/contact", status: 404 },
+  { pathname: "/fr", status: 404 },
+  { pathname: "/fr/contact", status: 404 },
 ];
 const CF_PREVIEW_SMOKE_EXPECTATIONS = [
   { pathname: "/", status: 200, html: true },
@@ -27,13 +27,13 @@ const CF_PREVIEW_SMOKE_EXPECTATIONS = [
   { pathname: "/products", status: 200, html: true },
   { pathname: "/contact", status: 200, html: true },
   { pathname: "/request-quote", status: 200, html: true },
-  { pathname: "/zh", status: 404 },
-  { pathname: "/zh/contact", status: 404 },
+  { pathname: "/fr", status: 404 },
+  { pathname: "/fr/contact", status: 404 },
   // public/ 下的文件由 Cloudflare Static Assets 直送，不经过 Next 服务器，
   // 所以 Node 侧的 e2e 证明不了它们的响应头。这里打的是本地 Worker，
   // 是 public/_headers 唯一的行为层证明。
   {
-    pathname: "/downloads/spec-sheet-tb-bw.pdf",
+    pathname: "/downloads/spec-sheet-tb-ag.pdf",
     status: 200,
     robotsTag: "noindex",
   },
@@ -45,12 +45,12 @@ const DEPLOYED_SMOKE_EXPECTATIONS = [
   { pathname: "/contact", status: 200 },
   { pathname: "/request-quote", status: 200 },
   { pathname: "/api/health", status: 200 },
-  { pathname: "/zh", status: 404 },
-  { pathname: "/zh/contact", status: 404 },
+  { pathname: "/fr", status: 404 },
+  { pathname: "/fr/contact", status: 404 },
   { pathname: "/.well-known/security.txt", status: 200 },
   { pathname: "/security-policy.txt", status: 404 },
   {
-    pathname: "/downloads/spec-sheet-tb-bw.pdf",
+    pathname: "/downloads/spec-sheet-tb-ag.pdf",
     status: 200,
     robotsTag: "noindex",
   },
@@ -738,7 +738,7 @@ function runCloudflarePreviewDeployedProof() {
   }
 
   const smokeArgs = [
-    "scripts/starter-checks.js",
+    "scripts/quality/checks/cloudflare-smoke.js",
     "deployed-smoke",
     "--base-url",
     baseUrl,
@@ -759,6 +759,38 @@ function runCloudflarePreviewDeployedProof() {
   console.log(JSON.stringify(result, null, 2));
 
   return smokeResult.status ?? 1;
+}
+
+async function main([command, ...args] = process.argv.slice(2)) {
+  const handlers = {
+    "cf-preview-smoke": runCloudflarePreviewSmoke,
+    "external-url-smoke": runExternalUrlSmoke,
+    "deployed-smoke": runDeployedSmoke,
+    "cf-preview-deployed": runCloudflarePreviewDeployedProof,
+  };
+  const handler = handlers[command];
+
+  if (!handler) {
+    console.error(
+      "Usage: node scripts/quality/checks/cloudflare-smoke.js <cf-preview-smoke|external-url-smoke|deployed-smoke|cf-preview-deployed> [options]",
+    );
+    return 1;
+  }
+
+  const result = await handler(args);
+  return typeof result === "number" ? result : result ? 0 : 1;
+}
+
+if (require.main === module) {
+  main().then(
+    (status) => {
+      process.exitCode = status;
+    },
+    (error) => {
+      console.error("[cloudflare-smoke] Unexpected error:", error);
+      process.exitCode = 1;
+    },
+  );
 }
 
 module.exports = {

@@ -2,12 +2,11 @@
  * Cookie Consent Storage Utilities
  *
  * Safe localStorage operations with SSR compatibility,
- * schema versioning, and type-safe parsing.
+ * and type-safe parsing.
  */
 
 import {
   CONSENT_STORAGE_KEY,
-  CONSENT_VERSION,
   DEFAULT_CONSENT,
   type CookieConsent,
   type StoredConsent,
@@ -41,11 +40,7 @@ function isValidConsent(obj: unknown): obj is CookieConsent {
 function isValidStoredConsent(obj: unknown): obj is StoredConsent {
   if (typeof obj !== "object" || obj === null) return false;
   const stored = obj as Record<string, unknown>;
-  return (
-    typeof stored.version === "number" &&
-    typeof stored.updatedAt === "string" &&
-    isValidConsent(stored.consent)
-  );
+  return typeof stored.updatedAt === "string" && isValidConsent(stored.consent);
 }
 
 /** Load consent from localStorage */
@@ -62,13 +57,6 @@ export function loadConsent(): StoredConsent | null {
       return null;
     }
 
-    // Handle version migrations if needed
-    if (parsed.version < CONSENT_VERSION) {
-      const migrated = migrateConsent(parsed);
-      saveConsent(migrated.consent);
-      return migrated;
-    }
-
     return parsed;
   } catch {
     window.localStorage.removeItem(CONSENT_STORAGE_KEY);
@@ -83,7 +71,6 @@ export function saveConsent(consent: CookieConsent): void {
   const stored: StoredConsent = {
     consent,
     updatedAt: new Date().toISOString(),
-    version: CONSENT_VERSION,
   };
 
   try {
@@ -91,26 +78,6 @@ export function saveConsent(consent: CookieConsent): void {
   } catch {
     // Storage quota exceeded or other error - fail silently
   }
-}
-
-/** Clear consent from localStorage */
-export function clearConsent(): void {
-  if (!isStorageAvailable()) return;
-
-  try {
-    window.localStorage.removeItem(CONSENT_STORAGE_KEY);
-  } catch {
-    // Fail silently
-  }
-}
-
-/** Migrate consent from older versions */
-function migrateConsent(stored: StoredConsent): StoredConsent {
-  // Currently only version 1, future migrations go here
-  return {
-    ...stored,
-    version: CONSENT_VERSION,
-  };
 }
 
 /** Create consent with all optional categories accepted */

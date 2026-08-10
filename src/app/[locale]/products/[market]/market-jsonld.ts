@@ -1,5 +1,5 @@
 import { buildCatalogBreadcrumbJsonLd } from "@/components/products/catalog-breadcrumb-jsonld";
-import { SITE_CONFIG } from "@/config/paths";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import type { MarketDefinition } from "@/constants/product-catalog";
 import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-pages";
 import { generateProductData } from "@/lib/structured-data-generators";
@@ -13,7 +13,7 @@ function getJsonLdProductImage(productPage: TucsenbergProductPage) {
     return undefined;
   }
 
-  return new URL(productPage.image.src, SITE_CONFIG.baseUrl).toString();
+  return new URL(productPage.image.src, SINGLE_SITE_CONFIG.baseUrl).toString();
 }
 
 function isSafeRootRelativeImageSrc(src: string): boolean {
@@ -36,7 +36,7 @@ export async function buildMarketPageJsonLdData({
     name: productPage.title,
     description: productPage.lead,
     url: marketUrl,
-    brand: SITE_CONFIG.name,
+    brand: SINGLE_SITE_CONFIG.name,
     ...(image ? { image } : {}),
   });
   const breadcrumbSchema = await buildCatalogBreadcrumbJsonLd({

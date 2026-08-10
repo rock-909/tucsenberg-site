@@ -80,52 +80,6 @@ const eslintConfig = [
     ...reactYouMightNotNeedAnEffect.configs.strict,
   },
 
-  // Theme switcher exception for SSR hydration pattern
-  {
-    name: "theme-switcher-ssr-exception",
-    files: ["**/theme-switcher.tsx", "**/horizontal-theme-toggle-simple.tsx"],
-    plugins: {
-      "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
-    },
-    rules: {
-      // next-themes 推荐的 SSR 水合模式需要在 useEffect 中初始化 mounted 状态
-      "react-you-might-not-need-an-effect/no-initialize-state": "off",
-    },
-  },
-
-  // Mobile navigation route change handler exception
-  {
-    name: "mobile-navigation-route-exception",
-    files: ["**/mobile-navigation.tsx"],
-    plugins: {
-      "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
-    },
-    rules: {
-      // Next.js 路由变化时关闭菜单是合理的 useEffect 用例
-      "react-you-might-not-need-an-effect/no-event-handler": "off",
-    },
-  },
-
-  // SSR-compatible hooks and components exception
-  {
-    name: "ssr-hooks-exception",
-    files: [
-      "**/locale-storage-hooks.ts",
-      "**/use-breakpoint.ts",
-      "**/use-scroll-shadow.ts",
-      "**/use-web-vitals-diagnostics.ts",
-    ],
-    plugins: {
-      "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
-    },
-    rules: {
-      // SSR 兼容性模式：使用 lazy initializer 或 useEffect 安全访问浏览器 API
-      "react-you-might-not-need-an-effect/no-initialize-state": "off",
-      // Web Vitals 诊断需要在 useEffect 中初始化历史数据
-      "react-you-might-not-need-an-effect/no-pass-data-to-parent": "off",
-    },
-  },
-
   // Accessibility: prefersReducedMotion is a system media query, not a component prop
   // When user preference changes, updating visibility state is a valid a11y pattern
   {
@@ -204,39 +158,6 @@ const eslintConfig = [
     rules: {
       complexity: "off",
       "max-params": "off",
-    },
-  },
-
-  // CSS-First Responsive Design - Discourage useBreakpoint for layout
-  //
-  // 这块的作用域是 files + 它自己这份 ignores，跟后面的
-  // architecture-boundaries 不是同一个作用域（那块排除了 scripts、config、
-  // src/constants 等）。所以它在那些被排除的文件上仍然生效，不是重复声明。
-  {
-    name: "css-first-responsive-design",
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    ignores: [
-      // Allow useBreakpoint in its own file and tests
-      "**/hooks/use-breakpoint.ts",
-      "**/hooks/__tests__/use-breakpoint.test.ts",
-      // Legacy ResponsiveLayout tests during migration
-      "**/components/__tests__/responsive-layout.test.tsx",
-    ],
-    rules: {
-      "no-restricted-imports": [
-        "warn",
-        {
-          paths: [
-            {
-              name: "@/hooks/use-breakpoint",
-              message:
-                "⚠️ CSS-First Responsive: Prefer Tailwind responsive classes (sm:, md:, lg:) for layout. " +
-                "useBreakpoint is approved only for: (1) interaction logic requiring width detection, " +
-                "(2) analytics/tracking.",
-            },
-          ],
-        },
-      ],
     },
   },
 

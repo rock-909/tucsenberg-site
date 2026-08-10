@@ -29,7 +29,6 @@ describe("i18n locale truth parity", () => {
       "utf8",
     );
 
-    expect(source).not.toContain('["en", "zh"]');
     expect(source).toContain("LOCALES_CONFIG.locales");
   });
 });

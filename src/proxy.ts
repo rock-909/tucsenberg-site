@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { LOCALES_CONFIG } from "@/config/paths/locales-config";
 import { routing } from "@/i18n/routing-config";
 import { HTTP_NOT_FOUND } from "@/constants";
 import { isProductMarketSlug } from "@/constants/product-catalog";
@@ -11,12 +10,6 @@ const PLAIN_NOT_FOUND_HEADERS = {
   "content-type": "text/plain; charset=utf-8",
   "x-robots-tag": "noindex, nofollow",
 } as const;
-
-function isRetiredLocalePath(pathname: string): boolean {
-  return LOCALES_CONFIG.retiredLocales.some(
-    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
-  );
-}
 
 function createPlainNotFound() {
   return new NextResponse("Not Found", {
@@ -42,9 +35,9 @@ function isUnknownProductPath(pathname: string): boolean {
   return market !== undefined && !isProductMarketSlug(market);
 }
 
-export default function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (isRetiredLocalePath(pathname) || isUnknownProductPath(pathname)) {
+  if (isUnknownProductPath(pathname)) {
     return createPlainNotFound();
   }
 

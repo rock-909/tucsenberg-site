@@ -10,26 +10,13 @@ import { captureExpectedConsoleErrors } from "@/test/console";
  * real in-memory rate limiter, and the real Turnstile verification logic.
  *
  * Only the external wires are stubbed:
- * - `global.fetch` — Turnstile siteverify and the Resend HTTP API
- * - the `airtable` SDK — CRM wire with captured create payloads
+ * - `global.fetch` — Turnstile, Resend, and Airtable HTTP APIs
  */
 
 const { fetchMock } = vi.hoisted(() => {
   const fetchMock = vi.fn();
   globalThis.fetch = fetchMock as unknown as typeof fetch;
   return { fetchMock };
-});
-
-const { airtableCreateMock } = vi.hoisted(() => ({
-  airtableCreateMock: vi.fn(),
-}));
-
-vi.mock("airtable", () => {
-  const create = airtableCreateMock;
-  const table = vi.fn(() => ({ create }));
-  const base = vi.fn(() => ({ table }));
-  const configure = vi.fn();
-  return { default: { configure, base } };
 });
 
 import * as inquiryRoute from "@/app/api/inquiry/route";
@@ -40,6 +27,7 @@ const TURNSTILE_SITEVERIFY_URL =
 const TURNSTILE_ALWAYS_PASS_TEST_SECRET = "1x0000000000000000000000000000000AA";
 const TURNSTILE_DUMMY_TEST_TOKEN = "XXXX.DUMMY.TOKEN.XXXX";
 const RESEND_EMAILS_URL = "https://api.resend.com/emails";
+const AIRTABLE_API_URL_PREFIX = "https://api.airtable.com/v0/";
 
 interface TurnstileSiteverifyResponse {
   success: boolean;
@@ -53,6 +41,14 @@ let turnstileResponse: TurnstileSiteverifyResponse = {
   hostname: "localhost",
   action: "product_inquiry",
 };
+let airtableOutcome: Response | Error = jsonResponse({
+  records: [{ id: "rec_real_001" }],
+});
+
+function resolveAirtableOutcome(): Response {
+  if (airtableOutcome instanceof Error) throw airtableOutcome;
+  return airtableOutcome;
+}
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -82,6 +78,18 @@ function getResendCalls(): Array<{
     .filter((call) => call.url.includes("api.resend.com"));
 }
 
+function getAirtableCalls(): Array<{
+  url: string;
+  init: RequestInit | undefined;
+}> {
+  return fetchMock.mock.calls
+    .map(([input, init]) => ({
+      url: resolveFetchUrl(input),
+      init: init as RequestInit | undefined,
+    }))
+    .filter((call) => call.url.startsWith(AIRTABLE_API_URL_PREFIX));
+}
+
 function parseJsonBody(init: RequestInit | undefined): Record<string, unknown> {
   if (typeof init?.body !== "string") {
     throw new Error("Expected Resend request body to be a JSON string");
@@ -90,12 +98,14 @@ function parseJsonBody(init: RequestInit | undefined): Record<string, unknown> {
 }
 
 function getCapturedAirtableFields(): Record<string, unknown> {
-  const call = airtableCreateMock.mock.calls[0];
+  const call = getAirtableCalls()[0];
   if (!call) {
     throw new Error("Airtable create was not called");
   }
-  const records = call[0] as Array<{ fields: Record<string, unknown> }>;
-  const fields = records[0]?.fields;
+  const body = parseJsonBody(call.init) as {
+    records?: Array<{ fields?: Record<string, unknown> }>;
+  };
+  const fields = body.records?.[0]?.fields;
   if (!fields) {
     throw new Error("Airtable create payload had no fields");
   }
@@ -148,15 +158,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
       action: "product_inquiry",
     };
 
-    airtableCreateMock.mockImplementation(
-      async (records: Array<{ fields: Record<string, unknown> }>) => [
-        {
-          id: "rec_real_001",
-          fields: records[0]?.fields ?? {},
-          get: () => new Date().toISOString(),
-        },
-      ],
-    );
+    airtableOutcome = jsonResponse({ records: [{ id: "rec_real_001" }] });
 
     fetchMock.mockImplementation(async (input: unknown) => {
       const url = resolveFetchUrl(input);
@@ -165,6 +167,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
       }
       if (url === RESEND_EMAILS_URL) {
         return jsonResponse({ id: "email_real_001" });
+      }
+      if (url.startsWith(AIRTABLE_API_URL_PREFIX)) {
+        return resolveAirtableOutcome();
       }
       if (url.includes("/messages/")) {
         return jsonResponse({});
@@ -184,7 +189,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(typeof body.data.referenceId).toBe("string");
     expect(body.data.referenceId).toMatch(/^PRO-/);
 
-    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getAirtableCalls()).toHaveLength(1);
     const fields = getCapturedAirtableFields();
     expect(fields).toMatchObject({
       Email: "buyer@example.com",
@@ -320,7 +325,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
         success: false,
         errorCode: API_ERROR_CODES.TURNSTILE_REJECTED,
       });
-      expect(airtableCreateMock).not.toHaveBeenCalled();
+      expect(getAirtableCalls()).toHaveLength(0);
       expect(getResendCalls()).toHaveLength(0);
     },
   );
@@ -334,7 +339,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
 
-    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getAirtableCalls()).toHaveLength(1);
     const fields = getCapturedAirtableFields();
     expect(fields["Requirements"]).toBe(CANONICAL_BUYER_MESSAGE);
     expect(fields["Email"]).toBe("buyer@example.com");
@@ -391,7 +396,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getAirtableCalls()).toHaveLength(1);
     expect(getResendCalls()).toHaveLength(1);
   });
 
@@ -407,6 +412,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
       }
       if (url === RESEND_EMAILS_URL) {
         return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.startsWith(AIRTABLE_API_URL_PREFIX)) {
+        return resolveAirtableOutcome();
       }
       if (url.includes("/messages/")) {
         return jsonResponse({});
@@ -426,7 +434,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(getResendCalls()).toHaveLength(1);
-    expect(airtableCreateMock).toHaveBeenCalledTimes(1);
+    expect(getAirtableCalls()).toHaveLength(1);
     expect(getCapturedAirtableFields()["Requirements"]).toContain(
       "Need flood protection",
     );
@@ -445,6 +453,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
       }
       if (url === RESEND_EMAILS_URL) {
         return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.startsWith(AIRTABLE_API_URL_PREFIX)) {
+        return resolveAirtableOutcome();
       }
       if (url.includes("/messages/")) {
         return jsonResponse({});
@@ -500,7 +511,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(body.success).toBe(false);
     expect(body.errorCode).toBe(API_ERROR_CODES.INQUIRY_VALIDATION_FAILED);
 
-    expect(airtableCreateMock).not.toHaveBeenCalled();
+    expect(getAirtableCalls()).toHaveLength(0);
     expect(getResendCalls()).toHaveLength(0);
   });
 
@@ -519,7 +530,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
     expect(body.success).toBe(false);
     expect(body.errorCode).toBe(API_ERROR_CODES.TURNSTILE_REJECTED);
 
-    expect(airtableCreateMock).not.toHaveBeenCalled();
+    expect(getAirtableCalls()).toHaveLength(0);
     expect(getResendCalls()).toHaveLength(0);
   });
 
@@ -528,7 +539,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "Failed to create lead record",
       "Product Airtable createLead failed",
     );
-    airtableCreateMock.mockRejectedValue(new Error("airtable down"));
+    airtableOutcome = new Error("airtable down");
 
     const response = await inquiryRoute.POST(
       makeInquiryRequest(VALID_INQUIRY_BODY),
@@ -549,7 +560,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "Product owner email failed",
       "Product Airtable createLead failed",
     );
-    airtableCreateMock.mockRejectedValue(new Error("airtable down"));
+    airtableOutcome = new Error("airtable down");
     fetchMock.mockImplementation(async (input: unknown) => {
       const url = resolveFetchUrl(input);
       if (url === TURNSTILE_SITEVERIFY_URL) {
@@ -557,6 +568,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
       }
       if (url === RESEND_EMAILS_URL) {
         return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.startsWith(AIRTABLE_API_URL_PREFIX)) {
+        return resolveAirtableOutcome();
       }
       if (url.includes("/messages/")) {
         return jsonResponse({});
@@ -583,7 +597,7 @@ describe("lead pipeline (real end-to-end proof)", () => {
       "Product owner email failed",
       "Product Airtable createLead failed",
     );
-    airtableCreateMock.mockResolvedValue([{ id: undefined }]);
+    airtableOutcome = jsonResponse({ records: [{}] });
     fetchMock.mockImplementation(async (input: unknown) => {
       const url = resolveFetchUrl(input);
       if (url === TURNSTILE_SITEVERIFY_URL) {
@@ -591,6 +605,9 @@ describe("lead pipeline (real end-to-end proof)", () => {
       }
       if (url === RESEND_EMAILS_URL) {
         return jsonResponse({ error: "resend down" }, 500);
+      }
+      if (url.startsWith(AIRTABLE_API_URL_PREFIX)) {
+        return resolveAirtableOutcome();
       }
       if (url.includes("/messages/")) {
         return jsonResponse({});

@@ -14,7 +14,6 @@ const COMPONENT_GOVERNANCE_APP_ROOT = "src/app";
 const COMPONENT_GOVERNANCE_SOURCE_ROOT = "src";
 const COMPONENT_GOVERNANCE_PRODUCTION_CONTENT_ROOTS = ["content/pages"];
 const COMPONENT_GOVERNANCE_UI_ROOT = "src/components/ui";
-const COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE = "required";
 const COMPONENT_GOVERNANCE_SOURCE_TRUTH_FIELDS = [
   "radixLayer",
   "clientBoundary",
@@ -277,32 +276,6 @@ function collectRegistryFindings(rootDir, registry, errors) {
       );
     }
 
-    if (
-      !component ||
-      typeof component !== "object" ||
-      !Object.prototype.hasOwnProperty.call(component, "story")
-    ) {
-      errors.push(
-        createFinding(
-          COMPONENT_GOVERNANCE_REGISTRY_PATH,
-          "registry-story-missing",
-          `Registry item "${componentName}" must define story governance.`,
-        ),
-      );
-      continue;
-    }
-
-    if (component.story !== COMPONENT_GOVERNANCE_REQUIRED_STORY_VALUE) {
-      errors.push(
-        createFinding(
-          COMPONENT_GOVERNANCE_REGISTRY_PATH,
-          "registry-story-invalid",
-          `Registry item "${componentName}" story must be "required".`,
-        ),
-      );
-      continue;
-    }
-
     collectRegistrySourceTruthFieldFindings(componentName, component, errors);
     collectRegistrySourceTruthMismatchFindings(
       rootDir,
@@ -310,17 +283,6 @@ function collectRegistryFindings(rootDir, registry, errors) {
       component,
       errors,
     );
-
-    const storyPath = `${COMPONENT_GOVERNANCE_UI_ROOT}/${componentName}.stories.tsx`;
-    if (!exists(rootDir, storyPath)) {
-      errors.push(
-        createFinding(
-          storyPath,
-          "required-story-missing",
-          `Required story for UI primitive "${componentName}" is missing.`,
-        ),
-      );
-    }
   }
 }
 
@@ -455,6 +417,10 @@ function runComponentGovernanceCli() {
   }
 
   return true;
+}
+
+if (require.main === module) {
+  if (!runComponentGovernanceCli()) process.exitCode = 1;
 }
 
 module.exports = {

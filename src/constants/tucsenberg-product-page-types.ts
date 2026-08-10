@@ -190,7 +190,7 @@ export interface TucsenbergProductPage {
   /** Honest-boundary note rendered after the lead; supports inline markdown links. */
   leadNote?: string;
   cta: TucsenbergProductCta;
-  downloadHref: string;
+  downloadHref?: string;
   /** Page-specific request-a-quote guidance shown in the final CTA section. */
   rfqNote?: string;
   /** Scannable proof strip under the hero; verifiable facts only, never invented. */

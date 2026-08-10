@@ -72,7 +72,6 @@ export const serverEnvSchema = {
     .string()
     .default("true")
     .transform((val) => val === "true"),
-  CSP_REPORT_URI: z.url().optional(),
   CORS_ALLOWED_ORIGINS: z.string().optional(),
 };
 
@@ -145,7 +144,6 @@ export const runtimeEnv = {
   PLAYWRIGHT_TEST: process.env.PLAYWRIGHT_TEST,
   SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
   SECURITY_HEADERS_ENABLED: process.env.SECURITY_HEADERS_ENABLED,
-  CSP_REPORT_URI: process.env.CSP_REPORT_URI,
   CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
 
   // Client
@@ -200,7 +198,7 @@ export const env = createEnv({
   client: clientEnvSchema,
   /**
    * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
-   * middlewares) or client-side so we need to destruct manually.
+   * proxies) or client-side so we need to destruct manually.
    */
   runtimeEnv,
   /**

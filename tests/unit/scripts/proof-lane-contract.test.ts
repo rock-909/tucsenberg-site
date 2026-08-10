@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { STARTER_CHECK_COMMANDS } from "../../../scripts/starter-checks.js";
 import {
   RELEASE_PROOF_MANIFEST,
   getReleaseProofSequence,
@@ -76,7 +75,6 @@ describe("package proof command surface", () => {
 
   it("keeps release-facing package scripts wired to existing commands", () => {
     const scripts = readPackageScripts();
-    const knownChecks = new Set(STARTER_CHECK_COMMANDS);
 
     for (const scriptName of LEAF_RELEASE_SCRIPTS) {
       expect(scripts[scriptName]?.trim(), scriptName).toBeTruthy();
@@ -89,11 +87,14 @@ describe("package proof command surface", () => {
         `${scriptName} is missing from package.json`,
       ).toBeDefined();
 
-      const referencedChecks = [
-        ...command!.matchAll(/starter-checks\.js\s+([\w-]+)/gu),
-      ].map((match) => match[1]!);
-      for (const check of referencedChecks) {
-        expect(knownChecks, `${scriptName} -> ${check}`).toContain(check);
+      const nodeScripts = [...command!.matchAll(/\bnode\s+([\w./-]+)/gu)].map(
+        (match) => match[1]!,
+      );
+      for (const scriptPath of nodeScripts) {
+        expect(
+          repoPathExists(scriptPath),
+          `${scriptName} -> ${scriptPath}`,
+        ).toBe(true);
       }
 
       const nestedScripts = [...command!.matchAll(/\bpnpm\s+([\w:-]+)/gu)]
@@ -106,7 +107,7 @@ describe("package proof command surface", () => {
       }
 
       expect(
-        referencedChecks.length + nestedScripts.length,
+        nodeScripts.length + nestedScripts.length,
         `${scriptName} reaches no check or nested script`,
       ).toBeGreaterThan(0);
     }
