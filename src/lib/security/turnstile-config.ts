@@ -1,5 +1,5 @@
 import { env, getRuntimeEnvString } from "@/lib/env";
-import { SITE_CONFIG } from "@/config/paths/site-config";
+import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import { logger } from "@/lib/logger";
 
 /**
@@ -22,7 +22,7 @@ function parseConfiguredHosts(): string[] {
  */
 function deriveFallbackHosts(): string[] {
   const hosts = new Set<string>();
-  const baseUrl = SITE_CONFIG.baseUrl?.trim() ?? "";
+  const baseUrl = SINGLE_SITE_CONFIG.baseUrl?.trim() ?? "";
 
   if (baseUrl !== "") {
     try {

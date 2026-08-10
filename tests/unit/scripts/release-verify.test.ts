@@ -205,4 +205,41 @@ describe("release verify runner", () => {
     expect(status).toBe(0);
     expect(executedBudgetSteps).toEqual(["wrangler-preview-dry-run"]);
   });
+
+  it("stops when the Cloudflare build reports a missing translation message", async () => {
+    const executedSteps: string[] = [];
+    const errorSpy = captureExpectedConsoleErrors(
+      "Release verification rejected cloudflare-build output: found MISSING_MESSAGE.",
+    );
+
+    const status = await runReleaseVerify({
+      rootDir: "/repo",
+      runCommand: (step) => {
+        executedSteps.push(step.id);
+        if (step.forbiddenOutput) {
+          return {
+            status: 0,
+            stdout: "IntlError: MISSING_MESSAGE: catalog.title",
+            stderr: "",
+          };
+        }
+        if (step.artifactBudget) {
+          return {
+            status: 0,
+            stdout: "Total Upload: 8423.21 KiB / gzip: 2174.32 KiB",
+            stderr: "",
+          };
+        }
+        return 0;
+      },
+      portInUse: async () => false,
+    });
+
+    expect(status).toBe(1);
+    expect(executedSteps.at(-1)).toBe("cloudflare-build");
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Release verification rejected cloudflare-build output: found MISSING_MESSAGE.",
+    );
+    errorSpy.mockRestore();
+  });
 });

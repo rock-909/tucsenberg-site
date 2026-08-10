@@ -36,7 +36,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
     label: "Request a Quote",
     note: "Reply within 12 hours.",
   },
-  downloadHref: "/downloads/spec-sheet-tb-bw.pdf",
   proofStrip: [
     "Freestanding — no fixing",
     `${TB_BW_HEIGHT_RANGE.label} heights`,

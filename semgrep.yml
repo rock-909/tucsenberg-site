@@ -315,7 +315,6 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
-        - "src/middleware.ts"
         - "src/lib/security/client-ip.ts"
     metadata:
       category: security
@@ -338,7 +337,6 @@ rules:
         - "**/__tests__/**"
         - "**/*.test.*"
         - "**/*.spec.*"
-        - "src/app/api/csp-report/**"
     metadata:
       category: correctness
       technology: [nextjs]

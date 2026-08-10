@@ -13,33 +13,24 @@ test.describe("Tucsenberg site smoke", () => {
     });
   }
 
-  test("current site exposes no Chinese language entry", async ({ page }) => {
+  test("current site renders the configured English locale", async ({
+    page,
+  }) => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
 
     expect(response?.status(), "/ should return HTTP 200").toBe(200);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByText("简体中文")).toHaveCount(0);
-    await expect(page.getByText("中文")).toHaveCount(0);
-    await expect(page.locator('a[hreflang="zh"]')).toHaveCount(0);
-    await expect(page.locator('a[href="/zh"]')).toHaveCount(0);
   });
 
-  for (const removedRoute of ["/zh", "/zh/contact"] as const) {
-    test(`${removedRoute} is not a live language route`, async ({ page }) => {
-      const response = await page.goto(removedRoute, {
-        waitUntil: "domcontentloaded",
-      });
-
-      expect(response?.status(), `${removedRoute} should return HTTP 404`).toBe(
-        404,
-      );
-      await expect(page.locator("html")).not.toHaveAttribute("lang", "zh");
-      await expect(page.getByText("简体中文")).toHaveCount(0);
-      await expect(page.getByText("中文")).toHaveCount(0);
-      await expect(page.locator('a[hreflang="zh"]')).toHaveCount(0);
-      await expect(page.locator('a[href="/zh"]')).toHaveCount(0);
+  test("unknown locale-like prefixes use the ordinary 404", async ({
+    page,
+  }) => {
+    const response = await page.goto("/fr/contact", {
+      waitUntil: "domcontentloaded",
     });
-  }
+
+    expect(response?.status(), "/fr/contact should return HTTP 404").toBe(404);
+  });
 
   test("public PDF downloads stay noindex", async ({ request }) => {
     const response = await request.head("/downloads/spec-sheet-tb-ag.pdf");

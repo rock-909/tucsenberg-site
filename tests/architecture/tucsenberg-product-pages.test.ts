@@ -131,12 +131,26 @@ describe("Tucsenberg product page copy contract", () => {
       expect(page.cta.label, slug).toMatch(/quote|interest/iu);
       expect(page.sections.length, slug).toBeGreaterThanOrEqual(4);
       expect(page.faqs.length, slug).toBeGreaterThanOrEqual(3);
-      expect(page.downloadHref, slug).toMatch(/^\/downloads\/.+\.pdf$/u);
+      if (page.downloadHref) {
+        expect(page.downloadHref, slug).toMatch(/^\/downloads\/.+\.pdf$/u);
+      }
       expect(pagePayload, slug).not.toMatch(/offers"\s*:\s*\{/iu);
       expect(pagePayload, slug).not.toMatch(/price"\s*:/iu);
       expect(pagePayload, slug).not.toMatch(/[$€£]\s*\d/u);
       expect(pagePayload, slug).not.toContain("TODO-OWNER");
     }
+  });
+
+  it("does not link suspended or unverified product PDFs", () => {
+    expect(
+      "downloadHref" in TUCSENBERG_PRODUCT_PAGES["frp-flood-barriers"],
+    ).toBe(false);
+    expect("downloadHref" in TUCSENBERG_PRODUCT_PAGES["flood-tube-dams"]).toBe(
+      false,
+    );
+    expect(
+      JSON.stringify(TUCSENBERG_PRODUCT_PAGES["flood-tube-dams"]),
+    ).not.toContain("MOQ from 10 metres");
   });
 
   it("uses explicit product image state instead of placeholder paths", () => {

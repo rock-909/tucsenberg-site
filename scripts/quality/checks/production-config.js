@@ -96,21 +96,6 @@ function loadSingleSiteModule() {
   return require("../../../src/config/single-site");
 }
 
-function loadSiteConfigValidatorModule() {
-  if (isVitestRuntime()) {
-    return {
-      validateSiteConfig: () => ({
-        valid: true,
-        warnings: [],
-        errors: [],
-      }),
-    };
-  }
-
-  ensureTypeScriptRequireRuntime();
-  return require("../../../src/config/paths/site-config");
-}
-
 const MIN_SECRET_LENGTH = 32;
 
 function readEnv(env, key) {
@@ -447,8 +432,6 @@ function validatePublicLaunchTrustContent(env) {
 }
 
 function validateProductionConfig(env = process.env) {
-  const { validateSiteConfig } = loadSiteConfigValidatorModule();
-  const siteConfig = validateSiteConfig();
   const runtimeContractChecked = shouldValidateProductionRuntimeContract(env);
   const runtimeContract = runtimeContractChecked
     ? validateProductionRuntimeContract(env)
@@ -456,16 +439,8 @@ function validateProductionConfig(env = process.env) {
   const publicLaunchTrust = validatePublicLaunchTrustContent(env);
 
   return {
-    warnings: [
-      ...siteConfig.warnings,
-      ...runtimeContract.warnings,
-      ...publicLaunchTrust.warnings,
-    ],
-    errors: [
-      ...siteConfig.errors,
-      ...runtimeContract.errors,
-      ...publicLaunchTrust.errors,
-    ],
+    warnings: [...runtimeContract.warnings, ...publicLaunchTrust.warnings],
+    errors: [...runtimeContract.errors, ...publicLaunchTrust.errors],
     runtimeContractChecked,
   };
 }
@@ -493,6 +468,10 @@ function runValidateProductionConfigCli() {
     console.log("Runtime contract enforced.");
   }
   return true;
+}
+
+if (require.main === module) {
+  if (!runValidateProductionConfigCli()) process.exitCode = 1;
 }
 
 module.exports = {

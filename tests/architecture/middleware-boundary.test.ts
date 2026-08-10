@@ -6,15 +6,15 @@ function read(repoPath: string) {
   return readFileSync(repoPath, "utf8");
 }
 
-describe("middleware responsibility boundary", () => {
-  it("keeps CSP and generic security headers out of middleware", () => {
-    const middlewareSource = read("src/middleware.ts");
+describe("proxy responsibility boundary", () => {
+  it("keeps CSP and generic security headers out of proxy", () => {
+    const proxySource = read("src/proxy.ts");
 
-    expect(middlewareSource).not.toContain("@/config/security");
-    expect(middlewareSource).not.toContain("generateNonce");
-    expect(middlewareSource).not.toContain("getSecurityHeaders");
-    expect(middlewareSource).not.toContain("Content-Security-Policy");
-    expect(middlewareSource).not.toContain("x-nonce");
+    expect(proxySource).not.toContain("@/config/security");
+    expect(proxySource).not.toContain("generateNonce");
+    expect(proxySource).not.toContain("getSecurityHeaders");
+    expect(proxySource).not.toContain("Content-Security-Policy");
+    expect(proxySource).not.toContain("x-nonce");
   });
 
   it("keeps Next.js native headers as the security-header owner", () => {
@@ -37,42 +37,17 @@ describe("middleware responsibility boundary", () => {
     expect(securitySource).not.toContain("export function isValidNonce");
   });
 
-  it("keeps retired custom locale patch routing narrow", () => {
-    const middlewareSource = read("src/middleware.ts");
-    const headerClientSource = read("src/components/layout/header-client.tsx");
+  it("keeps proxy as a thin next-intl delegate with pre-stream finite-route 404s", () => {
+    const proxySource = read("src/proxy.ts");
 
-    expect(middlewareSource).toContain("isRetiredLocalePath");
-    expect(middlewareSource).not.toContain("fromLocaleFallback");
-    expect(middlewareSource).not.toContain("getRoutingPathPatterns");
-    expect(middlewareSource).not.toContain("matchesRoutePattern");
-    expect(middlewareSource).not.toContain("isKnownLocalizedPath");
-    expect(middlewareSource).not.toContain("tryHandleInvalidLocalePrefix");
-    expect(headerClientSource).not.toContain("fromLocaleFallback");
-  });
-
-  it("keeps manual locale cookie handling out of middleware", () => {
-    const middlewareSource = read("src/middleware.ts");
-
-    expect(middlewareSource).not.toContain('cookies.set("NEXT_LOCALE"');
-    expect(middlewareSource).not.toContain("x-middleware-set-cookie");
-    expect(middlewareSource).not.toContain("isSecureAppEnv");
-    expect(middlewareSource).not.toContain("extractLocaleCandidate");
-    expect(middlewareSource).not.toContain("setLocaleCookie");
-    expect(middlewareSource).not.toContain("extractLocaleFromLocationHeader");
-  });
-
-  it("keeps middleware as a thin next-intl delegate with pre-stream finite-route 404s", () => {
-    const middlewareSource = read("src/middleware.ts");
-
-    expect(middlewareSource).toContain(
+    expect(proxySource).toContain(
       'import createMiddleware from "next-intl/middleware";',
     );
-    expect(middlewareSource).toContain(
+    expect(proxySource).toContain(
       "const intlMiddleware = createMiddleware(routing);",
     );
-    expect(middlewareSource).toContain("isRetiredLocalePath(pathname)");
-    expect(middlewareSource).toContain("isUnknownProductPath(pathname)");
-    expect(middlewareSource).toContain("return createPlainNotFound();");
-    expect(middlewareSource).toContain("return intlMiddleware(request);");
+    expect(proxySource).toContain("isUnknownProductPath(pathname)");
+    expect(proxySource).toContain("return createPlainNotFound();");
+    expect(proxySource).toContain("return intlMiddleware(request);");
   });
 });

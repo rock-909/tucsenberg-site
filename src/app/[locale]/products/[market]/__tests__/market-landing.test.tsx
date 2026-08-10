@@ -109,10 +109,17 @@ vi.mock("@/i18n/routing", () => ({
 }));
 
 vi.mock("@/config/paths", () => ({
-  ...mockPathsConfig,
+  LOCALES_CONFIG: mockPathsConfig.LOCALES_CONFIG,
+  PATHS_CONFIG: mockPathsConfig.PATHS_CONFIG,
+  DYNAMIC_PATHS_CONFIG: mockPathsConfig.DYNAMIC_PATHS_CONFIG,
   getLocalizedPath: (pageType: string) =>
     pageType === "products" ? "/products" : "/",
   getProductMarketPath: (market: string) => `/products/${market}`,
+}));
+
+vi.mock("@/config/single-site", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/config/single-site")>()),
+  SINGLE_SITE_CONFIG: mockPathsConfig.SITE_CONFIG,
 }));
 
 vi.mock("@/components/products/catalog-breadcrumb", () => ({
@@ -185,7 +192,9 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
 
 describe("Market Landing Page", () => {
   beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     vi.resetModules();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     mockPathsConfig.SITE_CONFIG.baseUrl = "https://www.example.com";
     mockNotFound.mockClear();
     mockJsonLdGraphScript.mockClear();
@@ -477,12 +486,20 @@ describe("Market Landing Page", () => {
       );
     });
 
-    it("renders the spec-sheet download link without gating", async () => {
+    it("does not render a download link for a suspended spec sheet", async () => {
       await renderPage("abs-flood-barriers");
 
       expect(
+        screen.queryByRole("link", { name: "Download spec sheet" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders a verified public spec-sheet download", async () => {
+      await renderPage("aluminum-flood-gates");
+
+      expect(
         screen.getByRole("link", { name: "Download spec sheet" }),
-      ).toHaveAttribute("href", "/downloads/spec-sheet-tb-bw.pdf");
+      ).toHaveAttribute("href", "/downloads/spec-sheet-tb-ag.pdf");
     });
 
     it("links to the specifications guide from the ABS specifications section", async () => {

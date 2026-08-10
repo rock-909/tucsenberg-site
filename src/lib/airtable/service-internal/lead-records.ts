@@ -1,6 +1,5 @@
 import "server-only";
 
-import type AirtableNS from "airtable";
 import type {
   CreatedAirtableRecord,
   ProductLeadData,
@@ -79,21 +78,20 @@ function buildLeadFields(data: ProductLeadData, now: string): AirtableFields {
   return fields;
 }
 
-interface AirtableLikeError {
-  error: string;
-  message: string;
+interface AirtableHttpError {
+  errorType?: string;
   statusCode: number;
 }
 
-function isAirtableLikeError(error: unknown): error is AirtableLikeError {
+function isAirtableHttpError(error: unknown): error is AirtableHttpError {
   if (typeof error !== "object" || error === null) {
     return false;
   }
 
   const candidate = error as Record<string, unknown>;
   return (
-    typeof candidate.error === "string" &&
-    typeof candidate.message === "string" &&
+    (candidate.errorType === undefined ||
+      typeof candidate.errorType === "string") &&
     typeof candidate.statusCode === "number"
   );
 }
@@ -101,33 +99,63 @@ function isAirtableLikeError(error: unknown): error is AirtableLikeError {
 function buildCreateLeadRecordLogContext(
   error: unknown,
 ): Record<string, string | number> {
-  if (error instanceof Error) {
-    return { error: error.message };
+  if (isAirtableHttpError(error)) {
+    return {
+      ...(error.errorType ? { errorType: error.errorType } : {}),
+      statusCode: error.statusCode,
+    };
   }
 
-  if (isAirtableLikeError(error)) {
-    return { errorType: error.error, statusCode: error.statusCode };
-  }
+  if (error instanceof Error) return { error: error.message };
 
   return { error: "Unknown error" };
 }
 
 export async function createLeadRecord(params: {
-  base: AirtableNS.Base;
+  apiKey: string;
+  baseId: string;
   tableName: string;
   data: ProductLeadData;
+  signal: AbortSignal;
 }): Promise<CreatedAirtableRecord> {
-  const { base, tableName, data } = params;
+  const { apiKey, baseId, tableName, data, signal } = params;
 
   try {
     const now = new Date().toISOString();
     const fields = buildLeadFields(data, now);
 
-    const [createdRecord] = await base.table(tableName).create([
+    const response = await fetch(
+      `https://api.airtable.com/v0/${encodeURIComponent(baseId)}/${encodeURIComponent(tableName)}`,
       {
-        fields,
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${apiKey}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ records: [{ fields }] }),
+        signal,
       },
-    ]);
+    );
+
+    if (!response.ok) {
+      const errorPayload = (await response.json().catch(() => ({}))) as {
+        error?: { type?: unknown };
+      };
+      const errorType =
+        typeof errorPayload.error?.type === "string"
+          ? errorPayload.error.type
+          : undefined;
+
+      throw Object.assign(new Error("Airtable request failed"), {
+        statusCode: response.status,
+        ...(errorType ? { errorType } : {}),
+      } satisfies AirtableHttpError);
+    }
+
+    const payload = (await response.json()) as {
+      records?: Array<{ id?: unknown }>;
+    };
+    const createdRecord = payload.records?.[0];
 
     if (!createdRecord) {
       throw new Error("Failed to create lead record");

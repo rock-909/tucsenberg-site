@@ -47,7 +47,6 @@ export function moveFixtureToTrash(rootDir: string): void {
 }
 
 export const VALID_BUTTON_REGISTRY_ITEM = {
-  story: "required",
   radixLayer: "primitive",
   clientBoundary: "server-safe",
 };
@@ -63,8 +62,6 @@ export function baseFiles(extraFiles: Record<string, string> = {}) {
     }),
     "src/components/ui/button.tsx":
       'import { Slot } from "@radix-ui/react-slot";\nexport function Button() { return <Slot />; }',
-    "src/components/ui/button.stories.tsx":
-      "export default { title: 'UI/Button' };",
     ...extraFiles,
   };
 }

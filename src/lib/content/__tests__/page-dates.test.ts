@@ -97,7 +97,6 @@ describe("page-dates", () => {
 
     expect(lastModified).toEqual(new Date("2026-04-01T00:00:00Z"));
     expect(mockGetContentEntry).toHaveBeenCalledWith("en", "about");
-    expect(mockGetContentEntry).not.toHaveBeenCalledWith("zh", "about");
   });
 
   it("rejects paths that are not mapped from a static route id", async () => {

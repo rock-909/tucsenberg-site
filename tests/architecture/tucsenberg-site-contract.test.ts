@@ -46,12 +46,15 @@ const TARGET_MDX_PAGES = [
 ] as const;
 
 const TARGET_DOWNLOADS = [
-  "public/downloads/product-catalog.pdf",
-  "public/downloads/supplier-checklist.pdf",
   "public/downloads/spec-sheet-tb-ag.pdf",
-  "public/downloads/spec-sheet-tb-bw.pdf",
   "public/downloads/spec-sheet-tb-fb.pdf",
+] as const;
+
+const SUSPENDED_DOWNLOADS = [
+  "public/downloads/product-catalog.pdf",
+  "public/downloads/spec-sheet-tb-bw.pdf",
   "public/downloads/spec-sheet-tb-td.pdf",
+  "public/downloads/supplier-checklist.pdf",
 ] as const;
 
 const ACTIVE_HOMEPAGE_MESSAGE_FILES = [
@@ -579,7 +582,6 @@ describe("Tucsenberg Phase 1 site contract", () => {
   it("runs as an English-only site", () => {
     expect(LOCALES_CONFIG.locales).toEqual(["en"]);
     expect(LOCALES_CONFIG.defaultLocale).toBe("en");
-    expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);
     expect(getLocaleTimeZone("en")).toBe("UTC");
     expect(getLocaleCurrency("en")).toBe("USD");
   });
@@ -652,24 +654,10 @@ describe("Tucsenberg Phase 1 site contract", () => {
     }
   });
 
-  // 从 `retiredLocales` 派生，而不是点名 zh：以后再退役一种语言，这条自动跟上。
-  // 上面 "runs as an English-only site" 那条仍然钉死 `retiredLocales` 等于 ["zh"]，
-  // 那是故意的——语言集合变动必须有人明确改测试。这条只负责目录别偷偷长回来。
-  it("ships no content or message directory for a retired locale", () => {
-    const retiredDirectories = LOCALES_CONFIG.retiredLocales.flatMap(
-      (locale) => [
-        `content/pages/${locale}`,
-        `messages/${locale}`,
-        `messages/base/${locale}`,
-        `messages/profiles/b2b-lead/${locale}`,
-        `messages/profiles/catalog/${locale}`,
-      ],
-    );
-
-    expect(retiredDirectories.length).toBeGreaterThan(0);
-    for (const directory of retiredDirectories) {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks directories derived from the locale registry
-      expect(() => statSync(directory), directory).toThrow();
+  it("keeps unverified PDF downloads off the public surface", () => {
+    for (const downloadFile of SUSPENDED_DOWNLOADS) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- architecture test checks fixed suspended download list
+      expect(() => statSync(downloadFile), downloadFile).toThrow();
     }
   });
 

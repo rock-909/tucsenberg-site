@@ -105,40 +105,6 @@ describe("component-governance-check", () => {
     expectFinding(result.errors, "registry-primitive-missing-source");
   });
 
-  it("fails when a registry item does not define the story property", () => {
-    const rootDir = createFixture({
-      "src/components/component-governance.registry.json": registry({
-        button: {},
-      }),
-      "src/components/ui/button.tsx":
-        "export function Button() { return null; }",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = collectComponentGovernanceFindings(rootDir);
-
-    expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-story-missing");
-  });
-
-  it("fails when a registry item uses a story value other than required", () => {
-    const rootDir = createFixture({
-      "src/components/component-governance.registry.json": registry({
-        button: { story: "optional" },
-      }),
-      "src/components/ui/button.tsx":
-        "export function Button() { return null; }",
-      "src/components/ui/button.stories.tsx":
-        "export default { title: 'UI/Button' };",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = collectComponentGovernanceFindings(rootDir);
-
-    expect(result.status).toBe("failed");
-    expectFinding(result.errors, "registry-story-invalid");
-  });
-
   it("fails when a registry item is missing source-truth metadata", () => {
     const rootDir = createFixture(
       baseFiles({
@@ -234,26 +200,6 @@ describe("component-governance-check", () => {
 
     expect(result.status).toBe("failed");
     expectFinding(result.errors, "registry-source-mismatch");
-  });
-
-  it("fails when a required primitive story file is missing", () => {
-    const rootDir = createFixture({
-      "src/components/component-governance.registry.json": registry({
-        button: { story: "required" },
-      }),
-      "src/components/ui/button.tsx":
-        "export function Button() { return null; }",
-    });
-    fixtureRoots.push(rootDir);
-
-    const result = collectComponentGovernanceFindings(rootDir);
-
-    expect(result.status).toBe("failed");
-    expectFinding(
-      result.errors,
-      "required-story-missing",
-      "src/components/ui/button.stories.tsx",
-    );
   });
 
   it("fails when production UI code outside src/components/ui imports Radix directly", () => {

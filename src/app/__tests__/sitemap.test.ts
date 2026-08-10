@@ -10,13 +10,13 @@ import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap, { generateSitemap } from "../sitemap";
 
 // Mock dependencies before imports
-vi.mock("@/config/paths", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/config/paths")>();
+vi.mock("@/config/single-site", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/config/single-site")>();
 
   return {
     ...actual,
-    SITE_CONFIG: {
-      ...actual.SITE_CONFIG,
+    SINGLE_SITE_CONFIG: {
+      ...actual.SINGLE_SITE_CONFIG,
       baseUrl: "https://example.com",
     },
   };

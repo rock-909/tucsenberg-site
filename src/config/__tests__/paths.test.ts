@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { Locale } from "@/config/paths";
-import { isPlaceholder } from "@/config/paths/site-config";
 import {
   DYNAMIC_PATHS_CONFIG,
   getCanonicalPath,
@@ -12,7 +11,6 @@ import {
   getProductMarketPath,
   LOCALES_CONFIG,
   PATHS_CONFIG,
-  SITE_CONFIG,
   type PageType,
 } from "../paths";
 
@@ -36,27 +34,6 @@ import {
  * 留下的是有业务语义的：canonical 路径、locale 合约、SEO 可索引性、公开 URL 安全、
  * 原型污染，以及 PageType 穷尽性——新增页面漏配路径会被它抓到。
  */
-
-// 占位符判断复用生产实现（`^\[.+\]$`，首尾锚定）。这个文件原来自己写了一份不带锚的
-// 正则，`"https:// [TWITTER_URL]"`、`"sales[TODO]@bad"` 这种半成品值整串都能通过。
-// URL 也改成真解析：`/^https?:\/\/.+/` 会放行 `"https:// "`。
-const isHttpUrl = (value: string) => {
-  try {
-    const url = new URL(value);
-    return (
-      (url.protocol === "http:" || url.protocol === "https:") &&
-      url.hostname.length > 0
-    );
-  } catch {
-    return false;
-  }
-};
-const isOptionalUrl = (value: string) => value === "" || isHttpUrl(value);
-const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const isPhone = (value: string) =>
-  /^\+\d{1,3}[-\s]?\(?[\d]{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,9}$/.test(value);
-const isOptionalPhone = (value: string) => value === "" || isPhone(value);
-const isOwnerTodo = (value: string) => value === "TODO-OWNER";
 
 const CURRENT_PRODUCTION_LOCALE_CONTRACT = {
   locales: ["en"],
@@ -140,12 +117,6 @@ describe("paths configuration", () => {
       );
     });
 
-    // zh 是退役 locale，middleware 对 /zh 直接 404。它留在这里是为了让退役这件事
-    // 有单一真源，不是为了将来还能开回来。
-    it("keeps zh recorded as retired rather than absent", () => {
-      expect(LOCALES_CONFIG.retiredLocales).toEqual(["zh"]);
-    });
-
     it("resolves locale metadata through helpers", () => {
       expect(getLocaleTimeZone("en")).toBe("UTC");
       expect(getLocaleCurrency("en")).toBe("USD");
@@ -156,56 +127,6 @@ describe("paths configuration", () => {
       expect(Object.isFrozen(LOCALES_CONFIG.locales)).toBe(true);
       expect(Object.isFrozen(LOCALES_CONFIG.timeZones)).toBe(true);
       expect(Object.isFrozen(LOCALES_CONFIG.currencies)).toBe(true);
-    });
-  });
-
-  describe("SITE_CONFIG", () => {
-    it("carries the brand facts pages render", () => {
-      expect(SITE_CONFIG.name).toBe("Tucsenberg");
-      expect(SITE_CONFIG.description).toMatch(/flood barrier/iu);
-    });
-
-    // `toContain("%s")` 放行 `"%ss | Tucsenberg"`：每个页面标题都会多一个字母。
-    // 直接断言渲染结果。
-    it("renders a page title through the SEO template", () => {
-      expect(SITE_CONFIG.seo.titleTemplate.replace("%s", "Contact")).toBe(
-        "Contact | Tucsenberg",
-      );
-      expect(SITE_CONFIG.seo.defaultTitle).toBeTruthy();
-      expect(SITE_CONFIG.seo.defaultDescription).toBeTruthy();
-    });
-
-    // 占位符是允许的，半成品 URL 不是：footer 会把这些值直接渲染成链接，
-    // `structured-data-generators.ts` 还会把它们塞进 JSON-LD 的 `sameAs`。
-    it("only ships social links that are placeholders or real URLs", () => {
-      Object.values(SITE_CONFIG.social).forEach((link) => {
-        expect(isPlaceholder(link) || isOptionalUrl(link)).toBe(true);
-      });
-    });
-
-    it("only ships contact details that are placeholders or well-formed", () => {
-      const { contact } = SITE_CONFIG;
-
-      expect(
-        isPlaceholder(contact.phone) ||
-          isOwnerTodo(contact.phone) ||
-          isOptionalPhone(contact.phone),
-      ).toBe(true);
-      expect(isPlaceholder(contact.email) || isEmail(contact.email)).toBe(true);
-    });
-
-    // 上面两条只在当前值合法时是绿的，看不出校验器自己是不是恒真。这条喂已知的
-    // 坏值，证明它们会红。四个都是真见过的半成品形态。
-    it.each([
-      ["https:// [TWITTER_URL]", "占位符没替换完就拼进了 URL"],
-      ["https:// ", "只有协议，没有主机名"],
-      ["sales[TODO]@bad", "占位符嵌在邮箱里"],
-      ["call[TODO]now", "占位符嵌在电话里"],
-    ])("rejects %s as a publishable public value", (value) => {
-      expect(isPlaceholder(value)).toBe(false);
-      expect(isOptionalUrl(value)).toBe(false);
-      expect(isEmail(value)).toBe(false);
-      expect(isOptionalPhone(value)).toBe(false);
     });
   });
 

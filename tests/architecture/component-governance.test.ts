@@ -22,7 +22,6 @@ const STORY_OR_TEST_FILE_PATTERN =
 const SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?)$/;
 const STORY_FILE_PATTERN = /\.(?:stories)\.(?:ts|tsx|js|jsx|mdx)$/;
 const TSX_FILE_PATTERN = /\.tsx$/;
-const REQUIRED_STORY_VALUE = "required";
 const RADIX_LAYER_VALUES = ["primitive", "local"] as const;
 const CLIENT_BOUNDARY_VALUES = ["server-safe", "client"] as const;
 const REQUIRED_SOURCE_TRUTH_FIELDS = ["radixLayer", "clientBoundary"] as const;
@@ -45,7 +44,6 @@ type ComponentClientBoundary = "server-safe" | "client";
 interface ComponentGovernanceRegistryItem {
   clientBoundary?: ComponentClientBoundary;
   radixLayer?: ComponentRadixLayer;
-  story?: string;
 }
 
 function walkFiles(root: string): string[] {
@@ -162,15 +160,6 @@ describe("component governance", () => {
     for (const [componentName, component] of Object.entries(
       registry.components,
     )) {
-      expect(
-        component,
-        `${componentName} should define story governance`,
-      ).toHaveProperty("story");
-      expect(
-        component.story,
-        `${componentName} story governance should be strictly required`,
-      ).toBe(REQUIRED_STORY_VALUE);
-
       for (const field of REQUIRED_SOURCE_TRUTH_FIELDS) {
         expect(
           component,
@@ -247,21 +236,6 @@ describe("component governance", () => {
 
     expect(undeclared).toEqual([]);
     expect(dependencies).not.toHaveProperty("@radix-ui/themes");
-  });
-
-  it("keeps required Storybook coverage for registered UI primitives", () => {
-    const registry = readComponentGovernanceRegistry();
-    const missingRequiredStories = Object.entries(registry.components)
-      .filter(([, component]) => component.story === REQUIRED_STORY_VALUE)
-      .map(
-        ([componentName]) => `${UI_WRAPPER_ROOT}/${componentName}.stories.tsx`,
-      )
-      .filter((storyPath) => {
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- story paths are built from fixed governance inventory
-        return !existsSync(storyPath);
-      });
-
-    expect(missingRequiredStories).toEqual([]);
   });
 
   it("keeps direct Radix imports inside the UI wrapper layer", () => {

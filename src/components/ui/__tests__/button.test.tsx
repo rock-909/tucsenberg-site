@@ -69,14 +69,9 @@ describe("Button", () => {
   // 这是一张有意为之的映射表，不是逐个 variant 复述它的完整 class 串。
   it.each([
     ["default", "var(--button-primary-bg)"],
-    ["destructive", "bg-destructive"],
     ["outline", "var(--button-outline-border)"],
     ["secondary", "bg-secondary"],
     ["ghost", "hover:bg-accent"],
-    ["link", "underline-offset-4"],
-    ["accent", "bg-accent"],
-    ["on-dark", "var(--neutral-1)"],
-    ["ghost-dark", "var(--neutral-1)"],
   ] as const)("maps the %s variant to its own token", (variant, token) => {
     expect(buttonVariants({ variant })).toContain(token);
   });

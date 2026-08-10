@@ -1141,6 +1141,12 @@ function runCloudflareStaticAssetHeaderCli(options = {}) {
   return true;
 }
 
+if (require.main === module) {
+  if (!runCloudflareStaticAssetHeaderCli({ rootDir: process.cwd() })) {
+    process.exitCode = 1;
+  }
+}
+
 module.exports = {
   EXPECTED_DOWNLOADS_NOINDEX,
   EXPECTED_STATIC_ASSET_CACHE_CONTROL,

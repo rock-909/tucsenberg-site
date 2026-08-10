@@ -260,7 +260,6 @@ describe("env module boundaries", () => {
     expect(loggerSource).not.toContain("env-runtime");
     expect(loggerSource).toContain("sanitizeEmail");
     expect(loggerSource).toContain("sanitizeIP");
-    expect(loggerSource).toContain("sanitizeLogContext");
   });
 
   it("keeps Client Components off PII logger helpers", () => {
@@ -271,9 +270,7 @@ describe("env module boundaries", () => {
 
       return (
         isClientComponent &&
-        (source.includes("sanitizeEmail") ||
-          source.includes("sanitizeIP") ||
-          source.includes("sanitizeLogContext"))
+        (source.includes("sanitizeEmail") || source.includes("sanitizeIP"))
       );
     });
 

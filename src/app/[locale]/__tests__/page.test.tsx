@@ -38,10 +38,8 @@ const mockGetSingleSiteHomeLinkTargets = vi.hoisted(() =>
   })),
 );
 
-// 这里原来本地 mock 了 `@/i18n/routing`，把 locales 写成 `["en", "zh"]`，然后
-// 下面断言 generateStaticParams 返回 en 和 zh——断的是自己刚写下的 mock，站点
-// 真实语言集合是什么它不看，而 zh 早已退役。它确实顺带覆盖了「每个 locale 都要
-// 映射一遍」这个行为，那部分覆盖搬到了
+// 这里不本地 mock `@/i18n/routing`，避免测试制造第二套 locale 事实源。
+// 「每个 locale 都要映射一遍」的行为覆盖在
 // `src/app/[locale]/__tests__/generate-static-params.test.ts`。
 //
 // 全局 setup 已经 mock 了这个模块，locales 是 `["en"]`，Link 也有。
@@ -94,7 +92,7 @@ describe("Home Page", () => {
   describe("generateStaticParams", () => {
     // 期望值手写，不从 routing 反推。这条自己不是独立真值——它读的是全局 mock；
     // 真值在 `tests/architecture/tucsenberg-site-contract.test.ts`，那里手写钉住
-    // `LOCALES_CONFIG.locales` 等于 `["en"]`、`retiredLocales` 等于 `["zh"]`。
+    // `LOCALES_CONFIG.locales` 等于 `["en"]`。
     // 两条合起来才封住：一条钉语言集合是什么，这条钉首页会为它们预生成页面。
     // 这条钉的是「现在只有 en」，它抓不到 `routing.locales.slice(0, 1)` 这类
     // 改动：集合里只有一个元素时，截断和不截断的结果一模一样。「每个 locale 都

@@ -95,11 +95,11 @@ function createPreviewFetchMock(
         });
       }
 
-      if (["/zh", "/zh/contact"].includes(pathname)) {
+      if (["/fr", "/fr/contact"].includes(pathname)) {
         return response(404, "Not Found", { "content-type": "text/plain" });
       }
 
-      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+      if (pathname === "/downloads/spec-sheet-tb-ag.pdf") {
         const headers = new Headers(pdfHeaders);
         headers.set("content-type", "application/pdf");
         return response(200, "%PDF-1.7", headers);
@@ -120,7 +120,7 @@ function createExternalUrlFetchMock() {
       return response(200, "healthy external page");
     }
 
-    if (["/zh", "/zh/contact"].includes(pathname)) {
+    if (["/fr", "/fr/contact"].includes(pathname)) {
       return response(404, "not found");
     }
 
@@ -155,8 +155,8 @@ function createDeployedFetchMock(
 
       if (
         [
-          "/zh",
-          "/zh/contact",
+          "/fr",
+          "/fr/contact",
           "/invalid/contact",
           "/security-policy.txt",
         ].includes(pathname)
@@ -164,7 +164,7 @@ function createDeployedFetchMock(
         return response(404, "not found");
       }
 
-      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+      if (pathname === "/downloads/spec-sheet-tb-ag.pdf") {
         return response(200, "%PDF-1.7", pdfHeaders);
       }
 
@@ -189,7 +189,7 @@ function listenForExternalUrlSmoke(): Promise<{
         return;
       }
 
-      if (["/zh", "/zh/contact"].includes(pathname)) {
+      if (["/fr", "/fr/contact"].includes(pathname)) {
         serverResponse.writeHead(404, { "content-type": "text/plain" });
         serverResponse.end("not found");
         return;
@@ -244,8 +244,8 @@ function listenForDeployedSmoke(): Promise<{
 
       if (
         [
-          "/zh",
-          "/zh/contact",
+          "/fr",
+          "/fr/contact",
           "/invalid/contact",
           "/security-policy.txt",
         ].includes(pathname)
@@ -255,7 +255,7 @@ function listenForDeployedSmoke(): Promise<{
         return;
       }
 
-      if (pathname === "/downloads/spec-sheet-tb-bw.pdf") {
+      if (pathname === "/downloads/spec-sheet-tb-ag.pdf") {
         serverResponse.writeHead(200, {
           "content-type": "application/pdf",
           "x-robots-tag": "noindex",
@@ -286,17 +286,13 @@ function listenForDeployedSmoke(): Promise<{
   });
 }
 
-function createMinimalStarterChecksFixture(): string {
+function createMinimalCloudflareSmokeFixture(): string {
   const rootDir = mkdtempSync(
     path.join(os.tmpdir(), "tucsenberg-minimal-starter-checks-"),
   );
   const focusedChecksDir = path.join(rootDir, "scripts", "quality", "checks");
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- test-owned temp path created above
   mkdirSync(focusedChecksDir, { recursive: true });
-  copyFileSync(
-    path.resolve("scripts/starter-checks.js"),
-    path.join(rootDir, "scripts", "starter-checks.js"),
-  );
   copyFileSync(
     path.resolve("scripts/quality/checks/cloudflare-smoke.js"),
     path.join(focusedChecksDir, "cloudflare-smoke.js"),
@@ -378,16 +374,16 @@ describe("external URL smoke", () => {
       "/products",
       "/contact",
       "/request-quote",
-      "/zh",
-      "/zh/contact",
+      "/fr",
+      "/fr/contact",
     ]);
   });
 
-  it("keeps the starter-checks facade wired to the external-url-smoke CLI", async () => {
+  it("runs external-url-smoke through the direct CLI", async () => {
     const { baseUrl, paths } = await listenForExternalUrlSmoke();
 
     const result = await runNodeCommand([
-      "scripts/starter-checks.js",
+      "scripts/quality/checks/cloudflare-smoke.js",
       "external-url-smoke",
       "--base-url",
       baseUrl,
@@ -399,8 +395,8 @@ describe("external URL smoke", () => {
       "/products",
       "/contact",
       "/request-quote",
-      "/zh",
-      "/zh/contact",
+      "/fr",
+      "/fr/contact",
     ]);
     expect(result.stdout).toContain("[external-url-smoke] All checks passed");
   });
@@ -535,18 +531,18 @@ describe("cloudflare preview smoke", () => {
       "/products",
       "/contact",
       "/request-quote",
-      "/zh",
-      "/zh/contact",
-      "/downloads/spec-sheet-tb-bw.pdf",
+      "/fr",
+      "/fr/contact",
+      "/downloads/spec-sheet-tb-ag.pdf",
       "/api/health",
       "/",
       "/invalid/contact",
       "/products",
       "/contact",
       "/request-quote",
-      "/zh",
-      "/zh/contact",
-      "/downloads/spec-sheet-tb-bw.pdf",
+      "/fr",
+      "/fr/contact",
+      "/downloads/spec-sheet-tb-ag.pdf",
       "/api/health",
       "/products",
       "/products",
@@ -561,7 +557,7 @@ describe("cloudflare preview smoke", () => {
     ).toBe(true);
   });
 
-  it("proves preview pages, removed locale routes, and optional api-health probes", async () => {
+  it("proves preview pages, unknown prefixes, and optional api-health probes", async () => {
     const fetchMock = createPreviewFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
@@ -581,9 +577,9 @@ describe("cloudflare preview smoke", () => {
       "/products",
       "/contact",
       "/request-quote",
-      "/zh",
-      "/zh/contact",
-      "/downloads/spec-sheet-tb-bw.pdf",
+      "/fr",
+      "/fr/contact",
+      "/downloads/spec-sheet-tb-ag.pdf",
       "/api/health",
       "/products",
       "/products",
@@ -719,10 +715,10 @@ describe("cloudflare preview smoke", () => {
     ).resolves.toBe(false);
   });
 
-  it("fails when the removed Chinese route becomes live again", async () => {
+  it("fails when an unknown locale-like prefix becomes live", async () => {
     const consoleError = captureExpectedConsoleErrors(
       "[cf-preview-smoke] Failures detected:",
-      "  - Expected /zh to return 404",
+      "  - Expected /fr to return 404",
     );
     const previewFetchMock = createPreviewFetchMock();
     const fetchMock = vi.fn(
@@ -730,7 +726,7 @@ describe("cloudflare preview smoke", () => {
         input: RequestInfo | URL,
         init?: RequestInit,
       ): Promise<Response> => {
-        if (getRequestPath(input) === "/zh") {
+        if (getRequestPath(input) === "/fr") {
           return response(200, HEALTHY_HTML, {
             "content-type": "text/html; charset=utf-8",
           });
@@ -750,7 +746,7 @@ describe("cloudflare preview smoke", () => {
   it("fails when the preview worker serves a pdf without the noindex header", async () => {
     const consoleError = captureExpectedConsoleErrors(
       "[cf-preview-smoke] Failures detected:",
-      "  - Expected /downloads/spec-sheet-tb-bw.pdf to carry X-Robots-Tag: noindex, got none",
+      "  - Expected /downloads/spec-sheet-tb-ag.pdf to carry X-Robots-Tag: noindex, got none",
     );
     vi.stubGlobal("fetch", createPreviewFetchMock({}));
 
@@ -794,11 +790,11 @@ describe("deployed smoke", () => {
       "/contact",
       "/request-quote",
       "/api/health",
-      "/zh",
-      "/zh/contact",
+      "/fr",
+      "/fr/contact",
       "/.well-known/security.txt",
       "/security-policy.txt",
-      "/downloads/spec-sheet-tb-bw.pdf",
+      "/downloads/spec-sheet-tb-ag.pdf",
     ]);
     expect(
       fetchMock.mock.calls.every(
@@ -850,13 +846,18 @@ describe("deployed smoke", () => {
 
   it("runs deployed smoke from a minimal fixture without node_modules", async () => {
     const { baseUrl, paths } = await listenForDeployedSmoke();
-    const fixtureRoot = createMinimalStarterChecksFixture();
+    const fixtureRoot = createMinimalCloudflareSmokeFixture();
 
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed child path under a test-owned fixture root
     expect(existsSync(path.join(fixtureRoot, "node_modules"))).toBe(false);
 
     const result = await runNodeCommand(
-      ["scripts/starter-checks.js", "deployed-smoke", "--base-url", baseUrl],
+      [
+        "scripts/quality/checks/cloudflare-smoke.js",
+        "deployed-smoke",
+        "--base-url",
+        baseUrl,
+      ],
       fixtureRoot,
     );
 
@@ -871,11 +872,11 @@ describe("deployed smoke", () => {
         "/contact",
         "/request-quote",
         "/api/health",
-        "/zh",
-        "/zh/contact",
+        "/fr",
+        "/fr/contact",
         "/.well-known/security.txt",
         "/security-policy.txt",
-        "/downloads/spec-sheet-tb-bw.pdf",
+        "/downloads/spec-sheet-tb-ag.pdf",
       ].sort(),
     );
     expect(result.stdout).toContain("[post-deploy-smoke] All checks passed");
@@ -897,7 +898,7 @@ describe("deployed smoke", () => {
   it("fails when the deployed PDF loses its noindex header", async () => {
     captureExpectedConsoleErrors(
       "[post-deploy-smoke] Failures detected:",
-      "  - Expected /downloads/spec-sheet-tb-bw.pdf to carry X-Robots-Tag: noindex, got none",
+      "  - Expected /downloads/spec-sheet-tb-ag.pdf to carry X-Robots-Tag: noindex, got none",
     );
     vi.stubGlobal("fetch", createDeployedFetchMock({}));
 

@@ -49,11 +49,16 @@ vi.mock("@/i18n/routing", () => ({
   },
 }));
 
-vi.mock("@/config/paths", () => ({
-  SITE_CONFIG: {
-    baseUrl: "https://www.example.com",
-  },
-}));
+vi.mock("@/config/single-site", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/config/single-site")>();
+  return {
+    ...actual,
+    SINGLE_SITE_CONFIG: {
+      ...actual.SINGLE_SITE_CONFIG,
+      baseUrl: "https://www.example.com",
+    },
+  };
+});
 
 describe("CatalogBreadcrumb", () => {
   async function importComponent() {

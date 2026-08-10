@@ -13,8 +13,8 @@ describe("resolveLocaleParam", () => {
     expect(resolveLocaleParam({ locale: "en" })).toBe("en");
   });
 
-  it("calls notFound for a retired locale", () => {
-    expect(() => resolveLocaleParam({ locale: "zh" })).toThrow(
+  it("calls notFound for an unsupported locale", () => {
+    expect(() => resolveLocaleParam({ locale: "fr" })).toThrow(
       "NEXT_NOT_FOUND",
     );
     expect(notFound).toHaveBeenCalled();

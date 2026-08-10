@@ -12,6 +12,10 @@ import {
   ProductLineDiagram,
 } from "@/components/products/product-diagrams";
 
+beforeEach(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+});
+
 const boxwallSentinel: BoxwallProductDiagram = {
   kind: "boxwall",
   ariaLabel: "SENTINEL BOXWALL ARIA",

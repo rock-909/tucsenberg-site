@@ -21,7 +21,6 @@ import {
   type MobileNavigationLinksProps,
 } from "@/components/layout/mobile-navigation";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -176,7 +175,6 @@ export function MobileNavigationInteractive({
           />
         </SheetTrigger>
         <SheetContent
-          side="right"
           closeLabel={closeMenuLabel}
           className="w-[300px] overflow-y-auto sm:w-[350px]"
           id="mobile-navigation"
@@ -188,7 +186,11 @@ export function MobileNavigationInteractive({
             siteDescription={resolvedSiteDescription}
             siteName={resolvedSiteName}
           />
-          <Separator className="my-4" />
+          <div
+            aria-orientation="horizontal"
+            className="my-4 h-px w-full shrink-0 bg-border"
+            role="separator"
+          />
           {navigationContent}
         </SheetContent>
       </Sheet>
