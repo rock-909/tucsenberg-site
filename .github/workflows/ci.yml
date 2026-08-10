@@ -70,7 +70,7 @@ jobs:
         run: pnpm component:governance
 
       - name: Storybook build check
-        run: pnpm exec storybook build
+        run: pnpm storybook:build
 
       - name: Dependency cruiser architecture check
         run: pnpm exec dependency-cruiser src --config .dependency-cruiser.js -T err
