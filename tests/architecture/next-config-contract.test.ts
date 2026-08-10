@@ -26,6 +26,22 @@ describe("next.config contract", () => {
     ).toBe(true);
   });
 
+  it("omits the Turbopack-only compiler option for Storybook", async () => {
+    vi.stubEnv("STORYBOOK", "true");
+    vi.resetModules();
+
+    try {
+      const nextConfigModule = await import("../../next.config");
+
+      expect(
+        nextConfigModule.default.experimental?.turbopackRustReactCompiler,
+      ).toBeUndefined();
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    }
+  });
+
   it("keeps the request-quote route out of Instant Navigations", async () => {
     const requestQuotePage =
       await import("../../src/app/[locale]/request-quote/page");

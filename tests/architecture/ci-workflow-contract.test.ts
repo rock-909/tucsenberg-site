@@ -9,7 +9,7 @@ const SEMGREP_CONFIG_PATH = "semgrep.yml";
 // Vitest 已覆盖治理测试；CI 只需额外运行 scanner 和 Storybook build。
 const COMPONENT_PROOF_COMMANDS = [
   "pnpm component:governance",
-  "pnpm exec storybook build",
+  "pnpm storybook:build",
 ] as const;
 const FULL_COMPONENT_CHECK_COMMAND = "pnpm component:check";
 interface SemgrepRulePaths {

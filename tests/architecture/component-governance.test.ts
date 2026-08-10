@@ -272,6 +272,7 @@ describe("component governance", () => {
     const governanceTestScript =
       manifest.scripts?.["component:governance:test"] ?? "";
     const governanceScript = manifest.scripts?.["component:governance"] ?? "";
+    const storybookBuildScript = manifest.scripts?.["storybook:build"] ?? "";
     const componentCheckScript = manifest.scripts?.["component:check"] ?? "";
 
     // Vitest 会把不存在的路径当过滤器，因此要显式确认清单中的测试仍存在。
@@ -294,9 +295,13 @@ describe("component governance", () => {
       expect.arrayContaining([
         "pnpm component:governance:test",
         "pnpm component:governance",
-        "pnpm exec storybook build",
+        "pnpm storybook:build",
       ]),
     );
+    expect(storybookBuildScript.split("&&").map((s) => s.trim())).toEqual([
+      "pnpm exec storybook build",
+      "test -f storybook-static/iframe.html",
+    ]);
     expect(componentCheckScript).not.toContain("|| true");
     expect(componentCheckScript).not.toContain("; true");
     expect(componentCheckScript).not.toContain("--passWithNoTests");

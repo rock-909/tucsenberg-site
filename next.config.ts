@@ -11,6 +11,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const isCloudflare = process.env.DEPLOYMENT_PLATFORM === "cloudflare";
+const isStorybook = process.env.STORYBOOK === "true";
 const nextConfig: NextConfig = {
   // Everything writes `.next` by default. `next start` reads this same config,
   // so setting NEXT_DIST_DIR on both build and start gives a command its own
@@ -103,7 +104,8 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    turbopackRustReactCompiler: true,
+    // Storybook 使用 Vite，不能读取只允许 Turbopack 的原生编译器开关。
+    ...(isStorybook ? {} : { turbopackRustReactCompiler: true }),
     // The TS7 CLI is exposed by a side-by-side package alias. Next only looks
     // for `typescript/bin/tsc`, so its internal checker must keep using TS6.
     // Project type-check scripts still run the TS7 `tsc` binary explicitly.
