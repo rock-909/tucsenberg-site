@@ -5,7 +5,9 @@ import {
   PRODUCT_LEAD_TYPE,
   type ProductLeadInput,
 } from "../lead-schema";
+import { resolveProductIdentity } from "../product-identity";
 import { processValidatedInquiry } from "../process-lead";
+import { resolveProductBuyerText, splitName } from "../utils";
 
 const { mockCreateLead, mockSendProductInquiryEmail } = vi.hoisted(() => ({
   mockCreateLead: vi.fn(),
@@ -18,6 +20,21 @@ vi.mock("@/lib/airtable/instance", () => ({
 vi.mock("@/lib/resend-instance", () => ({
   resendService: { sendProductInquiryEmail: mockSendProductInquiryEmail },
 }));
+vi.mock("@/lib/lead-pipeline/product-identity", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../product-identity")>();
+  return {
+    ...actual,
+    resolveProductIdentity: vi.fn(actual.resolveProductIdentity),
+  };
+});
+vi.mock("@/lib/lead-pipeline/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../utils")>();
+  return {
+    ...actual,
+    resolveProductBuyerText: vi.fn(actual.resolveProductBuyerText),
+    splitName: vi.fn(actual.splitName),
+  };
+});
 vi.mock("@/lib/logger", async () => import("@/lib/__tests__/mocks/logger"));
 
 const VALID_LEAD: ProductLeadInput = {
@@ -87,6 +104,14 @@ describe("processValidatedInquiry", () => {
     expect(mockCreateLead).toHaveBeenCalledWith(
       expect.objectContaining({ referenceId }),
     );
+  });
+
+  it("normalizes shared owner fields once before provider mapping", async () => {
+    await processValidatedInquiry(VALID_LEAD);
+
+    expect(vi.mocked(splitName)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(resolveProductIdentity)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(resolveProductBuyerText)).toHaveBeenCalledTimes(1);
   });
 
   it("keeps that reference in both provider failure logs", async () => {

@@ -18,10 +18,6 @@ import { logger, sanitizeEmail } from "@/lib/logger";
 import { pickAttributionFields } from "@/lib/marketing/attribution-fields";
 import { resendService } from "@/lib/resend-instance";
 
-interface LeadProcessingContext {
-  referenceId: string;
-}
-
 export interface LeadResult {
   success: boolean;
   emailSent: boolean;
@@ -53,60 +49,66 @@ function createProcessingFailureResult(referenceId?: string): LeadResult {
   };
 }
 
-function createProductEmailData(
-  lead: ProductLeadInput,
-  referenceId: string,
-): ProductInquiryEmailData {
+function createOwnerLead(lead: ProductLeadInput, referenceId: string) {
   const { firstName, lastName } = splitName(lead.fullName);
-  const { productName } = resolveProductIdentity(lead);
-  const buyerText = resolveProductBuyerText({ message: lead.message });
-  const requirements = composeInquiryDescription({
-    buyerInterest: lead.buyerInterest,
-    requirements: buyerText,
-  });
+  const identity = resolveProductIdentity(lead);
+  const requirements = resolveProductBuyerText({ message: lead.message });
 
   return {
     referenceId,
     firstName,
     lastName,
     email: lead.email,
-    productName,
+    productName: identity.productName,
+    ...(identity.catalogProductId
+      ? { catalogProductId: identity.catalogProductId }
+      : {}),
+    ...(lead.buyerInterest ? { buyerInterest: lead.buyerInterest } : {}),
+    ...(requirements ? { requirements } : {}),
+    attribution: pickAttributionFields(lead),
+  };
+}
+
+type OwnerLead = ReturnType<typeof createOwnerLead>;
+
+function createProductEmailData(lead: OwnerLead): ProductInquiryEmailData {
+  const requirements = composeInquiryDescription({
+    buyerInterest: lead.buyerInterest,
+    requirements: lead.requirements,
+  });
+
+  return {
+    referenceId: lead.referenceId,
+    firstName: lead.firstName,
+    lastName: lead.lastName,
+    email: lead.email,
+    productName: lead.productName,
     ...(requirements ? { requirements } : {}),
   };
 }
 
-async function sendProductOwnerEmail(
-  lead: ProductLeadInput,
-  context: LeadProcessingContext,
-): Promise<boolean> {
+async function sendProductOwnerEmail(lead: OwnerLead): Promise<boolean> {
   try {
-    await resendService.sendProductInquiryEmail(
-      createProductEmailData(lead, context.referenceId),
-    );
+    await resendService.sendProductInquiryEmail(createProductEmailData(lead));
     return true;
   } catch (error) {
     logger.error("Product owner email failed", {
       error: normalizeErrorMessage(error),
       email: sanitizeEmail(lead.email),
-      referenceId: context.referenceId,
+      referenceId: lead.referenceId,
     });
     return false;
   }
 }
 
 async function createProductLeadRecord(
-  lead: ProductLeadInput,
-  context: LeadProcessingContext,
+  lead: OwnerLead,
   emailSent: boolean,
 ): Promise<boolean> {
-  const { firstName, lastName } = splitName(lead.fullName);
-  const { referenceId } = context;
-  const identity = resolveProductIdentity(lead);
-  const buyerText = resolveProductBuyerText({ message: lead.message });
   const baseMessage = generateProductInquiryMessage({
-    productName: identity.productName,
+    productName: lead.productName,
     buyerInterest: lead.buyerInterest,
-    requirements: buyerText,
+    requirements: lead.requirements,
   });
   // 邮件没发出去时，业主唯一能看到这条线索的地方就是这条记录。
   // 提示写进自由文本的 Message 字段：写什么都不会被 Airtable 拒收，
@@ -117,17 +119,17 @@ async function createProductLeadRecord(
 
   try {
     await airtableService.createLead({
-      firstName,
-      lastName,
+      firstName: lead.firstName,
+      lastName: lead.lastName,
       email: lead.email,
       message,
-      productName: identity.productName,
-      ...(identity.catalogProductId
-        ? { catalogProductId: identity.catalogProductId }
+      productName: lead.productName,
+      ...(lead.catalogProductId
+        ? { catalogProductId: lead.catalogProductId }
         : {}),
-      ...(buyerText ? { requirements: buyerText } : {}),
-      referenceId,
-      ...pickAttributionFields(lead),
+      ...(lead.requirements ? { requirements: lead.requirements } : {}),
+      referenceId: lead.referenceId,
+      ...lead.attribution,
     });
     return true;
   } catch (error) {
@@ -135,7 +137,7 @@ async function createProductLeadRecord(
       error: normalizeErrorMessage(error),
       email: sanitizeEmail(lead.email),
       leadDeliveryPolicy: LEAD_DELIVERY_POLICY,
-      referenceId,
+      referenceId: lead.referenceId,
     });
     return false;
   }
@@ -160,12 +162,9 @@ export async function processValidatedInquiry(
     // 「这封通知没发出去」一次写进记录。事后补一次更新做不到——Airtable
     // 限流重试可能在预算过期后才落库，那时已经拿不到记录编号了。
     // 代价：最坏耗时从 max(5s, 8s) 变成 5s + 8s。邮件有 5 秒硬超时，不会无限等。
-    const emailSent = await sendProductOwnerEmail(input, { referenceId });
-    const recordCreated = await createProductLeadRecord(
-      input,
-      { referenceId },
-      emailSent,
-    );
+    const ownerLead = createOwnerLead(input, referenceId);
+    const emailSent = await sendProductOwnerEmail(ownerLead);
+    const recordCreated = await createProductLeadRecord(ownerLead, emailSent);
 
     if (!emailSent && !recordCreated) {
       return createProcessingFailureResult(referenceId);
