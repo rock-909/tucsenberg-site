@@ -8,7 +8,6 @@ import type {
   TubeDiagramLabels,
   TucsenbergProductDiagram,
 } from "@/constants/tucsenberg-product-page-types";
-import { BoxwallCrossSection } from "@/components/products/boxwall-cross-section";
 
 export { ProductLineGlyph } from "@/components/products/product-diagram-glyphs";
 
@@ -471,7 +470,6 @@ export function ProductDiagramPanel({
 }: {
   diagram: TucsenbergProductDiagram;
 }) {
-  const staticDrawing = renderProductDiagram(diagram);
   return (
     <figure
       className="min-w-0 rounded-2xl border border-border bg-card p-4 md:p-5"
@@ -485,18 +483,7 @@ export function ProductDiagramPanel({
           <span aria-hidden className="size-1.5 rounded-full bg-primary" />
         </div>
       ) : null}
-      {diagram.animated && diagram.kind === "boxwall" ? (
-        <BoxwallCrossSection
-          fallback={staticDrawing}
-          labels={{
-            load: diagram.labels.load,
-            floodSide: diagram.labels.floodSide,
-            drySide: diagram.labels.drySide,
-          }}
-        />
-      ) : (
-        staticDrawing
-      )}
+      {renderProductDiagram(diagram)}
       <figcaption className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
         {diagram.caption}
       </figcaption>
