@@ -175,7 +175,10 @@ function appRouteResolves(pathnameSegments: string[]): boolean {
     // A catch-all segment (`[...rest]`) exists only to render notFound(); a path
     // that resolves *into* it is by definition a dead route, not a real page.
     if (dynamicDir.startsWith("[...")) return false;
-    if (dynamicDir === "[market]" && !getAllMarketSlugs().includes(segment)) {
+    if (
+      dynamicDir === "[market]" &&
+      !getAllMarketSlugs().some((slug) => slug === segment)
+    ) {
       return false;
     }
     dir = path.join(currentDir, dynamicDir);

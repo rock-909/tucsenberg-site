@@ -1,4 +1,7 @@
-import type { ProductMarketSlug } from "@/constants/product-catalog";
+import {
+  TUCSENBERG_PRODUCT_PAGES,
+  type TucsenbergProductPageSlug,
+} from "@/constants/tucsenberg-product-pages";
 
 /**
  * Canonical single-site page-expression inputs.
@@ -31,32 +34,21 @@ export const SINGLE_SITE_HOME_SECTION_ORDER = [
 export type SingleSiteHomeSectionKey =
   (typeof SINGLE_SITE_HOME_SECTION_ORDER)[number];
 
-export const SINGLE_SITE_HOME_PRODUCT_LINES = [
-  {
-    key: "absFloodBarriers",
-    slug: "abs-flood-barriers",
-  },
-  {
-    key: "aluminumFloodGates",
-    slug: "aluminum-flood-gates",
-  },
-  {
-    key: "absorbentFloodBags",
-    slug: "absorbent-flood-bags",
-  },
-  {
-    key: "floodTubeDams",
-    slug: "flood-tube-dams",
-  },
-  {
-    key: "frpFloodBarriers",
-    slug: "frp-flood-barriers",
-    hasBadge: true,
-  },
-] as const satisfies readonly {
+export const SINGLE_SITE_HOME_PRODUCT_LINES = Object.values(
+  TUCSENBERG_PRODUCT_PAGES,
+).map((page) => ({
+  key: page.catalog.homeMessageKey,
+  slug: page.slug,
+  ...("homeBadge" in page.catalog
+    ? {
+        badgeKey:
+          `productLines.items.${page.catalog.homeMessageKey}.badge` as const,
+      }
+    : {}),
+})) satisfies readonly {
   key: string;
-  slug: ProductMarketSlug;
-  hasBadge?: true;
+  slug: TucsenbergProductPageSlug;
+  badgeKey?: string;
 }[];
 
 export const SINGLE_SITE_HOME_BUYER_SEGMENT_KEYS = [

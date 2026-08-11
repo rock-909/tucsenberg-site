@@ -2,6 +2,13 @@ import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-
 
 export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
   slug: "absorbent-flood-bags",
+  catalog: {
+    label: "Absorbent Flood Bags",
+    standardLabel: "TB-FB series",
+    sizeSystem: "mm",
+    standardIds: ["tb_fb"],
+    homeMessageKey: "absorbentFloodBags",
+  },
   meta: {
     title: "Sandless Sandbags & Water-Activated Flood Bags — Wholesale",
     description:
@@ -22,7 +29,6 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
       stacking: "stack like sandbags — two layers per doorway",
     },
   },
-  eyebrow: "TB-FB series",
   title: "Absorbent Flood Bags (Sandless Sandbags) — Bulk & Private Label",
   subtitle:
     "Fresh water only — these are for rain and inland flooding, not coastal storm surge.",

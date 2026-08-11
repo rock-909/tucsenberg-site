@@ -1,4 +1,4 @@
-import type { ProductMarketSlug } from "@/config/single-site-product-catalog";
+import type { MarketDefinition } from "@/config/site-types";
 
 export interface TucsenbergProductCta {
   label: string;
@@ -140,7 +140,9 @@ export type TucsenbergProductDiagram =
  * Straight-run unit estimator (quote funnel: quantities only, never prices).
  * `unitWidthCm` must come from a real owner spec — never invented.
  */
-export interface TucsenbergProductCalculator {
+export interface TucsenbergProductCalculator<
+  ProductSlug extends string = string,
+> {
   heading: string;
   intro: string;
   inputLabel: string;
@@ -152,7 +154,7 @@ export interface TucsenbergProductCalculator {
   /** Honest limits: what the estimate does not cover. */
   disclaimer: string;
   ctaLabel: string;
-  catalogProductId: ProductMarketSlug;
+  catalogProductId: ProductSlug;
   /** RFQ prefill message; placeholders: {length}, {units}. */
   rfqMessageTemplate: string;
 }
@@ -176,12 +178,20 @@ export interface TucsenbergProductScenes {
   items: readonly TucsenbergProductScene[];
 }
 
-export interface TucsenbergProductPage {
-  slug: ProductMarketSlug;
+export interface TucsenbergProductCatalogIdentity extends Omit<
+  MarketDefinition,
+  "slug"
+> {
+  homeMessageKey: string;
+  homeBadge?: true;
+}
+
+export interface TucsenbergProductPage<ProductSlug extends string = string> {
+  slug: ProductSlug;
+  catalog: TucsenbergProductCatalogIdentity;
   meta: TucsenbergProductMeta;
   image: TucsenbergProductImage;
   diagram?: TucsenbergProductDiagram;
-  eyebrow: string;
   title: string;
   subtitle: string;
   lead: string;
@@ -195,7 +205,7 @@ export interface TucsenbergProductPage {
   proofStrip?: readonly string[];
   scenes?: TucsenbergProductScenes;
   /** Optional straight-run estimator rendered after the content sections. */
-  calculator?: TucsenbergProductCalculator;
+  calculator?: TucsenbergProductCalculator<ProductSlug>;
   sections: readonly TucsenbergProductSection[];
   faqs: readonly TucsenbergProductFaq[];
 }

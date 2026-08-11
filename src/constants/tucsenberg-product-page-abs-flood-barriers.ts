@@ -3,6 +3,13 @@ import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 
 export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "abs-flood-barriers",
+  catalog: {
+    label: "ABS Interlocking Boxwall",
+    standardLabel: "TB-BW series",
+    sizeSystem: "mm",
+    standardIds: ["tb_bw"],
+    homeMessageKey: "absFloodBarriers",
+  },
   meta: {
     title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
     description: `Freestanding ABS interlocking flood barriers, factory-direct from China. ${TB_BW_HEIGHT_RANGE.label} heights; straight, curve and gable-end units. Reply within 12 hours.`,
@@ -26,7 +33,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
       heightRange: TB_BW_HEIGHT_RANGE.label,
     },
   },
-  eyebrow: "TB-BW series",
   title: "ABS Interlocking Boxwall Flood Barriers",
   subtitle:
     "Freestanding flood barriers for driveways, doorways and paved perimeters — no drilling, no fixing to the building.",

@@ -1,10 +1,8 @@
 /**
  * Product catalog query facade.
  *
- * Catalog route/list truth stays in src/config/single-site-product-catalog.ts.
- * Current Tucsenberg product page specs/copy live in
- * src/constants/tucsenberg-product-page-*.ts and
- * src/constants/tucsenberg-product-pages.ts.
+ * Product identity and order live with the Tucsenberg product pages. This file
+ * remains the narrow query facade used by routes and the lead pipeline.
  */
 
 import {
@@ -15,7 +13,7 @@ import type { MarketDefinition, ProductCatalog } from "@/config/site-types";
 
 export type { MarketDefinition, ProductCatalog, ProductMarketSlug };
 
-export const PRODUCT_CATALOG: ProductCatalog = singleSiteProductCatalog;
+export const PRODUCT_CATALOG = singleSiteProductCatalog;
 
 /** Type guard for catalog product ids (market slugs). */
 export function isProductMarketSlug(value: string): value is ProductMarketSlug {
@@ -25,11 +23,11 @@ export function isProductMarketSlug(value: string): value is ProductMarketSlug {
 }
 
 /** Get a market definition by its URL slug */
-export function getMarketBySlug(slug: string): MarketDefinition | undefined {
+export function getMarketBySlug(slug: string) {
   return PRODUCT_CATALOG.markets.find((market) => market.slug === slug);
 }
 
 /** Return all market slugs for static generation */
-export function getAllMarketSlugs(): readonly string[] {
+export function getAllMarketSlugs(): readonly ProductMarketSlug[] {
   return PRODUCT_CATALOG.markets.map((market) => market.slug);
 }

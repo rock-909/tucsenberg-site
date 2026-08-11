@@ -2,6 +2,13 @@ import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-
 
 export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
   slug: "flood-tube-dams",
+  catalog: {
+    label: "Water & Air-Filled Tube Dams",
+    standardLabel: "TB-TD series",
+    sizeSystem: "mm",
+    standardIds: ["tb_td"],
+    homeMessageKey: "floodTubeDams",
+  },
   meta: {
     title: "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs",
     description:
@@ -21,7 +28,6 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
       tubeConstruction: "0.9 mm PVC tube — air or water fill",
     },
   },
-  eyebrow: "TB-TD series",
   title: "Water & Air-Filled Flood Tube Dams",
   subtitle:
     "Where rigid barriers can't seal — grass, mud, gravel, long uneven runs — a tube dam can.",

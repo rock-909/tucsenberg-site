@@ -2,6 +2,13 @@ import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-
 
 export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
   slug: "aluminum-flood-gates",
+  catalog: {
+    label: "Aluminum Flood Gates",
+    standardLabel: "TB-AG series",
+    sizeSystem: "mm",
+    standardIds: ["tb_ag"],
+    homeMessageKey: "aluminumFloodGates",
+  },
   meta: {
     title: "Aluminum Flood Gates for Doors & Garages — Custom-Cut",
     description:
@@ -21,7 +28,6 @@ export const ALUMINUM_FLOOD_GATES_PRODUCT_PAGE = {
       post: "post",
     },
   },
-  eyebrow: "TB-AG series",
   title: "Aluminum Flood Gates & Demountable Barrier Systems",
   subtitle:
     "The trade standard for protecting defined openings — doors, garages, loading docks, shopfronts.",

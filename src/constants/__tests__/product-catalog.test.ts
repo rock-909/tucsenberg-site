@@ -6,9 +6,28 @@ import {
   PRODUCT_CATALOG,
 } from "@/constants/product-catalog";
 import { singleSiteProductCatalog } from "@/config/single-site-product-catalog";
+import type { MarketDefinition } from "@/config/site-types";
+import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 describe("product-catalog wrapper", () => {
-  it("uses the single-site catalog as runtime truth during cutover", () => {
+  it("derives the lightweight catalog from product pages in page order", () => {
+    const productPages = Object.values(TUCSENBERG_PRODUCT_PAGES) as readonly {
+      slug: string;
+      catalog: Omit<MarketDefinition, "slug"> & {
+        homeMessageKey: string;
+        homeBadge?: true;
+      };
+    }[];
+
+    expect(singleSiteProductCatalog.markets).toEqual(
+      productPages.map((page) => ({
+        slug: page.slug,
+        label: page.catalog.label,
+        standardLabel: page.catalog.standardLabel,
+        sizeSystem: page.catalog.sizeSystem,
+        standardIds: page.catalog.standardIds,
+      })),
+    );
     expect(PRODUCT_CATALOG).toBe(singleSiteProductCatalog);
   });
 
