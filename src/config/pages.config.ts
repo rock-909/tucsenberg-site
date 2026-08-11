@@ -33,19 +33,6 @@ const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
 export type PublicStaticPageChangeFrequency =
   "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
-type PublicStaticPageSeoKey =
-  | "home"
-  | "content.pages.about"
-  | "content.pages.oem-wholesale"
-  | "content.pages.flood-barrier-materials-guide"
-  | "content.pages.flood-barrier-specifications"
-  | "content.pages.request-quote"
-  | "content.pages.warranty"
-  | "catalog.overview"
-  | "content.pages.contact"
-  | "content.pages.privacy"
-  | "content.pages.terms";
-
 interface PublicStaticPageSitemapConfig {
   include: boolean;
   changeFrequency: PublicStaticPageChangeFrequency;
@@ -70,7 +57,6 @@ export interface PublicStaticPageDefinition {
   pageType: PageType;
   localizedPaths: LocalizedPath;
   navigationKey: NavigationMessageKey | null;
-  seoKey: PublicStaticPageSeoKey;
   sitemap: PublicStaticPageSitemapConfig;
   lastmod: PublicStaticPageStaticLastmod | PublicStaticPageMdxLastmod;
   mdxCollection: PublicStaticPageMdxCollection | null;
@@ -93,7 +79,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "home",
       localizedPaths: localizedPath("/"),
       navigationKey: "navigation.home",
-      seoKey: "home",
       sitemap: { include: true, changeFrequency: "daily", priority: 1 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
@@ -103,7 +88,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "products",
       localizedPaths: localizedPath("/products"),
       navigationKey: "navigation.products",
-      seoKey: "catalog.overview",
       sitemap: { include: true, changeFrequency: "weekly", priority: 0.9 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
@@ -113,7 +97,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "oemWholesale",
       localizedPaths: localizedPath("/oem-wholesale"),
       navigationKey: "navigation.oemWholesale",
-      seoKey: "content.pages.oem-wholesale",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "oem-wholesale" },
@@ -123,7 +106,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "materialsGuide",
       localizedPaths: localizedPath("/guides/flood-barrier-materials-guide"),
       navigationKey: "navigation.guides",
-      seoKey: "content.pages.flood-barrier-materials-guide",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: {
@@ -137,7 +119,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "specificationsGuide",
       localizedPaths: localizedPath("/guides/flood-barrier-specifications"),
       navigationKey: null,
-      seoKey: "content.pages.flood-barrier-specifications",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: {
@@ -151,7 +132,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "about",
       localizedPaths: localizedPath("/about"),
       navigationKey: "navigation.about",
-      seoKey: "content.pages.about",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "about" },
@@ -161,7 +141,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "requestQuote",
       localizedPaths: localizedPath("/request-quote"),
       navigationKey: null,
-      seoKey: "content.pages.request-quote",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.9 },
       lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
@@ -171,7 +150,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "contact",
       localizedPaths: localizedPath("/contact"),
       navigationKey: null,
-      seoKey: "content.pages.contact",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "contact" },
@@ -181,7 +159,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "warranty",
       localizedPaths: localizedPath("/warranty"),
       navigationKey: null,
-      seoKey: "content.pages.warranty",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "warranty" },
@@ -191,7 +168,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "privacy",
       localizedPaths: localizedPath("/privacy"),
       navigationKey: null,
-      seoKey: "content.pages.privacy",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "privacy" },
@@ -201,7 +177,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       pageType: "terms",
       localizedPaths: localizedPath("/terms"),
       navigationKey: null,
-      seoKey: "content.pages.terms",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
       lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "terms" },
