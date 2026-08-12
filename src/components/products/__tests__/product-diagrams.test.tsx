@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type {
   BagProductDiagram,
   BoxwallProductDiagram,
@@ -7,14 +7,11 @@ import type {
   GateProductDiagram,
   TubeProductDiagram,
 } from "@/constants/tucsenberg-product-page-types";
+import { ABS_FLOOD_BARRIERS_PRODUCT_PAGE } from "@/constants/tucsenberg-product-page-abs-flood-barriers";
 import {
   ProductDiagramPanel,
   ProductLineDiagram,
 } from "@/components/products/product-diagrams";
-
-beforeEach(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
-});
 
 const boxwallSentinel: BoxwallProductDiagram = {
   kind: "boxwall",
@@ -168,128 +165,18 @@ describe("ProductDiagramPanel", () => {
       within(panel).getByRole("img", { name: "SENTINEL BOXWALL ARIA" }),
     ).toBeInTheDocument();
   });
-});
 
-describe("BoxwallCrossSection canvas labels", () => {
-  const fillText = vi.fn();
-  let matchMediaListeners: Array<() => void> = [];
-
-  beforeEach(() => {
-    fillText.mockClear();
-    matchMediaListeners = [];
-
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn((query: string) => ({
-        matches: query.includes("prefers-reduced-motion"),
-        media: query,
-        addEventListener: (_event: string, listener: () => void) => {
-          matchMediaListeners.push(listener);
-        },
-        removeEventListener: vi.fn(),
-      })),
-    );
-
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-      setTransform: vi.fn(),
-      clearRect: vi.fn(),
-      beginPath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      stroke: vi.fn(),
-      fill: vi.fn(),
-      closePath: vi.fn(),
-      fillRect: vi.fn(),
-      save: vi.fn(),
-      restore: vi.fn(),
-      setLineDash: vi.fn(),
-      fillText,
-      strokeStyle: "",
-      fillStyle: "",
-      lineWidth: 1,
-      globalAlpha: 1,
-      font: "",
-      textAlign: "left",
-      textBaseline: "alphabetic",
-      lineJoin: "round",
-    } as unknown as CanvasRenderingContext2D);
-
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
-      width: 480,
-      height: 360,
-      top: 0,
-      left: 0,
-      right: 480,
-      bottom: 360,
-      x: 0,
-      y: 0,
-      toJSON: () => ({}),
-    });
-
-    vi.spyOn(window, "getComputedStyle").mockReturnValue({
-      color: "rgb(0, 0, 0)",
-    } as CSSStyleDeclaration);
-
-    vi.stubGlobal(
-      "ResizeObserver",
-      class {
-        observe = vi.fn();
-        disconnect = vi.fn();
-      },
-    );
-
-    vi.stubGlobal(
-      "MutationObserver",
-      class {
-        observe = vi.fn();
-        disconnect = vi.fn();
-      },
-    );
-  });
-
-  it("draws sentinel canvas labels with reduced motion and keeps TB-BW literal", async () => {
-    const { BoxwallCrossSection } =
-      await import("@/components/products/boxwall-cross-section");
-
+  it("keeps the boxwall diagram as server-rendered SVG", () => {
     render(
-      <BoxwallCrossSection
-        fallback={<svg aria-hidden />}
-        labels={{
-          load: "SENTINEL LOAD",
-          floodSide: "SENTINEL FLOOD",
-          drySide: "SENTINEL DRY",
-        }}
-      />,
+      <ProductDiagramPanel diagram={ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram} />,
     );
 
-    for (const listener of matchMediaListeners) {
-      listener();
-    }
-
-    expect(fillText).toHaveBeenCalledWith(
-      "SENTINEL LOAD",
-      expect.any(Number),
-      expect.any(Number),
-    );
-    expect(fillText).toHaveBeenCalledWith(
-      "SENTINEL FLOOD",
-      expect.any(Number),
-      expect.any(Number),
-    );
-    expect(fillText).toHaveBeenCalledWith(
-      "SENTINEL DRY",
-      expect.any(Number),
-      expect.any(Number),
-    );
-    expect(fillText).toHaveBeenCalledWith(
-      "TB-BW",
-      expect.any(Number),
-      expect.any(Number),
-    );
-    expect(fillText).not.toHaveBeenCalledWith(
-      "LOAD",
-      expect.any(Number),
-      expect.any(Number),
-    );
+    const panel = screen.getByTestId("product-diagram");
+    expect(
+      within(panel).getByRole("img", {
+        name: ABS_FLOOD_BARRIERS_PRODUCT_PAGE.diagram.ariaLabel,
+      }),
+    ).toBeInTheDocument();
+    expect(panel.querySelector("canvas")).not.toBeInTheDocument();
   });
 });

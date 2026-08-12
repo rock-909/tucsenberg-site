@@ -11,7 +11,6 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   image: { status: "pending" },
   diagram: {
     kind: "boxwall",
-    animated: true,
     panelLabel: "TB-BW BOXWALL · SELF-ANCHORING PRINCIPLE",
     ariaLabel:
       "TB-BW ABS boxwall flood barrier — freestanding L-profile side view with water load sealing the base",

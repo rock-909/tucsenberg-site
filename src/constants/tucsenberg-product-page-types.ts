@@ -98,8 +98,6 @@ interface TucsenbergProductDiagramBase {
   caption: string;
   /** Instrument-panel header label (mono microcopy) above the drawing. */
   panelLabel?: string;
-  /** Upgrade the static drawing to the animated canvas cross-section. */
-  animated?: boolean;
 }
 
 /**
