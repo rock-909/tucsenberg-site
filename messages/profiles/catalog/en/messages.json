@@ -181,7 +181,7 @@
       "items": {
         "minimumOrder": {
           "question": "What is your minimum order?",
-          "answer": "It depends on the line: boxwall from one carton, flood bags from 300 bags (six cartons), tube dams from a single section; gates are quoted per opening schedule. We don't ship single retail units — freight economics punish everyone. Smaller need? Ask about joining our next consolidated shipment."
+          "answer": "It depends on the line: boxwall from one carton, flood bags from 300 bags, tube dams from a single section; gates are quoted per opening schedule. Flood-bag carton count is confirmed by model at quotation. We don't ship single retail units — freight economics punish everyone. Smaller need? Ask about joining our next consolidated shipment."
         },
         "quoteSpeed": {
           "question": "How fast will I get a price?",
