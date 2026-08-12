@@ -646,6 +646,8 @@ describe("public launch trust content guard", () => {
     );
 
     expect(result.status).toBe(1);
+    expect(result.stderr).toContain("SITE_CONFIG.contact.phone");
+    expect(result.stderr).toContain("brandAssets.productPhotos.status");
     expect(result.stderr).not.toContain("SITE_CONFIG.social.twitter");
     expect(result.stderr).not.toContain("SITE_CONFIG.social.linkedin");
   });
