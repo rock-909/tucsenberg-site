@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "documents": {
+    "tb-ag": {
+      "outputPath": "public/downloads/spec-sheet-tb-ag.pdf",
+      "inputSha256": "611eede384b7d34af9298a0c32ec050a58fd6696ee0b0eb91b810e8153c69c1b",
+      "pdfSha256": "b0fe8cac7f59ed884e77dcacde8a4b78a1bcd0b8e6cdc2b3fd0ec9e9af71e07c"
+    },
+    "tb-fb": {
+      "outputPath": "public/downloads/spec-sheet-tb-fb.pdf",
+      "inputSha256": "053fd502468dec4286cfbc227ebf26615aa268a707e35080c5e7e5e8f18fbb11",
+      "pdfSha256": "dac41fbf4539e14edb9a3e7e0084cf00ec7b1e3d73cdb481f9950a7e45955469"
+    }
+  }
+}
