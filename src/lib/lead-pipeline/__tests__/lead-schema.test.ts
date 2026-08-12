@@ -32,7 +32,7 @@ describe("productLeadSchema", () => {
     );
   });
 
-  it.each([null, true, 42, [], {}])(
+  it.each([[null], [true], [42], [[]], [{}]])(
     "rejects invalid message input %j",
     (message) => {
       expect(
