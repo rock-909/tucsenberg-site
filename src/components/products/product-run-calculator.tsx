@@ -5,6 +5,7 @@ import type { TucsenbergProductCalculator } from "@/constants/tucsenberg-product
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
+import type { ProductMarketSlug } from "@/constants/product-catalog";
 
 /**
  * Straight-run unit estimator wired as a quote funnel: it outputs quantities
@@ -25,7 +26,7 @@ type LengthUnit = "m" | "cm";
 export function ProductRunCalculator({
   calculator,
 }: {
-  calculator: TucsenbergProductCalculator;
+  calculator: TucsenbergProductCalculator<ProductMarketSlug>;
 }) {
   const inputId = useId();
   const [length, setLength] = useState("");

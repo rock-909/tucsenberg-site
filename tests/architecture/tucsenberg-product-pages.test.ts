@@ -6,6 +6,7 @@ import { TB_BW_HEIGHT_RANGE } from "@/constants/tucsenberg-product-spec-values";
 import {
   getTucsenbergProductPage,
   type TucsenbergProductPage,
+  type TucsenbergProductPageDefinition,
   TUCSENBERG_PRODUCT_PAGES,
 } from "@/constants/tucsenberg-product-pages";
 
@@ -118,7 +119,7 @@ describe("Tucsenberg product page copy contract", () => {
 
     expect(missingProductPage).toBeUndefined();
     expectTypeOf(missingProductPage).toEqualTypeOf<
-      TucsenbergProductPage | undefined
+      TucsenbergProductPageDefinition | undefined
     >();
   });
 

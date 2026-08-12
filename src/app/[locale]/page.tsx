@@ -83,8 +83,8 @@ function getHomePageContent(t: HomeTranslator) {
         href: `/products/${productLine.slug}`,
         linkLabel: t(`productLines.items.${productLine.key}.linkLabel`),
         diagram: getTucsenbergProductPage(productLine.slug)?.diagram,
-        ...("hasBadge" in productLine && productLine.hasBadge
-          ? { badge: t(`productLines.items.${productLine.key}.badge`) }
+        ...("badgeKey" in productLine
+          ? { badge: t(productLine.badgeKey) }
           : {}),
       }),
     ),

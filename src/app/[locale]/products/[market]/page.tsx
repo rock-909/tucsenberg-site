@@ -17,7 +17,7 @@ import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/mark
 import { Button } from "@/components/ui/button";
 import {
   getTucsenbergProductPage,
-  type TucsenbergProductPage,
+  type TucsenbergProductPageDefinition,
   type TucsenbergProductProseSection,
   type TucsenbergProductSection,
   type TucsenbergProductTable,
@@ -35,7 +35,7 @@ import { ProductRunCalculator } from "@/components/products/product-run-calculat
 import { InlineMarkdown } from "@/lib/content/inline-markdown";
 import { createCatalogInquiryHref } from "@/lib/lead-pipeline/inquiry-handoff";
 
-function getProductQuoteHref(productPage: TucsenbergProductPage) {
+function getProductQuoteHref(productPage: TucsenbergProductPageDefinition) {
   return createCatalogInquiryHref(productPage.slug);
 }
 
@@ -297,7 +297,7 @@ function ProductFaqSection({
   page,
   labels,
 }: {
-  page: TucsenbergProductPage;
+  page: TucsenbergProductPageDefinition;
   labels: ProductLandingLabels;
 }) {
   return (
@@ -321,7 +321,7 @@ function ProductFinalCta({
   page,
   labels,
 }: {
-  page: TucsenbergProductPage;
+  page: TucsenbergProductPageDefinition;
   labels: ProductLandingLabels;
 }) {
   return (
@@ -424,7 +424,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
       <header className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
         <div className="min-w-0">
           <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-            {productPage.eyebrow}
+            {productPage.catalog.standardLabel}
           </span>
           <h1 className="text-heading mb-4">{productPage.title}</h1>
           <p className="text-body max-w-3xl font-medium text-foreground">

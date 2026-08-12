@@ -2,6 +2,14 @@ import type { TucsenbergProductPage } from "@/constants/tucsenberg-product-page-
 
 export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
   slug: "frp-flood-barriers",
+  catalog: {
+    label: "FRP Composite Planks",
+    standardLabel: "TB-CP series",
+    sizeSystem: "mm",
+    standardIds: ["tb_cp"],
+    homeMessageKey: "frpFloodBarriers",
+    homeBadge: true,
+  },
   meta: {
     title: "FRP Composite Flood Barrier Planks — Corrosion-Free",
     description:
@@ -21,7 +29,6 @@ export const FRP_FLOOD_BARRIERS_PRODUCT_PAGE = {
       properties: "corrosion-free · non-conductive · continuous glass fibre",
     },
   },
-  eyebrow: "TB-CP series",
   title: "FRP Composite Flood Barrier Planks",
   subtitle:
     "A flood plank that never corrodes, conducts nothing, and shrugs off salt air.",

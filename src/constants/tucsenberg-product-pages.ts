@@ -27,10 +27,12 @@ export const TUCSENBERG_PRODUCT_PAGES = {
 } as const satisfies Record<string, TucsenbergProductPage>;
 
 export type TucsenbergProductPageSlug = keyof typeof TUCSENBERG_PRODUCT_PAGES;
+export type TucsenbergProductPageDefinition =
+  TucsenbergProductPage<TucsenbergProductPageSlug>;
 
 export function getTucsenbergProductPage(
   slug: string,
-): TucsenbergProductPage | undefined {
+): TucsenbergProductPageDefinition | undefined {
   return Object.hasOwn(TUCSENBERG_PRODUCT_PAGES, slug)
     ? TUCSENBERG_PRODUCT_PAGES[slug as TucsenbergProductPageSlug]
     : undefined;
