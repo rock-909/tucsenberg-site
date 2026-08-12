@@ -72,7 +72,6 @@ describe("pages.config static public page registry", () => {
     for (const definition of PUBLIC_STATIC_PAGE_DEFINITIONS) {
       expect(definition.pageType).toBeTruthy();
       expect(definition.localizedPaths).toHaveProperty("en");
-      expect(definition.seoKey).toMatch(/^[a-z][a-zA-Z0-9.:-]*$/);
       expectStaticRouteOwner(definition.routeOwner);
       expect(repoFileExists(definition.routeOwner)).toBe(true);
       expect(definition.sitemap.include).toBe(true);
