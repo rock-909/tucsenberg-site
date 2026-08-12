@@ -25,6 +25,7 @@ describe("product spec sheets", () => {
     );
 
     expect(document).toBeDefined();
+    expect(document?.html).toContain("0.23 kg to 20 kg");
     expect(document?.html).toContain("MOQ 300 bags");
     expect(document?.html).not.toMatch(/six cartons/iu);
     expect(document?.html).toContain("50/carton");

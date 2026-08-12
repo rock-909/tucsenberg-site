@@ -338,7 +338,7 @@ function buildFloodBagSheet(): ProductSpecSheetDocument {
   const [moq, ...leadTimeSentences] = minimumOrderAndLeadTime.split(". ");
   const dryWeight = getMatchedValue(
     getTableValue(specifications, "Dry weight"),
-    /^([\d.]+)\s*kg\b/u,
+    /^([\d.]+\s*kg)\b/u,
     "TB-FB400 dry weight",
   );
   const deployedWeight = getMatchedValue(
