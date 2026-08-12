@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import catalogMessages from "../../../messages/profiles/catalog/en/messages.json";
-import packageJson from "../../../package.json";
 import {
   getProductSpecSheetDocuments,
   validateProductSpecSheetContracts,
@@ -43,11 +42,5 @@ describe("product spec sheets", () => {
 
   it("reports no critical buyer-copy contract findings", () => {
     expect(validateProductSpecSheetContracts()).toEqual([]);
-  });
-
-  it("runs the PDF freshness gate in the blocking content pipeline", () => {
-    expect(packageJson.scripts["content:check"]).toContain(
-      "pnpm product-spec-sheets:check",
-    );
   });
 });

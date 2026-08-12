@@ -14,16 +14,15 @@ import type {
 } from "@/constants/tucsenberg-product-page-types";
 
 const ROOT_DIR = process.cwd();
-const GENERATOR_PATH = "scripts/product-spec-sheets.ts";
 const MANIFEST_PATH =
   "scripts/quality/config/product-spec-sheets.generated.json";
 const DOCUMENT_VERSION = "2026.08";
+const PDF_METADATA_DATE = "20260801000000";
 const APPROVED_REPLY_END = "Otherwise, we ask only for the missing essentials.";
 
 export interface ProductSpecSheetDocument {
   id: "tb-ag" | "tb-fb";
   outputPath: string;
-  inputPaths: readonly string[];
   html: string;
 }
 
@@ -31,11 +30,7 @@ interface ProductSpecSheetManifest {
   version: 1;
   documents: Record<
     ProductSpecSheetDocument["id"],
-    {
-      outputPath: string;
-      inputSha256: string;
-      pdfSha256: string;
-    }
+    { htmlSha256: string; pdfSha256: string }
   >;
 }
 
@@ -286,13 +281,6 @@ function buildAluminumSheet(): ProductSpecSheetDocument {
   return {
     id: "tb-ag",
     outputPath: "public/downloads/spec-sheet-tb-ag.pdf",
-    inputPaths: [
-      GENERATOR_PATH,
-      "src/config/single-site.ts",
-      "src/config/public-trust.ts",
-      "src/constants/tucsenberg-product-page-aluminum-flood-gates.ts",
-      "messages/profiles/catalog/en/messages.json",
-    ],
     html: renderSheet({
       title: "Aluminum Flood Gates & Demountable Barriers",
       series: page.catalog.standardLabel,
@@ -372,13 +360,6 @@ function buildFloodBagSheet(): ProductSpecSheetDocument {
   return {
     id: "tb-fb",
     outputPath: "public/downloads/spec-sheet-tb-fb.pdf",
-    inputPaths: [
-      GENERATOR_PATH,
-      "src/config/single-site.ts",
-      "src/config/public-trust.ts",
-      "src/constants/tucsenberg-product-page-absorbent-flood-bags.ts",
-      "messages/profiles/catalog/en/messages.json",
-    ],
     html: renderSheet({
       title: "Absorbent Flood Bags (Sandless Sandbags)",
       series: page.catalog.standardLabel,
@@ -453,37 +434,49 @@ export function validateProductSpecSheetContracts(): string[] {
   return findings;
 }
 
+function normalizePdfMetadata(pdf: Buffer): Buffer {
+  let replacements = 0;
+  const normalized = pdf
+    .toString("latin1")
+    .replace(
+      /\/(CreationDate|ModDate) \(D:\d{14}\+00'00'\)/gu,
+      (_match, field: string) => {
+        replacements += 1;
+        return `/${field} (D:${PDF_METADATA_DATE}+00'00')`;
+      },
+    );
+  if (replacements !== 2) {
+    throw new Error(
+      `Expected two Chromium PDF timestamps, found ${replacements}`,
+    );
+  }
+  return Buffer.from(normalized, "latin1");
+}
+
 async function sha256File(relativePath: string): Promise<string> {
   return createHash("sha256")
     .update(await readFile(resolve(ROOT_DIR, relativePath)))
     .digest("hex");
 }
 
-async function sha256Inputs(paths: readonly string[]): Promise<string> {
-  const hash = createHash("sha256");
-  for (const inputPath of [...paths].sort()) {
-    hash.update(inputPath);
-    hash.update("\0");
-    hash.update(await readFile(resolve(ROOT_DIR, inputPath)));
-    hash.update("\0");
-  }
-  return hash.digest("hex");
+function sha256Text(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
 }
 
-async function generateProductSpecSheets(): Promise<void> {
+async function renderProductSpecSheets(): Promise<
+  { document: ProductSpecSheetDocument; pdf: Buffer }[]
+> {
   const findings = validateProductSpecSheetContracts();
   if (findings.length > 0) throw new Error(findings.join("\n"));
 
   const documents = getProductSpecSheetDocuments();
   const browser = await chromium.launch({ headless: true });
   try {
+    const rendered = [];
     for (const document of documents) {
-      const outputPath = resolve(ROOT_DIR, document.outputPath);
-      await mkdir(dirname(outputPath), { recursive: true });
       const page = await browser.newPage();
       await page.setContent(document.html, { waitUntil: "load" });
-      await page.pdf({
-        path: outputPath,
+      const pdf = await page.pdf({
         format: "A4",
         printBackground: true,
         preferCSSPageSize: true,
@@ -491,20 +484,29 @@ async function generateProductSpecSheets(): Promise<void> {
         outline: true,
       });
       await page.close();
+      rendered.push({ document, pdf: normalizePdfMetadata(pdf) });
     }
+    return rendered;
   } finally {
     await browser.close();
   }
+}
 
+async function generateProductSpecSheets(): Promise<void> {
+  const rendered = await renderProductSpecSheets();
+  for (const { document, pdf } of rendered) {
+    const outputPath = resolve(ROOT_DIR, document.outputPath);
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, pdf);
+  }
   const manifest: ProductSpecSheetManifest = {
     version: 1,
     documents: Object.fromEntries(
       await Promise.all(
-        documents.map(async (document) => [
+        rendered.map(async ({ document }) => [
           document.id,
           {
-            outputPath: document.outputPath,
-            inputSha256: await sha256Inputs(document.inputPaths),
+            htmlSha256: sha256Text(document.html),
             pdfSha256: await sha256File(document.outputPath),
           },
         ]),
@@ -514,7 +516,7 @@ async function generateProductSpecSheets(): Promise<void> {
   const manifestPath = resolve(ROOT_DIR, MANIFEST_PATH);
   await mkdir(dirname(manifestPath), { recursive: true });
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(`[product-spec-sheets] generated ${documents.length} PDF(s)`);
+  console.log(`[product-spec-sheets] generated ${rendered.length} PDF(s)`);
 }
 
 async function checkProductSpecSheets(): Promise<void> {
@@ -530,34 +532,25 @@ async function checkProductSpecSheets(): Promise<void> {
       `manifest: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
-
-  if (manifest) {
-    for (const document of documents) {
-      const entry = manifest.documents[document.id];
+  for (const document of documents) {
+    try {
+      const entry = manifest?.documents[document.id];
       if (!entry) {
         findings.push(`${document.id}: missing freshness manifest entry`);
         continue;
       }
-      if (entry.outputPath !== document.outputPath) {
-        findings.push(`${document.id}: output path does not match manifest`);
+      if (entry.htmlSha256 !== sha256Text(document.html)) {
+        findings.push(`${document.id}: rendered source changed; rebuild PDF`);
       }
-      try {
-        if (entry.inputSha256 !== (await sha256Inputs(document.inputPaths))) {
-          findings.push(
-            `${document.id}: source inputs changed; regenerate PDF`,
-          );
-        }
-        if (entry.pdfSha256 !== (await sha256File(document.outputPath))) {
-          findings.push(`${document.id}: PDF changed; regenerate manifest`);
-        }
-      } catch (error) {
-        findings.push(
-          `${document.id}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+      if (entry.pdfSha256 !== (await sha256File(document.outputPath))) {
+        findings.push(`${document.id}: committed PDF changed; rebuild`);
       }
+    } catch (error) {
+      findings.push(
+        `${document.id}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
-
   if (findings.length > 0) {
     throw new Error(findings.join("\n"));
   }

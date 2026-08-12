@@ -2,14 +2,12 @@
   "version": 1,
   "documents": {
     "tb-ag": {
-      "outputPath": "public/downloads/spec-sheet-tb-ag.pdf",
-      "inputSha256": "611eede384b7d34af9298a0c32ec050a58fd6696ee0b0eb91b810e8153c69c1b",
-      "pdfSha256": "b0fe8cac7f59ed884e77dcacde8a4b78a1bcd0b8e6cdc2b3fd0ec9e9af71e07c"
+      "htmlSha256": "d74e08120bdca8388931e543fe261b44f84415ff2f3c3492e8ce4505fa5f30ed",
+      "pdfSha256": "29bbc0616057ffe6e9d3345ee119249af53420c2b8a2e6b73acd61cc1b6db723"
     },
     "tb-fb": {
-      "outputPath": "public/downloads/spec-sheet-tb-fb.pdf",
-      "inputSha256": "053fd502468dec4286cfbc227ebf26615aa268a707e35080c5e7e5e8f18fbb11",
-      "pdfSha256": "dac41fbf4539e14edb9a3e7e0084cf00ec7b1e3d73cdb481f9950a7e45955469"
+      "htmlSha256": "5f6e9cab0321a09ce0db9e153a797a18372d580a0f258fe733ea288cf5708f6d",
+      "pdfSha256": "0ff8bb18f632092b9f36fe1683c7b416321b5cfd6380028f576ea0dffa4379f7"
     }
   }
 }
