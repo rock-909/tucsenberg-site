@@ -8,7 +8,10 @@ import {
   isProductMarketSlug,
 } from "@/constants/product-catalog";
 
-function capBuyerInterest(raw: string | null | undefined): string | undefined {
+function capString(
+  raw: string | null | undefined,
+  maxLength: number,
+): string | undefined {
   if (!raw) {
     return undefined;
   }
@@ -18,20 +21,7 @@ function capBuyerInterest(raw: string | null | undefined): string | undefined {
     return undefined;
   }
 
-  return trimmed.slice(0, MAX_LEAD_PRODUCT_NAME_LENGTH);
-}
-
-function capConfigPrefill(raw: string | null | undefined): string | undefined {
-  if (!raw) {
-    return undefined;
-  }
-
-  const trimmed = raw.trim();
-  if (trimmed.length === 0) {
-    return undefined;
-  }
-
-  return trimmed.slice(0, MAX_INQUIRY_CONFIG_PREFILL_LENGTH);
+  return trimmed.slice(0, maxLength);
 }
 
 export type InquirySearchParams = Record<string, string | string[] | undefined>;
@@ -56,8 +46,8 @@ function readOptionalDescription(
   const value = searchParams[key];
   const raw = Array.isArray(value) ? value[0] : value;
   return key === "interest"
-    ? capBuyerInterest(raw ?? null)
-    : capConfigPrefill(raw ?? null);
+    ? capString(raw, MAX_LEAD_PRODUCT_NAME_LENGTH)
+    : capString(raw, MAX_INQUIRY_CONFIG_PREFILL_LENGTH);
 }
 
 function readCatalogProductId(
@@ -115,7 +105,7 @@ export function createCatalogInquiryHref(
 ): `/request-quote${string}` {
   const params = new URLSearchParams({ catalogProductId });
   const cappedMessage = initialMessage
-    ? capConfigPrefill(initialMessage)
+    ? capString(initialMessage, MAX_INQUIRY_CONFIG_PREFILL_LENGTH)
     : undefined;
 
   if (cappedMessage) {

@@ -2,7 +2,6 @@ const { spawnSync } = require("node:child_process");
 const net = require("node:net");
 const {
   RELEASE_PROOF_MANIFEST,
-  formatReleaseProofCommand,
   getManualProofLaneSummaryLines,
   getReleaseProofSequence,
   getReleaseVerifyCommands,
@@ -16,10 +15,6 @@ const RELEASE_VERIFY_COMMANDS = getReleaseVerifyCommands();
 function isReleaseVerifyBlockedEnv(name) {
   const value = process.env[name] ?? "";
   return value === "true" || value === "1";
-}
-
-function formatReleaseCommand(step) {
-  return formatReleaseProofCommand(step);
 }
 
 function runReleaseVerifyCommand(step, rootDir) {
@@ -214,7 +209,6 @@ module.exports = {
   RELEASE_PROOF_MANIFEST,
   RELEASE_PROOF_SEQUENCE,
   RELEASE_VERIFY_COMMANDS,
-  formatReleaseCommand,
   isLocalPortInUse,
   isReleaseVerifyBlockedEnv,
   parseWranglerDryRunGzipKiB,
