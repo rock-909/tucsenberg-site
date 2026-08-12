@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getAllMarketSlugs } from "@/constants/product-catalog";
+import {
+  getAllMarketSlugs,
+  getMarketBySlug,
+} from "@/constants/product-catalog";
 import { getProductMarketPath, LOCALES_CONFIG } from "@/config/paths";
 import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import { generateMetadataForPath } from "@/lib/seo-metadata";
@@ -14,7 +17,6 @@ import { buildMarketPageJsonLdData } from "@/app/[locale]/products/[market]/mark
 import { Button } from "@/components/ui/button";
 import {
   getTucsenbergProductPage,
-  toTucsenbergProductMarket,
   type TucsenbergProductPageDefinition,
   type TucsenbergProductProseSection,
   type TucsenbergProductSection,
@@ -353,11 +355,11 @@ export async function generateMetadata({
   const resolvedParams = await params;
   const { market: marketSlug } = resolvedParams;
   const locale = resolveLocaleParam(resolvedParams);
+  const market = getMarketBySlug(marketSlug);
   const productPage = getTucsenbergProductPage(marketSlug);
 
-  if (!productPage) return {};
+  if (!market || !productPage) return {};
 
-  const market = toTucsenbergProductMarket(productPage);
   const { updatedAt, ...meta } = productPage.meta;
 
   return generateMetadataForPath({
@@ -374,13 +376,17 @@ export default async function MarketPage({ params }: MarketPageProps) {
   const locale = resolveLocaleParam(resolvedParams);
   setRequestLocale(locale);
 
+  const market = getMarketBySlug(marketSlug);
+  if (!market) {
+    notFound();
+  }
+
   const productPage = getTucsenbergProductPage(marketSlug);
 
   if (!productPage) {
     notFound();
   }
 
-  const market = toTucsenbergProductMarket(productPage);
   const tLanding = await getTranslations("catalog.market.landing");
   const landingLabels: ProductLandingLabels = {
     faqTitle: tLanding("faqTitle"),
@@ -418,7 +424,7 @@ export default async function MarketPage({ params }: MarketPageProps) {
       <header className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
         <div className="min-w-0">
           <span className="mb-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-            {market.standardLabel}
+            {productPage.catalog.standardLabel}
           </span>
           <h1 className="text-heading mb-4">{productPage.title}</h1>
           <p className="text-body max-w-3xl font-medium text-foreground">
