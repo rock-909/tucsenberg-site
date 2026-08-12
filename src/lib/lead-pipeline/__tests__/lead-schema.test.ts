@@ -6,11 +6,15 @@ import {
   productLeadSchema,
 } from "../lead-schema";
 
-const GENERAL_INQUIRY = {
+const BASE_GENERAL_INQUIRY = {
   type: PRODUCT_LEAD_TYPE,
   productInquiryKind: PRODUCT_INQUIRY_KINDS.GENERAL_RFQ,
   fullName: "Jane Buyer",
   email: "jane@example.com",
+} as const;
+
+const GENERAL_INQUIRY = {
+  ...BASE_GENERAL_INQUIRY,
   message: "Need flood protection for a warehouse.",
 } as const;
 
@@ -21,6 +25,24 @@ describe("productLeadSchema", () => {
     expect(result).toEqual(GENERAL_INQUIRY);
     expect(isCatalogProductInquiry(result)).toBe(false);
   });
+
+  it("accepts omitted buyer text", () => {
+    expect(productLeadSchema.safeParse(BASE_GENERAL_INQUIRY).success).toBe(
+      true,
+    );
+  });
+
+  it.each([[null], [true], [42], [[]], [{}]])(
+    "rejects invalid message input %j",
+    (message) => {
+      expect(
+        productLeadSchema.safeParse({
+          ...BASE_GENERAL_INQUIRY,
+          message,
+        }).success,
+      ).toBe(false);
+    },
+  );
 
   it("accepts a registry-backed catalog product inquiry", () => {
     const result = productLeadSchema.parse({

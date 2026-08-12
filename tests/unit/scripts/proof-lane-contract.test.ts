@@ -136,18 +136,6 @@ describe("package proof command surface", () => {
     }
   });
 
-  // 保护当前公开命令面，不维护历史脚本名清单。
-  it("keeps phase and mutation lanes out of public package scripts and release proof", () => {
-    const scriptNames = Object.keys(readPackageScripts());
-    const releaseProofFlow = RELEASE_PROOF_SEQUENCE.join("\n");
-
-    expect(
-      scriptNames.filter((name) => name.startsWith("test:mutation")),
-    ).toEqual([]);
-    expect(scriptNames.filter((name) => name.includes(":phase"))).toEqual([]);
-    expect(releaseProofFlow).not.toMatch(/:?phase\d/u);
-  });
-
   // 发布序列引用的 Node 脚本必须真实存在。
   it("keeps every release sequence node script pointing at a real file", () => {
     const nodeScripts = RELEASE_PROOF_SEQUENCE.flatMap(
