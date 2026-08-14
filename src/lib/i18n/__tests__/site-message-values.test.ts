@@ -14,7 +14,7 @@ describe("site message values", () => {
     const { getSiteMessageValues } =
       await import("@/lib/i18n/site-message-values");
 
-    const values = getSiteMessageValues();
+    const values = await getSiteMessageValues();
 
     expect(values).toEqual({
       siteName: SINGLE_SITE_CONFIG.name,
