@@ -80,9 +80,6 @@ export type Logger = typeof logger;
  * Replaces sensitive data with safe identifiers
  */
 
-const IP_V4_PATTERN = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-const IP_V6_PATTERN = /^[a-fA-F0-9:]+$/;
-
 /**
  * Sanitize email for logging - fully redacts to avoid PII leakage
  * Returns "[REDACTED_EMAIL]" for any provided value
@@ -93,13 +90,8 @@ export function sanitizeEmail(email: string | undefined | null): string {
 }
 
 /**
- * Sanitize IP address for logging
- * Returns "[REDACTED_IP]" to prevent tracking
+ * 日志 IP 脱敏：一律完全打码，防止追踪。
  */
 export function sanitizeIP(ip: string | undefined | null): string {
-  if (!ip) return "[NO_IP]";
-  if (IP_V4_PATTERN.test(ip) || IP_V6_PATTERN.test(ip) || ip === "::1") {
-    return "[REDACTED_IP]";
-  }
-  return "[REDACTED_IP]";
+  return ip ? "[REDACTED_IP]" : "[NO_IP]";
 }

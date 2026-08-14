@@ -66,7 +66,7 @@ describe("market metadata live integration", () => {
 
     expect(metadata.robots).toMatchObject({ index: true, follow: true });
     expect(metadata.openGraph).toMatchObject({
-      modifiedTime: "2026-07-05T00:00:00Z",
+      modifiedTime: "2026-08-10T00:00:00Z",
     });
   });
 

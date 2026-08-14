@@ -9,7 +9,6 @@ import {
   getMdxPageSlugByStaticPath,
   getPublicStaticPageDefinition,
   getStaticPageDefinitionsByType,
-  getStaticPageLastmodByPath,
   getStaticSitemapPageConfigByPath,
   getStaticSitemapPages,
 } from "@/config/pages.config";
@@ -77,7 +76,6 @@ describe("pages.config static public page registry", () => {
       expect(definition.sitemap.include).toBe(true);
       expect(definition.sitemap.priority).toBeGreaterThan(0);
       expect(definition.sitemap.priority).toBeLessThanOrEqual(1);
-      expect(definition.lastmod.source).toMatch(/^(mdx|static)$/u);
     }
   });
 
@@ -118,14 +116,6 @@ describe("pages.config static public page registry", () => {
     expect(sitemapConfig["/request-quote"]).toEqual({
       changeFrequency: "monthly",
       priority: 0.9,
-    });
-  });
-
-  it("keeps static sidecar lastmod only for non-MDX static public pages", () => {
-    expect(getStaticPageLastmodByPath()).toEqual({
-      "": "2026-07-05T00:00:00Z",
-      "/products": "2026-07-05T00:00:00Z",
-      "/request-quote": "2026-07-05T00:00:00Z",
     });
   });
 

@@ -13,7 +13,7 @@ export const ABSORBENT_FLOOD_BAGS_PRODUCT_PAGE = {
     title: "Sandless Sandbags & Water-Activated Flood Bags — Wholesale",
     description:
       "Water-activated absorbent flood bags factory-direct: 0.23 kg flat, 20 kg in 3–4 minutes, 3-year shelf life. Carton to pallet, private label. Fresh water only.",
-    updatedAt: "2026-07-05T00:00:00Z",
+    updatedAt: "2026-07-18T00:00:00Z",
   },
   image: { status: "pending" },
   diagram: {

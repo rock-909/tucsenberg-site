@@ -3,16 +3,12 @@ import {
   getMdxPageLastModified,
   isMdxDrivenPage,
 } from "@/lib/content/page-dates";
-import {
-  getStaticPageLastModified,
-  type StaticPageLastModConfig,
-} from "@/lib/sitemap-utils";
 import { LOCALES_CONFIG, getProductMarketPath } from "@/config/paths";
 import { SINGLE_SITE_CONFIG } from "@/config/single-site";
 import {
   getSingleSitePublicStaticPages,
+  getSingleSiteProductMarketLastmod,
   getSingleSiteSitemapPageConfig,
-  getSingleSiteStaticPageLastmod,
   hasSingleSiteDynamicSurface,
   type SingleSiteSitemapPageConfig,
 } from "@/config/single-site-seo";
@@ -24,12 +20,11 @@ const BASE_URL = SINGLE_SITE_CONFIG.baseUrl;
 
 type PageConfig = SingleSiteSitemapPageConfig;
 
-function createStaticPageLastmod(): StaticPageLastModConfig {
+function buildProductMarketLastmod(): Map<string, Date> {
   return new Map(
-    Object.entries(getSingleSiteStaticPageLastmod()).map(([route, isoDate]) => [
-      route,
-      new Date(isoDate),
-    ]),
+    Object.entries(getSingleSiteProductMarketLastmod()).map(
+      ([route, isoDate]) => [route, new Date(isoDate)],
+    ),
   );
 }
 
@@ -65,7 +60,7 @@ function buildAlternateLanguages(path: string): Record<string, string> {
 
 interface SitemapEntryParams {
   url: string;
-  lastModified: Date;
+  lastModified: Date | undefined;
   config: PageConfig;
   alternates: Record<string, string>;
 }
@@ -76,7 +71,7 @@ function createSitemapEntry(
 ): MetadataRoute.Sitemap[number] {
   return {
     url: params.url,
-    lastModified: params.lastModified,
+    ...(params.lastModified ? { lastModified: params.lastModified } : {}),
     changeFrequency: params.config.changeFrequency,
     priority: params.config.priority,
     alternates: {
@@ -85,10 +80,11 @@ function createSitemapEntry(
   };
 }
 
-// Generate static page entries for all locales
+// 为所有 locale 生成静态页条目。
+// 只有 MDX 驱动的页面携带 lastmod；非 MDX 静态页没有可靠内容日期，
+// 因此省略 lastmod，而不是伪造一个。
 async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
   const publicStaticPages = getSingleSitePublicStaticPages();
-  const staticPageLastmod = createStaticPageLastmod();
   const mdxPages = publicStaticPages.filter(isMdxDrivenPage);
   const mdxDates = new Map<string, Date>();
   await Promise.all(
@@ -104,9 +100,7 @@ async function generateStaticPageEntries(): Promise<MetadataRoute.Sitemap> {
       const config = getPageConfig(page);
       const url = buildAbsoluteUrl(locale, page);
       const alternates = buildAlternateLanguages(page);
-      const lastModified =
-        mdxDates.get(page) ??
-        getStaticPageLastModified(page, staticPageLastmod);
+      const lastModified = mdxDates.get(page);
 
       entries.push(
         createSitemapEntry({ url, lastModified, config, alternates }),
@@ -124,12 +118,12 @@ function generateCatalogEntries(): MetadataRoute.Sitemap {
   }
 
   const entries: MetadataRoute.Sitemap = [];
-  const staticPageLastmod = createStaticPageLastmod();
+  const productMarketLastmod = buildProductMarketLastmod();
 
   const marketConfig = getPageConfig("productMarket");
   for (const market of PRODUCT_CATALOG.markets) {
     const path = getProductMarketPath(market.slug);
-    const lastModified = getStaticPageLastModified(path, staticPageLastmod);
+    const lastModified = productMarketLastmod.get(path);
 
     for (const locale of routing.locales) {
       entries.push(

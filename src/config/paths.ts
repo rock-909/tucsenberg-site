@@ -13,10 +13,7 @@ export type {
 } from "@/config/paths/types";
 
 // 重新导出配置
-export {
-  DYNAMIC_PATHS_CONFIG,
-  PATHS_CONFIG,
-} from "@/config/paths/paths-config";
+export { PATHS_CONFIG } from "@/config/paths/paths-config";
 export {
   getLocaleCurrency,
   getLocaleTimeZone,
@@ -28,7 +25,6 @@ export {
   getCanonicalPath,
   getLocalizedPath,
   getPageTypeFromPath,
-  getPathnames,
   getProductMarketPath,
 } from "@/config/paths/utils";
 

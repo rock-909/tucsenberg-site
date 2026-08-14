@@ -28,8 +28,6 @@ export function toNavigationNamespaceKey(
   return key.slice(NAVIGATION_MESSAGE_PREFIX.length) as NavigationNamespaceKey;
 }
 
-const STATIC_PAGE_LASTMOD_ISO = "2026-07-05T00:00:00Z";
-
 export type PublicStaticPageChangeFrequency =
   "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
 
@@ -37,15 +35,6 @@ interface PublicStaticPageSitemapConfig {
   include: boolean;
   changeFrequency: PublicStaticPageChangeFrequency;
   priority: number;
-}
-
-interface PublicStaticPageStaticLastmod {
-  source: "static";
-  iso: string;
-}
-
-interface PublicStaticPageMdxLastmod {
-  source: "mdx";
 }
 
 interface PublicStaticPageMdxCollection {
@@ -58,7 +47,6 @@ export interface PublicStaticPageDefinition {
   localizedPaths: LocalizedPath;
   navigationKey: NavigationMessageKey | null;
   sitemap: PublicStaticPageSitemapConfig;
-  lastmod: PublicStaticPageStaticLastmod | PublicStaticPageMdxLastmod;
   mdxCollection: PublicStaticPageMdxCollection | null;
   routeOwner: string;
 }
@@ -80,7 +68,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/"),
       navigationKey: "navigation.home",
       sitemap: { include: true, changeFrequency: "daily", priority: 1 },
-      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/page.tsx",
     },
@@ -89,7 +76,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/products"),
       navigationKey: "navigation.products",
       sitemap: { include: true, changeFrequency: "weekly", priority: 0.9 },
-      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/products/page.tsx",
     },
@@ -98,7 +84,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/oem-wholesale"),
       navigationKey: "navigation.oemWholesale",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.85 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "oem-wholesale" },
       routeOwner: "src/app/[locale]/oem-wholesale/page.tsx",
     },
@@ -107,7 +92,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/guides/flood-barrier-materials-guide"),
       navigationKey: "navigation.guides",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
       mdxCollection: {
         collection: "pages",
         slug: "flood-barrier-materials-guide",
@@ -120,7 +104,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/guides/flood-barrier-specifications"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
       mdxCollection: {
         collection: "pages",
         slug: "flood-barrier-specifications",
@@ -133,7 +116,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/about"),
       navigationKey: "navigation.about",
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "about" },
       routeOwner: "src/app/[locale]/about/page.tsx",
     },
@@ -142,7 +124,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/request-quote"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.9 },
-      lastmod: { source: "static", iso: STATIC_PAGE_LASTMOD_ISO },
       mdxCollection: null,
       routeOwner: "src/app/[locale]/request-quote/page.tsx",
     },
@@ -151,7 +132,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/contact"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.8 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "contact" },
       routeOwner: "src/app/[locale]/contact/page.tsx",
     },
@@ -160,7 +140,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/warranty"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "warranty" },
       routeOwner: "src/app/[locale]/warranty/page.tsx",
     },
@@ -169,7 +148,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/privacy"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "privacy" },
       routeOwner: "src/app/[locale]/privacy/page.tsx",
     },
@@ -178,7 +156,6 @@ export const PUBLIC_STATIC_PAGE_DEFINITIONS: readonly PublicStaticPageDefinition
       localizedPaths: localizedPath("/terms"),
       navigationKey: null,
       sitemap: { include: true, changeFrequency: "monthly", priority: 0.7 },
-      lastmod: { source: "mdx" },
       mdxCollection: { collection: "pages", slug: "terms" },
       routeOwner: "src/app/[locale]/terms/page.tsx",
     },
@@ -237,23 +214,6 @@ export function getStaticSitemapPageConfigByPath(): Record<
         : [],
     ),
   );
-}
-
-export function getStaticPageLastmodByPath(): Record<string, string> {
-  const entries = PUBLIC_STATIC_PAGE_DEFINITIONS.flatMap((definition) => {
-    if (definition.lastmod.source !== "static") {
-      return [];
-    }
-
-    return [
-      [
-        toSitemapStaticPath(definition.localizedPaths.en),
-        definition.lastmod.iso,
-      ] as const,
-    ];
-  });
-
-  return Object.fromEntries(entries);
 }
 
 export function getMdxPageSlugByStaticPath(): Record<string, string> {

@@ -1,7 +1,6 @@
 import {
   PUBLIC_STATIC_PAGE_TYPES,
   type PublicStaticPageChangeFrequency,
-  getStaticPageLastmodByPath,
   getStaticSitemapPageConfigByPath,
   getStaticSitemapPages,
 } from "@/config/pages.config";
@@ -16,8 +15,6 @@ export interface SingleSiteSitemapPageConfig {
   priority: number;
 }
 
-const SINGLE_SITE_STATIC_LASTMOD_ISO = "2026-07-05T00:00:00Z";
-
 const SINGLE_SITE_PRODUCT_MARKET_CONFIG = {
   changeFrequency: "weekly",
   priority: 0.8,
@@ -27,7 +24,7 @@ function buildSingleSiteProductMarketLastmod(): Record<string, string> {
   return Object.fromEntries(
     Object.values(TUCSENBERG_PRODUCT_PAGES).map((productPage) => [
       getProductMarketPath(productPage.slug),
-      productPage.meta.updatedAt ?? SINGLE_SITE_STATIC_LASTMOD_ISO,
+      productPage.meta.updatedAt,
     ]),
   );
 }
@@ -98,13 +95,10 @@ export function getSingleSiteSitemapPageConfigByPath(): Readonly<
   };
 }
 
-export function getSingleSiteStaticPageLastmod(): Record<string, string> {
-  return {
-    ...getStaticPageLastmodByPath(),
-    ...(hasSingleSiteDynamicSurface("productMarket")
-      ? buildSingleSiteProductMarketLastmod()
-      : {}),
-  };
+export function getSingleSiteProductMarketLastmod(): Record<string, string> {
+  return hasSingleSiteDynamicSurface("productMarket")
+    ? buildSingleSiteProductMarketLastmod()
+    : {};
 }
 
 export const SINGLE_SITE_PUBLIC_STATIC_PAGE_ROUTES =

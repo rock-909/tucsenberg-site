@@ -113,14 +113,6 @@ vi.mock("@/lib/env", () => {
       const value = mockEnv[key];
       return typeof value === "boolean" ? value : undefined;
     },
-    getRuntimeNodeEnv: () => {
-      const value = readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV;
-      return value === "development" ||
-        value === "test" ||
-        value === "production"
-        ? value
-        : undefined;
-    },
     getRuntimeAppEnv: () => {
       const value = readProcessEnvValue("APP_ENV") ?? mockEnv.APP_ENV;
       return value === "local" ||
@@ -135,24 +127,5 @@ vi.mock("@/lib/env", () => {
       (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "development",
     isRuntimeProduction: () =>
       (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "production",
-    isRuntimeTest: () =>
-      (readProcessEnvValue("NODE_ENV") ?? mockEnv.NODE_ENV) === "test",
-    isRuntimeCi: () => readProcessEnvValue("CI") === "true",
-    isRuntimePlaywright: () =>
-      readProcessEnvValue("PLAYWRIGHT_TEST") === "true",
-    isRuntimeProductionBuildPhase: () =>
-      readProcessEnvValue("NEXT_PHASE") === "phase-production-build",
-    isRuntimeCloudflare: () =>
-      readProcessEnvValue("DEPLOYMENT_PLATFORM") === "cloudflare" ||
-      readProcessEnvValue("NEXT_PUBLIC_DEPLOYMENT_PLATFORM") === "cloudflare",
-    requireEnvVar: (key: string) => {
-      const value = mockEnv[key];
-      if (!value || typeof value === "boolean" || typeof value === "number") {
-        throw new Error(
-          `Required environment variable ${key} is not set or is not a string`,
-        );
-      }
-      return value;
-    },
   };
 });

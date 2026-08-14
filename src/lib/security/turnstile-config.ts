@@ -48,10 +48,6 @@ function getAllowedTurnstileHostsFromConfig(): string[] {
   return configured.length > 0 ? configured : deriveFallbackHosts();
 }
 
-function getAllowedTurnstileHostsSet(): Set<string> {
-  return new Set(getAllowedTurnstileHostsFromConfig());
-}
-
 /**
  * Return the list of hostnames that are allowed to appear in Turnstile verification responses.
  */
@@ -66,5 +62,5 @@ export function isAllowedTurnstileHostname(hostname?: string | null): boolean {
   if (!hostname) return false;
 
   const normalized = hostname.toLowerCase();
-  return getAllowedTurnstileHostsSet().has(normalized);
+  return new Set(getAllowedTurnstileHostsFromConfig()).has(normalized);
 }

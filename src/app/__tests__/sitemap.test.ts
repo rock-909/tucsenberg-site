@@ -6,7 +6,6 @@ import {
   SINGLE_SITE_PUBLIC_STATIC_PAGES,
 } from "@/config/single-site-seo";
 import { getMdxPageLastModified } from "@/lib/content/page-dates";
-import { getStaticPageLastModified } from "@/lib/sitemap-utils";
 import sitemap, { generateSitemap } from "../sitemap";
 
 // Mock dependencies before imports
@@ -28,30 +27,6 @@ vi.mock("@/i18n/routing", () => ({
     defaultLocale: "en",
   },
 }));
-
-vi.mock("@/lib/sitemap-utils", async () => {
-  const { getCanonicalPath } = await import("@/config/paths/utils");
-  const productsPath = getCanonicalPath("products");
-  const staticLastmodPaths = new Set(["", productsPath, "/request-quote"]);
-
-  return {
-    getStaticPageLastModified: vi.fn((page: string) => {
-      if (page === "") {
-        return new Date("2024-12-01T00:00:00Z");
-      }
-      const marketSlug = page.startsWith(`${productsPath}/`)
-        ? page.slice(productsPath.length + 1)
-        : "";
-      if (
-        staticLastmodPaths.has(page) ||
-        (marketSlug.length > 0 && !marketSlug.includes("/"))
-      ) {
-        return new Date("2024-11-01T00:00:00Z");
-      }
-      throw new Error(`Unexpected static lastmod fallback: ${page}`);
-    }),
-  };
-});
 
 vi.mock("@/lib/content/page-dates", async () => {
   const { getMdxPageSlugByStaticPath } = await import("@/config/pages.config");
@@ -167,13 +142,21 @@ describe("sitemap.ts", () => {
       }
     });
 
-    it("should have lastModified for entries", async () => {
+    it("omits lastModified for non-MDX static pages without a reliable content date", async () => {
       const result = await sitemap();
+      const homePath = "";
+      const productsPath = getCanonicalPath("products");
+      const requestQuotePath = getCanonicalPath("requestQuote");
 
-      for (const entry of result) {
-        expect(entry.lastModified).toBeDefined();
-        expect(entry.lastModified).toBeInstanceOf(Date);
-      }
+      expect(
+        findEntry(result, defaultLocale, homePath)?.lastModified,
+      ).toBeUndefined();
+      expect(
+        findEntry(result, defaultLocale, productsPath)?.lastModified,
+      ).toBeUndefined();
+      expect(
+        findEntry(result, defaultLocale, requestQuotePath)?.lastModified,
+      ).toBeUndefined();
     });
 
     it("should have changeFrequency for entries", async () => {
@@ -267,7 +250,7 @@ describe("sitemap.ts", () => {
       expect(about?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
     });
 
-    it("should use MDX dates for default active MDX pages and sidecar dates for static pages", async () => {
+    it("uses MDX dates for MDX pages, omits static lastmod, and drives markets from product updatedAt", async () => {
       const result = await sitemap();
       const aboutPath = getCanonicalPath("about");
       const contactPath = getCanonicalPath("contact");
@@ -284,25 +267,11 @@ describe("sitemap.ts", () => {
       expect(marketSlug).toBeDefined();
       expect(getMdxPageLastModified).toHaveBeenCalledWith(aboutPath);
       expect(getMdxPageLastModified).toHaveBeenCalledWith(contactPath);
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        productsPath,
-        expect.any(Map),
-      );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        requestQuotePath,
-        expect.any(Map),
-      );
-      expect(getStaticPageLastModified).toHaveBeenCalledWith(
-        marketPath,
-        expect.any(Map),
-      );
       expect(about?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
       expect(contact?.lastModified).toEqual(new Date("2026-04-20T00:00:00Z"));
-      expect(products?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
-      expect(requestQuote?.lastModified).toEqual(
-        new Date("2024-11-01T00:00:00Z"),
-      );
-      expect(market?.lastModified).toEqual(new Date("2024-11-01T00:00:00Z"));
+      expect(products?.lastModified).toBeUndefined();
+      expect(requestQuote?.lastModified).toBeUndefined();
+      expect(market?.lastModified).toEqual(new Date("2026-08-10T00:00:00Z"));
     });
 
     it("should keep terms page SEO defaults explicit", async () => {
