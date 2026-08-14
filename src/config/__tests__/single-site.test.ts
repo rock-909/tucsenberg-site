@@ -101,7 +101,5 @@ describe("single-site", () => {
       "/images/tucsenberg-logo.png",
     );
     expect(SINGLE_SITE_FACTS.brandAssets.productPhotos.status).toBe("pending");
-    // 从 establishedYear 减出来的值，买家在页面上看得见。算错方向就是负数。
-    expect(SINGLE_SITE_FACTS.company.yearsInBusiness).toBeGreaterThan(0);
   });
 });

@@ -12,7 +12,6 @@ import type {
 
 export type {
   BusinessHours,
-  BusinessStats,
   Certification,
   CompanyInfo,
   ContactInfo,
@@ -156,7 +155,6 @@ const contact = {
 } as const;
 
 const establishedYear = 2021;
-const siteFactSnapshotYear = 2026;
 
 /**
  * Single-site canonical source for the current cutover phase.
@@ -182,8 +180,6 @@ export const SINGLE_SITE_DEFINITION = {
     company: {
       name: "Jiangsu Tucson Borg Technology Co., Ltd. (trading as Tucsenberg)",
       established: establishedYear,
-      yearsInBusiness: siteFactSnapshotYear - establishedYear,
-      employees: 0,
       location: {
         country: "China",
         city: "Lianyungang, Jiangsu",
@@ -200,13 +196,6 @@ export const SINGLE_SITE_DEFINITION = {
       },
     },
     certifications: [],
-    stats: {
-      exportCountries: 0,
-      annualCapacity:
-        "ABS boxwall, aluminum gates, flood bags, tube dams, and FRP planks",
-      clientsServed: 0,
-      onTimeDeliveryRate: 0,
-    },
     social,
     brandAssets: {
       logo: {

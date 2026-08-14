@@ -4,6 +4,8 @@
  * so derivative projects replace that input without editing shared type
  * definitions.
  */
+import type { NavigationNamespaceKey } from "@/config/pages.config";
+
 export type SiteKey = string;
 
 export interface SiteSeoConfig {
@@ -37,8 +39,6 @@ export interface SiteConfig {
 export interface CompanyInfo {
   name: string;
   established: number;
-  yearsInBusiness: number;
-  employees: number;
   location: {
     country: string;
     city: string;
@@ -65,13 +65,6 @@ export interface Certification {
   certificateNumber?: string;
   file?: string;
   validUntil?: string;
-}
-
-export interface BusinessStats {
-  exportCountries: number;
-  annualCapacity?: string;
-  clientsServed?: number;
-  onTimeDeliveryRate?: number;
 }
 
 export interface SocialLinks {
@@ -104,12 +97,9 @@ export interface SiteFacts {
   company: CompanyInfo;
   contact: ContactInfo;
   certifications: Certification[];
-  stats: BusinessStats;
   social: SocialLinks;
   brandAssets: BrandAssets;
 }
-
-import type { NavigationNamespaceKey } from "@/config/pages.config";
 
 export interface SiteNavigationItem {
   key: string;

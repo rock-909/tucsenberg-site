@@ -36,9 +36,7 @@ vi.mock("@/lib/env", () => {
       return mockRuntimeEnv[key] ?? "";
     },
     getRuntimeEnvBoolean: () => false,
-    getRuntimeNodeEnv: () => "test",
     isRuntimeProduction: () => false,
-    isRuntimePlaywright: () => false,
   };
 });
 

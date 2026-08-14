@@ -50,16 +50,14 @@ function getRateLimitStore(): RateLimitStore {
 /**
  * Get rate limit config for preset (safe access pattern)
  */
-function getRateLimitConfig(preset: RateLimitPreset): {
+type RateLimitConfig = {
   maxRequests: number;
   windowMs: number;
-} {
-  return RATE_LIMIT_PRESETS[preset];
-}
+};
 
 async function executeRateLimitCheck(
   key: string,
-  config: ReturnType<typeof getRateLimitConfig>,
+  config: RateLimitConfig,
 ): Promise<RateLimitResult> {
   try {
     // getRateLimitStore inside try so any constructor/factory failure
@@ -104,7 +102,7 @@ export function checkDistributedRateLimit(
   identifier: string,
   preset: RateLimitPreset,
 ): Promise<RateLimitResult> {
-  const config = getRateLimitConfig(preset);
+  const config = RATE_LIMIT_PRESETS[preset];
   const key = `ratelimit:${preset}:${identifier}`;
   return executeRateLimitCheck(key, config);
 }

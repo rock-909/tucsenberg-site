@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getProductMarketPath } from "@/config/paths/utils";
 import {
   getSingleSiteSitemapPageConfigByPath,
-  getSingleSiteStaticPageLastmod,
+  getSingleSiteProductMarketLastmod,
   hasSingleSiteDynamicSurface,
   SINGLE_SITE_ROBOTS_DISALLOW_PATHS,
 } from "@/config/single-site-seo";
@@ -10,7 +10,7 @@ import { TUCSENBERG_PRODUCT_PAGES } from "@/constants/tucsenberg-product-pages";
 
 describe("single-site-seo", () => {
   it("derives product page lastmod from the live catalog", () => {
-    const catalogLastmod = getSingleSiteStaticPageLastmod();
+    const catalogLastmod = getSingleSiteProductMarketLastmod();
     for (const productPage of Object.values(TUCSENBERG_PRODUCT_PAGES)) {
       expect(catalogLastmod[getProductMarketPath(productPage.slug)]).toBe(
         productPage.meta.updatedAt,

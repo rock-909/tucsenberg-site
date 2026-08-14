@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Locale } from "@/config/paths";
 import {
-  DYNAMIC_PATHS_CONFIG,
   getCanonicalPath,
   getLocaleCurrency,
   getLocaleTimeZone,
   getLocalizedPath,
   getPageTypeFromPath,
-  getPathnames,
   getProductMarketPath,
   LOCALES_CONFIG,
   PATHS_CONFIG,
@@ -178,34 +176,6 @@ describe("paths configuration", () => {
           getLocalizedPath("home", input as Locale);
         }).toThrow();
       });
-    });
-  });
-
-  describe("getPathnames", () => {
-    it("derives static pathnames from PATHS_CONFIG", () => {
-      const pathnames = getPathnames();
-      const expectedStaticPaths = Object.values(PATHS_CONFIG).map((paths) =>
-        paths.en === "/" ? "/" : paths.en,
-      );
-
-      for (const path of expectedStaticPaths) {
-        expect(pathnames[path]).toBe(path);
-      }
-    });
-
-    it("derives dynamic route patterns from DYNAMIC_PATHS_CONFIG", () => {
-      const pathnames = getPathnames();
-
-      for (const config of Object.values(DYNAMIC_PATHS_CONFIG)) {
-        expect(pathnames[config.pattern]).toBe(config.pattern);
-      }
-    });
-
-    it("does not advertise product family pages without a real route", () => {
-      const pathnames = getPathnames();
-      const removedFamilyRoute = `/products/${"[market]"}/${"[family]"}`;
-
-      expect(pathnames).not.toHaveProperty(removedFamilyRoute);
     });
   });
 

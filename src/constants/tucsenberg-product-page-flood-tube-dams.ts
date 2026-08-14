@@ -13,7 +13,7 @@ export const FLOOD_TUBE_DAMS_PRODUCT_PAGE = {
     title: "Water & Air-Filled Tube Dams — Flood Barriers for Long Runs",
     description:
       "Inflatable PVC tube dams factory-direct: 1 m height, 5–10 m sections, deploy on grass and mud where rigid barriers can't seal. Kit included. Reply within 12 hours.",
-    updatedAt: "2026-07-06T00:00:00Z",
+    updatedAt: "2026-08-10T00:00:00Z",
   },
   image: { status: "pending" },
   diagram: {

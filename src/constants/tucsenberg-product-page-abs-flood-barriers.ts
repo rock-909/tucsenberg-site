@@ -13,7 +13,7 @@ export const ABS_FLOOD_BARRIERS_PRODUCT_PAGE = {
   meta: {
     title: "ABS Interlocking Flood Barriers — Freestanding Boxwall",
     description: `Freestanding ABS interlocking flood barriers, factory-direct from China. ${TB_BW_HEIGHT_RANGE.label} heights; straight, curve and gable-end units. Reply within 12 hours.`,
-    updatedAt: "2026-07-05T00:00:00Z",
+    updatedAt: "2026-08-10T00:00:00Z",
   },
   image: { status: "pending" },
   diagram: {
