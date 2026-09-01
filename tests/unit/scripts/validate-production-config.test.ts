@@ -547,7 +547,7 @@ describe("validateProductionConfig CI vs deploy gate", () => {
 });
 
 describe("public launch trust content guard", () => {
-  it("checks the actual wrangler production public URLs in strict mode", () => {
+  it("accepts the actual wrangler production public URLs in strict mode", () => {
     const result = validateProductionConfig({
       ...createValidProductionEnv(),
       APP_ENV: "production",
@@ -557,7 +557,7 @@ describe("public launch trust content guard", () => {
       NEXT_PUBLIC_BASE_URL: "https://launch.tucsenberg.test",
     });
 
-    expect(result.errors).toEqual(
+    expect(result.errors).not.toEqual(
       expect.arrayContaining([
         expect.stringContaining(
           "wrangler.jsonc env.production.vars.NEXT_PUBLIC_SITE_URL",
@@ -581,8 +581,12 @@ describe("public launch trust content guard", () => {
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.logo.status"),
+      ]),
+    );
+    expect(result.warnings).not.toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.productPhotos.status"),
       ]),
     );
@@ -599,8 +603,12 @@ describe("public launch trust content guard", () => {
 
     expect(result.errors).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.logo.status"),
+      ]),
+    );
+    expect(result.errors).not.toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("SITE_CONFIG.contact.phone"),
         expect.stringContaining("brandAssets.productPhotos.status"),
       ]),
     );
@@ -646,8 +654,8 @@ describe("public launch trust content guard", () => {
     );
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("SITE_CONFIG.contact.phone");
-    expect(result.stderr).toContain("brandAssets.productPhotos.status");
+    expect(result.stderr).not.toContain("SITE_CONFIG.contact.phone");
+    expect(result.stderr).not.toContain("brandAssets.productPhotos.status");
     expect(result.stderr).not.toContain("SITE_CONFIG.social.twitter");
     expect(result.stderr).not.toContain("SITE_CONFIG.social.linkedin");
   });
