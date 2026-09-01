@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 describe("site message values", () => {
-  it("derives the footer year from the build-time UTC clock", async () => {
+  it("keeps the checked-in footer year independent from the runtime clock", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2030-06-15T00:00:00.000Z"));
 
@@ -19,7 +19,7 @@ describe("site message values", () => {
     expect(values).toEqual({
       siteName: SINGLE_SITE_CONFIG.name,
       companyName: SINGLE_SITE_FACTS.company.name,
-      currentYear: "2030",
+      currentYear: "2026",
     });
   });
 });
